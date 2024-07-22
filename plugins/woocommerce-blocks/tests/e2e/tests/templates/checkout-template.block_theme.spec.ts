@@ -15,11 +15,11 @@ test.describe( 'Test the checkout template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place order',
 			} )
 		).toBeVisible();
 	} );
@@ -29,19 +29,15 @@ test.describe( 'Test the checkout template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
-		await admin.visitSiteEditor( { path: '/page' } );
+		await admin.visitSiteEditor( { postType: 'page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
-		await editor.enterEditMode();
+		await editor.canvas.locator( 'body' ).click();
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place order',
 			} )
 		).toBeVisible();
 
@@ -51,7 +47,7 @@ test.describe( 'Test the checkout template', () => {
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place order',
 			} )
 		).toBeVisible();
 	} );
@@ -65,9 +61,13 @@ test.describe( 'Test the checkout template', () => {
 		await frontendUtils.addToCart();
 		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
+
+		// Close welcome popup.
+		await admin.page.getByRole( 'button', { name: 'Get started' } ).click();
+
 		await expect(
 			editor.canvas.getByRole( 'button', {
-				name: 'Place Order · <price/>',
+				name: 'Place order',
 			} )
 		).toBeVisible();
 	} );
@@ -81,8 +81,8 @@ test.describe( 'Test editing the checkout template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
 		);

@@ -28,7 +28,6 @@ test.describe( 'Product Collection', () => {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
-		expect( pageObject.productTemplate ).not.toBeNull();
 		await expect( pageObject.products ).toHaveCount( 9 );
 		await expect( pageObject.productImages ).toHaveCount( 9 );
 		await expect( pageObject.productTitles ).toHaveCount( 9 );
@@ -37,7 +36,6 @@ test.describe( 'Product Collection', () => {
 
 		await pageObject.publishAndGoToFrontend();
 
-		expect( pageObject.productTemplate ).not.toBeNull();
 		await expect( pageObject.products ).toHaveCount( 9 );
 		await expect( pageObject.productImages ).toHaveCount( 9 );
 		await expect( pageObject.productTitles ).toHaveCount( 9 );
@@ -46,44 +44,6 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Renders correctly with all Product Elements', () => {
-		const insertProductElements = async (
-			pageObject: ProductCollectionPage
-		) => {
-			// By default there are inner blocks:
-			// - woocommerce/product-image
-			// - core/post-title
-			// - woocommerce/product-price
-			// - woocommerce/product-button
-			// We're adding remaining ones
-			const productElements = [
-				{ name: 'woocommerce/product-rating', attributes: {} },
-				{ name: 'woocommerce/product-sku', attributes: {} },
-				{ name: 'woocommerce/product-stock-indicator', attributes: {} },
-				{ name: 'woocommerce/product-sale-badge', attributes: {} },
-				{
-					name: 'core/post-excerpt',
-					attributes: {
-						__woocommerceNamespace:
-							'woocommerce/product-collection/product-summary',
-					},
-				},
-				{
-					name: 'core/post-terms',
-					attributes: { term: 'product_tag' },
-				},
-				{
-					name: 'core/post-terms',
-					attributes: { term: 'product_cat' },
-				},
-			];
-
-			for ( const productElement of productElements ) {
-				await pageObject.insertBlockInProductCollection(
-					productElement
-				);
-			}
-		};
-
 		const expectedProductContent = [
 			'Beanie', // core/post-title
 			'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.', // woocommerce/product-price
@@ -103,7 +63,7 @@ test.describe( 'Product Collection', () => {
 				page.locator( '[data-testid="product-image"]:visible' )
 			).toHaveCount( 9 );
 
-			await insertProductElements( pageObject );
+			await pageObject.insertProductElements();
 			await pageObject.publishAndGoToFrontend();
 
 			for ( const content of expectedProductContent ) {
@@ -118,16 +78,16 @@ test.describe( 'Product Collection', () => {
 			editor,
 			pageObject,
 		} ) => {
-			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
-			);
+			await pageObject.goToEditorTemplate();
 
 			await expect(
 				editor.canvas.locator( '[data-testid="product-image"]:visible' )
 			).toHaveCount( 16 );
 
-			await insertProductElements( pageObject );
-			await editor.saveSiteEditorEntities();
+			await pageObject.insertProductElements();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 			await pageObject.goToProductCatalogFrontend();
 
 			// Workaround for the issue with the product change not being
@@ -152,8 +112,10 @@ test.describe( 'Product Collection', () => {
 				editor.canvas.locator( '[data-testid="product-image"]:visible' )
 			).toHaveCount( 9 );
 
-			await insertProductElements( pageObject );
-			await editor.saveSiteEditorEntities();
+			await pageObject.insertProductElements();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 			await pageObject.goToHomePageFrontend();
 
 			for ( const content of expectedProductContent ) {
@@ -456,11 +418,68 @@ test.describe( 'Product Collection', () => {
 				).toBeHidden();
 			} );
 
+			const archiveTemplates = [
+				'woocommerce/woocommerce//archive-product',
+				'woocommerce/woocommerce//taxonomy-product_cat',
+				'woocommerce/woocommerce//taxonomy-product_tag',
+				'woocommerce/woocommerce//taxonomy-product_attribute',
+				'woocommerce/woocommerce//product-search-results',
+			];
+
+			const nonArchiveTemplates = [
+				'woocommerce/woocommerce//single-product',
+				'twentytwentyfour//home',
+				'twentytwentyfour//index',
+			];
+
+			archiveTemplates.map( async ( template ) => {
+				test( `should be visible in archive template: ${ template }`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
+
+					const sidebarSettings =
+						await pageObject.locateSidebarSettings();
+					await expect(
+						sidebarSettings.locator(
+							SELECTORS.inheritQueryFromTemplateControl
+						)
+					).toBeVisible();
+				} );
+			} );
+
+			nonArchiveTemplates.map( async ( template ) => {
+				test( `should not be visible in non-archive template: ${ template }`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
+
+					const sidebarSettings =
+						await pageObject.locateSidebarSettings();
+					await expect(
+						sidebarSettings.locator(
+							SELECTORS.inheritQueryFromTemplateControl
+						)
+					).toBeHidden();
+				} );
+			} );
+
 			test( 'should work as expected in Product Catalog template', async ( {
 				pageObject,
 				editor,
 			} ) => {
-				await pageObject.goToProductCatalogAndInsertCollection();
+				await pageObject.goToEditorTemplate();
+				await pageObject.focusProductCollection();
 				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
@@ -516,7 +535,8 @@ test.describe( 'Product Collection', () => {
 			} ) => {
 				// First Product Catalog
 				// Option should be visible & ENABLED by default
-				await pageObject.goToProductCatalogAndInsertCollection();
+				await pageObject.goToEditorTemplate();
+				await pageObject.focusProductCollection();
 				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
@@ -788,10 +808,18 @@ test.describe( 'Product Collection', () => {
 		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
 			pageObject,
 			editor,
+			admin,
 		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection(
-				'productCatalog'
-			);
+			await admin.visitSiteEditor( {
+				postId: 'woocommerce/woocommerce//archive-product',
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+
+			await editor.setContent( '' );
+
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInTemplate();
 			await editor.openDocumentSettingsSidebar();
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
@@ -1004,8 +1032,8 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
@@ -1033,8 +1061,8 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 			await editor.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
@@ -1132,46 +1160,40 @@ test.describe( 'Product Collection', () => {
 		];
 
 		genericArchiveTemplates.forEach( ( { name, path } ) => {
-			test( `${ name } template`, async ( {
-				editor,
-				page,
-				pageObject,
-			} ) => {
-				await pageObject.replaceProductsWithProductCollectionInTemplate(
-					path
-				);
+			test( `${ name } template`, async ( { editor, pageObject } ) => {
+				await pageObject.goToEditorTemplate( path );
+				await pageObject.focusProductCollection();
 
-				const previewButtonLocator = editor.canvas.locator(
-					'button[data-test-id="product-collection-preview-button"]'
+				const previewButtonLocator = editor.canvas.getByTestId(
+					SELECTORS.previewButtonTestID
 				);
 
 				// The preview button should be visible
 				await expect( previewButtonLocator ).toBeVisible();
 
-				// The preview button should be hidden when the block is not selected
-				await page.click( 'body' );
+				// The preview button should be hidden when the block is not selected.
+				// Changing focus.
+				const otherBlockSelector = editor.canvas.getByLabel(
+					'Block: Archive Title'
+				);
+				await editor.selectBlocks( otherBlockSelector );
 				await expect( previewButtonLocator ).toBeHidden();
 
-				// Preview button should be visible when any of inner block is selected
-				await editor.canvas
-					.getByLabel( BLOCK_LABELS.productTemplate )
-					.getByLabel( BLOCK_LABELS.productImage )
-					.first()
-					.click();
+				// Preview button should be visible again when the block is selected.
+				await pageObject.focusProductCollection();
 				await expect( previewButtonLocator ).toBeVisible();
 			} );
 		} );
 	} );
 
+	// Tests for regressions of https://github.com/woocommerce/woocommerce/pull/47994
 	test.describe( 'Product Collection should be visible after Refresh', () => {
 		test( 'Product Collection should be visible after Refresh in a Template', async ( {
 			page,
 			editor,
 			pageObject,
 		} ) => {
-			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
-			);
+			await pageObject.goToEditorTemplate();
 			const productTemplate = editor.canvas.getByLabel(
 				BLOCK_LABELS.productTemplate
 			);
@@ -1204,7 +1226,9 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 			editor,
 		} ) => {
-			await pageObject.goToProductCatalogAndInsertCollection( 'onSale' );
+			await pageObject.goToEditorTemplate();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInTemplate( 'onSale' );
 
 			const productTemplate = editor.canvas.getByLabel(
 				BLOCK_LABELS.productTemplate
@@ -1213,7 +1237,9 @@ test.describe( 'Product Collection', () => {
 			await expect( productTemplate ).toHaveCount( 2 );
 
 			// Refresh the template and verify "On Sale" collection is still visible
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 			await page.reload();
 			await expect( productTemplate ).toHaveCount( 2 );
 		} );
@@ -1233,6 +1259,349 @@ test.describe( 'Product Collection', () => {
 			await editor.saveDraft();
 			await page.reload();
 			await expect( productTemplate ).toBeVisible();
+		} );
+	} );
+
+	const templates = {
+		// This test is disabled because archives are disabled for attributes by default. This can be uncommented when this is toggled on.
+		//'taxonomy-product_attribute': {
+		//	templateTitle: 'Product Attribute',
+		//	slug: 'taxonomy-product_attribute',
+		//	frontendPage: '/product-attribute/color/',
+		//	legacyBlockName: 'woocommerce/legacy-template',
+		//},
+		'taxonomy-product_cat': {
+			templateTitle: 'Product Category',
+			slug: 'taxonomy-product_cat',
+			frontendPage: '/product-category/music/',
+			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 2,
+		},
+		'taxonomy-product_tag': {
+			templateTitle: 'Product Tag',
+			slug: 'taxonomy-product_tag',
+			frontendPage: '/product-tag/recommended/',
+			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 2,
+		},
+		'archive-product': {
+			templateTitle: 'Product Catalog',
+			slug: 'archive-product',
+			frontendPage: '/shop/',
+			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 16,
+		},
+		'product-search-results': {
+			templateTitle: 'Product Search Results',
+			slug: 'product-search-results',
+			frontendPage: '/?s=shirt&post_type=product',
+			legacyBlockName: 'woocommerce/legacy-template',
+			expectedProductsCount: 3,
+		},
+	};
+
+	for ( const {
+		templateTitle,
+		slug,
+		frontendPage,
+		legacyBlockName,
+		expectedProductsCount,
+	} of Object.values( templates ) ) {
+		test.describe( `${ templateTitle } template`, () => {
+			test( 'Product Collection block matches with classic template block', async ( {
+				pageObject,
+				requestUtils,
+				admin,
+				editor,
+				page,
+			} ) => {
+				await pageObject.refreshLocators( 'frontend' );
+
+				await page.goto( frontendPage );
+
+				const productCollectionProductNames =
+					await pageObject.getProductNames();
+
+				const template = await requestUtils.createTemplate(
+					'wp_template',
+					{
+						slug,
+						title: 'classic template test',
+						content: 'howdy',
+					}
+				);
+
+				await admin.visitSiteEditor( {
+					postId: template.id,
+					postType: 'wp_template',
+					canvas: 'edit',
+				} );
+
+				await expect(
+					editor.canvas.getByText( 'howdy' )
+				).toBeVisible();
+
+				await editor.insertBlock( { name: legacyBlockName } );
+
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+
+				await page.goto( frontendPage );
+
+				const classicProducts = page.locator(
+					'.woocommerce-loop-product__title'
+				);
+
+				await expect( classicProducts ).toHaveCount(
+					expectedProductsCount
+				);
+
+				const classicProductsNames =
+					await classicProducts.allTextContents();
+
+				expect( classicProductsNames ).toEqual(
+					productCollectionProductNames
+				);
+			} );
+		} );
+	}
+} );
+
+/**
+ * These E2E tests are for `registerProductCollection` which we are exposing
+ * for 3PDs to register new product collections.
+ */
+test.describe( 'Testing registerProductCollection', () => {
+	const MY_REGISTERED_COLLECTIONS = {
+		myCustomCollection: {
+			name: 'My Custom Collection',
+			label: 'Block: My Custom Collection',
+		},
+		myCustomCollectionWithPreview: {
+			name: 'My Custom Collection with Preview',
+			label: 'Block: My Custom Collection with Preview',
+		},
+		myCustomCollectionWithAdvancedPreview: {
+			name: 'My Custom Collection with Advanced Preview',
+			label: 'Block: My Custom Collection with Advanced Preview',
+		},
+	};
+
+	// Activate plugin which registers custom product collections
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'register-product-collection-tester'
+		);
+	} );
+
+	test( `Registered collections should be available in Collection chooser`, async ( {
+		pageObject,
+		editor,
+		admin,
+		page,
+	} ) => {
+		await admin.createNewPost();
+		await editor.insertBlockUsingGlobalInserter( pageObject.BLOCK_NAME );
+		await page
+			.getByRole( 'button', {
+				name: 'Choose collection',
+			} )
+			.click();
+
+		// Get text of all buttons in the collection chooser
+		const collectionChooserButtonsTexts = await editor.page
+			.locator( '.wc-blocks-product-collection__collection-button-title' )
+			.allTextContents();
+
+		// Check if all registered collections are available in the collection chooser
+		expect(
+			collectionChooserButtonsTexts.includes(
+				MY_REGISTERED_COLLECTIONS.myCustomCollection.name
+			)
+		).toBeTruthy();
+		expect(
+			collectionChooserButtonsTexts.includes(
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithPreview.name
+			)
+		).toBeTruthy();
+		expect(
+			collectionChooserButtonsTexts.includes(
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithAdvancedPreview
+					.name
+			)
+		).toBeTruthy();
+	} );
+
+	test.describe( 'My Custom Collection', () => {
+		test( 'Clicking "My Custom Collection" should insert block and show 5 products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock(
+				'myCustomCollection'
+			);
+
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.productImages ).toHaveCount( 5 );
+			await expect( pageObject.productTitles ).toHaveCount( 5 );
+			await expect( pageObject.productPrices ).toHaveCount( 5 );
+			await expect( pageObject.addToCartButtons ).toHaveCount( 5 );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 5 );
+		} );
+
+		test( 'Should display properly in Product Catalog template', async ( {
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.goToProductCatalogAndInsertCollection(
+				'myCustomCollection'
+			);
+
+			const block = editor.canvas.getByLabel(
+				MY_REGISTERED_COLLECTIONS.myCustomCollection.label
+			);
+
+			const products = block
+				.getByLabel( BLOCK_LABELS.productImage )
+				.locator( 'visible=true' );
+			await expect( products ).toHaveCount( 5 );
+		} );
+	} );
+
+	test.describe( 'My Custom Collection with Preview', () => {
+		test( 'Clicking "My Custom Collection with Preview" should insert block and show 9 products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock(
+				'myCustomCollectionWithPreview'
+			);
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+			await expect( pageObject.productImages ).toHaveCount( 9 );
+			await expect( pageObject.productTitles ).toHaveCount( 9 );
+			await expect( pageObject.productPrices ).toHaveCount( 9 );
+			await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 9 );
+		} );
+
+		test( 'Clicking "My Custom Collection with Preview" should show preview', async ( {
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock(
+				'myCustomCollectionWithPreview'
+			);
+			const previewButtonLocator = editor.page.getByTestId(
+				SELECTORS.previewButtonTestID
+			);
+
+			// The preview button should be visible
+			await expect( previewButtonLocator ).toBeVisible();
+		} );
+
+		test( 'Should display properly in Product Catalog template', async ( {
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.goToProductCatalogAndInsertCollection(
+				'myCustomCollectionWithPreview'
+			);
+
+			const block = editor.canvas.getByLabel(
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithPreview.label
+			);
+
+			// Check if products are visible
+			const products = block
+				.getByLabel( BLOCK_LABELS.productImage )
+				.locator( 'visible=true' );
+			await expect( products ).toHaveCount( 9 );
+
+			// Check if the preview button is visible
+			const previewButtonLocator = block.getByTestId(
+				SELECTORS.previewButtonTestID
+			);
+			await expect( previewButtonLocator ).toBeVisible();
+		} );
+	} );
+
+	test.describe( 'My Custom Collection with Advanced Preview', () => {
+		test( 'Clicking "My Custom Collection with Advanced Preview" should insert block and show 9 products', async ( {
+			pageObject,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock(
+				'myCustomCollectionWithAdvancedPreview'
+			);
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+			await expect( pageObject.productImages ).toHaveCount( 9 );
+			await expect( pageObject.productTitles ).toHaveCount( 9 );
+			await expect( pageObject.productPrices ).toHaveCount( 9 );
+			await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.products ).toHaveCount( 9 );
+		} );
+
+		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview for 1 second', async ( {
+			pageObject,
+			editor,
+			page,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock(
+				'myCustomCollectionWithAdvancedPreview'
+			);
+			const previewButtonLocator = editor.page.getByTestId(
+				SELECTORS.previewButtonTestID
+			);
+
+			// The preview button should be visible
+			await expect( previewButtonLocator ).toBeVisible();
+
+			// Disabling eslint rule because we need to wait for the preview to disappear
+			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+			await page.waitForTimeout( 1000 );
+
+			// The preview button should be hidden
+			await expect( previewButtonLocator ).toBeHidden();
+		} );
+
+		test( 'Should display properly in Product Catalog template', async ( {
+			pageObject,
+			editor,
+			page,
+		} ) => {
+			await pageObject.goToProductCatalogAndInsertCollection(
+				'myCustomCollectionWithAdvancedPreview'
+			);
+
+			const block = editor.canvas.getByLabel(
+				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithAdvancedPreview
+					.label
+			);
+
+			// Check if the preview button is visible
+			const previewButtonLocator = block.getByTestId(
+				SELECTORS.previewButtonTestID
+			);
+			await expect( previewButtonLocator ).toBeVisible();
+
+			// Check if products are visible
+			const products = block
+				.getByLabel( BLOCK_LABELS.productImage )
+				.locator( 'visible=true' );
+			await expect( products ).toHaveCount( 9 );
+
+			// Disabling eslint rule because we need to wait for the preview to disappear
+			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+			await page.waitForTimeout( 1000 );
+
+			// The preview button should be hidden after 1 second
+			await expect( previewButtonLocator ).toBeHidden();
 		} );
 	} );
 } );

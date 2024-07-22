@@ -6,8 +6,9 @@ The Compatibility Layer is disabled when either of classic template blocks are a
 
 - `Product (Classic)`,
 - `Product Attribute (Classic)`,
-- `Product Taxonomy (Classic)`,
+- `Product Category (Classic)`,
 - `Product Tag (Classic)`,
+- `Product's Custom Taxonomy (Classic)`,
 - `Product Search Results (Classic)`,
 - `Product Grid (Classic)`.
 
@@ -17,7 +18,7 @@ Furthermore, it is possible to disable the compatibility layer via the hook: [`w
 
 ## Archive Product Templates - [ArchiveProductTemplatesCompatibility](https://github.com/woocommerce/woocommerce-blocks/blob/trunk/src/Templates/ArchiveProductTemplatesCompatibility.php)
 
-The compatibility is built around the Products block because the loop is the main element of archive templates and hooks are placed inside and around the loop. The Compatibility Layer injects custom attributes for the Products block that inherits query from the template and its inner blocks.
+The compatibility is built around the Product Collection and Products (Beta) blocks because the loop is the main element of archive templates and hooks are placed inside and around the loop. The Compatibility Layer injects custom attributes for the Product Collection and Products (Beta) blocks that **inherit query from the template** and their inner blocks.
 
 The following table shows where the hooks are injected into the page.
 

@@ -40,35 +40,24 @@ export class FrontendUtils {
 	}
 
 	async goToCheckout() {
-		await this.page.goto( '/checkout', {
-			waitUntil: 'domcontentloaded',
-		} );
-
+		await this.page.goto( '/checkout' );
 		await this.page.locator( '#email' ).waitFor();
 	}
 
 	async goToCart() {
-		await this.page.goto( '/cart', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/cart' );
 	}
 
 	async goToCartShortcode() {
-		await this.page.goto( '/cart-shortcode', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/cart-shortcode' );
 	}
 
 	async goToMiniCart() {
-		await this.page.goto( '/mini-cart', {
-			waitUntil: 'domcontentloaded',
-		} );
+		await this.page.goto( '/mini-cart' );
 	}
 
 	async goToShop() {
-		await this.page.goto( '/shop', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/shop' );
 	}
 
 	async emptyCart() {
@@ -101,8 +90,6 @@ export class FrontendUtils {
 	}
 
 	async gotoMyAccount() {
-		await this.page.goto( '/my-account', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/my-account' );
 	}
 }

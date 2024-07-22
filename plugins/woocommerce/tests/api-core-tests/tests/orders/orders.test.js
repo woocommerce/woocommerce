@@ -1,7 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
 const { order } = require( '../../data' );
-const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
 
 /**
  * Billing properties to update.
@@ -48,312 +46,6 @@ test.describe.serial( 'Orders API tests', () => {
 	let orderId, sampleData;
 
 	test.beforeAll( async ( { request } ) => {
-		// create Sample Data function
-		const createSampleData = async () => {
-			const testProductData = await productsTestSetupCreateSampleData();
-
-			const orderedProducts = {
-				pocketHoodie: testProductData.simpleProducts.find(
-					( p ) => p.name === 'Hoodie with Pocket oxo'
-				),
-				sunglasses: testProductData.simpleProducts.find(
-					( p ) => p.name === 'Sunglasses oxo'
-				),
-				beanie: testProductData.simpleProducts.find(
-					( p ) => p.name === 'Beanie oxo'
-				),
-				blueVneck:
-					testProductData.variableProducts.vneckVariations.find(
-						( p ) => p.sku === 'woo-vneck-tee-blue'
-					),
-				pennant: testProductData.externalProducts[ 0 ],
-			};
-
-			const johnAddress = {
-				first_name: 'John',
-				last_name: 'Doe',
-				company: 'Automattic',
-				country: 'US',
-				address_1: '60 29th Street',
-				address_2: '#343',
-				city: 'San Francisco',
-				state: 'CA',
-				postcode: '94110',
-				phone: '123456789',
-			};
-			const tinaAddress = {
-				first_name: 'Tina',
-				last_name: 'Clark',
-				company: 'Automattic',
-				country: 'US',
-				address_1: 'Oxford Ave',
-				address_2: '',
-				city: 'Buffalo',
-				state: 'NY',
-				postcode: '14201',
-				phone: '123456789',
-			};
-			const guestShippingAddress = {
-				first_name: 'Ano',
-				last_name: 'Nymous',
-				company: '',
-				country: 'US',
-				address_1: '0 Incognito St',
-				address_2: '',
-				city: 'Erie',
-				state: 'PA',
-				postcode: '16515',
-				phone: '123456789',
-			};
-			const guestBillingAddress = {
-				first_name: 'Ben',
-				last_name: 'Efactor',
-				company: '',
-				country: 'US',
-				address_1: '200 W University Avenue',
-				address_2: '',
-				city: 'Gainesville',
-				state: 'FL',
-				postcode: '32601',
-				phone: '123456789',
-				email: 'ben.efactor@email.net',
-			};
-
-			const john = await request.post( '/wp-json/wc/v3/customers', {
-				data: {
-					first_name: 'John',
-					last_name: 'Doe',
-					username: 'john.doe',
-					email: 'john.doe@example.com',
-					billing: {
-						...johnAddress,
-						email: 'john.doe@example.com',
-					},
-					shipping: johnAddress,
-				},
-			} );
-			const johnJSON = await john.json();
-
-			const tina = await request.post( '/wp-json/wc/v3/customers', {
-				data: {
-					first_name: 'Tina',
-					last_name: 'Clark',
-					username: 'tina.clark',
-					email: 'tina.clark@example.com',
-					billing: {
-						...tinaAddress,
-						email: 'tina.clark@example.com',
-					},
-					shipping: tinaAddress,
-				},
-			} );
-			const tinaJSON = await tina.json();
-
-			const orderBaseData = {
-				payment_method: 'cod',
-				payment_method_title: 'Cash on Delivery',
-				status: 'processing',
-				set_paid: false,
-				currency: 'USD',
-				customer_id: 0,
-			};
-
-			const orders = [];
-			// Have "John" order all products.
-			Object.values( orderedProducts ).forEach( async ( product ) => {
-				const order = await request.post( '/wp-json/wc/v3/orders', {
-					data: {
-						...orderBaseData,
-						customer_id: johnJSON.id,
-						billing: {
-							...johnAddress,
-							email: 'john.doe@example.com',
-						},
-						shipping: johnAddress,
-						line_items: [
-							{
-								product_id: product.id,
-								quantity: 1,
-							},
-						],
-					},
-				} );
-				const orderJSON = await order.json();
-
-				orders.push( orderJSON );
-			} );
-
-			// Have "Tina" order some sunglasses and make a child order.
-			// This somewhat resembles a subscription renewal, but we're just testing the `parent` field.
-			const order2 = await request.post( '/wp-json/wc/v3/orders', {
-				data: {
-					...orderBaseData,
-					status: 'completed',
-					set_paid: true,
-					customer_id: tinaJSON.id,
-					billing: {
-						...tinaAddress,
-						email: 'tina.clark@example.com',
-					},
-					shipping: tinaAddress,
-					line_items: [
-						{
-							product_id: orderedProducts.sunglasses.id,
-							quantity: 1,
-						},
-					],
-				},
-			} );
-			const order2JSON = await order2.json();
-
-			orders.push( order2JSON );
-
-			// create child order by referencing a parent_id
-			const order3 = await request.post( '/wp-json/wc/v3/orders', {
-				data: {
-					...orderBaseData,
-					parent_id: order2JSON.id,
-					customer_id: tinaJSON.id,
-					billing: {
-						...tinaAddress,
-						email: 'tina.clark@example.com',
-					},
-					shipping: tinaAddress,
-					line_items: [
-						{
-							product_id: orderedProducts.sunglasses.id,
-							quantity: 1,
-						},
-					],
-				},
-			} );
-			const order3JSON = await order3.json();
-
-			orders.push( order3JSON );
-
-			// Guest order.
-			const guestOrder = await request.post( '/wp-json/wc/v3/orders', {
-				data: {
-					...orderBaseData,
-					billing: guestBillingAddress,
-					shipping: guestShippingAddress,
-					line_items: [
-						{
-							product_id: orderedProducts.pennant.id,
-							quantity: 2,
-						},
-						{
-							product_id: orderedProducts.beanie.id,
-							quantity: 1,
-						},
-					],
-				},
-			} );
-			const guestOrderJSON = await guestOrder.json();
-
-			// Create an order with all possible numerical fields (taxes, fees, refunds, etc).
-			await request.put(
-				'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
-				{
-					data: {
-						value: 'yes',
-					},
-				}
-			);
-
-			await request.post( '/wp-json/wc/v3/taxes', {
-				data: {
-					country: '*',
-					state: '*',
-					postcode: '*',
-					city: '*',
-					name: 'Tax',
-					rate: '5.5',
-					shipping: true,
-				},
-			} );
-
-			const coupon = await request.post( '/wp-json/wc/v3/coupons', {
-				data: {
-					code: 'save5',
-					amount: '5',
-				},
-			} );
-			const couponJSON = await coupon.json();
-
-			const order4 = await request.post( '/wp-json/wc/v3/orders', {
-				data: {
-					...orderBaseData,
-					line_items: [
-						{
-							product_id: orderedProducts.blueVneck.id,
-							quantity: 1,
-						},
-					],
-					coupon_lines: [
-						{
-							code: 'save5',
-						},
-					],
-					shipping_lines: [
-						{
-							method_id: 'flat_rate',
-							total: '5.00',
-						},
-					],
-					fee_lines: [
-						{
-							total: '1.00',
-							name: 'Test Fee',
-						},
-					],
-				},
-			} );
-			const order4JSON = await order4.json();
-
-			await request.post(
-				`/wp-json/wc/v3/orders/${ order4JSON.id }/refunds`,
-				{
-					data: {
-						api_refund: false, // Prevent an actual refund request (fails with CoD),
-						line_items: [
-							{
-								id: order4JSON.line_items[ 0 ].id,
-								quantity: 1,
-								refund_total: order4JSON.line_items[ 0 ].total,
-								refund_tax: [
-									{
-										id: order4JSON.line_items[ 0 ]
-											.taxes[ 0 ].id,
-										refund_total:
-											order4JSON.line_items[ 0 ]
-												.total_tax,
-									},
-								],
-							},
-						],
-					},
-				}
-			);
-			orders.push( order4JSON );
-
-			return {
-				customers: {
-					johnJSON,
-					tinaJSON,
-				},
-				orders,
-				precisionOrder: order4JSON,
-				hierarchicalOrders: {
-					parent: order2JSON,
-					child: order3JSON,
-				},
-				guestOrderJSON,
-				testProductData,
-				couponJSON,
-			};
-		};
-
 		const createSampleCategories = async () => {
 			const clothing = await request.post(
 				'/wp-json/wc/v3/products/categories',
@@ -2392,7 +2084,7 @@ test.describe.serial( 'Orders API tests', () => {
 				( p ) => p.name === 'T-Shirt oxo'
 			);
 
-			const order = await request.post( '/wp-json/wc/v3/orders', {
+			const order1 = await request.post( '/wp-json/wc/v3/orders', {
 				data: {
 					set_paid: true,
 					status: 'completed',
@@ -2412,7 +2104,7 @@ test.describe.serial( 'Orders API tests', () => {
 					],
 				},
 			} );
-			const orderJSON = await order.json();
+			const orderJSON = await order1.json();
 
 			return [ orderJSON ];
 		};
@@ -2472,11 +2164,316 @@ test.describe.serial( 'Orders API tests', () => {
 			};
 		};
 
+		// create Sample Data function
+		const createSampleData = async () => {
+			const testProductData = await productsTestSetupCreateSampleData();
+			const orderedProducts = {
+				pocketHoodie: testProductData.simpleProducts.find(
+					( p ) => p.name === 'Hoodie with Pocket oxo'
+				),
+				sunglasses: testProductData.simpleProducts.find(
+					( p ) => p.name === 'Sunglasses oxo'
+				),
+				beanie: testProductData.simpleProducts.find(
+					( p ) => p.name === 'Beanie oxo'
+				),
+				blueVneck:
+					testProductData.variableProducts.vneckVariations.find(
+						( p ) => p.sku === 'woo-vneck-tee-blue'
+					),
+				pennant: testProductData.externalProducts[ 0 ],
+			};
+
+			const johnAddress = {
+				first_name: 'John',
+				last_name: 'Doe',
+				company: 'Automattic',
+				country: 'US',
+				address_1: '60 29th Street',
+				address_2: '#343',
+				city: 'San Francisco',
+				state: 'CA',
+				postcode: '94110',
+				phone: '123456789',
+			};
+			const tinaAddress = {
+				first_name: 'Tina',
+				last_name: 'Clark',
+				company: 'Automattic',
+				country: 'US',
+				address_1: 'Oxford Ave',
+				address_2: '',
+				city: 'Buffalo',
+				state: 'NY',
+				postcode: '14201',
+				phone: '123456789',
+			};
+			const guestShippingAddress = {
+				first_name: 'Ano',
+				last_name: 'Nymous',
+				company: '',
+				country: 'US',
+				address_1: '0 Incognito St',
+				address_2: '',
+				city: 'Erie',
+				state: 'PA',
+				postcode: '16515',
+				phone: '123456789',
+			};
+			const guestBillingAddress = {
+				first_name: 'Ben',
+				last_name: 'Efactor',
+				company: '',
+				country: 'US',
+				address_1: '200 W University Avenue',
+				address_2: '',
+				city: 'Gainesville',
+				state: 'FL',
+				postcode: '32601',
+				phone: '123456789',
+				email: 'ben.efactor@email.net',
+			};
+
+			const john = await request.post( '/wp-json/wc/v3/customers', {
+				data: {
+					first_name: 'John',
+					last_name: 'Doe',
+					username: 'john.doe',
+					email: 'john.doe@example.com',
+					billing: {
+						...johnAddress,
+						email: 'john.doe@example.com',
+					},
+					shipping: johnAddress,
+				},
+			} );
+			const johnJSON = await john.json();
+
+			const tina = await request.post( '/wp-json/wc/v3/customers', {
+				data: {
+					first_name: 'Tina',
+					last_name: 'Clark',
+					username: 'tina.clark',
+					email: 'tina.clark@example.com',
+					billing: {
+						...tinaAddress,
+						email: 'tina.clark@example.com',
+					},
+					shipping: tinaAddress,
+				},
+			} );
+			const tinaJSON = await tina.json();
+
+			const orderBaseData = {
+				payment_method: 'cod',
+				payment_method_title: 'Cash on Delivery',
+				status: 'processing',
+				set_paid: false,
+				currency: 'USD',
+				customer_id: 0,
+			};
+
+			const orders = [];
+			// Have "John" order all products.
+			Object.values( orderedProducts ).forEach( async ( product ) => {
+				const order2 = await request.post( '/wp-json/wc/v3/orders', {
+					data: {
+						...orderBaseData,
+						customer_id: johnJSON.id,
+						billing: {
+							...johnAddress,
+							email: 'john.doe@example.com',
+						},
+						shipping: johnAddress,
+						line_items: [
+							{
+								product_id: product.id,
+								quantity: 1,
+							},
+						],
+					},
+				} );
+				const orderJSON = await order2.json();
+
+				orders.push( orderJSON );
+			} );
+
+			// Have "Tina" order some sunglasses and make a child order.
+			// This somewhat resembles a subscription renewal, but we're just testing the `parent` field.
+			const order2 = await request.post( '/wp-json/wc/v3/orders', {
+				data: {
+					...orderBaseData,
+					status: 'completed',
+					set_paid: true,
+					customer_id: tinaJSON.id,
+					billing: {
+						...tinaAddress,
+						email: 'tina.clark@example.com',
+					},
+					shipping: tinaAddress,
+					line_items: [
+						{
+							product_id: orderedProducts.sunglasses.id,
+							quantity: 1,
+						},
+					],
+				},
+			} );
+			const order2JSON = await order2.json();
+
+			orders.push( order2JSON );
+
+			// create child order by referencing a parent_id
+			const order3 = await request.post( '/wp-json/wc/v3/orders', {
+				data: {
+					...orderBaseData,
+					parent_id: order2JSON.id,
+					customer_id: tinaJSON.id,
+					billing: {
+						...tinaAddress,
+						email: 'tina.clark@example.com',
+					},
+					shipping: tinaAddress,
+					line_items: [
+						{
+							product_id: orderedProducts.sunglasses.id,
+							quantity: 1,
+						},
+					],
+				},
+			} );
+			const order3JSON = await order3.json();
+
+			orders.push( order3JSON );
+
+			// Guest order.
+			const guestOrder = await request.post( '/wp-json/wc/v3/orders', {
+				data: {
+					...orderBaseData,
+					billing: guestBillingAddress,
+					shipping: guestShippingAddress,
+					line_items: [
+						{
+							product_id: orderedProducts.pennant.id,
+							quantity: 2,
+						},
+						{
+							product_id: orderedProducts.beanie.id,
+							quantity: 1,
+						},
+					],
+				},
+			} );
+			const guestOrderJSON = await guestOrder.json();
+
+			// Create an order with all possible numerical fields (taxes, fees, refunds, etc).
+			await request.put(
+				'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
+				{
+					data: {
+						value: 'yes',
+					},
+				}
+			);
+
+			await request.post( '/wp-json/wc/v3/taxes', {
+				data: {
+					country: '*',
+					state: '*',
+					postcode: '*',
+					city: '*',
+					name: 'Tax',
+					rate: '5.5',
+					shipping: true,
+				},
+			} );
+
+			const coupon = await request.post( '/wp-json/wc/v3/coupons', {
+				data: {
+					code: 'save5',
+					amount: '5',
+				},
+			} );
+			const couponJSON = await coupon.json();
+
+			const order4 = await request.post( '/wp-json/wc/v3/orders', {
+				data: {
+					...orderBaseData,
+					line_items: [
+						{
+							product_id: orderedProducts.blueVneck.id,
+							quantity: 1,
+						},
+					],
+					coupon_lines: [
+						{
+							code: 'save5',
+						},
+					],
+					shipping_lines: [
+						{
+							method_id: 'flat_rate',
+							total: '5.00',
+						},
+					],
+					fee_lines: [
+						{
+							total: '1.00',
+							name: 'Test Fee',
+						},
+					],
+				},
+			} );
+			const order4JSON = await order4.json();
+
+			await request.post(
+				`/wp-json/wc/v3/orders/${ order4JSON.id }/refunds`,
+				{
+					data: {
+						api_refund: false, // Prevent an actual refund request (fails with CoD),
+						line_items: [
+							{
+								id: order4JSON.line_items[ 0 ].id,
+								quantity: 1,
+								refund_total: order4JSON.line_items[ 0 ].total,
+								refund_tax: [
+									{
+										id: order4JSON.line_items[ 0 ]
+											.taxes[ 0 ].id,
+										refund_total:
+											order4JSON.line_items[ 0 ]
+												.total_tax,
+									},
+								],
+							},
+						],
+					},
+				}
+			);
+			orders.push( order4JSON );
+
+			return {
+				customers: {
+					johnJSON,
+					tinaJSON,
+				},
+				orders,
+				precisionOrder: order4JSON,
+				hierarchicalOrders: {
+					parent: order2JSON,
+					child: order3JSON,
+				},
+				guestOrderJSON,
+				testProductData,
+				couponJSON,
+			};
+		};
+
 		sampleData = await createSampleData();
 	}, 100000 );
 
 	test.afterAll( async ( { request } ) => {
-		const productsTestSetupDeleteSampleData = async ( sampleData ) => {
+		const productsTestSetupDeleteSampleData = async ( _sampleData ) => {
 			const {
 				categories,
 				attributes,
@@ -2489,7 +2486,7 @@ test.describe.serial( 'Orders API tests', () => {
 				variableProducts,
 				hierarchicalProducts,
 				orders,
-			} = sampleData;
+			} = _sampleData;
 
 			const productIds = []
 				.concat( simpleProducts.map( ( p ) => p.id ) )
@@ -2504,8 +2501,8 @@ test.describe.serial( 'Orders API tests', () => {
 					hierarchicalProducts.childJSON.id,
 				] );
 
-			for ( const order of orders ) {
-				await request.delete( `/wp-json/wc/v3/orders/${ order.id }`, {
+			for ( const _order of orders ) {
+				await request.delete( `/wp-json/wc/v3/orders/${ _order.id }`, {
 					data: {
 						force: true,
 					},
@@ -2586,22 +2583,22 @@ test.describe.serial( 'Orders API tests', () => {
 			}
 		};
 
-		const deleteSampleData = async ( sampleData ) => {
+		const deleteSampleData = async ( _sampleData ) => {
 			await productsTestSetupDeleteSampleData(
-				sampleData.testProductData
+				_sampleData.testProductData
 			);
 
-			for ( const order of sampleData.orders.concat( [
-				sampleData.guestOrderJSON,
+			for ( const _order of _sampleData.orders.concat( [
+				_sampleData.guestOrderJSON,
 			] ) ) {
-				await request.delete( `/wp-json/wc/v3/orders/${ order.id }`, {
+				await request.delete( `/wp-json/wc/v3/orders/${ _order.id }`, {
 					data: {
 						force: true,
 					},
 				} );
 			}
 
-			for ( const customer of Object.values( sampleData.customers ) ) {
+			for ( const customer of Object.values( _sampleData.customers ) ) {
 				await request.delete(
 					`/wp-json/wc/v3/customers/${ customer.id }`,
 					{
@@ -2781,7 +2778,7 @@ test.describe.serial( 'Orders API tests', () => {
 			const allOrdersJSON = await allOrders.json();
 
 			expect( allOrders.status() ).toEqual( 200 );
-			const allOrdersIds = allOrdersJSON.map( ( order ) => order.id );
+			const allOrdersIds = allOrdersJSON.map( ( _order ) => _order.id );
 			expect( allOrdersIds ).toHaveLength( ORDERS_COUNT );
 
 			const ordersToFilter = [
@@ -2939,8 +2936,8 @@ test.describe.serial( 'Orders API tests', () => {
 
 			expect( result1.status() ).toEqual( 200 );
 			expect( result1JSON ).toHaveLength( 5 );
-			result1JSON.forEach( ( order ) =>
-				expect( order ).toEqual(
+			result1JSON.forEach( ( _order ) =>
+				expect( _order ).toEqual(
 					expect.objectContaining( {
 						customer_id: sampleData.customers.johnJSON.id,
 					} )
@@ -2957,8 +2954,8 @@ test.describe.serial( 'Orders API tests', () => {
 
 			expect( result2.status() ).toEqual( 200 );
 			expect( result2JSON ).toHaveLength( 3 );
-			result2JSON.forEach( ( order ) =>
-				expect( order ).toEqual(
+			result2JSON.forEach( ( _order ) =>
+				expect( _order ).toEqual(
 					expect.objectContaining( {
 						customer_id: 0,
 					} )
@@ -2979,8 +2976,8 @@ test.describe.serial( 'Orders API tests', () => {
 
 			expect( result1.status() ).toEqual( 200 );
 			expect( result1JSON ).toHaveLength( 2 );
-			result1JSON.forEach( ( order ) =>
-				expect( order ).toEqual(
+			result1JSON.forEach( ( _order ) =>
+				expect( _order ).toEqual(
 					expect.objectContaining( {
 						line_items: expect.arrayContaining( [
 							expect.objectContaining( {
@@ -3002,36 +2999,36 @@ test.describe.serial( 'Orders API tests', () => {
 				);
 			};
 
-			const verifyOrderPrecision = ( order, dp ) => {
-				expectPrecisionToMatch( order.discount_total, dp );
-				expectPrecisionToMatch( order.discount_tax, dp );
-				expectPrecisionToMatch( order.shipping_total, dp );
-				expectPrecisionToMatch( order.shipping_tax, dp );
-				expectPrecisionToMatch( order.cart_tax, dp );
-				expectPrecisionToMatch( order.total, dp );
-				expectPrecisionToMatch( order.total_tax, dp );
+			const verifyOrderPrecision = ( _order, dp ) => {
+				expectPrecisionToMatch( _order.discount_total, dp );
+				expectPrecisionToMatch( _order.discount_tax, dp );
+				expectPrecisionToMatch( _order.shipping_total, dp );
+				expectPrecisionToMatch( _order.shipping_tax, dp );
+				expectPrecisionToMatch( _order.cart_tax, dp );
+				expectPrecisionToMatch( _order.total, dp );
+				expectPrecisionToMatch( _order.total_tax, dp );
 
-				order.line_items.forEach( ( lineItem ) => {
+				_order.line_items.forEach( ( lineItem ) => {
 					expectPrecisionToMatch( lineItem.total, dp );
 					expectPrecisionToMatch( lineItem.total_tax, dp );
 				} );
 
-				order.tax_lines.forEach( ( taxLine ) => {
+				_order.tax_lines.forEach( ( taxLine ) => {
 					expectPrecisionToMatch( taxLine.tax_total, dp );
 					expectPrecisionToMatch( taxLine.shipping_tax_total, dp );
 				} );
 
-				order.shipping_lines.forEach( ( shippingLine ) => {
+				_order.shipping_lines.forEach( ( shippingLine ) => {
 					expectPrecisionToMatch( shippingLine.total, dp );
 					expectPrecisionToMatch( shippingLine.total_tax, dp );
 				} );
 
-				order.fee_lines.forEach( ( feeLine ) => {
+				_order.fee_lines.forEach( ( feeLine ) => {
 					expectPrecisionToMatch( feeLine.total, dp );
 					expectPrecisionToMatch( feeLine.total_tax, dp );
 				} );
 
-				order.refunds.forEach( ( refund ) => {
+				_order.refunds.forEach( ( refund ) => {
 					expectPrecisionToMatch( refund.total, dp );
 				} );
 			};
@@ -3089,8 +3086,8 @@ test.describe.serial( 'Orders API tests', () => {
 
 			expect( result1.status() ).toEqual( 200 );
 			expect( result1JSON.length ).toBeGreaterThanOrEqual( 1 );
-			result1JSON.forEach( ( order ) =>
-				expect( order.billing.email ).toContain( 'example.com' )
+			result1JSON.forEach( ( _order ) =>
+				expect( _order.billing.email ).toContain( 'example.com' )
 			);
 
 			// Test billing address.
@@ -3131,8 +3128,8 @@ test.describe.serial( 'Orders API tests', () => {
 
 			expect( result4.status() ).toEqual( 200 );
 			expect( result4JSON.length ).toBeGreaterThanOrEqual( 1 );
-			result4JSON.forEach( ( order ) =>
-				expect( order.billing.last_name ).toEqual( 'Doe' )
+			result4JSON.forEach( ( _order ) =>
+				expect( _order.billing.last_name ).toEqual( 'Doe' )
 			);
 
 			// Test order item name.
@@ -3145,8 +3142,8 @@ test.describe.serial( 'Orders API tests', () => {
 
 			expect( result5.status() ).toEqual( 200 );
 			expect( result5JSON ).toHaveLength( 2 );
-			result5JSON.forEach( ( order ) =>
-				expect( order ).toEqual(
+			result5JSON.forEach( ( _order ) =>
+				expect( _order ).toEqual(
 					expect.objectContaining( {
 						line_items: expect.arrayContaining( [
 							expect.objectContaining( {

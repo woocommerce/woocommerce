@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: Fix flaky merchant filling sku field in the new editor

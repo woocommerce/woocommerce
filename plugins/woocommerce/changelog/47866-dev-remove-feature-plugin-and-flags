@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Remove the isFeaturePlugin function, which was used to turn off experimental block styling (but was non functional). Also remove associated code in FeatureGating class.

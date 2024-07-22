@@ -6,6 +6,8 @@
  * @package WooCommerce\Admin\Helper
  */
 
+use Automattic\WooCommerce\Admin\PluginsHelper;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -26,7 +28,7 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
-		add_action( 'plugins_loaded', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
+		add_action( 'admin_init', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
 	}
 
 	/**
@@ -272,21 +274,37 @@ class WC_Helper_Updater {
 		// Prepare the expiry notice based on subscription status.
 		$expiry_notice = '';
 		if ( ! empty( $subscription['expired'] ) && ! $subscription['lifetime'] ) {
+
+			$renew_link = add_query_arg(
+				array(
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_plugin_screen_renew',
+				),
+				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
+			);
+
 			/* translators: 1: Product regular price */
 			$product_price = ! empty( $subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $subscription['product_regular_price'] ) ) : '';
 
 			$expiry_notice = sprintf(
 			/* translators: 1: URL to My Subscriptions page 2: Product price */
 				__( ' Your subscription expired, <a href="%1$s" class="woocommerce-renew-subscription">renew %2$s</a>to update.', 'woocommerce' ),
-				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' ),
+				esc_url( $renew_link ),
 				$product_price
 			);
 		} elseif ( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ) {
+			$renew_link    = add_query_arg(
+				array(
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_plugin_screen_enable_autorenew',
+				),
+				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
+			);
 			$expiry_notice = sprintf(
 			/* translators: 1: Expiry date 1: URL to My Subscriptions page */
 				__( ' Your subscription expires on %1$s, <a href="%2$s" class="woocommerce-enable-autorenew">enable auto-renew</a> to continue receiving updates.', 'woocommerce' ),
 				date_i18n( 'F jS', $subscription['expires'] ),
-				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' )
+				esc_url( $renew_link )
 			);
 		}
 

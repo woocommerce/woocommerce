@@ -51,4 +51,5 @@ export type SettingsContextType = {
 	) => void;
 	isSaving: boolean;
 	save: () => void;
+	isDirty: boolean;
 };

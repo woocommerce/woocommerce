@@ -87,7 +87,7 @@ function getMarketingItems( props ) {
 			link: 'https://kb.mailpoet.com/category/114-getting-started',
 		},
 		activePlugins.includes( 'google-listings-and-ads' ) && {
-			title: __( 'Set up Google Listing & Ads', 'woocommerce' ),
+			title: __( 'Set up Google for WooCommerce', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
 		},
 		activePlugins.includes( 'pinterest-for-woocommerce' ) && {
@@ -190,7 +190,10 @@ function getProductsItems() {
 function getShippingItems( { activePlugins, countryCode } ) {
 	const showWCS =
 		countryCode === 'US' &&
-		! activePlugins.includes( 'woocommerce-services' );
+		! activePlugins.includes( 'woocommerce-services' ) &&
+		! activePlugins.includes( 'woocommerce-shipping' ) &&
+		! activePlugins.includes( 'woocommerce-tax' );
+
 	return [
 		{
 			title: __( 'Setting up Shipping Zones', 'woocommerce' ),
@@ -235,11 +238,18 @@ function getTaxItems( props ) {
 	}
 
 	const { additionalData } = task;
-	const { woocommerceTaxCountries = [], taxJarActivated } = additionalData;
+	const {
+		woocommerceTaxCountries = [],
+		taxJarActivated,
+		woocommerceTaxActivated,
+		woocommerceShippingActivated,
+	} = additionalData;
 
 	const showWCS =
 		! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-		woocommerceTaxCountries.includes( countryCode );
+		woocommerceTaxCountries.includes( countryCode ) &&
+		! woocommerceTaxActivated &&
+		! woocommerceShippingActivated;
 
 	return [
 		{

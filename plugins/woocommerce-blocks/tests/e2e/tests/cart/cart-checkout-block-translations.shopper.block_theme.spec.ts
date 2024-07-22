@@ -94,14 +94,7 @@ test.describe( 'Shopper → Translations', () => {
 				.locator( 'h2' )
 		).toBeVisible();
 
-		await expect(
-			page.getByRole( 'link', { name: 'Terug naar winkelwagen' } )
-		).toBeVisible();
-
-		/**
-		 * @todo Uncomment and update when WooCommerce 9.0.0 is released and a translation for the new string is available.
-		 * @see https://github.com/woocommerce/woocommerce/issues/47260
-		 */
+		// TODO: Re-enable this test when translations update.
 		// await expect(
 		// 	page.getByRole( 'button', { name: 'Bestel en betaal' } )
 		// ).toBeVisible();

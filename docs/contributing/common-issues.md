@@ -36,9 +36,9 @@ mysqladmin: CREATE DATABASE failed; error: 'Access denied for user 'wp'@'localho
 
 To fix:
 
-- Open MySQL with `sudo mysql`.
-- Run `GRANT ALL PRIVILEGES ON * . * TO 'wp'@'localhost';`. Exit by typing `exit;`.
-- Run the `install-wp-tests.sh` script again.
+-   Open MySQL with `sudo mysql`.
+-   Run `GRANT ALL PRIVILEGES ON * . * TO 'wp'@'localhost';`. Exit by typing `exit;`.
+-   Run the `install-wp-tests.sh` script again.
 
 ## Timeout / 404 errors while running e2e tests
 
@@ -115,11 +115,3 @@ and set Chrome's log level "verbose" to checked.
 5. All tests: `./vendor/bin/phpunit`
 
 You might need to `composer install` if `phpunit` doesn't exist.
-
-## Show the welcome modal again
-
-Delete the option `woocommerce_task_list_welcome_modal_dismissed`:
-
-```sql
-DELETE FROM wp_options WHERE option_name = 'woocommerce_task_list_welcome_modal_dismissed'
-```

@@ -119,7 +119,9 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const isHomescreen =
 		isWCAdmin() && getScreenFromPath() === 'homescreen' && ! query.task;
 	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
-		useLaunchYourStore();
+		useLaunchYourStore( {
+			enabled: isHomescreen,
+		} );
 	const showLaunchYourStoreStatus =
 		isHomescreen && launchYourStoreEnabled && ! isLoading;
 

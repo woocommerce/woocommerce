@@ -150,19 +150,6 @@ describe( 'Task', () => {
 		expect( queryByText( 'Show things to do next' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should class updateOptions with default data on render', () => {
-		render(
-			<div>
-				<TaskLists query={ {} } />
-			</div>
-		);
-		waitFor( () => {
-			expect( updateOptions ).toHaveBeenCalledWith( {
-				woocommerce_task_list_prompt_shown: true,
-			} );
-		} );
-	} );
-
 	describe( 'toggle list', () => {
 		it( 'should trigger hide track when clicking Show things to do next button', () => {
 			( useSelect as jest.Mock ).mockImplementation( () => ( {

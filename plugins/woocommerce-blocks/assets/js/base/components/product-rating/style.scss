@@ -88,14 +88,15 @@ $line-height: 1.618;
 		/* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
 		font-family: WooCommerce;
 		font-weight: 400;
-		-webkit-text-stroke: 2px var(--wp--preset--color--black, #000);
 		&::before {
 			content: "\53";
 			top: 0;
 			left: 0;
 			right: 0;
 			position: absolute;
-			color: transparent;
+			-webkit-text-stroke-color: inherit;
+			-webkit-text-stroke-width: 2px;
+			-webkit-text-fill-color: transparent;
 			white-space: nowrap;
 			text-align: center;
 		}

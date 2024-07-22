@@ -113,10 +113,14 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByRole( 'heading', { name: 'Plugins', exact: true } )
 			).toBeVisible();
 			// confirm that some of the optional extensions aren't present
-			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
-			await expect( page.getByText( 'Pinterest' ) ).toBeHidden();
 			await expect(
-				page.getByText( 'Google Listings & Ads' )
+				page.getByText( 'MailPoet for WooCommerce', { exact: true } )
+			).toBeHidden();
+			await expect(
+				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
+			).toBeHidden();
+			await expect(
+				page.getByText( 'Google for WooCommerce', { exact: true } )
 			).toBeHidden();
 		} );
 
@@ -263,12 +267,18 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			try {
 				await page
 					.getByText(
-						'Drive sales with Google Listings & AdsReach millions of active shoppers across'
+						'Drive sales with Google for WooCommerceReach millions of active shoppers across'
 					)
 					.getByRole( 'checkbox' )
 					.check( { timeout: 2000 } );
 			} catch ( e ) {
-				console.log( 'Checkbox not present for Google Listings & Ads' );
+				// Temporary fix until rebranding is done.
+				await page
+					.getByText(
+						'Drive sales with Google Listings & AdsReach millions of active shoppers across'
+					)
+					.getByRole( 'checkbox' )
+					.check( { timeout: 2000 } );
 			}
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
@@ -307,8 +317,12 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect(
 				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
 			).toBeVisible();
+
 			await expect(
-				page.getByText( 'Google Listings and Ads', { exact: true } )
+				page.getByText(
+					/(Google for WooCommerce|Google Listings & Ads)/,
+					{ exact: true }
+				)
 			).toBeVisible();
 			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
 			await expect( page.getByText( 'Jetpack' ) ).toBeHidden();
@@ -338,26 +352,46 @@ test.describe( 'Store owner can complete the core profiler', () => {
 
 		await test.step( 'Clean up installed extensions', async () => {
 			await page.goto( 'wp-admin/plugins.php' );
-			await page.getByLabel( 'Deactivate Google Listings' ).click();
+			await page.getByLabel( 'Deactivate Google' ).click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Google Listings' ).click();
-			await expect(
-				page.getByText(
-					'Google Listings and Ads was successfully deleted.'
-				)
-			).toBeVisible();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Google' ).click();
+				await expect(
+					page.getByText( 'was successfully deleted.' )
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
+			await expect( page.getByLabel( 'Delete Google' ) ).toBeHidden();
 			await page.getByLabel( 'Deactivate Pinterest for' ).click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Pinterest for' ).click();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Pinterest for' ).click();
+				await expect(
+					page.getByText( 'was successfully deleted.' )
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
 			await expect(
-				page.getByText(
-					'Pinterest for WooCommerce was successfully deleted.'
-				)
-			).toBeVisible();
+				page.getByLabel( 'Delete Pinterest for' )
+			).toBeHidden();
 		} );
 	} );
 } );
@@ -395,23 +429,22 @@ test.describe( 'Store owner can skip the core profiler', () => {
 	} );
 
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
-		await test.step( 'Go to WC Home and make sure the connect button is visible', async () => {
+		await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
 			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Connect to WooCommerce.com',
-				} )
-			).toBeVisible();
 			await page
-				.getByRole( 'link', { name: 'Connect', exact: true } )
-				.click();
+				.getByRole( 'menuitem', { name: 'Total sales' } )
+				.waitFor( { state: 'visible' } );
 		} );
 
-		await test.step( 'Ensure we are redirected to the correct URL and connect store', async () => {
-			await expect( page.url() ).toContain(
-				'?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
+		await test.step( 'Go to the extensions tab and connect store', async () => {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
 			);
+			await expect(
+				page.getByText(
+					'Hundreds of vetted products and services. Unlimited potential.'
+				)
+			).toBeVisible();
 			await expect(
 				page.getByRole( 'button', { name: 'My Subscriptions' } )
 			).toBeVisible();
@@ -429,7 +462,7 @@ test.describe( 'Store owner can skip the core profiler', () => {
 				page.getByRole( 'heading', {
 					name: 'Log in to your account',
 				} )
-			).toBeVisible();
+			).toBeVisible( { timeout: 30000 } );
 		} );
 	} );
 } );

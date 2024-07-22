@@ -9,5 +9,5 @@ jobs:
     name: 'Run tests'
     uses: ./.github/workflows/ci.yml
     with:
-      trigger: 'daily-e2e'
+      trigger: 'daily-checks'
     secrets: inherit

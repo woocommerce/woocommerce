@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Comment: Update db_version variable and use it to prevent adding global_unique_id when the lookup table was not yet updated

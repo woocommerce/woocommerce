@@ -7,7 +7,6 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
-import { PopoverStatus } from './use-popover-handler';
 
 const setStyle = ( documentElement: HTMLElement ) => {
 	const element = documentElement.ownerDocument.documentElement;
@@ -89,9 +88,62 @@ const findAndSetLogoBlock = (
 
 export const DISABLE_CLICK_CLASS = 'disable-click';
 
+const makeInert = ( element: Element ) => {
+	element.setAttribute( 'inert', 'true' );
+};
+
+const makeInteractive = ( element: Element ) => {
+	element.removeAttribute( 'inert' );
+};
+
+const addInertToAssemblerPatterns = (
+	documentElement: HTMLElement,
+	page: string
+) => {
+	const body = documentElement.ownerDocument.body;
+
+	const interactiveBlocks: Record< string, string > = {
+		'/customize-store/assembler-hub/header': `header[data-type='core/template-part']`,
+		'/customize-store/assembler-hub/footer': `footer[data-type='core/template-part']`,
+		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part']):not(.${ DISABLE_CLICK_CLASS })`,
+	};
+
+	const pathInteractiveBlocks = page.includes(
+		'/customize-store/assembler-hub/homepage'
+	)
+		? interactiveBlocks[ '/customize-store/assembler-hub/homepage' ]
+		: interactiveBlocks[ page ];
+
+	const addInertToTemplateParts = () => {
+		for ( const disableClick of documentElement.querySelectorAll(
+			`[data-is-parent-block='true']`
+		) ) {
+			makeInert( disableClick );
+		}
+
+		for ( const element of documentElement.querySelectorAll(
+			pathInteractiveBlocks
+		) ) {
+			makeInteractive( element );
+		}
+	};
+
+	addInertToTemplateParts();
+
+	const observerChildList = new window.MutationObserver(
+		addInertToTemplateParts
+	);
+
+	observerChildList.observe( body, {
+		childList: true,
+	} );
+
+	return observerChildList;
+};
+
 /**
  * Adds an 'inert' attribute to all inner blocks and blocks with the class "disable-click" within the provided document element.
- * The 'inert' attribute makes the blocks uninteractive, preventing them from receiving focus or being clicked.
+ * The 'inert' attribute makes the blocks non-interactive, preventing them from receiving focus or being clicked.
  */
 const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 	const body = documentElement.ownerDocument.body;
@@ -105,9 +157,9 @@ const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 		}
 
 		for ( const disableClick of documentElement.querySelectorAll(
-			`[data-is-parent-block='true'] *, header *, footer *, .${ DISABLE_CLICK_CLASS }`
+			`[data-is-parent-block='true'] *`
 		) ) {
-			disableClick.setAttribute( 'inert', 'true' );
+			makeInert( disableClick );
 		}
 	} );
 
@@ -145,12 +197,11 @@ const updateSelectedBlock = (
 		} );
 
 		updatePopoverPosition( {
-			mainBodyWidth: window.document.body.clientWidth,
-			iframeWidth: body.clientWidth,
 			event,
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
 		} );
+		( event.target as HTMLElement ).focus();
 	};
 
 	const handleMouseMove = ( event: MouseEvent ) => {
@@ -162,8 +213,6 @@ const updateSelectedBlock = (
 
 		if ( selectedBlockClientId ) {
 			updatePopoverPosition( {
-				mainBodyWidth: window.document.body.clientWidth,
-				iframeWidth: body.clientWidth,
 				event,
 				hoveredBlockClientId: selectedBlockClientId,
 				clickedBlockClientId: null,
@@ -182,10 +231,20 @@ const updateSelectedBlock = (
 
 export const hidePopoverWhenMouseLeaveIframe = (
 	iframeRef: HTMLElement,
-	setPopoverStatus: ( popoverStatus: PopoverStatus ) => void
+	{
+		hidePopover,
+		selectBlock,
+	}: Pick<
+		useAutoBlockPreviewEventListenersCallbacks,
+		'hidePopover' | 'selectBlock'
+	>
 ) => {
-	const handleMouseLeave = () => {
-		setPopoverStatus( PopoverStatus.HIDDEN );
+	const handleMouseLeave = ( event: MouseEvent ) => {
+		/// Deselect the block if the mouse exits the iframe unless it's moving towards the Block Toolbar.
+		if ( event.clientX < 0 || event.clientY < 0 ) {
+			selectBlock( '' );
+		}
+		hidePopover();
 	};
 
 	if ( iframeRef ) {
@@ -205,6 +264,7 @@ type useAutoBlockPreviewEventListenersValues = {
 	isPatternPreview: boolean;
 	contentHeight: number | null;
 	logoBlockIds: string[];
+	query: Record< string, string >;
 };
 
 type useAutoBlockPreviewEventListenersCallbacks = {
@@ -223,15 +283,13 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	getBlockParents: ( clientId: string ) => string[];
 	setBlockEditingMode: ( clientId: string ) => void;
 	updatePopoverPosition: ( options: {
-		mainBodyWidth: number;
-		iframeWidth: number;
 		event: MouseEvent;
 		hoveredBlockClientId: string | null;
 		clickedBlockClientId: string | null;
 	} ) => void;
 	setLogoBlockIds: ( logoBlockIds: string[] ) => void;
 	setContentHeight: ( contentHeight: number | null ) => void;
-	setPopoverStatus: ( popoverStatus: PopoverStatus ) => void;
+	hidePopover: () => void;
 };
 
 /**
@@ -244,6 +302,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		autoScale,
 		isPatternPreview,
 		logoBlockIds,
+		query,
 	}: useAutoBlockPreviewEventListenersValues,
 	{
 		selectBlockOnHover,
@@ -253,7 +312,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		updatePopoverPosition,
 		setLogoBlockIds,
 		setContentHeight,
-		setPopoverStatus,
+		hidePopover,
 	}: useAutoBlockPreviewEventListenersCallbacks
 ) => {
 	useEffect( () => {
@@ -279,26 +338,25 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 
 		setStyle( documentElement );
 
-		if ( logoBlockIds.length === 0 ) {
-			const logoObserver = findAndSetLogoBlock(
-				{ autoScale, documentElement },
-				{
-					setLogoBlockIds,
-				}
-			);
+		const logoObserver = findAndSetLogoBlock(
+			{ autoScale, documentElement },
+			{
+				setLogoBlockIds,
+			}
+		);
 
-			observers.push( logoObserver );
-		}
+		observers.push( logoObserver );
 
 		if (
 			isFullComposabilityFeatureAndAPIAvailable() &&
 			! isPatternPreview
 		) {
 			const removeEventListenerHidePopover =
-				hidePopoverWhenMouseLeaveIframe(
-					documentElement,
-					setPopoverStatus
-				);
+				hidePopoverWhenMouseLeaveIframe( documentElement, {
+					hidePopover,
+					selectBlock,
+				} );
+
 			const removeEventListenersSelectedBlock = updateSelectedBlock(
 				documentElement,
 				{
@@ -309,8 +367,17 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 					updatePopoverPosition,
 				}
 			);
-			const inertObserver = addInertToAllInnerBlocks( documentElement );
-			observers.push( inertObserver );
+
+			const inertInnerBlockObserver =
+				addInertToAllInnerBlocks( documentElement );
+			observers.push( inertInnerBlockObserver );
+
+			const inertAssemblerPatternObserver = addInertToAssemblerPatterns(
+				documentElement,
+				query?.path
+			);
+			observers.push( inertAssemblerPatternObserver );
+
 			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
 		}
@@ -321,5 +388,5 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ documentElement, logoBlockIds ] );
+	}, [ documentElement, logoBlockIds, query ] );
 };

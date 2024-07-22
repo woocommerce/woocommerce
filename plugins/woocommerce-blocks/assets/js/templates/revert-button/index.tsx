@@ -98,21 +98,22 @@ const RevertClassicTemplateButton = () => {
 							} }
 						>
 							{ __(
-								'Revert to Classic Product Template',
+								'Revert to Classic Template',
 								'woocommerce'
 							) }
 						</Button>
 						<span>
 							{ createInterpolateElement(
 								__(
-									`The <strongText /> template doesn’t allow for reordering or customizing blocks, but might work better with your extensions`,
+									`The <strongText /> template doesn’t allow for reordering or customizing blocks, but might work better with your extensions.`,
 									'woocommerce'
 								),
 								{
 									strongText: (
 										<strong>
-											{ template?.record?.title
-												?.rendered ?? '' }
+											{ template?.record?.title?.rendered
+												? `${ template.record.title.rendered } (Classic)`
+												: '' }
 										</strong>
 									),
 								}

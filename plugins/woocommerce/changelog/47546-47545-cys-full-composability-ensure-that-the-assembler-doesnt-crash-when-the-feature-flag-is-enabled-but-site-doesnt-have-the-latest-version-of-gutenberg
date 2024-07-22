@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-[CYS Full Composability] Ensure that the assembler doesn't crash when the feature flag is enabled, but the site doesn't have the latest version of Gutenberg.

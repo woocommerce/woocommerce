@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+CYS - Filter out patterns with external dependencies.

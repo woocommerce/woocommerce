@@ -49,7 +49,6 @@ class Reviews {
 		self::add_action( 'wp_ajax_replyto-comment', [ $this, 'handle_reply_to_review' ], -1 );
 
 		self::add_filter( 'parent_file', [ $this, 'edit_review_parent_file' ] );
-		self::add_filter( 'gettext', [ $this, 'edit_comments_screen_text' ], 10, 2 );
 		self::add_action( 'admin_notices', [ $this, 'display_notices' ] );
 	}
 
@@ -520,45 +519,6 @@ class Reviews {
 		}
 
 		return $parent_file;
-	}
-
-	/**
-	 * Replaces Edit/Moderate Comment title/headline with Edit Review, when editing/moderating a review.
-	 *
-	 * @param  string|mixed $translation Translated text.
-	 * @param  string|mixed $text        Text to translate.
-	 * @return string|mixed              Translated text.
-	 */
-	protected function edit_comments_screen_text( $translation, $text ) {
-		global $comment;
-
-		// Bail out if not a text we should replace.
-		if ( ! in_array( $text, [ 'Edit Comment', 'Moderate Comment' ], true ) ) {
-			return $translation;
-		}
-
-		// Try to get comment from query params when not in context already.
-		if ( ! $comment && isset( $_GET['action'], $_GET['c'] ) && $_GET['action'] === 'editcomment' ) {
-			$comment_id = absint( $_GET['c'] );
-			$comment    = get_comment( $comment_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-
-		$is_reply = isset( $comment->comment_parent ) && $comment->comment_parent > 0;
-
-		// Only replace the translated text if we are editing a comment left on a product (ie. a review).
-		if ( isset( $comment->comment_post_ID ) && get_post_type( $comment->comment_post_ID ) === 'product' ) {
-			if ( $text === 'Edit Comment' ) {
-				$translation = $is_reply
-					? __( 'Edit Review Reply', 'woocommerce' )
-					: __( 'Edit Review', 'woocommerce' );
-			} elseif ( $text === 'Moderate Comment' ) {
-				$translation = $is_reply
-					? __( 'Moderate Review Reply', 'woocommerce' )
-					: __( 'Moderate Review', 'woocommerce' );
-			}
-		}
-
-		return $translation;
 	}
 
 	/**

@@ -23,6 +23,7 @@ import { updateTemplate } from '../data/actions';
 import { installAndActivateTheme as setTheme } from '../data/service';
 import { THEME_SLUG } from '../data/constants';
 import { trackEvent } from '../tracking';
+import { installPatterns } from '../design-without-ai/services';
 
 const { escalate } = actions;
 
@@ -418,8 +419,7 @@ export const assembleSite = async (
 	try {
 		await updateTemplate( {
 			// TODO: Get from context
-			homepageTemplateId: context.aiSuggestions
-				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
+			homepageTemplateId: 'template1' as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
 		trackEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
@@ -464,4 +464,5 @@ export const services = {
 	saveAiResponseToOption,
 	installAndActivateTheme,
 	resetPatternsAndProducts,
+	installPatterns,
 };

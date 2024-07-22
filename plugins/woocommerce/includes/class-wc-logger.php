@@ -183,10 +183,10 @@ class WC_Logger implements WC_Logger_Interface {
 				 * @param array  $context Additional information for log handlers.
 				 * @param object $handler The handler object, such as WC_Log_Handler_File. Available since 5.3.
 				 */
-				$message = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context, $handler );
+				$filtered_message = apply_filters( 'woocommerce_logger_log_message', $message, $level, $context, $handler );
 
-				if ( null !== $message ) {
-					$handler->handle( $timestamp, $level, $message, $context );
+				if ( null !== $filtered_message ) {
+					$handler->handle( $timestamp, $level, $filtered_message, $context );
 				}
 			}
 		}

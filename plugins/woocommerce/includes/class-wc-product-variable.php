@@ -601,7 +601,7 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
-	 * Sync a variable product with it's children. These sync functions sync
+	 * Sync a variable product with its children. These sync functions sync
 	 * upwards (from child to parent) when the variation is saved.
 	 *
 	 * @param WC_Product|int $product Product object or ID for which you wish to sync.

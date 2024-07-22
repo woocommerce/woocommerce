@@ -75,6 +75,11 @@ add_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery
  */
 function wc_deliver_webhook_async( $webhook_id, $arg ) {
 	$webhook = new WC_Webhook( $webhook_id );
+
+	if ( 0 === $webhook->get_id() ) {
+		return;
+	}
+
 	$webhook->deliver( $arg );
 }
 add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10, 2 );

@@ -49,8 +49,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 	} );
 
@@ -161,8 +161,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -204,8 +204,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -712,7 +712,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 			// Turn on return to cart link and check it shows in the block.
 			const returnToCartLink = shippingAddressBlock.getByText(
-				'Return to Cart',
+				'Return to cart',
 				{ exact: true }
 			);
 

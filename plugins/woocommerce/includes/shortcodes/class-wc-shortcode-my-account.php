@@ -39,7 +39,12 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
-		if ( ! is_user_logged_in() || isset( $wp->query_vars['lost-password'] ) ) {
+		if ( ! is_user_logged_in() ) {
+			/**
+			 * Filters the message shown on the 'my account' page when the user is not logged in.
+			 *
+			 * @since 2.6.0
+			 */
 			$message = apply_filters( 'woocommerce_my_account_message', '' );
 
 			if ( ! empty( $message ) ) {
@@ -56,50 +61,16 @@ class WC_Shortcode_My_Account {
 			} else {
 				wc_get_template( 'myaccount/form-login.php' );
 			}
-		} else {
-			// Start output buffer since the html may need discarding for BW compatibility.
-			ob_start();
-
-			if ( isset( $wp->query_vars['customer-logout'] ) ) {
-				/* translators: %s: logout url */
-				wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
-			}
-
-			// Collect notices before output.
-			$notices = wc_get_notices();
-
-			// Output the new account page.
-			self::my_account( $atts );
-
-			/**
-			 * Deprecated my-account.php template handling. This code should be
-			 * removed in a future release.
-			 *
-			 * If woocommerce_account_content did not run, this is an old template
-			 * so we need to render the endpoint content again.
-			 */
-			if ( ! did_action( 'woocommerce_account_content' ) ) {
-				if ( ! empty( $wp->query_vars ) ) {
-					foreach ( $wp->query_vars as $key => $value ) {
-						if ( 'pagename' === $key ) {
-							continue;
-						}
-						if ( has_action( 'woocommerce_account_' . $key . '_endpoint' ) ) {
-							ob_clean(); // Clear previous buffer.
-							wc_set_notices( $notices );
-							wc_print_notices();
-							do_action( 'woocommerce_account_' . $key . '_endpoint', $value );
-							break;
-						}
-					}
-
-					wc_deprecated_function( 'Your theme version of my-account.php template', '2.6', 'the latest version, which supports multiple account pages and navigation, from WC 2.6.0' );
-				}
-			}
-
-			// Send output buffer.
-			ob_end_flush();
+			return;
 		}
+
+		if ( isset( $wp->query_vars['customer-logout'] ) ) {
+			/* translators: %s: logout url */
+			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
+		}
+
+		// Output the my account page.
+		self::my_account( $atts );
 	}
 
 	/**
@@ -376,6 +347,7 @@ class WC_Shortcode_My_Account {
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
+		update_user_meta( $user->ID, 'default_password_nag', false );
 		self::set_reset_password_cookie();
 
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {

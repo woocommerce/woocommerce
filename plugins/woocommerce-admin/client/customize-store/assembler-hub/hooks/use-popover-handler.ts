@@ -38,20 +38,16 @@ export const usePopoverHandler = () => {
 	);
 
 	const updatePopoverPosition = ( {
-		mainBodyWidth,
-		iframeWidth,
 		event,
 		clickedBlockClientId,
 		hoveredBlockClientId,
 	}: {
-		mainBodyWidth: number;
-		iframeWidth: number;
 		event: MouseEvent;
 		clickedBlockClientId: string | null;
 		hoveredBlockClientId: string | null;
 	} ) => {
 		const iframe = window.document.querySelector(
-			'iframe[name="editor-canvas"]'
+			'.woocommerce-customize-store-assembler > iframe[name="editor-canvas"]'
 		) as HTMLElement;
 
 		clickedClientId =
@@ -72,10 +68,8 @@ export const usePopoverHandler = () => {
 
 			const newElement = {
 				getBoundingClientRect: generateGetBoundingClientRect(
-					event.clientX +
-						( mainBodyWidth - iframeWidth - iframeRect.left ) +
-						200,
-					event.clientY + iframeRect.top + 40
+					event.clientX + iframeRect.left,
+					event.clientY + iframeRect.top + 20
 				),
 			} as VirtualElement;
 
@@ -87,10 +81,17 @@ export const usePopoverHandler = () => {
 		clickedClientId = null;
 	};
 
+	const hidePopover = () => {
+		setPopoverStatus( PopoverStatus.HIDDEN );
+		clickedClientId = null;
+		hoveredClientId = null;
+	};
+
 	return [
 		popoverStatus,
 		virtualElement,
 		updatePopoverPosition,
+		hidePopover,
 		setPopoverStatus,
 	] as const;
 };

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove performance tests from PR checks (leave on push to trunk)

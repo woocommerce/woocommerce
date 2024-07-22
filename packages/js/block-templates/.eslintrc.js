@@ -9,4 +9,16 @@ module.exports = {
 			},
 		},
 	],
+	settings: {
+		'import/core-modules': [
+			'@wordpress/core-data',
+			'@wordpress/blocks',
+			'@woocommerce/expression-evaluation',
+		],
+		'import/resolver': {
+			node: {},
+			webpack: {},
+			typescript: {},
+		},
+	},
 };

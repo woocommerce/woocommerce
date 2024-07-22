@@ -26,15 +26,38 @@ The majority of our feature flagging is blocks, this is a list of them:
 
 ### Experimental flag
 
--   Product Gallery ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L234) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L53-L55) | [BlockTemplatesController](https://github.com/woocommerce/woocommerce-blocks/blob/211960f753d093f2f819273e130b34f893a784cd/src/BlockTemplatesController.php/#L467-L469)).
--   Product Gallery Large Image ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L235) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L56-L59)).
--   Product Gallery Next/Previous Buttons ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L236) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L60-L63)).
--   Product Gallery Pager ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L237) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L64-L67)).
--   Product Gallery Thumbnails ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L238) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L68-L71)).
--   Collection Filters ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L299) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L98) | [JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/assets/js/blocks/collection-filters/index.tsx#L15)).
--   Collection Stock Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L300) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L101) | [JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/assets/js/blocks/collection-filters/inner-blocks/stock-filter/index.tsx#L15)).
--   Collection Price Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L301) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L105)).
--   Collection Attribute Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L302) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L109)).
+- Clear (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L308)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L122)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/clear-button/index.tsx#L15)
+- Product Filter (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L301)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L95)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/index.tsx#L30)
+- Product Filters (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L302)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L98)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filters/index.tsx#L13)
+- Product Filter: Active Filters (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L307)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L118)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/active-filters/index.tsx#L16)
+- Product Filter: Attribute (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L305)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L110)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/attribute-filter/index.tsx#L14)
+- Product Filter: Price (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L304)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L106)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/price-filter/index.tsx#L15)
+- Product Filter: Rating (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L306)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L114)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/bad0b61a83c5e86703a985deaab67cbb3a88a06d/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/rating-filter/index.tsx#L14)
+- Product Filter: Stock Status (Experimental)
+    - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L303)
+    - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L101)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/stock-filter/index.tsx#L15)
 
 ## Features behind flags
 
