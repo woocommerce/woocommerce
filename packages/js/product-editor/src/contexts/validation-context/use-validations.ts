@@ -18,7 +18,13 @@ export function useValidations< T = unknown >() {
 	const [ isValidating, setIsValidating ] = useState( false );
 
 	async function focusByValidatorId( validatorId: string ) {
-		const field = await context.getFieldByValidatorId( validatorId );
+		const field =
+			validatorId === 'product_sku'
+				? document.getElementById( validatorId )
+				: await context.getFieldByValidatorId( validatorId );
+		if ( ! field ) {
+			return;
+		}
 		const tab = field.closest(
 			'.wp-block-woocommerce-product-tab__content'
 		);

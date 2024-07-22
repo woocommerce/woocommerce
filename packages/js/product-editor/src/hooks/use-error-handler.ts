@@ -122,7 +122,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 					if ( visibleTab !== 'inventory' ) {
 						response.errorProps = getErrorPropsWithActions(
 							'inventory',
-							validatorId,
+							'product_sku',
 							focusByValidatorId
 						);
 					}

@@ -54,6 +54,7 @@ export function Edit( {
 				) }
 			>
 				<InputControl
+					id={ 'product_sku' }
 					name={ 'woocommerce-product-sku' }
 					onChange={ setSku }
 					value={ sku || '' }
