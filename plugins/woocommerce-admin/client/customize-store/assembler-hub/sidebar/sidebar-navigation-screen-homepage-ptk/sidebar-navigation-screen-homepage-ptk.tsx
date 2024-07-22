@@ -46,10 +46,7 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import clsx from 'clsx';
 import './style.scss';
-import {
-	usePatterns,
-	usePatternsByCategory,
-} from '~/customize-store/assembler-hub/hooks/use-patterns';
+import { usePatterns } from '~/customize-store/assembler-hub/hooks/use-patterns';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
