@@ -354,7 +354,7 @@ jobs:
           echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
 
       - name: 'Report flaky tests'
-        if: ${{ !!env.FLAKY_REPORTS }}
+        if: ${{ !!env.FLAKY_REPORTS || 'true' }}
         uses: ./.github/actions/report-flaky-tests
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
