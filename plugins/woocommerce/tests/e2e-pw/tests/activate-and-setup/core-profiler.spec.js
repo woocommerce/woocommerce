@@ -348,7 +348,9 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 			// delete plugin regularly or, if attempted, accept deleting data as well
 			try {
-				await page.getByLabel( 'Delete Google for WooCommerce' ).click();
+				await page
+					.getByLabel( 'Delete Google for WooCommerce' )
+					.click();
 				await expect(
 					page.getByText(
 						'Google for WooCommerce was successfully deleted.'
