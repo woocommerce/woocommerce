@@ -93,10 +93,10 @@ class DefaultFreeExtensions {
 		$plugins = array(
 			'google-listings-and-ads'       => array(
 				'min_php_version' => '7.4',
-				'name'            => __( 'Google Listings & Ads', 'woocommerce' ),
+				'name'            => __( 'Google for WooCommerce', 'woocommerce' ),
 				'description'     => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Drive sales with %1$sGoogle Listings and Ads%2$s', 'woocommerce' ),
+					__( 'Drive sales with %1$sGoogle for WooCommerce%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
@@ -116,7 +116,7 @@ class DefaultFreeExtensions {
 				),
 			),
 			'google-listings-and-ads:alt'   => array(
-				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
+				'name'           => __( 'Google for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
@@ -862,7 +862,7 @@ class DefaultFreeExtensions {
 				'install_priority' => 1,
 			),
 			'google-listings-and-ads'       => array(
-				'label'            => __( 'Drive sales with Google Listings & Ads', 'woocommerce' ),
+				'label'            => __( 'Drive sales with Google for WooCommerce', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-google.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Reach millions of active shoppers across Google with free product listings and ads.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/google-listings-and-ads?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
