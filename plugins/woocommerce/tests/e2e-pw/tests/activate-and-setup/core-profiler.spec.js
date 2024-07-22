@@ -263,12 +263,14 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			try {
 				await page
 					.getByText(
-						'Drive sales with Google Listings & AdsReach millions of active shoppers across'
+						'Drive sales with Google for WooCommerceReach millions of active shoppers across'
 					)
 					.getByRole( 'checkbox' )
 					.check( { timeout: 2000 } );
 			} catch ( e ) {
-				console.log( 'Checkbox not present for Google Listings & Ads' );
+				console.log(
+					'Checkbox not present for Google for WooCommerce'
+				);
 			}
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
@@ -361,7 +363,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 					.waitFor();
 			}
 			await expect(
-				page.getByLabel( 'Delete Google Listings' )
+				page.getByLabel( 'Delete Google for WooCommerce' )
 			).toBeHidden();
 			await page.getByLabel( 'Deactivate Pinterest for' ).click();
 			await expect(
