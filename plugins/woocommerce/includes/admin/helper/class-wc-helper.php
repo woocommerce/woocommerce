@@ -1298,6 +1298,34 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get the user's connected subscriptions that are activated on the current
+	 * site.
+	 *
+	 * Activated here is not an activated plugin or theme, but it's a Woo subscription
+	 * being activated on the site.
+	 *
+	 * @return array
+	 */
+	public static function get_site_subscriptions() {
+		static $site_subscriptions = null;
+
+		// Cache site_subscriptions in the current request.
+		if ( is_null( $site_subscriptions ) ) {
+			$auth    = WC_Helper_Options::get( 'auth' );
+			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
+
+			$site_subscriptions = array_filter(
+				WC_Helper::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'], true );
+				}
+			);
+		}
+
+		return $site_subscriptions;
+	}
+
+	/**
 	 * Get subscription state of a given product ID.
 	 *
 	 * @since TBD
@@ -1307,7 +1335,11 @@ class WC_Helper {
 	 * @return array Array of state_name => (bool) state
 	 */
 	public static function get_product_subscription_state( $product_id ) {
-		$subscription = self::_get_subscriptions_from_product_id( $product_id, true );
+		$product_subscriptions = wp_list_filter( self::get_site_subscriptions(), array( 'product_id' => $product_id ) );
+
+		$subscription = ! ( empty( $product_subscriptions ) )
+			? array_shift( $product_subscriptions )
+			: array();
 
 		return array(
 			'unregistered' => empty( $subscription ),
