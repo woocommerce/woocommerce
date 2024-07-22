@@ -251,12 +251,7 @@ jQuery( function ( $ ) {
 					var target_id = $( event.currentTarget ).attr( 'id' );
 
 					update_cart_totals_div( response );
-
-					var $newCurrentTarget = $( '.cart_totals' ).find( '#' + target_id );
-
-					if ( $newCurrentTarget.length > 0 ) {
-						$newCurrentTarget.focus();
-					}
+					$( '.cart_totals' ).find( '#' + target_id ).focus();
 				},
 				complete: function () {
 					unblock( $( 'div.cart_totals' ) );
