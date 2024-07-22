@@ -57,8 +57,7 @@ class LegacyDataCleanupTests extends WC_Unit_Test_Case {
 			$this->disable_cot_sync();
 		}
 
-		update_option( $this->sut::OPTION_NAME, 'yes' );
-		$this->assertEquals( $expected_cleanup_option_value, get_option( $this->sut::OPTION_NAME ) );
+		$this->sut->toggle_flag( true );
 		$this->assertEquals( wc_string_to_bool( $expected_cleanup_option_value ), $this->sut->is_flag_set() );
 	}
 
@@ -70,11 +69,11 @@ class LegacyDataCleanupTests extends WC_Unit_Test_Case {
 
 		$this->toggle_cot_authoritative( true );
 		$this->disable_cot_sync();
-		update_option( $this->sut::OPTION_NAME, 'yes' );
+		$this->sut->toggle_flag( true );
 		$this->assertTrue( $batch_processing->is_enqueued( get_class( $this->sut ) ) );
 		$this->assertFalse( $batch_processing->is_enqueued( DataSynchronizer::class ) );
 
-		update_option( $this->sut::OPTION_NAME, 'no' );
+		$this->sut->toggle_flag( false );
 		$this->assertFalse( $batch_processing->is_enqueued( get_class( $this->sut ) ) );
 	}
 
@@ -86,7 +85,7 @@ class LegacyDataCleanupTests extends WC_Unit_Test_Case {
 		$order_ids        = $this->create_test_orders( 11 ); // 11 test orders.
 
 		$this->disable_cot_sync();
-		update_option( $this->sut::OPTION_NAME, 'yes' );
+		$this->sut->toggle_flag( true );
 
 		$this->assertEquals( count( $order_ids ), $this->sut->get_total_pending_count() );
 

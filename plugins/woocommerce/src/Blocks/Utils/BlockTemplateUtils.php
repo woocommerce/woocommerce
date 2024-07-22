@@ -318,6 +318,10 @@ class BlockTemplateUtils {
 			'mini-cart.html',
 		);
 
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$wp_template_part_filenames[] = 'product-filters-overlay.html';
+		}
+
 		/*
 		* This may return the blockified directory for wp_templates.
 		* At the moment every template file has a corresponding blockified file.

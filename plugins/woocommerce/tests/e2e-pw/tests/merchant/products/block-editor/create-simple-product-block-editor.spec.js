@@ -17,7 +17,7 @@ const productData = {
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Simple product form', () => {
 		test( 'renders each block without error', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
@@ -116,7 +116,7 @@ test.describe( 'General tab', () => {
 				.click();
 
 			await expect(
-				page.getByLabel( 'Dismiss this notice' )
+				page.locator( '.components-snackbar__content' )
 			).toContainText( 'Invalid or duplicated SKU.' );
 		} );
 

@@ -132,6 +132,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 * Test fetch patterns should not set the patterns cache when fetching patterns fails.
 	 */
 	public function test_fetch_patterns_should_not_set_the_patterns_cache_when_fetching_patterns_fails() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$this->ptk_client
 			->expects( $this->once() )
 			->method( 'fetch_patterns' )
@@ -144,9 +145,10 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test fetch patterns should set the patterns cache after fetching patterns.
+	 * Test fetch patterns should set the patterns cache after fetching patterns if tracking is allowed.
 	 */
 	public function test_fetch_patterns_should_set_the_patterns_cache_after_fetching_patterns() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
 		$expected_patterns = array(
 			array(
 				'title' => 'My pattern',
@@ -157,40 +159,123 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 			->expects( $this->once() )
 			->method( 'fetch_patterns' )
 			->willReturn( $expected_patterns );
-
 		$this->pattern_store->fetch_patterns();
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+
 		$this->assertEquals( $expected_patterns, $patterns );
 	}
 
 	/**
-	 * Test fetch_patterns should filter out the excluded patterns.
+	 * Test fetch_patterns should register testimonials category as reviews.
 	 */
-	public function test_fetch_patterns_should_filter_out_the_excluded_patterns() {
+	public function test_fetch_patterns_should_register_testimonials_category_as_reviews() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$ptk_patterns = array(
+			array(
+				'title'      => 'My pattern',
+				'slug'       => 'my-pattern',
+				'categories' => array(
+					'testimonials' => array(
+						'slug'  => 'testimonials',
+						'title' => 'Testimonials',
+					),
+				),
+			),
+		);
+
 		$expected_patterns = array(
 			array(
-				'title' => 'My pattern',
-				'slug'  => 'my-pattern',
-			),
-			array(
-				'ID'    => PTKPatternsStore::EXCLUDED_PATTERNS[0],
-				'title' => 'Excluded pattern',
-				'slug'  => 'excluded-pattern',
+				'title'      => 'My pattern',
+				'slug'       => 'my-pattern',
+				'categories' => array(
+					'reviews' => array(
+						'slug'  => 'reviews',
+						'title' => 'Reviews',
+					),
+				),
 			),
 		);
 
 		$this->ptk_client
 			->expects( $this->once() )
 			->method( 'fetch_patterns' )
-			->willReturn( $expected_patterns );
+			->willReturnOnConsecutiveCalls(
+				$ptk_patterns,
+				array()
+			);
 
 		$this->pattern_store->fetch_patterns();
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
 
-		$this->assertEquals( array( $expected_patterns[0] ), $patterns );
-		$this->assertEquals( array( $expected_patterns[0] ), get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+	}
+
+	/**
+	 * Test fetch_patterns should filter out the patterns with dependencies.
+	 */
+	public function test_fetch_patterns_should_filter_out_the_patterns_with_dependencies_diff_than_woocommerce() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$ptk_patterns = array(
+			array(
+				'ID'    => 1,
+				'title' => 'No deps',
+			),
+			array(
+				'ID'           => 2,
+				'title'        => 'Jetpack dep',
+				'dependencies' => [ 'jetpack' ],
+			),
+			array(
+				'ID'           => 3,
+				'title'        => 'Jetpack and WooCommerce dep',
+				'dependencies' => [ 'woocommerce', 'jetpack' ],
+			),
+			array(
+				'ID'           => 4,
+				'title'        => 'WooCommerce dep',
+				'dependencies' => [ 'woocommerce' ],
+			),
+			array(
+				'ID'           => 5,
+				'title'        => 'Empty deps',
+				'dependencies' => [],
+			),
+		);
+
+		$expected_patterns = array(
+			array(
+				'ID'    => 1,
+				'title' => 'No deps',
+			),
+			array(
+				'ID'           => 4,
+				'title'        => 'WooCommerce dep',
+				'dependencies' => [ 'woocommerce' ],
+			),
+			array(
+				'ID'           => 5,
+				'title'        => 'Empty deps',
+				'dependencies' => [],
+			),
+		);
+
+		$this->ptk_client
+			->expects( $this->once() )
+			->method( 'fetch_patterns' )
+			->willReturnOnConsecutiveCalls(
+				$ptk_patterns,
+				array()
+			);
+
+		$this->pattern_store->fetch_patterns();
+
+		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
 	}
 
 	/**

@@ -1162,5 +1162,3 @@ class WC_Tracker {
 		return get_option( 'woocommerce_mobile_app_usage' );
 	}
 }
-
-WC_Tracker::init();

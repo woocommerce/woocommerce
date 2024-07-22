@@ -25,7 +25,12 @@ import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { trackEvent } from '~/customize-store/tracking';
-export const SidebarNavigationScreenTypography = () => {
+
+export const SidebarNavigationScreenTypography = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
@@ -91,6 +96,7 @@ export const SidebarNavigationScreenTypography = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( label, {
 				EditorLink: (
 					<Link

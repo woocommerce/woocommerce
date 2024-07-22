@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-CRUD: populates items and itemsCount when a new item is created

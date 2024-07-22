@@ -1,3 +1,11 @@
+---
+post_title: Cart and Checkout Filters - Coupons
+menu_title: Coupons
+tags: reference, checkout-available-filters
+---
+
+<!-- markdownlint-disable MD024 -->
+
 # Coupons
 
 The following Coupon filters are available:
@@ -62,18 +70,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="385" alt="Before applying the Coupons filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/6cab1aff-e4b9-4909-b81c-5726c6a20c40">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="382" alt="After applying the Coupons filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/b053304c-179a-4d54-821d-5ad5e7dccafc">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Coupons filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/6cab1aff-e4b9-4909-b81c-5726c6a20c40) |![After applying the Coupons filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a5cc2572-16e7-4781-a5ab-5d6cdced2ff6) |
 
 ## `showApplyCouponNotice`
 
@@ -129,18 +128,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="648" alt="Before applying the Show Apply Coupon Notice filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/374d4899-61f3-49b2-ae04-5541d4c130c2">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="662" alt="After applying the Show Apply Coupon Notice filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c35dbd9b-eee4-4afe-9a29-9c554d467729">
-</td>
-</tr>
-</table>
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Show Apply Coupon Notice filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/374d4899-61f3-49b2-ae04-5541d4c130c2) |![After applying the Show Apply Coupon Notice filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c35dbd9b-eee4-4afe-9a29-9c554d467729) |
 
 ## `showRemoveCouponNotice`
 
@@ -196,23 +186,6 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots <!-- omit in toc -->
 
-<table>
-<tr>
-<td valign="top">Before:
-<br><br>
-<img width="648" alt="Before applying the Show Remove Coupon Notice filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/9d8607fa-ab20-4181-b70b-7954e7aa49cb">
-</td>
-<td valign="top">After:
-<br><br>
-<img width="648" alt="After applying the Show Remove Coupon Notice filter" src="https://github.com/woocommerce/woocommerce-blocks/assets/3323310/83d5f65f-c4f3-4707-a250-077952514931">
-</td>
-</tr>
-</table>
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/coupons.md)
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Show Remove Coupon Notice filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/9d8607fa-ab20-4181-b70b-7954e7aa49cb) |![After applying the Show Remove Coupon Notice filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/83d5f65f-c4f3-4707-a250-077952514931) |

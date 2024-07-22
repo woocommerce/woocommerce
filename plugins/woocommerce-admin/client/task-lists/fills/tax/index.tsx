@@ -45,7 +45,7 @@ export type TaxProps = {
 	task: TaskType;
 };
 
-const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
+export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	const [ isPending, setIsPending ] = useState( false );
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -88,7 +88,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		} else {
 			redirectToTaxSettings();
 		}
-	}, [] );
+	}, [ generalSettings, taxSettings, updateAndPersistSettingsForGroup ] );
 
 	const onAutomate = useCallback( async () => {
 		setIsPending( true );
@@ -127,7 +127,13 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			)
 		);
 		onComplete();
-	}, [] );
+	}, [
+		createNotice,
+		generalSettings,
+		onComplete,
+		taxSettings,
+		updateAndPersistSettingsForGroup,
+	] );
 
 	const onDisable = useCallback( () => {
 		setIsPending( true );
@@ -142,7 +148,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		} ).then( () => {
 			window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
 		} );
-	}, [] );
+	}, [ updateOptions ] );
 
 	const getVisiblePartners = () => {
 		const countryCode =
@@ -152,6 +158,8 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 			additionalData: {
 				woocommerceTaxCountries = [],
 				taxJarActivated,
+				woocommerceTaxActivated,
+				woocommerceShippingActivated,
 			} = {},
 		} = task;
 
@@ -162,6 +170,8 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 				component: WooCommerceTax,
 				isVisible:
 					! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
+					! woocommerceTaxActivated &&
+					! woocommerceShippingActivated &&
 					woocommerceTaxCountries.includes( countryCode ),
 			},
 		];
@@ -186,7 +196,7 @@ const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		recordEvent( 'tasklist_tax_view_options', {
 			options: partners.map( ( partner ) => partner.id ),
 		} );
-	}, [] );
+	}, [ onAutomate, partners, query ] );
 
 	const getCurrentPartner = () => {
 		if ( ! query.partner ) {

@@ -204,27 +204,6 @@ const completeOnboardingWizard = async () => {
 	await waitAndClickPrimary();
 
 	// End of onboarding wizard
-	if ( IS_RETEST_MODE ) {
-		// Home screen modal can't be reset via the rest api.
-		return;
-	}
-
-	// Wait for homescreen welcome modal to appear
-	const welcomeHeader = await waitForSelectorWithoutThrow(
-		'.woocommerce__welcome-modal__page-content'
-	);
-	if ( ! welcomeHeader ) {
-		return;
-	}
-
-	// Click two Next buttons
-	for ( let b = 0; b < 2; b++ ) {
-		await page.waitForSelector( 'button.components-guide__forward-button' );
-		await page.click( 'button.components-guide__forward-button' );
-	}
-	// Wait for "Let's go" button to become active
-	await page.waitForSelector( 'button.components-guide__finish-button' );
-	await page.click( 'button.components-guide__finish-button' );
 };
 
 /**
@@ -297,8 +276,7 @@ const createSimpleDownloadableProduct = async (
 			{
 				id: uuid.v4(),
 				name: downloadName,
-				file:
-					'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
+				file: 'https://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2017/08/single.jpg',
 			},
 		],
 		download_limit: downloadLimit,
@@ -578,7 +556,7 @@ const createCoupon = async (
  * Adds a shipping zone along with a shipping method.
  *
  * @param {string} zoneName     Shipping zone name.
- * @param {string} zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
+ * @param {string} zoneLocation Shipping zone location. Defaults to country:US. For states use: state:US:CA
  * @param {string} zipCode      Shipping zone zip code. Defaults to empty one space.
  * @param {string} zoneMethod   Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */

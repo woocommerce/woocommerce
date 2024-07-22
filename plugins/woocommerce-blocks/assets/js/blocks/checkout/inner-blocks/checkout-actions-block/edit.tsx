@@ -13,11 +13,15 @@ import { getSetting } from '@woocommerce/settings';
 import { ReturnToCartButton } from '@woocommerce/base-components/cart-checkout';
 import EditableButton from '@woocommerce/editor-components/editable-button';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
+import { useStoreCart } from '@woocommerce/base-context';
+import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
+import './editor.scss';
 
 export const Edit = ( {
 	attributes,
@@ -25,6 +29,7 @@ export const Edit = ( {
 }: {
 	attributes: {
 		showReturnToCart: boolean;
+		showPrice: boolean;
 		cartPageId: number;
 		placeOrderButtonLabel: string;
 	};
@@ -33,9 +38,13 @@ export const Edit = ( {
 	const blockProps = useBlockProps();
 	const {
 		cartPageId = 0,
-		showReturnToCart = true,
+		showReturnToCart = false,
 		placeOrderButtonLabel,
+		showPrice = false,
 	} = attributes;
+	const { cartTotals } = useStoreCart();
+	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
 		( select ) => {
@@ -51,16 +60,32 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody title={ __( 'Account options', 'woocommerce' ) }>
+				<PanelBody title={ __( 'Navigation options', 'woocommerce' ) }>
 					<ToggleControl
 						label={ __(
 							'Show a "Return to Cart" link',
+							'woocommerce'
+						) }
+						help={ __(
+							'Recommended to enable only if there is no Cart link in the header.',
 							'woocommerce'
 						) }
 						checked={ showReturnToCart }
 						onChange={ () =>
 							setAttributes( {
 								showReturnToCart: ! showReturnToCart,
+							} )
+						}
+					/>
+					<ToggleControl
+						label={ __(
+							'Show price in the button',
+							'woocommerce'
+						) }
+						checked={ showPrice }
+						onChange={ () =>
+							setAttributes( {
+								showPrice: ! showPrice,
 							} )
 						}
 					/>
@@ -116,7 +141,19 @@ export const Edit = ( {
 								placeOrderButtonLabel: content,
 							} );
 						} }
-					/>
+					>
+						{ showPrice && (
+							<>
+								<div className="wc-block-components-checkout-place-order-button__separator"></div>
+								<div className="wc-block-components-checkout-place-order-button__price">
+									<FormattedMonetaryAmount
+										value={ cartTotals.total_price }
+										currency={ totalsCurrency }
+									/>
+								</div>
+							</>
+						) }
+					</EditableButton>
 				</div>
 			</div>
 		</div>

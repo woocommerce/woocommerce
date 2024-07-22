@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Move tracking option API call to listener function with caching

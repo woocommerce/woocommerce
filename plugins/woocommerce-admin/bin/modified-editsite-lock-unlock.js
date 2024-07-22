@@ -1,34 +1,29 @@
 /**
- * WordPress dependencies
+ * External dependencies
  */
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
-const oldConsentString =
-	'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.';
-const newConsentString =
-	'I know using unstable features means my theme or plugin will inevitably break in the next version of WordPress.';
+const wordPressConsentString = {
+	6.4: 'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.',
+	6.5: 'I know using unstable features means my theme or plugin will inevitably break in the next version of WordPress.',
+	6.6: 'I acknowledge private features are not for use in themes or plugins and doing so will break in the next version of WordPress.',
+};
 
-let consentString = oldConsentString;
-const wcSettings = window.wcSettings;
-const admin = wcSettings?.admin;
+function optInToUnstableAPIs() {
+	let error;
+	for ( const optInString of Object.values( wordPressConsentString ) ) {
+		try {
+			return __dangerousOptInToUnstableAPIsOnlyForCoreModules(
+				optInString,
+				'@wordpress/edit-site'
+			);
+		} catch ( anError ) {
+			error = anError;
+		}
+	}
 
-const wpVersion = parseFloat( wcSettings?.wpVersion );
-const gutenbergVersion = parseFloat( admin?.gutenberg_version );
-
-// Use the new consent string if the WP version is 6.4 and above
-if ( ! isNaN( wpVersion ) && wpVersion >= 6.4 ) {
-	consentString = newConsentString;
+	throw error;
 }
 
-// Users can install the latest Gutenberg plugin manually
-// Use the new consent string for Gutenberg 16.9 and above
-if ( ! isNaN( gutenbergVersion ) && gutenbergVersion >= 16.9 ) {
-	consentString = newConsentString;
-}
-
-export const { lock, unlock } =
-	__dangerousOptInToUnstableAPIsOnlyForCoreModules(
-		consentString,
-		'@wordpress/edit-site'
-	);
+export const { lock, unlock } = optInToUnstableAPIs();
 //# sourceMappingURL=lock-unlock.js.map

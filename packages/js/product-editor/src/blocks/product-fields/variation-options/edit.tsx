@@ -148,22 +148,6 @@ export function Edit( {
 					<Button variant="primary" onClick={ () => addAttribute() }>
 						{ __( 'Add options', 'woocommerce' ) }
 					</Button>
-					<Button
-						variant="secondary"
-						onClick={ () =>
-							addAttribute( __( 'Size', 'woocommerce' ) )
-						}
-					>
-						{ __( 'Add sizes', 'woocommerce' ) }
-					</Button>
-					<Button
-						variant="secondary"
-						onClick={ () =>
-							addAttribute( __( 'Color', 'woocommerce' ) )
-						}
-					>
-						{ __( 'Add colors', 'woocommerce' ) }
-					</Button>
 				</div>
 			</div>
 		);

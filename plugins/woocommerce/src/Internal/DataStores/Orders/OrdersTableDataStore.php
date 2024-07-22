@@ -2524,7 +2524,7 @@ FROM $order_meta_table
 		$this->persist_save( $order );
 
 		// Do not fire 'woocommerce_new_order' for draft statuses for backwards compatibility.
-		if ( 'auto-draft' === $order->get_status( 'edit' ) ) {
+		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
 			return;
 		}
 
@@ -2587,7 +2587,6 @@ FROM $order_meta_table
 	 */
 	public function update( &$order ) {
 		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
-		$changes         = $order->get_changes();
 
 		// Before updating, ensure date paid is set if missing.
 		if (
@@ -2622,8 +2621,8 @@ FROM $order_meta_table
 		$order->apply_changes();
 		$this->clear_caches( $order );
 
-		// For backwards compatibility, moving an auto-draft order to a valid status triggers the 'woocommerce_new_order' hook.
-		if ( ! empty( $changes['status'] ) && 'auto-draft' === $previous_status ) {
+		// For backwards compatibility, moving a draft order to a valid status triggers the 'woocommerce_new_order' hook.
+		if ( ! empty( $changes['status'] ) && in_array( $previous_status, array( 'new', 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			return;
 		}

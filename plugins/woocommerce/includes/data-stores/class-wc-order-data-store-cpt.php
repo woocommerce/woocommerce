@@ -100,6 +100,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order->set_order_key( wc_generate_order_key() );
 		}
 		parent::create( $order );
+
+		// Do not fire 'woocommerce_new_order' for draft statuses.
+		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
+			return;
+		}
+
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
@@ -190,7 +196,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// Fire a hook depending on the status - this should be considered a creation if it was previously draft status.
 		$new_status = $order->get_status( 'edit' );
 
-		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft' ), true ) ) {
+		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order );
 		} else {
 			do_action( 'woocommerce_update_order', $order->get_id(), $order );
@@ -997,6 +1003,40 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array|object
 	 */
 	public function query( $query_vars ) {
+		/**
+		 * Allows 3rd parties to filter query args that will trigger an unsupported notice.
+		 *
+		 * @since 9.2.0
+		 *
+		 * @param array $unsupported_args Array of query arg names.
+		 */
+		$unsupported_args = (array) apply_filters(
+			'woocommerce_order_data_store_cpt_query_unsupported_args',
+			array( 'meta_query', 'field_query' )
+		);
+
+		// Trigger doing_it_wrong() for query vars only supported in HPOS.
+		$unsupported_args_in_query = array_keys( array_filter( array_intersect_key( $query_vars, array_flip( $unsupported_args ) ) ) );
+
+		if ( $unsupported_args_in_query && __CLASS__ === get_class( $this ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				esc_html(
+					sprintf(
+						// translators: %s is a comma separated list of query arguments.
+						_n(
+							'Order query argument (%s) is not supported on the current order datastore.',
+							'Order query arguments (%s) are not supported on the current order datastore.',
+							count( $unsupported_args_in_query ),
+							'woocommerce'
+						),
+						implode( ', ', $unsupported_args_in_query )
+					)
+				),
+				'9.2.0'
+			);
+		}
+
 		$args = $this->get_wp_query_args( $query_vars );
 
 		if ( ! empty( $args['errors'] ) ) {

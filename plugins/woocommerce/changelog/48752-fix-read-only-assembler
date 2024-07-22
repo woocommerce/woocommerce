@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+CYS: Disable readonly mode only when full composability feature flag is enabled.

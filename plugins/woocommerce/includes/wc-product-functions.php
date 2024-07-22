@@ -640,6 +640,47 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 }
 
 /**
+ * Check if product unique ID is unique.
+ *
+ * @since 9.1.0
+ * @param int    $product_id Product ID.
+ * @param string $global_unique_id Product Unique ID.
+ * @return bool
+ */
+function wc_product_has_global_unique_id( $product_id, $global_unique_id ) {
+	/**
+	 * Gives plugins an opportunity to verify Unique ID uniqueness themselves.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param bool|null $has_global_unique_id Set to a boolean value to short-circuit the default Unique ID check.
+	 * @param int $product_id The ID of the current product.
+	 * @param string $sku The Unique ID to check for uniqueness.
+	 */
+	$has_global_unique_id = apply_filters( 'wc_product_pre_has_global_unique_id', null, $product_id, $global_unique_id );
+	if ( ! is_null( $has_global_unique_id ) ) {
+		return boolval( $has_global_unique_id );
+	}
+
+	$data_store             = WC_Data_Store::load( 'product' );
+	$global_unique_id_found = $data_store->is_existing_global_unique_id( $product_id, $global_unique_id );
+	/**
+	 * Gives plugins an opportunity to verify Unique ID uniqueness themselves.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param boolean $global_unique_id_found Whether the Unique ID is found.
+	 * @param int $product_id The ID of the current product.
+	 * @param string $sku The Unique ID to check for uniqueness.
+	 */
+	if ( apply_filters( 'wc_product_has_global_unique_id', $global_unique_id_found, $product_id, $global_unique_id ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Force a unique SKU.
  *
  * @since  3.0.0
@@ -690,6 +731,18 @@ function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
 function wc_get_product_id_by_sku( $sku ) {
 	$data_store = WC_Data_Store::load( 'product' );
 	return $data_store->get_product_id_by_sku( $sku );
+}
+
+/**
+ * Get product ID by Unique ID.
+ *
+ * @since  9.1.0
+ * @param  string $global_unique_id Product Unique ID.
+ * @return int
+ */
+function wc_get_product_id_by_global_unique_id( $global_unique_id ) {
+	$data_store = WC_Data_Store::load( 'product' );
+	return $data_store->get_product_id_by_global_unique_id( $global_unique_id );
 }
 
 /**
@@ -1421,6 +1474,7 @@ function wc_update_product_lookup_tables() {
 		'min_max_price',
 		'stock_quantity',
 		'sku',
+		'global_unique_id',
 		'stock_status',
 		'average_rating',
 		'total_sales',
@@ -1517,6 +1571,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 			);
 			break;
 		case 'sku':
+		case 'global_unique_id':
 		case 'stock_status':
 		case 'average_rating':
 		case 'total_sales':

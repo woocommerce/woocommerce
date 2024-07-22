@@ -344,22 +344,48 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Google for WooCommerce' ).click();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Google for WooCommerce' ).click();
+				await expect(
+					page.getByText(
+						'Google for WooCommerce was successfully deleted.'
+					)
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
 			await expect(
-				page.getByText(
-					'Google for WooCommerce was successfully deleted.'
-				)
-			).toBeVisible();
+				page.getByLabel( 'Delete Google Listings' )
+			).toBeHidden();
 			await page.getByLabel( 'Deactivate Pinterest for' ).click();
 			await expect(
 				page.getByText( 'Plugin deactivated.' )
 			).toBeVisible();
-			await page.getByLabel( 'Delete Pinterest for' ).click();
+			// delete plugin regularly or, if attempted, accept deleting data as well
+			try {
+				await page.getByLabel( 'Delete Pinterest for' ).click();
+				await expect(
+					page.getByText(
+						'Pinterest for WooCommerce was successfully deleted.'
+					)
+				).toBeVisible( { timeout: 5000 } );
+			} catch ( e ) {
+				await page
+					.getByText( 'Yes, delete these files and data' )
+					.click();
+				await page
+					.getByText( 'The selected plugin has been deleted.' )
+					.waitFor();
+			}
 			await expect(
-				page.getByText(
-					'Pinterest for WooCommerce was successfully deleted.'
-				)
-			).toBeVisible();
+				page.getByLabel( 'Delete Pinterest for' )
+			).toBeHidden();
 		} );
 	} );
 } );
@@ -394,5 +420,43 @@ test.describe( 'Store owner can skip the core profiler', () => {
 				name: 'Welcome to WooCommerce Core E2E Test Suite',
 			} )
 		).toBeVisible();
+	} );
+
+	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
+		await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await page
+				.getByRole( 'menuitem', { name: 'Total sales' } )
+				.waitFor( { state: 'visible' } );
+		} );
+
+		await test.step( 'Go to the extensions tab and connect store', async () => {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
+			);
+			await expect(
+				page.getByText(
+					'Hundreds of vetted products and services. Unlimited potential.'
+				)
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'button', { name: 'My Subscriptions' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'link', { name: 'Connect your store' } )
+			).toBeVisible();
+			await page
+				.getByRole( 'link', { name: 'Connect your store' } )
+				.click();
+		} );
+
+		await test.step( 'Check that we are sent to wp.com', async () => {
+			await expect( page.url() ).toContain( 'wordpress.com/log-in' );
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Log in to your account',
+				} )
+			).toBeVisible( { timeout: 30000 } );
+		} );
 	} );
 } );

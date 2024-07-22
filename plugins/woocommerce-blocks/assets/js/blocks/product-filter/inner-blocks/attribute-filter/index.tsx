@@ -3,6 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
+import { productFilterOptions } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -14,5 +15,6 @@ import Edit from './edit';
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		edit: Edit,
+		icon: productFilterOptions,
 	} );
 }

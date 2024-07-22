@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, currencyDollar } from '@wordpress/icons';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
+import { productFilterOptions } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -14,14 +14,7 @@ import Edit from './edit';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
-		icon: {
-			src: (
-				<Icon
-					icon={ currencyDollar }
-					className="wc-block-editor-components-block-icon"
-				/>
-			),
-		},
+		icon: productFilterOptions,
 		edit: Edit,
 	} );
 }

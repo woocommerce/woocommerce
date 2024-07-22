@@ -12,7 +12,6 @@ import StarIcon from 'gridicons/dist/star';
 import StarOutlineIcon from 'gridicons/dist/star-outline';
 import interpolateComponents from '@automattic/interpolate-components';
 import {
-	EmptyContent,
 	Link,
 	ReviewRating,
 	ProductImage,
@@ -307,25 +306,8 @@ class ReviewsPanel extends Component {
 		const { isRequesting, isError, reviews } = this.props;
 
 		if ( isError ) {
-			const title = __(
-				'There was an error getting your reviews. Please try again.',
-				'woocommerce'
-			);
-			const actionLabel = __( 'Reload', 'woocommerce' );
-			const actionCallback = () => {
-				// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
-				window.location.reload();
-			};
-
-			return (
-				<Fragment>
-					<EmptyContent
-						title={ title }
-						actionLabel={ actionLabel }
-						actionURL={ null }
-						actionCallback={ actionCallback }
-					/>
-				</Fragment>
+			throw new Error(
+				'Failed to load reviews, Raise error to trigger ErrorBoundary'
 			);
 		}
 

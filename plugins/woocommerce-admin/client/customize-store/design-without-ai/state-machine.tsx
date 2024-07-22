@@ -38,6 +38,15 @@ export const hasFontInstallInUrl = () => {
 	);
 };
 
+export const hasPatternInstallInUrl = () => {
+	const { path = '' } = getQuery() as { path: string };
+	const pathFragments = path.split( '/' );
+	return (
+		pathFragments[ 2 ] === 'design' &&
+		pathFragments[ 3 ] === 'install-patterns'
+	);
+};
+
 const installFontFamiliesState = {
 	initial: 'checkFontLibrary',
 	states: {
@@ -72,6 +81,7 @@ const installFontFamiliesState = {
 export type DesignWithoutAIStateMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
+	| { type: 'INSTALL_PATTERNS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } };
 
 export const designWithNoAiStateMachineDefinition = createMachine(
@@ -93,6 +103,9 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			INSTALL_FONTS: {
 				target: 'installFontFamilies',
 			},
+			INSTALL_PATTERNS: {
+				target: 'installPatterns',
+			},
 		},
 		context: {
 			startLoadingTime: null,
@@ -101,6 +114,8 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				hasErrors: false,
 			},
 			isFontLibraryAvailable: false,
+			isPTKPatternsAPIAvailable: false,
+			isBlockTheme: false,
 		},
 		initial: 'navigate',
 		states: {
@@ -112,6 +127,13 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 							step: 'design',
 						},
 						target: 'installFontFamilies',
+					},
+					{
+						cond: {
+							type: 'hasPatternInstallInUrl',
+							step: 'design',
+						},
+						target: 'installPatterns',
 					},
 					{
 						cond: {
@@ -144,7 +166,40 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 					},
 				},
 				onDone: {
-					target: '#designWithoutAI.showAssembleHub',
+					target: '#designWithoutAI.showAssembleHubTypography',
+				},
+			},
+			installPatterns: {
+				meta: {
+					component: ApiCallLoader,
+				},
+				initial: 'enableTracking',
+				states: {
+					enableTracking: {
+						invoke: {
+							src: 'enableTracking',
+							onDone: {
+								target: 'fetchPatterns',
+							},
+						},
+					},
+					fetchPatterns: {
+						invoke: {
+							src: 'installPatterns',
+							onDone: {
+								target: 'success',
+							},
+							onError: {
+								actions: 'redirectToIntroWithError',
+							},
+						},
+					},
+					success: {
+						type: 'final',
+					},
+				},
+				onDone: {
+					target: '#designWithoutAI.showAssembleHubHomepage',
 				},
 			},
 			preAssembleSite: {
@@ -209,6 +264,25 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
+							installPatterns: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'installPatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												target: 'success',
+											},
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
+							},
 						},
 						onDone: {
 							target: 'assembleSite',
@@ -245,6 +319,22 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				},
 				entry: [ 'redirectToAssemblerHub' ],
 			},
+			showAssembleHubHomepage: {
+				entry: [
+					{
+						type: 'redirectToAssemblerHubSection',
+						section: 'homepage',
+					},
+				],
+			},
+			showAssembleHubTypography: {
+				entry: [
+					{
+						type: 'redirectToAssemblerHubSection',
+						section: 'typography',
+					},
+				],
+			},
 		},
 	},
 	{
@@ -254,6 +344,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			hasStepInUrl,
 			isFontLibraryAvailable,
 			hasFontInstallInUrl,
+			hasPatternInstallInUrl,
 		},
 	}
 );

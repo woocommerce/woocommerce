@@ -125,7 +125,7 @@ export const getChangelogType = ( body: string ) => {
  * @return {void|string} changelog message.
  */
 export const getChangelogMessage = ( body: string ) => {
-	const messageRegex = /#### Message ?(<!--(.*)-->)?(.*)#### Comment/gms;
+	const messageRegex = /#### Message ?(<!--(.*?)-->)?(.*?)<\/details>/gms;
 	const match = messageRegex.exec( body );
 
 	if ( ! match ) {

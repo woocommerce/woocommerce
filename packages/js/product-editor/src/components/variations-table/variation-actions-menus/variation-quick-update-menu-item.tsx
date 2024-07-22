@@ -41,6 +41,7 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 	group = TOP_LEVEL_MENU,
 	supportsMultipleSelection,
 	onClick = () => {},
+	...props
 } ) => {
 	const handleClick =
 		( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) => () => {
@@ -61,7 +62,7 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 		>
 			{ ( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) =>
 				createOrderedChildren(
-					<MenuItem onClick={ handleClick( fillProps ) }>
+					<MenuItem { ...props } onClick={ handleClick( fillProps ) }>
 						{ children }
 					</MenuItem>,
 					order,

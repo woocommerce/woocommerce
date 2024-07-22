@@ -39,6 +39,16 @@ export function isWooQueryBlockVariation( block: ProductQueryBlock ) {
 }
 
 /**
+ * Identifies if a block is a Related Products variation.
+ */
+export function isRelatedProducts( block: ProductQueryBlock ) {
+	return (
+		block.name === QUERY_LOOP_ID &&
+		block.attributes.namespace === QueryVariation.RELATED_PRODUCTS
+	);
+}
+
+/**
  * Sets the new query arguments of a Product Query block
  *
  * Shorthand for setting new nested query parameters.

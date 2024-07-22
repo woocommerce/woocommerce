@@ -68,13 +68,6 @@ const PackageRates = ( {
 		}
 	}, [ onSelectRate, rates, selectedOption ] );
 
-	// Update the data store when the local selected rate changes.
-	useEffect( () => {
-		if ( selectedOption ) {
-			onSelectRate( selectedOption );
-		}
-	}, [ onSelectRate, selectedOption ] );
-
 	if ( rates.length === 0 ) {
 		return noResultsMessage;
 	}
