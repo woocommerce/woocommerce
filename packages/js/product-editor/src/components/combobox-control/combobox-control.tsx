@@ -81,7 +81,7 @@ export const ComboboxControl = forwardRef( function ForwardedComboboxControl(
 			/**
 			 * The Combobox component clear the value of its internal
 			 * input control when losing the focus, even when the
-			 * selected value is set, afecting the validation behavior
+			 * selected value is set, affecting the validation behavior
 			 * on bluring
 			 */
 			function handleBlur( event: FocusEvent ) {
