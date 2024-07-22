@@ -149,6 +149,9 @@ const ExpressPaymentMethods = () => {
 			? {
 					height: `${ buttonHeight }px`,
 					borderRadius: `${ buttonBorderRadius }px`,
+					pointerEvents: 'none',
+					userSelect: 'none',
+					ariaDisabled: true,
 			  }
 			: {};
 
