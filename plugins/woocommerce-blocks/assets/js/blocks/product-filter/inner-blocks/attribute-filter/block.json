@@ -73,9 +73,9 @@
 			"type": "string",
 			"default": "count-desc"
 		},
-		"showEmpty": {
+		"hideEmpty": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"clearButton": {
 			"type": "boolean",

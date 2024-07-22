@@ -34,7 +34,7 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 		queryType,
 		displayStyle,
 		showCounts,
-		showEmpty,
+		hideEmpty,
 		clearButton,
 	} = attributes;
 
@@ -137,9 +137,9 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 					/>
 					<ToggleControl
 						label={ __( 'Empty filter options', 'woocommerce' ) }
-						checked={ showEmpty }
+						checked={ ! hideEmpty }
 						onChange={ ( value ) =>
-							setAttributes( { showEmpty: value } )
+							setAttributes( { hideEmpty: ! value } )
 						}
 					/>
 					<ToggleControl

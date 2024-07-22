@@ -41,7 +41,7 @@ const Edit = ( props: EditProps ) => {
 		displayStyle,
 		showCounts,
 		sortOrder,
-		showEmpty,
+		hideEmpty,
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
@@ -57,7 +57,7 @@ const Edit = ( props: EditProps ) => {
 		resourceName: 'products/attributes/terms',
 		resourceValues: [ attributeObject?.id || 0 ],
 		shouldSelect: blockAttributes.attributeId > 0,
-		query: { orderby: 'menu_order', hide_empty: ! showEmpty },
+		query: { orderby: 'menu_order', hide_empty: hideEmpty },
 	} );
 
 	const { results: filteredCounts } = useCollectionData( {
@@ -117,13 +117,13 @@ const Edit = ( props: EditProps ) => {
 				? filteredCounts.attribute_counts.map( ( term ) => term.term )
 				: [];
 
-		if ( termIdHasProducts.length === 0 && ! showEmpty )
+		if ( termIdHasProducts.length === 0 && hideEmpty )
 			return setAttributeOptions( [] );
 
 		setAttributeOptions(
 			attributeTerms
 				.filter( ( term ) => {
-					if ( ! showEmpty )
+					if ( hideEmpty )
 						return termIdHasProducts.includes( term.id );
 					return true;
 				} )
@@ -141,7 +141,7 @@ const Edit = ( props: EditProps ) => {
 					}
 				} )
 		);
-	}, [ attributeTerms, filteredCounts, sortOrder, showEmpty ] );
+	}, [ attributeTerms, filteredCounts, sortOrder, hideEmpty ] );
 
 	useEffect( () => {
 		if ( productFilterWrapperBlockId ) {

@@ -16,7 +16,7 @@ export type BlockAttributes = {
 	selectType: string;
 	isPreview: boolean;
 	sortOrder: keyof typeof sortOrders;
-	showEmpty: boolean;
+	hideEmpty: boolean;
 	clearButton: boolean;
 };
 
