@@ -326,8 +326,11 @@ class LegacyDataHandler {
 		$prevent_sync_on_read = fn() => false;
 
 		add_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read, 999 );
-		$data_store->read( $order );
-		remove_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read );
+		try {
+			$data_store->read( $order );
+		} finally {
+			remove_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read, 999 );
+		}
 
 		return $order;
 	}
