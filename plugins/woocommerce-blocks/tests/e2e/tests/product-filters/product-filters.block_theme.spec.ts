@@ -57,42 +57,53 @@ test.describe( `${ blockData.name }`, () => {
 		);
 		await expect( block ).toBeVisible();
 
-		const filtersbBlockHeading = block.getByRole( 'document', {
-			name: 'Filters',
-		} );
-		await expect( filtersbBlockHeading ).toBeVisible();
-
 		const activeHeading = block.getByText( 'Active', { exact: true } );
-		const activeFilterBlock = block.getByLabel(
-			'Block: Product Filter: Active'
-		);
+		const activeFilterBlock = block
+			.getByLabel( 'Block: Filter Options' )
+			.and(
+				editor.canvas.locator(
+					'[data-type="woocommerce/product-filter-active"]'
+				)
+			);
 		await expect( activeHeading ).toBeVisible();
 		await expect( activeFilterBlock ).toBeVisible();
 
 		const priceHeading = block.getByText( 'Price', {
 			exact: true,
 		} );
-		const priceFilterBlock = block.getByLabel(
-			'Block: Product Filter: Price'
-		);
+		const priceFilterBlock = block
+			.getByLabel( 'Block: Filter Options' )
+			.and(
+				editor.canvas.locator(
+					'[data-type="woocommerce/product-filter-price"]'
+				)
+			);
 		await expect( priceHeading ).toBeVisible();
 		await expect( priceFilterBlock ).toBeVisible();
 
 		const statusHeading = block.getByText( 'Status', {
 			exact: true,
 		} );
-		const statusFilterBlock = block.getByLabel(
-			'Block: Product Filter: Stock'
-		);
+		const statusFilterBlock = block
+			.getByLabel( 'Block: Filter Options' )
+			.and(
+				editor.canvas.locator(
+					'[data-type="woocommerce/product-filter-stock-status"]'
+				)
+			);
 		await expect( statusHeading ).toBeVisible();
 		await expect( statusFilterBlock ).toBeVisible();
 
 		const colorHeading = block.getByText( 'Color', {
 			exact: true,
 		} );
-		const colorFilterBlock = block.getByLabel(
-			'Block: Product Filter: Attribute (Experimental)'
-		);
+		const colorFilterBlock = block
+			.getByLabel( 'Block: Filter Options' )
+			.and(
+				editor.canvas.locator(
+					'[data-type="woocommerce/product-filter-attribute"]'
+				)
+			);
 		const expectedColorFilterOptions = [
 			'Blue',
 			'Green',
@@ -112,9 +123,13 @@ test.describe( `${ blockData.name }`, () => {
 		const ratingHeading = block.getByText( 'Rating', {
 			exact: true,
 		} );
-		const ratingFilterBlock = block.getByLabel(
-			'Block: Product Filter: Rating (Experimental)'
-		);
+		const ratingFilterBlock = block
+			.getByLabel( 'Block: Filter Options' )
+			.and(
+				editor.canvas.locator(
+					'[data-type="woocommerce/product-filter-rating"]'
+				)
+			);
 		await expect( ratingHeading ).toBeVisible();
 		await expect( ratingFilterBlock ).toBeVisible();
 	} );
@@ -394,9 +409,13 @@ test.describe( `${ blockData.name }`, () => {
 				productFilterAttributeColorBlockListItem
 			).toBeVisible();
 
-			const productFilterAttributeBlock = editor.canvas.getByLabel(
-				'Block: Product Filter: Attribute (Experimental)'
-			);
+			const productFilterAttributeBlock = editor.canvas
+				.getByLabel( 'Block: Filter Options' )
+				.and(
+					editor.canvas.locator(
+						'[data-type="woocommerce/product-filter-attribute"]'
+					)
+				);
 			await editor.selectBlocks( productFilterAttributeBlock );
 			await editor.clickBlockToolbarButton( 'Edit' );
 			await editor.canvas

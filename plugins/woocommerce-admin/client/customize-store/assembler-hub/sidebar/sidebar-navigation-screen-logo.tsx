@@ -544,6 +544,7 @@ export const SidebarNavigationScreenLogo = ( {
 											href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
 											target="_blank"
 											type="external"
+											rel="noreferrer"
 										/>
 									),
 								},

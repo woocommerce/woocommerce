@@ -712,7 +712,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 			// Turn on return to cart link and check it shows in the block.
 			const returnToCartLink = shippingAddressBlock.getByText(
-				'Return to Cart',
+				'Return to cart',
 				{ exact: true }
 			);
 

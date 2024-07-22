@@ -6526,8 +6526,8 @@ img.help_tip {
 
 	.upload_image_button {
 		display: block;
-		width: 64px;
-		height: 64px;
+		width: 128px;
+		height: 128px;
 		float: left;
 		margin-right: 20px;
 		position: relative;
@@ -6548,8 +6548,8 @@ img.help_tip {
 			right: 0;
 			bottom: 0;
 			text-align: center;
-			line-height: 64px;
-			font-size: 64px;
+			line-height: 128px;
+			font-size: 128px;
 			font-weight: 400;
 			-webkit-font-smoothing: antialiased;
 		}
@@ -6654,6 +6654,12 @@ img.help_tip {
 	&.form-row-full {
 		clear: both;
 	}
+}
+
+.form-flex-box {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 /**

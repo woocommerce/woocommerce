@@ -16,6 +16,7 @@ import {
 import { PatternWithBlocks } from '~/customize-store/types/pattern';
 import { PATTERN_CATEGORIES } from '../sidebar/pattern-screen/categories';
 import { usePatternsByCategory } from '../hooks/use-patterns';
+import { trackEvent } from '~/customize-store/tracking';
 
 // This is the icon that is used in the Shuffle button. Currently we are using an outdated version of @wordpress/icons.
 // import { shuffle } from '@wordpress/icons';
@@ -128,6 +129,10 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 						},
 					};
 					replaceBlocks( clientId, nextPattern.blocks );
+					trackEvent(
+						'customize_your_store_assembler_pattern_shuffle_click',
+						{ category, pattern: nextPattern.name }
+					);
 				} }
 			>
 				{ categoryLabel && (

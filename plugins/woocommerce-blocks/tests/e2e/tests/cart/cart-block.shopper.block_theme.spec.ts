@@ -240,7 +240,7 @@ test.describe( 'Shopper → Cart block', () => {
 
 		// Verify that the "Place Order" button is visible, then we're on the checkout page
 		await expect(
-			page.getByRole( 'button', { name: 'Place Order' } )
+			page.getByRole( 'button', { name: 'Place order' } )
 		).toBeVisible();
 	} );
 
