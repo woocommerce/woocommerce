@@ -338,16 +338,14 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 
 		setStyle( documentElement );
 
-		if ( logoBlockIds.length === 0 ) {
-			const logoObserver = findAndSetLogoBlock(
-				{ autoScale, documentElement },
-				{
-					setLogoBlockIds,
-				}
-			);
+		const logoObserver = findAndSetLogoBlock(
+			{ autoScale, documentElement },
+			{
+				setLogoBlockIds,
+			}
+		);
 
-			observers.push( logoObserver );
-		}
+		observers.push( logoObserver );
 
 		if (
 			isFullComposabilityFeatureAndAPIAvailable() &&
