@@ -63,18 +63,18 @@ export const Edit = ( {
 					setAttributes( { buttonHeight: newValue } )
 				}
 			/>
-			<TextControl
-				label={ __( 'Button Border Radius', 'woocommerce' ) }
-				value={ buttonBorderRadius }
-				onChange={ ( newValue: string ) =>
-					setAttributes( {
-						buttonBorderRadius: newValue,
-					} )
-				}
-				type="number"
-				min={ 0 }
-				max={ 100 }
-			/>
+			<div className="border-radius-control-container">
+				<TextControl
+					label={ __( 'Button Border Radius', 'woocommerce' ) }
+					value={ buttonBorderRadius }
+					onChange={ ( newValue: string ) =>
+						setAttributes( {
+							buttonBorderRadius: newValue,
+						} )
+					}
+				/>
+				<span className="border-radius-control-px">px</span>
+			</div>
 		</>
 	);
 
