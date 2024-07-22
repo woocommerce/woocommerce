@@ -58,6 +58,7 @@ return array(
 		'default'     => 'no',
 		/* translators: %s: URL */
 		'description' => sprintf(
+			// translators: %s is a placeholder for a URL.
 			__( 'Log PayPal events such as IPN requests and review them on the <a href="%s">Logs screen</a>. Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished.', 'woocommerce' ),
 			esc_url( LoggingUtil::get_logs_tab_url() )
 		),
