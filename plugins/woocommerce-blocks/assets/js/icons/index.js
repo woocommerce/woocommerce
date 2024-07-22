@@ -16,6 +16,7 @@ export { default as folderStarred } from './library/folder-starred';
 export { default as miniCart } from './library/mini-cart';
 export { default as miniCartAlt } from './library/mini-cart-alt';
 export { default as productDetails } from './library/product-details';
+export { default as productFilterOptions } from './library/product-filter-options';
 export { default as productMeta } from './library/product-meta';
 export { default as removeCart } from './library/remove-cart';
 export { default as sparkles } from './library/sparkles';

@@ -13,6 +13,18 @@
 			margin-bottom: 0;
 		}
 	}
+	.wc-block-checkout__login-prompt {
+		float: right;
+		margin-top: -$gap-large;
+		@include font-size(regular);
+	}
+	.wc-block-checkout__create-account {
+		margin-top: $gap-large !important;
+	}
+	.wc-block-checkout__guest-checkout-notice {
+		margin: $gap-smallest 0 0;
+		@include font-size(smaller);
+	}
 }
 
 .is-large {

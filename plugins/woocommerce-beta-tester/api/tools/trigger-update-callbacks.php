@@ -48,7 +48,7 @@ function trigger_selected_update_callbacks( $request ) {
 	$update_callbacks = $db_updates[ $version ];
 
 	foreach ( $update_callbacks as $update_callback ) {
-		call_user_func( $update_callback );
+		\WC_Install::run_update_callback( $update_callback );
 	}
 
 	return false;
