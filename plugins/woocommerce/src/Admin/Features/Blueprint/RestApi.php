@@ -25,13 +25,6 @@ class RestApi {
 	protected $namespace = 'blueprint';
 
 	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'process';
-
-	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0
@@ -39,7 +32,7 @@ class RestApi {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base,
+			'/import',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
