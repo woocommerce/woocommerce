@@ -119,7 +119,7 @@ jobs:
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
-          build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || 'full' }}
+          build-type: ${{ ( ( matrix.testType == 'unit:php' || matrix.testType == 'api' ) && 'backend' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
           pull-package-deps: '${{ matrix.projectName }}'
 
@@ -236,7 +236,7 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork  }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -273,7 +273,7 @@ jobs:
         'project-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ !cancelled() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork  }}
     strategy:
       fail-fast: false
       matrix:
