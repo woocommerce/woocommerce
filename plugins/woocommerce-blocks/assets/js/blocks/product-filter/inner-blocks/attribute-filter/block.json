@@ -51,7 +51,7 @@
 		},
 		"showCounts": {
 			"type": "boolean",
-			"default": true
+			"default": false
 		},
 		"queryType": {
 			"type": "string",
