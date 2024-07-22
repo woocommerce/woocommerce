@@ -44,7 +44,7 @@ export const BuilderIntro = ( {
 		}
 
 		apiFetch( {
-			path: '/blueprint/process',
+			path: '/blueprint/import',
 			method: 'POST',
 			body: formData,
 		} )
