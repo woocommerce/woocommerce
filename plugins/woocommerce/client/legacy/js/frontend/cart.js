@@ -247,11 +247,14 @@ jQuery( function ( $ ) {
 				url: get_url( 'update_shipping_method' ),
 				data: data,
 				dataType: 'html',
-				success: function ( response ) {
-					var target_id = $( event.currentTarget ).attr( 'id' );
-
+				success: function ( response ) {					
 					update_cart_totals_div( response );
-					$( '.cart_totals' ).find( '#' + target_id ).focus();
+					
+					var newCurrentTarget = document.getElementById( event.currentTarget.id );
+
+					if ( newCurrentTarget ) {
+						newCurrentTarget.focus();
+					}
 				},
 				complete: function () {
 					unblock( $( 'div.cart_totals' ) );
