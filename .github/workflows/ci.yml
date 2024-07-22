@@ -338,12 +338,6 @@ jobs:
       issues: write
     
     steps:
-      - name: 'Checkout Gutenberg repository'
-        uses: actions/checkout@v4
-        with:
-          repository: WordPress/gutenberg
-          ref: dbf201449e9736f672b61e422787d47659db327a
-
       - uses: actions/download-artifact@v4
         id: download-artifact
         with:
@@ -359,41 +353,9 @@ jobs:
           # any output means there are reports
           echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
 
-      - name: 'Pick pre-built @wordpress/report-flaky-tests resources'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
-        with:
-          path: ./packages/report-flaky-tests/build/
-          key: "${{ runner.os }}-report-flaky-tests-dbf201449e9736f672b61e422787d47659db327a"
-          restore-keys: '${{ runner.os }}-report-flaky-tests-'
-
-      - name: 'Check the build scope (full or minimal)'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        shell: 'bash'
-        run: |
-          if [[ ! -f ./packages/report-flaky-tests/build/index.js ]]; then
-              echo "PERFORM_FULL_BUILD=yes" >> $GITHUB_ENV
-          else
-              echo "PERFORM_FULL_BUILD=no" >> $GITHUB_ENV
-          fi
-
-      - name: 'Setup Node'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        uses: ./.github/setup-node
-
-      - name: 'Build package(s)'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        shell: 'bash'
-        run: |
-          if [[ '${{ env.PERFORM_FULL_BUILD }}' == 'no' ]]; then
-            npm install --silent
-          else
-            npm run build:packages
-          fi
-
       - name: 'Report flaky tests'
         if: ${{ !!env.FLAKY_REPORTS }}
-        uses: ./packages/report-flaky-tests
+        uses: ./.github/actions/report-flaky-tests
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           label: 'metric: flaky e2e test'
