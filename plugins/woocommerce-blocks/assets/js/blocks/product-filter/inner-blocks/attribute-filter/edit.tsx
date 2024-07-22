@@ -34,8 +34,15 @@ const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes, clientId } = props;
 
-	const { attributeId, queryType, isPreview, displayStyle, showCounts } =
-		blockAttributes;
+	const {
+		attributeId,
+		queryType,
+		isPreview,
+		displayStyle,
+		showCounts,
+		sortOrder,
+		showEmpty,
+	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
 
@@ -50,7 +57,7 @@ const Edit = ( props: EditProps ) => {
 		resourceName: 'products/attributes/terms',
 		resourceValues: [ attributeObject?.id || 0 ],
 		shouldSelect: blockAttributes.attributeId > 0,
-		query: { orderby: 'menu_order' },
+		query: { orderby: 'menu_order', hide_empty: ! showEmpty },
 	} );
 
 	const { results: filteredCounts } = useCollectionData( {
@@ -110,14 +117,31 @@ const Edit = ( props: EditProps ) => {
 				? filteredCounts.attribute_counts.map( ( term ) => term.term )
 				: [];
 
-		if ( termIdHasProducts.length === 0 ) return setAttributeOptions( [] );
+		if ( termIdHasProducts.length === 0 && ! showEmpty )
+			return setAttributeOptions( [] );
 
 		setAttributeOptions(
-			attributeTerms.filter( ( term ) => {
-				return termIdHasProducts.includes( term.id );
-			} )
+			attributeTerms
+				.filter( ( term ) => {
+					if ( ! showEmpty )
+						return termIdHasProducts.includes( term.id );
+					return true;
+				} )
+				.sort( ( a, b ) => {
+					switch ( sortOrder ) {
+						case 'name-asc':
+							return a.name > b.name ? 1 : -1;
+						case 'name-desc':
+							return a.name < b.name ? 1 : -1;
+						case 'count-asc':
+							return a.count > b.count ? 1 : -1;
+						case 'count-desc':
+						default:
+							return a.count < b.count ? 1 : -1;
+					}
+				} )
 		);
-	}, [ attributeTerms, filteredCounts ] );
+	}, [ attributeTerms, filteredCounts, sortOrder, showEmpty ] );
 
 	useEffect( () => {
 		if ( productFilterWrapperBlockId ) {
