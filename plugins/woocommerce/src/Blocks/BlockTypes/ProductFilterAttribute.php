@@ -44,7 +44,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'defaultProductFilterAttributeId', $this->get_default_attribute_id() );
+			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_attribute() );
 		}
 	}
 
@@ -55,7 +55,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 */
 	public function delete_default_attribute_id_transient( $transient ) {
 		if ( 'wc_attribute_taxonomies' === $transient ) {
-			delete_transient( 'wc_block_product_filter_attribute_default_attribute_id' );
+			delete_transient( 'wc_block_product_filter_attribute_default_attribute' );
 		}
 	}
 
@@ -361,12 +361,14 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 *
 	 * @return int
 	 */
-	private function get_default_attribute_id() {
-		$cached = get_transient( 'wc_block_product_filter_attribute_default_attribute_id' );
+	private function get_default_attribute() {
+		$cached = get_transient( 'wc_block_product_filter_attribute_default_attribute' );
 
 		if ( $cached ) {
 			return $cached;
 		}
+
+		$attributes = wc_get_attribute_taxonomies();
 
 		$attributes_count = array_map(
 			function ( $attribute ) {
@@ -379,7 +381,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 					)
 				);
 			},
-			wc_get_attribute_taxonomies()
+			$attributes
 		);
 
 		asort( $attributes_count );
@@ -399,10 +401,17 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 		}
 
-		$attribute_id = $attribute_id ? intval( str_replace( 'id:', '', $id ) ) : 0;
+		$default_attribute = array(
+			'id'    => 0,
+			'label' => __( 'Attribute', 'woocommerce' ),
+		);
 
-		set_transient( 'wc_block_product_filter_attribute_default_attribute_id', $attribute_id );
+		if ( $attribute_id ) {
+			$default_attribute = $attributes[ $attribute_id ];
+		}
 
-		return $attribute_id;
+		set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute );
+
+		return $default_attribute;
 	}
 }
