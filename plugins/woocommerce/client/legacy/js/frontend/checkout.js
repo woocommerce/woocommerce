@@ -420,7 +420,7 @@ jQuery( function( $ ) {
 						$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
 
 						wc_checkout_form.scroll_to_notices();
-					} 
+					}
 
 					// Re-init methods
 					wc_checkout_form.init_payment_methods();

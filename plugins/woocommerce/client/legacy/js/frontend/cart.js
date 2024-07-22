@@ -247,7 +247,7 @@ jQuery( function ( $ ) {
 				url: get_url( 'update_shipping_method' ),
 				data: data,
 				dataType: 'html',
-				success: function ( response ) {					
+				success: function ( response ) {
 					update_cart_totals_div( response );
 					
 					var newCurrentTarget = document.getElementById( event.currentTarget.id );
