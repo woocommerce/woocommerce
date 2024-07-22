@@ -86,10 +86,12 @@ final class LoggingUtil {
 	/**
 	 * Get the directory for storing log files.
 	 *
+	 * @param bool $initialize Optional. True to attempt to create the log directory if it doesn't exist. Default true.
+	 *
 	 * @return string The full directory path, with trailing slash.
 	 */
-	public static function get_log_directory(): string {
-		return Settings::get_log_directory();
+	public static function get_log_directory( bool $initialize = true ): string {
+		return Settings::get_log_directory( $initialize );
 	}
 
 	/**

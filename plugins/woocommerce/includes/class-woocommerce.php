@@ -437,7 +437,7 @@ final class WooCommerce {
 		if ( defined( 'WC_LOG_DIR' ) ) {
 			$this->define( 'WC_LOG_DIR_CUSTOM', true );
 		}
-		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
+		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory( false ) );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
