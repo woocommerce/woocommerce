@@ -28,7 +28,6 @@ test.describe( 'Product Collection', () => {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
-		expect( pageObject.productTemplate ).not.toBeNull();
 		await expect( pageObject.products ).toHaveCount( 9 );
 		await expect( pageObject.productImages ).toHaveCount( 9 );
 		await expect( pageObject.productTitles ).toHaveCount( 9 );
@@ -37,7 +36,6 @@ test.describe( 'Product Collection', () => {
 
 		await pageObject.publishAndGoToFrontend();
 
-		expect( pageObject.productTemplate ).not.toBeNull();
 		await expect( pageObject.products ).toHaveCount( 9 );
 		await expect( pageObject.productImages ).toHaveCount( 9 );
 		await expect( pageObject.productTitles ).toHaveCount( 9 );
@@ -46,44 +44,6 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Renders correctly with all Product Elements', () => {
-		const insertProductElements = async (
-			pageObject: ProductCollectionPage
-		) => {
-			// By default there are inner blocks:
-			// - woocommerce/product-image
-			// - core/post-title
-			// - woocommerce/product-price
-			// - woocommerce/product-button
-			// We're adding remaining ones
-			const productElements = [
-				{ name: 'woocommerce/product-rating', attributes: {} },
-				{ name: 'woocommerce/product-sku', attributes: {} },
-				{ name: 'woocommerce/product-stock-indicator', attributes: {} },
-				{ name: 'woocommerce/product-sale-badge', attributes: {} },
-				{
-					name: 'core/post-excerpt',
-					attributes: {
-						__woocommerceNamespace:
-							'woocommerce/product-collection/product-summary',
-					},
-				},
-				{
-					name: 'core/post-terms',
-					attributes: { term: 'product_tag' },
-				},
-				{
-					name: 'core/post-terms',
-					attributes: { term: 'product_cat' },
-				},
-			];
-
-			for ( const productElement of productElements ) {
-				await pageObject.insertBlockInProductCollection(
-					productElement
-				);
-			}
-		};
-
 		const expectedProductContent = [
 			'Beanie', // core/post-title
 			'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.', // woocommerce/product-price
@@ -103,7 +63,7 @@ test.describe( 'Product Collection', () => {
 				page.locator( '[data-testid="product-image"]:visible' )
 			).toHaveCount( 9 );
 
-			await insertProductElements( pageObject );
+			await pageObject.insertProductElements();
 			await pageObject.publishAndGoToFrontend();
 
 			for ( const content of expectedProductContent ) {
@@ -124,7 +84,7 @@ test.describe( 'Product Collection', () => {
 				editor.canvas.locator( '[data-testid="product-image"]:visible' )
 			).toHaveCount( 16 );
 
-			await insertProductElements( pageObject );
+			await pageObject.insertProductElements();
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
@@ -152,7 +112,7 @@ test.describe( 'Product Collection', () => {
 				editor.canvas.locator( '[data-testid="product-image"]:visible' )
 			).toHaveCount( 9 );
 
-			await insertProductElements( pageObject );
+			await pageObject.insertProductElements();
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
@@ -1350,39 +1310,59 @@ test.describe( 'Product Collection', () => {
 		test.describe( `${ templateTitle } template`, () => {
 			test( 'Product Collection block matches with classic template block', async ( {
 				pageObject,
+				requestUtils,
 				admin,
 				editor,
 				page,
 			} ) => {
-				const getProductNamesFromClassicTemplate = async () => {
-					const products = page.locator(
-						'.woocommerce-loop-product__title'
-					);
-					await expect( products ).toHaveCount(
-						expectedProductsCount
-					);
-					return products.allTextContents();
-				};
+				await pageObject.refreshLocators( 'frontend' );
+
+				await page.goto( frontendPage );
+
+				const productCollectionProductNames =
+					await pageObject.getProductNames();
+
+				const template = await requestUtils.createTemplate(
+					'wp_template',
+					{
+						slug,
+						title: 'classic template test',
+						content: 'howdy',
+					}
+				);
 
 				await admin.visitSiteEditor( {
-					postId: `woocommerce/woocommerce//${ slug }`,
+					postId: template.id,
 					postType: 'wp_template',
 					canvas: 'edit',
 				} );
 
+				await expect(
+					editor.canvas.getByText( 'howdy' )
+				).toBeVisible();
+
 				await editor.insertBlock( { name: legacyBlockName } );
+
 				await editor.saveSiteEditorEntities( {
 					isOnlyCurrentEntityDirty: true,
 				} );
+
 				await page.goto( frontendPage );
-				await pageObject.refreshLocators( 'frontend' );
 
-				const classicProducts =
-					await getProductNamesFromClassicTemplate();
-				const productCollectionProducts =
-					await pageObject.getProductNames();
+				const classicProducts = page.locator(
+					'.woocommerce-loop-product__title'
+				);
 
-				expect( classicProducts ).toEqual( productCollectionProducts );
+				await expect( classicProducts ).toHaveCount(
+					expectedProductsCount
+				);
+
+				const classicProductsNames =
+					await classicProducts.allTextContents();
+
+				expect( classicProductsNames ).toEqual(
+					productCollectionProductNames
+				);
 			} );
 		} );
 	}
@@ -1460,7 +1440,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollection'
 			);
-			expect( pageObject.productTemplate ).not.toBeNull();
+
 			await expect( pageObject.products ).toHaveCount( 5 );
 			await expect( pageObject.productImages ).toHaveCount( 5 );
 			await expect( pageObject.productTitles ).toHaveCount( 5 );
@@ -1497,7 +1477,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollectionWithPreview'
 			);
-			expect( pageObject.productTemplate ).not.toBeNull();
+
 			await expect( pageObject.products ).toHaveCount( 9 );
 			await expect( pageObject.productImages ).toHaveCount( 9 );
 			await expect( pageObject.productTitles ).toHaveCount( 9 );
@@ -1556,7 +1536,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollectionWithAdvancedPreview'
 			);
-			expect( pageObject.productTemplate ).not.toBeNull();
+
 			await expect( pageObject.products ).toHaveCount( 9 );
 			await expect( pageObject.productImages ).toHaveCount( 9 );
 			await expect( pageObject.productTitles ).toHaveCount( 9 );
