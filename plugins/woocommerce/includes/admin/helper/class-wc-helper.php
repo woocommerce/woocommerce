@@ -1312,7 +1312,7 @@ class WC_Helper {
 			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
 
 			$installed_subscriptions = array_filter(
-				WC_Helper::get_subscriptions(),
+				self::get_subscriptions(),
 				function ( $subscription ) use ( $site_id ) {
 					return in_array( $site_id, $subscription['connections'], true );
 				}
