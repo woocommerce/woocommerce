@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add scope attribute to the product attributes table
