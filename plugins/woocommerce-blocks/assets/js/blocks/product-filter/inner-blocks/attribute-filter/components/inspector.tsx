@@ -15,13 +15,14 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
+import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { sortOrderOptions } from '../constants';
-import { EditProps, BlockAttributes } from '../types';
+import { BlockAttributes, EditProps } from '../types';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -73,9 +74,14 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 					style={ { width: '100%' } }
 					help={
 						queryType === 'and'
-							? __(
-									'Show results for all selected attributes. Displayed products must contain all of them to appear in the results.',
-									'woocommerce'
+							? createInterpolateElement(
+									__(
+										'Show results for <b>all</b> selected attributes. Displayed products must contain <b>all of them</b> to appear in the results.',
+										'woocommerce'
+									),
+									{
+										b: <strong />,
+									}
 							  )
 							: __(
 									'Show results for any of the attributes selected (displayed products don’t have to have them all).',
