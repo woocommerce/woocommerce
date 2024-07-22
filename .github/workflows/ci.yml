@@ -350,14 +350,14 @@ jobs:
 
       - name: 'Merge flaky tests reports'
         run: |
-          downloadPath='${{ steps.download-artifact.outputs.download-path }}'
+          downloadPath='${{ steps.download-artifact.outputs.download-path || './flaky-tests' }}'
           # make dir so that next step doesn't fail if it doesn't exist 
           mkdir -p $downloadPath
           # any output means there are reports
           echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
 
       - name: 'Report flaky tests'
-        if: ${{ !!env.FLAKY_REPORTS || 'true' }}
+        if: ${{ !!env.FLAKY_REPORTS }}
         uses: './.github/actions/report-flaky-tests'
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
