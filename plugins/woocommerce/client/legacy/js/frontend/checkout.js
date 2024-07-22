@@ -160,7 +160,7 @@ jQuery( function( $ ) {
 		trigger_update_checkout: function( event ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.dirtyInput = false;
-			$( document.body ).trigger( 'update_checkout', { currentTarget: event.currentTarget } );
+			$( document.body ).trigger( 'update_checkout', { current_target: event.currentTarget } );
 		},
 		maybe_update_checkout: function() {
 			var update_totals = true;
@@ -421,13 +421,19 @@ jQuery( function( $ ) {
 
 						wc_checkout_form.scroll_to_notices();
 					} 
-					// If there is no errors and the checkout update was triggered by changing the shipping method, focus its radio input.
-					else if ( args.currentTarget && args.currentTarget.id.includes( 'shipping_method' ) ) {
-						document.getElementById( args.currentTarget.id ).focus();
-					}
 
 					// Re-init methods
 					wc_checkout_form.init_payment_methods();
+
+					// If there is no errors and the checkout update was triggered by changing the shipping method, focus its radio input.
+					if (
+						data &&
+						'success' === data.result &&
+						args.current_target &&
+						args.current_target.id.includes( 'shipping_method' )
+					) {
+						document.getElementById( args.current_target.id ).focus();
+					}
 
 					// Fire updated_checkout event.
 					$( document.body ).trigger( 'updated_checkout', [ data ] );
