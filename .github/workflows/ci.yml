@@ -338,14 +338,17 @@ jobs:
       issues: write
     
     steps:
-      - uses: actions/download-artifact@v4
-        id: download-artifact
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+
+      - uses: 'actions/download-artifact@v4'
+        name: 'Download artifacts'
         with:
           pattern: flaky-tests*
           path: flaky-tests
           merge-multiple: true
 
-      - name: 'Check if there are flaky tests reports'
+      - name: 'Merge flaky tests reports'
         run: |
           downloadPath='${{ steps.download-artifact.outputs.download-path }}'
           # make dir so that next step doesn't fail if it doesn't exist 
@@ -355,7 +358,7 @@ jobs:
 
       - name: 'Report flaky tests'
         if: ${{ !!env.FLAKY_REPORTS || 'true' }}
-        uses: ./.github/actions/report-flaky-tests
+        uses: './.github/actions/report-flaky-tests'
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           label: 'metric: flaky e2e test'
