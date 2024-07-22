@@ -841,11 +841,11 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			// Check text inputs in edit mode match the expected values.
 			const govIdInput = checkoutPageObject.page.getByLabel(
-				'Government ID *',
+				'Government ID * required',
 				{ exact: true }
 			);
 			const confirmGovIdInput = checkoutPageObject.page.getByLabel(
-				'Confirm government ID *',
+				'Confirm government ID * required',
 				{ exact: true }
 			);
 			await expect( govIdInput ).toHaveValue( '54321' );
@@ -897,13 +897,16 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			// Check text inputs in edit mode match the expected values.
 			const shippingGovIdInput = checkoutPageObject.page.getByLabel(
-				'Government ID *',
+				'Government ID * required',
 				{ exact: true }
 			);
 			const shippingConfirmGovIdInput =
-				checkoutPageObject.page.getByLabel( 'Confirm government ID *', {
-					exact: true,
-				} );
+				checkoutPageObject.page.getByLabel(
+					'Confirm government ID * required',
+					{
+						exact: true,
+					}
+				);
 			await expect( shippingGovIdInput ).toHaveValue( '12345' );
 			await expect( shippingConfirmGovIdInput ).toHaveValue( '12345' );
 
