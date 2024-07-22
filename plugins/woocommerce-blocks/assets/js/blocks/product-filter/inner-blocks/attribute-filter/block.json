@@ -14,7 +14,33 @@
 		"inserter": false,
 		"color": {
 			"text": true,
-			"background": false
+			"background": false,
+			"__experimentalDefaultControls": {
+				"text": false
+			}
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": false
+			}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false,
+				"blockGap": false
+			}
 		}
 	},
 	"usesContext": [ "query", "queryId" ],
@@ -25,7 +51,7 @@
 		},
 		"showCounts": {
 			"type": "boolean",
-			"default": false
+			"default": true
 		},
 		"queryType": {
 			"type": "string",
@@ -46,6 +72,14 @@
 		"sortOrder": {
 			"type": "string",
 			"default": "count-desc"
+		},
+		"showEmpty": {
+			"type": "boolean",
+			"default": false
+		},
+		"clearButton": {
+			"type": "boolean",
+			"default":true
 		}
 	}
 }

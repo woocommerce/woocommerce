@@ -16,6 +16,8 @@ export type BlockAttributes = {
 	selectType: string;
 	isPreview: boolean;
 	sortOrder: keyof typeof sortOrders;
+	showEmpty: boolean;
+	clearButton: boolean;
 };
 
 export interface EditProps extends BlockEditProps< BlockAttributes > {
