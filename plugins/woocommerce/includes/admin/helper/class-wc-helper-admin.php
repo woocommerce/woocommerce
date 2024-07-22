@@ -27,7 +27,14 @@ class WC_Helper_Admin {
 	 * @return void
 	 */
 	public static function load() {
-		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_marketplace_settings' ) );
+		global $pagenow;
+
+		$is_in_app_marketplace = ( 'admin.php' === $pagenow && ( isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'] ) && ( isset( $_GET['path'] ) && '/extensions' === $_GET['path'] ) );
+
+		if ( is_admin() && $is_in_app_marketplace ) {
+			add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_marketplace_settings' ) );
+		}
+
 		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 	}
 
