@@ -24,7 +24,7 @@ module.exports = {
 				exclude: [
 					/storybook\/wordpress/,
 					/build-style\/*\/*.css/,
-					/\/(changelog|build|build-module|build-types|vendor)\//,
+					/[\/\\](changelog|bin|docs|build|build-module|build-types|vendor)[\/\\]/,
 				],
 				use: [
 					MiniCssExtractPlugin.loader,
