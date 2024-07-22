@@ -432,7 +432,7 @@ jQuery( function( $ ) {
 						args.current_target &&
 						args.current_target.id.indexOf( 'shipping_method' ) !== -1
 					) {
-						document.getElementById( args.current_target.id ).focus();
+						$( '#' + args.current_target.id ).focus();
 					}
 
 					// Fire updated_checkout event.
