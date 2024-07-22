@@ -259,6 +259,9 @@ class WC_Helper_Updater {
 
 		// Product subscriptions.
 		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+		if ( empty( $subscriptions ) ) {
+			return;
+		}
 
 		$expired_subscription = current(
 			array_filter(
