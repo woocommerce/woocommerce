@@ -2854,8 +2854,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		}
 
 		if ( $args['required'] ) {
-			$args['class'][] = 'validate-required';
-			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '" aria-hidden="true">*</abbr>&nbsp;<span class="screen-reader-text">' . esc_html__( "required", "woocommerce" ) . '</span>';
+			$args['class'][]                            = 'validate-required';
+			$required                                   = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '" aria-hidden="true">*</abbr>&nbsp;<span class="screen-reader-text">' . esc_html__( 'required', 'woocommerce' ) . '</span>';
 			$args['custom_attributes']['aria-required'] = 'true';
 		} else {
 			$required = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
