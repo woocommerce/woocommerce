@@ -27,6 +27,7 @@ declare global {
 					symbol: string;
 				};
 				currentUserId: number;
+				blueprint_upload_nonce?: string;
 			};
 		};
 		wcAdminFeatures: {
@@ -59,6 +60,7 @@ declare global {
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
+			'blueprint': boolean;
 		};
 		wp: {
 			updates?: {
