@@ -254,35 +254,11 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
-		static $site_subscriptions = null;
-
-		// Cache site_subscriptions in current request as there might be multiple
-		// Woo plugins that call this method.
-		if ( is_null( $site_subscriptions ) ) {
-			$auth    = WC_Helper_Options::get( 'auth' );
-			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
-			if ( 0 === $site_id ) {
-				return;
-			}
-
-			// Get the site subscriptions.
-			$site_subscriptions = array_filter(
-				WC_Helper::get_subscriptions(),
-				function ( $subscription ) use ( $site_id ) {
-					return in_array( $site_id, $subscription['connections'], true );
-				}
-			);
-		}
-
-		if ( empty( $site_subscriptions ) ) {
-			return;
-		}
-
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
 		// Product subscriptions.
-		$subscriptions = wp_list_filter( $site_subscriptions, array( 'product_id' => $product_id ) );
+		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
 
 		$expired_subscription = current(
 			array_filter(
