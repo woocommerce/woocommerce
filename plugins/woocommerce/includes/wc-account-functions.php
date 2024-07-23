@@ -165,6 +165,28 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 }
 
 /**
+ * Get current page in order to set the current menu item.
+ *
+ * @param string $endpoint Endpoint.
+ * @return string
+ * @since 9.2.0
+ */
+function wc_get_current_page( $endpoint ) {
+	global $wp;
+	$current = isset( $wp->query_vars[ $endpoint ] );
+	$aria_current = '';
+	if ( isset( $wp->query_vars['page'] ) ) {
+		$current = $wp->query_vars['page'];
+	}
+
+	if ( $current ) {
+		$aria_current = 'aria-current="page"';
+	}
+
+	return $aria_current;
+}
+
+/**
  * Get account endpoint URL.
  *
  * @since 2.6.0
