@@ -316,8 +316,11 @@ class BlockTemplateUtils {
 		$wp_template_part_filenames = array(
 			'checkout-header.html',
 			'mini-cart.html',
-			'product-filters-overlay.html',
 		);
+
+		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$wp_template_part_filenames[] = 'product-filters-overlay.html';
+		}
 
 		/*
 		* This may return the blockified directory for wp_templates.

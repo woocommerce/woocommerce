@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Added computedStyleMap for Firefox support in making the Order Summary sticky when not longer than view
+
+

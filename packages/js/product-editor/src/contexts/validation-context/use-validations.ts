@@ -19,8 +19,20 @@ export function useValidations< T = unknown >() {
 
 	async function focusByValidatorId( validatorId: string ) {
 		const field = await context.getFieldByValidatorId( validatorId );
-		if ( field ) {
-			field.focus();
+		const tab = field.closest(
+			'.wp-block-woocommerce-product-tab__content'
+		);
+		const observer = new MutationObserver( () => {
+			if ( tab && getComputedStyle( tab ).display !== 'none' ) {
+				field.focus();
+				observer.disconnect();
+			}
+		} );
+
+		if ( tab ) {
+			observer.observe( tab, {
+				attributes: true,
+			} );
 		}
 	}
 

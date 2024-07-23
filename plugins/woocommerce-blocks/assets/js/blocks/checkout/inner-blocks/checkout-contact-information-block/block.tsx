@@ -11,18 +11,21 @@ import { ContactFormValues, getSetting } from '@woocommerce/settings';
 import {
 	StoreNoticesContainer,
 	CheckboxControl,
-	ValidatedTextInput,
 } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 
+/**
+ * Internal dependencies
+ */
+import CreatePassword from './create-password';
+
 const CreateAccountUI = (): React.ReactElement | null => {
-	const { customerPassword, shouldCreateAccount } = useSelect( ( select ) => {
+	const { shouldCreateAccount } = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
 		return {
-			customerPassword: store.getCustomerPassword(),
 			shouldCreateAccount: store.getShouldCreateAccount(),
 		};
 	} );
@@ -72,32 +75,7 @@ const CreateAccountUI = (): React.ReactElement | null => {
 					} }
 				/>
 			) }
-			{ showCreateAccountPassword && (
-				<ValidatedTextInput
-					type="password"
-					label={ __( 'Create a password', 'woocommerce' ) }
-					className={ `wc-block-components-address-form__password` }
-					value={ customerPassword }
-					required={ true }
-					customValidityMessage={ (
-						validity: ValidityState
-					): string | undefined => {
-						if (
-							validity.valueMissing ||
-							validity.badInput ||
-							validity.typeMismatch
-						) {
-							return __(
-								'Please enter a valid password',
-								'woocommerce'
-							);
-						}
-					} }
-					onChange={ ( value: string ) =>
-						__internalSetCustomerPassword( value )
-					}
-				/>
-			) }
+			{ showCreateAccountPassword && <CreatePassword /> }
 		</>
 	);
 };
