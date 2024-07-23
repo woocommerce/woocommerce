@@ -141,7 +141,12 @@ final class ProductFilterPrice extends AbstractBlock {
 		) = $attributes;
 
 		$wrapper_attributes = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+			'data-wc-interactive' => wp_json_encode(
+				array(
+					'namespace' => $this->get_full_block_name(),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
+				)
+			),
 			'data-wc-context'     => wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-has-filter'     => 'no',
 		);

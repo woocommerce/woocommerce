@@ -29,7 +29,7 @@ class CheckboxList {
 		$checkbox_list_context = array( 'items' => $items );
 		$on_change             = $props['on_change'] ?? '';
 
-		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ) );
+		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 		ob_start();
 		?>

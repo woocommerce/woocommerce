@@ -35,7 +35,7 @@ class Dropdown {
 		);
 
 		$action    = $props['action'] ?? '';
-		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ) );
+		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-dropdown' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 		ob_start();
 		?>
