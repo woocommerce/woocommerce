@@ -1,32 +1,32 @@
+<!-- markdownlint-disable MD029 -->
 # Blueprint
 
-This PHP Composer package facilitates exporting and importing WordPress Blueprint compatible JSON formats. 
-It offers a solid framework for seamless integration with WordPress sites and supports extensibility, 
-enabling plugins to customize export and import functionalities. Manage site configurations, options, 
-and settings effortlessly with JSON files.
+This PHP Composer package facilitates exporting and importing WordPress Blueprint
+compatible JSON formats. It offers a solid framework for seamless integration with
+WordPress sites and supports extensibility, enabling plugins to customize export
+and import functionalities. Manage site configurations, options, and settings
+effortlessly with JSON files.
 
-# Built-in Steps
+## Built-in Steps
 
-| Step             | 
-|------------------| 
-| `installPlugin`  | 
-| `activatePlugin` | 
-| `deactivatePlugin` | 
-| `deletePlugin`   | 
-| `installTheme`   | 
-| `activateTheme`  | 
-| `setSiteOptions` | 
+| Step             |
+|------------------|
+| `installPlugin`  |
+| `activatePlugin` |
+| `deactivatePlugin` |
+| `deletePlugin`   |
+| `installTheme`   |
+| `activateTheme`  |
+| `setSiteOptions` |
 
-
-# Hooks
-
+## Hooks
 
 | Hook                     | Description                     |
 |--------------------------|---------------------------------|
 | `wooblueprint_exporters` | A hook to add custom exporters. |
 | `wooblueprint_importers` | A hook to add custom importers. |
 
-# Example: Adding a Custom Exporter
+## Example: Adding a Custom Exporter
 
 1. Create a new class that extends `Automattic\WooCommerce\Blueprint\Exporters\StepExporter`.
 
@@ -49,11 +49,10 @@ class MyCustomExporter extends StepExporter {
 ```
 
 2. The `export` method should return a `Step` object.
-3. Let's use a built-in `SetSiteOptions` step for this example. We'll cover how to add a custom Step later in this document.
+3. Let's use a built-in `SetSiteOptions` step for this example.
 4. Create a new instance of `SetSiteOptions` and return it.
 
 ```php
-
 
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
@@ -73,11 +72,11 @@ class MyCustomExporter extends StepExporter {
 }
 
 ```
-5. Lastly, register the exporter with the Blueprint package via `wooblueprint_exporters` filter.
+
+5. Lastly, register the exporter with the Blueprint package via `wooblueprint_exporters`
+filter.
 
 ```php
-
-
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
 use Automattic\WooCommerce\Blueprint\Steps\Step;
 
@@ -101,10 +100,12 @@ add_filter( 'wooblueprint_exporters', function( array $exporters ) {
 } );
 
 ```
-When exporting a Blueprint, the `MyCustomExporter` class will be called and the `SetSiteOptions` step will be added to the Blueprint JSON.
+
+When exporting a Blueprint, the `MyCustomExporter` class will be called and the `SetSiteOptions`
+step will be added to the Blueprint JSON.
 
 Output:
-    
+
   ```json
   {
       "steps": [
@@ -119,6 +120,8 @@ Output:
   }
   ```
 
-# Example: Adding a Custom Importer
-# Example: Adding a Custom Step
-# Example: Aliasing a Custom Exporter
+## Example: Adding a Custom Importer
+
+## Example: Adding a Custom Step
+
+## Example: Aliasing a Custom Exporter
