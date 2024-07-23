@@ -1310,6 +1310,10 @@ class WC_Helper {
 		if ( is_null( $installed_subscriptions ) ) {
 			$auth    = WC_Helper_Options::get( 'auth' );
 			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
+			if ( 0 === $site_id ) {
+				$installed_subscriptions = array();
+				return $installed_subscriptions;
+			}
 
 			$installed_subscriptions = array_filter(
 				self::get_subscriptions(),
