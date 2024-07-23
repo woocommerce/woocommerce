@@ -24,7 +24,11 @@ import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
 import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
 import useRecordCompletionTime from '../use-record-completion-time';
-import { SETUP_TASKLIST_PRODUCTS_AFTER_FILTER } from './constants';
+import {
+	SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
+	ImportCSVItem,
+	PrintfulAdvertProductPlacement,
+} from './constants';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -71,7 +75,7 @@ export const Products = () => {
 		() =>
 			productTypes.map( ( productType ) => ( {
 				...productType,
-				onClick: () => {
+				onClick: (): void => {
 					productType.onClick();
 					recordCompletionTime();
 				},
@@ -112,6 +116,27 @@ export const Products = () => {
 		return surfacedProductTypesAndAppendedProducts;
 	}, [ surfacedProductTypeKeys, isExpanded, productTypesWithTimeRecord ] );
 
+	const footerStack = useMemo( () => {
+		const options = [];
+		const importCSVItemWithTimeRecord = {
+			...ImportCSVItem,
+			onClick: () => {
+				ImportCSVItem.onClick();
+				recordCompletionTime();
+			},
+		};
+
+		options.push( importCSVItemWithTimeRecord );
+
+		if (
+			window.wcAdminFeatures &&
+			window.wcAdminFeatures.printful === true
+		) {
+			options.push( PrintfulAdvertProductPlacement );
+		}
+		return options;
+	}, [ recordCompletionTime ] );
+
 	return (
 		<div className="woocommerce-task-products">
 			<Text
@@ -141,6 +166,11 @@ export const Products = () => {
 						}
 						setIsExpanded( ! isExpanded );
 					} }
+				/>
+				<Stack
+					items={ footerStack }
+					showOtherOptions={ false }
+					isTaskListItemClicked={ isRequesting }
 				/>
 			</div>
 			{ isLoadingSampleProducts ? (
