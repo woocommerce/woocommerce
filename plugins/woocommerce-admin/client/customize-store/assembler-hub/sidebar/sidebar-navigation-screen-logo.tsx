@@ -548,7 +548,7 @@ export const SidebarNavigationScreenLogo = ( {
 											rel="noreferrer"
 											onClick={ () => {
 												trackEvent(
-													'customize_store_fiverr_logo_maker_cta_click'
+													'customize_your_store_fiverr_logo_maker_cta_click'
 												);
 											} }
 										/>
