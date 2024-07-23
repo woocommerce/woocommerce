@@ -44,6 +44,8 @@ jobs:
                   # Both install and build are handled by compressed-size-action.
                   install: false
                   build: false
+                  pull-package-deps: '@woocommerce/plugin-woocommerce'
+
             - uses: preactjs/compressed-size-action@f780fd104362cfce9e118f9198df2ee37d12946c
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
