@@ -10,7 +10,7 @@ import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import { useValidations } from '../../contexts/validation-context';
-import type { WPError } from '../../utils/get-product-error-message-and-props';
+import type { WPError } from '../../hooks/use-error-handler';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
 export function errorHandler( error: WPError, productStatus: ProductStatus ) {
@@ -18,21 +18,21 @@ export function errorHandler( error: WPError, productStatus: ProductStatus ) {
 		return error;
 	}
 
+	const errorObj = Object.values( error ).find(
+		( value ) => value !== undefined
+	) as WPError | undefined;
+
 	if ( 'variations' in error && error.variations ) {
 		return {
+			...errorObj,
 			code: 'variable_product_no_variation_prices',
-			message: error.variations,
 		};
 	}
 
-	const errorMessage = Object.values( error ).find(
-		( value ) => value !== undefined
-	) as string | undefined;
-
-	if ( errorMessage !== undefined ) {
+	if ( errorObj !== undefined ) {
 		return {
+			...errorObj,
 			code: 'product_form_field_error',
-			message: errorMessage,
 		};
 	}
 

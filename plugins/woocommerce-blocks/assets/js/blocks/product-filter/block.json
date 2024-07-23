@@ -11,6 +11,7 @@
 		"reusable": false,
 		"inserter": false
 	},
+	"ancestor": [ "woocommerce/product-filters" ],
 	"usesContext": [ "query", "queryId" ],
 	"attributes": {
 		"filterType": {
