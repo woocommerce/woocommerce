@@ -64,6 +64,15 @@ const isInProductArchive = () => {
 		'woocommerce/woocommerce//taxonomy-product_tag',
 		'woocommerce/woocommerce//taxonomy-product_attribute',
 		'woocommerce/woocommerce//product-search-results',
+		// Custom taxonomy templates have structure:
+		// <<THEME>>//taxonomy-product_cat-<<CATEGORY>>
+		// hence we're checking if template ID includes the middle part.
+		//
+		// That includes:
+		// - woocommerce/woocommerce//taxonomy-product_cat
+		// - woocommerce/woocommerce//taxonomy-product_tag
+		'//taxonomy-product_cat',
+		'//taxonomy-product_tag',
 	];
 
 	const currentTemplateId = select(
@@ -75,9 +84,13 @@ const isInProductArchive = () => {
 	 * We want inherit value to be true when block is added to ARCHIVE_PRODUCT_TEMPLATES
 	 * and false when added to somewhere else.
 	 */
-	return currentTemplateId
-		? ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId )
-		: false;
+	if ( currentTemplateId ) {
+		return ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
+			currentTemplateId.includes( template )
+		);
+	}
+
+	return false;
 };
 
 const isFirstBlockThatSyncsWithQuery = () => {
@@ -100,6 +113,8 @@ const isFirstBlockThatSyncsWithQuery = () => {
 			return block.attributes?.query?.inherit;
 		}
 	);
+
+	console.log( { productCollectionBlockIDs, blockAlreadySyncedWithQuery } );
 
 	return ! blockAlreadySyncedWithQuery;
 };
