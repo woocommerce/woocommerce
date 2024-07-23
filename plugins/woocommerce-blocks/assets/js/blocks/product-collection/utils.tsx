@@ -114,8 +114,6 @@ const isFirstBlockThatSyncsWithQuery = () => {
 		}
 	);
 
-	console.log( { productCollectionBlockIDs, blockAlreadySyncedWithQuery } );
-
 	return ! blockAlreadySyncedWithQuery;
 };
 
@@ -214,17 +212,18 @@ export const useSetPreviewState = ( {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive &&
 				location.sourceData?.termId === null;
-			if ( isGenericArchiveTemplate ) {
-				setAttributes( {
-					__privatePreviewState: {
-						isPreview: !! attributes?.query?.inherit,
-						previewMessage: __(
-							'Actual products will vary depending on the page being viewed.',
-							'woocommerce'
-						),
-					},
-				} );
-			}
+
+			setAttributes( {
+				__privatePreviewState: {
+					isPreview: isGenericArchiveTemplate
+						? !! attributes?.query?.inherit
+						: false,
+					previewMessage: __(
+						'Actual products will vary depending on the page being viewed.',
+						'woocommerce'
+					),
+				},
+			} );
 		}
 	}, [
 		attributes?.query?.inherit,
