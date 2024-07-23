@@ -186,11 +186,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		);
 
 		return array(
-<<<<<<< HEAD
 			'data-wc-interactive'    => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-=======
-			'data-wc-interactive'    => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) ),
->>>>>>> XSS vulnerability on various unescaped attributes
 			'data-wc-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wc-on--mousemove'  => 'actions.startZoom',
 			'data-wc-on--mouseleave' => 'actions.resetZoom',
