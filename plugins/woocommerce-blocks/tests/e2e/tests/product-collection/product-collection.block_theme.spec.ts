@@ -574,6 +574,57 @@ test.describe( 'Product Collection', () => {
 
 				await expect( usePageContextToggle ).toBeChecked();
 			} );
+
+			test( 'allows filtering in non-archive context', async ( {
+				pageObject,
+				editor,
+				page,
+			} ) => {
+				await pageObject.createNewPostAndInsertBlock();
+
+				await expect( pageObject.products ).toHaveCount( 9 );
+
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( 'productCatalog' );
+
+				await expect( pageObject.products ).toHaveCount( 18 );
+
+				await page.getByLabel( 'Toggle block inserter' ).click();
+				await page.getByRole( 'tab', { name: 'Patterns' } ).click();
+				await page
+					.getByPlaceholder( 'Search' )
+					.fill( 'product filters' );
+				await page.getByLabel( 'Product Filters' ).click();
+
+				const postId = await editor.publishPost();
+				await page.goto( `/?p=${ postId }` );
+
+				const productCollection = page.locator(
+					'.wp-block-woocommerce-product-collection'
+				);
+
+				await expect(
+					productCollection.first().locator( SELECTORS.product )
+				).toHaveCount( 9 );
+				await expect(
+					productCollection.last().locator( SELECTORS.product )
+				).toHaveCount( 9 );
+
+				await page
+					.getByRole( 'textbox', {
+						name: 'Filter products by maximum',
+					} )
+					.dblclick();
+				await page.keyboard.type( '10' );
+				await page.keyboard.press( 'Tab' );
+
+				await expect(
+					productCollection.first().locator( SELECTORS.product )
+				).toHaveCount( 1 );
+				await expect(
+					productCollection.last().locator( SELECTORS.product )
+				).toHaveCount( 9 );
+			} );
 		} );
 	} );
 
