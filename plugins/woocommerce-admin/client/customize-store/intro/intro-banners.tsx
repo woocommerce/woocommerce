@@ -353,6 +353,8 @@ export const ExistingNoAiThemeBanner = () => {
 };
 
 export const ClassicThemeBanner = () => {
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
@@ -373,6 +375,7 @@ export const ClassicThemeBanner = () => {
 			} }
 			bannerButtonText={ __( 'Go to the Customizer', 'woocommerce' ) }
 			showAIDisclaimer={ false }
+			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>
 	);
 };
