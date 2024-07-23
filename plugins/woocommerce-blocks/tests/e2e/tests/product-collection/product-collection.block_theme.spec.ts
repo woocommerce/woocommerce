@@ -127,13 +127,11 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Inspector Controls', () => {
-		test.beforeEach( async ( { pageObject } ) => {
-			await pageObject.createNewPostAndInsertBlock();
-		} );
-
 		test( 'Reflects the correct number of columns according to sidebar settings', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await pageObject.setNumberOfColumns( 2 );
 			await expect( pageObject.productTemplate ).toHaveClass(
 				/columns-2/
@@ -154,6 +152,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Order By - sort products by title in descending order correctly', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			const sortedTitles = [
 				'WordPress Pennant',
 				'V-Neck T-Shirt',
@@ -177,6 +177,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on "on sale" status', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			const allProducts = pageObject.products;
 			const salePoducts = pageObject.products.filter( {
 				hasText: 'Product on sale',
@@ -201,6 +203,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await pageObject.addFilter( 'Show Hand-picked Products' );
 
 			const filterName = 'Hand-picked Products';
@@ -220,6 +224,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on keyword.', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await pageObject.addFilter( 'Keyword' );
 
 			await pageObject.setKeyword( 'Album' );
@@ -235,6 +241,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on category.', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			const filterName = 'Product categories';
 			await pageObject.addFilter( 'Show product categories' );
 			await pageObject.setFilterComboboxValue( filterName, [
@@ -275,6 +283,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on tags.', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			const filterName = 'Product tags';
 			await pageObject.addFilter( 'Show product tags' );
 			await pageObject.setFilterComboboxValue( filterName, [
@@ -295,6 +305,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await pageObject.addFilter( 'Show Product Attributes' );
 			await pageObject.setProductAttribute( 'Color', 'Green' );
 
@@ -312,6 +324,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await pageObject.setFilterComboboxValue( 'Stock status', [
 				'Out of stock',
 			] );
@@ -330,6 +344,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on featured status.', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.addFilter( 'Featured' );
@@ -348,6 +364,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on created date.', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.addFilter( 'Created' );
@@ -375,6 +393,8 @@ test.describe( 'Product Collection', () => {
 		test( 'Products can be filtered based on price range.', async ( {
 			pageObject,
 		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
 			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.addFilter( 'Price Range' );
@@ -513,40 +533,46 @@ test.describe( 'Product Collection', () => {
 				).toBeChecked();
 			} );
 
-			test( 'is enabled by default in 1st Product Collection and disabled in 2nd+', async ( {
+			test( 'is enabled by default unless already enabled elsewhere', async ( {
 				pageObject,
 				editor,
 			} ) => {
+				const productCollection = editor.canvas.getByLabel(
+					'Block: Product Collection',
+					{ exact: true }
+				);
+				const usePageContextToggle = pageObject
+					.locateSidebarSettings()
+					.locator( SELECTORS.usePageContextControl )
+					.locator( 'input' );
+
 				// First Product Catalog
 				// Option should be visible & ENABLED by default
 				await pageObject.goToEditorTemplate();
-				await pageObject.focusProductCollection();
+				await editor.selectBlocks( productCollection.first() );
 				await editor.openDocumentSettingsSidebar();
 
-				const sidebarSettings = pageObject.locateSidebarSettings();
-
-				await expect(
-					sidebarSettings.locator( SELECTORS.usePageContextControl )
-				).toBeVisible();
-				await expect(
-					sidebarSettings.locator(
-						`${ SELECTORS.usePageContextControl } input`
-					)
-				).toBeChecked();
+				await expect( usePageContextToggle ).toBeChecked();
 
 				// Second Product Catalog
 				// Option should be visible & DISABLED by default
 				await pageObject.insertProductCollection();
 				await pageObject.chooseCollectionInTemplate( 'productCatalog' );
+				await editor.selectBlocks( productCollection.last() );
 
-				await expect(
-					sidebarSettings.locator( SELECTORS.usePageContextControl )
-				).toBeVisible();
-				await expect(
-					sidebarSettings.locator(
-						`${ SELECTORS.usePageContextControl } input`
-					)
-				).not.toBeChecked();
+				await expect( usePageContextToggle ).not.toBeChecked();
+
+				// Disable the option in the first Product Catalog
+				await editor.selectBlocks( productCollection.first() );
+				await usePageContextToggle.click();
+
+				// Third Product Catalog
+				// Option should be visible & ENABLED by default
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInTemplate( 'productCatalog' );
+				await editor.selectBlocks( productCollection.last() );
+
+				await expect( usePageContextToggle ).toBeChecked();
 			} );
 		} );
 	} );
