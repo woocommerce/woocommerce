@@ -86,7 +86,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 					'title'      => $stock_status_options[ $status ],
 					'attributes' => array(
 						'data-wc-on--click' => "$action_namespace::actions.removeFilter",
-						'data-wc-context'   => "$action_namespace::" . wp_json_encode( array( 'value' => $status ) ),
+						'data-wc-context'   => "$action_namespace::" . wp_json_encode( array( 'value' => $status ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 					),
 				);
 			},
