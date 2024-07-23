@@ -19,8 +19,16 @@ import { speak } from '@wordpress/a11y';
 /**
  * Internal dependencies
  */
-import { useLinkedTree } from '../experimental-tree-control/hooks/use-linked-tree';
-import { Item, TreeControlProps } from '../experimental-tree-control/types';
+import {
+	expandNodeNumber,
+	getLinkedTree,
+	getVisibleNodeIndex as getVisibleNodeIndex,
+} from '../experimental-tree-control/hooks/use-linked-tree';
+import {
+	Item,
+	LinkedTree,
+	TreeControlProps,
+} from '../experimental-tree-control/types';
 import { SelectedItems } from '../experimental-select-control/selected-items';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
@@ -55,7 +63,10 @@ export const SelectTree = function SelectTree( {
 	onClear = () => {},
 	...props
 }: SelectTreeProps ) {
-	const linkedTree = useLinkedTree( items );
+	const [ linkedTree, setLinkedTree ] = useState< LinkedTree[] >( [] );
+
+	useEffect( () => setLinkedTree( getLinkedTree( items ) ), [ items ] );
+
 	const selectTreeInstanceId = useInstanceId(
 		SelectTree,
 		'woocommerce-experimental-select-tree-control__dropdown'
@@ -104,12 +115,23 @@ export const SelectTree = function SelectTree( {
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ inputValue, setInputValue ] = useState( '' );
 	const isReadOnly = ! isOpen && ! isFocused;
+	const [ highlightedIndex, setHighlightedIndex ] = useState( -1 );
 
 	useEffect( () => {
 		if ( initialInputValue !== undefined && isFocused ) {
 			setInputValue( initialInputValue as string );
 		}
 	}, [ isFocused ] );
+
+	useEffect(
+		() =>
+			document
+				.querySelector(
+					'.experimental-woocommerce-tree-item--testnathan'
+				)
+				?.scrollIntoView( false ),
+		[ highlightedIndex ]
+	);
 
 	let placeholder: string | undefined = '';
 	if ( Array.isArray( props.selected ) ) {
@@ -159,12 +181,19 @@ export const SelectTree = function SelectTree( {
 			setIsOpen( true );
 			if ( event.key === 'ArrowDown' ) {
 				event.preventDefault();
-				// focus on the first element from the Popover
-				(
-					document.querySelector(
-						`#${ menuInstanceId } input, #${ menuInstanceId } button`
-					) as HTMLInputElement | HTMLButtonElement
-				 )?.focus();
+				const a = getVisibleNodeIndex(
+					linkedTree,
+					Math.min( highlightedIndex + 1, items.length - 1 ),
+					'down'
+				);
+				setHighlightedIndex( a !== undefined ? a : highlightedIndex );
+			} else if ( event.key === 'ArrowUp' ) {
+				const a = getVisibleNodeIndex(
+					linkedTree,
+					Math.max( highlightedIndex - 1, -1 ),
+					'up'
+				);
+				setHighlightedIndex( a !== undefined ? a : highlightedIndex );
 			} else if ( event.key === 'Tab' || event.key === 'Escape' ) {
 				setIsOpen( false );
 				recalculateInputValue();
@@ -186,13 +215,25 @@ export const SelectTree = function SelectTree( {
 					recalculateInputValue();
 				}
 			} else if (
-				( event.key === 'ArrowLeft' || event.key === 'Backspace' ) &&
+				event.key === 'Backspace' &&
 				// test if the cursor is at the beginning of the input with nothing selected
 				( event.target as HTMLInputElement ).selectionStart === 0 &&
 				( event.target as HTMLInputElement ).selectionEnd === 0 &&
 				selectedItemsFocusHandle.current
 			) {
 				selectedItemsFocusHandle.current();
+			} else if ( event.key === 'ArrowRight' ) {
+				setLinkedTree(
+					expandNodeNumber( linkedTree, highlightedIndex, true )
+				);
+			} else if ( event.key === 'ArrowLeft' ) {
+				setLinkedTree(
+					expandNodeNumber( linkedTree, highlightedIndex, false )
+				);
+			} else if ( event.key === 'Home' ) {
+				setHighlightedIndex( 0 );
+			} else if ( event.key === 'End' ) {
+				setHighlightedIndex( items.length - 1 );
 			}
 		},
 		onChange: ( event ) => {
@@ -346,6 +387,12 @@ export const SelectTree = function SelectTree( {
 							isEventOutside={ isEventOutside }
 							isLoading={ isLoading }
 							isOpen={ isOpen }
+							highlightedIndex={ highlightedIndex }
+							onExpand={ ( index ) => {
+								setLinkedTree(
+									expandNodeNumber( linkedTree, index, true )
+								);
+							} }
 							items={ linkedTree }
 							shouldShowCreateButton={ shouldShowCreateButton }
 							onEscape={ () => {

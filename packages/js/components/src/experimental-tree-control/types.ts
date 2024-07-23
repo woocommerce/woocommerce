@@ -2,6 +2,8 @@ export interface Item {
 	parent?: string;
 	value: string;
 	label: string;
+	index: number;
+	isExpanded: boolean;
 }
 
 export interface LinkedTree {
@@ -18,6 +20,10 @@ type BaseTreeProps = {
 	 * a list of items if it is true.
 	 */
 	selected?: Item | Item[];
+
+	onExpand?( index: number ): void;
+
+	highlightedIndex?: number;
 	/**
 	 * Whether the tree items are single or multiple selected.
 	 */
@@ -137,6 +143,7 @@ export type TreeItemProps = BaseTreeProps &
 		item: LinkedTree;
 		index: number;
 		isFocused?: boolean;
+		isHighlighted?: boolean;
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
 		onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;

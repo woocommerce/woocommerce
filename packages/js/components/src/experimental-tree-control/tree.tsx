@@ -45,7 +45,12 @@ export const Tree = forwardRef( function ForwardedTree(
 					{ items.map( ( child, index ) => (
 						<TreeItem
 							{ ...treeItemProps }
-							isExpanded={ props.isExpanded }
+							isHighlighted={
+								props.highlightedIndex === child.data.index
+							}
+							onExpand={ props.onExpand }
+							highlightedIndex={ props.highlightedIndex }
+							isExpanded={ child.data.isExpanded }
 							key={ child.data.value }
 							item={ child }
 							index={ index }

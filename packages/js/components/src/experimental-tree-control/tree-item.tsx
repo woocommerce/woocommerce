@@ -24,7 +24,6 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		treeItemProps,
 		headingProps,
 		treeProps,
-		expander: { isExpanded, onToggleExpand },
 		selection,
 		highlighter: { isHighlighted },
 		getLabel,
@@ -51,6 +50,8 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{
 					'experimental-woocommerce-tree-item--highlighted':
 						isHighlighted,
+					'experimental-woocommerce-tree-item--testnathan':
+						props.isHighlighted,
 				}
 			) }
 		>
@@ -94,11 +95,15 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{ Boolean( item.children?.length ) && (
 					<div className="experimental-woocommerce-tree-item__expander">
 						<Button
-							icon={ isExpanded ? chevronUp : chevronDown }
-							onClick={ onToggleExpand }
+							icon={
+								item.data.isExpanded ? chevronUp : chevronDown
+							}
+							onClick={ () =>
+								props.onExpand?.( item.data.index )
+							}
 							className="experimental-woocommerce-tree-item__expander"
 							aria-label={
-								isExpanded
+								item.data.isExpanded
 									? __( 'Collapse', 'woocommerce' )
 									: __( 'Expand', 'woocommerce' )
 							}
@@ -107,8 +112,13 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				) }
 			</div>
 
-			{ Boolean( item.children.length ) && isExpanded && (
-				<Tree { ...treeProps } onEscape={ props.onEscape } />
+			{ Boolean( item.children.length ) && item.data.isExpanded && (
+				<Tree
+					{ ...treeProps }
+					highlightedIndex={ props.highlightedIndex }
+					onExpand={ props.onExpand }
+					onEscape={ props.onEscape }
+				/>
 			) }
 		</li>
 	);

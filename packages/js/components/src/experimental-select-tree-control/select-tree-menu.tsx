@@ -26,6 +26,7 @@ type MenuProps = {
 	isLoading?: boolean;
 	position?: Popover.Position;
 	scrollIntoViewOnOpen?: boolean;
+	highlightedIndex?: number;
 	items: LinkedTree[];
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	onClose?: () => void;
@@ -44,6 +45,7 @@ export const SelectTreeMenu = ( {
 	onEscape,
 	shouldShowCreateButton,
 	onFirstItemLoop,
+	onExpand,
 	...props
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
@@ -130,6 +132,7 @@ export const SelectTreeMenu = ( {
 									ref={ ref }
 									items={ items }
 									onTreeBlur={ onClose }
+									onExpand={ onExpand }
 									shouldItemBeExpanded={
 										shouldItemBeExpanded
 									}
