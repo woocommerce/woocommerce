@@ -57,13 +57,13 @@ class ImportSchema {
 	 * @param string $file The file path.
 	 * @return ImportSchema The created ImportSchema instance.
 	 */
-	public static function crate_from_file( $file ) {
+	public static function create_from_file( $file ) {
 		// @todo check for mime type
 		// @todo check for allowed types -- json or zip
 		$path_info = pathinfo( $file );
 		$is_zip    = $path_info['extension'] === 'zip';
 
-		return $is_zip ? self::crate_from_zip( $file ) : self::create_from_json( $file );
+		return $is_zip ? self::create_from_zip( $file ) : self::create_from_json( $file );
 	}
 
 	/**
