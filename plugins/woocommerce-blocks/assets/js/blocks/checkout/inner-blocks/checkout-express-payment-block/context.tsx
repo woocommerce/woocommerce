@@ -12,7 +12,7 @@ type ExpressCheckoutContextProps = {
 export const ExpressCheckoutContext: React.Context< ExpressCheckoutContextProps > =
 	createContext< ExpressCheckoutContextProps >( {
 		showButtonStyles: true,
-		buttonHeight: '4',
+		buttonHeight: '48',
 		buttonBorderRadius: '4',
 	} );
 
