@@ -1,4 +1,5 @@
-body:has(.woocommerce-coming-soon-entire-site) {
+body:has(.woocommerce-coming-soon-entire-site),
+body:has(.woocommerce-coming-soon-banner) {
 	margin: 0;
 	background-color: var(--woocommerce-coming-soon-color);
 	font-family: Inter, sans-serif;
@@ -32,14 +33,8 @@ body:has(.woocommerce-coming-soon-entire-site) {
 	.woocommerce-coming-soon-banner.alignwide {
 		max-width: 820px;
 	}
-}
 
-.block-editor-block-preview__content-iframe body {
-	/* Set ratio to 1:1 so height is always equal to width for the preview. */
-	aspect-ratio: 1 / 1;
-}
 
-.woocommerce-coming-soon-entire-site {
 	.wp-container-core-group-is-layout-4 {
 		&.wp-container-core-group-is-layout-4 {
 			justify-content: space-between;
@@ -168,5 +163,13 @@ body:has(.woocommerce-coming-soon-entire-site) {
 		color: var(--wp--preset--color--contrast);
 		margin: 0 auto;
 		text-wrap: balance;
+	}
+}
+
+.block-editor-block-preview__content-iframe {
+	body:has(.woocommerce-coming-soon-entire-site),
+	body:has(.woocommerce-coming-soon-banner) {
+		/* Set ratio to 1:1 so height is always equal to width for the preview. */
+		aspect-ratio: 1 / 1;
 	}
 }

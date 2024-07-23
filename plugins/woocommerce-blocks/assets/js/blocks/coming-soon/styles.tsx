@@ -1,4 +1,4 @@
-/** Deprecated styles, please use the styles from the *.scss files. */
+// Deprecated styles since 9.2. Please use *.scss file instead.
 export const generateStyles = ( color = '#bea0f2' ) => {
 	return `
     /* Reset */
@@ -123,7 +123,7 @@ export const generateStyles = ( color = '#bea0f2' ) => {
     .woocommerce-coming-soon-header {
         height: 40px;
     }
-    h1.wp-block-heading.woocommerce-coming-soon-banner {
+    .woocommerce-coming-soon-banner {
         font-size: clamp(27px, 1.74rem + ((1vw - 3px) * 2), 48px);
         font-weight: 400;
         line-height: 58px;
