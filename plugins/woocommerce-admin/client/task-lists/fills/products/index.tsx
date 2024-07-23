@@ -20,7 +20,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { getSurfacedProductTypeKeys, getProductTypes } from './utils';
 import useProductTypeListItems from './use-product-types-list-items';
 import Stack from './stack';
-import Footer from './footer';
 import LoadSampleProductModal from '../components/load-sample-product-modal';
 import useLoadSampleProducts from '../components/use-load-sample-products';
 import LoadSampleProductConfirmModal from '../components/load-sample-product-confirm-modal';
@@ -143,7 +142,6 @@ export const Products = () => {
 						setIsExpanded( ! isExpanded );
 					} }
 				/>
-				<Footer />
 			</div>
 			{ isLoadingSampleProducts ? (
 				<LoadSampleProductModal />
