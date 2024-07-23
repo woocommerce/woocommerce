@@ -24,12 +24,14 @@ const Block = ( {
 	className,
 	showPrice,
 	placeOrderButtonLabel,
+	separatorText,
 }: {
 	cartPageId: number;
 	showReturnToCart: boolean;
 	showPrice: boolean;
 	className?: string;
 	placeOrderButtonLabel: string;
+	separatorText: string;
 } ): JSX.Element => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
 

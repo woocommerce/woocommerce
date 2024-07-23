@@ -32,6 +32,10 @@
 			"type": "boolean",
 			"default": true
 		},
+		"separatorText": {
+			"type": "string",
+			"default": "·"
+		},
 		"className": {
 			"type": "string",
 			"default": ""

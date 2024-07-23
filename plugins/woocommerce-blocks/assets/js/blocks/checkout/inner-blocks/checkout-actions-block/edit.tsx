@@ -32,6 +32,7 @@ export const Edit = ( {
 		showPrice: boolean;
 		cartPageId: number;
 		placeOrderButtonLabel: string;
+		separatorText: string;
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element => {
@@ -41,6 +42,7 @@ export const Edit = ( {
 		showReturnToCart = false,
 		placeOrderButtonLabel,
 		showPrice = false,
+		separatorText = '·',
 	} = attributes;
 	const { cartTotals } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
