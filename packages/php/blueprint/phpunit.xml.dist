@@ -10,8 +10,8 @@
 		 stopOnFailure="false"
 		 verbose="true">
 	<testsuites>
-		<testsuite name="WPOpenAPITestSuite">
-			<directory suffix="Test.php">./tests/Unit</directory>
+		<testsuite name="BlueprintTestSuite">
+			<directory suffix="Test.php">./tests</directory>
 		</testsuite>
 	</testsuites>
 
