@@ -20,12 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load colors.
-$bg        = get_option( 'woocommerce_email_background_color' );
-$body      = get_option( 'woocommerce_email_body_background_color' );
-$base      = get_option( 'woocommerce_email_base_color' );
-$base_text = wc_light_or_dark( $base, '#202020', '#ffffff' );
-$text      = get_option( 'woocommerce_email_text_color' );
-$footer    = get_option( 'woocommerce_email_footer_text_color' );
+$bg                = get_option( 'woocommerce_email_background_color' );
+$body              = get_option( 'woocommerce_email_body_background_color' );
+$base              = get_option( 'woocommerce_email_base_color' );
+$base_text         = wc_light_or_dark( $base, '#202020', '#ffffff' );
+$text              = get_option( 'woocommerce_email_text_color' );
+$footer_text       = get_option( 'woocommerce_email_footer_text_color' );
+$footer_background = get_option( 'woocommerce_email_footer_background_color' );
 
 
 // Pick a contrasting color for links.
@@ -190,6 +191,16 @@ body {
 #header_wrapper {
 	padding: 36px 48px;
 	display: block;
+}
+
+#template_footer {
+	background-color: <?php echo esc_attr( $footer_background ); ?>;
+	border-radius: 0 0 3px 3px !important;
+}
+
+#template_footer #credit,
+#template_footer #credit a {
+	color: <?php echo esc_attr( $footer_text ); ?>;
 }
 
 h1 {
