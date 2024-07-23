@@ -333,7 +333,7 @@ class WC_Auth {
 				 */
 
 				// Check if Jetpack is installed and activated.
-				if ( class_exists( 'Jetpack' ) && Jetpack::connection()->is_active() ) {
+				if ( class_exists( 'Jetpack' ) && Jetpack::connection()->has_connected_owner() ) {
 
 					// Check if the user is using the WordPress.com SSO.
 					if ( Jetpack::is_module_active( 'sso' ) ) {
@@ -341,7 +341,7 @@ class WC_Auth {
 						$redirect_url = $this->build_url( $data, 'authorize' );
 
 						// Build the SSO URL.
-						$login_url = Jetpack_SSO::get_instance()->build_sso_button_url(
+						$login_url = \Automattic\Jetpack\Connection\SSO::get_instance()->build_sso_button_url(
 							array(
 								'redirect_to' => rawurlencode( esc_url_raw( $redirect_url ) ),
 								'action'      => 'login',
