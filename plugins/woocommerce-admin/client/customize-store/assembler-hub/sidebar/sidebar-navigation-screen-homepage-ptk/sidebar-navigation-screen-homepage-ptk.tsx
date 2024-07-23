@@ -46,6 +46,8 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import clsx from 'clsx';
 import './style.scss';
+import { usePatterns } from '~/customize-store/assembler-hub/hooks/use-patterns';
+import { THEME_SLUG } from '~/customize-store/data/constants';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
 	if ( path?.includes( category ) ) {
@@ -105,6 +107,17 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		}, initialAccumulator );
 	}, [ blocks ] );
 
+	const { blockPatterns, isLoading: isLoadingPatterns } = usePatterns();
+	const patternsFromPTK = blockPatterns.filter(
+		( pattern ) =>
+			! pattern.name.includes( THEME_SLUG ) &&
+			! pattern.name.includes( 'woocommerce' ) &&
+			pattern.source !== 'core' &&
+			pattern.source !== 'pattern-directory/featured' &&
+			pattern.source !== 'pattern-directory/theme' &&
+			pattern.source !== 'pattern-directory/core'
+	);
+
 	let notice;
 	if ( isNetworkOffline ) {
 		notice = __(
@@ -119,6 +132,11 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 	} else if ( ! isTrackingAllowed() ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
+			'woocommerce'
+		);
+	} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
+		notice = __(
+			'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
 			'woocommerce'
 		);
 	}
@@ -241,6 +259,22 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											<Button
 												onClick={ () => {
 													openModal();
+												} }
+												variant="link"
+											/>
+										),
+										FetchPatterns: (
+											<Button
+												onClick={ () => {
+													if ( isIframe( window ) ) {
+														sendMessageToParent( {
+															type: 'INSTALL_PATTERNS',
+														} );
+													} else {
+														sendEvent(
+															'INSTALL_PATTERNS'
+														);
+													}
 												} }
 												variant="link"
 											/>
