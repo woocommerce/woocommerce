@@ -98,7 +98,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				'{content}'            => $content,
 				'{directives}'         => array_reduce(
 					array_keys( $directives ),
-					function( $carry, $key ) use ( $directives ) {
+					function ( $carry, $key ) use ( $directives ) {
 						return $carry . ' ' . $key . '="' . esc_attr( $directives[ $key ] ) . '"';
 					},
 					''
@@ -188,7 +188,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		return array(
 			'data-wc-interactive'    => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) ),
-			'data-wc-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK ),
+			'data-wc-context'        => wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wc-on--mousemove'  => 'actions.startZoom',
 			'data-wc-on--mouseleave' => 'actions.resetZoom',
 		);
