@@ -29,7 +29,9 @@
 }
 
 .show-button-styles-notice {
-	margin: 0px -$gap;
+	/* stylelint-disable scss/operator-no-unspaced */
+	margin: 0 -$gap;
+	/* stylelint-enable scss/operator-no-unspaced */
 }
 
 .border-radius-control-container {
@@ -40,8 +42,5 @@
 	position: absolute;
 	top: 29px;
 	right: 12px;
-	color: var(
-		--wp-components-color-accent,
-		var(--wp-admin-theme-color, #3858e9)
-	);
+	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 }
