@@ -56,7 +56,6 @@ class ZipExportedSchema {
 
 		$archive = new \PclZip( $this->destination );
 		if ( $archive->create( $this->files, PCLZIP_OPT_REMOVE_PATH, $this->working_dir ) == 0 ) {
-			var_dump( $this->files );
 			die( 'Error : ' . $archive->errorInfo( true ) );
 		}
 
