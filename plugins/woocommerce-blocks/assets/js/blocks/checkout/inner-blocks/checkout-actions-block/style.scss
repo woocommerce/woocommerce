@@ -30,6 +30,8 @@
 
 			.wc-block-components-checkout-place-order-button__separator {
 				margin: 0 20px;
+				// This is required because if this element becomes too narrow, the placeholder's vertical alignment is off.
+				min-width: auto !important;
 			}
 
 			.wc-block-components-button__text {
