@@ -24,11 +24,9 @@ class ZipExportedSchema {
 	public function __construct( $schema, $destination = null ) {
 		$this->schema = $schema;
 
-		if ( $destination === null ) {
-			$dir               = $this->get_default_destination_dir();
-			$this->dir         = $dir;
-			$this->destination = $dir . '/woo-blueprint.zip';
-		}
+		$dir               = $this->get_default_destination_dir();
+		$this->dir         = $dir;
+		$this->destination = $destination === null ? $dir . '/woo-blueprint.zip' : $destination;
 
 		$this->working_dir = $this->dir . '/' . date( 'Ymd' ) . '_' . time();
 
