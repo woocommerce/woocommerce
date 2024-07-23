@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+In blocks codebase, export SITE_CURRENCY property with properties matching typescript definitions.

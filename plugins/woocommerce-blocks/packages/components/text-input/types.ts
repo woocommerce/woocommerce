@@ -20,6 +20,8 @@ export interface ValidatedTextInputProps
 	ariaDescribedBy?: string | undefined;
 	// id to use for the error message. If not provided, an id will be generated.
 	errorId?: string;
+	// Feedback to display alongside the input. May be hidden when validation errors are displayed.
+	feedback?: JSX.Element | null;
 	// if true, the input will be focused on mount.
 	focusOnMount?: boolean;
 	// Callback to run on change which is passed the updated value.
@@ -36,6 +38,8 @@ export interface ValidatedTextInputProps
 	customValidation?:
 		| ( ( inputObject: HTMLInputElement ) => boolean )
 		| undefined;
+	// Custom validation message to display when validity is false. Given the input element. Expected to use inputObject.validity.
+	customValidityMessage?: ( validity: ValidityState ) => undefined | string;
 	// Custom formatted to format values as they are typed.
 	customFormatter?: ( value: string ) => string;
 	// Whether validation should run when focused - only has an effect when focusOnMount is also true.

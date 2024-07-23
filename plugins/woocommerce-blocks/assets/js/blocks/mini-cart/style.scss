@@ -7,6 +7,20 @@
 	height: 100%;
 }
 
+// Remove the stickiness from the footer when there isn't enough room
+// to display the items.
+@media screen and (max-height: 500px) {
+	.wp-block-woocommerce-mini-cart-contents {
+		height: auto;
+	}
+	.wc-block-mini-cart__drawer {
+		overflow-y: auto;
+	}
+	.wc-block-mini-cart__footer {
+		position: static;
+	}
+}
+
 .wc-block-mini-cart__button {
 	align-items: center;
 	background-color: transparent;
@@ -141,7 +155,7 @@ h2.wc-block-mini-cart__title {
 }
 
 .wc-block-mini-cart__footer {
-	@include with-translucent-border( 1px 0 0 );
+	@include with-translucent-border(1px 0 0);
 	padding: $gap-large $gap;
 
 	.wc-block-components-totals-item.wc-block-mini-cart__footer-subtotal {

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the hooked blocks feature gate and replace with wc_hooked_blocks_version option

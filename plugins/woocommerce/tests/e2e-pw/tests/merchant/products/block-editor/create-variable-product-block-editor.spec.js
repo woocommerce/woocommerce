@@ -290,17 +290,17 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.getByRole( 'tab', { name: 'General' } )
 				.click();
 
-			await page.getByLabel( 'Regular price', { exact: true } ).click();
-
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
 				.waitFor( { state: 'visible' } );
 
 			await waitResponse;
 
+			await page.getByLabel( 'Regular price', { exact: true } ).click();
+
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.pressSequentially( '100' );
+				.fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
