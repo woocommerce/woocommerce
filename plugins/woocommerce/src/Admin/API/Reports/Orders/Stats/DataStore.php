@@ -313,7 +313,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @see get_noncached_stats_data
-	 * @param array $query_args Query parameters.
+	 * @param array    $query_args Query parameters.
 	 * @param array    $params                  Query limit parameters.
 	 * @param stdClass $data                    Reference to the data object to fill.
 	 * @param int      $expected_interval_count Number of expected intervals.
@@ -354,9 +354,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->total_query->add_sql_clause( 'left_join', $coupon_join );
 		$this->total_query->add_sql_clause( 'where_time', $where_time );
 		$totals = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$this->total_query->get_query_statement(),
 			ARRAY_A
-		); // phpcs:ignore cache ok, DB call ok, unprepared SQL ok.
+		);
 		if ( null === $totals ) {
 			return new \WP_Error( 'woocommerce_analytics_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
 		}

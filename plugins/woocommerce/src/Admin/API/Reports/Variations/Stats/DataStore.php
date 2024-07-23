@@ -166,7 +166,7 @@ class DataStore extends VariationsDataStore implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @see get_noncached_stats_data
-	 * @param array $query_args Query parameters.
+	 * @param array    $query_args Query parameters.
 	 * @param array    $params                  Query limit parameters.
 	 * @param stdClass $data                    Reference to the data object to fill.
 	 * @param int      $expected_interval_count Number of expected intervals.

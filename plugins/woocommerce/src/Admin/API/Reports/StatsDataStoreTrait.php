@@ -50,7 +50,7 @@ trait StatsDataStoreTrait {
 		// Default, empty data object.
 		$data = (object) array(
 			'totals'    => null,
-			'intervals' => [],
+			'intervals' => array(),
 			'total'     => $expected_interval_count,
 			'pages'     => $total_pages,
 			'page_no'   => (int) $query_args['page'],
