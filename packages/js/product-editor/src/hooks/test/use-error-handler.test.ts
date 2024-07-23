@@ -83,10 +83,15 @@ describe( 'useErrorHandler', () => {
 	} );
 
 	it( 'should call focusByValidatorId when errorProps action is triggered', () => {
-		const error = {
-			code: 'product_invalid_sku',
-			validatorId: 'test-validator',
-		} as WPError;
+		const errors = [
+			{
+				code: 'product_invalid_sku',
+			},
+			{
+				code: 'product_form_field_error',
+				validatorId: 'test-validator',
+			},
+		] as WPError[];
 		const visibleTab = 'general';
 
 		jest.useFakeTimers();
@@ -95,7 +100,7 @@ describe( 'useErrorHandler', () => {
 		const { getProductErrorMessageAndProps } = result.current;
 
 		const { errorProps } = getProductErrorMessageAndProps(
-			error,
+			errors[ 0 ],
 			visibleTab
 		);
 
@@ -108,9 +113,22 @@ describe( 'useErrorHandler', () => {
 			errorProps.actions[ 0 ].onClick();
 		}
 
-		jest.runAllTimers(); // Run all pending timers (for setTimeout)
+		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'product_sku' );
 
-		expect( mockNavigateTo ).toHaveBeenCalledWith( { url: '/new-path' } );
+		const { errorProps: fieldsErrorProps } = getProductErrorMessageAndProps(
+			errors[ 1 ],
+			visibleTab
+		);
+
+		expect( fieldsErrorProps ).toBeDefined();
+		expect( fieldsErrorProps.actions ).toBeDefined();
+		expect( fieldsErrorProps.actions?.length ).toBeGreaterThan( 0 );
+
+		// Trigger the action
+		if ( fieldsErrorProps.actions && fieldsErrorProps.actions.length > 0 ) {
+			fieldsErrorProps.actions[ 0 ].onClick();
+		}
+
 		expect( mockFocusByValidatorId ).toHaveBeenCalledWith(
 			'test-validator'
 		);
