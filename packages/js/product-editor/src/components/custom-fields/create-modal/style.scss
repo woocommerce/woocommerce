@@ -33,6 +33,10 @@
 
 				.components-input-base {
 					gap: 0;
+
+					.components-input-control__input {
+						height: 36px;
+					}
 				}
 			}
 

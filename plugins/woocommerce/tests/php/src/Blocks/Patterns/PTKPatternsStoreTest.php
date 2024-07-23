@@ -167,33 +167,6 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test fetch_patterns should filter out the excluded patterns.
-	 */
-	public function test_fetch_patterns_should_filter_out_the_excluded_patterns() {
-		update_option( 'woocommerce_allow_tracking', 'yes' );
-		$api_patterns = array(
-			array(
-				'title' => 'My pattern',
-				'slug'  => 'my-pattern',
-			),
-			array(
-				'ID'    => PTKPatternsStore::EXCLUDED_PATTERNS[0],
-				'title' => 'Excluded pattern',
-				'slug'  => 'excluded-pattern',
-			),
-		);
-
-		$this->ptk_client
-			->expects( $this->once() )
-			->method( 'fetch_patterns' )
-			->willReturn( $api_patterns );
-
-		$this->pattern_store->fetch_patterns();
-
-		$this->assertEquals( array( $api_patterns[0] ), get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
-	}
-
-	/**
 	 * Test fetch_patterns should register testimonials category as reviews.
 	 */
 	public function test_fetch_patterns_should_register_testimonials_category_as_reviews() {
@@ -221,6 +194,71 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 						'title' => 'Reviews',
 					),
 				),
+			),
+		);
+
+		$this->ptk_client
+			->expects( $this->once() )
+			->method( 'fetch_patterns' )
+			->willReturnOnConsecutiveCalls(
+				$ptk_patterns,
+				array()
+			);
+
+		$this->pattern_store->fetch_patterns();
+
+		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
+
+		$this->assertEquals( $expected_patterns, $patterns );
+		$this->assertEquals( $expected_patterns, get_transient( PTKPatternsStore::TRANSIENT_NAME ) );
+	}
+
+	/**
+	 * Test fetch_patterns should filter out the patterns with dependencies.
+	 */
+	public function test_fetch_patterns_should_filter_out_the_patterns_with_dependencies_diff_than_woocommerce() {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		$ptk_patterns = array(
+			array(
+				'ID'    => 1,
+				'title' => 'No deps',
+			),
+			array(
+				'ID'           => 2,
+				'title'        => 'Jetpack dep',
+				'dependencies' => [ 'jetpack' ],
+			),
+			array(
+				'ID'           => 3,
+				'title'        => 'Jetpack and WooCommerce dep',
+				'dependencies' => [ 'woocommerce', 'jetpack' ],
+			),
+			array(
+				'ID'           => 4,
+				'title'        => 'WooCommerce dep',
+				'dependencies' => [ 'woocommerce' ],
+			),
+			array(
+				'ID'           => 5,
+				'title'        => 'Empty deps',
+				'dependencies' => [],
+			),
+		);
+
+		$expected_patterns = array(
+			array(
+				'ID'    => 1,
+				'title' => 'No deps',
+			),
+			array(
+				'ID'           => 4,
+				'title'        => 'WooCommerce dep',
+				'dependencies' => [ 'woocommerce' ],
+			),
+			array(
+				'ID'           => 5,
+				'title'        => 'Empty deps',
+				'dependencies' => [],
 			),
 		);
 

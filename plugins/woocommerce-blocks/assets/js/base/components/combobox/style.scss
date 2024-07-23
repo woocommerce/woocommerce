@@ -6,16 +6,6 @@
 
 .wc-block-components-form .wc-block-components-combobox,
 .wc-block-components-combobox {
-	position: relative;
-
-	svg {
-		fill: currentColor;
-		position: absolute;
-		right: 15px;
-		top: 15px;
-		pointer-events: none;
-	}
-
 	.wc-block-components-combobox-control {
 		@include reset-typography();
 		@include reset-box();
@@ -41,10 +31,10 @@
 			line-height: em($gap);
 			box-sizing: border-box;
 			outline: inherit;
-			border: 1px solid $universal-border-light;
+			border: 1px solid $input-border-gray;
 			background: #fff;
 			box-shadow: none;
-			color: currentColor;
+			color: $input-text-active;
 			font-family: inherit;
 			font-weight: normal;
 			letter-spacing: inherit;
@@ -55,14 +45,14 @@
 			width: 100%;
 			opacity: initial;
 			border-radius: $universal-border-radius;
-			max-height: 50px;
+			height: 50px;
 
 			&[aria-expanded="true"],
 			&:focus {
 				background-color: #fff;
+				color: $input-text-active;
 				outline: 0;
-				box-shadow: 0 0 0 2px currentColor;
-				border-bottom: 0;
+				box-shadow: 0 0 0 1px $input-border-gray;
 			}
 
 			&[aria-expanded="true"] {
@@ -78,7 +68,7 @@
 				&:focus {
 					background-color: $input-background-dark;
 					color: $input-text-dark;
-					box-shadow: 0 0 0 2px $input-border-gray;
+					box-shadow: 0 0 0 1px $input-border-dark;
 				}
 			}
 		}
@@ -86,19 +76,18 @@
 			position: absolute;
 			z-index: 10;
 			background-color: $select-dropdown-light;
-			border: 2px solid currentColor;
+			border: 1px solid $input-border-gray;
 			border-top: 0;
-			border-bottom-width: 2px;
+			border-bottom: 0;
 			margin: 3em 0 0 0;
 			padding: 0;
 			max-height: 300px;
-			min-width: calc(100% + 4px);
-			left: -2px;
-			top: -1px;
+			min-width: 100%;
 			overflow: auto;
 			color: currentColor;
 			border-bottom-left-radius: $universal-border-radius;
 			border-bottom-right-radius: $universal-border-radius;
+			box-shadow: 0 1px 0 1px $input-border-gray;
 			box-sizing: border-box;
 
 			.has-dark-controls & {
@@ -108,7 +97,7 @@
 
 			.components-form-token-field__suggestion {
 				@include font-size(regular);
-				color: currentColor;
+				color: $gray-700;
 				cursor: default;
 				list-style: none;
 				margin: 0;
@@ -144,10 +133,10 @@
 			transform: translateY(em($gap));
 			line-height: 1.25; // =20px when font-size is 16px.
 			left: em($gap-smaller);
-			top: 0;
+			top: -2px;
 			transform-origin: top left;
 			transition: all 200ms ease;
-			color: currentColor;
+			color: $universal-body-low-emphasis;
 			z-index: 1;
 			margin: 0;
 			overflow: hidden;
@@ -166,7 +155,7 @@
 
 	.wc-block-components-combobox-control:has(input:-webkit-autofill) {
 		label {
-			transform: translateY(25%) scale(0.75);
+			transform: translateY(#{$gap-smallest}) scale(0.75);
 		}
 	}
 
@@ -174,7 +163,7 @@
 	&:focus-within {
 		.wc-block-components-combobox-control
 		label.components-base-control__label {
-			transform: translateY(25%) scale(0.75);
+			transform: translateY(#{$gap-smallest}) scale(0.75);
 		}
 	}
 

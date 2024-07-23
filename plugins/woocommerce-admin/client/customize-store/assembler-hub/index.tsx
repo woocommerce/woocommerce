@@ -51,6 +51,8 @@ import { onBackButtonClicked } from '../utils';
 import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
 
+import './tracking';
+
 const { RouterProvider } = unlock( routerPrivateApis );
 
 addFilter(

@@ -16,8 +16,9 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
+		"build:project:patch-dependecies": "cp ./bin/modified-editsite-lock-unlock.js ./node_modules/@wordpress/edit-site/build-module/lock-unlock.js",
 		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"example": "webpack --config docs/examples/extensions/examples.config.js",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
@@ -29,6 +30,7 @@
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
+		"watch:build:project:patch-dependecies": "cp ./bin/modified-editsite-lock-unlock.js ./node_modules/@wordpress/edit-site/build-module/lock-unlock.js",
 		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../woocommerce/bin/generate-feature-config.php",
 		"postinstall": "node ./bin/xstate5-react-script.js"
 	},

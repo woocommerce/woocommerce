@@ -40,8 +40,8 @@ export const useAddNoBlocksPlaceholder = ( {
 				'core/cover',
 				{
 					url: '',
-					customOverlayColor: '#F6F7F7',
-					minHeight: 800,
+					customOverlayColor: '#FAFAFA',
+					minHeight: '60vh',
 					__noBlocksPlaceholder: true,
 					className: DISABLE_CLICK_CLASS,
 				},
@@ -64,7 +64,7 @@ export const useAddNoBlocksPlaceholder = ( {
 								fontFamily: 'inter',
 								style: {
 									color: {
-										text: '#000000',
+										text: '#2F2F2F',
 									},
 								},
 								content: __(
