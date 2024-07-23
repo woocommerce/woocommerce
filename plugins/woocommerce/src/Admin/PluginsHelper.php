@@ -827,6 +827,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['active']
 						&& $sub['expiring']
 						&& ! $sub['autorenew'];
 			},
@@ -904,6 +905,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['active']
 						&& $sub['expired']
 						&& ! $sub['lifetime'];
 			},
