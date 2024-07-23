@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Product Collection: flatten telemetry query filters data to json string

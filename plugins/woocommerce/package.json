@@ -104,7 +104,8 @@
 			},
 			"tests": [
 				{
-					"name": "PHP",
+					"name": "PHP: 8.0 WP: latest",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -116,35 +117,14 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
-					],
-					"testEnv": {
-						"start": "env:test"
-					},
-					"events": [
-						"pull_request",
-						"push"
-					]
-				},
-				{
-					"name": "PHP 8.0",
-					"command": "test:php:env",
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0"
+							"phpVersion": "8.0",
+							"wpVersion": "latest"
 						}
 					},
 					"events": [
@@ -154,6 +134,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 1",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -165,7 +146,8 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -180,6 +162,7 @@
 				},
 				{
 					"name": "PHP WP: latest - 2",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
 						"client/admin/config/*.json",
@@ -191,7 +174,8 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -206,6 +190,7 @@
 				},
 				{
 					"name": "PHP WP: nightly",
+					"testType": "unit:php",
 					"command": "test:php:env",
 					"optional": true,
 					"changes": [
@@ -218,7 +203,8 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -251,7 +237,8 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e-pw/**"
+						"tests/e2e-pw/**",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -281,7 +268,6 @@
 					"changes": [],
 					"events": [
 						"daily-checks",
-						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -390,16 +376,7 @@
 						"daily-checks",
 						"release-checks"
 					],
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/e2e-pw/**"
-					],
+					"changes": [],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
@@ -482,7 +459,8 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/api-core-tests/**",
-						"tests/e2e-pw/bin/**"
+						"tests/e2e-pw/bin/**",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -511,7 +489,8 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/api-core-tests/**",
-						"tests/e2e-pw/bin/**"
+						"tests/e2e-pw/bin/**",
+						".wp-env.json"
 					],
 					"events": [
 						"push"
@@ -541,7 +520,8 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/performance/**"
+						"tests/performance/**",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:perf"
@@ -564,10 +544,11 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"tests/metrics/**"
+						"tests/metrics/**",
+						".wp-env.json"
 					],
 					"events": [
-						"push"
+						"disabled"
 					]
 				},
 				{
@@ -596,11 +577,13 @@
 					"events": [
 						"pull_request",
 						"push",
-						"release-checks"
+						"release-checks",
+						"nightly-checks"
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
-						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results"
+						"resultsPath": "../woocommerce-blocks/tests/e2e/artifacts/test-results",
+						"allure": true
 					}
 				},
 				{
@@ -610,10 +593,27 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks"
+						"daily-checks",
+						"on-demand"
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - default WPCOM site",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default-wpcom",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-checks",
+						"on-demand"
+					],
+					"report": {
+						"resultsBlobName": "default-wpcom-core-e2e",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -626,7 +626,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.44.1",
+		"@playwright/test": "^1.45.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
@@ -641,7 +641,7 @@
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.4",
-		"@wordpress/env": "^9.0.7",
+		"@wordpress/env": "^9.7.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.25.0",
 		"allure-playwright": "^2.9.2",

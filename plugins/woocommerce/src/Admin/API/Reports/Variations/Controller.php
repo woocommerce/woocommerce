@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * REST API Reports products controller class.
@@ -39,6 +40,7 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	protected $param_mapping = array(
 		'variations' => 'variation_includes',
+		'products'   => 'product_includes',
 	);
 
 	/**
@@ -72,7 +74,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			}
 		}
 
-		$reports       = new Query( $args );
+		$reports       = new GenericQuery( $args, 'variations' );
 		$products_data = $reports->get_data();
 
 		$data = array();
@@ -381,6 +383,15 @@ class Controller extends ReportsController implements ExportableInterface {
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['products']            = array(
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 
 		return $params;

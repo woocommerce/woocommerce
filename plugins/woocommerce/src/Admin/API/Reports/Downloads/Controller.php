@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * REST API Reports downloads controller class.
@@ -42,7 +43,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			}
 		}
 
-		$reports        = new Query( $args );
+		$reports        = new GenericQuery( $args, 'downloads' );
 		$downloads_data = $reports->get_data();
 
 		$data = array();
