@@ -169,10 +169,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.1.2 2024-07-12 =
+= 9.1.3 2024-07-24 =
 
 **WooCommerce**
 
-* Fix - Revert 46857 to preserve backcompat with earlier WC versions. [#48753](https://github.com/woocommerce/woocommerce/pull/48753)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
