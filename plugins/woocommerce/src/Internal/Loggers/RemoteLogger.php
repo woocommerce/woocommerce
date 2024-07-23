@@ -96,7 +96,7 @@ class RemoteLogger {
 		}
 
 		$retry_count = get_transient( self::FETCH_LATEST_VERSION_RETRY );
-		if ( false === $retry_count ) {
+		if ( false === $retry_count || ! is_numeric( $retry_count ) ) {
 			$retry_count = 0;
 		}
 
