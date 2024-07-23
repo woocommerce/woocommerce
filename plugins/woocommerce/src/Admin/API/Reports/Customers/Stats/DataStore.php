@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 
 /**
@@ -58,6 +59,21 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 			'avg_total_spend'     => 'AVG( total_spend ) as avg_total_spend',
 			'avg_avg_order_value' => 'AVG( avg_order_value ) as avg_avg_order_value',
 		);
+	}
+
+	/**
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
+	 *
+	 * @override CustomersDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
+	 */
+	public function get_default_query_vars() {
+		$defaults                 = ReportsDataStore::get_default_query_vars();
+		$defaults['orderby']      = 'date_registered';
+		// Do not set `order_before` and `order_after` here, like in the parent class.
+		return $defaults;
 	}
 
 	/**
