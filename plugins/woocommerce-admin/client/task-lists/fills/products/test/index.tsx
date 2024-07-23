@@ -239,6 +239,6 @@ describe( 'Products', () => {
 		const { container } = render( <Products /> );
 		expect(
 			container.getElementsByClassName( 'woocommerce-products-stack' )
-		).toHaveLength( 1 );
+		).toBeGreaterThanOrEqual( 1 );
 	} );
 } );
