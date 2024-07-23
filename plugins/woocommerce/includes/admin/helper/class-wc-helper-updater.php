@@ -254,26 +254,36 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
-
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
-		// Get the subscription details based on product ID.
-		$subscription = current(
-			wp_list_filter(
-				WC_Helper::get_subscriptions(),
-				array( 'product_id' => $product_id )
-			)
-		);
-
-		// Check if subscription is empty.
-		if ( empty( $subscription ) ) {
+		// Product subscriptions.
+		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+		if ( empty( $subscriptions ) ) {
 			return;
 		}
 
+		$expired_subscription = current(
+			array_filter(
+				$subscriptions,
+				function ( $subscription ) {
+					return ! empty( $subscription['expired'] ) && ! $subscription['lifetime'];
+				}
+			)
+		);
+
+		$expiring_subscription = current(
+			array_filter(
+				$subscriptions,
+				function ( $subscription ) {
+					return ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'];
+				}
+			)
+		);
+
 		// Prepare the expiry notice based on subscription status.
 		$expiry_notice = '';
-		if ( ! empty( $subscription['expired'] ) && ! $subscription['lifetime'] ) {
+		if ( ! empty( $expired_subscription ) ) {
 
 			$renew_link = add_query_arg(
 				array(
@@ -284,7 +294,7 @@ class WC_Helper_Updater {
 			);
 
 			/* translators: 1: Product regular price */
-			$product_price = ! empty( $subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $subscription['product_regular_price'] ) ) : '';
+			$product_price = ! empty( $expired_subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $expired_subscription['product_regular_price'] ) ) : '';
 
 			$expiry_notice = sprintf(
 			/* translators: 1: URL to My Subscriptions page 2: Product price */
@@ -292,18 +302,19 @@ class WC_Helper_Updater {
 				esc_url( $renew_link ),
 				$product_price
 			);
-		} elseif ( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ) {
-			$renew_link    = add_query_arg(
+		} elseif ( ! empty( $expiring_subscription ) ) {
+			$renew_link = add_query_arg(
 				array(
 					'utm_source'   => 'pu',
 					'utm_campaign' => 'pu_plugin_screen_enable_autorenew',
 				),
 				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
 			);
+
 			$expiry_notice = sprintf(
 			/* translators: 1: Expiry date 1: URL to My Subscriptions page */
 				__( ' Your subscription expires on %1$s, <a href="%2$s" class="woocommerce-enable-autorenew">enable auto-renew</a> to continue receiving updates.', 'woocommerce' ),
-				date_i18n( 'F jS', $subscription['expires'] ),
+				date_i18n( 'F jS', $expiring_subscription['expires'] ),
 				esc_url( $renew_link )
 			);
 		}
