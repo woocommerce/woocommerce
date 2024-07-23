@@ -40,13 +40,12 @@ class ZipExportedSchema {
 
 	protected function maybe_create_dir( $dir ) {
 		if ( ! is_dir( $dir ) ) {
-			mkdir( $dir );
+			mkdir( $dir, 0777, true );
 		}
 	}
 
 	public function zip() {
 
-		$this->maybe_create_dir( $this->dir );
 		$this->maybe_create_dir( $this->working_dir );
 
 		// create .json file
