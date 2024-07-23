@@ -32,4 +32,32 @@ class McStats extends A8c_Mc_Stats {
 		}
 		return array();
 	}
+
+	/**
+	 * Outputs the tracking pixels for the current stats and empty the stored stats from the object
+	 *
+	 * @return void
+	 */
+	public function do_stats() {
+		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+			return;
+		}
+
+		parent::do_stats();
+	}
+
+	/**
+	 * Runs stats code for a one-off, server-side.
+	 *
+	 * @param string $url string The URL to be pinged. Should include `x_jetpack-{$group}={$stats}` or whatever we want to store.
+	 *
+	 * @return bool If it worked.
+	 */
+	public function do_server_side_stat( $url ) {
+		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+			return;
+		}
+
+		return parent::do_server_side_stat( $url );
+	}
 }
