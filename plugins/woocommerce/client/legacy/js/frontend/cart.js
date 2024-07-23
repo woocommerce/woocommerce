@@ -147,7 +147,7 @@ jQuery( function ( $ ) {
 				.find( ':input[name="update_cart"]' )
 				.prop( 'disabled', true );
 
-			if ( preserve_notices && $old_coupon_error_msg.length > 0) {
+			if ( preserve_notices && $old_coupon_error_msg.length > 0 ) {
 				var $new_coupon_field = $( '.woocommerce-cart-form' ).find( '#coupon_code' );
 				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
 				
