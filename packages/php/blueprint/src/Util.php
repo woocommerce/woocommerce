@@ -21,6 +21,15 @@ class Util {
 		return new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
 	}
 
+	public static function ensure_wp_content_path($path) {
+		$path = realpath( $path );
+		if ( $path === false || strpos( $path, WP_CONTENT_DIR ) !== 0 ) {
+			throw new \InvalidArgumentException( "Invalid path: $path" );
+		}
+
+		return $path;
+	}
+
 	public static function camel_to_snake( $input ) {
 		// Replace all uppercase letters with an underscore followed by the lowercase version of the letter
 		$pattern     = '/([a-z])([A-Z])/';
