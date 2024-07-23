@@ -23,7 +23,7 @@ import { CartDispatchFromMap, CartSelectFromMap } from './index';
  * @param {CartResponse} response
  */
 export const receiveCart =
-	( response: Partial< CartResponse >, onSuccess = true ) =>
+	( response: Partial< CartResponse > ) =>
 	( {
 		dispatch,
 		select,
@@ -41,12 +41,7 @@ export const receiveCart =
 			cartItemsPendingDelete: select.getItemsPendingDelete(),
 		} );
 		dispatch.setCartData( newCart );
-
-		// If this was a successful update, clear top level errors.
-		if ( onSuccess ) {
-			notifyErrors( null, select.getCartErrors() );
-			dispatch.setErrorData( null );
-		}
+		dispatch.setErrorData( null );
 	};
 
 /**
@@ -74,11 +69,9 @@ export const receiveError =
 		if ( ! isApiErrorResponse( response ) ) {
 			return;
 		}
-
 		if ( response.data?.cart ) {
-			dispatch.receiveCart( response?.data?.cart, false );
+			dispatch.receiveCart( response?.data?.cart );
 		}
-
 		dispatch.setErrorData( response );
 	};
 

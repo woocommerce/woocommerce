@@ -52,7 +52,7 @@ const reducer: Reducer< CartState > = (
 			if ( action.error ) {
 				state = {
 					...state,
-					errors: [ ...state.errors, action.error ],
+					errors: [ action.error ],
 				};
 			}
 			break;
