@@ -65,11 +65,11 @@ function getErrorPropsWithActions(
 		actions: [
 			{
 				label: errorLinkLabel,
-				onClick: () => {
+				onClick: async () => {
+					await focusByValidatorId( validatorId );
 					navigateTo( {
 						url: getUrl( errorContext ),
 					} );
-					focusByValidatorId( validatorId );
 				},
 			},
 		],
