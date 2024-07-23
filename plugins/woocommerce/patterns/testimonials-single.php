@@ -28,8 +28,8 @@ $description        = $content['descriptions'][0]['default'] ?? '';
 		</div>
 		<!-- /wp:column -->
 
-		<!-- wp:column {"layout":{"type":"constrained","justifyContent":"left"}} -->
-		<div class="wp-block-column">
+		<!-- wp:column {"verticalAlignment":"center","layout":{"type":"constrained","justifyContent":"left"}} -->
+		<div class="wp-block-column is-vertically-aligned-center">
 			<!-- wp:paragraph -->
 			<p><strong><?php echo esc_html( $testimonials_title ); ?></strong></p>
 			<!-- /wp:paragraph -->
