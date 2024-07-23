@@ -8,6 +8,7 @@ import TypesIcon from 'gridicons/dist/types';
 import { Icon, chevronRight } from '@wordpress/icons';
 import { addFilter } from '@wordpress/hooks';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -16,6 +17,7 @@ import Link from './icon/link_24px.js';
 import Widget from './icon/widgets_24px.js';
 import LightBulb from './icon/lightbulb_24px.js';
 import PrintfulIcon from './icon/printful.png';
+import Upload from './icon/upload_40px.js';
 
 export const productTypes = Object.freeze( [
 	{
@@ -102,6 +104,27 @@ export const PrintfulAdvertProductPlacement = {
 	onClick: () => {
 		recordEvent( 'tasklist_product_printful_advert_click' );
 		window.open( 'https://woocommerce.com/products/printful', '_blank' );
+	},
+};
+
+export const ImportCSVItem = {
+	key: 'import-csv' as const,
+	title: (
+		<span className="printful-sponsored__text">
+			{ __( 'Are you already selling somewhere else?', 'woocommerce' ) }
+		</span>
+	),
+	content: __( 'Import your products from a CSV file.', 'woocommerce' ),
+	className: 'woocommerce-products-list__item-printful-advert',
+	before: <Upload />,
+	after: <Icon icon={ chevronRight } />,
+	onClick: () => {
+		recordEvent( 'tasklist_add_product', {
+			method: 'import',
+		} );
+		window.location.href = getAdminLink(
+			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
+		);
 	},
 };
 
