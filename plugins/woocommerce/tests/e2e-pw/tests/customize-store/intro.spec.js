@@ -136,6 +136,21 @@ test.describe(
 
 		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer', async ( {
 			page,
+		} ) => {
+			await activateTheme( 'twentytwenty' );
+
+			await page.goto( CUSTOMIZE_STORE_URL );
+
+			await page
+				.getByRole( 'button', { name: 'Go to the Customizer' } )
+				.click();
+
+			await page.waitForNavigation();
+			await expect( page.url() ).toContain( 'customize.php' );
+		} );
+
+		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer when customize your step is completed', async ( {
+			page,
 			baseURL,
 		} ) => {
 			await activateTheme( 'twentytwenty' );
