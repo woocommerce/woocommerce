@@ -141,12 +141,12 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 	 * @see get_data
 	 * @see get_noncached_stats_data
 	 * @param array $query_args Query parameters.
-	 * @param array    $limit_params            Query limit parameters.
+	 * @param array    $params            Query limit parameters.
 	 * @param stdClass $data                    Reference to the data object to fill.
 	 * @param int      $expected_interval_count Number of expected intervals.
 	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
-	public function get_noncached_stats_data( $query_args, $limit_params, &$data, $expected_interval_count ) {
+	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
@@ -156,6 +156,7 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 		$selections      = $this->selected_columns( $query_args );
 		$totals_query    = array();
 		$intervals_query = array();
+		$limit_params    = $this->get_limit_sql_params( $query_args );
 		$this->update_sql_query_params( $query_args, $totals_query, $intervals_query );
 
 		$db_intervals = $wpdb->get_col(

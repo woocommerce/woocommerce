@@ -335,6 +335,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->add_intervals_sql_params( $query_args, $table_name );
 		$this->add_order_by_sql_params( $query_args );
 		$where_time  = $this->get_sql_clause( 'where_time' );
+		$params      = $this->get_limit_sql_params( $query_args );
 		$coupon_join = "LEFT JOIN (
 					SELECT
 						order_id,
