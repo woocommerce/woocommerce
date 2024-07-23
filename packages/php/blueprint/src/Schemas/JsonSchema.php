@@ -14,15 +14,31 @@ class JsonSchema {
 		}
 	}
 
+	/**
+	 * Returns the steps from the schema.
+	 *
+	 * @return array
+	 */
 	public function get_steps() {
 		return $this->schema->steps;
 	}
 
+	/**
+	 * Returns steps by name.
+	 *
+	 * @param $name
+	 *
+	 * @return array
+	 */
 	public function get_step( $name ) {
-		if ( isset( $this->schema->steps->{$name} ) ) {
-			return $this->schema->steps->{$name};
+		$steps = array();
+		foreach ( $this->schema->steps as $step ) {
+			if ( $step->step === $name ) {
+				$steps[] = $step;
+			}
 		}
-		return null;
+
+		return $steps;
 	}
 
 	/**

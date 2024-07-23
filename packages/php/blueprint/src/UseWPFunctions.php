@@ -131,6 +131,6 @@ trait UseWPFunctions {
 	}
 
 	public function wp_upload_dir() {
-		return wp_upload_dir();
+		return \wp_upload_dir();
 	}
 }
