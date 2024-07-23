@@ -173,7 +173,7 @@ function wc_get_account_menu_item_classes( $endpoint ) {
  */
 function wc_get_current_page( $endpoint ) {
 	global $wp;
-	$current = isset( $wp->query_vars[ $endpoint ] );
+	$current      = isset( $wp->query_vars[ $endpoint ] );
 	$aria_current = '';
 
 	if ( 'dashboard' === $endpoint && ( isset( $wp->query_vars['page'] ) || empty( $wp->query_vars ) ) ) {
