@@ -625,6 +625,45 @@ test.describe( 'Product Collection', () => {
 					productCollection.last().locator( SELECTORS.product )
 				).toHaveCount( 9 );
 			} );
+
+			test( 'correctly combines editor and front-end filters', async ( {
+				pageObject,
+				editor,
+				page,
+			} ) => {
+				await pageObject.createNewPostAndInsertBlock();
+
+				await expect( pageObject.products ).toHaveCount( 9 );
+
+				await pageObject.addFilter( 'Show product categories' );
+				await pageObject.setFilterComboboxValue( 'Product categories', [
+					'Music',
+				] );
+
+				await page.getByLabel( 'Toggle block inserter' ).click();
+				await page.getByRole( 'tab', { name: 'Patterns' } ).click();
+				await page
+					.getByPlaceholder( 'Search' )
+					.fill( 'product filters' );
+				await page.getByLabel( 'Product Filters' ).click();
+
+				await expect( pageObject.products ).toHaveCount( 2 );
+
+				const postId = await editor.publishPost();
+				await page.goto( `/?p=${ postId }` );
+
+				await expect( pageObject.products ).toHaveCount( 2 );
+
+				await page
+					.getByRole( 'textbox', {
+						name: 'Filter products by maximum',
+					} )
+					.dblclick();
+				await page.keyboard.type( '5' );
+				await page.keyboard.press( 'Tab' );
+
+				await expect( pageObject.products ).toHaveCount( 1 );
+			} );
 		} );
 	} );
 
