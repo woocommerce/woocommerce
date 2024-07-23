@@ -364,10 +364,11 @@ export const ExistingNoAiThemeBanner = () => {
 					);
 				}
 			} }
-			bannerButtonText={ __(
-				isBlockTheme ? 'Go to the Editor' : 'Go to the Customizer',
-				'woocommerce'
-			) }
+			bannerButtonText={
+				isBlockTheme
+					? __( 'Go to the Editor', 'woocommerce' )
+					: __( 'Go to the Customizer', 'woocommerce' )
+			}
 			showAIDisclaimer={ false }
 			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>
