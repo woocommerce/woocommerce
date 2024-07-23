@@ -614,7 +614,7 @@ jQuery( function( $ ) {
 			return false;
 		},
 		show_coupon_error: function( html_element, $target ) {
-			if ($target.length === 0) {
+			if ( $target.length === 0 ) {
 				return;
 			}
 	
