@@ -128,12 +128,14 @@ export const ImportCSVItem = {
 	},
 };
 
-export const SponsoredProductPlacementType = PrintfulAdvertProductPlacement;
+export type SponsoredProductPlacementType =
+	| typeof PrintfulAdvertProductPlacement
+	| typeof ImportCSVItem;
 
 export type ProductType =
 	| ( typeof productTypes )[ number ]
 	| typeof LoadSampleProductType
-	| typeof SponsoredProductPlacementType;
+	| SponsoredProductPlacementType;
 export type ProductTypeKey = ProductType[ 'key' ];
 
 export const onboardingProductTypesToSurfaced: Readonly<
