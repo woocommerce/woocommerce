@@ -71,6 +71,11 @@ export default function InserterSidebar() {
 					rootClientId={ rootClientId }
 					ref={ libraryRef }
 					onClose={ closeInserter }
+					onSelect={ () => {
+						if ( isMobileViewport ) {
+							closeInserter();
+						}
+					} }
 				/>
 			</div>
 		</div>

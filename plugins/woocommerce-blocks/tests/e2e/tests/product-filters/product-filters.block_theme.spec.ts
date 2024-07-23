@@ -256,6 +256,64 @@ test.describe( `${ blockData.name }`, () => {
 		await expect(
 			editor.page.getByText( 'LayoutJustificationOrientation' )
 		).toBeVisible();
+
+		// Overlay settings
+		const overlayModeSettings = [ 'Never', 'Mobile', 'Always' ];
+		const overlayButtonSettings = [
+			'Label and icon',
+			'Label only',
+			'Icon only',
+		];
+		const overlayIconsSettings = [
+			'Filter icon 1',
+			'Filter icon 2',
+			'Filter icon 3',
+			'Filter icon 4',
+		];
+
+		await expect( editor.page.getByText( 'Overlay' ) ).toBeVisible();
+
+		for ( const mode of overlayModeSettings ) {
+			await expect( editor.page.getByText( mode ) ).toBeVisible();
+		}
+
+		await editor.page.getByLabel( 'Mobile' ).click();
+		await expect( editor.page.getByText( 'BUTTON' ) ).toBeVisible();
+
+		for ( const mode of overlayButtonSettings ) {
+			await expect( editor.page.getByText( mode ) ).toBeVisible();
+		}
+
+		for ( const mode of overlayIconsSettings ) {
+			await expect( editor.page.getByLabel( mode ) ).toBeVisible();
+		}
+
+		await expect( editor.page.getByText( 'ICON SIZE' ) ).toBeVisible();
+		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
+
+		await editor.page.getByLabel( 'Always' ).click();
+
+		await expect( editor.page.getByText( 'BUTTON' ) ).toBeHidden();
+
+		for ( const mode of overlayButtonSettings ) {
+			await expect( editor.page.getByText( mode ) ).toBeHidden();
+		}
+
+		for ( const mode of overlayIconsSettings ) {
+			await expect( editor.page.getByLabel( mode ) ).toBeHidden();
+		}
+
+		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
+
+		await editor.page.getByLabel( 'Mobile' ).click();
+
+		await editor.page.locator( 'input[value="label"]' ).click();
+
+		for ( const mode of overlayIconsSettings ) {
+			await expect( editor.page.getByLabel( mode ) ).toBeHidden();
+		}
+
+		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
 	} );
 
 	test( 'Layout > default to vertical stretch', async ( {
