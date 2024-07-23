@@ -9,12 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Admin\API\Reports\DataStore: Common parent for custom report data stores.
  */
-class DataStore extends SqlQuery {
+class DataStore extends SqlQuery implements DataStoreInterface {
 
 	/**
 	 * Cache group for the reports.
