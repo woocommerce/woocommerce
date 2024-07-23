@@ -50,6 +50,6 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce-blocks}/{build,build-style}/**/*.{js,css}'
-                  clean-script: '--if-present distclean'
+                  clean-script: 'rm -rf packages/js/*/build packages/js/*/build-style plugins/*/build plugins/*/build-style'
                   minimum-change-threshold: 100
                   omit-unchanged: true
