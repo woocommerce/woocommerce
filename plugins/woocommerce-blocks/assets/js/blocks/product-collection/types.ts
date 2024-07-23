@@ -102,6 +102,7 @@ export type ProductCollectionEditComponentProps =
 			initialPreviewState?: PreviewState;
 			setPreviewState?: SetPreviewState;
 		};
+		usesReference: string;
 		context: {
 			templateSlug: string;
 		};

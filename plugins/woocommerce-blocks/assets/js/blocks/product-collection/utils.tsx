@@ -144,11 +144,63 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	}
 };
 
+/**
+ * Get the preview message for the Product Collection block based on the usesReference.
+ * There are two scenarios:
+ * 1. When usesReference is product, the preview message will be:
+ * 	  "Actual products will vary depending on the product being viewed."
+ * 2. For all other usesReference, the preview message will be:
+ *    "Actual products will vary depending on the page being viewed."
+ *
+ * This message will be shown when the usesReference isn't available on the Editor side, but is available on the Frontend.
+ */
+export const getUsesReferencePreviewMessage = (
+	usesReference: string,
+	location: WooCommerceBlockLocation
+) => {
+	if ( ! usesReference ) {
+		return '';
+	}
+
+	if ( usesReference === location.type ) {
+		/**
+		 * Block shouldn't be in preview mode when:
+		 * 1. usesReference is archive and termId is available.
+		 * 2. usesReference is product and productId is available.
+		 *
+		 * In both cases, we have required context on the editor side.
+		 */
+		if (
+			( location.type === LocationType.Archive &&
+				location.sourceData?.termId ) ||
+			( location.type === LocationType.Product &&
+				location.sourceData?.productId )
+		) {
+			return '';
+		}
+
+		if ( location.type === LocationType.Product ) {
+			return __(
+				'Actual products will vary depending on the product being viewed.',
+				'woocommerce'
+			);
+		}
+
+		return __(
+			'Actual products will vary depending on the page being viewed.',
+			'woocommerce'
+		);
+	}
+
+	return '';
+};
+
 export const useSetPreviewState = ( {
 	setPreviewState,
 	location,
 	attributes,
 	setAttributes,
+	usesReference,
 }: {
 	setPreviewState?: SetPreviewState | undefined;
 	location: WooCommerceBlockLocation;
@@ -156,6 +208,7 @@ export const useSetPreviewState = ( {
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
+	usesReference: string;
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
@@ -166,9 +219,28 @@ export const useSetPreviewState = ( {
 		} );
 	};
 
+	/**
+	 * When usesReference is available on Frontend but not on Editor side,
+	 * we want to show a preview label to indicate that the block is in preview mode.
+	 */
+	const usesReferencePreviewMessage = getUsesReferencePreviewMessage(
+		usesReference,
+		location
+	);
+	useLayoutEffect( () => {
+		if ( usesReferencePreviewMessage.length ) {
+			setAttributes( {
+				__privatePreviewState: {
+					isPreview: true,
+					previewMessage: usesReferencePreviewMessage,
+				},
+			} );
+		}
+	}, [ setAttributes, usesReferencePreviewMessage ] );
+
 	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
+		if ( ! setPreviewState && ! usesReferencePreviewMessage?.length ) {
 			return;
 		}
 
@@ -195,7 +267,7 @@ export const useSetPreviewState = ( {
 	 * - Products by attribute
 	 */
 	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
+		if ( ! setPreviewState && ! usesReferencePreviewMessage?.length ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive &&
 				location.sourceData?.termId === null;
@@ -213,6 +285,7 @@ export const useSetPreviewState = ( {
 		}
 	}, [
 		attributes?.query?.inherit,
+		usesReferencePreviewMessage,
 		location.sourceData?.termId,
 		location.type,
 		setAttributes,
