@@ -126,8 +126,6 @@ class ZipExportedSchema {
 			$archive = new \PclZip( $destination );
 			$result  = $archive->create( $plugin_dir, PCLZIP_OPT_REMOVE_PATH, WP_CONTENT_DIR . '/' . $type );
 			if ( $result === 0 ) {
-				var_dump( $plugin_dir );
-
 				die( $archive->errorInfo( true ) );
 			}
 			$files[] = $destination;
