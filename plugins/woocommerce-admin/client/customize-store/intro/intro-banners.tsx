@@ -339,7 +339,7 @@ export const ExistingNoAiThemeBanner = () => {
 		<BaseIntroBanner
 			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
 			bannerText={ __(
-				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
+				'Customize everything from the color palette and the fonts to the page layouts, making sure every detail aligns with your brand.',
 				'woocommerce'
 			) }
 			bannerClass="existing-no-ai-theme-banner"
@@ -364,7 +364,11 @@ export const ExistingNoAiThemeBanner = () => {
 					);
 				}
 			} }
-			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
+			bannerButtonText={
+				isBlockTheme
+					? __( 'Go to the Editor', 'woocommerce' )
+					: __( 'Go to the Customizer', 'woocommerce' )
+			}
 			showAIDisclaimer={ false }
 			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>
