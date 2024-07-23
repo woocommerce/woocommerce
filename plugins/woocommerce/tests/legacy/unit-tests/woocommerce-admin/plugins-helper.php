@@ -49,24 +49,18 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 	 * Test get_active_plugin_slugs()
 	 */
 	public function test_get_active_plugin_slugs() {
-
-		// Get active slugs.
 		$active_slugs = PluginsHelper::get_active_plugin_slugs();
 
-		// Phpunit test environment active plugins option is empty.
-		$this->assertEquals( array(), $active_slugs, 'Should not be any active slugs.' );
+		$this->assertEquals( array( 'woocommerce' ), $active_slugs, 'WooCommerce should be the only active slug.' );
 
-		// Get facebook plugin path.
+		// Activate Akismet.
 		$akismet_path = PluginsHelper::get_plugin_path_from_slug( 'akismet' );
-
-		// Activate facebook plugin.
 		activate_plugin( $akismet_path );
 
-		// Get active slugs.
-		$active_slugs = PluginsHelper::get_active_plugin_slugs();
+		$expected_slugs = array( 'akismet', 'woocommerce' );
+		$actual_slugs   = PluginsHelper::get_active_plugin_slugs();
 
-		// Phpunit test environment active plugins option is empty.
-		$this->assertEquals( array( 'akismet' ), $active_slugs, 'Akismet should be listed as active.' );
+		$this->assertEquals( $expected_slugs, $actual_slugs, 'Akismet should be listed as active.' );
 	}
 
 	/**

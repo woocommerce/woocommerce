@@ -210,6 +210,9 @@ class WC_Unit_Tests_Bootstrap {
 
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
+
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		activate_plugin( 'woocommerce/woocommerce.php', '', false, true );
 	}
 
 	/**
