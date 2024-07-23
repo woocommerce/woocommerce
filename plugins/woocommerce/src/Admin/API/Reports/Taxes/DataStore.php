@@ -192,11 +192,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$total_results = count( $query_args['taxes'] );
 			$total_pages   = (int) ceil( $total_results / $params['per_page'] );
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
 			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-					{$this->subquery->get_query_statement()}
-				) AS tt"
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
+				"SELECT COUNT(*) FROM ( {$this->subquery->get_query_statement()} ) AS tt"
 			);
 
 			$total_results = $db_records_count;
