@@ -53,6 +53,10 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 								attributeId: parseInt( value || '', 10 ),
 							} )
 						}
+						help={ __(
+							'Choose the attribute to show in this filter.',
+							'woocommerce'
+						) }
 					/>
 				</PanelBody>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
