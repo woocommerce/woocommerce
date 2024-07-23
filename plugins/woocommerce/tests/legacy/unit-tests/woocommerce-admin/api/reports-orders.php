@@ -93,8 +93,6 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	public function test_get_reports_with_orphaned_refund() {
-		$this->markTestSkipped( 'Flaky: see https://github.com/woocommerce/woocommerce/issues/49630' );
-
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
@@ -107,6 +105,8 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->set_status( 'completed' );
 		$order->set_total( 100 ); // $25 x 4.
+		// Make sure the order is paid at least a minute ago to avoid issues with the same timestamp - undeterministic order.
+		$order->set_date_paid( $order->get_date_paid()->modify( '-1 minute' ) );
 		$order->save();
 
 		$refund = wc_create_refund(
@@ -134,8 +134,8 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $reports ) );
 
-		$order_report  = $reports[0];
-		$refund_report = $reports[1];
+		$refund_report = $reports[0];
+		$order_report  = $reports[1];
 
 		$this->assertEquals( $order->get_id(), $order_report['order_id'] );
 		$this->assertEquals( $refund->get_id(), $refund_report['order_id'] );

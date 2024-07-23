@@ -6,6 +6,7 @@
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
+	"private": true,
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"analyzer": "node -r ts-node/register ./src/commands/analyzer/index.ts",
