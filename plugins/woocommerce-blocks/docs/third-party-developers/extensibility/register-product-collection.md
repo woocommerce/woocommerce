@@ -225,8 +225,8 @@ This will create a collection with a heading, product image, and product price. 
 
 ![image](https://github.com/woocommerce/woocommerce/assets/16707866/3d92c084-91e9-4872-a898-080b4b93afca)
 
-> ![TIP]
+> [!TIP]
 > You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
 
-> ![TIP]
+> [!TIP]
 > You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.
