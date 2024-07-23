@@ -1,9 +1,9 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Stats;
+namespace Automattic\WooCommerce\Tests\Internal;
 
-use Automattic\WooCommerce\Stats\McStats;
+use Automattic\WooCommerce\Internal\McStats;
 
 /**
  * Test Mc Stats class

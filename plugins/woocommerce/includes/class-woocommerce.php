@@ -26,10 +26,10 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Admin\WCAdminHelper;
-use Automattic\WooCommerce\Stats\McStats;
 
 /**
  * Main WooCommerce Class.
@@ -539,6 +539,7 @@ final class WooCommerce {
 	 * Load REST API.
 	 */
 	public function load_rest_api() {
+		throw new \Exception( 'This is a test exception' );
 		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 	}
 

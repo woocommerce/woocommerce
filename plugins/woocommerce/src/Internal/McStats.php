@@ -1,11 +1,11 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * WooCommerce MC Stats package
  */
 
-namespace Automattic\WooCommerce\Stats;
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal;
 
 use Automattic\Jetpack\A8c_Mc_Stats;
 
