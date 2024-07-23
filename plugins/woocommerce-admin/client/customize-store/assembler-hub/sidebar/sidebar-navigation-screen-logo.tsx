@@ -541,7 +541,7 @@ export const SidebarNavigationScreenLogo = ( {
 								components: {
 									link: (
 										<Link
-											href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
+											href="https://www.fiverr.com/logo-maker/woo?utm_source=917527&utm_medium=cx_affiliate&utm_campaign=&afp=&cxd_token=917527_36243864&show_join=true"
 											target="_blank"
 											type="external"
 											rel="noreferrer"
