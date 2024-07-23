@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Ensure menu order does not have duplicated WC-related items
