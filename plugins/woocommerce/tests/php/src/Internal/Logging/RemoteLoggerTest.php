@@ -1,9 +1,9 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Loggers;
+namespace Automattic\WooCommerce\Tests\Internal\Logging;
 
-use Automattic\WooCommerce\Internal\Loggers\RemoteLogger;
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * Class RemoteLoggerTest.
