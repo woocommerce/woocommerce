@@ -19,9 +19,9 @@ export function useValidations< T = unknown >() {
 
 	async function focusByValidatorId( validatorId: string ) {
 		const field =
-			validatorId === 'product_sku'
-				? document.getElementById( validatorId )
-				: await context.getFieldByValidatorId( validatorId );
+			( await context.getFieldByValidatorId( validatorId ) ) ??
+			document.getElementById( validatorId );
+
 		if ( ! field ) {
 			return;
 		}
