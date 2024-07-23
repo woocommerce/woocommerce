@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/code-analyzer",
+	"name": "code-analyzer",
 	"version": "1.0.0",
 	"description": "A tool to analyze code changes in WooCommerce Monorepo.",
 	"author": "Automattic",
