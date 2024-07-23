@@ -539,7 +539,6 @@ final class WooCommerce {
 	 * Load REST API.
 	 */
 	public function load_rest_api() {
-		throw new \Exception( 'This is a test exception' );
 		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 	}
 
