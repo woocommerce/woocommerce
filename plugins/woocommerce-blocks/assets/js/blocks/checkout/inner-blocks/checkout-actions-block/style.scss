@@ -30,11 +30,6 @@
 
 			.wc-block-components-checkout-place-order-button__separator {
 				margin: 0 20px;
-
-				// This selector displays the separator so it can be targeted and edited by extensions.
-				&::after {
-					content: "·";
-				}
 			}
 
 			.wc-block-components-button__text {
