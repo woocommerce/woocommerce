@@ -49,6 +49,7 @@ import {
 	MAX_LOGO_WIDTH,
 	ALLOWED_MEDIA_TYPES,
 } from './constants';
+import { trackEvent } from '~/customize-store/tracking';
 
 const useLogoEdit = ( {
 	shouldSyncIcon,
@@ -545,6 +546,11 @@ export const SidebarNavigationScreenLogo = ( {
 											target="_blank"
 											type="external"
 											rel="noreferrer"
+											onClick={ () => {
+												trackEvent(
+													'customize_store_fiverr_logo_maker_cta_click'
+												);
+											} }
 										/>
 									),
 								},
