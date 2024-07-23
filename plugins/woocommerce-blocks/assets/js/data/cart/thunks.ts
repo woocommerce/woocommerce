@@ -23,7 +23,7 @@ import { CartDispatchFromMap, CartSelectFromMap } from './index';
  * @param {CartResponse} response
  */
 export const receiveCart =
-	( response: Partial< CartResponse > ) =>
+	( response: Partial< CartResponse >, onSuccess = true ) =>
 	( {
 		dispatch,
 		select,
@@ -33,7 +33,6 @@ export const receiveCart =
 	} ) => {
 		const newCart = camelCaseKeys( response ) as unknown as Cart;
 		const oldCart = select.getCartData();
-		notifyErrors( null, select.getCartErrors() );
 		notifyErrors( newCart.errors, oldCart.errors );
 		notifyQuantityChanges( {
 			oldCart,
@@ -42,6 +41,12 @@ export const receiveCart =
 			cartItemsPendingDelete: select.getItemsPendingDelete(),
 		} );
 		dispatch.setCartData( newCart );
+
+		// If this was a successful update, clear top level errors.
+		if ( onSuccess ) {
+			notifyErrors( null, select.getCartErrors() );
+			dispatch.setErrorData( null );
+		}
 	};
 
 /**
@@ -65,24 +70,16 @@ export const receiveCartContents =
  */
 export const receiveError =
 	( response: ApiErrorResponse | null = null ) =>
-	( {
-		dispatch,
-		select,
-	}: {
-		dispatch: CartDispatchFromMap;
-		select: CartSelectFromMap;
-	} ) => {
-		if ( isApiErrorResponse( response ) ) {
-			const newError = response;
-			const oldError = select.getCartErrors();
-
-			if ( response.data?.cart ) {
-				dispatch.receiveCart( response?.data?.cart );
-			}
-
-			dispatch.setErrorData( response );
-			notifyErrors( newError, oldError );
+	( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+		if ( ! isApiErrorResponse( response ) ) {
+			return;
 		}
+
+		if ( response.data?.cart ) {
+			dispatch.receiveCart( response?.data?.cart, false );
+		}
+
+		dispatch.setErrorData( response );
 	};
 
 export type Thunks =
