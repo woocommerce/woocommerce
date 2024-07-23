@@ -1823,8 +1823,22 @@ class WC_Helper {
 			return false;
 		}
 
-		// If there are multiple subscriptions, but no active subscriptions, then mark the first one as installed.
-		$product_subscription = array_shift( $product_subscriptions );
+		// Find subscriptions that can be activated.
+		$product_subscriptions_without_maxed_connections = wp_list_filter(
+			$product_subscriptions,
+			array(
+				'maxed' => false,
+			)
+		);
+
+		if ( 0 < count( $product_subscriptions_without_maxed_connections ) ) {
+			// Pick the first subscription available for activation.
+			$product_subscription = array_shift( $product_subscriptions_without_maxed_connections );
+		} else {
+			// If there are multiple subscriptions, but no active subscriptions, then mark the first one as installed.
+			$product_subscription = array_shift( $product_subscriptions );
+		}
+
 		if ( $product_subscription['product_key'] === $subscription['product_key'] ) {
 			return true;
 		}
