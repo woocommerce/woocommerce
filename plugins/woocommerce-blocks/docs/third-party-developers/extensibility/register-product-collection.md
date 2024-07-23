@@ -66,7 +66,17 @@ Attributes are the properties that define the behavior of the collection. All th
     - `type` (type `string`): The type of layout. Accepted values are `grid` and `stack`.
     - `columns` (type `number`): The number of columns to display.
     - `shrinkColumns` (type `boolean`): Whether the layout should be responsive.
-- `hideControls` (type `array`): The controls to hide.
+- `hideControls` (type `array`): The controls to hide. Possible values:
+    - `order` - "Order by" setting
+    - `attributes` - "Product Attributes" filter
+    - `created` - "Created" filter
+    - `featured` - "Featured" filter
+    - `hand-picked` - "Hand-picked Products" filter
+    - `keyword` - "Keyword" filter
+    - `on-sale` - "On Sale" filter
+    - `stock-status` - "Stock Status" filter
+    - `taxonomy` - "Product Categories", "Product Tags" and custom taxonomies filters
+    - `price-range` - "Price Range" filter
 
 #### Preview Attribute
 
@@ -127,6 +137,7 @@ __experimentalRegisterProductCollection({
       columns: 3,
       shrinkColumns: true,
     },
+	hideControls: [ "created", "stock-status" ]
   },
 });
 ```
