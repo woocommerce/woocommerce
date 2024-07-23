@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
-Comment: It just fixes a minor syntax issue in documentation (register-product-collection.md)
 
+Fix tip block syntax in register-product-collection.md
