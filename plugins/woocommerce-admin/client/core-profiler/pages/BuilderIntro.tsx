@@ -12,6 +12,10 @@ import apiFetch from '@wordpress/api-fetch';
 import { Navigation } from '../components/navigation/navigation';
 import { IntroOptInEvent } from '../events';
 
+/**
+ * This is a temporary page for testing the blueprint import functionality.
+ * This will be replaced with more user-friendly design in the future.
+ */
 export const BuilderIntro = ( {
 	sendEvent,
 	navigationProgress = 80,
