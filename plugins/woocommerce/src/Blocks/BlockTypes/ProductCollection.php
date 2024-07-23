@@ -181,7 +181,7 @@ class ProductCollection extends AbstractBlock {
 					'data-wc-navigation-id',
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
-				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 				$p->set_attribute(
 					'data-wc-context',
 					wp_json_encode(
@@ -295,7 +295,7 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
 			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
