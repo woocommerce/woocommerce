@@ -92,7 +92,7 @@ export const PrintfulAdvertProductPlacement = {
 		'Design and easily sell custom print products online with Printful.',
 		'woocommerce'
 	),
-	className: 'woocommerce-products-list__item-printful-advert',
+	className: 'woocommerce-products-list__item-advert',
 	before: (
 		<img
 			className="printful-sponsored__icon"
@@ -115,7 +115,7 @@ export const ImportCSVItem = {
 		</span>
 	),
 	content: __( 'Import your products from a CSV file.', 'woocommerce' ),
-	className: 'woocommerce-products-list__item-printful-advert',
+	className: 'woocommerce-products-list__item-advert',
 	before: <Upload />,
 	after: <Icon icon={ chevronRight } />,
 	onClick: () => {
