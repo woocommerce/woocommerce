@@ -129,7 +129,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				'{next_button}'         => $next_button,
 				'{alignment_class}'     => $alignment_class,
 				'{position_class}'      => $position_class,
-				'{data_wc_interactive}' => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_NUMERIC_CHECK ),
+				'{data_wc_interactive}' => wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			)
 		);
 	}
@@ -188,7 +188,6 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			$this->get_class_suffix( $context ),
 			$icon_path
 		);
-
 	}
 
 	/**
@@ -229,6 +228,5 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			$this->get_class_suffix( $context ),
 			$icon_path
 		);
-
 	}
 }
