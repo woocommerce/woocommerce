@@ -32,7 +32,7 @@ const test = baseTest.extend( {
 
 test(
 	'can edit a product and save the changes',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@external' ] },
 	async ( { page, products } ) => {
 		await page.goto(
 			`wp-admin/post.php?post=${ products[ 0 ].id }&action=edit`
@@ -89,7 +89,7 @@ test(
 
 test(
 	'can bulk edit products',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@external' ] },
 	async ( { page, products } ) => {
 		await page.goto( `wp-admin/edit.php?post_type=product` );
 

@@ -101,7 +101,7 @@ const test = baseTest.extend( {
 
 test(
 	'add local attribute (with terms) to the Product',
-	{ tag: '@gutenberg' },
+	{ tag: [ '@gutenberg', '@external' ] },
 	async ( { page, product } ) => {
 		await test.step( 'go to product editor -> Organization tab -> Click on `Add new`', async () => {
 			await page.goto(
@@ -269,7 +269,7 @@ test(
 
 test.skip(
 	'can add existing attributes',
-	{ tag: '@gutenberg' },
+	{ tag: [ '@gutenberg', '@external' ] },
 	async ( { page, product, attributes } ) => {
 		await test.step( 'go to product editor, Organization tab', async () => {
 			await page.goto(
@@ -359,7 +359,7 @@ test.skip(
 // See https://github.com/woocommerce/woocommerce/issues/44925
 test.skip(
 	'can update product attributes',
-	{ tag: '@gutenberg' },
+	{ tag: [ '@gutenberg', '@external' ] },
 	async ( { page, productWithAttributes } ) => {
 		const attribute = productWithAttributes.attributes[ 0 ];
 
@@ -454,7 +454,7 @@ test.skip(
 
 test(
 	'can remove product attributes',
-	{ tag: '@gutenberg' },
+	{ tag: [ '@gutenberg', '@external' ] },
 	async ( { page, productWithAttributes, attributes } ) => {
 		await test.step( 'go to product editor, Organization tab', async () => {
 			await page.goto(

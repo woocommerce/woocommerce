@@ -22,7 +22,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Transform Classic Checkout To Checkout Block',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@external' ] },
 	() => {
 		test.beforeAll( async ( { api } ) => {
 			// enable COD

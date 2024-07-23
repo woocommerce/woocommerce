@@ -32,7 +32,7 @@ const test = baseTest.extend( {
 for ( const userData of users ) {
 	test(
 		`can create a new ${ userData.role }`,
-		{ tag: '@services' },
+		{ tag: [ '@services', '@external' ] },
 		async ( { page, user } ) => {
 			await page.goto( `wp-admin/user-new.php` );
 

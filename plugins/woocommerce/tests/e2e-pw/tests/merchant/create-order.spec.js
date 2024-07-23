@@ -48,7 +48,7 @@ let simpleProductId,
 
 test.describe(
 	'WooCommerce Orders > Add new order',
-	{ tag: '@services' },
+	{ tag: [ '@services', '@external' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -59,6 +59,13 @@ test.describe(
 				consumerSecret: process.env.CONSUMER_SECRET,
 				version: 'wc/v3',
 			} );
+			// ensure default shop address is shop based
+			await api.put(
+				'settings/general/woocommerce_default_customer_address',
+				{
+					value: 'base',
+				}
+			);
 			// enable taxes on the account
 			await api.put( 'settings/general/woocommerce_calc_taxes', {
 				value: 'yes',

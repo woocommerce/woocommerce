@@ -29,7 +29,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Products > Related products',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@external' ] },
 	() => {
 		async function navigate( page, productId ) {
 			await test.step( 'Navigate to product edit page', async () => {

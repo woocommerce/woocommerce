@@ -13,7 +13,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Can create a new page',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@external' ] },
 	() => {
 		// eslint-disable-next-line playwright/expect-expect
 		test( 'can create new page', async ( { page, testPage } ) => {

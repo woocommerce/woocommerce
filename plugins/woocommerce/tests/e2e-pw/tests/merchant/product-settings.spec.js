@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 
 test.describe(
 	'WooCommerce Products > Downloadable Product Settings',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@external' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

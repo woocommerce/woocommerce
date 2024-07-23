@@ -17,7 +17,7 @@ const orderStatus = [
 
 test.describe(
 	'WooCommerce Orders > Filter Order by Status',
-	{ tag: '@services' },
+	{ tag: [ '@services', '@external' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -57,8 +57,13 @@ test.describe(
 
 		test( 'should filter by All', async ( { page } ) => {
 			await page.goto( '/wp-admin/admin.php?page=wc-orders' );
-
 			await page.locator( 'li.all > a' ).click();
+			await page
+				.getByRole( 'cell' )
+				.getByRole( 'mark' )
+				.first()
+				.waitFor();
+
 			// because tests are running in parallel, we can't know how many orders there
 			// are beyond the ones we created here.
 			for ( let i = 0; i < orderStatus.length; i++ ) {
@@ -75,6 +80,7 @@ test.describe(
 				await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 				await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
+				await page.locator( statusColumnTextSelector ).waitFor();
 				const countElements = await page
 					.locator( statusColumnTextSelector )
 					.count();

@@ -15,7 +15,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Transform Classic Cart To Cart Block',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@external' ] },
 	() => {
 		test( 'can transform classic cart to cart block', async ( {
 			page,
