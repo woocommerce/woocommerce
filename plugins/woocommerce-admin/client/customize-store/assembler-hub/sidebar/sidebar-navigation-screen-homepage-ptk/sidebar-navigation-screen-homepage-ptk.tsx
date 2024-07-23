@@ -136,7 +136,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		);
 	} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
 		notice = __(
-			"Unfortunately, we're experiencing some technical issues getting the patterns — please <FetchPatterns>try again.</FetchPatterns>",
+			'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
 			'woocommerce'
 		);
 	}
