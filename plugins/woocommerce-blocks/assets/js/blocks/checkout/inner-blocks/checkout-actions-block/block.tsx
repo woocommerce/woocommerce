@@ -55,6 +55,7 @@ const Block = ( {
 					/>
 				) }
 				<PlaceOrderButton
+					separatorText={ separatorText }
 					showPrice={ showPrice }
 					label={ label }
 					fullWidth={ ! showReturnToCart }

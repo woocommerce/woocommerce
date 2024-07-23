@@ -16,12 +16,14 @@ import {
 
 interface PlaceOrderButton {
 	label: string;
+	separatorText?: string;
 	fullWidth?: boolean | undefined;
 	showPrice?: boolean | undefined;
 }
 
 const PlaceOrderButton = ( {
 	label,
+	separatorText = '·',
 	fullWidth = false,
 	showPrice = false,
 }: PlaceOrderButton ): JSX.Element => {
@@ -32,6 +34,11 @@ const PlaceOrderButton = ( {
 		waitingForProcessing,
 		waitingForRedirect,
 	} = useCheckoutSubmit();
+
+	// Merchant deleted the separator, leaving the · placeholder. It won't be undefined because it has a default value.
+	if ( separatorText === '' ) {
+		separatorText = '·';
+	}
 
 	const { cartTotals } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
@@ -52,7 +59,9 @@ const PlaceOrderButton = ( {
 			{ label }
 			{ showPrice && (
 				<>
-					<div className="wc-block-components-checkout-place-order-button__separator" />
+					<div className="wc-block-components-checkout-place-order-button__separator">
+						{ separatorText }
+					</div>
 					<div className="wc-block-components-checkout-place-order-button__price">
 						<FormattedMonetaryAmount
 							value={ cartTotals.total_price }
