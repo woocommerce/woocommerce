@@ -193,7 +193,7 @@ class ProductCollection extends AbstractBlock {
 							// This way we avoid prefetching when the page loads.
 							'isPrefetchNextOrPreviousLink' => false,
 						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 					)
 				);
 				$block_content = $p->get_updated_html();
