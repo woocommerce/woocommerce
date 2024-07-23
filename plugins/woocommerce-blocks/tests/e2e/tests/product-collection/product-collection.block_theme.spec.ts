@@ -766,17 +766,16 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test( "Product Catalog Collection can be added in post and doesn't sync query with template", async ( {
+		test( 'Product Catalog Collection can be added in post and syncs query with template', async ( {
 			pageObject,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
 
-			const sidebarSettings = pageObject.locateSidebarSettings();
-			const input = sidebarSettings.locator(
-				`${ SELECTORS.usePageContextControl } input`
-			);
+			const usePageContextToggle = pageObject
+				.locateSidebarSettings()
+				.locator( `${ SELECTORS.usePageContextControl } input` );
 
-			await expect( input ).toBeHidden();
+			await expect( usePageContextToggle ).toBeVisible();
 			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.publishAndGoToFrontend();
