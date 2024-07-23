@@ -18,6 +18,8 @@ jobs:
 
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
+        with:
+          pull-package-deps: '@woocommerce/plugin-woocommerce'
 
       - name: Build zip
         working-directory: plugins/woocommerce

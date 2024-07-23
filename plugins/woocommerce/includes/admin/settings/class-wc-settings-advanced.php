@@ -391,7 +391,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			__( 'The legacy REST API is NOT enabled', 'woocommerce' );
 
 		$legacy_api_setting_tip =
-			is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ?
+			WC()->legacy_rest_api_is_available() ?
 			__( 'ℹ️️ The WooCommerce Legacy REST API extension is installed and active.', 'woocommerce' ) :
 			sprintf(
 				/* translators: placeholders are URLs */

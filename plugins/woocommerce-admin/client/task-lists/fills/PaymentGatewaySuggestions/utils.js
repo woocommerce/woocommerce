@@ -90,7 +90,7 @@ export const getIsWCPayOrOtherCategoryDoneSetup = (
  * @param {string}  countryCode                     Store country code.
  * @param {boolean} isWCPaySupported                Whether WCPay is supported in the store.
  * @param {boolean} isWCPayOrOtherCategoryDoneSetup Whether WCPay or "other" category gateway is done setup.
- * @return {Array} Array of [ WCPay, offline, main list ].
+ * @return {Array} Array of [ WCPay, offline, main list, WCPayBNPL ].
  */
 export const getSplitGateways = (
 	paymentGateways,
@@ -103,17 +103,28 @@ export const getSplitGateways = (
 		.reduce(
 			( all, gateway ) => {
 				// mainList is the list of gateways that is shown in the payments task.
-				const [ wcPay, offline, mainList ] = all;
+				const [ wcPay, offline, mainList, wcPayBnpl ] = all;
 
+				// Handle WCPay-related gateways.
 				if ( getIsGatewayWCPay( gateway ) ) {
-					if (
-						isWCPaySupported &&
-						! ( gateway.installed && ! gateway.needsSetup )
-					) {
-						// WCPay is always shown when it's installed but not setup.
-						wcPay.push( gateway );
+					if ( isWCPaySupported ) {
+						// If we encounter the special WCPay BNPL gateway, we handle it separately and
+						// not let it be added to the regular WCPay list.
+						if ( gateway.id === 'woocommerce_payments:bnpl' ) {
+							// WCPay BNPL is only shown when WCPay is installed and setup.
+							// It should be mutually exclusive with WCPay.
+							if ( gateway.installed && ! gateway.needsSetup ) {
+								wcPayBnpl.push( gateway );
+							}
+						} else if (
+							! ( gateway.installed && ! gateway.needsSetup )
+						) {
+							// WCPay is always shown when it's not installed, or it's installed but needs setup.
+							wcPay.push( gateway );
+						}
 					}
-					// WCPay is ignored if it reaches here.
+
+					// The WCPay-related gateway is ignored if it reaches here.
 				} else if ( gateway.is_offline ) {
 					// Offline gateways are always shown.
 					offline.push( gateway );
@@ -137,5 +148,5 @@ export const getSplitGateways = (
 
 				return all;
 			},
-			[ [], [], [] ]
+			[ [], [], [], [] ]
 		);

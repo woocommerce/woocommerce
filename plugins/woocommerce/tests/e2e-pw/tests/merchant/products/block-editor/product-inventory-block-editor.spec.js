@@ -25,10 +25,20 @@ const test = baseTest.extend( {
 	},
 	page: async ( { page, product }, use ) => {
 		await test.step( 'go to product editor, inventory tab', async () => {
+			// This wait for response is only to avoid flakiness when filling SKU field
+			const waitResponse = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							'wp-json/wc-admin/options?options=woocommerce_dimension_unit'
+						) && response.status() === 200
+			);
 			await page.goto(
 				`wp-admin/post.php?post=${ product.id }&action=edit`
 			);
 			await page.getByRole( 'tab', { name: 'Inventory' } ).click();
+			await waitResponse;
 		} );
 
 		await use( page );

@@ -78,6 +78,7 @@ const wpAdminScripts = [
 	'woo-enable-autorenew',
 	'woo-renew-subscription',
 	'woo-subscriptions-notice',
+	'woo-product-usage-notice',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -152,6 +153,11 @@ const webpackConfig = {
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 						].filter( Boolean ),
+						cacheDirectory: path.resolve(
+							__dirname,
+							'../../node_modules/.cache/babel-loader'
+						),
+						cacheCompression: false,
 					},
 				},
 			},

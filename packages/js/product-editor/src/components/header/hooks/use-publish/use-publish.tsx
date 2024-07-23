@@ -13,7 +13,7 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
  */
 import { useProductManager } from '../../../../hooks/use-product-manager';
 import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
-import type { WPError } from '../../../../utils/get-product-error-message-and-props';
+import type { WPError } from '../../../../hooks/use-error-handler';
 import type { PublishButtonProps } from '../../publish-button';
 
 export function usePublish< T = Product >( {

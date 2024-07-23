@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: fix side-effects of setting strict mode for linting script.

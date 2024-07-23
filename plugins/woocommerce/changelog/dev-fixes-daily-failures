@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update a few e2e tests failing on the daily run
