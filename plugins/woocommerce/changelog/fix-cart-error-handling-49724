@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix extensionCartUpdates not surfacing errors to cart and checkout
