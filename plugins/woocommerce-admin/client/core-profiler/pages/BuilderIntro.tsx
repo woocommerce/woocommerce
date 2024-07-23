@@ -80,35 +80,6 @@ export const BuilderIntro = ( {
 			.catch( ( error ) => {
 				setMessage( `Error: ${ error.message }` );
 			} );
-
-		// fetch( '/wp-json/blueprint/process', {
-		// 	method: 'POST',
-		// 	body: formData,
-		// } )
-		// 	.then( ( response ) => response.json() )
-		// 	.then( ( data ) => {
-		// 		if ( data.status === 'success' ) {
-		// 			setMessage(
-		// 				'Schema imported successfully. Redirecting to ' +
-		// 					data.data.redirect
-		// 			);
-
-		// 			window.setTimeout( () => {
-		// 				window.location.href = data.data.redirect;
-		// 			}, 2000 );
-		// 		} else {
-		// 			setMessage( `Error: ${ data.message }` );
-
-		// 			if ( data?.data?.result ) {
-		// 				setMessage(
-		// 					JSON.stringify( data.data.result, null, 2 )
-		// 				);
-		// 			}
-		// 		}
-		// 	} )
-		// 	.catch( ( error ) => {
-		// 		setMessage( `Error: ${ error.message }` );
-		// 	} );
 	};
 	return (
 		<>
