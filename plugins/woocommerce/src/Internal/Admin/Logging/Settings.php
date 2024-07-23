@@ -54,15 +54,15 @@ class Settings {
 	 * The `wp_upload_dir` function takes into account the possibility of multisite, and handles changing
 	 * the directory if the context is switched to a different site in the network mid-request.
 	 *
-	 * @param bool $initialize Optional. True to attempt to create the log directory if it doesn't exist. Default true.
+	 * @param bool $create_dir Optional. True to attempt to create the log directory if it doesn't exist. Default true.
 	 *
 	 * @return string The full directory path, with trailing slash.
 	 */
-	public static function get_log_directory( bool $initialize = true ): string {
+	public static function get_log_directory( bool $create_dir = true ): string {
 		if ( true === Constants::get_constant( 'WC_LOG_DIR_CUSTOM' ) ) {
 			$dir = Constants::get_constant( 'WC_LOG_DIR' );
 		} else {
-			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir', null, $initialize );
+			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir', null, $create_dir );
 
 			/**
 			 * Filter to change the directory for storing WooCommerce's log files.
@@ -76,7 +76,7 @@ class Settings {
 
 		$dir = trailingslashit( $dir );
 
-		if ( true === $initialize ) {
+		if ( true === $create_dir ) {
 			$realpath = realpath( $dir );
 			if ( false === $realpath ) {
 				$result = wp_mkdir_p( $dir );
