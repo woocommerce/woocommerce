@@ -10,10 +10,10 @@ class ExportInstallThemeSteps implements StepExporter {
 
 	public function export() {
 		$steps        = array();
-		$thmes        = $this->wp_get_themes();
+		$themes       = $this->wp_get_themes();
 		$active_theme = $this->wp_get_theme();
 
-		foreach ( $thmes as $slug => $theme ) {
+		foreach ( $themes as $slug => $theme ) {
 			// Check if the theme is active
 			$is_active = $theme->get( 'Name' ) === $active_theme->get( 'Name' );
 
