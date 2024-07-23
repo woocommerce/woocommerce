@@ -103,6 +103,8 @@ defined( 'ABSPATH' ) || exit;
 
 	</table>
 
+	<?php do_action( 'woocommerce_cart_totals_after_table' ); ?>
+
 	<div class="wc-proceed-to-checkout">
 		<?php do_action( 'woocommerce_proceed_to_checkout' ); ?>
 	</div>
