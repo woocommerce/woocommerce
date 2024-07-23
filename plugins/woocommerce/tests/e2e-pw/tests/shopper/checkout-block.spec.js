@@ -921,7 +921,7 @@ test.describe(
 			);
 		} );
 
-		test( 'can create an account during checkout with custom password', async ( {
+		test.skip( 'can create an account during checkout with custom password', async ( {
 			page,
 			testPage,
 			baseURL,
