@@ -3,7 +3,6 @@
  */
 import type { ForwardedRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
-import { ComboboxControl, ComboboxControlProps } from '../../combobox-control';
 import { useDebounce } from '@wordpress/compose';
 import {
 	createElement,
@@ -17,6 +16,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
+import { ComboboxControl, ComboboxControlProps } from '../../combobox-control';
 import type { ComboboxControlOption } from '../../attribute-combobox-field/types';
 import type { CustomFieldNameControlProps } from './types';
 
