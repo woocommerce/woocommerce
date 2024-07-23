@@ -61,7 +61,7 @@ trait UseWPFunctions {
 
 	public function wp_plugins_api( $action, $args = array() ) {
 		if ( ! function_exists( 'plugins_api' ) ) {
-			require_once ABSPATH . '/wp-admin/includes/plugin-install.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 		}
 		return plugins_api( $action, $args );
 	}
