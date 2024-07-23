@@ -8,12 +8,13 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Categories;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
  * API\Reports\Categories\DataStore.
  */
-class DataStore extends ReportsDataStore {
+class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Table used to get the data.

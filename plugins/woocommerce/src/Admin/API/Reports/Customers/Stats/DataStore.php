@@ -8,11 +8,12 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 
 /**
  * API\Reports\Customers\Stats\DataStore.
  */
-class DataStore extends CustomersDataStore {
+class DataStore extends CustomersDataStore implements DataStoreInterface {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
