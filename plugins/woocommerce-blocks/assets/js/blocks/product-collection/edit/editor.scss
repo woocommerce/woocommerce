@@ -146,18 +146,12 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	}
 }
 
-// Preview mode
-.wc-block-product-collection__preview-button {
-	position: absolute;
-	top: 0;
-	right: 0;
-	transform: translateY(-100%);
-	font-family: var(--wp--preset--font-family--system-sans-serif);
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
+// Preview tooltip
+.wc-block-components-notice-banner .components-button.components-notice__dismiss,
+.wc-block-components-notice-banner .components-notice__content {
+	align-self: center;
+}
 
-	&.is-primary:focus:not(:disabled) {
-		outline: none;
-		box-shadow: none;
-	}
+.wc-block-components-notice-banner p {
+	margin: 0;
 }

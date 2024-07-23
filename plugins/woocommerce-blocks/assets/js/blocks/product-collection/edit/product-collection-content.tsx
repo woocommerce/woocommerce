@@ -8,7 +8,7 @@ import {
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect, useRef, useMemo } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Notice } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import fastDeepEqual from 'fast-deep-equal/es6';
@@ -135,20 +135,16 @@ const ProductCollectionContent = ( {
 		<div { ...blockProps }>
 			{ attributes.__privatePreviewState?.isPreview &&
 				props.isSelected && (
-					<Button
-						variant="primary"
-						size="small"
-						showTooltip
-						label={
-							attributes.__privatePreviewState?.previewMessage
-						}
-						className="wc-block-product-collection__preview-button"
-						data-testid="product-collection-preview-button"
+					<Notice
+						status="info"
+						className="wc-block-components-notice-banner"
+						isDismissible={ false }
 					>
-						Preview
-					</Button>
+						<p>
+							{ attributes.__privatePreviewState?.previewMessage }
+						</p>
+					</Notice>
 				) }
-
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
