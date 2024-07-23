@@ -323,18 +323,6 @@ export const ExistingAiThemeBanner = ( {
 export const ExistingNoAiThemeBanner = () => {
 	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
-	interface Theme {
-		is_block_theme?: boolean;
-	}
-
-	const currentTheme = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-
-	const isBlockTheme = currentTheme?.is_block_theme;
-
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
@@ -346,29 +334,18 @@ export const ExistingNoAiThemeBanner = () => {
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
 				trackEvent( 'customize_your_store_intro_customize_click', {
-					theme_type: isBlockTheme ? 'block' : 'classic',
+					theme_type: 'block',
 				} );
-				if ( isBlockTheme ) {
-					navigateOrParent(
-						window,
-						getNewPath(
-							{ customizing: true },
-							'/customize-store/assembler-hub',
-							{}
-						)
-					);
-				} else {
-					navigateOrParent(
-						window,
-						'customize.php?return=/wp-admin/themes.php'
-					);
-				}
+				navigateOrParent(
+					window,
+					getNewPath(
+						{ customizing: true },
+						'/customize-store/assembler-hub',
+						{}
+					)
+				);
 			} }
-			bannerButtonText={
-				isBlockTheme
-					? __( 'Go to the Editor', 'woocommerce' )
-					: __( 'Go to the Customizer', 'woocommerce' )
-			}
+			bannerButtonText={ __( 'Go to the Editor', 'woocommerce' ) }
 			showAIDisclaimer={ false }
 			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>
