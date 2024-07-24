@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Change CLIRunner namespace for better PSR compatibility.

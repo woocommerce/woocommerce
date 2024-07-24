@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a warning showing when using the Shipping Address Calculator in combination with the additional checkout fields API

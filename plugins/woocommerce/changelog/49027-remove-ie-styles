@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove unneeded IE styling as IE is no longer supported

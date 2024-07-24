@@ -34,6 +34,7 @@ module.exports = {
 			'@wordpress/stylelint-config',
 			'eslint-import-resolver-typescript',
 			'@woocommerce/product-editor',
+			'ajv-keywords@^3.5.2', // Adding ajv-keywords to fix a dependency issue caused by legacy-peer-deps = true.
 		],
 		customScripts: {
 			postinstall: 'composer install',

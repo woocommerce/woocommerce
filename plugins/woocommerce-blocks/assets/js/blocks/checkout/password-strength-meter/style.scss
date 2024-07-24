@@ -1,0 +1,73 @@
+.wc-block-components-password-strength {
+	&.hidden {
+		opacity: 0;
+	}
+	.wc-block-components-password-strength__meter {
+		margin: $gap-small 0 0;
+		width: 100%;
+		display: block;
+		height: 6px;
+		border-radius: 4px;
+		border: 0;
+		background-color: $universal-border-light;
+		color: $alert-red;
+
+		&::-webkit-meter-bar,
+		&::-webkit-meter-inner-element {
+			background: none;
+			border: 0;
+			height: 6px;
+			vertical-align: middle;
+		}
+		&::-webkit-meter-optimum-value,
+		&::-webkit-meter-even-less-good-value,
+		&::-webkit-meter-suboptimum-value {
+			background: none;
+			background-color: currentColor;
+			transition: 0.2s ease;
+			border-radius: 3px;
+			border: 0;
+			height: 6px;
+			vertical-align: middle;
+		}
+
+		&:-moz-meter-optimum::-moz-meter-bar,
+		&:-moz-meter-sub-optimum::-moz-meter-bar,
+		&:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+			background: none;
+			background-color: currentColor;
+			transition: 0.2s ease;
+			border-radius: 3px;
+			border: 0;
+			height: 6px;
+			vertical-align: middle;
+		}
+	}
+	.wc-block-components-password-strength__result {
+		@include font-size(smaller);
+		display: block;
+		text-align: right;
+		margin: $gap-smallest 0 0;
+		color: $alert-red;
+
+		&::after {
+			content: "\00a0 ";
+		}
+	}
+	.wc-block-components-password-strength__meter[value="1"],
+	.wc-block-components-password-strength__meter[value="1"] + .wc-block-components-password-strength__result {
+		color: $alert-red;
+	}
+	.wc-block-components-password-strength__meter[value="2"],
+	.wc-block-components-password-strength__meter[value="2"] + .wc-block-components-password-strength__result {
+		color: #ff6f00;
+	}
+	.wc-block-components-password-strength__meter[value="3"],
+	.wc-block-components-password-strength__meter[value="3"] + .wc-block-components-password-strength__result {
+		color: $alert-yellow;
+	}
+	.wc-block-components-password-strength__meter[value="4"],
+	.wc-block-components-password-strength__meter[value="4"] + .wc-block-components-password-strength__result {
+		color: $alert-green;
+	}
+}

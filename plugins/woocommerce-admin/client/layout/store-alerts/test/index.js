@@ -74,9 +74,10 @@ describe( 'StoreAlerts', () => {
 		} );
 		const { container } = render( <StoreAlerts /> );
 
-		expect( container.querySelector( 'h2' ).textContent ).toBe(
-			'Alert title 1'
-		);
+		expect(
+			container.querySelector( '.woocommerce-store-alerts__title' )
+				.textContent
+		).toBe( 'Alert title 1' );
 		expect(
 			container.querySelector( '.woocommerce-store-alerts__message' )
 				.textContent
@@ -171,24 +172,27 @@ describe( 'StoreAlerts', () => {
 			<StoreAlerts />
 		);
 
-		expect( container.querySelector( 'h2' ).textContent ).toBe(
-			'Alert title 1'
-		);
+		expect(
+			container.querySelector( '.woocommerce-store-alerts__title' )
+				.textContent
+		).toBe( 'Alert title 1' );
 
 		fireEvent.click( getByLabelText( 'Next Alert' ) );
 
 		rerender( <StoreAlerts /> );
 
-		expect( container.querySelector( 'h2' ).textContent ).toBe(
-			'Alert title 2'
-		);
+		expect(
+			container.querySelector( '.woocommerce-store-alerts__title' )
+				.textContent
+		).toBe( 'Alert title 2' );
 
 		fireEvent.click( getByLabelText( 'Previous Alert' ) );
 
 		rerender( <StoreAlerts /> );
 
-		expect( container.querySelector( 'h2' ).textContent ).toBe(
-			'Alert title 1'
-		);
+		expect(
+			container.querySelector( '.woocommerce-store-alerts__title' )
+				.textContent
+		).toBe( 'Alert title 1' );
 	} );
 } );

@@ -114,7 +114,7 @@ class Init extends RemoteSpecsEngine {
 		$locale = get_user_locale();
 
 		$specs   = self::get_specs();
-		$results = EvaluateSuggestion::evaluate_specs( $specs );
+		$results = EvaluateSuggestion::evaluate_specs( $specs, array( 'source' => 'wc-wcpay-promotions' ) );
 
 		if ( count( $results['errors'] ) > 0 ) {
 			// Unlike payment gateway suggestions, we don't have a non-empty default set of promotions to fall back to.
