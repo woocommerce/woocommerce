@@ -297,7 +297,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											className="core-profiler__checkbox"
 											label={ interpolateComponents( {
 												mixedString: __(
-													'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+													'More patterns from the WooCommerce.com library are available! Opt in to connect your store and access the full library, plus get more relevant content, and a tailored store setup experience. Opting in will enable {{link}}usage tracking{{/link}}, which you can opt out of at any time via WooCommerce settings.',
 													'woocommerce'
 												),
 												components: {
