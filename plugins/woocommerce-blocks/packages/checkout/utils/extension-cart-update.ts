@@ -21,7 +21,9 @@ export const extensionCartUpdate = (
 ): Promise< CartResponse > => {
 	const { applyExtensionCartUpdate } = dispatch( STORE_KEY );
 	return applyExtensionCartUpdate( args ).catch( ( error ) => {
-		processErrorResponse( error );
+		if ( error?.code === 'woocommerce_rest_cart_extensions_error' ) {
+			processErrorResponse( error );
+		}
 		return Promise.resolve( false );
 	} );
 };

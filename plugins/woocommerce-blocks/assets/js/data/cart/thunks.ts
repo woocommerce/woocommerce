@@ -13,7 +13,7 @@ import { camelCaseKeys } from '@woocommerce/base-utils';
  * Internal dependencies
  */
 import { notifyQuantityChanges } from './notify-quantity-changes';
-import { notifyErrors } from './notify-errors';
+import { notifyCartErrors } from './notify-errors';
 import { CartDispatchFromMap, CartSelectFromMap } from './index';
 
 /**
@@ -33,7 +33,7 @@ export const receiveCart =
 	} ) => {
 		const newCart = camelCaseKeys( response ) as unknown as Cart;
 		const oldCart = select.getCartData();
-		notifyErrors( newCart.errors, oldCart.errors );
+		notifyCartErrors( newCart.errors, oldCart.errors );
 		notifyQuantityChanges( {
 			oldCart,
 			newCart,

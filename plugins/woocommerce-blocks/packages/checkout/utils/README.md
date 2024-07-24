@@ -16,7 +16,7 @@ Miscellaneous utility functions for dealing with checkout functionality.
 
 ## `extensionCartUpdate`
 
-When executed, this will call the cart/extensions REST API endpoint. The new cart is then received into the client-side store.
+When executed, this will call the cart/extensions REST API endpoint. The new cart is then received into the client-side store. `extensionCartUpdate` returns a promise that resolves when the cart is updated which should also be used for error handling.
 
 ### Usage
 
@@ -32,6 +32,10 @@ extensionCartUpdate( {
 	data: {
 		key: 'value',
 	},
+} ).then( () => {
+	// Cart has been updated.
+} ).catch( ( error ) => {
+	// Handle error.
 } );
 ```
 

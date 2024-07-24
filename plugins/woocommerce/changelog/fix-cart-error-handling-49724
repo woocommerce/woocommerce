@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix extensionCartUpdates not surfacing errors to cart and checkout
+Fix extensionCartUpdates to surface generic error messages, and include documentation for the error handling.
