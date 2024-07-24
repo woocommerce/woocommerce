@@ -189,7 +189,7 @@ const CustomizedThemeBanners = ( {
 											: 'classic',
 									}
 								);
-								if ( isDefaultTheme ) {
+								if ( isDefaultTheme && isNoAiFlow ) {
 									navigateOrParent(
 										window,
 										getNewPath(
@@ -244,6 +244,7 @@ const CustomizedThemeBanners = ( {
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }
+					isNoAiFlow={ isNoAiFlow }
 					redirectToCYSFlow={ () =>
 						sendEvent( {
 							type: isNoAiFlow
