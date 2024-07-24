@@ -49,6 +49,7 @@ export default function ( {
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
 						label={ __( 'Price Range Selector', 'woocommerce' ) }
+						isBlock
 						value={ showInputFields ? 'editable' : 'text' }
 						onChange={ ( value: string ) =>
 							setAttributes( {

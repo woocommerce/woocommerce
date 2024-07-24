@@ -111,6 +111,7 @@ export const getSharedReviewContentControls = ( attributes, setAttributes ) => {
 				<>
 					<ToggleGroupControl
 						label={ __( 'Review image', 'woocommerce' ) }
+						isBlock
 						value={ attributes.imageType }
 						onChange={ ( value ) =>
 							setAttributes( { imageType: value } )

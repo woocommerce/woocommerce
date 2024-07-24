@@ -43,6 +43,7 @@ export const Inspector = ( {
 							'Allow selecting multiple options?',
 							'woocommerce'
 						) }
+						isBlock
 						value={ selectType || 'multiple' }
 						onChange={ ( value: string ) =>
 							setAttributes( {
@@ -71,6 +72,7 @@ export const Inspector = ( {
 				) }
 				<ToggleGroupControl
 					label={ __( 'Display Style', 'woocommerce' ) }
+					isBlock
 					value={ displayStyle }
 					onChange={ ( value: string ) =>
 						setAttributes( {

@@ -97,6 +97,7 @@ export const BlockSettings = ( {
 				{ displayIconStyleSelector ? (
 					<ToggleGroupControl
 						label={ __( 'Display Style', 'woocommerce' ) }
+						isBlock
 						value={ iconStyle }
 						onChange={ ( value: IconStyle ) =>
 							setAttributes( {
