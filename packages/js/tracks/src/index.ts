@@ -57,6 +57,39 @@ export function recordEvent(
 	window.wcTracks.recordEvent( eventName, eventProperties );
 }
 
+/**
+ * Record an event to Tracks
+ *
+ * @param {string} eventName       The name of the event to record, don't include the wcadmin_ prefix
+ * @param {Object} eventProperties event properties to include in the event
+ * @param {string} consentText     The text providing consent for this event.
+ */
+export function recordConsentedEvent(
+	eventName: string,
+	eventProperties?: ExtraProperties,
+	consentText: string
+) {
+	if ( ! consentText.length ) {
+		return false;
+	}
+
+	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties, {
+		_tqk: window._tkq,
+		shouldRecord:
+			! isDevelopmentMode &&
+			!! window._tkq &&
+			!! window.wcTracks &&
+			!! window.wcTracks.isEnabled,
+	} );
+
+	if ( isDevelopmentMode ) {
+		window.wcTracks.validateEvent( eventName, eventProperties );
+		return false;
+	}
+
+	window.wcTracks.recordEvent( eventName, eventProperties );
+}
+
 const tracksQueue = {
 	localStorageKey() {
 		return 'tracksQueue';
