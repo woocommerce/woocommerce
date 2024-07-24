@@ -1,4 +1,4 @@
-name: 'Automate assigning team for review.'
+name: 'Automate assigning team for review'
 on:
     pull_request:
         types: [opened, ready_for_review]
