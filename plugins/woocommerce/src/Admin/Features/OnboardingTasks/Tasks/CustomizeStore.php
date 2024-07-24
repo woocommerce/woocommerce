@@ -51,7 +51,7 @@ class CustomizeStore extends Task {
 	}
 
 	/**
-	 * Mark the CYS task as complete whenever the user saves the customizer.
+	 * Mark the CYS task as complete whenever the user saves the customizer changes.
 	 *
 	 * @return void
 	 */
