@@ -19,7 +19,7 @@ type SelectProps = Omit<
 	React.SelectHTMLAttributes< HTMLSelectElement >,
 	'onChange'
 > & {
-	options: { value: string; label: string; disabled?: boolean }[];
+	options: SelectOption[];
 	label: string;
 	onChange: ( newVal: string ) => void;
 };
