@@ -47,8 +47,7 @@ import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
 import { trackEvent } from '~/customize-store/tracking';
-import { addQueryArgs } from '@wordpress/url';
-import { ADMIN_URL } from '~/utils/admin-settings';
+import { isNoAIFlow as isNoAiFlowGuard } from '../guards';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -151,24 +150,15 @@ const ThemeCards = ( {
 const CustomizedThemeBanners = ( {
 	isBlockTheme,
 	isDefaultTheme,
+	isNoAiFlow,
 	sendEvent,
 }: {
 	isBlockTheme: boolean | undefined;
 	isDefaultTheme: boolean | undefined;
+	isNoAiFlow: boolean;
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
-
-	const redirectToCYSFlow = () => {
-		const customizeStoreDesignUrl = addQueryArgs(
-			`${ ADMIN_URL }admin.php`,
-			{
-				page: 'wc-admin',
-				path: '/customize-store/design',
-			}
-		);
-		window.location.href = customizeStoreDesignUrl;
-	};
 
 	return (
 		<>
@@ -254,7 +244,13 @@ const CustomizedThemeBanners = ( {
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }
-					redirectToCYSFlow={ redirectToCYSFlow }
+					redirectToCYSFlow={ () =>
+						sendEvent( {
+							type: isNoAiFlow
+								? 'DESIGN_WITHOUT_AI'
+								: 'DESIGN_WITH_AI',
+						} )
+					}
 				/>
 			) }
 		</>
@@ -444,6 +440,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							isBlockTheme={ isBlockTheme }
 							isDefaultTheme={ isDefaultTheme }
 							sendEvent={ sendEvent }
+							isNoAiFlow={ isNoAiFlowGuard( context.flowType ) }
 						/>
 					) }
 				</div>
