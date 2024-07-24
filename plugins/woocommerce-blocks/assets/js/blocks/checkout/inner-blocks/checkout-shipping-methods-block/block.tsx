@@ -25,7 +25,7 @@ import type {
 	CartShippingPackageShippingRate,
 } from '@woocommerce/types';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
-import type { ReactElement } from 'react';
+import { useMemo, type ReactElement } from 'react';
 
 /**
  * Renders a shipping rate control option.
@@ -73,19 +73,36 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 
 	const { shippingAddress } = useCustomerData();
 
-	const filteredShippingRates = isCollectable
-		? shippingRates.map( ( shippingRatesPackage ) => {
-				return {
-					...shippingRatesPackage,
-					shipping_rates: shippingRatesPackage.shipping_rates.filter(
-						( shippingRatesPackageRate ) =>
-							! hasCollectableRate(
-								shippingRatesPackageRate.method_id
-							)
-					),
-				};
-		  } )
-		: shippingRates;
+	const memoizedFilteredShippingRates = useMemo( () => {
+		return isCollectable
+			? shippingRates.map( ( shippingRatesPackage ) => {
+					return {
+						...shippingRatesPackage,
+						shipping_rates:
+							shippingRatesPackage.shipping_rates.filter(
+								( shippingRatesPackageRate ) =>
+									! hasCollectableRate(
+										shippingRatesPackageRate.method_id
+									)
+							),
+					};
+			  } )
+			: shippingRates;
+	}, [ shippingRates, isCollectable ] );
+
+	// const filteredShippingRates = isCollectable
+	// 	? shippingRates.map( ( shippingRatesPackage ) => {
+	// 			return {
+	// 				...shippingRatesPackage,
+	// 				shipping_rates: shippingRatesPackage.shipping_rates.filter(
+	// 					( shippingRatesPackageRate ) =>
+	// 						! hasCollectableRate(
+	// 							shippingRatesPackageRate.method_id
+	// 						)
+	// 				),
+	// 			};
+	// 	  } )
+	// 	: shippingRates;
 
 	if ( ! needsShipping ) {
 		return null;
@@ -138,7 +155,7 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 					}
 					renderOption={ renderShippingRatesControlOption }
 					collapsible={ false }
-					shippingRates={ filteredShippingRates }
+					shippingRates={ memoizedFilteredShippingRates }
 					isLoadingRates={ isLoadingRates }
 					context="woocommerce/checkout"
 				/>

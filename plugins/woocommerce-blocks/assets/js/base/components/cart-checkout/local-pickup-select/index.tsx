@@ -50,6 +50,7 @@ export const LocalPickupSelect = ( {
 			<RadioControl
 				onChange={ ( value ) => {
 					setSelectedOption( value );
+					console.log( 'calling on select rate', value );
 					onSelectRate( value );
 				} }
 				highlightChecked={ true }

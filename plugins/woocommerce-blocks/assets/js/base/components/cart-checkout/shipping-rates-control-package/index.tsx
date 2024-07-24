@@ -99,6 +99,10 @@ export const ShippingRatesControlPackage = ( {
 
 	const onSelectRate = useCallback(
 		( newShippingRateId: string ) => {
+			console.log(
+				'onSelectRate ShippingRatesControlPackage',
+				newShippingRateId
+			);
 			selectShippingRate( newShippingRateId, packageId );
 		},
 		[ packageId, selectShippingRate ]

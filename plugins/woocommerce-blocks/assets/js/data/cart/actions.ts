@@ -394,6 +394,7 @@ export const selectShippingRate =
 		dispatch: CartDispatchFromMap;
 		select: CartSelectFromMap;
 	} ) => {
+		console.log( 'selectShippingRate', rateId, packageId );
 		const selectedShippingRate = select
 			.getShippingRates()
 			.find(

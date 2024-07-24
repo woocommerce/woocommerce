@@ -7,6 +7,7 @@ import {
 	useEffect,
 	useCallback,
 	createInterpolateElement,
+	useMemo,
 } from '@wordpress/element';
 import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
@@ -139,9 +140,16 @@ const Block = (): JSX.Element | null => {
 	const { shippingRates, selectShippingRate } = useShippingData();
 
 	// Get pickup locations from the first shipping package.
-	const pickupLocations = ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
-		isPackageRateCollectable
-	);
+
+	// Memoize pickup locations to prevent re-rendering when the shipping rates change.
+	const pickupLocations = useMemo( () => {
+		return ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
+			isPackageRateCollectable
+		);
+	}, [ shippingRates ] );
+	// const pickupLocations = ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
+	// 	isPackageRateCollectable
+	// );
 
 	const [ selectedOption, setSelectedOption ] = useState< string >(
 		() => pickupLocations.find( ( rate ) => rate.selected )?.rate_id || ''
@@ -149,6 +157,7 @@ const Block = (): JSX.Element | null => {
 
 	const onSelectRate = useCallback(
 		( rateId: string ) => {
+			console.log( 'onSelectRate', rateId );
 			selectShippingRate( rateId );
 		},
 		[ selectShippingRate ]
@@ -169,6 +178,7 @@ const Block = (): JSX.Element | null => {
 	};
 
 	useEffect( () => {
+		console.log( 'useEffect', typeof selectedOption, pickupLocations );
 		if (
 			! selectedOption &&
 			pickupLocations[ 0 ] &&
