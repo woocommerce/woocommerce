@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: refine approach to patching dependecies in favour of built-in pnpm functionality.
