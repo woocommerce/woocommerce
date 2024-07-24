@@ -289,14 +289,13 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			bannerStatus = 'classic-theme';
 			break;
 		case context.flowType === FlowType.noAI &&
-			! customizeStoreTaskCompleted:
-			bannerStatus = FlowType.noAI;
-			break;
-		case context.flowType === FlowType.noAI &&
-			customizeStoreTaskCompleted &&
 			isBlockTheme &&
 			! isDefaultTheme:
 			bannerStatus = 'non-default-block-theme';
+			break;
+		case context.flowType === FlowType.noAI &&
+			! customizeStoreTaskCompleted:
+			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
 			bannerStatus = 'existing-no-ai-theme';
@@ -414,16 +413,15 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						sendEvent={ sendEvent }
 					/>
 
-					{ customizeStoreTaskCompleted &&
-					( isDefaultTheme || ! isBlockTheme ) ? (
-						<CustomizedThemeBanners
-							isBlockTheme={ isBlockTheme }
-							sendEvent={ sendEvent }
-						/>
-					) : (
+					{ isDefaultTheme && ! customizeStoreTaskCompleted ? (
 						<ThemeCards
 							sendEvent={ sendEvent }
 							themeData={ themeData }
+						/>
+					) : (
+						<CustomizedThemeBanners
+							isBlockTheme={ isBlockTheme }
+							sendEvent={ sendEvent }
 						/>
 					) }
 				</div>
