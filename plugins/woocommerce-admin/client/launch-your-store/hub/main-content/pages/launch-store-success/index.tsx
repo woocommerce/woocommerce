@@ -135,7 +135,7 @@ export const LaunchYourStoreSuccess = ( {
 									{
 										link: (
 											<a
-												href="https://woocommerce.com/document/configuring-woocommerce-settings/coming-soon-mode/#server-caches/"
+												href="https://woocommerce.com/document/configuring-woocommerce-settings/coming-soon-mode/#server-caches"
 												target="_blank"
 												rel="noreferrer"
 											>
