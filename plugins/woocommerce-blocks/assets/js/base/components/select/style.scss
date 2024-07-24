@@ -4,7 +4,7 @@
 	.wc-blocks-components-select__container {
 		border-radius: $universal-border-radius;
 		box-sizing: border-box;
-		border: 1px solid $universal-border-light;
+		border: 1px solid $universal-border-strong;
 		background: #fff;
 		width: 100%;
 		height: 50px;
@@ -27,16 +27,21 @@
 		@include reset-typography();
 		@include font-size(regular);
 		border-radius: $universal-border-radius;
+		border: none;
 		width: 100%;
 		height: 100%;
 		appearance: none;
 		background: none;
 		padding: em($gap) em($gap-smaller) 0;
-		color: currentColor;
+		color: $input-text-active;
 
 		&:focus {
 			outline: 0;
-			box-shadow: 0 0 0 1px currentColor;
+			box-shadow: 0 0 0 1px inherit;
+		}
+
+		.has-dark-controls & {
+			color: $input-text-dark;
 		}
 	}
 
@@ -46,10 +51,10 @@
 		position: absolute;
 		line-height: 1.25; // =20px when font-size is 16px.
 		left: em($gap-smaller);
-		top: 0;
+		top: 2px;
 		transform-origin: top left;
 		transition: all 200ms ease;
-		color: currentColor;
+		color: $input-text-active;
 		z-index: 1;
 		margin: 0;
 		overflow: hidden;
@@ -73,6 +78,10 @@
 		top: 50%;
 		right: $gap-small;
 		pointer-events: none;
-		fill: currentColor;
+		fill: $input-text-active;
+
+		.has-dark-controls & {
+			fill: $input-text-dark;
+		}
 	}
 }
