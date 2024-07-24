@@ -25,6 +25,10 @@ export const generateStyles = ( color = '#bea0f2' ) => {
     body .is-layout-constrained > .alignwide {
         margin: 0 auto;
     }
+	.block-editor-block-preview__content-iframe body {
+		/* Set ratio to 1:1 so height is always equal to width for the preview. */
+		aspect-ratio: 1 / 1;
+	}
     .wp-container-core-group-is-layout-4.wp-container-core-group-is-layout-4 {
         justify-content: space-between;
     }
