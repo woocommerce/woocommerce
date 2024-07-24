@@ -5,11 +5,12 @@ import { dispatch, select } from '@wordpress/data';
 import { ShippingAddress } from '@woocommerce/settings';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { __ } from '@wordpress/i18n';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 
-function previousString( initialValue?: string ) {
+function previousAddress( initialValue?: ShippingAddress ) {
 	let lastValue = initialValue;
 
-	function track( value: string ) {
+	function track( value: ShippingAddress ) {
 		const currentValue = lastValue;
 
 		lastValue = value;
@@ -21,7 +22,8 @@ function previousString( initialValue?: string ) {
 	return track;
 }
 
-const lastValue = previousString( '' );
+const lastShippingAddress = previousAddress();
+const lastBillingAddress = previousAddress();
 
 export const validateState = (
 	addressType: string,
@@ -32,7 +34,13 @@ export const validateState = (
 	const hasValidationError =
 		select( VALIDATION_STORE_KEY ).getValidationError( validationErrorId );
 
-	const countryChanged = lastValue( values.country ) !== values.country;
+	const lastAddress =
+		addressType === 'shipping'
+			? lastShippingAddress( values )
+			: lastBillingAddress( values );
+
+	const addressChanged =
+		!! lastAddress && ! isShallowEqual( lastAddress, values );
 
 	if ( hasValidationError ) {
 		if ( ! isRequired || values.state ) {
@@ -40,8 +48,8 @@ export const validateState = (
 			dispatch( VALIDATION_STORE_KEY ).clearValidationError(
 				validationErrorId
 			);
-		} else if ( ! countryChanged ) {
-			// Validation error has been set, there has not been a country set so show the error.
+		} else if ( ! addressChanged ) {
+			// Validation error has been set, there has not been an address change so show the error.
 			dispatch( VALIDATION_STORE_KEY ).showValidationError(
 				validationErrorId
 			);
