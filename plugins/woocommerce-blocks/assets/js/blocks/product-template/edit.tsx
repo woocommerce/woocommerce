@@ -194,15 +194,6 @@ const ProductTemplateEdit = (
 				per_page: -1,
 				context: 'view',
 			} );
-			const templateCategory =
-				inherit &&
-				templateSlug?.startsWith( 'category-' ) &&
-				getEntityRecords( 'taxonomy', 'category', {
-					context: 'view',
-					per_page: 1,
-					_fields: [ 'id' ],
-					slug: templateSlug.replace( 'category-', '' ),
-				} );
 			const query: Record< string, unknown > = {
 				postType,
 				offset: perPage ? perPage * ( page - 1 ) + offset : 0,
@@ -240,8 +231,37 @@ const ProductTemplateEdit = (
 			}
 			// If `inherit` is truthy, adjust conditionally the query to create a better preview.
 			if ( inherit ) {
-				if ( templateCategory ) {
-					query.categories = templateCategory[ 0 ]?.id;
+				const categoryTemplatePrefix = 'category-';
+				const wooCategoryTemplatePrefix = 'taxonomy-product_cat-';
+
+				const isCategoryArchive = templateSlug?.startsWith(
+					categoryTemplatePrefix
+				);
+				const isWooCategoryArchive = templateSlug?.startsWith(
+					wooCategoryTemplatePrefix
+				);
+
+				if ( isCategoryArchive || isWooCategoryArchive ) {
+					const slug = templateSlug.replace(
+						isCategoryArchive
+							? categoryTemplatePrefix
+							: wooCategoryTemplatePrefix,
+						''
+					);
+					const templateCategory = getEntityRecords(
+						'taxonomy',
+						'category',
+						{
+							context: 'view',
+							per_page: 1,
+							_fields: [ 'id' ],
+							slug,
+						}
+					);
+
+					if ( templateCategory ) {
+						query.categories = templateCategory[ 0 ]?.id;
+					}
 				}
 				query.per_page = loopShopPerPage;
 			}
