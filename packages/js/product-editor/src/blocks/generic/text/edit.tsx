@@ -164,6 +164,7 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<TextControl
+				id={ property }
 				ref={ inputRef }
 				type={ type?.value ?? 'text' }
 				value={ value }
