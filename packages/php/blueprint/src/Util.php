@@ -63,7 +63,7 @@ class Util {
 	}
 
 	public static function activate_plugin_by_slug( $slug ) {
-		if ( ! function_exists( 'deactivate_plugins' ) ) {
+		if ( ! function_exists( 'activate_plugin' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
