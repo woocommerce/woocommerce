@@ -391,7 +391,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$attribute_id = null;
 
 		foreach ( $attributes_count as $id => $count ) {
-			if ( $closest === null || abs( $search - $closest ) > abs( $count - $search ) ) {
+			if ( null === $closest || abs( $search - $closest ) > abs( $count - $search ) ) {
 				$closest      = $count;
 				$attribute_id = $id;
 			}

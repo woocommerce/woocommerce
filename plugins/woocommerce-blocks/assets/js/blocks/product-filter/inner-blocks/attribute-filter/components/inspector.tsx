@@ -4,6 +4,8 @@
 import { getSetting } from '@woocommerce/settings';
 import { AttributeSetting } from '@woocommerce/types';
 import { InspectorControls } from '@wordpress/block-editor';
+import { createInterpolateElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import {
 	ComboboxControl,
 	PanelBody,
@@ -16,8 +18,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { createInterpolateElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies

@@ -1,19 +1,22 @@
 /**
  * External dependencies
  */
+import { filter, filterThreeLines } from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
+import { AttributeSetting } from '@woocommerce/types';
 import {
 	InnerBlocks,
+	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
-	InspectorControls,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { AttributeSetting } from '@woocommerce/types';
+import { Icon, menu, settings } from '@wordpress/icons';
 import {
+	ExternalLink,
 	PanelBody,
 	RadioControl,
-	ExternalLink,
 	RangeControl,
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -22,15 +25,12 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { Icon, settings, menu } from '@wordpress/icons';
-import { filter, filterThreeLines } from '@woocommerce/icons';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import type { BlockAttributes } from './types';
 import './editor.scss';
+import type { BlockAttributes } from './types';
 
 const defaultAttribute = getSetting< AttributeSetting >(
 	'defaultProductFilterAttribute'
