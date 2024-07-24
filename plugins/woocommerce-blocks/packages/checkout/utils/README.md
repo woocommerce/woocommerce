@@ -18,7 +18,7 @@ Miscellaneous utility functions for dealing with checkout functionality.
 
 When executed, this will call the cart/extensions REST API endpoint. The new cart is then received into the client-side store. `extensionCartUpdate` returns a promise that resolves when the cart is updated which should also be used for error handling.
 
-### Usage
+### `extensionCartUpdate` Usage
 
 ```ts
 // Aliased import
@@ -39,7 +39,7 @@ extensionCartUpdate( {
 } );
 ```
 
-### Options
+### `extensionCartUpdate` Options
 
 The following options are available:
 
@@ -51,7 +51,7 @@ Args to pass to the Rest API endpoint. This can contain data and a namespace to 
 
 Ensures that a given value contains a string, or throws an error.
 
-### Usage
+### `mustContain` Usage
 
 ```js
 // Aliased import
@@ -64,7 +64,7 @@ mustContain( 'This is a string containing a <price />', '<price />' ); // This w
 mustContain( 'This is a string', '<price />' ); // This will throw an error
 ```
 
-### Options
+### `mustContain` Options
 
 The following options are available:
 
