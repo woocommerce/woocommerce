@@ -292,6 +292,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 								} );
 							} }
 							options={ field.options }
+							required={ field.required }
+							errorMessage={
+								fieldProps.errorMessage || undefined
+							}
 						/>
 					);
 				}

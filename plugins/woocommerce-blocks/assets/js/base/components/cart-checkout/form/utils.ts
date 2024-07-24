@@ -21,6 +21,7 @@ export interface FieldProps {
 	autoComplete: string | undefined;
 	errorMessage: string | undefined;
 	required: boolean | undefined;
+	placeholder: string | undefined;
 	className: string;
 }
 
@@ -36,6 +37,7 @@ export const createFieldProps = (
 	autoComplete: field?.autocomplete,
 	errorMessage: field?.errorMessage,
 	required: field?.required,
+	placeholder: field?.placeholder,
 	className: `wc-block-components-address-form__${ field?.key }`.replaceAll(
 		'/',
 		'-'
