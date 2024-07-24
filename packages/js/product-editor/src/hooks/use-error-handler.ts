@@ -54,17 +54,14 @@ function getUrl( tab: string ): string {
 function getErrorPropsWithActions(
 	errorContext = '',
 	validatorId: string,
-	focusByValidatorId: ( validatorId: string ) => void
+	focusByValidatorId: ( validatorId: string ) => void,
+	label: string = __( 'View error', 'woocommerce' )
 ): ErrorProps {
-	const errorLinkLabel =
-		errorContext === 'inventory'
-			? __( 'View SKU field', 'woocommerce' )
-			: __( 'View error', 'woocommerce' );
 	return {
 		explicitDismiss: true,
 		actions: [
 			{
-				label: errorLinkLabel,
+				label,
 				onClick: async () => {
 					await focusByValidatorId( validatorId );
 					navigateTo( {
@@ -119,11 +116,12 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						'Invalid or duplicated SKU.',
 						'woocommerce'
 					);
-					if ( visibleTab !== 'inventory' ) {
+					if ( visibleTab !== errorContext ) {
 						response.errorProps = getErrorPropsWithActions(
-							'inventory',
+							errorContext,
 							'product_sku',
-							focusByValidatorId
+							focusByValidatorId,
+							__( 'View SKU field', 'woocommerce' )
 						);
 					}
 					break;
@@ -132,11 +130,12 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						'Invalid or duplicated GTIN, UPC, EAN or ISBN.',
 						'woocommerce'
 					);
-					if ( visibleTab !== 'inventory' ) {
+					if ( visibleTab !== errorContext ) {
 						response.errorProps = getErrorPropsWithActions(
-							'inventory',
-							validatorId,
-							focusByValidatorId
+							errorContext,
+							'global_unique_id',
+							focusByValidatorId,
+							__( 'View identifier field', 'woocommerce' )
 						);
 					}
 					break;
