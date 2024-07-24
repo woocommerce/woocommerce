@@ -196,11 +196,11 @@ export const StartOverWarningModal = ( {
 };
 
 export const ThemeSwitchWarningModal = ( {
-	isNoAiFlow,
+	isNoAiFlow = true,
 	setIsModalOpen,
 	redirectToCYSFlow,
 }: {
-	isNoAiFlow: boolean;
+	isNoAiFlow?: boolean;
 	setIsModalOpen: ( arg0: boolean ) => void;
 	redirectToCYSFlow: () => void;
 } ) => {
