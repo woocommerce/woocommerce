@@ -525,7 +525,7 @@ class ProductCollection extends AbstractBlock {
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
 		$inherit    = $block->context['query']['inherit'] ?? false;
-		$filterable = $block->context['query']['filterable'] ?? false;;
+		$filterable = $block->context['query']['filterable'] ?? false;
 
 		$is_exclude_applied_filters = ! ( $inherit || $filterable );
 
