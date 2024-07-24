@@ -13,6 +13,9 @@ class ExportCli {
 
 	public function run($args = array()) {
 		$export_as_zip = isset($args['format']) && $args['format'] === 'zip';
+		if ( ! isset( $args['steps'] ) ) {
+			$args['steps'] = array();
+		}
 
 		$exporter = new ExportSchema();
 
