@@ -6,6 +6,9 @@ wp-env run tests-cli wp theme activate twentytwentythree
 echo -e 'Update URL structure \n'
 wp-env run tests-cli wp rewrite structure '/%postname%/' --hard
 
+echo -e 'Activate LazyLoad plugin \n'
+wp-env run tests-cli wp plugin activate rocket-lazy-load
+
 echo -e 'Activate Filter Setter utility plugin \n'
 wp-env run tests-cli wp plugin activate filter-setter
 
