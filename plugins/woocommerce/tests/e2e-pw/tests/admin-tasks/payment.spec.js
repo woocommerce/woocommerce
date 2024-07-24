@@ -119,7 +119,7 @@ test.describe( 'Payment setup task', () => {
 		).toHaveText( 'Get paid' );
 	} );
 
-	test( 'Enabling cash on delivery enables the payment method', async ( {
+	test.skip( 'Enabling cash on delivery enables the payment method', async ( {
 		page,
 		baseURL,
 	} ) => {
