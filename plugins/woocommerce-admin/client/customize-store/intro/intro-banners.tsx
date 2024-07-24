@@ -323,17 +323,37 @@ export const ExistingAiThemeBanner = ( {
 export const ExistingNoAiThemeBanner = () => {
 	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
-	interface Theme {
-		is_block_theme?: boolean;
-	}
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
+			bannerText={ __(
+				'Customize everything from the color palette and the fonts to the page layouts, making sure every detail aligns with your brand.',
+				'woocommerce'
+			) }
+			bannerClass="existing-no-ai-theme-banner"
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: 'block',
+				} );
+				navigateOrParent(
+					window,
+					getNewPath(
+						{ customizing: true },
+						'/customize-store/assembler-hub',
+						{}
+					)
+				);
+			} }
+			bannerButtonText={ __( 'Go to the Editor', 'woocommerce' ) }
+			showAIDisclaimer={ false }
+			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
+		></BaseIntroBanner>
+	);
+};
 
-	const currentTheme = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-
-	const isBlockTheme = currentTheme?.is_block_theme;
+export const ClassicThemeBanner = () => {
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
 	return (
 		<BaseIntroBanner
@@ -346,29 +366,14 @@ export const ExistingNoAiThemeBanner = () => {
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
 				trackEvent( 'customize_your_store_intro_customize_click', {
-					theme_type: isBlockTheme ? 'block' : 'classic',
+					theme_type: 'classic',
 				} );
-				if ( isBlockTheme ) {
-					navigateOrParent(
-						window,
-						getNewPath(
-							{ customizing: true },
-							'/customize-store/assembler-hub',
-							{}
-						)
-					);
-				} else {
-					navigateOrParent(
-						window,
-						'customize.php?return=/wp-admin/themes.php'
-					);
-				}
+				navigateOrParent(
+					window,
+					'customize.php?return=/wp-admin/themes.php'
+				);
 			} }
-			bannerButtonText={
-				isBlockTheme
-					? __( 'Go to the Editor', 'woocommerce' )
-					: __( 'Go to the Customizer', 'woocommerce' )
-			}
+			bannerButtonText={ __( 'Go to the Customizer', 'woocommerce' ) }
 			showAIDisclaimer={ false }
 			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>

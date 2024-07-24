@@ -17,11 +17,14 @@ import {
  */
 import {
 	CoreFilterNames,
-	ProductCollectionQuery,
-	QueryControlProps,
+	type ProductCollectionQuery,
+	type QueryControlProps,
 } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
-import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
+import {
+	getDefaultValueOfInherit,
+	getDefaultValueOfFilterable,
+} from '../../utils';
 
 const label = __( 'Sync with current query', 'woocommerce' );
 
@@ -47,6 +50,11 @@ const productsByAttributeHelpText = __(
 
 const searchResultsHelpText = __(
 	'Enable to adjust the displayed products based on the current search and any applied filters.',
+	'woocommerce'
+);
+
+const filterableHelpText = __(
+	'Adjust the displayed products depending on the current template and any applied query filters.',
 	'woocommerce'
 );
 
@@ -81,10 +89,7 @@ const InheritQueryControl = ( {
 		}
 	);
 
-	const defaultValue = useMemo(
-		() => getDefaultValueOfInheritQueryFromTemplate(),
-		[]
-	);
+	const defaultValue = useMemo( () => getDefaultValueOfInherit(), [] );
 
 	const currentTemplateId = editSiteStore.getEditedPostId() as string;
 	const helpText = getHelpTextForTemplate( currentTemplateId );
@@ -128,4 +133,41 @@ const InheritQueryControl = ( {
 	);
 };
 
-export default InheritQueryControl;
+const FilterableControl = ( {
+	setQueryAttribute,
+	trackInteraction,
+	query,
+}: QueryControlProps ) => {
+	const filterable = query?.filterable;
+
+	const defaultValue = useMemo( () => getDefaultValueOfFilterable(), [] );
+
+	return (
+		<ToolsPanelItem
+			label={ label }
+			hasValue={ () => filterable !== defaultValue }
+			isShownByDefault
+			onDeselect={ () => {
+				setQueryAttribute( {
+					filterable: defaultValue,
+				} );
+				trackInteraction( CoreFilterNames.FILTERABLE );
+			} }
+		>
+			<ToggleControl
+				className="wc-block-product-collection__inherit-query-control"
+				label={ label }
+				help={ filterableHelpText }
+				checked={ !! filterable }
+				onChange={ ( value ) => {
+					setQueryAttribute( {
+						filterable: value,
+					} );
+					trackInteraction( CoreFilterNames.FILTERABLE );
+				} }
+			/>
+		</ToolsPanelItem>
+	);
+};
+
+export { FilterableControl, InheritQueryControl };
