@@ -37,6 +37,7 @@ import {
 	ExistingThemeBanner,
 	NoAIBanner,
 	ExistingNoAiThemeBanner,
+	ClassicThemeBanner,
 } from './intro-banners';
 import welcomeTourImg from '../assets/images/design-your-own.svg';
 import professionalThemeImg from '../assets/images/professional-theme.svg';
@@ -67,6 +68,7 @@ const BANNER_COMPONENTS = {
 	'existing-theme': ExistingThemeBanner,
 	[ FlowType.noAI ]: NoAIBanner,
 	'existing-no-ai-theme': ExistingNoAiThemeBanner,
+	'classic-theme': ClassicThemeBanner,
 	default: DefaultBanner,
 };
 
@@ -280,6 +282,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
+			break;
+		case ! isBlockTheme:
+			bannerStatus = 'classic-theme';
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
