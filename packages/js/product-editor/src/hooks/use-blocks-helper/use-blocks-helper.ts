@@ -33,30 +33,11 @@ export function useBlocksHelper() {
 				'woocommerce/product-sku-field'
 			);
 
-		console.log( 'skuClientIds', skuClientIds );
 		if ( skuClientIds.length ) {
 			return getClosestParentTabId( skuClientIds[ 0 ] );
 		}
 		return 'inventory';
 	}
-
-	// function getParentTab( clientId: string ) {
-	// 	// const skuClientIds = wp.data.select( wp.blockEditor.store ).getBlocksByName('woocommerce/product-sku-field');
-	// 	// errorContext = skuClientIds.length ? getParentTabId( skuClientIds[0] ) : 'inventory';
-	// 	const skuClientIds =
-	// 		// @ts-expect-error Outdated type definition.
-	// 		select( 'core/block-editor' ).getBlocksByName(
-	// 			'woocommerce/product-sku-field'
-	// 		);
-	// 	const errorContext = skuClientIds.length
-	// 		? getParentTabId( skuClientIds[ 0 ] )
-	// 		: 'inventory';
-	// 	console.log( 'errorContext', errorContext );
-	// 	return errorContext;
-	// 	// if ( ! closestParentClientId ) {
-	// 	// 	return '';
-	// 	// }
-	// }
 
 	return {
 		getParentTabId,
