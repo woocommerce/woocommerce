@@ -28,7 +28,7 @@ use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
-use Automattic\WooCommerce\Loggers\RemoteLogger;
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * Main WooCommerce Class.
