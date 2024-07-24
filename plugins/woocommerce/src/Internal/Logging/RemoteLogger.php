@@ -227,7 +227,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( ! $this->is_tracking_opted_in() ) {
+		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
 			return false;
 		}
 
@@ -240,15 +240,6 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Check if the user has opted into tracking/logging.
-	 *
-	 * @return bool
-	 */
-	private function is_tracking_opted_in() {
-		return 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
 	}
 
 	/**
