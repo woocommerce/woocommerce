@@ -30,8 +30,8 @@ const createNoticesFromErrors = ( errors: ApiErrorResponse[] ) => {
 /**
  * This function is used to dismiss old errors from the store.
  */
-const dismissNoticesFromErrors = ( oldErrors: ApiErrorResponse[] ) => {
-	oldErrors.forEach( ( error ) => {
+const dismissNoticesFromErrors = ( errors: ApiErrorResponse[] ) => {
+	errors.forEach( ( error ) => {
 		dispatch( 'core/notices' ).removeNotice(
 			error.code,
 			error?.data?.context || 'wc/cart'
