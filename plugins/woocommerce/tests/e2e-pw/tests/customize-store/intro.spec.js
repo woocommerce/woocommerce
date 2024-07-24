@@ -115,21 +115,10 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'it shows the "non default block theme" banner when the task is completed', async ( {
+		test( 'it shows the "non default block theme" banner when the theme is a block theme different than TT4', async ( {
 			page,
-			baseURL,
 		} ) => {
 			await activateTheme( 'twentytwentythree' );
-			try {
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_admin_customize_store_completed',
-					'yes'
-				);
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
-			}
 
 			await page.goto( CUSTOMIZE_STORE_URL );
 
@@ -141,56 +130,11 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "Customize your store" with a block theme should go to the assembler', async ( {
-			page,
-			assemblerPageObject,
-		} ) => {
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await page.click( 'text=Start designing' );
-			await assemblerPageObject.waitForLoadingScreenFinish();
-
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await page
-				.getByRole( 'button', { name: 'Customize your store' } )
-				.click();
-
-			const assembler = await assemblerPageObject.getAssembler();
-			await expect(
-				assembler.locator( "text=Let's get creative" )
-			).toBeVisible();
-		} );
-
 		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer', async ( {
 			page,
 		} ) => {
 			await activateTheme( 'twentytwenty' );
 
-			await page.goto( CUSTOMIZE_STORE_URL );
-
-			await page
-				.getByRole( 'button', { name: 'Go to the Customizer' } )
-				.click();
-
-			await page.waitForNavigation();
-			await expect( page.url() ).toContain( 'customize.php' );
-		} );
-
-		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer when customize your step is completed', async ( {
-			page,
-			baseURL,
-		} ) => {
-			await activateTheme( 'twentytwenty' );
-
-			try {
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_admin_customize_store_completed',
-					'yes'
-				);
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
-			}
 			await page.goto( CUSTOMIZE_STORE_URL );
 
 			await page

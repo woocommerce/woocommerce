@@ -8,6 +8,7 @@ import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getNewPath } from '@woocommerce/navigation';
 import { Sender } from 'xstate';
+import { addQueryArgs } from '@wordpress/url';
 import {
 	Notice,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment

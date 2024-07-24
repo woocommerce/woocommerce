@@ -7,7 +7,6 @@ import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
