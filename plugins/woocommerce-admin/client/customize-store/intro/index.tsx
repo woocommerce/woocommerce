@@ -296,11 +296,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			customizeStoreTaskCompleted &&
 			isBlockTheme &&
 			! isDefaultTheme:
-			bannerStatus = FlowType.noAI;
-			break;
-		case context.flowType === FlowType.noAI &&
-			customizeStoreTaskCompleted &&
-			! isDefaultTheme:
 			bannerStatus = 'non-default-block-theme';
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:

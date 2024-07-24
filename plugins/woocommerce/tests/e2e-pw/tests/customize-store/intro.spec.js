@@ -115,6 +115,32 @@ test.describe(
 			).toBeVisible();
 		} );
 
+		test( 'it shows the "non default block theme" banner when the task is completed', async ( {
+			page,
+			baseURL,
+		} ) => {
+			await activateTheme( 'twentytwentythree' );
+			try {
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_admin_customize_store_completed',
+					'yes'
+				);
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
+			}
+
+			await page.goto( CUSTOMIZE_STORE_URL );
+
+			await expect( page.locator( 'h1' ) ).toHaveText(
+				'Customize your theme'
+			);
+			await expect(
+				page.getByRole( 'button', { name: 'Go to the Editor' } )
+			).toBeVisible();
+		} );
+
 		test( 'Clicking on "Customize your store" with a block theme should go to the assembler', async ( {
 			page,
 			assemblerPageObject,
