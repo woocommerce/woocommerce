@@ -21,7 +21,7 @@ type BaseTreeProps = {
 	 */
 	selected?: Item | Item[];
 
-	onExpand?( index: number ): void;
+	onExpand?( index: number, value: boolean ): void;
 
 	highlightedIndex?: number;
 	/**

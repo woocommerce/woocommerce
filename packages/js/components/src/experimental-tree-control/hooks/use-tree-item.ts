@@ -79,16 +79,19 @@ export function useTreeItem( {
 		getLabel,
 		treeItemProps: {
 			...props,
-			role: 'none',
+			id:
+				'woocommerce-experimental-select-tree-control__menu-item-' +
+				item.data.index,
+			role: 'option',
 		},
 		headingProps: {
 			role: 'treeitem',
 			'aria-selected': selection.checkedStatus !== 'unchecked',
 			'aria-expanded': item.children.length
-				? expander.isExpanded
+				? item.data.isExpanded
 				: undefined,
 			'aria-owns':
-				item.children.length && expander.isExpanded
+				item.children.length && item.data.isExpanded
 					? subTreeId
 					: undefined,
 			style: {
