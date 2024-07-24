@@ -116,5 +116,4 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 		do_action( 'load-edit.php' );
 		$this->assertRecordedTracksEvent( 'wcadmin_products_search' );
 	}
-
 }
