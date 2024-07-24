@@ -31,5 +31,5 @@ const blockConfig = {
 registerBlockSingleProductTemplate( {
 	blockName: 'woocommerce/product-price',
 	blockSettings: blockConfig,
-	isAvailableOnPostEditor: false,
+	isAvailableOnPostEditor: true,
 } );
