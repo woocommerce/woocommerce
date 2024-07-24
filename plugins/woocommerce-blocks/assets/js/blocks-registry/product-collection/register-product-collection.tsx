@@ -25,7 +25,7 @@ export interface ProductCollectionConfig extends BlockVariation {
 		setPreviewState?: SetPreviewState;
 		initialPreviewState?: PreviewState;
 	};
-	usesReference?: string;
+	usesReference?: string[];
 }
 
 /**
@@ -306,10 +306,10 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// usesReference
 	if (
 		config.usesReference !== undefined &&
-		typeof config.usesReference !== 'string'
+		! Array.isArray( config.usesReference )
 	) {
 		console.error(
-			'Invalid usesReference: usesReference must be a string.'
+			'Invalid usesReference: usesReference must be an array of strings.'
 		);
 		return false;
 	}
@@ -426,7 +426,11 @@ export const __experimentalRegisterProductCollection = (
 	 * If setPreviewState or initialPreviewState is provided, inject the setPreviewState & initialPreviewState props.
 	 * This is useful for handling preview mode in the editor.
 	 */
-	if ( setPreviewState || initialPreviewState || usesReference?.length ) {
+	if (
+		setPreviewState ||
+		initialPreviewState ||
+		( Array.isArray( usesReference ) && usesReference.length > 0 )
+	) {
 		/**
 		 * This function is used to inject following props to the BlockEdit component:
 		 * 1. preview: { setPreviewState, initialPreviewState }

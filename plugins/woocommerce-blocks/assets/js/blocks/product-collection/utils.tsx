@@ -155,20 +155,20 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
  * This message will be shown when the usesReference isn't available on the Editor side, but is available on the Frontend.
  */
 export const getUsesReferencePreviewMessage = (
-	usesReference: string,
+	usesReference: string[],
 	location: WooCommerceBlockLocation
 ) => {
-	if ( ! usesReference ) {
+	if ( ! ( Array.isArray( usesReference ) && usesReference.length > 0 ) ) {
 		return '';
 	}
 
-	if ( usesReference === location.type ) {
+	if ( usesReference.includes( location.type ) ) {
 		/**
 		 * Block shouldn't be in preview mode when:
-		 * 1. usesReference is archive and termId is available.
-		 * 2. usesReference is product and productId is available.
+		 * 1. Current location is archive and termId is available.
+		 * 2. Current location is product and productId is available.
 		 *
-		 * In both cases, we have required context on the editor side.
+		 * Because in these cases, we have required context on the editor side.
 		 */
 		if (
 			( location.type === LocationType.Archive &&
@@ -208,7 +208,7 @@ export const useSetPreviewState = ( {
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
-	usesReference: string;
+	usesReference: string[];
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
