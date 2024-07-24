@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Reduce the amount of duplicated code in Analytics `DataStore`s. Deprecate `DataStoreInterface`.
+Reduce the amount of duplicated code in Analytics `DataStore`s.
