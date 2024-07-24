@@ -8,6 +8,7 @@ wp-env run tests-cli wp rewrite structure '/%postname%/' --hard
 
 echo -e 'Activate LazyLoad plugin \n'
 wp-env run tests-cli wp plugin activate rocket-lazy-load
+wp-env run tests-cli wp option update rocket_lazyload_options 'a:1:{s:6:"images";s:1:"1";}'
 
 echo -e 'Activate Filter Setter utility plugin \n'
 wp-env run tests-cli wp plugin activate filter-setter
