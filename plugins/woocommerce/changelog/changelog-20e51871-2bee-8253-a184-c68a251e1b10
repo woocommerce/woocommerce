@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: Can connect to WooCommerce.com

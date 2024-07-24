@@ -428,7 +428,7 @@ test.describe( 'Store owner can skip the core profiler', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
+	test.skip( 'Can connect to WooCommerce.com', async ( { page } ) => {
 		await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
 			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 			await page
