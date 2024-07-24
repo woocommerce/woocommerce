@@ -2,6 +2,7 @@
  * External dependencies
  */
 import debug from 'debug';
+import { loadScript } from '@automattic/load-script';
 
 /**
  * Internal dependencies
@@ -64,7 +65,7 @@ export function recordEvent(
  * @param {Object} eventProperties event properties to include in the event
  * @param {string} consentText     The text providing consent for this event.
  */
-export function recordConsentedEvent(
+export async function recordConsentedEvent(
 	eventName: string,
 	eventProperties?: ExtraProperties,
 	consentText: string
@@ -83,11 +84,10 @@ export function recordConsentedEvent(
 	} );
 
 	if ( isDevelopmentMode ) {
-		window.wcTracks.validateEvent( eventName, eventProperties );
 		return false;
 	}
-
-	window.wcTracks.recordEvent( eventName, eventProperties );
+	await loadScript( 'https://stats.wp.com/w.js' );
+	window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 }
 
 const tracksQueue = {
