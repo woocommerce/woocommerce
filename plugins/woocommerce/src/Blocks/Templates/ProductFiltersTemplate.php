@@ -67,7 +67,7 @@ class ProductFiltersTemplate extends AbstractTemplatePart {
 		// If template part is modified, Core will pick it up and register a variation
 		// for it. Check if the variation already exists before adding it.
 		foreach ( $variations as $variation ) {
-			if ( ! empty( $variation['attributes']['slug'] ) && $variation['attributes']['slug'] === 'product-filters' ) {
+			if ( ! empty( $variation['attributes']['slug'] ) && 'product-filters' === $variation['attributes']['slug'] ) {
 					return $variations;
 			}
 		}
