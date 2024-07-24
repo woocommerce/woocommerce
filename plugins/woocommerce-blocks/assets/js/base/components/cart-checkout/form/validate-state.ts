@@ -36,7 +36,7 @@ export const validateState = (
 
 	if ( hasValidationError ) {
 		if ( ! isRequired || values.state ) {
-			// Validation error has been set, but its no longer required, or the state was provided, clear the error.
+			// Validation error has been set, but it's no longer required, or the state was provided, clear the error.
 			dispatch( VALIDATION_STORE_KEY ).clearValidationError(
 				validationErrorId
 			);
