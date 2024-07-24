@@ -39,7 +39,7 @@ import ColumnsControl from './columns-control';
 import {
 	InheritQueryControl,
 	FilterableControl,
-} from './inherit-query-control';
+} from './use-page-context-control';
 import OrderByControl from './order-by-control';
 import OnSaleControl from './on-sale-control';
 import StockStatusControl from './stock-status-control';
