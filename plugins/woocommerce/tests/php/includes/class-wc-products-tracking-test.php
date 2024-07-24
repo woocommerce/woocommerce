@@ -58,6 +58,9 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 		$product->set_price( '10.00' );
 		$product->save();
 		$this->assertNotRecordedTracksEvent( 'wcadmin_product_add_publish' );
+		// Empty save.
+		$product->save();
+		$this->assertNotRecordedTracksEvent( 'wcadmin_product_add_publish' );
 	}
 
 	/**
