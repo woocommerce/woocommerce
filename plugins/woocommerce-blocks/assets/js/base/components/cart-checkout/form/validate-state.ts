@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { dispatch, select } from '@wordpress/data';
-import { ShippingAddress } from '@woocommerce/settings';
+import { KeyedFormField, ShippingAddress } from '@woocommerce/settings';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
 function previousAddress( initialValue?: ShippingAddress ) {
@@ -28,11 +28,12 @@ const lastBillingAddress = previousAddress();
 export const validateState = (
 	addressType: string,
 	values: ShippingAddress,
-	isRequired: boolean
+	stateField: KeyedFormField
 ) => {
 	const validationErrorId = `${ addressType }_state`;
 	const hasValidationError =
 		select( VALIDATION_STORE_KEY ).getValidationError( validationErrorId );
+	const isRequired = stateField.required;
 
 	const lastAddress =
 		addressType === 'shipping'
@@ -63,7 +64,11 @@ export const validateState = (
 		// No validation has been set yet, if it's required, there is a country set and no state, set the error.
 		dispatch( VALIDATION_STORE_KEY ).setValidationErrors( {
 			[ validationErrorId ]: {
-				message: __( 'Please select your state', 'woocommerce' ),
+				message: sprintf(
+					/* translators: %s will be the state field label in lowercase e.g. "state" */
+					__( 'Please select a %s', 'woocommerce' ),
+					stateField.label.toLowerCase()
+				),
 				hidden: true,
 			},
 		} );

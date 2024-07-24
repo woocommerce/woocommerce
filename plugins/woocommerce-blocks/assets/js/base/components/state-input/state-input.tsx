@@ -48,8 +48,11 @@ const StateInput = ( {
 		if ( countryStates && Object.keys( countryStates ).length > 0 ) {
 			const emptyStateOption: SelectOption = {
 				value: '',
-				/* translators: %s will be the type of province depending on country, e.g "state" or "state/county" or "department" */
-				label: sprintf( __( 'Select a %s', 'woocommerce' ), label ),
+				label: sprintf(
+					/* translators: %s will be the type of province depending on country, e.g "state" or "state/county" or "department" */
+					__( 'Select a %s', 'woocommerce' ),
+					label?.toLowerCase()
+				),
 				disabled: true,
 			};
 

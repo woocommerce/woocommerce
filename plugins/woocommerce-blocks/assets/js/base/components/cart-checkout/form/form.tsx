@@ -106,7 +106,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 			);
 
 			if ( stateField ) {
-				validateState( addressType, values, stateField.required );
+				validateState( addressType, values, stateField );
 			}
 		}
 	}, [ values, addressType, addressFormFields ] );
