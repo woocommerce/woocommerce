@@ -24,7 +24,6 @@ const EditableButton = ( {
 	onChange,
 	placeholder,
 	value,
-	children,
 	...props
 }: EditableButtonProps ) => {
 	return (
@@ -36,7 +35,6 @@ const EditableButton = ( {
 				placeholder={ placeholder }
 				onChange={ onChange }
 			/>
-			{ children }
 		</Button>
 	);
 };
