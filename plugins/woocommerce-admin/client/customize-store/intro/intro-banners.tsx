@@ -379,3 +379,28 @@ export const ClassicThemeBanner = () => {
 		></BaseIntroBanner>
 	);
 };
+
+export const NonDefaultBlockThemeBanner = () => {
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
+			bannerText={ __(
+				'Customize everything from the color palette and the fonts to the page layouts, making sure every detail aligns with your brand.',
+				'woocommerce'
+			) }
+			bannerClass="existing-no-ai-theme-banner"
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: 'block',
+				} );
+				navigateOrParent( window, 'site-editor.php' );
+			} }
+			bannerButtonText={ __( 'Go to the Editor', 'woocommerce' ) }
+			showAIDisclaimer={ false }
+			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
+		></BaseIntroBanner>
+	);
+};

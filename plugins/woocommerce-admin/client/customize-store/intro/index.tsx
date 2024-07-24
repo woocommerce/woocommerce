@@ -38,6 +38,7 @@ import {
 	NoAIBanner,
 	ExistingNoAiThemeBanner,
 	ClassicThemeBanner,
+	NonDefaultBlockThemeBanner,
 } from './intro-banners';
 import welcomeTourImg from '../assets/images/design-your-own.svg';
 import professionalThemeImg from '../assets/images/professional-theme.svg';
@@ -69,6 +70,7 @@ const BANNER_COMPONENTS = {
 	[ FlowType.noAI ]: NoAIBanner,
 	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	'classic-theme': ClassicThemeBanner,
+	'non-default-block-theme': NonDefaultBlockThemeBanner,
 	default: DefaultBanner,
 };
 
@@ -285,6 +287,11 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case ! isBlockTheme:
 			bannerStatus = 'classic-theme';
+			break;
+		case context.flowType === FlowType.noAI &&
+			customizeStoreTaskCompleted &&
+			! isDefaultTheme:
+			bannerStatus = 'non-default-block-theme';
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
