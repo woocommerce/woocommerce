@@ -5,30 +5,28 @@ This directory contains some components and hooks used for validations in the pr
 ## What happens when there is an error in the form?
 
 1. Fields registered in the validator context [will get validated](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/contexts/validation-context/validation-provider.tsx#L87-L110). A field can be registered by making use of the useValidation hook.
-
     - For instance:
 
     ```javascript
     const {
-    	ref: myRef,
-    	error: myValidationError,
-    	validate: validateMyField,
+      ref: myRef,
+      error: myValidationError,
+      validate: validateMyField,
     } = useValidation <
     Product >
     ( 'myfield',
     async function myFieldValidator() {
-    	if ( ! myField ) {
-    		return {
-    			message: 'My error message',
-    			context: clientId,
-    		};
-    	}
+      if ( ! myField ) {
+        return {
+          message: 'My error message',
+          context: clientId,
+        };
+      }
     },
     [ myField ] );
     ```
 
 2. If a field has an error, it returns an object consisting of the error/validation message, the context, and the validatorId ([link](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/contexts/validation-context/validation-provider.tsx#L74) ).
-
     - The `context` contains the block Id, and the `validatorId` a unique ID for the validator specifically ( generally a prefix with the block id ).
     - If, for instance, the name field is empty, the validation will fail and will throw an object like this:
 
