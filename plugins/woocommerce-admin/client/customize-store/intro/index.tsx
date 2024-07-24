@@ -303,7 +303,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
 			break;
-		case ! isBlockTheme:
+		case context.flowType === FlowType.noAI && ! isBlockTheme:
 			bannerStatus = 'classic-theme';
 			break;
 		case context.flowType === FlowType.noAI &&
