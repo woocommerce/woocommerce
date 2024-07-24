@@ -111,11 +111,11 @@ test.describe(
 				'Customize your theme'
 			);
 			await expect(
-				page.getByRole( 'button', { name: 'Go to the Editor' } )
+				page.getByRole( 'button', { name: 'Customize your store' } )
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "Go to the Editor" with a block theme should go to the assembler', async ( {
+		test( 'Clicking on "Customize your store" with a block theme should go to the assembler', async ( {
 			page,
 			assemblerPageObject,
 		} ) => {
@@ -125,7 +125,7 @@ test.describe(
 
 			await page.goto( CUSTOMIZE_STORE_URL );
 			await page
-				.getByRole( 'button', { name: 'Go to the Editor' } )
+				.getByRole( 'button', { name: 'Customize your store' } )
 				.click();
 
 			const assembler = await assemblerPageObject.getAssembler();
