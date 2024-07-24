@@ -70,8 +70,8 @@ class DataStore extends CustomersDataStore implements DataStoreInterface {
 	 * @return array Query parameters.
 	 */
 	public function get_default_query_vars() {
-		$defaults                 = ReportsDataStore::get_default_query_vars();
-		$defaults['orderby']      = 'date_registered';
+		$defaults            = ReportsDataStore::get_default_query_vars();
+		$defaults['orderby'] = 'date_registered';
 		// Do not set `order_before` and `order_after` here, like in the parent class.
 		return $defaults;
 	}
