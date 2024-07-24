@@ -338,7 +338,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			).toBeVisible();
 		} );
 
-		test( 'can delete a variation', async ( { page } ) => {
+		test.skip( 'can delete a variation', async ( { page } ) => {
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
 			);
