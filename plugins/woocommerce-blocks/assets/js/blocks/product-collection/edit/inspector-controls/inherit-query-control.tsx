@@ -28,7 +28,7 @@ import {
 const label = __( 'Use page context', 'woocommerce' );
 
 const helpText = __(
-	'Adjust the dispalyed products depending on the current template and any applied query filters.',
+	'Adjust the displayed products depending on the current template and any applied query filters.',
 	'woocommerce'
 );
 
