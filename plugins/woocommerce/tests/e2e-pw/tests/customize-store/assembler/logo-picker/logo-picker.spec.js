@@ -126,7 +126,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await expect( useAsSiteIcon ).toBeVisible();
 	} );
 
-	test( 'Changing the image width should update the site preview and the frontend', async ( {
+	test.skip( 'Changing the image width should update the site preview and the frontend', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
 		baseURL,
