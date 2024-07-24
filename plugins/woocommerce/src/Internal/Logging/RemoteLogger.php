@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * WooCommerce Remote Logger
@@ -286,7 +287,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		$wc_plugin_dir = 'plugins/' . dirname( WC_PLUGIN_BASENAME );
+		$wc_plugin_dir = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
 
 		// Check if the error message contains the WooCommerce plugin directory.
 		if ( is_string( $message ) && str_contains( $message, $wc_plugin_dir ) ) {
@@ -402,13 +403,13 @@ class RemoteLogger extends \WC_Log_Handler {
 	 *
 	 * The trace is sanitized by:
 	 *
-	 * 1. Removing the path to the WordPress installation directory.
-	 * 2. Removing the path to the WooCommerce plugin directory if it is present.
+	 * 1. Remove the absolute path to the WooCommerce plugin directory.
+	 * 2. Remove the absolute path to the WordPress root directory.
 	 *
 	 * For example, the trace:
 	 *
 	 * /var/www/html/wp-content/plugins/woocommerce/includes/class-wc-remote-logger.php on line 123
-	 * will be sanitized to: **\/plugins/woocommerce/includes/class-wc-remote-logger.php on line 123
+	 * will be sanitized to: **\/woocommerce/includes/class-wc-remote-logger.php on line 123
 	 *
 	 * @param string $message The message to sanitize.
 	 * @return string The sanitized message.
@@ -418,9 +419,16 @@ class RemoteLogger extends \WC_Log_Handler {
 			return $message;
 		}
 
-		$pattern           = '/\/.*(\/plugins\/' . preg_quote( dirname( WC_PLUGIN_BASENAME ), '/' ) . '.*|\/wp-.*)/i';
-		$sanitized_message = preg_replace( $pattern, '**$1', $message );
-		return $sanitized_message;
+		$wc_path = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
+		$wp_path = StringUtil::normalize_local_path_slashes( ABSPATH );
+
+		$sanitized = str_replace(
+			array( $wc_path, $wp_path ),
+			array( '**/' . dirname( WC_PLUGIN_BASENAME ) . '/', '**/' ),
+			$message
+		);
+
+		return $sanitized;
 	}
 
 	/**

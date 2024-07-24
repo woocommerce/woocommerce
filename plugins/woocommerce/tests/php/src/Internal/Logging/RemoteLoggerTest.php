@@ -242,7 +242,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_formatted_log_basic() {
 		$level   = 'error';
-		$message = 'Fatal error occurred at line 123 in /home/user/path/wp-content/file.php';
+		$message = 'Fatal error occurred at line 123 in ' . ABSPATH . 'wp-content/file.php';
 		$context = array( 'tags' => array( 'tag1', 'tag2' ) );
 
 		$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
@@ -275,20 +275,20 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	public function test_get_formatted_log_with_backtrace() {
 		$level   = 'error';
 		$message = 'Test error message';
-		$context = array( 'backtrace' => '/home/user/path/wp-content/file.php' );
+		$context = array( 'backtrace' => ABSPATH . 'wp-content/file.php' );
 
 		$result = $this->sut->get_formatted_log( $level, $message, $context );
 		$this->assertEquals( '**/wp-content/file.php', $result['trace'] );
 
-		$context = array( 'backtrace' => '/home/user/path/wp-content/plugins/woocommerce/file.php' );
+		$context = array( 'backtrace' => ABSPATH . 'wp-content/plugins/woocommerce/file.php' );
 		$result  = $this->sut->get_formatted_log( $level, $message, $context );
-		$this->assertEquals( '**/plugins/woocommerce/file.php', $result['trace'] );
+		$this->assertEquals( '**/woocommerce/file.php', $result['trace'] );
 
 		$context = array( 'backtrace' => true );
 		$result  = $this->sut->get_formatted_log( $level, $message, $context );
 
 		$this->assertIsString( $result['trace'] );
-		$this->assertStringContainsString( '**/plugins/woocommerce/tests/php/src/Internal/Loggers/RemoteLoggerTest.php', $result['trace'] );
+		$this->assertStringContainsString( '**/woocommerce/tests/php/src/Internal/Logging/RemoteLoggerTest.php', $result['trace'] );
 	}
 
 
@@ -457,13 +457,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 * @param bool   $expected_result  Expected result.
 	 */
 	public function test_is_third_party_error( $message, $context, $expected_result ) {
-		$this->fake_logger = new class() extends RemoteLogger {
-			public function check_is_third_party_error( $message, $context ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
-				return parent::is_third_party_error( $message, $context );
-			}
-		};
-
-		$result = $this->fake_logger->check_is_third_party_error( $message, $context );
+		$result = $this->invoke_private_method( $this->sut, 'is_third_party_error', array( $message, $context ) );
 
 		$this->assertEquals( $expected_result, $result );
 	}
@@ -476,14 +470,19 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	public function data_provider_for_is_third_party_error() {
 		return array(
 			array(
-				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/woocommerce/file.php',
+				'Fatal error occurred at line 123 in' . WC_ABSPATH . 'file.php',
 				array(),
 				false,
 			),
 			array(
 				'Fatal error occurred at line 123 in /home/user/path/wp-content/file.php',
+				array(),
+				false,  // source is not.
+			),
+			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/file.php',
 				array( 'source' => 'fatal-errors' ),
-				false,
+				false, // backtrace is not set.
 			),
 			array(
 				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
@@ -491,17 +490,27 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 					'source'    => 'fatal-errors',
 					'backtrace' => array(
 						'/home/user/path/wp-content/plugins/3rd-plugin/file.php',
-						'/home/user/path/wp-content/plugins/woocommerce/file.php',
+						WC_ABSPATH . 'file.php',
 					),
 				),
 				false,
 			),
 			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/woocommerce-3rd-plugin/file.php',
+				array(
+					'source'    => 'fatal-errors',
+					'backtrace' => array(
+						WP_PLUGIN_DIR . 'woocommerce-3rd-plugin/file.php',
+					),
+				),
+				true,
+			),
+			array(
 				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
 				array(
 					'source'    => 'fatal-errors',
 					'backtrace' => array(
-						'/home/user/path/wp-content/plugins/3rd-plugin/file.php',
+						WP_PLUGIN_DIR . '3rd-plugin/file.php',
 					),
 				),
 				true,
@@ -512,12 +521,28 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 					'source'    => 'fatal-errors',
 					'backtrace' => array(
 						array(
-							'file' => '/home/user/path/wp-content/plugins/3rd-plugin/file.php',
+							'file' => WP_PLUGIN_DIR . '3rd-plugin/file.php',
 						),
 					),
 				),
 				true,
 			),
 		);
+	}
+
+
+	/**
+	 * Helper method to invoke private methods.
+	 *
+	 * @param object $obj     Object instance.
+	 * @param string $method_name Name of the private method.
+	 * @param array  $parameters  Parameters to pass to the method.
+	 * @return mixed
+	 */
+	private function invoke_private_method( $obj, $method_name, $parameters = array() ) {
+		$reflection = new \ReflectionClass( get_class( $obj ) );
+		$method     = $reflection->getMethod( $method_name );
+		$method->setAccessible( true );
+		return $method->invokeArgs( $obj, $parameters );
 	}
 }
