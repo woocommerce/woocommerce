@@ -28,6 +28,7 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
+	filterable: boolean;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	__privatePreviewState?: PreviewState;
 }
@@ -93,6 +94,7 @@ export interface ProductCollectionQuery {
 	isProductCollectionBlock: boolean;
 	woocommerceHandPickedProducts: string[];
 	priceRange: undefined | PriceRange;
+	filterable: boolean;
 }
 
 export type ProductCollectionEditComponentProps =
@@ -118,13 +120,15 @@ export type ProductCollectionSetAttributes = (
 	attrs: Partial< ProductCollectionAttributes >
 ) => void;
 
+export type TrackInteraction = ( filter: CoreFilterNames | string ) => void;
+
 export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
 	setAttributes: ProductCollectionSetAttributes;
 };
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
-	trackInteraction: ( filter: CoreFilterNames | string ) => void;
+	trackInteraction: TrackInteraction;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
 };
 
@@ -150,6 +154,7 @@ export enum CoreFilterNames {
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
 	PRICE_RANGE = 'price-range',
+	FILTERABLE = 'filterable',
 }
 
 export type CollectionName = CoreCollectionNames | string;

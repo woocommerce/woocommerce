@@ -22,7 +22,7 @@
 		"test": "pnpm -r test",
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
-		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune && pnpm i",
+		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune",
 		"buildclean": "git clean --force -d -X ./packages ./plugins ./tools",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",

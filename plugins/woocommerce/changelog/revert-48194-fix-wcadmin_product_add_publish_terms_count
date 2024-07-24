@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Revert fixing terms count in tracking PR as it caused product_add_publish to be triggered more than usual.
