@@ -38,7 +38,7 @@ export const SELECTORS = {
 	},
 	onSaleControlLabel: 'Show only products on sale',
 	featuredControlLabel: 'Show only featured products',
-	inheritQueryFromTemplateControl:
+	usePageContextControl:
 		'.wc-block-product-collection__inherit-query-control',
 	shrinkColumnsToFit: 'Responsive',
 	productSearchLabel: 'Search',
@@ -387,7 +387,7 @@ class ProductCollectionPage {
 	}
 
 	async setNumberOfColumns( numberOfColumns: number ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const inputField = sidebarSettings.getByRole( 'spinbutton', {
 			name: 'Columns',
 		} );
@@ -403,7 +403,7 @@ class ProductCollectionPage {
 			| 'popularity/desc'
 			| 'rating/desc'
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const orderByComboBox = sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
@@ -413,7 +413,7 @@ class ProductCollectionPage {
 	}
 
 	async getOrderByElement() {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		return sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
@@ -436,7 +436,7 @@ class ProductCollectionPage {
 			onSale: true,
 		}
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.onSaleControlLabel
 		);
@@ -461,7 +461,7 @@ class ProductCollectionPage {
 			isLocatorsRefreshNeeded: true,
 		}
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.featuredControlLabel
 		);
@@ -488,7 +488,7 @@ class ProductCollectionPage {
 		const operatorSelector = SELECTORS.createdFilter.operator[ operator ];
 		const rangeSelector = SELECTORS.createdFilter.range[ range ];
 
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const operatorButton = sidebarSettings.getByLabel( operatorSelector );
 		const rangeButton = sidebarSettings.getByLabel( rangeSelector );
 
@@ -500,7 +500,7 @@ class ProductCollectionPage {
 		const minInputSelector = SELECTORS.priceRangeFilter.min;
 		const maxInputSelector = SELECTORS.priceRangeFilter.max;
 
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const minInput = sidebarSettings.getByLabel( minInputSelector );
 		const maxInput = sidebarSettings.getByLabel( maxInputSelector );
 
@@ -511,7 +511,7 @@ class ProductCollectionPage {
 	}
 
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel( filterName );
 		await input.click();
 
@@ -540,7 +540,7 @@ class ProductCollectionPage {
 	}
 
 	async setKeyword( keyword: string ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel( 'Keyword' );
 		await input.clear();
 		await input.fill( keyword );
@@ -603,7 +603,7 @@ class ProductCollectionPage {
 	}
 
 	async setShrinkColumnsToFit( value = true ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.shrinkColumnsToFit
 		);
@@ -615,7 +615,7 @@ class ProductCollectionPage {
 	}
 
 	async setProductAttribute( attribute: 'Color' | 'Size', value: string ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 
 		const productAttributesContainer = sidebarSettings.locator(
 			'.woocommerce-product-attributes'
@@ -644,9 +644,9 @@ class ProductCollectionPage {
 	}
 
 	async setInheritQueryFromTemplate( inheritQueryFromTemplate: boolean ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.locator(
-			`${ SELECTORS.inheritQueryFromTemplateControl } input`
+			`${ SELECTORS.usePageContextControl } input`
 		);
 		if ( inheritQueryFromTemplate ) {
 			await input.check();
@@ -700,7 +700,7 @@ class ProductCollectionPage {
 	/**
 	 * Locators
 	 */
-	async locateSidebarSettings() {
+	locateSidebarSettings() {
 		return this.page.getByRole( 'region', {
 			name: 'Editor settings',
 		} );

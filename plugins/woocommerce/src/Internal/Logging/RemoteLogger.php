@@ -1,6 +1,8 @@
 <?php
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Internal\Logging;
+
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -10,11 +12,14 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  *
  * No personal information is logged, only error information and relevant context.
  *
- * @class WC_Remote_Logger
+ * @class RemoteLogger
  * @since 9.2.0
  * @package WooCommerce\Classes
  */
-class WC_Remote_Logger {
+class RemoteLogger {
+	const WC_LATEST_VERSION_TRANSIENT = 'latest_woocommerce_version';
+	const FETCH_LATEST_VERSION_RETRY  = 'fetch_latest_woocommerce_version_retry';
+
 	/**
 	 * Determines if remote logging is allowed based on the following conditions:
 	 *
@@ -85,24 +90,36 @@ class WC_Remote_Logger {
 	 * @return string|null
 	 */
 	private function fetch_latest_woocommerce_version() {
-		$transient_key  = 'latest_woocommerce_version';
-		$cached_version = get_transient( $transient_key );
+		$cached_version = get_transient( self::WC_LATEST_VERSION_TRANSIENT );
 		if ( $cached_version ) {
 			return $cached_version;
+		}
+
+		$retry_count = get_transient( self::FETCH_LATEST_VERSION_RETRY );
+		if ( false === $retry_count || ! is_numeric( $retry_count ) ) {
+			$retry_count = 0;
+		}
+
+		if ( $retry_count >= 3 ) {
+			return null;
 		}
 
 		if ( ! function_exists( 'plugins_api' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 		}
-
+		// Fetch the latest version from the WordPress API.
 		$plugin_info = plugins_api( 'plugin_information', array( 'slug' => 'woocommerce' ) );
+
 		if ( is_wp_error( $plugin_info ) ) {
+			++$retry_count;
+			set_transient( self::FETCH_LATEST_VERSION_RETRY, $retry_count, HOUR_IN_SECONDS );
 			return null;
 		}
 
 		if ( ! empty( $plugin_info->version ) ) {
 			$latest_version = $plugin_info->version;
-			set_transient( $transient_key, $latest_version, DAY_IN_SECONDS );
+			set_transient( self::WC_LATEST_VERSION_TRANSIENT, $latest_version, WEEK_IN_SECONDS );
+			delete_transient( self::FETCH_LATEST_VERSION_RETRY );
 			return $latest_version;
 		}
 

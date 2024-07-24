@@ -80,7 +80,9 @@ const isInProductArchive = () => {
 		: false;
 };
 
-const isFirstBlockThatSyncsWithQuery = () => {
+const isFirstBlockThatUsesPageContext = (
+	property: 'inherit' | 'filterable'
+) => {
 	// We use experimental selector because it's been graduated as stable (`getBlocksByName`)
 	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
 	// available in WordPress 6.5.
@@ -97,15 +99,23 @@ const isFirstBlockThatSyncsWithQuery = () => {
 		( clientId ) => {
 			const block = getBlock( clientId );
 
-			return block.attributes?.query?.inherit;
+			return block.attributes?.query?.[ property ];
 		}
 	);
 
 	return ! blockAlreadySyncedWithQuery;
 };
 
-export function getDefaultValueOfInheritQueryFromTemplate() {
-	return isInProductArchive() ? isFirstBlockThatSyncsWithQuery() : false;
+export function getDefaultValueOfInherit() {
+	return isInProductArchive()
+		? isFirstBlockThatUsesPageContext( 'inherit' )
+		: false;
+}
+
+export function getDefaultValueOfFilterable() {
+	return ! isInProductArchive()
+		? isFirstBlockThatUsesPageContext( 'filterable' )
+		: false;
 }
 
 /**
@@ -299,7 +309,8 @@ export const getDefaultQuery = (
 	...currentQuery,
 	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
 	order: DEFAULT_QUERY.order as TProductCollectionOrder,
-	inherit: getDefaultValueOfInheritQueryFromTemplate(),
+	inherit: getDefaultValueOfInherit(),
+	filterable: getDefaultValueOfFilterable(),
 } );
 
 export const getDefaultDisplayLayout = () =>
@@ -319,7 +330,8 @@ export const getDefaultProductCollection = () =>
 			...DEFAULT_ATTRIBUTES,
 			query: {
 				...DEFAULT_ATTRIBUTES.query,
-				inherit: getDefaultValueOfInheritQueryFromTemplate(),
+				inherit: getDefaultValueOfInherit(),
+				filterable: getDefaultValueOfFilterable(),
 			},
 		},
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
