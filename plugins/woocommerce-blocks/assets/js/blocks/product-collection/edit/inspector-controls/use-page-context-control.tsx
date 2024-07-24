@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { usePrevious } from '@woocommerce/base-hooks';
+import { select } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import {
 	ToggleControl,
@@ -25,12 +26,53 @@ import {
 	getDefaultValueOfFilterable,
 } from '../../utils';
 
-const label = __( 'Use page context', 'woocommerce' );
+const label = __( 'Sync with current query', 'woocommerce' );
 
-const helpText = __(
+const productArchiveHelpText = __(
+	'Enable to adjust the displayed products based on the current template and any applied filters.',
+	'woocommerce'
+);
+
+const productsByCategoryHelpText = __(
+	'Enable to adjust the displayed products based on the current category and any applied filters.',
+	'woocommerce'
+);
+
+const productsByTagHelpText = __(
+	'Enable to adjust the displayed products based on the current tag and any applied filters.',
+	'woocommerce'
+);
+
+const productsByAttributeHelpText = __(
+	'Enable to adjust the displayed products based on the current attribute and any applied filters.',
+	'woocommerce'
+);
+
+const searchResultsHelpText = __(
+	'Enable to adjust the displayed products based on the current search and any applied filters.',
+	'woocommerce'
+);
+
+const filterableHelpText = __(
 	'Adjust the displayed products depending on the current template and any applied query filters.',
 	'woocommerce'
 );
+
+const getHelpTextForTemplate = ( templateId: string ): string => {
+	if ( templateId.includes( '//taxonomy-product_cat' ) ) {
+		return productsByCategoryHelpText;
+	}
+	if ( templateId.includes( '//taxonomy-product_tag' ) ) {
+		return productsByTagHelpText;
+	}
+	if ( templateId.includes( '//taxonomy-product_attribute' ) ) {
+		return productsByAttributeHelpText;
+	}
+	if ( templateId.includes( '//product-search-results' ) ) {
+		return searchResultsHelpText;
+	}
+	return productArchiveHelpText;
+};
 
 const InheritQueryControl = ( {
 	setQueryAttribute,
@@ -38,6 +80,7 @@ const InheritQueryControl = ( {
 	query,
 }: QueryControlProps ) => {
 	const inherit = query?.inherit;
+	const editSiteStore = select( 'core/edit-site' );
 
 	const queryObjectBeforeInheritEnabled = usePrevious(
 		query,
@@ -47,6 +90,9 @@ const InheritQueryControl = ( {
 	);
 
 	const defaultValue = useMemo( () => getDefaultValueOfInherit(), [] );
+
+	const currentTemplateId = editSiteStore.getEditedPostId() as string;
+	const helpText = getHelpTextForTemplate( currentTemplateId );
 
 	return (
 		<ToolsPanelItem
@@ -111,7 +157,7 @@ const FilterableControl = ( {
 			<ToggleControl
 				className="wc-block-product-collection__inherit-query-control"
 				label={ label }
-				help={ helpText }
+				help={ filterableHelpText }
 				checked={ !! filterable }
 				onChange={ ( value ) => {
 					setQueryAttribute( {

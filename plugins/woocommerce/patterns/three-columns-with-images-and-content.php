@@ -23,8 +23,8 @@ $image_2       = PatternsHelper::get_image_url( $images, 0, 'assets/images/patte
 <!-- /wp:spacer -->
 
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"full","style":{"typography":{"fontStyle":"normal","fontWeight":"700"}}} -->
-<h2 class="wp-block-heading alignfull has-text-align-left" style="font-style:normal;font-weight:700"><strong><?php echo esc_html( $header ); ?></strong></h2>
+<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"full","style":{"typography":{"fontStyle":"normal"}}} -->
+<h2 class="wp-block-heading alignfull has-text-align-left" style="font-style:normal;"><?php echo esc_html( $header ); ?></h2>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
