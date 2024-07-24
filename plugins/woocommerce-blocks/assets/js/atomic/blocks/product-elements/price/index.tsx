@@ -30,7 +30,6 @@ const blockConfig = {
 
 registerBlockSingleProductTemplate( {
 	blockName: 'woocommerce/product-price',
-	blockMetadata: 'woocommerce/product-price',
 	blockSettings: blockConfig,
 	isAvailableOnPostEditor: false,
 } );
