@@ -8,6 +8,7 @@ import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getNewPath } from '@woocommerce/navigation';
 import { Sender } from 'xstate';
+import { addQueryArgs } from '@wordpress/url';
 import {
 	Notice,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -47,7 +48,6 @@ import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
 import { trackEvent } from '~/customize-store/tracking';
-import { addQueryArgs } from '@wordpress/url';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 export type events =

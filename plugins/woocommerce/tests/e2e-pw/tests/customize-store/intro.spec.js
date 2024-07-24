@@ -117,7 +117,6 @@ test.describe(
 
 		test( 'it shows the "non default block theme" banner when the theme is a block theme different than TT4', async ( {
 			page,
-			baseURL,
 		} ) => {
 			await activateTheme( 'twentytwentythree' );
 
