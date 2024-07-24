@@ -391,6 +391,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Clear recorded tracks event.
+	 */
+	public function clear_tracks_events( ) {
+		$events  = WC_Tracks_Footer_Pixel::clear_events();
+	}
+
+	/**
 	 * Assert that a valid tracks event has been recorded.
 	 *
 	 * @param string $event_name Event name.
