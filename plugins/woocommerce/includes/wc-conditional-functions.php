@@ -95,7 +95,7 @@ if ( ! function_exists( 'is_cart' ) ) {
 	function is_cart() {
 		$page_id = wc_get_page_id( 'cart' );
 
-		return ( $page_id && is_page( $page_id ) ) || Constants::is_defined( 'WOOCOMMERCE_CART' ) || wc_post_content_has_shortcode( 'woocommerce_cart' );
+		return ( $page_id && is_page( $page_id ) ) || Constants::is_defined( 'WOOCOMMERCE_CART' ) || wc_post_content_has_shortcode( 'woocommerce_cart' ) || apply_filters( 'woocommerce_is_cart', false );
 	}
 }
 
