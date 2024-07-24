@@ -345,7 +345,7 @@ export const ExistingNoAiThemeBanner = () => {
 					)
 				);
 			} }
-			bannerButtonText={ __( 'Go to the Editor', 'woocommerce' ) }
+			bannerButtonText={ __( 'Customize your store', 'woocommerce' ) }
 			showAIDisclaimer={ false }
 			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>
