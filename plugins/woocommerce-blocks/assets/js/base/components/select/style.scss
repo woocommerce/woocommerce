@@ -59,7 +59,7 @@
 		position: absolute;
 		line-height: 1.25; // =20px when font-size is 16px.
 		left: em($gap-smaller);
-		top: 0;
+		top: 2px;
 		transform-origin: top left;
 		transition: all 200ms ease;
 		color: $input-text-active;

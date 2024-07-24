@@ -260,9 +260,14 @@ const assignCurrentUserEmail = assign( {
 const assignOnboardingProfile = assign( {
 	onboardingProfile: ( {
 		event,
+		context,
 	}: {
 		event: DoneActorEvent< OnboardingProfile | undefined >;
-	} ) => event.output,
+		context: CoreProfilerStateMachineContext;
+	} ) =>
+		! event.output || typeof event.output !== 'object'
+			? context.onboardingProfile // if the onboarding profile is not an object, keep the existing context
+			: event.output,
 } );
 
 const getGeolocation = fromPromise(
