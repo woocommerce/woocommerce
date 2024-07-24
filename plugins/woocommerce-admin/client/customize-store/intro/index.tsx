@@ -25,6 +25,7 @@ import {
 	DesignChangeWarningModal,
 	StartNewDesignWarningModal,
 	StartOverWarningModal,
+	ThemeSwitchWarningModal,
 } from './warning-modals';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import './intro.scss';
@@ -46,6 +47,8 @@ import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
 import { trackEvent } from '~/customize-store/tracking';
+import { addQueryArgs } from '@wordpress/url';
+import { ADMIN_URL } from '~/utils/admin-settings';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -147,11 +150,26 @@ const ThemeCards = ( {
 
 const CustomizedThemeBanners = ( {
 	isBlockTheme,
+	isDefaultTheme,
 	sendEvent,
 }: {
 	isBlockTheme: boolean | undefined;
+	isDefaultTheme: boolean | undefined;
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
+	const redirectToCYSFlow = () => {
+		const customizeStoreDesignUrl = addQueryArgs(
+			`${ ADMIN_URL }admin.php`,
+			{
+				page: 'wc-admin',
+				path: '/customize-store/design',
+			}
+		);
+		window.location.href = customizeStoreDesignUrl;
+	};
+
 	return (
 		<>
 			<p className="select-theme-text">
@@ -181,7 +199,7 @@ const CustomizedThemeBanners = ( {
 											: 'classic',
 									}
 								);
-								if ( isBlockTheme ) {
+								if ( isDefaultTheme ) {
 									navigateOrParent(
 										window,
 										getNewPath(
@@ -191,10 +209,7 @@ const CustomizedThemeBanners = ( {
 										)
 									);
 								} else {
-									navigateOrParent(
-										window,
-										'customize.php?return=/wp-admin/themes.php'
-									);
+									setIsModalOpen( true );
 								}
 							} }
 						>
@@ -236,6 +251,12 @@ const CustomizedThemeBanners = ( {
 					</div>
 				</div>
 			</div>
+			{ isModalOpen && (
+				<ThemeSwitchWarningModal
+					setIsModalOpen={ setIsModalOpen }
+					redirectToCYSFlow={ redirectToCYSFlow }
+				/>
+			) }
 		</>
 	);
 };
@@ -421,6 +442,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					) : (
 						<CustomizedThemeBanners
 							isBlockTheme={ isBlockTheme }
+							isDefaultTheme={ isDefaultTheme }
 							sendEvent={ sendEvent }
 						/>
 					) }

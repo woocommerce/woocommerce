@@ -7,7 +7,6 @@ import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -17,7 +16,6 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
-import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 import { trackEvent } from '../tracking';
 
 export const BaseIntroBanner = ( {
@@ -223,20 +221,6 @@ export const NoAIBanner = ( {
 }: {
 	redirectToCYSFlow: () => void;
 } ) => {
-	const [ isModalOpen, setIsModalOpen ] = useState( false );
-	interface Theme {
-		is_block_theme?: boolean;
-		stylesheet?: string;
-	}
-
-	const currentTheme = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-
-	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
-
 	return (
 		<>
 			<BaseIntroBanner
@@ -248,20 +232,10 @@ export const NoAIBanner = ( {
 				bannerClass="no-ai-banner"
 				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
 				bannerButtonOnClick={ () => {
-					if ( ! isDefaultTheme ) {
-						setIsModalOpen( true );
-					} else {
-						redirectToCYSFlow();
-					}
+					redirectToCYSFlow();
 				} }
 				showAIDisclaimer={ false }
 			/>
-			{ isModalOpen && (
-				<ThemeSwitchWarningModal
-					setIsModalOpen={ setIsModalOpen }
-					redirectToCYSFlow={ redirectToCYSFlow }
-				/>
-			) }
 		</>
 	);
 };
