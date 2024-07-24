@@ -24,7 +24,6 @@ class ZipExportedSchema {
 	public function __construct( $schema, $destination = null ) {
 		$this->schema = $schema;
 
-
 		$this->dir         = $this->get_default_destination_dir();
 		$this->destination = $destination === null ? $this->dir . '/woo-blueprint.zip' : Util::ensure_wp_content_path( $destination );
 		$this->working_dir = $this->dir . '/' . date( 'Ymd' ) . '_' . time();
