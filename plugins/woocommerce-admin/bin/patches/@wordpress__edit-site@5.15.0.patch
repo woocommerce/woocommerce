@@ -1,13 +1,13 @@
 Subject: [PATCH] patch
 ---
-Index: plugins/woocommerce-admin/lock-unlock.js
+Index: build-module/lock-unlock.js
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/plugins/woocommerce-admin/lock-unlock.js b/plugins/woocommerce-admin/lock-unlock.js
---- a/plugins/woocommerce-admin/lock-unlock.js	(revision 04d5c0a5a2beaab1a9e12f62c77610c7f6facd30)
-+++ b/plugins/woocommerce-admin/lock-unlock.js	(date 1721805602909)
+diff --git a/build-module/lock-unlock.js b/build-module/lock-unlock.js
+--- a/build-module/lock-unlock.js
++++ b/build-module/lock-unlock.js
 @@ -1,9 +1,34 @@
  /**
 - * WordPress dependencies
