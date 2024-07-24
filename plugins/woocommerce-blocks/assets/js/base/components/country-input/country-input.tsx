@@ -4,7 +4,7 @@
 import { useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { ValidationInputError } from '@woocommerce/blocks-components';
@@ -15,12 +15,6 @@ import { ValidationInputError } from '@woocommerce/blocks-components';
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
 import { Select, SelectOption } from '../select';
-
-const emptyCountryOption: SelectOption = {
-	value: '',
-	label: __( 'Select a country', 'woocommerce' ),
-	disabled: true,
-};
 
 export const CountryInput = ( {
 	className,
@@ -33,6 +27,15 @@ export const CountryInput = ( {
 	required = false,
 	errorId,
 }: CountryInputWithCountriesProps ): JSX.Element => {
+	const emptyCountryOption: SelectOption = {
+		value: '',
+		label: sprintf(
+			// translators: %s will be label of the country input. For example "country/region".
+			__( 'Select a %s', 'woocommerce' ),
+			label?.toLowerCase()
+		),
+		disabled: true,
+	};
 	const options = useMemo< SelectOption[] >( () => {
 		return [ emptyCountryOption ].concat(
 			Object.entries( countries ).map(
