@@ -1569,7 +1569,7 @@ test.describe( 'Testing registerProductCollection', () => {
 				'myCustomCollection'
 			);
 
-			const sidebarSettings = await pageObject.locateSidebarSettings();
+			const sidebarSettings = pageObject.locateSidebarSettings();
 			const onsaleControl = sidebarSettings.getByLabel(
 				SELECTORS.onSaleControlLabel
 			);

@@ -527,7 +527,7 @@ class ProductCollection extends AbstractBlock {
 		$inherit    = isset( $block->context['query'], $block->context['query']['inherit'] ) && $block->context['query']['inherit'];
 		$filterable = isset( $block->context['query'], $block->context['query']['filterable'] ) && $block->context['query']['filterable'];
 
-		$is_exclude_applied_filters = !( $inherit || $filterable );
+		$is_exclude_applied_filters = ! ( $inherit || $filterable );
 
 		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
 	}
