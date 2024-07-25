@@ -300,7 +300,7 @@ You can set a placeholder to be shown on the select by passing a `placeholder` v
 |-----|-----|-----|----------------|--------------|
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | see below | No default - this must be provided. |
 | `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
-| `placeholder` | If this value is set, the shopper will see this option in select. If the select is required, the shopper cannot select this option. | No | `Select a role | Select a $label |
+| `placeholder` | If this value is set, the shopper will see this option in the select. If the select is required, the shopper cannot select this option. | No | `Select a role | Select a $label |
 
 ##### Example of `options` value
 
