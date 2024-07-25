@@ -2,4 +2,4 @@
 
 set -eo pipefail
 
-echo "Default Pressable site setup."
+echo "Default Pressable site setup for e2e tests."

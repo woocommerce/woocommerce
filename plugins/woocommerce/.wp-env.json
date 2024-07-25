@@ -16,8 +16,8 @@
 		"test-data/images/": "./tests/e2e-pw/test-data/images/"
 	},
 	"lifecycleScripts": {
-		"afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",
-		"afterClean": "./tests/e2e-pw/bin/test-env-setup.sh"
+		"afterStart": "./tests/environments/default-env-setup.sh",
+		"afterClean": "./tests/environments/default-env-setup.sh"
 	},
 	"env": {
 		"development": {},
