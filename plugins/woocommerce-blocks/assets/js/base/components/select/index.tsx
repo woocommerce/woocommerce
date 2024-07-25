@@ -40,7 +40,7 @@ export const Select = ( props: SelectProps ) => {
 		value = '',
 		className,
 		size,
-		errorId,
+		errorId: incomingErrorId,
 		required,
 		errorMessage = __( 'Please select a valid option', 'woocommerce' ),
 		placeholder,
@@ -59,7 +59,7 @@ export const Select = ( props: SelectProps ) => {
 			label:
 				placeholder ??
 				sprintf(
-					// translators: %s will be label of the country input. For example "country/region".
+					// translators: %s will be label of the field. For example "country/region".
 					__( 'Select a %s', 'woocommerce' ),
 					label?.toLowerCase()
 				),
@@ -67,10 +67,18 @@ export const Select = ( props: SelectProps ) => {
 		} ),
 		[ label, placeholder, required ]
 	);
-	const errorIdString = errorId || restOfProps.id || '';
+
+	const generatedId = useId();
+	const inputId =
+		restOfProps.id || `wc-blocks-components-select-${ generatedId }`;
+	const errorId = incomingErrorId || inputId;
+
 	const optionsWithEmpty = useMemo< SelectOption[] >( () => {
+		if ( required && value ) {
+			return options;
+		}
 		return [ emptyOption ].concat( options );
-	}, [ options, emptyOption ] );
+	}, [ required, value, emptyOption, options ] );
 
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
@@ -78,29 +86,29 @@ export const Select = ( props: SelectProps ) => {
 	const { error, validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
-			error: store.getValidationError( errorIdString ),
-			validationErrorId: store.getValidationErrorId( errorIdString ),
+			error: store.getValidationError( errorId ),
+			validationErrorId: store.getValidationErrorId( errorId ),
 		};
 	} );
 
 	useEffect( () => {
 		if ( ! required || value ) {
-			clearValidationError( errorIdString );
+			clearValidationError( errorId );
 		} else {
 			setValidationErrors( {
-				[ errorIdString ]: {
+				[ errorId ]: {
 					message: errorMessage,
 					hidden: true,
 				},
 			} );
 		}
 		return () => {
-			clearValidationError( errorIdString );
+			clearValidationError( errorId );
 		};
 	}, [
 		clearValidationError,
 		value,
-		errorIdString,
+		errorId,
 		errorMessage,
 		required,
 		setValidationErrors,
@@ -109,17 +117,12 @@ export const Select = ( props: SelectProps ) => {
 	const validationError = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return (
-			store.getValidationError( errorIdString || '' ) || {
+			store.getValidationError( errorId || '' ) || {
 				hidden: true,
 			}
 		);
 	} );
-
-	const generatedId = useId();
-
-	const inputId =
-		restOfProps.id || `wc-blocks-components-select-${ generatedId }`;
-
+	console.log( errorId );
 	return (
 		<div
 			className={ clsx( className, {
@@ -167,11 +170,7 @@ export const Select = ( props: SelectProps ) => {
 					/>
 				</div>
 			</div>
-			{ validationError && validationError.hidden !== true && (
-				<ValidationInputError
-					errorMessage={ validationError.message }
-				/>
-			) }
+			<ValidationInputError propertyName={ errorId } />
 		</div>
 	);
 };

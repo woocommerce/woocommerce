@@ -96,11 +96,7 @@ const StateInput = ( {
 				options={ options }
 				label={ label || '' }
 				id={ id }
-				onChange={ ( newValue ) => {
-					if ( required ) {
-					}
-					onChangeState( newValue );
-				} }
+				onChange={ onChangeState }
 				value={ value }
 				autoComplete={ autoComplete }
 				required={ required }

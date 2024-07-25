@@ -45,6 +45,17 @@ export const createFieldProps = (
 	...field?.attributes,
 } );
 
+export const createCheckboxFieldProps = ( fieldProps: FieldProps ) => {
+	const {
+		errorId,
+		errorMessage,
+		autoCapitalize,
+		autoComplete,
+		placeholder,
+		...rest
+	} = fieldProps;
+	return rest;
+};
 export const getFieldData = < T extends AddressFormValues | ContactFormValues >(
 	key: 'address_1' | 'address_2',
 	fields: AddressFormFields[ 'fields' ],
