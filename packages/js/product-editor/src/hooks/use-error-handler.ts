@@ -75,7 +75,7 @@ function getErrorPropsWithActions(
 
 export const useErrorHandler = (): UseErrorHandlerTypes => {
 	const { focusByValidatorId } = useValidations();
-	const { getParentTabId } = useBlocksHelper();
+	const { getParentTabId, getParentTabIdByBlockName } = useBlocksHelper();
 
 	const getProductErrorMessageAndProps = useCallback(
 		( error: WPError, visibleTab: string | null ) => {
@@ -116,9 +116,12 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						'Invalid or duplicated SKU.',
 						'woocommerce'
 					);
-					if ( visibleTab !== errorContext ) {
+					const errorSkuContext = getParentTabIdByBlockName(
+						'woocommerce/product-sku-field'
+					);
+					if ( visibleTab !== errorSkuContext ) {
 						response.errorProps = getErrorPropsWithActions(
-							errorContext,
+							errorSkuContext,
 							'sku',
 							focusByValidatorId,
 							__( 'View SKU field', 'woocommerce' )
@@ -130,9 +133,10 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						'Invalid or duplicated GTIN, UPC, EAN or ISBN.',
 						'woocommerce'
 					);
-					if ( visibleTab !== errorContext ) {
+					const errorUniqueIdContext = errorContext ?? 'inventory';
+					if ( visibleTab !== errorUniqueIdContext ) {
 						response.errorProps = getErrorPropsWithActions(
-							errorContext,
+							errorUniqueIdContext,
 							'global_unique_id',
 							focusByValidatorId,
 							__( 'View identifier field', 'woocommerce' )
