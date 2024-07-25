@@ -41,7 +41,12 @@ class ImportInstallPlugin implements StepProcessor {
 
 		if ( isset( $plugin->options, $plugin->options->activate ) && $plugin->options->activate === true ) {
 			$activate = $this->activate( $plugin->slug );
-			if ( $activate ) {
+
+			if ( $activate instanceof \WP_Error ) {
+				$result->add_error( "Failed to activate {$plugin->slug}." );
+			}
+
+			if ( null === $activate ) {
 				$result->add_info( "Activated {$plugin->slug}." );
 			}
 		}
