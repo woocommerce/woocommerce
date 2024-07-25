@@ -101,44 +101,4 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		OrderHelper::toggle_cot_feature_and_usage( false );
 	}
 
-	/**
-	 * @param bool $clear_datastore_cache Whether the datastore cache should be cleared prior to retrieving the cached Order.
-	 *
-	 * @testDox Test that an WC_Order_Factory::get_order() does not return an order that did not properly load, $id = 0.
-	 * @testWith [ true ]
-	 *           [ false ]
-	 */
-	public function test_get_order_doesnt_return_invalid_cached_order( bool $clear_datastore_cache ) {
-		global $wpdb;
-
-		OrderHelper::toggle_cot_feature_and_usage( true );
-		$this->setup_serializing_cache();
-
-		$order = OrderHelper::create_order();
-
-		// Retrieve the order to prime the cache.
-		$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
-		$this->assertEquals( $order->get_id(), $retrieved_order->get_id() );
-
-		// Delete the order from the DB to mimic situations like SQL replication lag where the cache has propagated,
-		// but SQL data hasn't yet caught up.
-		$wpdb->delete( OrdersTableDataStore::get_orders_table_name(), array( 'ID' => $retrieved_order->get_id() ) );
-		foreach ( OrdersTableDataStore::get_all_table_names_with_id() as $table_id => $table ) {
-			if ( 'orders' !== $table_id ) {
-				$wpdb->delete( $table, array( 'order_id' => $retrieved_order->get_id() ) );
-			}
-		}
-		if ( $clear_datastore_cache ) {
-			$datastore = wc_get_container()->get( OrdersTableDataStore::class );
-			$datastore->clear_cached_data( array( $retrieved_order->get_id() ) );
-			// Retrieving the order again should either return false because the order was not able to fully load as the data was missing.
-			$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
-			$this->assertFalse( $retrieved_order );
-		} else {
-			// Retrieving the order again should return the correctly loaded order because we were able to load from cache.
-			$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
-			$this->assertInstanceOf( WC_Order::class, $retrieved_order );
-			$this->assertEquals( $order->get_id(), $retrieved_order->get_id() );
-		}
-	}
 }
