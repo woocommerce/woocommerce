@@ -377,6 +377,7 @@ final class BlockTypesController {
 			'OrderConfirmation\AdditionalInformation',
 			'OrderConfirmation\AdditionalFieldsWrapper',
 			'OrderConfirmation\AdditionalFields',
+			'CartLink',
 		);
 
 		$block_types = array_merge(

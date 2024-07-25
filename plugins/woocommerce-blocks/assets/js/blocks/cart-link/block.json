@@ -1,0 +1,17 @@
+{
+	"name": "woocommerce/cart-link",
+	"version": "1.0.0",
+	"title": "Cart Link",
+	"description": "Enables customers to access the Cart, with customizable icon and text.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"textdomain": "woocommerce",
+	"icon": "smiley",
+	"supports": {
+		"html": false
+	},
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
