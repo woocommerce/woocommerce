@@ -40,7 +40,10 @@ class EnvironmentReporter {
 			if ( info.ok() ) {
 				const data = await info.json();
 				for ( const [ key, value ] of Object.entries( data ) ) {
-					environmentData += `\n${ key }=${ value }`;
+					// We need to format the values to be compatible with the Java properties file format
+					environmentData += `\n${ key
+						.replace( / /g, '\\u0020' )
+						.replace( /:/g, '-' ) }=${ value }`;
 				}
 			}
 		} catch ( err ) {
