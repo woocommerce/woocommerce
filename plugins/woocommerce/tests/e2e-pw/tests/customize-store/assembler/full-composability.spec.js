@@ -21,6 +21,20 @@ async function prepareAssembler( pageObject, baseURL ) {
 		.waitFor( { state: 'hidden' } );
 }
 
+async function deleteAllPatterns( editor, assembler ) {
+	const previewPatterns = await editor
+		.locator(
+			'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+		)
+		.all();
+
+	for ( const pattern of previewPatterns ) {
+		await pattern.click();
+		const deleteButton = assembler.locator( 'button[aria-label="Delete"]' );
+		await deleteButton.click();
+	}
+}
+
 test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -133,5 +147,133 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				expect( count ).toBeGreaterThan( 0 );
 			} ).toPass();
 		}
+	} );
+
+	test( 'Clicking on a pattern should insert it in the preview', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.first();
+
+		const sidebarPatternContent = await sidebarPattern
+			.frameLocator( 'iframe' )
+			.locator( '.is-root-container' )
+			.textContent();
+
+		await sidebarPattern.click();
+
+		const insertedPatternContent = await editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.first()
+			.textContent();
+
+		await expect( insertedPatternContent ).toContain(
+			sidebarPatternContent
+		);
+	} );
+
+	test( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		const sidebarPattern = await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.nth( 2 );
+
+		const sidebarPatternContent = await sidebarPattern
+			.frameLocator( 'iframe' )
+			.locator( '.is-root-container' )
+			.textContent();
+
+		await sidebarPattern.click();
+
+		const insertedPattern = await editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.nth( 1 );
+		await insertedPattern.click();
+
+		const moveUpButton = assembler.locator(
+			'button[aria-label="Move up"]'
+		);
+		await moveUpButton.click();
+
+		const firstPattern = await editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.first();
+		const firstPatternContent = await firstPattern.textContent();
+
+		expect( firstPatternContent ).toContain( sidebarPatternContent );
+	} );
+
+	test( 'Clicking the "Shuffle" button on a patterns should replace it for another one', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.first();
+		await sidebarPattern.click();
+
+		const insertedPattern = await editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.first();
+
+		const insertedPatternContent = await insertedPattern.textContent();
+
+		await insertedPattern.click();
+		const shuffleButton = assembler.locator(
+			'button[aria-label="Shuffle"]'
+		);
+		await shuffleButton.click();
+
+		const shuffledPattern = await editor.locator(
+			'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+		);
+
+		expect( await shuffledPattern.textContent() ).not.toBe(
+			insertedPatternContent
+		);
+	} );
+
+	test( 'Clicking the "Delete" button on a pattern should remove it from the preview', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const emptyPatternsBlock = editor.getByText(
+			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
+		);
+		await expect( emptyPatternsBlock ).toBeVisible();
 	} );
 } );
