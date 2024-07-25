@@ -327,4 +327,42 @@ describe( 'Testing Checkout', () => {
 
 		expect( formStepsWithNumber.length ).not.toBe( 0 );
 	} );
+
+	it( 'Shows guest checkout text', async () => {
+		await act( async () => {
+			allSettings.checkoutAllowsGuest = true;
+			allSettings.checkoutAllowsSignup = true;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 0 );
+		} );
+
+		// Render the CheckoutBlock
+		const { rerender, queryByText } = render( <CheckoutBlock /> );
+
+		// Wait for the component to fully load, assuming fetch calls or state updates
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		// Query the text.
+		expect(
+			queryByText( /You are currently checking out as a guest./i )
+		).toBeInTheDocument();
+
+		await act( async () => {
+			allSettings.checkoutAllowsGuest = true;
+			allSettings.checkoutAllowsSignup = true;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			queryByText( /You are currently checking out as a guest./i )
+		).not.toBeInTheDocument();
+
+		await act( async () => {
+			// Restore initial settings
+			allSettings.checkoutAllowsGuest = undefined;
+			allSettings.checkoutAllowsSignup = undefined;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
+		} );
+	} );
 } );

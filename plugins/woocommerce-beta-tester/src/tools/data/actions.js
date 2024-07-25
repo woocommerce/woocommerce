@@ -262,3 +262,13 @@ export function* updateBlockTemplateLoggingThreshold( params ) {
 		} );
 	} );
 }
+
+export function* updateComingSoonMode( params ) {
+	yield runCommand( 'Update coming soon mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/update-coming-soon-mode/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
