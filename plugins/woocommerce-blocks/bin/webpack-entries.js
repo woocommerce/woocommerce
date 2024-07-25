@@ -161,6 +161,7 @@ const blocks = {
 	'order-confirmation-additional-fields': {
 		customDir: 'order-confirmation/additional-fields',
 	},
+	'cart-link': {},
 };
 
 // Intentional separation of cart and checkout entry points to allow for better code splitting.
