@@ -17,7 +17,7 @@ interface ResourceStorage {
 	/**
 	 * @param $slug
 	 *
-	 * @return string downloaded local path.
+	 * @return string|false downloaded local path.
 	 */
-	public function download( $slug ): string;
+	public function download( $slug );
 }
