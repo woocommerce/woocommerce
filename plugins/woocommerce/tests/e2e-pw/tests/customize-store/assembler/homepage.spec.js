@@ -3,6 +3,7 @@ const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 const { setFeatureFlag } = require( '../../../utils/features' );
+const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -171,21 +172,50 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		// Get all the content between the header and the footer.
-		const homepageHTML = await page
-			.locator(
-				'//header/following-sibling::*[following-sibling::footer]'
-			)
-			.all();
 
-		let index = 0;
-		for ( const element of homepageHTML ) {
-			await expect(
-				await element.getAttribute( 'class' )
-			).toMatchSnapshot( {
-				name: `selected-homepage-blocks-class-frontend-${ index }`,
-			} );
-			index++;
+		// Check if Gutenberg is installed
+		const apiContext = await request.newContext( {
+			baseURL,
+			extraHTTPHeaders: {
+				Authorization: `Basic ${ encodeCredentials(
+					'admin',
+					'password'
+				) }`,
+				cookie: '',
+			},
+		} );
+		const listPluginsResponse = await apiContext.get(
+			`/wp-json/wp/v2/plugins`,
+			{
+				failOnStatusCode: true,
+			}
+		);
+		const pluginsList = await listPluginsResponse.json();
+		const withGutenbergPlugin = pluginsList.find(
+			( { textdomain } ) => textdomain === 'gutenberg'
+		);
+
+		// if testing with Gutenberg, perform Gutenberg-specific testing
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( withGutenbergPlugin ) {
+			// Get all the content between the header and the footer.
+			const homepageHTML = await page
+				.locator(
+					'//header/following-sibling::*[following-sibling::footer]'
+				)
+				.all();
+
+			let index = 0;
+			for ( const element of homepageHTML ) {
+				await expect(
+					await element.getAttribute( 'class' )
+				).toMatchSnapshot( {
+					name: `${
+						withGutenbergPlugin ? 'gutenberg' : ''
+					}-selected-homepage-blocks-class-frontend-${ index }`,
+				} );
+				index++;
+			}
 		}
 	} );
 

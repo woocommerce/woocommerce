@@ -56,7 +56,7 @@ class DefaultMarketingRecommendations {
 
 		return array(
 			array(
-				'title'          => 'Google Listings and Ads',
+				'title'          => 'Google for WooCommerce',
 				'description'    => __( 'Get in front of shoppers and drive traffic so you can grow your business with Smart Shopping Campaigns and free listings.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/google-listings-and-ads/{$utm_string}",
 				'direct_install' => true,

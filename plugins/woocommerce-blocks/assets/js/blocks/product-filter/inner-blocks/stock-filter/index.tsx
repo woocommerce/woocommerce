@@ -3,6 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
+import { productFilterOptions } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -10,13 +11,10 @@ import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import './style.scss';
 import edit from './edit';
 import metadata from './block.json';
-import { stockStatusFilterIcon } from './icon';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
-		icon: {
-			src: stockStatusFilterIcon,
-		},
+		icon: productFilterOptions,
 		edit,
 	} );
 }
