@@ -37,6 +37,7 @@ jest.mock( '@wordpress/data', () => ( {
 jest.mock( '../use-blocks-helper', () => ( {
 	useBlocksHelper: jest.fn().mockReturnValue( {
 		getParentTabId: jest.fn( () => 'inventory' ),
+		getParentTabIdByBlockName: jest.fn( () => 'inventory' ),
 	} ),
 } ) );
 
@@ -113,7 +114,7 @@ describe( 'useErrorHandler', () => {
 			errorProps.actions[ 0 ].onClick();
 		}
 
-		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'product_sku' );
+		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'sku' );
 
 		const { errorProps: fieldsErrorProps } = getProductErrorMessageAndProps(
 			errors[ 1 ],
