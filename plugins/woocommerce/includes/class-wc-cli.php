@@ -57,7 +57,7 @@ class WC_CLI {
 		}
 	}
 
-		/**
+	/**
 	 * Include Blueprint CLI if it's available.
 	 */
 	private function maybe_include_blueprint_cli() {
