@@ -429,10 +429,13 @@ const appendURLParams = (
 	return urlObject.toString();
 };
 
-const enableAutorenewal = ( subscription: Subscription ): string => {
+const enableAutorenewalUrl = ( subscription: Subscription ): string => {
+	if ( ! subscription.product_key ) {
+		// review subscriptions on the Marketplace
+		return MARKETPLACE_RENEW_SUBSCRIPTON_PATH;
+	}
 	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
-		[ 'renew_product', subscription.product_id.toString() ],
-		[ 'order_id', subscription.order_id.toString() ],
+		[ 'key', subscription.product_key.toString() ],
 	] );
 };
 
@@ -466,7 +469,7 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
-	enableAutorenewal,
+	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,

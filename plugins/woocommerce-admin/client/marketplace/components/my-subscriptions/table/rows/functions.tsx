@@ -14,6 +14,7 @@ import { StatusLevel, Subscription } from '../../types';
 import ConnectButton from '../actions/connect-button';
 import Install from '../actions/install';
 import RenewButton from '../actions/renew-button';
+import AutoRenewButton from '../actions/auto-renew-button';
 import SubscribeButton from '../actions/subscribe-button';
 import Update from '../actions/update';
 import StatusPopover from './status-popover';
@@ -23,7 +24,7 @@ import {
 	appendURLParams,
 	renewUrl,
 	subscribeUrl,
-	enableAutorenewal,
+	enableAutorenewalUrl,
 } from '../../../../utils/functions';
 import {
 	MARKETPLACE_COLLABORATION_PATH,
@@ -139,7 +140,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 				{
 					renew: (
 						<a
-							href={ enableAutorenewal( subscription ) }
+							href={ enableAutorenewalUrl( subscription ) }
 							rel="nofollow noopener noreferrer"
 						>
 							renew
@@ -368,7 +369,10 @@ export function actions( subscription: Subscription ): TableRow {
 		actionButton = (
 			<ConnectButton subscription={ subscription } variant="link" />
 		);
+	} else if ( ! subscription.autorenew ) {
+		actionButton = <AutoRenewButton subscription={ subscription } />;
 	}
+
 	return {
 		display: (
 			<div className="woocommerce-marketplace__my-subscriptions__actions">
