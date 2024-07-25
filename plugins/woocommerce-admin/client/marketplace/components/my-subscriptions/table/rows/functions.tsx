@@ -223,8 +223,6 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 		);
 	}
 
-	const statusBadge = getStatusBadge( subscription );
-
 	const displayElement = (
 		<div className="woocommerce-marketplace__my-subscriptions__product">
 			<a
