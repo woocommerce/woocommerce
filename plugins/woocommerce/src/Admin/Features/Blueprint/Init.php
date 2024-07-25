@@ -45,7 +45,7 @@ class Init {
 		}
 
 		$page_id = PageController::get_instance()->get_current_screen_id();
-		if ( 'woocommerce_page_wc-admin' == $page_id ) {
+		if ( 'woocommerce_page_wc-admin' === $page_id ) {
 			$settings['blueprint_upload_nonce'] = wp_create_nonce( 'blueprint_upload_nonce' );
 			return $settings;
 		}
