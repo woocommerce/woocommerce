@@ -1,5 +1,6 @@
 {
   "name": "woocommerce/blueprint",
+  "version": "0.0.1",
   "autoload": {
 	"psr-4": {
 	  "Automattic\\WooCommerce\\Blueprint\\": "src/",
