@@ -2,41 +2,30 @@
  * Internal dependencies
  */
 import { ObjectSchema, Data, ValidationError } from '../../types';
-import { parseString } from '../string';
-import { validateType } from '../../validators/validate-type'
-import { validateRequired } from '../../validators/validate-required'
+import { getInvalidTypeError } from '../../errors/get-invalid-type-error';
+import { validateKeywords } from '../../utils/validate-keywords';
+import { required } from '../../keywords/required';
+import { parse } from './parse';
 
 export function parseObject( schema: ObjectSchema, data: Data, path: string ) {
-    validateType( data, 'object', path );
-
-    const parsed = {} as Data;
-    let errors = [] as ValidationError[];
-
-    console.log(data);
-    const properties = Object.keys(  schema.properties ) as string[];
-    for ( const property of properties ) {
-        const propertySchema = schema.properties[ property ];
-        const propertyPath = `${path}/${property}`;
-
-        switch ( propertySchema.type ) {
-            case 'string':
-                try {
-                    parsed[ property ] = parseString( propertySchema, data[ property ], propertyPath );
-                } catch( e ) {
-                    errors = [ ...errors,  ...e as ValidationError[] ]; 
-                }
-        }
+    // Throw early if we're not dealing with an object.
+    if ( typeof data !== 'object' || data == null ) {
+        throw [ getInvalidTypeError( 'object', path ) ];
     }
 
-    try {
-        validateRequired( data, schema, path )
-    } catch ( e ) {
-        errors = [ ...errors, ...e as ValidationError[] ];
-    }
+    const { parsed, errors } = parse( data, schema, path );
 
-    if ( errors.length ) {
-        throw errors;
-    }
+    const keywordErrors = validateKeywords< object, ObjectSchema >(
+        [
+            required,
+        ],
+        parsed,
+        schema,
+        path
+    );
 
-    return parsed;
+    return {
+        parsed,
+        errors: [ ...errors, ...keywordErrors ],
+    };
 }

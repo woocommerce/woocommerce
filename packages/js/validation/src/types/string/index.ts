@@ -8,9 +8,9 @@ import { validateKeywords } from '../../utils/validate-keywords';
 import { parse } from './parse';
 
 export function parseString( schema: StringSchema, data: unknown, path: string ) {
-    const parsed = parse( data, path );
+    const { parsed, errors } = parse( data, path );
 
-    validateKeywords< string, StringSchema >(
+    const keywordErrors = validateKeywords< string, StringSchema >(
         [
             maxLength,
             minLength,
@@ -20,5 +20,8 @@ export function parseString( schema: StringSchema, data: unknown, path: string )
         path
     );
 
-    return parsed;
+    return {
+        errors: [ ...errors, ...keywordErrors ],
+        parsed
+    };
 }
