@@ -28,6 +28,11 @@ export type GetPropsFn<
 	TAttributes extends Record< string, unknown >
 > = ( el: HTMLElement, i: number ) => BlockProps< TProps, TAttributes >;
 
+type RenderedBlock = {
+	container: HTMLElement;
+	root: Root;
+};
+
 interface RenderBlockParams<
 	TProps extends Record< string, unknown >,
 	TAttributes extends Record< string, unknown >
@@ -112,14 +117,11 @@ const renderBlockInContainers = <
 	containers,
 	getProps = () => ( {} as BlockProps< TProps, TAttributes > ),
 	getErrorBoundaryProps = () => ( {} ),
-}: RenderBlockInContainersParams< TProps, TAttributes > ): {
-	container: Element;
-	root: Root;
-}[] => {
+}: RenderBlockInContainersParams< TProps, TAttributes > ): RenderedBlock[] => {
 	if ( containers.length === 0 ) {
 		return [];
 	}
-	const roots: { container: Element; root: Root }[] = [];
+	const roots: RenderedBlock[] = [];
 
 	// Use Array.forEach for IE11 compatibility.
 	Array.prototype.forEach.call( containers, ( el, i ) => {
@@ -179,10 +181,10 @@ const renderBlockOutsideWrappers = <
 	getErrorBoundaryProps,
 	selector,
 	wrappers,
-}: RenderBlockOutsideWrappersParams< TProps, TAttributes > ): {
-	container: Element;
-	root: Root;
-}[] => {
+}: RenderBlockOutsideWrappersParams<
+	TProps,
+	TAttributes
+> ): RenderedBlock[] => {
 	const containers = document.body.querySelectorAll( selector );
 	// Filter out blocks inside the wrappers.
 	if ( wrappers && wrappers.length > 0 ) {
@@ -260,7 +262,7 @@ export const renderFrontend = <
 	props:
 		| RenderBlockOutsideWrappersParams< TProps, TAttributes >
 		| RenderBlockInsideWrapperParams< TProps, TAttributes >
-): { container: Element; root: Root }[] => {
+): RenderedBlock[] => {
 	const wrappersToSkipOnLoad = document.body.querySelectorAll(
 		selectorsToSkipOnLoad.join( ',' )
 	);
