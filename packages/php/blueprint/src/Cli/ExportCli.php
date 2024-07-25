@@ -24,10 +24,14 @@ class ExportCli {
 		if ($export_as_zip) {
 			$zipExportedSchema = new ZipExportedSchema($schema);
 			$this->save_to = $zipExportedSchema->zip();
+			\WP_CLI::success( "Exported zip to {$this->save_to}" );
 		} else {
-			file_put_contents( $this->save_to, json_encode( $schema, JSON_PRETTY_PRINT ) );
+			$save = file_put_contents( $this->save_to, json_encode( $schema, JSON_PRETTY_PRINT ) );
+			if ( false === $save ) {
+				\WP_CLI::error( "Failed to save to {$this->save_to}" );
+			} else {
+				\WP_CLI::success( "Exported JSON to {$this->save_to}" );
+			}
 		}
-
-		\WP_CLI::success("Exported to {$this->save_to}");
 	}
 }
