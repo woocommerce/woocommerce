@@ -36,7 +36,7 @@ jest.mock( '@wordpress/data', () => ( {
 
 jest.mock( '../use-blocks-helper', () => ( {
 	useBlocksHelper: jest.fn().mockReturnValue( {
-		getParentTabId: jest.fn( ( context ) => context ),
+		getParentTabId: jest.fn( () => 'inventory' ),
 	} ),
 } ) );
 
