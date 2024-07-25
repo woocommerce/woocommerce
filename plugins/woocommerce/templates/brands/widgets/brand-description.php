@@ -14,15 +14,11 @@
  * @package WooCommerce\Templates
  * @version x.x.x
  */
-?>
-<?php global $woocommerce; ?>
 
-<?php if ( $thumbnail ) : ?>
+global $woocommerce;
 
-	<?php echo get_brand_thumbnail_image( $brand ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-
-	<?php
-
-endif;
+if ( $thumbnail ) {
+	echo get_brand_thumbnail_image( $brand ); // phpcs:ignore WordPress.Security.EscapeOutput
+}
 
 echo wp_kses_post( wpautop( wptexturize( term_description() ) ) );
