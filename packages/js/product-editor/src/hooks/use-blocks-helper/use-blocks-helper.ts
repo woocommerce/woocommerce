@@ -13,7 +13,7 @@ export function useBlocksHelper() {
 				true
 			);
 		if ( ! closestParentClientId ) {
-			return '';
+			return null;
 		}
 		// @ts-expect-error Outdated type definition.
 		const { attributes } = select( 'core/block-editor' ).getBlock(
@@ -26,20 +26,22 @@ export function useBlocksHelper() {
 		if ( clientId ) {
 			return getClosestParentTabId( clientId );
 		}
+		return null;
+	}
 
-		const skuClientIds =
+	function getParentTabIdByBlockName( blockName: string ) {
+		const blockClientIds =
 			// @ts-expect-error Outdated type definition.
-			select( 'core/block-editor' ).getBlocksByName(
-				'woocommerce/product-sku-field'
-			);
+			select( 'core/block-editor' ).getBlocksByName( blockName );
 
-		if ( skuClientIds.length ) {
-			return getClosestParentTabId( skuClientIds[ 0 ] );
+		if ( blockClientIds.length ) {
+			return getClosestParentTabId( blockClientIds[ 0 ] );
 		}
-		return 'inventory';
+		return null;
 	}
 
 	return {
 		getParentTabId,
+		getParentTabIdByBlockName,
 	};
 }
