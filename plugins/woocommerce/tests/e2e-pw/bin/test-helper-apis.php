@@ -124,13 +124,13 @@ function is_allowed() {
  */
 function get_environment_info() {
 	$data['Core'] = get_bloginfo( 'version' );
-	$data['PHP'] =  sprintf( "%s.%s", PHP_MAJOR_VERSION, PHP_MINOR_VERSION );
+	$data['PHP']  = sprintf( '%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION );
 
 	$all_plugins = get_plugins();
 
-	foreach ($all_plugins as $plugin_file => $plugin_data) {
-		if ( is_plugin_active($plugin_file) ) {
-			$data[$plugin_data['Name']] = $plugin_data['Version'];
+	foreach ( $all_plugins as $plugin_file => $plugin_data ) {
+		if ( is_plugin_active( $plugin_file ) ) {
+			$data[ $plugin_data['Name'] ] = $plugin_data['Version'];
 		}
 	}
 
