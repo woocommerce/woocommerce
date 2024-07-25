@@ -52,7 +52,7 @@ class RestApi {
 					'permission_callback' => array( $this, 'check_permission' ),
 					'args'                => array(
 						'steps'         => array(
-							'description'       => __( 'A list of plugins to install' ),
+							'description'       => __( 'A list of plugins to install', 'woocommerce' ),
 							'type'              => 'array',
 							'items'             => 'string',
 							'default'           => array(),
@@ -67,7 +67,7 @@ class RestApi {
 							'required'          => false,
 						),
 						'export_as_zip' => array(
-							'description' => __( 'Export as a zip file' ),
+							'description' => __( 'Export as a zip file', 'woocommerce' ),
 							'type'        => 'boolean',
 							'default'     => false,
 							'required'    => false,
@@ -78,6 +78,11 @@ class RestApi {
 		);
 	}
 
+	/**
+	 * Check if the current user has permission to perform the request.
+	 *
+	 * @return bool|\WP_Error
+	 */
 	public function check_permission() {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
@@ -117,10 +122,12 @@ class RestApi {
 	 * Handle the import request.
 	 *
 	 * @return \WP_HTTP_Response The response object.
+	 * @throws \InvalidArgumentException If the import fails.
 	 */
 	public function import() {
 
-		// Check for nonce to prevent CSRF
+		// Check for nonce to prevent CSRF.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		if ( ! isset( $_POST['blueprint_upload_nonce'] ) || ! \wp_verify_nonce( $_POST['blueprint_upload_nonce'], 'blueprint_upload_nonce' ) ) {
 			return new \WP_HTTP_Response(
 				array(
@@ -187,7 +194,7 @@ class RestApi {
 		return new \WP_HTTP_Response(
 			array(
 				'status'  => 'error',
-				'message' => __( 'No file uploaded' ),
+				'message' => __( 'No file uploaded', 'woocommerce' ),
 			),
 			400
 		);

@@ -35,7 +35,7 @@ class Init {
 	 *
 	 * The value can be accessed at wcSettings.admin.blueprint_upload_nonce
 	 *
-	 * @param array $settings
+	 * @param array $settings Global JS settings.
 	 *
 	 * @return array
 	 */
