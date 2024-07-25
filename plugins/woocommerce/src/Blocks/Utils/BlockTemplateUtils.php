@@ -319,6 +319,7 @@ class BlockTemplateUtils {
 		);
 
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
+			$wp_template_part_filenames[] = 'product-filters.html';
 			$wp_template_part_filenames[] = 'product-filters-overlay.html';
 		}
 

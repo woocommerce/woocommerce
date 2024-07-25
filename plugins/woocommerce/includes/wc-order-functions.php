@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -147,9 +148,9 @@ function wc_get_is_pending_statuses() {
  */
 function wc_get_order_status_name( $status ) {
 	$statuses = wc_get_order_statuses();
-	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
-	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
-	return $status;
+	$status   = OrderUtil::remove_status_prefix( $status );
+
+	return $statuses[ 'wc-' . $status ] ?? $status;
 }
 
 /**
