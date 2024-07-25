@@ -66,10 +66,12 @@ export const SelectTree = function SelectTree( {
 	const [ linkedTree, setLinkedTree ] = useState< LinkedTree[] >( [] );
 	const [ highlightedIndex, setHighlightedIndex ] = useState( -1 );
 
+	// whenever the items change, the linked tree needs to be recalculated
 	useEffect( () => {
 		setLinkedTree( getLinkedTree( items, props.createValue ) );
 	}, [ items.length ] );
 
+	// reset highlighted index when the input value changes
 	useEffect( () => setHighlightedIndex( -1 ), [ props.createValue ] );
 
 	const selectTreeInstanceId = useInstanceId(
@@ -204,6 +206,7 @@ export const SelectTree = function SelectTree( {
 			if ( event.key === 'ArrowDown' ) {
 				event.preventDefault();
 				if (
+					// is advancing from the last menu item to the create button
 					highlightedIndex === items.length - 1 &&
 					shouldShowCreateButton?.( props.createValue )
 				) {
@@ -246,6 +249,7 @@ export const SelectTree = function SelectTree( {
 				) {
 					props.onCreateNew?.();
 				} else if (
+					// is selecting an item that is not already selected
 					highlightedIndex !== -1 &&
 					( Array.isArray( props.selected )
 						? ! Boolean(
@@ -268,6 +272,8 @@ export const SelectTree = function SelectTree( {
 						focusOnInput();
 					}
 				} else if ( inputValue ) {
+					// no highlighted item, but there is an input value, check if it matches any item
+
 					const item = items.find(
 						( i ) => i.label === escapeHTML( inputValue )
 					);

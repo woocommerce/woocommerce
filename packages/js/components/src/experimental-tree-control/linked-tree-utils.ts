@@ -105,6 +105,7 @@ export function toggleNode(
 	} );
 }
 
+// This function gets the index of the next/previous visible node in the linked tree
 export function getVisibleNodeIndex(
 	tree: LinkedTree[],
 	highlightedIndex: number,

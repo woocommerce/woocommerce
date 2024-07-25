@@ -14,7 +14,7 @@
 		&__optional {
 			color: $gray-700;
 		}
-		.components-modal__content {
+		.components-modal__content { // make sure that inline popovers can exceed the dialog's limits
 			overflow: visible;
 		}
 	}
