@@ -430,7 +430,7 @@ add_action(
 			array(
 				'id'          => 'namespace/how-did-you-hear-about-us',
 				'label'       => 'How did you hear about us?',
-				'placeholder' => 'Select a source',,
+				'placeholder' => 'Select a source',
 				'location'    => 'order',
 				'type'        => 'select',
 				'options'     => [
