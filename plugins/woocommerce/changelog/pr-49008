@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Optimize the method that gets the downloads count for a given download

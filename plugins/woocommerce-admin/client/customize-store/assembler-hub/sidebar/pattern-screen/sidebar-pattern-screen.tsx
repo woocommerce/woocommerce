@@ -43,59 +43,16 @@ import './style.scss';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
-import { Pattern } from '~/customize-store/types/pattern';
 import {
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-} from '../../utils/hero-pattern';
+} from '../../utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
-
-/**
- * Sorts patterns by category. For 'intro' and 'about' categories
- * priorizied DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
- * For other categories, it simply sorts patterns to prioritize Woo Patterns.
- */
-const sortPatternsByCategory = (
-	patterns: Pattern[],
-	category: keyof typeof PATTERN_CATEGORIES
-) => {
-	const prefix = 'woocommerce-blocks';
-	if ( category === 'intro' || category === 'about' ) {
-		return patterns.sort( ( a, b ) => {
-			if (
-				a.name ===
-				'woocommerce-blocks/centered-content-with-image-below'
-			) {
-				return -1;
-			}
-
-			if (
-				b.name ===
-				'woocommerce-blocks/centered-content-with-image-below'
-			) {
-				return 1;
-			}
-
-			if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
-				return 1;
-			}
-			if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
-				return -1;
-			}
-			return 0;
-		} );
-	}
-
-	return patterns.sort( ( a, b ) => {
-		if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
-			return -1;
-		}
-		if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
-			return 1;
-		}
-		return 0;
-	} );
-};
+import {
+	sortPatternsByCategory,
+	addIsAddedClassToPatternPreview,
+} from './utils';
+import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
@@ -112,28 +69,37 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		const patternWithPatchedProductHeroPattern =
 			patternsWithoutThemePatterns.map( ( pattern ) => {
 				if (
-					pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
+					pattern.name !==
+						'woocommerce-blocks/just-arrived-full-hero' &&
+					pattern.name !==
+						'woocommerce-blocks/featured-category-cover-image'
 				) {
 					return pattern;
 				}
 
 				if ( ! isActiveNewNeutralVariation ) {
 					const blocks =
-						findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+						findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 							pattern.blocks,
-							( block: BlockInstance ) => {
-								block.attributes.style = {};
+							( patternBlocks: BlockInstance[] ) => {
+								patternBlocks.forEach(
+									( block: BlockInstance ) =>
+										( block.attributes.style = {} )
+								);
 							}
 						);
 					return { ...pattern, blocks };
 				}
 
 				const blocks =
-					findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 						pattern.blocks,
-						( block: BlockInstance ) => {
-							block.attributes.style =
-								PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+						( patternBlocks: BlockInstance[] ) => {
+							patternBlocks.forEach(
+								( block ) =>
+									( block.attributes.style =
+										PRODUCT_HERO_PATTERN_BUTTON_STYLE )
+							);
 						}
 					);
 
@@ -169,6 +135,36 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const isEditorLoading = useIsSiteEditorLoading();
 
 	const isSpinnerVisible = isLoading || isEditorLoading;
+
+	useEffect( () => {
+		if ( isSpinnerVisible || refElement.current === null ) {
+			return;
+		}
+
+		// We want to add the is-added class to the pattern preview when the pattern is loaded in the editor and for each mutation.
+		addIsAddedClassToPatternPreview( refElement.current, blocks );
+
+		const observer = new MutationObserver( () => {
+			addIsAddedClassToPatternPreview(
+				refElement.current as HTMLElement,
+				blocks
+			);
+		} );
+
+		const previewPatternList = document.querySelector(
+			'.woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern .block-editor-block-patterns-list'
+		);
+
+		if ( previewPatternList ) {
+			observer.observe( previewPatternList, {
+				childList: true,
+			} );
+		}
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [ isLoading, blocks, isSpinnerVisible ] );
 
 	useEffect( () => {
 		if ( isEditorLoading ) {
@@ -223,11 +219,52 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				( blockInstance: BlockInstance ) => cloneBlock( blockInstance )
 			);
 
-			insertBlocks( cloneBlocks, insertableIndex, undefined, false );
+			if ( ! isActiveNewNeutralVariation ) {
+				const updatedBlocks =
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+						cloneBlocks,
+						( patternBlocks: BlockInstance[] ) => {
+							patternBlocks.forEach(
+								( block: BlockInstance ) =>
+									( block.attributes.style = {} )
+							);
+						}
+					);
 
-			blockToScroll.current = cloneBlocks[ 0 ].clientId;
+				insertBlocks(
+					updatedBlocks,
+					insertableIndex,
+					undefined,
+					false
+				);
+				blockToScroll.current = updatedBlocks[ 0 ].clientId;
+			} else {
+				const updatedBlocks =
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
+						cloneBlocks,
+						( patternBlocks: BlockInstance[] ) => {
+							patternBlocks.forEach(
+								( block ) =>
+									( block.attributes.style =
+										PRODUCT_HERO_PATTERN_BUTTON_STYLE )
+							);
+						}
+					);
+				insertBlocks(
+					updatedBlocks,
+					insertableIndex,
+					undefined,
+					false
+				);
+				blockToScroll.current = updatedBlocks[ 0 ].clientId;
+			}
+
+			trackEvent(
+				'customize_your_store_assembler_pattern_sidebar_click',
+				{ pattern: pattern.name }
+			);
 		},
-		[ insertBlocks, insertableIndex ]
+		[ insertBlocks, insertableIndex, isActiveNewNeutralVariation ]
 	);
 
 	return (
@@ -259,8 +296,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 							`/customize-store/assembler-hub/homepage`,
 							{}
 						);
-
 						navigateTo( { url: homepageUrl } );
+						trackEvent(
+							'customize_your_store_assembler_pattern_sidebar_close'
+						);
 					} }
 					iconSize={ 18 }
 					icon={ close }

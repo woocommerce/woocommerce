@@ -46,6 +46,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	protected $param_mapping = array(
 		'variations' => 'variation_includes',
+		'products'   => 'product_includes',
 	);
 
 	/**
@@ -322,6 +323,15 @@ class Controller extends GenericController implements ExportableInterface {
 		);
 		$params['category_excludes'] = array(
 			'description'       => __( 'Limit result set to variations not in the specified categories.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
+		$params['products']          = array(
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',

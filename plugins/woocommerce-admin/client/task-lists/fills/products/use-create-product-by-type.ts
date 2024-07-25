@@ -3,7 +3,7 @@
  */
 import { useDispatch } from '@wordpress/data';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { loadExperimentAssignment } from '@woocommerce/explat';
 import { useState } from '@wordpress/element';
@@ -22,19 +22,7 @@ export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
 
-	const getProductEditPageLink = async (
-		type: ProductTypeKey,
-		classicEditor: boolean
-	) => {
-		if (
-			type === 'physical' ||
-			type === 'variable' ||
-			type === 'digital'
-		) {
-			return classicEditor
-				? getAdminLink( 'post-new.php?post_type=product' )
-				: getNewPath( {}, '/add-product', {} );
-		}
+	const getProductEditPageLink = async ( type: ProductTypeKey ) => {
 		try {
 			const data: {
 				id?: number;
@@ -46,11 +34,9 @@ export const useCreateProductByType = () => {
 				{ _fields: [ 'id' ] }
 			);
 			if ( data && data.id ) {
-				return classicEditor
-					? getAdminLink(
-							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${ type }`
-					  )
-					: getNewPath( {}, '/product/' + data.id, {} );
+				return getAdminLink(
+					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${ type }`
+				);
 			}
 			throw new Error( 'Unexpected empty data response from server' );
 		} catch ( error ) {
@@ -72,7 +58,7 @@ export const useCreateProductByType = () => {
 				EXPERIMENT_NAME
 			);
 			if ( assignment.variationName === 'treatment' ) {
-				const url = await getProductEditPageLink( type, true );
+				const url = await getProductEditPageLink( type );
 				const _feature_nonce = getAdminSetting( '_feature_nonce' );
 				window.location.href =
 					url +
@@ -81,7 +67,7 @@ export const useCreateProductByType = () => {
 			}
 		}
 
-		const url = await getProductEditPageLink( type, true );
+		const url = await getProductEditPageLink( type );
 		if ( url ) {
 			navigateTo( { url } );
 		}
