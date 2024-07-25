@@ -25,7 +25,11 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useGetLocation, useProductCollectionQueryContext } from './utils';
+import {
+	useGetLocation,
+	useProductCollectionQueryContext,
+	parseTemplateSlug,
+} from './utils';
 import './editor.scss';
 import { getDefaultStockStatuses } from '../product-collection/constants';
 
@@ -231,26 +235,12 @@ const ProductTemplateEdit = (
 			}
 			// If `inherit` is truthy, adjust conditionally the query to create a better preview.
 			if ( inherit ) {
-				const categoryTemplatePrefix = 'category-';
-				const wooCategoryTemplatePrefix = 'taxonomy-product_cat-';
+				const { taxonomy, slug } = parseTemplateSlug( templateSlug );
 
-				const isCategoryArchive = templateSlug?.startsWith(
-					categoryTemplatePrefix
-				);
-				const isWooCategoryArchive = templateSlug?.startsWith(
-					wooCategoryTemplatePrefix
-				);
-
-				if ( isCategoryArchive || isWooCategoryArchive ) {
-					const slug = templateSlug.replace(
-						isCategoryArchive
-							? categoryTemplatePrefix
-							: wooCategoryTemplatePrefix,
-						''
-					);
+				if ( taxonomy && slug ) {
 					const templateCategory = getEntityRecords(
 						'taxonomy',
-						'category',
+						taxonomy,
 						{
 							context: 'view',
 							per_page: 1,
@@ -260,7 +250,13 @@ const ProductTemplateEdit = (
 					);
 
 					if ( templateCategory ) {
-						query.categories = templateCategory[ 0 ]?.id;
+						const taxonomyId = templateCategory[ 0 ]?.id;
+						if ( taxonomy === 'category' ) {
+							query.categories = taxonomyId;
+						} else {
+							// If taxonomy is not `category`, we expect either `product_cat` or `product_tag`
+							query[ taxonomy ] = taxonomyId;
+						}
 					}
 				}
 				query.per_page = loopShopPerPage;
