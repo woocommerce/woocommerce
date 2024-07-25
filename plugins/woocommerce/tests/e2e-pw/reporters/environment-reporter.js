@@ -1,7 +1,8 @@
 require( '@playwright/test/reporter' );
+const { request } = require( '@playwright/test' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const { wpCLI } = require( '../utils/wp-cli' );
+const { admin } = require( '../test-data/data' );
 
 class EnvironmentReporter {
 	constructor( options ) {
@@ -17,25 +18,33 @@ class EnvironmentReporter {
 			return;
 		}
 
-		const { USE_WP_ENV, CI } = process.env;
+		const { BASE_URL, CI } = process.env;
+		let environmentData = '';
 
-		let environmentData = `CI=${ CI }\nUSE_WP_ENV=${ USE_WP_ENV }`;
+		if ( CI ) {
+			environmentData += `CI=${ CI }`;
+		}
 
-		if ( USE_WP_ENV ) {
-			try {
-				// Get WooCommerce version
-				const woocommerceData = await wpCLI(
-					'plugin get woocommerce --format=json'
-				);
+		try {
+			const wpApi = await request.newContext( {
+				baseURL: BASE_URL,
+				extraHTTPHeaders: {
+					Authorization: `Basic ${ Buffer.from(
+						`${ admin.username }:${ admin.password }`
+					).toString( 'base64' ) }`,
+				},
+			} );
 
-				console.log( woocommerceData );
+			const info = await wpApi.get( `/wp-json/e2e-environment/info` );
 
-				if ( woocommerceData?.version ) {
-					environmentData += `\nWooCommerce=${ woocommerceData.version }`;
+			if ( info.ok() ) {
+				const data = await info.json();
+				for ( const [ key, value ] of Object.entries( data ) ) {
+					environmentData += `\n${ key }=${ value }`;
 				}
-			} catch ( err ) {
-				console.error( `Error getting environment details: ${ err }` );
 			}
+		} catch ( err ) {
+			console.error( `Error getting environment info: ${ err }` );
 		}
 
 		const filePath = path.resolve( outputFolder, 'environment.properties' );
