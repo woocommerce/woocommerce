@@ -18,9 +18,7 @@ export function useValidations< T = unknown >() {
 	const [ isValidating, setIsValidating ] = useState( false );
 
 	async function focusByValidatorId( validatorId: string ) {
-		const field =
-			( await context.getFieldByValidatorId( validatorId ) ) ??
-			document.getElementById( validatorId );
+		const field = await context.getFieldByValidatorId( validatorId );
 
 		if ( ! field ) {
 			return;

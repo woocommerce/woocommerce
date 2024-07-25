@@ -119,7 +119,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 					if ( visibleTab !== errorContext ) {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
-							'product_sku',
+							'sku',
 							focusByValidatorId,
 							__( 'View SKU field', 'woocommerce' )
 						);
