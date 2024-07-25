@@ -91,7 +91,7 @@ export const useAddNoBlocksPlaceholder = ( {
 							createBlock( 'core/button', {
 								align: 'center',
 								fontFamily: 'inter',
-								className: `is-style-outline ${ ENABLE_CLICK_CLASS }`,
+								className: `is-style-outline ${ ENABLE_CLICK_CLASS } no-blocks-insert-pattern-button`,
 								style: {
 									border: {
 										radius: '2px',

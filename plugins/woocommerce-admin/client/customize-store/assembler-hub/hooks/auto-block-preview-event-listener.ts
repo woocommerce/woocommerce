@@ -30,6 +30,9 @@ const setStyle = ( documentElement: HTMLElement ) => {
 		styleBlock.setAttribute( 'type', 'text/css' );
 		styleBlock.setAttribute( 'id', styleBlockId );
 		styleBlock.innerHTML = `
+			.${ ENABLE_CLICK_CLASS }[data-type="core/button"]:hover {
+				cursor: pointer;
+			}
 			.${ ENABLE_CLICK_CLASS }:focus::after {
 				content: none !important;
 			}
@@ -283,6 +286,34 @@ export const hidePopoverWhenMouseLeaveIframe = (
 	};
 };
 
+const addPatternButtonClickListener = (
+	documentElement: HTMLElement,
+	insertPatternByName: ( pattern: string ) => void
+) => {
+	const DEFAULT_PATTTERN_NAME =
+		'woocommerce-blocks/centered-content-with-image-below';
+	const handlePatternButtonClick = () => {
+		console.log('Click');
+		insertPatternByName( DEFAULT_PATTTERN_NAME );
+	};
+
+	const patternButton = documentElement.querySelector(
+		'.no-blocks-insert-pattern-button'
+	);
+	if ( patternButton ) {
+		patternButton.addEventListener( 'click', handlePatternButtonClick );
+	}
+
+	return () => {
+		if ( patternButton ) {
+			patternButton.removeEventListener(
+				'click',
+				handlePatternButtonClick
+			);
+		}
+	};
+};
+
 type useAutoBlockPreviewEventListenersValues = {
 	documentElement: HTMLElement | null;
 	autoScale: boolean;
@@ -315,6 +346,7 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	setLogoBlockIds: ( logoBlockIds: string[] ) => void;
 	setContentHeight: ( contentHeight: number | null ) => void;
 	hidePopover: () => void;
+	insertPatternByName: ( pattern: string ) => void;
 };
 
 /**
@@ -338,6 +370,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		setLogoBlockIds,
 		setContentHeight,
 		hidePopover,
+		insertPatternByName,
 	}: useAutoBlockPreviewEventListenersCallbacks
 ) => {
 	useEffect( () => {
@@ -406,6 +439,12 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
 		}
+
+		const removePatternButtonClickListener = addPatternButtonClickListener(
+			documentElement,
+			insertPatternByName
+		);
+		unsubscribeCallbacks.push( removePatternButtonClickListener );
 
 		return () => {
 			observers.forEach( ( observer ) => observer.disconnect() );
