@@ -31,8 +31,8 @@ class WC_Helper_Admin {
 
 		if ( is_admin() ) {
 			$is_in_app_marketplace = ( 'admin.php' === $pagenow
-				&& isset( $_GET['page'] ) && 'wc-admin' === $_GET['page']
-				&& isset( $_GET['path'] ) && '/extensions' === $_GET['path']
+				&& isset( $_GET['page'] ) && 'wc-admin' === $_GET['page'] //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& isset( $_GET['path'] ) && '/extensions' === $_GET['path'] //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			);
 
 			if ( $is_in_app_marketplace ) {
