@@ -14,22 +14,32 @@
  * @package WooCommerce\Templates
  * @version x.x.x
  */
+
 ?>
 <ul class="brand-thumbnails-description">
 
-	<?php foreach ( $brands as $index => $brand ) :
+	<?php
+	foreach ( $brands as $index => $brand ) :
 
+		/**
+		 * Filter the brand's thumbnail size.
+		 *
+		 * @since x.x.x
+		 * @param string $size Defaults to 'shop_catalog'
+		 */
 		$thumbnail = get_brand_thumbnail_url( $brand->term_id, apply_filters( 'woocommerce_brand_thumbnail_size', 'shop_catalog' ) );
 
-		if ( ! $thumbnail )
+		if ( ! $thumbnail ) {
 			$thumbnail = wc_placeholder_img_src();
+		}
 
 		$class = '';
 
-		if ( $index == 0 || $index % $columns == 0 )
+		if ( 0 === $index || 0 === $index % $columns ) {
 			$class = 'first';
-		elseif ( ( $index + 1 ) % $columns == 0 )
+		} elseif ( 0 === ( $index + 1 ) % $columns ) {
 			$class = 'last';
+		}
 
 		$width = floor( ( ( 100 - ( ( $columns - 1 ) * 2 ) ) / $columns ) * 100 ) / 100;
 		?>
