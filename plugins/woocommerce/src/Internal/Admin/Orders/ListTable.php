@@ -976,6 +976,14 @@ class ListTable extends WP_List_Table {
 			echo '<a href="#" class="order-preview" data-order-id="' . absint( $order->get_id() ) . '" title="' . esc_attr( __( 'Preview', 'woocommerce' ) ) . '">' . esc_html( __( 'Preview', 'woocommerce' ) ) . '</a>';
 			echo '<a href="' . esc_url( $this->get_order_edit_link( $order ) ) . '" class="order-view"><strong>#' . esc_attr( $order->get_order_number() ) . ' ' . esc_html( $buyer ) . '</strong></a>';
 		}
+
+		// Used for showing date & status next to order number/buyer name on small screens.
+		echo '<div class="order_date small-screen-only">';
+		$this->render_order_date_column( $order );
+		echo '</div>';
+		echo '<div class="order_status small-screen-only">';
+		$this->render_order_status_column( $order );
+		echo '</div>';
 	}
 
 	/**
@@ -1056,14 +1064,14 @@ class ListTable extends WP_List_Table {
 	 */
 	private function get_order_status_label( WC_Order $order ): string {
 		$status_names = array(
-			'Pending payment' => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
-			'On hold'         => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
-			'Processing'      => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
-			'Completed'       => __( 'Order fulfilled and complete.', 'woocommerce' ),
-			'Failed'          => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
-			'Draft'           => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
-			'Canceled'        => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
-			'Refunded'        => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
+			'pending'        => __( 'The order has been received, but no payment has been made. Pending payment orders are generally awaiting customer action.', 'woocommerce' ),
+			'on-hold'        => __( 'The order is awaiting payment confirmation. Stock is reduced, but you need to confirm payment.', 'woocommerce' ),
+			'processing'     => __( 'Payment has been received (paid), and the stock has been reduced. The order is awaiting fulfillment.', 'woocommerce' ),
+			'completed'      => __( 'Order fulfilled and complete.', 'woocommerce' ),
+			'failed'         => __( 'The customer’s payment failed or was declined, and no payment has been successfully made.', 'woocommerce' ),
+			'checkout-draft' => __( 'Draft orders are created when customers start the checkout process while the block version of the checkout is in place.', 'woocommerce' ),
+			'cancelled'      => __( 'The order was canceled by an admin or the customer.', 'woocommerce' ),
+			'refunded'       => __( 'Orders are automatically put in the Refunded status when an admin or shop manager has fully refunded the order’s value after payment.', 'woocommerce' ),
 		);
 
 		/**
@@ -1073,9 +1081,9 @@ class ListTable extends WP_List_Table {
 		 * @param WC_Order $order  Current order object.
 		 * @since 9.1.0
 		 */
-		$status_names = apply_filters( 'woocommerce_get_order_status_labels', $status_names );
+		$status_names = apply_filters( 'woocommerce_get_order_status_labels', $status_names, $order );
 
-		$status_name = wc_get_order_status_name( $order->get_status() );
+		$status_name = $order->get_status();
 
 		return isset( $status_names[ $status_name ] ) ? $status_names[ $status_name ] : '';
 	}

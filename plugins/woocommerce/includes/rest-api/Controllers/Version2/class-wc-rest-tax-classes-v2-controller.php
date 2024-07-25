@@ -97,12 +97,14 @@ class WC_REST_Tax_Classes_V2_Controller extends WC_REST_Tax_Classes_V1_Controlle
 			$tax_class = WC_Tax::get_tax_class_by( 'slug', sanitize_title( $request['slug'] ) );
 		}
 
-		$data = array();
-		if ( $tax_class ) {
-			$class  = $this->prepare_item_for_response( $tax_class, $request );
-			$class  = $this->prepare_response_for_collection( $class );
-			$data[] = $class;
+		if ( ! $tax_class ) {
+			return new WP_Error( 'woocommerce_rest_tax_class_invalid_slug', __( 'Invalid slug.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
+
+		$data   = array();
+		$class  = $this->prepare_item_for_response( $tax_class, $request );
+		$class  = $this->prepare_response_for_collection( $class );
+		$data[] = $class;
 
 		return rest_ensure_response( $data );
 	}

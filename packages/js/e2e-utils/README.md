@@ -225,7 +225,7 @@ There is a general utilities object `utils` with the following functions:
 | `orderPageSaveChanges` |  | Save the current order page |
 | `permalinkSettingsPageSaveChanges` |  | Save the current Permalink settings |
 | `removeCoupon` | | helper method that removes a single coupon within cart or checkout |
-| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
+| `selectOptionInSelect2` | `selector, value` | helper method that searches for select2 type fields and select plus insert value inside |
 | `selectOrderAction` | `action` | Helper method to select an order action in the `Order Actions` postbox |
 | `setCheckbox` | `selector` | Check a checkbox |
 | `settingsPageSaveChanges` |  | Save the current WooCommerce settings page |
@@ -239,8 +239,8 @@ There is a general utilities object `utils` with the following functions:
 | `verifyValueOfInputField` | `selector, value` | Verify an input contains the passed value |
 | `clickFilter` | `selector` | Click on a list page filter |
 | `moveAllItemsToTrash` |  | Moves all items in a list view to the Trash |
-| `selectOptionInSelect2` | `selector, value` | helper method that searchs for select2 type fields and select plus insert value inside |
-| `searchForOrder` | `value, orderId, customerName` | helper method that searchs for an order via many different terms |
+| `selectOptionInSelect2` | `selector, value` | helper method that searches for select2 type fields and select plus insert value inside |
+| `searchForOrder` | `value, orderId, customerName` | helper method that searches for an order via many different terms |
 | `addShippingZoneAndMethod` | `zoneName, zoneLocation, zipCode, zoneMethod` | util helper method for adding shipping zones with shipping methods |
 | `applyCoupon` | `couponName` | helper method which applies a coupon in cart or checkout |
 | `removeCoupon` | | helper method that removes a single coupon within cart or checkout |

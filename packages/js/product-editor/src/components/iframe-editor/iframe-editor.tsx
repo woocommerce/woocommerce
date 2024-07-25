@@ -62,6 +62,7 @@ type IframeEditorProps = {
 	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 	showBackButton?: boolean;
+	name: string;
 };
 
 export function IframeEditor( {
@@ -70,6 +71,7 @@ export function IframeEditor( {
 	onInput = () => {},
 	settings: __settings,
 	showBackButton = false,
+	name,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
 	const [ temporalBlocks, setTemporalBlocks ] = useState< BlockInstance[] >(
@@ -270,7 +272,7 @@ export function IframeEditor( {
 					</div>
 					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 					<PluginArea scope="woocommerce-product-editor-modal-block-editor" />
-					<SettingsSidebar />
+					<SettingsSidebar smallScreenTitle={ name } />
 				</BlockEditorProvider>
 			</EditorContext.Provider>
 		</div>

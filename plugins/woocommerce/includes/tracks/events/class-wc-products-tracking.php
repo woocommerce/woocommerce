@@ -29,8 +29,7 @@ class WC_Products_Tracking {
 		add_action( 'load-edit.php', array( $this, 'track_products_view' ), 10 );
 		add_action( 'load-edit-tags.php', array( $this, 'track_categories_and_tags_view' ), 10, 2 );
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
-		add_action( 'woocommerce_new_product', array( $this, 'track_product_published' ), 10, 3 );
-		add_action( 'woocommerce_update_product', array( $this, 'track_product_published' ), 10, 3 );
+		add_action( 'wp_after_insert_post', array( $this, 'track_product_published' ), 10, 4 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 		add_action( 'edited_product_cat', array( $this, 'track_product_category_updated' ) );
 		add_action( 'add_meta_boxes_product', array( $this, 'track_product_updated_client_side' ), 10 );
@@ -304,21 +303,24 @@ class WC_Products_Tracking {
 	/**
 	 * Send a Tracks event when a product is published.
 	 *
-	 * @param int        $product_id  Product ID.
-	 * @param WC_Product $product     Product object.
-	 * @param array      $changes     Product changes.
+	 * @param int          $post_id     Post ID.
+	 * @param WP_Post      $post        Post object.
+	 * @param bool         $update      Whether this is an existing post being updated.
+	 * @param null|WP_Post $post_before Null for new posts, the WP_Post object prior
+	 *                                  to the update for updated posts.
 	 */
-	public function track_product_published( $product_id, $product, $changes = null ) {
+	public function track_product_published( $post_id, $post, $update, $post_before ) {
 		if (
-			! isset( $product ) ||
-			'product' !== $product->post_type ||
-			'publish' !== $product->get_status( 'edit' ) ||
-			( $changes && ! isset( $changes['status'] ) )
+			'product' !== $post->post_type ||
+			'publish' !== $post->post_status ||
+			( $post_before && 'publish' === $post_before->post_status )
 		) {
 			return;
 		}
 
-		$product_type_options        = self::get_product_type_options( $product_id );
+		$product = wc_get_product( $post_id );
+
+		$product_type_options        = self::get_product_type_options( $post_id );
 		$product_type_options_string = self::get_product_type_options_string( $product_type_options );
 
 		$properties = array(
@@ -332,7 +334,7 @@ class WC_Products_Tracking {
 			'is_virtual'           => $product->is_virtual() ? 'yes' : 'no',
 			'manage_stock'         => $product->get_manage_stock() ? 'yes' : 'no',
 			'menu_order'           => $product->get_menu_order() ? 'yes' : 'no',
-			'product_id'           => $product_id,
+			'product_id'           => $post_id,
 			'product_gallery'      => count( $product->get_gallery_image_ids() ),
 			'product_image'        => $product->get_image_id() ? 'yes' : 'no',
 			'product_type'         => $product->get_type(),
@@ -344,6 +346,7 @@ class WC_Products_Tracking {
 			'tags'                 => count( $product->get_tag_ids() ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
 			'weight'               => $product->get_weight() ? 'yes' : 'no',
+			'global_unique_id'     => $product->get_global_unique_id() ? 'yes' : 'no',
 		);
 
 		WC_Tracks::record_event( 'product_add_publish', $properties );

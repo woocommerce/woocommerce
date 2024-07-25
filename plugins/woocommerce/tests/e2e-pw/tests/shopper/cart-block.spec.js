@@ -26,7 +26,7 @@ const test = baseTest.extend( {
 	testPageTitlePrefix: 'Cart Block',
 } );
 
-test.describe( 'Cart Block page', () => {
+test.describe( 'Cart Block page', { tag: [ '@payments', '@services' ] }, () => {
 	test.beforeAll( async ( { api } ) => {
 		// make sure the currency is USD
 		await api.put( 'settings/general/woocommerce_currency', {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-</details> Improve E2E selector by making it stricter. Wait for text due to AJAX call. <details>  <summary>E2E test tweaks</summary>

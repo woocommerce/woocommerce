@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
+const shouldSkip = API_BASE_URL !== undefined;
 
 /**
  * Internal dependencies
@@ -717,12 +717,7 @@ test.describe( 'Products API tests: CRUD', () => {
 			const getDeletedProductReviewResponse = await request.get(
 				`wp-json/wc/v3/products/reviews/${ productReviewId }`
 			);
-			/**
-			 *  currently returns a 403 (forbidden) rather than a 404 (not found)
-			 *  an issue has been raised to track this
-			 *  See: https://github.com/woocommerce/woocommerce/issues/35162
-			 */
-			expect( getDeletedProductReviewResponse.status() ).toEqual( 403 );
+			expect( getDeletedProductReviewResponse.status() ).toEqual( 404 );
 		} );
 
 		test( 'can batch update product reviews', async ( { request } ) => {
@@ -817,12 +812,7 @@ test.describe( 'Products API tests: CRUD', () => {
 			const getDeletedProductReviewResponse = await request.get(
 				`wp-json/wc/v3/products/reviews/${ review2Id }`
 			);
-			/**
-			 *  currently returns a 403 (forbidden) rather than a 404 (not found)
-			 *  an issue has been raised to track this
-			 *  See: https://github.com/woocommerce/woocommerce/issues/35162
-			 */
-			expect( getDeletedProductReviewResponse.status() ).toEqual( 403 );
+			expect( getDeletedProductReviewResponse.status() ).toEqual( 404 );
 
 			// Batch delete the created tags
 			await request.post( `wp-json/wc/v3/products/reviews/batch`, {
@@ -1534,12 +1524,9 @@ test.describe( 'Products API tests: CRUD', () => {
 			// Send request to batch delete the products created earlier
 			const idsToDelete = expectedProducts.map( ( { id } ) => id );
 			const batchDeletePayload = batch( 'delete', idsToDelete );
-			const response = await request.post(
-				'wp-json/wc/v3/products/batch',
-				{
-					data: batchDeletePayload,
-				}
-			);
+			let response = await request.post( 'wp-json/wc/v3/products/batch', {
+				data: batchDeletePayload,
+			} );
 			const responseJSON = await response.json();
 			const actualBatchDeletedProducts = responseJSON.delete;
 
@@ -1556,7 +1543,7 @@ test.describe( 'Products API tests: CRUD', () => {
 
 			// Verify that the deleted product ID's can no longer be retrieved
 			for ( const id of idsToDelete ) {
-				const response = await request.get(
+				response = await request.get(
 					`wp-json/wc/v3/products/${ id }`
 				);
 				expect( response.status() ).toEqual( 404 );
