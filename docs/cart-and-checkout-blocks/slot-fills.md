@@ -6,7 +6,7 @@ tags: reference
 
 ## The problem
 
-You added custom data to the [Store API](https://github.com/woocommerce/woocommerce/blob/1675c63bba94c59703f57c7ef06e7deff8fd6bba/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./available-filters.md). Now you want to render your own components in specific places in the Cart and Checkout.
+You added custom data to the [Store API](https://github.com/woocommerce/woocommerce/blob/1675c63bba94c59703f57c7ef06e7deff8fd6bba/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/rest-api/extend-rest-api-add-data.md). You changed several strings using [Checkout filters](./cart-and-checkout-available-filters/). Now you want to render your own components in specific places in the Cart and Checkout.
 
 ## Solution
 
