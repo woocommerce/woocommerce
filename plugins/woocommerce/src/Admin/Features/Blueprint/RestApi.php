@@ -67,7 +67,7 @@ class RestApi {
 							'required'          => false,
 						),
 						'export_as_zip' => array(
-							'description' => 'Export as a zip file',
+							'description' => __( 'Export as a zip file' ),
 							'type'        => 'boolean',
 							'default'     => false,
 							'required'    => false,
