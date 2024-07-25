@@ -55,7 +55,7 @@ class McStats extends A8c_Mc_Stats {
 	 */
 	public function do_server_side_stat( $url ) {
 		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
-			return;
+			return false;
 		}
 
 		return parent::do_server_side_stat( $url );
