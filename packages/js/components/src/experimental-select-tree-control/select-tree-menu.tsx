@@ -10,6 +10,7 @@ import {
 	useLayoutEffect,
 	useState,
 } from '@wordpress/element';
+import { escapeRegExp } from 'lodash';
 
 /**
  * Internal dependencies
@@ -76,9 +77,10 @@ export const SelectTreeMenu = ( {
 		if ( ! props.createValue || ! item.children?.length ) return false;
 		return item.children.some( ( child ) => {
 			if (
-				new RegExp( props.createValue || '', 'ig' ).test(
-					child.data.label
-				)
+				new RegExp(
+					escapeRegExp( props.createValue || '' ),
+					'ig'
+				).test( child.data.label )
 			) {
 				return true;
 			}
