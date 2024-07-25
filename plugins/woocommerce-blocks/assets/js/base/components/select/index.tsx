@@ -122,7 +122,7 @@ export const Select = ( props: SelectProps ) => {
 			}
 		);
 	} );
-	console.log( errorId );
+
 	return (
 		<div
 			className={ clsx( className, {
