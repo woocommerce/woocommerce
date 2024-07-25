@@ -404,7 +404,7 @@ final class WooCommerce {
 			);
 
 			$remote_logger = wc_get_container()->get( RemoteLogger::class );
-			$remote_logger->log( WC_Log_Levels::CRITICAL, $message, $context );
+			$remote_logger->handle( time(), WC_Log_Levels::CRITICAL, $message, $context );
 
 			/**
 			 * Action triggered when there are errors during shutdown.

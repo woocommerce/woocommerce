@@ -314,11 +314,11 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 
 
 	/**
-	 * @testdox Test log method when throttled.
+	 * @testdox Test handle() method when throttled.
 	 *
 	 * @return void
 	 */
-	public function test_log_when_throttled() {
+	public function test_handle_returns_false_when_throttled() {
 		$mock_local_logger = $this->createMock( \WC_Logger::class );
 		$mock_local_logger->expects( $this->once() )
 			->method( 'info' )
@@ -339,16 +339,16 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 
 		set_transient( RemoteLogger::THROTTLE_TRANSIENT, $throttle_data, RemoteLogger::THROTTLE_INTERVAL );
 
-		$this->sut->log( 'error', 'Test message' );
+		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
 	}
 
 
 	/**
-	 * @testdox Test log method applies filter.
+	 * @testdox Test handle() method applies filter.
 	 *
 	 * @return void
 	 */
-	public function test_log_filtered_log_null() {
+	public function test_handle_filtered_log_null() {
 		$this->sut = $this->getMockBuilder( RemoteLogger::class )
 							->onlyMethods( array( 'is_remote_logging_allowed' ) )
 							->getMock();
@@ -380,13 +380,13 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$this->sut->log( 'error', 'Test message' );
+		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
 	}
 
 	/**
-	 * @testdox Test successfully sends log.
+	 * @testdox Test handle() method successfully sends log.
 	 */
-	public function test_log_successful() {
+	public function test_handle_successful() {
 		$this->sut = $this->getMockBuilder( RemoteLogger::class )
 							->onlyMethods( array( 'is_remote_logging_allowed' ) )
 							->getMock();
@@ -411,14 +411,14 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$this->sut->log( 'error', 'Test message' );
+		$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array() ) );
 		$this->assertNotEmpty( get_transient( RemoteLogger::THROTTLE_TRANSIENT ) );
 	}
 
 	/**
-	 * @testdox Test log method when remote logging fails.
+	 * @testdox Test handle method when remote logging fails.
 	 **/
-	public function test_log_remote_logging_failure() {
+	public function test_handle_remote_logging_failure() {
 		$mock_local_logger = $this->createMock( \WC_Logger::class );
 		$mock_local_logger->expects( $this->once() )
 			->method( 'error' );
@@ -443,7 +443,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$this->sut->log( 'error', 'Test message' );
+		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
 		$this->assertNotEmpty( get_transient( RemoteLogger::THROTTLE_TRANSIENT ) );
 	}
 

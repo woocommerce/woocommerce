@@ -51,53 +51,27 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @param int    $timestamp Log timestamp.
 	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
-	 * @param array  $context Optional. Additional information for log handlers.
+	 * @param array  $context Additional information for log handlers.
 	 *
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
-		// Do nothing here.
-		// This is an abstract method in WC_Log_Handler class. We don't use this method for remote logging.
-		return false;
-	}
-
-
-	/**
-	 * Log a message remotely.
-	 *
-	 * This function is inefficient because the data goes over the REST API, so use sparingly.
-	 *
-	 * @param string $level One of the following:
-	 *     'emergency': System is unusable.
-	 *     'alert': Action must be taken immediately.
-	 *     'critical': Critical conditions.
-	 *     'error': Error conditions.
-	 *     'warning': Warning conditions.
-	 *     'notice': Normal but significant condition.
-	 *     'info': Informational messages.
-	 *     'debug': Debug-level messages.
-	 * @param string $message Log message.
-	 * @param array  $context Optional. Additional information for log handlers.
-	 *
-	 * @return void
-	 */
-	public function log( $level, $message, $context = array() ) {
 		if ( ! \WC_Log_Levels::is_valid_level( $level ) ) {
 			/* translators: 1: WC_Remote_Logger::log 2: level */
 			wc_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'woocommerce' ), '<code>WC_Remote_Logger::log</code>', $level ), '9.2.0' );
 		}
 
 		if ( ! $this->is_remote_logging_allowed() ) {
-			return;
+			return false;
 		}
 
 		if ( $this->is_third_party_error( $message, $context ) ) {
-			return;
+			return false;
 		}
 
 		if ( $this->should_throttle_logging() ) {
 			$this->local_logger->info( 'Remote logging throttled.', array( 'source' => 'wc-remote-logger' ) );
-			return;
+			return false;
 		}
 
 		try {
@@ -105,13 +79,14 @@ class RemoteLogger extends \WC_Log_Handler {
 
 			// Ensure the log data is valid.
 			if ( ! is_array( $log_data ) || empty( $log_data['message'] ) || empty( $log_data['feature'] ) ) {
-				return;
+				return false;
 			}
 
 			$body = array(
 				'params' => wp_json_encode( $log_data ),
 			);
 
+			$this->record_log_timestamp();
 			wp_safe_remote_post(
 				self::LOG_ENDPOINT,
 				array(
@@ -124,12 +99,13 @@ class RemoteLogger extends \WC_Log_Handler {
 					'blocking' => false,
 				)
 			);
+
+			return true;
 		} catch ( \Exception $e ) {
 			// Log the error locally if the remote logging fails.
 			$this->local_logger->error( 'Remote logging failed: ' . $e->getMessage() );
 		}
-
-		$this->record_log_timestamp();
+		return false;
 	}
 
 
