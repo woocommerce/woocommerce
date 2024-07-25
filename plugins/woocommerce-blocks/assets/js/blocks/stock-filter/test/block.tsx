@@ -2,7 +2,14 @@
  * External dependencies
  */
 import React from '@wordpress/element';
-import { act, render, screen, within, waitFor } from '@testing-library/react';
+import {
+	act,
+	cleanup,
+	render,
+	screen,
+	within,
+	waitFor,
+} from '@testing-library/react';
 import { default as fetchMock } from 'jest-fetch-mock';
 import userEvent from '@testing-library/user-event';
 
@@ -68,6 +75,7 @@ const selectors = {
 };
 
 const setup = ( params: SetupParams = {} ) => {
+	cleanup();
 	const url = `http://woo.local/${
 		params.filterStock ? '?filter_stock_status=' + params.filterStock : ''
 	}`;
@@ -376,13 +384,13 @@ describe( 'Filter by Stock block', () => {
 				const dropdown = getDropdown();
 
 				if ( dropdown ) {
-					user.click( dropdown );
+					await user.click( dropdown );
 				}
 
 				const inStockSuggestion = getInStockSuggestion();
 
 				if ( inStockSuggestion ) {
-					user.click( inStockSuggestion );
+					await user.click( inStockSuggestion );
 				}
 
 				expect( getInStockChips() ).toBeInTheDocument();
@@ -391,13 +399,13 @@ describe( 'Filter by Stock block', () => {
 
 				const freshDropdown = getDropdown();
 				if ( freshDropdown ) {
-					user.click( freshDropdown );
+					await user.click( freshDropdown );
 				}
 
 				const outOfStockSuggestion = getOutOfStockSuggestion();
 
 				if ( outOfStockSuggestion ) {
-					userEvent.click( outOfStockSuggestion );
+					await userEvent.click( outOfStockSuggestion );
 				}
 
 				expect( getInStockChips() ).toBeInTheDocument();
