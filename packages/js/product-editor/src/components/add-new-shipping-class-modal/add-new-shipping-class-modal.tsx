@@ -5,6 +5,8 @@ import {
 	useState,
 	createElement,
 	createInterpolateElement,
+	useRef,
+	useEffect,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Form, FormErrors, useFormContext } from '@woocommerce/components';
@@ -55,6 +57,14 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		shippingNameInputValue
 	);
 
+	// Get the reference of the name field
+	const nameRef = useRef< HTMLInputElement | null >( null );
+
+	// Focus in the name field when the component is mounted.
+	useEffect( () => {
+		nameRef.current?.focus();
+	}, [] );
+
 	/**
 	 * Pull the slug suggestion from the server,
 	 * and update the slug input field.
@@ -66,6 +76,8 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 		if ( prevNameValue === shippingNameInputValue ) {
 			return;
 		}
+
+		setIsRequestingSlug( true );
 
 		setPrevNameValue( shippingNameInputValue );
 
@@ -113,6 +125,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 					}
 				) }
 				onBlur={ getSlugSuggestion }
+				ref={ nameRef }
 			/>
 
 			<InputControl
@@ -155,7 +168,7 @@ function ShippingClassForm( { onAdd, onCancel }: ShippingClassFormProps ) {
 			/>
 
 			<div className="woocommerce-add-new-shipping-class-modal__buttons">
-				<Button isSecondary onClick={ onCancel }>
+				<Button variant="secondary" onClick={ onCancel }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button

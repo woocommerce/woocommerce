@@ -8,17 +8,30 @@ import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { useLayoutEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import {
+	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
+	createBlocksFromInnerBlocksTemplate,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import {
-	PreviewState,
 	ProductCollectionAttributes,
+	TProductCollectionOrder,
+	TProductCollectionOrderBy,
 	ProductCollectionQuery,
+	ProductCollectionDisplayLayout,
+	PreviewState,
 	SetPreviewState,
 } from './types';
-import { coreQueryPaginationBlockName } from './constants';
+import {
+	coreQueryPaginationBlockName,
+	DEFAULT_QUERY,
+	DEFAULT_ATTRIBUTES,
+	INNER_BLOCKS_TEMPLATE,
+} from './constants';
 import blockJson from './block.json';
 import {
 	LocationType,
@@ -67,7 +80,9 @@ const isInProductArchive = () => {
 		: false;
 };
 
-const isFirstBlockThatSyncsWithQuery = () => {
+const isFirstBlockThatUsesPageContext = (
+	property: 'inherit' | 'filterable'
+) => {
 	// We use experimental selector because it's been graduated as stable (`getBlocksByName`)
 	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
 	// available in WordPress 6.5.
@@ -84,15 +99,23 @@ const isFirstBlockThatSyncsWithQuery = () => {
 		( clientId ) => {
 			const block = getBlock( clientId );
 
-			return block.attributes?.query?.inherit;
+			return block.attributes?.query?.[ property ];
 		}
 	);
 
 	return ! blockAlreadySyncedWithQuery;
 };
 
-export function getDefaultValueOfInheritQueryFromTemplate() {
-	return isInProductArchive() ? isFirstBlockThatSyncsWithQuery() : false;
+export function getDefaultValueOfInherit() {
+	return isInProductArchive()
+		? isFirstBlockThatUsesPageContext( 'inherit' )
+		: false;
+}
+
+export function getDefaultValueOfFilterable() {
+	return ! isInProductArchive()
+		? isFirstBlockThatUsesPageContext( 'filterable' )
+		: false;
 }
 
 /**
@@ -206,3 +229,37 @@ export const useSetPreviewState = ( {
 		setPreviewState,
 	] );
 };
+
+export const getDefaultQuery = (
+	currentQuery: ProductCollectionQuery
+): ProductCollectionQuery => ( {
+	...currentQuery,
+	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
+	order: DEFAULT_QUERY.order as TProductCollectionOrder,
+	inherit: getDefaultValueOfInherit(),
+	filterable: getDefaultValueOfFilterable(),
+} );
+
+export const getDefaultDisplayLayout = () =>
+	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+
+export const getDefaultSettings = (
+	currentAttributes: ProductCollectionAttributes
+): Partial< ProductCollectionAttributes > => ( {
+	displayLayout: getDefaultDisplayLayout(),
+	query: getDefaultQuery( currentAttributes.query ),
+} );
+
+export const getDefaultProductCollection = () =>
+	createBlock(
+		blockJson.name,
+		{
+			...DEFAULT_ATTRIBUTES,
+			query: {
+				...DEFAULT_ATTRIBUTES.query,
+				inherit: getDefaultValueOfInherit(),
+				filterable: getDefaultValueOfFilterable(),
+			},
+		},
+		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
+	);

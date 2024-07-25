@@ -53,6 +53,7 @@ import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { trackEvent } from '../tracking';
+import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -172,30 +173,33 @@ export const Layout = () => {
 							</motion.div>
 
 							<div className="edit-site-layout__content">
-								<NavigableRegion
-									ariaLabel={ __(
-										'Navigation',
-										'woocommerce'
-									) }
-									className="edit-site-layout__sidebar-region"
-								>
-									<motion.div
-										animate={ { opacity: 1 } }
-										transition={ {
-											type: 'tween',
-											duration:
-												// Disable transitiont in mobile to emulate a full page transition.
-												disableMotion ||
-												isMobileViewport
-													? 0
-													: ANIMATION_DURATION,
-											ease: 'easeOut',
-										} }
-										className="edit-site-layout__sidebar"
+								<div className="edit-site-layout__sidebar">
+									<NavigableRegion
+										ariaLabel={ __(
+											'Navigation',
+											'woocommerce'
+										) }
+										className="edit-site-layout__sidebar-region"
 									>
-										<Sidebar />
-									</motion.div>
-								</NavigableRegion>
+										<motion.div
+											animate={ { opacity: 1 } }
+											transition={ {
+												type: 'tween',
+												duration:
+													// Disable transitiont in mobile to emulate a full page transition.
+													disableMotion ||
+													isMobileViewport
+														? 0
+														: ANIMATION_DURATION,
+												ease: 'easeOut',
+											} }
+											className="edit-site-layout__sidebar"
+										>
+											<Sidebar />
+										</motion.div>
+									</NavigableRegion>
+									<SidebarNavigationExtraScreen />
+								</div>
 
 								{ ! isMobileViewport && (
 									<div className="edit-site-layout__canvas-container">

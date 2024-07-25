@@ -4,16 +4,11 @@
 import { controls as dataControls } from '@wordpress/data-controls';
 import { Action } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-
 /**
  * Internal dependencies
  */
 import { WC_ADMIN_NAMESPACE } from '../constants';
-
-let optionNames: string[] = [];
-const fetches: {
-	[ key: string ]: Promise< unknown >;
-} = {};
+import { debounce } from './utils';
 
 export const batchFetch = ( optionName: string ) => {
 	return {
@@ -22,41 +17,63 @@ export const batchFetch = ( optionName: string ) => {
 	};
 };
 
-export const controls = {
-	...dataControls,
-	BATCH_FETCH( { optionName }: Action ) {
-		optionNames.push( optionName );
+let optionNames: string[] = [];
+const fetches: {
+	[ key: string ]: Promise< unknown >;
+} = {};
 
-		return new Promise( ( resolve ) => {
-			setTimeout( function () {
-				if (
-					fetches.hasOwnProperty( optionName ) &&
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore TODO - this type bug needs to be fixed.
-					fetches[ optionName ]
-				) {
-					return fetches[ optionName ].then( ( result ) => {
-						resolve( result );
-					} );
+const debouncedFetch = async ( optionName: string ) => {
+	// Wrap the debounced function in a promise because debounce function doesn't wait for the promise to resolve
+	return new Promise(
+		async ( resolve, reject ) =>
+			debounce( () => {
+				// If the option name is already being fetched, return the promise
+				if ( fetches.hasOwnProperty( optionName ) ) {
+					return fetches[ optionName ]
+						.then( resolve )
+						.catch( reject );
 				}
 
-				// Get unique option names.
-				const names = [ ...new Set( optionNames ) ].join( ',' );
-				// Send request for a group of options.
-				const url = WC_ADMIN_NAMESPACE + '/options?options=' + names;
-				const fetch = apiFetch( { path: url } );
-				fetch.then( ( result ) => resolve( result ) );
-				optionNames.forEach( ( option ) => {
-					fetches[ option ] = fetch;
-					fetches[ option ].then( () => {
-						// Delete the fetch after to allow wp data to handle cache invalidation.
-						delete fetches[ option ];
-					} );
+				if ( optionNames.length === 0 ) {
+					// Previous batch fetch might fail
+					optionNames.push( optionName );
+				}
+
+				// Get unique option names
+				const uniqueOptionNames = [ ...new Set( optionNames ) ];
+				const names = uniqueOptionNames.join( ',' );
+
+				// Send request for a group of options
+				const fetch = apiFetch( {
+					path: `${ WC_ADMIN_NAMESPACE }/options?options=${ names }`,
 				} );
 
-				// Clear option names after we've sent the request for a group of options.
+				uniqueOptionNames.forEach( async ( option ) => {
+					fetches[ option ] = fetch;
+					try {
+						await fetch;
+					} catch ( error ) {
+						// ignore error, the error will be thrown by the parent fetch
+					} finally {
+						// Delete the fetch after completion to allow wp data to handle cache invalidation
+						delete fetches[ option ];
+					}
+				} );
+
+				// Clear option names after we've sent the request for a group of options
 				optionNames = [];
-			}, 1 );
-		} );
+
+				fetch.then( resolve ).catch( reject );
+			}, 100 )() // 100ms debounce time for batch fetches (to avoid multiple fetches for the same options while not affecting user experience too much. Typically, values between 50ms and 200ms should provide a good balance for most applications.
+	);
+};
+
+export const controls = {
+	...dataControls,
+	async BATCH_FETCH( { optionName }: Action ) {
+		optionNames.push( optionName );
+
+		// Consolidate multiple fetches into a single fetch
+		return await debouncedFetch( optionName );
 	},
 };

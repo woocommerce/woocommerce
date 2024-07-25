@@ -15,8 +15,8 @@ test.describe( 'Test the cart template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await expect(
 			editor.canvas.getByLabel( 'Block: Title' )
 		).toBeVisible();
@@ -27,11 +27,11 @@ test.describe( 'Test the cart template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( { path: '/page' } );
+		await admin.visitSiteEditor( { postType: 'page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Cart', exact: true } )
 			.click();
-		await editor.enterEditMode();
+		await editor.canvas.locator( 'body' ).click();
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Cart")' ).first()
@@ -63,8 +63,8 @@ test.describe( 'Test editing the cart template', () => {
 		await admin.visitSiteEditor( {
 			postId: templatePath,
 			postType: templateType,
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->'
 		);

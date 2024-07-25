@@ -11,11 +11,11 @@ export type WordCountType =
 
 export interface WcBlocksConfig {
 	pluginUrl: string;
-	productCount: number;
+	productCount?: number;
 	defaultAvatar: string;
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
-	experimentalBlocksEnabled: boolean;
+	experimentalBlocksEnabled?: boolean;
 }
 
 export const blocksConfig = getSetting( 'wcBlocksConfig', {

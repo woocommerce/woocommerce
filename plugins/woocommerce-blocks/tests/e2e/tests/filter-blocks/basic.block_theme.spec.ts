@@ -6,65 +6,49 @@ import { test, expect } from '@woocommerce/e2e-utils';
 const filterBlocks = [
 	{
 		name: 'woocommerce/product-filter-price',
-		title: 'Product Filter: Price (Beta)',
+		title: 'Product Filter: Price (Experimental)',
 		heading: 'Filter by Price',
 	},
 	{
 		name: 'woocommerce/product-filter-stock-status',
-		title: 'Product Filter: Stock Status (Beta)',
+		title: 'Product Filter: Stock Status (Experimental)',
 		heading: 'Filter by Stock Status',
 	},
 	{
 		name: 'woocommerce/product-filter-rating',
-		title: 'Product Filter: Rating (Beta)',
+		title: 'Product Filter: Rating (Experimental)',
 		heading: 'Filter by Rating',
 	},
 	{
 		name: 'woocommerce/product-filter-attribute',
-		title: 'Product Filter: Attribute (Beta)',
+		title: 'Product Filter: Attribute (Experimental)',
 		heading: 'Filter by Attribute',
 	},
 	{
 		name: 'woocommerce/product-filter-active',
-		title: 'Product Filter: Active Filters (Beta)',
+		title: 'Product Filter: Active Filters (Experimental)',
 		heading: 'Active Filters',
 	},
 ];
 
 test.describe( 'Filter blocks registration', () => {
-	test.beforeEach( async ( { admin, requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-enable-experimental-features'
-		);
+	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );
 
-	test( 'Variations can be inserted through the inserter.', async ( {
+	test( 'Variations cannot be inserted through the inserter.', async ( {
 		page,
 		editor,
 	} ) => {
 		for ( const block of filterBlocks ) {
-			await editor.insertBlockUsingGlobalInserter( block.title );
+			await editor.openGlobalBlockInserter();
+			await page.getByPlaceholder( 'Search' ).fill( block.title );
+			const filterBlock = page.getByRole( 'option', {
+				name: block.title,
+				exact: true,
+			} );
 
-			await expect(
-				page.getByLabel( `Block: ${ block.title }` )
-			).toBeVisible();
-		}
-	} );
-
-	test( 'Each filter block comes with a default title', async ( {
-		editor,
-		page,
-	} ) => {
-		for ( const block of filterBlocks ) {
-			await editor.insertBlockUsingGlobalInserter( block.title );
-
-			await expect(
-				page
-					.getByLabel( `Block: Product Filter` )
-					.getByLabel( 'Block: Heading' )
-					.and( page.getByText( block.heading ) )
-			).toBeVisible();
+			await expect( filterBlock ).toBeHidden();
 		}
 	} );
 } );

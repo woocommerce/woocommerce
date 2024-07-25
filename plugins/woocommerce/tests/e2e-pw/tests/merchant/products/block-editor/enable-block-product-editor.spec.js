@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
@@ -26,7 +26,7 @@ async function disableNewEditorIfEnabled( browser ) {
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'Enable block product editor', () => {
+test.describe( 'Enable block product editor', { tag: '@gutenberg' }, () => {
 	test.describe( 'Enabled', () => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

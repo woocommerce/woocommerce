@@ -15,12 +15,6 @@
 	}
 }
 
-@include breakpoint(">782px") {
-	.wc-block-cart .wc-block-cart__submit-container--sticky {
-		display: none;
-	}
-}
-
 @include breakpoint("<782px") {
 	.wc-block-cart .wc-block-cart__submit-container--sticky {
 		background: $white;
@@ -42,5 +36,17 @@
 			right: 0;
 			top: 0;
 		}
+	}
+}
+
+@include breakpoint(">=782px") {
+	.wc-block-cart .wc-block-cart__submit-container--sticky {
+		display: none;
+	}
+}
+
+@media screen and (max-height: 500px) {
+	.wc-block-cart .wc-block-cart__submit-container--sticky {
+		display: none;
 	}
 }

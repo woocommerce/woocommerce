@@ -25,7 +25,12 @@ import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
 import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { trackEvent } from '~/customize-store/tracking';
-export const SidebarNavigationScreenTypography = () => {
+
+export const SidebarNavigationScreenTypography = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
@@ -91,6 +96,7 @@ export const SidebarNavigationScreenTypography = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( label, {
 				EditorLink: (
 					<Link
@@ -164,7 +170,7 @@ export const SidebarNavigationScreenTypography = () => {
 										'woocommerce-customize-store__opt-in-usage-tracking-modal'
 									}
 									title={ __(
-										'Get more fonts',
+										'Access more fonts',
 										'woocommerce'
 									) }
 									onRequestClose={ closeModal }
@@ -174,7 +180,7 @@ export const SidebarNavigationScreenTypography = () => {
 										className="core-profiler__checkbox"
 										label={ interpolateComponents( {
 											mixedString: __(
-												'I would like to get store updates, including new fonts, on an ongoing basis. In doing so, I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+												'More fonts are available! Opt in to connect your store and access the full font library, plus get more relevant content and a tailored store setup experience. Opting in will enable {{link}}usage tracking{{/link}}, which you can opt out of at any time via WooCommerece settings.',
 												'woocommerce'
 											),
 											components: {

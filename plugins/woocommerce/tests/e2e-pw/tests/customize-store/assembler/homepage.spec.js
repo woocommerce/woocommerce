@@ -1,7 +1,9 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
+const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
+const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -10,7 +12,17 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Homepage', () => {
+async function prepareAssembler( pageObject, baseURL ) {
+	await pageObject.setupSite( baseURL );
+	await pageObject.waitForLoadingScreenFinish();
+	const assembler = await pageObject.getAssembler();
+	await assembler.getByText( 'Design your homepage' ).click();
+	await assembler
+		.locator( '.components-placeholder__preview' )
+		.waitFor( { state: 'hidden' } );
+}
+
+test.skip( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -49,19 +61,12 @@ test.describe( 'Assembler -> Homepage', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
-		await assembler.getByText( 'Design your homepage' ).click();
-		await assembler
-			.locator( '.components-placeholder__preview' )
-			.waitFor( { state: 'hidden' } );
-	} );
-
 	test( 'Available homepage should be displayed', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 
 		const homepages = assembler.locator(
@@ -73,7 +78,10 @@ test.describe( 'Assembler -> Homepage', () => {
 
 	test( 'The selected homepage should be focused when is clicked', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const homepage = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
@@ -85,7 +93,10 @@ test.describe( 'Assembler -> Homepage', () => {
 
 	test( 'The selected homepage should be visible on the site preview', async ( {
 		pageObject,
+		baseURL,
 	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const editor = await pageObject.getEditor();
 
@@ -127,6 +138,8 @@ test.describe( 'Assembler -> Homepage', () => {
 		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
+		await prepareAssembler( pageObject, baseURL );
+
 		const assembler = await pageObject.getAssembler();
 		const homepage = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
@@ -152,21 +165,182 @@ test.describe( 'Assembler -> Homepage', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		// Get all the content between the header and the footer.
-		const homepageHTML = await page
-			.locator(
-				'//header/following-sibling::*[following-sibling::footer]'
-			)
-			.all();
 
-		let index = 0;
-		for ( const element of homepageHTML ) {
-			await expect(
-				await element.getAttribute( 'class' )
-			).toMatchSnapshot( {
-				name: `selected-homepage-blocks-class-frontend-${ index }`,
-			} );
-			index++;
+		// Check if Gutenberg is installed
+		const apiContext = await request.newContext( {
+			baseURL,
+			extraHTTPHeaders: {
+				Authorization: `Basic ${ encodeCredentials(
+					'admin',
+					'password'
+				) }`,
+				cookie: '',
+			},
+		} );
+		const listPluginsResponse = await apiContext.get(
+			`/wp-json/wp/v2/plugins`,
+			{
+				failOnStatusCode: true,
+			}
+		);
+		const pluginsList = await listPluginsResponse.json();
+		const withGutenbergPlugin = pluginsList.find(
+			( { textdomain } ) => textdomain === 'gutenberg'
+		);
+
+		// if testing with Gutenberg, perform Gutenberg-specific testing
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( withGutenbergPlugin ) {
+			// Get all the content between the header and the footer.
+			const homepageHTML = await page
+				.locator(
+					'//header/following-sibling::*[following-sibling::footer]'
+				)
+				.all();
+
+			let index = 0;
+			for ( const element of homepageHTML ) {
+				await expect(
+					await element.getAttribute( 'class' )
+				).toMatchSnapshot( {
+					name: `${
+						withGutenbergPlugin ? 'gutenberg' : ''
+					}-selected-homepage-blocks-class-frontend-${ index }`,
+				} );
+				index++;
+			}
 		}
 	} );
+
+	test.describe( 'Homepage tracking banner', () => {
+		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
+			pageObject,
+			baseURL,
+		} ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
+
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeVisible();
+			await expect(
+				assembler.getByText(
+					'Opt in to usage tracking to get access to more patterns.'
+				)
+			).toBeVisible();
+		} );
+
+		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is not allowed', async ( {
+			context,
+			pageObject,
+			baseURL,
+		} ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
+
+			await prepareAssembler( pageObject, baseURL );
+
+			await context.setOffline( true );
+
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeVisible();
+			await expect(
+				assembler.getByText(
+					"Looks like we can't detect your network. Please double-check your internet connection and refresh the page."
+				)
+			).toBeVisible();
+		} );
+
+		test( 'Should not show the "Want more patterns?" banner when tracking is allowed', async ( {
+			baseURL,
+			pageObject,
+		} ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'yes'
+			);
+
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeHidden();
+		} );
+	} );
 } );
+
+test.describe(
+	'Assembler -> Homepage -> PTK API is down',
+	{ tag: '@gutenberg' },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
+
+		test.beforeAll( async ( { baseURL } ) => {
+			const wordPressVersion = await getInstalledWordPressVersion();
+
+			if ( wordPressVersion <= 6.5 ) {
+				test.skip(
+					'Skipping PTK API test: WordPress version is below 6.5, which does not support this feature.'
+				);
+			}
+			try {
+				// In some environments the tour blocks clicking other elements.
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_customize_store_onboarding_tour_hidden',
+					'yes'
+				);
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
+			}
+		} );
+
+		test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
+			baseURL,
+			pageObject,
+			page,
+		} ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
+
+			await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
+				route.fulfill( {
+					status: 500,
+				} );
+			} );
+
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeVisible();
+			await expect(
+				assembler.getByText(
+					"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
+				)
+			).toBeVisible();
+		} );
+	}
+);

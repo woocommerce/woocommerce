@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add placeholder options and validation to checkout country and state select inputs.

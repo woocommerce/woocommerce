@@ -1,12 +1,13 @@
 <?php
 
-namespace Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable;
+namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 use WP_CLI;
 
 /**
@@ -76,6 +77,9 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
 		WP_CLI::add_command( 'wc hpos backfill', array( $this, 'backfill' ) );
+		WP_CLI::add_command( 'wc hpos compatibility-info', array( $this, 'compatibility_info' ) );
+		WP_CLI::add_command( 'wc hpos compatibility-mode enable', array( $this, 'enable_compat_mode' ) );
+		WP_CLI::add_command( 'wc hpos compatibility-mode disable', array( $this, 'disable_compat_mode' ) );
 
 		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) ); // Fully deprecated. No longer works.
 	}
@@ -734,6 +738,9 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * default: false
 	 * ---
 	 *
+	 * [--ignore-plugin-compatibility]
+	 * : Enable even if there are active plugins that are incompatible with HPOS.
+	 *
 	 * ### EXAMPLES
 	 *
 	 *      # Enable HPOS on new shops.
@@ -748,8 +755,9 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$assoc_args = wp_parse_args(
 			$assoc_args,
 			array(
-				'for-new-shop' => false,
-				'with-sync'    => false,
+				'for-new-shop'                => false,
+				'with-sync'                   => false,
+				'ignore-plugin-compatibility' => false,
 			)
 		);
 
@@ -761,12 +769,18 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			WP_CLI::error( __( '[Failed] This is not a new shop, but --for-new-shop flag was passed.', 'woocommerce' ) );
 		}
 
+		$container = wc_get_container();
 		/** Feature controller instance @var FeaturesController $feature_controller */
-		$feature_controller = wc_get_container()->get( FeaturesController::class );
-		$plugin_info        = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-		if ( count( array_merge( $plugin_info['uncertain'], $plugin_info['incompatible'] ) ) > 0 ) {
-			WP_CLI::warning( __( '[Failed] Some installed plugins are incompatible. Please review the plugins by going to WooCommerce > Settings > Advanced > Features and see the "Order data storage" section.', 'woocommerce' ) );
-			$enable_hpos = false;
+		$feature_controller = $container->get( FeaturesController::class );
+		if ( ! $assoc_args['ignore-plugin-compatibility'] ) {
+			$compatibility_info = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
+			/** Plugin util instance @var PluginUtil $plugin_util */
+			$plugin_util   = $container->get( PluginUtil::class );
+			$incompatibles = $plugin_util->get_items_considered_incompatible( 'custom_order_tables', $compatibility_info );
+			if ( count( $incompatibles ) > 0 ) {
+				WP_CLI::warning( __( '[Failed] Some installed plugins are incompatible. Please review the plugins by going to WooCommerce > Settings > Advanced > Features and see the "Order data storage" section.', 'woocommerce' ) );
+				$enable_hpos = false;
+			}
 		}
 
 		/** DataSynchronizer instance @var DataSynchronizer $data_synchronizer */
@@ -803,12 +817,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		}
 
 		if ( $assoc_args['with-sync'] && $table_exists ) {
-			if ( $data_synchronizer->data_sync_is_enabled() ) {
-				WP_CLI::warning( __( 'Sync is already enabled.', 'woocommerce' ) );
-			} else {
-				$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, true );
-				WP_CLI::success( __( 'Sync enabled.', 'woocommerce' ) );
-			}
+			$this->toggle_compat_mode( true );
 		}
 
 		if ( ! $enable_hpos ) {
@@ -889,15 +898,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		}
 
 		if ( $assoc_args['with-sync'] ) {
-			if ( ! $data_synchronizer->data_sync_is_enabled() ) {
-				return WP_CLI::warning( __( 'Sync is already disabled.', 'woocommerce' ) );
-			}
-			$feature_controller->change_feature_enable( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, false );
-			if ( $data_synchronizer->data_sync_is_enabled() ) {
-				return WP_CLI::warning( __( 'Sync could not be disabled.', 'woocommerce' ) );
-			} else {
-				WP_CLI::success( __( 'Sync disabled.', 'woocommerce' ) );
-			}
+			$this->toggle_compat_mode( false );
 		}
 	}
 
@@ -1222,5 +1223,154 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				$to
 			)
 		);
+	}
+
+	/**
+	 * Show the list of WooCommerce-aware plugins known to be compatible, incompatible or without compatibility declaration for HPOS. Note that inactive plugins will always be listed in the "uncertain" list.
+	 *
+	 * [--include-inactive]
+	 * : Include inactive plugins in the list.
+	 *
+	 * [--display-filenames]
+	 * : Print plugin file names instead of plugin names.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function compatibility_info( array $args = array(), array $assoc_args = array() ): void {
+		$container          = wc_get_container();
+		$feature_controller = $container->get( FeaturesController::class );
+		$plugin_info        = $feature_controller->get_compatible_plugins_for_feature( 'custom_order_tables', ! ( (bool) ( $assoc_args['include-inactive'] ?? null ) ) );
+		$display_filenames  = (bool) ( $assoc_args['display-filenames'] ?? null );
+
+		$compatibles       = $this->get_printable_plugin_names( $plugin_info['compatible'], $display_filenames );
+		$compatibles_count = count( $compatibles );
+		$this->log(
+			sprintf(
+				// translators: $1$d = plugins count, %2$s = colon (if list follows) or empty.
+				_n( "\n%%C%1\$d%%n compatible plugin found%2\$s", "\n%%C%1\$d%%n compatible plugins found%2\$s", $compatibles_count, 'woocommerce' ),
+				$compatibles_count,
+				$compatibles_count > 0 ? ":\n" : ''
+			)
+		);
+		$this->print_plugin_names( $compatibles );
+
+		$incompatibles       = $this->get_printable_plugin_names( $plugin_info['incompatible'], $display_filenames );
+		$incompatibles_count = count( $incompatibles );
+		$this->log(
+			sprintf(
+				// translators: $1$d = plugins count, %2$s = colon (if list follows) or empty.
+				_n( "\n%%C%1\$d%%n incompatible plugin found%2\$s", "\n%%C%1\$d%%n incompatible plugins found%2\$s", $incompatibles_count, 'woocommerce' ),
+				$incompatibles_count,
+				$incompatibles_count > 0 ? ":\n" : ''
+			)
+		);
+		$this->print_plugin_names( $incompatibles );
+
+		$uncertain       = $this->get_printable_plugin_names( $plugin_info['uncertain'], $display_filenames );
+		$uncertain_count = count( $uncertain );
+		$this->log(
+			sprintf(
+				// translators: $1$d = plugins count, %2$s = colon (if list follows) or empty.
+				_n( "\n%%C%1\$d%%n uncertain plugin found%2\$s", "\n%%C%1\$d%%n uncertain plugins found%2\$s", $uncertain_count, 'woocommerce' ),
+				$uncertain_count,
+				$uncertain_count > 0 ? ":\n" : ''
+			)
+		);
+		$this->print_plugin_names( $uncertain );
+	}
+
+	/**
+	 * Get the printable names for a set of plugins given their file names.
+	 *
+	 * @param array $plugins The plugin file names.
+	 * @param bool  $display_filenames True to simply return the sorted list of plugin file names.
+	 * @return array A sorted array of plugin names or file names.
+	 */
+	private function get_printable_plugin_names( array $plugins, bool $display_filenames ): array {
+		if ( $display_filenames ) {
+			sort( $plugins );
+			return $plugins;
+		}
+
+		$plugin_names = array_map(
+			fn( $plugin_file ) => get_plugin_data( WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $plugin_file, false )['Name'] ?? $plugin_file,
+			$plugins
+		);
+		sort( $plugin_names );
+		return $plugin_names;
+	}
+
+	/**
+	 * Print a list of plugin names.
+	 *
+	 * @param array $plugins The names to print.
+	 */
+	private function print_plugin_names( array $plugins ): void {
+		foreach ( $plugins as $plugin_file ) {
+			$this->log( '  ' . $plugin_file );
+		}
+	}
+
+	/**
+	 * Show a log message using the WP_CLI text colorization feature.
+	 *
+	 * @param string $text Text to show.
+	 */
+	private function log( string $text ) {
+		WP_CLI::log( WP_CLI::colorize( $text ) );
+	}
+
+	/**
+	 * Enables compatibility mode, which keeps the HPOS and posts datastore in sync.
+	 *
+	 * @since 9.1.0
+	 */
+	public function enable_compat_mode(): void {
+		$this->toggle_compat_mode( true );
+	}
+
+	/**
+	 * Disables compatibility mode, which keeps the HPOS and posts datastore in sync.
+	 *
+	 * @since 9.1.0
+	 */
+	public function disable_compat_mode(): void {
+		$this->toggle_compat_mode( false );
+	}
+
+	/**
+	 * Toggles compatibility mode on or off.
+	 *
+	 * @since 9.1.0
+	 *
+	 * @param bool $enabled TRUE to enable compatibility mode, FALSE to disable.
+	 */
+	private function toggle_compat_mode( bool $enabled ): void {
+		if ( ! $this->synchronizer->check_orders_table_exists() ) {
+			WP_CLI::error( __( 'HPOS tables do not exist.', 'woocommerce' ) );
+		}
+
+		$currently_enabled = $this->synchronizer->data_sync_is_enabled();
+
+		if ( $currently_enabled === $enabled ) {
+			if ( $enabled ) {
+				WP_CLI::warning( __( 'Compatibility mode is already enabled.', 'woocommerce' ) );
+			} else {
+				WP_CLI::warning( __( 'Compatibility mode is already disabled.', 'woocommerce' ) );
+			}
+
+			return;
+		}
+
+		update_option( $this->synchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, wc_bool_to_string( $enabled ) );
+
+		if ( $enabled ) {
+			WP_CLI::success( __( 'Compatibility mode enabled.', 'woocommerce' ) );
+		} else {
+			WP_CLI::success( __( 'Compatibility mode disabled.', 'woocommerce' ) );
+		}
 	}
 }

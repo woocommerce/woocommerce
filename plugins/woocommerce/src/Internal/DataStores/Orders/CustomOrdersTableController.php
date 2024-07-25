@@ -501,12 +501,13 @@ class CustomOrdersTableController {
 	 */
 	private function add_feature_definition( $features_controller ) {
 		$definition = array(
-			'option_key'          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			'is_experimental'     => false,
-			'enabled_by_default'  => false,
-			'order'               => 50,
-			'setting'             => $this->get_hpos_setting_for_feature(),
-			'additional_settings' => array(
+			'option_key'                          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'is_experimental'                     => false,
+			'enabled_by_default'                  => false,
+			'order'                               => 50,
+			'setting'                             => $this->get_hpos_setting_for_feature(),
+			'plugins_are_incompatible_by_default' => true,
+			'additional_settings'                 => array(
 				$this->get_hpos_setting_for_sync(),
 			),
 		);
@@ -544,11 +545,11 @@ class CustomOrdersTableController {
 		};
 
 		$get_disabled = function () {
-			$plugin_compatibility = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-			$sync_complete        = 0 === $this->data_synchronizer->get_current_orders_pending_sync_count();
-			$disabled             = array();
-			// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
-			$incompatible_plugins = array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] );
+			$compatibility_info = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
+			$sync_complete      = 0 === $this->data_synchronizer->get_current_orders_pending_sync_count();
+			$disabled           = array();
+			// Changing something here? You might also want to look at `enable|disable` functions in Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner.
+			$incompatible_plugins = $this->plugin_util->get_items_considered_incompatible( 'custom_order_tables', $compatibility_info );
 			$incompatible_plugins = array_diff( $incompatible_plugins, $this->plugin_util->get_plugins_excluded_from_compatibility_ui() );
 			if ( count( $incompatible_plugins ) > 0 ) {
 				$disabled = array( 'yes' );

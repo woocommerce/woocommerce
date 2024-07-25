@@ -103,7 +103,7 @@ Given a query object, return an array of activeFilters, if any.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| query | <code>object</code> | query oject |
+| query | <code>object</code> | query object |
 | config | <code>object</code> | config object |
 
 ### getDefaultOptionValue(config, options) ⇒ <code>string</code> \| <code>undefined</code>

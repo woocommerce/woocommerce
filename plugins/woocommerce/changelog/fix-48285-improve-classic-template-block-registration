@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Fix Classic Template block registration on WP 6.6

@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add parse number function to convert a formatted string into fixed number

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Lint new PHP files for strict types directive

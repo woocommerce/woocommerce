@@ -19,6 +19,16 @@ jest.mock( '../../assembler-hub/site-hub', () => ( {
 jest.mock( '~/utils/react-hooks/use-network-status', () => ( {
 	useNetworkStatus: jest.fn(),
 } ) );
+
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...originalModule,
+		useSelect: jest.fn( () => ( {
+			is_block_theme: true,
+		} ) ),
+	};
+} );
 describe( 'Intro Banners', () => {
 	it( 'should display NetworkOfflineBanner when network is offline', () => {
 		( useNetworkStatus as jest.Mock ).mockImplementation( () => true );
@@ -46,6 +56,7 @@ describe( 'Intro Banners', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
@@ -85,6 +96,7 @@ describe( 'Intro Banners', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
@@ -130,6 +142,7 @@ describe( 'Intro Banners', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }

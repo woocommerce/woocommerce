@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add new CI workflow to trigger tests on demand.

@@ -10,7 +10,6 @@ import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import Block from './block';
-import './editor.scss';
 
 export const Edit = ( {
 	attributes,

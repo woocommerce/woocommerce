@@ -1,5 +1,25 @@
 .wc-block-checkout__terms {
-	margin: $gap-larger 0;
+	margin: 0 0 $gap-largest;
+
+	.is-mobile &,
+	.is-small & {
+		margin-bottom: $gap-larger;
+
+		&.wc-block-checkout__terms--with-separator {
+			padding-top: $gap-larger;
+		}
+	}
+
+	&.wc-block-checkout__terms--with-separator {
+		padding-top: $gap-largest;
+		border-top: 1px solid $universal-border-light;
+
+
+		.is-mobile &,
+		.is-small & {
+			border-top: 0;
+		}
+	}
 
 	textarea {
 		top: -5px;

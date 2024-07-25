@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Return HTTP 404 for REST API requests involving non-existing tax class.
