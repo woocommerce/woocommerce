@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Fixes `plugins/woocommerce/tests/e2e-pw/tests/customize-store/assembler/color-picker.spec.js`E2E tests when run on WordPress 6.6.
-
