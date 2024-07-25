@@ -22,12 +22,10 @@ const Block = ( {
 	cartPageId,
 	showReturnToCart,
 	className,
-	showPrice,
 	placeOrderButtonLabel,
 }: {
 	cartPageId: number;
 	showReturnToCart: boolean;
-	showPrice: boolean;
 	className?: string;
 	placeOrderButtonLabel: string;
 } ): JSX.Element => {
@@ -53,7 +51,6 @@ const Block = ( {
 					/>
 				) }
 				<PlaceOrderButton
-					showPrice={ showPrice }
 					label={ label }
 					fullWidth={ ! showReturnToCart }
 				/>

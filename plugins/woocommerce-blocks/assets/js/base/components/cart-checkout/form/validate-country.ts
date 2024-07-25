@@ -8,10 +8,14 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 // If it's the shipping address form and the user starts entering address
 // values without having set the country first, show an error.
-const validateShippingCountry = ( values: ShippingAddress ): void => {
-	const validationErrorId = 'shipping_country';
+const validateCountry = (
+	addressType: string,
+	values: ShippingAddress
+): void => {
+	const validationErrorId = `${ addressType }_country`;
 	const hasValidationError =
 		select( VALIDATION_STORE_KEY ).getValidationError( validationErrorId );
+
 	if (
 		! values.country &&
 		( values.city || values.state || values.postcode )
@@ -37,4 +41,4 @@ const validateShippingCountry = ( values: ShippingAddress ): void => {
 	}
 };
 
-export default validateShippingCountry;
+export default validateCountry;
