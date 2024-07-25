@@ -22,6 +22,7 @@ import { possiblyRenderSettingsSlots } from './settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from './launch-your-store';
+import { SettingsPaymentsMainWrapper } from './settings-payments';
 import { ErrorBoundary } from './error-boundary';
 
 const appRoot = document.getElementById( 'root' );
@@ -117,5 +118,30 @@ if (
 			<CustomerEffortScoreTracksContainer />,
 			root.insertBefore( document.createElement( 'div' ), null )
 		);
+	} )();
+}
+
+// Render the payment settings components only if
+// the feature flag is enabled.
+if (
+	window.wcAdminFeatures &&
+	window.wcAdminFeatures[ 'reactify-classic-payments-settings' ] === true
+) {
+	( function () {
+		const paymentsMainRoot = document.getElementById(
+			'experimental_wc_settings_payments_main'
+		);
+
+		if ( paymentsMainRoot ) {
+			render(
+				<SettingsPaymentsMainWrapper />,
+				paymentsMainRoot.insertBefore(
+					document.createElement( 'div' ),
+					null
+				)
+			);
+		}
+		// Todo: SettingsPaymentsOfflineWrapper
+		// Todo: SettingsPaymentsWooPaymentsWrapper
 	} )();
 }
