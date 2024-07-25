@@ -61,6 +61,7 @@ declare global {
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
 			'blueprint': boolean;
+			'reactify-classic-payments-settings': boolean;
 		};
 		wp: {
 			updates?: {

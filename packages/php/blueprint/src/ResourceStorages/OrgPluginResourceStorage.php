@@ -3,8 +3,19 @@
 namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
 
 class OrgPluginResourceStorage implements ResourceStorage {
-	public function download( $slug ): string {
-		return $this->download_url( $this->get_download_link( $slug ) );
+	/**
+	 * Download the plugin from wordpress.org
+	 *
+	 * @param $slug
+	 *
+	 * @return string|null
+	 */
+	public function download( $slug ) {
+		$download_link = $this->get_download_link( $slug );
+		if ( ! $download_link ) {
+			return false;
+		}
+		return $this->download_url( $download_link );
 	}
 
 	protected function download_url( $url ) {
@@ -28,7 +39,11 @@ class OrgPluginResourceStorage implements ResourceStorage {
 			)
 		);
 
-		return $info->download_link;
+		if ( is_object( $info ) && isset( $info->download_link ) ) {
+			return $info->download_link;
+		}
+
+		return false;
 	}
 
 	public function get_supported_resource(): string {

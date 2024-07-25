@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\Blueprint\Exporters;
  * Step B: Exports options for the core profiler selection.
  * Step C: Exports options for the task list.
  *
- * You also have a UI where a client can select which steps to export. In this can, we have three checkboxes.
+ * You also have a UI where a client can select which steps to export. In this case, we have three checkboxes.
  *
  * [ ] WooCommerce Settings
  * [ ] WooCommerce Core Profiler

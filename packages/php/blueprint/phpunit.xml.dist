@@ -2,7 +2,7 @@
 <phpunit backupGlobals="false"
 		 backupStaticAttributes="false"
 		 colors="true"
-		 bootstrap="vendor/autoload.php"
+		 bootstrap="tests/bootstrap.php"
 		 convertErrorsToExceptions="true"
 		 convertNoticesToExceptions="true"
 		 convertWarningsToExceptions="true"
@@ -10,8 +10,8 @@
 		 stopOnFailure="false"
 		 verbose="true">
 	<testsuites>
-		<testsuite name="WPOpenAPITestSuite">
-			<directory suffix="Test.php">./tests/Unit</directory>
+		<testsuite name="BlueprintTestSuite">
+			<directory suffix="Test.php">./tests</directory>
 		</testsuite>
 	</testsuites>
 

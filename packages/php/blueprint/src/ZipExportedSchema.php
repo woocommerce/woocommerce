@@ -24,12 +24,8 @@ class ZipExportedSchema {
 	public function __construct( $schema, $destination = null ) {
 		$this->schema = $schema;
 
-		if ( $destination === null ) {
-			$dir               = $this->get_default_destination_dir();
-			$this->dir         = $dir;
-			$this->destination = $dir . '/woo-blueprint.zip';
-		}
-
+		$this->dir         = $this->get_default_destination_dir();
+		$this->destination = $destination === null ? $this->dir . '/woo-blueprint.zip' : Util::ensure_wp_content_path( $destination );
 		$this->working_dir = $this->dir . '/' . date( 'Ymd' ) . '_' . time();
 
 		if ( ! class_exists( 'PclZip' ) ) {
@@ -43,13 +39,12 @@ class ZipExportedSchema {
 
 	protected function maybe_create_dir( $dir ) {
 		if ( ! is_dir( $dir ) ) {
-			mkdir( $dir );
+			mkdir( $dir, 0777, true );
 		}
 	}
 
 	public function zip() {
 
-		$this->maybe_create_dir( $this->dir );
 		$this->maybe_create_dir( $this->working_dir );
 
 		// create .json file
@@ -59,7 +54,6 @@ class ZipExportedSchema {
 
 		$archive = new \PclZip( $this->destination );
 		if ( $archive->create( $this->files, PCLZIP_OPT_REMOVE_PATH, $this->working_dir ) == 0 ) {
-			var_dump( $this->files );
 			die( 'Error : ' . $archive->errorInfo( true ) );
 		}
 
@@ -131,8 +125,6 @@ class ZipExportedSchema {
 			$archive = new \PclZip( $destination );
 			$result  = $archive->create( $plugin_dir, PCLZIP_OPT_REMOVE_PATH, WP_CONTENT_DIR . '/' . $type );
 			if ( $result === 0 ) {
-				var_dump( $plugin_dir );
-
 				die( $archive->errorInfo( true ) );
 			}
 			$files[] = $destination;

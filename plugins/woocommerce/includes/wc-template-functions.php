@@ -46,6 +46,12 @@ function wc_template_redirect() {
 		exit;
 	}
 
+	// Redirect to edit account if trying to recover password whilst logged in.
+	if ( isset( $wp->query_vars['lost-password'] ) && is_user_logged_in() ) {
+		wp_safe_redirect( esc_url_raw( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) );
+		exit;
+	}
+
 	// Trigger 404 if trying to access an endpoint on wrong page.
 	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() && apply_filters( 'woocommerce_account_endpoint_page_not_found', true ) ) {
 		$wp_query->set_404();
@@ -1386,6 +1392,10 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 					'rel'              => 'nofollow',
 				),
 			);
+
+			if ( is_a( $product, 'WC_Product_Simple' ) ) {
+				$defaults['attributes']['data-success_message'] = $product->add_to_cart_success_message();
+			}
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
 
@@ -4019,3 +4029,45 @@ function wc_update_product_archive_title( $post_type_name, $post_type ) {
 add_filter( 'post_type_archive_title', 'wc_update_product_archive_title', 10, 2 );
 
 // phpcs:enable Generic.Commenting.Todo.TaskFound
+
+/**
+ * Set the version of the hooked blocks in the database. Used when WC is installed for the first time.
+ *
+ * @since 9.2.0
+ *
+ * @return void
+ */
+function wc_set_hooked_blocks_version() {
+	// Only set the version if the current theme is a block theme.
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name = 'woocommerce_hooked_blocks_version';
+
+	if ( get_option( $option_name ) ) {
+		return;
+	}
+
+	add_option( $option_name, WC()->version );
+}
+
+/**
+ * If the user switches from a classic to a block theme and they haven't already got a woocommerce_hooked_blocks_version,
+ * set the version of the hooked blocks in the database, or as "no" to disable all block hooks then set as the latest WC version.
+ *
+ * @since 9.2.0
+ *
+ * @param string    $old_name Old theme name.
+ * @param \WP_Theme $old_theme Instance of the old theme.
+ * @return void
+ */
+function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name, false );
+
+	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
+	if ( ! $old_theme->is_block_theme() && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
+		add_option( $option_name, WC()->version );
+	}
+}

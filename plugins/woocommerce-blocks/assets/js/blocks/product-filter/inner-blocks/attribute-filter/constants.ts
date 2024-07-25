@@ -1,7 +1,12 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
 export const attributeOptionsPreview = [
 	{
 		id: 23,
-		name: 'Blue',
+		name: __( 'Blue', 'woocommerce' ),
 		slug: 'blue',
 		attr_slug: 'blue',
 		description: '',
@@ -10,7 +15,7 @@ export const attributeOptionsPreview = [
 	},
 	{
 		id: 29,
-		name: 'Gray',
+		name: __( 'Gray', 'woocommerce' ),
 		slug: 'gray',
 		attr_slug: 'gray',
 		description: '',
@@ -19,7 +24,7 @@ export const attributeOptionsPreview = [
 	},
 	{
 		id: 24,
-		name: 'Green',
+		name: __( 'Green', 'woocommerce' ),
 		slug: 'green',
 		attr_slug: 'green',
 		description: '',
@@ -28,7 +33,7 @@ export const attributeOptionsPreview = [
 	},
 	{
 		id: 25,
-		name: 'Red',
+		name: __( 'Red', 'woocommerce' ),
 		slug: 'red',
 		attr_slug: 'red',
 		description: '',
@@ -37,7 +42,7 @@ export const attributeOptionsPreview = [
 	},
 	{
 		id: 30,
-		name: 'Yellow',
+		name: __( 'Yellow', 'woocommerce' ),
 		slug: 'yellow',
 		attr_slug: 'yellow',
 		description: '',
@@ -45,3 +50,17 @@ export const attributeOptionsPreview = [
 		count: 1,
 	},
 ];
+
+export const sortOrders = {
+	'name-asc': __( 'Name, A to Z', 'woocommerce' ),
+	'name-desc': __( 'Name, Z to A', 'woocommerce' ),
+	'count-desc': __( 'Most results first', 'woocommerce' ),
+	'count-asc': __( 'Least results first', 'woocommerce' ),
+};
+
+export const sortOrderOptions = Object.entries( sortOrders ).map(
+	( [ value, label ] ) => ( {
+		label,
+		value,
+	} )
+);

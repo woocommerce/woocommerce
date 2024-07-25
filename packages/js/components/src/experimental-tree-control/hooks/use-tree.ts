@@ -24,6 +24,7 @@ export function useTree( {
 	onCreateNew,
 	shouldShowCreateButton,
 	onFirstItemLoop,
+	onEscape,
 	...props
 }: TreeProps ) {
 	return {

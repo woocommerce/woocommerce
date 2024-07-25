@@ -30,10 +30,10 @@ trait UsePluginHelpers {
 			// Check if the plugin path contains the slug
 			if ( strpos( $plugin_path, $slug . '/' ) === 0 ) {
 				// Deactivate the plugin
-				$this->deactivate_plugin_by_slug( $slug );
-
-				// Delete the plugin
-				return $this->wp_delete_plugins( array( $plugin_path ) );
+				if ( $this->deactivate_plugin_by_slug( $slug ) ) {
+					// Delete the plugin
+					return $this->wp_delete_plugins( array( $plugin_path ) );
+				}
 			}
 		}
 		return false;
@@ -49,6 +49,11 @@ trait UsePluginHelpers {
 			if ( strpos( $plugin_path, $slug . '/' ) === 0 ) {
 				// Deactivate the plugin
 				deactivate_plugins( $plugin_path );
+
+				// Check if the plugin has been deactivated
+				if ( !is_plugin_active( $plugin_path ) ) {
+					return true;
+				}
 			}
 		}
 		return false;

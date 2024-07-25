@@ -33,7 +33,6 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
  */
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
-
 import { trackEvent } from '~/customize-store/tracking';
 import { CustomizeStoreContext } from '../..';
 import { Link } from '@woocommerce/components';
@@ -47,6 +46,8 @@ import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import clsx from 'clsx';
 import './style.scss';
+import { usePatterns } from '~/customize-store/assembler-hub/hooks/use-patterns';
+import { THEME_SLUG } from '~/customize-store/data/constants';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
 	if ( path?.includes( category ) ) {
@@ -106,6 +107,17 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		}, initialAccumulator );
 	}, [ blocks ] );
 
+	const { blockPatterns, isLoading: isLoadingPatterns } = usePatterns();
+	const patternsFromPTK = blockPatterns.filter(
+		( pattern ) =>
+			! pattern.name.includes( THEME_SLUG ) &&
+			! pattern.name.includes( 'woocommerce' ) &&
+			pattern.source !== 'core' &&
+			pattern.source !== 'pattern-directory/featured' &&
+			pattern.source !== 'pattern-directory/theme' &&
+			pattern.source !== 'pattern-directory/core'
+	);
+
 	let notice;
 	if ( isNetworkOffline ) {
 		notice = __(
@@ -120,6 +132,11 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 	} else if ( ! isTrackingAllowed() ) {
 		notice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
+			'woocommerce'
+		);
+	} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
+		notice = __(
+			'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
 			'woocommerce'
 		);
 	}
@@ -201,6 +218,10 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											navigateTo( {
 												url: categoryUrl,
 											} );
+											trackEvent(
+												'customize_your_store_assembler_pattern_category_click',
+												{ category: categoryKey }
+											);
 										} }
 										as={ SidebarNavigationItem }
 										withChevron
@@ -242,6 +263,22 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												variant="link"
 											/>
 										),
+										FetchPatterns: (
+											<Button
+												onClick={ () => {
+													if ( isIframe( window ) ) {
+														sendMessageToParent( {
+															type: 'INSTALL_PATTERNS',
+														} );
+													} else {
+														sendEvent(
+															'INSTALL_PATTERNS'
+														);
+													}
+												} }
+												variant="link"
+											/>
+										),
 									} ) }
 								</p>
 								{ isModalOpen && (
@@ -250,7 +287,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											'woocommerce-customize-store__opt-in-usage-tracking-modal'
 										}
 										title={ __(
-											'Opt in to usage tracking',
+											'Access more patterns',
 											'woocommerce'
 										) }
 										onRequestClose={ closeModal }
@@ -260,7 +297,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											className="core-profiler__checkbox"
 											label={ interpolateComponents( {
 												mixedString: __(
-													'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+													'More patterns from the WooCommerce.com library are available! Opt in to connect your store and access the full library, plus get more relevant content and a tailored store setup experience. Opting in will enable {{link}}usage tracking{{/link}}, which you can opt out of at any time via WooCommerce settings.',
 													'woocommerce'
 												),
 												components: {

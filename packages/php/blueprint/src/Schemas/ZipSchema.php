@@ -15,8 +15,9 @@ class ZipSchema extends JsonSchema {
 		$this->unzip_path = $unzip_path ?? $this->wp_upload_dir()['path'];
 
 		// Attempt to unzip the file
-		if (!$this->wp_unzip_file($zip_path, $this->unzip_path)) {
-			throw new \Exception("Unable to unzip the file to {$zip_path}. Please check the directory permission.");
+		$unzip_result = $this->wp_unzip_file($zip_path, $this->unzip_path);
+		if ( $unzip_result instanceof \WP_Error ) {
+			throw new \Exception( $unzip_result->get_error_message() );
 		}
 
 		// Determine the name of the unzipped directory

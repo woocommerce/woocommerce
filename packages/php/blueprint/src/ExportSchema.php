@@ -44,6 +44,16 @@ class ExportSchema {
 		);
 
 		$built_in_exporters = (new BuiltInExporters())->get_all();
+
+		/**
+		 * Filters the step exporters.
+		 *
+		 * Allows adding/removing custom step exporters.
+		 *
+		 * @param StepExporter[] $exporters Array of step exporters.
+		 *
+		 * @since 0.0.1
+		 */
 		$exporters = $this->wp_apply_filters('wooblueprint_exporters', array_merge($this->exporters, $built_in_exporters));
 
 		// Filter out any exporters that are not in the list of steps to export.
