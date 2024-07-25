@@ -15,7 +15,7 @@ import {
 	hasInnerBlocks,
 } from '@woocommerce/blocks-checkout';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
-import type { Root } from 'react-dom/client';
+import type { ReactRootWithContainer } from '@woocommerce/base-utils';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React
@@ -295,7 +295,7 @@ export const renderParentBlock = ( {
 	selector: string;
 	// Function to generate the props object for the block.
 	getProps: ( el: Element, i: number ) => Record< string, unknown >;
-} ): { container: Element; root: Root }[] => {
+} ): ReactRootWithContainer[] => {
 	/**
 	 * In addition to getProps, we need to render and return the children. This adds children to props.
 	 */

@@ -28,7 +28,7 @@ export type GetPropsFn<
 	TAttributes extends Record< string, unknown >
 > = ( el: HTMLElement, i: number ) => BlockProps< TProps, TAttributes >;
 
-type ReactRootWithContainer = {
+export type ReactRootWithContainer = {
 	container: HTMLElement;
 	root: Root;
 };

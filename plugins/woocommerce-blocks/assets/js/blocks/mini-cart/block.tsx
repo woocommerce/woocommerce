@@ -23,7 +23,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import clsx from 'clsx';
-import type { Root } from 'react-dom/client';
+import type { ReactRootWithContainer } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -105,9 +105,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		setContentsNode( node );
 	}, [] );
 
-	const rootRef = useRef< { container: Element; root: Root }[] | null >(
-		null
-	);
+	const rootRef = useRef< ReactRootWithContainer[] | null >( null );
 
 	useEffect( () => {
 		const body = document.querySelector( 'body' );
