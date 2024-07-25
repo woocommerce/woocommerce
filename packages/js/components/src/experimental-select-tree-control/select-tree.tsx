@@ -8,6 +8,7 @@ import {
 	useEffect,
 	useState,
 	Fragment,
+	useRef,
 } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { BaseControl, Button, TextControl } from '@wordpress/components';
@@ -25,6 +26,7 @@ import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
 import { SelectTreeMenu } from './select-tree-menu';
 import { escapeHTML } from '../utils';
+import { SelectedItemFocusHandle } from '../experimental-select-control/types';
 
 interface SelectTreeProps extends TreeControlProps {
 	id: string;
@@ -48,7 +50,7 @@ export const SelectTree = function SelectTree( {
 	initialInputValue,
 	onInputChange,
 	shouldShowCreateButton,
-	help = __( 'Separate with commas or the Enter key.', 'woocommerce' ),
+	help,
 	isClearingAllowed = false,
 	onClear = () => {},
 	...props
@@ -63,6 +65,8 @@ export const SelectTree = function SelectTree( {
 		'woocommerce-select-tree-control__menu'
 	) as string;
 
+	const selectedItemsFocusHandle = useRef< SelectedItemFocusHandle >( null );
+
 	function isEventOutside( event: React.FocusEvent ) {
 		const isInsideSelect = document
 			.getElementById( selectTreeInstanceId )
@@ -74,7 +78,10 @@ export const SelectTree = function SelectTree( {
 				'.woocommerce-experimental-select-tree-control__popover-menu'
 			)
 			?.contains( event.relatedTarget );
-		return ! ( isInsideSelect || isInsidePopover );
+		const isInRemoveTag = event.relatedTarget?.classList.contains(
+			'woocommerce-tag__remove'
+		);
+		return ! isInsideSelect && ! isInRemoveTag && ! isInsidePopover;
 	}
 
 	const recalculateInputValue = () => {
@@ -141,11 +148,12 @@ export const SelectTree = function SelectTree( {
 			}
 		},
 		onBlur: ( event ) => {
-			if ( isOpen && isEventOutside( event ) ) {
+			event.preventDefault();
+			if ( isEventOutside( event ) ) {
 				setIsOpen( false );
+				setIsFocused( false );
 				recalculateInputValue();
 			}
-			setIsFocused( false );
 		},
 		onKeyDown: ( event ) => {
 			setIsOpen( true );
@@ -157,12 +165,10 @@ export const SelectTree = function SelectTree( {
 						`#${ menuInstanceId } input, #${ menuInstanceId } button`
 					) as HTMLInputElement | HTMLButtonElement
 				 )?.focus();
-			}
-			if ( event.key === 'Tab' || event.key === 'Escape' ) {
+			} else if ( event.key === 'Tab' || event.key === 'Escape' ) {
 				setIsOpen( false );
 				recalculateInputValue();
-			}
-			if ( event.key === ',' || event.key === 'Enter' ) {
+			} else if ( event.key === ',' || event.key === 'Enter' ) {
 				event.preventDefault();
 				const item = items.find(
 					( i ) => i.label === escapeHTML( inputValue )
@@ -179,6 +185,14 @@ export const SelectTree = function SelectTree( {
 					setInputValue( '' );
 					recalculateInputValue();
 				}
+			} else if (
+				( event.key === 'ArrowLeft' || event.key === 'Backspace' ) &&
+				// test if the cursor is at the beginning of the input with nothing selected
+				( event.target as HTMLInputElement ).selectionStart === 0 &&
+				( event.target as HTMLInputElement ).selectionEnd === 0 &&
+				selectedItemsFocusHandle.current
+			) {
+				selectedItemsFocusHandle.current();
 			}
 		},
 		onChange: ( event ) => {
@@ -219,7 +233,14 @@ export const SelectTree = function SelectTree( {
 				<BaseControl
 					label={ props.label }
 					id={ `${ props.id }-input` }
-					help={ help }
+					help={
+						props.multiple && ! help
+							? __(
+									'Separate with commas or the Enter key.',
+									'woocommerce'
+							  )
+							: help
+					}
 				>
 					<>
 						{ props.multiple ? (
@@ -236,7 +257,13 @@ export const SelectTree = function SelectTree( {
 								suffix={
 									<div className="woocommerce-experimental-select-control__suffix-items">
 										{ isClearingAllowed && isOpen && (
-											<Button onClick={ handleClear }>
+											<Button
+												label={ __(
+													'Remove all',
+													'woocommerce'
+												) }
+												onClick={ handleClear }
+											>
 												<SuffixIcon
 													className="woocommerce-experimental-select-control__icon-clear"
 													icon={ closeSmall }
@@ -253,6 +280,7 @@ export const SelectTree = function SelectTree( {
 							>
 								<SelectedItems
 									isReadOnly={ isReadOnly }
+									ref={ selectedItemsFocusHandle }
 									items={ ( props.selected as Item[] ) || [] }
 									getItemLabel={ ( item ) =>
 										item?.label || ''
@@ -268,6 +296,13 @@ export const SelectTree = function SelectTree( {
 											props.onRemove( item );
 										}
 									} }
+									onBlur={ ( event ) => {
+										if ( isEventOutside( event ) ) {
+											setIsOpen( false );
+											setIsFocused( false );
+										}
+									} }
+									onSelectedItemsEnd={ focusOnInput }
 									getSelectedItemProps={ () => ( {} ) }
 								/>
 							</ComboBox>
@@ -313,6 +348,10 @@ export const SelectTree = function SelectTree( {
 							isOpen={ isOpen }
 							items={ linkedTree }
 							shouldShowCreateButton={ shouldShowCreateButton }
+							onEscape={ () => {
+								focusOnInput();
+								setIsOpen( false );
+							} }
 							onClose={ () => {
 								setIsOpen( false );
 							} }
