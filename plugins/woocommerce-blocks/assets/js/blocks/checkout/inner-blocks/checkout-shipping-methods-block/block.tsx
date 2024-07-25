@@ -74,7 +74,7 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 
 	const { shippingAddress } = useCustomerData();
 
-	const memoizedFilteredShippingRates = useMemo( () => {
+	const filteredShippingRates = useMemo( () => {
 		return isCollectable
 			? shippingRates.map( ( shippingRatesPackage ) => {
 					return {
@@ -142,7 +142,7 @@ const Block = ( { noShippingPlaceholder = null } ): ReactElement | null => {
 					}
 					renderOption={ renderShippingRatesControlOption }
 					collapsible={ false }
-					shippingRates={ memoizedFilteredShippingRates }
+					shippingRates={ filteredShippingRates }
 					isLoadingRates={ isLoadingRates }
 					context="woocommerce/checkout"
 				/>
