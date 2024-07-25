@@ -52,7 +52,7 @@ class RestApi {
 					'permission_callback' => array( $this, 'check_permission' ),
 					'args'                => array(
 						'steps'         => array(
-							'description'       => 'A list of plugins to install',
+							'description'       => __( 'A list of plugins to install' ),
 							'type'              => 'array',
 							'items'             => 'string',
 							'default'           => array(),
