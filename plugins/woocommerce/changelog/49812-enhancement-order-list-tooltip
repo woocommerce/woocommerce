@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Tooltips message is now selected based on the order status instead of the label of the order status, which would break if the current WordPress language was not English. Also passes the order object to the woocommerce_get_order_status_labels filter to allow for more personalized tooltips.
