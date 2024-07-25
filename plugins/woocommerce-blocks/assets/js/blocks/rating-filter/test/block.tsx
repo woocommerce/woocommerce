@@ -2,7 +2,14 @@
  * External dependencies
  */
 import React from '@wordpress/element';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import {
+	act,
+	cleanup,
+	render,
+	screen,
+	waitFor,
+	within,
+} from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import userEvent from '@testing-library/user-event';
 
@@ -59,6 +66,7 @@ const selectors = {
 };
 
 const setup = ( params: SetupParams ) => {
+	cleanup();
 	const url = `http://woo.local/${
 		params.filterRating ? '?rating_filter=' + params.filterRating : ''
 	}`;
