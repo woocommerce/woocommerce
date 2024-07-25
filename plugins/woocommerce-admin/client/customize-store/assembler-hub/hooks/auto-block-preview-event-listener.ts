@@ -8,11 +8,34 @@ import { useEffect } from '@wordpress/element';
  */
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
+export const DISABLE_CLICK_CLASS = 'disable-click';
+
+export const ENABLE_CLICK_CLASS = 'enable-click';
+
 const setStyle = ( documentElement: HTMLElement ) => {
 	const element = documentElement.ownerDocument.documentElement;
 	element.classList.add( 'block-editor-block-preview__content-iframe' );
 	element.style.position = 'absolute';
 	element.style.width = '100%';
+
+	// Necessary for us to prevent the block editor from showing the focus outline on blocks that we've enabled interaction on.
+	const styleBlockId = 'enable-click-styles';
+	if (
+		! documentElement.ownerDocument.head.querySelector(
+			`#${ styleBlockId }`
+		)
+	) {
+		const styleBlock =
+			documentElement.ownerDocument.createElement( 'style' );
+		styleBlock.setAttribute( 'type', 'text/css' );
+		styleBlock.setAttribute( 'id', styleBlockId );
+		styleBlock.innerHTML = `
+			.${ ENABLE_CLICK_CLASS }:focus::after {
+				content: none !important;
+			}
+		`;
+		documentElement.ownerDocument.head.appendChild( styleBlock );
+	}
 
 	// Necessary for contentResizeListener to work.
 	documentElement.style.boxSizing = 'border-box';
@@ -86,8 +109,6 @@ const findAndSetLogoBlock = (
 	return observer;
 };
 
-export const DISABLE_CLICK_CLASS = 'disable-click';
-
 const makeInert = ( element: Element ) => {
 	element.setAttribute( 'inert', 'true' );
 };
@@ -118,7 +139,9 @@ const addInertToAssemblerPatterns = (
 		for ( const disableClick of documentElement.querySelectorAll(
 			`[data-is-parent-block='true']`
 		) ) {
-			makeInert( disableClick );
+			if ( ! disableClick.classList.contains( ENABLE_CLICK_CLASS ) ) {
+				makeInert( disableClick );
+			}
 		}
 
 		for ( const element of documentElement.querySelectorAll(
@@ -159,7 +182,9 @@ const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 		for ( const disableClick of documentElement.querySelectorAll(
 			`[data-is-parent-block='true'] *`
 		) ) {
-			makeInert( disableClick );
+			if ( ! disableClick.classList.contains( ENABLE_CLICK_CLASS ) ) {
+				makeInert( disableClick );
+			}
 		}
 	} );
 
