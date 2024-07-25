@@ -28,7 +28,7 @@ export type GetPropsFn<
 	TAttributes extends Record< string, unknown >
 > = ( el: HTMLElement, i: number ) => BlockProps< TProps, TAttributes >;
 
-type RenderedBlock = {
+type ReactRootWithContainer = {
 	container: HTMLElement;
 	root: Root;
 };
@@ -117,11 +117,14 @@ const renderBlockInContainers = <
 	containers,
 	getProps = () => ( {} as BlockProps< TProps, TAttributes > ),
 	getErrorBoundaryProps = () => ( {} ),
-}: RenderBlockInContainersParams< TProps, TAttributes > ): RenderedBlock[] => {
+}: RenderBlockInContainersParams<
+	TProps,
+	TAttributes
+> ): ReactRootWithContainer[] => {
 	if ( containers.length === 0 ) {
 		return [];
 	}
-	const roots: RenderedBlock[] = [];
+	const roots: ReactRootWithContainer[] = [];
 
 	// Use Array.forEach for IE11 compatibility.
 	Array.prototype.forEach.call( containers, ( el, i ) => {
@@ -184,7 +187,7 @@ const renderBlockOutsideWrappers = <
 }: RenderBlockOutsideWrappersParams<
 	TProps,
 	TAttributes
-> ): RenderedBlock[] => {
+> ): ReactRootWithContainer[] => {
 	const containers = document.body.querySelectorAll( selector );
 	// Filter out blocks inside the wrappers.
 	if ( wrappers && wrappers.length > 0 ) {
@@ -262,7 +265,7 @@ export const renderFrontend = <
 	props:
 		| RenderBlockOutsideWrappersParams< TProps, TAttributes >
 		| RenderBlockInsideWrapperParams< TProps, TAttributes >
-): RenderedBlock[] => {
+): ReactRootWithContainer[] => {
 	const wrappersToSkipOnLoad = document.body.querySelectorAll(
 		selectorsToSkipOnLoad.join( ',' )
 	);
