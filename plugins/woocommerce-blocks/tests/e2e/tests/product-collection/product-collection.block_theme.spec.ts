@@ -1458,12 +1458,18 @@ test.describe( 'Product Collection', () => {
 			} );
 		} );
 	}
-	test.describe( 'In taxonomies templates', () => {
+	test.describe( 'Editor: In taxonomies templates', () => {
 		test( 'Products by specific category template displays products from this category', async ( {
 			admin,
 			page,
 			pageObject,
 		} ) => {
+			const expectedProducts = [
+				'Hoodie',
+				'Hoodie with Logo',
+				'Hoodie with Zipper',
+			];
+
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
 			await page
@@ -1477,16 +1483,23 @@ test.describe( 'Product Collection', () => {
 					name: `Hoodies`,
 				} )
 				.click();
+			await page
+				.getByRole( 'option', { name: 'Fallback content' } )
+				.click();
 
 			await pageObject.refreshLocators( 'editor' );
 
-			await expect( pageObject.productTitles ).toHaveCount( 3 );
+			await expect( pageObject.productTitles ).toHaveText(
+				expectedProducts
+			);
 		} );
 		test( 'Products by specific tag template displays products from this tag', async ( {
 			admin,
 			page,
 			pageObject,
 		} ) => {
+			const expectedProducts = [ 'Hoodie', 'Beanie' ];
+
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
 			await page
@@ -1500,10 +1513,15 @@ test.describe( 'Product Collection', () => {
 					name: `Recommended`,
 				} )
 				.click();
+			await page
+				.getByRole( 'option', { name: 'Fallback content' } )
+				.click();
 
 			await pageObject.refreshLocators( 'editor' );
 
-			await expect( pageObject.productTitles ).toHaveCount( 2 );
+			await expect( pageObject.productTitles ).toHaveText(
+				expectedProducts
+			);
 		} );
 	} );
 } );
