@@ -4,13 +4,17 @@
 import { useMemo } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
+import { __, sprintf } from '@wordpress/i18n';
+import { useSelect } from '@wordpress/data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { ValidationInputError } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
-import { Select } from '../select';
+import { Select, SelectOption } from '../select';
 
 export const CountryInput = ( {
 	className,
@@ -21,21 +25,42 @@ export const CountryInput = ( {
 	value = '',
 	autoComplete = 'off',
 	required = false,
+	errorId,
 }: CountryInputWithCountriesProps ): JSX.Element => {
-	const options = useMemo(
-		() =>
+	const emptyCountryOption: SelectOption = {
+		value: '',
+		label: sprintf(
+			// translators: %s will be label of the country input. For example "country/region".
+			__( 'Select a %s', 'woocommerce' ),
+			label?.toLowerCase()
+		),
+		disabled: true,
+	};
+	const options = useMemo< SelectOption[] >( () => {
+		return [ emptyCountryOption ].concat(
 			Object.entries( countries ).map(
 				( [ countryCode, countryName ] ) => ( {
 					value: countryCode,
 					label: decodeEntities( countryName ),
 				} )
-			),
-		[ countries ]
-	);
+			)
+		);
+	}, [ countries ] );
+
+	const validationError = useSelect( ( select ) => {
+		const store = select( VALIDATION_STORE_KEY );
+		return (
+			store.getValidationError( errorId || '' ) || {
+				hidden: true,
+			}
+		);
+	} );
 
 	return (
 		<div
-			className={ clsx( className, 'wc-block-components-country-input' ) }
+			className={ clsx( className, 'wc-block-components-country-input', {
+				'has-error': ! validationError.hidden,
+			} ) }
 		>
 			<Select
 				id={ id }
@@ -46,6 +71,11 @@ export const CountryInput = ( {
 				required={ required }
 				autoComplete={ autoComplete }
 			/>
+			{ validationError && validationError.hidden !== true && (
+				<ValidationInputError
+					errorMessage={ validationError.message }
+				/>
+			) }
 		</div>
 	);
 };
