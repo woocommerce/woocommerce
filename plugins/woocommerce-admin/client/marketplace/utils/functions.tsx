@@ -17,6 +17,7 @@ import {
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
@@ -428,6 +429,13 @@ const appendURLParams = (
 	return urlObject.toString();
 };
 
+const enableAutorenewal = ( subscription: Subscription ): string => {
+	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
+		[ 'renew_product', subscription.product_id.toString() ],
+		[ 'order_id', subscription.order_id.toString() ],
+	] );
+};
+
 const renewUrl = ( subscription: Subscription ): string => {
 	return appendURLParams( MARKETPLACE_CART_PATH, [
 		[ 'renew_product', subscription.product_id.toString() ],
@@ -458,6 +466,7 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	enableAutorenewal,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,

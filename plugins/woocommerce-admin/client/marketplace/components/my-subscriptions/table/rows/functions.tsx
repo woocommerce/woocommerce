@@ -23,6 +23,7 @@ import {
 	appendURLParams,
 	renewUrl,
 	subscribeUrl,
+	enableAutorenewal,
 } from '../../../../utils/functions';
 import {
 	MARKETPLACE_COLLABORATION_PATH,
@@ -101,6 +102,44 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 					renew: (
 						<a
 							href={ renewUrl( subscription ) }
+							rel="nofollow noopener noreferrer"
+						>
+							renew
+						</a>
+					),
+					sharing: (
+						<a
+							href={ MARKETPLACE_COLLABORATION_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+					transferring: (
+						<a
+							href={ MARKETPLACE_COLLABORATION_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+				}
+			),
+		};
+	}
+	if ( subscription.expiring && ! subscription.autorenew ) {
+		return {
+			text: __( 'Expires soon', 'woocommerce' ),
+			level: StatusLevel.Error,
+			explanation: createInterpolateElement(
+				__(
+					'To receive updates and support, please <renew>renew</renew> this subscription before it expires or use a subscription from another account by <sharing>sharing</sharing> or <transferring>transferring</transferring>.',
+					'woocommerce'
+				),
+				{
+					renew: (
+						<a
+							href={ enableAutorenewal( subscription ) }
 							rel="nofollow noopener noreferrer"
 						>
 							renew
@@ -205,13 +244,6 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 				{ subscription.product_name }
 			</a>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
-				{ statusBadge && (
-					<StatusPopover
-						text={ statusBadge.text }
-						level={ statusBadge.level }
-						explanation={ statusBadge.explanation ?? '' }
-					/>
-				) }
 				{ subscription.is_shared && (
 					<StatusPopover
 						text={ __( 'Shared with you', 'woocommerce' ) }
@@ -289,12 +321,26 @@ export function expiry( subscription: Subscription ): TableRow {
 	};
 }
 
-export function autoRenew( subscription: Subscription ): TableRow {
+export function subscriptionStatus( subscription: Subscription ): TableRow {
+	function getStatus() {
+		const statusBadge = getStatusBadge( subscription );
+		if ( statusBadge ) {
+			return (
+				<StatusPopover
+					text={ statusBadge.text }
+					level={ statusBadge.level }
+					explanation={ statusBadge.explanation ?? '' }
+					explanationOnHover
+				/>
+			);
+		}
+
+		return subscription.autorenew
+			? __( 'Active', 'woocommerce' )
+			: __( 'Cancelled', 'woocommerce' );
+	}
 	return {
-		display: subscription.autorenew
-			? __( 'On', 'woocommerce' )
-			: __( 'Off', 'woocommerce' ),
-		value: subscription.autorenew,
+		display: getStatus(),
 	};
 }
 

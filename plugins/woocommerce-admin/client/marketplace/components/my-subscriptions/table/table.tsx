@@ -25,7 +25,7 @@ const tableHeadersDefault = [
 		label: __( 'Expires/Renews on', 'woocommerce' ),
 	},
 	{
-		key: 'autoRenew',
+		key: 'subscription',
 		label: __( 'Subscription', 'woocommerce' ),
 	},
 	{
