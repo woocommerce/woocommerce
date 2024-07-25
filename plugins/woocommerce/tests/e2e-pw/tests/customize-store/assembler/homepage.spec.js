@@ -1,6 +1,7 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
+const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
@@ -291,6 +292,13 @@ test.describe(
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
+			const wordPressVersion = await getInstalledWordPressVersion();
+
+			if ( wordPressVersion <= 6.5 ) {
+				test.skip(
+					'Skipping PTK API test: WordPress version is below 6.5, which does not support this feature.'
+				);
+			}
 			try {
 				// In some environments the tour blocks clicking other elements.
 				await setOption(

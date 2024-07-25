@@ -110,6 +110,7 @@
 				'launch-your-store',
 				'minified-js',
 				'product-custom-fields',
+				'reactify-classic-payments-settings',
 				'settings',
 			];
 
