@@ -55,7 +55,7 @@ describe( 'useBlocksHelper', () => {
 
 		const tabId = getParentTabId( clientId );
 
-		expect( tabId ).toBe( '' );
+		expect( tabId ).toBe( null );
 		expect( mockGetBlockParentsByBlockName ).toHaveBeenCalledWith(
 			clientId,
 			'woocommerce/product-tab',
