@@ -183,6 +183,7 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			ARRAY_A
 		);
 
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// @todo remove these assignements when refactoring segmenter classes to use query objects.
 		$totals_query          = array(
 			'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
