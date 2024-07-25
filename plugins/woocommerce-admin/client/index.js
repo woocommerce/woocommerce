@@ -2,7 +2,7 @@
  * External dependencies
  */
 import '@wordpress/notices';
-import { render } from '@wordpress/element';
+import { render, createRoot } from '@wordpress/element';
 import { CustomerEffortScoreTracksContainer } from '@woocommerce/customer-effort-score';
 import {
 	withCurrentUserHydration,
@@ -133,13 +133,12 @@ if (
 		);
 
 		if ( paymentsMainRoot ) {
-			render(
-				<SettingsPaymentsMainWrapper />,
+			createRoot(
 				paymentsMainRoot.insertBefore(
 					document.createElement( 'div' ),
 					null
 				)
-			);
+			).render( <SettingsPaymentsMainWrapper /> );
 		}
 		// Todo: SettingsPaymentsOfflineWrapper
 		// Todo: SlotFill for WooPayments & others
