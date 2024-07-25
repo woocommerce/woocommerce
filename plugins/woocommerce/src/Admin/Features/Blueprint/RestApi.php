@@ -93,8 +93,8 @@ class RestApi {
 	 * @return \WP_HTTP_Response The response object.
 	 */
 	public function export( $request ) {
-		$steps         = $request->get_param( 'steps', array() );
-		$export_as_zip = $request->get_param( 'export_as_zip', false );
+		$steps         = $request->get_param( 'steps' );
+		$export_as_zip = $request->get_param( 'export_as_zip' );
 		$exporter      = new ExportSchema();
 
 		$data = $exporter->export( $steps, $export_as_zip );
