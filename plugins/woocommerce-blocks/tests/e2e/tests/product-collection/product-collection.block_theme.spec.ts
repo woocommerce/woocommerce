@@ -1462,7 +1462,7 @@ test.describe( 'Product Collection', () => {
 		test( 'Products by specific category template displays products from this category', async ( {
 			admin,
 			page,
-			pageObject,
+			editor,
 		} ) => {
 			const expectedProducts = [
 				'Hoodie',
@@ -1487,16 +1487,15 @@ test.describe( 'Product Collection', () => {
 				.getByRole( 'option', { name: 'Fallback content' } )
 				.click();
 
-			await pageObject.refreshLocators( 'editor' );
+			const products = editor.canvas.getByLabel( 'Block: Product Title' );
 
-			await expect( pageObject.productTitles ).toHaveText(
-				expectedProducts
-			);
+			await expect( products ).toHaveCount( 3 );
+			await expect( products ).toHaveText( expectedProducts );
 		} );
 		test( 'Products by specific tag template displays products from this tag', async ( {
 			admin,
 			page,
-			pageObject,
+			editor,
 		} ) => {
 			const expectedProducts = [ 'Hoodie', 'Beanie' ];
 
@@ -1517,11 +1516,10 @@ test.describe( 'Product Collection', () => {
 				.getByRole( 'option', { name: 'Fallback content' } )
 				.click();
 
-			await pageObject.refreshLocators( 'editor' );
+			const products = editor.canvas.getByLabel( 'Block: Product Title' );
 
-			await expect( pageObject.productTitles ).toHaveText(
-				expectedProducts
-			);
+			await expect( products ).toHaveCount( 2 );
+			await expect( products ).toHaveText( expectedProducts );
 		} );
 	} );
 } );
