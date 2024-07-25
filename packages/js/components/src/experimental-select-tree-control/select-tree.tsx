@@ -249,21 +249,23 @@ export const SelectTree = function SelectTree( {
 				) {
 					props.onCreateNew?.();
 				} else if (
-					// is selecting an item that is not already selected
-					highlightedIndex !== -1 &&
-					( Array.isArray( props.selected )
-						? ! Boolean(
+					// is selecting an item
+					highlightedIndex !== -1
+				) {
+					if ( props.multiple && Array.isArray( props.selected ) ) {
+						if (
+							! Boolean(
 								props.selected.find(
 									( i ) =>
 										i.label ===
 										items[ highlightedIndex ].label
 								)
-						  )
-						: props.selected?.label !==
-						  items[ highlightedIndex ].label )
-				) {
-					if ( props.multiple ) {
-						props.onSelect?.( items[ highlightedIndex ] );
+							)
+						) {
+							props.onSelect?.( items[ highlightedIndex ] );
+						} else {
+							props.onRemove?.( items[ highlightedIndex ] );
+						}
 						setInputValue( '' );
 					} else {
 						onInputChange?.( items[ highlightedIndex ].label );
