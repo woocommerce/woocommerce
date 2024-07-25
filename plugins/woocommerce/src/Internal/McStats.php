@@ -49,7 +49,7 @@ class McStats extends A8c_Mc_Stats {
 	/**
 	 * Runs stats code for a one-off, server-side.
 	 *
-	 * @param string $url string The URL to be pinged. Should include `x_jetpack-{$group}={$stats}` or whatever we want to store.
+	 * @param string $url string The URL to be pinged. Should include `x_woocommerce-{$group}={$stats}` or whatever we want to store.
 	 *
 	 * @return bool If it worked.
 	 */
