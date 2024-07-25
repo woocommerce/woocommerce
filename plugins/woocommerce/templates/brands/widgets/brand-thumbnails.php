@@ -25,9 +25,9 @@ if ( ! $fluid_columns && in_array( $columns, array( 1, 2, 3, 4, 5, 6 ), true ) )
 <?php
 foreach ( array_values( $brands ) as $index => $brand ) :
 	$class = '';
-	if ( $index === 0 || $index % $columns === 0 ) {
+	if ( 0=== $index || 0=== $index % $columns ) {
 		$class = 'first';
-	} else if ( ( $index + 1 ) % $columns === 0 ) {
+	} elseif ( 0 === ( $index + 1 ) % $columns ) {
 		$class = 'last';
 	}
 	?>
