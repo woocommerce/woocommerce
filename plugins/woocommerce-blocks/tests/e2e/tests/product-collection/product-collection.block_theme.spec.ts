@@ -1458,6 +1458,54 @@ test.describe( 'Product Collection', () => {
 			} );
 		} );
 	}
+	test.describe( 'In taxonomies templates', () => {
+		test( 'Products by specific category template displays products from this category', async ( {
+			admin,
+			page,
+			pageObject,
+		} ) => {
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Products by Category' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Hoodies`,
+				} )
+				.click();
+
+			await pageObject.refreshLocators( 'editor' );
+
+			await expect( pageObject.productTitles ).toHaveCount( 3 );
+		} );
+		test( 'Products by specific tag template displays products from this tag', async ( {
+			admin,
+			page,
+			pageObject,
+		} ) => {
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Products by Tag' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Recommended`,
+				} )
+				.click();
+
+			await pageObject.refreshLocators( 'editor' );
+
+			await expect( pageObject.productTitles ).toHaveCount( 2 );
+		} );
+	} );
 } );
 
 /**
