@@ -1,4 +1,7 @@
-<?php // @codingStandardsIgnoreLine.
+<?php
+declare( strict_types = 1);
+
+// @codingStandardsIgnoreLine.
 /**
  * WooCommerce Checkout Settings
  *
@@ -7,14 +10,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( class_exists( 'WC_Settings_Payment_Gateways', false ) ) {
-	return new WC_Settings_Payment_Gateways();
+if ( class_exists( 'WC_Settings_Payment_Gateways_React', false ) ) {
+	return new WC_Settings_Payment_Gateways_React();
 }
 
 /**
- * WC_Settings_Payment_Gateways.
+ * WC_Settings_Payment_Gateways_React.
  */
-class WC_Settings_Payment_Gateways extends WC_Settings_Page {
+class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 
 	/**
 	 * Constructor.
@@ -78,4 +81,4 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	}
 }
 
-return new WC_Settings_Payment_Gateways();
+return new WC_Settings_Payment_Gateways_React();
