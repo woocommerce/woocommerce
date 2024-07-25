@@ -19,7 +19,6 @@ import {
 	isString,
 	isCartResponseTotals,
 	isNumber,
-	isObject,
 } from '@woocommerce/types';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
