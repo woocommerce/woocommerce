@@ -685,9 +685,6 @@ jQuery( function( $ ) {
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
 					}
 				},
-				complete: function () {
-					$coupon_field.val( '' );
-				},
 				dataType: 'html'
 			});
 
