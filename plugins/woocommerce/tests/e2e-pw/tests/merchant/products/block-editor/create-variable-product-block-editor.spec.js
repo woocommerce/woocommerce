@@ -308,7 +308,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.click();
 
 			await page
-				.locator( '#product_sku' )
+				.locator( '#sku' )
 				.fill( `product-sku-${ new Date().getTime().toString() }` );
 
 			await page
