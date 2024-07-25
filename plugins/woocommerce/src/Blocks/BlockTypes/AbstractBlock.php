@@ -202,18 +202,32 @@ abstract class AbstractBlock {
 		$chunks = preg_filter( '/.js/', '', $blocks );
 		return $chunks;
 	}
+
+	/**
+	 * Get extra block settings. Some protected properties are always overriden in
+	 * AbstractBlock::register_block_type().
+	 *
+	 * @return array
+	 */
+	protected function get_extra_block_settings() {
+		return [];
+	}
+
 	/**
 	 * Registers the block type with WordPress.
 	 *
 	 * @return string[] Chunks paths.
 	 */
 	protected function register_block_type() {
-		$block_settings = [
-			'render_callback' => $this->get_block_type_render_callback(),
-			'editor_script'   => $this->get_block_type_editor_script( 'handle' ),
-			'editor_style'    => $this->get_block_type_editor_style(),
-			'style'           => $this->get_block_type_style(),
-		];
+		$block_settings = array_merge(
+			is_array( $this->get_extra_block_settings() ) ? $this->get_extra_block_settings() : [],
+			[
+				'render_callback' => $this->get_block_type_render_callback(),
+				'editor_script'   => $this->get_block_type_editor_script( 'handle' ),
+				'editor_style'    => $this->get_block_type_editor_style(),
+				'style'           => $this->get_block_type_style(),
+			]
+		);
 
 		if ( isset( $this->api_version ) && '2' === $this->api_version ) {
 			$block_settings['api_version'] = 2;
