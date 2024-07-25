@@ -73,7 +73,8 @@
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:copy-assets": "wireit"
+		"watch:build:project:copy-assets": "wireit",
+		"wp-env": "wp-env"
 	},
 	"lint-staged": {
 		"*.php": [
