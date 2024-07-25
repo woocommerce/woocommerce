@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: The block is currently on experimental state, so the changes done in this PR won't be available for the users.
-
