@@ -2,13 +2,16 @@ export interface Item {
 	parent?: string;
 	value: string;
 	label: string;
-	index: number;
-	isExpanded: boolean;
 }
+
+export type AugmentedItem = Item & {
+	isExpanded: boolean;
+	index: number;
+};
 
 export interface LinkedTree {
 	parent?: LinkedTree;
-	data: Item;
+	data: AugmentedItem;
 	children: LinkedTree[];
 }
 

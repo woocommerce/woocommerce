@@ -32,6 +32,9 @@ export function useTreeItem( {
 	onFirstItemLoop,
 	onTreeBlur,
 	onEscape,
+	highlightedIndex,
+	isHighlighted,
+	onExpand,
 	...props
 }: TreeItemProps ) {
 	const nextLevel = level + 1;
@@ -80,7 +83,7 @@ export function useTreeItem( {
 		treeItemProps: {
 			...props,
 			id:
-				'woocommerce-experimental-select-tree-control__menu-item-' +
+				'woocommerce-experimental-tree-control__menu-item-' +
 				item.data.index,
 			role: 'option',
 		},

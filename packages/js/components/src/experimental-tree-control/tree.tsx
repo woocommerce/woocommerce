@@ -14,6 +14,7 @@ import { useMergeRefs } from '@wordpress/compose';
 import { useTree } from './hooks/use-tree';
 import { TreeItem } from './tree-item';
 import { TreeProps } from './types';
+import { countNumberOfItems } from './linked-tree-utils';
 
 export const Tree = forwardRef( function ForwardedTree(
 	props: TreeProps,
@@ -26,6 +27,8 @@ export const Tree = forwardRef( function ForwardedTree(
 		...props,
 		ref,
 	} );
+
+	const numberOfItems = countNumberOfItems( items );
 
 	const isCreateButtonVisible =
 		props.shouldShowCreateButton &&
@@ -72,7 +75,17 @@ export const Tree = forwardRef( function ForwardedTree(
 			) : null }
 			{ isCreateButtonVisible && (
 				<Button
-					className="experimental-woocommerce-tree__button"
+					id={
+						'woocommerce-experimental-tree-control__menu-item-' +
+						numberOfItems
+					}
+					className={ classNames(
+						'experimental-woocommerce-tree__button',
+						{
+							'experimental-woocommerce-tree__button--highlighted':
+								props.highlightedIndex === numberOfItems,
+						}
+					) }
 					onClick={ () => {
 						if ( props.onCreateNew ) {
 							props.onCreateNew();

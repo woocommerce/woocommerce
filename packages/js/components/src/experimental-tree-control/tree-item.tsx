@@ -25,7 +25,6 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		headingProps,
 		treeProps,
 		selection,
-		highlighter: { isHighlighted },
 		getLabel,
 	} = useTreeItem( {
 		...props,
@@ -49,8 +48,6 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				'experimental-woocommerce-tree-item',
 				{
 					'experimental-woocommerce-tree-item--highlighted':
-						isHighlighted,
-					'experimental-woocommerce-tree-item--testnathan':
 						props.isHighlighted,
 				}
 			) }
@@ -99,7 +96,10 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 								item.data.isExpanded ? chevronUp : chevronDown
 							}
 							onClick={ () =>
-								props.onExpand?.( item.data.index )
+								props.onExpand?.(
+									item.data.index,
+									! item.data.isExpanded
+								)
 							}
 							className="experimental-woocommerce-tree-item__expander"
 							aria-label={

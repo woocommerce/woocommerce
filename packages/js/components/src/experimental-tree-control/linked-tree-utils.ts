@@ -1,15 +1,10 @@
 /**
- * External dependencies
- */
-import { useMemo } from 'react';
-
-/**
  * Internal dependencies
  */
-import { Item, LinkedTree } from '../types';
+import { AugmentedItem, Item, LinkedTree } from './types';
 
 type MemoItems = {
-	[ value: Item[ 'value' ] ]: LinkedTree;
+	[ value: AugmentedItem[ 'value' ] ]: LinkedTree;
 };
 
 const shouldItemBeExpanded = (
@@ -26,12 +21,13 @@ const shouldItemBeExpanded = (
 };
 
 function findChildren(
-	items: Item[],
-	parent?: Item[ 'parent' ],
-	memo: MemoItems = {}
+	items: AugmentedItem[],
+	memo: MemoItems = {},
+	parent?: AugmentedItem[ 'parent' ],
+	createValue?: string | undefined
 ): LinkedTree[] {
-	const children: Item[] = [];
-	const others: Item[] = [];
+	const children: AugmentedItem[] = [];
+	const others: AugmentedItem[] = [];
 
 	items.forEach( ( item ) => {
 		if ( item.parent === parent ) {
@@ -49,22 +45,33 @@ function findChildren(
 	return children.map( ( child ) => {
 		const linkedTree = memo[ child.value ];
 		linkedTree.parent = child.parent ? memo[ child.parent ] : undefined;
-		linkedTree.children = findChildren( others, child.value, memo );
+		linkedTree.children = findChildren(
+			others,
+			memo,
+			child.value,
+			createValue
+		);
 		linkedTree.data.isExpanded =
-			linkedTree.children.length > 0 ? false : true;
+			linkedTree.children.length === 0
+				? true
+				: shouldItemBeExpanded( linkedTree, createValue );
 		return linkedTree;
 	} );
 }
 
-export function getLinkedTree( items: Item[] ): LinkedTree[] {
-	return findChildren(
-		items.map( ( i, index ) => ( { ...i, index, isExpanded: false } ) ),
-		undefined,
-		{}
-	);
+export function getLinkedTree(
+	items: Item[],
+	value: string | undefined
+): LinkedTree[] {
+	const augmentedItems = items.map( ( i, index ) => ( {
+		...i,
+		index,
+		isExpanded: false,
+	} ) );
+	return findChildren( augmentedItems, {}, undefined, value );
 }
 
-export function expandNodeNumber(
+export function toggleNode(
 	tree: LinkedTree[],
 	number: number,
 	value: boolean
@@ -73,7 +80,7 @@ export function expandNodeNumber(
 		return {
 			...node,
 			children: node.children
-				? expandNodeNumber( node.children, number, value )
+				? toggleNode( node.children, number, value )
 				: node.children,
 			data: {
 				...node.data,
@@ -139,4 +146,15 @@ export function getVisibleNodeIndex(
 	}
 
 	return undefined;
+}
+
+export function countNumberOfItems( linkedTree: LinkedTree[] ) {
+	let count = 0;
+	for ( const node of linkedTree ) {
+		count++;
+		if ( node.children ) {
+			count += countNumberOfItems( node.children );
+		}
+	}
+	return count;
 }
