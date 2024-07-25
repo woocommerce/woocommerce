@@ -22,7 +22,10 @@ class ImportCli {
 			$result_formatter->format($optional_args['show-messages']);
 		}
 
-		$is_success && \WP_CLI::success("$this->schema_path imported successfully");
-		!$is_success && \WP_CLI::error("Failed to import $this->schema_path. Run with --show-messages=all to debug");
+		if ( $is_success ) {
+			\WP_CLI::success( "$this->schema_path imported successfully" );
+		} else {
+			\WP_CLI::error( "Failed to import $this->schema_path. Run with --show-messages=all to debug" );
+		}
 	}
 }
