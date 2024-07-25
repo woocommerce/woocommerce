@@ -36,7 +36,7 @@ describe( 'SelectTree', () => {
 			<SelectTree { ...DEFAULT_PROPS } />
 		);
 		expect( queryByText( 'Item 1' ) ).not.toBeInTheDocument();
-		queryByRole( 'textbox' )?.focus();
+		queryByRole( 'combobox' )?.focus();
 		expect( queryByText( 'Item 1' ) ).toBeInTheDocument();
 	} );
 
@@ -47,20 +47,20 @@ describe( 'SelectTree', () => {
 				shouldShowCreateButton={ () => true }
 			/>
 		);
-		queryByRole( 'textbox' )?.focus();
+		queryByRole( 'combobox' )?.focus();
 		expect( queryByText( 'Create new' ) ).toBeInTheDocument();
 	} );
 	it( 'should not show create button when callback is false or no callback', () => {
 		const { queryByText, queryByRole } = render(
 			<SelectTree { ...DEFAULT_PROPS } />
 		);
-		queryByRole( 'textbox' )?.focus();
+		queryByRole( 'combobox' )?.focus();
 		expect( queryByText( 'Create new' ) ).not.toBeInTheDocument();
 	} );
 	it( 'should show a root item when focused and child when expand button is clicked', () => {
 		const { queryByText, queryByLabelText, queryByRole } =
 			render( <SelectTree { ...DEFAULT_PROPS } /> );
-		queryByRole( 'textbox' )?.focus();
+		queryByRole( 'combobox' )?.focus();
 		expect( queryByText( 'Item 1' ) ).toBeInTheDocument();
 
 		expect( queryByText( 'Item 2' ) ).not.toBeInTheDocument();
@@ -72,7 +72,7 @@ describe( 'SelectTree', () => {
 		const { queryAllByRole, queryByRole } = render(
 			<SelectTree { ...DEFAULT_PROPS } selected={ [ mockItems[ 0 ] ] } />
 		);
-		queryByRole( 'textbox' )?.focus();
+		queryByRole( 'combobox' )?.focus();
 		expect( queryAllByRole( 'treeitem' )[ 0 ] ).toHaveAttribute(
 			'aria-selected',
 			'true'
@@ -87,7 +87,7 @@ describe( 'SelectTree', () => {
 				shouldShowCreateButton={ () => true }
 			/>
 		);
-		queryByRole( 'textbox' )?.focus();
+		queryByRole( 'combobox' )?.focus();
 		expect( queryByText( 'Create "new item"' ) ).toBeInTheDocument();
 	} );
 	it( 'should call onCreateNew when Create "<createValue>" button is clicked', () => {
@@ -100,7 +100,7 @@ describe( 'SelectTree', () => {
 				onCreateNew={ mockFn }
 			/>
 		);
-		queryByRole( 'textbox' )?.focus();
+		queryByRole( 'combobox' )?.focus();
 		queryByText( 'Create "new item"' )?.click();
 		expect( mockFn ).toBeCalledTimes( 1 );
 	} );
