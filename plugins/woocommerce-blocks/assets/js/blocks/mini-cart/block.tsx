@@ -165,16 +165,11 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					const foundRoot = rootRef?.current?.find(
 						( { container } ) => unmountingContainer === container
 					);
-					if (
-						typeof foundRoot === 'undefined' ||
-						! isObject( foundRoot ) ||
-						typeof foundRoot?.root?.unmount !== 'function'
-					) {
-						return;
+					if ( typeof foundRoot?.root?.unmount === 'function' ) {
+						setTimeout( () => {
+							foundRoot.root.unmount();
+						} );
 					}
-					setTimeout( () => {
-						foundRoot.root.unmount();
-					} );
 				}
 			}
 		};
