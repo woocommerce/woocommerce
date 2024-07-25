@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Blueprint\Tests\Schemas;
+namespace Automattic\WooCommerce\Blueprint\Tests\Unit\Schemas;
 
 use Automattic\WooCommerce\Blueprint\Schemas\ZipSchema;
 use Automattic\WooCommerce\Blueprint\Tests\TestCase;
