@@ -159,7 +159,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 
 		await deleteAllPatterns( editor, assembler );
 
-		const sidebarPattern = await assembler
+		const sidebarPattern = assembler
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.first();
 
@@ -190,7 +190,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		const assembler = await pageObject.getAssembler();
 		const editor = await pageObject.getEditor();
 
-		const sidebarPattern = await assembler
+		const sidebarPattern = assembler
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.nth( 2 );
 
@@ -201,7 +201,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 
 		await sidebarPattern.click();
 
-		const insertedPattern = await editor
+		const insertedPattern = editor
 			.locator(
 				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
 			)
@@ -213,7 +213,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 		await moveUpButton.click();
 
-		const firstPattern = await editor
+		const firstPattern = editor
 			.locator(
 				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
 			)
@@ -233,12 +233,12 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 
 		await deleteAllPatterns( editor, assembler );
 
-		const sidebarPattern = await assembler
+		const sidebarPattern = assembler
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.first();
 		await sidebarPattern.click();
 
-		const insertedPattern = await editor
+		const insertedPattern = editor
 			.locator(
 				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
 			)
@@ -252,11 +252,11 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 		await shuffleButton.click();
 
-		const shuffledPattern = await editor.locator(
+		const shuffledPattern = editor.locator(
 			'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
 		);
 
-		expect( await shuffledPattern.textContent() ).not.toBe(
+		await expect( await shuffledPattern ).not.toHaveText(
 			insertedPatternContent
 		);
 	} );
