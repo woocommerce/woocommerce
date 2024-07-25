@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: Make woocommerce/product-price available in the Single Product template
