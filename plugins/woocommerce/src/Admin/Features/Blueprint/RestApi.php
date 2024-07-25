@@ -187,7 +187,7 @@ class RestApi {
 		return new \WP_HTTP_Response(
 			array(
 				'status'  => 'error',
-				'message' => 'No file uploaded',
+				'message' => __( 'No file uploaded' ),
 			),
 			400
 		);
