@@ -128,7 +128,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 */
 	public function get_meta_data_for_object_ids( array $object_ids ): array {
 		if ( ! OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
-			return $this->get_meta_data_for_object_ids( $object_ids );
+			return parent::get_meta_data_for_object_ids( $object_ids );
 		}
 		$cache_engine        = wc_get_container()->get( WPCacheEngine::class );
 		$meta_data           = $cache_engine->get_cached_objects( $object_ids, $this->get_cache_group() );
