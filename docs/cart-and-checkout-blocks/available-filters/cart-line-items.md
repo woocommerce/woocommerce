@@ -17,8 +17,8 @@ The following Cart Line Items filters are available:
 
 The following objects are shared between the filters:
 
--   Cart object
--  [Cart Item object
+-   [Cart object](#cart-object)
+-   [Cart Item object](#cart-item-object)
 
 The following screenshot shows which parts the individual filters affect:
 
@@ -110,17 +110,17 @@ The `cartItemPrice` filter allows to format the cart item price.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ `string` (default: `<price/>`) - The default cart item price.
+-   _defaultValue_ `string` (default: `U+003Cprice/U+003E`) - The default cart item price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
--   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
+-   _validation_ `boolean` - Checks if the return value contains the substring `U+003Cprice/U+003E`.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified format of the cart item price, which must contain the substring `<price/>`, or the original price format.
+-   `string` - The modified format of the cart item price, which must contain the substring `U+003Cprice/U+003E`, or the original price format.
 
 ### Code examples <!-- omit in toc -->
 
@@ -136,7 +136,7 @@ const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
 		return defaultValue;
 	}
 
-	return '<price/> for all items';
+	return 'U+003Cprice/U+003E for all items';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -157,14 +157,14 @@ const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
 	}
 
 	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
-		return '<price/> to keep you ☀️';
+		return 'U+003Cprice/U+003E to keep you ☀️';
 	}
 
 	if ( args?.cartItem?.name === 'Sunglasses' ) {
-		return '<price/> to keep you ❄️';
+		return 'U+003Cprice/U+003E to keep you ❄️';
 	}
 
-	return '<price/> for all items';
+	return 'U+003Cprice/U+003E for all items';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -265,17 +265,17 @@ The `saleBadgePriceFormat` filter allows to format the cart item sale badge pric
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ `string` (default: `<price/>`) - The default cart item sale badge price.
+-   _defaultValue_ `string` (default: `U+003Cprice/U+003E`) - The default cart item sale badge price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
--   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
+-   _validation_ `boolean` - Checks if the return value contains the substring `U+003Cprice/U+003E`.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified format of the cart item sale badge price, which must contain the substring `<price/>`, or the original price format.
+-   `string` - The modified format of the cart item sale badge price, which must contain the substring `U+003Cprice/U+003E`, or the original price format.
 
 ### Code examples <!-- omit in toc -->
 
@@ -294,7 +294,7 @@ const modifySaleBadgePriceFormat = (
 		return defaultValue;
 	}
 
-	return '<price/> per item';
+	return 'U+003Cprice/U+003E per item';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -320,14 +320,14 @@ const modifySaleBadgePriceFormat = (
 	}
 
 	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
-		return '<price/> per item while keeping warm';
+		return 'U+003Cprice/U+003E per item while keeping warm';
 	}
 
 	if ( args?.cartItem?.name === 'Sunglasses' ) {
-		return '<price/> per item while looking cool';
+		return 'U+003Cprice/U+003E per item while looking cool';
 	}
 
-	return '<price/> per item';
+	return 'U+003Cprice/U+003E per item';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -431,17 +431,17 @@ The `subtotalPriceFormat` filter allows to format the cart item subtotal price.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ `string` (default: `<price/>`) - The default cart item subtotal price.
+-   _defaultValue_ `string` (default: `U+003Cprice/U+003E`) - The default cart item subtotal price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
--   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
+-   _validation_ `boolean` - Checks if the return value contains the substring `U+003Cprice/U+003E`.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified format of the cart item subtotal price, which must contain the substring `<price/>`, or the original price format.
+-   `string` - The modified format of the cart item subtotal price, which must contain the substring `U+003Cprice/U+003E`, or the original price format.
 
 ### Code examples <!-- omit in toc -->
 
@@ -462,7 +462,7 @@ const modifySubtotalPriceFormat = (
 		return defaultValue;
 	}
 
-	return '<price/> per item';
+	return 'U+003Cprice/U+003E per item';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -488,14 +488,14 @@ const modifySubtotalPriceFormat = (
 	}
 
 	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
-		return '<price/> per warm beanie';
+		return 'U+003Cprice/U+003E per warm beanie';
 	}
 
 	if ( args?.cartItem?.name === 'Sunglasses' ) {
-		return '<price/> per cool sunglasses';
+		return 'U+003Cprice/U+003E per cool sunglasses';
 	}
 
-	return '<price/> per item';
+	return 'U+003Cprice/U+003E per item';
 };
 
 registerCheckoutFilters( 'example-extension', {

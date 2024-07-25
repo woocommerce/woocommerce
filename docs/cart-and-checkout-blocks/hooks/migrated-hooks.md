@@ -6,7 +6,7 @@ tags: reference
 
 Below are the hooks that exist in WooCommerce core and that were brough over to WooCommerce Blocks.
 
-Please note that the actions and filters here run on the server side. The client-side blocks won't necessarily change based on a callback added to a server side hook. [Please see our documentation relating to APIs for manipulating the blocks on the client-side](../README.md).
+Please note that the actions and filters here run on the server side. The client-side blocks won't necessarily change based on a callback added to a server side hook. [Please see our documentation relating to APIs for manipulating the blocks on the client-side](./an-introduction-to-extensiblity-in-woocommerce-blocks/).
 
 ## Legacy Filters
 

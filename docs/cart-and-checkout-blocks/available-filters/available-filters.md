@@ -10,12 +10,12 @@ This document lists the filters that are currently available to extensions and o
 
 The following [Cart Line Items filters](./cart-line-items.md) are available:
 
--   [`cartItemClass`](./cart-line-items.md#cartitemclass)
--   [`cartItemPrice`](./cart-line-items.md#cartitemprice)
--   [`itemName`](./cart-line-items.md#itemname)
--   [`saleBadgePriceFormat`](./cart-line-items.md#salebadgepriceformat)
--   [`showRemoveItemLink`](./cart-line-items.md#showremoveitemlink)
--   [`subtotalPriceFormat`](./cart-line-items.md#subtotalpriceformat)
+-   `cartItemClass`
+-   `cartItemPrice`
+-   `itemName`
+-   `saleBadgePriceFormat`
+-   `showRemoveItemLink`
+-   `subtotalPriceFormat`
 
 The following screenshot shows which parts the individual filters affect:
 
@@ -25,10 +25,10 @@ The following screenshot shows which parts the individual filters affect:
 
 The following [Order Summary Items filters](./order-summary-items.md) are available:
 
--   [`cartItemClass`](./order-summary-items.md#cartitemclass)
--   [`cartItemPrice`](./order-summary-items.md#cartitemprice)
--   [`itemName`](./order-summary-items.md#itemname)
--   [`subtotalPriceFormat`](./order-summary-items.md#subtotalpriceformat)
+-   `cartItemClass`
+-   `cartItemPrice`
+-   `itemName`
+-   `subtotalPriceFormat`
 
 The following screenshot shows which parts the individual filters affect:
 
@@ -38,30 +38,30 @@ The following screenshot shows which parts the individual filters affect:
 
 The following [Totals Footer Item filter](./totals-footer-item.md) is available:
 
--   [`totalLabel`](./totals-footer-item.md#totallabel)
--   [`totalValue`](./totals-footer-item.md#totalvalue)
+-   `totalLabel`
+-   `totalValue`
 
 ## Checkout and place order button filters
 
 The following [Checkout and place order button filters](./checkout-and-place-order-button.md) are available:
 
--   [`proceedToCheckoutButtonLabel`](./checkout-and-place-order-button.md#proceedtocheckoutbuttonlabel)
--   [`proceedToCheckoutButtonLink`](./checkout-and-place-order-button.md#proceedtocheckoutbuttonlink)
--   [`placeOrderButtonLabel`](./checkout-and-place-order-button.md#placeorderbuttonlabel)
+-   `proceedToCheckoutButtonLabel`
+-   `proceedToCheckoutButtonLink`
+-   `placeOrderButtonLabel`
 
 ## Coupon filters
 
 The following [Coupon filters](./coupons.md) are available:
 
--   [`coupons`](./coupons.md#coupons-1)
--   [`showApplyCouponNotice`](./coupons.md#showapplycouponnotice)
--   [`showRemoveCouponNotice`](./coupons.md#showremovecouponnotice)
+-   `coupons`
+-   `showApplyCouponNotice`
+-   `showRemoveCouponNotice`
 
 ## Additional Cart and Checkout inner block types filter
 
 The following [Additional Cart and Checkout inner block types filter](./additional-cart-checkout-inner-block-types.md) is available:
 
--   [`additionalCartCheckoutInnerBlockTypes`](./additional-cart-checkout-inner-block-types.md#additionalcartcheckoutinnerblocktypes)
+-   `additionalCartCheckoutInnerBlockTypes`
 
 ## Combined filters
 
