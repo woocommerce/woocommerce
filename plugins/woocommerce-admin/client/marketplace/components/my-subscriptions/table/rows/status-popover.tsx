@@ -68,7 +68,9 @@ export default function StatusPopover( props: {
 		<button
 			onClick={ () => setIsClicked( ! isClicked ) }
 			onMouseOver={ startHover }
+			onFocus={ startHover }
 			onMouseOut={ endHover }
+			onBlur={ endHover }
 			className={ clsx(
 				'woocommerce-marketplace__my-subscriptions__product-status',
 				`woocommerce-marketplace__my-subscriptions__product-status--${ props.level }`
@@ -82,6 +84,8 @@ export default function StatusPopover( props: {
 					focusOnMount={ false }
 					onMouseOver={ startHover }
 					onMouseOut={ endHover }
+					onFocus={ startHover }
+					onBlur={ endHover }
 				>
 					{ props.explanation }
 				</Popover>
