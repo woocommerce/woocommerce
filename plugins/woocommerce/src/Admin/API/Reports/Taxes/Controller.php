@@ -65,14 +65,17 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param mixed           $report  Report data item as returned from Data Store.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		$response = parent::prepare_item_for_response( $report, $request );
+
+		// Map to `object` for backwards compatibility.
+		$report = (object) $report;
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**

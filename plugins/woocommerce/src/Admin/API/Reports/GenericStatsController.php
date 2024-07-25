@@ -187,7 +187,7 @@ abstract class GenericStatsController extends GenericController {
 		);
 
 		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
+			$item                    = $this->prepare_item_for_response( $interval_data, $request );
 			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
 		}
 

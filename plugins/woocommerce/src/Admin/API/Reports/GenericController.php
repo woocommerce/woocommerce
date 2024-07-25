@@ -174,14 +174,14 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param mixed           $report_item Report data item as returned from Data Store.
+	 * @param WP_REST_Request $request     Request object.
 	 * @return WP_REST_Response
 	 */
-	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
+	public function prepare_item_for_response( $report_item, $request ) {
+		$data = $report_item;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );

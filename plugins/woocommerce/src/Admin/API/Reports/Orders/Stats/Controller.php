@@ -88,9 +88,9 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param Array           $report  Report data.
+	 * @param Array           $report  Report data item as returned from Data Store.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
