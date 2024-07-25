@@ -40,7 +40,7 @@ export function Edit( {
 
 	const { ref: skuRef } = useValidation< Product >(
 		'sku',
-		async function nameValidator() {
+		async function skuValidator() {
 			return undefined;
 		},
 		[ sku ]
