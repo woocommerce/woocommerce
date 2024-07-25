@@ -142,6 +142,6 @@ if (
 			);
 		}
 		// Todo: SettingsPaymentsOfflineWrapper
-		// Todo: SettingsPaymentsWooPaymentsWrapper
+		// Todo: SlotFill for WooPayments & others
 	} )();
 }
