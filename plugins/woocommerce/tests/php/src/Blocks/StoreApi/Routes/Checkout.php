@@ -108,6 +108,7 @@ class Checkout extends MockeryTestCase {
 			$default_zone->delete_shipping_method( $method->instance_id );
 		}
 		$default_zone->save();
+		remove_all_filters( 'woocommerce_get_country_locale' );
 
 		global $wp_rest_server;
 		$wp_rest_server = null;
@@ -264,21 +265,18 @@ class Checkout extends MockeryTestCase {
 	/**
 	 * Ensure that validation respects locale filtering.
 	 */
-	public function test_locale_filtering_post_data() {
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-
+	public function test_locale_required_filtering_post_data() {
+		unset( WC()->countries->locale );
 		add_filter(
 			'woocommerce_get_country_locale',
 			function ( $locale ) {
 				$locale['US']['state']['required'] = false;
-				$locale['FR']['state']['label']    = 'French state';
-				$locale['FR']['state']['required'] = true;
-				$locale['DE']['state']['label']    = 'German state';
-				$locale['DE']['state']['required'] = true;
 				return $locale;
 			}
 		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 
 		// Test that a country that usually requires state can be overridden with woocommerce_get_country_locale filter.
 		$request->set_body_params(
@@ -313,8 +311,28 @@ class Checkout extends MockeryTestCase {
 		);
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+	}
 
-		// Test that a field's label can be overriden by filter.
+	/**
+	 * Ensure that labels respect locale filtering.
+	 */
+	public function test_locale_label_filtering_post_data() {
+		unset( WC()->countries->locale );
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) {
+				$locale['FR']['state']['label']    = 'French state';
+				$locale['FR']['state']['required'] = true;
+				$locale['DE']['state']['label']    = 'German state';
+				$locale['DE']['state']['required'] = true;
+				return $locale;
+			}
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		// Test that a country that usually requires state can be overridden with woocommerce_get_country_locale filter.
 		$request->set_body_params(
 			array(
 				'billing_address'  => (object) array(
@@ -324,6 +342,7 @@ class Checkout extends MockeryTestCase {
 					'address_1'  => 'test lane',
 					'address_2'  => '',
 					'city'       => 'test',
+					'state'      => '',
 					'postcode'   => '90210',
 					'country'    => 'FR',
 					'phone'      => '123456',
@@ -336,6 +355,7 @@ class Checkout extends MockeryTestCase {
 					'address_1'  => 'test',
 					'address_2'  => '',
 					'city'       => 'test',
+					'state'      => '',
 					'postcode'   => '90210',
 					'country'    => 'DE',
 					'phone'      => '123456',
@@ -343,8 +363,6 @@ class Checkout extends MockeryTestCase {
 				'payment_method'   => 'bacs',
 			)
 		);
-
-		$this->setUp();
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 'French state is required', $response->get_data()['data']['errors']['billing'][0] );
 		$this->assertEquals( 'German state is required', $response->get_data()['data']['errors']['shipping'][0] );
