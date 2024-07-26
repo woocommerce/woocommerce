@@ -206,7 +206,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	/**
 	 * Get current page URL for layered nav items.
 	 *
-	 * @param  string $taxonomy Taxonomy
+	 * @param  string $taxonomy Taxonomy.
 	 * @return string
 	 */
 	protected function get_page_base_url( $taxonomy ) {
@@ -431,14 +431,14 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 			echo '<li class="wc-layered-nav-term ' . ( $option_is_set ? 'chosen' : '' ) . '">';
 
-			// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment.
+			// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
 			echo ( $count > 0 || $option_is_set ) ? '<a href="' . esc_url( apply_filters( 'woocommerce_layered_nav_link', $link ) ) . '">' : '<span>';
 
 			echo esc_html( $term->name );
 
 			echo ( $count > 0 || $option_is_set ) ? '</a> ' : '</span> ';
 
-			// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment.
+			// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
 			echo wp_kses_post( apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term ) );
 
 			$child_terms = get_terms(
@@ -504,6 +504,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			AND terms.term_id IN (' . implode( ',', array_map( 'absint', $term_ids ) ) . ')
 		';
 		$query['group_by'] = 'GROUP BY terms.term_id';
+		// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );
 
@@ -511,7 +512,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		$query_hash = md5( $query );
 
 		// Maybe store a transient of the count values.
-		// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment.
+		// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
 		if ( true === $cache ) {
 			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
