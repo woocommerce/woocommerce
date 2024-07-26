@@ -149,7 +149,7 @@ describe( 'useErrorHandler', () => {
 		jest.mock( '../use-blocks-helper', () => ( {
 			useBlocksHelper: jest.fn().mockReturnValue( {
 				getParentTabId: jest.fn( () => 'inventory' ),
-				getParentTabIdByBlockName: jest.fn( () => '' ), // Mock returns an empty string
+				getParentTabIdByBlockName: jest.fn( () => null ), // Mock returns null
 			} ),
 		} ) );
 
