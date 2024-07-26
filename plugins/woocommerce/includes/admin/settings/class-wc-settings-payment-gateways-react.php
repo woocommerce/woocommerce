@@ -132,6 +132,40 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	public function get_sections() {
 		return array();
 	}
+
+	/**
+	 * Save settings.
+	 */
+	public function save() {
+		global $current_section;
+
+		$wc_payment_gateways = WC_Payment_Gateways::instance();
+
+		$this->save_settings_for_current_section();
+
+		if ( ! $current_section ) {
+			// If section is empty, we're on the main settings page. This makes sure 'gateway ordering' is saved.
+			$wc_payment_gateways->process_admin_options();
+			$wc_payment_gateways->init();
+		} else {
+			// There is a section - this may be a gateway or custom section.
+			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
+				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
+					/**
+					 * Fires update actions for payment gateways.
+					 *
+					 * @since 3.4.0
+					 *
+					 * @param int $gateway->id Gateway ID.
+					 */
+					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
+					$wc_payment_gateways->init();
+				}
+			}
+
+			$this->do_update_options_action();
+		}
+	}
 }
 
 return new WC_Settings_Payment_Gateways_React();
