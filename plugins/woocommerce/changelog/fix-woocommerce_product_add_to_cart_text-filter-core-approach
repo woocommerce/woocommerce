@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Hardening against XSS via the Product Button unescaped attribute
