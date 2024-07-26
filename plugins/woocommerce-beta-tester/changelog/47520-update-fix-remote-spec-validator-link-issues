@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix lint errors from the remote spec test endpoint.

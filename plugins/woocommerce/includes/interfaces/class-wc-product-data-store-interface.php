@@ -42,12 +42,29 @@ interface WC_Product_Data_Store_Interface {
 	public function is_existing_sku( $product_id, $sku );
 
 	/**
+	 * Check if product unique ID is found for any other product IDs.
+	 *
+	 * @param int    $product_id Product ID.
+	 * @param string $global_unique_id Unique ID.
+	 * @return bool
+	 */
+	public function is_existing_global_unique_id( $product_id, $global_unique_id );
+
+	/**
 	 * Return product ID based on SKU.
 	 *
 	 * @param string $sku SKU.
 	 * @return int
 	 */
 	public function get_product_id_by_sku( $sku );
+
+	/**
+	 * Return product ID based on Unique ID.
+	 *
+	 * @param string $global_unique_id Unique ID.
+	 * @return int
+	 */
+	public function get_product_id_by_global_unique_id( $global_unique_id );
 
 	/**
 	 * Returns an array of IDs of products that have sales starting soon.
@@ -96,11 +113,11 @@ interface WC_Product_Data_Store_Interface {
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 *
-	 * @param int    $product_id_with_stock Product ID.
-	 * @param int    $stock_quantity Stock quantity to update to.
-	 * @param string $operation Either set, increase or decrease.
+	 * @param int      $product_id_with_stock Product ID.
+	 * @param int|null $stock_quantity Stock quantity to update to.
+	 * @param string   $operation Either set, increase or decrease.
 	 */
-	public function update_product_stock( $product_id_with_stock, $stock_quantity = 0, $operation = 'set' );
+	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' );
 
 	/**
 	 * Update a product's sale count directly.

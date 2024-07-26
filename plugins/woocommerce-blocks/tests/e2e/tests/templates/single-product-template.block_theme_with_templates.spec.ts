@@ -11,7 +11,7 @@ const testData = {
 	permalink: '/product/belt',
 	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
-	templateType: 'wp_template',
+	templateType: 'wp_template' as 'wp_template' | 'wp_template_part',
 };
 
 const userText = 'Hello World in the Belt template';
@@ -48,5 +48,19 @@ test.describe( 'Single Product Template', () => {
 			page.getByText( themeTemplateText ).first()
 		).toBeVisible();
 		await expect( page.getByText( userText ).first() ).toBeVisible();
+
+		// Revert edition and verify the template from the theme is used.
+		await admin.visitSiteEditor( {
+			postType: testData.templateType,
+		} );
+		await editor.revertTemplateCustomizations( {
+			templateName: testData.templateName,
+		} );
+		await page.goto( testData.permalink );
+
+		await expect(
+			page.getByText( themeTemplateText ).first()
+		).toBeVisible();
+		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

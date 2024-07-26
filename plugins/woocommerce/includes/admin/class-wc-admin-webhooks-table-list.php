@@ -76,7 +76,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 		// Title.
 		$warning_prefix =
-			is_null( wc()->api ) && $this->uses_legacy_rest_api( $webhook ) ?
+			$this->uses_legacy_rest_api( $webhook ) && ! WC()->legacy_rest_api_is_available() ?
 			sprintf(
 				"<span title='%s'>⚠️</span>️ ",
 				esc_html__( 'This webhook is configured to be delivered using the Legacy REST API, but the Legacy REST API plugin is not installed on this site.', 'woocommerce' )

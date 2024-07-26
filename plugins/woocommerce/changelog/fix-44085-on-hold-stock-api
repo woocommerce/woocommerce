@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Ensure available stock is updated correctly when updating line items in orders via the REST API.

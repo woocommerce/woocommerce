@@ -249,6 +249,10 @@ test.describe(
 			// but I could see it as checked/enabled in the settings
 			// workaround for the change to take effect is to just save the settings.
 			await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+			// Modify a random unrelated settings so we can save the form.
+			await page
+				.locator( '#woocommerce_allowed_countries' )
+				.selectOption( 'all' );
 			await page.locator( 'text=Save changes' ).click();
 
 			const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
@@ -295,8 +299,11 @@ test.describe(
 
 			// Product Collection requires choosing some collection.
 			await page
+				.locator(
+					'[data-type="woocommerce/product-collection"] .components-placeholder'
+				)
 				.getByRole( 'button', {
-					name: 'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
+					name: 'create your own',
 				} )
 				.click();
 
@@ -310,7 +317,13 @@ test.describe(
 				.click();
 
 			await expect(
-				page.getByRole( 'button', { name: 'Update', exact: true } )
+				// WP 6.6 updates the button text from "Update" to "Save", so we'll need to check for either.
+				page.getByRole( 'button', { name: 'Update', exact: true } ).or(
+					page.getByRole( 'button', {
+						name: 'Save',
+						exact: true,
+					} )
+				)
 			).toBeVisible();
 
 			// go to created page with products showcase

@@ -1,0 +1,14 @@
+.wc-block-product-filters-overlay-navigation__wrapper {
+	display: flex;
+}
+
+.wc-block-product-filters-overlay-navigation {
+	&.alignright {
+		margin-left: auto;
+	}
+
+	&.aligncenter {
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
