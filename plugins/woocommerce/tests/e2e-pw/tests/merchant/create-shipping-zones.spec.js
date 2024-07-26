@@ -68,8 +68,7 @@ test.describe(
 				// this shipping zone already exists, don't create it
 			} else {
 				await page.goto(
-					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
-					{ waitUntil: 'networkidle' }
+					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 				);
 				await page
 					.getByPlaceholder( 'Zone name' )
@@ -105,10 +104,8 @@ test.describe(
 					.getByRole( 'button', { name: 'Continue' } )
 					.last()
 					.click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await page.locator( '#btn-ok' ).click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await expect(
 					page
@@ -147,8 +144,7 @@ test.describe(
 				// this shipping zone already exists, don't create it
 			} else {
 				await page.goto(
-					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
-					{ waitUntil: 'networkidle' }
+					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 				);
 				await page
 					.getByPlaceholder( 'Zone name' )
@@ -179,10 +175,8 @@ test.describe(
 					.getByRole( 'button', { name: 'Continue' } )
 					.last()
 					.click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await page.locator( '#btn-ok' ).click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await expect(
 					page
@@ -220,8 +214,7 @@ test.describe(
 				// this shipping zone already exists, don't create it
 			} else {
 				await page.goto(
-					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
-					{ waitUntil: 'networkidle' }
+					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 				);
 				await page
 					.getByPlaceholder( 'Zone name' )
@@ -246,10 +239,8 @@ test.describe(
 					.getByRole( 'button', { name: 'Continue' } )
 					.last()
 					.click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await page.locator( '#btn-ok' ).click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await expect(
 					page
@@ -267,7 +258,6 @@ test.describe(
 					.getByRole( 'button', { name: 'Save' } )
 					.last()
 					.click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await page.goto(
 					'wp-admin/admin.php?page=wc-settings&tab=shipping'
@@ -379,8 +369,7 @@ test.describe(
 				// this shipping zone already exists, don't create it
 			} else {
 				await page.goto(
-					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new',
-					{ waitUntil: 'networkidle' }
+					'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
 				);
 				await page
 					.locator( '#zone_name' )
@@ -405,10 +394,7 @@ test.describe(
 					.last()
 					.click();
 
-				await page.waitForLoadState( 'networkidle' );
-
 				await page.locator( '#btn-ok' ).click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await expect(
 					page
@@ -425,7 +411,6 @@ test.describe(
 					.locator( '#woocommerce_flat_rate_cost' )
 					.fill( '10' );
 				await page.locator( '#btn-ok' ).click();
-				await page.waitForLoadState( 'networkidle' );
 
 				await page.locator( 'text=Delete' ).waitFor();
 
@@ -527,7 +512,6 @@ test.describe(
 			await context.clearCookies();
 
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
