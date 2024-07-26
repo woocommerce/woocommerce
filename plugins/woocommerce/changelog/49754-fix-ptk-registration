@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-CYS - Schedule the `fetch_patterns` actions only once every hour.
