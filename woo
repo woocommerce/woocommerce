@@ -1,0 +1,58 @@
+#!/usr/bin/env php
+<?php
+
+namespace WooCommerce\Dev\CLI;
+
+use lucatume\DI52\App;
+use lucatume\DI52\Container;
+use Stecman\Component\Symfony\Console\BashCompletion\CompletionCommand;
+use Symfony\Component\Console\Application;
+use WooCommerce\Dev\CLI\Commands\Autocomplete;
+use WooCommerce\Dev\CLI\Commands\Build;
+use WooCommerce\Dev\CLI\Commands\RunTests;
+
+if ( PHP_VERSION_ID < 70300 ) {
+	$phpVersion = PHP_VERSION;
+	echo "\n\e[31mThe minimum PHP version required by the CLI is 7.3, your version of PHP ({$phpVersion}) is not supported.\n\n\e[0m";
+	exit( 1 );
+}
+
+if ( file_exists( '/.dockerenv' ) ) {
+	echo 'The CLI can\'t run inside the Docker Container yet.' . PHP_EOL;
+	exit( 1 );
+}
+
+require __DIR__ . '/tools/cli/vendor/autoload.php';
+
+$application = new class extends Application {
+	protected function getDefaultCommands() {
+		$commands   = parent::getDefaultCommands();
+		$commands[] = new CompletionCommand();
+
+		return $commands;
+	}
+};
+
+
+/***********
+ * CONTAINER DEFINITIONS
+ **********/
+$container = new Container();
+App::setContainer( $container );
+$container->setVar( 'rootPath', __DIR__ );
+
+/***********
+ * COMMANDS
+ **********/
+$application->add( $container->make( Autocomplete::class ) );
+$application->add( $container->make( RunTests::class ) );
+$application->add( $container->make( Build::class ) );
+
+try {
+	$application->run();
+} catch ( \Exception $e ) {
+	echo $e->getMessage();
+
+	exit( Command::FAILURE );
+}
+
