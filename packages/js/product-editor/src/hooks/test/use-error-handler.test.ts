@@ -83,16 +83,10 @@ describe( 'useErrorHandler', () => {
 		expect( errorProps.explicitDismiss ).toBeTruthy();
 	} );
 
-	it( 'should call focusByValidatorId when errorProps action is triggered', () => {
-		const errors = [
-			{
-				code: 'product_invalid_sku',
-			},
-			{
-				code: 'product_form_field_error',
-				validatorId: 'test-validator',
-			},
-		] as WPError[];
+	it( 'should call focusByValidatorId for form field errors when errorProps action is triggered', () => {
+		const errors = {
+			code: 'product_invalid_sku',
+		} as WPError;
 		const visibleTab = 'general';
 
 		jest.useFakeTimers();
@@ -101,7 +95,7 @@ describe( 'useErrorHandler', () => {
 		const { getProductErrorMessageAndProps } = result.current;
 
 		const { errorProps } = getProductErrorMessageAndProps(
-			errors[ 0 ],
+			errors,
 			visibleTab
 		);
 
@@ -115,9 +109,21 @@ describe( 'useErrorHandler', () => {
 		}
 
 		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'sku' );
+	} );
+	it( 'should call getParentTabIdByBlockName and focusByValidatorId for product_invalid_sku error when errorProps action is triggered', () => {
+		const error = {
+			code: 'product_form_field_error',
+			validatorId: 'test-validator',
+		} as WPError;
+		const visibleTab = 'general';
+
+		jest.useFakeTimers();
+
+		const { result } = renderHook( () => useErrorHandler() );
+		const { getProductErrorMessageAndProps } = result.current;
 
 		const { errorProps: fieldsErrorProps } = getProductErrorMessageAndProps(
-			errors[ 1 ],
+			error,
 			visibleTab
 		);
 
@@ -133,5 +139,39 @@ describe( 'useErrorHandler', () => {
 		expect( mockFocusByValidatorId ).toHaveBeenCalledWith(
 			'test-validator'
 		);
+	} );
+	it( 'should call getParentTabIdByBlockName for product_invalid_sku error when errorProps action is triggered and does not find sku block name', () => {
+		const errors = {
+			code: 'product_invalid_sku',
+		} as WPError;
+		const visibleTab = 'general';
+
+		jest.mock( '../use-blocks-helper', () => ( {
+			useBlocksHelper: jest.fn().mockReturnValue( {
+				getParentTabId: jest.fn( () => 'inventory' ),
+				getParentTabIdByBlockName: jest.fn( () => '' ), // Mock returns an empty string
+			} ),
+		} ) );
+
+		jest.useFakeTimers();
+
+		const { result } = renderHook( () => useErrorHandler() );
+		const { getProductErrorMessageAndProps } = result.current;
+
+		const { errorProps } = getProductErrorMessageAndProps(
+			errors,
+			visibleTab
+		);
+
+		expect( errorProps ).toBeDefined();
+		expect( errorProps.actions ).toBeDefined();
+		expect( errorProps.actions?.length ).toBeGreaterThan( 0 );
+
+		// Trigger the action
+		if ( errorProps.actions && errorProps.actions.length > 0 ) {
+			errorProps.actions[ 0 ].onClick();
+		}
+
+		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'sku' );
 	} );
 } );
