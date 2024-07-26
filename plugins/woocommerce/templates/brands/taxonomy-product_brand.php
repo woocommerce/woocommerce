@@ -1,5 +1,5 @@
 <?php
-// phpcs:ignore WordPress.Files.FileName.NotHyphenatedLowercase for backwards compatibility.
+// @codingStandardsChangeSetting WordPress.Files.FileName exclude NotHyphenatedLowercase
 
 /**
  * Use the WooCommerce archive template for brand taxonomy pages
