@@ -171,7 +171,7 @@ class Packages {
 			$plugin_dir = basename( dirname( $plugin_name ) );
 			if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
 				// Necessary to properly display notice within row.
-				$plugins[ $plugin_name ][ 'update' ] = 1;
+				$plugins[ $plugin_name ]['update'] = 1;
 			}
 		}
 		return $plugins;
@@ -184,7 +184,7 @@ class Packages {
 	 * Requires 'mark_merged_plugins_as_pending_update' to properly display this notice.
 	 *
 	 * @param string $plugin_file Plugin file.
-	 * @param array $plugin_data  Plugin data.
+	 * @param array  $plugin_data Plugin data.
 	 */
 	public static function display_notice_for_merged_plugins( $plugin_file, $plugin_data ) {
 		global $wp_list_table;
@@ -194,7 +194,7 @@ class Packages {
 		$notice        = __( 'This plugin can no longer be activated because its functionality is now included in <strong>WooCommerce</strong>. It is recommended to <strong>delete</strong> it.', 'woocommerce' );
 
 		if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
-			echo '<tr class="plugin-update-tr"><td colspan="' . $columns_count . '" class="plugin-update"><div class="update-message notice inline notice-error notice-alt"><p>' . $notice . '</p></div></td></tr>';
+			echo '<tr class="plugin-update-tr"><td colspan="' . esc_attr( $columns_count ) . '" class="plugin-update"><div class="update-message notice inline notice-error notice-alt"><p>' . wp_kses_post( $notice ) . '</p></div></td></tr>';
 		}
 	}
 
