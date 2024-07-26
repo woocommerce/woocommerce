@@ -131,6 +131,9 @@ if (
 		const paymentsMainRoot = document.getElementById(
 			'experimental_wc_settings_payments_main'
 		);
+		const paymentsOfflineRoot = document.getElementById(
+			'experimental_wc_settings_payments_offline'
+		);
 
 		if ( paymentsMainRoot ) {
 			createRoot(
@@ -140,7 +143,15 @@ if (
 				)
 			).render( <SettingsPaymentsMainWrapper /> );
 		}
-		// Todo: SettingsPaymentsOfflineWrapper
+
+		if ( paymentsOfflineRoot ) {
+			createRoot(
+				paymentsOfflineRoot.insertBefore(
+					document.createElement( 'div' ),
+					null
+				)
+			).render( <SettingsPaymentsOfflineWrapper /> );
+		}
 		// Todo: SlotFill for WooPayments & others
 	} )();
 }
