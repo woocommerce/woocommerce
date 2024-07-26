@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update Jetpack's new SSO classes and methods to prevent deprecation notice.
