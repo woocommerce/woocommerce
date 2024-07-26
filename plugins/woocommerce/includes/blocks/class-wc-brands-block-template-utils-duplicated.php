@@ -282,7 +282,7 @@ class BlockTemplateUtilsDuplicated {
 		// or the stylesheet directory for child themes.
 		$possible_paths = array_reduce(
 			$possible_templates_dir,
-			function( $carry, $item ) use ( $template_filename ) {
+			function ( $carry, $item ) use ( $template_filename ) {
 				$filepath = DIRECTORY_SEPARATOR . $item . DIRECTORY_SEPARATOR . $template_filename;
 
 				$carry[] = get_template_directory() . $filepath;
@@ -362,5 +362,4 @@ class BlockTemplateUtilsDuplicated {
 
 		return $use_blockified_templates;
 	}
-
 }

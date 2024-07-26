@@ -19,13 +19,16 @@ class WC_Widget_Brand_Description extends WP_Widget {
 	function __construct() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_name        = __('WooCommerce Brand Description', 'woocommerce' );
+		$this->woo_widget_name        = __( 'WooCommerce Brand Description', 'woocommerce' );
 		$this->woo_widget_description = __( 'When viewing a brand archive, show the current brands description.', 'woocommerce' );
 		$this->woo_widget_idbase      = 'wc_brands_brand_description';
 		$this->woo_widget_cssclass    = 'widget_brand_description';
 
 		/* Widget settings. */
-		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		$widget_ops = array(
+			'classname'   => $this->woo_widget_cssclass,
+			'description' => $this->woo_widget_description,
+		);
 
 		/* Create the widget. */
 		parent::__construct( $this->woo_widget_idbase, $this->woo_widget_name, $widget_ops );
@@ -43,11 +46,13 @@ class WC_Widget_Brand_Description extends WP_Widget {
 	function widget( $args, $instance ) {
 		extract( $args );
 
-		if ( ! is_tax( 'product_brand' ) )
+		if ( ! is_tax( 'product_brand' ) ) {
 			return;
+		}
 
-		if ( ! get_query_var( 'term' ) )
+		if ( ! get_query_var( 'term' ) ) {
 			return;
+		}
 
 		$thumbnail = '';
 		$term      = get_term_by( 'slug', get_query_var( 'term' ), 'product_brand' );
@@ -56,10 +61,15 @@ class WC_Widget_Brand_Description extends WP_Widget {
 
 		echo $before_widget . $before_title . $term->name . $after_title; // phpcs:ignore WordPress.Security.EscapeOutput
 
-		wc_get_template( 'widgets/brand-description.php', array(
-			'thumbnail' => $thumbnail,
-			'brand' => $term
-		), 'woocommerce', WC()->plugin_path() . '/templates/brands/' );
+		wc_get_template(
+			'widgets/brand-description.php',
+			array(
+				'thumbnail' => $thumbnail,
+				'brand'     => $term,
+			),
+			'woocommerce',
+			WC()->plugin_path() . '/templates/brands/'
+		);
 
 		echo $after_widget; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
@@ -79,9 +89,13 @@ class WC_Widget_Brand_Description extends WP_Widget {
 		?>
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'woocommerce' ); ?></label>
-				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php if ( isset ( $instance['title'] ) ) echo esc_attr( $instance['title'] ); ?>" />
+				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="
+																	<?php
+																	if ( isset( $instance['title'] ) ) {
+																		echo esc_attr( $instance['title'] );}
+																	?>
+				" />
 			</p>
 		<?php
 	}
-
 }

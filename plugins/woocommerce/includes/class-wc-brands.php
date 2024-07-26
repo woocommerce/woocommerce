@@ -284,7 +284,7 @@ class WC_Brands {
 		// Inc
 		require_once WC()->plugin_path() . '/includes/widgets/class-wc-widget-brand-description.php';
 		require_once WC()->plugin_path() . '/includes/widgets/class-wc-widget-brand-nav.php';
-		require_once  WC()->plugin_path() . '/includes/widgets/class-wc-widget-brand-thumbnails.php';
+		require_once WC()->plugin_path() . '/includes/widgets/class-wc-widget-brand-thumbnails.php';
 
 		// Register
 		register_widget( 'WC_Widget_Brand_Description' );

@@ -37,17 +37,20 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 	 */
 	public $woo_widget_name;
 
-	/** constructor */
+	/** Constructor */
 	public function __construct() {
 
 		/* Widget variable settings. */
-		$this->woo_widget_name        = __('WooCommerce Brand Thumbnails', 'woocommerce' );
+		$this->woo_widget_name        = __( 'WooCommerce Brand Thumbnails', 'woocommerce' );
 		$this->woo_widget_description = __( 'Show a grid of brand thumbnails.', 'woocommerce' );
 		$this->woo_widget_idbase      = 'wc_brands_brand_thumbnails';
 		$this->woo_widget_cssclass    = 'widget_brand_thumbnails';
 
 		/* Widget settings. */
-		$widget_ops = array( 'classname' => $this->woo_widget_cssclass, 'description' => $this->woo_widget_description );
+		$widget_ops = array(
+			'classname'   => $this->woo_widget_cssclass,
+			'description' => $this->woo_widget_description,
+		);
 
 		/* Create the widget. */
 		parent::__construct( $this->woo_widget_idbase, $this->woo_widget_name, $widget_ops );
@@ -100,11 +103,16 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 
-		wc_get_template( 'widgets/brand-thumbnails.php', array(
-			'brands'        => $brands,
-			'columns'       => $instance['columns'],
-			'fluid_columns' => ! empty( $instance['fluid_columns'] ) ? true : false,
-		), 'woocommerce', WC()->plugin_path() . '/templates/brands/' );
+		wc_get_template(
+			'widgets/brand-thumbnails.php',
+			array(
+				'brands'        => $brands,
+				'columns'       => $instance['columns'],
+				'fluid_columns' => ! empty( $instance['fluid_columns'] ) ? true : false,
+			),
+			'woocommerce',
+			WC()->plugin_path() . '/templates/brands/'
+		);
 
 		echo $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
@@ -163,12 +171,25 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		?>
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'woocommerce' ); ?></label>
-				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php if ( isset ( $instance['title'] ) ) echo esc_attr( $instance['title'] ); ?>" />
+				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="
+																	<?php
+																	if ( isset( $instance['title'] ) ) {
+																		echo esc_attr( $instance['title'] );}
+																	?>
+				" />
 			</p>
 
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'columns' ) ); ?>"><?php esc_html_e( 'Columns:', 'woocommerce' ); ?></label>
-				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'columns' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'columns' ) ); ?>" value="<?php if ( isset ( $instance['columns'] ) ) echo esc_attr( $instance['columns'] ); else echo '1'; ?>" />
+				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'columns' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'columns' ) ); ?>" value="
+																	<?php
+																	if ( isset( $instance['columns'] ) ) {
+																		echo esc_attr( $instance['columns'] );
+																	} else {
+																		echo '1';
+																	}
+																	?>
+				" />
 			</p>
 
 			<p>
@@ -203,5 +224,4 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 			</p>
 		<?php
 	}
-
 }

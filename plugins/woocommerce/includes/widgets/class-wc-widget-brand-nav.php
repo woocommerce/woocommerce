@@ -19,7 +19,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		$this->widget_cssclass    = 'woocommerce widget_brand_nav widget_layered_nav';
 		$this->widget_description = __( 'Shows brands in a widget which lets you narrow down the list of products when viewing products.', 'woocommerce' );
 		$this->widget_id          = 'woocommerce_brand_nav';
-		$this->widget_name        = __('WooCommerce Brand Layered Nav', 'woocommerce' );
+		$this->widget_name        = __( 'WooCommerce Brand Layered Nav', 'woocommerce' );
 
 		add_filter( 'woocommerce_product_subcategories_args', array( $this, 'filter_out_cats' ) );
 
@@ -29,10 +29,9 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 	/**
 	 * Filter out all categories and not display them
-	 *
 	 */
 	public function filter_out_cats( $cat_args ) {
-		if ( ! empty( $_GET[ 'filter_product_brand' ] ) ) {
+		if ( ! empty( $_GET['filter_product_brand'] ) ) {
 			return array( 'taxonomy' => '' );
 		}
 
@@ -41,6 +40,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 	/**
 	 * Return the currently viewed taxonomy name.
+	 *
 	 * @return string
 	 */
 	protected function get_current_taxonomy() {
@@ -49,6 +49,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 	/**
 	 * Return the currently viewed term ID.
+	 *
 	 * @return int
 	 */
 	protected function get_current_term_id() {
@@ -57,6 +58,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 	/**
 	 * Return the currently viewed term slug.
+	 *
 	 * @return int
 	 */
 	protected function get_current_term_slug() {
@@ -102,10 +104,13 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		}
 
 		// Get only parent terms. Methods will recursively retrieve children.
-		$terms = get_terms( $taxonomy, array(
-			'hide_empty' => '1',
-			'parent'     => 0,
-		) );
+		$terms = get_terms(
+			$taxonomy,
+			array(
+				'hide_empty' => '1',
+				'parent'     => 0,
+			)
+		);
 
 		if ( empty( $terms ) ) {
 			return;
@@ -147,8 +152,9 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	public function update( $new_instance, $old_instance ) {
 		global $woocommerce;
 
-		if ( empty( $new_instance['title'] ) )
+		if ( empty( $new_instance['title'] ) ) {
 			$new_instance['title'] = __( 'Brands', 'woocommerce' );
+		}
 
 		$instance['title']        = strip_tags( stripslashes( $new_instance['title'] ) );
 		$instance['display_type'] = stripslashes( $new_instance['display_type'] );
@@ -167,11 +173,17 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	public function form( $instance ) {
 		global $woocommerce;
 
-		if ( ! isset( $instance['display_type'] ) )
+		if ( ! isset( $instance['display_type'] ) ) {
 			$instance['display_type'] = 'list';
+		}
 		?>
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'woocommerce' ); ?></label>
-		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php if ( isset( $instance['title'] ) ) echo esc_attr( $instance['title'] ); ?>" /></p>
+		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="
+															<?php
+															if ( isset( $instance['title'] ) ) {
+																echo esc_attr( $instance['title'] );}
+															?>
+		" /></p>
 
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'display_type' ) ); ?>"><?php esc_html_e( 'Display Type:', 'woocommerce' ); ?></label>
 		<select id="<?php echo esc_attr( $this->get_field_id( 'display_type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'display_type' ) ); ?>">
@@ -270,6 +282,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 	/**
 	 * Show dropdown layered nav.
+	 *
 	 * @param  array  $terms
 	 * @param  string $taxonomy
 	 * @param  int    $depth
@@ -307,27 +320,31 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 				echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( $option_is_set, true, false ) . '>' . esc_html( str_repeat( '&nbsp;', 2 * $depth ) . $term->name ) . '</option>';
 
-				$child_terms = get_terms( $taxonomy, array(
-					'hide_empty' => 1,
-					'parent'     => $term->term_id,
-				) );
+				$child_terms = get_terms(
+					$taxonomy,
+					array(
+						'hide_empty' => 1,
+						'parent'     => $term->term_id,
+					)
+				);
 
 				if ( ! empty( $child_terms ) ) {
 					$found |= $this->layered_nav_dropdown( $child_terms, $taxonomy, $depth + 1 );
 				}
-
 			}
 
 			if ( 0 == $depth ) {
 				$link = $this->get_page_base_url( $taxonomy );
 				echo '</select>';
 
-				wc_enqueue_js( "
-					jQuery( '.wc-brand-dropdown-layered-nav-". esc_js( $taxonomy ) . "' ).change( function() {
+				wc_enqueue_js(
+					"
+					jQuery( '.wc-brand-dropdown-layered-nav-" . esc_js( $taxonomy ) . "' ).change( function() {
 						var slug = jQuery( this ).val();
 						location.href = '" . preg_replace( '%\/page\/[0-9]+%', '', str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( add_query_arg( 'filtering', '1', $link ) ) ) ) . '&filter_' . esc_js( $taxonomy ) . "=' + jQuery( '.wc-brand-dropdown-layered-nav-" . esc_js( $taxonomy ) . "' ).val();
 					});
-				" );
+				"
+				);
 			}
 		}
 
@@ -351,11 +368,11 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		$current_values     = ! empty( $_chosen_attributes ) ? $_chosen_attributes : array();
 		$found              = false;
 
-		$filter_name    = 'filter_' . $taxonomy;
+		$filter_name = 'filter_' . $taxonomy;
 
 		foreach ( $terms as $term ) {
-			$option_is_set  = in_array( $term->term_id, $current_values );
-			$count          = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
+			$option_is_set = in_array( $term->term_id, $current_values );
+			$count         = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
 			// skip the term for the current archive
 			if ( $this->get_current_term_id() === $term->term_id ) {
@@ -392,7 +409,13 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			}
 
 			if ( ! empty( $current_filter ) ) {
-				$link = add_query_arg( array( 'filtering' => '1', $filter_name => implode( ',', $current_filter ) ), $link );
+				$link = add_query_arg(
+					array(
+						'filtering'  => '1',
+						$filter_name => implode( ',', $current_filter ),
+					),
+					$link
+				);
 			}
 
 			echo '<li class="wc-layered-nav-term ' . ( $option_is_set ? 'chosen' : '' ) . '">';
@@ -405,10 +428,13 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 			echo wp_kses_post( apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term ) );
 
-			$child_terms = get_terms( $taxonomy, array(
-				'hide_empty' => 1,
-				'parent'     => $term->term_id,
-			) );
+			$child_terms = get_terms(
+				$taxonomy,
+				array(
+					'hide_empty' => 1,
+					'parent'     => $term->term_id,
+				)
+			);
 
 			if ( ! empty( $child_terms ) ) {
 				$found |= $this->layered_nav_list( $child_terms, $taxonomy, $depth + 1 );
@@ -424,7 +450,8 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 	/**
 	 * Count products within certain terms, taking the main WP query into consideration.
-	 * @param  array $term_ids
+	 *
+	 * @param  array  $term_ids
 	 * @param  string $taxonomy
 	 * @param  string $query_type
 	 * @return array
@@ -443,27 +470,27 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			}
 		}
 
-		$meta_query      = new WP_Meta_Query( $meta_query );
-		$tax_query       = new WP_Tax_Query( $tax_query );
-		$meta_query_sql  = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
-		$tax_query_sql   = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$meta_query     = new WP_Meta_Query( $meta_query );
+		$tax_query      = new WP_Tax_Query( $tax_query );
+		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
+		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
 		// Generate query
-		$query           = array();
-		$query['select'] = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id";
-		$query['from']   = "FROM {$wpdb->posts}";
-		$query['join']   = "
+		$query             = array();
+		$query['select']   = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id";
+		$query['from']     = "FROM {$wpdb->posts}";
+		$query['join']     = "
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON {$wpdb->posts}.ID = term_relationships.object_id
 			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
 			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
 			" . $tax_query_sql['join'] . $meta_query_sql['join'];
-		$query['where']   = "
+		$query['where']    = "
 			WHERE {$wpdb->posts}.post_type IN ( 'product' )
 			AND {$wpdb->posts}.post_status = 'publish'
-			" . $tax_query_sql['where'] . $meta_query_sql['where'] . "
-			AND terms.term_id IN (" . implode( ',', array_map( 'absint', $term_ids ) ) . ")
-		";
-		$query['group_by'] = "GROUP BY terms.term_id";
+			" . $tax_query_sql['where'] . $meta_query_sql['where'] . '
+			AND terms.term_id IN (' . implode( ',', array_map( 'absint', $term_ids ) ) . ')
+		';
+		$query['group_by'] = 'GROUP BY terms.term_id';
 		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
 		$query             = implode( ' ', $query );
 

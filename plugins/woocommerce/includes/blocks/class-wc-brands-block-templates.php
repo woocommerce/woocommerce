@@ -147,7 +147,6 @@ class WC_Brands_Block_Templates {
 
 		return $query_result;
 	}
-
 }
 
 new WC_Brands_Block_Templates();

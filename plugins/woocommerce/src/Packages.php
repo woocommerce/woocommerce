@@ -125,7 +125,7 @@ class Packages {
 			deactivate_plugins( $active_plugin_path );
 			add_action(
 				'admin_notices',
-				function() use ( $plugin_data ) {
+				function () use ( $plugin_data ) {
 					echo '<div class="error"><p>';
 					printf(
 						/* translators: %s: is referring to the plugin's name. */
@@ -263,7 +263,7 @@ class Packages {
 		}
 		add_action(
 			'admin_notices',
-			function() use ( $package ) {
+			function () use ( $package ) {
 				?>
 				<div class="notice notice-error">
 					<p>
