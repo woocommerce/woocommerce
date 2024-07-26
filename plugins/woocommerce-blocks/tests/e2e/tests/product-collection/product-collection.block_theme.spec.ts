@@ -1496,7 +1496,7 @@ test.describe( 'Product Collection', () => {
 			page,
 			editor,
 		} ) => {
-			const expectedProducts = [ 'Hoodie', 'Beanie' ];
+			const expectedProducts = [ 'Beanie', 'Hoodie' ];
 
 			await admin.visitSiteEditor( { path: '/wp_template' } );
 
