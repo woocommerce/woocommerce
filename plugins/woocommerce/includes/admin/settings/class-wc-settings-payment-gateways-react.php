@@ -24,11 +24,6 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 *
 	 * @return array List of section identifiers.
 	 */
-	/**
-	 * Get the whitelist of sections to render using React.
-	 *
-	 * @return array List of section identifiers.
-	 */
 	private function get_reactify_render_sections() {
 		$sections = array(
 			'offline',
@@ -39,7 +34,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		/**
 		 * Filters the list of payment settings sections to be rendered using React.
 		 *
-		 * @since 8.0.0
+		 * @since 9.3.0
 		 *
 		 * @param array $sections List of section identifiers.
 		 */
