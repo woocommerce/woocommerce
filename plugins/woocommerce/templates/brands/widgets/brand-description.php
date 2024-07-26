@@ -18,7 +18,8 @@
 global $woocommerce;
 
 if ( $thumbnail ) {
-	echo get_brand_thumbnail_image( $brand ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo get_brand_thumbnail_image( $brand );
 }
 
 echo wp_kses_post( wpautop( wptexturize( term_description() ) ) );
