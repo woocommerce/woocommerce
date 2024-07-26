@@ -50,7 +50,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 
 		if ( $current_section ) {
 			if ( in_array( $current_section, self::REACTIFY_RENDER_SECTIONS, true ) ) {
-				echo '<div id="wc_settings_payments_' . esc_attr( $current_section ) . '"></div>';
+				echo '<div id="experimental_wc_settings_payments_' . esc_attr( $current_section ) . '"></div>';
 			} else {
 				foreach ( $payment_gateways as $gateway ) {
 					if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
