@@ -221,6 +221,15 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 	} );
 
 	test.describe( 'Homepage tracking banner', () => {
+		test.beforeAll( async ( { baseURL } ) => {
+			await setFeatureFlag(
+				request,
+				baseURL,
+				'pattern-toolkit-full-composability',
+				true
+			);
+		} );
+
 		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
 			pageObject,
 			baseURL,
