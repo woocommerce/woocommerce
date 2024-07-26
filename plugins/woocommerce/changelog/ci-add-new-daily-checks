@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add daily checks for core e2e with PHP 8.1 and WP latest-1

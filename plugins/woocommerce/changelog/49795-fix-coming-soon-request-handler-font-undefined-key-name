@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the undefined array key "name" warning in ComingSoonRequestHandler.php when the font name is not set

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: If either the upcoming WooCommerce Shipping or WooCommerce Tax extension is active, don't recommend WooCommerce Shipping & Tax in the onboarding wizards and the "Select your shipping options" task.  Allowing WCS&T to be installed alongside WC Shipping or WC Tax would lead to a notice about incompatibility which is something this PR aims to avoid.
-

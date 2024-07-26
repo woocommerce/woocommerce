@@ -1,34 +1,40 @@
 /**
  * External dependencies
  */
-import {
-	InnerBlocks,
-	useBlockProps,
-	useInnerBlocksProps,
-	InspectorControls,
-} from '@wordpress/block-editor';
-import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
-import { __, sprintf } from '@wordpress/i18n';
-import { useCollection } from '@woocommerce/base-context/hooks';
-import { AttributeTerm } from '@woocommerce/types';
-import {
-	PanelBody,
-	RadioControl,
-	Spinner,
-	ExternalLink,
-	RangeControl,
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-	__experimentalToggleGroupControl as ToggleGroupControl,
-} from '@wordpress/components';
-import { Icon, settings, menu } from '@wordpress/icons';
 import { filter, filterThreeLines } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
+import { AttributeSetting } from '@woocommerce/types';
+import {
+	InnerBlocks,
+	InspectorControls,
+	useBlockProps,
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
+import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
+import { Icon, menu, settings } from '@wordpress/icons';
+import {
+	ExternalLink,
+	PanelBody,
+	RadioControl,
+	RangeControl,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import type { BlockAttributes } from './types';
 import './editor.scss';
+import type { BlockAttributes } from './types';
+
+const defaultAttribute = getSetting< AttributeSetting >(
+	'defaultProductFilterAttribute'
+);
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -64,8 +70,8 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		'woocommerce/product-filter',
 		{
 			filterType: 'attribute-filter',
-			heading: __( 'Attribute', 'woocommerce' ),
-			attributeId: 0,
+			heading: defaultAttribute.attribute_label,
+			attributeId: parseInt( defaultAttribute.attribute_id, 10 ),
 		},
 	],
 	[
@@ -101,73 +107,11 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	],
 ];
 
-const addHighestProductCountAttributeToTemplate = (
-	template: InnerBlockTemplate[],
-	highestProductCountAttribute: AttributeTerm | null
-): InnerBlockTemplate[] => {
-	if ( highestProductCountAttribute === null ) return template;
-
-	return template.map( ( block ) => {
-		const blockNameIndex = 0;
-		const blockAttributesIndex = 1;
-		const blockName = block[ blockNameIndex ];
-		const blockAttributes = block[ blockAttributesIndex ];
-		if (
-			blockName === 'woocommerce/product-filter' &&
-			blockAttributes?.filterType === 'attribute-filter'
-		) {
-			return [
-				blockName,
-				{
-					...blockAttributes,
-					heading: highestProductCountAttribute.name,
-					attributeId: highestProductCountAttribute.id,
-					metadata: {
-						name: sprintf(
-							/* translators: %s is referring to the filter attribute name. For example: Color, Size, etc. */
-							__( '%s (Experimental)', 'woocommerce' ),
-							highestProductCountAttribute.name
-						),
-					},
-				},
-			];
-		}
-
-		return block;
-	} );
-};
-
 export const Edit = ( {
 	setAttributes,
 	attributes,
 }: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps();
-	const { results: attributeTerms, isLoading } =
-		useCollection< AttributeTerm >( {
-			namespace: '/wc/store/v1',
-			resourceName: 'products/attributes',
-		} );
-
-	const highestProductCountAttribute =
-		attributeTerms.reduce< AttributeTerm | null >(
-			( attributeWithMostProducts, attribute ) => {
-				if ( attributeWithMostProducts === null ) {
-					return attribute;
-				}
-				return attribute.count > attributeWithMostProducts.count
-					? attribute
-					: attributeWithMostProducts;
-			},
-			null
-		);
-	const updatedTemplate = addHighestProductCountAttributeToTemplate(
-		TEMPLATE,
-		highestProductCountAttribute
-	);
-
-	if ( isLoading ) {
-		return <Spinner />;
-	}
 
 	const templatePartEditUri = getSetting< string >(
 		'templatePartProductFiltersOverlayEditUri',
@@ -329,7 +273,7 @@ export const Edit = ( {
 					) }
 				</PanelBody>
 			</InspectorControls>
-			<InnerBlocks templateLock={ false } template={ updatedTemplate } />
+			<InnerBlocks templateLock={ false } template={ TEMPLATE } />
 		</div>
 	);
 };
