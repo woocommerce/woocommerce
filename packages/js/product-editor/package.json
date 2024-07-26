@@ -88,7 +88,7 @@
 		"@testing-library/user-event": "13.5.0",
 		"@types/dompurify": "^2.4.0",
 		"@types/jest": "^27.5.2",
-		"@types/react": "^17.0.71",
+		"@types/react": "^17.0.71 || ^18.0.0",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/wordpress__block-editor": "7.0.0",
 		"@types/wordpress__block-library": "2.6.1",
@@ -149,7 +149,7 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
+		"@types/react": "^17.0.71 || ^18.0.0",
 		"@wordpress/data": "wp-6.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"

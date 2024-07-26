@@ -67,7 +67,7 @@
 		"@types/jest": "^27.5.2",
 		"@types/node": "^16.18.68",
 		"@types/qs": "^6.9.10",
-		"@types/react": "^17.0.71",
+		"@types/react": "^17.0.71 || ^18.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"concurrently": "^7.6.0",
