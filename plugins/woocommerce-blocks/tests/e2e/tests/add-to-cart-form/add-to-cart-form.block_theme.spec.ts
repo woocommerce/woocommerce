@@ -12,6 +12,8 @@ import {
  * Internal dependencies
  */
 
+// Triggers Blocks E2E tests.
+
 const blockData: BlockData = {
 	name: 'Add to Cart with Options',
 	slug: 'woocommerce/add-to-cart-form',
