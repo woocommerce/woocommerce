@@ -22,13 +22,17 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	/**
 	 * Whitelist of sections to render using React.
 	 *
-	 * @var array
+	 * @return array
 	 */
-	private const REACTIFY_RENDER_SECTIONS = [
-		'offline',
-		'woocommerce_payments',
-		'main',
-	];
+	private function get_reactify_render_sections() {
+		$sections = [
+			'offline',
+			'woocommerce_payments',
+			'main',
+		];
+
+		return apply_filters( 'woocommerce_admin_payment_reactify_render_sections', $sections );
+	}
 
 	/**
 	 * Constructor.
@@ -63,7 +67,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	}
 
 	private function should_render_react_section( $section ) {
-		return in_array( $section, self::REACTIFY_RENDER_SECTIONS, true );
+		return in_array( $section, $this->get_reactify_render_sections(), true );
 	}
 
 	private function render_react_section( $section ) {
