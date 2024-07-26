@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 6.5
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 9.1.2
+Stable tag: 9.1.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,12 +169,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.1.3 2024-07-24 =
+= 9.1.4 2024-07-26 =
 
 **WooCommerce**
 
 * Fix - Revert fixing terms count in tracking PR as it caused product_add_publish to be triggered more than usual. [#49797](https://github.com/woocommerce/woocommerce/pull/49797)
 * Fix - Hardening against XSS via the Product Button unescaped attribute. [#50010](https://github.com/woocommerce/woocommerce/pull/50010)
+* Fix - Enhance escaping for block attributes. [#50015](https://github.com/woocommerce/woocommerce/pull/50015)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
