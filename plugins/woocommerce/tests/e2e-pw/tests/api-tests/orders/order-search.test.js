@@ -1,10 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 
 const { getOrderExampleSearchTest } = require( '../../../data/order' );
-const { customerShippingSearchTest } = require( '../../../data/shared/customer' );
 const {
-	simpleProduct,
-} = require('../../../data/products-crud');
+	customerShippingSearchTest,
+} = require( '../../../data/shared/customer' );
+const { simpleProduct } = require( '../../../data/products-crud' );
 
 /**
  * Order to be searched
@@ -59,13 +59,13 @@ const searchParams = [
 test.describe( 'Order Search API tests', () => {
 	test.beforeAll( async ( { request } ) => {
 		// Create a product to be associated with the order
-		const productResponse = await request.post('wp-json/wc/v3/products', {
+		const productResponse = await request.post( 'wp-json/wc/v3/products', {
 			data: simpleProduct,
-		});
+		} );
 		const productResponseJSON = await productResponse.json();
 
 		// Save the created product id against the order line_items
-		order.line_items[0].product_id = productResponseJSON.id;
+		order.line_items[ 0 ].product_id = productResponseJSON.id;
 
 		// Create an order and save its ID
 		const response = await request.post( '/wp-json/wc/v3/orders', {
@@ -77,9 +77,12 @@ test.describe( 'Order Search API tests', () => {
 
 	test.afterAll( async ( { request } ) => {
 		// Cleanup: Delete the product
-		await request.delete( `/wp-json/wc/v3/products/${ order.line_items[0].product_id }`, {
-			data: { force: true },
-		} );
+		await request.delete(
+			`/wp-json/wc/v3/products/${ order.line_items[ 0 ].product_id }`,
+			{
+				data: { force: true },
+			}
+		);
 		// Cleanup: Delete the order
 		await request.delete( `/wp-json/wc/v3/orders/${ order.id }`, {
 			data: { force: true },

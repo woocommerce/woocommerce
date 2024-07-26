@@ -1,7 +1,6 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+const { admin } = require( '../../../test-data/data' );
 const { customer } = require( '../../../data' );
-const { USER_KEY } = process.env;
-const userKey = USER_KEY ?? 'admin';
 
 /**
  * Tests for the WooCommerce Customers API.
@@ -97,7 +96,7 @@ test.describe( 'Customers API tests: CRUD', () => {
 			expect( responseJSON.is_paying_customer ).toEqual( false );
 			expect( responseJSON.role ).toEqual( 'administrator' );
 			// this test was updated to allow for local test setup and other test sites.
-			expect( responseJSON.username ).toEqual( userKey );
+			expect( responseJSON.username ).toEqual( admin.username );
 		} );
 
 		test( 'can retrieve subscriber user', async ( { request } ) => {

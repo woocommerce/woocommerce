@@ -1,7 +1,6 @@
-const { test, expect } = require( '@playwright/test' );
-const { API_BASE_URL } = process.env;
-const shouldSkip =
-	API_BASE_URL !== undefined && ! API_BASE_URL.includes( 'localhost' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+const { BASE_URL } = process.env;
+const shouldSkip = BASE_URL !== undefined && ! BASE_URL.includes( 'localhost' );
 
 /**
  * Tests for the WooCommerce API.

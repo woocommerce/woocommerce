@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 
 /**
  * Tests to verify connection to the API.

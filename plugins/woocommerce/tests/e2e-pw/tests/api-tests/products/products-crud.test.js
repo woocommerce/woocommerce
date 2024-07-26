@@ -1,6 +1,6 @@
-const { test, expect } = require( '@playwright/test' );
-const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL !== undefined;
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+const { BASE_URL } = process.env;
+const shouldSkip = BASE_URL !== undefined;
 
 /**
  * Internal dependencies

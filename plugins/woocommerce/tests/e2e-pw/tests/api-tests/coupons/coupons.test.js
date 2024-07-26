@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { coupon, order } = require( '../../../data' );
 
 /**
@@ -7,6 +7,7 @@ const { coupon, order } = require( '../../../data' );
  * @group api
  * @group coupons
  */
+
 test.describe( 'Coupons API tests', () => {
 	//create variable to store the coupon id we will be using
 	let couponId;

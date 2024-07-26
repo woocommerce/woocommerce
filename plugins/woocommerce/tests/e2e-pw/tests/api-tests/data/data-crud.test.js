@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 
 // 259 countries total
 const countryCodes = [
@@ -3973,7 +3973,7 @@ test.describe( 'Data API tests', () => {
 
 		// loop through all the countries and validate against the expected data
 		for ( const country of countryCodes ) {
-			const countryData = require( `../../data/countries/${ country }.json` );
+			const countryData = require( `../../../data/countries/${ country }.json` );
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {

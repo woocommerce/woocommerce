@@ -1,4 +1,4 @@
-const {devices} = require("@playwright/test");
+const { devices } = require( '@playwright/test' );
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
 const testsRootPath = __dirname;
