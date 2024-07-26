@@ -52,12 +52,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
-							'How wide is your road?': 'wide',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
-							'How wide is your road?': 'narrow',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: {
@@ -171,7 +171,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Shipping address',
 					} )
-					.getByLabel( 'How wide is your road?' )
+					.getByLabel( 'How wide is your road? (optional)' )
 			).toHaveValue( 'wide' );
 			await expect(
 				checkoutPageObject.page
@@ -199,7 +199,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Billing address',
 					} )
-					.getByLabel( 'How wide is your road?' )
+					.getByLabel( 'How wide is your road? (optional)' )
 			).toHaveValue( 'narrow' );
 		} );
 
@@ -222,12 +222,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
-							'How wide is your road?': 'wide',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
-							'How wide is your road?': 'narrow',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: {
@@ -245,10 +245,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{
 					address: {
 						shipping: {
-							'How wide is your road?': 'super-wide',
+							'How wide is your road? (optional)': 'super-wide',
 						},
 						billing: {
-							'How wide is your road?': 'wide',
+							'How wide is your road? (optional)': 'wide',
 						},
 					},
 				}
@@ -313,7 +313,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					order: {
 						'What is your favourite colour?': 'Red',
 						'How did you hear about us?':
-							'Select a How did you hear about us? (optional)',
+							'Select a how did you hear about us? (optional)',
 					},
 				}
 			);
@@ -383,12 +383,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': ' 1. 2 3 4 5 ',
 							'Confirm government ID': '1      2345',
-							'How wide is your road?': 'wide',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': ' 5. 4 3 2 1 ',
 							'Confirm government ID': '543 21',
-							'How wide is your road?': 'narrow',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: {
@@ -502,7 +502,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Shipping address',
 					} )
-					.getByLabel( 'How wide is your road?' )
+					.getByLabel( 'How wide is your road? (optional)' )
 			).toHaveValue( 'wide' );
 			await expect(
 				checkoutPageObject.page
@@ -530,7 +530,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Billing address',
 					} )
-					.getByLabel( 'How wide is your road?' )
+					.getByLabel( 'How wide is your road? (optional)' )
 			).toHaveValue( 'narrow' );
 		} );
 
@@ -605,12 +605,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
-							'How wide is your road?': 'wide',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
-							'How wide is your road?': 'narrow',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: { 'How did you hear about us?': 'Other' },
@@ -649,12 +649,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
-							'How wide is your road?': 'wide',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
-							'How wide is your road?': 'narrow',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: { 'How did you hear about us?': 'Other' },
@@ -761,7 +761,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			// Check select in edit mode match the expected value.
 			const roadSizeSelect = checkoutPageObject.page.getByLabel(
-				'How wide is your road?'
+				'How wide is your road? (optional)'
 			);
 			await expect( roadSizeSelect ).toHaveValue( 'narrow' );
 
@@ -824,7 +824,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			// Check select in edit mode match the expected value.
 			const shippingRoadSizeSelect = checkoutPageObject.page.getByLabel(
-				'How wide is your road?'
+				'How wide is your road? (optional)'
 			);
 			await expect( shippingRoadSizeSelect ).toHaveValue( 'wide' );
 
