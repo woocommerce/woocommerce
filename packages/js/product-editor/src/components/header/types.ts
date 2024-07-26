@@ -1,7 +1,7 @@
 export type HeaderProps = {
-	onTabSelect: ( tabId: string | null ) => void;
+	onTabSelect: ( tabId: string ) => void;
 	productType?: string;
-	selectedTab?: string | null;
+	selectedTab: string | null;
 };
 
 export interface Image {

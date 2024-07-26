@@ -32,13 +32,17 @@ export const registerBlockSingleProductTemplate = ( {
 	isAvailableOnPostEditor,
 }: {
 	blockName: string;
-	blockMetadata: Partial< BlockConfiguration >;
+	blockMetadata?: string | Partial< BlockConfiguration >;
 	blockSettings: Partial< BlockConfiguration >;
 	isAvailableOnPostEditor: boolean;
 	isVariationBlock?: boolean;
 	variationName?: string;
 } ) => {
 	let currentTemplateId: string | undefined = '';
+
+	if ( ! blockMetadata ) {
+		blockMetadata = blockName;
+	}
 
 	subscribe( () => {
 		const previousTemplateId = currentTemplateId;

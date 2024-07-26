@@ -1,10 +1,13 @@
 /**
  * External dependencies
  */
-import { assign, fromCallback, setup } from 'xstate5';
+import { assertEvent, assign, fromCallback, fromPromise, setup } from 'xstate5';
 import React from 'react';
-import { getQuery } from '@woocommerce/navigation';
-import type { TaskListType } from '@woocommerce/data';
+import { getQuery, navigateTo } from '@woocommerce/navigation';
+import { ONBOARDING_STORE_NAME, type TaskListType } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
+import { dispatch } from '@wordpress/data';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -19,6 +22,7 @@ import {
 	actions as congratsActions,
 	LaunchYourStoreSuccess,
 } from './pages/launch-store-success';
+import { getSiteCachedStatus } from '../sidebar/xstate';
 
 export type MainContentMachineContext = {
 	congratsScreen: {
@@ -27,7 +31,7 @@ export type MainContentMachineContext = {
 		allTasklists: TaskListType[];
 		activePlugins: string[];
 	};
-	siteIsShowingCachedContent: boolean;
+	siteIsShowingCachedContent: boolean | undefined;
 };
 
 export type MainContentComponentProps = LaunchYourStoreComponentProps & {
@@ -59,6 +63,31 @@ export const mainContentMachine = setup( {
 		assignSiteCachedStatus: assign( {
 			siteIsShowingCachedContent: true,
 		} ),
+		recordSurveyResults: ( { event } ) => {
+			assertEvent( event, 'COMPLETE_SURVEY' );
+			recordEvent( 'launch_your_store_congrats_survey_complete', {
+				action: event.payload.action,
+				score: event.payload.score,
+				comments: event.payload.comments,
+			} );
+		},
+		recordBackToHomeClick: () => {
+			recordEvent( 'launch_your_store_congrats_back_to_home_click' );
+		},
+		recordPreviewStoreClick: () => {
+			recordEvent( 'launch_your_store_congrats_preview_store_click' );
+		},
+		navigateToPreview: () => {
+			const homeUrl: string = getSetting( 'homeUrl', '' );
+			window.open( homeUrl, '_blank' );
+		},
+		navigateToHome: () => {
+			const { invalidateResolutionForStoreSelector } = dispatch(
+				ONBOARDING_STORE_NAME
+			);
+			invalidateResolutionForStoreSelector( 'getTaskLists' );
+			navigateTo( { url: '/' } );
+		},
 	},
 	guards: {
 		hasContentLocation: (
@@ -72,6 +101,7 @@ export const mainContentMachine = setup( {
 	actors: {
 		contentQueryParamListener,
 		fetchCongratsData: congratsServices.fetchCongratsData,
+		getSiteCachedStatus: fromPromise( getSiteCachedStatus ),
 	},
 } ).createMachine( {
 	id: 'mainContent',
@@ -83,7 +113,7 @@ export const mainContentMachine = setup( {
 			allTasklists: [],
 			activePlugins: [],
 		},
-		siteIsShowingCachedContent: false,
+		siteIsShowingCachedContent: undefined,
 	},
 	invoke: {
 		id: 'contentQueryParamListener',
@@ -118,26 +148,71 @@ export const mainContentMachine = setup( {
 		},
 		launchStoreSuccess: {
 			id: 'launchStoreSuccess',
-			invoke: [
-				{
-					src: 'fetchCongratsData',
-					onDone: {
-						actions: assign( congratsActions.assignCongratsData ),
+			initial: 'loading',
+			states: {
+				loading: {
+					invoke: [
+						{
+							src: 'fetchCongratsData',
+							onDone: {
+								actions: assign(
+									congratsActions.assignCongratsData
+								),
+							},
+						},
+						{
+							src: 'getSiteCachedStatus',
+							onDone: {
+								actions: assign( {
+									siteIsShowingCachedContent: ( { event } ) =>
+										event.output,
+								} ),
+							},
+							onError: {
+								actions: assign( {
+									siteIsShowingCachedContent: false,
+								} ),
+							},
+						},
+					],
+					always: {
+						guard: ( { context } ) => {
+							return (
+								context.congratsScreen.hasLoadedCongratsData &&
+								context.siteIsShowingCachedContent !== undefined
+							);
+						},
+						target: 'congrats',
+					},
+					meta: {
+						component: LoadingPage,
 					},
 				},
-			],
-			entry: [
-				{
-					type: 'updateQueryParams',
-					params: { content: 'launch-store-success' },
+				congrats: {
+					entry: [
+						{
+							type: 'updateQueryParams',
+							params: { content: 'launch-store-success' },
+						},
+					],
+					meta: {
+						component: LaunchYourStoreSuccess,
+					},
 				},
-			],
-			meta: {
-				component: LaunchYourStoreSuccess,
 			},
+
 			on: {
 				COMPLETE_SURVEY: {
-					actions: assign( congratsActions.assignCompleteSurvey ),
+					actions: [
+						assign( congratsActions.assignCompleteSurvey ),
+						'recordSurveyResults',
+					],
+				},
+				PREVIEW_STORE: {
+					actions: [ 'recordPreviewStoreClick', 'navigateToPreview' ],
+				},
+				BACK_TO_HOME: {
+					actions: [ 'recordBackToHomeClick', 'navigateToHome' ],
 				},
 			},
 		},

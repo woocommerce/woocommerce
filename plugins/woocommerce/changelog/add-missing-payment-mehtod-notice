@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Display an admin notice in Setting and Extension pages when there are expiring subscriptions and connected account doesn't have a payment method.

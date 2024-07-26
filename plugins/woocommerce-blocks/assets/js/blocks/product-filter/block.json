@@ -11,6 +11,7 @@
 		"reusable": false,
 		"inserter": false
 	},
+	"ancestor": [ "woocommerce/product-filters" ],
 	"usesContext": [ "query", "queryId" ],
 	"attributes": {
 		"filterType": {
@@ -33,6 +34,6 @@
 			"isPreview": true
 		}
 	},
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

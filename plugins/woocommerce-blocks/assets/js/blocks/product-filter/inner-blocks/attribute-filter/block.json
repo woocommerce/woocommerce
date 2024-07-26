@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-attribute",
 	"version": "1.0.0",
-	"title": "Product Filter: Attribute (Experimental)",
+	"title": "Filter Options",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
@@ -14,7 +14,45 @@
 		"inserter": false,
 		"color": {
 			"text": true,
-			"background": false
+			"background": false,
+			"__experimentalDefaultControls": {
+				"text": false
+			}
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": false
+			}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false,
+				"blockGap": false
+			}
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": false,
+				"radius": false,
+				"style": false,
+				"width": false
+			}
 		}
 	},
 	"usesContext": [ "query", "queryId" ],
@@ -42,6 +80,18 @@
 		"isPreview": {
 			"type": "boolean",
 			"default": false
+		},
+		"sortOrder": {
+			"type": "string",
+			"default": "count-desc"
+		},
+		"hideEmpty": {
+			"type": "boolean",
+			"default": true
+		},
+		"clearButton": {
+			"type": "boolean",
+			"default":true
 		}
 	}
 }

@@ -6,7 +6,9 @@ const {
 	insertBlock,
 	transformIntoBlocks,
 	publishPage,
+	openEditorSettings,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 const simpleProductName = 'Very Simple Product';
 const singleProductPrice = '999.00';
@@ -73,11 +75,15 @@ test.describe(
 			await goToPageEditor( { page } );
 
 			await fillPageTitle( page, testPage.title );
-			await insertBlock( page, 'Classic Checkout' );
+			const wordPressVersion = await getInstalledWordPressVersion();
+			await insertBlock( page, 'Classic Checkout', wordPressVersion );
 			await transformIntoBlocks( page );
 
 			// When Gutenberg is active, the canvas is in an iframe
 			let canvas = await getCanvas( page );
+
+			// Open Settings sidebar if closed
+			await openEditorSettings( { page } );
 
 			// Activate the terms and conditions checkbox
 			await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
