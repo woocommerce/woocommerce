@@ -24,17 +24,22 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 *
 	 * @return array List of section identifiers.
 	 */
+	/**
+	 * Get the whitelist of sections to render using React.
+	 *
+	 * @return array List of section identifiers.
+	 */
 	private function get_reactify_render_sections() {
-		$sections = [
+		$sections = array(
 			'offline',
 			'woocommerce_payments',
 			'main',
-		];
+		);
 
 		/**
 		 * Filters the list of payment settings sections to be rendered using React.
 		 *
-		 * @since x.x.x
+		 * @since 8.0.0
 		 *
 		 * @param array $sections List of section identifiers.
 		 */
@@ -73,18 +78,35 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		//phpcs:enable
 	}
 
+	/**
+	 * Check if the given section should be rendered using React.
+	 *
+	 * @param string $section The section to check.
+	 * @return bool Whether the section should be rendered using React.
+	 */
 	private function should_render_react_section( $section ) {
 		return in_array( $section, $this->get_reactify_render_sections(), true );
 	}
 
+	/**
+	 * Render the React section.
+	 *
+	 * @param string $section The section to render.
+	 */
 	private function render_react_section( $section ) {
 		echo '<div id="experimental_wc_settings_payments_' . esc_attr( $section ) . '"></div>';
 	}
 
+	/**
+	 * Render the classic gateway settings page.
+	 *
+	 * @param array  $payment_gateways The payment gateways.
+	 * @param string $current_section The current section.
+	 */
 	private function render_classic_gateway_settings_page( $payment_gateways, $current_section ) {
 		foreach ( $payment_gateways as $gateway ) {
 			if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
-				if ( isset( $_GET['toggle_enabled'] ) ) {
+				if ( isset( $_GET['toggle_enabled'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$enabled = $gateway->get_option( 'enabled' );
 
 					if ( $enabled ) {
