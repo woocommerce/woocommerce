@@ -276,4 +276,23 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 		await expect( emptyPatternsBlock ).toBeVisible();
 	} );
+
+	test( 'Clicking the "Add patterns" button on the No Blocks view should add a default pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+		const addPatternsButton = editor.locator('.no-blocks-insert-pattern-button');
+		await addPatternsButton.click();
+		const emptyPatternsBlock = editor.getByText(
+			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
+		);
+		const defaultPattern = editor.locator('[data-is-parent-block="true"]:not([data-type="core/template-part"])');
+		await expect( emptyPatternsBlock ).not.toBeVisible();
+		await expect( defaultPattern ).toBeVisible();
+	} );
 } );
