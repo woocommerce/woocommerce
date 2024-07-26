@@ -87,7 +87,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			);
 
 			$this->record_log_timestamp();
-			wp_safe_remote_post(
+			$response = wp_safe_remote_post(
 				self::LOG_ENDPOINT,
 				array(
 					'body'     => wp_json_encode( $body ),
@@ -95,17 +95,20 @@ class RemoteLogger extends \WC_Log_Handler {
 					'headers'  => array(
 						'Content-Type' => 'application/json',
 					),
-					// Send the request asynchronously to avoid performance issues.
 					'blocking' => false,
 				)
 			);
+
+			if ( is_wp_error( $response ) ) {
+				throw new \Exception( $response->get_error_message() );
+			}
 
 			return true;
 		} catch ( \Exception $e ) {
 			// Log the error locally if the remote logging fails.
 			$this->local_logger->error( 'Remote logging failed: ' . $e->getMessage() );
+			return false;
 		}
-		return false;
 	}
 
 
