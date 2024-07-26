@@ -15,6 +15,7 @@
  * @usedby [product_brand_list]
  * @version x.x.x
  */
+
 ?>
 <div id="brands_a_z">
 
@@ -30,26 +31,28 @@
 		?>
 	</ul>
 
-	<?php foreach ( $index as $i ) if ( isset( $product_brands[ $i ] ) ) : ?>
+	<?php foreach ( $index as $i ) {
+		if ( isset( $product_brands[ $i ] ) ) { ?>
 
-		<h3 id="brands-<?php echo esc_attr( $i ); ?>"><?php echo esc_html( $i ); ?></h3>
+			<h3 id="brands-<?php echo esc_attr( $i ); ?>"><?php echo esc_html( $i ); ?></h3>
 
-		<ul class="brands">
-			<?php
-			foreach ( $product_brands[ $i ] as $brand ) {
-				printf(
-					'<li><a href="%s">%s</a></li>',
-					esc_url( get_term_link( $brand->slug, 'product_brand' ) ),
-					esc_html( $brand->name )
-				);
-			}
-			?>
-		</ul>
+			<ul class="brands">
+				<?php
+				foreach ( $product_brands[ $i ] as $brand ) {
+					printf(
+						'<li><a href="%s">%s</a></li>',
+						esc_url( get_term_link( $brand->slug, 'product_brand' ) ),
+						esc_html( $brand->name )
+					);
+				}
+				?>
+			</ul>
 
-		<?php if ( $show_top_links ) : ?>
-			<a class="top" href="#brands_a_z"><?php esc_html_e( '&uarr; Top', 'woocommerce-brands' ); ?></a>
-		<?php endif; ?>
+			<?php if ( $show_top_links ) { ?>
+				<a class="top" href="#brands_a_z"><?php esc_html_e( '&uarr; Top', 'woocommerce' ); ?></a>
+			<?php } ?>
 
-	<?php endif; ?>
+		<?php }
+	} ?>
 
 </div>
