@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Resolved issues with new order hook triggers during transitions to and from draft statuses.

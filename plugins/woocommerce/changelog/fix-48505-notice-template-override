@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Narrowed scope of block theme notice templates so other template overrides are unaffected
