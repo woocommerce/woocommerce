@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignore WordPress.Files.FileName.NotHyphenatedLowercase for backwards compatibility.
 /**
  * Use the WooCommerce archive template for brand taxonomy pages
  *
@@ -6,5 +7,4 @@
  * @version x.x.x
  */
 
-// phpcs:ignore WordPress.Files.FileName.NotHyphenatedLowercase for backwards compatibility.
 wc_get_template( 'archive-product.php' );
