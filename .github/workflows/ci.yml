@@ -207,7 +207,7 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && github.event_name == 'pull_request' }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -330,8 +330,11 @@ jobs:
   
   report-flaky-tests:
     name: 'Create issues for flaky tests'
-    if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
-    needs: [ 'project-test-jobs' ]
+    if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork && needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs:       [
+      'project-jobs',
+      'project-test-jobs',
+    ]
     runs-on: ubuntu-latest
     permissions:
       contents: read
