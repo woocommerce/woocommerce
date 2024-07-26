@@ -16,7 +16,7 @@
   },
   "require-dev": {
 	"phpunit/phpunit": "^9",
-	"mockery/mockery": "^1.5",
+	"mockery/mockery": "^1.6",
     "yoast/phpunit-polyfills": "^2.0"
   }
 }
