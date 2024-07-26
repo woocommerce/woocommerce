@@ -24,7 +24,6 @@
 		/**
 		 * Filter the brand's thumbnail size.
 		 *
-		 * @since x.x.x
 		 * @param string $size Defaults to 'shop_catalog'
 		 */
 		$thumbnail = get_brand_thumbnail_url( $brand->term_id, apply_filters( 'woocommerce_brand_thumbnail_size', 'shop_catalog' ) );

@@ -81,21 +81,26 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		$exclude = array_map( 'intval', explode( ',', $instance['exclude'] ) );
 		$order   = 'name' === $instance['orderby'] ? 'asc' : 'desc';
 
-		$brands = get_terms(
-			'product_brand',
-			array(
-				'hide_empty' => $instance['hide_empty'],
-				'orderby'    => $instance['orderby'],
-				'exclude'    => $exclude,
-				'number'     => $instance['number'],
-				'order'      => $order,
-			)
-		);
+		$brands = get_terms( array(
+			'taxonomy'   => 'product_brand',
+			'hide_empty' => $instance['hide_empty'],
+			'orderby'    => $instance['orderby'],
+			'exclude'    => $exclude,
+			'number'     => $instance['number'],
+			'order'      => $order,
+		) );
 
 		if ( ! $brands ) {
 			return;
 		}
 
+		/**
+		 * Filter the widget's title.
+		 *
+		 * @param string $title Widget title
+		 * @param array $instance The settings for the particular instance of the widget.
+		 * @param string $woo_widget_idbase The widget's id base.
+		 */
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->woo_widget_idbase );
 
 		echo $args['before_widget']; // phpcs:ignore WordPress.Security.EscapeOutput
@@ -117,15 +122,23 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		echo $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
-	/** @see WP_Widget->update */
+	/**
+	 * Update widget instance.
+	 *
+	 * @param array $new_instance The new settings for the particular instance of the widget.
+	 * @param array $old_instance The old settings for the particular instance of the widget.
+	 *
+	 * @see WP_Widget->update
+	 *
+	 */
 	public function update( $new_instance, $old_instance ) {
-		$instance['title']         = strip_tags( stripslashes( $new_instance['title'] ) );
-		$instance['columns']       = strip_tags( stripslashes( $new_instance['columns'] ) );
+		$instance['title']         = wp_strip_all_tags( stripslashes( $new_instance['title'] ) );
+		$instance['columns']       = wp_strip_all_tags( stripslashes( $new_instance['columns'] ) );
 		$instance['fluid_columns'] = ! empty( $new_instance['fluid_columns'] ) ? true : false;
-		$instance['orderby']       = strip_tags( stripslashes( $new_instance['orderby'] ) );
-		$instance['exclude']       = strip_tags( stripslashes( $new_instance['exclude'] ) );
-		$instance['hide_empty']    = strip_tags( stripslashes( $new_instance['hide_empty'] ) );
-		$instance['number']        = strip_tags( stripslashes( $new_instance['number'] ) );
+		$instance['orderby']       = wp_strip_all_tags( stripslashes( $new_instance['orderby'] ) );
+		$instance['exclude']       = wp_strip_all_tags( stripslashes( $new_instance['exclude'] ) );
+		$instance['hide_empty']    = wp_strip_all_tags( stripslashes( $new_instance['hide_empty'] ) );
+		$instance['number']        = wp_strip_all_tags( stripslashes( $new_instance['number'] ) );
 
 		if ( ! $instance['columns'] ) {
 			$instance['columns'] = 1;
