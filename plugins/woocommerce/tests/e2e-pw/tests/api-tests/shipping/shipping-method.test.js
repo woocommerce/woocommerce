@@ -6,7 +6,7 @@ const {
 
 const {
 	getShippingMethodExample
-} = require('../../data');
+} = require('../../../data');
 
 /**
  * Shipping zone id for "Locations not covered by your other zones".

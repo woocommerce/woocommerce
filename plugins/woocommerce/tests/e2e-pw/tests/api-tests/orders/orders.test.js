@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { order } = require( '../../data' );
+const { order } = require( '../../../data' );
 
 /**
  * Billing properties to update.

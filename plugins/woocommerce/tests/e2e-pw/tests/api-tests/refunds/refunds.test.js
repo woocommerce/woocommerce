@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { refund } = require( '../../data' );
+const { refund } = require( '../../../data' );
 
 /**
  * Tests for the WooCommerce Refunds API.

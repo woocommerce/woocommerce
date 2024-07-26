@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
-const { allUSTaxesExample } = require( '../../data' );
+const { allUSTaxesExample } = require( '../../../data' );
 const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
+const shouldSkip = API_BASE_URL !== undefined;
 
 /**
  * Tests for the WooCommerce API.

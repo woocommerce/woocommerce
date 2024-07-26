@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { coupon, order } = require( '../../data' );
+const { coupon, order } = require( '../../../data' );
 
 /**
  * Tests for the WooCommerce Coupons API.

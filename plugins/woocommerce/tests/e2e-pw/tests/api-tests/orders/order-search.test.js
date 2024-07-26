@@ -1,10 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
 
-const { getOrderExampleSearchTest } = require( '../../data/order' );
-const { customerShippingSearchTest } = require( '../../data/shared/customer' );
+const { getOrderExampleSearchTest } = require( '../../../data/order' );
+const { customerShippingSearchTest } = require( '../../../data/shared/customer' );
 const {
 	simpleProduct,
-} = require('../../data/products-crud');
+} = require('../../../data/products-crud');
 
 /**
  * Order to be searched

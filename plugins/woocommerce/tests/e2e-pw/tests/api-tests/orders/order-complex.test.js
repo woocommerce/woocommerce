@@ -8,7 +8,7 @@ const {
 	variableProduct: defaultVariableProduct,
 	groupedProduct: defaultGroupedProduct,
 	externalProduct: defaultExternalProduct,
-} = require( '../../data' );
+} = require( '../../../data' );
 
 /**
  * Simple product with Standard tax rate

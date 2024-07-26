@@ -51,10 +51,9 @@
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
 		"test": "pnpm test:unit",
-		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
-		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"test:e2e-pw": "pnpm test:e2e:install && pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
-		"test:e2e": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
+		"test:api": "pnpm test:e2e:default --project=api",
+		"test:e2e": "pnpm test:e2e:default --project=ui",
+		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
@@ -221,7 +220,7 @@
 				{
 					"name": "Core e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/6",
 						"--shard=2/6",
@@ -365,7 +364,7 @@
 				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -393,7 +392,7 @@
 				{
 					"name": "Core e2e tests - PHP 8.1",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -421,7 +420,7 @@
 				{
 					"name": "Core e2e tests - WP latest-1",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -449,7 +448,7 @@
 				{
 					"name": "Core API tests",
 					"testType": "api",
-					"command": "test:api-pw",
+					"command": "test:api",
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
@@ -479,7 +478,7 @@
 				{
 					"name": "Core API tests - HPOS disabled",
 					"testType": "api",
-					"command": "test:api-pw",
+					"command": "test:api",
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",

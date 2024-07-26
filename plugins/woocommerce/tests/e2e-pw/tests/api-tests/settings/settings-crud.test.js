@@ -6,7 +6,7 @@ const {
 	countries,
 	currencies,
 	stateOptions,
-} = require( '../../data/settings' );
+} = require( '../../../data/settings' );
 
 /**
  * Tests for the WooCommerce API.

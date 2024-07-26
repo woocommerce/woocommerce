@@ -9,8 +9,8 @@ const {
 	simpleProduct,
 	virtualProduct,
 	variableProduct,
-} = require( '../../data/products-crud' );
-const { batch } = require( '../../data/shared/batch-update' );
+} = require( '../../../data/products-crud' );
+const { batch } = require( '../../../data/shared/batch-update' );
 
 /**
  * Tests for the WooCommerce Products API.

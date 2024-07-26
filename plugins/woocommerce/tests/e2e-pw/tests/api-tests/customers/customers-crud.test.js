@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { customer } = require( '../../data' );
+const { customer } = require( '../../../data' );
 const { USER_KEY } = process.env;
 const userKey = USER_KEY ?? 'admin';
 
