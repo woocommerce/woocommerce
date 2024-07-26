@@ -84,7 +84,7 @@ export function useTreeItem( {
 			...props,
 			id:
 				'woocommerce-experimental-tree-control__menu-item-' +
-				item.data.index,
+				item.index,
 			role: 'option',
 		},
 		headingProps: {

@@ -59,16 +59,38 @@ function findChildren(
 	} );
 }
 
+function populateIndexes(
+	linkedTree: LinkedTree[],
+	startCount = 0
+): LinkedTree[] {
+	let count = startCount;
+
+	function populate( tree: LinkedTree[] ): number {
+		for ( const node of tree ) {
+			node.index = count;
+			count++;
+			if ( node.children ) {
+				count = populate( node.children );
+			}
+		}
+		return count;
+	}
+
+	populate( linkedTree );
+	return linkedTree;
+}
+
 export function getLinkedTree(
 	items: Item[],
 	value: string | undefined
 ): LinkedTree[] {
-	const augmentedItems = items.map( ( i, index ) => ( {
+	const augmentedItems = items.map( ( i ) => ( {
 		...i,
-		index,
 		isExpanded: false,
 	} ) );
-	return findChildren( augmentedItems, {}, undefined, value );
+	return populateIndexes(
+		findChildren( augmentedItems, {}, undefined, value )
+	);
 }
 
 export function toggleNode(
@@ -85,7 +107,7 @@ export function toggleNode(
 			data: {
 				...node.data,
 				isExpanded:
-					node.data.index === number ? value : node.data.isExpanded,
+					node.index === number ? value : node.data.isExpanded,
 			},
 			...( node.parent
 				? {
@@ -94,7 +116,7 @@ export function toggleNode(
 							data: {
 								...node.parent.data,
 								isExpanded:
-									node.parent.data.index === number
+									node.parent.index === number
 										? value
 										: node.parent.data.isExpanded,
 							},
@@ -114,8 +136,11 @@ export function getVisibleNodeIndex(
 	if ( direction === 'down' ) {
 		for ( const node of tree ) {
 			if ( ! node.parent || node.parent.data.isExpanded ) {
-				if ( node.data.index >= highlightedIndex ) {
-					return node.data.index;
+				if (
+					node.index !== undefined &&
+					node.index >= highlightedIndex
+				) {
+					return node.index;
 				}
 				const visibleNodeIndex = getVisibleNodeIndex(
 					node.children,
@@ -139,8 +164,11 @@ export function getVisibleNodeIndex(
 				if ( visibleNodeIndex !== undefined ) {
 					return visibleNodeIndex;
 				}
-				if ( node.data.index <= highlightedIndex ) {
-					return node.data.index;
+				if (
+					node.index !== undefined &&
+					node.index <= highlightedIndex
+				) {
+					return node.index;
 				}
 			}
 		}

@@ -217,11 +217,9 @@ export const SelectTree = function SelectTree( {
 						Math.min( highlightedIndex + 1, items.length ),
 						'down'
 					);
-					setHighlightedIndex(
-						visibleNodeIndex !== undefined
-							? visibleNodeIndex
-							: highlightedIndex
-					);
+					if ( visibleNodeIndex !== undefined ) {
+						setHighlightedIndex( visibleNodeIndex );
+					}
 				}
 			} else if ( event.key === 'ArrowUp' ) {
 				if ( highlightedIndex > 0 ) {
@@ -230,11 +228,9 @@ export const SelectTree = function SelectTree( {
 						Math.max( highlightedIndex - 1, -1 ),
 						'up'
 					);
-					setHighlightedIndex(
-						visibleNodeIndex !== undefined
-							? visibleNodeIndex
-							: highlightedIndex
-					);
+					if ( visibleNodeIndex !== undefined ) {
+						setHighlightedIndex( visibleNodeIndex );
+					}
 				} else {
 					setHighlightedIndex( -1 );
 				}

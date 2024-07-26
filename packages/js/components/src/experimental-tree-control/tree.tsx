@@ -49,7 +49,7 @@ export const Tree = forwardRef( function ForwardedTree(
 						<TreeItem
 							{ ...treeItemProps }
 							isHighlighted={
-								props.highlightedIndex === child.data.index
+								props.highlightedIndex === child.index
 							}
 							onExpand={ props.onExpand }
 							highlightedIndex={ props.highlightedIndex }

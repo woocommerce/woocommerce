@@ -6,13 +6,13 @@ export interface Item {
 
 export type AugmentedItem = Item & {
 	isExpanded: boolean;
-	index: number;
 };
 
 export interface LinkedTree {
 	parent?: LinkedTree;
 	data: AugmentedItem;
 	children: LinkedTree[];
+	index?: number;
 }
 
 export type CheckedStatus = 'checked' | 'unchecked' | 'indeterminate';
@@ -27,6 +27,7 @@ type BaseTreeProps = {
 	onExpand?( index: number, value: boolean ): void;
 
 	highlightedIndex?: number;
+
 	/**
 	 * Whether the tree items are single or multiple selected.
 	 */

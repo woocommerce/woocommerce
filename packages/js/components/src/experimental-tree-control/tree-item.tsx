@@ -31,12 +31,18 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		ref,
 	} );
 
-	function handleEscapePress(
-		event: React.KeyboardEvent< HTMLInputElement >
-	) {
+	function handleKeyDown( event: React.KeyboardEvent< HTMLElement > ) {
 		if ( event.key === 'Escape' && props.onEscape ) {
 			event.preventDefault();
 			props.onEscape();
+		} else if ( event.key === 'ArrowLeft' ) {
+			if ( item.index ) {
+				props.onExpand?.( item.index, false );
+			}
+		} else if ( event.key === 'ArrowRight' ) {
+			if ( item.index ) {
+				props.onExpand?.( item.index, true );
+			}
 		}
 	}
 
@@ -65,7 +71,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							}
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
-							onKeyDown={ handleEscapePress }
+							onKeyDown={ handleKeyDown }
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore __nextHasNoMarginBottom is a valid prop
 							__nextHasNoMarginBottom={ true }
@@ -78,7 +84,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							onChange={ ( event ) =>
 								selection.onSelectChild( event.target.checked )
 							}
-							onKeyDown={ handleEscapePress }
+							onKeyDown={ handleKeyDown }
 						/>
 					) }
 
@@ -95,12 +101,15 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							icon={
 								item.data.isExpanded ? chevronUp : chevronDown
 							}
-							onClick={ () =>
-								props.onExpand?.(
-									item.data.index,
-									! item.data.isExpanded
-								)
-							}
+							onClick={ () => {
+								if ( item.index ) {
+									props.onExpand?.(
+										item.index,
+										! item.data.isExpanded
+									);
+								}
+							} }
+							onKeyDown={ handleKeyDown }
 							className="experimental-woocommerce-tree-item__expander"
 							aria-label={
 								item.data.isExpanded
