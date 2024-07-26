@@ -94,7 +94,9 @@ const getCoreConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(t|j)sx?$/,
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					exclude: [
+						/[\/\\](node_modules|build|docs|bin|storybook|tests|test)[\/\\]/,
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
