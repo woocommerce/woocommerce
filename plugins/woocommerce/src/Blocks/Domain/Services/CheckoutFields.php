@@ -789,7 +789,7 @@ class CheckoutFields {
 	 * @return mixed
 	 */
 	public function update_default_locale_with_fields( $locale ) {
-		foreach ( $this->fields_locations['address'] as $field_id => $additional_field ) {
+		foreach ( $this->get_fields_for_location( 'address' ) as $field_id => $additional_field ) {
 			if ( empty( $locale[ $field_id ] ) ) {
 				$locale[ $field_id ] = $additional_field;
 			}
