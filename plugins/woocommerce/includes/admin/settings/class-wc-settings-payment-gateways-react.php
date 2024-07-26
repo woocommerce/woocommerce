@@ -53,7 +53,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		if ( $this->should_render_react_section( $current_section ) ) {
 			$this->render_react_section( $current_section );
 		} elseif ( $current_section ) {
-			$this->render_gateway_section( $payment_gateways, $current_section );
+			$this->render_classic_gateway_settings_page( $payment_gateways, $current_section );
 		} else {
 			$this->render_react_section( 'main' );
 		}
@@ -70,7 +70,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		echo '<div id="experimental_wc_settings_payments_' . esc_attr( $section ) . '"></div>';
 	}
 
-	private function render_gateway_section( $payment_gateways, $current_section ) {
+	private function render_classic_gateway_settings_page( $payment_gateways, $current_section ) {
 		foreach ( $payment_gateways as $gateway ) {
 			if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
 				if ( isset( $_GET['toggle_enabled'] ) ) {
