@@ -963,8 +963,6 @@ test.describe.serial(
 						} )
 					).toBeVisible();
 
-					await page.pause();
-
 					await expect(
 						page.getByRole( 'cell', {
 							name: 'Flat rate: $23.00 (incl. tax',

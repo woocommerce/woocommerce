@@ -77,11 +77,12 @@ class Payments extends Task {
 	 */
 	public function can_view() {
 		$woocommerce_payments = $this->task_list->get_task( 'woocommerce-payments' );
+		// Make sure the task is mutually exclusive with the WooPayments task.
 		return Features::is_enabled( 'payment-gateway-suggestions' ) && ! $woocommerce_payments->can_view();
 	}
 
 	/**
-	 * Check if the store has any enabled gateways.
+	 * Check if the store has any enabled gateways, other than WooPayments.
 	 *
 	 * @return bool
 	 */
@@ -90,7 +91,8 @@ class Payments extends Task {
 		$enabled_gateways = array_filter(
 			$gateways,
 			function( $gateway ) {
-				return 'yes' === $gateway->enabled && 'woocommerce_payments' !== $gateway->id;
+				// Filter out any WooPayments gateways as this task is mutually exclusive with the WooPayments task.
+				return 'yes' === $gateway->enabled && 0 !== strpos( $gateway->id, 'woocommerce_payments' );
 			}
 		);
 

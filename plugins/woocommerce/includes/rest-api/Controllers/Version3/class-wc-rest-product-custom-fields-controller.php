@@ -81,7 +81,7 @@ class WC_REST_Product_Custom_Fields_Controller extends WC_REST_Controller {
 			WHERE posts.post_type = %s AND post_metas.meta_key NOT LIKE %s AND post_metas.meta_key LIKE %s",
 			$this->post_type,
 			$wpdb->esc_like( '_' ) . '%',
-			"%{$search}%"
+			'%' . $wpdb->esc_like( $search ) . '%'
 		);
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $base_query has been prepared already and $order is a static value.

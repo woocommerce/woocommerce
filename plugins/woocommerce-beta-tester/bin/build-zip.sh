@@ -10,7 +10,7 @@ rm -rf "$BUILD_PATH"
 mkdir -p "$DEST_PATH"
 
 echo "Installing PHP and JS dependencies..."
-pnpm install
+pnpm install --frozen-lockfile
 echo "Running JS Build..."
 pnpm --filter='@woocommerce/plugin-woocommerce-beta-tester' build || exit "$?"
 

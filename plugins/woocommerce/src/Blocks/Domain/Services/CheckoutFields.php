@@ -386,17 +386,8 @@ class CheckoutFields {
 
 		$field_data['options'] = $cleaned_options;
 
-		// If the field is not required, inject an empty option at the start.
-		if ( isset( $field_data['required'] ) && false === $field_data['required'] && ! in_array( '', $added_values, true ) ) {
-			$field_data['options'] = array_merge(
-				[
-					[
-						'value' => '',
-						'label' => '',
-					],
-				],
-				$field_data['options']
-			);
+		if ( isset( $field_data['placeholder'] ) ) {
+			$field_data['placeholder'] = sanitize_text_field( $field_data['placeholder'] );
 		}
 
 		return $field_data;

@@ -1571,6 +1571,7 @@ function wc_update_product_lookup_tables_column( $column ) {
 			);
 			break;
 		case 'sku':
+		case 'global_unique_id':
 		case 'stock_status':
 		case 'average_rating':
 		case 'total_sales':

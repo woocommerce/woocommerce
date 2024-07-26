@@ -38,7 +38,7 @@ export const SELECTORS = {
 	},
 	onSaleControlLabel: 'Show only products on sale',
 	featuredControlLabel: 'Show only featured products',
-	inheritQueryFromTemplateControl:
+	usePageContextControl:
 		'.wc-block-product-collection__inherit-query-control',
 	shrinkColumnsToFit: 'Responsive',
 	productSearchLabel: 'Search',
@@ -60,6 +60,8 @@ export const SELECTORS = {
 		max: 'MAX',
 	},
 	previewButtonTestID: 'product-collection-preview-button',
+	collectionPlaceholder:
+		'[data-type="woocommerce/product-collection"] .components-placeholder',
 };
 
 export type Collections =
@@ -74,18 +76,16 @@ export type Collections =
 	| 'myCustomCollectionWithAdvancedPreview';
 
 const collectionToButtonNameMap = {
-	newArrivals: 'New Arrivals Recommend your newest products.',
-	topRated: 'Top Rated Recommend products with the highest review ratings.',
-	bestSellers: 'Best Sellers Recommend your best-selling products.',
-	onSale: 'On Sale Highlight products that are currently on sale.',
-	featured: 'Featured Showcase your featured products.',
-	productCatalog:
-		'Product Catalog Display all products in your catalog. Results can (change to) match the current template, page, or search term.',
-	myCustomCollection: 'My Custom Collection This is a custom collection.',
-	myCustomCollectionWithPreview:
-		'My Custom Collection with Preview This is a custom collection with preview.',
+	newArrivals: 'New Arrivals',
+	topRated: 'Top Rated',
+	bestSellers: 'Best Sellers',
+	onSale: 'On Sale',
+	featured: 'Featured',
+	productCatalog: 'create your own',
+	myCustomCollection: 'My Custom Collection',
+	myCustomCollectionWithPreview: 'My Custom Collection with Preview',
 	myCustomCollectionWithAdvancedPreview:
-		'My Custom Collection with Advanced Preview This is a custom collection with advanced preview.',
+		'My Custom Collection with Advanced Preview',
 };
 
 class ProductCollectionPage {
@@ -121,9 +121,35 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		await this.admin.page
-			.getByRole( 'button', { name: buttonName } )
-			.click();
+		const placeholderSelector = this.admin.page.locator(
+			SELECTORS.collectionPlaceholder
+		);
+
+		const chooseCollectionFromPlaceholder = async () => {
+			await placeholderSelector
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		};
+
+		const chooseCollectionFromDropdown = async () => {
+			await placeholderSelector
+				.getByRole( 'button', {
+					name: 'Choose collection',
+				} )
+				.click();
+
+			await this.admin.page
+				.locator(
+					'.wc-blocks-product-collection__collections-dropdown-content'
+				)
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		};
+
+		await Promise.any( [
+			chooseCollectionFromPlaceholder(),
+			chooseCollectionFromDropdown(),
+		] );
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -131,9 +157,34 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		await this.editor.canvas
-			.getByRole( 'button', { name: buttonName } )
-			.click();
+		const inserterClass = await this.editor.canvas
+			.locator( SELECTORS.collectionPlaceholder )
+			.locator(
+				'.wc-blocks-product-collection__collections-grid, .wc-blocks-product-collection__collections-dropdown'
+			)
+			.getAttribute( 'class' );
+
+		const isDropdown = inserterClass?.includes(
+			'wc-blocks-product-collection__collections-dropdown'
+		);
+
+		if ( isDropdown ) {
+			await this.editor.canvas
+				.getByRole( 'button', { name: 'Choose collection' } )
+				.click();
+
+			await this.editor.canvas
+				.locator(
+					'.wc-blocks-product-collection__collections-dropdown-content'
+				)
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		} else {
+			await this.editor.canvas
+				.locator( SELECTORS.collectionPlaceholder )
+				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		}
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
@@ -168,6 +219,39 @@ class ProductCollectionPage {
 		const productResponse = await productResponsePromise;
 
 		return new URL( productResponse.url() );
+	}
+	async insertProductElements() {
+		// By default there are inner blocks:
+		// - woocommerce/product-image
+		// - core/post-title
+		// - woocommerce/product-price
+		// - woocommerce/product-button
+		// We're adding remaining ones
+		const productElements = [
+			{ name: 'woocommerce/product-rating', attributes: {} },
+			{ name: 'woocommerce/product-sku', attributes: {} },
+			{ name: 'woocommerce/product-stock-indicator', attributes: {} },
+			{ name: 'woocommerce/product-sale-badge', attributes: {} },
+			{
+				name: 'core/post-excerpt',
+				attributes: {
+					__woocommerceNamespace:
+						'woocommerce/product-collection/product-summary',
+				},
+			},
+			{
+				name: 'core/post-terms',
+				attributes: { term: 'product_tag' },
+			},
+			{
+				name: 'core/post-terms',
+				attributes: { term: 'product_cat' },
+			},
+		];
+
+		for ( const productElement of productElements ) {
+			await this.insertBlockInProductCollection( productElement );
+		}
 	}
 
 	async publishAndGoToFrontend() {
@@ -290,7 +374,7 @@ class ProductCollectionPage {
 	}
 
 	async setNumberOfColumns( numberOfColumns: number ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const inputField = sidebarSettings.getByRole( 'spinbutton', {
 			name: 'Columns',
 		} );
@@ -306,7 +390,7 @@ class ProductCollectionPage {
 			| 'popularity/desc'
 			| 'rating/desc'
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const orderByComboBox = sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
@@ -316,7 +400,7 @@ class ProductCollectionPage {
 	}
 
 	async getOrderByElement() {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		return sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
@@ -339,7 +423,7 @@ class ProductCollectionPage {
 			onSale: true,
 		}
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.onSaleControlLabel
 		);
@@ -364,7 +448,7 @@ class ProductCollectionPage {
 			isLocatorsRefreshNeeded: true,
 		}
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.featuredControlLabel
 		);
@@ -391,7 +475,7 @@ class ProductCollectionPage {
 		const operatorSelector = SELECTORS.createdFilter.operator[ operator ];
 		const rangeSelector = SELECTORS.createdFilter.range[ range ];
 
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const operatorButton = sidebarSettings.getByLabel( operatorSelector );
 		const rangeButton = sidebarSettings.getByLabel( rangeSelector );
 
@@ -403,7 +487,7 @@ class ProductCollectionPage {
 		const minInputSelector = SELECTORS.priceRangeFilter.min;
 		const maxInputSelector = SELECTORS.priceRangeFilter.max;
 
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const minInput = sidebarSettings.getByLabel( minInputSelector );
 		const maxInput = sidebarSettings.getByLabel( maxInputSelector );
 
@@ -414,7 +498,7 @@ class ProductCollectionPage {
 	}
 
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel( filterName );
 		await input.click();
 
@@ -443,7 +527,7 @@ class ProductCollectionPage {
 	}
 
 	async setKeyword( keyword: string ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel( 'Keyword' );
 		await input.clear();
 		await input.fill( keyword );
@@ -506,7 +590,7 @@ class ProductCollectionPage {
 	}
 
 	async setShrinkColumnsToFit( value = true ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.shrinkColumnsToFit
 		);
@@ -518,7 +602,7 @@ class ProductCollectionPage {
 	}
 
 	async setProductAttribute( attribute: 'Color' | 'Size', value: string ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 
 		const productAttributesContainer = sidebarSettings.locator(
 			'.woocommerce-product-attributes'
@@ -547,9 +631,9 @@ class ProductCollectionPage {
 	}
 
 	async setInheritQueryFromTemplate( inheritQueryFromTemplate: boolean ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.locator(
-			`${ SELECTORS.inheritQueryFromTemplateControl } input`
+			`${ SELECTORS.usePageContextControl } input`
 		);
 		if ( inheritQueryFromTemplate ) {
 			await input.check();
@@ -603,7 +687,7 @@ class ProductCollectionPage {
 	/**
 	 * Locators
 	 */
-	async locateSidebarSettings() {
+	locateSidebarSettings() {
 		return this.page.getByRole( 'region', {
 			name: 'Editor settings',
 		} );
@@ -619,7 +703,7 @@ class ProductCollectionPage {
 
 	async getProductNames() {
 		const products = this.page.locator( '.wp-block-post-title' );
-		return products.allTextContents();
+		return await products.allTextContents();
 	}
 
 	/**
