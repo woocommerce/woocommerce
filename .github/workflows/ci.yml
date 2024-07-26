@@ -236,7 +236,7 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ !cancelled() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce'  }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -273,7 +273,7 @@ jobs:
         'project-jobs',
         'project-test-jobs',
       ]
-    if: ${{ !cancelled() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ !cancelled() && needs.project-jobs.outputs.report-jobs != '[]' && github.repository == 'woocommerce/woocommerce' }}
     strategy:
       fail-fast: false
       matrix:
@@ -330,7 +330,7 @@ jobs:
   
   report-flaky-tests:
     name: 'Create issues for flaky tests'
-    if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork && needs.project-jobs.outputs.test-jobs != '[]' }}
+    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && needs.project-jobs.outputs.test-jobs != '[]' }}
     needs:
       [
         'project-jobs',

@@ -22,7 +22,11 @@ import { possiblyRenderSettingsSlots } from './settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from './launch-your-store';
-import { SettingsPaymentsMainWrapper } from './settings-payments';
+import {
+	SettingsPaymentsMainWrapper,
+	SettingsPaymentsOfflineWrapper,
+	SettingsPaymentsWooCommercePaymentsWrapper,
+} from './settings-payments';
 import { ErrorBoundary } from './error-boundary';
 
 const appRoot = document.getElementById( 'root' );
@@ -131,6 +135,12 @@ if (
 		const paymentsMainRoot = document.getElementById(
 			'experimental_wc_settings_payments_main'
 		);
+		const paymentsOfflineRoot = document.getElementById(
+			'experimental_wc_settings_payments_offline'
+		);
+		const paymentsWooCommercePaymentsRoot = document.getElementById(
+			'experimental_wc_settings_payments_woocommerce_payments'
+		);
 
 		if ( paymentsMainRoot ) {
 			createRoot(
@@ -140,7 +150,23 @@ if (
 				)
 			).render( <SettingsPaymentsMainWrapper /> );
 		}
-		// Todo: SettingsPaymentsOfflineWrapper
-		// Todo: SlotFill for WooPayments & others
+
+		if ( paymentsOfflineRoot ) {
+			createRoot(
+				paymentsOfflineRoot.insertBefore(
+					document.createElement( 'div' ),
+					null
+				)
+			).render( <SettingsPaymentsOfflineWrapper /> );
+		}
+
+		if ( paymentsWooCommercePaymentsRoot ) {
+			createRoot(
+				paymentsWooCommercePaymentsRoot.insertBefore(
+					document.createElement( 'div' ),
+					null
+				)
+			).render( <SettingsPaymentsWooCommercePaymentsWrapper /> );
+		}
 	} )();
 }
