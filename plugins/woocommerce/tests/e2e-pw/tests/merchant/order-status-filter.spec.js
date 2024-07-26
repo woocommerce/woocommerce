@@ -2,7 +2,6 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const orderBatchId = [];
-const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
 const orderStatus = [
@@ -80,11 +79,16 @@ test.describe(
 				await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 				await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
-				await page.locator( statusColumnTextSelector ).waitFor();
-				const countElements = await page
-					.locator( statusColumnTextSelector )
-					.count();
-				await expect( countElements ).toBeGreaterThan( 0 );
+
+				await page
+					.getByRole( 'cell', { name: orderStatus[ i ][ 0 ] } )
+					.locator( 'span' )
+					.waitFor();
+				await expect(
+					page
+						.getByRole( 'cell', { name: orderStatus[ i ][ 0 ] } )
+						.locator( 'span' )
+				).toBeVisible();
 			} );
 		}
 	}

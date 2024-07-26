@@ -386,7 +386,7 @@ test.describe(
 			orderId = orderId[ 0 ].toString();
 
 			// Select customer
-			await page.getByText( 'Guest' ).click();
+			await page.getByText( 'Guest', { exact: true } ).click();
 			await page
 				.locator( 'input[aria-owns="select2-customer_user-results"]' )
 				.fill( 'sideshowbob@' );

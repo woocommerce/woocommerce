@@ -96,7 +96,7 @@ for ( const productType of Object.keys( productData ) ) {
 				await page
 					.getByLabel( 'Regular price ($)' )
 					.fill( productData[ productType ].regularPrice );
-				await page.getByText( 'Inventory' ).click();
+				await page.getByRole( 'link', { name: 'Inventory' } ).click();
 
 				// Inventory information
 				await page
@@ -197,8 +197,12 @@ for ( const productType of Object.keys( productData ) ) {
 			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( productData[ productType ].virtual ) {
 				await test.step( 'add virtual product details', async () => {
-					await page.getByLabel( 'Virtual' ).check();
-					await expect( page.getByLabel( 'Virtual' ) ).toBeChecked();
+					await page
+						.getByRole( 'checkbox', { name: 'Virtual:' } )
+						.check();
+					await expect(
+						page.getByRole( 'checkbox', { name: 'Virtual:' } )
+					).toBeChecked();
 				} );
 			}
 

@@ -74,37 +74,32 @@ test.describe(
 			await expect(
 				page
 					.locator( `#order-${ orderId1 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Processing' )
+					.getByRole( 'cell', { name: 'Processing' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId2 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Processing' )
+					.getByRole( 'cell', { name: 'Processing' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId3 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Processing' )
+					.getByRole( 'cell', { name: 'Processing' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId4 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Processing' )
+					.getByRole( 'cell', { name: 'Processing' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId5 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Processing' )
+					.getByRole( 'cell', { name: 'Processing' } )
+					.locator( 'span' )
 			).toBeVisible();
 
 			await page.locator( '#cb-select-all-1' ).click();
@@ -117,37 +112,32 @@ test.describe(
 			await expect(
 				page
 					.locator( `#order-${ orderId1 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Completed' )
+					.getByRole( 'cell', { name: 'Completed' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId2 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Completed' )
+					.getByRole( 'cell', { name: 'Completed' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId3 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Completed' )
+					.getByRole( 'cell', { name: 'Completed' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId4 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Completed' )
+					.getByRole( 'cell', { name: 'Completed' } )
+					.locator( 'span' )
 			).toBeVisible();
 			await expect(
 				page
 					.locator( `#order-${ orderId5 }` )
-					.locator( '.order_status' )
-					.locator( 'mark' )
-					.getByText( 'Completed' )
+					.getByRole( 'cell', { name: 'Completed' } )
+					.locator( 'span' )
 			).toBeVisible();
 		} );
 	}
