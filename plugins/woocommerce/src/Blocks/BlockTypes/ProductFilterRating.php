@@ -84,8 +84,8 @@ final class ProductFilterRating extends AbstractBlock {
 					/* translators: %d is the rating value. */
 					'title'      => sprintf( __( 'Rated %d out of 5', 'woocommerce' ), $rating ),
 					'attributes' => array(
-						'data-wc-on--click' => "{$this->get_full_block_name()}::actions.removeFilter",
-						'data-wc-context'   => "{$this->get_full_block_name()}::" . wp_json_encode( array( 'value' => $rating ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+						'data-wc-on--click' => esc_attr( "{$this->get_full_block_name()}::actions.removeFilter" ),
+						'data-wc-context'   => esc_attr( "{$this->get_full_block_name()}::" ) . wp_json_encode( array( 'value' => $rating ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 					),
 				);
 			},
