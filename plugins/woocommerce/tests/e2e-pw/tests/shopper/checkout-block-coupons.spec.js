@@ -3,6 +3,7 @@ const {
 	fillPageTitle,
 	insertBlockByShortcut,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
@@ -40,6 +41,7 @@ const test = baseTest.extend( {
 	testPageTitlePrefix: 'Checkout Block',
 	page: async ( { context, page, testPage }, use ) => {
 		await goToPageEditor( { page } );
+		await closeChoosePatternModal( { page } );
 		await fillPageTitle( page, testPage.title );
 		await insertBlockByShortcut( page, 'Checkout' );
 		await publishPage( page, testPage.title );

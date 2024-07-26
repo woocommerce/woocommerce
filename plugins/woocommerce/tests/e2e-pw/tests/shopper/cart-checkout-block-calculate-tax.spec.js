@@ -5,6 +5,7 @@ const {
 	fillPageTitle,
 	insertBlockByShortcut,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const { random } = require( '../../utils/helpers' );
@@ -111,6 +112,7 @@ test.describe(
 		// eslint-disable-next-line playwright/expect-expect
 		test( 'can create Cart Block page', async ( { page } ) => {
 			await goToPageEditor( { page } );
+			await closeChoosePatternModal( { page } );
 			await fillPageTitle( page, cartBlockPageTitle );
 			await insertBlockByShortcut( page, 'Cart' );
 			await publishPage( page, cartBlockPageTitle );
@@ -119,6 +121,7 @@ test.describe(
 		// eslint-disable-next-line playwright/expect-expect
 		test( 'can create Checkout Block page', async ( { page } ) => {
 			await goToPageEditor( { page } );
+			await closeChoosePatternModal( { page } );
 			await fillPageTitle( page, checkoutBlockPageTitle );
 			await insertBlockByShortcut( page, 'Checkout' );
 			await publishPage( page, checkoutBlockPageTitle );
