@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fetch site cache status correctly if directly navigating to LYS Success page, and some refactoring

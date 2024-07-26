@@ -28,7 +28,6 @@ use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
-use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * Main WooCommerce Class.
@@ -44,7 +43,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.2.0';
+	public $version = '9.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -647,7 +646,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
-		include_once WC_ABSPATH . 'includes/class-wc-remote-logger.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
 		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
