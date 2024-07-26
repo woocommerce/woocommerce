@@ -196,6 +196,119 @@ test.describe(
 			).toBeVisible();
 		} );
 
+		test( 'can approve a product review', async ( { page, reviews } ) => {
+			const review = reviews[ 0 ]; // Select the first review for approval
+
+			// Go to the Product Reviews page
+			await page.goto(
+				`wp-admin/edit.php?post_type=product&page=product-reviews`
+			);
+
+			// Locate the review to be approved
+			const reviewRow = page.locator( `#comment-${ review.id }` );
+
+			// Ensure the review is not already approved
+			const approveButton = reviewRow.getByRole( 'button', {
+				name: 'Approve',
+			} );
+			const isApproveButtonVisible = await approveButton.isVisible();
+
+			if ( isApproveButtonVisible ) {
+				// Scroll to the review row and hover to reveal action buttons
+				await reviewRow.scrollIntoViewIfNeeded();
+				await reviewRow.hover();
+
+				// Click the "Approve" button and wait for the state to become 'networkidle'
+				await approveButton.click();
+				await page.waitForLoadState( 'networkidle' );
+
+				// Verify the review is approved by checking the presence of "Unapprove" button
+				const unapproveButton = reviewRow.getByRole( 'button', {
+					name: 'Unapprove',
+				} );
+				await expect( unapproveButton ).toBeVisible;
+			}
+		} );
+
+		test( 'can mark a product review as spam', async ( {
+			page,
+			reviews,
+		} ) => {
+			const review = reviews[ 0 ]; // Select the first review to mark as spam
+
+			// Go to the Product Reviews page
+			await page.goto(
+				`wp-admin/edit.php?post_type=product&page=product-reviews`
+			);
+
+			// Locate the review to be marked as spam
+			const reviewRow = page.locator( `#comment-${ review.id }` );
+			await reviewRow.hover();
+
+			// Select Spam action and verify the review is marked as spam
+			await reviewRow.getByRole( 'button', { name: 'Spam' } ).click();
+
+			// Navigate to the "Spam" tab to verify the review is marked as spam
+			await page.click( 'a[href*="comment_status=spam"]' );
+
+			// Check if the spammed review row is located and verify the review is
+			// marked as spam by confirming "Not Spam" button is visible
+			const spammedReviewRow = page.locator( `#comment-${ review.id }` );
+			await spammedReviewRow.isVisible();
+			await reviewRow.hover();
+			await spammedReviewRow.getByRole( 'button', { name: 'Not Spam' } )
+				.toBeVisible;
+		} );
+
+		test( 'can reply to a product review', async ( { page, reviews } ) => {
+			const review = reviews[ 0 ]; // Select the first review to reply to
+
+			// Go to the Product Reviews page
+			await page.goto(
+				'wp-admin/edit.php?post_type=product&page=product-reviews'
+			);
+
+			// Locate the review to be replied to
+			const reviewRow = page.locator( `#comment-${ review.id }` );
+			await reviewRow.hover();
+
+			// Click the Reply button within the review row
+			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
+
+			// Wait for the reply textarea to be visible
+			const replyTextArea = page.locator( 'textarea#replycontent' );
+			await replyTextArea.isVisible();
+
+			// Fill in the reply and submit it
+			const replyText = 'Thank you for your feedback!';
+			await replyTextArea.fill( replyText );
+
+			// Ensure the "Submit Reply" button within the reply area is visible and clickable
+			await page.locator( 'button.save.button.button-primary' ).click();
+
+			// Verify that the reply is visible in the admin review list
+			const replyLocator = page.locator(
+				`#comment-${ review.id } ~ .comment-reply div.comment-text`
+			);
+			await expect( replyLocator ).toContainText( replyText );
+
+			// Verify that the reply is visible on the shop's product page
+			const productLink = await reviewRow
+				.locator( 'a.comments-view-item-link' )
+				.getAttribute( 'href' );
+			await page.goto( productLink );
+			await page.click( '#tab-reviews' );
+
+			// Wait for the reviews tab content to load
+			await page.waitForSelector( '.comment_container' );
+
+			// Verify that the reply is visible in the customer-facing reviews section
+			const reviewContainer = page.locator(
+				`.comment_container #comment-${ review.id }`
+			);
+			await expect( reviewContainer ).toContainText( replyText );
+		} );
+
 		test( 'can delete a product review', async ( { page, reviews } ) => {
 			const review = reviews[ 0 ];
 
