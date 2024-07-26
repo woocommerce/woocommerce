@@ -332,7 +332,7 @@ class WC_Meta_Box_Product_Data {
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
 		$product      = new $classname( $post_id );
 		$attributes   = self::prepare_attributes();
-		$stock        = 0;
+		$stock        = null;
 
 		// Handle stock changes.
 		if ( isset( $_POST['_stock'] ) ) {
@@ -369,6 +369,7 @@ class WC_Meta_Box_Product_Data {
 		$errors = $product->set_props(
 			array(
 				'sku'                => isset( $_POST['_sku'] ) ? wc_clean( wp_unslash( $_POST['_sku'] ) ) : null,
+				'global_unique_id'   => isset( $_POST['_global_unique_id'] ) ? wc_clean( wp_unslash( $_POST['_global_unique_id'] ) ) : null,
 				'purchase_note'      => isset( $_POST['_purchase_note'] ) ? wp_kses_post( wp_unslash( $_POST['_purchase_note'] ) ) : '',
 				'downloadable'       => isset( $_POST['_downloadable'] ),
 				'virtual'            => isset( $_POST['_virtual'] ),
@@ -483,7 +484,7 @@ class WC_Meta_Box_Product_Data {
 				}
 				$variation_id = absint( $_POST['variable_post_id'][ $i ] );
 				$variation    = wc_get_product_object( 'variation', $variation_id );
-				$stock        = 0;
+				$stock        = null;
 
 				// Handle stock changes.
 				if ( isset( $_POST['variable_stock'], $_POST['variable_stock'][ $i ] ) ) {
@@ -544,6 +545,7 @@ class WC_Meta_Box_Product_Data {
 						'image_id'          => isset( $_POST['upload_image_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['upload_image_id'][ $i ] ) ) : null,
 						'attributes'        => self::prepare_set_attributes( $parent->get_attributes(), 'attribute_', $i ),
 						'sku'               => isset( $_POST['variable_sku'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_sku'][ $i ] ) ) : '',
+						'global_unique_id'  => isset( $_POST['variable_global_unique_id'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_global_unique_id'][ $i ] ) ) : '',
 						'weight'            => isset( $_POST['variable_weight'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_weight'][ $i ] ) ) : '',
 						'length'            => isset( $_POST['variable_length'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_length'][ $i ] ) ) : '',
 						'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_width'][ $i ] ) ) : '',

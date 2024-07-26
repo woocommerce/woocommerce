@@ -18,7 +18,7 @@ import {
 	QueryControlProps,
 	CoreFilterNames,
 } from '../../types';
-import { getDefaultQuery } from '../../constants';
+import { getDefaultQuery } from '../../utils';
 
 const orderOptions = [
 	{

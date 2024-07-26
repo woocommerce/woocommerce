@@ -11,6 +11,10 @@ import {
 	TriggerUpdateCallbacks,
 	TRIGGER_UPDATE_CALLBACKS_ACTION_NAME,
 } from './trigger-update-callbacks';
+import {
+	SetComingSoonMode,
+	UPDATE_COMING_SOON_MODE_ACTION_NAME,
+} from './set-coming-soon-mode';
 
 export default [
 	{
@@ -77,5 +81,10 @@ export default [
 		command: 'Update block template logging threshold',
 		description: <UpdateBlockTemplateLoggingThreshold />,
 		action: UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
+	},
+	{
+		command: 'Force coming soon page to show',
+		description: <SetComingSoonMode />,
+		action: UPDATE_COMING_SOON_MODE_ACTION_NAME,
 	},
 ];

@@ -23,8 +23,8 @@ And as such will require data layer logic for products to fully build the table
 export default [
 	{
 		product_id: 20,
-		items_sold: 1000,
-		net_revenue: 999.99,
+		items_sold: 123456789,
+		net_revenue: 9876543.215,
 		orders_count: 54,
 		name: 'awesome shirt',
 		_links: {

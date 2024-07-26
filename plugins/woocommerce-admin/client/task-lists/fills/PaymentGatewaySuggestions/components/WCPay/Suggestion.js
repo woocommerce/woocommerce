@@ -31,10 +31,10 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	const isWooPayEligible = getAdminSetting( 'isWooPayEligible' );
 
 	const { createNotice } = useDispatch( 'core/notices' );
-	// When the WC Pay is installed and onSetupCallback is null
+	// When WCPay is installed and onSetupCallback is null
 	// Overwrite onSetupCallback to redirect to the setup page
 	// when the user clicks on the "Finish setup" button.
-	// WC Pay doesn't need to be configured in WCA.
+	// WCPay doesn't need to be configured in WCA.
 	// It should be configured in its onboarding flow.
 	if ( installed && onSetupCallback === null ) {
 		onSetupCallback = () => {

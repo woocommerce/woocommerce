@@ -15,67 +15,71 @@ const orderStatus = [
 	[ 'Failed', 'wc-failed' ],
 ];
 
-test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+test.describe(
+	'WooCommerce Orders > Filter Order by Status',
+	{ tag: '@services' },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		// create some orders we can filter
-		const orders = orderStatus.map( ( entryPair ) => {
-			const statusName = entryPair[ 1 ].replace( 'wc-', '' );
-
-			return {
-				status: statusName,
-			};
-		} );
-		await api
-			.post( 'orders/batch', { create: orders } )
-			.then( ( response ) => {
-				for ( let i = 0; i < response.data.create.length; i++ ) {
-					orderBatchId.push( response.data.create[ i ].id );
-				}
+		test.beforeAll( async ( { baseURL } ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
 			} );
-	} );
+			// create some orders we can filter
+			const orders = orderStatus.map( ( entryPair ) => {
+				const statusName = entryPair[ 1 ].replace( 'wc-', '' );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
+				return {
+					status: statusName,
+				};
+			} );
+			await api
+				.post( 'orders/batch', { create: orders } )
+				.then( ( response ) => {
+					for ( let i = 0; i < response.data.create.length; i++ ) {
+						orderBatchId.push( response.data.create[ i ].id );
+					}
+				} );
 		} );
-		await api.post( 'orders/batch', { delete: [ ...orderBatchId ] } );
-	} );
 
-	test( 'should filter by All', async ( { page } ) => {
-		await page.goto( '/wp-admin/admin.php?page=wc-orders' );
+		test.afterAll( async ( { baseURL } ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			await api.post( 'orders/batch', { delete: [ ...orderBatchId ] } );
+		} );
 
-		await page.locator( 'li.all > a' ).click();
-		// because tests are running in parallel, we can't know how many orders there
-		// are beyond the ones we created here.
-		for ( let i = 0; i < orderStatus.length; i++ ) {
-			const statusTag = 'text=' + orderStatus[ i ][ 0 ];
-			const countElements = await page.locator( statusTag ).count();
-			await expect( countElements ).toBeGreaterThan( 0 );
-		}
-	} );
-
-	for ( let i = 0; i < orderStatus.length; i++ ) {
-		test( `should filter by ${ orderStatus[ i ][ 0 ] }`, async ( {
-			page,
-		} ) => {
+		test( 'should filter by All', async ( { page } ) => {
 			await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
-			await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
-			const countElements = await page
-				.locator( statusColumnTextSelector )
-				.count();
-			await expect( countElements ).toBeGreaterThan( 0 );
+			await page.locator( 'li.all > a' ).click();
+			// because tests are running in parallel, we can't know how many orders there
+			// are beyond the ones we created here.
+			for ( let i = 0; i < orderStatus.length; i++ ) {
+				const statusTag = 'text=' + orderStatus[ i ][ 0 ];
+				const countElements = await page.locator( statusTag ).count();
+				await expect( countElements ).toBeGreaterThan( 0 );
+			}
 		} );
+
+		for ( let i = 0; i < orderStatus.length; i++ ) {
+			test( `should filter by ${ orderStatus[ i ][ 0 ] }`, async ( {
+				page,
+			} ) => {
+				await page.goto( '/wp-admin/admin.php?page=wc-orders' );
+
+				await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
+				const countElements = await page
+					.locator( statusColumnTextSelector )
+					.count();
+				await expect( countElements ).toBeGreaterThan( 0 );
+			} );
+		}
 	}
-} );
+);

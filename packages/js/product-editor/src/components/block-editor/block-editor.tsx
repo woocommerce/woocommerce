@@ -11,7 +11,7 @@ import {
 	lazy,
 	Suspense,
 } from '@wordpress/element';
-import { dispatch, select, useSelect } from '@wordpress/data';
+import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
@@ -30,7 +30,7 @@ import {
 	BlockTools,
 	ObserveTyping,
 } from '@wordpress/block-editor';
-// It doesn't seem to notice the External dependency block whn @ts-ignore is added.
+// It doesn't seem to notice the External dependency block when @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -53,7 +53,6 @@ import { BlockEditorProps } from './types';
 import { LoadingState } from './loading-state';
 import type { ProductFormPostProps, ProductTemplate } from '../../types';
 import isProductFormTemplateSystemEnabled from '../../utils/is-product-form-template-system-enabled';
-import useProductEntityProp from '../../hooks/use-product-entity-prop';
 
 const PluginArea = lazy( () =>
 	import( '@wordpress/plugins' ).then( ( module ) => ( {
@@ -200,11 +199,6 @@ export function BlockEditor( {
 		[ product?.meta_data ]
 	);
 
-	const [ , setProductTemplateId ] = useProductEntityProp(
-		'meta_data._product_template_id',
-		{ postType }
-	);
-
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
 		hasResolved ? product : null
@@ -303,6 +297,7 @@ export function BlockEditor( {
 			settings,
 			productTemplate,
 			productFormTemplate,
+			productId,
 		]
 	);
 
@@ -310,14 +305,31 @@ export function BlockEditor( {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading ] );
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { editEntityRecord } = useDispatch( 'core' );
+
 	useEffect( function maybeSetProductTemplateFromURL() {
 		const query: { template?: string } = getQuery();
 		const isAddProduct = getPath().endsWith( 'add-product' );
 		if ( isAddProduct && query.template ) {
 			const productTemplates =
 				window.productBlockEditorSettings?.productTemplates ?? [];
-			if ( productTemplates.find( ( t ) => t.id === query.template ) ) {
-				setProductTemplateId( query.template );
+			const selectedProductTemplate = productTemplates.find(
+				( t ) => t.id === query.template
+			);
+			if ( selectedProductTemplate ) {
+				editEntityRecord( 'postType', postType, productId, {
+					...selectedProductTemplate.productData,
+					meta_data: [
+						...( selectedProductTemplate.productData.meta_data ??
+							[] ),
+						{
+							key: '_product_template_id',
+							value: selectedProductTemplate.id,
+						},
+					],
+				} );
 			}
 		}
 	}, [] );
@@ -343,6 +355,11 @@ export function BlockEditor( {
 						dispatch( productEditorUiStore ).closeModalEditor
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
+					name={
+						product.name === 'AUTO-DRAFT'
+							? __( '(no product name)', 'woocommerce' )
+							: product.name
+					}
 				/>
 			</Suspense>
 		);

@@ -39,12 +39,18 @@ export class LogoPickerPage {
 	}
 
 	async pickImage( assemblerLocator ) {
-		await assemblerLocator.getByText( 'Media Library' ).click();
+		await assemblerLocator
+			.getByRole( 'tab', { name: 'Media Library' } )
+			.click();
 
 		await assemblerLocator.getByLabel( 'image-03' ).click();
 		await assemblerLocator
 			.getByRole( 'button', { name: 'Select', exact: true } )
 			.click();
+	}
+
+	getPlaceholderPreview( assemblerLocator ) {
+		return assemblerLocator.locator( '.components-placeholder__preview' );
 	}
 
 	async resetLogo( baseURL ) {
@@ -67,21 +73,19 @@ export class LogoPickerPage {
 	}
 
 	async saveLogoSettings( assemblerLocator ) {
-		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
 		const waitForLogoResponse = this.page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
 				response.status() === 200
 		);
-		const waitForHeaderResponse = this.page.waitForResponse(
-			( response ) =>
-				response
-					.url()
-					.includes(
-						'wp-json/wp/v2/template-parts/twentytwentyfour//header'
-					) && response.status() === 200
-		);
-		await assemblerLocator.getByText( 'Save' ).click();
-		await Promise.all( [ waitForLogoResponse, waitForHeaderResponse ] );
+		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
+		await assemblerLocator
+			.getByRole( 'button', { name: 'Save', exact: true } )
+			.waitFor();
+		await Promise.all( [
+			waitForLogoResponse,
+			assemblerLocator.getByText( 'Save' ).click(),
+		] );
+		await assemblerLocator.getByText( 'Your store looks great!' ).waitFor();
 	}
 }

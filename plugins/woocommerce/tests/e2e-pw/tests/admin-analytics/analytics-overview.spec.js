@@ -111,7 +111,7 @@ const resetSections = async () => {
 	} );
 };
 
-test.describe( 'Analytics pages', () => {
+test.describe( 'Analytics pages', { tag: [ '@payments', '@services' ] }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { browser } ) => {
