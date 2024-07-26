@@ -61,7 +61,7 @@ export const Tree = forwardRef( function ForwardedTree(
 							onLastItemLoop={ () => {
 								(
 									rootListRef.current
-										?.closest( 'ol[role="tree"]' )
+										?.closest( 'ol[role="listbox"]' )
 										?.parentElement?.querySelector(
 											'.experimental-woocommerce-tree__button'
 										) as HTMLButtonElement
