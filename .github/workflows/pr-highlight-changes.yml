@@ -17,6 +17,8 @@ jobs:
         with:
           install: 'code-analyzer...'
           build: 'code-analyzer'
+          pull-package-deps: 'code-analyzer'
+
       - name: 'Analyze'
         id: 'analyze'
         working-directory: 'tools/code-analyzer'

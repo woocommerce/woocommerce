@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: If either the upcoming WooCommerce Shipping or WooCommerce Tax extension is active, don't suggest WooCommerce Shipping & Tax in the "Collect sales tax" Home task.  This only adjusts the extension recommendation merchants receive and does not affect any other functionality.
+

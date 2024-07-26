@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix bumped down data when analytics chart current period contains 29th Feb

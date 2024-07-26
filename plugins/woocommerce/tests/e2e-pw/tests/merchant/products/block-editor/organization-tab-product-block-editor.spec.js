@@ -38,12 +38,6 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await page
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
-			await page
-				.locator(
-					'[data-template-block-id="basic-details"] .components-summary-control'
-				)
-				.last()
-				.fill( productData.summary );
 
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
@@ -59,11 +53,16 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await salePrice.click();
 			await salePrice.fill( productData.salePrice );
 
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.fill( productData.summary );
+
 			await clickOnTab( 'Organization', page );
 
-			await page
-				.locator( '[id^="woocommerce-taxonomy-select-"]' )
-				.click();
+			await page.getByLabel( 'Categories' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 
@@ -79,7 +78,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				} )
 				.click();
 
-			await page.locator( '[id^="tag-field-"]' ).click();
+			await page.getByLabel( 'Tags' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 

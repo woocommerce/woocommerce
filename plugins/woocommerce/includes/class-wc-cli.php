@@ -6,7 +6,7 @@
  * @version 3.0.0
  */
 
-use Automattic\WooCommerce\DataBase\Migrations\CustomOrderTable\CLIRunner as CustomOrdersTableCLIRunner;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner as CustomOrdersTableCLIRunner;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\CLIRunner as ProductAttributesLookupCLIRunner;
 
 defined( 'ABSPATH' ) || exit;

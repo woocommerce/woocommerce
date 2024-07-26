@@ -50,29 +50,31 @@ const CheckoutProcessor = () => {
 	const { onCheckoutValidation } = useCheckoutEventsContext();
 
 	const {
+		additionalFields,
+		customerId,
+		customerPassword,
+		extensionData,
 		hasError: checkoutHasError,
-		redirectUrl,
-		isProcessing: checkoutIsProcessing,
 		isBeforeProcessing: checkoutIsBeforeProcessing,
 		isComplete: checkoutIsComplete,
+		isProcessing: checkoutIsProcessing,
 		orderNotes,
+		redirectUrl,
 		shouldCreateAccount,
-		extensionData,
-		customerId,
-		additionalFields,
 	} = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
 		return {
+			additionalFields: store.getAdditionalFields(),
+			customerId: store.getCustomerId(),
+			customerPassword: store.getCustomerPassword(),
+			extensionData: store.getExtensionData(),
 			hasError: store.hasError(),
-			redirectUrl: store.getRedirectUrl(),
-			isProcessing: store.isProcessing(),
 			isBeforeProcessing: store.isBeforeProcessing(),
 			isComplete: store.isComplete(),
+			isProcessing: store.isProcessing(),
 			orderNotes: store.getOrderNotes(),
+			redirectUrl: store.getRedirectUrl(),
 			shouldCreateAccount: store.getShouldCreateAccount(),
-			extensionData: store.getExtensionData(),
-			customerId: store.getCustomerId(),
-			additionalFields: store.getAdditionalFields(),
 		};
 	} );
 
@@ -248,17 +250,18 @@ const CheckoutProcessor = () => {
 			: {};
 
 		const data = {
-			shipping_address: cartNeedsShipping
-				? emptyHiddenAddressFields( currentShippingAddress.current )
-				: undefined,
+			additional_fields: additionalFields,
 			billing_address: emptyHiddenAddressFields(
 				currentBillingAddress.current
 			),
-			additional_fields: additionalFields,
-			customer_note: orderNotes,
 			create_account: shouldCreateAccount,
-			...paymentData,
+			customer_note: orderNotes,
+			customer_password: customerPassword,
 			extensions: { ...extensionData },
+			shipping_address: cartNeedsShipping
+				? emptyHiddenAddressFields( currentShippingAddress.current )
+				: undefined,
+			...paymentData,
 		};
 
 		triggerFetch( {
@@ -327,6 +330,8 @@ const CheckoutProcessor = () => {
 		activePaymentMethod,
 		orderNotes,
 		shouldCreateAccount,
+		customerId,
+		customerPassword,
 		extensionData,
 		additionalFields,
 		cartNeedsShipping,

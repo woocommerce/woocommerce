@@ -48,6 +48,8 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames = '';
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
+			$classnames = 'is-product-collection-layout-' . $block->context['displayLayout']['type'] . ' ';
+
 			if ( isset( $block->context['displayLayout']['type'] ) && 'flex' === $block->context['displayLayout']['type'] ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
 					$classnames = "wc-block-product-template__responsive columns-{$block->context['displayLayout']['columns']}";
@@ -56,6 +58,7 @@ class ProductTemplate extends AbstractBlock {
 				}
 			}
 		}
+
 		if ( isset( $attributes['style']['elements']['link']['color']['text'] ) ) {
 			$classnames .= ' has-link-color';
 		}

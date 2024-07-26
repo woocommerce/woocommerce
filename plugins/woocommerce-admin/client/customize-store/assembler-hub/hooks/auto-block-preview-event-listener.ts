@@ -201,6 +201,7 @@ const updateSelectedBlock = (
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
 		} );
+		( event.target as HTMLElement ).focus();
 	};
 
 	const handleMouseMove = ( event: MouseEvent ) => {
@@ -232,9 +233,17 @@ export const hidePopoverWhenMouseLeaveIframe = (
 	iframeRef: HTMLElement,
 	{
 		hidePopover,
-	}: Pick< useAutoBlockPreviewEventListenersCallbacks, 'hidePopover' >
+		selectBlock,
+	}: Pick<
+		useAutoBlockPreviewEventListenersCallbacks,
+		'hidePopover' | 'selectBlock'
+	>
 ) => {
-	const handleMouseLeave = () => {
+	const handleMouseLeave = ( event: MouseEvent ) => {
+		/// Deselect the block if the mouse exits the iframe unless it's moving towards the Block Toolbar.
+		if ( event.clientX < 0 || event.clientY < 0 ) {
+			selectBlock( '' );
+		}
 		hidePopover();
 	};
 
@@ -329,16 +338,14 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 
 		setStyle( documentElement );
 
-		if ( logoBlockIds.length === 0 ) {
-			const logoObserver = findAndSetLogoBlock(
-				{ autoScale, documentElement },
-				{
-					setLogoBlockIds,
-				}
-			);
+		const logoObserver = findAndSetLogoBlock(
+			{ autoScale, documentElement },
+			{
+				setLogoBlockIds,
+			}
+		);
 
-			observers.push( logoObserver );
-		}
+		observers.push( logoObserver );
 
 		if (
 			isFullComposabilityFeatureAndAPIAvailable() &&
@@ -347,7 +354,9 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			const removeEventListenerHidePopover =
 				hidePopoverWhenMouseLeaveIframe( documentElement, {
 					hidePopover,
+					selectBlock,
 				} );
+
 			const removeEventListenersSelectedBlock = updateSelectedBlock(
 				documentElement,
 				{

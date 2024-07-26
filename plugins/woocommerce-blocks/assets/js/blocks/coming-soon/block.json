@@ -15,6 +15,7 @@
 		"color": {
 			"background": false,
 			"text": true
-		}
+		},
+		"inserter": false
 	}
 }

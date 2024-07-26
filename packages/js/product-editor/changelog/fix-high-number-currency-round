@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Prevent high numbers from breaking currency inputs
+
+
