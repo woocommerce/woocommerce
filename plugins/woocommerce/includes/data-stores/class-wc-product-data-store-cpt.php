@@ -29,6 +29,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected $internal_meta_keys = array(
 		'_visibility',
 		'_sku',
+		'_global_unique_id',
 		'_price',
 		'_regular_price',
 		'_sale_price',
@@ -96,6 +97,46 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected $updated_props = array();
 
+
+	/**
+	 * Method to obtain DB lock on SKU to make sure we only
+	 * create product with unique SKU for concurrent requests.
+	 *
+	 * We are doing so by inserting a row in the wc_product_meta_lookup table
+	 * upfront with the SKU of the product we are trying to insert.
+	 *
+	 * If the SKU is already present in the table, it means that another
+	 * request is processing the same SKU and we should not proceed
+	 * with the insert.
+	 *
+	 * Using $wpdb->options as it always has some data, if we select from a table
+	 * that does not have any data, then our query will always return null set
+	 * and the where subquery won't be fired, effectively bypassing any lock.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return bool True if lock is obtained (unique SKU), false otherwise.
+	 */
+	private function obtain_lock_on_sku_for_concurrent_requests( $product ) {
+		global $wpdb;
+		$product_id = $product->get_id();
+		$sku        = $product->get_sku();
+
+		$query = $wpdb->prepare(
+			"INSERT INTO $wpdb->wc_product_meta_lookup (product_id, sku)
+			SELECT %d, %s FROM $wpdb->options
+			WHERE NOT EXISTS (
+				SELECT * FROM $wpdb->wc_product_meta_lookup WHERE sku = %s LIMIT 1
+			) LIMIT 1;",
+			$product_id,
+			$sku,
+			$sku
+		);
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$result = $wpdb->query( $query );
+
+		return (bool) $result;
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| CRUD Methods
@@ -106,6 +147,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Method to create a new product in the database.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @throws Exception If SKU is already under processing.
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created( 'edit' ) ) {
@@ -137,6 +179,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
+			$sku = $product->get_sku();
+
+			/**
+			 * If SKU is already under processing aka Duplicate SKU
+			 * because of concurrent requests, then we should not proceed
+			 * Delete the product and throw an exception only if the request is
+			 * initiated via REST API
+			 */
+			if ( ! empty( $sku ) && WC()->is_rest_api_request() && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
+				$product->delete( true );
+				// translators: 1: SKU.
+				throw new Exception( esc_html( sprintf( __( 'The SKU (%1$s) you are trying to insert is already under processing', 'woocommerce' ), $sku ) ) );
+			}
 
 			// get the post object so that we can set the status
 			// to the correct value; it is possible that the status was
@@ -279,7 +334,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->apply_changes();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'woocommerce_update_product', $product->get_id(), $product, $changes );
+		do_action( 'woocommerce_update_product', $product->get_id(), $product );
 	}
 
 	/**
@@ -332,6 +387,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$post_meta_values  = get_post_meta( $id );
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
+			'_global_unique_id'      => 'global_unique_id',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_price'                 => 'price',
@@ -523,6 +579,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function update_post_meta( &$product, $force = false ) {
 		$meta_key_to_props = array(
 			'_sku'                   => 'sku',
+			'_global_unique_id'      => 'global_unique_id',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
 			'_sale_price_dates_from' => 'date_on_sale_from',
@@ -689,7 +746,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
+		if ( array_intersect( $this->updated_props, array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
@@ -1016,6 +1073,37 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Check if product sku is found for any other product IDs.
+	 *
+	 * @since 9.1.0
+	 * @param int    $product_id Product ID.
+	 * @param string $global_unique_id Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
+	 * @return bool
+	 */
+	public function is_existing_global_unique_id( $product_id, $global_unique_id ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT posts.ID
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+				WHERE
+				posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status != 'trash'
+				AND lookup.global_unique_id = %s
+				AND lookup.product_id <> %d
+				LIMIT 1
+				",
+				wp_slash( $global_unique_id ),
+				$product_id
+			)
+		);
+	}
+
+	/**
 	 * Return product ID based on SKU.
 	 *
 	 * @since 3.0.0
@@ -1043,6 +1131,42 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		);
 
 		return (int) apply_filters( 'woocommerce_get_product_id_by_sku', $id, $sku );
+	}
+
+	/**
+	 * Return product ID based on Unique ID.
+	 *
+	 * @since 9.1.0
+	 * @param string $global_unique_id Product Unique ID.
+	 * @return int
+	 */
+	public function get_product_id_by_global_unique_id( $global_unique_id ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
+		$id = $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT posts.ID
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+				WHERE
+				posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status != 'trash'
+				AND lookup.global_unique_id = %s
+				LIMIT 1
+				",
+				$global_unique_id
+			)
+		);
+		/**
+		 * Hook woocommerce_get_product_id_by_global_unique_id.
+		 *
+		 * @since 9.1.0
+		 * @param mixed $id List of post statuses.
+		 * @param string $global_unique_id Unique ID.
+		 */
+		return (int) apply_filters( 'woocommerce_get_product_id_by_global_unique_id', $id, $global_unique_id );
 	}
 
 	/**
@@ -2113,7 +2237,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
-			return array(
+			$product_data = array(
 				'product_id'     => absint( $id ),
 				'sku'            => get_post_meta( $id, '_sku', true ),
 				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
@@ -2129,6 +2253,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
 				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
+				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			return $product_data;
 		}
 		return array();
 	}

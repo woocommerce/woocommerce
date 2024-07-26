@@ -6,8 +6,8 @@ use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use \WP_REST_Server;
 use \WP_REST_Request;
 use \WP_Error;
-use \InvalidArgumentException;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Internal\RestApiControllerBase;
 
 /**
  * Controller for the REST endpoints associated to the receipt rendering engine.

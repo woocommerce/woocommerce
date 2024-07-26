@@ -120,6 +120,11 @@ test(
 				.isVisible();
 
 			await page.waitForLoadState( 'domcontentloaded' );
+
+			// Confirm the Add button is disabled
+			await expect(
+				page.getByRole( 'button', { name: 'Add attributes' } )
+			).toBeDisabled();
 		} );
 
 		await test.step( 'create local attributes with terms', async () => {
@@ -131,10 +136,7 @@ test(
 				'.woocommerce-new-attribute-modal__table-row'
 			);
 
-			/*
-			 * First, check the app loads the attributes,
-			 * based on the Spinner visibility.
-			 */
+			// First, check the app loads the attributes,
 			await waitForGlobalAttributesLoaded( page );
 
 			for ( const attribute of attributesData ) {
@@ -168,14 +170,32 @@ test(
 					await FormTokenFieldInputLocator.press( 'Enter' );
 				}
 
-				await page.getByLabel( 'Add another attribute' ).click();
-			}
+				// Terms accepted, so the Add button should be enabled.
+				await expect(
+					page.getByRole( 'button', { name: 'Add attributes' } )
+				).toBeEnabled();
 
-			// Add the product attributes
-			await page
-				.getByRole( 'button', { name: 'Add attributes' } )
-				.click();
+				await page.getByLabel( 'Add another attribute' ).click();
+
+				// Attribute no defined, so the Add button should be disabled.
+				await expect(
+					page.getByRole( 'button', { name: 'Add attributes' } )
+				).toBeDisabled();
+			}
 		} );
+
+		// Remove the last row, as it was added by the last click on "Add another attribute".
+		await page
+			.getByRole( 'button', { name: 'Remove attribute' } )
+			.last()
+			.click();
+
+		await expect(
+			page.getByRole( 'button', { name: 'Add attributes' } )
+		).toBeEnabled();
+
+		// Add the product attributes
+		await page.getByRole( 'button', { name: 'Add attributes' } ).click();
 
 		await test.step( 'verify attributes in product editor', async () => {
 			// Locate the main attributes list element

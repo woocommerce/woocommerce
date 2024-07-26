@@ -165,7 +165,7 @@ export const Toolbar = () => {
 
 				return new window.DOMRect(
 					rect?.left + 10,
-					Math.max( top + 90, 110 ),
+					Math.max( top + 70 + rect.top, 100 ),
 					width,
 					height
 				);
@@ -214,6 +214,7 @@ export const Toolbar = () => {
 						<Shuffle clientId={ selectedBlockClientId } />
 						<Delete
 							clientId={ selectedBlockClientId }
+							currentBlockName={ currentBlock?.name }
 							nextBlockClientId={ nextBlock?.clientId }
 						/>
 					</>

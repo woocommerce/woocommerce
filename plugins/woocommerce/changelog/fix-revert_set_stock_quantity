@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Revert "Set stock quantity value as 0 by default (#48448)" #48863

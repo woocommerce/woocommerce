@@ -47,13 +47,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			if ( empty( self::$settings ) ) {
 				$settings = array();
 
-				include_once dirname( __FILE__ ) . '/settings/class-wc-settings-page.php';
+				include_once __DIR__ . '/settings/class-wc-settings-page.php';
 
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-general.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-products.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-tax.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-shipping.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
+				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways-react.php';
+				} else {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
+				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';
@@ -153,7 +157,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			// Get tabs for the settings page.
 			$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
-			include dirname( __FILE__ ) . '/views/html-admin-settings.php';
+			include __DIR__ . '/views/html-admin-settings.php';
 		}
 
 		/**
@@ -514,11 +518,19 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							$visibility_class[] = $value['row_class'];
 						}
 
+						$must_disable = $value['disabled'] ?? false;
+
+						if ( $must_disable ) {
+							$visibility_class[] = 'disabled';
+						}
+
 						$container_class = implode( ' ', $visibility_class );
-						$must_disable    = $value['disabled'] ?? false;
+						$has_title       = isset( $value['title'] ) && '' !== $value['title'];
+						$has_legend      = isset( $value['legend'] ) && '' !== $value['legend'];
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'start' === $value['checkboxgroup'] ) {
-							$has_tooltip             = isset( $value['tooltip'] ) && '' !== $value['tooltip'];
+							$has_tooltip = isset( $value['tooltip'] ) && '' !== $value['tooltip'];
+
 							$tooltip_container_class = $has_tooltip ? 'with-tooltip' : '';
 							?>
 								<tr class="<?php echo esc_attr( $container_class ); ?>">
@@ -535,9 +547,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 							<?php
 						}
 
-						if ( ! empty( $value['title'] ) ) {
+						if ( $has_title || $has_legend ) {
 							?>
-								<legend class="screen-reader-text"><span><?php echo esc_html( $value['title'] ); ?></span></legend>
+								<legend class="<?php echo $has_legend ? '' : 'screen-reader-text'; ?>"><span><?php echo esc_html( $has_legend ? $value['legend'] : $value['title'] ); ?></span></legend>
 							<?php
 						}
 
@@ -550,7 +562,6 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									type="checkbox"
 									class="<?php echo esc_attr( isset( $value['class'] ) ? $value['class'] : '' ); ?>"
 									value="1"
-									<?php disabled( $value['disabled'] ?? false ); ?>
 									<?php checked( $option_value, 'yes' ); ?>
 									<?php echo implode( ' ', $custom_attributes ); // WPCS: XSS ok. ?>
 								/> <?php echo $description; // WPCS: XSS ok. ?>

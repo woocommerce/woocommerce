@@ -42,12 +42,29 @@ interface WC_Product_Data_Store_Interface {
 	public function is_existing_sku( $product_id, $sku );
 
 	/**
+	 * Check if product unique ID is found for any other product IDs.
+	 *
+	 * @param int    $product_id Product ID.
+	 * @param string $global_unique_id Unique ID.
+	 * @return bool
+	 */
+	public function is_existing_global_unique_id( $product_id, $global_unique_id );
+
+	/**
 	 * Return product ID based on SKU.
 	 *
 	 * @param string $sku SKU.
 	 * @return int
 	 */
 	public function get_product_id_by_sku( $sku );
+
+	/**
+	 * Return product ID based on Unique ID.
+	 *
+	 * @param string $global_unique_id Unique ID.
+	 * @return int
+	 */
+	public function get_product_id_by_global_unique_id( $global_unique_id );
 
 	/**
 	 * Returns an array of IDs of products that have sales starting soon.

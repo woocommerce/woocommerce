@@ -4,7 +4,6 @@
 import {
 	test,
 	expect,
-	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
 
@@ -61,10 +60,9 @@ test.describe( 'Template customization', () => {
 				} );
 				await editor.revertTemplateCustomizations( {
 					templateName: testData.templateName,
-					templateType: testData.templateType,
 				} );
 				await testData.visitPage( { frontendUtils, page } );
-				await expect( page.getByText( userText ) ).toHaveCount( 0 );
+				await expect( page.getByText( userText ) ).toBeHidden();
 			} );
 
 			if ( testData.fallbackTemplate ) {
@@ -102,12 +100,11 @@ test.describe( 'Template customization', () => {
 					await editor.revertTemplateCustomizations( {
 						templateName:
 							testData.fallbackTemplate?.templateName || '',
-						templateType: 'wp_template',
 					} );
 					await testData.visitPage( { frontendUtils, page } );
 					await expect(
 						page.getByText( fallbackTemplateUserText )
-					).toHaveCount( 0 );
+					).toBeHidden();
 				} );
 			}
 		} );
@@ -172,7 +169,7 @@ test.describe( 'Template customization', () => {
 				).toBeVisible();
 				await expect(
 					page.getByText( woocommerceTemplateUserText )
-				).toHaveCount( 0 );
+				).toBeHidden();
 
 				// Revert edition and verify the user-modified WC template is used.
 				// Note: we need to revert it from the admin (instead of calling
@@ -185,7 +182,6 @@ test.describe( 'Template customization', () => {
 
 				await editor.revertTemplateCustomizations( {
 					templateName: testData.templateName,
-					templateType: testData.templateType,
 				} );
 
 				await testData.visitPage( { frontendUtils, page } );
@@ -193,9 +189,7 @@ test.describe( 'Template customization', () => {
 				await expect(
 					page.getByText( woocommerceTemplateUserText ).first()
 				).toBeVisible();
-				await expect( page.getByText( userText ) ).toHaveCount( 0 );
-
-				await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+				await expect( page.getByText( userText ) ).toBeHidden();
 			} );
 		} );
 	}

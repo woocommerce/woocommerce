@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout - Available Filters
+menu_title: Available Filters
+tags: reference
+---
+
 # Available filters <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
@@ -121,13 +127,3 @@ If you are logged in to the store as an administrator, you should be shown an er
 working correctly. The error will also be shown in your console.
 
 ![Troubleshooting](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-30-at-10.52.53.png)
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters.md)
-
-<!-- /FEEDBACK -->

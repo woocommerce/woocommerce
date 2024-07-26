@@ -6,6 +6,7 @@ import { Icon } from '@wordpress/icons';
 import {
 	customerAccountStyle,
 	customerAccountStyleAlt,
+	customerAccountStyleLine,
 } from '@woocommerce/icons';
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
@@ -104,6 +105,22 @@ export const BlockSettings = ( {
 						}
 						className="wc-block-editor-customer-account__icon-style-toggle"
 					>
+						<ToggleGroupControlOption
+							value={ IconStyle.LINE }
+							label={
+								<Icon
+									icon={ customerAccountStyleLine }
+									size={ 16 }
+									className={ clsx(
+										'wc-block-editor-customer-account__icon-option',
+										{
+											active:
+												iconStyle === IconStyle.LINE,
+										}
+									) }
+								/>
+							}
+						/>
 						<ToggleGroupControlOption
 							value={ IconStyle.DEFAULT }
 							label={
