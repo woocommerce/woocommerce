@@ -71,6 +71,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	protected $additional_fields_controller;
 
 	/**
+	 * True when this route has been requested with a valid cart token.
+	 *
+	 * @var bool|null
+	 */
+	protected $has_cart_token = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param SchemaController $schema_controller Schema Controller instance.
@@ -163,9 +170,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		$cart_token = $request->get_header( 'Cart-Token' );
-
-		if ( $cart_token && JsonWebToken::validate( $cart_token, $this->get_cart_token_secret() ) ) {
+		if ( $this->has_cart_token( $request ) ) {
 			// Overrides the core session class.
 			add_filter(
 				'woocommerce_session_handler',
@@ -174,7 +179,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				}
 			);
 		}
-
 		$this->cart_controller->load_cart();
 	}
 
@@ -223,6 +227,19 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Checks if the request has a valid cart token.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool
+	 */
+	protected function has_cart_token( \WP_REST_Request $request ) {
+		if ( is_null( $this->has_cart_token ) ) {
+			$this->has_cart_token = JsonWebToken::validate( $request->get_header( 'Cart-Token' ), $this->get_cart_token_secret() );
+		}
+		return $this->has_cart_token;
+	}
+
+	/**
 	 * Checks if a nonce is required for the route.
 	 *
 	 * @param \WP_REST_Request $request Request.
@@ -230,7 +247,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		return $this->is_update_request( $request );
+		return $this->is_update_request( $request ) && ! $this->has_cart_token( $request );
 	}
 
 	/**
