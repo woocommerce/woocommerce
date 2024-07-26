@@ -187,3 +187,21 @@ export function countNumberOfItems( linkedTree: LinkedTree[] ) {
 	}
 	return count;
 }
+
+export function getNodeDataByIndex(
+	linkedTree: LinkedTree[],
+	index: number
+): Item | undefined {
+	for ( const node of linkedTree ) {
+		if ( node.index === index ) {
+			return node.data;
+		}
+		if ( node.children ) {
+			const child = getNodeDataByIndex( node.children, index );
+			if ( child ) {
+				return child;
+			}
+		}
+	}
+	return undefined;
+}

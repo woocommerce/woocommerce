@@ -23,6 +23,7 @@ import {
 	toggleNode,
 	getLinkedTree,
 	getVisibleNodeIndex as getVisibleNodeIndex,
+	getNodeDataByIndex,
 } from '../experimental-tree-control/linked-tree-utils';
 import {
 	Item,
@@ -252,23 +253,30 @@ export const SelectTree = function SelectTree( {
 					// is selecting an item
 					highlightedIndex !== -1
 				) {
+					const nodeData = getNodeDataByIndex(
+						linkedTree,
+						highlightedIndex
+					);
+					if ( ! nodeData ) {
+						return;
+					}
 					if ( props.multiple && Array.isArray( props.selected ) ) {
 						if (
 							! Boolean(
 								props.selected.find(
-									( i ) =>
-										i.label ===
-										items[ highlightedIndex ].label
+									( i ) => i.label === nodeData.label
 								)
 							)
 						) {
-							props.onSelect?.( items[ highlightedIndex ] );
-						} else {
-							props.onRemove?.( items[ highlightedIndex ] );
+							if ( props.onSelect ) {
+								props.onSelect( nodeData );
+							}
+						} else if ( props.onRemove ) {
+							props.onRemove( nodeData );
 						}
 						setInputValue( '' );
 					} else {
-						onInputChange?.( items[ highlightedIndex ].label );
+						onInputChange?.( nodeData.label );
 						setIsOpen( false );
 						setIsFocused( false );
 						focusOnInput();

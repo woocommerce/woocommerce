@@ -36,11 +36,11 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 			event.preventDefault();
 			props.onEscape();
 		} else if ( event.key === 'ArrowLeft' ) {
-			if ( item.index ) {
+			if ( item.index !== undefined ) {
 				props.onExpand?.( item.index, false );
 			}
 		} else if ( event.key === 'ArrowRight' ) {
-			if ( item.index ) {
+			if ( item.index !== undefined ) {
 				props.onExpand?.( item.index, true );
 			}
 		}
@@ -102,7 +102,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 								item.data.isExpanded ? chevronUp : chevronDown
 							}
 							onClick={ () => {
-								if ( item.index ) {
+								if ( item.index !== undefined ) {
 									props.onExpand?.(
 										item.index,
 										! item.data.isExpanded
