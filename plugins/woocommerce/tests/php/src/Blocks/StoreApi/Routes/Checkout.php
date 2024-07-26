@@ -428,6 +428,55 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * Ensure that orders can be placed with coupons.
+	 */
+	public function test_coupon_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'test' );
+		$coupon->set_amount( 2 );
+		$coupon->save();
+
+		WC()->cart->apply_coupon( 'test' );
+
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, wc_get_order( $response->get_data()['order_id'] )->get_data()['discount_total'] );
+	}
+
+	/**
 	 * Ensure that orders cannot be placed with invalid data.
 	 */
 	public function test_invalid_post_data() {
