@@ -39,8 +39,6 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return <<<HTML
-			<div>Product Filters</div>
-		HTML;
+		return $content;
 	}
 }

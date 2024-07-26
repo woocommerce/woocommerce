@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure data filtered by `woocommerce_logger_log_message` does not carry across multiple log handlers

@@ -22,8 +22,8 @@
 		"test": "pnpm -r test",
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
-		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune && pnpm i",
-		"distclean": "git clean --force -d -X",
+		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune",
+		"buildclean": "git clean --force -d -X ./packages ./plugins ./tools",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "pnpm git:update-hooks",
 		"git:update-hooks": "if test -d .git; then rm -rf .git/hooks && mkdir -p .git/hooks && husky install; else husky install; fi",
@@ -75,6 +75,9 @@
 			"@types/react": "^17.0.71",
 			"react-resize-aware": "3.1.1",
 			"@automattic/tour-kit>@wordpress/element": "4.4.1"
+		},
+		"patchedDependencies": {
+			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch"
 		}
 	}
 }

@@ -72,6 +72,34 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox the customer notes are correctly sanitized.
+	 */
+	public function test_order_notes() {
+		$_POST = array(
+			'ship_to_different_address' => false,
+			'order_comments'             => '<a href="http://attackerpage.com/csrf.html">This text should not save inside an anchor.</a><script>alert("alert")</script>',
+			'payment_method'            => 'bacs',
+		);
+		$data  = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+		$result = $this->sut->create_order( $data );
+
+		$content = wc_get_template_html(
+			'order/order-details.php',
+			array(
+				'order_id'       => $result,
+				'show_downloads' => false,
+			)
+		);
+		$this->assertStringNotContainsString( '<a href="http://attackerpage.com/csrf.html">', $content );
+		$this->assertStringNotContainsString( '<script>', $content );
+		$this->assertStringContainsString( 'This text should not save inside an anchor.', $content );
+	}
+
+	/**
 	 * @testdox 'validate_posted_data' doesn't add errors for existing billing/shipping countries.
 	 *
 	 * @testWith [true]
@@ -175,3 +203,4 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		);
 	}
 }
+

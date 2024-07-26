@@ -14,6 +14,7 @@
 	}
 	&__button {
 		width: 100%;
+		cursor: default;
 		&:hover,
 		&:focus-within {
 			outline: 1.5px solid var( --wp-admin-theme-color );

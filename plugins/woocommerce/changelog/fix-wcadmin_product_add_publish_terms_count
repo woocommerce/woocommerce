@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the terms counts in wcadmin_product_add_publish event.

@@ -25,7 +25,7 @@ const step_goToAttributesTab = async ( page ) => {
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'Add product attributes', () => {
+test.describe( 'Add product attributes', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { browser } ) => {

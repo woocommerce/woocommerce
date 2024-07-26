@@ -16490,7 +16490,7 @@ index a27469c37c..b853bf7cd0 100644
 @@ -97,8 +88,7 @@ function getMarketingItems( props ) {
  		},
  		activePlugins.includes( 'google-listings-and-ads' ) && {
- 			title: __( 'Set up Google Listing & Ads', 'woocommerce' ),
+ 			title: __( 'Set up Google for WooCommerce', 'woocommerce' ),
 -			link:
 -				'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
 +			link: 'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
