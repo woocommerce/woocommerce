@@ -19,16 +19,20 @@ const SettingsPaymentsOfflineChunk = lazy(
 
 export const SettingsPaymentsMainWrapper: React.FC = () => {
 	return (
-		<Suspense fallback={ null }>
-			<SettingsPaymentsMainChunk />
+		<Suspense fallback={ <div>Loading main settings...</div> }>
+			<ErrorBoundary fallback={ <div>Error loading main settings</div> }>
+				<SettingsPaymentsMainChunk />
+			</ErrorBoundary>
 		</Suspense>
 	);
 };
 
 export const SettingsPaymentsOfflineWrapper: React.FC = () => {
 	return (
-		<Suspense fallback={ null }>
-			<SettingsPaymentsOfflineChunk />
+		<Suspense fallback={ <div>Loading offline settings...</div> }>
+			<ErrorBoundary fallback={ <div>Error loading offline settings</div> }>
+				<SettingsPaymentsOfflineChunk />
+			</ErrorBoundary>
 		</Suspense>
 	);
 };
