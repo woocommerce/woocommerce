@@ -3,29 +3,29 @@ const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const couponData = {
 	fixedCart: {
 		code: `fixedCart-${ Date.now() }`,
-		description: 'Simple fixed cart discount',
-		amount: '25',
+		description: `Simple fixed cart discount ${ Date.now() }`,
+		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
 	},
 	fixedProduct: {
 		code: `fixedProduct-${ Date.now() }`,
-		description: 'Simple fixed product discount',
-		amount: '5',
+		description: `Simple fixed product discount ${ Date.now() }`,
+		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
 	},
 	percentage: {
 		code: `percentage-${ Date.now() }`,
-		description: 'Simple percentage discount',
-		amount: '10',
+		description: `Simple percentage discount ${ Date.now() }`,
+		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
 	},
 	expiryDate: {
 		code: `expiryDate-${ Date.now() }`,
-		description: 'Simple expiry date discount',
-		amount: '15',
+		description: `Simple expiry date discount ${ Date.now() }`,
+		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
 		expiryDate: '2023-12-31',
 	},
 	freeShipping: {
 		code: `freeShipping-${ Date.now() }`,
-		description: 'Simple free shipping discount',
-		amount: '1',
+		description: `Simple free shipping discount ${ Date.now() }`,
+		amount: `${ Math.floor( Math.random() * 50 ) + 1 }`,
 		freeShipping: true,
 	},
 };

@@ -255,6 +255,7 @@
                 item = $('<img/>', {
                   onload: 'this.width = this.naturalWidth; this.height = this.naturalHeight',
                   src: slide.attr('data-thumb'),
+                  srcset: slide.attr('data-thumb-srcset'),
                   alt: slide.attr('alt')
                 })
               }

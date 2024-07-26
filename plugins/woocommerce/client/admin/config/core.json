@@ -19,12 +19,13 @@
 		"navigation": true,
 		"onboarding": true,
 		"onboarding-tasks": true,
-		"pattern-toolkit-full-composability": false,
+		"pattern-toolkit-full-composability": true,
 		"product-pre-publish-modal": false,
 		"product-custom-fields": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
+		"printful": true,
 		"settings": false,
 		"shipping-label-banner": true,
 		"subscriptions": true,
@@ -35,6 +36,7 @@
 		"wc-pay-welcome-page": true,
 		"async-product-editor-category-field": false,
 		"launch-your-store": true,
-		"product-editor-template-system": false
+		"product-editor-template-system": false,
+		"reactify-classic-payments-settings": false
 	}
 }

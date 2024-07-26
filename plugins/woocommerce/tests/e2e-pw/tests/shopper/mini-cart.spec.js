@@ -1,5 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
+const {
+	disableWelcomeModal,
+	openEditorSettings,
+} = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
 
@@ -146,6 +149,9 @@ test.describe(
 				.filter( { hasText: 'Mini-Cart' } )
 				.click();
 			await expect( page.getByLabel( 'Block: Mini-Cart' ) ).toBeVisible();
+
+			// Open Settings sidebar if closed
+			await openEditorSettings( { page } );
 
 			// customize mini cart block
 			await page.getByLabel( 'Block: Mini-Cart' ).click();

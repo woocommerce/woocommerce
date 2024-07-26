@@ -165,6 +165,8 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 * Test that empty suggestions are replaced with defaults.
 	 */
 	public function test_empty_suggestions() {
+		// Arrange.
+		// Make sure there are no specs in the transient.
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
 			array(
@@ -172,14 +174,67 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 			)
 		);
 
-		$suggestions       = PaymentGatewaySuggestions::get_suggestions();
-		$stored_transients = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+		// Replace the external data sources.
+		add_filter(
+			PaymentGatewaySuggestionsDataSourcePoller::FILTER_NAME,
+			function () {
+				return array(
+					'payment-gateway-suggestions-data-source.json',
+				);
+			}
+		);
 
+		// Intercept the request to the data source and return a non-empty array to allow us to
+		// skip defaulting to the default payment gateways suggestions too early.
+		add_filter(
+			'pre_http_request',
+			function ( $pre, $parsed_args, $url ) {
+				$locale = get_locale();
+
+				if ( 'payment-gateway-suggestions-data-source.json?locale=' . $locale === $url ) {
+					return array(
+						'body' => wp_json_encode(
+							array(
+								array(
+									'id' => 'mock-gateway1',
+								),
+								array(
+									'id' => 'mock-gateway2',
+								),
+							)
+						),
+					);
+				}
+
+				return $pre;
+			},
+			10,
+			3
+		);
+
+		// Finally return empty specs that should default the suggestions to the default payment gateways suggestions.
+		add_filter(
+			'woocommerce_admin_payment_gateway_suggestion_specs',
+			function () {
+				return array();
+			}
+		);
+
+		// Act.
+		$suggestions               = PaymentGatewaySuggestions::get_suggestions();
+		$stored_specs_in_transient = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+
+		// Assert.
 		$this->assertEquals( 'bacs', $suggestions[0]->id );
-		$this->assertEquals( count( $stored_transients['en_US'] ), count( DefaultPaymentGateways::get_all() ) );
+		$this->assertEquals( count( $stored_specs_in_transient['en_US'] ), count( DefaultPaymentGateways::get_all() ) );
 
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
 		$this->assertTrue( ( $expires - time() ) <= 3 * HOUR_IN_SECONDS );
+
+		// Clean up.
+		remove_all_filters( PaymentGatewaySuggestionsDataSourcePoller::FILTER_NAME );
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'woocommerce_admin_payment_gateway_suggestion_specs' );
 	}
 
 	/**

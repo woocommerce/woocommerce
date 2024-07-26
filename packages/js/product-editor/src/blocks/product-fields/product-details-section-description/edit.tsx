@@ -33,10 +33,7 @@ import { ProductEditorSettings } from '../../../components';
 import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
 import { TRACKS_SOURCE } from '../../../constants';
-import {
-	WPError,
-	getProductErrorMessageAndProps,
-} from '../../../utils/get-product-error-message-and-props';
+import { WPError, useErrorHandler } from '../../../hooks/use-error-handler';
 import type {
 	ProductEditorBlockEditProps,
 	ProductFormPostProps,
@@ -53,6 +50,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	context: { selectedTab },
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
+
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
