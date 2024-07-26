@@ -41,9 +41,20 @@ class ImportInstallTheme implements StepProcessor {
 		$this->result->add_debug( "'$theme->slug' has been downloaded in $downloaded_path" );
 
 		$install = $this->install( $downloaded_path );
-		$install && $this->result->add_debug( "Theme '$theme->slug' installed successfully." );
+
+		if ( $install ) {
+			$this->result->add_debug( "Theme '$theme->slug' installed successfully." );
+		} else {
+			$this->result->add_error( "Failed to install theme '$theme->slug'." );
+		}
+
 		$theme_switch = $theme->activate === true && $this->wp_switch_theme( $theme->slug );
-		$theme_switch && $this->result->add_debug( "Switched theme to '$theme->slug'." );
+
+		if ( $theme_switch ) {
+			$this->result->add_info( "Switched theme to '$theme->slug'." );
+		} else {
+			$this->result->add_error( "Failed to switch theme to '$theme->slug'." );
+		}
 
 		return $this->result;
 	}

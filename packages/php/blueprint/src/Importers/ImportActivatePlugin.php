@@ -15,8 +15,11 @@ class ImportActivatePlugin implements StepProcessor {
 		$name   = $schema->pluginName;
 
 		$activate = $this->activate_plugin_by_slug( $name );
-		$activate && $result->add_info( "Activated {$name}." );
-		! $activate && $result->add_info( "Unable to activate {$name}." );
+		if ( $activate ) {
+			$result->add_info( "Activated {$name}." );
+		} else {
+			$result->add_error( "Unable to activate {$name}." );
+		}
 
 		return $result;
 	}
