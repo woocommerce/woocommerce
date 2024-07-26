@@ -102,6 +102,7 @@ class Checkout extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
+		unset( wc()->countries->locale );
 		$default_zone     = \WC_Shipping_Zones::get_zone( 0 );
 		$shipping_methods = $default_zone->get_shipping_methods();
 		foreach ( $shipping_methods as $method ) {
@@ -266,7 +267,6 @@ class Checkout extends MockeryTestCase {
 	 * Ensure that validation respects locale filtering.
 	 */
 	public function test_locale_required_filtering_post_data() {
-		unset( WC()->countries->locale );
 		add_filter(
 			'woocommerce_get_country_locale',
 			function ( $locale ) {
@@ -317,7 +317,6 @@ class Checkout extends MockeryTestCase {
 	 * Ensure that labels respect locale filtering.
 	 */
 	public function test_locale_label_filtering_post_data() {
-		unset( WC()->countries->locale );
 		add_filter(
 			'woocommerce_get_country_locale',
 			function ( $locale ) {
