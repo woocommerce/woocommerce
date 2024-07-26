@@ -10,9 +10,9 @@ import { memo, useCallback, useContext } from '@wordpress/element';
  * Internal dependencies
  */
 import { SidebarNavigationScreenColorPalette } from './sidebar-navigation-screen-color-palette';
-import { SidebarNavigationScreenFooter } from './sidebar-navigation-screen-footer';
-import { SidebarNavigationScreenHeader } from './sidebar-navigation-screen-header';
-import { SidebarNavigationScreenHomepage } from './sidebar-navigation-screen-homepage';
+import { SidebarNavigationScreenFooter } from './sidebar-navigation-screen-footer/sidebar-navigation-screen-footer';
+import { SidebarNavigationScreenHeader } from './sidebar-navigation-screen-header/sidebar-navigation-screen-header';
+import { SidebarNavigationScreenHomepage } from './sidebar-navigation-screen-homepage/sidebar-navigation-screen-homepage';
 import { SidebarNavigationScreenMain } from './sidebar-navigation-screen-main';
 import { SidebarNavigationScreenTypography } from './sidebar-navigation-screen-typography';
 // import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages';
