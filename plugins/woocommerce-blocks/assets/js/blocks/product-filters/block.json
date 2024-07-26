@@ -20,16 +20,49 @@
 			"text": true
 		},
 		"multiple": false,
+		"inserter": false,
 		"interactivity": true,
 		"typography": {
 			"fontSize": true,
 			"textAlign": true
+		},
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"justifyContent": "stretch",
+				"verticalAlignment": "top"
+			},
+			"allowVerticalAlignment": true,
+			"allowJustification": true,
+			"allowOrientation": true,
+			"allowInheriting": false
+		},
+		"spacing": {
+			"blockGap": true
 		}
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
 	"providesContext": {},
-	"attributes": {},
+	"attributes": {
+		"overlay": {
+			"type": "string",
+			"default": "never"
+		},
+		"overlayIcon": {
+			"type": "string",
+			"default": "filter-icon-1"
+		},
+		"overlayButtonStyle": {
+			"type": "string",
+			"default": "label-icon"
+		},
+		"overlayIconSize": {
+			"type": "number",
+			"default": "12"
+		}
+	},
 	"viewScript": "wc-product-filters-frontend",
 	"example": {}
 }

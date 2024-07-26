@@ -1334,9 +1334,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_enable_guest_checkout',
-						label: 'Guest checkout',
-						description:
-							'Allow customers to place orders without an account',
+						label: 'Checkout',
+						description: 'Enable guest checkout (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1348,8 +1347,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_enable_checkout_login_reminder',
 						label: 'Login',
-						description:
-							'Allow customers to log into an existing account during checkout',
+						description: 'Enable log-in during checkout',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1361,8 +1359,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_enable_signup_and_login_from_checkout',
 						label: 'Account creation',
-						description:
-							'Allow customers to create an account during checkout',
+						description: 'During checkout',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1373,9 +1370,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_enable_myaccount_registration',
-						label: '',
-						description:
-							'Allow customers to create an account on the "My account" page',
+						label: 'Account creation',
+						description: 'On "My account" page',
 						type: 'checkbox',
 						default: 'no',
 						value: 'no',
@@ -1386,9 +1382,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_username',
-						label: '',
+						label: 'Account creation options',
 						description:
-							'When creating an account, automatically generate an account username for the customer based on their name, surname or email',
+							'Use email address as account login (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1399,9 +1395,8 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'woocommerce_registration_generate_password',
-						label: '',
-						description:
-							'When creating an account, send the new user a link to set their password',
+						label: 'Account creation options',
+						description: 'Send password setup link (recommended)',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',

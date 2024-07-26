@@ -14,4 +14,5 @@ export enum DisplayStyle {
 export enum IconStyle {
 	DEFAULT = 'default',
 	ALT = 'alt',
+	LINE = 'line',
 }

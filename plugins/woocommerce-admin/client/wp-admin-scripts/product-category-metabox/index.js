@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, Suspense, lazy } from '@wordpress/element';
+import { createRoot, Suspense, lazy } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,7 +20,7 @@ if ( metaboxContainer ) {
 	const initialSelected = getSelectedCategoryData(
 		metaboxContainer.parentElement
 	);
-	render(
+	createRoot( metaboxContainer ).render(
 		<Suspense fallback={ null }>
 			<CategoryMetabox initialSelected={ initialSelected } />
 		</Suspense>,

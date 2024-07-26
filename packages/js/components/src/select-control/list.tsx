@@ -39,7 +39,7 @@ type Props = {
 	 */
 	selectedIndex: number | null | undefined;
 	/**
-	 * Bool to determine if the list should be positioned absolutely or staticly.
+	 * Bool to determine if the list should be positioned absolutely or statically.
 	 */
 	staticList: boolean;
 	/**

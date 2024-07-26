@@ -1,4 +1,9 @@
 *** WooCommerce Beta Tester Changelog ***
+2024-06-25 - versio 2.3.2
+* Minor - Adds a new tool to the WCA Test Helper that helps import remote inbox notifications from staging or production for testing purposes #48735
+* Minor - Remove the new old experience #47814
+* Patch - Fix "Live Branches" item not shown in the WooCommerce menu #47691
+* Patch - Fix lint errors from the remote spec test endpoint. #47520
 
 2024-05-13 - version 2.3.1
 * Minor - Add Remote Spec Validator to WooCommerce Admin Tester

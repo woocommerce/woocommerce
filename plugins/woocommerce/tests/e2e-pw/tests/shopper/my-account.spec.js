@@ -3,7 +3,7 @@ const { customer } = require( '../../test-data/data' );
 
 const pages = [ 'Orders', 'Downloads', 'Addresses', 'Account details' ];
 
-test.describe( 'My account page', () => {
+test.describe( 'My account page', { tag: [ '@payments', '@services' ] }, () => {
 	test.use( { storageState: process.env.CUSTOMERSTATE } );
 
 	test( 'allows customer to login and navigate', async ( { page } ) => {

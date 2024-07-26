@@ -2,9 +2,10 @@
  * External dependencies
  */
 import React, { createElement } from 'react';
-import { Card, CardBody, Modal, Notice } from '@wordpress/components';
+import { Modal, Notice } from '@wordpress/components';
 import { MediaItem } from '@wordpress/media-utils';
 import { useState } from '@wordpress/element';
+import { cloudUpload } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -121,23 +122,19 @@ export const Basic: React.FC = () => {
 	const [ images, setImages ] = useState< File[] >( [] );
 
 	return (
-		<Card size="large">
-			<CardBody>
-				<ImageGallery images={ images } />
-				<MediaUploader
-					MediaUploadComponent={ MockMediaUpload }
-					onSelect={ ( file ) => setImages( [ ...images, file ] ) }
-					onError={ () => null }
-					onFileUploadChange={ ( files ) =>
-						setImages( [ ...images, ...files ] )
-					}
-					onUpload={ ( files ) =>
-						setImages( [ ...images, ...files ] )
-					}
-					uploadMedia={ mockUploadMedia }
-				/>
-			</CardBody>
-		</Card>
+		<>
+			<ImageGallery images={ images } />
+			<MediaUploader
+				MediaUploadComponent={ MockMediaUpload }
+				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+				onError={ () => null }
+				onFileUploadChange={ ( files ) =>
+					setImages( [ ...images, ...files ] )
+				}
+				onUpload={ ( files ) => setImages( [ ...images, ...files ] ) }
+				uploadMedia={ mockUploadMedia }
+			/>
+		</>
 	);
 };
 
@@ -145,22 +142,20 @@ export const DisabledDropZone: React.FC = () => {
 	const [ images, setImages ] = useState< File[] >( [] );
 
 	return (
-		<Card size="large">
-			<CardBody>
-				<ImageGallery images={ images } />
-				<MediaUploader
-					hasDropZone={ false }
-					label={ 'Click the button below to upload' }
-					MediaUploadComponent={ MockMediaUpload }
-					onFileUploadChange={ ( files ) =>
-						setImages( [ ...images, ...files ] )
-					}
-					onSelect={ ( file ) => setImages( [ ...images, file ] ) }
-					onError={ () => null }
-					uploadMedia={ mockUploadMedia }
-				/>
-			</CardBody>
-		</Card>
+		<>
+			<ImageGallery images={ images } />
+			<MediaUploader
+				hasDropZone={ false }
+				label={ 'Click the button below to upload' }
+				MediaUploadComponent={ MockMediaUpload }
+				onFileUploadChange={ ( files ) =>
+					setImages( [ ...images, ...files ] )
+				}
+				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+				onError={ () => null }
+				uploadMedia={ mockUploadMedia }
+			/>
+		</>
 	);
 };
 
@@ -168,23 +163,50 @@ export const MaxUploadFileSize: React.FC = () => {
 	const [ error, setError ] = useState< string | null >( null );
 
 	return (
-		<Card size="large">
-			<CardBody>
-				{ error && (
-					<Notice isDismissible={ false } status={ 'error' }>
-						{ error }
-					</Notice>
-				) }
+		<>
+			{ error && (
+				<Notice isDismissible={ false } status={ 'error' }>
+					{ error }
+				</Notice>
+			) }
 
-				<MediaUploader
-					maxUploadFileSize={ 1000 }
-					MediaUploadComponent={ MockMediaUpload }
-					onSelect={ () => null }
-					onError={ ( e ) => setError( e.message ) }
-					onUpload={ () => null }
-				/>
-			</CardBody>
-		</Card>
+			<MediaUploader
+				maxUploadFileSize={ 1000 }
+				MediaUploadComponent={ MockMediaUpload }
+				onSelect={ () => null }
+				onError={ ( e ) => setError( e.message ) }
+				onUpload={ () => null }
+			/>
+		</>
+	);
+};
+
+export const ButtonWithOnlyIcon: React.FC = () => {
+	const [ error, setError ] = useState< string | null >( null );
+
+	return (
+		<>
+			{ error && (
+				<Notice isDismissible={ false } status={ 'error' }>
+					{ error }
+				</Notice>
+			) }
+
+			<MediaUploader
+				maxUploadFileSize={ 1000 }
+				buttonProps={ {
+					icon: cloudUpload,
+					iconSize: 32,
+					variant: 'tertiary',
+					'aria-label': 'Upload media',
+				} }
+				buttonText=""
+				MediaUploadComponent={ MockMediaUpload }
+				onSelect={ () => null }
+				onError={ ( e ) => setError( e.message ) }
+				onUpload={ () => null }
+			/>
+		</>
 	);
 };
 

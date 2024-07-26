@@ -58,3 +58,5 @@ export type getItemLabelType< ItemType > = ( item: ItemType | null ) => string;
 export type getItemValueType< ItemType > = (
 	item: ItemType | null
 ) => string | number;
+
+export type SelectedItemFocusHandle = () => void;

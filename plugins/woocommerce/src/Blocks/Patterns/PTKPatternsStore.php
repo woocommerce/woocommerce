@@ -11,10 +11,9 @@ use WP_Upgrader;
 class PTKPatternsStore {
 	const TRANSIENT_NAME = 'ptk_patterns';
 
-	// Some patterns need to be excluded because they have dependencies which
-	// are not installed by default (like Jetpack). Otherwise, the user
-	// would see an error when trying to insert them in the editor.
-	const EXCLUDED_PATTERNS = array( '13923', '14781', '14779', '13666', '13664', '13660', '13588', '14922', '14880', '13596', '13967', '13958', '15050', '15027' );
+	const CATEGORY_MAPPING = array(
+		'testimonials' => 'reviews',
+	);
 
 	/**
 	 * PatternsToolkit instance.
@@ -92,11 +91,13 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		if ( as_has_scheduled_action( $action ) ) {
+		$last_request = get_transient( 'last_fetch_patterns_request' );
+		if ( as_has_scheduled_action( $action ) || false !== $last_request ) {
 			return;
 		}
 
 		as_schedule_single_action( time(), $action );
+		set_transient( 'last_fetch_patterns_request', time(), HOUR_IN_SECONDS );
 	}
 
 	/**
@@ -117,26 +118,31 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Filter patterns to exclude those with the given IDs.
+	 * Filter the patterns that have external dependencies.
 	 *
 	 * @param array $patterns The patterns to filter.
-	 * @param array $pattern_ids The pattern IDs to exclude.
 	 * @return array
 	 */
-	private function filter_patterns( array $patterns, array $pattern_ids ) {
-		return array_filter(
-			$patterns,
-			function ( $pattern ) use ( $pattern_ids ) {
-				if ( ! isset( $pattern['ID'] ) ) {
+	private function filter_patterns( array $patterns ) {
+		return array_values(
+			array_filter(
+				$patterns,
+				function ( $pattern ) {
+					if ( ! isset( $pattern['ID'] ) ) {
+						return true;
+					}
+
+					if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
+						return false;
+					}
+
+					if ( $this->has_external_dependencies( $pattern ) ) {
+						return false;
+					}
+
 					return true;
 				}
-
-				if ( isset( $pattern['post_type'] ) && 'wp_block' !== $pattern['post_type'] ) {
-					return false;
-				}
-
-				return ! in_array( (string) $pattern['ID'], $pattern_ids, true );
-			}
+			)
 		);
 	}
 
@@ -181,22 +187,35 @@ class PTKPatternsStore {
 
 		$patterns = $this->ptk_client->fetch_patterns(
 			array(
-				'categories' => array( 'intro', 'about', 'services', 'testimonials' ),
+				// This is the site where the patterns are stored. Despite the 'wpcomstaging.com' domain suggesting a staging environment, this URL points to the production environment where stable versions of the patterns are maintained.
+				'site'       => 'wooblockpatterns.wpcomstaging.com',
+				'categories' => array(
+					'_woo_intro',
+					'_woo_featured_selling',
+					'_woo_about',
+					'_woo_reviews',
+					'_woo_social_media',
+					'_woo_woocommerce',
+					'_dotcom_imported_intro',
+					'_dotcom_imported_about',
+					'_dotcom_imported_services',
+					'_dotcom_imported_reviews',
+				),
 			)
 		);
-
 		if ( is_wp_error( $patterns ) ) {
 			wc_get_logger()->warning(
 				sprintf(
 				// translators: %s is a generated error message.
-					__( 'Failed to get the patterns from the PTK: "%s"', 'woocommerce' ),
+					__( 'Failed to get WooCommerce patterns from the PTK: "%s"', 'woocommerce' ),
 					$patterns->get_error_message()
 				),
 			);
 			return;
 		}
 
-		$patterns = $this->filter_patterns( $patterns, self::EXCLUDED_PATTERNS );
+		$patterns = $this->filter_patterns( $patterns );
+		$patterns = $this->map_categories( $patterns );
 
 		set_transient( self::TRANSIENT_NAME, $patterns );
 	}
@@ -208,5 +227,52 @@ class PTKPatternsStore {
 	 */
 	private function allowed_tracking_is_enabled(): bool {
 		return 'yes' === get_option( 'woocommerce_allow_tracking' );
+	}
+
+	/**
+	 * Change the categories of the patterns to match the ones used in the CYS flow
+	 *
+	 * @param array $patterns The patterns to map categories for.
+	 * @return array The patterns with the categories mapped.
+	 */
+	private function map_categories( array $patterns ) {
+		return array_map(
+			function ( $pattern ) {
+				if ( isset( $pattern['categories'] ) ) {
+					foreach ( $pattern['categories'] as $key => $category ) {
+						if ( isset( $category['slug'] ) && isset( self::CATEGORY_MAPPING[ $key ] ) ) {
+							$new_category = self::CATEGORY_MAPPING[ $key ];
+							unset( $pattern['categories'][ $key ] );
+							$pattern['categories'][ $new_category ]['slug']  = $new_category;
+							$pattern['categories'][ $new_category ]['title'] = ucfirst( $new_category );
+						}
+					}
+				}
+
+				return $pattern;
+			},
+			$patterns
+		);
+	}
+
+	/**
+	 * Check if the pattern has external dependencies.
+	 *
+	 * @param array $pattern The pattern to check.
+	 *
+	 * @return bool
+	 */
+	private function has_external_dependencies( $pattern ) {
+		if ( ! isset( $pattern['dependencies'] ) || ! is_array( $pattern['dependencies'] ) ) {
+			return false;
+		}
+
+		foreach ( $pattern['dependencies'] as $dependency ) {
+			if ( 'woocommerce' !== $dependency ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
