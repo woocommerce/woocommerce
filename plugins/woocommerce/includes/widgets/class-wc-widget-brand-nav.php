@@ -431,19 +431,13 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 			echo '<li class="wc-layered-nav-term ' . ( $option_is_set ? 'chosen' : '' ) . '">';
 
-			/**
-			 * phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
-			 */
-			echo ( $count > 0 || $option_is_set ) ? '<a href="' . esc_url( apply_filters( 'woocommerce_layered_nav_link', $link ) ) . '">' : '<span>';
+			echo ( $count > 0 || $option_is_set ) ? '<a href="' . esc_url( apply_filters( 'woocommerce_layered_nav_link', $link ) ) . '">' : '<span>'; // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 			echo esc_html( $term->name );
 
 			echo ( $count > 0 || $option_is_set ) ? '</a> ' : '</span> ';
 
-			/**
-			 * phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
-			 */
-			echo wp_kses_post( apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term ) );
+			echo wp_kses_post( apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term ) );// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 			$child_terms = get_terms(
 				array(
@@ -508,20 +502,14 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			AND terms.term_id IN (' . implode( ',', array_map( 'absint', $term_ids ) ) . ')
 		';
 		$query['group_by'] = 'GROUP BY terms.term_id';
-		/**
-		 * phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
-		 */
-		$query = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query );
-		$query = implode( ' ', $query );
+		$query             = apply_filters( 'woocommerce_get_filtered_term_product_counts_query', $query ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$query             = implode( ' ', $query );
 
 		// We have a query - let's see if cached results of this query already exist.
 		$query_hash = md5( $query );
 
 		// Maybe store a transient of the count values.
-		/**
-		 * phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment
-		 */
-		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
+		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment 
 		if ( true === $cache ) {
 			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
 		} else {
