@@ -8,9 +8,8 @@
  */
 class WC_Widget_Brand_Nav extends WC_Widget {
 	/**
-	 * constructor
+	 * Constructor
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function __construct() {
@@ -29,6 +28,8 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 	/**
 	 * Filter out all categories and not display them
+	 *
+	 * @param array $cat_args Category arguments.
 	 */
 	public function filter_out_cats( $cat_args ) {
 		if ( ! empty( $_GET['filter_product_brand'] ) ) {
@@ -66,12 +67,12 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	}
 
 	/**
-	 * widget function.
+	 * Widget function.
 	 *
 	 * @see WP_Widget
-	 * @access public
-	 * @param array $args
-	 * @param array $instance
+	 *
+	 * @param array $args Arguments.
+	 * @param array $instance Widget instance.
 	 * @return void
 	 */
 	public function widget( $args, $instance ) {
@@ -95,6 +96,15 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		$current_term = $attribute_array && is_tax( $attribute_array ) ? get_queried_object()->term_id : '';
 		$current_tax  = $attribute_array && is_tax( $attribute_array ) ? get_queried_object()->taxonomy : '';
 
+		/**
+		 * Filter the widget's title.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param string $title Widget title
+		 * @param array $instance The settings for the particular instance of the widget.
+		 * @param string $woo_widget_idbase The widget's id base.
+		 */
 		$title        = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 		$taxonomy     = 'product_brand';
 		$display_type = isset( $instance['display_type'] ) ? $instance['display_type'] : 'list';
@@ -105,9 +115,9 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 		// Get only parent terms. Methods will recursively retrieve children.
 		$terms = get_terms(
-			$taxonomy,
 			array(
-				'hide_empty' => '1',
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => true,
 				'parent'     => 0,
 			)
 		);
@@ -128,7 +138,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 		$this->widget_end( $args );
 
-		// Force found when option is selected - do not force found on taxonomy attributes
+		// Force found when option is selected - do not force found on taxonomy attributes.
 		if ( ! is_tax() && is_array( $_chosen_attributes ) && array_key_exists( $taxonomy, $_chosen_attributes ) ) {
 			$found = true;
 		}
@@ -141,12 +151,12 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	}
 
 	/**
-	 * update function.
+	 * Update function.
 	 *
 	 * @see WP_Widget->update
-	 * @access public
-	 * @param array $new_instance
-	 * @param array $old_instance
+	 *
+	 * @param array $new_instance The new settings for the particular instance of the widget.
+	 * @param array $old_instance The old settings for the particular instance of the widget.
 	 * @return array
 	 */
 	public function update( $new_instance, $old_instance ) {
@@ -156,18 +166,18 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			$new_instance['title'] = __( 'Brands', 'woocommerce' );
 		}
 
-		$instance['title']        = strip_tags( stripslashes( $new_instance['title'] ) );
+		$instance['title']        = wp_strip_all_tags( stripslashes( $new_instance['title'] ) );
 		$instance['display_type'] = stripslashes( $new_instance['display_type'] );
 
 		return $instance;
 	}
 
 	/**
-	 * form function.
+	 * Form function.
 	 *
 	 * @see WP_Widget->form
-	 * @access public
-	 * @param array $instance
+	 *
+	 * @param array $instance Widget instance.
 	 * @return void
 	 */
 	public function form( $instance ) {
@@ -196,7 +206,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	/**
 	 * Get current page URL for layered nav items.
 	 *
-	 * @param  string $taxonomy
+	 * @param  string $taxonomy Taxonomy
 	 * @return string
 	 */
 	protected function get_page_base_url( $taxonomy ) {
@@ -213,7 +223,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		}
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 
-		// Min/Max
+		// Min/Max.
 		if ( isset( $_GET['min_price'] ) ) {
 			$link = add_query_arg( 'min_price', wc_clean( wp_unslash( $_GET['min_price'] ) ), $link );
 		}
@@ -222,7 +232,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			$link = add_query_arg( 'max_price', wc_clean( wp_unslash( $_GET['max_price'] ) ), $link );
 		}
 
-		// Orderby
+		// Orderby.
 		if ( isset( $_GET['orderby'] ) ) {
 			$link = add_query_arg( 'orderby', wc_clean( wp_unslash( $_GET['orderby'] ) ), $link );
 		}
@@ -235,18 +245,19 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			$link = add_query_arg( 's', rawurlencode( htmlspecialchars_decode( get_search_query() ) ), $link );
 		}
 
-		// Post Type Arg
+		// Post Type Arg.
 		if ( isset( $_GET['post_type'] ) ) {
 			$link = add_query_arg( 'post_type', wc_clean( wp_unslash( $_GET['post_type'] ) ), $link );
 		}
 
-		// Min Rating Arg
+		// Min Rating Arg.
 		if ( isset( $_GET['min_rating'] ) ) {
 			$link = add_query_arg( 'min_rating', wc_clean( wp_unslash( $_GET['min_rating'] ) ), $link );
 		}
 
-		// All current filters
-		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) {
+		// All current filters.
+		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
+		if ( $_chosen_attributes ) {
 			foreach ( $_chosen_attributes as $name => $data ) {
 				if ( $name === $taxonomy ) {
 					continue;
@@ -255,7 +266,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 				if ( ! empty( $data['terms'] ) ) {
 					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
 				}
-				if ( 'or' == $data['query_type'] ) {
+				if ( 'or' === $data['query_type'] ) {
 					$link = add_query_arg( 'query_type_' . $filter_name, 'or', $link );
 				}
 			}
@@ -283,9 +294,9 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	/**
 	 * Show dropdown layered nav.
 	 *
-	 * @param  array  $terms
-	 * @param  string $taxonomy
-	 * @param  int    $depth
+	 * @param  array  $terms Terms.
+	 * @param  string $taxonomy Taxonomy.
+	 * @param  int    $depth Depth.
 	 * @return bool Will nav display?
 	 */
 	protected function layered_nav_dropdown( $terms, $taxonomy, $depth = 0 ) {
@@ -295,23 +306,23 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			$term_counts        = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, 'or' );
 			$_chosen_attributes = $this->get_chosen_attributes();
 
-			if ( 0 == $depth ) {
+			if ( 0 === $depth ) {
 				echo '<select class="wc-brand-dropdown-layered-nav-' . esc_attr( $taxonomy ) . '">';
 				echo '<option value="">' . esc_html__( 'Any Brand', 'woocommerce' ) . '</option>';
 			}
 
 			foreach ( $terms as $term ) {
-				// If on a term page, skip that term in widget list
+				// If on a term page, skip that term in widget list.
 				if ( $term->term_id === $this->get_current_term_id() ) {
 					continue;
 				}
 
-				// Get count based on current view
+				// Get count based on current view.
 				$current_values = ! empty( $_chosen_attributes ) ? $_chosen_attributes : array();
-				$option_is_set  = in_array( $term->term_id, $current_values );
+				$option_is_set  = in_array( $term->term_id, $current_values, true );
 				$count          = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
-				// Only show options with count > 0
+				// Only show options with count > 0.
 				if ( 0 < $count ) {
 					$found = true;
 				} elseif ( 0 === $count && ! $option_is_set ) {
@@ -321,9 +332,9 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 				echo '<option value="' . esc_attr( $term->term_id ) . '" ' . selected( $option_is_set, true, false ) . '>' . esc_html( str_repeat( '&nbsp;', 2 * $depth ) . $term->name ) . '</option>';
 
 				$child_terms = get_terms(
-					$taxonomy,
 					array(
-						'hide_empty' => 1,
+						'taxonomy'   => $taxonomy,
+						'hide_empty' => true,
 						'parent'     => $term->term_id,
 					)
 				);
@@ -333,7 +344,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 				}
 			}
 
-			if ( 0 == $depth ) {
+			if ( 0 === $depth ) {
 				$link = $this->get_page_base_url( $taxonomy );
 				echo '</select>';
 
@@ -354,14 +365,14 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	/**
 	 * Show list based layered nav.
 	 *
-	 * @param  array  $terms
-	 * @param  string $taxonomy
-	 * @param  int    $depth
+	 * @param  array  $terms Terms.
+	 * @param  string $taxonomy Taxonomy.
+	 * @param  int    $depth Depth.
 	 * @return bool   Will nav display?
 	 */
 	protected function layered_nav_list( $terms, $taxonomy, $depth = 0 ) {
-		// List display
-		echo '<ul class="' . ( 0 == $depth ? '' : 'children ' ) . 'wc-brand-list-layered-nav-' . esc_attr( $taxonomy ) . '">';
+		// List display.
+		echo '<ul class="' . ( 0 === $depth ? '' : 'children ' ) . 'wc-brand-list-layered-nav-' . esc_attr( $taxonomy ) . '">';
 
 		$term_counts        = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, 'or' );
 		$_chosen_attributes = $this->get_chosen_attributes();
@@ -371,15 +382,15 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		$filter_name = 'filter_' . $taxonomy;
 
 		foreach ( $terms as $term ) {
-			$option_is_set = in_array( $term->term_id, $current_values );
+			$option_is_set = in_array( $term->term_id, $current_values, true );
 			$count         = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : 0;
 
-			// skip the term for the current archive
+			// skip the term for the current archive.
 			if ( $this->get_current_term_id() === $term->term_id ) {
 				continue;
 			}
 
-			// Only show options with count > 0
+			// Only show options with count > 0.
 			if ( 0 < $count ) {
 				$found = true;
 			} elseif ( 0 === $count && ! $option_is_set ) {
@@ -389,7 +400,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 			$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$current_filter = array_map( 'intval', $current_filter );
 
-			if ( ! in_array( $term->term_id, $current_filter ) ) {
+			if ( ! in_array( $term->term_id, $current_filter, true ) ) {
 				$current_filter[] = $term->term_id;
 			}
 
@@ -397,7 +408,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 			// Add current filters to URL.
 			foreach ( $current_filter as $key => $value ) {
-				// Exclude query arg for current term archive term
+				// Exclude query arg for current term archive term.
 				if ( $value === $this->get_current_term_id() ) {
 					unset( $current_filter[ $key ] );
 				}
@@ -420,18 +431,20 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 
 			echo '<li class="wc-layered-nav-term ' . ( $option_is_set ? 'chosen' : '' ) . '">';
 
+			// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment.
 			echo ( $count > 0 || $option_is_set ) ? '<a href="' . esc_url( apply_filters( 'woocommerce_layered_nav_link', $link ) ) . '">' : '<span>';
 
 			echo esc_html( $term->name );
 
 			echo ( $count > 0 || $option_is_set ) ? '</a> ' : '</span> ';
 
+			// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment.
 			echo wp_kses_post( apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term ) );
 
 			$child_terms = get_terms(
-				$taxonomy,
 				array(
-					'hide_empty' => 1,
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => true,
 					'parent'     => $term->term_id,
 				)
 			);
@@ -451,9 +464,9 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	/**
 	 * Count products within certain terms, taking the main WP query into consideration.
 	 *
-	 * @param  array  $term_ids
-	 * @param  string $taxonomy
-	 * @param  string $query_type
+	 * @param  array  $term_ids Term IDs.
+	 * @param  string $taxonomy Taxonomy.
+	 * @param  string $query_type Query type.
 	 * @return array
 	 */
 	protected function get_filtered_term_product_counts( $term_ids, $taxonomy, $query_type = 'and' ) {
@@ -475,7 +488,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
 		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
 
-		// Generate query
+		// Generate query.
 		$query             = array();
 		$query['select']   = "SELECT COUNT( DISTINCT {$wpdb->posts}.ID ) as term_count, terms.term_id as term_count_id";
 		$query['from']     = "FROM {$wpdb->posts}";
@@ -498,6 +511,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		$query_hash = md5( $query );
 
 		// Maybe store a transient of the count values.
+		// phpcs:ignoreWooCommerce.Commenting.CommentHooks.MissingHookComment.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
 		if ( true === $cache ) {
 			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
