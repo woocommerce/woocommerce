@@ -158,7 +158,7 @@ add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_items', 10 );
  *
  * Does the same thing as wc_nav_menu_items but for block themes.
  *
- * @since 9.2.0
+ * @since 9.3.0
  * @param \WP_Block_list $inner_blocks Inner blocks.
  * @return \WP_Block_list
  */
