@@ -244,7 +244,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 			if ( ! shouldSkip ) {
 				// Verify that the deleted tax rates cannot be retrieved.
 				for ( const id of taxRateIdsToDelete ) {
-					//Call the API to attempte to retrieve the tax rates
+					// Call the API to attempt to retrieve the tax rates
 					const r = await request.get(
 						`wp-json/wc/v3/taxes/${ id }`
 					);
