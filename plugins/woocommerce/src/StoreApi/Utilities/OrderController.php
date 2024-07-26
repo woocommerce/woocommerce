@@ -381,6 +381,11 @@ class OrderController {
 		$address        = $order->get_address( $address_type );
 		$current_locale = isset( $all_locales[ $address['country'] ] ) ? $all_locales[ $address['country'] ] : array();
 
+		foreach( $all_locales['default'] as $key => $value ) {
+			$default_value          = empty( $current_locale[ $key] ) ? [] : $current_locale[ $key ];
+			$current_locale[ $key ] = wp_parse_args( $default_value, $value );
+		}
+
 		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $order, $address_type );
 
 		$address = array_merge( $address, $additional_fields );
