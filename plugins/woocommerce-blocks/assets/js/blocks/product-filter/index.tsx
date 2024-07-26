@@ -6,18 +6,8 @@ import {
 	createBlock,
 	registerBlockType,
 } from '@wordpress/blocks';
-import {
-	Icon,
-	box,
-	category,
-	currencyDollar,
-	more,
-	starEmpty,
-} from '@wordpress/icons';
+import { Icon, more } from '@wordpress/icons';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
-import { __ } from '@wordpress/i18n';
-import { toggle } from '@woocommerce/icons';
-
 /**
  * Internal dependencies
  */
@@ -26,6 +16,7 @@ import edit from './edit';
 import save from './save';
 import { BLOCK_NAME_MAP } from './constants';
 import { BlockAttributes } from './types';
+import { blockVariations } from './block-variations';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
@@ -39,124 +30,7 @@ if ( isExperimentalBlocksEnabled() ) {
 		},
 		edit,
 		save,
-		variations: [
-			{
-				name: 'product-filter-active',
-				title: __(
-					'Product Filter: Active Filters (Experimental)',
-					'woocommerce'
-				),
-				description: __(
-					'Display the currently active filters.',
-					'woocommerce'
-				),
-				attributes: {
-					heading: __( 'Active filters', 'woocommerce' ),
-					filterType: 'active-filters',
-				},
-				icon: {
-					src: (
-						<Icon
-							icon={ toggle }
-							className="wc-block-editor-components-block-icon"
-						/>
-					),
-				},
-				isDefault: true,
-			},
-			{
-				name: 'product-filter-price',
-				title: __(
-					'Product Filter: Price (Experimental)',
-					'woocommerce'
-				),
-				description: __(
-					'Enable customers to filter the product collection by choosing a price range.',
-					'woocommerce'
-				),
-				attributes: {
-					filterType: 'price-filter',
-					heading: __( 'Filter by Price', 'woocommerce' ),
-				},
-				icon: {
-					src: (
-						<Icon
-							icon={ currencyDollar }
-							className="wc-block-editor-components-block-icon"
-						/>
-					),
-				},
-			},
-			{
-				name: 'product-filter-stock-status',
-				title: __(
-					'Product Filter: Stock Status (Experimental)',
-					'woocommerce'
-				),
-				description: __(
-					'Enable customers to filter the product collection by stock status.',
-					'woocommerce'
-				),
-				attributes: {
-					filterType: 'stock-filter',
-					heading: __( 'Filter by Stock Status', 'woocommerce' ),
-				},
-				icon: {
-					src: (
-						<Icon
-							icon={ box }
-							className="wc-block-editor-components-block-icon"
-						/>
-					),
-				},
-			},
-			{
-				name: 'product-filter-attribute',
-				title: __(
-					'Product Filter: Attribute (Experimental)',
-					'woocommerce'
-				),
-				description: __(
-					'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
-					'woocommerce'
-				),
-				attributes: {
-					filterType: 'attribute-filter',
-					heading: __( 'Filter by Attribute', 'woocommerce' ),
-				},
-				icon: {
-					src: (
-						<Icon
-							icon={ category }
-							className="wc-block-editor-components-block-icon"
-						/>
-					),
-				},
-			},
-			{
-				name: 'product-filter-rating',
-				title: __(
-					'Product Filter: Rating (Experimental)',
-					'woocommerce'
-				),
-				description: __(
-					'Enable customers to filter the product collection by rating.',
-					'woocommerce'
-				),
-				attributes: {
-					filterType: 'rating-filter',
-					heading: __( 'Filter by Rating', 'woocommerce' ),
-				},
-				icon: {
-					src: (
-						<Icon
-							icon={ starEmpty }
-							className="wc-block-editor-components-block-icon"
-						/>
-					),
-				},
-			},
-		],
+		variations: blockVariations,
 		transforms: {
 			from: [
 				{

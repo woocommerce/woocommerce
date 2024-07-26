@@ -105,7 +105,7 @@ const addInertToAssemblerPatterns = (
 	const interactiveBlocks: Record< string, string > = {
 		'/customize-store/assembler-hub/header': `header[data-type='core/template-part']`,
 		'/customize-store/assembler-hub/footer': `footer[data-type='core/template-part']`,
-		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part'])`,
+		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part']):not(.${ DISABLE_CLICK_CLASS })`,
 	};
 
 	const pathInteractiveBlocks = page.includes(
@@ -157,7 +157,7 @@ const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 		}
 
 		for ( const disableClick of documentElement.querySelectorAll(
-			`[data-is-parent-block='true'] *, header *, footer *, .${ DISABLE_CLICK_CLASS }`
+			`[data-is-parent-block='true'] *`
 		) ) {
 			makeInert( disableClick );
 		}
@@ -201,6 +201,7 @@ const updateSelectedBlock = (
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
 		} );
+		( event.target as HTMLElement ).focus();
 	};
 
 	const handleMouseMove = ( event: MouseEvent ) => {
@@ -232,9 +233,17 @@ export const hidePopoverWhenMouseLeaveIframe = (
 	iframeRef: HTMLElement,
 	{
 		hidePopover,
-	}: Pick< useAutoBlockPreviewEventListenersCallbacks, 'hidePopover' >
+		selectBlock,
+	}: Pick<
+		useAutoBlockPreviewEventListenersCallbacks,
+		'hidePopover' | 'selectBlock'
+	>
 ) => {
-	const handleMouseLeave = () => {
+	const handleMouseLeave = ( event: MouseEvent ) => {
+		/// Deselect the block if the mouse exits the iframe unless it's moving towards the Block Toolbar.
+		if ( event.clientX < 0 || event.clientY < 0 ) {
+			selectBlock( '' );
+		}
 		hidePopover();
 	};
 
@@ -329,16 +338,14 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 
 		setStyle( documentElement );
 
-		if ( logoBlockIds.length === 0 ) {
-			const logoObserver = findAndSetLogoBlock(
-				{ autoScale, documentElement },
-				{
-					setLogoBlockIds,
-				}
-			);
+		const logoObserver = findAndSetLogoBlock(
+			{ autoScale, documentElement },
+			{
+				setLogoBlockIds,
+			}
+		);
 
-			observers.push( logoObserver );
-		}
+		observers.push( logoObserver );
 
 		if (
 			isFullComposabilityFeatureAndAPIAvailable() &&
@@ -347,7 +354,9 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			const removeEventListenerHidePopover =
 				hidePopoverWhenMouseLeaveIframe( documentElement, {
 					hidePopover,
+					selectBlock,
 				} );
+
 			const removeEventListenersSelectedBlock = updateSelectedBlock(
 				documentElement,
 				{

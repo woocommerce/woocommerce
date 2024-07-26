@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
+
 /**
  * Update a product's stock amount.
  *
@@ -21,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  * @param  int|null       $stock_quantity Stock quantity.
  * @param  string         $operation      Type of operation, allows 'set', 'increase' and 'decrease'.
  * @param  bool           $updating       If true, the product object won't be saved here as it will be updated later.
- * @return bool|int
+ * @return bool|int|null
  */
 function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set', $updating = false ) {
 	if ( ! is_a( $product, 'WC_Product' ) ) {
@@ -348,7 +350,8 @@ function wc_get_held_stock_quantity( WC_Product $product, $exclude_order_id = 0 
 		return 0;
 	}
 
-	return ( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->get_reserved_stock( $product, $exclude_order_id );
+	$reserve_stock = new ReserveStock();
+	return $reserve_stock->get_reserved_stock( $product, $exclude_order_id );
 }
 
 /**
@@ -374,7 +377,8 @@ function wc_reserve_stock_for_order( $order ) {
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
 
 	if ( $order ) {
-		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->reserve_stock_for_order( $order );
+		$reserve_stock = new ReserveStock();
+		$reserve_stock->reserve_stock_for_order( $order );
 	}
 }
 add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' );
@@ -400,7 +404,8 @@ function wc_release_stock_for_order( $order ) {
 	$order = $order instanceof WC_Order ? $order : wc_get_order( $order );
 
 	if ( $order ) {
-		( new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock() )->release_stock_for_order( $order );
+		$reserve_stock = new ReserveStock();
+		$reserve_stock->release_stock_for_order( $order );
 	}
 }
 add_action( 'woocommerce_checkout_order_exception', 'wc_release_stock_for_order' );
