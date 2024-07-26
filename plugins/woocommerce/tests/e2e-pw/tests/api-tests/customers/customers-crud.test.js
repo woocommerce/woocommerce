@@ -2,13 +2,6 @@ const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { admin } = require( '../../../test-data/data' );
 const { customer } = require( '../../../data' );
 
-/**
- * Tests for the WooCommerce Customers API.
- *
- * @group api
- * @group customers
- *
- */
 test.describe( 'Customers API tests: CRUD', () => {
 	let customerId;
 	let subscriberUserId;
@@ -59,7 +52,9 @@ test.describe( 'Customers API tests: CRUD', () => {
 			`/wp-json/wc/v3/customers/${ subscriberUserId }`
 		);
 		const responseJSON = await response.json();
+		// eslint-disable-next-line jest/no-standalone-expect
 		expect( response.status() ).toEqual( 200 );
+		// eslint-disable-next-line jest/no-standalone-expect
 		expect( responseJSON.role ).toEqual( 'subscriber' );
 	} );
 
@@ -179,7 +174,9 @@ test.describe( 'Customers API tests: CRUD', () => {
 			expect( responseJSON.role ).toEqual( 'customer' );
 		} );
 
-		test( 'can retrieve all customers', async ( { request } ) => {
+		test( 'can retrieve all customers after create', async ( {
+			request,
+		} ) => {
 			// call API to retrieve all customers
 			const response = await request.get( '/wp-json/wc/v3/customers' );
 			const responseJSON = await response.json();
@@ -492,12 +489,12 @@ test.describe( 'Customers API tests: CRUD', () => {
 			expect( deletedCustomerIds ).toEqual( customerIdsToDelete );
 
 			// Verify that the 2 deleted customers cannot be retrieved.
-			for ( const customerId of customerIdsToDelete ) {
+			for ( const id of customerIdsToDelete ) {
 				//Call the API to attempte to retrieve the customers
-				const response = await request.get(
-					`wp-json/wc/v3/customers/${ customerId }`
+				const r = await request.get(
+					`wp-json/wc/v3/customers/${ id }`
 				);
-				expect( response.status() ).toEqual( 404 );
+				expect( r.status() ).toEqual( 404 );
 			}
 		} );
 	} );

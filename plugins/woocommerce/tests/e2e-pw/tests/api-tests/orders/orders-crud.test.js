@@ -57,13 +57,6 @@ const simpleProduct = {
 	regular_price: '48',
 };
 
-/**
- * Tests for the WooCommerce Orders API.
- *
- * @group api
- * @group orders
- *
- */
 test.describe.serial( 'Orders API tests: CRUD', () => {
 	let orderId;
 
@@ -264,6 +257,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			test( `can update status of an order to ${ expectedOrderStatus }`, async ( {
 				request,
 			} ) => {
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				if ( shouldSkip ) {
 					await delay( 1000 ); // if this runs too fast on an external host, it fails
 				}

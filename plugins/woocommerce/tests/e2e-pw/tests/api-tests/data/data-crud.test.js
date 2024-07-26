@@ -253,13 +253,6 @@ const countryCodes = [
 	'zw',
 ];
 
-/**
- * Tests for the WooCommerce Refunds API.
- *
- * @group api
- * @group data
- *
- */
 test.describe( 'Data API tests', () => {
 	test( 'can list all data', async ( { request } ) => {
 		// call API to retrieve data values

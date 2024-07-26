@@ -1,12 +1,5 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 
-/**
- * Tests for the WooCommerce Refunds API.
- *
- * @group api
- * @group payment gateways
- *
- */
 test.describe( 'Payment Gateways API tests', () => {
 	test( 'can view all payment gateways', async ( { request } ) => {
 		// call API to retrieve the payment gateways
@@ -16,8 +9,9 @@ test.describe( 'Payment Gateways API tests', () => {
 		expect( Array.isArray( responseJSON ) ).toBe( true );
 
 		const localPickupKey =
-			process.env.API_BASE_URL &&
-			! process.env.API_BASE_URL.includes( 'localhost' )
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			process.env.BASE_URL &&
+			! process.env.BASE_URL.includes( 'localhost' )
 				? 'pickup_location'
 				: 'local_pickup';
 		console.log( 'localPickupKey=', localPickupKey );

@@ -1,13 +1,6 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { refund } = require( '../../../data' );
 
-/**
- * Tests for the WooCommerce Refunds API.
- *
- * @group api
- * @group refunds
- *
- */
 test.describe( 'Refunds API tests', () => {
 	let expectedRefund;
 	let orderId;

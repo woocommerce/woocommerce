@@ -6,7 +6,6 @@
  * @param {string} action    Batch action. Must be one of: create, update, or delete.
  * @param {Array}  resources A list of resource objects. For the delete action, this will be a list of IDs.
  * @param {Object} payload   The batch payload object. Defaults to an empty object.
- * @return {Object} The payload to send to the batch endpoint.
  */
 const batch = ( action, resources = [], payload = {} ) => {
 	if ( ! [ 'create', 'update', 'delete' ].includes( action ) ) {

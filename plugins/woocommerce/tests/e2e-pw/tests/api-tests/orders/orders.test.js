@@ -34,14 +34,6 @@ const updatedCustomerShipping = {
 	phone: '123456789',
 };
 
-/**
- * Tests for the WooCommerce Orders API.
- *
- * @group api
- * @group orders
- *
- */
-
 test.describe.serial( 'Orders API tests', () => {
 	let orderId, sampleData;
 

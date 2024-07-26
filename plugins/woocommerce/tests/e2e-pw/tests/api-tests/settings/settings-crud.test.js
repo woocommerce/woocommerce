@@ -8,14 +8,6 @@ const {
 	stateOptions,
 } = require( '../../../data/settings' );
 
-/**
- * Tests for the WooCommerce API.
- *
- * @group api
- * @group settings
- *
- */
-
 test.describe.serial( 'Settings API tests: CRUD', () => {
 	test.describe( 'List all settings groups', () => {
 		test( 'can retrieve all settings groups', async ( { request } ) => {
@@ -376,6 +368,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			);
 
 			// different on external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
@@ -395,6 +388,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			}
 
 			// different on external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
@@ -436,6 +430,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			);
 
 			// different on external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
@@ -517,6 +512,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				] )
 			);
 
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
@@ -1628,6 +1624,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			expect( Array.isArray( responseJSON ) ).toBe( true );
 
 			// not present in external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
@@ -1647,6 +1644,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 			}
 
 			// not present in external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
@@ -1849,6 +1847,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [

@@ -1,12 +1,5 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 
-/**
- * Tests for the WooCommerce API.
- *
- * @group api
- * @group taxes
- *
- */
 test.describe( 'Tax Classes API tests: CRUD', () => {
 	let taxClassSlug;
 

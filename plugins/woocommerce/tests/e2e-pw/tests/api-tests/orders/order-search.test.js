@@ -49,13 +49,6 @@ const searchParams = [
 	[ 'shipping state', order.shipping.state ],
 ];
 
-/**
- * Tests for the WooCommerce Order Search API.
- *
- * @group api
- * @group orders
- *
- */
 test.describe( 'Order Search API tests', () => {
 	test.beforeAll( async ( { request } ) => {
 		// Create a product to be associated with the order
@@ -97,6 +90,7 @@ test.describe( 'Order Search API tests', () => {
 			request,
 		} ) => {
 			const searchValue =
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				searchParamRow[ paramIndex ] === 'orderId'
 					? order.id
 					: searchParamRow[ paramIndex ];

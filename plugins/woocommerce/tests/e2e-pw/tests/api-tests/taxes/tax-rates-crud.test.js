@@ -3,14 +3,6 @@ const { allUSTaxesExample } = require( '../../../data' );
 const { BASE_URL } = process.env;
 const shouldSkip = BASE_URL !== undefined;
 
-/**
- * Tests for the WooCommerce API.
- *
- * @group api
- * @group taxes
- *
- */
-
 test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 	let taxRateId;
 
@@ -140,6 +132,7 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 			expect( response.status() ).toEqual( 200 );
 
 			// only run this test on wp-env -- with external hosting there is caching
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				// Verify that the tax rate can no longer be retrieved.
 				const getDeletedTaxRateResponse = await request.get(
@@ -247,14 +240,15 @@ test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 			expect( deletedTaxRateIds ).toEqual( taxRateIdsToDelete );
 
 			// only run this step on wp-env -- caching with external hosting makes unreliable
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				// Verify that the deleted tax rates cannot be retrieved.
-				for ( const taxRateId of taxRateIdsToDelete ) {
+				for ( const id of taxRateIdsToDelete ) {
 					//Call the API to attempte to retrieve the tax rates
-					const response = await request.get(
-						`wp-json/wc/v3/taxes/${ taxRateId }`
+					const r = await request.get(
+						`wp-json/wc/v3/taxes/${ id }`
 					);
-					expect( response.status() ).toEqual( 404 );
+					expect( r.status() ).toEqual( 404 );
 				}
 			}
 		} );

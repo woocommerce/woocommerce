@@ -1,13 +1,6 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { coupon, order } = require( '../../../data' );
 
-/**
- * Tests for the WooCommerce Coupons API.
- *
- * @group api
- * @group coupons
- */
-
 test.describe( 'Coupons API tests', () => {
 	//create variable to store the coupon id we will be using
 	let couponId;

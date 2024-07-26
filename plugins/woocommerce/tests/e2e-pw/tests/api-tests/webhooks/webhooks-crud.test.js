@@ -1,12 +1,5 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 
-/**
- * Tests for the WooCommerce Refunds API.
- *
- * @group api
- * @group webhooks
- *
- */
 test.describe( 'Webhooks API tests', () => {
 	let webhookId;
 

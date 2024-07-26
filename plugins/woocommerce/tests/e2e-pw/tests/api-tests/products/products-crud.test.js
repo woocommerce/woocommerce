@@ -12,14 +12,6 @@ const {
 } = require( '../../../data/products-crud' );
 const { batch } = require( '../../../data/shared/batch-update' );
 
-/**
- * Tests for the WooCommerce Products API.
- * These tests cover API endpoints for creating, retrieving, updating, and deleting a single product.
- *
- * @group api
- * @group products
- *
- */
 test.describe( 'Products API tests: CRUD', () => {
 	let productId;
 
@@ -468,7 +460,9 @@ test.describe( 'Products API tests: CRUD', () => {
 			expect( responseJSON.count ).toEqual( 0 );
 		} );
 
-		test( 'can permanently delete a product tag', async ( { request } ) => {
+		test( 'can permanently delete a product category', async ( {
+			request,
+		} ) => {
 			// Delete the product category.
 			const response = await request.delete(
 				`wp-json/wc/v3/products/categories/${ productCategoryId }`,
@@ -1279,6 +1273,7 @@ test.describe( 'Products API tests: CRUD', () => {
 			expect( response.status() ).toEqual( 200 );
 
 			// if we're running on CI, then skip -- because objects are cached and they don't disappear instantly.
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				// Verify that the product variation can no longer be retrieved.
 				const getDeletedProductVariationResponse = await request.get(
@@ -1368,6 +1363,7 @@ test.describe( 'Products API tests: CRUD', () => {
 			);
 
 			// if we're running on CI, then skip -- because objects are cached and they don't disappear instantly.
+			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( ! shouldSkip ) {
 				// Verify that the deleted product variation can no longer be retrieved.
 				const getDeletedProductVariationResponse = await request.get(

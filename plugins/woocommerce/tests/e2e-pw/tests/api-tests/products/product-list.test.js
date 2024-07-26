@@ -1,15 +1,5 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-/**
- * Internal dependencies
- */
 
-/**
- * Tests for the WooCommerce "List all products" API.
- *
- * @group api
- * @group products
- *
- */
 test.describe( 'Products API tests: List All Products', () => {
 	const PRODUCTS_COUNT = 20;
 	let sampleData;

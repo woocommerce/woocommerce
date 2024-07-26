@@ -73,14 +73,6 @@ const expectedSimpleProductTaxTotal = '1.00';
 const expectedVariableProductTaxTotal = '0.20';
 const expectedExternalProductTaxTotal = '0.00';
 
-/**
- *
- * Test for adding a complex order with different product types and tax classes.
- *
- * @group api
- * @group orders
- *
- */
 test.describe( 'Orders API test', () => {
 	test.beforeAll( async ( { request } ) => {
 		/**

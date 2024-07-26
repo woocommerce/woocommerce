@@ -1,11 +1,5 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 
-/**
- * Tests to verify connection to the API.
- *
- * @group api
- * @group hello
- */
 test.describe( 'Test API connectivity', () => {
 	test( 'can access a non-authenticated endpoint', async ( { request } ) => {
 		const result = await request.get( '/wp-json/wc/v3/' );

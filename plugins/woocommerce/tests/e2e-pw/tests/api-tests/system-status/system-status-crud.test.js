@@ -2,14 +2,6 @@ const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { BASE_URL } = process.env;
 const shouldSkip = BASE_URL !== undefined && ! BASE_URL.includes( 'localhost' );
 
-/**
- * Tests for the WooCommerce API.
- *
- * @group api
- * @group system status
- *
- */
-
 test.describe( 'System Status API tests', () => {
 	test( 'can view all system status items', async ( { request } ) => {
 		// call API to view all system status items
@@ -18,6 +10,7 @@ test.describe( 'System Status API tests', () => {
 		expect( response.status() ).toEqual( 200 );
 
 		// local environment differs from external hosts.  Local listed first.
+		// eslint-disable-next-line playwright/no-conditional-in-test
 		if ( ! shouldSkip ) {
 			expect( responseJSON ).toEqual(
 				expect.objectContaining( {
@@ -407,6 +400,7 @@ test.describe( 'System Status API tests', () => {
 		);
 
 		// local environment differs from external hosts.  Local listed first.
+		// eslint-disable-next-line playwright/no-conditional-in-test
 		if ( ! shouldSkip ) {
 			expect( responseJSON ).toEqual(
 				expect.objectContaining( {
