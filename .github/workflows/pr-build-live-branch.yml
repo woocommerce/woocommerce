@@ -8,6 +8,8 @@ on:
             - '**/changelog/**'
             - '**/tests/**'
             - '**/*.md'
+            - '.github/**'
+            - '!.github/workflows/pr-build-live-branch.yml'
 
 concurrency:
     # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the latter.
@@ -18,7 +20,7 @@ permissions: {}
 
 jobs:
     build:
-        if: github.repository_owner == 'woocommerce' && github.event.pull_request.user.login != 'github-actions[bot]'
+        if: github.repository_owner == 'woocommerce' && github.event.pull_request.user.login != 'github-actions[bot]' && ! github.event.pull_request.head.repo.fork
         runs-on: ubuntu-20.04
         permissions:
             contents: write
