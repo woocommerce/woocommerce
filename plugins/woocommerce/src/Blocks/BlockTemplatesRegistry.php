@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductFiltersTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductFiltersOverlayTemplate;
 
 /**
@@ -64,6 +65,7 @@ class BlockTemplatesRegistry {
 			);
 
 			if ( Features::is_enabled( 'experimental-blocks' ) ) {
+				$template_parts[ ProductFiltersTemplate::SLUG ]        = new ProductFiltersTemplate();
 				$template_parts[ ProductFiltersOverlayTemplate::SLUG ] = new ProductFiltersOverlayTemplate();
 			}
 		} else {
