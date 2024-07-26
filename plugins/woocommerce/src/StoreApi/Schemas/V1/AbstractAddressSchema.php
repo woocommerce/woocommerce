@@ -269,7 +269,6 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			}
 		}
 
-
 		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', 'billing_address' === $this->title ? 'billing' : 'shipping' );
 
 		if ( is_wp_error( $result ) && $result->has_errors() ) {
