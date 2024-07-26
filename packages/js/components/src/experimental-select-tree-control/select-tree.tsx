@@ -163,7 +163,10 @@ export const SelectTree = function SelectTree( {
 		className: 'woocommerce-experimental-select-control__input',
 		id: `${ props.id }-input`,
 		'aria-autocomplete': 'list',
-		'aria-activedescendant': `woocommerce-experimental-tree-control__menu-item-${ highlightedIndex }`,
+		'aria-activedescendant':
+			highlightedIndex >= 0
+				? `woocommerce-experimental-tree-control__menu-item-${ highlightedIndex }`
+				: undefined,
 		'aria-controls': menuInstanceId,
 		'aria-owns': menuInstanceId,
 		role: 'combobox',
@@ -222,6 +225,7 @@ export const SelectTree = function SelectTree( {
 					}
 				}
 			} else if ( event.key === 'ArrowUp' ) {
+				event.preventDefault();
 				if ( highlightedIndex > 0 ) {
 					const visibleNodeIndex = getVisibleNodeIndex(
 						linkedTree,
