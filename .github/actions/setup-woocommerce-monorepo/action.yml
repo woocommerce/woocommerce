@@ -87,11 +87,13 @@ runs:
           shell: 'bash'
           # The installation command is a bit odd as it's a workaround for know bug - https://github.com/pnpm/pnpm/issues/6300.
           run: |
-            if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' ]]; then
-              echo 'Starting parallel installation of composer dependecies'
+            if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
+              # PHPUnit/REST testing optimized installation
               composer install --working-dir=./plugins/woocommerce --quiet &
+              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false
+            else
+              pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
             fi
-            pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
         # We want to include an option to build projects using this action so that we can make
         # sure that the build cache is always used when building projects.
         - name: 'Cache Build Output'
