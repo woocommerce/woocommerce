@@ -114,6 +114,243 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * Ensure that orders can be placed.
+	 */
+	public function test_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that orders cannot be placed with invalid data.
+	 */
+	public function test_invalid_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		// Test with empty state.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Test with invalid state.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => 'GG',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => 'GG',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Test with no state passed.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => 'test',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that validation respects locale filtering.
+	 */
+	public function test_locale_filtering_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) {
+				$locale['US']['state']['required'] = false;
+				$locale['FR']['state']['label']    = 'French state';
+				$locale['FR']['state']['required'] = true;
+				$locale['DE']['state']['label']    = 'German state';
+				$locale['DE']['state']['required'] = true;
+				return $locale;
+			}
+		);
+
+		// Test that a country that usually requires state can be overridden with woocommerce_get_country_locale filter.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test lane',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '123456',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '123456',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Test that a field's label can be overriden by filter.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test lane',
+					'address_2'  => '',
+					'city'       => 'test',
+					'postcode'   => '90210',
+					'country'    => 'FR',
+					'phone'      => '123456',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'postcode'   => '90210',
+					'country'    => 'DE',
+					'phone'      => '123456',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+
+		$this->setUp();
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 'French state is required', $response->get_data()['data']['errors']['billing'][0] );
+		$this->assertEquals( 'German state is required', $response->get_data()['data']['errors']['shipping'][0] );
+	}
+
+	/**
 	 * Ensure that registered extension data is correctly shown on options requests.
 	 */
 	public function test_options_extension_data() {
