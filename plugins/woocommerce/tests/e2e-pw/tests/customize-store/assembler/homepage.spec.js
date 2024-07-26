@@ -224,7 +224,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 test.describe( 'Homepage tracking banner', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async () => {
+	test.beforeAll( async ( { baseURL } ) => {
 		try {
 			// In some environments the tour blocks clicking other elements.
 			await setOption(
