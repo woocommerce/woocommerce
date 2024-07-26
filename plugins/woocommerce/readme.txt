@@ -174,6 +174,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 **WooCommerce**
 
 * Fix - Revert fixing terms count in tracking PR as it caused product_add_publish to be triggered more than usual. [#49797](https://github.com/woocommerce/woocommerce/pull/49797)
+* Fix - Hardening against XSS via the Product Button unescaped attribute. [#50010](https://github.com/woocommerce/woocommerce/pull/50010)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
