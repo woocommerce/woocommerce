@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Ensure that data containing multibyte characters and/or slashes that is appended to log entries gets encoded and rendered correctly

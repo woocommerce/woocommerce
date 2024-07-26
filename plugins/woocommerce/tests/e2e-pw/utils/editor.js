@@ -1,14 +1,13 @@
 const { expect } = require( '@playwright/test' );
 
-const closeWelcomeModal = async ( { page } ) => {
-	// Close welcome popup if prompted
-	try {
-		await page
-			.getByLabel( 'Close', { exact: true } )
-			.click( { timeout: 5000 } );
-	} catch ( error ) {
-		// Welcome modal wasn't present, skipping action.
-	}
+const closeChoosePatternModal = async ( { page } ) => {
+	const closeModal = page.getByRole( 'button', {
+		name: 'Close',
+		exact: true,
+	} );
+	await page.addLocatorHandler( closeModal, async () => {
+		await closeModal.click();
+	} );
 };
 
 const disableWelcomeModal = async ( { page } ) => {
@@ -26,6 +25,15 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const openEditorSettings = async ( { page } ) => {
+	// Open Settings sidebar if closed
+	if ( await page.getByLabel( 'Editor Settings' ).isVisible() ) {
+		console.log( 'Editor Settings is open, skipping action.' );
+	} else {
+		await page.getByLabel( 'Settings', { exact: true } ).click();
+	}
+};
+
 const getCanvas = async ( page ) => {
 	return page.frame( 'editor-canvas' ) || page;
 };
@@ -33,26 +41,54 @@ const getCanvas = async ( page ) => {
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 	await disableWelcomeModal( { page } );
+	await page.waitForResponse(
+		( response ) =>
+			response.url().includes( '//page' ) && response.status() === 200
+	);
 };
 
 const goToPostEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php' );
 	await disableWelcomeModal( { page } );
+	await page.waitForResponse(
+		( response ) =>
+			response.url().includes( '//single' ) && response.status() === 200
+	);
 };
 
 const fillPageTitle = async ( page, title ) => {
-	await ( await getCanvas( page ) )
-		.getByRole( 'textbox', { name: 'Add title' } )
-		.fill( title );
+	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).click();
+	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).fill( title );
 };
 
-const insertBlock = async ( page, blockName ) => {
-	const canvas = await getCanvas( page );
-	// Click the title to activate the block inserter.
-	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
-	await canvas.getByLabel( 'Add block' ).click();
+const insertBlock = async ( page, blockName, wpVersion = null ) => {
+	await page
+		.getByRole( 'button', {
+			name: 'Toggle block inserter',
+			expanded: false,
+		} )
+		.click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+
+	// In WP 6.6 'Toggle block inserter' button closes the inserter as expected,
+	// but trying to immediately open it again will fail in Playwright, while manually it works.
+	// We have tests that insert multiple blocks and fail because of this.
+	// Using the new 'Close block inserter' button added in WP 6.6 works fine.
+	if ( wpVersion && wpVersion <= 6.5 ) {
+		await page
+			.getByRole( 'button', {
+				name: 'Toggle block inserter',
+				expanded: true,
+			} )
+			.click();
+	} else {
+		await page
+			.getByRole( 'button', {
+				name: 'Close block inserter',
+			} )
+			.click();
+	}
 };
 
 const insertBlockByShortcut = async ( page, blockName ) => {
@@ -104,10 +140,11 @@ const publishPage = async ( page, pageTitle ) => {
 };
 
 module.exports = {
-	closeWelcomeModal,
+	closeChoosePatternModal,
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	openEditorSettings,
 	getCanvas,
 	fillPageTitle,
 	insertBlock,

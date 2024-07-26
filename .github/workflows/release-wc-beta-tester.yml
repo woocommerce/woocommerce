@@ -22,6 +22,7 @@ jobs:
               with:
                 install: '@woocommerce/plugin-woocommerce'
                 build: '@woocommerce/plugin-woocommerce'
+                pull-package-deps: '@woocommerce/plugin-woocommerce-beta-tester'
 
             - name: Lint
               working-directory: plugins/woocommerce-beta-tester

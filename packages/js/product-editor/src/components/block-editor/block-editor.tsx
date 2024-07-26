@@ -297,6 +297,7 @@ export function BlockEditor( {
 			settings,
 			productTemplate,
 			productFormTemplate,
+			productId,
 		]
 	);
 
@@ -354,6 +355,11 @@ export function BlockEditor( {
 						dispatch( productEditorUiStore ).closeModalEditor
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
+					name={
+						product.name === 'AUTO-DRAFT'
+							? __( '(no product name)', 'woocommerce' )
+							: product.name
+					}
 				/>
 			</Suspense>
 		);
