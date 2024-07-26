@@ -91,6 +91,15 @@ class Checkout extends MockeryTestCase {
 					'weight'        => 10,
 				)
 			),
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Virtual Test Product 2',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+					'virtual'       => true,
+				)
+			),
 		);
 		wc_empty_cart();
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
