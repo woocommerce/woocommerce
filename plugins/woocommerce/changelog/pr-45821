@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Check if there's an actual session available inside wc_clear_cart_after_payment

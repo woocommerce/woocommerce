@@ -26,6 +26,7 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 
@@ -43,7 +44,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.2.0';
+	public $version = '9.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -401,6 +402,12 @@ final class WooCommerce {
 				$message,
 				$context
 			);
+
+			// Record fatal error stats.
+			$container = wc_get_container();
+			$mc_stats  = $container->get( McStats::class );
+			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
+			$mc_stats->do_server_side_stats();
 
 			/**
 			 * Action triggered when there are errors during shutdown.

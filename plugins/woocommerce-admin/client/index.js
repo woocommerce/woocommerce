@@ -2,7 +2,7 @@
  * External dependencies
  */
 import '@wordpress/notices';
-import { render } from '@wordpress/element';
+import { render, createRoot } from '@wordpress/element';
 import { CustomerEffortScoreTracksContainer } from '@woocommerce/customer-effort-score';
 import {
 	withCurrentUserHydration,
@@ -22,6 +22,11 @@ import { possiblyRenderSettingsSlots } from './settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from './launch-your-store';
+import {
+	SettingsPaymentsMainWrapper,
+	SettingsPaymentsOfflineWrapper,
+	SettingsPaymentsWooCommercePaymentsWrapper,
+} from './settings-payments';
 import { ErrorBoundary } from './error-boundary';
 
 const appRoot = document.getElementById( 'root' );
@@ -117,5 +122,51 @@ if (
 			<CustomerEffortScoreTracksContainer />,
 			root.insertBefore( document.createElement( 'div' ), null )
 		);
+	} )();
+}
+
+// Render the payment settings components only if
+// the feature flag is enabled.
+if (
+	window.wcAdminFeatures &&
+	window.wcAdminFeatures[ 'reactify-classic-payments-settings' ] === true
+) {
+	( function () {
+		const paymentsMainRoot = document.getElementById(
+			'experimental_wc_settings_payments_main'
+		);
+		const paymentsOfflineRoot = document.getElementById(
+			'experimental_wc_settings_payments_offline'
+		);
+		const paymentsWooCommercePaymentsRoot = document.getElementById(
+			'experimental_wc_settings_payments_woocommerce_payments'
+		);
+
+		if ( paymentsMainRoot ) {
+			createRoot(
+				paymentsMainRoot.insertBefore(
+					document.createElement( 'div' ),
+					null
+				)
+			).render( <SettingsPaymentsMainWrapper /> );
+		}
+
+		if ( paymentsOfflineRoot ) {
+			createRoot(
+				paymentsOfflineRoot.insertBefore(
+					document.createElement( 'div' ),
+					null
+				)
+			).render( <SettingsPaymentsOfflineWrapper /> );
+		}
+
+		if ( paymentsWooCommercePaymentsRoot ) {
+			createRoot(
+				paymentsWooCommercePaymentsRoot.insertBefore(
+					document.createElement( 'div' ),
+					null
+				)
+			).render( <SettingsPaymentsWooCommercePaymentsWrapper /> );
+		}
 	} )();
 }
