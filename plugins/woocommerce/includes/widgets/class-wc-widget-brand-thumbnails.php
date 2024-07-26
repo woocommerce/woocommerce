@@ -81,14 +81,16 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		$exclude = array_map( 'intval', explode( ',', $instance['exclude'] ) );
 		$order   = 'name' === $instance['orderby'] ? 'asc' : 'desc';
 
-		$brands = get_terms( array(
+		$brands = get_terms(
+			array(
 			'taxonomy'   => 'product_brand',
 			'hide_empty' => $instance['hide_empty'],
 			'orderby'    => $instance['orderby'],
 			'exclude'    => $exclude,
 			'number'     => $instance['number'],
 			'order'      => $order,
-		) );
+			)
+		);
 
 		if ( ! $brands ) {
 			return;
@@ -96,6 +98,8 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 
 		/**
 		 * Filter the widget's title.
+		 *
+		 * @since 9.3.0
 		 *
 		 * @param string $title Widget title
 		 * @param array $instance The settings for the particular instance of the widget.
