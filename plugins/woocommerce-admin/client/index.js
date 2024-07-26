@@ -138,6 +138,9 @@ if (
 		const paymentsOfflineRoot = document.getElementById(
 			'experimental_wc_settings_payments_offline'
 		);
+		const paymentsWooCommercePaymentsRoot = document.getElementById(
+			'experimental_wc_settings_payments_woocommerce_payments'
+		);
 
 		if ( paymentsMainRoot ) {
 			createRoot(
@@ -156,10 +159,6 @@ if (
 				)
 			).render( <SettingsPaymentsOfflineWrapper /> );
 		}
-
-		const paymentsWooCommercePaymentsRoot = document.getElementById(
-			'experimental_wc_settings_payments_woocommerce_payments'
-		);
 
 		if ( paymentsWooCommercePaymentsRoot ) {
 			createRoot(
