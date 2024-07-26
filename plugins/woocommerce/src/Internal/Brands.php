@@ -21,7 +21,7 @@ class Brands {
 
 		// If the WooCommerce Brands plugin is activated via the WP CLI using the '--skip-plugins' flag, deactivate it here.
 		if ( function_exists( 'wc_brands_init' ) ) {
-			remove_action( 'plugins_loaded', 'wc_brands_init', 1);
+			remove_action( 'plugins_loaded', 'wc_brands_init', 1 );
 		}
 
 		include_once WC_ABSPATH . 'includes/class-wc-brands.php';

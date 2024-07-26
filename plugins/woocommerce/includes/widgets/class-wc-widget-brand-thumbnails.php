@@ -9,10 +9,32 @@
  */
 class WC_Widget_Brand_Thumbnails extends WP_Widget {
 
-	/** Variables to setup the widget. */
+	/**
+	 * Widget CSS class.
+	 *
+	 * @var string
+	 */
 	public $woo_widget_cssclass;
+
+	/**
+	 * Widget description.
+	 *
+	 * @var string
+	 */
 	public $woo_widget_description;
+
+	/**
+	 * Widget id base.
+	 *
+	 * @var string
+	 */
 	public $woo_widget_idbase;
+
+	/**
+	 * Widget name.
+	 *
+	 * @var string
+	 */
 	public $woo_widget_name;
 
 	/** constructor */
