@@ -26,6 +26,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 */
 	private const REACTIFY_RENDER_SECTIONS = [
 		'offline',
+		'woocommerce_payments',
 	];
 
 	/**
