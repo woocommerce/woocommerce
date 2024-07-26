@@ -549,8 +549,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-taxonomy-field',
 				'order'      => 15,
 				'attributes' => array(
-					'label'       => __( 'Brands', 'woocommerce-brands' ),
-					'createTitle' => __( 'Create new brand', 'woocommerce-brands' ),
+					'label'       => __( 'Brands', 'woocommerce' ),
+					'createTitle' => __( 'Create new brand', 'woocommerce' ),
 					'slug'        => 'product_brand',
 					'property'    => 'brands',
 				),
