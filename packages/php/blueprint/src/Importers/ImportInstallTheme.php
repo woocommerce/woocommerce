@@ -19,7 +19,7 @@ class ImportInstallTheme implements StepProcessor {
 		$this->storage = $storage;
 	}
 	public function process( $schema ): StepProcessorResult {
-		$installed_themes = wp_get_themes();
+		$installed_themes = $this->wp_get_themes();
 		$theme            = $schema->themeZipFile;
 
 		if ( isset( $installed_themes[ $theme->slug ] ) ) {

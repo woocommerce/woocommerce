@@ -6,9 +6,11 @@ use Automattic\WooCommerce\Blueprint\ResourceStorages;
 use Automattic\WooCommerce\Blueprint\StepProcessor;
 use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 use Plugin_Upgrader;
 
 class ImportInstallPlugin implements StepProcessor {
+	use UseWPFunctions;
 	private ResourceStorages $storage;
 	private array $installed_plugin_paths = array();
 
@@ -70,7 +72,7 @@ class ImportInstallPlugin implements StepProcessor {
 		}
 
 		$path = $this->installed_plugin_paths[ $slug ] ?? false;
-		return activate_plugin( $path );
+		return $this->wp_activate_plugin( $path );
 	}
 
 	protected function get_installed_plugins_paths() {
