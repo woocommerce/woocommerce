@@ -31,8 +31,10 @@
 		?>
 	</ul>
 
-	<?php foreach ( $index as $i ) {
-		if ( isset( $product_brands[ $i ] ) ) { ?>
+	<?php
+	foreach ( $index as $i ) {
+		if ( isset( $product_brands[ $i ] ) ) {
+			?>
 
 			<h3 id="brands-<?php echo esc_attr( $i ); ?>"><?php echo esc_html( $i ); ?></h3>
 
@@ -52,7 +54,9 @@
 				<a class="top" href="#brands_a_z"><?php esc_html_e( '&uarr; Top', 'woocommerce' ); ?></a>
 			<?php } ?>
 
-		<?php }
-	} ?>
+		<?php
+		}
+	}
+	?>
 
 </div>
