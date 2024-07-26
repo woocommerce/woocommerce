@@ -62,7 +62,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 					),
 					sharing: (
 						<a
-							href={ MARKETPLACE_COLLABORATION_PATH }
+							href={ MARKETPLACE_SHARING_PATH }
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -110,7 +110,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 					),
 					sharing: (
 						<a
-							href={ MARKETPLACE_COLLABORATION_PATH }
+							href={ MARKETPLACE_SHARING_PATH }
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -148,7 +148,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 					),
 					sharing: (
 						<a
-							href={ MARKETPLACE_COLLABORATION_PATH }
+							href={ MARKETPLACE_SHARING_PATH }
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
