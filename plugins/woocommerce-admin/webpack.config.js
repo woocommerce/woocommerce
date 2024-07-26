@@ -127,7 +127,7 @@ const webpackConfig = {
 				},
 				exclude: [
 					/[\/\\]node_modules[\/\\]\.pnpm[\/\\]/,
-					/[\/\\](changelog|build|docs|vendor)[\/\\]/,
+					/[\/\\](changelog|bin|build|docs|vendor)[\/\\]/,
 				],
 				use: {
 					loader: 'babel-loader',
