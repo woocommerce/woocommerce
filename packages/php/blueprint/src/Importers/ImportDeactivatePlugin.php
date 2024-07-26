@@ -11,7 +11,7 @@ class ImportDeactivatePlugin implements StepProcessor {
 	use UsePluginHelpers;
 
 	public function process( $schema ): StepProcessorResult {
-		$result = StepProcessorResult::success( 'DeactivatePlugins' );
+		$result = StepProcessorResult::success( DeactivatePlugin::get_step_name() );
 		$name   = $schema->pluginName;
 
 		$this->deactivate_plugin_by_slug( $name );

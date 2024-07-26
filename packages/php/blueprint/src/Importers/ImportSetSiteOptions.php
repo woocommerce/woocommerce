@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 class ImportSetSiteOptions implements StepProcessor {
 	use UseWPFunctions;
 	public function process( $schema ): StepProcessorResult {
-		$result = StepProcessorResult::success( 'SetOptions' );
+		$result = StepProcessorResult::success( SetSiteOptions::get_step_name() );
 		foreach ( $schema->options as $key => $value ) {
 			if ( is_object( $value ) ) {
 				$value = (array) $value;

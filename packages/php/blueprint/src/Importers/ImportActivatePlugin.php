@@ -11,7 +11,7 @@ class ImportActivatePlugin implements StepProcessor {
 	use UsePluginHelpers;
 
 	public function process( $schema ): StepProcessorResult {
-		$result = StepProcessorResult::success( 'DeactivatePlugins' );
+		$result = StepProcessorResult::success( ActivatePlugin::get_step_name() );
 		$name   = $schema->pluginName;
 
 		$activate = $this->activate_plugin_by_slug( $name );

@@ -15,7 +15,7 @@ class ImportInstallTheme implements StepProcessor {
 	private StepProcessorResult $result;
 
 	public function __construct( ResourceStorages $storage ) {
-		$this->result  = StepProcessorResult::success( 'InstallThemes' );
+		$this->result  = StepProcessorResult::success( InstallTheme::get_step_name() );
 		$this->storage = $storage;
 	}
 	public function process( $schema ): StepProcessorResult {

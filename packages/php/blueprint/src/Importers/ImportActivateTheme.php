@@ -14,7 +14,7 @@ class ImportActivateTheme implements StepProcessor {
 	use UseWPFunctions;
 
 	public function process( $schema ): StepProcessorResult {
-		$result = StepProcessorResult::success( 'DeactivatePlugins' );
+		$result = StepProcessorResult::success( ActivateTheme::get_step_name() );
 		$name   = $schema->themeName;
 
 		$switch = $this->wp_switch_theme( $name );

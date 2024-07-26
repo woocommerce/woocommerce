@@ -11,7 +11,7 @@ class ImportDeletePlugin implements StepProcessor {
 	use UsePluginHelpers;
 
 	public function process( $schema ): StepProcessorResult {
-		$result = StepProcessorResult::success( 'DeletePlugins' );
+		$result = StepProcessorResult::success( DeletePlugin::get_step_name() );
 		$name   = $schema->pluginName;
 
 		$delete = $this->delete_plugin_by_slug( $name );

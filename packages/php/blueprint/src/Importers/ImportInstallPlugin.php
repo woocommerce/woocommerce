@@ -16,7 +16,7 @@ class ImportInstallPlugin implements StepProcessor {
 		$this->storage = $storage;
 	}
 	public function process( $schema ): StepProcessorResult {
-		$result = StepProcessorResult::success( 'InstallPlugins' );
+		$result = StepProcessorResult::success( InstallPlugin::get_step_name() );
 
 		$installed_plugins = $this->get_installed_plugins_paths();
 		$plugin            = $schema->pluginZipFile;
