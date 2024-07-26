@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix page titles of the cart and checkout page when using blocks and FSE themes.

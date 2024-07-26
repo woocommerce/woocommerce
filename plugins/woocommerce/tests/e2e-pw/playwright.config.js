@@ -3,6 +3,11 @@ require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 const testsRootPath = __dirname;
 const testsResultsPath = `${ testsRootPath }/test-results`;
 
+if ( ! process.env.BASE_URL ) {
+	console.log( 'BASE_URL is not set. Using default.' );
+	process.env.BASE_URL = 'http://localhost:8086';
+}
+
 const {
 	ALLURE_RESULTS_DIR,
 	BASE_URL,
@@ -23,12 +28,6 @@ const reporter = [
 				`${ testsRootPath }/test-results/allure-results`,
 			detail: true,
 			suiteTitle: true,
-			environmentInfo: {
-				Node: process.version,
-				OS: process.platform,
-				WP: process.env.WP_VERSION,
-				CI: process.env.CI,
-			},
 		},
 	],
 	[
@@ -36,6 +35,10 @@ const reporter = [
 		{
 			outputFile: `${ testsRootPath }/test-results/test-results-${ Date.now() }.json`,
 		},
+	],
+	[
+		`${ testsRootPath }/reporters/environment-reporter.js`,
+		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
 	],
 ];
 
@@ -71,7 +74,7 @@ const config = {
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
-		baseURL: BASE_URL ?? 'http://localhost:8086',
+		baseURL: BASE_URL,
 		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: `${ testsRootPath }/.state/`,
 		trace:
