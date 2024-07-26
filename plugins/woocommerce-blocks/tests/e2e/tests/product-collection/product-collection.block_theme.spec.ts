@@ -1487,9 +1487,8 @@ test.describe( 'Product Collection', () => {
 				.getByRole( 'option', { name: 'Fallback content' } )
 				.click();
 
-			const products = editor.canvas.getByLabel( 'Block: Product Title' );
+			const products = editor.canvas.getByLabel( 'Block: Title' );
 
-			await expect( products ).toHaveCount( 3 );
 			await expect( products ).toHaveText( expectedProducts );
 		} );
 		test( 'Products by specific tag template displays products from this tag', async ( {
@@ -1516,9 +1515,8 @@ test.describe( 'Product Collection', () => {
 				.getByRole( 'option', { name: 'Fallback content' } )
 				.click();
 
-			const products = editor.canvas.getByLabel( 'Block: Product Title' );
+			const products = editor.canvas.getByLabel( 'Block: Title' );
 
-			await expect( products ).toHaveCount( 2 );
 			await expect( products ).toHaveText( expectedProducts );
 		} );
 	} );
