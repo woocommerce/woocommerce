@@ -137,7 +137,7 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
         run: |
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}' || (echo 'Re-trying' && pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}')
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }} || (echo 'Re-trying' && pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }})
         shell: bash
 
       - name: 'Get commit message'
