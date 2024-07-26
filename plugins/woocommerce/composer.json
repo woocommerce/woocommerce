@@ -108,6 +108,9 @@
 		"lint-branch": [
 			"bash ./bin/lint-branch.sh"
 		],
+		"fix-branch": [
+			"bash ./bin/fix-branch.sh"
+		],
 		"phpcbf": [
 			"phpcbf -p"
 		],
