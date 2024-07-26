@@ -49,17 +49,21 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 		if ( $current_section ) {
-			foreach ( $payment_gateways as $gateway ) {
-				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
-					if ( isset( $_GET['toggle_enabled'] ) ) {
-							$enabled = $gateway->get_option( 'enabled' );
+			if ( in_array( $current_section, self::REACTIFY_RENDER_SECTIONS, true ) ) {
+				echo '<div id="wc_settings_payments_' . esc_attr( $current_section ) . '"></div>';
+			} else {
+				foreach ( $payment_gateways as $gateway ) {
+					if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
+						if ( isset( $_GET['toggle_enabled'] ) ) {
+								$enabled = $gateway->get_option( 'enabled' );
 
-						if ( $enabled ) {
-							$gateway->settings['enabled'] = wc_string_to_bool( $enabled ) ? 'no' : 'yes';
+							if ( $enabled ) {
+								$gateway->settings['enabled'] = wc_string_to_bool( $enabled ) ? 'no' : 'yes';
+							}
 						}
+						$this->run_gateway_admin_options( $gateway );
+						break;
 					}
-					$this->run_gateway_admin_options( $gateway );
-					break;
 				}
 			}
 		} else {
