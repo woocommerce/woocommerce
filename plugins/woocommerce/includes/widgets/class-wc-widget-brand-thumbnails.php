@@ -83,12 +83,12 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 
 		$brands = get_terms(
 			array(
-			'taxonomy'   => 'product_brand',
-			'hide_empty' => $instance['hide_empty'],
-			'orderby'    => $instance['orderby'],
-			'exclude'    => $exclude,
-			'number'     => $instance['number'],
-			'order'      => $order,
+				'taxonomy'   => 'product_brand',
+				'hide_empty' => $instance['hide_empty'],
+				'orderby'    => $instance['orderby'],
+				'exclude'    => $exclude,
+				'number'     => $instance['number'],
+				'order'      => $order,
 			)
 		);
 
@@ -108,7 +108,7 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->woo_widget_idbase );
 
 		echo $args['before_widget']; // phpcs:ignore WordPress.Security.EscapeOutput
-		if ( $title !== '' ) {
+		if ( '' !== $title ) {
 			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 
@@ -133,7 +133,6 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 	 * @param array $old_instance The old settings for the particular instance of the widget.
 	 *
 	 * @see WP_Widget->update
-	 *
 	 */
 	public function update( $new_instance, $old_instance ) {
 		$instance['title']         = wp_strip_all_tags( stripslashes( $new_instance['title'] ) );
