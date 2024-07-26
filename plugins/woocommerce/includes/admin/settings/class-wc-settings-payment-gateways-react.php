@@ -38,7 +38,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		 *
 		 * @param array $sections List of section identifiers.
 		 */
-		return apply_filters( 'woocommerce_admin_payment_reactify_render_sections', $sections );
+		return apply_filters( 'experimental_woocommerce_admin_payment_reactify_render_sections', $sections );
 	}
 
 	/**
