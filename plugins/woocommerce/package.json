@@ -470,7 +470,7 @@
 					],
 					"report": {
 						"resultsBlobName": "core-api-report",
-						"resultsPath": "tests/api-core-tests/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
@@ -501,7 +501,7 @@
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
-						"resultsPath": "tests/api-core-tests/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
