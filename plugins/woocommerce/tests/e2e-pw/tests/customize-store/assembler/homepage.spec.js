@@ -222,7 +222,21 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 } );
 
 test.describe( 'Homepage tracking banner', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
+
 	test.beforeAll( async () => {
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'yes'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
+
 		const wordPressVersion = await getInstalledWordPressVersion();
 
 		if ( wordPressVersion <= 6.5 ) {
