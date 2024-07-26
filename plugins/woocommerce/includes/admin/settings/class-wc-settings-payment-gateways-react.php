@@ -20,9 +20,9 @@ if ( class_exists( 'WC_Settings_Payment_Gateways_React', false ) ) {
 class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 
 	/**
-	 * Whitelist of sections to render using React.
+	 * Get the whitelist of sections to render using React.
 	 *
-	 * @return array
+	 * @return array List of section identifiers.
 	 */
 	private function get_reactify_render_sections() {
 		$sections = [
@@ -31,6 +31,13 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 			'main',
 		];
 
+		/**
+		 * Filters the list of payment settings sections to be rendered using React.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $sections List of section identifiers.
+		 */
 		return apply_filters( 'woocommerce_admin_payment_reactify_render_sections', $sections );
 	}
 
