@@ -45,7 +45,7 @@ export type Options = {
  *                                                             presented with notice.
  * @param {Object}                [options.icon]               An icon displayed with the notice.
  * @param {boolean}               [options.explicitDismiss]    Whether the notice includes
- *                                                             an explict dismiss button and
+ *                                                             an explicit dismiss button and
  *                                                             can't be dismissed by clicking
  *                                                             the body of the notice.
  * @param {Function}              [options.onDismiss]          Called when the notice is dismissed.

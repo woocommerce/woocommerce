@@ -1,7 +1,9 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
+const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
+const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -20,7 +22,7 @@ async function prepareAssembler( pageObject, baseURL ) {
 		.waitFor( { state: 'hidden' } );
 }
 
-test.describe( 'Assembler -> Homepage', () => {
+test.skip( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -163,21 +165,50 @@ test.describe( 'Assembler -> Homepage', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		// Get all the content between the header and the footer.
-		const homepageHTML = await page
-			.locator(
-				'//header/following-sibling::*[following-sibling::footer]'
-			)
-			.all();
 
-		let index = 0;
-		for ( const element of homepageHTML ) {
-			await expect(
-				await element.getAttribute( 'class' )
-			).toMatchSnapshot( {
-				name: `selected-homepage-blocks-class-frontend-${ index }`,
-			} );
-			index++;
+		// Check if Gutenberg is installed
+		const apiContext = await request.newContext( {
+			baseURL,
+			extraHTTPHeaders: {
+				Authorization: `Basic ${ encodeCredentials(
+					'admin',
+					'password'
+				) }`,
+				cookie: '',
+			},
+		} );
+		const listPluginsResponse = await apiContext.get(
+			`/wp-json/wp/v2/plugins`,
+			{
+				failOnStatusCode: true,
+			}
+		);
+		const pluginsList = await listPluginsResponse.json();
+		const withGutenbergPlugin = pluginsList.find(
+			( { textdomain } ) => textdomain === 'gutenberg'
+		);
+
+		// if testing with Gutenberg, perform Gutenberg-specific testing
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( withGutenbergPlugin ) {
+			// Get all the content between the header and the footer.
+			const homepageHTML = await page
+				.locator(
+					'//header/following-sibling::*[following-sibling::footer]'
+				)
+				.all();
+
+			let index = 0;
+			for ( const element of homepageHTML ) {
+				await expect(
+					await element.getAttribute( 'class' )
+				).toMatchSnapshot( {
+					name: `${
+						withGutenbergPlugin ? 'gutenberg' : ''
+					}-selected-homepage-blocks-class-frontend-${ index }`,
+				} );
+				index++;
+			}
 		}
 	} );
 
@@ -254,46 +285,62 @@ test.describe( 'Assembler -> Homepage', () => {
 	} );
 } );
 
-test.describe( 'Assembler -> Homepage -> PTK API is down', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+test.describe(
+	'Assembler -> Homepage -> PTK API is down',
+	{ tag: '@gutenberg' },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		try {
-			// In some environments the tour blocks clicking other elements.
+		test.beforeAll( async ( { baseURL } ) => {
+			const wordPressVersion = await getInstalledWordPressVersion();
+
+			if ( wordPressVersion <= 6.5 ) {
+				test.skip(
+					'Skipping PTK API test: WordPress version is below 6.5, which does not support this feature.'
+				);
+			}
+			try {
+				// In some environments the tour blocks clicking other elements.
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_customize_store_onboarding_tour_hidden',
+					'yes'
+				);
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
+			}
+		} );
+
+		test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
+			baseURL,
+			pageObject,
+			page,
+		} ) => {
 			await setOption(
 				request,
 				baseURL,
-				'woocommerce_customize_store_onboarding_tour_hidden',
-				'yes'
+				'woocommerce_allow_tracking',
+				'no'
 			);
-		} catch ( error ) {
-			console.log( 'Store completed option not updated' );
-		}
-	} );
 
-	test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
-		baseURL,
-		pageObject,
-		page,
-	} ) => {
-		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
-
-		await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
-			route.fulfill( {
-				status: 500,
+			await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
+				route.fulfill( {
+					status: 500,
+				} );
 			} );
+
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeVisible();
+			await expect(
+				assembler.getByText(
+					"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
+				)
+			).toBeVisible();
 		} );
-
-		await prepareAssembler( pageObject, baseURL );
-
-		const assembler = await pageObject.getAssembler();
-		await expect(
-			assembler.getByText( 'Want more patterns?' )
-		).toBeVisible();
-		await expect(
-			assembler.getByText(
-				"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
-			)
-		).toBeVisible();
-	} );
-} );
+	}
+);

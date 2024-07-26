@@ -77,7 +77,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.describe( 'Merchant > Customer List', () => {
+test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 	test.beforeEach( async ( { context } ) => {
 		// prevents the column picker from saving state between tests
 		await context.route( '**/users/**', ( route ) => route.abort() );
@@ -128,7 +128,13 @@ test.describe( 'Merchant > Customer List', () => {
 						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
 						exact: true,
 					} )
-					.waitFor( { state: 'visible' } );
+					.waitFor();
+				await page
+					.getByRole( 'option', {
+						name: `${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
+					} )
+					.waitFor();
 				await page
 					.getByRole( 'option', {
 						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,

@@ -280,7 +280,7 @@ export const CurrencyFactory = CurrencyFactoryBase;
  * Dev Note: When adding new currencies below, the exchange rate array should also be updated in WooCommerce Admin's `business-details.js`.
  *
  * @deprecated
- * @return {Object} Curreny data.
+ * @return {Object} Currency data.
  */
 export function getCurrencyData() {
 	deprecated( 'getCurrencyData', {

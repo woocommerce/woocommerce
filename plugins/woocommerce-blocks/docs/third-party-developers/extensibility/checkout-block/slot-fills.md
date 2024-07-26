@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout - Slot and Fill
+menu_title: Slot and Fill
+tags: reference
+---
+
 # Slot and Fill <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
@@ -62,14 +68,3 @@ You use `registerPlugin` to feed in your plugin namespace, your component `rende
 ## Requirements
 
 For this to work, your script must be enqueued after Cart and Checkout. You can follow the [IntegrationInterface](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/50f9b3e8d012f425d318908cc13d9c601d97bd68/docs/extensibility/integration-interface.md) documentation for enqueueing your script.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/slot-fills.md)
-
-<!-- /FEEDBACK -->
-
