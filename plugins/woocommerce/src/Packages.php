@@ -44,7 +44,7 @@ class Packages {
 	 */
 	protected static $merged_packages = array(
 		'woocommerce-admin'                    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
-		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package'
+		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package',
 	);
 
 	/**
@@ -73,7 +73,7 @@ class Packages {
 
 		// Display a notice in the Plugins tab next to plugins already merged into WooCommerce core.
 		add_filter( 'all_plugins', array( __CLASS__, 'mark_merged_plugins_as_pending_update' ), 10, 1 );
-		add_action('after_plugin_row', array( __CLASS__, 'display_notice_for_merged_plugins' ), 10, 2);
+		add_action( 'after_plugin_row', array( __CLASS__, 'display_notice_for_merged_plugins' ), 10, 2 );
 	}
 
 	/**
@@ -145,16 +145,16 @@ class Packages {
 	 * @param string $plugin Plugin name.
 	 */
 	public static function deactivate_merged_plugins( $plugin ) {
-		$plugin_dir = basename(dirname($plugin ) );
+		$plugin_dir = basename( dirname( $plugin ) );
 
 		if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
-			$plugins_url = esc_url(admin_url('plugins.php'));
+			$plugins_url = esc_url( admin_url( 'plugins.php' ) );
 			wp_die(
-				__( 'This plugin cannot be activated because its functionality is now included in WooCommerce core.', 'woocommerce' ),
-				__( 'Plugin Activation Error', 'woocommerce' ),
+				esc_html__( 'This plugin cannot be activated because its functionality is now included in WooCommerce core.', 'woocommerce' ),
+				esc_html__( 'Plugin Activation Error', 'woocommerce' ),
 				array(
-					'link_url'  => $plugins_url,
-					'link_text' => __( 'Return to the Plugins page', 'woocommerce' ),
+					'link_url'  => esc_url( $plugins_url ),
+					'link_text' => esc_html__( 'Return to the Plugins page', 'woocommerce' ),
 				),
 			);
 		}
@@ -168,10 +168,10 @@ class Packages {
 	 */
 	public static function mark_merged_plugins_as_pending_update( $plugins ) {
 		foreach ( $plugins as $plugin_name => $plugin_data ) {
-			$plugin_dir = basename(dirname($plugin_name ) );
+			$plugin_dir = basename( dirname( $plugin_name ) );
 			if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
 				// Necessary to properly display notice within row.
-				$plugins[$plugin_name][ 'update' ] = 1;
+				$plugins[ $plugin_name ][ 'update' ] = 1;
 			}
 		}
 		return $plugins;
@@ -184,16 +184,16 @@ class Packages {
 	 * Requires 'mark_merged_plugins_as_pending_update' to properly display this notice.
 	 *
 	 * @param string $plugin_file Plugin file.
-	 * @param array $plugin_data Plugin data.
+	 * @param array $plugin_data  Plugin data.
 	 */
 	public static function display_notice_for_merged_plugins( $plugin_file, $plugin_data ) {
 		global $wp_list_table;
 
-		$plugin_dir    = basename(dirname($plugin_file ) );
+		$plugin_dir    = basename( dirname( $plugin_file ) );
 		$columns_count = $wp_list_table->get_column_count();
-		$notice        = __('This plugin can no longer be activated because its functionality is now included in <strong>WooCommerce</strong>. It is recommended to <strong>delete</strong> it.', 'woocommerce' );
+		$notice        = __( 'This plugin can no longer be activated because its functionality is now included in <strong>WooCommerce</strong>. It is recommended to <strong>delete</strong> it.', 'woocommerce' );
 
-		if (  isset( self::$merged_plugins[ $plugin_dir ] ) ) {
+		if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
 			echo '<tr class="plugin-update-tr"><td colspan="' . $columns_count . '" class="plugin-update"><div class="update-message notice inline notice-error notice-alt"><p>' . $notice . '</p></div></td></tr>';
 		}
 	}
