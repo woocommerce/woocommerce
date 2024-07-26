@@ -41,6 +41,8 @@ use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
+use Automattic\WooCommerce\Blocks\TemplateOptions;
+
 
 /**
  * Takes care of bootstrapping the plugin.
@@ -122,9 +124,35 @@ class Bootstrap {
 			0
 		);
 
-		$is_rest = wc()->is_rest_api_request();
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$is_store_api_request = $is_rest && ! empty( $_SERVER['REQUEST_URI'] ) && ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) );
+		// We need to initialize BlockTemplatesController and BlockTemplatesRegistry at the end of `after_setup_theme`
+		// so themes had the opportunity to declare support for template parts.
+		add_action(
+			'after_setup_theme',
+			function () {
+				$is_store_api_request = wc()->is_store_api_request();
+
+				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+					$this->container->register(
+						BlockTemplatesRegistry::class,
+						function () {
+							return new BlockTemplatesRegistry();
+						}
+					);
+					$this->container->register(
+						BlockTemplatesController::class,
+						function () {
+							return new BlockTemplatesController();
+						}
+					);
+					$this->container->get( BlockTemplatesRegistry::class )->init();
+					$this->container->get( BlockTemplatesController::class )->init();
+				}
+			},
+			999
+		);
+
+		$is_rest              = wc()->is_rest_api_request();
+		$is_store_api_request = wc()->is_store_api_request();
 
 		// Load and init assets.
 		$this->container->get( StoreApi::class )->init();
@@ -152,13 +180,12 @@ class Bootstrap {
 			$this->container->get( AIPatterns::class );
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
-			$this->container->get( BlockTemplatesRegistry::class )->init();
-			$this->container->get( BlockTemplatesController::class )->init();
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 			$this->container->get( PTKPatternsStore::class );
+			$this->container->get( TemplateOptions::class )->init();
 		}
 
 		$this->container->get( QueryFilters::class )->init();
@@ -255,18 +282,6 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			BlockTemplatesRegistry::class,
-			function () {
-				return new BlockTemplatesRegistry();
-			}
-		);
-		$this->container->register(
-			BlockTemplatesController::class,
-			function () {
-				return new BlockTemplatesController();
-			}
-		);
-		$this->container->register(
 			ClassicTemplatesCompatibility::class,
 			function ( Container $container ) {
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
@@ -348,6 +363,12 @@ class Bootstrap {
 			StoreApi::class,
 			function () {
 				return new StoreApi();
+			}
+		);
+		$this->container->register(
+			TemplateOptions::class,
+			function () {
+				return new TemplateOptions();
 			}
 		);
 		// Maintains backwards compatibility with previous Store API namespace.

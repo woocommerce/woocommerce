@@ -15,3 +15,12 @@
 		transform: scaleX(-1);
 	}
 }
+
+.wc-block-mini-cart__product-count-radiocontrol {
+	.components-base-control__field > .components-v-stack {
+		gap: 6px;
+		.components-radio-control__option {
+			align-items: flex-start;
+		}
+	}
+}

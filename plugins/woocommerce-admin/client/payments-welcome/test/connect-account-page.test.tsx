@@ -61,6 +61,7 @@ describe( 'Connect Account Page', () => {
 		expect( recordEvent ).toHaveBeenCalledWith( 'page_view', {
 			path: 'payments_connect_core_test',
 			incentive_id: 'incentiveId',
+			source: 'wcadmin',
 		} );
 	} );
 
@@ -73,6 +74,8 @@ describe( 'Connect Account Page', () => {
 			{
 				wpcom_connection: 'Yes',
 				incentive_id: 'incentiveId',
+				path: 'payments_connect_core_test',
+				source: 'wcadmin',
 			}
 		);
 	} );

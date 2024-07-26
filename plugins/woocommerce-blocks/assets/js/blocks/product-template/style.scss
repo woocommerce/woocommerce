@@ -27,7 +27,7 @@ $min-product-width: 150px;
 		flex-wrap: wrap;
 		gap: 1.25em;
 
-		> li {
+		>li {
 			margin: 0;
 			width: 100%;
 			// Below style is required to override high-specificity Storefront styles
@@ -36,8 +36,8 @@ $min-product-width: 150px;
 
 		@include break-small {
 			@for $i from 2 through 6 {
-				&.is-flex-container.columns-#{ $i } > li {
-					width: calc((100% / #{ $i }) - 1.25em + (1.25em / #{ $i }));
+				&.is-flex-container.columns-#{ $i }>li {
+					width: calc((100% / #{$i}) - 1.25em + (1.25em / #{$i}));
 				}
 			}
 		}
@@ -48,16 +48,16 @@ $min-product-width: 150px;
 		grid-gap: $grid-gap;
 
 		@for $i from 2 through 6 {
-			$gap-count: calc(#{ $i } - 1);
-			$total-gap-width: calc(#{ $gap-count } * #{ $grid-gap });
-			$max-product-width: calc((100% - #{ $total-gap-width }) / #{ $i });
+			$gap-count: calc(#{$i} - 1);
+			$total-gap-width: calc(#{$gap-count} * #{$grid-gap});
+			$max-product-width: calc((100% - #{$total-gap-width}) / #{$i});
 
 			&.columns-#{ $i } {
-				grid-template-columns: repeat(auto-fill, minmax(max(#{ $min-product-width }, #{ $max-product-width }), 1fr));
+				grid-template-columns: repeat(auto-fill, minmax(max(#{$min-product-width}, #{$max-product-width}), 1fr));
 			}
 		}
 
-		> li {
+		>li {
 			margin-block-start: 0;
 		}
 	}
@@ -71,3 +71,9 @@ $min-product-width: 150px;
 	margin-top: 0;
 }
 
+/**
+ * Stack layout
+ */
+.is-product-collection-layout-list .wc-block-product:not(:last-child) {
+	margin-bottom: 1.2rem;
+}

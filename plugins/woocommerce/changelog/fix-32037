@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Change the item schemas for Orders and Order Refunds API endpoints to correctly specify that the rate_id property in a tax_line object is an integer, not a string

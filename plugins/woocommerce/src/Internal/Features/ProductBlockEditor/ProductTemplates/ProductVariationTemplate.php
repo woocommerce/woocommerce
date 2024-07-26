@@ -309,11 +309,39 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order' => 10,
 			)
 		);
-		$product_inventory_inner_section->add_block(
+		$inventory_columns               = $product_inventory_inner_section->add_block(
+			array(
+				'id'        => 'product-inventory-inner-columns',
+				'blockName' => 'core/columns',
+			)
+		);
+		$inventory_columns->add_block(
+			array(
+				'id'        => 'product-inventory-inner-column1',
+				'blockName' => 'core/column',
+			)
+		)->add_block(
 			array(
 				'id'        => 'product-variation-sku-field',
 				'blockName' => 'woocommerce/product-sku-field',
 				'order'     => 10,
+			)
+		);
+		$inventory_columns->add_block(
+			array(
+				'id'        => 'product-inventory-inner-column2',
+				'blockName' => 'core/column',
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-unique-id-field',
+				'blockName'  => 'woocommerce/product-text-field',
+				'order'      => 20,
+				'attributes' => array(
+					'property' => 'global_unique_id',
+					'label'    => __( 'GTIN, UPC, EAN or ISBN', 'woocommerce' ),
+					'tooltip'  => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+				),
 			)
 		);
 		$product_inventory_inner_section->add_block(

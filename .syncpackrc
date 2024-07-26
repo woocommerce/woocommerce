@@ -41,7 +41,43 @@
 				"@types/*",
 				"@typescript-eslint/*",
 				"@woocommerce/*",
-				"@wordpress/*",
+				"@wordpress/api-fetch",
+				"@wordpress/autop",
+				"@wordpress/babel-preset-default",
+				"@wordpress/base-styles",
+				"@wordpress/block-editor",
+				"@wordpress/blocks",
+				"@wordpress/browserslist-config",
+				"@wordpress/components",
+				"@wordpress/compose",
+				"@wordpress/core-data",
+				"@wordpress/data",
+				"@wordpress/data-controls",
+				"@wordpress/date",
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/deprecated",
+				"@wordpress/dom",
+				"@wordpress/dom-ready",
+				"@wordpress/e2e-test-utils",
+				"@wordpress/e2e-test-utils-playwright",
+				"@wordpress/e2e-tests",
+				"@wordpress/element",
+				"@wordpress/html-entities",
+				"@wordpress/i18n",
+				"@wordpress/icons",
+				"@wordpress/is-shallow-equal",
+				"@wordpress/notices",
+				"@wordpress/plugins",
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/postcss-themes",
+				"@wordpress/prettier-config",
+				"@wordpress/primitives",
+				"@wordpress/scripts",
+				"@wordpress/server-side-render",
+				"@wordpress/style-engine",
+				"@wordpress/stylelint-config",
+				"@wordpress/url",
+				"@wordpress/wordcount",
 				"babel*",
 				"eslint*",
 				"glob*",
@@ -136,7 +172,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.44.1"
+			"pinVersion": "^1.45.1"
 		},
 		{
 			"dependencies": [
@@ -205,9 +241,10 @@
 				"@wordpress/env"
 			],
 			"packages": [
+				"@woocommerce/block-library",
 				"**"
 			],
-			"pinVersion": "^9.0.7"
+			"pinVersion": "^9.7.0"
 		},
 		{
 			"dependencies": [

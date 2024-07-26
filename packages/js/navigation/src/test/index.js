@@ -335,7 +335,7 @@ describe( 'navigateTo', () => {
 
 		const resultUrl = new URL( window.location.href );
 
-		expect( getHistory().push ).not.toBeCalled();
+		expect( getHistory().push ).not.toHaveBeenCalled();
 		expect( resultUrl.search ).toBe(
 			'?page=wc-admin&path=%2Fsetup-wizard'
 		);
@@ -353,7 +353,7 @@ describe( 'navigateTo', () => {
 
 		const resultUrl = new URL( window.location.href );
 
-		expect( getHistory().push ).not.toBeCalled();
+		expect( getHistory().push ).not.toHaveBeenCalled();
 		expect( resultUrl.toString() ).toBe(
 			'https://vagrant.local/wp/wp-admin/orders.php'
 		);
@@ -385,7 +385,7 @@ describe( 'navigateTo', () => {
 
 		const resultUrl = new URL( window.location.href );
 
-		expect( getHistory().push ).not.toBeCalled();
+		expect( getHistory().push ).not.toHaveBeenCalled();
 		expect( resultUrl.toString() ).toBe(
 			'https://vagrant.local/wp/wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
 		);

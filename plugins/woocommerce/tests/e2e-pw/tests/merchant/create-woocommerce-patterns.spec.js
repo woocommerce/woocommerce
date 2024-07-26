@@ -5,21 +5,15 @@ const {
 	insertBlock,
 	getCanvas,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 // some WooCommerce Patterns to use
 const wooPatterns = [
 	{
-		name: 'Banner',
-		button: 'Shop vinyl records',
-	},
-	{
-		name: 'Discount Banner with Image',
+		name: 'Hero Product 3 Split',
 		button: 'Shop now',
-	},
-	{
-		name: 'Featured Category Focus',
-		button: 'Shop prints',
 	},
 	{
 		name: 'Featured Category Cover Image',
@@ -41,11 +35,20 @@ test.describe(
 			testPage,
 		} ) => {
 			await goToPageEditor( { page } );
+
+			await closeChoosePatternModal( { page } );
+
 			await fillPageTitle( page, testPage.title );
+
+			const wordPressVersion = await getInstalledWordPressVersion();
 
 			for ( let i = 0; i < wooPatterns.length; i++ ) {
 				await test.step( `Insert ${ wooPatterns[ i ].name } pattern`, async () => {
-					await insertBlock( page, wooPatterns[ i ].name );
+					await insertBlock(
+						page,
+						wooPatterns[ i ].name,
+						wordPressVersion
+					);
 
 					await expect(
 						page.getByLabel( 'Dismiss this notice' ).filter( {

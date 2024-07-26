@@ -1,3 +1,11 @@
+---
+post_title: Cart and Checkout - Filtering payment methods in the Checkout block
+menu_title: Filtering Payment Methods
+tags: how-to, checkout-payment-methods
+---
+
+<!-- markdownlint-disable MD024 -->
+
 # Filtering Payment Methods in the Checkout block <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
@@ -164,13 +172,3 @@ add_action('woocommerce_blocks_loaded', function() {
 It is important to note the comment in this code block, you must not instantiate your own version of `ExtendSchema`.
 
 If you've added your payment method correctly with the correct `supports` values then when you reach the checkout page with a `Bookable` item in your cart, any method that does not `supports` the `booking_availability` requirement should not display, while yours, the one that _does_ support this requirement _will_ display.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-payment-methods/filtering-payment-methods.md)
-
-<!-- /FEEDBACK -->
