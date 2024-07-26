@@ -159,7 +159,7 @@ test.describe(
 			await page.locator( '#billing_phone' ).fill( '123456789' );
 			await page.locator( '#billing_email' ).fill( billingEmail );
 
-			await page.getByText( 'Create an account?' ).check();
+			await page.getByText( 'Create an account' ).check();
 
 			await page.locator( '#place_order' ).click();
 

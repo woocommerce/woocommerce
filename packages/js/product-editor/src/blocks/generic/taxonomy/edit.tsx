@@ -26,9 +26,11 @@ import type {
 	TaxonomyMetadata,
 } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { Label } from '../../../components/label/label';
 
 interface TaxonomyBlockAttributes extends BlockAttributes {
 	label: string;
+	help?: string;
 	slug: string;
 	property: string;
 	createTitle: string;
@@ -52,6 +54,7 @@ export function Edit( {
 	);
 	const {
 		label,
+		help,
 		slug,
 		property,
 		createTitle,
@@ -117,7 +120,7 @@ export function Edit( {
 							'woocommerce-taxonomy-select'
 						) as string
 					}
-					label={ label }
+					label={ <Label label={ label } tooltip={ help } /> }
 					isLoading={ isResolving }
 					disabled={ disabled }
 					multiple

@@ -23,7 +23,8 @@ import type {
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
-	getDefaultValueOfInheritQueryFromTemplate,
+	getDefaultValueOfInherit,
+	getDefaultValueOfFilterable,
 	useSetPreviewState,
 } from '../utils';
 import InspectorControls from './inspector-controls';
@@ -95,7 +96,8 @@ const ProductCollectionContent = ( {
 		...DEFAULT_ATTRIBUTES,
 		query: {
 			...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
-			inherit: getDefaultValueOfInheritQueryFromTemplate(),
+			inherit: getDefaultValueOfInherit(),
+			filterable: getDefaultValueOfFilterable(),
 		},
 		...( attributes as Partial< ProductCollectionAttributes > ),
 		queryId,
@@ -121,15 +123,6 @@ const ProductCollectionContent = ( {
 	);
 
 	/**
-	 * If inherit is not a boolean, then we haven't set default attributes yet.
-	 * We don't wanna render anything until default attributes are set.
-	 * Default attributes are set in the useEffect above.
-	 */
-	if ( typeof attributes?.query?.inherit !== 'boolean' ) {
-		return null;
-	}
-
-	/**
 	 * If default attributes are not set, we don't wanna render anything.
 	 * Default attributes are set in the useEffect above.
 	 */
@@ -152,7 +145,7 @@ const ProductCollectionContent = ( {
 							attributes.__privatePreviewState?.previewMessage
 						}
 						className="wc-block-product-collection__preview-button"
-						data-test-id="product-collection-preview-button"
+						data-testid="product-collection-preview-button"
 					>
 						Preview
 					</Button>

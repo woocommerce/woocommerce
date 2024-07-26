@@ -4,7 +4,6 @@
  * External dependencies
  */
 import {
-	privateApis as blockEditorPrivateApis,
 	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
@@ -24,20 +23,17 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 /**
  * Internal dependencies
  */
-import { isEqual } from 'lodash';
 import { CustomizeStoreContext } from './';
 import { BlockEditor } from './block-editor';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
 import { useAddNoBlocksPlaceholder } from './hooks/block-placeholder/use-add-no-blocks-placeholder';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
-import { COLOR_PALETTES } from './sidebar/global-styles/color-palette-variations/constants';
 import {
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
-} from './utils/hero-pattern';
-
-const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
+} from './utils/black-background-pattern-update-button';
+import { useIsActiveNewNeutralVariation } from './hooks/use-is-active-new-neutral-variation';
 
 export const BlockEditorContainer = () => {
 	const settings = useSiteEditorSettings();
@@ -98,37 +94,42 @@ export const BlockEditorContainer = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 
-	// @ts-expect-error No types for this exist yet.
-	const { user } = useContext( GlobalStylesContext );
+	const isActiveNewNeutralVariation = useIsActiveNewNeutralVariation();
 
 	useEffect( () => {
-		const isActiveNewNeutralVariation = isEqual(
-			COLOR_PALETTES[ 0 ].settings.color,
-			user.settings.color
-		);
-
 		if ( ! isActiveNewNeutralVariation ) {
-			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+			findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 				blocks,
-				( block: BlockInstance ) => {
-					updateBlockAttributes( block.clientId, {
+				( buttonBlocks: BlockInstance[] ) => {
+					const buttonBlockClientIds = buttonBlocks.map(
+						( { clientId } ) => clientId
+					);
+
+					updateBlockAttributes( buttonBlockClientIds, {
 						style: {},
 					} );
 				}
 			);
+
 			return;
 		}
-		findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+
+		findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 			blocks,
-			( block: BlockInstance ) => {
-				updateBlockAttributes( block.clientId, {
+			( buttonBlocks: BlockInstance[] ) => {
+				const buttonBlockClientIds = buttonBlocks.map(
+					( { clientId } ) => clientId
+				);
+				updateBlockAttributes( buttonBlockClientIds, {
 					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
 					// This is necessary; otherwise, the style won't be applied on the frontend during the style variation change.
 					className: '',
 				} );
 			}
 		);
-	}, [ blocks, updateBlockAttributes, user.settings.color ] );
+		// Blocks are not part of the dependencies because we don't want to trigger this effect when the blocks change. This would cause an infinite loop.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ isActiveNewNeutralVariation, updateBlockAttributes ] );
 
 	// @ts-expect-error No types for this exist yet.
 	const { insertBlock, removeBlock } = useDispatch( blockEditorStore );

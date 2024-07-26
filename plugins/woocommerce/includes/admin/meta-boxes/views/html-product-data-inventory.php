@@ -28,6 +28,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		do_action( 'woocommerce_product_options_sku' );
 
+		woocommerce_wp_text_input(
+			array(
+				'id'          => '_global_unique_id',
+				'value'       => $product_object->get_global_unique_id( 'edit' ),
+				'label'       => __( 'GTIN, UPC, EAN or ISBN', 'woocommerce' ),
+				'desc_tip'    => true,
+				'description' => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+			)
+		);
+
+		do_action( 'woocommerce_product_options_global_unique_id' );
+
 		?>
 		<div class="inline notice woocommerce-message show_if_variable">
 			<img class="info-icon" src="<?php echo esc_url( $info_img_url ); ?>" />

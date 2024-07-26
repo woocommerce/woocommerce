@@ -31,5 +31,9 @@ export function getLoggingLevels( state ) {
 }
 
 export function getBlockTemplateLoggingThreshold( state ) {
-	return state.blockTemplateLoggingThreshold;
+	return state.params.updateBlockTemplateLoggingThreshold.threshold;
+}
+
+export function getComingSoonMode( state ) {
+	return state.params.updateComingSoonMode.mode;
 }

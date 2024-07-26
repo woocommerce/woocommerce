@@ -94,7 +94,7 @@ jobs:
         id: 'setup-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: '${{ matrix.projectName }}'
+          pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
@@ -118,24 +118,19 @@ jobs:
         id: 'install-monorepo'
         with:
           install: '${{ matrix.projectName }}...'
-          build: 'false'
+          build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
+          build-type: ${{ ( ( matrix.testType == 'unit:php' || matrix.testType == 'api' ) && 'backend' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
-
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        if: ${{ github.ref_type != 'tag' }}
-        name: 'Build project'
-        id: 'build-project'
-        with:
-          install: 'false'
-          build: ${{ matrix.projectName }}
+          pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Update wp-env config'
         if: ${{ github.ref_type == 'tag' }}
         env:
           RELEASE_TAG: ${{ github.ref_name }}
           ARTIFACT_NAME: ${{ github.ref_name == 'nightly' && 'woocommerce-trunk-nightly.zip' || 'woocommerce.zip' }}
-        working-directory: ${{ matrix.projectPath }}
-        run: node ./tests/e2e-pw/bin/override-wp-env-plugins.js
+          # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/${{ matrix.testEnv.start == 'env:start:blocks' && 'plugins/woocommerce-blocks' || matrix.projectPath  }}
+        run: node .github/workflows/scripts/override-wp-env-plugins.js
 
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
@@ -159,7 +154,7 @@ jobs:
           echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: 'Run tests'
+      - name: 'Run tests (${{ matrix.testType }})'
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
@@ -212,7 +207,7 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && github.event_name == 'pull_request' }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -241,7 +236,7 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && github.event_name != 'pull_request'  }}
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork  }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -278,7 +273,7 @@ jobs:
         'project-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && needs.project-jobs.outputs.report-jobs != '[]' }}
+    if: ${{ !cancelled() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork  }}
     strategy:
       fail-fast: false
       matrix:
@@ -335,45 +330,39 @@ jobs:
   
   report-flaky-tests:
     name: 'Create issues for flaky tests'
-    if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
-    needs: [ 'project-test-jobs' ]
+    if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork && needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs:
+      [
+        'project-jobs',
+        'project-test-jobs',
+      ]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
     
     steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: WordPress/gutenberg
-          ref: dbf201449e9736f672b61e422787d47659db327a
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
 
-      - uses: actions/download-artifact@v4
-        id: download-artifact
+      - uses: 'actions/download-artifact@v4'
+        name: 'Download artifacts'
         with:
           pattern: flaky-tests*
           path: flaky-tests
           merge-multiple: true
 
-      - name: 'Check if there are flaky tests reports'
+      - name: 'Merge flaky tests reports'
         run: |
-          downloadPath='${{ steps.download-artifact.outputs.download-path }}'
+          downloadPath='${{ steps.download-artifact.outputs.download-path || './flaky-tests' }}'
           # make dir so that next step doesn't fail if it doesn't exist 
           mkdir -p $downloadPath
           # any output means there are reports
           echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
 
-      - name: 'Setup'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        uses: ./.github/setup-node
-
-      - name: 'Build packages'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        run: npm run build:packages
-
       - name: 'Report flaky tests'
         if: ${{ !!env.FLAKY_REPORTS }}
-        uses: ./packages/report-flaky-tests
+        uses: './.github/actions/report-flaky-tests'
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           label: 'metric: flaky e2e test'

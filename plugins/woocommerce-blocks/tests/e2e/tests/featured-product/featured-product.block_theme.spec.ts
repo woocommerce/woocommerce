@@ -28,4 +28,18 @@ test.describe( `${ blockData.slug } Block`, () => {
 			blockLocatorFrontend.getByText( 'Shop now' )
 		).toBeVisible();
 	} );
+
+	test( 'image can be edited', async ( { editor, admin } ) => {
+		await admin.createNewPost();
+		await editor.insertBlock( { name: blockData.slug } );
+		const blockLocator = await editor.getBlockByName( blockData.slug );
+		await blockLocator.getByText( 'Album' ).click();
+		await blockLocator.getByText( 'Done' ).click();
+		await editor.page.getByLabel( 'Edit product image' ).click();
+		await editor.page.getByLabel( 'Rotate' ).click();
+		await editor.page.getByRole( 'button', { name: 'Apply' } ).click();
+		await expect(
+			editor.page.locator( 'img[alt="Album"][src*="-edited"]' )
+		).toBeVisible();
+	} );
 } );

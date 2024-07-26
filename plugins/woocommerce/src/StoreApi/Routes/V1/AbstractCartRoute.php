@@ -105,7 +105,6 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$this->load_cart_session( $request );
-		$this->cart_controller->calculate_totals();
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -332,13 +331,11 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @return \WP_Error WP Error object.
 	 */
 	protected function get_route_error_response( $error_code, $error_message, $http_status_code = 500, $additional_data = [] ) {
-
 		$additional_data['status'] = $http_status_code;
 
 		// If there was a conflict, return the cart so the client can resolve it.
 		if ( 409 === $http_status_code ) {
-			$cart                    = $this->cart_controller->get_cart_instance();
-			$additional_data['cart'] = $this->cart_schema->get_item_response( $cart );
+			$additional_data['cart'] = $this->cart_schema->get_item_response( $this->cart_controller->get_cart_for_response() );
 		}
 
 		return new \WP_Error( $error_code, $error_message, $additional_data );

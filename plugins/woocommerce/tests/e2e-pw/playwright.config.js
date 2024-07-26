@@ -3,6 +3,11 @@ require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 const testsRootPath = __dirname;
 const testsResultsPath = `${ testsRootPath }/test-results`;
 
+if ( ! process.env.BASE_URL ) {
+	console.log( 'BASE_URL is not set. Using default.' );
+	process.env.BASE_URL = 'http://localhost:8086';
+}
+
 const {
 	ALLURE_RESULTS_DIR,
 	BASE_URL,
@@ -31,6 +36,10 @@ const reporter = [
 			outputFile: `${ testsRootPath }/test-results/test-results-${ Date.now() }.json`,
 		},
 	],
+	[
+		`${ testsRootPath }/reporters/environment-reporter.js`,
+		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
+	],
 ];
 
 if ( process.env.CI ) {
@@ -58,19 +67,19 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: `${ testsRootPath }/tests`,
-	retries: CI ? 2 : 0,
+	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
-		baseURL: BASE_URL ?? 'http://localhost:8086',
+		baseURL: BASE_URL,
 		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: `${ testsRootPath }/.state/`,
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
-				? 'retain-on-failure'
+				? 'retain-on-first-failure'
 				: 'off',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
