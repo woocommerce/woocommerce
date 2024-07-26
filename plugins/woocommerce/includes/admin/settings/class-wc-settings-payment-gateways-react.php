@@ -20,6 +20,17 @@ if ( class_exists( 'WC_Settings_Payment_Gateways_React', false ) ) {
 class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 
 	/**
+	 * Whitelist of sections to render an alternative output.
+	 *
+	 * @var array
+	 */
+	private const ALTERNATIVE_RENDER_SECTIONS = [
+		'stripe',
+		'paypal',
+		'cod',
+	];
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
