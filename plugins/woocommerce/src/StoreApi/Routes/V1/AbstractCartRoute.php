@@ -231,7 +231,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
 		if ( is_null( $this->has_cart_token ) ) {
-			$this->has_cart_token = JsonWebToken::validate( $request->get_header( 'Cart-Token' ), $this->get_cart_token_secret() );
+			$this->has_cart_token = JsonWebToken::validate( $request->get_header( 'Cart-Token' ) ?? '', $this->get_cart_token_secret() );
 		}
 		return $this->has_cart_token;
 	}
