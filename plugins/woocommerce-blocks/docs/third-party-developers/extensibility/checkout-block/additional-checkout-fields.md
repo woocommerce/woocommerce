@@ -292,12 +292,15 @@ As well as the options above, text fields also support a `required` option. If t
 
 As well as the options above, select fields must also be registered with an  `options` option. This is used to specify what options the shopper can select.
 
-Select fields can also be marked as required. If they are not (i.e. they are optional), then an empty entry will be added to allow the shopper to unset the field.
+Select fields will mount with no value selected by default, if the field is required, the user will be required to select a value.
+
+You can set a placeholder to be shown on the select by passing a `placeholder` value when registering the field. This will be the first option in the select and will not be selectable if the field is required.
 
 | Option name | Description | Required? | Example        | Default value |
 |-----|-----|-----|----------------|--------------|
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | see below | No default - this must be provided. |
 | `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
+| `placeholder` | If this value is set, the shopper will see this option in the select. If the select is required, the shopper cannot select this option. | No | `Select a role | Select a $label |
 
 ##### Example of `options` value
 
@@ -425,11 +428,12 @@ add_action(
 	function() {
 		woocommerce_register_additional_checkout_field(
 			array(
-				'id'       => 'namespace/how-did-you-hear-about-us',
-				'label'    => 'How did you hear about us?',
-				'location' => 'order',
-				'type'     => 'select',
-				'options'  => [
+				'id'          => 'namespace/how-did-you-hear-about-us',
+				'label'       => 'How did you hear about us?',
+				'placeholder' => 'Select a source',
+				'location'    => 'order',
+				'type'        => 'select',
+				'options'     => [
 					[
 						'value' => 'google',
 						'label' => 'Google'
@@ -463,7 +467,7 @@ This results in the order information section being rendered like so:
 
 ![The select input when focused](https://github.com/woocommerce/woocommerce/assets/5656702/bd943906-621b-404f-aa84-b951323e25d3)
 
-If it is undesirable to force the shopper to select a value, providing a value such as "None of the above" may help.
+If it is undesirable to force the shopper to select a value, mark the select as optional by setting the `required` option to `false`.
 
 ## Validation and sanitization
 
