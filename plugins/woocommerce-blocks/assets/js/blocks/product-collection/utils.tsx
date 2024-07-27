@@ -180,12 +180,13 @@ export const getUsesReferencePreviewMessage = (
 		 *
 		 * Because in these cases, we have required context on the editor side.
 		 */
-		if (
-			( location.type === LocationType.Archive &&
-				location.sourceData?.termId ) ||
-			( location.type === LocationType.Product &&
-				location.sourceData?.productId )
-		) {
+		const isArchiveLocationWithTermId =
+			location.type === LocationType.Archive &&
+			( location.sourceData?.termId ?? null ) !== null;
+		const isProductLocationWithProductId =
+			location.type === LocationType.Product &&
+			( location.sourceData?.productId ?? null ) !== null;
+		if ( isArchiveLocationWithTermId || isProductLocationWithProductId ) {
 			return '';
 		}
 
