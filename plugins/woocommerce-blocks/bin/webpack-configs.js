@@ -309,6 +309,13 @@ const getMainConfig = ( options = {} ) => {
 					},
 				],
 			} ),
+			new DependencyExtractionWebpackPlugin( {
+				requestToExternalModule( request ) {
+					if ( request === '@wordpress/interactivity' ) {
+						return request;
+					}
+				},
+			} ),
 		],
 		resolve: {
 			...resolve,
@@ -1102,9 +1109,121 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	};
 };
 
+const getInteractivityBlocksConfig = ( options = {} ) => {
+	let { fileSuffix } = options;
+	const { alias, resolvePlugins = [] } = options;
+	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
+
+	const resolve = alias
+		? {
+				alias,
+				plugins: resolvePlugins,
+		  }
+		: {
+				plugins: resolvePlugins,
+		  };
+	return {
+		entry: getEntryConfig( 'interactivity', options.exclude || [] ),
+		output: {
+			devtoolNamespace: 'wc',
+			path: path.resolve( __dirname, '../build/' ),
+			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
+			uniqueName: 'webpackWcInteractivityBlocksFrontendJsonp',
+			module: true,
+		},
+		experiments: {
+			outputModule: true,
+		},
+		module: {
+			rules: [
+				{
+					test: /\.(j|t)sx?$/,
+					exclude: /node_modules/,
+					use: {
+						loader: 'babel-loader',
+						options: {
+							presets: [
+								[
+									'@wordpress/babel-preset-default',
+									{
+										modules: false,
+										targets: {
+											browsers: [
+												'extends @wordpress/browserslist-config',
+											],
+										},
+									},
+								],
+							],
+							plugins: [
+								isProduction
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
+							].filter( Boolean ),
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
+						},
+					},
+				},
+				{
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
+				},
+			],
+		},
+		optimization: {
+			concatenateModules:
+				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
+			splitChunks: {
+				minSize: 200000,
+				automaticNameDelimiter: '--',
+			},
+			minimizer: [
+				new TerserPlugin( {
+					parallel: true,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
+			],
+		},
+		plugins: [
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Interactivity Blocks Frontend',
+			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Interactivity Blocks Frontend' )
+			),
+		],
+		resolve: {
+			...resolve,
+			extensions: [ '.js', '.ts', '.tsx' ],
+		},
+	};
+};
+
 module.exports = {
 	getCoreConfig,
 	getFrontConfig,
+	getInteractivityBlocksConfig,
 	getMainConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,

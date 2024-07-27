@@ -6,6 +6,7 @@ const {
 	getCoreConfig,
 	getMainConfig,
 	getFrontConfig,
+	getInteractivityBlocksConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getSiteEditorConfig,
@@ -91,6 +92,14 @@ const SiteEditorConfig = {
 	...getSiteEditorConfig( { alias: getAlias() } ),
 };
 
+/**
+ * Config to generate the site editor scripts.
+ */
+const InteractivityBlocksConfig = {
+	...sharedConfig,
+	...getInteractivityBlocksConfig( { alias: getAlias() } ),
+};
+
 module.exports = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
@@ -100,4 +109,5 @@ module.exports = [
 	PaymentsConfig,
 	SiteEditorConfig,
 	StylingConfig,
+	InteractivityBlocksConfig,
 ];
