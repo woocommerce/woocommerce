@@ -24,6 +24,8 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
  * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
 class Checkout extends MockeryTestCase {
+
+	const TEST_COUPON_CODE = 'test_coupon_code';
 	/**
 	 * Setup test product data. Called before every test.
 	 */
@@ -33,6 +35,11 @@ class Checkout extends MockeryTestCase {
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
 		do_action( 'rest_api_init', $wp_rest_server );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( self::TEST_COUPON_CODE );
+		$coupon->set_amount( 2 );
+		$coupon->save();
 
 		wp_set_current_user( 0 );
 		$customer = get_user_by( 'email', 'testaccount@test.com' );
@@ -119,6 +126,9 @@ class Checkout extends MockeryTestCase {
 		}
 		$default_zone->save();
 		remove_all_filters( 'woocommerce_get_country_locale' );
+
+		$coupon_to_delete = new \WC_Coupon( self::TEST_COUPON_CODE );
+		$coupon_to_delete->delete( true );
 
 		global $wp_rest_server;
 		$wp_rest_server = null;
@@ -297,12 +307,9 @@ class Checkout extends MockeryTestCase {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( 'test' );
-		$coupon->set_amount( 2 );
-		$coupon->save();
-
 		WC()->cart->apply_coupon( 'test' );
+
+		$coupon = new \WC_Coupon( self::TEST_COUPON_CODE );
 
 		// Apply email restriction after adding coupon to cart.
 		$coupon->set_email_restrictions( 'jon@mail.com' );
@@ -434,12 +441,7 @@ class Checkout extends MockeryTestCase {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( 'test' );
-		$coupon->set_amount( 2 );
-		$coupon->save();
-
-		WC()->cart->apply_coupon( 'test' );
+		WC()->cart->apply_coupon( self::TEST_COUPON_CODE );
 
 		$request->set_body_params(
 			array(
