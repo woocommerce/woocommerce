@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@woocommerce/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
@@ -22,7 +22,7 @@ const getQueryParams = ( e: Event ) => {
 	switch ( filter ) {
 		case 'woocommerce/product-filter-attribute':
 			const wcContext =
-				filterContainer?.getAttribute( 'data-wc-context' );
+				filterContainer?.getAttribute( 'data-wp-context' );
 			const queryParams = wcContext ? JSON.parse( wcContext ) : null;
 
 			return [

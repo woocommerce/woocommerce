@@ -25,7 +25,7 @@ class ProductButton extends AbstractBlock {
 		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-interactivity-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-interactivity-frontend' ),
-			'dependencies' => [ 'wc-interactivity' ],
+			'dependencies' => [],
 		];
 
 		return $key ? $script[ $key ] : $script;
@@ -75,16 +75,17 @@ class ProductButton extends AbstractBlock {
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
-		wc_initial_state(
-			'woocommerce/product-button',
-			array(
-				'inTheCartText' => sprintf(
-					/* translators: %s: product number. */
-					__( '%s in cart', 'woocommerce' ),
-					'###'
-				),
-			)
-		);
+		// TODO: Replace with server-side directive processing
+		// wc_initial_state(
+		// 	'woocommerce/product-button',
+		// 	array(
+		// 		'inTheCartText' => sprintf(
+		// 			/* translators: %s: product number. */
+		// 			__( '%s in cart', 'woocommerce' ),
+		// 			'###'
+		// 		),
+		// 	)
+		// );
 
 		if ( $product ) {
 			$number_of_items_in_cart = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
@@ -167,22 +168,22 @@ class ProductButton extends AbstractBlock {
 			);
 
 			$div_directives = '
-				data-wc-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK ) . '\'
-				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK ) . '\'
+				data-wp-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK ) . '\'
+				data-wp-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK ) . '\'
 			';
 
 			$button_directives = '
-				data-wc-on--click="actions.addToCart"
-				data-wc-class--loading="context.isLoading"
+				data-wp-on--click="actions.addToCart"
+				data-wp-class--loading="context.isLoading"
 			';
 
 			$span_button_directives = '
-				data-wc-text="state.addToCartText"
-				data-wc-class--wc-block-slide-in="state.slideInAnimation"
-				data-wc-class--wc-block-slide-out="state.slideOutAnimation"
-				data-wc-on--animationend="actions.handleAnimationEnd"
-				data-wc-watch="callbacks.startAnimation"
-				data-wc-layout-init="callbacks.syncTemporaryNumberOfItemsOnLoad"
+				data-wp-text="state.addToCartText"
+				data-wp-class--wc-block-slide-in="state.slideInAnimation"
+				data-wp-class--wc-block-slide-out="state.slideOutAnimation"
+				data-wp-on--animationend="actions.handleAnimationEnd"
+				data-wp-watch="callbacks.startAnimation"
+				data-wp-layout-init="callbacks.syncTemporaryNumberOfItemsOnLoad"
 			';
 
 			/**
@@ -262,7 +263,7 @@ class ProductButton extends AbstractBlock {
 		return sprintf(
 			'<span
 				hidden
-				data-wc-bind--hidden="!state.displayViewCart"
+				data-wp-bind--hidden="!state.displayViewCart"
 			>
 				<a
 					href="%1$s"

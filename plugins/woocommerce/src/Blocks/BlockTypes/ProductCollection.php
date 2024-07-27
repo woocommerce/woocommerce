@@ -170,20 +170,17 @@ class ProductCollection extends AbstractBlock {
 		$is_product_collection_block    = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 		if ( $is_product_collection_block && $is_enhanced_pagination_enabled ) {
-			// Enqueue the Interactivity API runtime.
-			wp_enqueue_script( 'wc-interactivity' );
-
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 
-			// Add `data-wc-navigation-id to the product collection block.
+			// Add `data-wp-navigation-id to the product collection block.
 			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
 				$p->set_attribute(
-					'data-wc-navigation-id',
+					'data-wp-navigation-id',
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
-				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+				$p->set_attribute( 'data-wp-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
 				$p->set_attribute(
-					'data-wc-context',
+					'data-wp-context',
 					wp_json_encode(
 						array(
 							// The message to be announced by the screen reader when the page is loading or loaded.
@@ -207,16 +204,16 @@ class ProductCollection extends AbstractBlock {
 			$last_tag_position                = strripos( $block_content, '</div>' );
 			$accessibility_and_animation_html = '
 				<div
-					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
+					data-wp-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
 					class="wc-block-product-collection__pagination-animation"
-					data-wc-class--start-animation="state.startAnimation"
-					data-wc-class--finish-animation="state.finishAnimation">
+					data-wp-class--start-animation="state.startAnimation"
+					data-wp-class--finish-animation="state.finishAnimation">
 				</div>
 				<div
-					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
+					data-wp-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
 					class="screen-reader-text"
 					aria-live="polite"
-					data-wc-text="context.accessibilityMessage">
+					data-wp-text="context.accessibilityMessage">
 				</div>
 			';
 			$block_content                    = substr_replace(
@@ -283,7 +280,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @param \WP_HTML_Tag_Processor $processor The HTML tag processor.
 	 * @param string                 $class_name The class name of the anchor tags.
-	 * @param string                 $key_prefix The prefix for the data-wc-key attribute.
+	 * @param string                 $key_prefix The prefix for the data-wp-key attribute.
 	 */
 	private function update_pagination_anchors( $processor, $class_name, $key_prefix ) {
 		// Start from the beginning of the block content.
@@ -295,13 +292,13 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
-			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
-			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
+			$processor->set_attribute( 'data-wp-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+			$processor->set_attribute( 'data-wp-on--click', 'actions.navigate' );
+			$processor->set_attribute( 'data-wp-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
 			if ( in_array( $class_name, array( 'wp-block-query-pagination-next', 'wp-block-query-pagination-previous' ), true ) ) {
-				$processor->set_attribute( 'data-wc-watch', 'callbacks.prefetch' );
-				$processor->set_attribute( 'data-wc-on--mouseenter', 'actions.prefetchOnHover' );
+				$processor->set_attribute( 'data-wp-watch', 'callbacks.prefetch' );
+				$processor->set_attribute( 'data-wp-on--mouseenter', 'actions.prefetchOnHover' );
 			}
 		}
 	}
@@ -381,7 +378,7 @@ class ProductCollection extends AbstractBlock {
 					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
 						$p = new \WP_HTML_Tag_Processor( $content );
 						if ( $p->next_tag() ) {
-							$p->set_attribute( 'data-wc-navigation-disabled', 'true' );
+							$p->set_attribute( 'data-wp-navigation-disabled', 'true' );
 						}
 						$content = $p->get_updated_html();
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;

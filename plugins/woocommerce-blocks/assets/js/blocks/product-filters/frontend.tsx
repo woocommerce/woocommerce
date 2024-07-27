@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store } from '@woocommerce/interactivity';
+import { store } from '@wordpress/interactivity';
 
 export interface ProductFiltersContext {
 	productId: string;

@@ -55,8 +55,8 @@ final class ProductFilterActive extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-				'data-wc-context'     => wp_json_encode( $context ),
+				'data-wp-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+				'data-wp-context'     => wp_json_encode( $context ),
 				'data-has-filter'     => empty( $active_filters ) ? 'no' : 'yes',
 			)
 		);
@@ -82,7 +82,7 @@ final class ProductFilterActive extends AbstractBlock {
 					</li>
 					<?php endforeach; ?>
 				</ul>
-				<button class="clear-all" data-wc-on--click="actions.clearAll">
+				<button class="clear-all" data-wp-on--click="actions.clearAll">
 					<span aria-hidden="true"><?php echo esc_html__( 'Clear All', 'woocommerce' ); ?></span>
 					<span class="screen-reader-text"><?php echo esc_html__( 'Clear All Filters', 'woocommerce' ); ?></span>
 				</button>

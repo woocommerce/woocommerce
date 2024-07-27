@@ -86,7 +86,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
-				'data-wc-on--click',
+				'data-wp-on--click',
 				'actions.selectPreviousImage'
 			);
 			$p->set_attribute(
@@ -101,7 +101,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute(
-				'data-wc-on--click',
+				'data-wp-on--click',
 				'actions.selectNextImage'
 			);
 			$p->set_attribute(
@@ -117,7 +117,7 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		return strtr(
 			'<div
 				class="wc-block-product-gallery-large-image-next-previous wp-block-woocommerce-product-gallery-large-image-next-previous {alignment_class}"
-				data-wc-interactive=\'{data_wc_interactive}\'
+				data-wp-interactive=\'{data_wc_interactive}\'
 			>
 				<div class="wc-block-product-gallery-large-image-next-previous-container {position_class}">
 					{prev_button}

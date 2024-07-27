@@ -8,6 +8,10 @@ const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
+const {
+	defaultRequestToExternal,
+	defaultRequestToHandle,
+} = require( '@wordpress/dependency-extraction-webpack-plugin/lib/util' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 const CreateFileWebpack = require( 'create-file-webpack' );
@@ -39,6 +43,9 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
+	requestToExternalFn = requestToExternal,
+	requestToHandleFn = requestToHandle,
+	dewpFallbackToDefault = true,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -59,8 +66,9 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			useDefaults: dewpFallbackToDefault,
+			requestToExternal: requestToExternalFn,
+			requestToHandle: requestToHandleFn,
 		} ),
 	].filter( Boolean );
 
@@ -300,6 +308,13 @@ const getMainConfig = ( options = {} ) => {
 						},
 					},
 				],
+			} ),
+			new DependencyExtractionWebpackPlugin( {
+				requestToExternalModule( request ) {
+					if ( request === '@wordpress/interactivity' ) {
+						return request;
+					}
+				},
 			} ),
 		],
 		resolve: {
@@ -945,73 +960,6 @@ const getStylingConfig = ( options = {} ) => {
 	};
 };
 
-const getInteractivityAPIConfig = ( options = {} ) => {
-	const { alias, resolvePlugins = [] } = options;
-	return {
-		entry: {
-			'wc-interactivity': './assets/js/interactivity',
-		},
-		output: {
-			filename: '[name].js',
-			path: path.resolve( __dirname, '../build/' ),
-			library: [ 'wc', '__experimentalInteractivity' ],
-			libraryTarget: 'this',
-			chunkLoadingGlobal: 'webpackWcBlocksJsonp',
-		},
-		resolve: {
-			alias,
-			plugins: resolvePlugins,
-			extensions: [ '.js', '.ts', '.tsx' ],
-		},
-		plugins: [
-			...getSharedPlugins( {
-				bundleAnalyzerReportTitle: 'WP directives',
-				checkCircularDeps: false,
-			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'WP directives' )
-			),
-		],
-		module: {
-			rules: [
-				{
-					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
-					use: [
-						{
-							loader: require.resolve( 'babel-loader' ),
-							options: {
-								babelrc: false,
-								configFile: false,
-								presets: [
-									'@babel/preset-typescript',
-									[
-										'@babel/preset-react',
-										{
-											runtime: 'automatic',
-											importSource: 'preact',
-										},
-									],
-								],
-								// Required until Webpack is updated to ^5.0.0
-								plugins: [
-									'@babel/plugin-proposal-optional-chaining',
-									'@babel/plugin-proposal-class-properties',
-								],
-								cacheDirectory: path.resolve(
-									__dirname,
-									'../../../node_modules/.cache/babel-loader'
-								),
-								cacheCompression: false,
-							},
-						},
-					],
-				},
-			],
-		},
-	};
-};
-
 const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	let { fileSuffix } = options;
 	const { alias, resolvePlugins = [] } = options;
@@ -1161,14 +1109,125 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 	};
 };
 
+const getInteractivityBlocksConfig = ( options = {} ) => {
+	let { fileSuffix } = options;
+	const { alias, resolvePlugins = [] } = options;
+	fileSuffix = fileSuffix ? `-${ fileSuffix }` : '';
+
+	const resolve = alias
+		? {
+				alias,
+				plugins: resolvePlugins,
+		  }
+		: {
+				plugins: resolvePlugins,
+		  };
+	return {
+		entry: getEntryConfig( 'interactivity', options.exclude || [] ),
+		output: {
+			devtoolNamespace: 'wc',
+			path: path.resolve( __dirname, '../build/' ),
+			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
+			uniqueName: 'webpackWcInteractivityBlocksFrontendJsonp',
+			module: true,
+		},
+		experiments: {
+			outputModule: true,
+		},
+		module: {
+			rules: [
+				{
+					test: /\.(j|t)sx?$/,
+					exclude: /node_modules/,
+					use: {
+						loader: 'babel-loader',
+						options: {
+							presets: [
+								[
+									'@wordpress/babel-preset-default',
+									{
+										modules: false,
+										targets: {
+											browsers: [
+												'extends @wordpress/browserslist-config',
+											],
+										},
+									},
+								],
+							],
+							plugins: [
+								isProduction
+									? require.resolve(
+											'babel-plugin-transform-react-remove-prop-types'
+									  )
+									: false,
+								'@babel/plugin-proposal-optional-chaining',
+								'@babel/plugin-proposal-class-properties',
+							].filter( Boolean ),
+							cacheDirectory: path.resolve(
+								__dirname,
+								'../../../node_modules/.cache/babel-loader'
+							),
+							cacheCompression: false,
+						},
+					},
+				},
+				{
+					test: /\.s[c|a]ss$/,
+					use: {
+						loader: 'ignore-loader',
+					},
+				},
+			],
+		},
+		optimization: {
+			concatenateModules:
+				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
+			splitChunks: {
+				minSize: 200000,
+				automaticNameDelimiter: '--',
+			},
+			minimizer: [
+				new TerserPlugin( {
+					parallel: true,
+					terserOptions: {
+						output: {
+							comments: /translators:/i,
+						},
+						compress: {
+							passes: 2,
+						},
+						mangle: {
+							reserved: [ '__', '_n', '_nx', '_x' ],
+						},
+					},
+					extractComments: false,
+				} ),
+			],
+		},
+		plugins: [
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Interactivity Blocks Frontend',
+			} ),
+			new ProgressBarPlugin(
+				getProgressBarPluginConfig( 'Interactivity Blocks Frontend' )
+			),
+		],
+		resolve: {
+			...resolve,
+			extensions: [ '.js', '.ts', '.tsx' ],
+		},
+	};
+};
+
 module.exports = {
 	getCoreConfig,
 	getFrontConfig,
+	getInteractivityBlocksConfig,
 	getMainConfig,
 	getPaymentsConfig,
 	getExtensionsConfig,
 	getSiteEditorConfig,
 	getStylingConfig,
-	getInteractivityAPIConfig,
 	getCartAndCheckoutFrontendConfig,
 };

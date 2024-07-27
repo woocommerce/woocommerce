@@ -85,8 +85,8 @@ final class ProductFilterStockStatus extends AbstractBlock {
 				return array(
 					'title'      => $stock_status_options[ $status ],
 					'attributes' => array(
-						'data-wc-on--click' => "$action_namespace::actions.removeFilter",
-						'data-wc-context'   => "$action_namespace::" . wp_json_encode( array( 'value' => $status ) ),
+						'data-wp-on--click' => "$action_namespace::actions.removeFilter",
+						'data-wp-context'   => "$action_namespace::" . wp_json_encode( array( 'value' => $status ) ),
 					),
 				);
 			},
@@ -194,7 +194,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		ob_start();
 		?>
 
-		<div data-wc-interactive='<?php echo esc_attr( $data_directive ); ?>'>
+		<div data-wp-interactive='<?php echo esc_attr( $data_directive ); ?>'>
 			<?php if ( 'list' === $display_style ) { ?>
 				<?php
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CheckboxList::render() escapes output.

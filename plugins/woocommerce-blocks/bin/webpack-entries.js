@@ -47,23 +47,8 @@ const blocks = {
 	'product-best-sellers': {},
 	'product-category': {},
 	'product-categories': {},
-	'product-collection': {},
 	'product-collection-no-results': {
 		customDir: 'product-collection/inner-blocks/no-results',
-	},
-	'product-gallery': {},
-	'product-gallery-large-image': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
-	},
-	'product-gallery-large-image-next-previous': {
-		customDir:
-			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
-	},
-	'product-gallery-pager': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
-	},
-	'product-gallery-thumbnails': {
-		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
 	},
 	'product-new': {},
 	'product-on-sale': {},
@@ -96,30 +81,6 @@ const blocks = {
 		isExperimental: true,
 	},
 	'product-filters-overlay-navigation': {
-		isExperimental: true,
-	},
-	'product-filter-stock-status': {
-		isExperimental: true,
-		customDir: 'product-filter/inner-blocks/stock-filter',
-	},
-	'product-filter-price': {
-		customDir: 'product-filter/inner-blocks/price-filter',
-		isExperimental: true,
-	},
-	'product-filter-attribute': {
-		customDir: 'product-filter/inner-blocks/attribute-filter',
-		isExperimental: true,
-	},
-	'product-filter-rating': {
-		customDir: 'product-filter/inner-blocks/rating-filter',
-		isExperimental: true,
-	},
-	'product-filter-active': {
-		customDir: 'product-filter/inner-blocks/active-filters',
-		isExperimental: true,
-	},
-	'product-filter-clear-button': {
-		customDir: 'product-filter/inner-blocks/clear-button',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
@@ -170,6 +131,48 @@ const cartAndCheckoutBlocks = {
 	'mini-cart': {},
 	'mini-cart-contents': {
 		customDir: 'mini-cart/mini-cart-contents',
+	},
+};
+
+const interactivityBlocks = {
+	'product-collection': {},
+	'product-filter-stock-status': {
+		isExperimental: true,
+		customDir: 'product-filter/inner-blocks/stock-filter',
+	},
+	'product-filter-price': {
+		customDir: 'product-filter/inner-blocks/price-filter',
+		isExperimental: true,
+	},
+	'product-filter-attribute': {
+		customDir: 'product-filter/inner-blocks/attribute-filter',
+		isExperimental: true,
+	},
+	'product-filter-rating': {
+		customDir: 'product-filter/inner-blocks/rating-filter',
+		isExperimental: true,
+	},
+	'product-filter-active': {
+		customDir: 'product-filter/inner-blocks/active-filters',
+		isExperimental: true,
+	},
+	'product-filter-clear-button': {
+		customDir: 'product-filter/inner-blocks/clear-button',
+		isExperimental: true,
+	},
+	'product-gallery': {},
+	'product-gallery-large-image': {
+		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
+	},
+	'product-gallery-large-image-next-previous': {
+		customDir:
+			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
+	},
+	'product-gallery-pager': {
+		customDir: 'product-gallery/inner-blocks/product-gallery-pager',
+	},
+	'product-gallery-thumbnails': {
+		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
 	},
 };
 
@@ -234,12 +237,6 @@ const entries = {
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
 		wcTypes: './assets/js/types/index.ts',
-
-		// interactivity components, exported as separate entries for now
-		'wc-interactivity-dropdown':
-			'./packages/interactivity-components/dropdown/index.ts',
-		'wc-interactivity-checkbox-list':
-			'./packages/interactivity-components/checkbox-list/index.ts',
 	},
 	main: {
 		// Shared blocks code
@@ -249,13 +246,21 @@ const entries = {
 		...getBlockEntries( 'index.{t,j}s{,x}', {
 			...blocks,
 			...cartAndCheckoutBlocks,
+			...interactivityBlocks,
 		} ),
 	},
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
+	},
+	interactivity: {
 		'product-button-interactivity':
 			'./assets/js/atomic/blocks/product-elements/button/frontend.tsx',
+		'wc-interactivity-dropdown':
+			'./packages/interactivity-components/dropdown/index.ts',
+		'wc-interactivity-checkbox-list':
+			'./packages/interactivity-components/checkbox-list/index.ts',
+		...getBlockEntries( 'frontend.{t,j}s{,x}', interactivityBlocks ),
 	},
 	payments: {
 		'wc-payment-method-cheque':
