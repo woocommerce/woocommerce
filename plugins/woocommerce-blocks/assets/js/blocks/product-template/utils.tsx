@@ -150,146 +150,159 @@ export const useGetLocation = < T, >(
 		[ clientId ]
 	);
 
-	/**
-	 * Case 1.1: BLOCK LEVEL: SPECIFIC PRODUCT
-	 * Single Product block - take product ID from context
-	 */
+	return useMemo( () => {
+		/**
+		 * Case 1.1: BLOCK LEVEL: SPECIFIC PRODUCT
+		 * Single Product block - take product ID from context
+		 */
 
-	if ( isInSingleProductBlock ) {
-		return createLocationObject( LocationType.Product, {
-			productId: postId,
-		} );
-	}
+		if ( isInSingleProductBlock ) {
+			return createLocationObject( LocationType.Product, {
+				productId: postId,
+			} );
+		}
 
-	/**
-	 * Case 1.2: BLOCK LEVEL: GENERIC CART
-	 * Cart, Checkout or Mini Cart blocks - block scope is more important than template
-	 */
+		/**
+		 * Case 1.2: BLOCK LEVEL: GENERIC CART
+		 * Cart, Checkout or Mini Cart blocks - block scope is more important than template
+		 */
 
-	if ( isInSomeCartCheckoutBlock ) {
-		return createLocationObject( LocationType.Cart );
-	}
+		if ( isInSomeCartCheckoutBlock ) {
+			return createLocationObject( LocationType.Cart );
+		}
 
-	/**
-	 * Case 2.1: TEMPLATES: SPECIFIC PRODUCT
-	 * Specific Single Product template - take product ID from taxononmy
-	 */
+		/**
+		 * Case 2.1: TEMPLATES: SPECIFIC PRODUCT
+		 * Specific Single Product template - take product ID from taxononmy
+		 */
 
-	if ( isInSpecificProductTemplate ) {
-		return createLocationObject( LocationType.Product, { productId } );
-	}
+		if ( isInSpecificProductTemplate ) {
+			return createLocationObject( LocationType.Product, { productId } );
+		}
 
-	const isInGenericTemplate = prepareIsInGenericTemplate( templateSlug );
+		const isInGenericTemplate = prepareIsInGenericTemplate( templateSlug );
 
-	/**
-	 * Case 2.2: TEMPLATES: GENERIC PRODUCT
-	 * Generic Single Product template
-	 */
+		/**
+		 * Case 2.2: TEMPLATES: GENERIC PRODUCT
+		 * Generic Single Product template
+		 */
 
-	const isInSingleProductTemplate = isInGenericTemplate(
-		templateSlugs.singleProduct
-	);
+		const isInSingleProductTemplate = isInGenericTemplate(
+			templateSlugs.singleProduct
+		);
 
-	if ( isInSingleProductTemplate ) {
-		return createLocationObject( LocationType.Product, {
-			productId: null,
-		} );
-	}
+		if ( isInSingleProductTemplate ) {
+			return createLocationObject( LocationType.Product, {
+				productId: null,
+			} );
+		}
 
-	/**
-	 * Case 2.3: TEMPLATES: SPECIFIC TAXONOMY
-	 * Specific Category template - take category ID from
-	 */
+		/**
+		 * Case 2.3: TEMPLATES: SPECIFIC TAXONOMY
+		 * Specific Category template - take category ID from
+		 */
 
-	if ( isInSpecificCategoryTemplate ) {
-		return createLocationObject( LocationType.Archive, {
-			taxonomy: 'product_cat',
-			termId: categoryId,
-		} );
-	}
+		if ( isInSpecificCategoryTemplate ) {
+			return createLocationObject( LocationType.Archive, {
+				taxonomy: 'product_cat',
+				termId: categoryId,
+			} );
+		}
 
-	/**
-	 * Case 2.4: TEMPLATES: SPECIFIC TAXONOMY
-	 * Specific Tag template
-	 */
+		/**
+		 * Case 2.4: TEMPLATES: SPECIFIC TAXONOMY
+		 * Specific Tag template
+		 */
 
-	if ( isInSpecificTagTemplate ) {
-		return createLocationObject( LocationType.Archive, {
-			taxonomy: 'product_tag',
-			termId: tagId,
-		} );
-	}
+		if ( isInSpecificTagTemplate ) {
+			return createLocationObject( LocationType.Archive, {
+				taxonomy: 'product_tag',
+				termId: tagId,
+			} );
+		}
 
-	/**
-	 * Case 2.5: TEMPLATES: GENERIC TAXONOMY
-	 * Generic Taxonomy template
-	 */
+		/**
+		 * Case 2.5: TEMPLATES: GENERIC TAXONOMY
+		 * Generic Taxonomy template
+		 */
 
-	const isInProductsByCategoryTemplate = isInGenericTemplate(
-		templateSlugs.productCategory
-	);
+		const isInProductsByCategoryTemplate = isInGenericTemplate(
+			templateSlugs.productCategory
+		);
 
-	if ( isInProductsByCategoryTemplate ) {
-		return createLocationObject( LocationType.Archive, {
-			taxonomy: 'product_cat',
-			termId: null,
-		} );
-	}
+		if ( isInProductsByCategoryTemplate ) {
+			return createLocationObject( LocationType.Archive, {
+				taxonomy: 'product_cat',
+				termId: null,
+			} );
+		}
 
-	const isInProductsByTagTemplate = isInGenericTemplate(
-		templateSlugs.productTag
-	);
+		const isInProductsByTagTemplate = isInGenericTemplate(
+			templateSlugs.productTag
+		);
 
-	if ( isInProductsByTagTemplate ) {
-		return createLocationObject( LocationType.Archive, {
-			taxonomy: 'product_tag',
-			termId: null,
-		} );
-	}
+		if ( isInProductsByTagTemplate ) {
+			return createLocationObject( LocationType.Archive, {
+				taxonomy: 'product_tag',
+				termId: null,
+			} );
+		}
 
-	const isInProductsByAttributeTemplate = isInGenericTemplate(
-		templateSlugs.productAttribute
-	);
+		const isInProductsByAttributeTemplate = isInGenericTemplate(
+			templateSlugs.productAttribute
+		);
 
-	if ( isInProductsByAttributeTemplate ) {
-		return createLocationObject( LocationType.Archive, {
-			taxonomy: null,
-			termId: null,
-		} );
-	}
+		if ( isInProductsByAttributeTemplate ) {
+			return createLocationObject( LocationType.Archive, {
+				taxonomy: null,
+				termId: null,
+			} );
+		}
 
-	/**
-	 * Case 2.6: TEMPLATES: GENERIC CART
-	 * Cart/Checkout templates
-	 */
+		/**
+		 * Case 2.6: TEMPLATES: GENERIC CART
+		 * Cart/Checkout templates
+		 */
 
-	const isInCartCheckoutTemplate =
-		templateSlug === templateSlugs.cart ||
-		templateSlug === templateSlugs.checkout;
+		const isInCartCheckoutTemplate =
+			templateSlug === templateSlugs.cart ||
+			templateSlug === templateSlugs.checkout;
 
-	if ( isInCartCheckoutTemplate ) {
-		return createLocationObject( LocationType.Cart );
-	}
+		if ( isInCartCheckoutTemplate ) {
+			return createLocationObject( LocationType.Cart );
+		}
 
-	/**
-	 * Case 2.7: TEMPLATES: GENERIC ORDER
-	 * Order Confirmation template
-	 */
+		/**
+		 * Case 2.7: TEMPLATES: GENERIC ORDER
+		 * Order Confirmation template
+		 */
 
-	const isInOrderTemplate = isInGenericTemplate(
-		templateSlugs.orderConfirmation
-	);
+		const isInOrderTemplate = isInGenericTemplate(
+			templateSlugs.orderConfirmation
+		);
 
-	if ( isInOrderTemplate ) {
-		return createLocationObject( LocationType.Order );
-	}
+		if ( isInOrderTemplate ) {
+			return createLocationObject( LocationType.Order );
+		}
 
-	/**
-	 * Case 3: GENERIC
-	 * All other cases
-	 */
+		/**
+		 * Case 3: GENERIC
+		 * All other cases
+		 */
 
-	return createLocationObject( LocationType.Site );
+		return createLocationObject( LocationType.Site );
+	}, [
+		categoryId,
+		isInSingleProductBlock,
+		isInSomeCartCheckoutBlock,
+		isInSpecificCategoryTemplate,
+		isInSpecificProductTemplate,
+		isInSpecificTagTemplate,
+		postId,
+		productId,
+		tagId,
+		templateSlug,
+	] );
 };
 
 /**
