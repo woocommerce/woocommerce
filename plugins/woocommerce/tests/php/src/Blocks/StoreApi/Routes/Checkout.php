@@ -118,7 +118,7 @@ class Checkout extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
-		unset( wc()->countries->locale );
+		unset( WC()->countries->locale );
 		$default_zone     = \WC_Shipping_Zones::get_zone( 0 );
 		$shipping_methods = $default_zone->get_shipping_methods();
 		foreach ( $shipping_methods as $method ) {
