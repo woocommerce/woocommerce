@@ -228,6 +228,7 @@ export const useSetPreviewState = ( {
 			},
 		} );
 	};
+	const isCollectionUsesReference = usesReference?.length > 0;
 
 	/**
 	 * When usesReference is available on Frontend but not on Editor side,
@@ -238,19 +239,23 @@ export const useSetPreviewState = ( {
 		location
 	);
 	useLayoutEffect( () => {
-		if ( usesReferencePreviewMessage.length ) {
+		if ( isCollectionUsesReference ) {
 			setAttributes( {
 				__privatePreviewState: {
-					isPreview: true,
+					isPreview: usesReferencePreviewMessage.length > 0,
 					previewMessage: usesReferencePreviewMessage,
 				},
 			} );
 		}
-	}, [ setAttributes, usesReferencePreviewMessage ] );
+	}, [
+		setAttributes,
+		usesReferencePreviewMessage,
+		isCollectionUsesReference,
+	] );
 
 	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
-		if ( ! setPreviewState && ! usesReferencePreviewMessage?.length ) {
+		if ( ! setPreviewState && ! isCollectionUsesReference ) {
 			return;
 		}
 
@@ -277,7 +282,7 @@ export const useSetPreviewState = ( {
 	 * - Products by attribute
 	 */
 	useLayoutEffect( () => {
-		if ( ! setPreviewState && ! usesReferencePreviewMessage?.length ) {
+		if ( ! setPreviewState && ! isCollectionUsesReference ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive &&
 				location.sourceData?.termId === null;
@@ -300,6 +305,7 @@ export const useSetPreviewState = ( {
 		location.type,
 		setAttributes,
 		setPreviewState,
+		isCollectionUsesReference,
 	] );
 };
 
