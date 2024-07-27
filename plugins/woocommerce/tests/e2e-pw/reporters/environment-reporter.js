@@ -53,7 +53,6 @@ class EnvironmentReporter {
 		const filePath = path.resolve( outputFolder, 'environment.properties' );
 
 		try {
-			console.log( environmentData );
 			fs.writeFileSync( filePath, environmentData );
 		} catch ( err ) {
 			console.error( `Error writing environment.properties: ${ err }` );
