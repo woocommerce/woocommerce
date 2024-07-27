@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update TaskItem to include a badge next to the title. Update also related components TaskList and SetupTaskList, as well as docs, storybook, and tests.
