@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
@@ -21,7 +20,7 @@ use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
  * @internal
  * @extends Automattic\WooCommerce\Admin\API\Reports\Controller
  */
-class Controller extends ReportsController implements ExportableInterface {
+class Controller extends GenericController implements ExportableInterface {
 
 	use OrderAwareControllerTrait;
 
