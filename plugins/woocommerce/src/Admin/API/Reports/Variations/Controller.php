@@ -77,6 +77,8 @@ class Controller extends GenericController implements ExportableInterface {
 		 *
 		 * Allows modification of the report data right before it is returned.
 		 *
+		 * @since 6.5.0
+		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
