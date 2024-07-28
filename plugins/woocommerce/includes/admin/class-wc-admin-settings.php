@@ -459,7 +459,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 								<fieldset>
 									<?php
 									if ( ! $show_desc_at_end ) {
-										echo wp_kses_post( $description );
+										echo $description; // WPCS: XSS ok.
 									}
 									?>
 									<ul>
@@ -483,11 +483,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 										</li>
 										<?php
 									}
-									if ( $show_desc_at_end ) {
-										echo wp_kses_post( "<p class='description description-thin'>{$description}</p>" );
-									}
 									?>
 									</ul>
+									<?php
+									if ( $show_desc_at_end ) {
+										echo $description; // WPCS: XSS ok.
+									}
+									?>
 								</fieldset>
 							</td>
 						</tr>
@@ -818,7 +820,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 
 			$error_class = ( ! empty( $value['description_is_error'] ) ) ? 'is-error' : '';
 
-			if ( $description && in_array( $value['type'], array( 'textarea', 'radio' ), true ) ) {
+			if ( $description && in_array( $value['type'], array( 'textarea' ), true ) ) {
 				$description = '<p style="margin-top:0">' . wp_kses_post( $description ) . '</p>';
 			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ), true ) ) {
 				$description = wp_kses_post( $description );
