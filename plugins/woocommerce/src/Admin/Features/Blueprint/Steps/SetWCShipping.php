@@ -38,18 +38,21 @@ class SetWCShipping extends Step {
 
 	/**
 	 * Shipping terms.
+	 *
 	 * @var array $terms Shipping terms.
 	 */
 	private array $terms;
 
 	/**
 	 * Shipping classes.
+	 *
 	 * @var array $classes Shipping classes.
 	 */
 	private array $classes;
 
 	/**
 	 * Local pickup settings.
+	 *
 	 * @var array $local_pickup Local pickup settings.
 	 */
 	private array $local_pickup;
