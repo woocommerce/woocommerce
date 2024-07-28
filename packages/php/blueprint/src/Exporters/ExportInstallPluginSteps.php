@@ -24,6 +24,10 @@ class ExportInstallPluginSteps implements StepExporter {
 			if ( in_array( $plugin['Name'], $exclude, true ) ) {
 				continue;
 			}
+			// skip inactive plugins for now.
+			if ( ! $this->wp_is_plugin_active( $path ) ) {
+				continue;
+			}
 			$slug = dirname( $path );
 			// single-file plugin
 			if ( $slug === '.' ) {
