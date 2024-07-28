@@ -119,4 +119,20 @@ jQuery( function( $ ) {
 			}
 		} );
 	} );
+
+	$( document ).ready( function() {
+		var noticeClasses = [ 'woocommerce-message', 'woocommerce-error', 'wc-block-components-notice-banner' ];
+
+		var $notice = $( noticeClasses.map( function( className ) {
+			return '.' + className + '[role="alert"]';
+		} ).join( ', ' ) );
+
+		if ( $notice.length > 0 ) {
+			$notice
+				.first()
+				.attr( 'tabindex', '-1' )
+				.delay( 100 ) // Wait for the element to get the tabindex attribute so it can be focused.
+				.focus();
+		}
+	} );
 });
