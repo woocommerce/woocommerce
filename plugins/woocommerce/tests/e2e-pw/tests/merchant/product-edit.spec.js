@@ -5,6 +5,7 @@ const test = baseTest.extend( {
 	products: async ( { api }, use ) => {
 		const products = [];
 
+		// Create two simple products
 		for ( let i = 0; i < 2; i++ ) {
 			await api
 				.post( 'products', {
@@ -23,54 +24,54 @@ const test = baseTest.extend( {
 
 		await use( products );
 
-		// Cleanup
+		// Delete the created products after tests
 		for ( const product of products ) {
 			await api.delete( `products/${ product.id }`, { force: true } );
 		}
 	},
 } );
 
-test(
-	'can edit a product and save the changes',
+test.describe(
+	'Product Editing',
 	{ tag: [ '@gutenberg', '@services' ] },
-	async ( { page, products } ) => {
-		await page.goto(
-			`wp-admin/post.php?post=${ products[ 0 ].id }&action=edit`
-		);
+	() => {
+		test( 'can edit a product and save the changes', async ( {
+			page,
+			products,
+		} ) => {
+			await page.goto(
+				`wp-admin/post.php?post=${ products[ 0 ].id }&action=edit`
+			);
 
-		const newProduct = {
-			name: `Product ${ Date.now() }`,
-			description: `This product is pretty awesome ${ Date.now() }`,
-			regularPrice: '100.05',
-			salePrice: '99.05',
-		};
+			const newProduct = {
+				name: `Product ${ Date.now() }`,
+				description: `This product is pretty awesome ${ Date.now() }`,
+				regularPrice: '100.05',
+				salePrice: '99.05',
+			};
 
-		await test.step( 'edit the product name', async () => {
+			// Edit product name
 			await page.getByLabel( 'Product name' ).fill( newProduct.name );
-		} );
 
-		await test.step( 'edit the product description', async () => {
-			await page.locator( '#content-html' ).click(); // text mode to work around iframe
+			// Switch to text mode and edit product description
+			await page.locator( '#content-html' ).click();
 			await page
 				.locator( '.wp-editor-area' )
 				.first()
 				.fill( newProduct.description );
-		} );
 
-		await test.step( 'edit the product price', async () => {
+			// Edit product prices
 			await page
 				.getByLabel( 'Regular price ($)' )
 				.fill( newProduct.regularPrice );
 			await page
 				.getByLabel( 'Sale price ($)' )
 				.fill( newProduct.salePrice );
-		} );
 
-		await test.step( 'publish the updated product', async () => {
+			// Publish the updated product
 			await page.getByRole( 'button', { name: 'Update' } ).click();
-		} );
 
-		await test.step( 'verify the changes', async () => {
+			// Verify the changes
 			await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
 				newProduct.name
 			);
@@ -84,24 +85,19 @@ test(
 				newProduct.salePrice
 			);
 		} );
-	}
-);
 
-test(
-	'can bulk edit products',
-	{ tag: [ '@gutenberg', '@services' ] },
-	async ( { page, products } ) => {
-		await page.goto( `wp-admin/edit.php?post_type=product` );
+		test( 'can bulk edit product prices', async ( { page, products } ) => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
 
-		const regularPriceIncrease = 10;
-		const salePriceDecrease = 10;
-		const stockQtyIncrease = 10;
+			const regularPriceIncrease = 10;
+			const salePriceDecrease = 10;
 
-		await test.step( 'select and bulk edit the products', async () => {
+			// Select product for bulk editing
 			for ( const product of products ) {
 				await page.getByLabel( `Select ${ product.name }` ).click();
 			}
 
+			// Click bulk edit
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
@@ -110,9 +106,8 @@ test(
 			await expect(
 				await page.locator( '#bulk-titles-list li' ).count()
 			).toEqual( products.length );
-		} );
 
-		await test.step( 'update the regular price', async () => {
+			// Update regular price by a percentage
 			await page
 				.locator( 'select[name="change_regular_price"]' )
 				.selectOption(
@@ -121,9 +116,8 @@ test(
 			await page
 				.getByPlaceholder( 'Enter price ($)' )
 				.fill( `${ regularPriceIncrease }%` );
-		} );
 
-		await test.step( 'update the sale price', async () => {
+			// Update sale price to a percentage of the regular price
 			await page
 				.locator( 'select[name="change_sale_price"]' )
 				.selectOption(
@@ -132,22 +126,11 @@ test(
 			await page
 				.getByPlaceholder( 'Enter sale price ($)' )
 				.fill( `${ salePriceDecrease }%` );
-		} );
 
-		await test.step( 'update the stock quantity', async () => {
-			await page
-				.locator( 'select[name="change_stock"]' )
-				.selectOption( 'Increase existing stock by:' );
-			await page
-				.getByPlaceholder( 'Stock qty' )
-				.fill( `${ stockQtyIncrease }` );
-		} );
-
-		await test.step( 'save the updates', async () => {
+			// Save the updates
 			await page.getByRole( 'button', { name: 'Update' } ).click();
-		} );
 
-		await test.step( 'verify the changes', async () => {
+			// Verify the price updates on the product pages
 			for ( const product of products ) {
 				await page.goto( `product/${ product.slug }` );
 
@@ -159,8 +142,6 @@ test(
 					expectedRegularPrice *
 					( 1 - salePriceDecrease / 100 )
 				).toFixed( 2 );
-				const expectedStockQty =
-					product.stock_quantity + stockQtyIncrease;
 
 				await expect
 					.soft(
@@ -178,9 +159,126 @@ test(
 							.count()
 					)
 					.toBeGreaterThan( 0 );
+			}
+		} );
+
+		test( 'can bulk edit product quantity', async ( {
+			page,
+			products,
+		} ) => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
+
+			const stockQtyIncrease = 10;
+
+			// Select product for bulk editing
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			// Initiate bulk edit
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await expect(
+				await page.locator( '#bulk-titles-list li' ).count()
+			).toEqual( products.length );
+
+			// Update stock quantity
+			await page
+				.locator( 'select[name="change_stock"]' )
+				.selectOption( 'Increase existing stock by:' );
+			await page
+				.getByPlaceholder( 'Stock qty' )
+				.fill( `${ stockQtyIncrease }` );
+
+			// Save the updates
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+
+			// Verify the stock quantity updates on the product pages
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				const expectedStockQty =
+					product.stock_quantity + stockQtyIncrease;
+
 				await expect
 					.soft( page.getByText( `${ expectedStockQty } in stock` ) )
 					.toBeVisible();
+			}
+		} );
+
+		test( 'can bulk edit product dimensions', async ( {
+			page,
+			products,
+		} ) => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
+
+			const weightDimension = 3;
+			const lengthDimension = 20;
+			const widthDimension = 20;
+			const heightDimension = 6;
+
+			// Select product for bulk editing
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			// Click on bulk edit
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await expect(
+				await page.locator( '#bulk-titles-list li' ).count()
+			).toEqual( products.length );
+
+			// Update weight
+			await page
+				.locator( 'select[name="change_weight"]' )
+				.selectOption( 'Change to:' );
+			await page
+				.getByPlaceholder( '0 (kg)' )
+				.fill( `${ weightDimension }` );
+
+			// Update dimensions
+			await page
+				.locator( 'select[name="change_dimensions"]' )
+				.selectOption( 'Change to:' );
+			await page
+				.getByPlaceholder( 'Length (cm)' )
+				.fill( `${ lengthDimension }` );
+			await page
+				.getByPlaceholder( 'Width (cm)' )
+				.fill( `${ widthDimension }` );
+			await page
+				.getByPlaceholder( 'Height (cm)' )
+				.fill( `${ heightDimension }` );
+
+			// Save the updates
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+
+			// Verify the weight and dimensions updates on the product pages
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				await expect(
+					page
+						.locator(
+							'tr.woocommerce-product-attributes-item--weight td'
+						)
+						.first()
+				).toContainText( `${ weightDimension } kg` );
+
+				await expect(
+					page.locator(
+						'tr.woocommerce-product-attributes-item--dimensions td.woocommerce-product-attributes-item__value'
+					)
+				).toContainText(
+					`${ lengthDimension } × ${ widthDimension } × ${ heightDimension } cm`
+				);
 			}
 		} );
 	}
