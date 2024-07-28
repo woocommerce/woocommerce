@@ -42,6 +42,18 @@
 			}
 		}
 
+		// Wrapper for the notice content with link.
+		.woocommerce-notice-content {
+			align-items: flex-start;
+			display: flex;
+			justify-content: space-between;
+			gap: $gap-small;
+
+			.wc-forward {
+				flex-shrink: 0;
+			}
+		}
+
 		// Legacy notice compatibility.
 		.wc-forward {
 			float: right;

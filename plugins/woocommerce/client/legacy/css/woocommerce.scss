@@ -1853,6 +1853,17 @@ p.demo_store,
 		padding-left: 0 !important; // Required for default theme compatibility
 		margin-left: 0 !important; // Required for default theme compatibility
 	}
+
+	.woocommerce-notice-content {
+		align-items: flex-start;
+		display: flex;
+		justify-content: space-between;
+		gap: 12px;
+
+		.wc-forward {
+			flex-shrink: 0;
+		}
+	}
 }
 
 /**
