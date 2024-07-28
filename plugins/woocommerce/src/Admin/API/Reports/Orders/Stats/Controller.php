@@ -10,9 +10,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders\Stats;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
-use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
-use Automattic\WooCommerce\Admin\API\Reports\Orders\Query;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query;
 
 /**
  * REST API Reports orders stats controller class.
