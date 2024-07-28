@@ -9,12 +9,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Admin\API\Reports\DataStore: Common parent for custom report data stores.
  */
-class DataStore extends SqlQuery {
+class DataStore extends SqlQuery implements DataStoreInterface {
 
 	/**
 	 * Cache group for the reports.
@@ -90,6 +91,8 @@ class DataStore extends SqlQuery {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override SqlQuery::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'reports';
@@ -138,6 +141,8 @@ class DataStore extends SqlQuery {
 
 	/**
 	 * Class constructor.
+	 *
+	 * @override SqlQuery::__construct()
 	 */
 	public function __construct() {
 		self::set_db_table_name();
@@ -160,12 +165,73 @@ class DataStore extends SqlQuery {
 		}
 	}
 
+
+	/**
+	 * Get the data based on args.
+	 *
+	 * Returns the report data based on parameters supplied by the user.
+	 * Fetches it from cache or returns `get_noncached_data` result.
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error
+	 */
+	public function get_data( $query_args ) {
+		$defaults   = $this->get_default_query_vars();
+		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
+
+		/*
+		 * We need to get the cache key here because
+		 * parent::update_intervals_sql_params() modifies $query_args.
+		 */
+		$cache_key = $this->get_cache_key( $query_args );
+		$data      = $this->get_cached_data( $cache_key );
+
+		if ( false === $data ) {
+			$data = $this->get_noncached_data( $query_args );
+			$this->set_cached_data( $cache_key, $data );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
+	 *
+	 * @return array Query parameters.
+	 */
+	public function get_default_query_vars() {
+		return array(
+			'per_page' => get_option( 'posts_per_page' ),
+			'page'     => 1,
+			'order'    => 'DESC',
+			'orderby'  => 'date',
+			'before'   => TimeInterval::default_before(),
+			'after'    => TimeInterval::default_after(),
+			'fields'   => '*',
+		);
+	}
+
 	/**
 	 * Get table name from database class.
 	 */
 	public static function get_db_table_name() {
 		global $wpdb;
 		return isset( $wpdb->{static::$table_name} ) ? $wpdb->{static::$table_name} : $wpdb->prefix . static::$table_name;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
+		/* translators: %s: Method name */
+		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
