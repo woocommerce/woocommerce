@@ -5,7 +5,7 @@ const test = baseTest.extend( {
 	products: async ( { api }, use ) => {
 		const products = [];
 
-		// Create two simple products
+		// Create two simple products for testing
 		for ( let i = 0; i < 2; i++ ) {
 			await api
 				.post( 'products', {
@@ -24,7 +24,7 @@ const test = baseTest.extend( {
 
 		await use( products );
 
-		// Delete the created products after tests
+		// Cleanup
 		for ( const product of products ) {
 			await api.delete( `products/${ product.id }`, { force: true } );
 		}
@@ -92,12 +92,12 @@ test.describe(
 			const regularPriceIncrease = 10;
 			const salePriceDecrease = 10;
 
-			// Select product for bulk editing
+			// Select all products for bulk editing
 			for ( const product of products ) {
 				await page.getByLabel( `Select ${ product.name }` ).click();
 			}
 
-			// Click bulk edit
+			// Initiate bulk edit
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
@@ -162,52 +162,45 @@ test.describe(
 			}
 		} );
 
-		test( 'can bulk edit product quantity', async ( {
-			page,
-			products,
-		} ) => {
-			await page.goto( `wp-admin/edit.php?post_type=product` );
-
+		test('can bulk edit product stock', async ({ page, products }) => {
+			await page.goto(`wp-admin/edit.php?post_type=product`);
+		  
 			const stockQtyIncrease = 10;
-
+		  
 			// Select product for bulk editing
-			for ( const product of products ) {
-				await page.getByLabel( `Select ${ product.name }` ).click();
+			for (const product of products) {
+			  await page.getByLabel(`Select ${product.name}`).click();
 			}
-
-			// Initiate bulk edit
-			await page
-				.locator( '#bulk-action-selector-top' )
-				.selectOption( 'Edit' );
-			await page.locator( '#doaction' ).click();
-
-			await expect(
-				await page.locator( '#bulk-titles-list li' ).count()
-			).toEqual( products.length );
-
+		  
+			// Click on bulk edit
+			await page.locator('#bulk-action-selector-top').selectOption('Edit');
+			await page.locator('#doaction').click();
+		  
+			await expect(await page.locator('#bulk-titles-list li').count()).toEqual(products.length);
+		  
 			// Update stock quantity
-			await page
-				.locator( 'select[name="change_stock"]' )
-				.selectOption( 'Increase existing stock by:' );
-			await page
-				.getByPlaceholder( 'Stock qty' )
-				.fill( `${ stockQtyIncrease }` );
-
+			await page.locator('select[name="change_stock"]').selectOption('Increase existing stock by:');
+			await page.getByPlaceholder('Stock qty').fill(`${stockQtyIncrease}`);
+		  
+			// Enable stock management in bulk edit
+			await page.locator('select[name="_manage_stock"]').selectOption({ label: 'Yes' });
+		  
+			// Update stock status to 'In stock'
+			await page.locator('select[name="_stock_status"]').first().selectOption('instock');
+		  
 			// Save the updates
-			await page.getByRole( 'button', { name: 'Update' } ).click();
-
-			// Verify the stock quantity updates on the product pages
-			for ( const product of products ) {
-				await page.goto( `product/${ product.slug }` );
-
-				const expectedStockQty =
-					product.stock_quantity + stockQtyIncrease;
-
-				await expect
-					.soft( page.getByText( `${ expectedStockQty } in stock` ) )
-					.toBeVisible();
+			await page.getByRole('button', { name: 'Update' }).click();
+		  
+			// Verify the stock quantity and status updates on the product pages
+			for (const product of products) {
+			  await page.goto(`product/${product.slug}`);
+		  
+			  const expectedStockQty = product.stock_quantity + stockQtyIncrease;
+		  
+			  // Verify updated stock quantity
+			  await expect.soft(page.getByText(`${expectedStockQty} in stock`)).toBeVisible();
 			}
-		} );
+		  });						  
 
 		test( 'can bulk edit product dimensions', async ( {
 			page,
@@ -220,12 +213,12 @@ test.describe(
 			const widthDimension = 20;
 			const heightDimension = 6;
 
-			// Select product for bulk editing
+			// Select all products for bulk editing
 			for ( const product of products ) {
 				await page.getByLabel( `Select ${ product.name }` ).click();
 			}
 
-			// Click on bulk edit
+			// Initiate bulk edit
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
