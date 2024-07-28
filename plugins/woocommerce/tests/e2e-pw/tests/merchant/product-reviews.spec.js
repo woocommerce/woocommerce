@@ -260,55 +260,45 @@ test.describe(
 				.toBeVisible;
 		} );
 
-		test( 'can reply to a product review', async ( { page, reviews } ) => {
-			const review = reviews[ 0 ]; // Select the first review to reply to
-
+		test('can reply to a product review', async ({ page, reviews }) => {
+			const review = reviews[0]; // Select the first review to reply to
+		
 			// Go to the Product Reviews page
-			await page.goto(
-				'wp-admin/edit.php?post_type=product&page=product-reviews'
-			);
-
+			await page.goto('wp-admin/edit.php?post_type=product&page=product-reviews');
+		
 			// Locate the review to be replied to
-			const reviewRow = page.locator( `#comment-${ review.id }` );
+			const reviewRow = page.locator(`#comment-${review.id}`);
 			await reviewRow.hover();
-
+		
 			// Click the Reply button within the review row
-			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
-
+			await reviewRow.getByRole('button', { name: 'Reply' }).click();
+		
 			// Wait for the reply textarea to be visible
-			const replyTextArea = page.locator( 'textarea#replycontent' );
-			await replyTextArea.isVisible();
-
+			const replyTextArea = page.locator('textarea#replycontent');
+			await expect(replyTextArea).toBeVisible();
+		
 			// Fill in the reply and submit it
 			const replyText = 'Thank you for your feedback!';
-			await replyTextArea.fill( replyText );
-
+			await replyTextArea.fill(replyText);
+		
 			// Ensure the "Submit Reply" button within the reply area is visible and clickable
-			await page.locator( 'button.save.button.button-primary' ).click();
-
-			// Verify that the reply is visible in the admin review list
-			const replyLocator = page.locator(
-				`#comment-${ review.id } ~ .comment-reply div.comment-text`
-			);
-			await expect( replyLocator ).toContainText( replyText );
-
-			// Verify that the reply is visible on the shop's product page
-			const productLink = await reviewRow
-				.locator( 'a.comments-view-item-link' )
-				.getAttribute( 'href' );
-			await page.goto( productLink );
-			await page.click( '#tab-reviews' );
-
-			// Wait for the reviews tab content to load
-			await page.waitForSelector( '.comment_container' );
-
-			// Verify that the reply is visible in the customer-facing reviews section
-			const reviewContainer = page.locator(
-				`.comment_container #comment-${ review.id }`
-			);
-			await expect( reviewContainer ).toContainText( replyText );
-		} );
-
+			const submitReplyButton = page.locator('button.save.button.button-primary');
+			await expect(submitReplyButton).toBeVisible();
+			await submitReplyButton.click();
+		
+			// Verify that the reply is visible in the product reviews list
+			const replyRow = page.locator(`tr.comment.byuser:has(div.comment-text:has-text("${replyText}"))`);
+			await expect(replyRow).toContainText(replyText);
+		
+			// Get the product link from the review row
+			await reviewRow.locator('a.comments-view-item-link').click();
+			await page.click('#tab-reviews');
+		
+			// Verify that the reply is visible in the shop reviews section
+			const reviewContainer = page.locator(`div.comment_container:has-text("${replyText}")`);
+    		await expect(reviewContainer).toContainText(replyText);
+		});		
+		
 		test( 'can delete a product review', async ( { page, reviews } ) => {
 			const review = reviews[ 0 ];
 
