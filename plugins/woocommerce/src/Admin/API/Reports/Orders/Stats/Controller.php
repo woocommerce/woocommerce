@@ -202,14 +202,14 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                       = parent::get_collection_params();
-		$params['orderby']['enum']    = array(
+		$params                     = parent::get_collection_params();
+		$params['orderby']['enum']  = array(
 			'date',
 			'net_revenue',
 			'orders_count',
 			'avg_order_value',
 		);
-		$params['match']              = array(
+		$params['match']            = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'all',
@@ -219,7 +219,7 @@ class Controller extends GenericStatsController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status_is']          = array(
+		$params['status_is']        = array(
 			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -230,7 +230,7 @@ class Controller extends GenericStatsController {
 				'type' => 'string',
 			),
 		);
-		$params['status_is_not']      = array(
+		$params['status_is_not']    = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -240,7 +240,7 @@ class Controller extends GenericStatsController {
 				'type' => 'string',
 			),
 		);
-		$params['product_includes']   = array(
+		$params['product_includes'] = array(
 			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -250,7 +250,7 @@ class Controller extends GenericStatsController {
 			'sanitize_callback' => 'wp_parse_id_list',
 
 		);
-		$params['product_excludes']   = array(
+		$params['product_excludes'] = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
