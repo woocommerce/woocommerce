@@ -42,9 +42,6 @@ export const useAddNoBlocksPlaceholder = ( {
 					__noBlocksPlaceholder: true,
 					className: ENABLE_CLICK_CLASS,
 					style: {
-						layout: {
-							type: 'constrained',
-						},
 						dimensions: {
 							minHeight: '60vh',
 						},
@@ -57,6 +54,12 @@ export const useAddNoBlocksPlaceholder = ( {
 								bottom: '40px',
 							},
 						},
+					},
+					layout: {
+						type: 'flex',
+						orientation: 'vertical',
+						justifyContent: 'center',
+						verticalAlignment: 'center',
 					},
 				},
 				[
