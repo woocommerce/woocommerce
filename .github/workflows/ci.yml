@@ -37,16 +37,13 @@ jobs:
     steps:
       - name: 'Calculate git fetch dept'
         id: 'git-fetch-depth'
-        uses: actions/github-script@v6.3.1
-        env:
-          COMMITS: ${{ toJSON( github.event.commits ) }}
-        with:
-          result-encoding: number
-          script: return JSON.parse( process.env.COMMITS ).length
+        shell: bash
+        run: |
+          run: echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          fetch-depth: ${{ steps.git-fetch-depth.outputs.result }}
+          fetch-depth: ${{ env.PR_FETCH_DEPTH }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
