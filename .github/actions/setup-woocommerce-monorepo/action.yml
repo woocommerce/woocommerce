@@ -89,12 +89,10 @@ runs:
           run: |
             if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
               # PHPUnit/REST testing optimized installation of the deps:
-              # 1) If needed, start composer installation earlier, so when pnpm triggers postinstall hooks the heavy lifting is done already
-              if [[ ! -d ./plugins/woocommerce/vendor ]]; then
-                  composer install --working-dir=./plugins/woocommerce --quiet --no-autoloader &
-              fi
-              # 2) We mostly need wp-env and playwright, but installing intermediate package deps instead for maintainability reasons
-              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false
+              # 1) Start composer installation earlier, so when pnpm finishes installation composer is ready as well.
+              composer install --working-dir=./plugins/woocommerce --quiet &
+              # 2) We mostly need wp-env and playwright, but installing intermediate package deps instead for CI maintainability reasons.
+              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
             else
               pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
             fi
