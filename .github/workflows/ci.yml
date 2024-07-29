@@ -38,9 +38,11 @@ jobs:
       - name: 'Calculate git fetch dept'
         id: 'git-fetch-depth'
         uses: actions/github-script@v6.3.1
+        env:
+          COMMITS: ${{ toJSON( github.event.commits ) }}
         with:
           result-encoding: number
-          script: return JSON.parse( "${{ toJSON( github.event.commits ) }}" ).length
+          script: return JSON.parse( process.env.COMMITS ).length
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
