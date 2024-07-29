@@ -297,7 +297,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		const defaultPattern = editor.locator(
 			'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
 		);
-		await expect( emptyPatternsBlock ).not.toBeVisible();
+		await expect( emptyPatternsBlock ).toBeHidden();
 		await expect( defaultPattern ).toBeVisible();
 	} );
 } );
