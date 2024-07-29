@@ -2,7 +2,8 @@
 /**
  * External dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
@@ -11,25 +12,27 @@ import { useQuery } from '@woocommerce/navigation';
 const allowedUrls = [ '/customize-store/assembler-hub/homepage/' ];
 
 function isPathIncluded( currentPath: string, urls: string[] ) {
+	if ( ! currentPath ) {
+		return false;
+	}
+
 	return urls.some( ( url ) => currentPath.startsWith( url ) );
 }
 
-export const useZoomOut = ( {
-	documentElement,
-}: {
-	documentElement: HTMLElement | null;
-} ) => {
+export const useZoomOut = () => {
+	const [ isZoomedOut, setIsZoomedOut ] = useState( false );
 	const params = useQuery();
 
 	useEffect( () => {
-		if ( ! documentElement ) {
-			return;
-		}
-
 		if ( isPathIncluded( params.path, allowedUrls ) ) {
-			documentElement.classList.add( 'is-zoomed-out' );
+			setIsZoomedOut( true );
 		} else {
-			documentElement.classList.remove( 'is-zoomed-out' );
+			setIsZoomedOut( false );
 		}
-	}, [ params.path, documentElement ] );
+	}, [ params.path ] );
+
+	return {
+		isZoomedOut,
+		setIsZoomedOut,
+	};
 };
