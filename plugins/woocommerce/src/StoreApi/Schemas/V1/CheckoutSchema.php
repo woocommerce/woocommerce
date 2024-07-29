@@ -319,6 +319,9 @@ class CheckoutSchema extends AbstractSchema {
 					},
 					$field['options']
 				);
+				if ( true !== $field['required'] ) {
+					$field_schema['enum'][] = '';
+				}
 			}
 
 			if ( 'checkbox' === $field['type'] ) {
