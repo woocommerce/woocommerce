@@ -133,4 +133,19 @@ trait UseWPFunctions {
 	public function wp_upload_dir() {
 		return \wp_upload_dir();
 	}
+
+	public function wp_get_theme_root() {
+		return \get_theme_root();
+	}
+
+	public function is_wp_error( $thing ) {
+		return is_wp_error( $thing );
+	}
+
+	public function wp_download_url( $url ) {
+		if ( ! function_exists( 'download_url' ) ) {
+			include ABSPATH . '/wp-admin/includes/file.php';
+		}
+		return download_url( $url );
+	}
 }

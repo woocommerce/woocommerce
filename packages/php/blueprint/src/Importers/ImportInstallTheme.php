@@ -60,14 +60,9 @@ class ImportInstallTheme implements StepProcessor {
 	}
 
 	protected function install( $local_plugin_path ) {
-		if ( ! class_exists( 'WP_Filesystem_Base' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			WP_Filesystem();
-		}
+		$unzip_result = $this->wp_unzip_file( $local_plugin_path, $this->wp_get_theme_root() );
 
-		$unzip_result = unzip_file( $local_plugin_path, get_theme_root() );
-
-		if ( is_wp_error( $unzip_result ) ) {
+		if ( $this->is_wp_error( $unzip_result ) ) {
 			return false;
 		}
 

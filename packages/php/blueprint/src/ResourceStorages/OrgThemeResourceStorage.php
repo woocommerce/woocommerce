@@ -4,10 +4,7 @@ namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
 
 class OrgThemeResourceStorage extends OrgPluginResourceStorage {
 	protected function get_download_link( $slug ): ?string {
-		if ( ! function_exists( 'themes_api' ) ) {
-			include_once ABSPATH . '/wp-admin/includes/themes.php';
-		}
-		$info = \themes_api(
+		$info = $this->wp_themes_api(
 			'theme_information',
 			array(
 				'slug'   => $slug,
