@@ -3,7 +3,7 @@
 namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
 
 class OrgThemeResourceStorage extends OrgPluginResourceStorage {
-	protected function get_download_link( $slug ) {
+	protected function get_download_link( $slug ): ?string {
 		if ( ! function_exists( 'themes_api' ) ) {
 			include_once ABSPATH . '/wp-admin/includes/themes.php';
 		}
@@ -17,7 +17,11 @@ class OrgThemeResourceStorage extends OrgPluginResourceStorage {
 			)
 		);
 
-		return $info->download_link;
+		if ( isset( $info->download_link ) ) {
+			return $info->download_link;
+		}
+
+		return null;
 	}
 
 	public function get_supported_resource(): string {

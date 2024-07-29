@@ -15,16 +15,16 @@ class LocalPluginResourceStorage implements ResourceStorage {
 	 *
 	 * @param $slug
 	 *
-	 * @return false|string
+	 * @return string|null
 	 */
-	public function download( $slug ): string {
+	public function download( $slug ): ?string {
 		foreach ( $this->paths as $path ) {
 			$full_path = $path . "/{$this->suffix}/" . $slug . '.zip';
 			if ( is_file( $full_path ) ) {
 				return $full_path;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public function get_supported_resource(): string {

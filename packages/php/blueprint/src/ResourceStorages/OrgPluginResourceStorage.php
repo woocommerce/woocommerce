@@ -10,7 +10,7 @@ class OrgPluginResourceStorage implements ResourceStorage {
 	 *
 	 * @return string|null
 	 */
-	public function download( $slug ) {
+	public function download( $slug ): ?string {
 		$download_link = $this->get_download_link( $slug );
 		if ( ! $download_link ) {
 			return false;
@@ -25,7 +25,7 @@ class OrgPluginResourceStorage implements ResourceStorage {
 		return \download_url( $url );
 	}
 
-	protected function get_download_link( $slug ) {
+	protected function get_download_link( $slug ): ?string {
 		if ( ! function_exists( 'plugins_api' ) ) {
 			include_once ABSPATH . '/wp-admin/includes/plugin-install.php';
 		}
@@ -43,7 +43,7 @@ class OrgPluginResourceStorage implements ResourceStorage {
 			return $info->download_link;
 		}
 
-		return false;
+		return null;
 	}
 
 	public function get_supported_resource(): string {
