@@ -10,14 +10,38 @@ test.describe( 'Filters Overlay Template Part', () => {
 		);
 		await admin.visitSiteEditor( {
 			postType: 'wp_template_part',
+			postId: 'woocommerce/woocommerce//product-filters-overlay',
+			canvas: 'edit',
 		} );
 	} );
 
-	test( 'should be visible', async ( { page } ) => {
+	test( 'should be visible in the template parts list', async ( {
+		page,
+		admin,
+	} ) => {
+		await admin.visitSiteEditor( {
+			postType: 'wp_template_part',
+		} );
 		const block = page
 			.getByLabel( 'Patterns content' )
 			.getByText( 'Filters Overlay' )
 			.and( page.getByRole( 'button' ) );
 		await expect( block ).toBeVisible();
+	} );
+
+	test( 'should render the correct inner blocks', async ( { editor } ) => {
+		const navigationBlock = editor.canvas.getByLabel(
+			'Block: Navigation (Experimental)'
+		);
+		const productFiltersTemplatePart = editor.canvas
+			.locator( '[data-type="core/template-part"]' )
+			.filter( {
+				has: editor.canvas.getByLabel(
+					'Block: Product Filters (Experimental)'
+				),
+			} );
+
+		await expect( navigationBlock ).toBeVisible();
+		await expect( productFiltersTemplatePart ).toBeVisible();
 	} );
 } );

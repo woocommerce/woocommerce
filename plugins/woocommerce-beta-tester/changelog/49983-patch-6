@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix "Creation of dynamic property WC_Beta_Tester::$wporg_data is deprecated" on PHP 8.2
