@@ -53,8 +53,8 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
-            # TODO: on merge into trunk all the jobs being started - should be same set of jobs as on PRs
-            # TODO: explore `let baseRef = ${{ toJson( github.base_ref || github.event.before || github.event.base_ref ) }}`
+            // TODO: on merge into trunk all the jobs being started - should be same set of jobs as on PRs
+            // TODO: explore `let baseRef = ${{ toJson( github.base_ref || github.event.before || github.event.base_ref ) }}`
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
