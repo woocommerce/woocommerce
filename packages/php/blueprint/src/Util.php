@@ -63,7 +63,7 @@ class Util {
 					$result[] = $item;
 				}
 				// Recursively search in nested arrays
-				$nestedResult = static::array_filter_by_field( $item, $field_name );
+				$nestedResult = static::array_filter_by_field( $item, $field_name, $force_convert );
 				if ( ! empty( $nestedResult ) ) {
 					$result = array_merge( $result, $nestedResult );
 				}
