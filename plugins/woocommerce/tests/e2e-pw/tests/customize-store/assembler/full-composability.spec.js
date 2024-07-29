@@ -287,12 +287,16 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		const editor = await pageObject.getEditor();
 
 		await deleteAllPatterns( editor, assembler );
-		const addPatternsButton = editor.locator('.no-blocks-insert-pattern-button');
+		const addPatternsButton = editor.locator(
+			'.no-blocks-insert-pattern-button'
+		);
 		await addPatternsButton.click();
 		const emptyPatternsBlock = editor.getByText(
 			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
 		);
-		const defaultPattern = editor.locator('[data-is-parent-block="true"]:not([data-type="core/template-part"])');
+		const defaultPattern = editor.locator(
+			'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+		);
 		await expect( emptyPatternsBlock ).not.toBeVisible();
 		await expect( defaultPattern ).toBeVisible();
 	} );
