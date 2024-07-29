@@ -35,7 +35,7 @@ jobs:
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
-      - name: 'Calculate git fetch dept'
+      - name: 'Calculate git fetch depth'
         id: 'git-fetch-depth'
         shell: bash
         run: |
