@@ -57,7 +57,6 @@ class ExportWCShipping implements StepExporter {
 			$terms = array();
 		}
 
-
 		// Fetch local pickup settings.
 		$local_pickup = array(
 			'general'   => get_option( 'woocommerce_pickup_location_settings', array() ),

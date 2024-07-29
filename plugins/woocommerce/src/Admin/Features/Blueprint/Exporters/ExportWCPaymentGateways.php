@@ -43,6 +43,11 @@ class ExportWCPaymentGateways implements StepExporter {
 		return $step;
 	}
 
+	/**
+	 * Return the payment gateways resgietered in WooCommerce
+	 *
+	 * @return string
+	 */
 	public function get_wc_payment_gateways() {
 		return WC()->payment_gateways->payment_gateways();
 	}

@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
  */
 class ExportWCCoreProfilerOptions implements StepExporter, HasAlias {
 	use UseWPFunctions;
+
 	/**
 	 * Export the step
 	 *

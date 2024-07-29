@@ -19,6 +19,7 @@ use WC_Tax;
  */
 class ImportSetWCShipping implements StepProcessor {
 	use UseWPFunctions;
+
 	/**
 	 * Process the import of WooCommerce shipping settings.
 	 *
