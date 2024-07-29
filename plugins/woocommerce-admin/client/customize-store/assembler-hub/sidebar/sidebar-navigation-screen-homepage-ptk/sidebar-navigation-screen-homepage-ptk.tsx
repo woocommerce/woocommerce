@@ -11,6 +11,7 @@ import {
 	Modal,
 	// @ts-ignore No types for this exist yet.
 	__experimentalNavigatorButton as NavigatorButton,
+	Spinner,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/components';
 import {
@@ -41,7 +42,6 @@ import { capitalize } from 'lodash';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
-import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import clsx from 'clsx';
@@ -62,7 +62,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context, sendEvent } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
@@ -163,6 +163,8 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 
 	const [ optInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
+
+	const [ isFetchingPatterns, setIsFetchingPatterns ] = useState( false );
 
 	const optIn = () => {
 		trackEvent(
@@ -281,17 +283,12 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 										FetchPatterns: (
 											<Button
 												onClick={ async () => {
-													const { success } =
-														await apiFetch< {
-															success: boolean;
-														} >( {
-															path: `/wc/private/patterns`,
-															method: 'POST',
-														} );
+													await apiFetch( {
+														path: `/wc/private/patterns`,
+														method: 'POST',
+													} );
 
-													if ( success ) {
-														invalidateCache();
-													}
+													invalidateCache();
 												} }
 												variant="link"
 											/>
@@ -347,25 +344,31 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												onClick={ async () => {
 													optIn();
 													await enableTracking();
-													const { success } =
-														await apiFetch< {
-															success: boolean;
-														} >( {
-															path: `/wc/private/patterns`,
-															method: 'POST',
-														} );
-
-													if ( success ) {
-														invalidateCache();
-														closeModal();
-													}
+													setIsFetchingPatterns(
+														true
+													);
+													await apiFetch< {
+														success: boolean;
+													} >( {
+														path: `/wc/private/patterns`,
+														method: 'POST',
+													} );
+													invalidateCache();
+													closeModal();
+													setIsFetchingPatterns(
+														false
+													);
 												} }
 												variant="primary"
 												disabled={ ! optInDataSharing }
 											>
-												{ __(
-													'Opt in',
-													'woocommerce'
+												{ isFetchingPatterns ? (
+													<Spinner />
+												) : (
+													__(
+														'Opt in',
+														'woocommerce'
+													)
 												) }
 											</Button>
 										</div>
