@@ -51,7 +51,7 @@
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
 		"test": "pnpm test:unit",
-		"test:api": "pnpm test:e2e:default --project=api",
+		"test:api": "pnpm test:e2e:default --project=api --workers 4",
 		"test:e2e": "pnpm test:e2e:default --project=ui",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
