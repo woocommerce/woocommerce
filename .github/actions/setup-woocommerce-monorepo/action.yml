@@ -43,17 +43,17 @@ runs:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
         - name: 'Cache: identify pnpm caching directory'
-          if: ${{ inputs.pull-package-deps != 'false' && inputs.build-type == 'full' }}
+          if: ${{ inputs.pull-package-deps != 'false' }}
           shell: 'bash'
           run: |
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
         - name: 'Cache: pnpm downloads'
-          if: ${{ inputs.pull-package-deps != 'false' && inputs.build-type == 'full' }}
+          if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
-              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-'
+              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
         - name: 'Cache: node cache'
           if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
@@ -89,8 +89,8 @@ runs:
           run: |
             if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
               # PHPUnit/REST testing optimized installation
-              composer install --working-dir=./plugins/woocommerce --quiet &
-              pnpm install --global @wordpress/env@^9.7.0
+              composer install --working-dir=./plugins/woocommerce --quiet --no-autoloader &
+              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false
             else
               pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
             fi
