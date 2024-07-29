@@ -40,7 +40,7 @@ jobs:
         with:
           ref: trunk
       - uses: 'actions/checkout@v4'
-        name: 'Checkout (current branch)'
+        name: 'Checkout (branch as per trigger event)'
         with:
           ref: ''
       - uses: './.github/actions/setup-woocommerce-monorepo'
