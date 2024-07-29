@@ -409,10 +409,10 @@ final class WooCommerce {
 			$mc_stats  = $container->get( McStats::class );
 			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
 			$mc_stats->do_server_side_stats();
-      
-      $container->get( RemoteLogger::class );
-      $remote_logger->handle( time(), WC_Log_Levels::CRITICAL, $message, $context );
-      
+
+			$container->get( RemoteLogger::class );
+			$remote_logger->handle( time(), WC_Log_Levels::CRITICAL, $message, $context );
+
 			/**
 			 * Action triggered when there are errors during shutdown.
 			 *

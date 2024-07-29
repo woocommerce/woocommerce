@@ -53,6 +53,8 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @param string $message Log message.
 	 * @param array  $context Additional information for log handlers.
 	 *
+	 * @throws \Exception If the remote logging fails. The error is caught and logged locally.
+	 *
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
