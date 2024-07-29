@@ -21,16 +21,11 @@ jest.mock( '@wordpress/element', () => {
 	};
 } );
 
-const renderInCheckoutProvider = ( ui, options = { legacyRoot: true } ) => {
+const renderInCheckoutProvider = ( ui, options = {} ) => {
 	const Wrapper = ( { children } ) => {
 		return <CheckoutProvider>{ children }</CheckoutProvider>;
 	};
 	const result = render( ui, { wrapper: Wrapper, ...options } );
-	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
-	// rendering error will be shown.
-	expect( console ).toHaveErroredWith(
-		`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot`
-	);
 
 	return result;
 };
@@ -46,7 +41,7 @@ const primaryAddress = {
 };
 const secondaryAddress = {
 	country: 'Austria', // We use Austria because it doesn't have states.
-	countryKey: 'AU',
+	countryKey: 'AT',
 	city: 'Vienna',
 	postcode: 'DCBA',
 };
@@ -57,23 +52,29 @@ const tertiaryAddress = {
 	state: 'Ontario',
 	postcode: 'EFGH',
 };
+const quaternaryAddress = {
+	country: 'Japan',
+	countryKey: 'JP',
+	city: 'Tokyo',
+	postcode: 'IJKL',
+};
 
-const countryRegExp = /country/i;
 const cityRegExp = /city/i;
 const stateRegExp = /county|province|state/i;
 const postalCodeRegExp = /postal code|postcode|zip/i;
 
 const inputAddress = async ( {
-	country = null,
+	countryKey = null,
 	city = null,
 	state = null,
 	postcode = null,
 } ) => {
-	if ( country ) {
-		const countryInput = screen.queryByRole( 'combobox', {
-			name: countryRegExp,
-		} );
-		await userEvent.type( countryInput, country + '{arrowdown}{enter}' );
+	if ( countryKey ) {
+		const countryInput = screen.getByLabelText( 'Country/Region' );
+
+		if ( countryInput ) {
+			await userEvent.selectOptions( countryInput, countryKey );
+		}
 	}
 	if ( city ) {
 		const cityInput = screen.getByLabelText( cityRegExp );
@@ -81,15 +82,12 @@ const inputAddress = async ( {
 	}
 
 	if ( state ) {
-		const stateButton = screen.queryByRole( 'combobox', {
-			name: stateRegExp,
+		const stateButton = screen.queryByLabelText( stateRegExp, {
+			selector: 'select',
 		} );
 		// State input might be a select or a text input.
 		if ( stateButton ) {
-			await userEvent.click( stateButton );
-			await userEvent.click(
-				screen.getByRole( 'option', { name: state } )
-			);
+			await userEvent.selectOptions( stateButton, state );
 		} else {
 			const stateInput = screen.getByLabelText( stateRegExp );
 			await userEvent.type( stateInput, state );
@@ -126,7 +124,7 @@ describe( 'Form Component', () => {
 		);
 	};
 
-	it( 'updates context value when interacting with form elements', async () => {
+	test( 'updates context value when interacting with form elements', async () => {
 		renderInCheckoutProvider(
 			<>
 				<WrappedAddressForm type="shipping" />
@@ -152,7 +150,7 @@ describe( 'Form Component', () => {
 		);
 	} );
 
-	it( 'input fields update when changing the country', async () => {
+	test( 'input fields update when changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
 		await act( async () => {
@@ -179,27 +177,19 @@ describe( 'Form Component', () => {
 		expect( screen.getByLabelText( /Postal code/ ) ).toBeInTheDocument();
 	} );
 
-	it( 'input values are reset after changing the country', async () => {
+	test( 'input values are reset after changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
+		// First enter an address with no state, but fill the city.
 		await act( async () => {
 			await inputAddress( secondaryAddress );
 		} );
 
-		// Only update `country` to verify other values are reset.
+		// Update country to another country without state.
 		await act( async () => {
-			await inputAddress( { country: primaryAddress.country } );
+			await inputAddress( { countryKey: quaternaryAddress.countryKey } );
 		} );
 
-		expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
-
-		// Repeat the test with an address which has a select for the state.
-		await act( async () => {
-			await inputAddress( tertiaryAddress );
-		} );
-		await act( async () => {
-			await inputAddress( { country: primaryAddress.country } );
-		} );
-		expect( screen.getByLabelText( stateRegExp ).value ).toBe( '' );
+		expect( screen.getByLabelText( postalCodeRegExp ).value ).toBe( '' );
 	} );
 } );

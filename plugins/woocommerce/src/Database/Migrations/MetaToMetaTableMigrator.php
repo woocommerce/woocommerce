@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Database\Migrations;
  * Base class for implementing migrations from the standard WordPress meta table
  * to custom meta (key-value pairs) tables.
  *
- * @package Automattic\WooCommerce\Database\Migrations\CustomOrderTable
+ * @package Automattic\WooCommerce\Database\Migrations
  */
 abstract class MetaToMetaTableMigrator extends TableMigrator {
 

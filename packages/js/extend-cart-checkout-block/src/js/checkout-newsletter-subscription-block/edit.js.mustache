@@ -43,7 +43,7 @@ export const Save = ( { attributes } ) => {
 	const { text } = attributes;
 	return (
 		<div { ...useBlockProps.save() }>
-			<RichText.Content value={ text } />
+			<RichText.Content value={ text || optInDefaultText } />
 		</div>
 	);
 };

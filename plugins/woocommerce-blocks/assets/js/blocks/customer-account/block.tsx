@@ -5,6 +5,7 @@ import { Icon } from '@wordpress/icons';
 import {
 	customerAccountStyle,
 	customerAccountStyleAlt,
+	customerAccountStyleLine,
 } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -13,6 +14,12 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Attributes, DisplayStyle, IconStyle } from './types';
+
+const icons = {
+	default: customerAccountStyle,
+	alt: customerAccountStyleAlt,
+	line: customerAccountStyleLine,
+};
 
 const AccountIcon = ( {
 	iconStyle,
@@ -23,13 +30,8 @@ const AccountIcon = ( {
 	displayStyle: DisplayStyle;
 	iconClass: string;
 } ) => {
-	const icon =
-		iconStyle === IconStyle.ALT
-			? customerAccountStyleAlt
-			: customerAccountStyle;
-
 	return displayStyle === DisplayStyle.TEXT_ONLY ? null : (
-		<Icon className={ iconClass } icon={ icon } size={ 18 } />
+		<Icon className={ iconClass } icon={ icons[ iconStyle ] } size={ 18 } />
 	);
 };
 

@@ -309,7 +309,7 @@
           "menu_title": "Integrating admin pages",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "hash": "9d01da78347ee7379fe096cce5e3982cd13e46617f90ad78e03af72bc3fb8aba",
+          "hash": "c172fff2814f552e2ab5712edb9e716f75c27946d993a1ade8f2269cc9a8689d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
           "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467"
         },
@@ -350,9 +350,17 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "844689b6d9c482fb217a512db6ddab0afd4d76b2b9e378a9302681d2a8dfe517",
+          "hash": "7e66b9ea605944c5926cf6099fb8fb323976c014fef7dd768c91cef17b091edd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
+        },
+        {
+          "post_title": "Integrating with coming soon mode",
+          "tags": "how-to, coming-soon",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/integrating-coming-soon-mode.md",
+          "hash": "d702df70aff95e040624ffc6f9c8383ef98df2616a508e8ba2b031a9743de7e5",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/integrating-coming-soon-mode.md",
+          "id": "787743efb6ef0ad509b17735eaf58b2a9a08afbc"
         },
         {
           "post_title": "Creating custom settings for WooCommerce extensions",
@@ -708,7 +716,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "cc5f82b66e949e3df2928b5e6b1217e8804c43b8e7b75ebc930cd0f90aef7bbe",
+          "hash": "a014d4f53a860ff74eec6cefbe868279616bcad5509b2f30f02bb8e118935c98",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -1359,5 +1367,5 @@
       "categories": []
     }
   ],
-  "hash": "7998790ab69ca3a0f7d480c0dfa0b58916e9c46a04b7e80940cac69f69b50ab4"
+  "hash": "73bcb44585da56302a4dd3056b4a7aab16b58a516f214bbfde7b9b7d7157e84b"
 }

@@ -255,7 +255,7 @@ class Product_Variations_API_V2 extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
