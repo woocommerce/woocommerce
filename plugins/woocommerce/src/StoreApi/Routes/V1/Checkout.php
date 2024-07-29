@@ -180,6 +180,8 @@ class Checkout extends AbstractCartRoute {
 	 * Validate required additional fields on request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @throws RouteException When a required additional field is missing.
 	 */
 	public function validate_required_additional_fields( \WP_REST_Request $request ) {
 		$contact_fields           = $this->additional_fields_controller->get_fields_for_location( 'contact' );
