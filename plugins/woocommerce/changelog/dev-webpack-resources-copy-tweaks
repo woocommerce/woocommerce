@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: tweak patching dependencies for better Webpack perfromance.
