@@ -123,6 +123,11 @@ function Iframe( {
 
 	useEffect( () => cleanup, [ cleanup ] );
 
+	// We need to counter the margin created by scaling the iframe. If the scale
+	// is e.g. 0.45, then the top + bottom margin is 0.55 (1 - scale). Just the
+	// top or bottom margin is 0.55 / 2 ((1 - scale) / 2).
+	const marginFromScaling = ( contentHeight * ( 1 - scale ) ) / 2;
+
 	useEffect( () => {
 		if ( ! iframeDocument || ! isZoomedOut ) {
 			return;
@@ -204,6 +209,18 @@ function Iframe( {
 						...props.style,
 						height: expand ? contentHeight : props.style?.height,
 						transition: 'all .3s',
+						marginTop:
+							scale !== 1
+								? -marginFromScaling + frameSize
+								: props.style?.marginTop,
+						marginBottom:
+							scale !== 1
+								? -marginFromScaling + frameSize
+								: props.style?.marginBottom,
+						transform:
+							scale !== 1
+								? `scale( ${ scale } )`
+								: props.style?.transform,
 					} }
 					ref={ useMergeRefs( [ ref, setRef ] ) }
 					tabIndex={ tabIndex }
