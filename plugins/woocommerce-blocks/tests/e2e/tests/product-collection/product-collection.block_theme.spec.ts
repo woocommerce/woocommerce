@@ -422,6 +422,76 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
+		// See https://github.com/woocommerce/woocommerce/pull/49917
+		test( 'Price range is inclusive in both editor and frontend.', async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				min: '45',
+				max: '55',
+			} );
+
+			// Wait for the products to be filtered.
+			await expect( pageObject.products ).not.toHaveCount( 9 );
+
+			await expect(
+				pageObject.products.filter( { hasText: '$45.00' } )
+			).not.toHaveCount( 0 );
+			await expect(
+				pageObject.products.filter( { hasText: '$55.00' } )
+			).not.toHaveCount( 0 );
+
+			// Reset the price range.
+			await pageObject.setPriceRange( {
+				min: '0',
+				max: '0',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: { filterType: 'price-filter' },
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await page
+				.getByRole( 'textbox', {
+					name: 'Filter products by minimum',
+				} )
+				.dblclick();
+			await page.keyboard.type( '45' );
+
+			await page
+				.getByRole( 'textbox', {
+					name: 'Filter products by maximum',
+				} )
+				.dblclick();
+			await page.keyboard.type( '55' );
+
+			await page.keyboard.press( 'Tab' );
+
+			// Wait for the products to be filtered.
+			await expect( pageObject.products ).not.toHaveCount( 9 );
+
+			await expect(
+				pageObject.products.filter( { hasText: '$45.00' } )
+			).not.toHaveCount( 0 );
+			await expect(
+				pageObject.products.filter( { hasText: '$55.00' } )
+			).not.toHaveCount( 0 );
+		} );
+
 		test.describe( '"Use page context" control', () => {
 			test( 'should be visible on posts', async ( { pageObject } ) => {
 				await pageObject.createNewPostAndInsertBlock();
