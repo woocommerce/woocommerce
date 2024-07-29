@@ -39,7 +39,7 @@ jobs:
         id: 'git-fetch-depth'
         shell: bash
         run: |
-          run: echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
+          echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
