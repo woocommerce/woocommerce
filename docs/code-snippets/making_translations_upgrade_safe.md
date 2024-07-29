@@ -11,7 +11,7 @@ Like all other plugins, WooCommerce keeps translations in `wp-content/languages/
 
 However, if you want to include a custom translation, you can add them to `wp-content/languages/woocommerce`, or you can use a snippet to load a custom translation stored elsewhere:
 
-```
+```php
 // Code to be placed in functions.php of your theme or a custom plugin file.
 add_filter( 'load_textdomain_mofile', 'load_custom_plugin_translation_file', 10, 2 );
 

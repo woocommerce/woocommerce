@@ -15,7 +15,7 @@ As this action is destructive and permanent, the information is provided as is. 
 
 To fully remove all WooCommerce data from your WordPress site, open `wp-config.php`, scroll down to the bottom of the file, and add the following constant on its own line above `/* That’s all, stop editing. */`.
 
-```
+```php
 define( 'WC_REMOVE_ALL_DATA', true );
 
 /* That’s all, stop editing! Happy publishing. */ 
@@ -23,4 +23,4 @@ define( 'WC_REMOVE_ALL_DATA', true );
 
 Then, once the changes are saved to the file, when you deactivate and delete WooCommerce, all of its data is removed from your WordPress site database.
 
-https://woocommerce.com/wp-content/uploads/2020/03/uninstall_wocommerce_plugin_wpconfig.png
+(https://woocommerce.com/wp-content/uploads/2020/03/uninstall_wocommerce_plugin_wpconfig.png)

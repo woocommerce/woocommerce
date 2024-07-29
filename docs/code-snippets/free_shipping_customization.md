@@ -26,7 +26,7 @@ Add this code to your child theme’s `functions.php`, or via a plugin that allo
 
 You can hook into the `is_available` function of the free shipping method.
 
-```
+```php
 return apply_filters( 'woocommerce_shipping_' . $this->id . '_is_available', $is_available );
 ```
 
@@ -36,7 +36,7 @@ This means you can use `add_filter()` on `woocommerce_shipping_free_shipping_is_
 
 The following snippet hides everything but `free_shipping`, if it’s available and the customer's cart qualifies. 
 
-```
+```php
 /**
  * Hide shipping rates when free shipping is available.
  * Updated to support WooCommerce 2.6 Shipping Zones.
@@ -61,7 +61,7 @@ add_filter( 'woocommerce_package_rates', 'my_hide_shipping_when_free_is_availabl
 
 The snippet below hides everything but `free_shipping` and `local_pickup`, if it’s available and the customer's cart qualifies. 
 
-```
+```php
 
 /**
  * Hide shipping rates when free shipping is available, but keep "Local pickup" 
@@ -99,7 +99,7 @@ add_filter( 'woocommerce_package_rates', 'hide_shipping_when_free_is_available',
 
 This snippet results in showing only free shipping in all states except the exclusion list. It hides free shipping if the customer is in one of the states listed:
 
-```
+```php
 /**
  * Hide ALL shipping options when free shipping is available and customer is NOT in certain states
  *

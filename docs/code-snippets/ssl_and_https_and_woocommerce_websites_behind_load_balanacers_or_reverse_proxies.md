@@ -13,7 +13,7 @@ WooCommerce uses the `is_ssl()` WordPress function to verify if your website usi
 
 Websites behind load balancers or reverse proxies that support `HTTP_X_FORWARDED_PROTO` can be fixed by adding the following code to the `wp-config.php` file, above the require_once call:
 
-```
+```php
 if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' == $_SERVER['HTTP_X_FORWARDED_PROTO'] ) {
     $_SERVER['HTTPS'] = 'on';
 }
