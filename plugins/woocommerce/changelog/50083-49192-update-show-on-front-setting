@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS - Update the "show_on_front" setting to "posts" to avoid overriding the "page" template.
