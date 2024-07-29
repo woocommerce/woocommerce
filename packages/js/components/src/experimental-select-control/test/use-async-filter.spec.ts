@@ -49,7 +49,7 @@ describe( 'useAsyncFilter', () => {
 		expect( filter ).toHaveBeenCalledWith( inputValue );
 	} );
 
-	it( 'should trigger onFilterStart at the begining of the filtering', async () => {
+	it( 'should trigger onFilterStart at the beginning of the filtering', async () => {
 		const filteredItems: string[] = [];
 
 		onFilterStart.mockImplementation( ( value = '' ) => {
@@ -78,7 +78,7 @@ describe( 'useAsyncFilter', () => {
 		expect( filter ).toHaveBeenCalledWith( inputValue );
 	} );
 
-	it( 'should trigger onFilterEnd when filtering is fullfiled', async () => {
+	it( 'should trigger onFilterEnd when filtering is fulfilled', async () => {
 		const filteredItems: string[] = [];
 
 		filter.mockResolvedValue( filteredItems );

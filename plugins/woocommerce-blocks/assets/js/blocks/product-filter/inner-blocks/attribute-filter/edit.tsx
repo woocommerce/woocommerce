@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useCallback, useEffect, useState } from '@wordpress/element';
-import { BlockControls, useBlockProps } from '@wordpress/block-editor';
+import { useEffect, useState } from '@wordpress/element';
+import { useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
 	useCollection,
@@ -14,26 +14,16 @@ import {
 	AttributeTerm,
 	objectHasProp,
 } from '@woocommerce/types';
-import {
-	Disabled,
-	Button,
-	ToolbarGroup,
-	withSpokenMessages,
-	Notice,
-} from '@wordpress/components';
+import { Disabled, withSpokenMessages, Notice } from '@wordpress/components';
 import { dispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { EditProps, isAttributeCounts } from './types';
-import {
-	NoAttributesPlaceholder,
-	AttributesPlaceholder,
-} from './components/placeholder';
-import { AttributeSelectControls } from './components/attribute-select-controls';
+import { NoAttributesPlaceholder } from './components/placeholder';
 import { getAttributeFromId } from './utils';
-import { Inspector } from './components/inspector-controls';
+import { Inspector } from './components/inspector';
 import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
 import { attributeOptionsPreview } from './constants';
@@ -41,83 +31,20 @@ import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
-const Toolbar = ( {
-	onClick,
-	isEditing,
-}: {
-	onClick: () => void;
-	isEditing: boolean;
-} ) => (
-	<BlockControls>
-		<ToolbarGroup
-			controls={ [
-				{
-					icon: 'edit',
-					title: __( 'Edit', 'woocommerce' ),
-					onClick,
-					isActive: isEditing,
-				},
-			] }
-		/>
-	</BlockControls>
-);
-
-const Wrapper = ( {
-	children,
-	onClickToolbarEdit,
-	isEditing,
-	blockProps,
-}: {
-	children: React.ReactNode;
-	onClickToolbarEdit: () => void;
-	isEditing: boolean;
-	blockProps: object;
-} ) => (
-	<div { ...blockProps }>
-		<Toolbar onClick={ onClickToolbarEdit } isEditing={ isEditing } />
-		{ children }
-	</div>
-);
-
-const AttributeSelectPlaceholder = ( {
-	attributeId,
-	setAttributeId,
-	onClickDone,
-}: {
-	attributeId: number;
-	setAttributeId: ( id: number ) => void;
-	onClickDone: () => void;
-} ) => (
-	<AttributesPlaceholder>
-		<div className="wc-block-attribute-filter__selection">
-			<AttributeSelectControls
-				isCompact={ false }
-				attributeId={ attributeId }
-				setAttributeId={ setAttributeId }
-			/>
-			<Button variant="primary" onClick={ onClickDone }>
-				{ __( 'Done', 'woocommerce' ) }
-			</Button>
-		</div>
-	</AttributesPlaceholder>
-);
-
 const Edit = ( props: EditProps ) => {
-	const {
-		attributes: blockAttributes,
-		setAttributes,
-		debouncedSpeak,
-		clientId,
-	} = props;
+	const { attributes: blockAttributes, clientId } = props;
 
-	const { attributeId, queryType, isPreview, displayStyle, showCounts } =
-		blockAttributes;
+	const {
+		attributeId,
+		queryType,
+		isPreview,
+		displayStyle,
+		showCounts,
+		sortOrder,
+		hideEmpty,
+	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
-
-	const [ isEditing, setIsEditing ] = useState(
-		! attributeId && ! isPreview
-	);
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		AttributeTerm[]
@@ -130,7 +57,7 @@ const Edit = ( props: EditProps ) => {
 		resourceName: 'products/attributes/terms',
 		resourceValues: [ attributeObject?.id || 0 ],
 		shouldSelect: blockAttributes.attributeId > 0,
-		query: { orderby: 'menu_order' },
+		query: { orderby: 'menu_order', hide_empty: hideEmpty },
 	} );
 
 	const { results: filteredCounts } = useCollectionData( {
@@ -183,8 +110,6 @@ const Edit = ( props: EditProps ) => {
 			[ clientId ]
 		);
 
-	const blockProps = useBlockProps();
-
 	useEffect( () => {
 		const termIdHasProducts =
 			objectHasProp( filteredCounts, 'attribute_counts' ) &&
@@ -192,14 +117,31 @@ const Edit = ( props: EditProps ) => {
 				? filteredCounts.attribute_counts.map( ( term ) => term.term )
 				: [];
 
-		if ( termIdHasProducts.length === 0 ) return setAttributeOptions( [] );
+		if ( termIdHasProducts.length === 0 && hideEmpty )
+			return setAttributeOptions( [] );
 
 		setAttributeOptions(
-			attributeTerms.filter( ( term ) => {
-				return termIdHasProducts.includes( term.id );
-			} )
+			attributeTerms
+				.filter( ( term ) => {
+					if ( hideEmpty )
+						return termIdHasProducts.includes( term.id );
+					return true;
+				} )
+				.sort( ( a, b ) => {
+					switch ( sortOrder ) {
+						case 'name-asc':
+							return a.name > b.name ? 1 : -1;
+						case 'name-desc':
+							return a.name < b.name ? 1 : -1;
+						case 'count-asc':
+							return a.count > b.count ? 1 : -1;
+						case 'count-desc':
+						default:
+							return a.count < b.count ? 1 : -1;
+					}
+				} )
 		);
-	}, [ attributeTerms, filteredCounts ] );
+	}, [ attributeTerms, filteredCounts, sortOrder, hideEmpty ] );
 
 	useEffect( () => {
 		if ( productFilterWrapperBlockId ) {
@@ -231,36 +173,16 @@ const Edit = ( props: EditProps ) => {
 		updateBlockAttributes,
 	] );
 
-	const onClickDone = useCallback( () => {
-		setIsEditing( false );
-		debouncedSpeak(
-			__(
-				'Now displaying a preview of the Filter Products by Attribute block.',
-				'woocommerce'
-			)
-		);
-	}, [ setIsEditing ] );
-
-	const setAttributeId = useCallback(
-		( id ) => {
-			setAttributes( {
-				attributeId: id,
-			} );
-		},
-		[ setAttributes ]
+	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
+		<div { ...useBlockProps() }>
+			<Inspector { ...props } />
+			{ children }
+		</div>
 	);
-
-	const toggleEditing = useCallback( () => {
-		setIsEditing( ! isEditing );
-	}, [ isEditing ] );
 
 	if ( isPreview ) {
 		return (
-			<Wrapper
-				onClickToolbarEdit={ toggleEditing }
-				isEditing={ isEditing }
-				blockProps={ blockProps }
-			>
+			<Wrapper>
 				<Disabled>
 					<AttributeCheckboxList
 						showCounts={ showCounts }
@@ -274,37 +196,14 @@ const Edit = ( props: EditProps ) => {
 	// Block rendering starts.
 	if ( Object.keys( ATTRIBUTES ).length === 0 )
 		return (
-			<Wrapper
-				onClickToolbarEdit={ toggleEditing }
-				isEditing={ isEditing }
-				blockProps={ blockProps }
-			>
+			<Wrapper>
 				<NoAttributesPlaceholder />
-			</Wrapper>
-		);
-
-	if ( isEditing )
-		return (
-			<Wrapper
-				onClickToolbarEdit={ toggleEditing }
-				isEditing={ isEditing }
-				blockProps={ blockProps }
-			>
-				<AttributeSelectPlaceholder
-					onClickDone={ onClickDone }
-					attributeId={ attributeId }
-					setAttributeId={ setAttributeId }
-				/>
 			</Wrapper>
 		);
 
 	if ( ! attributeId || ! attributeObject )
 		return (
-			<Wrapper
-				onClickToolbarEdit={ toggleEditing }
-				isEditing={ isEditing }
-				blockProps={ blockProps }
-			>
+			<Wrapper>
 				<Notice status="warning" isDismissible={ false }>
 					<p>
 						{ __(
@@ -318,11 +217,7 @@ const Edit = ( props: EditProps ) => {
 
 	if ( attributeOptions.length === 0 )
 		return (
-			<Wrapper
-				onClickToolbarEdit={ toggleEditing }
-				isEditing={ isEditing }
-				blockProps={ blockProps }
-			>
+			<Wrapper>
 				<Notice status="warning" isDismissible={ false }>
 					<p>
 						{ __(
@@ -335,12 +230,7 @@ const Edit = ( props: EditProps ) => {
 		);
 
 	return (
-		<Wrapper
-			onClickToolbarEdit={ toggleEditing }
-			isEditing={ isEditing }
-			blockProps={ blockProps }
-		>
-			<Inspector { ...props } />
+		<Wrapper>
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown

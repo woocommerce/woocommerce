@@ -25,9 +25,10 @@ class CustomizeStore extends Task {
 		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
 		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
 
-		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete' ), 10, 3 );
-		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete' ), 10, 3 );
-		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete' ), 10, 3 );
+		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
+		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
+		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
+		add_action( 'customize_save_after', array( $this, 'mark_task_as_complete_classic_theme' ) );
 	}
 
 	/**
@@ -39,7 +40,7 @@ class CustomizeStore extends Task {
 	 *
 	 * @return void
 	 */
-	public function mark_task_as_complete( $post_id, $post, $update ) {
+	public function mark_task_as_complete_block_theme( $post_id, $post, $update ) {
 		if ( $post instanceof WP_Post ) {
 			$is_cys_complete = $this->has_custom_global_styles( $post ) || $this->has_custom_template( $post );
 
@@ -47,6 +48,15 @@ class CustomizeStore extends Task {
 				update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 			}
 		}
+	}
+
+	/**
+	 * Mark the CYS task as complete whenever the user saves the customizer changes.
+	 *
+	 * @return void
+	 */
+	public function mark_task_as_complete_classic_theme() {
+		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 	}
 
 	/**
