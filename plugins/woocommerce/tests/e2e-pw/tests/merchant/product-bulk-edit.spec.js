@@ -35,18 +35,61 @@ test.describe(
 	'Bulk Product Editing',
 	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
+		test( 'can bulk edit product tags', async ( { page, products } ) => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
+
+			const newTags = 'vegan, eco-friendly, cozy';
+
+			// Select products for bulk editing
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			// Click on bulk edit
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await expect(
+				await page.locator( '#bulk-titles-list li' ).count()
+			).toEqual( products.length );
+
+			// Update product tags by targeting the specific textarea with a combination of attributes
+			await page
+				.locator(
+					'textarea[name="tax_input[product_tag]"].tax_input_product_tag.ui-autocomplete-input'
+				)
+				.fill( newTags );
+
+			// Save the updates
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+
+			// Verify the tags update on the product pages
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				// Verify the new tags are visible on the shop page
+				for ( const tag of newTags.split( ', ' ) ) {
+					await expect(
+						page.getByRole( 'link', { name: tag } )
+					).toBeVisible();
+				}
+			}
+		} );
+
 		test( 'can bulk edit product prices', async ( { page, products } ) => {
 			await page.goto( `wp-admin/edit.php?post_type=product` );
 
 			const regularPriceIncrease = 10;
 			const salePriceDecrease = 10;
 
-			// Select all products for bulk editing
+			// Select products for bulk editing
 			for ( const product of products ) {
 				await page.getByLabel( `Select ${ product.name }` ).click();
 			}
 
-			// Initiate bulk edit
+			// Click on bulk edit
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
@@ -178,12 +221,12 @@ test.describe(
 			const widthDimension = 20;
 			const heightDimension = 6;
 
-			// Select all products for bulk editing
+			// Select products for bulk editing
 			for ( const product of products ) {
 				await page.getByLabel( `Select ${ product.name }` ).click();
 			}
 
-			// Initiate bulk edit
+			// Click on bulk edit
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
@@ -320,7 +363,7 @@ test.describe(
 				// Ensure the product page displays the product as private
 				await expect(
 					page.getByRole( 'heading', {
-						name: new RegExp( `^Private: ${ product.name }` ),
+						name: `Private: ${ product.name }`,
 					} )
 				).toBeVisible();
 			}
