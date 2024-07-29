@@ -162,45 +162,61 @@ test.describe(
 			}
 		} );
 
-		test('can bulk edit product stock', async ({ page, products }) => {
-			await page.goto(`wp-admin/edit.php?post_type=product`);
-		  
+		test( 'can bulk edit product stock', async ( { page, products } ) => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
+
 			const stockQtyIncrease = 10;
-		  
+
 			// Select product for bulk editing
-			for (const product of products) {
-			  await page.getByLabel(`Select ${product.name}`).click();
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
 			}
-		  
+
 			// Click on bulk edit
-			await page.locator('#bulk-action-selector-top').selectOption('Edit');
-			await page.locator('#doaction').click();
-		  
-			await expect(await page.locator('#bulk-titles-list li').count()).toEqual(products.length);
-		  
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await expect(
+				await page.locator( '#bulk-titles-list li' ).count()
+			).toEqual( products.length );
+
 			// Update stock quantity
-			await page.locator('select[name="change_stock"]').selectOption('Increase existing stock by:');
-			await page.getByPlaceholder('Stock qty').fill(`${stockQtyIncrease}`);
-		  
+			await page
+				.locator( 'select[name="change_stock"]' )
+				.selectOption( 'Increase existing stock by:' );
+			await page
+				.getByPlaceholder( 'Stock qty' )
+				.fill( `${ stockQtyIncrease }` );
+
 			// Enable stock management in bulk edit
-			await page.locator('select[name="_manage_stock"]').selectOption({ label: 'Yes' });
-		  
+			await page
+				.locator( 'select[name="_manage_stock"]' )
+				.selectOption( { label: 'Yes' } );
+
 			// Update stock status to 'In stock'
-			await page.locator('select[name="_stock_status"]').first().selectOption('instock');
-		  
+			await page
+				.locator( 'select[name="_stock_status"]' )
+				.first()
+				.selectOption( 'instock' );
+
 			// Save the updates
-			await page.getByRole('button', { name: 'Update' }).click();
-		  
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+
 			// Verify the stock quantity and status updates on the product pages
-			for (const product of products) {
-			  await page.goto(`product/${product.slug}`);
-		  
-			  const expectedStockQty = product.stock_quantity + stockQtyIncrease;
-		  
-			  // Verify updated stock quantity
-			  await expect.soft(page.getByText(`${expectedStockQty} in stock`)).toBeVisible();
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				const expectedStockQty =
+					product.stock_quantity + stockQtyIncrease;
+
+				// Verify updated stock quantity
+				await expect
+					.soft( page.getByText( `${ expectedStockQty } in stock` ) )
+					.toBeVisible();
 			}
-		  });						  
+		} );
 
 		test( 'can bulk edit product dimensions', async ( {
 			page,
@@ -274,5 +290,75 @@ test.describe(
 				);
 			}
 		} );
+
+		test( 'can bulk edit product visibility to hidden', async ( {
+			page,
+			products,
+		} ) => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
+
+			// Select product for bulk editing
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			// Click on bulk edit
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await expect(
+				await page.locator( '#bulk-titles-list li' ).count()
+			).toEqual( products.length );
+
+			// Update visibility to hidden
+			await page
+				.locator( 'select[name="_visibility"]' )
+				.first()
+				.selectOption( { value: 'hidden' } );
+
+			// Save the updates
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+
+			// Verify the visibility update on the product pages
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				// Verify product is not visible on the shopper page
+				await expect(
+					page.locator( 'h1.product_title' )
+				).not.toBeVisible();
+			}
+		} );
+
+		test('can bulk edit product status to private', async ({ page, products }) => {
+			await page.goto(`wp-admin/edit.php?post_type=product`);
+		
+			// Select product for bulk editing
+			for (const product of products) {
+				await page.getByLabel(`Select ${product.name}`).click();
+			}
+		
+			// Click on bulk edit
+			await page.locator('#bulk-action-selector-top').selectOption('Edit');
+			await page.locator('#doaction').click();
+		
+			await expect(await page.locator('#bulk-titles-list li').count()).toEqual(products.length);
+		
+			// Update status to private
+			await page.locator('fieldset.inline-edit-col-right select[name="_status"]').first().selectOption('private');
+		
+			// Save the updates
+			await page.getByRole('button', { name: 'Update' }).click();
+		
+			// Verify the status updates on the product pages
+			for (const product of products) {
+				await page.goto(`product/${product.slug}`);
+		
+				// Ensure the product page displays the product as private
+				await expect(page.getByText('Private:')).toBeVisible();
+			}
+		});					
 	}
 );
