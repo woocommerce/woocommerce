@@ -17,8 +17,8 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/coenjacobs/mozart/zipball/2fb827dedaceee565dd8b45aa3f542ca6eef8a4f",
-                "reference": "2fb827dedaceee565dd8b45aa3f542ca6eef8a4f",
+                "url": "https://api.github.com/repos/coenjacobs/mozart/zipball/acfe1deacfed2b68c1b528e3916b0373b55c47fa",
+                "reference": "acfe1deacfed2b68c1b528e3916b0373b55c47fa",
                 "shasum": ""
             },
             "require": {
