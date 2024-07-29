@@ -60,8 +60,6 @@ export function setQueryAttribute(
 const isInProductArchive = () => {
 	const ARCHIVE_PRODUCT_TEMPLATES = [
 		'woocommerce/woocommerce//archive-product',
-		'woocommerce/woocommerce//taxonomy-product_cat',
-		'woocommerce/woocommerce//taxonomy-product_tag',
 		'woocommerce/woocommerce//taxonomy-product_attribute',
 		'woocommerce/woocommerce//product-search-results',
 		// Custom taxonomy templates have structure:
