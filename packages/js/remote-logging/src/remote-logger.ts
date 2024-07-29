@@ -215,10 +215,13 @@ export class RemoteLogger {
 	 * @return The formatted stack trace.
 	 */
 	private getFormattedStackFrame( stackTrace: TraceKit.StackTrace ) {
-		return stackTrace.stack
+		const trace = stackTrace.stack
 			.slice( 0, 10 )
 			.map( this.getFormattedFrame )
 			.join( '\n\n' );
+
+		// Set hard limit of 8192 characters for the stack trace so it does not use too much user bandwith and also our computation.
+		return trace.length > 8192 ? trace.substring( 0, 8192 ) : trace;
 	}
 
 	/**
