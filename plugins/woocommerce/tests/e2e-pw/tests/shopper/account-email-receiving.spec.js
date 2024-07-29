@@ -226,6 +226,9 @@ test.describe(
 		test( 'should receive an email when initiating a password reset', async ( {
 			page,
 		} ) => {
+			// Effect a log out/simulate a new browsing session by dropping all cookies.
+			await page.context().clearCookies();
+			await page.reload();
 			await page.goto( 'my-account/lost-password/' );
 
 			await test.step( 'initiate password reset from my account', async () => {

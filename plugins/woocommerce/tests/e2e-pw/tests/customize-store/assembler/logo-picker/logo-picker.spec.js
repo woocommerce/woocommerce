@@ -187,6 +187,38 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await expect( assembler.getByText( 'Media Library' ) ).toBeVisible();
 	} );
 
+	// This test checks this regression: https://github.com/woocommerce/woocommerce/issues/49668
+	test( 'Logo should be visible after header update', async ( {
+		assemblerPageObject,
+		logoPickerPageObject,
+	} ) => {
+		const assembler = await assemblerPageObject.getAssembler();
+		const emptyLogoPicker =
+			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
+		await emptyLogoPicker.click();
+		await logoPickerPageObject.pickImage( assembler );
+
+		await assembler.getByLabel( 'Back' ).click();
+
+		await assembler.getByText( 'Choose your header' ).click();
+
+		const header = assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.nth( 1 )
+			.frameLocator( 'iframe' )
+			.locator( '.wc-blocks-header-pattern' );
+
+		await header.click();
+
+		await assembler.getByLabel( 'Back' ).click();
+
+		await assembler.getByText( 'Add your logo' ).click();
+		const emptyLogoLocator =
+			logoPickerPageObject.getPlaceholderPreview( assembler );
+
+		await expect( emptyLogoLocator ).toBeHidden();
+	} );
+
 	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
 		page,
 		assemblerPageObject,

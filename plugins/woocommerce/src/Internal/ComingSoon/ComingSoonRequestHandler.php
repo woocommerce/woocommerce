@@ -5,7 +5,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Handles the template_include hook to determine whether the current page needs
- * to be replaced with a comiing soon screen.
+ * to be replaced with a coming soon screen.
  */
 class ComingSoonRequestHandler {
 
@@ -185,7 +185,7 @@ class ComingSoonRequestHandler {
 		foreach ( $fonts_to_add as $font_to_add ) {
 			$found = false;
 			foreach ( $font_data as $font ) {
-				if ( $font['name'] === $font_to_add['name'] ) {
+				if ( isset( $font['name'] ) && $font['name'] === $font_to_add['name'] ) {
 					$found = true;
 					break;
 				}

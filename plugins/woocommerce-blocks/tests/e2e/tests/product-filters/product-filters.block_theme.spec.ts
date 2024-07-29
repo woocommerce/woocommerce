@@ -412,7 +412,7 @@ test.describe( `${ blockData.name }`, () => {
 		).toBeVisible();
 	} );
 
-	test( 'Dimentions > Block spacing: changing option should update the preview', async ( {
+	test( 'Dimensions > Block spacing: changing option should update the preview', async ( {
 		editor,
 		pageObject,
 	} ) => {
