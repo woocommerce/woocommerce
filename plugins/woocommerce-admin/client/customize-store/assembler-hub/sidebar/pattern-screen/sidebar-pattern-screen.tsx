@@ -1,25 +1,15 @@
 /**
  * External dependencies
  */
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { useAsyncList } from '@wordpress/compose';
-import { useSelect, useDispatch, select } from '@wordpress/data';
-import { BlockInstance, cloneBlock } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
+import { BlockInstance } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { capitalize } from 'lodash';
 import { Button, Spinner } from '@wordpress/components';
-import {
-	unlock,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
@@ -31,7 +21,6 @@ import {
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	__experimentalBlockPatternsList as BlockPatternList,
-	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 
@@ -53,6 +42,7 @@ import {
 	addIsAddedClassToPatternPreview,
 } from './utils';
 import { trackEvent } from '~/customize-store/tracking';
+import { useInsertPattern } from '../../hooks/use-insert-pattern';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
@@ -200,72 +190,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		};
 	}, [ isEditorLoading ] );
 
-	// @ts-expect-error No types for this exist yet.
-	const { insertBlocks } = useDispatch( blockEditorStore );
-
-	const insertableIndex = useMemo( () => {
-		return blocks.findLastIndex(
-			( block ) => block.name === 'core/template-part'
-		);
-	}, [ blocks ] );
-
-	const onClickPattern = useCallback(
-		( pattern ) => {
-			const parsedPattern = unlock(
-				select( blockEditorStore )
-			).__experimentalGetParsedPattern( pattern.name );
-
-			const cloneBlocks = parsedPattern.blocks.map(
-				( blockInstance: BlockInstance ) => cloneBlock( blockInstance )
-			);
-
-			if ( ! isActiveNewNeutralVariation ) {
-				const updatedBlocks =
-					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
-						cloneBlocks,
-						( patternBlocks: BlockInstance[] ) => {
-							patternBlocks.forEach(
-								( block: BlockInstance ) =>
-									( block.attributes.style = {} )
-							);
-						}
-					);
-
-				insertBlocks(
-					updatedBlocks,
-					insertableIndex,
-					undefined,
-					false
-				);
-				blockToScroll.current = updatedBlocks[ 0 ].clientId;
-			} else {
-				const updatedBlocks =
-					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
-						cloneBlocks,
-						( patternBlocks: BlockInstance[] ) => {
-							patternBlocks.forEach(
-								( block ) =>
-									( block.attributes.style =
-										PRODUCT_HERO_PATTERN_BUTTON_STYLE )
-							);
-						}
-					);
-				insertBlocks(
-					updatedBlocks,
-					insertableIndex,
-					undefined,
-					false
-				);
-				blockToScroll.current = updatedBlocks[ 0 ].clientId;
-			}
-
-			trackEvent(
-				'customize_your_store_assembler_pattern_sidebar_click',
-				{ pattern: pattern.name }
-			);
-		},
-		[ insertBlocks, insertableIndex, isActiveNewNeutralVariation ]
-	);
+	const { insertPattern } = useInsertPattern();
 
 	return (
 		<div
@@ -330,7 +255,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 						0,
 						patternPagination
 					) }
-					onClickPattern={ onClickPattern }
+					onClickPattern={ insertPattern }
 					label={ 'Homepage' }
 					orientation="vertical"
 					category={ category }
