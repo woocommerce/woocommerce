@@ -41,9 +41,11 @@ class ImportSchema {
 	public function __construct( JsonSchema $schema, Validator $validator = null ) {
 		$this->schema = $schema;
 		if ( null === $validator ) {
-			$this->validator = new Validator();
+			$validator = new Validator();
 		}
 
+		$this->validator = $validator;
+		
 		$this->builtin_step_processors = new BuiltInStepProcessors( $schema );
 	}
 
