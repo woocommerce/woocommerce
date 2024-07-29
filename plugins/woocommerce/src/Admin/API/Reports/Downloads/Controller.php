@@ -18,7 +18,7 @@ use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
  * REST API Reports downloads controller class.
  *
  * @internal
- * @extends Automattic\WooCommerce\Admin\API\Reports\Controller
+ * @extends Automattic\WooCommerce\Admin\API\Reports\GenericController
  */
 class Controller extends GenericController implements ExportableInterface {
 
