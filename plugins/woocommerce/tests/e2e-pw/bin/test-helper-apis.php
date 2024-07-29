@@ -34,6 +34,16 @@ function register_helper_api() {
 			'permission_callback' => 'is_allowed',
 		)
 	);
+
+	register_rest_route(
+		'e2e-environment',
+		'/info',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'get_environment_info',
+			'permission_callback' => 'is_allowed',
+		)
+	);
 }
 
 add_action( 'rest_api_init', 'register_helper_api' );
@@ -106,4 +116,23 @@ function api_update_option( WP_REST_Request $request ) {
  */
 function is_allowed() {
 	return current_user_can( 'manage_options' );
+}
+
+/**
+ * Get environment info
+ * @return WP_REST_Response
+ */
+function get_environment_info() {
+	$data['Core'] = get_bloginfo( 'version' );
+	$data['PHP']  = sprintf( '%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION );
+
+	$all_plugins = get_plugins();
+
+	foreach ( $all_plugins as $plugin_file => $plugin_data ) {
+		if ( is_plugin_active( $plugin_file ) ) {
+			$data[ $plugin_data['Name'] ] = $plugin_data['Version'];
+		}
+	}
+
+	return new WP_REST_Response( $data, 200 );
 }

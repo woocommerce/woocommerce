@@ -167,26 +167,19 @@ class CustomerAccount extends AbstractBlock {
 		}
 
 		if ( self::DISPLAY_LINE === $attributes['iconStyle'] ) {
-			return '<svg
-				width="12"
-				height="13"
-				viewBox="0 0 12 13"
-				fill="none"
-				class="' . $attributes['iconClass'] . '"
-				xmlns="http://www.w3.org/2000/svg"
-			>
+			return '<svg class="' . $attributes['iconClass'] . '" viewBox="5 5 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<circle
-					cx="6"
-					cy="3"
-					r="2.25"
+					cx="16"
+					cy="10.5"
+					r="3.5"
 					stroke="currentColor"
-					stroke-width="1.5"
+					stroke-width="2"
 					fill="none"
 				/>
 				<path
 					fill-rule="evenodd"
 					clip-rule="evenodd"
-					d="M3 8.5H9C9.82843 8.5 10.5 9.17157 10.5 10V13H12V10C12 8.34315 10.6569 7 9 7H3C1.34315 7 0 8.34314 0 10V13H1.5V10C1.5 9.17157 2.17157 8.5 3 8.5Z"
+					d="M11.5 18.5H20.5C21.8807 18.5 23 19.6193 23 21V25.5H25V21C25 18.5147 22.9853 16.5 20.5 16.5H11.5C9.01472 16.5 7 18.5147 7 21V25.5H9V21C9 19.6193 10.1193 18.5 11.5 18.5Z"
 					fill="currentColor"
 				/>
 			</svg>';

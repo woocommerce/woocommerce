@@ -3,15 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockVariation } from '@wordpress/blocks';
-
-/**
- * Internal dependencies
- */
-import { activeFiltersIcon } from './inner-blocks/active-filters/icon';
-import { attributeFilterIcon } from './inner-blocks/attribute-filter/icon';
-import { priceFilterIcon } from './inner-blocks/price-filter/icon';
-import { ratingFilterIcon } from './inner-blocks/rating-filter/icon';
-import { stockStatusFilterIcon } from './inner-blocks/stock-filter/icon';
+import {
+	productFilterActive,
+	productFilterAttribute,
+	productFilterPrice,
+	productFilterRating,
+	productFilterStockStatus,
+} from '@woocommerce/icons';
 
 const variations: BlockVariation[] = [
 	{
@@ -25,9 +23,7 @@ const variations: BlockVariation[] = [
 			heading: __( 'Active filters', 'woocommerce' ),
 			filterType: 'active-filters',
 		},
-		icon: {
-			src: activeFiltersIcon,
-		},
+		icon: productFilterActive,
 		isDefault: true,
 	},
 	{
@@ -41,9 +37,7 @@ const variations: BlockVariation[] = [
 			filterType: 'price-filter',
 			heading: __( 'Price', 'woocommerce' ),
 		},
-		icon: {
-			src: priceFilterIcon,
-		},
+		icon: productFilterPrice,
 	},
 	{
 		name: 'product-filter-stock-status',
@@ -56,9 +50,7 @@ const variations: BlockVariation[] = [
 			filterType: 'stock-filter',
 			heading: __( 'Status', 'woocommerce' ),
 		},
-		icon: {
-			src: stockStatusFilterIcon,
-		},
+		icon: productFilterStockStatus,
 	},
 	{
 		name: 'product-filter-attribute',
@@ -72,9 +64,7 @@ const variations: BlockVariation[] = [
 			heading: __( 'Attribute', 'woocommerce' ),
 			attributeId: 0,
 		},
-		icon: {
-			src: attributeFilterIcon,
-		},
+		icon: productFilterAttribute,
 	},
 	{
 		name: 'product-filter-rating',
@@ -87,9 +77,7 @@ const variations: BlockVariation[] = [
 			filterType: 'rating-filter',
 			heading: __( 'Rating', 'woocommerce' ),
 		},
-		icon: {
-			src: ratingFilterIcon,
-		},
+		icon: productFilterRating,
 	},
 ];
 

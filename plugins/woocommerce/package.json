@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.2.0",
+	"version": "9.3.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -73,7 +73,8 @@
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:copy-assets": "wireit"
+		"watch:build:project:copy-assets": "wireit",
+		"wp-env": "wp-env"
 	},
 	"lint-staged": {
 		"*.php": [
@@ -593,7 +594,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks"
+						"daily-checks",
+						"on-demand"
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e",
@@ -608,7 +610,8 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks"
+						"daily-checks",
+						"on-demand"
 					],
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e",
