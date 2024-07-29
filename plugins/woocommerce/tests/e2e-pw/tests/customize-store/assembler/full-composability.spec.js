@@ -334,11 +334,15 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 			.waitFor( { state: 'hidden' } );
 
 		const sidebarPattern = assembler.locator(
-			'.block-editor-block-patterns-list__list-item'
+			'.block-editor-block-patterns-list'
 		);
 
 		await sidebarPattern.waitFor( { state: 'visible' } );
 
-		expect( await sidebarPattern.count() ).toBeGreaterThan( 4 );
+		expect(
+			await assembler
+				.locator( '.block-editor-block-patterns-list__list-item' )
+				.count()
+		).toBeGreaterThan( 4 );
 	} );
 } );
