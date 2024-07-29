@@ -44,7 +44,7 @@ final class ProductFilterPrice extends AbstractBlock {
 	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
 		$price_param_keys = array_filter(
 			$url_param_keys,
-			function( $param ) {
+			function ( $param ) {
 				return self::MIN_PRICE_QUERY_VAR === $param || self::MAX_PRICE_QUERY_VAR === $param;
 			}
 		);
@@ -141,8 +141,13 @@ final class ProductFilterPrice extends AbstractBlock {
 		) = $attributes;
 
 		$wrapper_attributes = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-			'data-wc-context'     => wp_json_encode( $data ),
+			'data-wc-interactive' => wp_json_encode(
+				array(
+					'namespace' => $this->get_full_block_name(),
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
+			),
+			'data-wc-context'     => wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-has-filter'     => 'no',
 		);
 
