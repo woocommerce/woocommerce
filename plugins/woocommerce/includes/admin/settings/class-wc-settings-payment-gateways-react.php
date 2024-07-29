@@ -66,6 +66,7 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		} elseif ( $current_section ) {
 			$this->render_classic_gateway_settings_page( $payment_gateways, $current_section );
 		} else {
+			$hide_save_button = true;
 			$this->render_react_section( 'main' );
 		}
 
