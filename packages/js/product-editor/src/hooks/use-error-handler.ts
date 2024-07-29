@@ -93,7 +93,10 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 			switch ( code ) {
 				case 'variable_product_no_variation_prices':
 					response.message = errorMessage;
-					if ( visibleTab !== 'variations' ) {
+					if (
+						visibleTab !== 'variations' &&
+						errorContext !== null
+					) {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
 							validatorId,
@@ -103,7 +106,10 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 					break;
 				case 'product_form_field_error':
 					response.message = errorMessage;
-					if ( visibleTab !== errorContext ) {
+					if (
+						visibleTab !== errorContext &&
+						errorContext !== null
+					) {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
 							validatorId,
@@ -119,7 +125,10 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 					const errorSkuContext = getParentTabIdByBlockName(
 						'woocommerce/product-sku-field'
 					);
-					if ( visibleTab !== errorSkuContext ) {
+					if (
+						visibleTab !== errorSkuContext &&
+						errorSkuContext !== null
+					) {
 						response.errorProps = getErrorPropsWithActions(
 							errorSkuContext,
 							'sku',
@@ -133,7 +142,7 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						'Invalid or duplicated GTIN, UPC, EAN or ISBN.',
 						'woocommerce'
 					);
-					const errorUniqueIdContext = errorContext ?? 'inventory';
+					const errorUniqueIdContext = errorContext || 'inventory';
 					if ( visibleTab !== errorUniqueIdContext ) {
 						response.errorProps = getErrorPropsWithActions(
 							errorUniqueIdContext,
