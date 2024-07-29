@@ -15,7 +15,7 @@ let categoryAId, categoryBId, categoryCId, product1Id, product2Id, product3Id;
 
 test.describe(
 	'Search, browse by categories and sort items in the shop',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {

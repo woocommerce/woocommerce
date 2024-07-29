@@ -26,7 +26,7 @@ const totals = [ '$15.00', '$10.00', '$13.00' ];
 
 test.describe(
 	'Cart & Checkout applying coupons',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		let firstProductId;
 		const couponBatchId = [];

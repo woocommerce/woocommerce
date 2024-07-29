@@ -14,7 +14,7 @@ const product = {
 
 test.describe(
 	'Customer can manage downloadable file in My Account > Downloads page',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		let productId, orderId;
 

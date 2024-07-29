@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 
 test.describe(
 	'Customer-role users are blocked from accessing the WP Dashboard.',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		test.use( { storageState: process.env.CUSTOMERSTATE } );
 

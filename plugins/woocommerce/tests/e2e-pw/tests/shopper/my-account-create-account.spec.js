@@ -5,7 +5,7 @@ const customerEmailAddress = 'john.doe.test@example.com';
 
 test.describe(
 	'Shopper My Account Create Account',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			let customerId;

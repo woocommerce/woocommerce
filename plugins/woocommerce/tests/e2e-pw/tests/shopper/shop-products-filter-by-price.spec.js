@@ -24,7 +24,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Filter items in the shop by product price',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		test.beforeAll( async ( { api } ) => {
 			// add products

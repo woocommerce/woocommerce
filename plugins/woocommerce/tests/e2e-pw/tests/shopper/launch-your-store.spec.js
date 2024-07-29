@@ -3,8 +3,21 @@ const { setOption } = require( '../../utils/options' );
 
 test.describe(
 	'Launch Your Store front end - logged out',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
+		test.afterEach( async ( { baseURL } ) => {
+			try {
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_coming_soon',
+					'no'
+				);
+			} catch ( error ) {
+				console.log( error );
+			}
+		} );
+
 		test.afterAll( async ( { baseURL } ) => {
 			try {
 				await setOption(

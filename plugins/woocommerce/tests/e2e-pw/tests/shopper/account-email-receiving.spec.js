@@ -1,5 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { customer } = require( '../../test-data/data' );
+const { customer, admin } = require( '../../test-data/data' );
 
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentHtml = '#wp-mail-logging-modal-format-html';
@@ -23,7 +23,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Shopper Account Email Receiving',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		test.beforeEach( async ( { page, user } ) => {
 			await page.goto(
@@ -197,7 +197,7 @@ test.describe(
 
 test.describe(
 	'Shopper Password Reset Email Receiving',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		test.beforeEach( async ( { page } ) => {
 			await page.goto(
@@ -240,20 +240,20 @@ test.describe(
 					.click();
 
 				await expect(
-					await page
-						.getByText( 'Password reset email has been sent' )
-						.count()
-				).toBeGreaterThan( 0 );
+					page
+						.getByRole( 'alert' )
+						.getByText( 'Password reset email has been sent.' )
+				).toBeVisible();
 			} );
 
 			await test.step( 'verify that the email was sent', async () => {
 				await page.goto( 'wp-login.php' );
 				await page
 					.getByLabel( 'Username or Email Address' )
-					.fill( 'admin' );
+					.fill( admin.username );
 				await page
 					.getByLabel( 'Password', { exact: true } )
-					.fill( 'password' );
+					.fill( admin.password );
 				await page.getByRole( 'button', { name: 'Log In' } ).click();
 				await page.goto(
 					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(

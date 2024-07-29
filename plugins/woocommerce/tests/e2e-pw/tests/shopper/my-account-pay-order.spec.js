@@ -10,7 +10,7 @@ const customer = {
 
 test.describe(
 	'Customer can pay for their order through My Account',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		let productId, orderId;
 

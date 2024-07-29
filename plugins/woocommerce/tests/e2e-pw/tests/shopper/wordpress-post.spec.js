@@ -6,7 +6,7 @@ const test = baseTest.extend( {
 
 test(
 	'logged-in customer can comment on a post',
-	{ tag: [ '@gutenberg', '@payments', '@services' ] },
+	{ tag: [ '@gutenberg', '@payments', '@services', '@external' ] },
 	async ( { page } ) => {
 		await page.goto( 'hello-world/' );
 		await expect(

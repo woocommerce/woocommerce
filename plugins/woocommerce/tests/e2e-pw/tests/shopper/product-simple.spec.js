@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const productPrice = '18.16';
@@ -9,7 +10,7 @@ let simpleProductId, productCategory1Id, productCategory2Id;
 
 test.describe(
 	'Single Product Page',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@external' ] },
 	() => {
 		const productCategoryName1 = 'Hoodies';
 		const productCategoryName2 = 'Jumpers';
@@ -100,8 +101,8 @@ test.describe(
 			page,
 		} ) => {
 			await page.goto( 'my-account' );
-			await page.locator( '#username' ).fill( 'admin' );
-			await page.locator( '#password' ).fill( 'password' );
+			await page.locator( '#username' ).fill( admin.username );
+			await page.locator( '#password' ).fill( admin.password );
 			await page.locator( 'text=Log in' ).click();
 
 			await page.goto( `product/${ simpleProductSlug }` );
