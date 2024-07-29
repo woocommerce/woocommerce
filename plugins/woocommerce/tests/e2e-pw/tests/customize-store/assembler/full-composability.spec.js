@@ -2,7 +2,7 @@ const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
-const { setFeatureFlag } = require( '../../../utils/features' );
+const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -51,12 +51,13 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 			console.log( 'Store completed option not updated' );
 		}
 
-		await setFeatureFlag(
-			request,
-			baseURL,
-			'pattern-toolkit-full-composability',
-			true
-		);
+		const wordPressVersion = await getInstalledWordPressVersion();
+
+		if ( wordPressVersion <= 6.5 ) {
+			test.skip(
+				'Skipping Full Composability tests: WordPress version is below 6.5, which does not support this feature.'
+			);
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
