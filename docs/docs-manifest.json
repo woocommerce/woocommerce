@@ -57,7 +57,7 @@
           "menu_title": "NGINX server to protect upload directory",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/using_nginx_server_to_protect_your_uploads_directory.md",
-          "hash": "9e0c65bf88e7fbbfcd87c2585a738c15f67b4f0dd37e12139b78aa28ce883391",
+          "hash": "5d7afe5c8217c3a5f753eb2f468b8304f7f9b5b1275461abf2146e4de82ed6b2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/using_nginx_server_to_protect_your_uploads_directory.md",
           "id": "8b325d3483f9a8d09961ca1082839752137faebf"
         },
@@ -74,7 +74,7 @@
           "menu_title": "Uninstalling and removing data",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/uninstall_remove_all_woocommerce_data.md",
-          "hash": "8018151823c209c9ef6af5e8e1de1a55edf4ad6c6d9cee731c1012fe5d29f304",
+          "hash": "5c60cd4cc79bbebcdf96e7c84d7251570a7c1c1f5145a0722d5f062310788cb5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/uninstall_remove_all_woocommerce_data.md",
           "id": "36b571fcf2471737729ab4769e2c721b2248187f"
         },
@@ -91,7 +91,7 @@
           "menu_title": "SSL and HTTPS and WooCommerce",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/ssl_and_https_and_woocommerce_websites_behind_load_balanacers_or_reverse_proxies.md",
-          "hash": "0c4295201a7e077019eb7fd3fb5f13ad4d98804bb9365c7164b76b1a7df3296c",
+          "hash": "92a5091c27d1af6c0b49df143dd13886fb2cb30538fa877f68000cab69f4f502",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/ssl_and_https_and_woocommerce_websites_behind_load_balanacers_or_reverse_proxies.md",
           "id": "78d5b5a20ce6471b74f809386eff41fffe2d1adb"
         },
@@ -100,7 +100,7 @@
           "menu_title": "Shipping method API",
           "tags": "shipping, API",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/shipping_method_api.md",
-          "hash": "d7255217ee03e61cd28ecd7155f81a3bed36d105a5d00e720503c7dc0b3c2b8a",
+          "hash": "bd7cbc361fe94acaa40fbc5befa8d14f302705a9d700dd7d7e78a482b003fe0b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/shipping_method_api.md",
           "id": "a419b97e5594918a015c61227ad9226c509eb314"
         },
@@ -125,7 +125,7 @@
           "menu_title": "Translation upgrade safety",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/making_translations_upgrade_safe.md",
-          "hash": "419eff30447fd147be73ac683b34ab7b5f05f92e14b151f1d9039ffc6c180e42",
+          "hash": "e2d296630d7af888a072de51870f3b4ff311b3c29f706fda735bd8f9122c8710",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/making_translations_upgrade_safe.md",
           "id": "0c1add87ef9f5452b4c8404bb55021ad8265c171"
         },
@@ -142,7 +142,7 @@
           "post_title": "Legacy Local Pickup Advanced Settings and Customization",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/legacy_local_pickup_advacned_settings_and_customization.md",
-          "hash": "28ae61b7f585ebbd0f114318381cf506765792342596a2e985b013fe296cf008",
+          "hash": "d0269f1ee2700356672a032e4e54491666b901765045f7c5224ef07eeb9d9598",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/legacy_local_pickup_advacned_settings_and_customization.md",
           "id": "c4d4a2276fc251082a80a8330eea1eb62a97c3bb"
         },
@@ -151,7 +151,7 @@
           "menu_title": "Free shipping customizations",
           "tags": "code-snippets",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/free_shipping_customization.md",
-          "hash": "7c8b3cfa8effa89baba0bd33e937f05f1b46ee82b7d135ab257a5581c911d94e",
+          "hash": "c18884a45e4e1cc7b174820c2553d2722df95b98f6783c2700096a5b7e19bffd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/free_shipping_customization.md",
           "id": "cac6f1ccd661588e9a5fa7405643e9c6d4da388e"
         },
@@ -160,7 +160,7 @@
           "menu_title": "Displaying custom fields in theme",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/displaying_custom_fields_in_your_theme_or_site.md",
-          "hash": "963a0792f69c62ff2a9dda32143bb253fa905f09c9aeb035550c7971a86b4734",
+          "hash": "8048c2e9e5d25268d17d4f4ca7929e265eddbd4653318dd8f544856ddecd39dd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/displaying_custom_fields_in_your_theme_or_site.md",
           "id": "3e3fd004afda355cf9dbb05f0967523d6d0da1ce"
         },
@@ -168,7 +168,7 @@
           "post_title": "Disabling Marketplace Suggestions Programmatically",
           "menu_title": "Disabling marketplace suggestions",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/disabling_marketplace_suggestions_programmatically.md",
-          "hash": "9082e812561425b983bdb5f672bd71e91cfe717c520b601c242c6935c2f220c8",
+          "hash": "c31589797be3061f6e0e0cad924dc423b907f109a13028e0efab152b56f67bb1",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/disabling_marketplace_suggestions_programmatically.md",
           "id": "94a7a28e5dd3d9394650e66abec2429445e87028"
         },
@@ -185,7 +185,7 @@
           "menu_title": "Configuring special tax scenarios",
           "tags": "code-snippet, tax",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
-          "hash": "25a11a039da64e632383058da707059841faa94daf4a3c6ea2a5126df2fdc0b1",
+          "hash": "128193e0e980f484f354c93e59d34c3948f112e4a1c99158cf3e5d9969db9352",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
           "id": "a8ab8b6734ba2ac5af7c6653635d15548abdab2a"
         },
@@ -194,7 +194,7 @@
           "menu_title": "Payment method support  for refunds, subscriptions, pre-orders",
           "tags": "payment-methods",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/check_payment_method_support.md",
-          "hash": "81801ae0cd936a3fc2763689128a10c8279147aaf08f91b09ac944d6a09950f3",
+          "hash": "6cae4b1fda5980c327c99d6bae8b1978fd05849f07179f0699a174b57d27b862",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/check_payment_method_support.md",
           "id": "2919c9fc523bce46f43a5f35f821d0c6623c5ede"
         },
@@ -1464,5 +1464,5 @@
       "categories": []
     }
   ],
-  "hash": "fbf666629a3e709b93f595af091852968173833bdf6ef0d782ce3ef40a463a54"
+  "hash": "2f838322a6be6b1ac5fde8338ad21f548623b2385cdd226b11ca8305a6a715b6"
 }
