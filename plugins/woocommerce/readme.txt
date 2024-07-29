@@ -443,6 +443,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Update all values to be random so that retries don't fail on assertions [#48734](https://github.com/woocommerce/woocommerce/pull/48734)
 * Dev - Updated CodeSniffer configuration to address conflicting rules. [#49183](https://github.com/woocommerce/woocommerce/pull/49183)
 * Dev - Update Playwright from 1.44 to 1.45 [#49202](https://github.com/woocommerce/woocommerce/pull/49202)
+* Tweak - Add admin_install_timestamp in WC_Tracker [#50076](https://github.com/woocommerce/woocommerce/pull/50076)
 * Tweak - Add $wpdb->esc_like to the search criteria when searching for a product custom field name [#48949](https://github.com/woocommerce/woocommerce/pull/48949)
 * Tweak - Add the initially installed WooCommerce version to the wp_options table [#49139](https://github.com/woocommerce/woocommerce/pull/49139)
 * Tweak - Change CLIRunner namespace for better PSR compatibility. [#49390](https://github.com/woocommerce/woocommerce/pull/49390)
