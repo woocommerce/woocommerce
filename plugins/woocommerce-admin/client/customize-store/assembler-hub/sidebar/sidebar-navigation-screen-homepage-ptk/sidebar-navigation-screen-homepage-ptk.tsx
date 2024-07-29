@@ -48,6 +48,8 @@ import clsx from 'clsx';
 import './style.scss';
 import { usePatterns } from '~/customize-store/assembler-hub/hooks/use-patterns';
 import { THEME_SLUG } from '~/customize-store/data/constants';
+import apiFetch from '@wordpress/api-fetch';
+import { enableTracking } from '~/customize-store/design-without-ai/services';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
 	if ( path?.includes( category ) ) {
@@ -107,7 +109,12 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		}, initialAccumulator );
 	}, [ blocks ] );
 
-	const { blockPatterns, isLoading: isLoadingPatterns } = usePatterns();
+	const {
+		blockPatterns,
+		isLoading: isLoadingPatterns,
+		invalidateCache,
+	} = usePatterns();
+
 	const patternsFromPTK = blockPatterns.filter(
 		( pattern ) =>
 			! pattern.name.includes( THEME_SLUG ) &&
@@ -118,28 +125,36 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 			pattern.source !== 'pattern-directory/core'
 	);
 
-	let notice;
-	if ( isNetworkOffline ) {
-		notice = __(
-			"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
-			'woocommerce'
-		);
-	} else if ( ! isPTKPatternsAPIAvailable ) {
-		notice = __(
-			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
-			'woocommerce'
-		);
-	} else if ( ! isTrackingAllowed() ) {
-		notice = __(
-			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
-			'woocommerce'
-		);
-	} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
-		notice = __(
-			'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
-			'woocommerce'
-		);
-	}
+	const notice = useMemo( () => {
+		let noticeText;
+		if ( isNetworkOffline ) {
+			noticeText = __(
+				"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
+				'woocommerce'
+			);
+		} else if ( ! isPTKPatternsAPIAvailable ) {
+			noticeText = __(
+				"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
+				'woocommerce'
+			);
+		} else if ( ! isTrackingAllowed() ) {
+			noticeText = __(
+				'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
+				'woocommerce'
+			);
+		} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
+			noticeText = __(
+				'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
+				'woocommerce'
+			);
+		}
+		return noticeText;
+	}, [
+		isNetworkOffline,
+		isPTKPatternsAPIAvailable,
+		isLoadingPatterns,
+		patternsFromPTK.length,
+	] );
 
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
@@ -265,15 +280,17 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 										),
 										FetchPatterns: (
 											<Button
-												onClick={ () => {
-													if ( isIframe( window ) ) {
-														sendMessageToParent( {
-															type: 'INSTALL_PATTERNS',
+												onClick={ async () => {
+													const { success } =
+														await apiFetch< {
+															success: boolean;
+														} >( {
+															path: `/wc/private/patterns`,
+															method: 'POST',
 														} );
-													} else {
-														sendEvent(
-															'INSTALL_PATTERNS'
-														);
+
+													if ( success ) {
+														invalidateCache();
 													}
 												} }
 												variant="link"
@@ -327,16 +344,20 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												) }
 											</Button>
 											<Button
-												onClick={ () => {
+												onClick={ async () => {
 													optIn();
-													if ( isIframe( window ) ) {
-														sendMessageToParent( {
-															type: 'INSTALL_PATTERNS',
+													await enableTracking();
+													const { success } =
+														await apiFetch< {
+															success: boolean;
+														} >( {
+															path: `/wc/private/patterns`,
+															method: 'POST',
 														} );
-													} else {
-														sendEvent(
-															'INSTALL_PATTERNS'
-														);
+
+													if ( success ) {
+														invalidateCache();
+														closeModal();
 													}
 												} }
 												variant="primary"
