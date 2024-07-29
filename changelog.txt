@@ -1,5 +1,14 @@
 == Changelog ==
 
+= 9.1.4 2024-07-26 =
+
+**WooCommerce**
+
+* Fix - Revert fixing terms count in tracking PR as it caused product_add_publish to be triggered more than usual. [#49797](https://github.com/woocommerce/woocommerce/pull/49797)
+* Fix - Hardening against XSS via the Product Button unescaped attribute. [#50010](https://github.com/woocommerce/woocommerce/pull/50010)
+* Fix - Enhance escaping for block attributes. [#50015](https://github.com/woocommerce/woocommerce/pull/50015)
+
+
 = 9.1.2 2024-07-12 =
 
 **WooCommerce**
