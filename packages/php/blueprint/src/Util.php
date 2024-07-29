@@ -43,44 +43,6 @@ class Util {
 		return strtolower( $snake );
 	}
 
-	public static function deactivate_plugin_by_slug( $slug ) {
-		if ( ! function_exists( 'deactivate_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		// Get all installed plugins
-		$all_plugins = get_plugins();
-
-		// Loop through all plugins to find the one with the specified slug
-		foreach ( $all_plugins as $plugin_path => $plugin_info ) {
-			// Check if the plugin path contains the slug
-			if ( strpos( $plugin_path, $slug . '/' ) === 0 ) {
-				// Deactivate the plugin
-				deactivate_plugins( $plugin_path );
-			}
-		}
-		return false;
-	}
-
-	public static function activate_plugin_by_slug( $slug ) {
-		if ( ! function_exists( 'activate_plugin' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		// Get all installed plugins
-		$all_plugins = get_plugins();
-
-		// Loop through all plugins to find the one with the specified slug
-		foreach ( $all_plugins as $plugin_path => $plugin_info ) {
-			// Check if the plugin path contains the slug
-			if ( strpos( $plugin_path, $slug . '/' ) === 0 ) {
-				// Deactivate the plugin
-				return activate_plugin( $plugin_path );
-			}
-		}
-		return false;
-	}
-
 	public static function index_array( $array, $callback ) {
 		$result = array();
 		foreach ( $array as $key => $value ) {
