@@ -214,7 +214,7 @@ class WC_Structured_Data {
 			$markup['sku'] = $product->get_id();
 		}
 
-		// Add GTIN only if it's a valid number
+		// Add GTIN only if it's a valid number.
 		$gtin = $product->get_global_unique_id();
 		if ( $gtin && is_numeric( $gtin ) ) {
 			$markup['gtin'] = $gtin;
