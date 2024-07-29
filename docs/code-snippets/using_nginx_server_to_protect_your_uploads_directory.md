@@ -9,7 +9,7 @@ current wccom url: https://woocommerce.com/document/digital-downloadable-product
 
 If you using NGINX server for your site along with **X-Accel-Redirect/X-Sendfile** or **Force Downloads** download method, it is necessary that you add this configuration for better security:
 
-```
+```php
 # Protect WooCommerce upload folder from being accessed directly.
 # You may want to change this config if you are using "X-Accel-Redirect/X-Sendfile" or "Force Downloads" method for downloadable products.
 # Place this config towards the end of "server" block in NGINX configuration.
@@ -23,7 +23,7 @@ location ~* /wp-content/uploads/woocommerce_uploads/ {
 
 And this the configuration in case you are using **Redirect only** download method:
 
-```
+```php
 # Protect WooCommerce upload folder from being accessed directly.
 # You may want to change this config if you are using "Redirect Only" method for downloadable products.
 # Place this config towards the end of "server" block in NGINX configuration.

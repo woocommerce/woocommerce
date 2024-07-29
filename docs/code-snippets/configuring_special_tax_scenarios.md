@@ -15,7 +15,7 @@ If a store enters product prices including taxes, but levies various location-ba
 
 Some merchants prefer to dynamically change product base prices to account for the changes in taxes and so keep the total price consistent regardless of tax rate. Enable that functionality by adding the following snippet to your child theme’s functions.php file or via a code snippet plugin.
 
-```
+```php
 <?php
 
 add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
@@ -25,7 +25,7 @@ add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
 
 The following snippet is useful in case where a store only ads taxes when the subtotal reaches a specified minimum. In the code snippet below that minimum is 110 of the store’s currency. Adjust the snippet according to your requirements. 
 
-```
+```php
 <?php
 
 add_filter( 'woocommerce_product_get_tax_class', 'big_apple_get_tax_class', 1, 2 );
@@ -44,7 +44,7 @@ Some merchants may require different tax rates to be applied based on a customer
 
 To enable this functionality, add the following snippet to your child theme’s functions.php file or via a code snippet plugin. In this snippet, users with “administrator” capabilities will be assigned the **Zero rate tax class**. Adjust it according to your requirements.
 
-```
+```php
 <?php
 /**
  * Apply a different tax rate based on the user role.
@@ -64,7 +64,7 @@ add_filter( 'woocommerce_product_variation_get_tax_class', 'wc_diff_rate_for_use
 
 Taxes that have 0-value are hidden by default. To show them regardless, add the following snippet to your theme’s functions.php file or via a code snippet plugins: 
 
-```
+```php
 add_filter( 'woocommerce_order_hide_zero_taxes', '__return_false' );
 ```
 
@@ -74,7 +74,7 @@ One of the tax settings for WooCommerce enables the use of suffixes to add addit
 
 The method responsible for the related price output can be customized via filter hooks if needed for variable products. This will require customization that can be implemented via this filter:
 
-```
+```php
 add_filter( 'woocommerce_show_variation_price', '__return_true' );
 ```
 

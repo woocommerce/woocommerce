@@ -13,7 +13,7 @@ To display the custom fields for each product, you have to edit your theme’s f
 
 ![image](https://github.com/woocommerce/woocommerce-developer-advocacy/assets/15178758/ed417ed8-4462-45b9-96b6-c0141afaeb2b)
 
-```
+```php
 <?php
 
 // Display a product custom field within single product pages after the short description 
