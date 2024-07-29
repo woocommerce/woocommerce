@@ -74,7 +74,7 @@
           "menu_title": "Uninstalling and removing data",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/uninstall_remove_all_woocommerce_data.md",
-          "hash": "5c60cd4cc79bbebcdf96e7c84d7251570a7c1c1f5145a0722d5f062310788cb5",
+          "hash": "73483ff158ceac81685a9cd52335dc98e99ac7f84d89cdbcf4ce994e18afe30d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/uninstall_remove_all_woocommerce_data.md",
           "id": "36b571fcf2471737729ab4769e2c721b2248187f"
         },
@@ -168,7 +168,7 @@
           "post_title": "Disabling Marketplace Suggestions Programmatically",
           "menu_title": "Disabling marketplace suggestions",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/disabling_marketplace_suggestions_programmatically.md",
-          "hash": "c31589797be3061f6e0e0cad924dc423b907f109a13028e0efab152b56f67bb1",
+          "hash": "3d5bd50d64a46efaea99efb0a87dfdb8882cb83598b7be8a8154ad0e464eb6f5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/disabling_marketplace_suggestions_programmatically.md",
           "id": "94a7a28e5dd3d9394650e66abec2429445e87028"
         },
@@ -1464,5 +1464,5 @@
       "categories": []
     }
   ],
-  "hash": "2f838322a6be6b1ac5fde8338ad21f548623b2385cdd226b11ca8305a6a715b6"
+  "hash": "d8fe058ebcce4d1f40585f1634b1e98e27063d81dd0dd7783217ab60d0bc915a"
 }
