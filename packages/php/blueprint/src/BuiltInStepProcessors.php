@@ -35,14 +35,14 @@ class BuiltInStepProcessors {
 	}
 
 	private function create_install_plugins_processor() {
-		$storage = new ResourceStorages();
-		$storage->add_storage( new OrgPluginResourceStorage() );
+		$storages = new ResourceStorages();
+		$storages->add_storage( new OrgPluginResourceStorage() );
 
 		if ( $this->schema instanceof ZipSchema ) {
-			$storage->add_storage( new LocalPluginResourceStorage( $this->schema->get_unzipped_path() ) );
+			$storages->add_storage( new LocalPluginResourceStorage( $this->schema->get_unzipped_path() ) );
 		}
 
-		return new ImportInstallPlugin( $storage );
+		return new ImportInstallPlugin( $storages );
 	}
 
 	private function create_install_themes_processor() {
