@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	createElement,
 	useEffect,
@@ -30,7 +31,6 @@ import type { MouseEventHandler } from 'react';
  */
 import AttributesComboboxControl from '../attribute-combobox-field';
 import type { AttributeTableRowProps } from './types';
-import { __ } from '@wordpress/i18n';
 
 interface FormTokenFieldProps extends CoreFormTokenField.Props {
 	__experimentalExpandOnFocus: boolean;
@@ -303,9 +303,13 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				return newTerm;
 			} catch ( error ) {
 				dispatch( 'core/notices' ).createErrorNotice(
-					__(
-						`There was an error trying to create the term "${ token.value }".`,
-						'woocommerce'
+					sprintf(
+						/* translators: %s: the attribute term */
+						__(
+							'There was an error trying to create the attribute term "%s".',
+							'woocommerce'
+						),
+						token.value
 					)
 				);
 				return undefined;
