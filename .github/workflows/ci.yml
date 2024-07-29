@@ -36,17 +36,13 @@ jobs:
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: 'Checkout (origin/trunk) as baseline'
+        name: 'Checkout (origin/trunk)'
         with:
           ref: trunk
-      - name: 'Calculate git fetch depth'
-        shell: bash
-        run: |
-          echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
       - uses: 'actions/checkout@v4'
         name: 'Checkout (current branch)'
         with:
-          fetch-depth: ${{ env.GIT_FETCH_DEPTH }}
+          ref: ''
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
