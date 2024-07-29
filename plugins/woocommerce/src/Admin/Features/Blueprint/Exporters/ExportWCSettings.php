@@ -197,7 +197,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 		);
 
 		$option_info['woocommerce_store_pages_only'] = array(
-			'location' => 'site_visibilitty.general',
+			'location' => 'site_visibility.general',
 			'title'    => 'Restrict to store pages only',
 		);
 
