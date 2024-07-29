@@ -103,6 +103,8 @@ class FeaturesController {
 		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
 		self::add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		self::add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
+		self::add_filter( 'update_option_woocommerce_allow_tracking', array( $this, 'woocommerce_allow_tracking_updated' ), 10, 2 );
+		self::add_filter( 'update_option_woocommerce_experimental_features_auto_enable', array( $this, 'woocommerce_experimental_features_auto_enable_updated' ), 10, 2 );
 	}
 
 	/**
@@ -408,6 +410,47 @@ class FeaturesController {
 	}
 
 	/**
+	 * Enable or disable all experimental features.
+	 *
+	 * @param bool $enable True to enable, false to disable all experimental features.
+	 */
+	public function enable_experimental_features( bool $enable = true ): void {
+		$features = $this->get_features( true );
+		foreach ( $features as $feature_id => $feature ) {
+			if ( $feature['is_experimental'] ) {
+				$this->change_feature_enable( $feature_id, $enable );
+			}
+		}
+	}
+
+	/**
+	 * Enable all experimental features if the `woocommerce_experimental_features_auto_enable` option was set to `yes`.
+	 *
+	 * @param string $old_value The old value of the option.
+	 * @param string $value The new value of the option.
+	 */
+	public function woocommerce_experimental_features_auto_enable_updated( $old_value, $value ): void {
+		if ( 'yes' === $value ) {
+			$this->enable_experimental_features( true );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ) );
+			exit();
+		}
+	}
+
+	/**
+	 * Disable all experimental features if the `woocommerce_experimental_features_auto_enable` option was set to `no`.
+	 *
+	 * @param string $old_value The old value of the option.
+	 * @param string $value The new value of the option.
+	 */
+	public function woocommerce_allow_tracking_updated( $old_value, $value ): void {
+		if ( 'no' === $value ) {
+			update_option( 'woocommerce_experimental_features_auto_enable', 'no' );
+			$this->enable_experimental_features( false );
+		}
+	}
+
+	/**
 	 * Declare (in)compatibility with a given feature for a given plugin.
 	 *
 	 * This method MUST be executed from inside a handler for the 'before_woocommerce_init' hook.
@@ -687,6 +730,13 @@ class FeaturesController {
 	}
 
 	/**
+	 * Local shorthand for whether tracking is enabled, might possibly be useful globally.
+	 */
+	private static function is_tracking_allowed(): bool {
+		return ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) );
+	}
+
+	/**
 	 * Handler for the 'woocommerce_get_settings_advanced' hook,
 	 * it adds the settings UI for all the existing features.
 	 *
@@ -749,9 +799,33 @@ class FeaturesController {
 					$feature_settings[] = array(
 						'title' => __( 'Experimental features', 'woocommerce' ),
 						'type'  => 'title',
-						'desc'  => __( 'These features are either experimental or incomplete, enable them at your own risk!', 'woocommerce' ),
+						'desc'  => __( 'These features are either experimental or incomplete. They might change or be discontinued in the future. Enable them at your own risk.', 'woocommerce' ),
 						'id'    => 'experimental_features_options',
 					);
+
+					$auto_enable_experimental = array(
+						'title'    => __( 'All Experimental Features', 'woocommerce' ),
+						'desc'     => __( 'Automatically enable all experimental features', 'woocommerce' ),
+						'id'       => 'woocommerce_experimental_features_auto_enable',
+						'type'     => 'checkbox',
+						'default'  => 'no',
+						'disabled' => ! ( self::is_tracking_allowed() ),
+					);
+
+					if ( ! self::is_tracking_allowed() ) {
+						$auto_enable_experimental['desc_tip'] = sprintf(
+						// translators: Placeholders are URLs.
+							__(
+								'⚠️ <b>To enable this you need to <a href="%1$s">opt in to usage tracking here</a>.</b>',
+								'woocommerce'
+							),
+							admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' )
+						);
+					} else {
+						$auto_enable_experimental['desc_tip'] = __( '⚠️ <b>We do not recommend using this option in live stores.</b>', 'woocommerce' );
+					}
+
+					$feature_settings[] = $auto_enable_experimental;
 				}
 				continue;
 			}
