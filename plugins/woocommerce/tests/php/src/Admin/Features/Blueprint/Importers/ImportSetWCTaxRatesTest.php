@@ -5,8 +5,16 @@ namespace php\src\Admin\Features\Blueprint\Importers;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCTaxRates;
 use WC_Unit_Test_Case;
 
+/**
+ * Class ImportSetWCTaxRatesTest
+ */
 class ImportSetWCTaxRatesTest extends WC_Unit_Test_Case {
+	/**
+	 * Test tax rate import.
+	 * @return void
+	 */
 	public function test() {
+		// phpcs:ignore
 		$fixture  = json_decode( file_get_contents( __DIR__ . '/../fixtures/woo-blueprint-taxrates.json' ) );
 		$importer = new ImportSetWCTaxRates();
 		$importer->process( $fixture->steps[0] );
@@ -15,6 +23,10 @@ class ImportSetWCTaxRatesTest extends WC_Unit_Test_Case {
 		$this->assertLocations();
 	}
 
+	/**
+	 * Assert tax rate.
+	 * @return void
+	 */
 	private function assertTaxRate() {
 		global $wpdb;
 		$rate = $wpdb->get_row( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = 1" );
@@ -29,6 +41,10 @@ class ImportSetWCTaxRatesTest extends WC_Unit_Test_Case {
 		$this->assertEquals( '', $rate->tax_rate_class );
 	}
 
+	/**
+	 * Assert locations
+	 * @return void
+	 */
 	private function assertLocations() {
 		global $wpdb;
 		$locations = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = 1" );
