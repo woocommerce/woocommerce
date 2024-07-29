@@ -38,7 +38,7 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout (origin/trunk) as baseline'
         with:
-          ref: origin/trunk
+          ref: trunk
       - name: 'Calculate git fetch depth'
         shell: bash
         run: |
