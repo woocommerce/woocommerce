@@ -240,7 +240,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_admin_install_timestamp', $time );
 		$tracking_data = WC_Tracker::get_tracking_data();
 		$this->assertArrayHasKey( 'admin_install_timestamp', $tracking_data['settings'] );
-		$this->assertEquals( $tracking_data['admin_install_timestamp'], $time );
+		$this->assertEquals(  $tracking_data['settings']['admin_install_timestamp'], $time );
 		delete_option( 'woocommerce_admin_install_timestamp' );
 	}
 }
