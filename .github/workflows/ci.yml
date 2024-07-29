@@ -35,10 +35,16 @@ jobs:
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
+      - name: 'Calculate git fetch dept'
+        id: 'git-fetch-depth'
+        uses: actions/github-script@v6.3.1
+        with:
+          result-encoding: number
+          script: return JSON.parse( "${{ toJSON( github.event.commits ) }}" ).length
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          fetch-depth: 0
+          fetch-depth: ${{ steps.git-fetch-depth.outputs.result }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
@@ -48,6 +54,8 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
+            # TODO: on merge into trunk all the jobs being started - should be same set of jobs as on PRs
+            # TODO: explore `let baseRef = ${{ toJson( github.base_ref || github.event.before || github.event.base_ref ) }}`
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
@@ -86,8 +94,6 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
-        with:
-          fetch-depth: 0
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
