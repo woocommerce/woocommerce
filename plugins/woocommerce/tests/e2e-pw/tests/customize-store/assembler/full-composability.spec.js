@@ -318,6 +318,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 	test( 'Clicking opt-in new patterns should be available', async ( {
 		pageObject,
 		baseURL,
+		page,
 	} ) => {
 		await prepareAssembler( pageObject, baseURL );
 		const assembler = await pageObject.getAssembler();
@@ -339,10 +340,8 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 
 		await sidebarPattern.waitFor( { state: 'visible' } );
 
-		expect(
-			await assembler
-				.locator( '.block-editor-block-patterns-list__list-item' )
-				.count()
-		).toBeGreaterThan( 4 );
+		await expect(
+			assembler.locator( '.block-editor-block-patterns-list__list-item' )
+		).toHaveCount( 10 );
 	} );
 } );
