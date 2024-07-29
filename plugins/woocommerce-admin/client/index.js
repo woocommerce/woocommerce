@@ -12,6 +12,7 @@ import {
 /**
  * Internal dependencies
  */
+import './lib/init-remote-logging';
 import './stylesheets/_index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';

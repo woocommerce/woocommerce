@@ -8,7 +8,7 @@ export type LogData = {
 	 */
 	message: string;
 	/**
-	 * A feature slug. Defaults to 'woocommerce_core'. The feature must be added to the features list in API before using.
+	 * A feature slug. Defaults to 'woocommerce_core'. The feature must be added to the features list in API before using.  @see D31385-code
 	 */
 	feature?: string;
 	/**
