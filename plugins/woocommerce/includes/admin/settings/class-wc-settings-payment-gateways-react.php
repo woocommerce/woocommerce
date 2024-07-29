@@ -55,18 +55,16 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 */
 	public function output() {
 		//phpcs:disable WordPress.Security.NonceVerification.Recommended
-		global $current_section, $hide_save_button;
+		global $current_section;
 
 		// Load gateways so we can show any global options they may have.
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 		if ( $this->should_render_react_section( $current_section ) ) {
-			$hide_save_button = true;
 			$this->render_react_section( $current_section );
 		} elseif ( $current_section ) {
 			$this->render_classic_gateway_settings_page( $payment_gateways, $current_section );
 		} else {
-			$hide_save_button = true;
 			$this->render_react_section( 'main' );
 		}
 
@@ -90,6 +88,8 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 	 * @param string $section The section to render.
 	 */
 	private function render_react_section( $section ) {
+		global $hide_save_button;
+		$hide_save_button = true;
 		echo '<div id="experimental_wc_settings_payments_' . esc_attr( $section ) . '"></div>';
 	}
 
