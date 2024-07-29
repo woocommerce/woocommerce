@@ -401,8 +401,8 @@ class DataSynchronizerTests extends HposTestCase {
 		$this->toggle_cot_authoritative( $cot_is_authoritative );
 		$this->enable_cot_sync();
 
-		$order_1 = OrderHelper::create_order( 1, $product );
-		$order_2 = OrderHelper::create_order( 1, $product );
+		$order_1 = OrderHelper::create_order();
+		$order_2 = OrderHelper::create_order();
 
 		$this->disable_cot_sync();
 
