@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
+use Automattic\WooCommerce\Caching\RequestLevelCacheEngine;
 use Automattic\WooCommerce\Caching\WPCacheEngine;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
@@ -16,6 +17,7 @@ class ObjectCacheServiceProvider extends AbstractServiceProvider {
 	 * @var array
 	 */
 	protected $provides = array(
+		RequestLevelCacheEngine::class,
 		WPCacheEngine::class,
 	);
 
@@ -23,6 +25,7 @@ class ObjectCacheServiceProvider extends AbstractServiceProvider {
 	 * Register the classes.
 	 */
 	public function register() {
+		$this->share( RequestLevelCacheEngine::class );
 		$this->share( WPCacheEngine::class );
 	}
 }

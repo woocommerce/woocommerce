@@ -2,8 +2,9 @@
 
 namespace Automattic\WooCommerce\Caches;
 
-use Automattic\WooCommerce\Caching\CacheException;
 use Automattic\WooCommerce\Caching\ObjectCache;
+use Automattic\WooCommerce\Caching\CacheEngine;
+use Automattic\WooCommerce\Caching\RequestLevelCacheEngine;
 
 /**
  * A class to cache order objects.
@@ -41,5 +42,14 @@ class OrderCache extends ObjectCache {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the instance of the cache engine to use.
+	 *
+	 * @return CacheEngine
+	 */
+	protected function get_cache_engine_instance(): CacheEngine {
+		return wc_get_container()->get( RequestLevelCacheEngine::class );
 	}
 }

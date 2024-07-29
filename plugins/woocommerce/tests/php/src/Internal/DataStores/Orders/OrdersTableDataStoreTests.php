@@ -2901,7 +2901,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			self::$reading_order_ids     = array();
 		};
 		$reset_state->call( $sut );
-		wp_cache_flush();
+		wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->flush();
 	}
 
 	/**
