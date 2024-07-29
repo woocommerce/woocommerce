@@ -18,20 +18,21 @@ import interpolateComponents from '@automattic/interpolate-components';
 /**
  * Internal dependencies
  */
-import { SidebarNavigationScreen } from './sidebar-navigation-screen';
+import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { FontPairing } from './global-styles';
-import { CustomizeStoreContext } from '..';
+import { FontPairing } from '../global-styles';
+import { CustomizeStoreContext } from '../..';
 import { FlowType } from '~/customize-store/types';
-import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { trackEvent } from '~/customize-store/tracking';
+import { installFontFamilies, loadFontFaceInBrowser } from '../../utils/fonts';
+import { enableTracking } from '~/customize-store/design-without-ai/services';
 
 export const SidebarNavigationScreenTypography = ( {
 	onNavigateBackClick,
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context, sendEvent } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
@@ -207,17 +208,12 @@ export const SidebarNavigationScreenTypography = ( {
 											{ __( 'Cancel', 'woocommerce' ) }
 										</Button>
 										<Button
-											onClick={ () => {
+											onClick={ async () => {
 												optIn();
-												if ( isIframe( window ) ) {
-													sendMessageToParent( {
-														type: 'INSTALL_FONTS',
-													} );
-												} else {
-													sendEvent(
-														'INSTALL_FONTS'
-													);
-												}
+												await enableTracking();
+												await installFontFamilies();
+
+												closeModal();
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }
