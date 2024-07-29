@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Introduce InMemoryCacheEngine for use by Order Cache.
