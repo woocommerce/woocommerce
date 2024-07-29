@@ -10,15 +10,18 @@ import {
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import {
 	PanelBody,
+	ExternalLink,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
+import './editor.scss';
 import type { ProductFiltersOverlayBlockAttributes } from './types';
 
 const TEMPLATE: InnerBlockTemplate[] = [ [ 'woocommerce/product-filters' ] ];
@@ -29,8 +32,23 @@ export const Edit = ( {
 }: BlockEditProps< ProductFiltersOverlayBlockAttributes > ) => {
 	const blockProps = useBlockProps();
 
+	const templatePartEditUri = getSetting< string >(
+		'templatePartProductFiltersEditUri',
+		''
+	);
+
 	return (
 		<div { ...blockProps }>
+			<InspectorControls group="settings">
+				<PanelBody>
+					<ExternalLink
+						href={ templatePartEditUri }
+						className="wc-block-editor-product-filters__link"
+					>
+						{ __( 'Edit product filters', 'woocommerce' ) }
+					</ExternalLink>
+				</PanelBody>
+			</InspectorControls>
 			<InspectorControls group="styles">
 				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 					<ToggleGroupControl

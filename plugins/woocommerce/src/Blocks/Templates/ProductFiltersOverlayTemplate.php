@@ -33,7 +33,7 @@ class ProductFiltersOverlayTemplate extends AbstractTemplatePart {
 	 * @return string
 	 */
 	public function get_template_title() {
-		return _x( 'Filters Overlay', 'Template name', 'woocommerce' );
+		return _x( 'Filters Overlay (Experimental)', 'Template name', 'woocommerce' );
 	}
 
 	/**

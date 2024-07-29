@@ -1,0 +1,14 @@
+$blue: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+
+.wc-block-editor-product-filters__link {
+	border-style: solid;
+	border-color: $blue;
+	border-width: 1px;
+	border-radius: 2px;
+	padding: 10px 20px;
+	text-align: center;
+	display: block;
+	.components-external-link__contents {
+		text-decoration: none;
+	}
+}
