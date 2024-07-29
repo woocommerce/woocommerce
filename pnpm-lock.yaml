@@ -2825,8 +2825,8 @@ importers:
   packages/js/remote-logging:
     dependencies:
       '@wordpress/hooks':
-        specifier: ^4.4.0
-        version: 4.4.0
+        specifier: wp-6.0
+        version: 3.6.1
       debug:
         specifier: ^4.3.4
         version: 4.3.5
@@ -2852,6 +2852,9 @@ importers:
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../internal-js-tests
+      '@wordpress/jest-console':
+        specifier: ^5.4.0
+        version: 5.4.0(jest@27.5.1(node-notifier@8.0.2)(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)))
       concurrently:
         specifier: ^7.6.0
         version: 7.6.0
