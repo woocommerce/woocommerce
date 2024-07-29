@@ -46,7 +46,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 			$setting_pages = WC_Admin_Settings::get_settings_pages();
 		}
 		$this->setting_pages = $setting_pages;
-		$this->wp_add_filter( 'wooblueprint_export_setttings', array( $this, 'add_site_visibility_setttings' ), 10, 3 );
+		$this->wp_add_filter( 'wooblueprint_export_settings', array( $this, 'add_site_visibility_settings' ), 10, 3 );
 	}
 
 	/**
