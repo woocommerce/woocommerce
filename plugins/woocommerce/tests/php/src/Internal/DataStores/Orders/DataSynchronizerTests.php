@@ -372,8 +372,6 @@ class DataSynchronizerTests extends HposTestCase {
 	public function test_deletion_record_for_non_existing_order_logs_warning_on_sync( bool $cot_is_authoritative ) {
 		global $wpdb;
 
-		$this->markTestSkipped( 'Flaky: breaks after separating main and legacy test suits.' );
-
 		//phpcs:disable Squiz.Commenting
 		$logger = new class() {
 			public $warnings = array();
