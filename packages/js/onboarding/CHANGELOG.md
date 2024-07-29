@@ -2,28 +2,36 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0](https://www.npmjs.com/package/@woocommerce/onboarding/v/3.6.0) - 2024-07-29 
+
+-   Minor - Add a new shared component to display logos of payment methods supported by WooPayments. [#49300]
+-   Minor - Added Task Referral system for wc-admin onboarding tasks. [#47654]
+-   Patch - Update events that should trigger the test job(s) [#47612]
+-   Patch - Update pnpm to 9.1.0 [#47385]
+-   Minor - Fix typo in findCountryOption test [#48648]
+
 ## [3.5.0](https://www.npmjs.com/package/@woocommerce/onboarding/v/3.5.0) - 2024-04-26 
 
--   Minor - Branding rollout - change WooCommerce Payments to WooPayments [#39188]
--   Patch - Corrected build configuration for packages that weren't outputting minified code. [#43716]
--   Patch - Fix minor layout shift in the core profiler. [#39898]
--   Patch - Fix styling issues with WooPayments banner on mobile version. [#46647]
+-   Minor - Branding rollout
 -   Minor - Remove accent from country labels when comparing against geo detected country [#39110]
 -   Minor - Added shouldLoop prop for the Loader component to determine if looping should happen [#40829]
 -   Minor - Bump node version. [#45148]
--   Patch - bump php version in packages/js/*/composer.json [#42020]
--   Patch - Remove BNPL (Klarna) additional payment method from WooPayments welcome page, update payment method icons [#46523]
 -   Minor - Remove references to Sofort in the Onboarding. [#40745]
--   Patch - Remove ToS acceptance where unnecessary [#46003]
--   Patch - update references to woocommerce.com to now reference woo.com [#41241]
 -   Minor - Update WCPay banners for WooPay in eligible countries. [#39596]
--   Patch - Update Woo.com references to WooCommerce.com. [#46259]
--   Patch - Make eslint emit JSON report for annotating PRs. [#39704]
 -   Minor - Refactored core profiler loader to be more generalizable and moved to @woocommerce/onboarding [#39735]
 -   Minor - Update pnpm monorepo-wide to 8.6.5 [#38990]
 -   Minor - Update pnpm to 8.6.7 [#39245]
 -   Minor - Upgrade TypeScript to 5.1.6 [#39531]
 -   Minor - Update the CYS task API loader smoother [#41279]
+-   Patch - Corrected build configuration for packages that weren't outputting minified code. [#43716]
+-   Patch - Fix minor layout shift in the core profiler. [#39898]
+-   Patch - Fix styling issues with WooPayments banner on mobile version. [#46647]
+-   Patch - bump php version in packages/js/*/composer.json [#42020]
+-   Patch - Remove BNPL (Klarna) additional payment method from WooPayments welcome page, update payment method icons [#46523]
+-   Patch - Remove ToS acceptance where unnecessary [#46003]
+-   Patch - update references to woocommerce.com to now reference woo.com [#41241]
+-   Patch - Update Woo.com references to WooCommerce.com. [#46259]
+-   Patch - Make eslint emit JSON report for annotating PRs. [#39704]
 
 ## [3.4.0](https://www.npmjs.com/package/@woocommerce/onboarding/v/3.4.0) - 2023-06-20 
 
