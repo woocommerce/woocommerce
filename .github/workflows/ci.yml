@@ -43,7 +43,7 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          fetch-depth: ${{ env.PR_FETCH_DEPTH }}
+          fetch-depth: ${{ env.GIT_FETCH_DEPTH }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
