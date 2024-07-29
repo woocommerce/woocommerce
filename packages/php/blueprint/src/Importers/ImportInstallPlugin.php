@@ -72,6 +72,11 @@ class ImportInstallPlugin implements StepProcessor {
 		}
 
 		$path = $this->installed_plugin_paths[ $slug ] ?? false;
+
+		if ( ! $path ) {
+			return new \WP_Error( 'plugin_not_installed', "Plugin {$slug} is not installed." );
+		}
+
 		return $this->wp_activate_plugin( $path );
 	}
 
