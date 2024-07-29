@@ -1528,6 +1528,68 @@ test.describe( 'Product Collection', () => {
 			} );
 		} );
 	}
+	test.describe( 'Editor: In taxonomies templates', () => {
+		test( 'Products by specific category template displays products from this category', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			const expectedProducts = [
+				'Hoodie',
+				'Hoodie with Logo',
+				'Hoodie with Zipper',
+			];
+
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Products by Category' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Hoodies`,
+				} )
+				.click();
+			await page
+				.getByRole( 'option', { name: 'Fallback content' } )
+				.click();
+
+			const products = editor.canvas.getByLabel( 'Block: Title' );
+
+			await expect( products ).toHaveText( expectedProducts );
+		} );
+		test( 'Products by specific tag template displays products from this tag', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			const expectedProducts = [ 'Beanie', 'Hoodie' ];
+
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Products by Tag' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Recommended`,
+				} )
+				.click();
+			await page
+				.getByRole( 'option', { name: 'Fallback content' } )
+				.click();
+
+			const products = editor.canvas.getByLabel( 'Block: Title' );
+
+			await expect( products ).toHaveText( expectedProducts );
+		} );
+	} );
 } );
 
 /**
