@@ -192,7 +192,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 		$options['woocommerce_store_pages_only'] = $this->wp_get_option( 'woocommerce_store_pages_only' );
 
 		$option_info['woocommerce_coming_soon'] = array(
-			'location' => 'site_visibilitty.general',
+			'location' => 'site_visibility.general',
 			'title'    => 'Coming soon',
 		);
 
