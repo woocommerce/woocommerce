@@ -581,7 +581,7 @@ function wc_create_refund( $args = array() ) {
 				// later to be used for revoking download permission.
 				$refunded_order_and_products[ $item_id ] = array(
 					'order_id'   => $order->get_id(),
-					'product_id' => $item->get_product_id(),
+					'product_id' => $item->is_type( 'line_item' ) ? $item->get_product_id() : '',
 				);
 
 				$class         = get_class( $item );
@@ -643,13 +643,15 @@ function wc_create_refund( $args = array() ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
 			}
 
-			// delete download using order and product id, if present.
-			foreach ( $refunded_order_and_products as $item_id => $refunded_order_and_product ) {
-				$download_data_store = WC_Data_Store::load( 'customer-download' );
-				$downloads           = $download_data_store->get_downloads( $refunded_order_and_product );
-				if ( ! empty( $downloads ) ) {
-					foreach ( $downloads as $download ) {
-						$download_data_store->delete_by_id( $download->get_id() );
+			if ( $item->is_type( 'line_item' ) ) {
+				// delete download using order and product id, if present.
+				foreach ( $refunded_order_and_products as $item_id => $refunded_order_and_product ) {
+					$download_data_store = WC_Data_Store::load( 'customer-download' );
+					$downloads           = $download_data_store->get_downloads( $refunded_order_and_product );
+					if ( ! empty( $downloads ) ) {
+						foreach ( $downloads as $download ) {
+							$download_data_store->delete_by_id( $download->get_id() );
+						}
 					}
 				}
 			}
