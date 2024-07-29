@@ -88,10 +88,7 @@ runs:
           # The installation command is a bit odd as it's a workaround for know bug - https://github.com/pnpm/pnpm/issues/6300.
           run: |
             if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
-              # PHPUnit/REST testing optimized installation of the deps:
-              # 1) Start composer earlier, so when pnpm triggers postinstall hooks the heavy lifting is done already
-              composer install --working-dir=./plugins/woocommerce --quiet --no-autoloader &
-              # 2) We mostly need wp-env and playwright, but installing intermediate package deps instead for mainatanability reasons
+              # PHPUnit/REST testing optimized installation of the deps - wee need only intermediate ones.
               pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false
             else
               pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
