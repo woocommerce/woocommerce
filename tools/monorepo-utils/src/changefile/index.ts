@@ -54,7 +54,7 @@ const program = new Command( 'changefile' )
 			Logger.startTask(
 				`Getting pull request data for PR number ${ prNumber }`
 			);
-			const { prBody, headOwner, branch, fileName, head, base } =
+			const { prBody, headOwner, branch, fileName, head, base, repoName } =
 				await getPullRequestData( { owner, name }, prNumber );
 
 			Logger.endTask();
@@ -85,22 +85,22 @@ const program = new Command( 'changefile' )
 			}
 
 			Logger.startTask(
-				`Making a temporary clone of '${ headOwner }/${ name }'`
+				`Making a temporary clone of '${ headOwner }/${ repoName }'`
 			);
 			const tmpRepoPath = devRepoPath
 				? devRepoPath
 				: await cloneAuthenticatedRepo(
-						{ owner: headOwner, name },
+						{ owner: headOwner, name: repoName },
 						false
 				  );
 
 			Logger.endTask();
 
 			Logger.notice(
-				`Temporary clone of '${ headOwner }/${ name }' created at ${ tmpRepoPath }`
+				`Temporary clone of '${ headOwner }/${ repoName }' created at ${ tmpRepoPath }`
 			);
 
-			// If a pull request is coming from a contributor's fork's trunk branch, we don't nee to checkout the remote branch because its already available as part of the clone.
+			// If a pull request is coming from a contributor's fork's trunk branch, we don't need to checkout the remote branch because its already available as part of the clone.
 			if ( branch !== 'trunk' ) {
 				Logger.notice( `Checking out remote branch ${ branch }` );
 				await checkoutRemoteBranch( tmpRepoPath, branch, false );

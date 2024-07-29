@@ -21,6 +21,7 @@ export const getPullRequestData = async (
 	const prData = await getPullRequest( { owner, name, prNumber } );
 	const isCommunityPR = isCommunityPullRequest( prData, owner, name );
 	const headOwner = isCommunityPR ? prData.head.repo.owner.login : owner;
+	const repoName = isCommunityPR ? prData.head.repo.name : name;
 	const branch = prData.head.ref;
 	const fileName = `${ prNumber }-${ branch.replace( /\//g, '-' ) }`;
 	const prBody = prData.body;
@@ -34,6 +35,7 @@ export const getPullRequestData = async (
 		fileName,
 		head,
 		base,
+		repoName,
 	};
 };
 
