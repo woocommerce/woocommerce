@@ -43,12 +43,12 @@ runs:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
         - name: 'Cache: identify pnpm caching directory'
-          if: ${{ inputs.pull-package-deps != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' && inputs.build-type == 'full' }}
           shell: 'bash'
           run: |
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
         - name: 'Cache: pnpm downloads'
-          if: ${{ inputs.pull-package-deps != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' && inputs.build-type == 'full' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
@@ -90,7 +90,7 @@ runs:
             if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
               # PHPUnit/REST testing optimized installation
               composer install --working-dir=./plugins/woocommerce --quiet &
-              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false
+              pnpm install --frozen-lockfile --global @wordpress/env@^9.7.0
             else
               pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
             fi
