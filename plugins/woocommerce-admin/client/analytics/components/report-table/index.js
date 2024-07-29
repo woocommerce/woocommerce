@@ -11,7 +11,12 @@ import { get, noop, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
-import { CompareButton, Search, TableCard } from '@woocommerce/components';
+import {
+	CompareButton,
+	ReportError,
+	Search,
+	TableCard,
+} from '@woocommerce/components';
 import {
 	getIdsFromQuery,
 	getSearchWords,
@@ -38,7 +43,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import DownloadIcon from './download-icon';
-import ReportError from '../report-error';
 import { extendTableData } from './utils';
 import './style.scss';
 

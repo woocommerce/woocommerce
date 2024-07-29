@@ -6,6 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { ReportError } from '@woocommerce/components';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -15,7 +16,6 @@ import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ProductsReportTable from './table';
 import ReportChart from '../../components/report-chart';
-import ReportError from '../../components/report-error';
 import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from '../variations/table';
 import ReportFilters from '../../components/report-filters';

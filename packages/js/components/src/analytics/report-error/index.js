@@ -3,7 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import { EmptyContent } from '@woocommerce/components';
+import { createElement } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import EmptyContent from '../../empty-content';
 
 /**
  * Component to render when there is an error in a report component due to data

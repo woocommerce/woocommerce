@@ -8,7 +8,7 @@ import { format as formatDate } from '@wordpress/date';
 import { withSelect } from '@wordpress/data';
 import { get, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
-import { Chart } from '@woocommerce/components';
+import { Chart, ReportError } from '@woocommerce/components';
 import {
 	getReportChartData,
 	getTooltipValueFormat,
@@ -27,7 +27,6 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import ReportError from '../report-error';
 import {
 	getChartMode,
 	getSelectedFilter,

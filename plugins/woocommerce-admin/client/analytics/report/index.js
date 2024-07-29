@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { find } from 'lodash';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
 import { searchItemsByString, ITEMS_STORE_NAME } from '@woocommerce/data';
+import { ReportError } from '@woocommerce/components';
 import {
 	CurrencyContext,
 	getFilteredCurrencyInstance,
@@ -18,7 +19,6 @@ import {
  */
 import './style.scss';
 import { NoMatch } from '~/layout/NoMatch';
-import ReportError from '../components/report-error';
 import getReports from './get-reports';
 
 /**

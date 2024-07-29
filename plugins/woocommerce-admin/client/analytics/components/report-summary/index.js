@@ -8,6 +8,7 @@ import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { getNewPath } from '@woocommerce/navigation';
 import {
+	ReportError,
 	SummaryList,
 	SummaryListPlaceholder,
 	SummaryNumber,
@@ -21,7 +22,6 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import ReportError from '../report-error';
 
 /**
  * Component to render summary numbers in reports.
