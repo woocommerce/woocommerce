@@ -102,17 +102,17 @@ function Iframe( {
 	// mode. Also preload the styles to avoid a flash of unstyled
 	// content.
 	const html = `<!doctype html>
-<html>
-    <head>
-        <script>window.frameElement._load()</script>
-        <style>html{height:auto!important;min-height:100%;}body{margin:0}</style>
-        ${ loadStyles ? styles : '' }
-        ${ loadScripts ? scripts : '' }
-    </head>
-    <body>
-        <script>document.currentScript.parentElement.remove()</script>
-    </body>
-</html>`;
+	<html>
+		<head>
+			<script>window.frameElement._load()</script>
+			<style>html{height:auto!important;min-height:100%;}body{margin:0}</style>
+			${ loadStyles ? styles : '' }
+			${ loadScripts ? scripts : '' }
+		</head>
+		<body>
+			<script>document.currentScript.parentElement.remove()</script>
+		</body>
+	</html>`;
 
 	const [ src, cleanup ] = useMemo( () => {
 		const _src = URL.createObjectURL(
