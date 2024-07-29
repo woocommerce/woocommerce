@@ -20,7 +20,6 @@ class ImportActivateTheme implements StepProcessor {
 		$switch = $this->wp_switch_theme( $name );
 		$switch && $result->add_debug( "Switched theme to '{$name}'." );
 
-
 		return $result;
 	}
 
