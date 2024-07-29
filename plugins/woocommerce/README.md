@@ -6,7 +6,7 @@
 [![Build Status](https://github.com/woocommerce/woocommerce/actions/workflows/ci.yml/badge.svg?branch=trunk 'Build Status')](https://github.com/woocommerce/woocommerce/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/woocommerce/woocommerce/branch/trunk/graph/badge.svg 'codecov')](https://codecov.io/gh/woocommerce/woocommerce)
 
-This is the WooCommerce Core plugin. Here you can browse the source and keep track of development. We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
+This is the WooCommerce Core plugin. Here you can browse the source and keep track of development. We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates
 
 If you are not a developer, please use the [WooCommerce plugin page](https://wordpress.org/plugins/woocommerce/) on WordPress.org.
 
