@@ -90,7 +90,7 @@ runs:
             if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
               # PHPUnit/REST testing optimized installation
               composer install --working-dir=./plugins/woocommerce --quiet &
-              pnpm install --frozen-lockfile --global @wordpress/env@^9.7.0
+              pnpm install --global @wordpress/env@^9.7.0
             else
               pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
             fi
