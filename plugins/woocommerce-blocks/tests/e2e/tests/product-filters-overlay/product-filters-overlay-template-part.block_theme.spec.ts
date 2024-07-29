@@ -3,6 +3,17 @@
  */
 import { test, expect } from '@woocommerce/e2e-utils';
 
+const blockData = {
+	name: 'woocommerce/product-filters-overlay',
+	title: 'Product Filters Overlay (Experimental)',
+	selectors: {
+		frontend: {},
+		editor: {
+			settings: {},
+		},
+	},
+};
+
 test.describe( 'Filters Overlay Template Part', () => {
 	test.beforeEach( async ( { admin, requestUtils } ) => {
 		await requestUtils.activatePlugin(
@@ -43,5 +54,31 @@ test.describe( 'Filters Overlay Template Part', () => {
 
 		await expect( navigationBlock ).toBeVisible();
 		await expect( productFiltersTemplatePart ).toBeVisible();
+	} );
+
+	test( 'should navigate to product filters template part', async ( {
+		editor,
+		page,
+	} ) => {
+		const block = editor.canvas.getByLabel( `Block: ${ blockData.title }` );
+		await block.click();
+
+		await editor.openDocumentSettingsSidebar();
+
+		await expect(
+			editor.page.getByText( 'Edit product filters' )
+		).toBeVisible();
+
+		await editor.page.getByText( 'Edit product filters' ).click();
+
+		const expectedParts = [
+			'postId=woocommerce%2Fwoocommerce%2F%2Fproduct-filters',
+			'postType=wp_template_part',
+			'canvas=edit',
+		];
+
+		for ( const part of expectedParts ) {
+			await expect( page ).toHaveURL( new RegExp( `.*${ part }.*` ) );
+		}
 	} );
 } );
