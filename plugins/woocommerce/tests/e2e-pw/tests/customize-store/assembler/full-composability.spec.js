@@ -318,7 +318,6 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 	test( 'Clicking opt-in new patterns should be available', async ( {
 		pageObject,
 		baseURL,
-		page,
 	} ) => {
 		await prepareAssembler( pageObject, baseURL );
 		const assembler = await pageObject.getAssembler();
