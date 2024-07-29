@@ -18,7 +18,7 @@ First, create a regular WordPress/WooCommerce plugin (see [Create a plugin](http
 
 To ensure the classes you need to extend exist, you should wrap your class in a function which is called after all plugins are loaded:
 
-```
+```php
 function your_shipping_method_init() {
     // Your class will go here
 }
@@ -30,7 +30,7 @@ add_action( 'woocommerce_shipping_init', 'your_shipping_method_init' );
 
 Create your class and place it inside the function you just created. Make sure it extends the shipping method class so that you have access to the API. You’ll see below we also init our shipping method options.
 
-```
+```php
 if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
     class WC_Your_Shipping_Method extends WC_Shipping_Method {
         /**
@@ -78,7 +78,7 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 
 As well as declaring your class, you also need to tell WooCommerce it exists with another function:
 
-```
+```php
 function add_your_shipping_method( $methods ) {
     $methods['your_shipping_method'] = 'WC_Your_Shipping_Method'; 
     return $methods;
@@ -95,7 +95,7 @@ You can define your options once the above is in place by using the settings API
 
 Add your rates by usign the `calculate_shipping()` method. WooCommerce calls this when doing shipping calculations. Do your plugin specific calculations here and then add the rates via the API. Like so:
 
-```
+```php
 $rate = array(
     'label'    => "Label for the rate",
     'cost'     => '10.99',
@@ -108,7 +108,7 @@ $this->add_rate( $rate );
 
 `Add_rate` takes an array of options. The defaults/possible values for the array are as follows:
 
-```
+```php
 $defaults = array(
     'label' => '',   // Label for the rate
     'cost'  => '0',  // Amount for shipping or an array of costs (for per item shipping)
@@ -124,7 +124,7 @@ Your shipping method can pass as many rates as you want – just ensure that the
 
 The skeleton shipping method code all put together looks like this:
 
-```
+```php
 <?php
 /*
 Plugin Name: Your Shipping plugin

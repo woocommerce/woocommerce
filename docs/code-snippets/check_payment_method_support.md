@@ -15,7 +15,7 @@ Payment methods can add support for certain features from WooCommerce and its ex
 
 Taking the Simplify Commerce payment method as an example, open the plugin files in your favorite editor and search for `$this->supports`. You'll find the supported features:
 
-```
+```php
 class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {    
 
 /**      * Constructor   */
@@ -38,7 +38,7 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
             'default_credit_card_form',
             'refunds',
             'pre-orders'
-        );
+        );    
 ```
 
 If you don’t find `$this->supports` in the plugin files, that may mean that the payment method isn’t correctly declaring support for refunds, subscripts or pre-orders.
