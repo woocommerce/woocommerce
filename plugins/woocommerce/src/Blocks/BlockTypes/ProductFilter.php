@@ -115,8 +115,8 @@ final class ProductFilter extends AbstractBlock {
 		}
 
 		$attributes_data = array(
-			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-			'data-wc-context'     => wp_json_encode( array( 'hasSelectedFilter' => $has_selected_filter ) ),
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-context'     => wp_json_encode( array( 'hasSelectedFilter' => $has_selected_filter ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'class'               => 'wc-block-product-filters',
 		);
 
