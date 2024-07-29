@@ -15,9 +15,12 @@ class ImportSetSiteOptions implements StepProcessor {
 			if ( is_object( $value ) ) {
 				$value = (array) $value;
 			}
+			
 			$updated = $this->wp_update_option( $key, $value );
-			$updated && $result->add_info( "{$key} has been updated" );
-			if ( ! $updated ) {
+
+			if ( $updated ) {
+				$result->add_info( "{$key} has been updated" );
+			} else {
 				$current_value = $this->wp_get_option( $key );
 				if ( $current_value === $value ) {
 					$result->add_info( "{$key} has not been updated because the current value is already up to date." );
