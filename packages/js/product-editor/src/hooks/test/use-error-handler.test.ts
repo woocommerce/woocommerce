@@ -7,6 +7,7 @@ import { renderHook } from '@testing-library/react-hooks';
  * Internal dependencies
  */
 import { useErrorHandler, WPError } from '../use-error-handler';
+import { useBlocksHelper } from '../use-blocks-helper';
 
 const mockNavigateTo = jest.fn();
 const mockFocusByValidatorId = jest.fn();
@@ -84,18 +85,17 @@ describe( 'useErrorHandler', () => {
 	} );
 
 	it( 'should call focusByValidatorId for form field errors when errorProps action is triggered', () => {
-		const errors = {
-			code: 'product_invalid_sku',
+		const error = {
+			code: 'product_form_field_error',
+			validatorId: 'test-validator',
 		} as WPError;
 		const visibleTab = 'general';
-
-		jest.useFakeTimers();
 
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
 		const { errorProps } = getProductErrorMessageAndProps(
-			errors,
+			error,
 			visibleTab
 		);
 
@@ -108,16 +108,15 @@ describe( 'useErrorHandler', () => {
 			errorProps.actions[ 0 ].onClick();
 		}
 
-		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'sku' );
+		expect( mockFocusByValidatorId ).toHaveBeenCalledWith(
+			'test-validator'
+		);
 	} );
-	it( 'should call getParentTabIdByBlockName and focusByValidatorId for product_invalid_sku error when errorProps action is triggered', () => {
+	it( 'should call getParentTabIdByBlockName and focusByValidatorId for invalid sku errors when errorProps action is triggered', () => {
 		const error = {
-			code: 'product_form_field_error',
-			validatorId: 'test-validator',
+			code: 'product_invalid_sku',
 		} as WPError;
 		const visibleTab = 'general';
-
-		jest.useFakeTimers();
 
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
@@ -136,42 +135,56 @@ describe( 'useErrorHandler', () => {
 			fieldsErrorProps.actions[ 0 ].onClick();
 		}
 
-		expect( mockFocusByValidatorId ).toHaveBeenCalledWith(
-			'test-validator'
-		);
+		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'sku' );
 	} );
-	it( 'should call getParentTabIdByBlockName for product_invalid_sku error when errorProps action is triggered and does not find sku block name', () => {
-		const errors = {
+	it( 'should not call getErrorPropsWithActions for invalid sku errors when getParentTabIdByBlockName returns null', () => {
+		const error = {
 			code: 'product_invalid_sku',
 		} as WPError;
 		const visibleTab = 'general';
 
-		jest.mock( '../use-blocks-helper', () => ( {
-			useBlocksHelper: jest.fn().mockReturnValue( {
-				getParentTabId: jest.fn( () => 'inventory' ),
-				getParentTabIdByBlockName: jest.fn( () => null ), // Mock returns null
-			} ),
-		} ) );
-
-		jest.useFakeTimers();
+		( useBlocksHelper as jest.Mock ).mockReturnValue( {
+			getParentTabId: jest.fn( () => null ), // Mock returns null
+			getParentTabIdByBlockName: jest.fn( () => null ), // Mock returns null
+		} );
 
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
-		const { errorProps } = getProductErrorMessageAndProps(
-			errors,
+		const { message, errorProps } = getProductErrorMessageAndProps(
+			error,
 			visibleTab
 		);
 
 		expect( errorProps ).toBeDefined();
-		expect( errorProps.actions ).toBeDefined();
-		expect( errorProps.actions?.length ).toBeGreaterThan( 0 );
+		expect( errorProps.actions ).not.toBeDefined();
+		expect( mockFocusByValidatorId ).not.toHaveBeenCalled();
+		expect( message ).toBe( 'Invalid or duplicated SKU.' );
+	} );
+	it( 'should not call getErrorPropsWithActions for form field errors when getParentTabId returns null', () => {
+		const error = {
+			code: 'product_form_field_error',
+			validatorId: 'test-validator',
+			message: 'Test error message',
+		} as WPError;
+		const visibleTab = 'inventory';
 
-		// Trigger the action
-		if ( errorProps.actions && errorProps.actions.length > 0 ) {
-			errorProps.actions[ 0 ].onClick();
-		}
+		( useBlocksHelper as jest.Mock ).mockReturnValue( {
+			getParentTabId: jest.fn( () => null ), // Mock returns null
+			getParentTabIdByBlockName: jest.fn( () => null ), // Mock returns null
+		} );
 
-		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'sku' );
+		const { result } = renderHook( () => useErrorHandler() );
+		const { getProductErrorMessageAndProps } = result.current;
+
+		const { message, errorProps } = getProductErrorMessageAndProps(
+			error,
+			visibleTab
+		);
+
+		expect( errorProps ).toBeDefined();
+		expect( errorProps.actions ).not.toBeDefined();
+		expect( mockFocusByValidatorId ).not.toHaveBeenCalled();
+		expect( message ).toBe( 'Test error message' );
 	} );
 } );
