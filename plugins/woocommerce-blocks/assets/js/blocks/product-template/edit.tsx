@@ -238,7 +238,7 @@ const ProductTemplateEdit = (
 				const { taxonomy, slug } = parseTemplateSlug( templateSlug );
 
 				if ( taxonomy && slug ) {
-					const templateCategory = getEntityRecords(
+					const taxonomyRecord = getEntityRecords(
 						'taxonomy',
 						taxonomy,
 						{
@@ -249,8 +249,8 @@ const ProductTemplateEdit = (
 						}
 					);
 
-					if ( templateCategory ) {
-						const taxonomyId = templateCategory[ 0 ]?.id;
+					if ( taxonomyRecord ) {
+						const taxonomyId = taxonomyRecord[ 0 ]?.id;
 						if ( taxonomy === 'category' ) {
 							query.categories = taxonomyId;
 						} else {
