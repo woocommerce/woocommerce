@@ -79,6 +79,7 @@ export const useAddNoBlocksPlaceholder = ( {
 						},
 						[
 							createBlock( 'core/paragraph', {
+								className: ENABLE_CLICK_CLASS,
 								align: 'center',
 								fontFamily: 'inter',
 								style: {

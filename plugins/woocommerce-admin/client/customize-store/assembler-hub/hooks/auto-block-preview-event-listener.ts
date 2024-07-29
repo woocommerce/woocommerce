@@ -33,7 +33,8 @@ const setStyle = ( documentElement: HTMLElement ) => {
 			.${ ENABLE_CLICK_CLASS }[data-type="core/button"]:hover {
 				cursor: pointer;
 			}
-			.${ ENABLE_CLICK_CLASS }:focus::after {
+			.${ ENABLE_CLICK_CLASS }:focus::after,
+			.${ ENABLE_CLICK_CLASS }.is-selected::after {
 				content: none !important;
 			}
 		`;
