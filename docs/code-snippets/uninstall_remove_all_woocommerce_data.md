@@ -23,4 +23,4 @@ define( 'WC_REMOVE_ALL_DATA', true );
 
 Then, once the changes are saved to the file, when you deactivate and delete WooCommerce, all of its data is removed from your WordPress site database.
 
-(https://woocommerce.com/wp-content/uploads/2020/03/uninstall_wocommerce_plugin_wpconfig.png)
+![Uninstall WooCommerce WPConfig](https://woocommerce.com/wp-content/uploads/2020/03/uninstall_wocommerce_plugin_wpconfig.png)
