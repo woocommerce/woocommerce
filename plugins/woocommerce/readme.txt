@@ -462,6 +462,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Trigger doing_it_wrong() when using HPOS query args for CPT order queries. [#47457](https://github.com/woocommerce/woocommerce/pull/47457)
 * Tweak - Update text to Content right with image left pattern [#49792](https://github.com/woocommerce/woocommerce/pull/49792)
 * Tweak - Update the "API enabled" entry in the System Status Report to clarify that it pertains to the Legacy REST API. [#48878](https://github.com/woocommerce/woocommerce/pull/48878)
+* Tweak - Add placeholder options and validation to all checkout select inputs. [#49929](https://github.com/woocommerce/woocommerce/pull/49929)
 * Performance - Load REST API namespaces only when needed. [#47704](https://github.com/woocommerce/woocommerce/pull/47704)
 * Performance - Reduced number of recalculations on Store API cart routes [#48944](https://github.com/woocommerce/woocommerce/pull/48944)
 * Enhancement - Add address title to edit/add buttons on My Account page [#49171](https://github.com/woocommerce/woocommerce/pull/49171)
