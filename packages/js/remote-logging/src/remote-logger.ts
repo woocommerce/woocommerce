@@ -299,6 +299,11 @@ let logger: RemoteLogger | null = null;
  *
  */
 export function init( config: RemoteLoggerConfig ): void {
+	if ( ! window.wcTracks || ! window.wcTracks.isEnabled ) {
+		debug( 'Tracks is not enabled.' );
+		return;
+	}
+
 	if ( logger ) {
 		warnLog( 'RemoteLogger is already initialized.' );
 		return;
@@ -326,6 +331,11 @@ export async function log(
 	message: string,
 	extraData?: Partial< Exclude< LogData, 'message' | 'severity' > >
 ) {
+	if ( ! window.wcTracks || ! window.wcTracks.isEnabled ) {
+		debug( 'Tracks is not enabled.' );
+		return;
+	}
+
 	if ( ! logger ) {
 		warnLog( 'RemoteLogger is not initialized. Call init() first.' );
 		return;

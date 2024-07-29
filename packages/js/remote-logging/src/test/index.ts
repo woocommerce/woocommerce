@@ -35,7 +35,6 @@ describe( 'RemoteLogger', () => {
 		jest.clearAllMocks();
 		localStorage.clear();
 		logger = new RemoteLogger( { errorRateLimitMs: 60000 } ); // 1 minute
-
 	} );
 
 	afterEach(() => {
@@ -202,19 +201,24 @@ describe( 'RemoteLogger', () => {
 describe( 'init', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		window.wcTracks = { isEnabled: true };
+
 	});
 
-	it( 'should initialize the logger', () => {
+	it( 'should not initialize the logger if Tracks is not enabled', () => {
+		window.wcTracks = { isEnabled: false };
+		init( { errorRateLimitMs: 1000 } );
+		expect( () => log( 'info', 'Test message' ) ).not.toThrow();
+	} );
+
+	it( 'should initialize the logger if Tracks is enabled', () => {
 		init( { errorRateLimitMs: 1000 } );
 		expect( () => log( 'info', 'Test message' ) ).not.toThrow();
 	} );
 
 	it( 'should not initialize the logger twice', () => {
 		init( { errorRateLimitMs: 1000 } );
-
-
 		init( { errorRateLimitMs: 2000 } );
-
 
 		expect( console ).toHaveWarnedWith(
 			'RemoteLogger: RemoteLogger is already initialized.'
@@ -222,3 +226,10 @@ describe( 'init', () => {
 	} );
 } );
 
+describe( 'log', () => {
+	it('should not log if Tracks is not enabled', () => {
+		window.wcTracks = { isEnabled: false };
+		log('info', 'Test message');
+		expect( fetchMock ).not.toHaveBeenCalled();
+	});
+});

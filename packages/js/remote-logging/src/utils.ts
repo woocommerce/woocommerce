@@ -27,7 +27,7 @@ export function mergeLogData( target: LogData, source: Partial< LogData > ) {
 			) {
 				result[ typedKey ] = [
 					...( Array.isArray( target[ typedKey ] )
-						? target[ typedKey ]
+						? ( target[ typedKey ] as string[] )
 						: [] ),
 					...( source[ typedKey ] as string[] ),
 				];
