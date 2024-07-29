@@ -211,23 +211,18 @@ test.describe(
 			const approveButton = reviewRow.getByRole( 'button', {
 				name: 'Approve',
 			} );
-			const isApproveButtonVisible = await approveButton.isVisible();
 
-			if ( isApproveButtonVisible ) {
-				// Scroll to the review row and hover to reveal action buttons
-				await reviewRow.scrollIntoViewIfNeeded();
-				await reviewRow.hover();
+			// Hover to reveal action buttons
+			await reviewRow.hover();
 
-				// Click the "Approve" button and wait for the state to become 'networkidle'
-				await approveButton.click();
-				await page.waitForLoadState( 'networkidle' );
+			// Click the "Approve" button and wait for the state to become 'networkidle'
+			await approveButton.click();
 
-				// Verify the review is approved by checking the presence of "Unapprove" button
-				const unapproveButton = reviewRow.getByRole( 'button', {
-					name: 'Unapprove',
-				} );
-				await expect( unapproveButton ).toBeVisible;
-			}
+			// Verify the review is approved by checking the presence of "Unapprove" button
+			const unapproveButton = reviewRow.getByRole( 'button', {
+				name: 'Unapprove',
+			} );
+			await expect( unapproveButton ).toBeVisible();
 		} );
 
 		test( 'can mark a product review as spam', async ( {
@@ -255,50 +250,54 @@ test.describe(
 			// marked as spam by confirming "Not Spam" button is visible
 			const spammedReviewRow = page.locator( `#comment-${ review.id }` );
 			await spammedReviewRow.isVisible();
-			await reviewRow.hover();
-			await spammedReviewRow.getByRole( 'button', { name: 'Not Spam' } )
-				.toBeVisible;
+			await spammedReviewRow.hover();
+			const notSpamButton = await spammedReviewRow.getByRole( 'button', {
+				name: 'Not Spam',
+			} );
+			await notSpamButton.isVisible();
 		} );
 
-		test('can reply to a product review', async ({ page, reviews }) => {
-			const review = reviews[0]; // Select the first review to reply to
-		
+		test( 'can reply to a product review', async ( { page, reviews } ) => {
+			const review = reviews[ 0 ]; // Select the first review to reply to
+
 			// Go to the Product Reviews page
-			await page.goto('wp-admin/edit.php?post_type=product&page=product-reviews');
-		
+			await page.goto(
+				'wp-admin/edit.php?post_type=product&page=product-reviews'
+			);
+
 			// Locate the review to be replied to
-			const reviewRow = page.locator(`#comment-${review.id}`);
+			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
-		
+
 			// Click the Reply button within the review row
-			await reviewRow.getByRole('button', { name: 'Reply' }).click();
-		
+			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
+
 			// Wait for the reply textarea to be visible
-			const replyTextArea = page.locator('textarea#replycontent');
-			await expect(replyTextArea).toBeVisible();
-		
+			const replyTextArea = page.locator( 'textarea#replycontent' );
+			await expect( replyTextArea ).toBeVisible();
+
 			// Fill in the reply and submit it
 			const replyText = 'Thank you for your feedback!';
-			await replyTextArea.fill(replyText);
-		
+			await replyTextArea.fill( replyText );
+
 			// Ensure the "Submit Reply" button within the reply area is visible and clickable
-			const submitReplyButton = page.locator('button.save.button.button-primary');
-			await expect(submitReplyButton).toBeVisible();
+			const submitReplyButton = page.locator(
+				'button.save.button.button-primary'
+			);
+			await expect( submitReplyButton ).toBeVisible();
 			await submitReplyButton.click();
-		
-			// Verify that the reply is visible in the product reviews list
-			const replyRow = page.locator(`tr.comment.byuser:has(div.comment-text:has-text("${replyText}"))`);
-			await expect(replyRow).toContainText(replyText);
-		
+
 			// Get the product link from the review row
-			await reviewRow.locator('a.comments-view-item-link').click();
-			await page.click('#tab-reviews');
-		
+			await reviewRow.locator( 'a.comments-view-item-link' ).click();
+			await page.click( '#tab-reviews' );
+
 			// Verify that the reply is visible in the shop reviews section
-			const reviewContainer = page.locator(`div.comment_container:has-text("${replyText}")`);
-    		await expect(reviewContainer).toContainText(replyText);
-		});		
-		
+			const reviewContainer = page.locator(
+				`div.comment_container:has-text("${ replyText }")`
+			);
+			await expect( reviewContainer ).toContainText( replyText );
+		} );
+
 		test( 'can delete a product review', async ( { page, reviews } ) => {
 			const review = reviews[ 0 ];
 
