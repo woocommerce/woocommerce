@@ -17,7 +17,7 @@ class WC_Helper_Product {
 	 *
 	 * @var int $sku_counter
 	 */
-	private static $sku_counter = 0;
+	private static $sku_counter = 20141022;
 
 	/**
 	 * Delete a product.

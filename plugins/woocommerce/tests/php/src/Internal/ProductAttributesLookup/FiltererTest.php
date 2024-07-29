@@ -16,7 +16,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 	 *
 	 * @var int $sku_counter
 	 */
-	private static $sku_counter = 0;
+	private static $sku_counter = 20210528;
 
 	/**
 	 * Runs before all the tests in the class.

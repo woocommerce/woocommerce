@@ -27,7 +27,7 @@ class ProductHelper {
 	 *
 	 * @var int $sku_counter
 	 */
-	private static $sku_counter = 0;
+	private static $sku_counter = 20190610;
 
 	/**
 	 * Delete a product.
