@@ -317,7 +317,9 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		} );
 
 		const newTerms = await Promise.all( promises );
-		const storedTerms = newTerms.filter( ( term ) => term !== undefined );
+		const storedTerms = newTerms.filter(
+			( term ) => term !== undefined
+		) as ProductAttributeTerm[];
 
 		// Remove the recently created terms from the temporary state,
 		setTemporaryTerms( ( prevTerms ) =>
