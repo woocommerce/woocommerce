@@ -52,6 +52,15 @@ class Util {
 		return $result;
 	}
 
+	public static function is_valid_wp_plugin_slug( $slug ) {
+		// Check if the slug only contains allowed characters
+		if ( preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
 	public static function array_filter_by_field( $array, $field_name, $force_convert = false ) {
 		if ( ! is_array( $array ) && $force_convert ) {
 			$array = json_decode( json_encode( $array ), true );

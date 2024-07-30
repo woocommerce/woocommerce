@@ -112,6 +112,12 @@ class ZipExportedSchema {
 
 		foreach ( $steps as $step ) {
 			$resource   = $step[ $type === 'plugins' ? 'pluginZipFile' : 'themeZipFile' ];
+			// This is unlikely to happen since we validate the schema before using this class
+			// but just in case.
+			if ( ! Util::is_valid_wp_plugin_slug( $resource['slug'] ) ) {
+				throw new \InvalidArgumentException( 'Invalid plugin slug: ' . $resource['slug']);
+			}
+
 			$destination = $this->working_dir . '/' . $type . '/' . $resource['slug'] . '.zip';
 			$plugin_dir  = WP_CONTENT_DIR . '/' . $type . '/' . $resource['slug'];
 			if ( ! is_dir( $plugin_dir ) ) {
