@@ -43,6 +43,7 @@ jobs:
         name: "Checkout (${{ github.event.pull_request.head.ref || 'auto' }})"
         with:
           ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
@@ -96,6 +97,7 @@ jobs:
         name: "Checkout (${{ github.event.pull_request.head.ref || 'auto' }})"
         with:
           ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         id: 'setup-monorepo'
