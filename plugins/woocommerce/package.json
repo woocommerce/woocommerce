@@ -221,6 +221,19 @@
 					"name": "PHP WP: nightly",
 					"testType": "unit:php",
 					"command": "test:php:env",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
+					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
