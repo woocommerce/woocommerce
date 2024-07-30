@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 3.3.1
+ * @version 8.8.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,7 +28,7 @@ if ( $total <= 1 ) {
 	return;
 }
 ?>
-<nav class="woocommerce-pagination">
+<nav class="woocommerce-pagination" aria-label="Pagination">
 	<?php
 	echo paginate_links(
 		apply_filters(
@@ -39,11 +39,12 @@ if ( $total <= 1 ) {
 				'add_args'  => false,
 				'current'   => max( 1, $current ),
 				'total'     => $total,
-				'prev_text' => is_rtl() ? '&rarr;' : '&larr;',
-				'next_text' => is_rtl() ? '&larr;' : '&rarr;',
+				'prev_text' => "<span class='screen-reader-text'>" . esc_html__( 'Go to previous page', 'woocommerce' ) . "</span>" . ( is_rtl() ? '&rarr;' : '&larr;' ),
+				'next_text' => "<span class='screen-reader-text'>" . esc_html__( 'Go to next page', 'woocommerce' ) . "</span>" . ( is_rtl() ? '&larr;' : '&rarr;' ),
 				'type'      => 'list',
 				'end_size'  => 3,
 				'mid_size'  => 3,
+				'before_page_number' => "<span class='screen-reader-text'>" . esc_html__( 'Go to page', 'woocommerce' ) . "</span>",
 			)
 		)
 	);
