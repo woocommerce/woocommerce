@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 
-test.describe( 'Marketing page', () => {
+test.describe( 'Marketing page', { tag: '@external' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test( 'A user can view the Marketing > Overview page without it crashing', async ( {
@@ -28,9 +28,7 @@ test.describe( 'Marketing page', () => {
 
 		// Sections present
 		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
+			page.getByText( 'Start by adding a channel to your store' )
 		).toBeVisible();
 		await expect(
 			page.getByText( 'Channels', { exact: true } )
