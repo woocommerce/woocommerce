@@ -57,6 +57,13 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 				'woocommerce_customize_store_onboarding_tour_hidden',
 				'yes'
 			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -75,6 +82,13 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 				request,
 				baseURL,
 				'woocommerce_admin_customize_store_completed',
+				'no'
+			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
 				'no'
 			);
 
@@ -208,5 +222,27 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 
 		expect( isPrimaryFontUsed ).toBe( true );
 		expect( isSecondaryFontUsed ).toBe( true );
+	} );
+
+	test( 'Clicking opt-in new fonts should be available', async ( {
+		pageObject,
+	} ) => {
+		const assembler = await pageObject.getAssembler();
+
+		await assembler.getByText( 'Usage tracking' ).click();
+		await expect(
+			assembler.getByText( 'Access more fonts' )
+		).toBeVisible();
+
+		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
+
+		await assembler
+			.getByText( 'Access more fonts' )
+			.waitFor( { state: 'hidden' } );
+
+		const fontPickers = assembler.locator(
+			'.woocommerce-customize-store_global-styles-variations_item'
+		);
+		await expect( fontPickers ).toHaveCount( 10 );
 	} );
 } );
