@@ -77,6 +77,7 @@ const wpAdminScripts = [
 	'woo-renew-subscription',
 	'woo-subscriptions-notice',
 	'woo-product-usage-notice',
+	'remote-logging',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
