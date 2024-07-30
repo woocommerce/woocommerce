@@ -93,6 +93,10 @@ export class RemoteLogger {
 	 * @return {Promise<void>} - A promise that resolves when the error is logged.
 	 */
 	public async error( error: Error, extraData?: Partial< LogData > ) {
+		if ( this.isRateLimited() ) {
+			return;
+		}
+
 		const errorData: ErrorData = {
 			...mergeLogData( DEFAULT_LOG_DATA, {
 				message: error.message,
@@ -177,13 +181,7 @@ export class RemoteLogger {
 	 * @param error - The error to handle.
 	 */
 	private async handleError( error: Error ) {
-		const currentTime = Date.now();
-
-		if (
-			currentTime - this.lastErrorSentTime <
-			this.config.errorRateLimitMs
-		) {
-			debug( 'Rate limit reached. Skipping send error', error );
+		if ( this.isRateLimited() ) {
 			return;
 		}
 
@@ -344,6 +342,18 @@ export class RemoteLogger {
 			error,
 			stackFrames
 		) as boolean;
+	}
+
+	private isRateLimited(): boolean {
+		const currentTime = Date.now();
+		if (
+			currentTime - this.lastErrorSentTime <
+			this.config.errorRateLimitMs
+		) {
+			debug( 'Rate limit reached. Skipping send error' );
+			return true;
+		}
+		return false;
 	}
 }
 
