@@ -3,11 +3,7 @@
  */
 import { createElement, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	BaseControl,
-	ComboboxControl as CoreComboboxControl,
-	Spinner,
-} from '@wordpress/components';
+import { BaseControl, Spinner } from '@wordpress/components';
 import { Product } from '@woocommerce/data';
 import classnames from 'classnames';
 
@@ -16,24 +12,8 @@ import classnames from 'classnames';
  */
 import { FormattedPrice } from '../formatted-price';
 import { ProductImage } from '../product-image';
-import {
-	ComboboxControlProductSelectOption,
-	ProductSelectProps,
-} from './types';
-
-interface ComboboxControlProps
-	extends Omit< CoreComboboxControl.Props, 'label' | 'help' > {
-	__experimentalRenderItem?: ( args: {
-		item: ComboboxControlProductSelectOption;
-	} ) => string | JSX.Element;
-}
-
-/*
- * Create an alias for the ComboboxControl core component,
- * but with the custom ComboboxControlProps interface.
- */
-const ComboboxControl =
-	CoreComboboxControl as React.ComponentType< ComboboxControlProps >;
+import { ProductSelectProps } from './types';
+import { ComboboxControl, ComboboxControlOption } from '../combobox-control';
 
 /**
  * Map the product item to the Combobox core option.
@@ -41,7 +21,9 @@ const ComboboxControl =
  * @param {Product} attr - Product item.
  * @return {ComboboxControlOption}               Combobox option.
  */
-function mapItemToOption( attr: Product ): ComboboxControlProductSelectOption {
+function mapItemToOption(
+	attr: Product
+): ComboboxControlOption & { product?: Product } {
 	return {
 		label: attr.name,
 		value: `attr-${ attr.id }`,
@@ -55,24 +37,28 @@ function mapItemToOption( attr: Product ): ComboboxControlProductSelectOption {
  * @return {JSX.Element}                       Component item.
  */
 function ComboboxControlOption( props: {
-	item: ComboboxControlProductSelectOption;
+	item: ComboboxControlOption & { product?: Product };
 } ): JSX.Element {
 	const { item } = props;
 	return (
 		<div className="woocommerce-product-select__menu-item">
-			<ProductImage
-				product={ item.product }
-				className="woocommerce-product-select__menu-item-image"
-			/>
+			{ item.product && (
+				<ProductImage
+					product={ item.product }
+					className="woocommerce-product-select__menu-item-image"
+				/>
+			) }
 			<div className="woocommerce-product-select__menu-item-content">
 				<div className="woocommerce-product-select__menu-item-title">
 					{ item.label }
 				</div>
 
-				<FormattedPrice
-					product={ item.product }
-					className="woocommerce-product-select__menu-item-description"
-				/>
+				{ item.product && (
+					<FormattedPrice
+						product={ item.product }
+						className="woocommerce-product-select__menu-item-description"
+					/>
+				) }
 			</div>
 		</div>
 	);
@@ -84,7 +70,6 @@ export function ProductSelect( {
 	help,
 	placeholder,
 	items = [],
-	instanceNumber = 0,
 	isLoading = false,
 	filter,
 	onSelect,
@@ -95,10 +80,10 @@ export function ProductSelect( {
 	 * Each option is an object with a label and value.
 	 * Both are strings.
 	 */
-	const options: ComboboxControlProductSelectOption[] =
+	const options: Array< ComboboxControlOption & { product?: Product } > =
 		items?.map( mapItemToOption );
 
-	const comboRef = useRef< HTMLDivElement | null >( null );
+	const comboRef = useRef< HTMLInputElement | null >( null );
 
 	// Label to link the input with the label.
 	const [ labelFor, setLabelFor ] = useState< string >( '' );
@@ -113,15 +98,11 @@ export function ProductSelect( {
 		 * to link the label with the input,
 		 * picking the input ID from the ComboboxControl.
 		 */
-		const inputElement = comboRef.current.querySelector(
-			'input.components-combobox-control__input'
-		);
-
-		const id = inputElement?.getAttribute( 'id' );
-		if ( inputElement && typeof id === 'string' ) {
+		const id = comboRef.current.getAttribute( 'id' );
+		if ( comboRef.current && typeof id === 'string' ) {
 			setLabelFor( id );
 		}
-	}, [ instanceNumber ] );
+	}, [] );
 
 	if ( placeholder && ! help ) {
 		help = placeholder;
@@ -153,7 +134,6 @@ export function ProductSelect( {
 				},
 				className
 			) }
-			ref={ comboRef }
 		>
 			<BaseControl label={ label } help={ help } id={ labelFor }>
 				<ComboboxControl
@@ -161,6 +141,7 @@ export function ProductSelect( {
 					allowReset={ false }
 					options={ options }
 					value={ value }
+					ref={ comboRef }
 					onChange={ ( newValue ) => {
 						if ( ! newValue ) {
 							return;

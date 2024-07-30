@@ -16,6 +16,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
+import { useDebounce } from '@wordpress/compose';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -111,7 +112,9 @@ export function LinkedProductListBlockEdit( {
 				exclude: excludedIds,
 			} )
 			.then( ( response ) => {
-				setSearchedProducts( response );
+				if ( response ) {
+					setSearchedProducts( response );
+				}
 			} )
 			.finally( () => {
 				setIsSearching( false );
@@ -128,9 +131,9 @@ export function LinkedProductListBlockEdit( {
 		}
 	}, [ linkedProductIds, state.selectedProduct ] );
 
-	function filter( search = '' ) {
+	const debouncedFilter = useDebounce( function filter( search = '' ) {
 		searchProducts( search, linkedProductIds );
-	}
+	}, 300 );
 
 	useEffect( () => {
 		// Only filter when the tab is selected.
@@ -138,8 +141,9 @@ export function LinkedProductListBlockEdit( {
 			return;
 		}
 
-		searchProducts();
-	}, [ isInSelectedTab, loadInitialSearchResults ] );
+		loadInitialSearchResults.current = true;
+		searchProducts( '', linkedProductIds );
+	}, [ isInSelectedTab, loadInitialSearchResults, linkedProductIds ] );
 
 	const handleSelect = useCallback(
 		( product: Product ) => {
@@ -268,7 +272,7 @@ export function LinkedProductListBlockEdit( {
 			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<ProductSelect
 					items={ searchedProducts }
-					filter={ filter }
+					filter={ debouncedFilter }
 					onSelect={ handleSelect }
 					isLoading={ isSearching }
 					selected={ null }
