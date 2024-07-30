@@ -19,6 +19,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  * Internal dependencies
  */
 import CustomerAddress from './customer-address';
+import { useShippingData } from '../../../../base/context/hooks/shipping/use-shipping-data';
 
 const Block = ( {
 	showCompanyField = false,
@@ -42,6 +43,7 @@ const Block = ( {
 		useBillingAsShipping,
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
+	const { needsShipping } = useShippingData();
 
 	// Syncs shipping address with billing address if "Force shipping to the customer billing address" is enabled.
 	useEffectOnce( () => {
@@ -110,7 +112,7 @@ const Block = ( {
 		shippingAddress
 	);
 	const defaultEditingAddress =
-		isEditor || ! hasAddress || billingMatchesShipping;
+		isEditor || ! hasAddress || ( needsShipping && billingMatchesShipping );
 
 	return (
 		<>
