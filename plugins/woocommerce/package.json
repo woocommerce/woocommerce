@@ -104,7 +104,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.0 WP: latest 1/2",
+					"name": "PHP: 8.0 WP: latest [suit:main]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-main",
 					"changes": [
@@ -133,7 +133,7 @@
 					]
 				},
 				{
-					"name": "PHP: 8.0 WP: latest 2/2",
+					"name": "PHP: 8.0 WP: latest [suit:legacy]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-legacy",
 					"changes": [
@@ -162,7 +162,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: latest - 1 1/2",
+					"name": "PHP WP: latest - 1 [suit:main]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-main",
 					"changes": [
@@ -190,7 +190,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: latest - 1 2/2",
+					"name": "PHP WP: latest - 1 [suit:legacy]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-legacy",
 					"changes": [
@@ -218,9 +218,36 @@
 					]
 				},
 				{
-					"name": "PHP WP: nightly",
+					"name": "PHP WP: nightly [suit:main]",
 					"testType": "unit:php",
-					"command": "test:php:env",
+					"command": "test:php:env -- --testsuite=wc-phpunit-main",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "nightly"
+						}
+					},
+					"events": [
+						"daily-checks"
+					]
+				},
+				{
+					"name": "PHP WP: nightly [suit:legacy]",
+					"testType": "unit:php",
+					"command": "test:php:env -- --testsuite=wc-phpunit-legacy",
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
