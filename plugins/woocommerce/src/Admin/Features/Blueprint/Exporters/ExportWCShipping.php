@@ -63,6 +63,10 @@ class ExportWCShipping implements StepExporter {
 			'locations' => get_option( 'pickup_location_pickup_locations', array() ),
 		);
 
+		if ( empty( $local_pickup['general'] ) ) {
+			$local_pickup['general'] = new \stdClass();
+		}
+
 		// Fetch shipping zones from the database.
 		$zones = $wpdb->get_results(
 			"
