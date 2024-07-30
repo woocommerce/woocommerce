@@ -13,14 +13,26 @@ $product      = $item->get_product();
 $product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
 $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empty( $class ) ? $class : '', $item, $order );
+$is_visible   = $product && $product->is_visible();
+
+/**
+ * Filter the order item name.
+ *
+ * @since 8.8.0
+ * @param string $item_name The order item's name.
+ * @param WC_Order_Item $item The order item object.
+ * @param bool $is_visible Item's product visibility in the catalog.
+ */
+$item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, $is_visible );
+
 ?>
 <tr class="item <?php echo esc_attr( $row_class ); ?>" data-order_item_id="<?php echo esc_attr( $item_id ); ?>">
 	<td class="thumb">
 		<?php echo '<div class="wc-order-item-thumbnail">' . wp_kses_post( $thumbnail ) . '</div>'; ?>
 	</td>
-	<td class="name" data-sort-value="<?php echo esc_attr( $item->get_name() ); ?>">
+	<td class="name" data-sort-value="<?php echo esc_attr( $item_name ); ?>">
 		<?php
-		echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' . wp_kses_post( $item->get_name() ) . '</a>' : '<div class="wc-order-item-name">' . wp_kses_post( $item->get_name() ) . '</div>';
+		echo $product_link ? '<a href="' . esc_url( $product_link ) . '" class="wc-order-item-name">' . wp_kses_post( $item_name ) . '</a>' : '<div class="wc-order-item-name">' . wp_kses_post( $item_name ) . '</div>';
 
 		if ( $product && $product->get_sku() ) {
 			echo '<div class="wc-order-item-sku"><strong>' . esc_html__( 'SKU:', 'woocommerce' ) . '</strong> ' . esc_html( $product->get_sku() ) . '</div>';
