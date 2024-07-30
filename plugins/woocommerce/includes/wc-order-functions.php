@@ -579,6 +579,7 @@ function wc_create_refund( $args = array() ) {
 
 				// array of order id and product id which were refunded.
 				// later to be used for revoking download permission.
+				// checking if the item is a product, as we only need to revoke download permission for products.
 				if ( $item->is_type( 'line_item' ) ) {
 					$refunded_order_and_products[ $item_id ] = array(
 						'order_id'   => $order->get_id(),
@@ -645,7 +646,7 @@ function wc_create_refund( $args = array() ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
 			}
 
-			// delete download using order and product id, if present.
+			// delete downloads that were refunded using order and product id, if present.
 			if ( ! empty( $refunded_order_and_products ) ) {
 				foreach ( $refunded_order_and_products as $item_id => $refunded_order_and_product ) {
 					$download_data_store = WC_Data_Store::load( 'customer-download' );
