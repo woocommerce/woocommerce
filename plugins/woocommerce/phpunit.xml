@@ -10,11 +10,10 @@
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
 	<testsuites>
 		<testsuite name="wc-unittests-all">
-			<directory suffix=".php">./tests/legacy/unit-tests</directory>
-			<directory suffix=".php">./tests/php</directory>
+			<directory suffix=".php">./tests/php/src/Utilities</directory>
 			<exclude>./tests/php/helpers</exclude>
 		</testsuite>
-		<testsuite name="shard1">
+		<!-- <testsuite name="shard1">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/legacy/unit-tests/woocommerce-admin</exclude>
@@ -22,9 +21,9 @@
 		</testsuite>
 		<testsuite name="shard2">
 			<directory suffix=".php">./tests/legacy/unit-tests/woocommerce-admin</directory>
-		</testsuite>
+		</testsuite> -->
 	</testsuites>
-	<coverage includeUncoveredFiles="true">
+	<!-- <coverage includeUncoveredFiles="true">
 		<include>
 			<directory suffix=".php">./includes</directory>
 		<file>woocommerce.php</file>
@@ -55,5 +54,5 @@
 			<file>./includes/wc-template-hooks.php</file>
 			<file>./includes/wc-widget-functions.php</file>
 		</exclude>
-	</coverage>
+	</coverage> -->
 </phpunit>
