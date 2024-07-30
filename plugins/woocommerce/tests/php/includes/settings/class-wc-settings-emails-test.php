@@ -83,7 +83,6 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_email_body_background_color'   => 'color',
 			'woocommerce_email_text_color'              => 'color',
 			'woocommerce_email_footer_text_color'       => 'color',
-			'woocommerce_email_footer_background_color' => 'color',
 			'email_merchant_notes'                      => array( 'title', 'sectionend' ),
 			'woocommerce_merchant_email_notifications'  => 'checkbox',
 		);

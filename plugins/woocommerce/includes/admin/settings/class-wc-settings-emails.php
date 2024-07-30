@@ -204,18 +204,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( 'Footer background color', 'woocommerce' ),
-					/* translators: %s: default color */
-					'desc'     => sprintf( __( 'The footer background color. Default %s.', 'woocommerce' ), '<code>#ffffff</code>' ),
-					'id'       => 'woocommerce_email_footer_background_color',
-					'type'     => 'color',
-					'css'      => 'width:6em;',
-					'default'  => '#ffffff',
-					'autoload' => false,
-					'desc_tip' => true,
-				),
-
-				array(
 					'type' => 'sectionend',
 					'id'   => 'email_template_options',
 				),
