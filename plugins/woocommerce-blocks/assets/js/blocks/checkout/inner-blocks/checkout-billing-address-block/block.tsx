@@ -7,6 +7,7 @@ import {
 	useCheckoutAddress,
 	useEditorContext,
 	noticeContexts,
+	useShippingData,
 } from '@woocommerce/base-context';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { ShippingAddress, FormFieldsConfig } from '@woocommerce/settings';
@@ -19,7 +20,6 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  * Internal dependencies
  */
 import CustomerAddress from './customer-address';
-import { useShippingData } from '../../../../base/context/hooks/shipping/use-shipping-data';
 
 const Block = ( {
 	showCompanyField = false,
