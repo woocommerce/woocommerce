@@ -60,10 +60,7 @@ export default function ConnectNotice(): JSX.Element | null {
 	);
 
 	const handleClick = () => {
-		recordEvent( 'woo_connect_notice_in_marketplace_clicked', {
-			utm_source: 'pu',
-			utm_campaign: 'pu_in_apps_screen_connect',
-		} );
+		recordEvent( 'woo_connect_notice_in_marketplace_clicked' );
 		return true;
 	};
 
