@@ -39,6 +39,7 @@ jobs:
         name: "Checkout (${{ github.base_ref }})"
         with:
           ref: ${{ github.base_ref }}
+          fetch-depth: 1000
       - name: 'Checkout (calculate number of commits for git fetch depth)'
         shell: bash
         run: |
@@ -97,6 +98,7 @@ jobs:
         name: "Checkout (${{ github.base_ref }})"
         with:
           ref: ${{ github.base_ref }}
+          fetch-depth: 1000
       - name: 'Checkout (calculate number of commits for git fetch depth)'
         shell: bash
         run: |
