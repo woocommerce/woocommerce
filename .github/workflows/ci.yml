@@ -40,7 +40,7 @@ jobs:
         with:
           ref: ${{ github.base_ref || 'trunk' }}
       - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.event.pull_request.head.ref }})"
+        name: "Checkout (${{ github.event.pull_request.head.ref || 'auto' }})"
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
@@ -93,7 +93,7 @@ jobs:
         with:
           ref: ${{ github.base_ref || 'trunk' }}
       - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.event.pull_request.head.ref }})"
+        name: "Checkout (${{ github.event.pull_request.head.ref || 'auto' }})"
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
