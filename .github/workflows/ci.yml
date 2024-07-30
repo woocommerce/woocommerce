@@ -89,8 +89,13 @@ jobs:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: 'Checkout'
-
+        name: "Checkout (${{ github.base_ref || 'trunk' }})"
+        with:
+          ref: ${{ github.base_ref || 'trunk' }}
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout (branch as per trigger event)'
+        with:
+          ref: ''
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         id: 'setup-monorepo'
