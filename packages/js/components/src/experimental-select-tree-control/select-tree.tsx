@@ -277,6 +277,7 @@ export const SelectTree = function SelectTree( {
 						setInputValue( '' );
 					} else {
 						onInputChange?.( nodeData.label );
+						props.onSelect?.( nodeData );
 						setIsOpen( false );
 						setIsFocused( false );
 						focusOnInput();
