@@ -13,10 +13,11 @@ class FiltererTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
+	 * The starting value ensures no conflicts between existing generators.
 	 *
 	 * @var int $sku_counter
 	 */
-	private static $sku_counter = 20210528;
+	private static $sku_counter = 200000;
 
 	/**
 	 * Runs before all the tests in the class.

@@ -24,10 +24,11 @@ class ProductHelper {
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
+	 * The starting value ensures no conflicts between existing generators.
 	 *
 	 * @var int $sku_counter
 	 */
-	private static $sku_counter = 20190610;
+	private static $sku_counter = 100000;
 
 	/**
 	 * Delete a product.
