@@ -60,7 +60,9 @@ jobs:
             if ( ! baseRef && refType === 'branch' && refName === 'trunk' && githubEvent === 'push' ) {
               // Context: merges into trunk - run jobs for all merged changes.
               baseRef = ${{ toJson( github.event.before ) }};
-              baseRef = `--base-ref origin/${ baseRef }`;
+              if ( baseRef ) {
+                baseRef = `--base-ref origin/${ baseRef }`;
+              }
             }
             
             if ( refType === 'tag' && refName !== 'nightly' ) {
