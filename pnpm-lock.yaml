@@ -12,9 +12,9 @@ overrides:
 pnpmfileChecksum: y3ex4x7shfdnqpcpdnu67kmuvu
 
 patchedDependencies:
-    '@wordpress/edit-site@5.15.0':
-        hash: 6y3l6gxu33zybfmvbjd23dtqda
-        path: bin/patches/@wordpress__edit-site@5.15.0.patch
+  '@wordpress/edit-site@5.15.0':
+    hash: 6y3l6gxu33zybfmvbjd23dtqda
+    path: bin/patches/@wordpress__edit-site@5.15.0.patch
 
 importers:
 
@@ -3243,7 +3243,7 @@ importers:
         version: 3.6.1
       '@wordpress/edit-site':
         specifier: 5.15.0
-        version: 5.15.0(@babel/helper-module-imports@7.24.7)(@babel/types@7.24.7)(@preact/signals-core@1.5.1)(@types/react@17.0.71)(babel-plugin-macros@3.1.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
+        version: 5.15.0(patch_hash=6y3l6gxu33zybfmvbjd23dtqda)(@babel/helper-module-imports@7.24.7)(@babel/types@7.24.7)(@preact/signals-core@1.5.1)(@types/react@17.0.71)(babel-plugin-macros@3.1.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@wordpress/element':
         specifier: wp-6.0
         version: 4.4.1
@@ -21566,7 +21566,7 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
-      react: 18.2.0
+      react: ^17.0.2
 
   react-number-format@4.9.3:
     resolution: {integrity: sha512-am1A1xYAbENuKJ+zpM7V+B1oRTSeOHYltqVKExznIVFweBzhLmOBmyb1DfIKjHo90E0bo1p3nzVJ2NgS5xh+sQ==}
@@ -21771,7 +21771,7 @@ packages:
   react-with-direction@1.4.0:
     resolution: {integrity: sha512-ybHNPiAmaJpoWwugwqry9Hd1Irl2hnNXlo/2SXQBwbLn/jGMauMS2y9jw+ydyX5V9ICryCqObNSthNt5R94xpg==}
     peerDependencies:
-      react: ^0.14 || ^15 || ^16
+      react: ^17.0.2
       react-dom: ^0.14 || ^15 || ^16
 
   react-with-styles-interface-css@4.0.3:
@@ -41447,7 +41447,7 @@ snapshots:
       - '@types/react'
       - react-with-direction
 
-  '@wordpress/edit-site@5.15.0(@babel/helper-module-imports@7.24.7)(@babel/types@7.24.7)(@preact/signals-core@1.5.1)(@types/react@17.0.71)(babel-plugin-macros@3.1.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)':
+  '@wordpress/edit-site@5.15.0(patch_hash=6y3l6gxu33zybfmvbjd23dtqda)(@babel/helper-module-imports@7.24.7)(@babel/types@7.24.7)(@preact/signals-core@1.5.1)(@types/react@17.0.71)(babel-plugin-macros@3.1.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)':
     dependencies:
       '@babel/runtime': 7.23.5
       '@wordpress/a11y': 3.47.0
@@ -52067,7 +52067,7 @@ snapshots:
       jest-environment-jsdom: 26.6.2
       jest-environment-node: 26.6.2
       jest-get-type: 26.3.0
-      jest-jasmine2: 26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3))
+      jest-jasmine2: 26.6.3
       jest-regex-util: 26.0.0
       jest-resolve: 26.6.2
       jest-util: 26.6.2
@@ -52666,7 +52666,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  jest-jasmine2@26.6.3(ts-node@10.9.2(@types/node@16.18.68)(typescript@5.3.3)):
+  jest-jasmine2@26.6.3:
     dependencies:
       '@babel/traverse': 7.23.6
       '@jest/environment': 26.6.2
@@ -52687,11 +52687,7 @@ snapshots:
       pretty-format: 26.6.2
       throat: 5.0.0
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   jest-jasmine2@27.5.1:
     dependencies:
