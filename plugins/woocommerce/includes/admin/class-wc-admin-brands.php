@@ -450,8 +450,8 @@ class WC_Brands_Admin {
 	 * @return void
 	 */
 	public function thumbnail_field_save( $term_id, $tt_id, $taxonomy ) {
-		if ( isset( $_POST['product_cat_thumbnail_id'] ) ) {
-			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) );
+		if ( isset( $_POST['product_cat_thumbnail_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing.
 		}
 	}
 
@@ -464,6 +464,8 @@ class WC_Brands_Admin {
 
 	/**
 	 * Sort brands function.
+	 *
+	 * @param array $sortable Sortable array.
 	 */
 	public function sort_brands( $sortable ) {
 		$sortable[] = 'product_brand';
@@ -474,7 +476,7 @@ class WC_Brands_Admin {
 	 * Add brands column in second-to-last position.
 	 *
 	 * @since x.x.x
-	 * @param mixed $columns Columns
+	 * @param mixed $columns Columns.
 	 * @return array
 	 */
 	public function product_columns( $columns ) {
@@ -519,7 +521,7 @@ class WC_Brands_Admin {
 	 * @param mixed $id ID.
 	 */
 	public function column( $columns, $column, $id ) {
-		if ( $column == 'thumb' ) {
+		if ( $column === 'thumb' ) {
 			global $woocommerce;
 
 			$image        = '';
@@ -546,6 +548,14 @@ class WC_Brands_Admin {
 		// phpcs:disable WordPress.Security.NonceVerification
 		$brands_count       = (int) wp_count_terms( 'product_brand' );
 		$current_brand_slug = wc_clean( wp_unslash( $_GET['product_brand'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		/**
+		 * Filter the brands threshold count.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param int $value Threshold.
+		 */
 		if ( $brands_count <= apply_filters( 'woocommerce_product_brand_filter_threshold', 100 ) ) {
 			wc_product_dropdown_categories(
 				array(
