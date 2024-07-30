@@ -4,7 +4,6 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import type { BlockConfiguration } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { __experimentalGetSpacingClassesAndStyles } from '@wordpress/block-editor';
 
 /**
@@ -34,30 +33,27 @@ const blockConfig: BlockConfiguration = {
 	save: Save,
 	supports: {
 		...sharedConfig.supports,
-		...( isFeaturePluginBuild() && {
-			typography: {
-				fontSize: true,
-				lineHeight: true,
-				__experimentalFontWeight: true,
-				__experimentalTextTransform: true,
-				__experimentalFontFamily: true,
-			},
-			color: {
-				text: true,
-				background: true,
-				link: false,
-				gradients: true,
+		typography: {
+			fontSize: true,
+			lineHeight: true,
+			__experimentalFontWeight: true,
+			__experimentalTextTransform: true,
+			__experimentalFontFamily: true,
+		},
+		color: {
+			text: true,
+			background: true,
+			link: false,
+			gradients: true,
+			__experimentalSkipSerialization: true,
+		},
+		...( typeof __experimentalGetSpacingClassesAndStyles === 'function' && {
+			spacing: {
+				margin: true,
 				__experimentalSkipSerialization: true,
 			},
-			...( typeof __experimentalGetSpacingClassesAndStyles ===
-				'function' && {
-				spacing: {
-					margin: true,
-					__experimentalSkipSerialization: true,
-				},
-			} ),
-			__experimentalSelector: '.wc-block-components-product-title',
 		} ),
+		__experimentalSelector: '.wc-block-components-product-title',
 	},
 };
 

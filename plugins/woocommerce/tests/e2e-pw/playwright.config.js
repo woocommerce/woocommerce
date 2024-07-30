@@ -1,6 +1,14 @@
 const { devices } = require( '@playwright/test' );
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
+const testsRootPath = __dirname;
+const testsResultsPath = `${ testsRootPath }/test-results`;
+
+if ( ! process.env.BASE_URL ) {
+	console.log( 'BASE_URL is not set. Using default.' );
+	process.env.BASE_URL = 'http://localhost:8086';
+}
+
 const {
 	ALLURE_RESULTS_DIR,
 	BASE_URL,
@@ -18,26 +26,34 @@ const reporter = [
 		{
 			outputFolder:
 				ALLURE_RESULTS_DIR ??
-				'./tests/e2e-pw/test-results/allure-results',
+				`${ testsRootPath }/test-results/allure-results`,
 			detail: true,
 			suiteTitle: true,
 		},
 	],
 	[
 		'json',
-		{ outputFile: `./test-results/test-results-${ Date.now() }.json` },
+		{
+			outputFile: `${ testsRootPath }/test-results/test-results-${ Date.now() }.json`,
+		},
+	],
+	[
+		`${ testsRootPath }/reporters/environment-reporter.js`,
+		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
 	],
 ];
 
 if ( process.env.CI ) {
 	reporter.push( [ 'github' ] );
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
+	reporter.push( [ `${ testsRootPath }/reporters/skipped-tests.js` ] );
 } else {
 	reporter.push( [
 		'html',
 		{
 			outputFolder:
-				PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
+				PLAYWRIGHT_HTML_REPORT ??
+				`${ testsResultsPath }/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
@@ -48,21 +64,24 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './test-results/results-data',
+	outputDir: `${ testsResultsPath }/results-data`,
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
-	testDir: 'tests',
-	retries: CI ? 2 : 0,
+	testDir: `${ testsRootPath }/tests`,
+	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
-		baseURL: BASE_URL ?? 'http://localhost:8086',
+		baseURL: BASE_URL,
 		screenshot: { mode: 'only-on-failure', fullPage: true },
-		stateDir: 'tests/e2e-pw/.state/',
-		trace: 'retain-on-failure',
+		stateDir: `${ testsRootPath }/.state/`,
+		trace:
+			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
+				? 'retain-on-first-failure'
+				: 'off',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 		actionTimeout: 20 * 1000,
@@ -71,14 +90,14 @@ const config = {
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 	projects: [
 		{
-			name: 'default',
+			name: 'ui',
 			use: { ...devices[ 'Desktop Chrome' ] },
+			testIgnore: '**/api-tests/**',
 		},
 		{
-			name: 'Gutenberg',
+			name: 'api',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testIgnore:
-				/.*smoke-tests\/*|.*js-file-monitor\/*|.*admin-tasks\/*|.*activate-and-setup\/*|.*admin-analytics\/*|.*admin-marketing\/*|.*basic\/*|.*account-\/*|.*settings-\/*|.*users-\/*|.*order\/*|.*page-loads\/*/,
+			testMatch: '**/api-tests/**',
 		},
 	],
 };

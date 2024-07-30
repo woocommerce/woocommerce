@@ -130,7 +130,7 @@ export default function FeedbackModal(): JSX.Element {
 				actions: [
 					{
 						onClick: openModal,
-						label: 'Give feedback',
+						label: __( 'Give feedback', 'woocommerce' ),
 					},
 				],
 			}

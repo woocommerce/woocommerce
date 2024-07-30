@@ -23,7 +23,7 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Logo Picker', () => {
+test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -142,11 +142,13 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await assembler
 			.getByRole( 'spinbutton', { name: 'Image width' } )
 			.fill( '100' );
-		const { width } = await editor
-			.locator( 'header .components-resizable-box__container' )
-			.boundingBox();
 
-		expect( Math.floor( width ) ).toBe( 100 );
+		await expect(
+			editor
+				.getByLabel( 'Block: Header' )
+				.getByLabel( 'Block: Site Logo' )
+		).toHaveCSS( 'width', '100px' );
+
 		await logoPickerPageObject.saveLogoSettings( assembler );
 		const imageFrontend = await logoPickerPageObject.getLogoLocator( page );
 		await page.goto( baseURL );
@@ -185,10 +187,42 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await expect( assembler.getByText( 'Media Library' ) ).toBeVisible();
 	} );
 
-	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
+	// This test checks this regression: https://github.com/woocommerce/woocommerce/issues/49668
+	test( 'Logo should be visible after header update', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
+	} ) => {
+		const assembler = await assemblerPageObject.getAssembler();
+		const emptyLogoPicker =
+			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
+		await emptyLogoPicker.click();
+		await logoPickerPageObject.pickImage( assembler );
+
+		await assembler.getByLabel( 'Back' ).click();
+
+		await assembler.getByText( 'Choose your header' ).click();
+
+		const header = assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.nth( 1 )
+			.frameLocator( 'iframe' )
+			.locator( '.wc-blocks-header-pattern' );
+
+		await header.click();
+
+		await assembler.getByLabel( 'Back' ).click();
+
+		await assembler.getByText( 'Add your logo' ).click();
+		const emptyLogoLocator =
+			logoPickerPageObject.getPlaceholderPreview( assembler );
+
+		await expect( emptyLogoLocator ).toBeHidden();
+	} );
+
+	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
 		page,
+		assemblerPageObject,
+		logoPickerPageObject,
 	} ) => {
 		const assembler = await assemblerPageObject.getAssembler();
 		const emptyLogoPicker =
@@ -196,19 +230,16 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await emptyLogoPicker.click();
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler.getByText( 'Use as site icon' ).click();
-
-		let isAValidResponse = false;
-		const waitForResponse = page.waitForResponse( ( response ) => {
-			isAValidResponse =
-				response.url().includes( '/wp-json/wp/v2/settings' ) &&
-				response.request().method() === 'POST' &&
-				response.status() === 200;
-			return isAValidResponse;
-		} );
 		await logoPickerPageObject.saveLogoSettings( assembler );
-		await waitForResponse;
 
-		await expect( isAValidResponse ).toBe( true );
+		// alternative way to verify new site icon on the site
+		// verifying site icon shown in the new tab is impossible in headless mode
+		const date = new Date();
+		await expect(
+			page.goto(
+				`/wp-content/uploads/${ date.getFullYear() }/${ date.getMonth() }/image-03-100x100.png`
+			)
+		).toBeTruthy();
 	} );
 
 	test( 'The selected image should be visible on the frontend', async ( {

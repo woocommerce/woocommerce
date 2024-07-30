@@ -2,6 +2,7 @@
 	@include reset-color();
 	@include reset-typography();
 	margin-top: em($gap);
+	line-height: 1;
 
 	label {
 		align-items: flex-start;
@@ -105,14 +106,6 @@
 	.wc-block-components-checkbox__label {
 		vertical-align: middle;
 		line-height: em(24px);
-	}
-}
-
-// Hack to hide the check mark in IE11
-// See comment: https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/2320/#issuecomment-621936576
-@include ie11() {
-	.wc-block-components-checkbox__mark {
-		display: none;
 	}
 }
 

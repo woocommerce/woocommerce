@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Sidebar } from '@woocommerce/base-components/sidebar-layout';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useObservedViewport } from '@woocommerce/base-hooks';
@@ -18,7 +18,7 @@ const FrontendBlock = ( {
 	return (
 		<Sidebar
 			ref={ observedRef }
-			className={ classnames( 'wc-block-checkout__sidebar', className, {
+			className={ clsx( 'wc-block-checkout__sidebar', className, {
 				'is-sticky': isSticky,
 			} ) }
 		>

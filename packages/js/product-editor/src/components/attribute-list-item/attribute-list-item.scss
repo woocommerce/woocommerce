@@ -7,7 +7,7 @@
 	}
 }
 
-.woocommerce-attribute-list-item {
+.woocommerce-list-item.woocommerce-attribute-list-item {
 	display: grid;
 	background: none;
 	border: none;
@@ -15,7 +15,9 @@
 	grid-template-columns: 1fr 2fr 16 * $grid-unit;
 	min-height: 9 * $grid-unit;
 	padding: $grid-unit + $grid-unit-05 0;
+}
 
+.woocommerce-attribute-list-item {
 	&:not(:last-child) {
 		border-bottom: 1px solid $gray-200;
 	}

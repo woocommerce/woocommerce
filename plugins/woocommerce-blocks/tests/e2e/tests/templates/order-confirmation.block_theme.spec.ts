@@ -11,8 +11,8 @@ test.describe( 'Test the order confirmation template', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.transformIntoBlocks();
 		await expect(
 			editor.canvas.getByText(

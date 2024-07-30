@@ -81,6 +81,13 @@
 "plugins/woocommerce/**/*":
   - team: proton
 
+"plugins/woocommerce/templates/**/*":
+  - team: rubik
+  - team: woo-fse
+
+"plugins/woocommerce/templates/emails/**/*":
+  - team: proton
+
 "plugins/woocommerce/src/Admin/**/*":
   - team: mothra
   - team: ghidorah

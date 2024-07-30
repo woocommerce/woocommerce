@@ -8,7 +8,7 @@ const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
 
-test.describe( 'Checkout page', () => {
+test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 	const singleProductPrice = '9.99';
 	const simpleProductName = 'Checkout Page Product';
 	const twoProductPrice = ( singleProductPrice * 2 ).toString();
@@ -333,9 +333,7 @@ test.describe( 'Checkout page', () => {
 			await page
 				.getByRole( 'textbox', { name: 'ZIP Code *' } )
 				.fill( '97403' );
-			await page
-				.getByRole( 'textbox', { name: 'Phone *' } )
-				.fill( '555 555-5555' );
+			await page.getByLabel( 'Phone *' ).fill( '555 555-5555' );
 			await page.getByLabel( 'Email address *' ).fill( guestEmail );
 
 			await page.getByText( 'Cash on delivery' ).click();

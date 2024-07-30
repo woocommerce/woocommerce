@@ -4,7 +4,7 @@
 import { Spinner } from '@wordpress/components';
 import { SearchListItem } from '@woocommerce/editor-components/search-list-control';
 import { RenderItemArgs } from '@woocommerce/editor-components/search-list-control/types';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 interface ExpandableSearchListItemProps extends RenderItemArgs {
 	isLoading: boolean;
@@ -33,7 +33,7 @@ const ExpandableSearchListItem = ( {
 			{ isSelected && isLoading && (
 				<div
 					key="loading"
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-search-list__item',
 						'woocommerce-product-attributes__item',
 						'depth-1',

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import { Icon } from '@wordpress/icons';
 
 /**
@@ -15,18 +14,17 @@ import './style.scss';
 
 const featurePluginSupport = {
 	...metadata.supports,
-	...( isFeaturePluginBuild() && {
-		typography: {
-			...metadata.supports.typography,
-			__experimentalFontFamily: true,
-			__experimentalFontStyle: true,
-			__experimentalFontWeight: true,
-			__experimentalTextTransform: true,
-			__experimentalDefaultControls: {
-				fontSize: true,
-			},
+
+	typography: {
+		...metadata.supports.typography,
+		__experimentalFontFamily: true,
+		__experimentalFontStyle: true,
+		__experimentalFontWeight: true,
+		__experimentalTextTransform: true,
+		__experimentalDefaultControls: {
+			fontSize: true,
 		},
-	} ),
+	},
 };
 
 registerBlockType( metadata, {

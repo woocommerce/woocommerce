@@ -23,7 +23,8 @@ import type {
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
-	getDefaultValueOfInheritQueryFromTemplate,
+	getDefaultValueOfInherit,
+	getDefaultValueOfFilterable,
 	useSetPreviewState,
 } from '../utils';
 import InspectorControls from './inspector-controls';
@@ -95,14 +96,16 @@ const ProductCollectionContent = ( {
 		...DEFAULT_ATTRIBUTES,
 		query: {
 			...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
-			inherit: getDefaultValueOfInheritQueryFromTemplate(),
+			inherit: getDefaultValueOfInherit(),
+			filterable: getDefaultValueOfFilterable(),
 		},
 		...( attributes as Partial< ProductCollectionAttributes > ),
 		queryId,
 		// If initialPreviewState is provided, set it as previewState.
-		...( !! attributes.collection && {
-			__privatePreviewState: initialPreviewState,
-		} ),
+		...( !! attributes.collection &&
+			initialPreviewState && {
+				__privatePreviewState: initialPreviewState,
+			} ),
 	};
 
 	/**
@@ -112,39 +115,12 @@ const ProductCollectionContent = ( {
 	useEffect(
 		() => {
 			setAttributes( defaultAttributesValue );
+			isInitialAttributesSet.current = true;
 		},
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
 	);
-
-	const isSelectedOrInnerBlockSelected = useSelect(
-		( select ) => {
-			const { getSelectedBlockClientId, hasSelectedInnerBlock } =
-				select( 'core/block-editor' );
-
-			// Check if the current block is selected.
-			const isSelected = getSelectedBlockClientId() === clientId;
-
-			// Check if any inner block of the current block is selected.
-			const isInnerBlockSelected = hasSelectedInnerBlock(
-				clientId,
-				true
-			);
-
-			return isSelected || isInnerBlockSelected;
-		},
-		[ clientId ]
-	);
-
-	/**
-	 * If inherit is not a boolean, then we haven't set default attributes yet.
-	 * We don't wanna render anything until default attributes are set.
-	 * Default attributes are set in the useEffect above.
-	 */
-	if ( typeof attributes?.query?.inherit !== 'boolean' ) {
-		return null;
-	}
 
 	/**
 	 * If default attributes are not set, we don't wanna render anything.
@@ -160,7 +136,7 @@ const ProductCollectionContent = ( {
 	return (
 		<div { ...blockProps }>
 			{ attributes.__privatePreviewState?.isPreview &&
-				isSelectedOrInnerBlockSelected && (
+				props.isSelected && (
 					<Button
 						variant="primary"
 						size="small"
@@ -169,7 +145,7 @@ const ProductCollectionContent = ( {
 							attributes.__privatePreviewState?.previewMessage
 						}
 						className="wc-block-product-collection__preview-button"
-						data-test-id="product-collection-preview-button"
+						data-testid="product-collection-preview-button"
 					>
 						Preview
 					</Button>

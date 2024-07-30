@@ -7,7 +7,6 @@
 import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
-import { isFeaturePluginBuild } from '@woocommerce/block-settings';
 import type { FunctionComponent } from 'react';
 import type { BlockConfiguration } from '@wordpress/blocks';
 
@@ -75,20 +74,16 @@ export function register(
 			},
 			spacing: {
 				padding: metadata.supports?.spacing?.padding,
-				...( isFeaturePluginBuild() && {
-					__experimentalDefaultControls: {
-						padding:
-							metadata.supports?.spacing
-								?.__experimentalDefaultControls,
-					},
-					__experimentalSkipSerialization:
+
+				__experimentalDefaultControls: {
+					padding:
 						metadata.supports?.spacing
-							?.__experimentalSkipSerialization,
-				} ),
+							?.__experimentalDefaultControls,
+				},
+				__experimentalSkipSerialization:
+					metadata.supports?.spacing?.__experimentalSkipSerialization,
 			},
-			...( isFeaturePluginBuild() && {
-				__experimentalBorder: metadata?.supports?.__experimentalBorder,
-			} ),
+			__experimentalBorder: metadata?.supports?.__experimentalBorder,
 		},
 	};
 

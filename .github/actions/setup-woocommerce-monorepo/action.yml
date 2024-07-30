@@ -10,6 +10,15 @@ inputs:
     build:
         description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
         default: false
+    build-type:
+        description: 'Given "full" or "backend" will perform optimized build steps.'
+        default: 'full'
+    pull-playwright-cache:
+        description: 'Given a boolean value, invokes Playwright dependencies caching.'
+        default: false
+    pull-package-deps:
+        description: 'Given a string value, will pull the package specific dependencies cache.'
+        default: false
 runs:
     using: 'composite'
     steps:
@@ -25,21 +34,47 @@ runs:
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
               node-version-file: '.nvmrc'
-              # We only want to use the cache if something is being installed.
-              cache: ${{ inputs.install != 'false' && 'pnpm' || '' }}
+              # The built-in caching is not fit to per-package caching we are aiming.
+              cache: ''
         - name: 'Setup PHP'
           if: ${{ inputs.php-version != 'false' }}
           uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
+        - name: 'Cache: identify pnpm caching directory'
+          if: ${{ inputs.pull-package-deps != 'false' }}
+          shell: 'bash'
+          run: |
+              echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+        - name: 'Cache: pnpm downloads'
+          if: ${{ inputs.pull-package-deps != 'false' }}
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          with:
+              path: "${{ env.PNPM_STORE_PATH }}"
+              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
+        - name: 'Cache: node cache'
+          if: ${{ inputs.pull-package-deps != 'false' }}
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          with:
+              path: './node_modules/.cache'
+              key: "${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-node-cache-${{ inputs.pull-package-deps }}-'
         - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.php-version != 'false' }}
+          if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
-              restore-keys: '${{ runner.os }}-composer-'
+              key: "${{ runner.os }}-composer-${{ inputs.pull-package-deps }}-${{ hashFiles( 'packages/*/*/composer.lock', 'plugins/*/composer.lock' ) }}"
+              restore-keys: '${{ runner.os }}-composer-${{ inputs.pull-package-deps }}-'
+        - name: 'Cache: playwright downloads'
+          if: ${{ inputs.pull-playwright-cache != 'false' }}
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
+          with:
+              path: '~/.cache/ms-playwright/'
+              key: "${{ runner.os }}-playwright-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-playwright-'
         - name: 'Parse Project Filters'
           id: 'project-filters'
           shell: 'bash'
@@ -50,9 +85,16 @@ runs:
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
           shell: 'bash'
-          run: 'pnpm install'
-          # `pnpm install` filtering is broken: https://github.com/pnpm/pnpm/issues/6300
-          # run: 'pnpm install ${{ steps.project-filters.outputs.install }}'
+          # The installation command is a bit odd as it's a workaround for know bug - https://github.com/pnpm/pnpm/issues/6300.
+          run: |
+            if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
+              # PHPUnit/REST testing optimized installation of the deps: minimalistic and parallellized between PHP/JS.
+              # JS deps installation is abit hard-core, but all we need actually is wp-env and playwright - we are good at that regard.
+              composer install --working-dir=./plugins/woocommerce --quiet &
+              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
+            else
+              pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
+            fi
         # We want to include an option to build projects using this action so that we can make
         # sure that the build cache is always used when building projects.
         - name: 'Cache Build Output'
@@ -62,5 +104,13 @@ runs:
         - name: 'Build'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+          env:
+            BROWSERSLIST_IGNORE_OLD_DATA: true
           shell: 'bash'
-          run: 'pnpm ${{ steps.project-filters.outputs.build }} build'
+          run: |
+            if [[ '${{ inputs.build-type }}' == 'backend' ]]; then
+              pnpm --filter="@woocommerce/admin-library" build:project:feature-config
+            fi
+            if [[ '${{ inputs.build-type }}' == 'full' ]]; then
+              pnpm ${{ steps.project-filters.outputs.build }} build
+            fi

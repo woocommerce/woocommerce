@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
@@ -94,7 +94,7 @@ export const TotalsShipping = ( {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-totals-shipping',
 				className
 			) }

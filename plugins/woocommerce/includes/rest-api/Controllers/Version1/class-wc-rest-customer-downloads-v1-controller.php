@@ -64,13 +64,14 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		$customer = get_user_by( 'id', (int) $request['customer_id'] );
+		$customer    = new WC_Customer( (int) $request['customer_id'] );
+		$customer_id = $customer->get_id();
 
-		if ( ! $customer ) {
+		if ( ! $customer_id ) {
 			return new WP_Error( 'woocommerce_rest_customer_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		if ( ! wc_rest_check_user_permissions( 'read', $customer->get_id() ) ) {
+		if ( ! wc_rest_check_user_permissions( 'read', $customer_id ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

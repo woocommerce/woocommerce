@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-remove PHP related scripts from package.json

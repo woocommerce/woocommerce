@@ -9,8 +9,8 @@ import {
 	useRef,
 } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withDispatch, withSelect } from '@wordpress/data';
-import classnames from 'classnames';
+import { withSelect } from '@wordpress/data';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
 	useUserPreferences,
@@ -35,12 +35,6 @@ import {
 	useActiveSetupTasklist,
 	ProgressTitle,
 } from '../task-lists';
-import {
-	WELCOME_MODAL_DISMISSED_OPTION_NAME,
-	WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME,
-} from './constants';
-import { WelcomeFromCalypsoModal } from './welcome-from-calypso-modal';
-import { WelcomeModal } from './welcome-modal';
 import { MobileAppModal } from './mobile-app-modal';
 import './style.scss';
 import '../dashboard/style.scss';
@@ -56,6 +50,23 @@ const TaskLists = lazy( () =>
 	)
 );
 
+export const hasTwoColumnLayout = (
+	userPrefLayout,
+	defaultHomescreenLayout,
+	taskListComplete,
+	isTaskListHidden
+) => {
+	const hasTwoColumnContent =
+		taskListComplete ||
+		isTaskListHidden ||
+		window.wcAdminFeatures.analytics;
+
+	return (
+		( userPrefLayout || defaultHomescreenLayout ) === 'two_columns' &&
+		hasTwoColumnContent
+	);
+};
+
 export const Layout = ( {
 	defaultHomescreenLayout,
 	query,
@@ -63,22 +74,20 @@ export const Layout = ( {
 	hasTaskList,
 	showingProgressHeader,
 	isLoadingTaskLists,
-	shouldShowWelcomeModal,
-	shouldShowWelcomeFromCalypsoModal,
 	isTaskListHidden,
-	updateOptions,
 } ) => {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
-	const hasTwoColumnContent =
-		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const isDashboardShown = Object.keys( query ).length > 0 && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
-	const twoColumns =
-		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
-			'two_columns' && hasTwoColumnContent;
+	const twoColumns = hasTwoColumnLayout(
+		userPrefs.homepage_layout,
+		defaultHomescreenLayout,
+		taskListComplete,
+		isTaskListHidden
+	);
 
 	const isWideViewport = useRef( true );
 	const maybeToggleColumns = useCallback( () => {
@@ -141,36 +150,17 @@ export const Layout = ( {
 		<>
 			{ isDashboardShown && (
 				<WooHomescreenHeaderBanner
-					className={ classnames( 'woocommerce-homescreen', {
+					className={ clsx( 'woocommerce-homescreen', {
 						'woocommerce-homescreen-column': ! twoColumns,
 					} ) }
 				/>
 			) }
 			<div
-				className={ classnames( 'woocommerce-homescreen', {
+				className={ clsx( 'woocommerce-homescreen', {
 					'two-columns': twoColumns,
 				} ) }
 			>
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
-				{ shouldShowWelcomeModal && (
-					<WelcomeModal
-						onClose={ () => {
-							updateOptions( {
-								[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]: 'yes',
-							} );
-						} }
-					/>
-				) }
-				{ shouldShowWelcomeFromCalypsoModal && (
-					<WelcomeFromCalypsoModal
-						onClose={ () => {
-							updateOptions( {
-								[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]:
-									'yes',
-							} );
-						} }
-					/>
-				) }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
 				{ window.wcAdminFeatures.navigation && (
 					<NavigationIntroModal />
@@ -201,25 +191,12 @@ Layout.propTypes = {
 	 * If the welcome from Calypso modal should display.
 	 */
 	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
-	/**
-	 * Timestamp of WooCommerce Admin installation.
-	 */
-	installTimestamp: PropTypes.string,
-	/**
-	 * Resolution of WooCommerce Admin installation timetsamp.
-	 */
-	installTimestampHasResolved: PropTypes.bool,
-	/**
-	 * Dispatch an action to update an option
-	 */
-	updateOptions: PropTypes.func.isRequired,
 };
 
 export default compose(
 	withSelect( ( select ) => {
 		const { isNotesRequesting } = select( NOTES_STORE_NAME );
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption } = select( OPTIONS_STORE_NAME );
 		const {
 			getTaskList,
 			getTaskLists,
@@ -228,35 +205,6 @@ export default compose(
 		const taskLists = getTaskLists();
 		const isLoadingTaskLists = ! taskListFinishResolution( 'getTaskLists' );
 
-		const welcomeFromCalypsoModalDismissed =
-			getOption( WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ) !==
-			'no';
-		const welcomeFromCalypsoModalDismissedResolved = hasFinishedResolution(
-			'getOption',
-			[ WELCOME_FROM_CALYPSO_MODAL_DISMISSED_OPTION_NAME ]
-		);
-		const fromCalypsoUrlArgIsPresent =
-			!! window.location.search.match( 'from-calypso' );
-
-		const shouldShowWelcomeFromCalypsoModal =
-			welcomeFromCalypsoModalDismissedResolved &&
-			! welcomeFromCalypsoModalDismissed &&
-			fromCalypsoUrlArgIsPresent;
-
-		const welcomeModalDismissed =
-			getOption( WELCOME_MODAL_DISMISSED_OPTION_NAME ) !== 'no';
-
-		const welcomeModalDismissedHasResolved = hasFinishedResolution(
-			'getOption',
-			[ WELCOME_MODAL_DISMISSED_OPTION_NAME ]
-		);
-
-		const shouldShowWelcomeModal =
-			welcomeModalDismissedHasResolved &&
-			! welcomeModalDismissed &&
-			welcomeFromCalypsoModalDismissedResolved &&
-			! welcomeFromCalypsoModalDismissed;
-
 		const defaultHomescreenLayout =
 			getOption( 'woocommerce_default_homepage_layout' ) ||
 			'single_column';
@@ -264,8 +212,6 @@ export default compose(
 		return {
 			defaultHomescreenLayout,
 			isBatchUpdating: isNotesRequesting( 'batchUpdateNotes' ),
-			shouldShowWelcomeModal,
-			shouldShowWelcomeFromCalypsoModal,
 			isLoadingTaskLists,
 			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
 			hasTaskList: getAdminSetting( 'visibleTaskListIds', [] ).length > 0,
@@ -274,8 +220,5 @@ export default compose(
 			),
 			taskListComplete: getTaskList( 'setup' )?.isComplete,
 		};
-	} ),
-	withDispatch( ( dispatch ) => ( {
-		updateOptions: dispatch( OPTIONS_STORE_NAME ).updateOptions,
-	} ) )
+	} )
 )( Layout );

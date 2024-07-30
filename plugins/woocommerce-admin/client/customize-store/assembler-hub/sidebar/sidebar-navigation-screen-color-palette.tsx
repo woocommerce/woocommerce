@@ -55,7 +55,11 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 	);
 };
 
-export const SidebarNavigationScreenColorPalette = () => {
+export const SidebarNavigationScreenColorPalette = ( {
+	onNavigateBackClick,
+}: {
+	onNavigateBackClick: () => void;
+} ) => {
 	const {
 		context: { flowType },
 	} = useContext( CustomizeStoreContext );
@@ -78,6 +82,7 @@ export const SidebarNavigationScreenColorPalette = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
+			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link

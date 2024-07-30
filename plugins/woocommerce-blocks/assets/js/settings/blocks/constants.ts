@@ -10,17 +10,15 @@ export type WordCountType =
 	| 'characters_including_spaces';
 
 export interface WcBlocksConfig {
-	buildPhase: number;
 	pluginUrl: string;
-	productCount: number;
+	productCount?: number;
 	defaultAvatar: string;
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
-	experimentalBlocksEnabled: boolean;
+	experimentalBlocksEnabled?: boolean;
 }
 
 export const blocksConfig = getSetting( 'wcBlocksConfig', {
-	buildPhase: 1,
 	pluginUrl: '',
 	productCount: 0,
 	defaultAvatar: '',
@@ -31,7 +29,6 @@ export const blocksConfig = getSetting( 'wcBlocksConfig', {
 export const WC_BLOCKS_IMAGE_URL = blocksConfig.pluginUrl + 'assets/images/';
 export const WC_BLOCKS_BUILD_URL =
 	blocksConfig.pluginUrl + 'assets/client/blocks/';
-export const WC_BLOCKS_PHASE = blocksConfig.buildPhase;
 export const SHOP_URL = STORE_PAGES.shop?.permalink;
 export const CHECKOUT_PAGE_ID = STORE_PAGES.checkout?.id;
 export const CHECKOUT_URL = STORE_PAGES.checkout?.permalink;

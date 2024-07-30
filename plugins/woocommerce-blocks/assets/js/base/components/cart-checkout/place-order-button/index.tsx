@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { Icon, check } from '@wordpress/icons';
 import Button from '@woocommerce/base-components/button';
@@ -25,7 +25,7 @@ const PlaceOrderButton = ( {
 
 	return (
 		<Button
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-checkout-place-order-button',
 				{
 					'wc-block-components-checkout-place-order-button--full-width':

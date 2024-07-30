@@ -3,7 +3,7 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Fragment, useMemo, useState } from '@wordpress/element';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -162,7 +162,7 @@ const CheckboxList = ( {
 		isDisabled,
 	] );
 
-	const classes = classNames(
+	const classes = clsx(
 		'wc-block-checkbox-list',
 		'wc-block-components-checkbox-list',
 		{

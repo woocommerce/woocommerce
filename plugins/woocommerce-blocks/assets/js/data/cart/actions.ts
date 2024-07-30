@@ -376,6 +376,9 @@ export const changeCartItemQuantity =
 		}
 	};
 
+// Facilitates aborting fetch requests.
+let abortController = null as AbortController | null;
+
 /**
  * Selects a shipping rate.
  *
@@ -401,11 +404,21 @@ export const selectShippingRate =
 				( rate: CartShippingPackageShippingRate ) =>
 					rate.selected === true
 			);
+
 		if ( selectedShippingRate?.rate_id === rateId ) {
 			return;
 		}
+
 		try {
 			dispatch.shippingRatesBeingSelected( true );
+			if ( abortController ) {
+				abortController.abort();
+			}
+			abortController =
+				typeof AbortController === 'undefined'
+					? undefined
+					: new AbortController();
+
 			const { response } = await apiFetchWithHeaders( {
 				path: `/wc/store/v1/cart/select-shipping-rate`,
 				method: 'POST',
@@ -414,7 +427,9 @@ export const selectShippingRate =
 					rate_id: rateId,
 				},
 				cache: 'no-store',
+				signal: abortController?.signal || null,
 			} );
+
 			// Remove shipping and billing address from the response, so we don't overwrite what the shopper is
 			// entering in the form if rates suddenly appear mid-edit.
 			const {
@@ -422,13 +437,15 @@ export const selectShippingRate =
 				billing_address: billingAddress,
 				...rest
 			} = response;
+
 			dispatch.receiveCart( rest );
+			dispatch.shippingRatesBeingSelected( false );
+
 			return response as CartResponse;
 		} catch ( error ) {
 			dispatch.receiveError( error );
-			return Promise.reject( error );
-		} finally {
 			dispatch.shippingRatesBeingSelected( false );
+			return Promise.reject( error );
 		}
 	};
 

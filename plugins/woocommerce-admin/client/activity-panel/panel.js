@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Suspense, useRef, useCallback } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Spinner } from '@woocommerce/components';
 
 /**
@@ -68,7 +68,7 @@ export const Panel = ( {
 		return null;
 	}
 
-	const classNames = classnames( panelClass, {
+	const classNames = clsx( panelClass, {
 		'is-open': isPanelOpen,
 		'is-switching': isPanelSwitching,
 	} );

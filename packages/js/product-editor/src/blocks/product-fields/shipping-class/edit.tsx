@@ -51,6 +51,11 @@ function mapShippingClassToSelectOption(
 	} ) );
 }
 
+/*
+ * Query to fetch shipping classes.
+ */
+const shippingClassRequestQuery = {};
+
 function extractDefaultShippingClassFromProduct(
 	categories?: PartialProduct[ 'categories' ],
 	shippingClasses?: ProductShippingClass[]
@@ -78,7 +83,7 @@ export function Edit( {
 
 	const blockProps = useWooBlockProps( attributes );
 
-	const { createProductShippingClass, invalidateResolution } = useDispatch(
+	const { createProductShippingClass } = useDispatch(
 		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 	);
 
@@ -130,9 +135,9 @@ export function Edit( {
 			return {
 				shippingClasses:
 					( isInSelectedTab &&
-						getProductShippingClasses<
-							ProductShippingClass[]
-						>() ) ||
+						getProductShippingClasses< ProductShippingClass[] >(
+							shippingClassRequestQuery
+						) ) ||
 					[],
 			};
 		},
@@ -214,13 +219,12 @@ export function Edit( {
 					onAdd={ ( shippingClassValues ) =>
 						createProductShippingClass<
 							Promise< ProductShippingClass >
-						>( shippingClassValues )
+						>( shippingClassValues, {
+							optimisticQueryUpdate: shippingClassRequestQuery,
+						} )
 							.then( ( value ) => {
 								recordEvent(
 									'product_new_shipping_class_modal_add_button_click'
-								);
-								invalidateResolution(
-									'getProductShippingClasses'
 								);
 								setShippingClass( value.slug );
 								return value;

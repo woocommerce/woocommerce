@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { ReactElement } from 'react';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
@@ -25,9 +25,9 @@ const FrontendBlock = ( {
 	}, [] );
 
 	return (
-		<Main className={ classnames( 'wc-block-checkout__main', className ) }>
+		<Main className={ clsx( 'wc-block-checkout__main', className ) }>
 			<form
-				className={ classnames(
+				className={ clsx(
 					'wc-block-components-form wc-block-checkout__form',
 					{
 						'wc-block-checkout__form--with-step-numbers':

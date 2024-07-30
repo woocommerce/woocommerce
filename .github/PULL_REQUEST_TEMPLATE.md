@@ -35,7 +35,13 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 
 -   [ ] Automatically create a changelog entry from the details below.
 
+<!-- If no changelog entry is required for this PR, you can specify that below and provide a comment explaining why. This cannot be used if you selected the option to automatically create a changelog entry above. -->
+
+-   [ ] This Pull Request does not require a changelog entry. (Comment required below)
+
 <details>
+
+<summary>Changelog Entry Details</summary>
 
 #### Significance
 
@@ -59,6 +65,12 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 
 #### Message <!-- Add a changelog message here -->
 
-#### Comment <!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->
+</details>
+
+<details>
+
+<summary>Changelog Entry Comment</summary>
+
+#### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
 
 </details>
