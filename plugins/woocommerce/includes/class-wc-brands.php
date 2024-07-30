@@ -20,7 +20,7 @@ class WC_Brands {
 	 * __construct function.
 	 */
 	public function __construct() {
-		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment.
+		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		add_action( 'plugins_loaded', array( $this, 'register_hooks' ), 2 );
 
@@ -198,7 +198,6 @@ class WC_Brands {
 
 	/**
 	 * Adds filter for introducing CSS classes.
-	 *
 	 */
 	public function body_class() {
 		if ( is_tax( 'product_brand' ) ) {
@@ -219,7 +218,6 @@ class WC_Brands {
 
 	/**
 	 * Enqueues styles.
-	 *
 	 */
 	public function styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );
@@ -228,7 +226,6 @@ class WC_Brands {
 
 	/**
 	 * Initializes brand taxonomy.
-	 *
 	 */
 	public static function init_taxonomy() {
 		$shop_page_id = wc_get_page_id( 'shop' );
@@ -293,7 +290,6 @@ class WC_Brands {
 
 	/**
 	 * Initializes brand widgets.
-	 *
 	 */
 	public function init_widgets() {
 		// Include.
@@ -348,7 +344,6 @@ class WC_Brands {
 
 	/**
 	 * Displays brand description.
-	 *
 	 */
 	public function brand_description() {
 		if ( ! is_tax( 'product_brand' ) ) {
@@ -376,14 +371,13 @@ class WC_Brands {
 
 	/**
 	 * Displays brand.
-	 *
 	 */
 	public function show_brand() {
 		global $post;
 
 		if ( is_singular( 'product' ) ) {
 			$terms       = get_the_terms( $post->ID, 'product_brand' );
-			$brand_count = is_array( $terms ) ? sizeof( $terms ) : 0;
+			$brand_count = is_array( $terms ) ? count( $terms ) : 0;
 
 			$taxonomy = get_taxonomy( 'product_brand' );
 			$labels   = $taxonomy->labels;
@@ -396,7 +390,7 @@ class WC_Brands {
 	/**
 	 * Add structured data to product page.
 	 *
-	 * @param  array $markup
+	 * @param  array $markup Markup.
 	 * @return array $markup
 	 */
 	public function add_structured_data( $markup ) {
@@ -421,7 +415,6 @@ class WC_Brands {
 
 	/**
 	 * Registers shortcodes.
-	 *
 	 */
 	public function register_shortcodes() {
 		add_shortcode( 'product_brand', array( $this, 'output_product_brand' ) );
@@ -512,15 +505,15 @@ class WC_Brands {
 		$show_empty        = $args['show_empty'];
 		$show_empty_brands = $args['show_empty_brands'];
 
-		if ( $show_top_links === 'false' ) {
+		if ( 'false' === $show_top_links ) {
 			$show_top_links = false;
 		}
 
-		if ( $show_empty === 'false' ) {
+		if ( 'false' === $show_empty ) {
 			$show_empty = false;
 		}
 
-		if ( $show_empty_brands === 'false' ) {
+		if ( 'false' === $show_empty_brands ) {
 			$show_empty_brands = false;
 		}
 
