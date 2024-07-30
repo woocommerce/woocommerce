@@ -122,6 +122,20 @@ const updateGlobalStylesWithDefaultValues = async (
 	);
 };
 
+const updateShowOnFront = async () => {
+	try {
+		await apiFetch( {
+			path: '/wp/v2/settings',
+			method: 'POST',
+			data: {
+				show_on_front: 'posts',
+			},
+		} );
+	} catch ( error ) {
+		throw error;
+	}
+};
+
 const installAndActivateTheme = async (
 	context: DesignWithoutAIStateMachineContext
 ) => {
@@ -216,4 +230,5 @@ export const services = {
 	installPatterns,
 	updateGlobalStylesWithDefaultValues,
 	enableTracking,
+	updateShowOnFront,
 };
