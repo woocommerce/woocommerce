@@ -6,10 +6,12 @@ import {
 	useCallback,
 	useEffect,
 	useReducer,
+	useRef,
 	useState,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { Product } from '@woocommerce/data';
+import { resolveSelect } from '@wordpress/data';
+import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { reusableBlock } from '@wordpress/icons';
@@ -33,7 +35,6 @@ import { ProductEditorBlockEditProps } from '../../../types';
 import {
 	getLoadLinkedProductsDispatcher,
 	getRemoveLinkedProductDispatcher,
-	getSearchProductsDispatcher,
 	getSelectSearchedProductDispatcher,
 	reducer,
 } from './reducer';
@@ -73,68 +74,98 @@ export function LinkedProductListBlockEdit( {
 	context: { postType, isInSelectedTab },
 }: ProductEditorBlockEditProps< LinkedProductListBlockAttributes > ) {
 	const { property, emptyState } = attributes;
+	const loadInitialSearchResults = useRef( false );
+	const [ , setSearchValue ] = useState( '' );
+	const [ searchedProducts, setSearchedProducts ] = useState< Product[] >(
+		[]
+	);
+	const [ isSearching, setIsSearching ] = useState( false );
 	const blockProps = useWooBlockProps( attributes );
 	const [ state, dispatch ] = useReducer( reducer, {
 		linkedProducts: [],
-		searchedProducts: [],
 	} );
 
 	const productId = useEntityId( 'postType', postType );
 
 	const loadLinkedProductsDispatcher =
 		getLoadLinkedProductsDispatcher( dispatch );
-	const searchProductsDispatcher = getSearchProductsDispatcher( dispatch );
 	const selectSearchedProductDispatcher =
 		getSelectSearchedProductDispatcher( dispatch );
 	const removeLinkedProductDispatcher =
 		getRemoveLinkedProductDispatcher( dispatch );
-
 	const [ linkedProductIds, setLinkedProductIds ] = useProductEntityProp<
 		number[]
 	>( property, { postType } );
 
+	function searchProducts( searchValue = '', excludedIds: number[] = [] ) {
+		setSearchValue( searchValue );
+		excludedIds.push( productId );
+
+		setIsSearching( true );
+		resolveSelect( PRODUCTS_STORE_NAME )
+			.getProducts< Product[] >( {
+				search: searchValue,
+				orderby: 'title',
+				order: 'asc',
+				per_page: 5,
+				exclude: excludedIds,
+			} )
+			.then( ( response ) => {
+				setSearchedProducts( response );
+			} )
+			.finally( () => {
+				setIsSearching( false );
+			} );
+	}
+
 	useEffect( () => {
-		if ( ! state.selectedProduct ) {
+		if (
+			! state.selectedProduct &&
+			linkedProductIds &&
+			linkedProductIds.length > 0
+		) {
 			loadLinkedProductsDispatcher( linkedProductIds ?? [] );
 		}
 	}, [ linkedProductIds, state.selectedProduct ] );
 
-	const filter = useCallback(
-		( search = '' ) => {
-			// Exclude the current product and any already linked products.
-			const exclude = [ productId ];
-			if ( linkedProductIds ) {
-				exclude.push( ...linkedProductIds );
-			}
-			return searchProductsDispatcher( exclude, search );
-		},
-		[ linkedProductIds ]
-	);
+	function filter( search = '' ) {
+		searchProducts( search, linkedProductIds );
+	}
 
 	useEffect( () => {
 		// Only filter when the tab is selected.
-		if ( ! isInSelectedTab ) {
+		if ( ! isInSelectedTab || loadInitialSearchResults.current ) {
 			return;
 		}
 
-		filter();
-	}, [ filter, isInSelectedTab ] );
+		searchProducts();
+	}, [ isInSelectedTab, loadInitialSearchResults ] );
 
-	function handleSelect( product: Product ) {
-		const newLinkedProductIds = selectSearchedProductDispatcher(
-			product,
-			state.linkedProducts
-		);
+	const handleSelect = useCallback(
+		( product: Product ) => {
+			const isAlreadySelected = ( linkedProductIds || [] ).includes(
+				product.id
+			);
+			if ( isAlreadySelected ) {
+				return;
+			}
+			const newLinkedProductIds = selectSearchedProductDispatcher(
+				product,
+				state.linkedProducts
+			);
 
-		setLinkedProductIds( newLinkedProductIds );
+			setLinkedProductIds( newLinkedProductIds );
+			searchProducts( '', newLinkedProductIds );
 
-		recordEvent( 'linked_products_product_add', {
-			source: TRACKS_SOURCE,
-			field: property,
-			product_id: productId,
-			linked_product_id: product.id,
-		} );
-	}
+			recordEvent( 'linked_products_product_add', {
+				source: TRACKS_SOURCE,
+				field: property,
+				product_id: productId,
+				linked_product_id: product.id,
+			} );
+		},
+		[ linkedProductIds ]
+	);
 
 	function handleProductListRemove( product: Product ) {
 		const newLinkedProductIds = removeLinkedProductDispatcher(
@@ -236,10 +267,11 @@ export function LinkedProductListBlockEdit( {
 
 			<div className="wp-block-woocommerce-product-linked-list-field__form-group-content">
 				<ProductSelect
-					items={ state.searchedProducts }
-					selected={ null }
+					items={ searchedProducts }
 					filter={ filter }
 					onSelect={ handleSelect }
+					isLoading={ isSearching }
+					selected={ null }
 				/>
 			</div>
 
