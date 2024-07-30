@@ -21,7 +21,7 @@ import { speak } from '@wordpress/a11y';
  */
 import {
 	toggleNode,
-	getLinkedTree,
+	createLinkedTree,
 	getVisibleNodeIndex as getVisibleNodeIndex,
 	getNodeDataByIndex,
 } from '../experimental-tree-control/linked-tree-utils';
@@ -69,7 +69,7 @@ export const SelectTree = function SelectTree( {
 
 	// whenever the items change, the linked tree needs to be recalculated
 	useEffect( () => {
-		setLinkedTree( getLinkedTree( items, props.createValue ) );
+		setLinkedTree( createLinkedTree( items, props.createValue ) );
 	}, [ items.length ] );
 
 	// reset highlighted index when the input value changes

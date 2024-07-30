@@ -80,7 +80,8 @@ function populateIndexes(
 	return linkedTree;
 }
 
-export function getLinkedTree(
+// creates a linked tree from an array of Items
+export function createLinkedTree(
 	items: Item[],
 	value: string | undefined
 ): LinkedTree[] {
@@ -93,6 +94,7 @@ export function getLinkedTree(
 	);
 }
 
+// Toggles the expanded state of a node in a linked tree
 export function toggleNode(
 	tree: LinkedTree[],
 	number: number,
@@ -127,7 +129,7 @@ export function toggleNode(
 	} );
 }
 
-// This function gets the index of the next/previous visible node in the linked tree
+// Gets the index of the next/previous visible node in the linked tree
 export function getVisibleNodeIndex(
 	tree: LinkedTree[],
 	highlightedIndex: number,
@@ -177,17 +179,19 @@ export function getVisibleNodeIndex(
 	return undefined;
 }
 
-export function countNumberOfItems( linkedTree: LinkedTree[] ) {
+// Counts the number of nodes in a LinkedTree
+export function countNumberOfNodes( linkedTree: LinkedTree[] ) {
 	let count = 0;
 	for ( const node of linkedTree ) {
 		count++;
 		if ( node.children ) {
-			count += countNumberOfItems( node.children );
+			count += countNumberOfNodes( node.children );
 		}
 	}
 	return count;
 }
 
+// Gets the data of a node by its index
 export function getNodeDataByIndex(
 	linkedTree: LinkedTree[],
 	index: number

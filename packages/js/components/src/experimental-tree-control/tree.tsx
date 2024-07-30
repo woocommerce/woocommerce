@@ -14,7 +14,7 @@ import { useMergeRefs } from '@wordpress/compose';
 import { useTree } from './hooks/use-tree';
 import { TreeItem } from './tree-item';
 import { TreeProps } from './types';
-import { countNumberOfItems } from './linked-tree-utils';
+import { countNumberOfNodes } from './linked-tree-utils';
 
 export const Tree = forwardRef( function ForwardedTree(
 	props: TreeProps,
@@ -28,7 +28,7 @@ export const Tree = forwardRef( function ForwardedTree(
 		ref,
 	} );
 
-	const numberOfItems = countNumberOfItems( items );
+	const numberOfItems = countNumberOfNodes( items );
 
 	const isCreateButtonVisible =
 		props.shouldShowCreateButton &&
