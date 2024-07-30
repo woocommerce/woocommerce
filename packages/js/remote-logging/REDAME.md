@@ -13,14 +13,6 @@ The WooCommerce Remote Logging package offers the following features:
 - Filtering of errors based on WooCommerce asset paths
 - Extensibility through WordPress filters
 
-## Installation
-
-Install the package using npm:
-
-```bash
-npm install @woocommerce/remote-logging
-```
-
 ## Usage
 
 1. Initialize the remote logger at the start of your application. If your plugin depends on WooCommerce plugin, the logger will be initialized in WooCommerce, so you don't need to call this function.
@@ -56,8 +48,10 @@ try {
 
 You can customize the behavior of the remote logger using WordPress filters:
 
-`woocommerce_remote_logging_should_send_error`: Control whether an error should be sent to the remote API.
-`woocommerce_remote_logging_error_data`: Modify the error data before sending it to the remote API.
+- `woocommerce_remote_logging_should_send_error`: Control whether an error should be sent to the remote API.
+- `woocommerce_remote_logging_error_data`: Modify the error data before sending it to the remote API.
+- `woocommerce_remote_logging_log_endpoint`: Customize the endpoint URL for sending log messages.
+- `woocommerce_remote_logging_js_error_endpoint`: Customize the endpoint URL for sending JavaScript errors.
 
 ### Example
 
