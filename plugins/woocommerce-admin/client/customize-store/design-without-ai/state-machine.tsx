@@ -209,6 +209,24 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						},
 						type: 'parallel',
 						states: {
+							updateShowOnFront: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'updateShowOnFront',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
 							installAndActivateTheme: {
 								initial: 'pending',
 								states: {
