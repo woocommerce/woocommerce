@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Whitelist line with maybe_unserialize() function call from QIT security tests.

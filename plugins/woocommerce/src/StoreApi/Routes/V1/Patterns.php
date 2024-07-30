@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
@@ -114,7 +115,11 @@ class Patterns extends AbstractRoute {
 	protected function get_route_post_response( WP_REST_Request $request ) {
 		$ptk_patterns_store = Package::container()->get( PTKPatternsStore::class );
 
-		$ptk_patterns_store->fetch_patterns();
+		$patterns = $ptk_patterns_store->fetch_patterns();
+
+		$block_patterns = Package::container()->get( BlockPatterns::class );
+
+		$block_patterns->register_ptk_patterns( $patterns );
 
 		return rest_ensure_response(
 			array(

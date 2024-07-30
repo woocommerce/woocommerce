@@ -1392,8 +1392,13 @@ S2.define('select2/selection/base',[
     var id = container.id + '-container';
     var resultsId = container.id + '-results';
     var searchHidden = this.options.get('minimumResultsForSearch') === Infinity;
+    var isRequired = this.options.get('required') === true;
 
     this.container = container;
+
+    if (isRequired) {
+      this.$selection.attr('aria-required', 'true')
+    }
 
     this.$selection.on('focus', function (evt) {
       self.trigger('focus', evt);
@@ -1552,6 +1557,11 @@ S2.define('select2/selection/single',[
     SingleSelection.__super__.bind.apply(this, arguments);
 
     var id = container.id + '-container';
+
+    var isRequired = this.options.get('required') === true;
+    if (isRequired) {
+      this.$selection.find('.select2-selection__rendered').attr('aria-required', 'true')
+    }
 
     this.$selection.find('.select2-selection__rendered')
       .attr('id', id)
@@ -5067,6 +5077,10 @@ S2.define('select2/options',[
 
     if (this.options.disabled == null) {
       this.options.disabled = $e.prop('disabled');
+    }
+
+    if (!this.options.required) {
+      this.options.required = $e.prop('required');
     }
 
     if (this.options.language == null) {

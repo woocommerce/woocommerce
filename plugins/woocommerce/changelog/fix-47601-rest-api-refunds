@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Provide more informative errors if a refund cannot be requested via the REST API, due to plugin conflicts.
