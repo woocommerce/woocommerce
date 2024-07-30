@@ -210,7 +210,10 @@ test.describe( 'Edit order', { tag: '@services' }, () => {
 		).toBeHidden();
 	} );
 
-	test( 'can load billing details', async ( { page, baseURL } ) => {
+	test( 'can load billing and shipping details', async ( {
+		page,
+		baseURL,
+	} ) => {
 		let customerId;
 
 		const api = new wcApi( {
@@ -231,13 +234,24 @@ test.describe( 'Edit order', { tag: '@services' }, () => {
 					last_name: 'Greenback',
 					company: 'Automattic',
 					country: 'US',
-					address_1: 'address1',
-					address_2: 'address2',
+					address_1: 'Billing Address 1',
+					address_2: 'Billing Address 2',
 					city: 'San Francisco',
 					state: 'CA',
 					postcode: '94107',
 					phone: '123456789',
 					email: 'archie123@email.addr',
+				},
+				shipping: {
+					first_name: 'Shipping First',
+					last_name: 'Shipping Last',
+					company: 'Automattic',
+					country: 'US',
+					address_1: 'Shipping Address 1',
+					address_2: 'Shipping Address 2',
+					city: 'San Francisco',
+					state: 'CA',
+					postcode: '94107',
 				},
 			} )
 			.then( ( response ) => {
@@ -260,11 +274,9 @@ test.describe( 'Edit order', { tag: '@services' }, () => {
 						user_id: custId,
 						action: 'woocommerce_get_customer_details',
 						security:
-							// eslint-disable-next-line no-undef
-							woocommerce_admin_meta_boxes.get_customer_details_nonce,
+							woocommerce_admin_meta_boxes.get_customer_details_nonce, // eslint-disable-line no-undef
 					},
 					type: 'POST',
-					// eslint-disable-next-line no-shadow
 					success( resp ) {
 						resolve( resp );
 					},
@@ -279,9 +291,77 @@ test.describe( 'Edit order', { tag: '@services' }, () => {
 		expect( response.billing.first_name ).toContain( 'Archibald' );
 		expect( response.meta_data ).toBeUndefined();
 
-		// Clean-up.
+		// Ensure the billing load button is visible before clicking
+		const billingLoadButton = page.locator( '#billing_load' );
+		await expect( billingLoadButton ).toBeVisible();
+		await billingLoadButton.click();
+		await expect( page.locator( '#_billing_first_name' ) ).toHaveValue(
+			'Archibald'
+		);
+
+		// Ensure the shipping load button is visible before clicking
+		const shippingLoadButton = page.locator( '#shipping_load' );
+		await expect( shippingLoadButton ).toBeVisible();
+		await shippingLoadButton.click();
+		await expect( page.locator( '#_shipping_first_name' ) ).toHaveValue(
+			'Shipping First'
+		);
+
+		// Save the order
+		await page.locator( 'button.save_order' ).click();
+
+		// Verify both addresses are saved
+		await expect( page.locator( '#_billing_first_name' ) ).toHaveValue(
+			'Archibald'
+		);
+		await expect( page.locator( '#_shipping_first_name' ) ).toHaveValue(
+			'Shipping First'
+		);
+
+		// Clean-up
 		await api.delete( `customers/${ customerId }`, { force: true } );
 	} );
+
+	test('can copy billing address to shipping address', async ({ page, baseURL }) => {
+		// Add new order
+		await page.goto('wp-admin/edit.php?post_type=shop_order');
+		await page.locator('a.page-title-action').click();
+	
+		// Fill in the billing address
+		await page.locator('#_billing_first_name').fill('Billing First');
+		await page.locator('#_billing_last_name').fill('Billing Last');
+		await page.locator('#_billing_company').fill('Billing Company');
+		await page.locator('#_billing_address_1').fill('Billing Address 1');
+		await page.locator('#_billing_address_2').fill('Billing Address 2');
+		await page.locator('#_billing_city').fill('Billing City');
+		await page.locator('#_billing_state').selectOption('CA');
+		await page.locator('#_billing_postcode').fill('90001');
+		await page.locator('#_billing_country').selectOption('US');
+		await page.locator('#_billing_email').fill('billing@example.com');
+		await page.locator('#_billing_phone').fill('1234567890');
+	
+		// Copy billing address to shipping address
+		await page.locator('#copy_billing').click();
+	
+		// Verify the shipping address fields are copied correctly
+		await expect(page.locator('#_shipping_first_name')).toHaveValue('Billing First');
+		await expect(page.locator('#_shipping_last_name')).toHaveValue('Billing Last');
+		await expect(page.locator('#_shipping_company')).toHaveValue('Billing Company');
+		await expect(page.locator('#_shipping_address_1')).toHaveValue('Billing Address 1');
+		await expect(page.locator('#_shipping_address_2')).toHaveValue('Billing Address 2');
+		await expect(page.locator('#_shipping_city')).toHaveValue('Billing City');
+		await expect(page.locator('#_shipping_state')).toHaveValue('CA');
+		await expect(page.locator('#_shipping_postcode')).toHaveValue('90001');
+		await expect(page.locator('#_shipping_country')).toHaveValue('US');
+	
+		// Save the order
+		await page.locator('button.save_order').click();
+	
+		// Verify both addresses are saved
+		await expect(page.locator('#_billing_first_name')).toHaveValue('Billing First');
+		await expect(page.locator('#_shipping_first_name')).toHaveValue('Billing First');
+	});
+	
 } );
 
 test.describe(
@@ -410,7 +490,7 @@ test.describe(
 			await revertGrantAccessAfterPaymentSetting( api );
 		} );
 
-		// these tests aren't completely independent.  Needs some refactoring.
+		// these tests aren't completely independent. Needs some refactoring.
 
 		test( 'can add downloadable product permissions to order without product', async ( {
 			page,
