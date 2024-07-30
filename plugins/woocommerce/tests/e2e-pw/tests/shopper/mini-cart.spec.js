@@ -2,6 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const {
 	disableWelcomeModal,
 	openEditorSettings,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
@@ -136,6 +137,8 @@ test.describe(
 
 			await disableWelcomeModal( { page } );
 
+			await closeChoosePatternModal( { page } );
+
 			// add page title and mini cart block
 			await page
 				.getByRole( 'textbox', { name: 'Add title' } )
@@ -230,8 +233,10 @@ test.describe(
 			);
 			await page.locator( miniCartButton ).click();
 			await expect(
-				await page.getByText( 'Your cart is currently empty!' ).count()
-			).toBeGreaterThan( 0 );
+				page
+					.getByRole( 'banner' )
+					.getByText( 'Your cart is currently empty!' )
+			).toBeVisible();
 			await page.getByRole( 'link', { name: 'Start shopping' } ).click();
 			await expect(
 				page.getByRole( 'heading', { name: 'Shop' } )
