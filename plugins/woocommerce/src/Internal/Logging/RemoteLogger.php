@@ -418,7 +418,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @param array|string $trace The error trace.
 	 * @return string The sanitized trace.
 	 */
-	private function sanitize_trace( $trace ) {
+	private function sanitize_trace( $trace ): string {
 		if ( is_string( $trace ) ) {
 			return $this->sanitize( $trace );
 		}
