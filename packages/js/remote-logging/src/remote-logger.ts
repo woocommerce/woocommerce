@@ -9,7 +9,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { mergeLogData } from './utils';
+import { mergeLogData, isDevelopmentEnvironment } from './utils';
 import { LogData, ErrorData, RemoteLoggerConfig } from './types';
 
 const debug = debugFactory( 'wc:remote-logging' );
@@ -80,6 +80,7 @@ export class RemoteLogger {
 			...extraData,
 		} );
 
+		debug( 'Logging:', logData );
 		await this.sendLog( logData );
 	}
 
@@ -115,6 +116,11 @@ export class RemoteLogger {
 	 * @param logData - The log data to be sent.
 	 */
 	private async sendLog( logData: LogData ): Promise< void > {
+		if ( isDevelopmentEnvironment ) {
+			debug( 'Skipping send log in development environment' );
+			return;
+		}
+
 		const body = new window.FormData();
 		body.append( 'params', JSON.stringify( logData ) );
 
@@ -196,12 +202,15 @@ export class RemoteLogger {
 	 * @param error - The error data to be sent.
 	 */
 	private async sendError( error: ErrorData ) {
+		if ( isDevelopmentEnvironment ) {
+			debug( 'Skipping send error in development environment' );
+			return;
+		}
+
 		const body = new window.FormData();
 		body.append( 'error', JSON.stringify( error ) );
 
 		try {
-			debug( 'Sending error to API:', error );
-
 			/**
 			 * Filters the JS error endpoint URL.
 			 *
@@ -211,6 +220,8 @@ export class RemoteLogger {
 				REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
 				'https://public-api.wordpress.com/rest/v1.1/js-error'
 			) as string;
+
+			debug( 'Sending error to API:', error );
 
 			await window.fetch( endpoint, {
 				method: 'POST',
@@ -321,9 +332,9 @@ let logger: RemoteLogger | null = null;
  * @param config - Configuration object for the RemoteLogger.
  *
  */
-export function init( config: RemoteLoggerConfig ): void {
-	if ( ! window.wcTracks || ! window.wcTracks.isEnabled ) {
-		debug( 'Tracks is not enabled.' );
+export function init( config: RemoteLoggerConfig ) {
+	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
+		debug( 'Remote logging is disabled.' );
 		return;
 	}
 
@@ -348,25 +359,29 @@ export function init( config: RemoteLoggerConfig ): void {
  * @param severity  - The severity of the log.
  * @param message   - The message to log.
  * @param extraData - Optional additional data to include in the log.
+ *
+ * @return Whether the log was sent successfully.
  */
 export async function log(
 	severity: Exclude< LogData[ 'severity' ], undefined >,
 	message: string,
 	extraData?: Partial< Exclude< LogData, 'message' | 'severity' > >
-) {
-	if ( ! window.wcTracks || ! window.wcTracks.isEnabled ) {
-		debug( 'Tracks is not enabled.' );
-		return;
+): Promise< boolean > {
+	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
+		debug( 'Remote logging is disabled.' );
+		return false;
 	}
 
 	if ( ! logger ) {
 		warnLog( 'RemoteLogger is not initialized. Call init() first.' );
-		return;
+		return false;
 	}
 
 	try {
 		await logger.log( severity, message, extraData );
+		return true;
 	} catch ( error ) {
 		errorLog( 'Failed to send log:', error );
+		return false;
 	}
 }

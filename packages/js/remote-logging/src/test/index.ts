@@ -3,6 +3,8 @@
  */
 import '@wordpress/jest-console';
 import { addFilter, removeFilter } from '@wordpress/hooks';
+import { getSetting } from '@woocommerce/settings';
+
 /**
  * Internal dependencies
  */
@@ -15,6 +17,12 @@ import {
 	REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
 } from '../remote-logger';
 import { fetchMock } from './__mocks__/fetch';
+
+jest.mock( '@woocommerce/settings', () => ( {
+	getSetting: jest.fn().mockReturnValue( {
+		isRemoteLoggingEnabled: true,
+	} ),
+} ) );
 
 jest.mock( 'tracekit', () => ( {
 	computeStackTrace: jest.fn().mockReturnValue( {
@@ -255,18 +263,37 @@ describe( 'RemoteLogger', () => {
 describe( 'init', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		window.wcTracks = { isEnabled: true };
+
+		( getSetting as jest.Mock ).mockImplementation(
+			( key, defaultValue ) => {
+				if ( key === 'isRemoteLoggingEnabled' ) {
+					return true;
+				}
+				return defaultValue;
+			}
+		);
 	} );
 
-	it( 'should not initialize the logger if Tracks is not enabled', () => {
-		window.wcTracks = { isEnabled: false };
+	it( 'should initialize and log without throwing when remote logging is enabled', () => {
 		init( { errorRateLimitMs: 1000 } );
 		expect( () => log( 'info', 'Test message' ) ).not.toThrow();
 	} );
 
-	it( 'should initialize the logger if Tracks is enabled', () => {
+	it( 'should not initialize or log when remote logging is disabled', () => {
+		// Mock the getSetting function to return false for isRemoteLoggingEnabled
+		( getSetting as jest.Mock ).mockImplementation(
+			( key, defaultValue ) => {
+				if ( key === 'isRemoteLoggingEnabled' ) {
+					return false;
+				}
+				return defaultValue;
+			}
+		);
+
 		init( { errorRateLimitMs: 1000 } );
-		expect( () => log( 'info', 'Test message' ) ).not.toThrow();
+
+		const logResult = log( 'info', 'Test message' );
+		expect( logResult ).resolves.toBe( false );
 	} );
 
 	it( 'should not initialize the logger twice', () => {
@@ -276,13 +303,5 @@ describe( 'init', () => {
 		expect( console ).toHaveWarnedWith(
 			'RemoteLogger: RemoteLogger is already initialized.'
 		);
-	} );
-} );
-
-describe( 'log', () => {
-	it( 'should not log if Tracks is not enabled', () => {
-		window.wcTracks = { isEnabled: false };
-		log( 'info', 'Test message' );
-		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 } );
