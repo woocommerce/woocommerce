@@ -246,6 +246,13 @@ class WC_Brands {
 		register_taxonomy(
 			'product_brand',
 			array( 'product' ),
+			/**
+			 * Filter the brand taxonomy.
+			 *
+			 * @since 9.3.0
+			 *
+			 * @param array $args Args.
+			 */
 			apply_filters(
 				'register_taxonomy_product_brand',
 				array(
