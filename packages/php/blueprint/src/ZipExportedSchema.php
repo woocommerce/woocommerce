@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Blueprint;
 
+use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
+use Automattic\WooCommerce\Blueprint\Steps\InstallTheme;
+
 class ZipExportedSchema {
 	// exported schema from ExportSchema class
 	protected array $schema;
@@ -49,8 +52,8 @@ class ZipExportedSchema {
 
 		// create .json file
 		$this->files[] = $this->create_json_schema_file();
-		$this->files   = array_merge( $this->files, $this->add_resource( 'installPlugin', 'plugins' ) );
-		$this->files   = array_merge( $this->files, $this->add_resource( 'installTheme', 'themes' ) );
+		$this->files   = array_merge( $this->files, $this->add_resource( InstallPlugin::get_step_name(), 'plugins' ) );
+		$this->files   = array_merge( $this->files, $this->add_resource( InstallTheme::get_step_name(), 'themes' ) );
 
 		$archive = new \PclZip( $this->destination );
 		if ( $archive->create( $this->files, PCLZIP_OPT_REMOVE_PATH, $this->working_dir ) == 0 ) {
