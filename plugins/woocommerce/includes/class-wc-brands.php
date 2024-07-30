@@ -9,13 +9,18 @@ use Automattic\Jetpack\Constants;
  */
 class WC_Brands {
 
-	var $template_url;
+	/**
+	 * Template URL -- filterable.
+	 *
+	 * @var mixed|null
+	 */
+	public $template_url;
 
 	/**
 	 * __construct function.
 	 */
 	public function __construct() {
-		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' );
+		$this->template_url = apply_filters( 'woocommerce_template_url', 'woocommerce/' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment.
 
 		add_action( 'plugins_loaded', array( $this, 'register_hooks' ), 2 );
 
@@ -39,7 +44,7 @@ class WC_Brands {
 		add_action( 'woocommerce_product_meta_end', array( $this, 'show_brand' ) );
 		add_filter( 'woocommerce_structured_data_product', array( $this, 'add_structured_data' ), 20 );
 
-		// duplicate product brands
+		// duplicate product brands.
 		add_action( 'woocommerce_product_duplicate_before_save', array( $this, 'duplicate_store_temporary_brands' ), 10, 2 );
 		add_action( 'woocommerce_new_product', array( $this, 'duplicate_add_product_brand_terms' ) );
 		add_action( 'woocommerce_new_product', array( $this, 'invalidate_wc_layered_nav_counts_cache' ), 10, 0 );
@@ -56,10 +61,10 @@ class WC_Brands {
 
 		// REST API.
 		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_maybe_set_brands' ), 10, 2 );
-		add_filter( 'woocommerce_rest_prepare_product', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 2.6.x
-		add_filter( 'woocommerce_rest_prepare_product_object', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 3.x
-		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 ); // WC 2.6.x
-		add_action( 'woocommerce_rest_insert_product_object', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 ); // WC 3.x
+		add_filter( 'woocommerce_rest_prepare_product', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 2.6.x.
+		add_filter( 'woocommerce_rest_prepare_product_object', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 3.x.
+		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 ); // WC 2.6.x.
+		add_action( 'woocommerce_rest_insert_product_object', array( $this, 'rest_api_add_brands_to_product' ), 10, 3 ); // WC 3.x.
 		add_filter( 'woocommerce_rest_product_object_query', array( $this, 'rest_api_filter_products_by_brand' ), 10, 2 );
 		add_filter( 'rest_product_collection_params', array( $this, 'rest_api_product_collection_params' ), 10, 2 );
 
@@ -112,8 +117,8 @@ class WC_Brands {
 	 */
 	public function recount_all_brands() {
 		$product_brands = get_terms(
-			'product_brand',
 			array(
+				'taxonomy'   => 'product_brand',
 				'hide_empty' => false,
 				'fields'     => 'id=>parent',
 			)
@@ -149,30 +154,29 @@ class WC_Brands {
 	/**
 	 * Filter to allow product_brand in the permalinks for products.
 	 *
-	 * @access public
 	 * @param string  $permalink The existing permalink URL.
-	 * @param WP_Post $post
+	 * @param WP_Post $post The post.
 	 * @return string
 	 */
 	public function post_type_link( $permalink, $post ) {
-		// Abort if post is not a product
-		if ( $post->post_type !== 'product' ) {
+		// Abort if post is not a product.
+		if ( 'product' !== $post->post_type ) {
 			return $permalink;
 		}
 
-		// Abort early if the placeholder rewrite tag isn't in the generated URL
+		// Abort early if the placeholder rewrite tag isn't in the generated URL.
 		if ( false === strpos( $permalink, '%' ) ) {
 			return $permalink;
 		}
 
-		// Get the custom taxonomy terms in use by this post
+		// Get the custom taxonomy terms in use by this post.
 		$terms = get_the_terms( $post->ID, 'product_brand' );
 
 		if ( empty( $terms ) ) {
-			// If no terms are assigned to this post, use a string instead (can't leave the placeholder there)
+			// If no terms are assigned to this post, use a string instead (can't leave the placeholder there).
 			$product_brand = _x( 'uncategorized', 'slug', 'woocommerce' );
 		} else {
-			// Replace the placeholder rewrite tag with the first term's slug
+			// Replace the placeholder rewrite tag with the first term's slug.
 			$first_term    = array_shift( $terms );
 			$product_brand = $first_term->slug;
 		}
@@ -192,27 +196,39 @@ class WC_Brands {
 		return $permalink;
 	}
 
+	/**
+	 * Adds filter for introducing CSS classes.
+	 *
+	 */
 	public function body_class() {
 		if ( is_tax( 'product_brand' ) ) {
 			add_filter( 'body_class', array( $this, 'add_body_class' ) );
 		}
 	}
 
+	/**
+	 * Adds classes to brand taxonomy pages.
+	 *
+	 * @param array $classes Classes array.
+	 */
 	public function add_body_class( $classes ) {
 		$classes[] = 'woocommerce';
 		$classes[] = 'woocommerce-page';
 		return $classes;
 	}
 
+	/**
+	 * Enqueues styles.
+	 *
+	 */
 	public function styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );
 		wp_enqueue_style( 'brands-styles', WC()->plugin_url() . '/assets/css/brands.css', array(), $version );
 	}
 
 	/**
-	 * init_taxonomy function.
+	 * Initializes brand taxonomy.
 	 *
-	 * @access public
 	 */
 	public static function init_taxonomy() {
 		$shop_page_id = wc_get_page_id( 'shop' );
@@ -276,24 +292,22 @@ class WC_Brands {
 	}
 
 	/**
-	 * init_widgets function.
+	 * Initializes brand widgets.
 	 *
-	 * @access public
 	 */
 	public function init_widgets() {
-		// Inc
+		// Include.
 		require_once WC()->plugin_path() . '/includes/widgets/class-wc-widget-brand-description.php';
 		require_once WC()->plugin_path() . '/includes/widgets/class-wc-widget-brand-nav.php';
 		require_once WC()->plugin_path() . '/includes/widgets/class-wc-widget-brand-thumbnails.php';
 
-		// Register
+		// Register.
 		register_widget( 'WC_Widget_Brand_Description' );
 		register_widget( 'WC_Widget_Brand_Nav' );
 		register_widget( 'WC_Widget_Brand_Thumbnails' );
 	}
 
 	/**
-	 * template_loader
 	 *
 	 * Handles template usage so that we can use our own templates instead of the themes.
 	 *
@@ -303,6 +317,8 @@ class WC_Brands {
 	 * For beginners, it also looks for a woocommerce.php template first. If the user adds
 	 * this to the theme (containing a woocommerce() inside) this will be used for all
 	 * woocommerce templates.
+	 *
+	 * @param string $template Template.
 	 */
 	public function template_loader( $template ) {
 		$find = array( 'woocommerce.php' );
@@ -331,9 +347,8 @@ class WC_Brands {
 	}
 
 	/**
-	 * brand_image function.
+	 * Displays brand description.
 	 *
-	 * @access public
 	 */
 	public function brand_description() {
 		if ( ! is_tax( 'product_brand' ) ) {
@@ -360,10 +375,8 @@ class WC_Brands {
 	}
 
 	/**
-	 * show_brand function.
+	 * Displays brand.
 	 *
-	 * @access public
-	 * @return void
 	 */
 	public function show_brand() {
 		global $post;
@@ -383,7 +396,6 @@ class WC_Brands {
 	/**
 	 * Add structured data to product page.
 	 *
-	 * @access public
 	 * @param  array $markup
 	 * @return array $markup
 	 */
@@ -408,9 +420,8 @@ class WC_Brands {
 	}
 
 	/**
-	 * register_shortcodes function.
+	 * Registers shortcodes.
 	 *
-	 * @access public
 	 */
 	public function register_shortcodes() {
 		add_shortcode( 'product_brand', array( $this, 'output_product_brand' ) );
@@ -421,12 +432,9 @@ class WC_Brands {
 	}
 
 	/**
-	 * output_product_brand function.
-	 *
-	 * @access public
+	 * Displays product brand.
 	 *
 	 * @param array $atts Attributes from the shortcode.
-	 *
 	 * @return string The generated output.
 	 */
 	public function output_product_brand( $atts ) {
@@ -485,12 +493,9 @@ class WC_Brands {
 	}
 
 	/**
-	 * output_product_brand_list function.
-	 *
-	 * @access public
+	 * Displays product brand list.
 	 *
 	 * @param array $atts Attributes from the shortcode.
-	 *
 	 * @return string
 	 */
 	public function output_product_brand_list( $atts ) {
@@ -535,7 +540,7 @@ class WC_Brands {
 		foreach ( $terms as $term ) {
 			$term_letter = $this->get_brand_name_first_character( $term->name );
 
-			// Allow a locale to be set for ctype_alpha()
+			// Allow a locale to be set for ctype_alpha().
 			if ( has_filter( 'woocommerce_brands_list_locale' ) ) {
 				setLocale( LC_CTYPE, apply_filters( 'woocommerce_brands_list_locale', 'en_US.UTF-8' ) );
 			}
@@ -587,9 +592,8 @@ class WC_Brands {
 	}
 
 	/**
-	 * output_product_brand_thumbnails function.
+	 * Displays brand thumbnails.
 	 *
-	 * @access public
 	 * @param mixed $atts
 	 * @return void
 	 */
@@ -652,9 +656,8 @@ class WC_Brands {
 	}
 
 	/**
-	 * output_product_brand_thumbnails_description function.
+	 * Displays brand thumbnails description.
 	 *
-	 * @access public
 	 * @param mixed $atts
 	 * @return void
 	 */
@@ -715,10 +718,9 @@ class WC_Brands {
 	}
 
 	/**
-	 * output_brand_products function.
+	 * Displays brand products.
 	 *
 	 * @param array $atts
-	 *
 	 * @return string
 	 */
 	public function output_brand_products( $atts ) {
@@ -726,13 +728,13 @@ class WC_Brands {
 			return '';
 		}
 
-		// add the brand attributes and query arguments
+		// Add the brand attributes and query arguments.
 		add_filter( 'shortcode_atts_brand_products', array( __CLASS__, 'add_brand_products_shortcode_atts' ), 10, 4 );
 		add_filter( 'woocommerce_shortcode_products_query', array( __CLASS__, 'get_brand_products_query_args' ), 10, 3 );
 
 		$shortcode = new WC_Shortcode_Products( $atts, 'brand_products' );
 
-		// remove the brand attributes and query arguments
+		// Remove the brand attributes and query arguments.
 		remove_filter( 'shortcode_atts_brand_products', array( __CLASS__, 'add_brand_products_shortcode_atts' ), 10 );
 		remove_filter( 'woocommerce_shortcode_products_query', array( __CLASS__, 'get_brand_products_query_args' ), 10 );
 
@@ -740,7 +742,7 @@ class WC_Brands {
 	}
 
 	/**
-	 * Adds the taxonomy query to the WooCommerce products shortcode query arguments
+	 * Adds the taxonomy query to the WooCommerce products shortcode query arguments.
 	 *
 	 * @param array  $query_args
 	 * @param array  $attributes
@@ -764,7 +766,7 @@ class WC_Brands {
 	}
 
 	/**
-	 * Adds the "brand" attribute to the list of WooCommerce products shortcode attributes
+	 * Adds the "brand" attribute to the list of WooCommerce products shortcode attributes.
 	 *
 	 * @param array  $out       The output array of shortcode attributes.
 	 * @param array  $pairs     The supported attributes and their defaults.
@@ -780,7 +782,7 @@ class WC_Brands {
 	}
 
 	/**
-	 * Maybe set brands when requesting PUT /products/<id>
+	 * Maybe set brands when requesting PUT /products/<id>.
 	 *
 	 * @since x.x.x
 	 *
@@ -801,7 +803,6 @@ class WC_Brands {
 	 *
 	 * @param WP_REST_Response $response   The response object.
 	 * @param WP_Post|WC_Data  $post       Post object or WC object.
-	 * @since x.x.x
 	 * @version x.x.x
 	 * @return WP_REST_Response
 	 */
@@ -831,7 +832,6 @@ class WC_Brands {
 	 * @param WC_Data         $product   Inserted product object.
 	 * @param WP_REST_Request $request   Request object.
 	 * @param boolean         $creating  True when creating object, false when updating.
-	 * @since x.x.x
 	 * @version x.x.x
 	 */
 	public function rest_api_add_brands_to_product( $product, $request, $creating = true ) {
@@ -860,7 +860,6 @@ class WC_Brands {
 	 * @param array           $args    Request args.
 	 * @param WP_REST_Request $request Request data.
 	 * @return array Request args.
-	 * @since x.x.x
 	 * @version x.x.x
 	 */
 	public function rest_api_filter_products_by_brand( $args, $request ) {
@@ -881,7 +880,6 @@ class WC_Brands {
 	 * @param array        $params JSON Schema-formatted collection parameters.
 	 * @param WP_Post_Type $post_type   Post type object.
 	 * @return array JSON Schema-formatted collection parameters.
-	 * @since x.x.x
 	 * @version x.x.x
 	 */
 	public function rest_api_product_collection_params( $params, $post_type ) {
@@ -903,7 +901,6 @@ class WC_Brands {
 	 * @param  string $link      Original layered nav item link.
 	 * @param  number $count     Number of items in that filter.
 	 * @return string            Term html.
-	 * @since x.x.x
 	 * @version x.x.x
 	 */
 	public function woocommerce_brands_update_layered_nav_link( $term_html, $term, $link, $count ) {
@@ -931,7 +928,6 @@ class WC_Brands {
 	 * to allow us to be able to use the meta when the product is saved to add
 	 * the brands when an ID has been generated.
 	 *
-	 * @since x.x.x
 	 *
 	 * @param WC_Product $duplicate
 	 * @return WC_Product $original
@@ -959,7 +955,7 @@ class WC_Brands {
 	 */
 	public function duplicate_add_product_brand_terms( $product_id ) {
 		$product = wc_get_product( $product_id );
-		// bail if product isn't found
+		// Bail if product isn't found.
 		if ( ! $product instanceof WC_Product ) {
 			return;
 		}

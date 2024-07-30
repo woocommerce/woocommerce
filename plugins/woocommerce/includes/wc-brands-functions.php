@@ -42,7 +42,6 @@ function get_brand_thumbnail_image( $brand, $size = '' ) {
 		 * @since 9.3.0
 		 *
 		 * @param string $size Brand's thumbnail size.
-		 *
 		 */
 		$size = apply_filters( 'woocommerce_brand_thumbnail_size', 'shop_catalog' );
 	}
