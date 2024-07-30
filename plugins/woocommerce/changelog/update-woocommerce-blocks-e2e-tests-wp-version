@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Remove WP 6.6 hardcoded version from WC Blocks e2e tests
+
+
