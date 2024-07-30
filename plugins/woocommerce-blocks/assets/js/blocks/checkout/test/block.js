@@ -36,7 +36,6 @@ import Shipping from '../inner-blocks/checkout-order-summary-shipping/frontend';
 import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 import { defaultCartState } from '../../../data/cart/default-state';
 import Checkout from '../block';
-import { displayForMinorUnit } from '../../../../js/previews/utils';
 
 jest.mock( '@wordpress/compose', () => ( {
 	...jest.requireActual( '@wordpress/compose' ),
@@ -101,8 +100,8 @@ const CheckoutBlock = () => {
 				<OrderNote />
 				<Terms
 					checkbox={ true }
-					text={ termsCheckboxDefaultText }
 					showSeparator={ false }
+					text={ termsCheckboxDefaultText }
 				/>
 				<Actions />
 			</Fields>
