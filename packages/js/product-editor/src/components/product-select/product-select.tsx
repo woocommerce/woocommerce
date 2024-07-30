@@ -20,7 +20,6 @@ import {
 	ComboboxControlProductSelectOption,
 	ProductSelectProps,
 } from './types';
-import { ComboboxControlOption } from '../attribute-combobox-field/types';
 
 interface ComboboxControlProps
 	extends Omit< CoreComboboxControl.Props, 'label' | 'help' > {
@@ -37,9 +36,9 @@ const ComboboxControl =
 	CoreComboboxControl as React.ComponentType< ComboboxControlProps >;
 
 /**
- * Map the product attribute item to the Combobox core option.
+ * Map the product item to the Combobox core option.
  *
- * @param {Product} attr - Product attribute item.
+ * @param {Product} attr - Product item.
  * @return {ComboboxControlOption}               Combobox option.
  */
 function mapItemToOption( attr: Product ): ComboboxControlProductSelectOption {
@@ -96,7 +95,8 @@ export function ProductSelect( {
 	 * Each option is an object with a label and value.
 	 * Both are strings.
 	 */
-	const options: ComboboxControlOption[] = items?.map( mapItemToOption );
+	const options: ComboboxControlProductSelectOption[] =
+		items?.map( mapItemToOption );
 
 	const comboRef = useRef< HTMLDivElement | null >( null );
 
@@ -120,21 +120,6 @@ export function ProductSelect( {
 		const id = inputElement?.getAttribute( 'id' );
 		if ( inputElement && typeof id === 'string' ) {
 			setLabelFor( id );
-		}
-
-		/*
-		 * Hack to handle AttributesComboboxControl instances z index,
-		 * avoiding to overlap the dropdown instances list.
-		 * Todo: this is a temporary/not-ideal solution.
-		 * It should be handled by the core ComboboxControl component.
-		 */
-		const listContainerElement = comboRef.current.querySelector(
-			'.components-combobox-control__suggestions-container'
-		) as HTMLElement;
-		const style = { zIndex: 1000 - instanceNumber };
-
-		if ( listContainerElement ) {
-			Object.assign( listContainerElement.style, style );
 		}
 	}, [ instanceNumber ] );
 
