@@ -369,7 +369,9 @@ test(
 					await page.reload();
 					await page.getByRole( 'button', { name: 'Edit' } ).click();
 					await expect(
-						page.getByLabel( `Remove ${ attribute.options[ 0 ] }` )
+						page.locator(
+							`button[aria-label="Remove ${ attribute.options[ 0 ] }"]`
+						)
 					).toBeVisible( { timeout: 2000 } );
 				},
 				{
