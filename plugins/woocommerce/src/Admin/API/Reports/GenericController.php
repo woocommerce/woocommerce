@@ -190,4 +190,26 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 		// Wrap the data in a response object.
 		return rest_ensure_response( $data );
 	}
+
+	/**
+	 * Maps query arguments from the REST request, to be fed to Query.
+	 *
+	 * `WP_REST_Request` does not expose a method to return all params covering defaults,
+	 * as it does for `$request['param']` accessor.
+	 * Therefore, we re-implement defaults resolution.
+	 *
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return array Simplified array of params.
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args = wp_parse_args(
+			array_intersect_key(
+				$request->get_query_params(),
+				$this->get_collection_params()
+			),
+			$request->get_default_params()
+		);
+
+		return $args;
+	}
 }
