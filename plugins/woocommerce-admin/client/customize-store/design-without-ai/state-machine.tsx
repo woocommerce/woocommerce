@@ -81,7 +81,6 @@ const installFontFamiliesState = {
 export type DesignWithoutAIStateMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
-	| { type: 'INSTALL_PATTERNS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } };
 
 export const designWithNoAiStateMachineDefinition = createMachine(
@@ -102,9 +101,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			},
 			INSTALL_FONTS: {
 				target: 'installFontFamilies',
-			},
-			INSTALL_PATTERNS: {
-				target: 'installPatterns',
 			},
 		},
 		context: {
