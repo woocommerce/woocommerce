@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable WordPress.Files.FileName.InvalidClassFileName
 
 use Automattic\WooCommerce\Blocks\Options;
 
@@ -125,7 +125,7 @@ class BlockTemplateUtilsDuplicated {
 		}
 
 		if ( ! $terms ) {
-			return new \WP_Error( 'template_missing_theme', __( 'No theme is defined for this template.', 'woocommerce-brands' ) );
+			return new \WP_Error( 'template_missing_theme', __( 'No theme is defined for this template.', 'woocommerce' ) );
 		}
 
 		$theme          = $terms[0]->name;
@@ -238,13 +238,13 @@ class BlockTemplateUtilsDuplicated {
 	public static function convert_slug_to_title( $template_slug ) {
 		switch ( $template_slug ) {
 			case 'single-product':
-				return __( 'Single Product', 'woocommerce-brands' );
+				return __( 'Single Product', 'woocommerce' );
 			case 'archive-product':
-				return __( 'Product Archive', 'woocommerce-brands' );
+				return __( 'Product Archive', 'woocommerce' );
 			case 'taxonomy-product_cat':
-				return __( 'Product Category', 'woocommerce-brands' );
+				return __( 'Product Category', 'woocommerce' );
 			case 'taxonomy-product_tag':
-				return __( 'Product Tag', 'woocommerce-brands' );
+				return __( 'Product Tag', 'woocommerce' );
 			default:
 				// Replace all hyphens and underscores with spaces.
 				return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
