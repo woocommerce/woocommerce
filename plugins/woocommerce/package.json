@@ -221,6 +221,7 @@
 					"name": "PHP WP: nightly [suit:main]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-main",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -241,13 +242,15 @@
 						}
 					},
 					"events": [
-						"daily-checks"
+						"pull_request",
+						"push"
 					]
 				},
 				{
 					"name": "PHP WP: nightly [suit:legacy]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-legacy",
+					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -268,7 +271,8 @@
 						}
 					},
 					"events": [
-						"daily-checks"
+						"pull_request",
+						"push"
 					]
 				},
 				{
