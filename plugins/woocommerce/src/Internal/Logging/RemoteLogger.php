@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use WC_Rate_Limiter;
 
 /**
  * WooCommerce Remote Logger
@@ -19,9 +20,8 @@ use Automattic\WooCommerce\Utilities\StringUtil;
  */
 class RemoteLogger extends \WC_Log_Handler {
 	const LOG_ENDPOINT                = 'https://public-api.wordpress.com/rest/v1.1/logstash';
-	const THROTTLE_TRANSIENT          = 'woocommerce_remote_logging_throttle';
-	const THROTTLE_LIMIT              = 10; // Maximum number of requests in the interval.
-	const THROTTLE_INTERVAL           = 300; // Throttle interval in seconds (5 minutes).
+	const RATE_LIMIT_ID               = 'woocommerce_remote_logging';
+	const RATE_LIMIT_DELAY            = 60; // 1 minute.
 	const WC_LATEST_VERSION_TRANSIENT = 'latest_woocommerce_version';
 	const FETCH_LATEST_VERSION_RETRY  = 'fetch_latest_woocommerce_version_retry';
 
@@ -71,7 +71,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( $this->should_throttle_logging() ) {
+		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
 			$this->local_logger->info( 'Remote logging throttled.', array( 'source' => 'wc-remote-logger' ) );
 			return false;
 		}
@@ -88,7 +88,8 @@ class RemoteLogger extends \WC_Log_Handler {
 				'params' => wp_json_encode( $log_data ),
 			);
 
-			$this->record_log_timestamp();
+			\WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
+
 			$response = wp_safe_remote_post(
 				self::LOG_ENDPOINT,
 				array(
@@ -340,43 +341,6 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Record the current timestamp to the throttle log.
-	 */
-	private function record_log_timestamp() {
-		$timestamps   = get_transient( self::THROTTLE_TRANSIENT );
-		$timestamps   = is_array( $timestamps ) ? $timestamps : array();
-		$timestamps[] = time();
-		set_transient( self::THROTTLE_TRANSIENT, $timestamps, self::THROTTLE_INTERVAL );
-	}
-
-	/**
-	 * Check if logging should be throttled.
-	 *
-	 * @return bool
-	 */
-	private function should_throttle_logging() {
-		$timestamps = get_transient( self::THROTTLE_TRANSIENT );
-		if ( ! is_array( $timestamps ) ) {
-			return false;
-		}
-
-		// Remove timestamps older than the throttle interval.
-		$current_time = time();
-		$timestamps   = array_filter(
-			$timestamps,
-			function ( $timestamp ) use ( $current_time ) {
-				return ( $current_time - $timestamp ) <= self::THROTTLE_INTERVAL;
-			}
-		);
-
-		// Update the transient with the filtered timestamps.
-		set_transient( self::THROTTLE_TRANSIENT, $timestamps, self::THROTTLE_INTERVAL );
-
-		// Check if the number of logs in the interval exceeds the limit.
-		return count( $timestamps ) >= self::THROTTLE_LIMIT;
 	}
 
 	/**

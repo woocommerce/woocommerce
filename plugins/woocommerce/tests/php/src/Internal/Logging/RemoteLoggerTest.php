@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Logging;
 
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use WC_Rate_Limiter;
+use WC_Cache_Helper;
 
 /**
  * Class RemoteLoggerTest.
@@ -41,7 +43,13 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_feature_remote_logging_enabled' );
 		delete_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT );
-		delete_transient( RemoteLogger::THROTTLE_TRANSIENT );
+
+		global $wpdb;
+		$wpdb->query(
+			"DELETE FROM {$wpdb->prefix}wc_rate_limits"
+		);
+
+		WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
 	}
 
 	/**
@@ -331,15 +339,10 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 
 		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
-		// generate throttling for 100 requests.
-		$throttle_data = array();
-		for ( $i = 0; $i < 100; $i++ ) {
-			$throttle_data[] = time() - $i;
-		}
-
-		set_transient( RemoteLogger::THROTTLE_TRANSIENT, $throttle_data, RemoteLogger::THROTTLE_INTERVAL );
-
-		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+		// Set rate limit to simulate exceeded limit.
+		WC_Rate_Limiter::set_rate_limit( RemoteLogger::RATE_LIMIT_ID, 10 );
+		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
+		$this->assertFalse( $result );
 	}
 
 
@@ -412,7 +415,8 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array() ) );
-		$this->assertNotEmpty( get_transient( RemoteLogger::THROTTLE_TRANSIENT ) );
+		// Verify that rate limit was set.
+		$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 	}
 
 	/**
@@ -444,7 +448,8 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
-		$this->assertNotEmpty( get_transient( RemoteLogger::THROTTLE_TRANSIENT ) );
+		// Verify that rate limit was set.
+		$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 	}
 
 	/**
