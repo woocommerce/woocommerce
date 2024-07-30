@@ -2877,6 +2877,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$args['custom_attributes']['aria-required'] = 'true';
 				$args['label_class'][]                      = 'required_field';
 			}
+
+            $args['class'][] = 'validate-required';
 		}
 
 		if ( is_string( $args['label_class'] ) ) {
