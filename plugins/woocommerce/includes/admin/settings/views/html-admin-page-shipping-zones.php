@@ -8,7 +8,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<span><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></span>
 	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add zone', 'woocommerce' ); ?></a>
 </h2>
-<p class="wc-shipping-zone-heading-help-text"><?php echo esc_html_e( 'A shipping zone consists of the region(s) you\'d like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we\'ll use their shipping address to show them the methods available in their area.', 'woocommerce' ); ?></p>
+<p class="wc-shipping-zone-heading-help-text">
+	<?php
+	echo wp_kses_post(
+		sprintf(
+			__(
+				"A shipping zone consists of the region(s) you'd like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we'll use their shipping address to show them the methods available in their area. To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
+				'woocommerce'
+			),
+			esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+		)
+	);
+	?>
+</p>
 <table class="wc-shipping-zones widefat">
 	<thead>
 		<tr>
@@ -59,7 +71,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
 				<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
 				<ul>
-					<li><?php _e( 'Local zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
 					<li><?php _e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
 					<li><?php _e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
 				</ul>
