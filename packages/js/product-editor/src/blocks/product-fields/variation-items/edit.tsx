@@ -80,19 +80,14 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice:
-					isInSelectedTab && productHasOptions
-						? getProductVariationsTotalCount< number >(
-								totalCountWithoutPriceRequestParams
-						  )
-						: 0,
+				totalCountWithoutPrice: productHasOptions
+					? getProductVariationsTotalCount< number >(
+							totalCountWithoutPriceRequestParams
+					  )
+					: 0,
 			};
 		},
-		[
-			isInSelectedTab,
-			productHasOptions,
-			totalCountWithoutPriceRequestParams,
-		]
+		[ productHasOptions, totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
