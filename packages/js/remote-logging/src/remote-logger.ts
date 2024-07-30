@@ -27,6 +27,11 @@ export const REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER =
 export const REMOTE_LOGGING_ERROR_DATA_FILTER =
 	'woocommerce_remote_logging_error_data';
 
+export const REMOTE_LOGGING_LOG_ENDPOINT_FILTER =
+	'woocommerce_remote_logging_log_endpoint';
+export const REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER =
+	'woocommerce_remote_logging_js_error_endpoint';
+
 const REMOTE_LOGGING_LAST_ERROR_SENT_KEY =
 	'wc_remote_logging_last_error_sent_time';
 
@@ -116,13 +121,20 @@ export class RemoteLogger {
 		try {
 			debug( 'Sending log to API:', logData );
 
-			await window.fetch(
-				'https://public-api.wordpress.com/rest/v1.1/logstash',
-				{
-					method: 'POST',
-					body,
-				}
-			);
+			/**
+			 * Filters the Log API endpoint URL.
+			 *
+			 * @param {string} endpoint The default Log API endpoint URL.
+			 */
+			const endpoint = applyFilters(
+				REMOTE_LOGGING_LOG_ENDPOINT_FILTER,
+				'https://public-api.wordpress.com/rest/v1.1/logstash'
+			) as string;
+
+			await window.fetch( endpoint, {
+				method: 'POST',
+				body,
+			} );
 		} catch ( error ) {
 			// eslint-disable-next-line no-console
 			console.error( 'Failed to send log to API:', error );
@@ -189,13 +201,21 @@ export class RemoteLogger {
 
 		try {
 			debug( 'Sending error to API:', error );
-			await window.fetch(
-				'https://public-api.wordpress.com/rest/v1.1/js-error',
-				{
-					method: 'POST',
-					body,
-				}
-			);
+
+			/**
+			 * Filters the JS error endpoint URL.
+			 *
+			 * @param {string} endpoint The default JS error endpoint URL.
+			 */
+			const endpoint = applyFilters(
+				REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
+				'https://public-api.wordpress.com/rest/v1.1/js-error'
+			) as string;
+
+			await window.fetch( endpoint, {
+				method: 'POST',
+				body,
+			} );
 		} catch ( _error: unknown ) {
 			// eslint-disable-next-line no-console
 			console.error( 'Failed to send error to API:', _error );

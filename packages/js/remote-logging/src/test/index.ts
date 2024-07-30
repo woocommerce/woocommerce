@@ -7,9 +7,14 @@ import { addFilter, removeFilter } from '@wordpress/hooks';
  * Internal dependencies
  */
 import { init, log } from '../';
-import { RemoteLogger, REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER, REMOTE_LOGGING_ERROR_DATA_FILTER } from '../remote-logger';
+import {
+	RemoteLogger,
+	REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
+	REMOTE_LOGGING_ERROR_DATA_FILTER,
+	REMOTE_LOGGING_LOG_ENDPOINT_FILTER,
+	REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
+} from '../remote-logger';
 import { fetchMock } from './__mocks__/fetch';
-
 
 jest.mock( 'tracekit', () => ( {
 	computeStackTrace: jest.fn().mockReturnValue( {
@@ -37,18 +42,17 @@ describe( 'RemoteLogger', () => {
 		logger = new RemoteLogger( { errorRateLimitMs: 60000 } ); // 1 minute
 	} );
 
-	afterEach(() => {
+	afterEach( () => {
 		removeFilter( REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER, 'test' );
-	});
+	} );
 
-	beforeAll(() => {
+	beforeAll( () => {
 		console.warn = jest.fn();
-	});
+	} );
 
-	afterAll(() => {
+	afterAll( () => {
 		console.warn = originalConsoleWarn;
-	});
-
+	} );
 
 	describe( 'log', () => {
 		it( 'should send a log message to the API', async () => {
@@ -66,6 +70,27 @@ describe( 'RemoteLogger', () => {
 			await logger.log( 'info', '' );
 			expect( fetchMock ).not.toHaveBeenCalled();
 		} );
+
+		it( 'should use the filtered Log endpoint', async () => {
+			const customEndpoint = 'https://custom-logstash.example.com';
+			addFilter(
+				REMOTE_LOGGING_LOG_ENDPOINT_FILTER,
+				'test',
+				() => customEndpoint
+			);
+
+			await logger.log( 'info', 'Test message' );
+
+			expect( fetchMock ).toHaveBeenCalledWith(
+				customEndpoint,
+				expect.objectContaining( {
+					method: 'POST',
+					body: expect.any( FormData ),
+				} )
+			);
+
+			removeFilter( REMOTE_LOGGING_LOG_ENDPOINT_FILTER, 'test' );
+		} );
 	} );
 
 	describe( 'handleError', () => {
@@ -82,7 +107,11 @@ describe( 'RemoteLogger', () => {
 		} );
 
 		it( 'should respect rate limiting', async () => {
-			addFilter( REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER, 'test', () => true );
+			addFilter(
+				REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
+				'test',
+				() => true
+			);
 
 			const error = new Error( 'Test error - rate limit' );
 			await ( logger as any ).handleError( error );
@@ -94,7 +123,7 @@ describe( 'RemoteLogger', () => {
 			const filteredErrorData = {
 				message: 'Filtered test error',
 				severity: 'warning',
-				tags: ['filtered-tag'],
+				tags: [ 'filtered-tag' ],
 				trace: 'Filtered stack trace',
 			};
 
@@ -102,14 +131,37 @@ describe( 'RemoteLogger', () => {
 				return filteredErrorData;
 			} );
 			// mock sendError to return true
-			const sendErrorSpy = jest.spyOn(logger as any, 'sendError').mockImplementation(() => {});
+			const sendErrorSpy = jest
+				.spyOn( logger as any, 'sendError' )
+				.mockImplementation( () => {} );
 
 			const error = new Error( 'Test error' );
 			await ( logger as any ).handleError( error );
 
-			expect(sendErrorSpy).toHaveBeenCalledWith(filteredErrorData);
+			expect( sendErrorSpy ).toHaveBeenCalledWith( filteredErrorData );
 		} );
 
+		it( 'should use the filtered JS error endpoint', async () => {
+			const customEndpoint = 'https://custom-js-error.example.com';
+			addFilter(
+				REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
+				'test',
+				() => customEndpoint
+			);
+
+			const error = new Error( 'Test error' );
+			await ( logger as any ).handleError( error );
+
+			expect( fetchMock ).toHaveBeenCalledWith(
+				customEndpoint,
+				expect.objectContaining( {
+					method: 'POST',
+					body: expect.any( FormData ),
+				} )
+			);
+
+			removeFilter( REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER, 'test' );
+		} );
 	} );
 
 	describe( 'shouldSendError', () => {
@@ -129,8 +181,6 @@ describe( 'RemoteLogger', () => {
 				stackFrames
 			);
 			expect( result ).toBe( true );
-
-
 		} );
 
 		it( 'should return false for non-WooCommerce errors', () => {
@@ -158,7 +208,11 @@ describe( 'RemoteLogger', () => {
 		} );
 
 		it( 'should return true if filter returns true', () => {
-			addFilter( REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER, 'test', () => true );
+			addFilter(
+				REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
+				'test',
+				() => true
+			);
 			const error = new Error( 'Test error' );
 			const result = ( logger as any ).shouldSendError( error, [] );
 			expect( result ).toBe( true );
@@ -199,11 +253,10 @@ describe( 'RemoteLogger', () => {
 } );
 
 describe( 'init', () => {
-	beforeEach(() => {
+	beforeEach( () => {
 		jest.clearAllMocks();
 		window.wcTracks = { isEnabled: true };
-
-	});
+	} );
 
 	it( 'should not initialize the logger if Tracks is not enabled', () => {
 		window.wcTracks = { isEnabled: false };
@@ -227,9 +280,9 @@ describe( 'init', () => {
 } );
 
 describe( 'log', () => {
-	it('should not log if Tracks is not enabled', () => {
+	it( 'should not log if Tracks is not enabled', () => {
 		window.wcTracks = { isEnabled: false };
-		log('info', 'Test message');
+		log( 'info', 'Test message' );
 		expect( fetchMock ).not.toHaveBeenCalled();
-	});
-});
+	} );
+} );
