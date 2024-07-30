@@ -9,7 +9,7 @@
 class WC_Brands_Block_Templates {
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'get_block_templates', array( $this, 'get_block_templates' ), 10, 3 );
@@ -46,8 +46,8 @@ class WC_Brands_Block_Templates {
 	 *
 	 * Triggered by woocommerce_has_block_template filter
 	 *
-	 * @param bool   $has_template  True if the template is available
-	 * @param string $template_name The name of the template
+	 * @param bool   $has_template  True if the template is available.
+	 * @param string $template_name The name of the template.
 	 *
 	 * @return bool True if the system is checking archive-product
 	 */
@@ -63,7 +63,7 @@ class WC_Brands_Block_Templates {
 	 * Get the block template for Taxonomy Product Brand. First it attempts to load the last version from DB
 	 * Otherwise it loads the file based template.
 	 *
-	 * @param string $template_type The post_type for the template. Normally wp_template or wp_template_part
+	 * @param string $template_type The post_type for the template. Normally wp_template or wp_template_part.
 	 *
 	 * @return WP_Block_Template The taxonomy-product_brand template.
 	 */
@@ -91,7 +91,7 @@ class WC_Brands_Block_Templates {
 	 * woocommerce//taxonomy-product_brand
 	 * woocommerce/woocommerce//taxonomy-product_brand
 	 *
-	 * @param  String $id The string to check if contains the template name
+	 * @param  String $id The string to check if contains the template name.
 	 *
 	 * @return bool True if the template is woocommerce/taxonomy-product_brand
 	 */
@@ -104,8 +104,8 @@ class WC_Brands_Block_Templates {
 	 * Triggered by get_block_file_template action
 	 *
 	 * @param WP_Block_Template|null $block_template The current Block Template loaded, if any.
-	 * @param string                 $id The template id normally in the format theme-slug//template-slug
-	 * @param string                 $template_type The post_type for the template. Normally wp_template or wp_template_part
+	 * @param string                 $id The template id normally in the format theme-slug//template-slug.
+	 * @param string                 $template_type The post_type for the template. Normally wp_template or wp_template_part.
 	 *
 	 * @return WP_Block_Template|null The taxonomy-product_brand template.
 	 */
@@ -121,9 +121,9 @@ class WC_Brands_Block_Templates {
 	 * Add the Block template in the template query results needed by FSE
 	 * Triggered by get_block_templates action
 	 *
-	 * @param array  $query_result The list of templates to render in the query
-	 * @param array  $query The current query parameters
-	 * @param string $template_type The post_type for the template. Normally wp_template or wp_template_part
+	 * @param array  $query_result The list of templates to render in the query.
+	 * @param array  $query The current query parameters.
+	 * @param string $template_type The post_type for the template. Normally wp_template or wp_template_part.
 	 *
 	 * @return WP_Block_Template[] Array of the matched Block Templates to render.
 	 */
@@ -136,7 +136,7 @@ class WC_Brands_Block_Templates {
 		$post_id = isset( $_REQUEST['postId'] ) ? wc_clean( wp_unslash( $_REQUEST['postId'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$slugs   = $query['slug__in'] ?? array();
 
-		// Only add the template if  asking for Product Brands
+		// Only add the template if  asking for Product Brands.
 		if (
 			in_array( 'taxonomy-product_brand', $slugs, true ) ||
 			( ! $post_id && ! count( $slugs ) ) ||

@@ -65,17 +65,17 @@ class WC_Brands_Coupons {
 
 		// 1) Coupon has a brand requirement but no products in the cart have the brand.
 		if ( ! $included_brands_match && ! empty( $brand_coupon_settings['included_brands'] ) ) {
-			throw new Exception( WC_Coupon::E_WC_COUPON_NOT_APPLICABLE ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped.
+			throw new Exception( WC_Coupon::E_WC_COUPON_NOT_APPLICABLE ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// 2) All products in the cart match brand exclusion rule.
 		if ( count( $items ) === $excluded_brands_matches ) {
-			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped.
+			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// 3) For a cart discount, there is at least one product in cart that matches exclusion rule.
 		if ( $coupon->is_type( 'fixed_cart' ) && $excluded_brands_matches > 0 ) {
-			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped.
+			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return $valid;
