@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ const appRoot = document.getElementById(
 );
 
 if ( appRoot ) {
-	render( <App />, appRoot );
+	createRoot( appRoot ).render( <App /> );
 }
 
 registerProductEditorDevTools();

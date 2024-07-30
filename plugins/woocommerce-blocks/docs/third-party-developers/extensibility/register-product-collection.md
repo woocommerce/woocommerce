@@ -66,7 +66,17 @@ Attributes are the properties that define the behavior of the collection. All th
     - `type` (type `string`): The type of layout. Accepted values are `grid` and `stack`.
     - `columns` (type `number`): The number of columns to display.
     - `shrinkColumns` (type `boolean`): Whether the layout should be responsive.
-- `hideControls` (type `array`): The controls to hide.
+- `hideControls` (type `array`): The controls to hide. Possible values:
+    - `order` - "Order by" setting
+    - `attributes` - "Product Attributes" filter
+    - `created` - "Created" filter
+    - `featured` - "Featured" filter
+    - `hand-picked` - "Hand-picked Products" filter
+    - `keyword` - "Keyword" filter
+    - `on-sale` - "On Sale" filter
+    - `stock-status` - "Stock Status" filter
+    - `taxonomy` - "Product Categories", "Product Tags" and custom taxonomies filters
+    - `price-range` - "Price Range" filter
 
 #### Preview Attribute
 
@@ -127,6 +137,7 @@ __experimentalRegisterProductCollection({
       columns: 3,
       shrinkColumns: true,
     },
+	hideControls: [ "created", "stock-status" ]
   },
 });
 ```
@@ -225,8 +236,8 @@ This will create a collection with a heading, product image, and product price. 
 
 ![image](https://github.com/woocommerce/woocommerce/assets/16707866/3d92c084-91e9-4872-a898-080b4b93afca)
 
-> ![TIP]
+> [!TIP]
 > You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
 
-> ![TIP]
+> [!TIP]
 > You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.

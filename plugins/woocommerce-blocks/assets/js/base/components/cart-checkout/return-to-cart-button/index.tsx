@@ -27,7 +27,7 @@ const ReturnToCartButton = ( {
 			className="wc-block-components-checkout-return-to-cart-button"
 		>
 			<Icon icon={ arrowLeft } />
-			{ __( 'Return to cart', 'woocommerce' ) }
+			{ __( 'Return to Cart', 'woocommerce' ) }
 		</a>
 	);
 };

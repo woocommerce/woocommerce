@@ -38,7 +38,7 @@ export const SELECTORS = {
 	},
 	onSaleControlLabel: 'Show only products on sale',
 	featuredControlLabel: 'Show only featured products',
-	inheritQueryFromTemplateControl:
+	usePageContextControl:
 		'.wc-block-product-collection__inherit-query-control',
 	shrinkColumnsToFit: 'Responsive',
 	productSearchLabel: 'Search',
@@ -220,6 +220,39 @@ class ProductCollectionPage {
 
 		return new URL( productResponse.url() );
 	}
+	async insertProductElements() {
+		// By default there are inner blocks:
+		// - woocommerce/product-image
+		// - core/post-title
+		// - woocommerce/product-price
+		// - woocommerce/product-button
+		// We're adding remaining ones
+		const productElements = [
+			{ name: 'woocommerce/product-rating', attributes: {} },
+			{ name: 'woocommerce/product-sku', attributes: {} },
+			{ name: 'woocommerce/product-stock-indicator', attributes: {} },
+			{ name: 'woocommerce/product-sale-badge', attributes: {} },
+			{
+				name: 'core/post-excerpt',
+				attributes: {
+					__woocommerceNamespace:
+						'woocommerce/product-collection/product-summary',
+				},
+			},
+			{
+				name: 'core/post-terms',
+				attributes: { term: 'product_tag' },
+			},
+			{
+				name: 'core/post-terms',
+				attributes: { term: 'product_cat' },
+			},
+		];
+
+		for ( const productElement of productElements ) {
+			await this.insertBlockInProductCollection( productElement );
+		}
+	}
 
 	async publishAndGoToFrontend() {
 		const postId = await this.editor.publishPost();
@@ -341,7 +374,7 @@ class ProductCollectionPage {
 	}
 
 	async setNumberOfColumns( numberOfColumns: number ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const inputField = sidebarSettings.getByRole( 'spinbutton', {
 			name: 'Columns',
 		} );
@@ -357,7 +390,7 @@ class ProductCollectionPage {
 			| 'popularity/desc'
 			| 'rating/desc'
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const orderByComboBox = sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
@@ -367,7 +400,7 @@ class ProductCollectionPage {
 	}
 
 	async getOrderByElement() {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		return sidebarSettings.getByRole( 'combobox', {
 			name: 'Order by',
 		} );
@@ -390,7 +423,7 @@ class ProductCollectionPage {
 			onSale: true,
 		}
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.onSaleControlLabel
 		);
@@ -415,7 +448,7 @@ class ProductCollectionPage {
 			isLocatorsRefreshNeeded: true,
 		}
 	) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.featuredControlLabel
 		);
@@ -442,7 +475,7 @@ class ProductCollectionPage {
 		const operatorSelector = SELECTORS.createdFilter.operator[ operator ];
 		const rangeSelector = SELECTORS.createdFilter.range[ range ];
 
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const operatorButton = sidebarSettings.getByLabel( operatorSelector );
 		const rangeButton = sidebarSettings.getByLabel( rangeSelector );
 
@@ -454,7 +487,7 @@ class ProductCollectionPage {
 		const minInputSelector = SELECTORS.priceRangeFilter.min;
 		const maxInputSelector = SELECTORS.priceRangeFilter.max;
 
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const minInput = sidebarSettings.getByLabel( minInputSelector );
 		const maxInput = sidebarSettings.getByLabel( maxInputSelector );
 
@@ -465,7 +498,7 @@ class ProductCollectionPage {
 	}
 
 	async setFilterComboboxValue( filterName: string, filterValue: string[] ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel( filterName );
 		await input.click();
 
@@ -494,7 +527,7 @@ class ProductCollectionPage {
 	}
 
 	async setKeyword( keyword: string ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel( 'Keyword' );
 		await input.clear();
 		await input.fill( keyword );
@@ -557,7 +590,7 @@ class ProductCollectionPage {
 	}
 
 	async setShrinkColumnsToFit( value = true ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.getByLabel(
 			SELECTORS.shrinkColumnsToFit
 		);
@@ -569,7 +602,7 @@ class ProductCollectionPage {
 	}
 
 	async setProductAttribute( attribute: 'Color' | 'Size', value: string ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 
 		const productAttributesContainer = sidebarSettings.locator(
 			'.woocommerce-product-attributes'
@@ -598,9 +631,9 @@ class ProductCollectionPage {
 	}
 
 	async setInheritQueryFromTemplate( inheritQueryFromTemplate: boolean ) {
-		const sidebarSettings = await this.locateSidebarSettings();
+		const sidebarSettings = this.locateSidebarSettings();
 		const input = sidebarSettings.locator(
-			`${ SELECTORS.inheritQueryFromTemplateControl } input`
+			`${ SELECTORS.usePageContextControl } input`
 		);
 		if ( inheritQueryFromTemplate ) {
 			await input.check();
@@ -654,7 +687,7 @@ class ProductCollectionPage {
 	/**
 	 * Locators
 	 */
-	async locateSidebarSettings() {
+	locateSidebarSettings() {
 		return this.page.getByRole( 'region', {
 			name: 'Editor settings',
 		} );
@@ -670,7 +703,7 @@ class ProductCollectionPage {
 
 	async getProductNames() {
 		const products = this.page.locator( '.wp-block-post-title' );
-		return products.allTextContents();
+		return await products.allTextContents();
 	}
 
 	/**

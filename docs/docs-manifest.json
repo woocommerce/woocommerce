@@ -716,7 +716,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "cc5f82b66e949e3df2928b5e6b1217e8804c43b8e7b75ebc930cd0f90aef7bbe",
+          "hash": "a014d4f53a860ff74eec6cefbe868279616bcad5509b2f30f02bb8e118935c98",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -1069,11 +1069,6 @@
       "categories": []
     },
     {
-      "category_slug": "utilities",
-      "category_title": "Utilities",
-      "categories": []
-    },
-    {
       "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woocommerce.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woocommerce.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
       "category_slug": "user-experience-extensions",
       "category_title": "Extension Guidelines",
@@ -1372,5 +1367,5 @@
       "categories": []
     }
   ],
-  "hash": "0f3a825397f5872c1f482a1402a07e71002b2aceec65845f60545f17d7a1d6ff"
+  "hash": "73bcb44585da56302a4dd3056b4a7aab16b58a516f214bbfde7b9b7d7157e84b"
 }

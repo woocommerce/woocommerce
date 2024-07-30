@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "9.2.0",
+	"version": "9.3.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -19,6 +19,7 @@
 	],
 	"require": {
 		"php": ">=7.4",
+		"automattic/jetpack-a8c-mc-stats": "^1.4",
 		"automattic/jetpack-autoloader": "2.11.18",
 		"automattic/jetpack-config": "1.15.2",
 		"automattic/jetpack-connection": "^1.57",
