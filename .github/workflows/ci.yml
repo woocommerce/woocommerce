@@ -36,9 +36,9 @@ jobs:
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: 'Checkout (origin/trunk)'
+        name: "Checkout (origin/${{ github.base_ref || 'trunk' }})"
         with:
-          ref: trunk
+          ref: ${{ github.base_ref || 'trunk' }}
       - uses: 'actions/checkout@v4'
         name: 'Checkout (branch as per trigger event)'
         with:
