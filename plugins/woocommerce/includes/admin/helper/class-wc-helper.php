@@ -1336,7 +1336,11 @@ class WC_Helper {
 	 * @return array Array of state_name => (bool) state
 	 */
 	public static function get_product_subscription_state( $product_id ) {
-		$subscription = self::_get_subscriptions_from_product_id( $product_id, true );
+		$product_subscriptions = wp_list_filter( self::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+
+		$subscription = ! empty( $product_subscriptions )
+			? array_shift( $product_subscriptions )
+			: array();
 
 		return array(
 			'unregistered' => empty( $subscription ),
