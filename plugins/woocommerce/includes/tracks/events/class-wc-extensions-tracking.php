@@ -89,7 +89,17 @@ class WC_Extensions_Tracking {
 	 * Send a Tracks even when a Helper connection process completed successfully.
 	 */
 	public function track_helper_connection_complete() {
-		WC_Tracks::record_event( 'extensions_subscriptions_connected' );
+		$properties = array();
+
+		if ( ! empty( $_GET['utm_source'] ) ) {
+			$properties['utm_source'] = wc_clean( wp_unslash( $_GET['utm_source'] ) );
+		}
+
+		if ( ! empty( $_GET['utm_campaign'] ) ) {
+			$properties['utm_campaign'] = wc_clean( wp_unslash( $_GET['utm_campaign'] ) );
+		}
+
+		WC_Tracks::record_event( 'extensions_subscriptions_connected', $properties );
 	}
 
 	/**
