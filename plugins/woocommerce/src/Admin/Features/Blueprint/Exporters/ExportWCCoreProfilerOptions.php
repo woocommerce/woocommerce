@@ -26,6 +26,7 @@ class ExportWCCoreProfilerOptions implements StepExporter, HasAlias {
 				'blogname'                       => $this->wp_get_option( 'blogname' ),
 				'woocommerce_allow_tracking'     => $this->wp_get_option( 'woocommerce_allow_tracking' ),
 				'woocommerce_onboarding_profile' => $this->wp_get_option( 'woocommerce_onboarding_profile', array() ),
+				'woocommerce_default_country'    => $this->wp_get_option( 'woocommerce_default_country' ),
 			)
 		);
 		$step->set_meta_values(
