@@ -39,11 +39,15 @@ jobs:
         name: "Checkout (${{ github.base_ref || 'trunk' }})"
         with:
           ref: ${{ github.base_ref || 'trunk' }}
+      - name: 'Calculate git fetch dept'
+        shell: bash
+        run: |
+          echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
       - uses: 'actions/checkout@v4'
         name: "Checkout (${{ github.event.pull_request.head.ref || 'auto' }})"
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
+          fetch-depth: ${{ env.GIT_FETCH_DEPTH }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
@@ -93,11 +97,15 @@ jobs:
         name: "Checkout (${{ github.base_ref || 'trunk' }})"
         with:
           ref: ${{ github.base_ref || 'trunk' }}
+      - name: 'Calculate git fetch dept'
+        shell: bash
+        run: |
+          echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
       - uses: 'actions/checkout@v4'
         name: "Checkout (${{ github.event.pull_request.head.ref || 'auto' }})"
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
+          fetch-depth: ${{ env.GIT_FETCH_DEPTH }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         id: 'setup-monorepo'
