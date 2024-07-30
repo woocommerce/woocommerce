@@ -37,7 +37,7 @@ class WC_Widget_Brand_Description extends WP_Widget {
 	 */
 	public $woo_widget_name;
 
-	/** constructor */
+	/** Constructor */
 	public function __construct() {
 
 		/* Widget variable settings. */

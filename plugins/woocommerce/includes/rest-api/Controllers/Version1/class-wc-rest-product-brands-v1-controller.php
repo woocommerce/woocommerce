@@ -6,7 +6,6 @@
  *
  * @package WooCommerce\RestApi
  * @since   x.x.x
- * @category API
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

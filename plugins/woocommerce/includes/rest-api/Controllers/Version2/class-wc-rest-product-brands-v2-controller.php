@@ -5,7 +5,6 @@
  * Handles requests to /products/brands endpoint.
  *
  * @package WooCommerce\RestApi
- * @category API
  * @since   x.x.x
  */
 

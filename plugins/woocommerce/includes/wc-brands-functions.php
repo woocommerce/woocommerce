@@ -3,6 +3,7 @@
  * Brands Helper Functions
  *
  * @version x.x.x
+ * @package WooCommerce
  */
 
 /**
@@ -35,6 +36,14 @@ function get_brand_thumbnail_image( $brand, $size = '' ) {
 	$thumbnail_id = get_term_meta( $brand->term_id, 'thumbnail_id', true );
 
 	if ( '' === $size || 'brand-thumb' === $size ) {
+		/**
+		 * Filter the brand's thumbnail size.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param string $size Brand's thumbnail size.
+		 *
+		 */
 		$size = apply_filters( 'woocommerce_brand_thumbnail_size', 'shop_catalog' );
 	}
 
