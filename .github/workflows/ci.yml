@@ -57,7 +57,8 @@ jobs:
               // Context: PRs - run jobs for all the branch changes on each commit.
               baseRef = `--base-ref origin/${ baseRef }`;
             }
-            if ( ! baseRef && refType === 'branch' && refName === 'trunk' && githubEvent === 'push' ) {
+            if ( ! baseRef && githubEvent === 'push' ) {
+              // TODO: restore `refType === 'branch' && refName === 'trunk' && `
               // Context: merges into trunk - run jobs for all merged changes.
               baseRef = ${{ toJson( github.event.before ) }};
               if ( baseRef ) {
