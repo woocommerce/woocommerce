@@ -36,10 +36,10 @@ jobs:
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.base_ref || 'trunk' }})"
+        name: "Checkout (${{ github.base_ref }})"
         with:
-          ref: ${{ github.base_ref || 'trunk' }}
-      - name: 'Calculate git fetch dept'
+          ref: ${{ github.base_ref }}
+      - name: 'Calculate git fetch depth'
         shell: bash
         run: |
           echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
@@ -94,10 +94,10 @@ jobs:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.base_ref || 'trunk' }})"
+        name: "Checkout (${{ github.base_ref }})"
         with:
-          ref: ${{ github.base_ref || 'trunk' }}
-      - name: 'Calculate git fetch dept'
+          ref: ${{ github.base_ref }}
+      - name: 'Calculate git fetch depth'
         shell: bash
         run: |
           echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
