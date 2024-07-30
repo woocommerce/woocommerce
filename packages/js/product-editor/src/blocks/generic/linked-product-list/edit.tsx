@@ -168,7 +168,7 @@ export function LinkedProductListBlockEdit( {
 				linked_product_id: product.id,
 			} );
 		},
-		[ linkedProductIds ]
+		[ linkedProductIds, state.linkedProducts ]
 	);
 
 	function handleProductListRemove( product: Product ) {
@@ -178,6 +178,7 @@ export function LinkedProductListBlockEdit( {
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
+		searchProducts( '', newLinkedProductIds );
 
 		recordEvent( 'linked_products_product_remove', {
 			source: TRACKS_SOURCE,
