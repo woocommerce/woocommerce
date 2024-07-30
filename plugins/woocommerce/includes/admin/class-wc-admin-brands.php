@@ -183,7 +183,7 @@ class WC_Brands_Admin {
 		$product_brands         = isset( $_POST['product_brands'] ) ? array_map( 'intval', $_POST['product_brands'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$exclude_product_brands = isset( $_POST['exclude_product_brands'] ) ? array_map( 'intval', $_POST['exclude_product_brands'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
-		// Save
+		// Save.
 		update_post_meta( $post_id, 'product_brands', $product_brands );
 		update_post_meta( $post_id, 'exclude_product_brands', $exclude_product_brands );
 	}
@@ -193,15 +193,14 @@ class WC_Brands_Admin {
 	 */
 	public function init_form_fields() {
 
-		// Define settings.
+		/**
+		 * Filter Brands settings.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param array $settings Brands settings.
+		 */
 		$this->settings = apply_filters(
-			/**
-			 * Filter Brands settings.
-			 *
-			 * @since 9.3.0
-			 *
-			 * @param array $settings Brands settings.
-			 */
 			'woocommerce_brands_settings_fields',
 			array(
 				array(
@@ -271,7 +270,6 @@ class WC_Brands_Admin {
 
 	/**
 	 * Admin settings function.
-	 *
 	 */
 	public function admin_settings() {
 		woocommerce_admin_fields( $this->settings );
