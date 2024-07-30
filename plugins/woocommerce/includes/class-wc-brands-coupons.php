@@ -29,11 +29,11 @@ class WC_Brands_Coupons {
 	 * 2) All products in the cart match the brand exclusion rule.
 	 * 3) For a cart discount, there is at least one product in cart that matches exclusion rule.
 	 *
-	 * @throws Exception
-	 * @param  bool         $valid  Whether the coupon is valid
-	 * @param  WC_Coupon    $coupon Coupon object
-	 * @param  WC_Discounts $discounts Discounts object
-	 * @return bool         $valid  True if coupon is valid, otherwise Exception will be thrown
+	 * @throws Exception Throws Exception for invalid coupons.
+	 * @param  bool         $valid  Whether the coupon is valid.
+	 * @param  WC_Coupon    $coupon Coupon object.
+	 * @param  WC_Discounts $discounts Discounts object.
+	 * @return bool         $valid  True if coupon is valid, otherwise Exception will be thrown.
 	 */
 	public function is_coupon_valid( $valid, $coupon, $discounts = null ) {
 		$this->set_brand_settings_on_coupon( $coupon );
@@ -65,17 +65,17 @@ class WC_Brands_Coupons {
 
 		// 1) Coupon has a brand requirement but no products in the cart have the brand.
 		if ( ! $included_brands_match && ! empty( $brand_coupon_settings['included_brands'] ) ) {
-			throw new Exception( WC_Coupon::E_WC_COUPON_NOT_APPLICABLE );
+			throw new Exception( WC_Coupon::E_WC_COUPON_NOT_APPLICABLE ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped.
 		}
 
 		// 2) All products in the cart match brand exclusion rule.
-		if ( sizeof( $items ) === $excluded_brands_matches ) {
-			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS );
+		if ( count( $items ) === $excluded_brands_matches ) {
+			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped.
 		}
 
 		// 3) For a cart discount, there is at least one product in cart that matches exclusion rule.
 		if ( $coupon->is_type( 'fixed_cart' ) && $excluded_brands_matches > 0 ) {
-			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS );
+			throw new Exception( self::E_WC_COUPON_EXCLUDED_BRANDS ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped.
 		}
 
 		return $valid;
@@ -87,10 +87,9 @@ class WC_Brands_Coupons {
 	 * This allows percentage and product discounts to apply to only
 	 * the correct products in the cart.
 	 *
-	 * @access public
-	 * @param  bool       $valid   Whether the product should get the coupon's discounts
-	 * @param  WC_Product $product WC Product Object
-	 * @param  WC_Coupon  $coupon  Coupon object
+	 * @param  bool       $valid   Whether the product should get the coupon's discounts.
+	 * @param  WC_Product $product WC Product Object.
+	 * @param  WC_Coupon  $coupon  Coupon object.
 	 * @return bool       $valid
 	 */
 	public function is_valid_for_product( $valid, $product, $coupon ) {
@@ -117,10 +116,9 @@ class WC_Brands_Coupons {
 	 * Display a custom error message when a cart discount coupon does not validate
 	 * because an excluded brand was found in the cart.
 	 *
-	 * @access public
-	 * @param  string $err      The error message
-	 * @param  string $err_code The error code
-	 * @param  object $coupon   Coupon object
+	 * @param  string $err      The error message.
+	 * @param  string $err_code The error code.
+	 * @param  object $coupon   Coupon object.
 	 * @return string
 	 */
 	public function brand_exclusion_error( $err, $err_code, $coupon ) {
@@ -128,13 +126,13 @@ class WC_Brands_Coupons {
 			return $err;
 		}
 
-		return __( 'Sorry, this coupon is not applicable to the brands of selected products.', 'woocommerce-brands' );
+		return __( 'Sorry, this coupon is not applicable to the brands of selected products.', 'woocommerce' );
 	}
 
 	/**
 	 * Get a list of brands that are assigned to a specific product
 	 *
-	 * @param  int $product_id
+	 * @param  int $product_id Product id.
 	 * @return array brands
 	 */
 	private function get_product_brands( $product_id ) {
@@ -145,7 +143,7 @@ class WC_Brands_Coupons {
 	 * Set brand settings as properties on coupon object. These properties are
 	 * lists of included product brand IDs and list of excluded brand IDs.
 	 *
-	 * @param WC_Coupon $coupon Coupon object
+	 * @param WC_Coupon $coupon Coupon object.
 	 *
 	 * @return void
 	 */
@@ -173,7 +171,7 @@ class WC_Brands_Coupons {
 	/**
 	 * Returns the product (or variant) ID.
 	 *
-	 * @param  WC_Product $product WC Product Object
+	 * @param  WC_Product $product WC Product Object.
 	 * @return int Product ID
 	 */
 	private function get_product_id( $product ) {
