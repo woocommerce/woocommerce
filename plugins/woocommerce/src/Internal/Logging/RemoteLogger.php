@@ -60,7 +60,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	public function handle( $timestamp, $level, $message, $context ) {
 		if ( ! \WC_Log_Levels::is_valid_level( $level ) ) {
 			/* translators: 1: WC_Remote_Logger::log 2: level */
-			wc_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'woocommerce' ), '<code>WC_Remote_Logger::log</code>', $level ), '9.2.0' );
+			wc_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'woocommerce' ), '<code>WC_Remote_Logger::handle</code>', $level ), '9.2.0' );
 		}
 
 		if ( ! $this->is_remote_logging_allowed() ) {
