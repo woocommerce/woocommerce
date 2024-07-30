@@ -12,10 +12,17 @@ namespace Automattic\WooCommerce\Blueprint\ResourceStorages;
  * @package Automattic\WooCommerce\Blueprint\ResourceStorages
  */
 interface ResourceStorage {
+	/**
+	 * Return supported resource type.
+	 *
+	 * @return string
+	 */
 	public function get_supported_resource(): string;
 
 	/**
-	 * @param $slug
+	 * Download the resource.
+	 *
+	 * @param string $slug resource slug.
 	 *
 	 * @return string|null downloaded local path.
 	 */
