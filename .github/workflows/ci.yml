@@ -52,8 +52,6 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
-            // TODO: on merge into trunk all the jobs being started - should be same set of jobs as on PRs
-            // TODO: explore falling back to github.event.before and github.event.base_ref for pushes.
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
