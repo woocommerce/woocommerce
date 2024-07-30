@@ -1576,8 +1576,10 @@ function wc_back_link( $label, $url ) {
 function wc_help_tip( $tip, $allow_html = false ) {
 	if ( $allow_html ) {
 		$sanitized_tip = wc_sanitize_tooltip( $tip );
+		$aria_label    = wc_sanitize_tooltip( wp_strip_all_tags( $tip ) );
 	} else {
 		$sanitized_tip = esc_attr( $tip );
+		$aria_label    = esc_attr( wp_strip_all_tags( $tip ) );
 	}
 
 	/**
@@ -1592,7 +1594,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
 	 *
 	 * @return string
 	 */
-	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-label="' . wp_strip_all_tags( $tip ) . '" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
+	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-label="' . $aria_label . '" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
 }
 
 /**
