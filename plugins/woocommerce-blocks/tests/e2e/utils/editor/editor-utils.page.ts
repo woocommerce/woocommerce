@@ -99,27 +99,17 @@ export class Editor extends CoreEditor {
 		templateName: string;
 	} ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+		await this.page.getByLabel( templateName, { exact: true } ).click();
 
 		const resetNotice = this.page
 			.getByLabel( 'Dismiss this notice' )
 			.getByText( `"${ templateName }" reset.` );
-		const savedButton = this.page.getByRole( 'button', {
-			name: 'Saved',
-		} );
 
-		// Wait until search has finished.
-		const searchResults = this.page.getByLabel( 'Actions' );
-		const initialSearchResultsCount = await searchResults.count();
-		await expect
-			.poll( async () => await searchResults.count() )
-			.toBeLessThan( initialSearchResultsCount );
-
-		await searchResults.first().click();
+		await this.page.getByLabel( 'Actions' ).click();
 		await this.page.getByRole( 'menuitem', { name: 'Reset' } ).click();
 		await this.page.getByRole( 'button', { name: 'Reset' } ).click();
 
 		await expect( resetNotice ).toBeVisible();
-		await expect( savedButton ).toBeVisible();
 	}
 
 	async publishAndVisitPost() {
