@@ -188,7 +188,7 @@
 								form.$form
 									.find( '.single_variation' )
 									.after(
-										'<p class="wc-no-matching-variations woocommerce-info">' +
+										'<p class="wc-no-matching-variations woocommerce-info" role="alert">' +
 										wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
 										'</p>'
 									);
@@ -216,7 +216,7 @@
 						form.$form
 							.find( '.single_variation' )
 							.after(
-								'<p class="wc-no-matching-variations woocommerce-info">' +
+								'<p class="wc-no-matching-variations woocommerce-info" role="alert">' +
 								wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
 								'</p>'
 							);
