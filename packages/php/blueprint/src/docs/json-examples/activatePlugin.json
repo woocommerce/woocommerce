@@ -1,4 +1,4 @@
 {
-  "step": "deactivatePlugin",
+  "step": "activatePlugin",
   "pluginName": "woocommerce"
 }

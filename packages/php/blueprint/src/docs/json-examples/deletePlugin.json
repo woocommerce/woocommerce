@@ -1,4 +1,4 @@
 {
   "step": "deletePlugins",
-  "plugins": ["woocommerce"]
+  "pluginName": "woocommerce"
 }
