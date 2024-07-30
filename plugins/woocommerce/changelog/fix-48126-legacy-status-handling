@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update allowed statuses in legacy payment handler for checkout block.

@@ -11,6 +11,11 @@ overrides:
 
 pnpmfileChecksum: y3ex4x7shfdnqpcpdnu67kmuvu
 
+patchedDependencies:
+    '@wordpress/edit-site@5.15.0':
+        hash: 6y3l6gxu33zybfmvbjd23dtqda
+        path: bin/patches/@wordpress__edit-site@5.15.0.patch
+
 importers:
 
   .:
