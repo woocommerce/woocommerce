@@ -2,7 +2,14 @@
  * External dependencies
  */
 import React from '@wordpress/element';
-import { act, render, screen, within, waitFor } from '@testing-library/react';
+import {
+	act,
+	cleanup,
+	render,
+	screen,
+	within,
+	waitFor,
+} from '@testing-library/react';
 import { default as fetchMock } from 'jest-fetch-mock';
 import userEvent from '@testing-library/user-event';
 
@@ -68,6 +75,7 @@ const selectors = {
 };
 
 const setup = ( params: SetupParams = {} ) => {
+	cleanup();
 	const url = `http://woo.local/${
 		params.filterStock ? '?filter_stock_status=' + params.filterStock : ''
 	}`;
@@ -87,14 +95,7 @@ const setup = ( params: SetupParams = {} ) => {
 	};
 
 	const { container, ...utils } = render(
-		<Block attributes={ attributes } />,
-		{ legacyRoot: true }
-	);
-
-	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
-	// rendering error will be shown.
-	expect( console ).toHaveErroredWith(
-		`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot`
+		<Block attributes={ attributes } />
 	);
 
 	const getList = () => container.querySelector( selectors.list );
@@ -227,7 +228,7 @@ describe( 'Filter by Stock block', () => {
 		fetchMock.resetMocks();
 	} );
 
-	it( 'renders the stock filter block', async () => {
+	test( 'renders the stock filter block', async () => {
 		const { container } = setup( {
 			showFilterButton: false,
 			showCounts: false,
@@ -235,7 +236,7 @@ describe( 'Filter by Stock block', () => {
 		expect( container ).toMatchSnapshot();
 	} );
 
-	it( 'renders the stock filter block with the filter button', async () => {
+	test( 'renders the stock filter block with the filter button', async () => {
 		const { container } = setup( {
 			showFilterButton: true,
 			showCounts: false,
@@ -243,7 +244,7 @@ describe( 'Filter by Stock block', () => {
 		expect( container ).toMatchSnapshot();
 	} );
 
-	it( 'renders the stock filter block with the product counts', async () => {
+	test( 'renders the stock filter block with the product counts', async () => {
 		const { container } = setup( {
 			showFilterButton: false,
 			showCounts: true,
@@ -254,80 +255,86 @@ describe( 'Filter by Stock block', () => {
 	describe( 'Single choice Dropdown', () => {
 		test( 'renders dropdown', () => {
 			const { getDropdown, getList } = setupSingleChoiceDropdown();
+
 			expect( getDropdown() ).toBeInTheDocument();
 			expect( getList() ).toBeNull();
 		} );
 
-		test( 'renders chips based on URL params', () => {
-			const ratingParam = 'instock';
-			const { getInStockChips, getOutOfStockChips, getOnBackorderChips } =
-				setupSingleChoiceDropdown( ratingParam );
+		test( 'renders chips based on URL params', async () => {
+			await waitFor( async () => {
+				const ratingParam = 'instock';
+				const {
+					getInStockChips,
+					getOutOfStockChips,
+					getOnBackorderChips,
+				} = setupSingleChoiceDropdown( ratingParam );
 
-			expect( getInStockChips() ).toBeInTheDocument();
-			expect( getOutOfStockChips() ).toBeNull();
-			expect( getOnBackorderChips() ).toBeNull();
+				expect( getInStockChips() ).toBeInTheDocument();
+				expect( getOutOfStockChips() ).toBeNull();
+				expect( getOnBackorderChips() ).toBeNull();
+			} );
 		} );
 
 		test( 'replaces chosen option when another one is clicked', async () => {
-			const user = userEvent.setup();
-			const ratingParam = 'instock';
-			const {
-				getDropdown,
-				getInStockChips,
-				getOutOfStockChips,
-				getOutOfStockSuggestion,
-			} = setupSingleChoiceDropdown( ratingParam );
+			await waitFor( async () => {
+				const user = userEvent.setup();
+				const ratingParam = 'instock';
+				const {
+					getDropdown,
+					getInStockChips,
+					getOutOfStockChips,
+					getOutOfStockSuggestion,
+				} = setupSingleChoiceDropdown( ratingParam );
 
-			expect( getInStockChips() ).toBeInTheDocument();
-			expect( getOutOfStockChips() ).toBeNull();
+				expect( getInStockChips() ).toBeInTheDocument();
+				expect( getOutOfStockChips() ).toBeNull();
 
-			const dropdown = getDropdown();
+				const dropdown = getDropdown();
 
-			if ( dropdown ) {
-				await act( async () => {
-					await user.click( dropdown );
-				} );
-			}
+				if ( dropdown ) {
+					await act( async () => {
+						await user.click( dropdown );
+					} );
+				}
 
-			const outOfStockSuggestion = getOutOfStockSuggestion();
+				const outOfStockSuggestion = getOutOfStockSuggestion();
 
-			if ( outOfStockSuggestion ) {
-				await act( async () => {
-					await user.click( outOfStockSuggestion );
-				} );
-			}
+				if ( outOfStockSuggestion ) {
+					await act( async () => {
+						await user.click( outOfStockSuggestion );
+					} );
+				}
 
-			expect( getInStockChips() ).toBeNull();
-			expect( getOutOfStockChips() ).toBeInTheDocument();
+				expect( getInStockChips() ).toBeNull();
+				expect( getOutOfStockChips() ).toBeInTheDocument();
+			} );
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
-			const user = userEvent.setup();
-			const ratingParam = 'outofstock';
-			const {
-				getInStockChips,
-				getOutOfStockChips,
-				getOnBackorderChips,
-				getRemoveButtonFromChips,
-			} = setupMultipleChoiceDropdown( ratingParam );
+			await waitFor( async () => {
+				const user = userEvent.setup();
+				const ratingParam = 'outofstock';
+				const {
+					getInStockChips,
+					getOutOfStockChips,
+					getOnBackorderChips,
+					getRemoveButtonFromChips,
+				} = setupMultipleChoiceDropdown( ratingParam );
 
-			await waitFor( () => {
 				expect( getInStockChips() ).toBeNull();
 				expect( getOutOfStockChips() ).toBeInTheDocument();
 				expect( getOnBackorderChips() ).toBeNull();
-			} );
 
-			const removeOutOfStockButton = getRemoveButtonFromChips(
-				getOutOfStockChips()
-			);
+				const removeOutOfStockButton = getRemoveButtonFromChips(
+					getOutOfStockChips()
+				);
 
-			if ( removeOutOfStockButton ) {
-				act( async () => {
-					await user.click( removeOutOfStockButton );
-				} );
-			}
+				if ( removeOutOfStockButton ) {
+					await act( async () => {
+						await user.click( removeOutOfStockButton );
+					} );
+				}
 
-			await waitFor( () => {
 				expect( getInStockChips() ).toBeNull();
 				expect( getOutOfStockChips() ).toBeNull();
 				expect( getOnBackorderChips() ).toBeNull();
@@ -342,67 +349,65 @@ describe( 'Filter by Stock block', () => {
 			expect( getList() ).toBeNull();
 		} );
 
-		test( 'renders chips based on URL params', () => {
-			const ratingParam = 'instock,onbackorder';
-			const { getInStockChips, getOutOfStockChips, getOnBackorderChips } =
-				setupMultipleChoiceDropdown( ratingParam );
+		test( 'renders chips based on URL params', async () => {
+			await waitFor( async () => {
+				const ratingParam = 'instock,onbackorder';
+				const {
+					getInStockChips,
+					getOutOfStockChips,
+					getOnBackorderChips,
+				} = setupMultipleChoiceDropdown( ratingParam );
 
-			expect( getInStockChips() ).toBeInTheDocument();
-			expect( getOutOfStockChips() ).toBeNull();
-			expect( getOnBackorderChips() ).toBeInTheDocument();
-		} );
-
-		test( 'adds chosen option to another one that is clicked', async () => {
-			const user = userEvent.setup();
-			const ratingParam = 'onbackorder';
-			const {
-				getDropdown,
-				getInStockChips,
-				getOutOfStockChips,
-				getOnBackorderChips,
-				getInStockSuggestion,
-				getOutOfStockSuggestion,
-			} = setupMultipleChoiceDropdown( ratingParam );
-
-			await waitFor( () => {
-				expect( getInStockChips() ).toBeNull();
+				expect( getInStockChips() ).toBeInTheDocument();
 				expect( getOutOfStockChips() ).toBeNull();
 				expect( getOnBackorderChips() ).toBeInTheDocument();
 			} );
-			const dropdown = getDropdown();
+		} );
 
-			if ( dropdown ) {
-				await act( async () => {
+		test( 'adds chosen option to another one that is clicked', async () => {
+			await waitFor( async () => {
+				const user = userEvent.setup();
+				const ratingParam = 'onbackorder';
+				const {
+					getDropdown,
+					getInStockChips,
+					getOutOfStockChips,
+					getOnBackorderChips,
+					getInStockSuggestion,
+					getOutOfStockSuggestion,
+				} = setupMultipleChoiceDropdown( ratingParam );
+
+				expect( getInStockChips() ).toBeNull();
+				expect( getOutOfStockChips() ).toBeNull();
+				expect( getOnBackorderChips() ).toBeInTheDocument();
+
+				const dropdown = getDropdown();
+
+				if ( dropdown ) {
 					await user.click( dropdown );
-				} );
-			}
+				}
 
-			const inStockSuggestion = getInStockSuggestion();
+				const inStockSuggestion = getInStockSuggestion();
 
-			if ( inStockSuggestion ) {
-				await act( async () => {
+				if ( inStockSuggestion ) {
 					await user.click( inStockSuggestion );
-				} );
-			}
+				}
 
-			expect( getInStockChips() ).toBeInTheDocument();
-			expect( getOutOfStockChips() ).toBeNull();
-			expect( getOnBackorderChips() ).toBeInTheDocument();
+				expect( getInStockChips() ).toBeInTheDocument();
+				expect( getOutOfStockChips() ).toBeNull();
+				expect( getOnBackorderChips() ).toBeInTheDocument();
 
-			const freshDropdown = getDropdown();
-			if ( freshDropdown ) {
-				await act( async () => {
+				const freshDropdown = getDropdown();
+				if ( freshDropdown ) {
 					await user.click( freshDropdown );
-				} );
-			}
+				}
 
-			const outOfStockSuggestion = getOutOfStockSuggestion();
+				const outOfStockSuggestion = getOutOfStockSuggestion();
 
-			if ( outOfStockSuggestion ) {
-				userEvent.click( outOfStockSuggestion );
-			}
+				if ( outOfStockSuggestion ) {
+					await userEvent.click( outOfStockSuggestion );
+				}
 
-			await waitFor( () => {
 				expect( getInStockChips() ).toBeInTheDocument();
 				expect( getOutOfStockChips() ).toBeInTheDocument();
 				expect( getOnBackorderChips() ).toBeInTheDocument();
@@ -410,32 +415,30 @@ describe( 'Filter by Stock block', () => {
 		} );
 
 		test( 'removes the option when the X button is clicked', async () => {
-			const user = userEvent.setup();
-			const ratingParam = 'instock,outofstock,onbackorder';
-			const {
-				getInStockChips,
-				getOutOfStockChips,
-				getOnBackorderChips,
-				getRemoveButtonFromChips,
-			} = setupMultipleChoiceDropdown( ratingParam );
+			await waitFor( async () => {
+				const user = userEvent.setup();
+				const ratingParam = 'instock,outofstock,onbackorder';
+				const {
+					getInStockChips,
+					getOutOfStockChips,
+					getOnBackorderChips,
+					getRemoveButtonFromChips,
+				} = setupMultipleChoiceDropdown( ratingParam );
 
-			await waitFor( () => {
 				expect( getInStockChips() ).toBeInTheDocument();
 				expect( getOutOfStockChips() ).toBeInTheDocument();
 				expect( getOnBackorderChips() ).toBeInTheDocument();
-			} );
 
-			const removeOutOfStockButton = getRemoveButtonFromChips(
-				getOutOfStockChips()
-			);
+				const removeOutOfStockButton = getRemoveButtonFromChips(
+					getOutOfStockChips()
+				);
 
-			if ( removeOutOfStockButton ) {
-				act( async () => {
-					await user.click( removeOutOfStockButton );
-				} );
-			}
+				if ( removeOutOfStockButton ) {
+					await act( async () => {
+						await user.click( removeOutOfStockButton );
+					} );
+				}
 
-			await waitFor( () => {
 				expect( getInStockChips() ).toBeInTheDocument();
 				expect( getOutOfStockChips() ).toBeNull();
 				expect( getOnBackorderChips() ).toBeInTheDocument();
@@ -450,67 +453,73 @@ describe( 'Filter by Stock block', () => {
 			expect( getList() ).toBeInTheDocument();
 		} );
 
-		test( 'renders checked options based on URL params', () => {
-			const ratingParam = 'instock';
-			const {
-				getInStockCheckbox,
-				getOutOfStockCheckbox,
-				getOnBackorderCheckbox,
-			} = setupSingleChoiceList( ratingParam );
+		test( 'renders checked options based on URL params', async () => {
+			await waitFor( async () => {
+				const ratingParam = 'instock';
+				const {
+					getInStockCheckbox,
+					getOutOfStockCheckbox,
+					getOnBackorderCheckbox,
+				} = setupSingleChoiceList( ratingParam );
 
-			expect( getInStockCheckbox()?.checked ).toBeTruthy();
-			expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+				expect( getInStockCheckbox()?.checked ).toBeTruthy();
+				expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
+				expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+			} );
 		} );
 
 		test( 'replaces chosen option when another one is clicked', async () => {
-			const user = userEvent.setup();
-			const ratingParam = 'outofstock';
-			const {
-				getInStockCheckbox,
-				getOutOfStockCheckbox,
-				getOnBackorderCheckbox,
-			} = setupSingleChoiceList( ratingParam );
+			await waitFor( async () => {
+				const user = userEvent.setup();
+				const ratingParam = 'outofstock';
+				const {
+					getInStockCheckbox,
+					getOutOfStockCheckbox,
+					getOnBackorderCheckbox,
+				} = setupSingleChoiceList( ratingParam );
 
-			expect( getInStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
-			expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+				expect( getInStockCheckbox()?.checked ).toBeFalsy();
+				expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
+				expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
 
-			const onBackorderCheckbox = getOnBackorderCheckbox();
+				const onBackorderCheckbox = getOnBackorderCheckbox();
 
-			if ( onBackorderCheckbox ) {
-				await act( async () => {
-					await user.click( onBackorderCheckbox );
-				} );
-			}
+				if ( onBackorderCheckbox ) {
+					await act( async () => {
+						await user.click( onBackorderCheckbox );
+					} );
+				}
 
-			expect( getInStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
+				expect( getInStockCheckbox()?.checked ).toBeFalsy();
+				expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
+				expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
+			} );
 		} );
 
 		test( 'removes the option when it is clicked again', async () => {
-			const ratingParam = 'onbackorder';
-			const {
-				getInStockCheckbox,
-				getOutOfStockCheckbox,
-				getOnBackorderCheckbox,
-			} = setupMultipleChoiceList( ratingParam );
+			await waitFor( async () => {
+				const ratingParam = 'onbackorder';
+				const {
+					getInStockCheckbox,
+					getOutOfStockCheckbox,
+					getOnBackorderCheckbox,
+				} = setupMultipleChoiceList( ratingParam );
 
-			expect( getInStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
-
-			const onBackorderCheckbox = getOnBackorderCheckbox();
-
-			if ( onBackorderCheckbox ) {
-				userEvent.click( onBackorderCheckbox );
-			}
-
-			await waitFor( () => {
 				expect( getInStockCheckbox()?.checked ).toBeFalsy();
 				expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
-				expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+				expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
+
+				const onBackorderCheckbox = getOnBackorderCheckbox();
+
+				if ( onBackorderCheckbox ) {
+					userEvent.click( onBackorderCheckbox );
+				}
+
+				await waitFor( () => {
+					expect( getInStockCheckbox()?.checked ).toBeFalsy();
+					expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
+					expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+				} );
 			} );
 		} );
 	} );
@@ -522,66 +531,72 @@ describe( 'Filter by Stock block', () => {
 			expect( getList() ).toBeInTheDocument();
 		} );
 
-		test( 'renders chips based on URL params', () => {
-			const ratingParam = 'instock,onbackorder';
-			const {
-				getInStockCheckbox,
-				getOutOfStockCheckbox,
-				getOnBackorderCheckbox,
-			} = setupMultipleChoiceList( ratingParam );
+		test( 'renders chips based on URL params', async () => {
+			await waitFor( async () => {
+				const ratingParam = 'instock,onbackorder';
+				const {
+					getInStockCheckbox,
+					getOutOfStockCheckbox,
+					getOnBackorderCheckbox,
+				} = setupMultipleChoiceList( ratingParam );
 
-			expect( getInStockCheckbox()?.checked ).toBeTruthy();
-			expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
-		} );
-
-		test( 'adds chosen option to another one that is clicked', async () => {
-			const ratingParam = 'outofstock,onbackorder';
-			const {
-				getInStockCheckbox,
-				getOutOfStockCheckbox,
-				getOnBackorderCheckbox,
-			} = setupMultipleChoiceList( ratingParam );
-
-			expect( getInStockCheckbox()?.checked ).toBeFalsy();
-			expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
-			expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
-
-			const inStockCheckbox = getInStockCheckbox();
-
-			if ( inStockCheckbox ) {
-				userEvent.click( inStockCheckbox );
-			}
-
-			await waitFor( () => {
 				expect( getInStockCheckbox()?.checked ).toBeTruthy();
-				expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
+				expect( getOutOfStockCheckbox()?.checked ).toBeFalsy();
 				expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
 			} );
 		} );
 
-		test( 'removes the option when it is clicked again', async () => {
-			const ratingParam = 'instock,outofstock';
-			const {
-				getInStockCheckbox,
-				getOutOfStockCheckbox,
-				getOnBackorderCheckbox,
-			} = setupMultipleChoiceList( ratingParam );
+		test( 'adds chosen option to another one that is clicked', async () => {
+			await waitFor( async () => {
+				const ratingParam = 'outofstock,onbackorder';
+				const {
+					getInStockCheckbox,
+					getOutOfStockCheckbox,
+					getOnBackorderCheckbox,
+				} = setupMultipleChoiceList( ratingParam );
 
-			expect( getInStockCheckbox()?.checked ).toBeTruthy();
-			expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
-			expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
-
-			const inStockCheckbox = getInStockCheckbox();
-
-			if ( inStockCheckbox ) {
-				userEvent.click( inStockCheckbox );
-			}
-
-			await waitFor( () => {
 				expect( getInStockCheckbox()?.checked ).toBeFalsy();
 				expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
+				expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
+
+				const inStockCheckbox = getInStockCheckbox();
+
+				if ( inStockCheckbox ) {
+					userEvent.click( inStockCheckbox );
+				}
+
+				await waitFor( () => {
+					expect( getInStockCheckbox()?.checked ).toBeTruthy();
+					expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
+					expect( getOnBackorderCheckbox()?.checked ).toBeTruthy();
+				} );
+			} );
+		} );
+
+		test( 'removes the option when it is clicked again', async () => {
+			await waitFor( async () => {
+				const ratingParam = 'instock,outofstock';
+				const {
+					getInStockCheckbox,
+					getOutOfStockCheckbox,
+					getOnBackorderCheckbox,
+				} = setupMultipleChoiceList( ratingParam );
+
+				expect( getInStockCheckbox()?.checked ).toBeTruthy();
+				expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
 				expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+
+				const inStockCheckbox = getInStockCheckbox();
+
+				if ( inStockCheckbox ) {
+					userEvent.click( inStockCheckbox );
+				}
+
+				await waitFor( () => {
+					expect( getInStockCheckbox()?.checked ).toBeFalsy();
+					expect( getOutOfStockCheckbox()?.checked ).toBeTruthy();
+					expect( getOnBackorderCheckbox()?.checked ).toBeFalsy();
+				} );
 			} );
 		} );
 	} );

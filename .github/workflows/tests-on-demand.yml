@@ -1,0 +1,17 @@
+name: 'On demand tests run'
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger:
+        description: 'Event name. It will be used to filter the jobs to run in ci.yml. It can be anything, as long as the job you want to run has this event configured in the `events` list. Example: daily-checks, pull_request, on-demand, etc.'
+        required: true
+        default: ''
+
+jobs:
+  run-tests:
+    name: 'Run tests'
+    uses: ./.github/workflows/ci.yml
+    with:
+      trigger: ${{ inputs.trigger }}
+    secrets: inherit

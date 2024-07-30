@@ -43,10 +43,22 @@ export function useObservedViewport< T extends HTMLElement >(): [
 		const resizeObserver = new ResizeObserver( ( entries ) => {
 			entries.forEach( ( entry ) => {
 				if ( entry.target === element ) {
+					let elementTop = '0';
+
+					if ( element.computedStyleMap ) {
+						elementTop =
+							element
+								.computedStyleMap()
+								.get( 'top' )
+								?.toString() || elementTop;
+					} else {
+						// Firefox support
+						elementTop =
+							getComputedStyle( element ).top || elementTop;
+					}
+
 					const { height, width } = entry.contentRect;
-					const elementTop =
-						element.computedStyleMap().get( 'top' )?.toString() ||
-						'0';
+
 					setObservedElement( {
 						height: height + parseInt( elementTop, 10 ),
 						width,

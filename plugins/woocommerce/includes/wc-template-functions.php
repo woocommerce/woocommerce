@@ -31,18 +31,24 @@ function wc_template_redirect() {
 	if ( is_page( wc_get_page_id( 'checkout' ) ) && wc_get_page_id( 'checkout' ) !== wc_get_page_id( 'cart' ) && WC()->cart->is_empty() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 		wp_safe_redirect( wc_get_cart_url() );
 		exit;
-
 	}
 
-	// Logout.
-	if ( isset( $wp->query_vars['customer-logout'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'customer-logout' ) ) {
-		wp_safe_redirect( str_replace( '&amp;', '&', wp_logout_url( apply_filters( 'woocommerce_logout_default_redirect_url', wc_get_page_permalink( 'myaccount' ) ) ) ) );
+	// Logout endpoint under My Account page. Logging out requires a valid nonce.
+	if ( isset( $wp->query_vars['customer-logout'] ) ) {
+		if ( ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( sanitize_key( $_REQUEST['_wpnonce'] ), 'customer-logout' ) ) {
+			wp_logout();
+			wp_safe_redirect( wc_get_logout_redirect_url() );
+			exit;
+		}
+		/* translators: %s: logout url */
+		wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
+		wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 		exit;
 	}
 
-	// Redirect to the correct logout endpoint.
-	if ( isset( $wp->query_vars['customer-logout'] ) && 'true' === $wp->query_vars['customer-logout'] ) {
-		wp_safe_redirect( esc_url_raw( wc_get_account_endpoint_url( 'customer-logout' ) ) );
+	// Redirect to edit account if trying to recover password whilst logged in.
+	if ( isset( $wp->query_vars['lost-password'] ) && is_user_logged_in() ) {
+		wp_safe_redirect( esc_url_raw( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) );
 		exit;
 	}
 
@@ -1386,6 +1392,10 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 					'rel'              => 'nofollow',
 				),
 			);
+
+			if ( is_a( $product, 'WC_Product_Simple' ) ) {
+				$defaults['attributes']['data-success_message'] = $product->add_to_cart_success_message();
+			}
 
 			$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );
 
@@ -2846,29 +2856,28 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'checked_value'     => '1',
 		);
 
-		$args       = wp_parse_args( $args, $defaults );
-		$args       = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
-		$isRequired = (bool) $args['required'];
-		$required = $isRequired === true ? 'required' : '';
-		$asterisk = '';
-		$requireSpan = '';
-
-		if ( $isRequired ) {
-			$asterisk = '<span class="asterisk"><span class="asterisk-line"></span><span class="asterisk-line"></span><span class="asterisk-line"></span></span>';
-			$requireSpan = '<span class="screen-reader-text">' . esc_html__( 'required', 'woocommerce' ) . '</span>' . $asterisk;
-		}
+		$args = wp_parse_args( $args, $defaults );
+		$args = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
 
 		if ( is_string( $args['class'] ) ) {
 			$args['class'] = array( $args['class'] );
 		}
 
-		if ( is_string( $args['label_class'] ) ) {
-			$args['label_class'] = array( $args['label_class'] );
+		if ( $args['required'] ) {
+			// hidden inputs are the only kind of inputs that don't need an `aria-required` attribute.
+			// checkboxes apply the `custom_attributes` to the label - we need to apply the attribute on the input itself, instead.
+			if ( ! in_array( $args['type'], array( 'hidden', 'checkbox' ), true ) ) {
+				$args['custom_attributes']['aria-required'] = 'true';
+			}
+
+			$args['class'][] = 'validate-required';
+			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
+		} else {
+			$required = '&nbsp;<span class="optional">(' . esc_html__( 'optional', 'woocommerce' ) . ')</span>';
 		}
 
-		if ( $isRequired ) {
-			$args['class'][] = 'validate-required';
-			$args['label_class'][] = 'required_field';
+		if ( is_string( $args['label_class'] ) ) {
+			$args['label_class'] = array( $args['label_class'] );
 		}
 
 		if ( is_null( $value ) ) {
@@ -2929,7 +2938,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				} else {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
 
-					$field = '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="country_to_state country_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_attr__( 'Select a country / region&hellip;', 'woocommerce' ) ) . '" ' . $data_label . $required . '><option value="">' . esc_html__( 'Select a country / region&hellip;', 'woocommerce' ) . '</option>';
+					$field = '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="country_to_state country_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_attr__( 'Select a country / region&hellip;', 'woocommerce' ) ) . '" ' . $data_label . '><option value="">' . esc_html__( 'Select a country / region&hellip;', 'woocommerce' ) . '</option>';
 
 					foreach ( $countries as $ckey => $cvalue ) {
 						$field .= '<option value="' . esc_attr( $ckey ) . '" ' . selected( $value, $ckey, false ) . '>' . esc_html( $cvalue ) . '</option>';
@@ -2956,14 +2965,14 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_html__( 'Select an option&hellip;', 'woocommerce' ) ) . '"  data-input-classes="' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . $data_label . $required . '>
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_html__( 'Select an option&hellip;', 'woocommerce' ) ) . '"  data-input-classes="' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . $data_label . '>
 						<option value="">' . esc_html__( 'Select an option&hellip;', 'woocommerce' ) . '</option>';
 
 					foreach ( $states as $ckey => $cvalue ) {
 						$field .= '<option value="' . esc_attr( $ckey ) . '" ' . selected( $value, $ckey, false ) . '>' . esc_html( $cvalue ) . '</option>';
 					}
 
-					$field .= $requireSpan . '</select>';
+					$field .= '</select>';
 
 				} else {
 
@@ -2985,16 +2994,17 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				}
 
 				$field .= sprintf(
-					'<input type="checkbox" name="%1$s" id="%2$s" value="%3$s" class="%4$s" %5$s /> %6$s',
+					'<input type="checkbox" name="%1$s" id="%2$s" value="%3$s" class="%4$s" %5$s%6$s /> %7$s',
 					esc_attr( $key ),
 					esc_attr( $args['id'] ),
 					esc_attr( $args['checked_value'] ),
 					esc_attr( 'input-checkbox ' . implode( ' ', $args['input_class'] ) ),
 					checked( $value, $args['checked_value'], false ),
+					$args['required'] ? ' aria-required="true"' : '',
 					wp_kses_post( $args['label'] )
 				);
 
-				$field .= '</label>';
+				$field .= $required . '</label>';
 
 				break;
 			case 'text':
@@ -3009,7 +3019,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			case 'email':
 			case 'url':
 			case 'tel':
-				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '"  value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes )  . esc_attr( $required ) .  ' />';
+				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-text ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" placeholder="' . esc_attr( $args['placeholder'] ) . '"  value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
 
 				break;
 			case 'hidden':
@@ -3032,7 +3042,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 						$options .= '<option value="' . esc_attr( $option_key ) . '" ' . selected( $value, $option_key, false ) . '>' . esc_html( $option_text ) . '</option>';
 					}
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . $required . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
 							' . $options . '
 						</select>';
 				}
@@ -3055,7 +3065,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field_html = '';
 
 			if ( $args['label'] && 'checkbox' !== $args['type'] ) {
-				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $asterisk . '</label>';
+				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $required . '</label>';
 			}
 
 			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;
@@ -3222,7 +3232,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . $required  . '>';
+		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
@@ -3735,22 +3745,31 @@ function wc_get_price_html_from_text() {
 }
 
 /**
- * Get logout endpoint.
+ * Get the redirect URL after logging out. Defaults to the my account page.
+ *
+ * @since 9.3.0
+ * @return string
+ */
+function wc_get_logout_redirect_url() {
+	/**
+	 * Filters the logout redirect URL.
+	 *
+	 * @since 2.6.9
+	 * @param string $logout_url Logout URL.
+	 * @return string
+	 */
+	return apply_filters( 'woocommerce_logout_default_redirect_url', wc_get_page_permalink( 'myaccount' ) );
+}
+
+/**
+ * Get logout link.
  *
  * @since  2.6.9
- *
  * @param string $redirect Redirect URL.
- *
  * @return string
  */
 function wc_logout_url( $redirect = '' ) {
-	$redirect = $redirect ? $redirect : apply_filters( 'woocommerce_logout_default_redirect_url', wc_get_page_permalink( 'myaccount' ) );
-
-	if ( get_option( 'woocommerce_logout_endpoint' ) ) {
-		return wp_nonce_url( wc_get_endpoint_url( 'customer-logout', '', $redirect ), 'customer-logout' );
-	}
-
-	return wp_logout_url( $redirect );
+	return wp_logout_url( $redirect ? $redirect : wc_get_logout_redirect_url() );
 }
 
 /**

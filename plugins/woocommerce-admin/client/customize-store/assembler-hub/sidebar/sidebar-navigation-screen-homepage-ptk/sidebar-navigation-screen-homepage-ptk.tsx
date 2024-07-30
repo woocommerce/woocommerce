@@ -11,6 +11,7 @@ import {
 	Modal,
 	// @ts-ignore No types for this exist yet.
 	__experimentalNavigatorButton as NavigatorButton,
+	Spinner,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/components';
 import {
@@ -41,11 +42,14 @@ import { capitalize } from 'lodash';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
-import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import clsx from 'clsx';
 import './style.scss';
+import { usePatterns } from '~/customize-store/assembler-hub/hooks/use-patterns';
+import { THEME_SLUG } from '~/customize-store/data/constants';
+import apiFetch from '@wordpress/api-fetch';
+import { enableTracking } from '~/customize-store/design-without-ai/services';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
 	if ( path?.includes( category ) ) {
@@ -58,7 +62,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context, sendEvent } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
@@ -105,23 +109,52 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		}, initialAccumulator );
 	}, [ blocks ] );
 
-	let notice;
-	if ( isNetworkOffline ) {
-		notice = __(
-			"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
-			'woocommerce'
-		);
-	} else if ( ! isPTKPatternsAPIAvailable ) {
-		notice = __(
-			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
-			'woocommerce'
-		);
-	} else if ( ! isTrackingAllowed() ) {
-		notice = __(
-			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
-			'woocommerce'
-		);
-	}
+	const {
+		blockPatterns,
+		isLoading: isLoadingPatterns,
+		invalidateCache,
+	} = usePatterns();
+
+	const patternsFromPTK = blockPatterns.filter(
+		( pattern ) =>
+			! pattern.name.includes( THEME_SLUG ) &&
+			! pattern.name.includes( 'woocommerce' ) &&
+			pattern.source !== 'core' &&
+			pattern.source !== 'pattern-directory/featured' &&
+			pattern.source !== 'pattern-directory/theme' &&
+			pattern.source !== 'pattern-directory/core'
+	);
+
+	const notice = useMemo( () => {
+		let noticeText;
+		if ( isNetworkOffline ) {
+			noticeText = __(
+				"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
+				'woocommerce'
+			);
+		} else if ( ! isPTKPatternsAPIAvailable ) {
+			noticeText = __(
+				"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
+				'woocommerce'
+			);
+		} else if ( ! isTrackingAllowed() ) {
+			noticeText = __(
+				'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
+				'woocommerce'
+			);
+		} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
+			noticeText = __(
+				'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
+				'woocommerce'
+			);
+		}
+		return noticeText;
+	}, [
+		isNetworkOffline,
+		isPTKPatternsAPIAvailable,
+		isLoadingPatterns,
+		patternsFromPTK.length,
+	] );
 
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
@@ -130,6 +163,8 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 
 	const [ optInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
+
+	const [ isFetchingPatterns, setIsFetchingPatterns ] = useState( false );
 
 	const optIn = () => {
 		trackEvent(
@@ -245,6 +280,19 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												variant="link"
 											/>
 										),
+										FetchPatterns: (
+											<Button
+												onClick={ async () => {
+													await apiFetch( {
+														path: `/wc/private/patterns`,
+														method: 'POST',
+													} );
+
+													invalidateCache();
+												} }
+												variant="link"
+											/>
+										),
 									} ) }
 								</p>
 								{ isModalOpen && (
@@ -253,7 +301,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											'woocommerce-customize-store__opt-in-usage-tracking-modal'
 										}
 										title={ __(
-											'Opt in to usage tracking',
+											'Access more patterns',
 											'woocommerce'
 										) }
 										onRequestClose={ closeModal }
@@ -263,7 +311,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											className="core-profiler__checkbox"
 											label={ interpolateComponents( {
 												mixedString: __(
-													'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+													'More patterns from the WooCommerce.com library are available! Opt in to connect your store and access the full library, plus get more relevant content and a tailored store setup experience. Opting in will enable {{link}}usage tracking{{/link}}, which you can opt out of at any time via WooCommerce settings.',
 													'woocommerce'
 												),
 												components: {
@@ -293,24 +341,34 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												) }
 											</Button>
 											<Button
-												onClick={ () => {
+												onClick={ async () => {
 													optIn();
-													if ( isIframe( window ) ) {
-														sendMessageToParent( {
-															type: 'INSTALL_PATTERNS',
-														} );
-													} else {
-														sendEvent(
-															'INSTALL_PATTERNS'
-														);
-													}
+													await enableTracking();
+													setIsFetchingPatterns(
+														true
+													);
+													await apiFetch< {
+														success: boolean;
+													} >( {
+														path: `/wc/private/patterns`,
+														method: 'POST',
+													} );
+													invalidateCache();
+													closeModal();
+													setIsFetchingPatterns(
+														false
+													);
 												} }
 												variant="primary"
 												disabled={ ! optInDataSharing }
 											>
-												{ __(
-													'Opt in',
-													'woocommerce'
+												{ isFetchingPatterns ? (
+													<Spinner />
+												) : (
+													__(
+														'Opt in',
+														'woocommerce'
+													)
 												) }
 											</Button>
 										</div>

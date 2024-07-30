@@ -256,6 +256,64 @@ test.describe( `${ blockData.name }`, () => {
 		await expect(
 			editor.page.getByText( 'LayoutJustificationOrientation' )
 		).toBeVisible();
+
+		// Overlay settings
+		const overlayModeSettings = [ 'Never', 'Mobile', 'Always' ];
+		const overlayButtonSettings = [
+			'Label and icon',
+			'Label only',
+			'Icon only',
+		];
+		const overlayIconsSettings = [
+			'Filter icon 1',
+			'Filter icon 2',
+			'Filter icon 3',
+			'Filter icon 4',
+		];
+
+		await expect( editor.page.getByText( 'Overlay' ) ).toBeVisible();
+
+		for ( const mode of overlayModeSettings ) {
+			await expect( editor.page.getByText( mode ) ).toBeVisible();
+		}
+
+		await editor.page.getByLabel( 'Mobile' ).click();
+		await expect( editor.page.getByText( 'BUTTON' ) ).toBeVisible();
+
+		for ( const mode of overlayButtonSettings ) {
+			await expect( editor.page.getByText( mode ) ).toBeVisible();
+		}
+
+		for ( const mode of overlayIconsSettings ) {
+			await expect( editor.page.getByLabel( mode ) ).toBeVisible();
+		}
+
+		await expect( editor.page.getByText( 'ICON SIZE' ) ).toBeVisible();
+		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
+
+		await editor.page.getByLabel( 'Always' ).click();
+
+		await expect( editor.page.getByText( 'BUTTON' ) ).toBeHidden();
+
+		for ( const mode of overlayButtonSettings ) {
+			await expect( editor.page.getByText( mode ) ).toBeHidden();
+		}
+
+		for ( const mode of overlayIconsSettings ) {
+			await expect( editor.page.getByLabel( mode ) ).toBeHidden();
+		}
+
+		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
+
+		await editor.page.getByLabel( 'Mobile' ).click();
+
+		await editor.page.locator( 'input[value="label"]' ).click();
+
+		for ( const mode of overlayIconsSettings ) {
+			await expect( editor.page.getByLabel( mode ) ).toBeHidden();
+		}
+
+		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
 	} );
 
 	test( 'Layout > default to vertical stretch', async ( {
@@ -380,73 +438,5 @@ test.describe( `${ blockData.name }`, () => {
 		await expect(
 			block.locator( blockData.selectors.editor.layoutWrapper )
 		).toHaveCSS( 'gap', '0px' );
-	} );
-
-	test.describe( 'product-filter-attribute', () => {
-		test( 'should dynamically set block title and heading based on the selected attribute', async ( {
-			editor,
-			pageObject,
-		} ) => {
-			await pageObject.addProductFiltersBlock( { cleanContent: true } );
-
-			await pageObject.page.getByLabel( 'Document Overview' ).click();
-			const listView = pageObject.page.getByLabel( 'List View' );
-
-			const productFiltersBlockListItem = listView.getByRole( 'link', {
-				name: 'Product Filters (Experimental)',
-			} );
-			await expect( productFiltersBlockListItem ).toBeVisible();
-			const listViewExpander =
-				pageObject.page.getByTestId( 'list-view-expander' );
-			const listViewExpanderIcon = listViewExpander.locator( 'svg' );
-
-			await listViewExpanderIcon.click();
-
-			const productFilterAttributeColorBlockListItem = listView.getByText(
-				'Color (Experimental)' // it must select the attribute with the highest product count
-			);
-			await expect(
-				productFilterAttributeColorBlockListItem
-			).toBeVisible();
-
-			const productFilterAttributeBlock = editor.canvas
-				.getByLabel( 'Block: Filter Options' )
-				.and(
-					editor.canvas.locator(
-						'[data-type="woocommerce/product-filter-attribute"]'
-					)
-				);
-			await editor.selectBlocks( productFilterAttributeBlock );
-			await editor.clickBlockToolbarButton( 'Edit' );
-			await editor.canvas
-				.locator( 'label' )
-				.filter( { hasText: 'Size' } )
-				.click();
-			await editor.canvas.getByRole( 'button', { name: 'Done' } ).click();
-
-			await expect(
-				productFilterAttributeColorBlockListItem
-			).toBeHidden();
-
-			const productFilterAttributeSizeBlockListItem = listView.getByText(
-				'Size (Experimental)' // it must select the attribute with the highest product count
-			);
-			await expect(
-				productFilterAttributeSizeBlockListItem
-			).toBeVisible();
-
-			const productFilterAttributeWrapperBlock = editor.canvas.getByLabel(
-				'Block: Attribute (Experimental)'
-			);
-			await editor.selectBlocks( productFilterAttributeWrapperBlock );
-			await expect( productFilterAttributeWrapperBlock ).toBeVisible();
-
-			const productFilterAttributeBlockHeading =
-				productFilterAttributeWrapperBlock.getByText( 'Size', {
-					exact: true,
-				} );
-
-			await expect( productFilterAttributeBlockHeading ).toBeVisible();
-		} );
 	} );
 } );

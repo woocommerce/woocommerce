@@ -1,0 +1,44 @@
+diff --git a/build-module/lock-unlock.js b/build-module/lock-unlock.js
+index 2265f933ceec19f65ca6776c24c3f88b368d713f..e9e10980bfd1b584ab0a037c3b72edae29a2a26e 100644
+--- a/build-module/lock-unlock.js
++++ b/build-module/lock-unlock.js
+@@ -1,9 +1,34 @@
+ /**
+- * WordPress dependencies
++ * External dependencies
+  */
+ import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
+-export const {
+-  lock,
+-  unlock
+-} = __dangerousOptInToUnstableAPIsOnlyForCoreModules('I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.', '@wordpress/edit-site');
++
++// Workaround for Gutenberg private API consent string differences between WP 6.3 and 6.4+
++// The modified version checks for the WP version and replaces the consent string with the correct one.
++// This can be removed once we drop support for WP 6.3 in the "Customize Your Store" task.
++// See this PR for details: https://github.com/woocommerce/woocommerce/pull/40884
++
++const wordPressConsentString = {
++	6.4: 'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.',
++	6.5: 'I know using unstable features means my theme or plugin will inevitably break in the next version of WordPress.',
++	6.6: 'I acknowledge private features are not for use in themes or plugins and doing so will break in the next version of WordPress.',
++};
++
++function optInToUnstableAPIs() {
++	let error;
++	for ( const optInString of Object.values( wordPressConsentString ) ) {
++		try {
++			return __dangerousOptInToUnstableAPIsOnlyForCoreModules(
++				optInString,
++				'@wordpress/edit-site'
++			);
++		} catch ( anError ) {
++			error = anError;
++		}
++	}
++
++	throw error;
++}
++
++export const { lock, unlock } = optInToUnstableAPIs();
+ //# sourceMappingURL=lock-unlock.js.map
