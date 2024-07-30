@@ -37,224 +37,15 @@
         },
         {
           "post_title": "How to add a custom field to simple and variable products",
-          "menu_title": "Add Custom Fields to Products",
+          "menu_title": "Add custom fields to products",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "59ef97ed2053dedfa5e7c658d5c7fa470d8110afc9b84584cb32b58389bf5687",
+          "hash": "72eba9999d9f1a152a10d27df349e666d1c3735fd3f1328a50c69c846dd18bed",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
       ],
       "categories": []
-    },
-    {
-      "content": "",
-      "category_slug": "cart-and-checkout-blocks",
-      "category_title": "Cart and Checkout Blocks",
-      "posts": [
-        {
-          "post_title": "Cart and Checkout - Slot and fill",
-          "menu_title": "Slot and Fill",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
-          "hash": "59ffc2bc3121b6bd9f5d0d6e390600e85bbffb0e23ad31118f8628eb264b0bd7",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
-          "id": "e388101586765dd9aca752d66d667d74951a1504"
-        },
-        {
-          "post_title": "Cart and Checkout - Handling scripts, styles, and data",
-          "menu_title": "Script, Styles, and Data Handling",
-          "tags": "how-to",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/integration-interface.md",
-          "hash": "0f69443cf4d6fc672fb1ff02158f81c513e05675c9df0f8f4bc82a7efacbb20c",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/integration-interface.md",
-          "id": "4e702e6f5d22756c4d3518ee3190320df691878f"
-        },
-        {
-          "post_title": "Cart and Checkout - How the checkout block processes an order",
-          "menu_title": "Processing an Order",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/how-checkout-processes-an-order.md",
-          "hash": "17b546f85344c84ee773be7d77ddd0f7f4bfe49f05c3f483dd2d01b21ac92dfc",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/how-checkout-processes-an-order.md",
-          "id": "092e66dac8f44d08799ba1d2411d757fd53c9e00"
-        },
-        {
-          "post_title": "Cart and Checkout - DOM events",
-          "menu_title": "DOM Events",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/dom-events.md",
-          "hash": "5ad212b2ee74a7f85dfe05dfa10a3797d839c4e791cc78998fadf30f8a61adf9",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/dom-events.md",
-          "id": "d04c25818072f47ec21c36e7907e0f81c9c20cc3"
-        },
-        {
-          "post_title": "Cart and Checkout - Available slots",
-          "menu_title": "Available Slots",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-slot-fills.md",
-          "hash": "0d715a474c3e6e5d11aec427c8baf2098416d09ea8d79a1ce32f0a88e6888ae9",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-slot-fills.md",
-          "id": "c7ac16eee5540b06b6db928f5d03282ff177e84e",
-          "links": {
-            "./slot-fills.md": "e388101586765dd9aca752d66d667d74951a1504"
-          }
-        },
-        {
-          "post_title": "Cart and Checkout - Additional checkout fields",
-          "menu_title": "Additional Checkout Fields",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/additional-checkout-fields.md",
-          "hash": "9ebaa1a488a72db1f698504bf0c6b556fb4d12a70f648e247dc323fa91969f13",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/additional-checkout-fields.md",
-          "id": "cb5dd8d59043a4e53929121b45da7b33b1661ab8"
-        }
-      ],
-      "categories": [
-        {
-          "content": "\n\n\n",
-          "category_slug": "cart-and-checkout-available-filters",
-          "category_title": "Available Filters",
-          "posts": [
-            {
-              "post_title": "Cart and Checkout - Totals footer item",
-              "menu_title": "Totals Footer Item",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
-              "hash": "628eec63db5f53987c508509e4929b4635725313701d6c5f9600d1e82746acb3",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
-              "id": "90a9b8df374082f1713866a58b810303adb4d3da"
-            },
-            {
-              "post_title": "Cart and Checkout Filters - Order summary items",
-              "menu_title": "Order Summary Items",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
-              "hash": "bb49ef3f1867dcb1992c629d0f8cbef1dfc5f138e2f0b479bca0f6b961150f94",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
-              "id": "78eb3b135f82a3624a49979e3e93334295abd060"
-            },
-            {
-              "post_title": "Cart and Checkout Filters - Coupons",
-              "menu_title": "Coupons",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/coupons.md",
-              "hash": "825c97646d49559e4f0425590f1d968f2c861c47484b90fc633eefe5f50e432e",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/coupons.md",
-              "id": "5a022617f3d0267c9b771374f28970e779a6e99d"
-            },
-            {
-              "post_title": "Cart and Checkout - Checkout and place order button",
-              "menu_title": "Checkout and Place Order Button",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
-              "hash": "b3d0568c6e4d17fcc6bb2446e6c606d8fc5b790af92920e5d6dd71f2b31c2e8f",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
-              "id": "c97ca710c2e8107bf90915e038a34c8a1016c63a"
-            },
-            {
-              "post_title": "Cart and Checkout - Cart line items",
-              "menu_title": "Cart Line Items",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "hash": "7bcde17e82296595ff97fcc57f38bab0e0f37bbcc741e40f1a12cbd10775174c",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2"
-            },
-            {
-              "post_title": "Cart and Checkout - Available filters",
-              "menu_title": "Available Filters",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/available-filters.md",
-              "hash": "7c58edf7ec3223171bff44a41c2fc2a65db8372f9718ca6f2ea1c9ab511f9dbb",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/available-filters.md",
-              "id": "d88f29ca4697eace597ea00ea41b6f25b4a4dee1",
-              "links": {
-                "./cart-line-items.md": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2",
-                "./order-summary-items.md": "78eb3b135f82a3624a49979e3e93334295abd060",
-                "./totals-footer-item.md": "90a9b8df374082f1713866a58b810303adb4d3da",
-                "./checkout-and-place-order-button.md": "c97ca710c2e8107bf90915e038a34c8a1016c63a",
-                "./coupons.md": "5a022617f3d0267c9b771374f28970e779a6e99d",
-                "./additional-cart-checkout-inner-block-types.md": "3167c9602b1bd3b206226a0d4415944a5f647495"
-              }
-            },
-            {
-              "post_title": "Cart and Checkout - Inner block types",
-              "menu_title": "Inner Block Types",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
-              "hash": "3ea3113a1686f0749ceac3ede28c865630563ccca6d18431d7efb0f6f463cc09",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
-              "id": "3167c9602b1bd3b206226a0d4415944a5f647495"
-            }
-          ],
-          "categories": []
-        },
-        {
-          "content": "\n\n\n",
-          "category_slug": "checkout-payment-methods",
-          "category_title": "Payment Methods",
-          "posts": [
-            {
-              "post_title": "Cart and Checkout - Payment method integration for the Checkout block",
-              "menu_title": "Payment Method Integration",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "f60acaaea4a6ac4adf637bc7069c966e01db089f9dfaa937def91165a71a4255",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
-              "links": {
-                "./checkout-flow-and-events.md": "499384cbb48ed96a2e12653cd68bd82d123a20a1"
-              }
-            },
-            {
-              "post_title": "Cart and Checkout - Filtering payment methods in the Checkout block",
-              "menu_title": "Filtering Payment Methods",
-              "tags": "how-to",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/filtering-payment-methods.md",
-              "hash": "eec74b9116b1c0b76fdd9e50810e5f08467aec90ee62486409ca204be21dc3e4",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/filtering-payment-methods.md",
-              "id": "5c9ff65767116f51e9ec4de26794e6e4e743ffa3",
-              "links": {
-                "./payment-method-integration.md": "c9a763b6976ecf03aeb961577c17c31f1ac7c420"
-              }
-            },
-            {
-              "post_title": "Cart and Checkout - Checkout flow and events",
-              "menu_title": "Checkout Flow and Events",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
-              "hash": "dcc4af69b2614b0722431f81a312558bf3c5fa349021849d241bf896e02813a7",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md",
-              "id": "499384cbb48ed96a2e12653cd68bd82d123a20a1",
-              "links": {
-                "./payment-method-integration.md": "c9a763b6976ecf03aeb961577c17c31f1ac7c420"
-              }
-            }
-          ],
-          "categories": []
-        },
-        {
-          "content": "\n\n\n",
-          "category_slug": "cart-and-checkout-hooks",
-          "category_title": "Hooks",
-          "posts": [
-            {
-              "post_title": "Cart and Checkout - Legacy hooks",
-              "menu_title": "Legacy Hooks",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "hash": "dc87374afba4a93d796d0fd89f99bec5a4c0bac6a5e1f81c89dc37242cd6dd0b",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "id": "5264fa45d393327b2c9cffb038c4d3670879d911",
-              "links": {
-                "../README.md": "c259c391610e4f89c7218966dd742c5c579c0a8f"
-              }
-            }
-          ],
-          "categories": []
-        }
-      ]
     },
     {
       "content": "\nAccess a collection of useful code snippets to customize and enhance your WooCommerce store's functionality.\n",
@@ -509,34 +300,6 @@
       "categories": []
     },
     {
-      "content": "",
-      "category_slug": "extensibility-in-blocks",
-      "category_title": "Extensibility in blocks",
-      "posts": [
-        {
-          "post_title": "An introduction to extensiblity in WooCommerce Blocks",
-          "menu_title": "Introduction",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extensibility-in-blocks/extending-blocks.md",
-          "hash": "c81b808abcdcfb708266a7db33d73bc85b014c5042c54801d6be719ca745e45d",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extensibility-in-blocks/extending-blocks.md",
-          "id": "4fadb6f83309e1033060d94b3340ae0be27ad718",
-          "links": {
-            "../cart-and-checkout-blocks/hooks/migrated-hooks.md": "5264fa45d393327b2c9cffb038c4d3670879d911",
-            "../cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md": "499384cbb48ed96a2e12653cd68bd82d123a20a1",
-            "../cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
-            "../cart-and-checkout-blocks/checkout-payment-methods/filtering-payment-methods.md": "5c9ff65767116f51e9ec4de26794e6e4e743ffa3",
-            "../cart-and-checkout-blocks/how-checkout-processes-an-order.md": "092e66dac8f44d08799ba1d2411d757fd53c9e00",
-            "../cart-and-checkout-blocks/integration-interface.md": "4e702e6f5d22756c4d3518ee3190320df691878f",
-            "../cart-and-checkout-blocks/slot-fills.md": "e388101586765dd9aca752d66d667d74951a1504",
-            "../cart-and-checkout-blocks/available-slot-fills.md": "c7ac16eee5540b06b6db928f5d03282ff177e84e",
-            "../cart-and-checkout-blocks/dom-events.md": "d04c25818072f47ec21c36e7907e0f81c9c20cc3",
-            "../cart-and-checkout-blocks/additional-checkout-fields.md": "cb5dd8d59043a4e53929121b45da7b33b1661ab8"
-          }
-        }
-      ],
-      "categories": []
-    },
-    {
       "content": "\nExplore how to develop WooCommerce extensions with practical tutorials and resources ideal for initial setup and understanding the core functionalities of the platform.\n",
       "category_slug": "extension-development",
       "category_title": "Extension Development",
@@ -587,7 +350,7 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "844689b6d9c482fb217a512db6ddab0afd4d76b2b9e378a9302681d2a8dfe517",
+          "hash": "7e66b9ea605944c5926cf6099fb8fb323976c014fef7dd768c91cef17b091edd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
         },
@@ -953,7 +716,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "cc5f82b66e949e3df2928b5e6b1217e8804c43b8e7b75ebc930cd0f90aef7bbe",
+          "hash": "a014d4f53a860ff74eec6cefbe868279616bcad5509b2f30f02bb8e118935c98",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -1604,5 +1367,5 @@
       "categories": []
     }
   ],
-  "hash": "287d122348fe6d8990938c8a08c37eaae24832f403cb020e555d8ea8980b0fde"
+  "hash": "73bcb44585da56302a4dd3056b4a7aab16b58a516f214bbfde7b9b7d7157e84b"
 }

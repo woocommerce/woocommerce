@@ -98,6 +98,15 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			}
 			break;
 
+		case types.SET_CUSTOMER_PASSWORD:
+			if ( typeof action.customerPassword !== 'undefined' ) {
+				newState = {
+					...state,
+					customerPassword: action.customerPassword,
+				};
+			}
+			break;
+
 		case types.SET_ADDITIONAL_FIELDS:
 			if ( action.additionalFields !== undefined ) {
 				newState = {

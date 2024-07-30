@@ -88,6 +88,7 @@ POST /wc/store/v1/checkout
 | `customer_note`    | string |    No    | Note added to the order by the customer during checkout.            |
 | `payment_method`   | string |   Yes    | The ID of the payment method being used to process the payment.     |
 | `payment_data`     | array  |    No    | Data to pass through to the payment method when processing payment. |
+| `customer_password`| string |    No    | Optionally define a password for new accounts.                      |
 
 ```sh
 curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout?payment_method=paypal&payment_data[0][key]=test-key&payment_data[0][value]=test-value

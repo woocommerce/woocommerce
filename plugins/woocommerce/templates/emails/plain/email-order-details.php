@@ -43,7 +43,7 @@ if ( $item_totals ) {
 }
 
 if ( $order->get_customer_note() ) {
-	echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses_post( wptexturize( $order->get_customer_note() ) ) . "\n";
+	echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses( wptexturize( $order->get_customer_note() ), array() ) . "\n";
 }
 
 if ( $sent_to_admin ) {

@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.2.0",
+	"version": "9.3.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -51,10 +51,9 @@
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
 		"test": "pnpm test:unit",
-		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
-		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
-		"test:e2e-pw": "pnpm test:e2e:install && pnpm playwright test --config=tests/e2e-pw/envs/default/playwright.config.js",
-		"test:e2e": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
+		"test:api": "pnpm test:e2e:default --project=api --workers 4",
+		"test:e2e": "pnpm test:e2e:default --project=ui",
+		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
@@ -73,7 +72,8 @@
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:copy-assets": "wireit"
+		"watch:build:project:copy-assets": "wireit",
+		"wp-env": "wp-env"
 	},
 	"lint-staged": {
 		"*.php": [
@@ -104,7 +104,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP",
+					"name": "PHP: 8.0 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"changes": [
@@ -117,36 +117,14 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
-					],
-					"testEnv": {
-						"start": "env:test"
-					},
-					"events": [
-						"pull_request",
-						"push"
-					]
-				},
-				{
-					"name": "PHP 8.0",
-					"testType": "unit:php",
-					"command": "test:php:env",
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.0"
+							"phpVersion": "8.0",
+							"wpVersion": "latest"
 						}
 					},
 					"events": [
@@ -168,7 +146,8 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -195,7 +174,8 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -223,7 +203,8 @@
 						"templates/**/*.php",
 						"tests/php/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/unit-tests/**/*.php",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -239,7 +220,7 @@
 				{
 					"name": "Core e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/6",
 						"--shard=2/6",
@@ -256,7 +237,8 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/e2e-pw/**"
+						"tests/e2e-pw/**",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -286,7 +268,6 @@
 					"changes": [],
 					"events": [
 						"daily-checks",
-						"nightly-checks",
 						"release-checks"
 					],
 					"testEnv": {
@@ -383,7 +364,7 @@
 				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -395,16 +376,7 @@
 						"daily-checks",
 						"release-checks"
 					],
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/e2e-pw/**"
-					],
+					"changes": [],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
@@ -420,7 +392,7 @@
 				{
 					"name": "Core e2e tests - PHP 8.1",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -448,7 +420,7 @@
 				{
 					"name": "Core e2e tests - WP latest-1",
 					"testType": "e2e",
-					"command": "test:e2e:with-env default",
+					"command": "test:e2e",
 					"shardingArguments": [
 						"--shard=1/5",
 						"--shard=2/5",
@@ -476,7 +448,7 @@
 				{
 					"name": "Core API tests",
 					"testType": "api",
-					"command": "test:api-pw",
+					"command": "test:api",
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
@@ -486,8 +458,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/api-core-tests/**",
-						"tests/e2e-pw/bin/**"
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -498,14 +469,14 @@
 					],
 					"report": {
 						"resultsBlobName": "core-api-report",
-						"resultsPath": "tests/api-core-tests/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
 				{
 					"name": "Core API tests - HPOS disabled",
 					"testType": "api",
-					"command": "test:api-pw",
+					"command": "test:api",
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
@@ -515,8 +486,8 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/api-core-tests/**",
-						"tests/e2e-pw/bin/**"
+						"tests/e2e-pw/bin/**",
+						".wp-env.json"
 					],
 					"events": [
 						"push"
@@ -529,7 +500,7 @@
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
-						"resultsPath": "tests/api-core-tests/test-results",
+						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
 				},
@@ -546,7 +517,8 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						"tests/performance/**"
+						"tests/performance/**",
+						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:perf"
@@ -569,7 +541,8 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"templates/**/*.html",
-						"tests/metrics/**"
+						"tests/metrics/**",
+						".wp-env.json"
 					],
 					"events": [
 						"disabled"
@@ -601,7 +574,8 @@
 					"events": [
 						"pull_request",
 						"push",
-						"release-checks"
+						"release-checks",
+						"nightly-checks"
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
@@ -616,10 +590,27 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks"
+						"daily-checks",
+						"on-demand"
 					],
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Core e2e tests - default WPCOM site",
+					"testType": "e2e",
+					"command": "test:e2e:with-env default-wpcom",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"daily-checks",
+						"on-demand"
+					],
+					"report": {
+						"resultsBlobName": "default-wpcom-core-e2e",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -647,7 +638,7 @@
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.4",
-		"@wordpress/env": "^9.0.7",
+		"@wordpress/env": "^9.7.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.25.0",
 		"allure-playwright": "^2.9.2",

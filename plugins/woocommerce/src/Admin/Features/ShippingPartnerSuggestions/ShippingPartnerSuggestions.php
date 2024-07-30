@@ -20,14 +20,14 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 		$locale = get_user_locale();
 
 		$specs           = is_array( $specs ) ? $specs : self::get_specs();
-		$results         = EvaluateSuggestion::evaluate_specs( $specs );
+		$results         = EvaluateSuggestion::evaluate_specs( $specs, array( 'source' => 'wc-shipping-partner-suggestions' ) );
 		$specs_to_return = $results['suggestions'];
 		$specs_to_save   = null;
 
 		if ( empty( $specs_to_return ) ) {
 			// When suggestions is empty, replace it with defaults and save for 3 hours.
 			$specs_to_save   = DefaultShippingPartners::get_all();
-			$specs_to_return = EvaluateSuggestion::evaluate_specs( $specs_to_save )['suggestions'];
+			$specs_to_return = EvaluateSuggestion::evaluate_specs( $specs_to_save, array( 'source' => 'wc-shipping-partner-suggestions' ) )['suggestions'];
 		} elseif ( count( $results['errors'] ) > 0 ) {
 			// When suggestions is not empty but has errors, save it for 3 hours.
 			$specs_to_save = $specs;
