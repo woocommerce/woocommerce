@@ -32,6 +32,8 @@ export const CheckboxControl = ( {
 	hasError = false,
 	checked = false,
 	disabled = false,
+	errorId,
+	errorMessage,
 	...rest
 }: CheckboxControlProps & Record< string, unknown > ): JSX.Element => {
 	const instanceId = useInstanceId( CheckboxControl );
