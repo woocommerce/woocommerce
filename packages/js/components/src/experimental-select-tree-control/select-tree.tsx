@@ -137,7 +137,7 @@ export const SelectTree = function SelectTree( {
 				.querySelector(
 					'.experimental-woocommerce-tree-item--highlighted'
 				)
-				?.scrollIntoView( {
+				?.scrollIntoView?.( {
 					block: 'nearest',
 				} ),
 		[ highlightedIndex ]
@@ -408,7 +408,11 @@ export const SelectTree = function SelectTree( {
 								<SelectedItems
 									isReadOnly={ isReadOnly }
 									ref={ selectedItemsFocusHandle }
-									items={ ( props.selected as Item[] ) || [] }
+									items={
+										! Array.isArray( props.selected )
+											? [ props.selected ]
+											: props.selected
+									}
 									getItemLabel={ ( item ) =>
 										item?.label || ''
 									}
@@ -417,6 +421,7 @@ export const SelectTree = function SelectTree( {
 									}
 									onRemove={ ( item ) => {
 										if (
+											item &&
 											! Array.isArray( item ) &&
 											props.onRemove
 										) {

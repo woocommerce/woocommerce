@@ -69,7 +69,7 @@ export const SelectTreeMenu = ( {
 	// Scroll the selected item into view when the menu opens.
 	useEffect( () => {
 		if ( isOpen && scrollIntoViewOnOpen ) {
-			selectControlMenuRef.current?.scrollIntoView();
+			selectControlMenuRef.current?.scrollIntoView?.();
 		}
 	}, [ isOpen, scrollIntoViewOnOpen ] );
 
