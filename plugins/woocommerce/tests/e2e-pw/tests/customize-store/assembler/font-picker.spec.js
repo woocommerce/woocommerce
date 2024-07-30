@@ -231,7 +231,7 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 
 		await assembler.getByText( 'Usage tracking' ).click();
 		await expect(
-			assembler.getByText( 'Access more patterns' )
+			assembler.getByText( 'Access more fonts' )
 		).toBeVisible();
 
 		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
