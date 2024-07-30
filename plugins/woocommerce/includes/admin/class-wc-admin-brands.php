@@ -98,7 +98,6 @@ class WC_Brands_Admin {
 	 *
 	 * @param array $settings Settings.
 	 * @param array $current_section Current section.
-	 * @return  void
 	 */
 	public function add_settings_section( $settings, $current_section ) {
 		if ( 'brands' == $current_section ) {
@@ -111,8 +110,7 @@ class WC_Brands_Admin {
 	 * Add a new "Brands" subtab to the "Products" tab.
 	 *
 	 * @since  x.x.x
-	 * @param array $sections
-	 * @return void
+	 * @param array $sections Sections.
 	 */
 	public function add_settings_tab( $sections ) {
 		$sections = array_merge( $sections, $this->settings_tabs );
@@ -133,7 +131,13 @@ class WC_Brands_Admin {
 			<select id="product_brands" name="product_brands[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'Any brand', 'woocommerce' ); ?>">
 				<?php
 				$category_ids = (array) get_post_meta( $post->ID, 'product_brands', true );
-				$categories   = get_terms( 'product_brand', 'orderby=name&hide_empty=0' );
+				$categories   = get_terms(
+					array(
+						'taxonomy'   => 'product_brand',
+						'orderby'    => 'name',
+						'hide_empty' => false,
+					)
+				);
 
 				if ( $categories ) {
 					foreach ( $categories as $cat ) {
@@ -150,7 +154,13 @@ class WC_Brands_Admin {
 			<select id="exclude_product_brands" name="exclude_product_brands[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'No brands', 'woocommerce' ); ?>">
 				<?php
 				$category_ids = (array) get_post_meta( $post->ID, 'exclude_product_brands', true );
-				$categories   = get_terms( 'product_brand', 'orderby=name&hide_empty=0' );
+				$categories   = get_terms(
+					array(
+						'taxonomy'   => 'product_brand',
+						'orderby'    => 'name',
+						'hide_empty' => false,
+					)
+				);
 
 				if ( $categories ) {
 					foreach ( $categories as $cat ) {
@@ -170,8 +180,8 @@ class WC_Brands_Admin {
 	 * @return  void
 	 */
 	public function save_coupon_brands( $post_id ) {
-		$product_brands         = isset( $_POST['product_brands'] ) ? array_map( 'intval', $_POST['product_brands'] ) : array();
-		$exclude_product_brands = isset( $_POST['exclude_product_brands'] ) ? array_map( 'intval', $_POST['exclude_product_brands'] ) : array();
+		$product_brands         = isset( $_POST['product_brands'] ) ? array_map( 'intval', $_POST['product_brands'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$exclude_product_brands = isset( $_POST['exclude_product_brands'] ) ? array_map( 'intval', $_POST['exclude_product_brands'] ) : array(); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		// Save
 		update_post_meta( $post_id, 'product_brands', $product_brands );
@@ -183,7 +193,7 @@ class WC_Brands_Admin {
 	 */
 	public function init_form_fields() {
 
-		// Define settings
+		// Define settings.
 		$this->settings = apply_filters(
 			/**
 			 * Filter Brands settings.
@@ -269,7 +279,6 @@ class WC_Brands_Admin {
 
 	/**
 	 * Save admin settings function.
-	 *
 	 */
 	public function save_admin_settings() {
 		if ( isset( $_GET['section'] ) && 'brands' === $_GET['section'] ) {
@@ -434,8 +443,10 @@ class WC_Brands_Admin {
 	}
 
 	/**
-	 * @param int $term_id Term ID.
-	 * @param int $tt_id Term taxonomy ID.
+	 * Saves thumbnail field.
+	 *
+	 * @param int    $term_id Term ID.
+	 * @param int    $tt_id Term taxonomy ID.
 	 * @param string $taxonomy Taxonomy.
 	 *
 	 * @return void
@@ -455,7 +466,6 @@ class WC_Brands_Admin {
 
 	/**
 	 * Sort brands function.
-	 *
 	 */
 	public function sort_brands( $sortable ) {
 		$sortable[] = 'product_brand';
@@ -466,7 +476,7 @@ class WC_Brands_Admin {
 	 * Add brands column in second-to-last position.
 	 *
 	 * @since x.x.x
-	 * @param mixed $columns
+	 * @param mixed $columns Columns
 	 * @return array
 	 */
 	public function product_columns( $columns ) {
@@ -488,7 +498,7 @@ class WC_Brands_Admin {
 	/**
 	 * Columns function.
 	 *
-	 * @param mixed $columns
+	 * @param mixed $columns Columns.
 	 */
 	public function columns( $columns ) {
 		if ( empty( $columns ) ) {
@@ -506,10 +516,9 @@ class WC_Brands_Admin {
 	/**
 	 * Column function.
 	 *
-	 * @access public
-	 * @param mixed $columns
-	 * @param mixed $column
-	 * @param mixed $id
+	 * @param mixed $columns Columns.
+	 * @param mixed $column Column.
+	 * @param mixed $id ID.
 	 */
 	public function column( $columns, $column, $id ) {
 		if ( $column == 'thumb' ) {
@@ -534,8 +543,6 @@ class WC_Brands_Admin {
 	/**
 	 * Renders either dropdown or a search field for brands depending on the threshold value of
 	 * woocommerce_product_brand_filter_threshold filter.
-	 *
-	 * @return void
 	 */
 	public function render_product_brand_filter() {
 		// phpcs:disable WordPress.Security.NonceVerification
@@ -677,11 +684,11 @@ class WC_Brands_Admin {
 	 * Based on WC_Product_CSV_Importer::parse_categories_field()
 	 *
 	 * @param string $value Field value.
-	 * @return array of brand IDs
+	 * @return array
 	 */
 	public function parse_brands_field( $value ) {
 
-		// Based on WC_Product_Importer::explode_values()
+		// Based on WC_Product_Importer::explode_values().
 		$values    = str_replace( '\\,', '::separator::', explode( ',', $value ) );
 		$row_terms = array();
 		foreach ( $values as $row_value ) {
@@ -738,7 +745,7 @@ class WC_Brands_Admin {
 			return '';
 		}
 
-		// Based on WC_CSV_Exporter::format_term_ids()
+		// Based on WC_CSV_Exporter::format_term_ids().
 		$formatted_brands = array();
 		foreach ( $brand_ids as $brand_id ) {
 			$formatted_term = array();
