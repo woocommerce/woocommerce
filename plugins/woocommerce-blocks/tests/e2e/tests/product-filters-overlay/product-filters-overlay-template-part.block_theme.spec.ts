@@ -59,7 +59,14 @@ test.describe( 'Filters Overlay Template Part', () => {
 	test( 'should navigate to product filters template part', async ( {
 		editor,
 		page,
+		admin,
 	} ) => {
+		await admin.visitSiteEditor( {
+			postType: 'wp_template_part',
+			postId: 'woocommerce/woocommerce//product-filters-overlay',
+			canvas: 'edit',
+		} );
+
 		const block = editor.canvas.getByLabel( `Block: ${ blockData.title }` );
 		await block.click();
 
