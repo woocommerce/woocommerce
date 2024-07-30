@@ -322,7 +322,8 @@ class LegacyDataHandler {
 		};
 		$update_data_store_func->call( $order, $data_store );
 
-		// Read order (without triggering sync).
+		// Read order (without triggering sync) -- we create our own callback instead of using `__return_false` to
+		// prevent `remove_filter()` from removing it in cases where it was already hooked by 3rd party code.
 		$prevent_sync_on_read = fn() => false;
 
 		add_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read, 999 );
