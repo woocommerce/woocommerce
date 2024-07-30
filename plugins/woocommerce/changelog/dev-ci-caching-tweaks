@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Tweaks related to caching Composer dependecies and Playwright downloads in CI.
