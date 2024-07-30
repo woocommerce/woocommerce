@@ -67,7 +67,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( $this->is_third_party_error( $message, $context ) ) {
+		if ( $this->is_third_party_error( (string) $message, (array) $context ) ) {
 			return false;
 		}
 
@@ -258,7 +258,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 *
 	 * @return bool
 	 */
-	protected function is_third_party_error( $message, $context ) {
+	protected function is_third_party_error( string $message, array $context ): bool {
 		// Only check for fatal-errors source context.
 		if ( ! isset( $context['source'] ) || 'fatal-errors' !== $context['source'] ) {
 			return false;
