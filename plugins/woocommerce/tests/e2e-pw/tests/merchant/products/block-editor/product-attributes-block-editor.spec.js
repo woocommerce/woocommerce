@@ -350,9 +350,7 @@ test(
 	}
 );
 
-// Test skipped because an issue with the options not always loading makes it flaky.
-// See https://github.com/woocommerce/woocommerce/issues/44925
-test.skip(
+test(
 	'can update product attributes',
 	{ tag: '@gutenberg' },
 	async ( { page, productWithAttributes } ) => {
