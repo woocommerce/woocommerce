@@ -508,8 +508,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		// We have a query - let's see if cached results of this query already exist.
 		$query_hash = md5( $query );
 
-		// Maybe store a transient of the count values.
-		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment 
+		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		if ( true === $cache ) {
 			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
 		} else {

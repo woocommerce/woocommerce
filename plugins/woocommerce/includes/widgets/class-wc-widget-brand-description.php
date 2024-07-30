@@ -9,14 +9,36 @@
  */
 class WC_Widget_Brand_Description extends WP_Widget {
 
-	/** Variables to setup the widget. */
-	var $woo_widget_cssclass;
-	var $woo_widget_description;
-	var $woo_widget_idbase;
-	var $woo_widget_name;
+	/**
+	 * Widget class.
+	 *
+	 * @var string
+	 */
+	public $woo_widget_cssclass;
+
+	/**
+	 * Widget description.
+	 *
+	 * @var string
+	 */
+	public $woo_widget_description;
+
+	/**
+	 * Widget idbase.
+	 *
+	 * @var string
+	 */
+	public $woo_widget_idbase;
+
+	/**
+	 * Widget name.
+	 *
+	 * @var string
+	 */
+	public $woo_widget_name;
 
 	/** constructor */
-	function __construct() {
+	public function __construct() {
 
 		/* Widget variable settings. */
 		$this->woo_widget_name        = __( 'WooCommerce Brand Description', 'woocommerce' );
@@ -43,8 +65,8 @@ class WC_Widget_Brand_Description extends WP_Widget {
 	 *                        'before_widget', and 'after_widget'.
 	 * @param array $instance The settings for the particular instance of the widget.
 	 */
-	function widget( $args, $instance ) {
-		extract( $args );
+	public function widget( $args, $instance ) {
+		extract( $args ); // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
 
 		if ( ! is_tax( 'product_brand' ) ) {
 			return;
@@ -74,9 +96,16 @@ class WC_Widget_Brand_Description extends WP_Widget {
 		echo $after_widget; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
-	/** @see WP_Widget->update */
-	function update( $new_instance, $old_instance ) {
-		$instance['title'] = strip_tags( stripslashes( $new_instance['title'] ) );
+	/**
+	 * Updates widget instance.
+	 *
+	 * @see WP_Widget->update
+	 *
+	 * @param array $new_instance New widget instance.
+	 * @param array $old_instance Old widget instance.
+	 */
+	public function update( $new_instance, $old_instance ) {
+		$instance['title'] = wp_strip_all_tags( stripslashes( $new_instance['title'] ) );
 		return $instance;
 	}
 
@@ -85,7 +114,7 @@ class WC_Widget_Brand_Description extends WP_Widget {
 	 *
 	 * @param array $instance Current settings.
 	 */
-	function form( $instance ) {
+	public function form( $instance ) {
 		?>
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'woocommerce' ); ?></label>
