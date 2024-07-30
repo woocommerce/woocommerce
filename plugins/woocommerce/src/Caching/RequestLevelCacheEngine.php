@@ -1,11 +1,11 @@
 <?php
-declare(strict_types=1);
-
 /**
  * RequestLevelCacheEngine class file.
  *
  * @phpcs:disable Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
  */
+
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Caching;
 
