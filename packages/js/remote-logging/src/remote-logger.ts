@@ -85,6 +85,30 @@ export class RemoteLogger {
 	}
 
 	/**
+	 * Logs an error to Logstash.
+	 *
+	 * @param  error     - The error to log.
+	 * @param  extraData - Optional additional data to include in the log.
+	 *
+	 * @return {Promise<void>} - A promise that resolves when the error is logged.
+	 */
+	public async error( error: Error, extraData?: Partial< LogData > ) {
+		const errorData: ErrorData = {
+			...mergeLogData( DEFAULT_LOG_DATA, {
+				message: error.message,
+				severity: 'error',
+				...extraData,
+			} ),
+			trace: this.getFormattedStackFrame(
+				TraceKit.computeStackTrace( error )
+			),
+		};
+
+		debug( 'Logging error:', errorData );
+		await this.sendError( errorData );
+	}
+
+	/**
 	 * Initializes error event listeners for catching unhandled errors and unhandled rejections.
 	 */
 	public initializeErrorHandlers(): void {
@@ -148,7 +172,7 @@ export class RemoteLogger {
 	}
 
 	/**
-	 * Handles an error and prepares it for sending to the remote API.
+	 * Handles an uncaught error and sends it to the remote API.
 	 *
 	 * @param error - The error to handle.
 	 */
@@ -164,7 +188,7 @@ export class RemoteLogger {
 		}
 
 		const trace = TraceKit.computeStackTrace( error );
-		if ( ! this.shouldSendError( error, trace.stack ) ) {
+		if ( ! this.shouldHandleError( error, trace.stack ) ) {
 			debug( 'Skipping error:', error );
 			return;
 		}
@@ -290,13 +314,13 @@ export class RemoteLogger {
 	}
 
 	/**
-	 * Determines whether an error should be sent to the remote API.
+	 * Determines whether an error should be handled.
 	 *
 	 * @param error       - The error to check.
 	 * @param stackFrames - The stack frames of the error.
-	 * @return Whether the error should be sent.
+	 * @return Whether the error should be handled.
 	 */
-	private shouldSendError(
+	private shouldHandleError(
 		error: Error,
 		stackFrames: TraceKit.StackFrame[]
 	) {
@@ -326,6 +350,25 @@ export class RemoteLogger {
 let logger: RemoteLogger | null = null;
 
 /**
+ * Checks if remote logging is enabled and if the logger is initialized.
+ *
+ * @return {boolean} - Returns true if remote logging is enabled and the logger is initialized, otherwise false.
+ */
+function canLog(): boolean {
+	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
+		debug( 'Remote logging is disabled.' );
+		return false;
+	}
+
+	if ( ! logger ) {
+		warnLog( 'RemoteLogger is not initialized. Call init() first.' );
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Initializes the remote logging and error handlers.
  * This function should be called once at the start of the application.
  *
@@ -352,7 +395,7 @@ export function init( config: RemoteLoggerConfig ) {
 }
 
 /**
- * Logs a message or error, respecting rate limiting.
+ * Logs a message or error.
  *
  * This function is inefficient because the data goes over the REST API, so use sparingly.
  *
@@ -360,28 +403,40 @@ export function init( config: RemoteLoggerConfig ) {
  * @param message   - The message to log.
  * @param extraData - Optional additional data to include in the log.
  *
- * @return Whether the log was sent successfully.
  */
 export async function log(
 	severity: Exclude< LogData[ 'severity' ], undefined >,
 	message: string,
 	extraData?: Partial< Exclude< LogData, 'message' | 'severity' > >
-): Promise< boolean > {
-	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
-		debug( 'Remote logging is disabled.' );
-		return false;
-	}
-
-	if ( ! logger ) {
-		warnLog( 'RemoteLogger is not initialized. Call init() first.' );
-		return false;
+): Promise< void > {
+	if ( ! canLog() ) {
+		return;
 	}
 
 	try {
-		await logger.log( severity, message, extraData );
-		return true;
+		await logger?.log( severity, message, extraData );
 	} catch ( error ) {
 		errorLog( 'Failed to send log:', error );
-		return false;
+	}
+}
+
+/**
+ * Captures an error and sends it to the remote API. Respects the error rate limit.
+ *
+ * @param error     - The error to capture.
+ * @param extraData - Optional additional data to include in the log.
+ */
+export async function captureException(
+	error: Error,
+	extraData?: Partial< LogData >
+) {
+	if ( ! canLog() ) {
+		return;
+	}
+
+	try {
+		await logger?.error( error, extraData );
+	} catch ( _error ) {
+		errorLog( 'Failed to send log:', _error );
 	}
 }
