@@ -8,7 +8,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import { init, log } from '../';
+import { init, log, captureException } from '../';
 import {
 	RemoteLogger,
 	REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
@@ -348,5 +348,37 @@ describe( 'init', () => {
 		expect( console ).toHaveWarnedWith(
 			'RemoteLogger: RemoteLogger is already initialized.'
 		);
+	} );
+} );
+
+describe( 'log', () => {
+	it( 'should not log if remote logging is disabled', () => {
+		( getSetting as jest.Mock ).mockImplementation(
+			( key, defaultValue ) => {
+				if ( key === 'isRemoteLoggingEnabled' ) {
+					return false;
+				}
+				return defaultValue;
+			}
+		);
+
+		log( 'info', 'Test message' );
+		expect( fetchMock ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'captureException', () => {
+	it( 'should not log error if remote logging is disabled', () => {
+		( getSetting as jest.Mock ).mockImplementation(
+			( key, defaultValue ) => {
+				if ( key === 'isRemoteLoggingEnabled' ) {
+					return false;
+				}
+				return defaultValue;
+			}
+		);
+
+		captureException( new Error( 'Test error' ) );
+		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 } );
