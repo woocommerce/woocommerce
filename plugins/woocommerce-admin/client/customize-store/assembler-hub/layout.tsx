@@ -120,14 +120,14 @@ export const Layout = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { setDeviceType } = useDispatch( editorStore );
 
-	const onDeviceClick = ( deviceType: string ) => {
+	const onDeviceClick = ( device: string ) => {
 		if ( isZoomedOut ) {
 			toggleZoomOut();
 			setTimeout( () => {
-				setDeviceType( deviceType );
+				setDeviceType( device );
 			}, ANIMATION_DURATION * 1000 );
 		} else {
-			setDeviceType( deviceType );
+			setDeviceType( device );
 		}
 	};
 
