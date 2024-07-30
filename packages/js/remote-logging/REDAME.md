@@ -27,22 +27,22 @@ The WooCommerce Remote Logging package offers the following features:
 
 2. Log messages or errors:
 
-```js
-import { log } from '@woocommerce/remote-logging';
+    ```js
+    import { log } from '@woocommerce/remote-logging';
 
-// Log an informational message
-log('info', 'User completed checkout', { extra: { orderId: '12345' } });
+    // Log an informational message
+    log('info', 'User completed checkout', { extra: { orderId: '12345' } });
 
-// Log a warning
-log('warning', 'API request failed, retrying...', { extra: { attempts: 3 } });
+    // Log a warning
+    log('warning', 'API request failed, retrying...', { extra: { attempts: 3 } });
 
-// Log an error
-try {
-  // Some operation that might throw
-} catch (error) {
-  log('error', 'Failed to process order', { extra: { error } });
-}
-```
+    // Log an error
+    try {
+      // Some operation that might throw
+    } catch (error) {
+      log('error', 'Failed to process order', { extra: { error } });
+    }
+    ```
 
 ## Customization
 
