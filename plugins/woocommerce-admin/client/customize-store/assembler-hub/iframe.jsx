@@ -12,6 +12,7 @@ import {
 	useMemo,
 	useEffect,
 	useRef,
+	useContext,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -28,7 +29,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { useZoomOut } from './hooks/use-zoom-out';
+import { ZoomOutContext } from './context/zoom-out-context';
 
 function Iframe( {
 	contentRef,
@@ -258,9 +259,7 @@ function IframeIfReady( props, ref ) {
 		[]
 	);
 
-	// We need to know if the editor is zoomed out to apply the correct styles.
-	// We determine this based on the URL path.
-	const { isZoomedOut } = useZoomOut();
+	const { isZoomedOut } = useContext( ZoomOutContext );
 
 	// We shouldn't render the iframe until the editor settings are initialised.
 	// The initial settings are needed to get the styles for the srcDoc, which

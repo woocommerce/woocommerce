@@ -21,7 +21,7 @@ import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as editorStore } from '@wordpress/editor';
 // @ts-ignore No types for this exist yet.
@@ -47,6 +47,7 @@ import { Editor } from './editor';
 import Sidebar from './sidebar';
 import { SiteHub } from './site-hub';
 import { LogoBlockContext } from './logo-block-context';
+import { ZoomOutContext } from './context/zoom-out-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
@@ -62,7 +63,7 @@ import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
-const ANIMATION_DURATION = 0.5;
+const ANIMATION_DURATION = 0.3;
 
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
@@ -70,12 +71,22 @@ export const Layout = () => {
 	const { sendEvent, currentState, context } = useContext(
 		CustomizeStoreContext
 	);
+	const { toggleZoomOut, isZoomedOut } = useContext( ZoomOutContext );
 
 	const { customizing } = useQuery();
 
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
 		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
 	);
+
+	const { deviceType } = useSelect( ( select ) => {
+		// @ts-ignore No types for this exist yet.
+		const { getDeviceType } = select( editorStore );
+
+		return {
+			deviceType: getDeviceType(),
+		};
+	} );
 
 	useEffect( () => {
 		setShowAiOfflineModal(
@@ -108,6 +119,17 @@ export const Layout = () => {
 
 	// @ts-expect-error No types for this exist yet.
 	const { setDeviceType } = useDispatch( editorStore );
+
+	const onDeviceClick = ( deviceType: string ) => {
+		if ( isZoomedOut ) {
+			toggleZoomOut();
+			setTimeout( () => {
+				setDeviceType( deviceType );
+			}, ANIMATION_DURATION * 1000 );
+		} else {
+			setDeviceType( deviceType );
+		}
+	};
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -223,9 +245,9 @@ export const Layout = () => {
 											<button
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Desktop"
-												onClick={ () =>
-													setDeviceType( 'Desktop' )
-												}
+												onClick={ () => {
+													onDeviceClick( 'Desktop' );
+												} }
 											>
 												<Icon
 													icon={ desktop }
@@ -236,9 +258,9 @@ export const Layout = () => {
 											<button
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Tablet"
-												onClick={ () =>
-													setDeviceType( 'Tablet' )
-												}
+												onClick={ () => {
+													onDeviceClick( 'Tablet' );
+												} }
 											>
 												<Icon
 													icon={ tablet }
@@ -249,9 +271,9 @@ export const Layout = () => {
 											<button
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Mobile"
-												onClick={ () =>
-													setDeviceType( 'Mobile' )
-												}
+												onClick={ () => {
+													onDeviceClick( 'Mobile' );
+												} }
 											>
 												<Icon
 													icon={ mobile }
@@ -262,7 +284,21 @@ export const Layout = () => {
 											<button
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Zoom out"
-												onClick={ () => {} }
+												onClick={ () => {
+													// Set the device type to Desktop before zooming out to avoid issues with the editors calculations.
+													if (
+														deviceType !== 'Desktop'
+													) {
+														setDeviceType(
+															'Desktop'
+														);
+														setTimeout( () => {
+															toggleZoomOut();
+														}, ANIMATION_DURATION * 1000 );
+													} else {
+														toggleZoomOut();
+													}
+												} }
 											>
 												<Icon
 													icon={ search }
