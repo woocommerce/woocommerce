@@ -9,6 +9,9 @@ namespace Automattic\WooCommerce\Tests\Caching;
 
 use Automattic\WooCommerce\Caching\RequestLevelCacheEngine;
 
+/**
+ * Test class for RequestLevelCacheEngine
+ */
 class RequestLevelCacheEngineTest extends \WC_Unit_Test_Case {
 
 	/**

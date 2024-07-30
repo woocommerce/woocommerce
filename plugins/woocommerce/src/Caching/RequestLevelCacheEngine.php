@@ -13,7 +13,6 @@ namespace Automattic\WooCommerce\Caching;
  * Implementation of CacheEngine that only stores objects in memory and will only persist for the duration of the request or process.
  *
  * $expiration is ignored.
- *
  */
 class RequestLevelCacheEngine implements CacheEngine {
 
