@@ -451,7 +451,7 @@ class WC_Brands_Admin {
 	 */
 	public function thumbnail_field_save( $term_id, $tt_id, $taxonomy ) {
 		if ( isset( $_POST['product_cat_thumbnail_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing.
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 	}
 
@@ -521,7 +521,7 @@ class WC_Brands_Admin {
 	 * @param mixed $id ID.
 	 */
 	public function column( $columns, $column, $id ) {
-		if ( $column === 'thumb' ) {
+		if ( 'thumb' === $column ) {
 			global $woocommerce;
 
 			$image        = '';
