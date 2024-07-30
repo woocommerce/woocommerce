@@ -36,9 +36,9 @@ jobs:
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.base_ref }})"
+        name: "Checkout (${{ github.event.pull_request.base.ref || github.base_ref }})"
         with:
-          ref: ${{ github.base_ref }}
+          ref: ${{ github.event.pull_request.base.ref || github.base_ref }}
           fetch-depth: 1000
       - name: 'Checkout (calculate number of commits for git fetch depth)'
         shell: bash
@@ -95,9 +95,9 @@ jobs:
         include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.base_ref }})"
+        name: "Checkout (${{ github.event.pull_request.base.ref || github.base_ref }})"
         with:
-          ref: ${{ github.base_ref }}
+          ref: ${{ github.event.pull_request.base.ref || github.base_ref }}
           fetch-depth: 1000
       - name: 'Checkout (calculate number of commits for git fetch depth)'
         shell: bash
