@@ -104,7 +104,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.0 WP: latest [suit:main]",
+					"name": "PHP: 8.0 WP: latest [suite:main]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-main",
 					"changes": [
@@ -133,7 +133,7 @@
 					]
 				},
 				{
-					"name": "PHP: 8.0 WP: latest [suit:legacy]",
+					"name": "PHP: 8.0 WP: latest [suite:legacy]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-legacy",
 					"changes": [
@@ -162,7 +162,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: latest - 1 [suit:main]",
+					"name": "PHP WP: latest - 1 [suite:main]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-main",
 					"changes": [
@@ -190,7 +190,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: latest - 1 [suit:legacy]",
+					"name": "PHP WP: latest - 1 [suite:legacy]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-legacy",
 					"changes": [
@@ -218,7 +218,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: nightly [suit:main]",
+					"name": "PHP WP: nightly [suite:main]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-main",
 					"optional": true,
@@ -247,7 +247,7 @@
 					]
 				},
 				{
-					"name": "PHP WP: nightly [suit:legacy]",
+					"name": "PHP WP: nightly [suite:legacy]",
 					"testType": "unit:php",
 					"command": "test:php:env -- --testsuite=wc-phpunit-legacy",
 					"optional": true,
