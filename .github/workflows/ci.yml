@@ -39,8 +39,8 @@ jobs:
         name: "Checkout (${{ github.event.pull_request.base.ref || github.base_ref }})"
         with:
           ref: ${{ github.event.pull_request.base.ref || github.base_ref }}
-          fetch-depth: 1000
-      - name: 'Checkout (calculate number of commits for git fetch depth)'
+          fetch-depth: 500
+      - name: 'Checkout (calculating --depth)'
         shell: bash
         run: |
           echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
@@ -98,8 +98,8 @@ jobs:
         name: "Checkout (${{ github.event.pull_request.base.ref || github.base_ref }})"
         with:
           ref: ${{ github.event.pull_request.base.ref || github.base_ref }}
-          fetch-depth: 1000
-      - name: 'Checkout (calculate number of commits for git fetch depth)'
+          fetch-depth: 500
+      - name: 'Checkout (calculating --depth)'
         shell: bash
         run: |
           echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
