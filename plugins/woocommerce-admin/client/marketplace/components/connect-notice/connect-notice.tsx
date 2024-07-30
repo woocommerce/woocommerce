@@ -73,13 +73,10 @@ export default function ConnectNotice(): JSX.Element | null {
 		recordEvent( 'woo_connect_notice_in_marketplace_shown' );
 	};
 
-	const connectUrlWithUTM = appendURLParams(
-		connectUrl(),
-		[
-			[ 'utm_source', 'pu' ],
-			[ 'utm_campaign', 'pu_in_apps_screen_connect' ],
-		]
-	);
+	const connectUrlWithUTM = appendURLParams( connectUrl(), [
+		[ 'utm_source', 'pu' ],
+		[ 'utm_campaign', 'pu_in_apps_screen_connect' ],
+	] );
 
 	return (
 		<Notice
