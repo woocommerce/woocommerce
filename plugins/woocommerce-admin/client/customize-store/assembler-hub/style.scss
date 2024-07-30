@@ -518,9 +518,11 @@ body.woocommerce-assembler {
 	/* Preview Canvas */
 	.edit-site-layout__canvas {
 		bottom: 16px;
-		top: 16px;
+		top: 75px;
 		left: 6px; // the default styles for this undersizes the width by 24px so we want to center this
-		padding: 0 4px 0 16px;
+		padding: 0;
+		background: #ddd;
+		border-radius: 0 0 12px 12px;
 	}
 
 	.edit-site-resizable-frame__handle {
@@ -532,14 +534,13 @@ body.woocommerce-assembler {
 		border-radius: 12px;
 		/* new frame */
 		box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
+		transition: all 0.3s ease 0s;
 	}
 
 	.woocommerce-customize-store__block-editor,
 	.edit-site-layout:not(.is-full-canvas)
 	.edit-site-layout__canvas > div
 	.interface-interface-skeleton__content {
-		border-radius: 12px;
-
 		.woocommerce-customize-store__block-editor,
 		.woocommerce-block-preview-container,
 		.auto-block-preview__container {
@@ -555,7 +556,41 @@ body.woocommerce-assembler {
 
 	.customize-your-store-edit-site-resizable-frame__inner-content {
 		height: 100%;
-		border-radius: 12px;
+		border-radius: 0 0 12px 12px;
+	}
+
+	.woocommerce-customize-store__resize-menu {
+		padding: 10px 8px;
+		text-align: center;
+		background-color: #fff;
+		box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
+    	position: relative;
+		top: 16px;
+    	z-index: 10;
+		border-radius: 12px 12px 0 0;
+		width: calc(100% - 16px);
+		left: 6px;
+	}
+
+	.woocommerce-customize-store__resize-button {
+		&:hover {
+			.woocommerce-customize-store__resize-icon {
+				fill: initial;
+			}
+		}
+	}
+
+	.woocommerce-customize-store__resize-icon {
+		margin-right: 10px;
+		fill: #757575;
+
+		&.is-selected {
+			fill: initial;
+		}
+
+		&:last-of-type {
+			margin-right: 0;
+		}
 	}
 }
 

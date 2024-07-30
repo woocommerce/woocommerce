@@ -15,11 +15,15 @@ import { useState, useContext, useEffect } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
+	NavigableMenu,
 } from '@wordpress/components';
 import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
+import { useDispatch } from '@wordpress/data';
+// @ts-ignore No types for this exist yet.
+import { store as editorStore } from '@wordpress/editor';
 // @ts-ignore No types for this exist yet.
 import useInitEditedEntityFromURL from '@wordpress/edit-site/build-module/components/sync-state-with-url/use-init-edited-entity-from-url';
 // @ts-ignore No types for this exist yet.
@@ -34,6 +38,7 @@ import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
+import { Icon, desktop, tablet, mobile, search } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -100,6 +105,9 @@ export const Layout = () => {
 		onClose();
 		setShowAiOfflineModal( false );
 	};
+
+	// @ts-expect-error No types for this exist yet.
+	const { setDeviceType } = useDispatch( editorStore );
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -203,6 +211,66 @@ export const Layout = () => {
 
 								{ ! isMobileViewport && (
 									<div className="edit-site-layout__canvas-container">
+										<NavigableMenu
+											className="woocommerce-customize-store__resize-menu"
+											orientation="horizontal"
+											role="toolbar"
+											aria-label={ __(
+												'Resize',
+												'woocommerce'
+											) }
+										>
+											<button
+												className="components-button has-icon woocommerce-customize-store__resize-button"
+												aria-label="Desktop"
+												onClick={ () =>
+													setDeviceType( 'Desktop' )
+												}
+											>
+												<Icon
+													icon={ desktop }
+													size={ 30 }
+													className="woocommerce-customize-store__resize-icon"
+												/>
+											</button>
+											<button
+												className="components-button has-icon woocommerce-customize-store__resize-button"
+												aria-label="Tablet"
+												onClick={ () =>
+													setDeviceType( 'Tablet' )
+												}
+											>
+												<Icon
+													icon={ tablet }
+													size={ 30 }
+													className="woocommerce-customize-store__resize-icon"
+												/>
+											</button>
+											<button
+												className="components-button has-icon woocommerce-customize-store__resize-button"
+												aria-label="Mobile"
+												onClick={ () =>
+													setDeviceType( 'Mobile' )
+												}
+											>
+												<Icon
+													icon={ mobile }
+													size={ 30 }
+													className="woocommerce-customize-store__resize-icon"
+												/>
+											</button>
+											<button
+												className="components-button has-icon woocommerce-customize-store__resize-button"
+												aria-label="Zoom out"
+												onClick={ () => {} }
+											>
+												<Icon
+													icon={ search }
+													size={ 30 }
+													className="woocommerce-customize-store__resize-icon"
+												/>
+											</button>
+										</NavigableMenu>
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
