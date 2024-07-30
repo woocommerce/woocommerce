@@ -3600,6 +3600,9 @@ importers:
       '@woocommerce/product-editor':
         specifier: workspace:*
         version: link:../../packages/js/product-editor
+      '@woocommerce/remote-logging':
+        specifier: workspace:*
+        version: link:../../packages/js/remote-logging
       '@woocommerce/tracks':
         specifier: workspace:*
         version: link:../../packages/js/tracks
