@@ -77,6 +77,9 @@ test.describe(
 						.first()
 				).toContainText( review.product_name );
 			}
+
+			// Check if the reviews are displayed
+			expect( reviews.length ).toBeGreaterThan( 0 );
 		} );
 
 		test( 'can filter the reviews by product', async ( {
@@ -246,15 +249,10 @@ test.describe(
 			// Navigate to the "Spam" tab to verify the review is marked as spam
 			await page.click( 'a[href*="comment_status=spam"]' );
 
-			// Check if the spammed review row is located and verify the review is
-			// marked as spam by confirming "Not Spam" button is visible
-			const spammedReviewRow = page.locator( `#comment-${ review.id }` );
-			await spammedReviewRow.isVisible();
-			await spammedReviewRow.hover();
-			const notSpamButton = await spammedReviewRow.getByRole( 'button', {
-				name: 'Not Spam',
-			} );
-			await notSpamButton.isVisible();
+			// Check if the spammed review is located on the "Spam" page
+			await expect(
+				page.locator( `#comment-${ review.id }` )
+			).toBeVisible();
 		} );
 
 		test( 'can reply to a product review', async ( { page, reviews } ) => {
@@ -287,15 +285,24 @@ test.describe(
 			await expect( submitReplyButton ).toBeVisible();
 			await submitReplyButton.click();
 
+			// Verify that the reply is visible in the admin review list
+			const replyLocator = page.locator(
+				`tr#comment-${ review.id } + tr.comment-reply .comment-text`
+			);
+			await expect( replyLocator ).toBeVisible();
+
 			// Get the product link from the review row
-			await reviewRow.locator( 'a.comments-view-item-link' ).click();
+			const productLink = await reviewRow
+				.locator( 'a.comments-view-item-link' )
+				.getAttribute( 'href' );
+			await page.goto( productLink );
 			await page.click( '#tab-reviews' );
 
-			// Verify that the reply is visible in the shop reviews section
-			const reviewContainer = page.locator(
+			// Verify that the reply is visible in the shop's reviews section
+			const replyReviews = page.locator(
 				`div.comment_container:has-text("${ replyText }")`
 			);
-			await expect( reviewContainer ).toContainText( replyText );
+			await expect( replyReviews ).toBeVisible();
 		} );
 
 		test( 'can delete a product review', async ( { page, reviews } ) => {
