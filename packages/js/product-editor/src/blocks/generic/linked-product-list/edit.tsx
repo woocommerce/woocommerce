@@ -70,6 +70,19 @@ export function EmptyStateImage( {
 	}
 }
 
+async function searchProducts(
+	searchValue = '',
+	excludedIds: number[] = []
+): Promise< Product[] > {
+	return resolveSelect( PRODUCTS_STORE_NAME ).getProducts< Product[] >( {
+		search: searchValue,
+		orderby: 'title',
+		order: 'asc',
+		per_page: 5,
+		exclude: excludedIds,
+	} );
+}
+
 export function LinkedProductListBlockEdit( {
 	attributes,
 	context: { postType, isInSelectedTab },
@@ -98,29 +111,6 @@ export function LinkedProductListBlockEdit( {
 		number[]
 	>( property, { postType } );
 
-	function searchProducts( searchValue = '', excludedIds: number[] = [] ) {
-		setSearchValue( searchValue );
-		excludedIds.push( productId );
-
-		setIsSearching( true );
-		resolveSelect( PRODUCTS_STORE_NAME )
-			.getProducts< Product[] >( {
-				search: searchValue,
-				orderby: 'title',
-				order: 'asc',
-				per_page: 5,
-				exclude: excludedIds,
-			} )
-			.then( ( response ) => {
-				if ( response ) {
-					setSearchedProducts( response );
-				}
-			} )
-			.finally( () => {
-				setIsSearching( false );
-			} );
-	}
-
 	useEffect( () => {
 		if (
 			! state.selectedProduct &&
@@ -132,7 +122,15 @@ export function LinkedProductListBlockEdit( {
 	}, [ linkedProductIds, state.selectedProduct ] );
 
 	const debouncedFilter = useDebounce( function filter( search = '' ) {
-		searchProducts( search, linkedProductIds );
+		setSearchValue( search );
+		setIsSearching( true );
+		searchProducts( search, [ ...( linkedProductIds || [] ), productId ] )
+			.then( ( products ) => {
+				setSearchedProducts( products );
+			} )
+			.finally( () => {
+				setIsSearching( false );
+			} );
 	}, 300 );
 
 	useEffect( () => {
@@ -142,8 +140,21 @@ export function LinkedProductListBlockEdit( {
 		}
 
 		loadInitialSearchResults.current = true;
-		searchProducts( '', linkedProductIds );
-	}, [ isInSelectedTab, loadInitialSearchResults, linkedProductIds ] );
+		setSearchValue( '' );
+		setIsSearching( true );
+		searchProducts( '', [ ...( linkedProductIds || [] ), productId ] )
+			.then( ( products ) => {
+				setSearchedProducts( products );
+			} )
+			.finally( () => {
+				setIsSearching( false );
+			} );
+	}, [
+		isInSelectedTab,
+		loadInitialSearchResults,
+		linkedProductIds,
+		productId,
+	] );
 
 	const handleSelect = useCallback(
 		( product: Product ) => {
@@ -159,7 +170,15 @@ export function LinkedProductListBlockEdit( {
 			);
 
 			setLinkedProductIds( newLinkedProductIds );
-			searchProducts( '', newLinkedProductIds );
+			setSearchValue( '' );
+			setIsSearching( true );
+			searchProducts( '', [ ...( linkedProductIds || [] ), productId ] )
+				.then( ( products ) => {
+					setSearchedProducts( products );
+				} )
+				.finally( () => {
+					setIsSearching( false );
+				} );
 
 			recordEvent( 'linked_products_product_add', {
 				source: TRACKS_SOURCE,
@@ -178,7 +197,15 @@ export function LinkedProductListBlockEdit( {
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
-		searchProducts( '', newLinkedProductIds );
+		setSearchValue( '' );
+		setIsSearching( true );
+		searchProducts( '', [ ...( linkedProductIds || [] ), productId ] )
+			.then( ( products ) => {
+				setSearchedProducts( products );
+			} )
+			.finally( () => {
+				setIsSearching( false );
+			} );
 
 		recordEvent( 'linked_products_product_remove', {
 			source: TRACKS_SOURCE,
