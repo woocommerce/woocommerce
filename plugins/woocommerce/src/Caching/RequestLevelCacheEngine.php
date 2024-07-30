@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * RequestLevelCacheEngine class file.
+ *
+ * @phpcs:disable Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
+ */
+
 namespace Automattic\WooCommerce\Caching;
 
 /**
@@ -8,7 +14,6 @@ namespace Automattic\WooCommerce\Caching;
  *
  * $expiration is ignored.
  *
- * @phpcs:disable Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
  */
 class RequestLevelCacheEngine implements CacheEngine {
 
