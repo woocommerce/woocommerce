@@ -95,6 +95,7 @@ class WC_Rate_Limiter {
 		global $wpdb;
 
 		$next_try_allowed_at = self::get_cached( $action_id );
+
 		if ( false === $next_try_allowed_at ) {
 			$next_try_allowed_at = $wpdb->get_var(
 				$wpdb->prepare(
@@ -109,6 +110,7 @@ class WC_Rate_Limiter {
 
 			self::set_cache( $action_id, $next_try_allowed_at );
 		}
+
 		// No record of action running, so action is allowed to run.
 		if ( null === $next_try_allowed_at ) {
 			return false;
