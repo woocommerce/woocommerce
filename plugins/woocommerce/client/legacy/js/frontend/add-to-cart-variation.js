@@ -11,6 +11,7 @@
 		self.$singleVariation     = $form.find( '.single_variation' );
 		self.$singleVariationWrap = $form.find( '.single_variation_wrap' );
 		self.$resetVariations     = $form.find( '.reset_variations' );
+		self.$resetAlert          = $form.find( '.reset_variations_alert' );
 		self.$product             = $form.closest( '.product' );
 		self.variationData        = $form.data( 'product_variations' );
 		self.useAjax              = false === self.variationData;
@@ -34,6 +35,7 @@
 		$form.on( 'show_variation', { variationForm: self }, self.onShow );
 		$form.on( 'click', '.single_add_to_cart_button', { variationForm: self }, self.onAddToCart );
 		$form.on( 'reset_data', { variationForm: self }, self.onResetDisplayedVariation );
+		$form.on( 'announce_reset', { variationForm: self }, self.onAnnounceReset );
 		$form.on( 'reset_image', { variationForm: self }, self.onResetImage );
 		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: self }, self.onChange );
 		$form.on( 'found_variation.wc-variation-form', { variationForm: self }, self.onFoundVariation );
@@ -54,6 +56,7 @@
 	VariationForm.prototype.onReset = function( event ) {
 		event.preventDefault();
 		event.data.variationForm.$attributeFields.val( '' ).trigger( 'change' );
+		event.data.variationForm.$form.trigger( 'announce_reset' );
 		event.data.variationForm.$form.trigger( 'reset_data' );
 	};
 
@@ -149,6 +152,17 @@
 		form.$form.trigger( 'reset_image' );
 		form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 	};
+
+	/**
+	 * Announce reset to screen readers.
+	 */
+	VariationForm.prototype.onAnnounceReset = function( event ) {
+		event.data.variationForm.$resetAlert.text( wc_add_to_cart_variation_params.i18n_reset_alert_text );
+		event.data.variationForm.$resetAlert.focus();
+		setTimeout( function() {
+			event.data.variationForm.$resetAlert.text("");
+		}, 1000 );
+	}
 
 	/**
 	 * When the product image is reset.
@@ -557,15 +571,17 @@
 	};
 
 	/**
-	 * Show or hide the reset link.
+	 * Show or hide the reset button.
 	 */
 	VariationForm.prototype.toggleResetLink = function( on ) {
 		if ( on ) {
 			if ( this.$resetVariations.css( 'visibility' ) === 'hidden' ) {
 				this.$resetVariations.css( 'visibility', 'visible' ).hide().fadeIn();
+				this.$resetVariations.css( 'display', 'inline-block' );
 			}
 		} else {
 			this.$resetVariations.css( 'visibility', 'hidden' );
+			this.$resetVariations.css( 'display', 'none' );
 		}
 	};
 
