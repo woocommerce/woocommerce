@@ -66,9 +66,9 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 	let currency: Currency;
 
 	function stripTags( str: string ) {
-		const tmp = document.createElement( 'DIV' );
+		const tmp = document.createElement( 'template' );
 		tmp.innerHTML = str;
-		return tmp.textContent || tmp.innerText || '';
+		return tmp.content.textContent;
 	}
 
 	/**
