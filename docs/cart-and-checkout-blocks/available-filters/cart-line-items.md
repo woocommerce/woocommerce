@@ -157,11 +157,11 @@ const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
 	}
 
 	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
-		return '<price/> to keep you ☀️';
+		return '<price/> to keep you warm';
 	}
 
 	if ( args?.cartItem?.name === 'Sunglasses' ) {
-		return '<price/> to keep you ❄️';
+		return '<price/> to keep you cool';
 	}
 
 	return '<price/> for all items';
