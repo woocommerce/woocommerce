@@ -23,16 +23,13 @@ jobs:
               with:
                   node-version: '18'
 
-            - name: Install pnpm
-              run: npm install -g pnpm
-
             - name: Install dependencies
               run: |
-                  pnpm add @octokit/rest@21.0.1
-                  pnpm add axios@1.7.2
-                  pnpm add google-auth-library@9.11.0
-                  pnpm add googleapis@140.0.1
-                  pnpm add dotenv@16.4.5
+                  npm install -g @octokit/rest@21.0.1
+                  npm install -g axios@1.7.2
+                  npm install -g google-auth-library@9.11.0
+                  npm install -g googleapis@140.0.1
+                  npm install -g dotenv@16.4.5
 
             - name: Create key.json
               run: echo '${{ secrets.FLAKY_TESTS_GOOGLE_SHEETS_CREDENTIALS }}' > ./.github/workflows/scripts/key.json
