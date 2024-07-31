@@ -23,6 +23,9 @@ jobs:
               with:
                   node-version: '18'
 
+            - name: Install updated npm
+              run: npm install npm@latest
+
             - name: Install dependencies # ignore package.json in the repo
               run: |
                   echo '{}' > temp-package.json
