@@ -2824,6 +2824,9 @@ importers:
 
   packages/js/remote-logging:
     dependencies:
+      '@woocommerce/tracks':
+        specifier: workspace:*
+        version: link:../tracks
       '@wordpress/hooks':
         specifier: wp-6.0
         version: 3.6.1
@@ -2892,9 +2895,18 @@ importers:
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
+      '@types/jest':
+        specifier: ^27.5.2
+        version: 27.5.2
+      '@types/node':
+        specifier: ^16.18.68
+        version: 16.18.68
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
+      '@woocommerce/internal-js-tests':
+        specifier: workspace:*
+        version: link:../internal-js-tests
       concurrently:
         specifier: ^7.6.0
         version: 7.6.0
