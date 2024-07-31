@@ -5,6 +5,7 @@ import { Component, ReactNode, ErrorInfo } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { captureException } from '@woocommerce/remote-logging';
+import { bumpStat } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
@@ -37,6 +38,8 @@ export class ErrorBoundary extends Component<
 
 	componentDidCatch( error: Error, errorInfo: ErrorInfo ) {
 		this.setState( { errorInfo } );
+
+		bumpStat( 'error', 'unhandled-js-error-during-render' );
 
 		// Limit the component stack to 10 calls so we don't send too much data.
 		const componentStack = errorInfo.componentStack
