@@ -146,6 +146,8 @@ export const Layout = ( {
 		);
 	};
 
+	throw new Error( 'Layout should not be rendered directly' );
+
 	return (
 		<>
 			{ isDashboardShown && (
