@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Failure to fetch the country list no longer blocks users in the profiler.

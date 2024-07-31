@@ -62,6 +62,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	woocommerceHandPickedProducts: [],
 	timeFrame: undefined,
 	priceRange: undefined,
+	filterable: false,
 };
 
 export const DEFAULT_ATTRIBUTES: Pick<

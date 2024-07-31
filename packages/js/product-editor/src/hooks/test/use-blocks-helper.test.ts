@@ -45,7 +45,7 @@ describe( 'useBlocksHelper', () => {
 		expect( mockGetBlock ).toHaveBeenCalledWith( parentClientId );
 	} );
 
-	it( 'should return an empty string if no parent tab id is found', () => {
+	it( 'should return null if no parent tab id is found', () => {
 		const clientId = 'test-client-id';
 
 		mockGetBlockParentsByBlockName.mockReturnValue( [] );
@@ -55,7 +55,7 @@ describe( 'useBlocksHelper', () => {
 
 		const tabId = getParentTabId( clientId );
 
-		expect( tabId ).toBe( '' );
+		expect( tabId ).toBe( null );
 		expect( mockGetBlockParentsByBlockName ).toHaveBeenCalledWith(
 			clientId,
 			'woocommerce/product-tab',
