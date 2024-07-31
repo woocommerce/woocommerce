@@ -48,6 +48,9 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
+            // Intended behaviour of the jobs generation:
+            // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
+            // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
