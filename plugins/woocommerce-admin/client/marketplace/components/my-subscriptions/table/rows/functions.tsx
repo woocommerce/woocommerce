@@ -80,16 +80,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 			),
 		};
 	}
-	if ( subscription.local.installed && ! subscription.active ) {
-		return {
-			text: __( 'Not connected', 'woocommerce' ),
-			level: StatusLevel.Warning,
-			explanation: __(
-				'To receive updates and support, please connect your subscription to this store.',
-				'woocommerce'
-			),
-		};
-	}
+
 	if ( subscription.expired ) {
 		return {
 			text: __( 'Expired', 'woocommerce' ),
@@ -128,6 +119,18 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 			),
 		};
 	}
+
+	if ( subscription.local.installed && ! subscription.active ) {
+		return {
+			text: __( 'Not connected', 'woocommerce' ),
+			level: StatusLevel.Warning,
+			explanation: __(
+				'To receive updates and support, please connect your subscription to this store.',
+				'woocommerce'
+			),
+		};
+	}
+	
 	if ( subscription.expiring && ! subscription.autorenew ) {
 		return {
 			text: __( 'Expires soon', 'woocommerce' ),
