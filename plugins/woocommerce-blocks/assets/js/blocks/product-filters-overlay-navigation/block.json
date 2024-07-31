@@ -5,7 +5,7 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
-	"ancestor": [ "woocommerce/product-filters-overlay" ],
+	"ancestor": [ "woocommerce/product-filters-overlay", "woocommerce/product-filters" ],
 	"attributes": {
 		"align": {
 			"type": "string",
@@ -29,6 +29,10 @@
 					"blockGap": "1rem"
 				}
 			}
+		},
+		"triggerType": {
+			"type": "string",
+			"default": "close-overlay"
 		}
 	},
 	"supports": {

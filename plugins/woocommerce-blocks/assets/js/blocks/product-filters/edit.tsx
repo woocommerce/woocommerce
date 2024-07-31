@@ -37,6 +37,7 @@ const defaultAttribute = getSetting< AttributeSetting >(
 );
 
 const TEMPLATE: InnerBlockTemplate[] = [
+	[ 'woocommerce/product-filters-overlay-navigation', {} ],
 	[
 		'core/heading',
 		{

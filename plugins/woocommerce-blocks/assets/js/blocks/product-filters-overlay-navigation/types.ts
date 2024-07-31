@@ -8,11 +8,13 @@ type BorderSide = {
 	color: string;
 	width: string;
 };
+export type BlockVariationTriggerType = 'open-overlay' | 'close-overlay';
 
 export type BlockAttributes = {
 	navigationStyle: 'label-and-icon' | 'label-only' | 'icon-only';
 	buttonStyle: string;
 	iconSize?: number;
+	triggerType: BlockVariationTriggerType;
 	style: {
 		border?: {
 			radius?: string | BorderRadius;

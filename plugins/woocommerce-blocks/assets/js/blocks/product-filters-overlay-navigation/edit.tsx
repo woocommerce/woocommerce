@@ -23,8 +23,96 @@ import { Icon, close } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import type { BlockAttributes } from './types';
+import type { BlockAttributes, BlockVariationTriggerType } from './types';
+import { default as productFiltersIcon } from '../product-filters/icon';
 import './editor.scss';
+
+const OverlayNavigationLabel = ( {
+	variation,
+}: {
+	variation: BlockVariationTriggerType;
+} ) => {
+	let label = __( 'Close', 'woocommerce' );
+	if ( variation === 'open-overlay' ) {
+		label = __( 'Filters', 'woocommerce' );
+	}
+
+	return <span>{ label }</span>;
+};
+
+const OverlayNavigationIcon = ( {
+	variation,
+	iconSize,
+	style,
+}: {
+	variation: BlockVariationTriggerType;
+	iconSize: number | undefined;
+	style: BlockAttributes[ 'style' ];
+} ) => {
+	let icon = close;
+
+	if ( variation === 'open-overlay' ) {
+		icon = productFiltersIcon();
+	}
+
+	return (
+		<Icon
+			fill="currentColor"
+			icon={ icon }
+			style={ {
+				width: iconSize || style?.typography?.fontSize || '16px',
+				height: iconSize || style?.typography?.fontSize || '16px',
+			} }
+		/>
+	);
+};
+
+const OverlayNavigationContent = ( {
+	variation,
+	iconSize,
+	style,
+	navigationStyle,
+}: {
+	variation: BlockVariationTriggerType;
+	iconSize: BlockAttributes[ 'iconSize' ];
+	style: BlockAttributes[ 'style' ];
+	navigationStyle: BlockAttributes[ 'navigationStyle' ];
+} ) => {
+	const overlayNavigationLabel = (
+		<OverlayNavigationLabel variation={ variation } />
+	);
+	const overlayNavigationIcon = (
+		<OverlayNavigationIcon
+			variation={ variation }
+			iconSize={ iconSize }
+			style={ style }
+		/>
+	);
+
+	if ( navigationStyle === 'label-and-icon' ) {
+		if ( variation === 'open-overlay' ) {
+			return (
+				<>
+					{ overlayNavigationIcon }
+					{ overlayNavigationLabel }
+				</>
+			);
+		} else if ( variation === 'close-overlay' ) {
+			return (
+				<>
+					{ overlayNavigationLabel }
+					{ overlayNavigationIcon }
+				</>
+			);
+		}
+	} else if ( navigationStyle === 'label-only' ) {
+		return overlayNavigationLabel;
+	} else if ( navigationStyle === 'icon-only' ) {
+		return overlayNavigationIcon;
+	}
+
+	return null;
+};
 
 export const Edit = ( {
 	attributes,
@@ -71,25 +159,12 @@ export const Edit = ( {
 			) }
 		>
 			<div { ...innerBlocksProps }>
-				{ navigationStyle !== 'icon-only' && (
-					<span>{ __( 'Close', 'woocommerce' ) }</span>
-				) }
-				{ navigationStyle !== 'label-only' && (
-					<Icon
-						fill="currentColor"
-						icon={ close }
-						style={ {
-							width:
-								iconSize ||
-								style?.typography?.fontSize ||
-								'16px',
-							height:
-								iconSize ||
-								style?.typography?.fontSize ||
-								'16px',
-						} }
-					/>
-				) }
+				<OverlayNavigationContent
+					variation={ attributes.triggerType }
+					iconSize={ attributes.iconSize }
+					navigationStyle={ attributes.navigationStyle }
+					style={ attributes.style }
+				/>
 			</div>
 			<InspectorControls group="styles">
 				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
