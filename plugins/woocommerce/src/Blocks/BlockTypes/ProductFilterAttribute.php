@@ -161,6 +161,11 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if ( empty( $attributes['attributeId'] ) ) {
+			$default_product_attribute = $this->get_default_product_attribute();
+			$attributes['attributeId'] = $default_product_attribute->attribute_id;
+		}
+
 		// don't render if its admin, or ajax in progress.
 		if ( is_admin() || wp_doing_ajax() || empty( $attributes['attributeId'] ) ) {
 			return '';
