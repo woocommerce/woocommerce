@@ -370,6 +370,14 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @return object
 	 */
 	private function get_default_product_attribute() {
+		// Cache this variable in memory to prevent repeated database queries to check
+		// for transient in the same request.
+		static $cached = null;
+
+		if ( $cached ) {
+			return $cached;
+		}
+
 		$cached = get_transient( 'wc_block_product_filter_attribute_default_attribute' );
 
 		if ( $cached ) {
