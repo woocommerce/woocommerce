@@ -35,7 +35,7 @@ jobs:
               run: echo '${{ secrets.FLAKY_TESTS_GOOGLE_SHEETS_CREDENTIALS }}' > ./.github/workflows/scripts/key.json
 
             - name: Run flaky test tracker
-              run: node ./.github/workflows/scripts/flaky-test-manager.js
+              run: node ./.github/workflows/scripts/flaky-test-manager.mjs
               env:
                   BUILDKITE_API_URL: ${{ secrets.FLAKY_TESTS_BUILDKITE_API_URL }}
                   BUILDKITE_API_TOKEN: ${{ secrets.FLAKY_TESTS_BUILDKITE_API_TOKEN }}
