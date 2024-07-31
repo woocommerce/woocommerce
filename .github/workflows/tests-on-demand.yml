@@ -17,19 +17,26 @@ on:
         default: on-demand
       custom-trigger:
         type: string
-        description: 'Custom event name. In case the `trigger` choice is `custom`, this field is required.'
+        description: 'Custom event name. In case the `Event name` choice is `custom`, this field is required.'
         required: false
 
 jobs:
   validate-input:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Check inputs'
+      - name: 'Validate trigger event'
         run: |
           if [ "${{ inputs.trigger }}" == "custom" ] && [ -z "${{ inputs.custom-trigger }}" ]; then
             echo "Custom trigger is required when trigger is set to custom."
             exit 1
           fi
+          
+          if [ "${{ inputs.trigger }}" == "custom" ]; then
+            echo "TRIGGER=${{ inputs.custom-trigger }}" >> $GITHUB_ENV
+          else
+            echo "TRIGGER=${{ inputs.trigger }}" >> $GITHUB_ENV
+          fi
+
   run-tests:
     name: 'Run tests'
     uses: ./.github/workflows/ci.yml
