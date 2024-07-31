@@ -80,7 +80,7 @@ export const DEFAULT_ATTRIBUTES: Pick<
 		columns: 3,
 		shrinkColumns: true,
 	},
-	queryContextIncludes: [ 'collection' ],
+	queryContextIncludes: [ 'collection', 'selectedReference' ],
 	forcePageReload: false,
 };
 

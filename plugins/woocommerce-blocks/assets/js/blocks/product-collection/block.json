@@ -41,6 +41,9 @@
 		},
 		"__privatePreviewState": {
 			"type": "object"
+		},
+		"selectedReference": {
+			"type": "object"
 		}
 	},
 	"providesContext": {

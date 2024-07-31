@@ -31,6 +31,12 @@ export interface ProductCollectionAttributes {
 	filterable: boolean;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	__privatePreviewState?: PreviewState;
+	selectedReference?: ProductCollectionSelectedReference;
+}
+
+export interface ProductCollectionSelectedReference {
+	type: 'product'; // In future, we can add more types like 'category', 'tag' etc.
+	id: number;
 }
 
 export enum LayoutOptions {

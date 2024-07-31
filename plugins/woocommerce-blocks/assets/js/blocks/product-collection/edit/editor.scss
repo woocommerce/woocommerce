@@ -161,3 +161,10 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		box-shadow: none;
 	}
 }
+
+// Editor Product Picker
+.wc-blocks-product-collection__editor-product-picker {
+	.wc-blocks-product-collection__info-icon {
+		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
+	}
+}
