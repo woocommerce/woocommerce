@@ -86,7 +86,7 @@ class ImportSetWCShipping implements StepProcessor {
 		}
 
 		if ( isset( $local_pickup->locations ) ) {
-			$local_pickup->locations = wp_json_encode( wp_json_encode( $local_pickup->locations ), true );
+			$local_pickup->locations = wp_json_decode( wp_json_encode( $local_pickup->locations ), true );
 			$this->wp_update_option( 'pickup_location_pickup_locations', $local_pickup->locations );
 		}
 	}
