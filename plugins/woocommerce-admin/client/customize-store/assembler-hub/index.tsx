@@ -50,7 +50,6 @@ import { GoBackWarningModal } from './go-back-warning-modal';
 import { onBackButtonClicked } from '../utils';
 import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
-import { ZoomOutContextProvider } from './context/zoom-out-context';
 
 import './tracking';
 
@@ -184,9 +183,7 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 				<ShortcutProvider style={ { height: '100%' } }>
 					<GlobalStylesProvider>
 						<RouterProvider>
-							<ZoomOutContextProvider>
-								<Layout />
-							</ZoomOutContextProvider>
+							<Layout />
 						</RouterProvider>
 						<PreloadFonts />
 					</GlobalStylesProvider>

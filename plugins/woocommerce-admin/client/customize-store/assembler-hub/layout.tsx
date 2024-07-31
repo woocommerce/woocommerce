@@ -16,12 +16,16 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
 	NavigableMenu,
+	Circle,
+	SVG,
+	Path,
 } from '@wordpress/components';
 import {
 	privateApis as blockEditorPrivateApis,
+	useZoomOut,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as editorStore } from '@wordpress/editor';
 // @ts-ignore No types for this exist yet.
@@ -38,7 +42,7 @@ import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
-import { Icon, desktop, tablet, mobile, search } from '@wordpress/icons';
+import { Icon, desktop, tablet, mobile } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -47,7 +51,6 @@ import { Editor } from './editor';
 import Sidebar from './sidebar';
 import { SiteHub } from './site-hub';
 import { LogoBlockContext } from './logo-block-context';
-import { ZoomOutContext } from './context/zoom-out-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
@@ -65,13 +68,40 @@ const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
 const ANIMATION_DURATION = 0.3;
 
+export const zoomIn = (
+	<SVG width="24" height="24" viewBox="0 0 24 24">
+		<Circle
+			cx="11"
+			cy="11"
+			r="7.25"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		/>
+		<Path d="M8 11H14M11 8V14" stroke="currentColor" strokeWidth="1.5" />
+		<Path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.5" />
+	</SVG>
+);
+
+export const zoomOut = (
+	<SVG width="24" height="24" viewBox="0 0 24 24">
+		<Circle
+			cx="11"
+			cy="11"
+			r="7.25"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		/>
+		<Path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.5" />
+		<Path d="M8 11H14" stroke="currentColor" strokeWidth="1.5" />
+	</SVG>
+);
+
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 
 	const { sendEvent, currentState, context } = useContext(
 		CustomizeStoreContext
 	);
-	const { toggleZoomOut, isZoomedOut } = useContext( ZoomOutContext );
 
 	const { customizing } = useQuery();
 
@@ -79,14 +109,7 @@ export const Layout = () => {
 		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
 	);
 
-	const { deviceType } = useSelect( ( select ) => {
-		// @ts-ignore No types for this exist yet.
-		const { getDeviceType } = select( editorStore );
-
-		return {
-			deviceType: getDeviceType(),
-		};
-	} );
+	const [ showZoomOut, setShowZoomOut ] = useState( false );
 
 	useEffect( () => {
 		setShowAiOfflineModal(
@@ -120,17 +143,6 @@ export const Layout = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { setDeviceType } = useDispatch( editorStore );
 
-	const onDeviceClick = ( device: string ) => {
-		if ( isZoomedOut ) {
-			toggleZoomOut();
-			setTimeout( () => {
-				setDeviceType( device );
-			}, ANIMATION_DURATION * 1000 );
-		} else {
-			setDeviceType( device );
-		}
-	};
-
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
 	const [ canvasResizer, canvasSize ] = useResizeObserver();
@@ -145,6 +157,8 @@ export const Layout = () => {
 
 	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
+
+	useZoomOut( showZoomOut );
 
 	if (
 		typeof currentState === 'object' &&
@@ -246,7 +260,7 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Desktop"
 												onClick={ () => {
-													onDeviceClick( 'Desktop' );
+													setDeviceType( 'Desktop' );
 												} }
 											>
 												<Icon
@@ -259,7 +273,7 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Tablet"
 												onClick={ () => {
-													onDeviceClick( 'Tablet' );
+													setDeviceType( 'Tablet' );
 												} }
 											>
 												<Icon
@@ -272,7 +286,7 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Mobile"
 												onClick={ () => {
-													onDeviceClick( 'Mobile' );
+													setDeviceType( 'Mobile' );
 												} }
 											>
 												<Icon
@@ -285,23 +299,13 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Zoom out"
 												onClick={ () => {
-													// Set the device type to Desktop before zooming out to avoid issues with the editors calculations.
-													if (
-														deviceType !== 'Desktop'
-													) {
-														setDeviceType(
-															'Desktop'
-														);
-														setTimeout( () => {
-															toggleZoomOut();
-														}, ANIMATION_DURATION * 1000 );
-													} else {
-														toggleZoomOut();
-													}
+													setShowZoomOut(
+														! showZoomOut
+													);
 												} }
 											>
 												<Icon
-													icon={ search }
+													icon={ zoomOut }
 													size={ 30 }
 													className="woocommerce-customize-store__resize-icon"
 												/>
