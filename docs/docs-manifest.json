@@ -127,7 +127,7 @@
               "menu_title": "Order Summary Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
-              "hash": "bb49ef3f1867dcb1992c629d0f8cbef1dfc5f138e2f0b479bca0f6b961150f94",
+              "hash": "36f1bfa8d192b106d28d71334b42413d4c289a0a8d1f5b76b2f905d6fa453883",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/order-summary-items.md",
               "id": "78eb3b135f82a3624a49979e3e93334295abd060"
             },
@@ -154,7 +154,7 @@
               "menu_title": "Cart Line Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "hash": "e2a3543efe12c2a10e53b826fd8cb4c8a89a55473fb8d7586b3a4f04fd80e6c4",
+              "hash": "f83254846b98a94f5c895f4a0a6719b281cba81884edb45e413a644967d28f73",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
               "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2"
             },
@@ -1581,5 +1581,5 @@
       "categories": []
     }
   ],
-  "hash": "47eb63ff8d29228ecc17fe0f528e296c9ed8b12b216b30eac543a75f3bf1b2ff"
+  "hash": "c23371741bd40127b0da21ead3e077e731757935f0de5abc22d9c5bedee753b2"
 }
