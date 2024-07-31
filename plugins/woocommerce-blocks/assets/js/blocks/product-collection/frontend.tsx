@@ -180,6 +180,9 @@ const productCollectionStore = {
 				yield prefetch( ref.href );
 			}
 		},
+		*onRender() {
+			yield triggerProductListRenderedEvent();
+		},
 	},
 };
 
