@@ -466,8 +466,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 <!-- wp:woocommerce/product-filter-attribute {"attributeId":%1$s,"lock":{"remove":true}} /-->
 <!-- /wp:woocommerce/product-filter -->
 					',
-					$default_attribute->attribute_id,
-					$default_attribute->attribute_label
+					esc_html( $default_attribute->attribute_id ),
+					esc_html( $default_attribute->attribute_label )
 				),
 			)
 		);
