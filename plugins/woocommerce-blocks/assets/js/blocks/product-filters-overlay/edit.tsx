@@ -45,7 +45,7 @@ export const Edit = ( {
 						href={ templatePartEditUri }
 						className="wc-block-editor-product-filters__link"
 					>
-						{ __( 'Edit product filters', 'woocommerce' ) }
+						{ __( 'Edit Product Filters', 'woocommerce' ) }
 					</ExternalLink>
 				</PanelBody>
 			</InspectorControls>
