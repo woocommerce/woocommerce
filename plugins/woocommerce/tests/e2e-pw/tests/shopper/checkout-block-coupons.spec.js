@@ -140,9 +140,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Add a coupon' } )
 					.click();
-				await page
-					.locator( '#wc-block-components-totals-coupon__input-0' )
-					.fill( coupons[ i ].code );
+				await page.getByLabel( 'Enter code' ).fill( coupons[ i ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
 				await expect(
 					page
@@ -185,9 +183,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Add a coupon' } )
 					.click();
-				await page
-					.locator( '#wc-block-components-totals-coupon__input-0' )
-					.fill( coupons[ i ].code );
+				await page.getByLabel( 'Enter code' ).fill( coupons[ i ].code );
 				await page.getByText( 'Apply', { exact: true } ).click();
 				await expect(
 					page
@@ -227,9 +223,7 @@ test.describe(
 		} ) => {
 			// try to add two same coupons and verify the error message
 			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
-			await page
-				.locator( '#wc-block-components-totals-coupon__input-0' )
-				.fill( coupons[ 0 ].code );
+			await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 			await page.getByText( 'Apply', { exact: true } ).click();
 			await expect(
 				page
@@ -239,9 +233,7 @@ test.describe(
 					)
 			).toBeVisible();
 			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
-			await page
-				.locator( '#wc-block-components-totals-coupon__input-0' )
-				.fill( coupons[ 0 ].code );
+			await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
 			await page.getByText( 'Apply', { exact: true } ).click();
 			await expect(
 				page
@@ -257,9 +249,7 @@ test.describe(
 		} ) => {
 			// add coupon with usage limit
 			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
-			await page
-				.locator( '#wc-block-components-totals-coupon__input-0' )
-				.fill( couponLimitedCode );
+			await page.getByLabel( 'Enter code' ).fill( couponLimitedCode );
 			await page.getByText( 'Apply', { exact: true } ).click();
 			await expect(
 				page

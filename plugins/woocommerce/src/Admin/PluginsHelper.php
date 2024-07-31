@@ -725,7 +725,7 @@ class PluginsHelper {
 			$hyperlink_url = add_query_arg(
 				array(
 					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_settings_screen_renew',
+					'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
 
 				),
 				self::WOO_SUBSCRIPTION_PAGE_URL
@@ -769,7 +769,7 @@ class PluginsHelper {
 				'product_id'   => $product_id,
 				'type'         => $type,
 				'utm_source'   => 'pu',
-				'utm_campaign' => 'pu_settings_screen_renew',
+				'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
 
 			),
 			self::WOO_SUBSCRIPTION_PAGE_URL
@@ -827,6 +827,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['active']
 						&& $sub['expiring']
 						&& ! $sub['autorenew'];
 			},
@@ -860,14 +861,20 @@ class PluginsHelper {
 			'expiring',
 		);
 
-		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		$button_link = add_query_arg(
+			array(
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_in_apps_screen_enable_autorenew',
+			),
+			self::WOO_SUBSCRIPTION_PAGE_URL
+		);
 		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
 					'product_id' => $notice_data['product_id'],
 					'type'       => 'expiring',
 				),
-				self::WOO_SUBSCRIPTION_PAGE_URL
+				$button_link
 			);
 		}
 
@@ -898,6 +905,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['active']
 						&& $sub['expired']
 						&& ! $sub['lifetime'];
 			},
