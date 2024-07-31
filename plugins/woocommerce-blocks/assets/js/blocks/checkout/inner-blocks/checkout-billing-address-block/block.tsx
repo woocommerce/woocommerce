@@ -7,6 +7,7 @@ import {
 	useCheckoutAddress,
 	useEditorContext,
 	noticeContexts,
+	useShippingData,
 } from '@woocommerce/base-context';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { ShippingAddress, FormFieldsConfig } from '@woocommerce/settings';
@@ -42,6 +43,7 @@ const Block = ( {
 		useBillingAsShipping,
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
+	const { needsShipping } = useShippingData();
 
 	// Syncs shipping address with billing address if "Force shipping to the customer billing address" is enabled.
 	useEffectOnce( () => {
@@ -110,7 +112,7 @@ const Block = ( {
 		shippingAddress
 	);
 	const defaultEditingAddress =
-		isEditor || ! hasAddress || billingMatchesShipping;
+		isEditor || ! hasAddress || ( needsShipping && billingMatchesShipping );
 
 	return (
 		<>
