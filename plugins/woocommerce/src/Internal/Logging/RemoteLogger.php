@@ -272,7 +272,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		$wc_plugin_dir = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
 
 		// Check if the error message contains the WooCommerce plugin directory.
-		if ( is_string( $message ) && str_contains( $message, $wc_plugin_dir ) ) {
+		if ( str_contains( $message, $wc_plugin_dir ) ) {
 			return false;
 		}
 
