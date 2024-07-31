@@ -6,7 +6,7 @@ config = {
 	...config,
 	projects: [
 		{
-			name: 'WooCommerce PayPal Payments',
+			name: '[env: WooCommerce PayPal Payments]',
 			grep: /@payments/,
 		},
 	],

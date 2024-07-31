@@ -5,7 +5,7 @@ config = {
 	...config,
 	projects: [
 		{
-			name: 'default pressable',
+			name: '[env: Pressable]',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: '**basic.spec.js',
 		},

@@ -6,7 +6,7 @@ config = {
 	...config,
 	projects: [
 		{
-			name: 'Gutenberg',
+			name: '[env: Gutenberg]',
 			grep: /@gutenberg/,
 		},
 	],
