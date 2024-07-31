@@ -28,7 +28,7 @@ export const PluginCard = ( {
 	title: string | ReactNode;
 	description: string | ReactNode;
 	checked?: boolean;
-	onChange: () => void;
+	onChange?: () => void;
 	learnMoreLink?: ReactNode;
 } ) => {
 	return (
