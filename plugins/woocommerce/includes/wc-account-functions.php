@@ -171,7 +171,7 @@ function wc_get_account_menu_item_classes( $endpoint ) {
  * @return string
  * @since 9.2.0
  */
-function wc_get_current_page( $endpoint ) {
+function wc_get_account_menu_aria_current( $endpoint ) {
 	global $wp;
 	$current      = isset( $wp->query_vars[ $endpoint ] );
 	$aria_current = '';
