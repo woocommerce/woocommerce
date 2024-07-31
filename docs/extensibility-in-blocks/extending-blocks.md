@@ -1,5 +1,5 @@
 ---
-post_title: An introduction to extensiblity in WooCommerce Blocks
+post_title: An introduction to extensibility in WooCommerce Blocks
 menu_title: Introduction
 ---
 

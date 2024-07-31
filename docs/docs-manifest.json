@@ -491,10 +491,10 @@
       "category_title": "Extensibility in blocks",
       "posts": [
         {
-          "post_title": "An introduction to extensiblity in WooCommerce Blocks",
+          "post_title": "An introduction to extensibility in WooCommerce Blocks",
           "menu_title": "Introduction",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extensibility-in-blocks/extending-blocks.md",
-          "hash": "c81b808abcdcfb708266a7db33d73bc85b014c5042c54801d6be719ca745e45d",
+          "hash": "84044a3a1ea541232b0cbe487ba4c4bde1bbbc0cdeba01ada3cdf7d3fc21ae47",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extensibility-in-blocks/extending-blocks.md",
           "id": "4fadb6f83309e1033060d94b3340ae0be27ad718",
           "links": {
@@ -1581,5 +1581,5 @@
       "categories": []
     }
   ],
-  "hash": "c23371741bd40127b0da21ead3e077e731757935f0de5abc22d9c5bedee753b2"
+  "hash": "d2d83c210c3c7f5d80f3481fdaa3c40fe1143a286e16d975207fed38be7e5621"
 }
