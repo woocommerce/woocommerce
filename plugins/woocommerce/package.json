@@ -52,7 +52,7 @@
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api --workers 4",
-		"test:e2e": "pnpm test:e2e:default --project=[env: Default]",
+		"test:e2e": "pnpm test:e2e:default --project=-DEFAULT-",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",

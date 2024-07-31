@@ -6,7 +6,7 @@ config = {
 	...config,
 	projects: [
 		{
-			name: '[env: Default]',
+			name: '-DEFAULT-',
 		},
 	],
 };
