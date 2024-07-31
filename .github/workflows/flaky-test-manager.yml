@@ -23,6 +23,9 @@ jobs:
               with:
                   node-version: '18'
 
+            - name: Install npm 7
+              run: npm install -g npm@7
+
             - name: Install dependencies
               run: |
                   npm install @octokit/rest@21.0.1
