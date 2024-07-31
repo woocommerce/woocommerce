@@ -165,6 +165,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 * Test that empty suggestions are replaced with defaults.
 	 */
 	public function test_empty_suggestions() {
+		$this->markTestSkipped('Skipped in release/9.1 due to a breaking change in an external resource. Will be fixed in trunk.');
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
 			array(
