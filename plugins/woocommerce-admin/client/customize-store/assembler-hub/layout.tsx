@@ -16,12 +16,15 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__unstableMotion as motion,
 	NavigableMenu,
+	Circle,
+	SVG,
+	Path,
 } from '@wordpress/components';
 import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/block-editor';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as editorStore } from '@wordpress/editor';
 // @ts-ignore No types for this exist yet.
@@ -65,6 +68,34 @@ const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
 const ANIMATION_DURATION = 0.3;
 
+export const zoomIn = (
+	<SVG width="24" height="24" viewBox="0 0 24 24">
+		<Circle
+			cx="11"
+			cy="11"
+			r="7.25"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		/>
+		<Path d="M8 11H14M11 8V14" stroke="currentColor" strokeWidth="1.5" />
+		<Path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.5" />
+	</SVG>
+);
+
+export const zoomOut = (
+	<SVG width="24" height="24" viewBox="0 0 24 24">
+		<Circle
+			cx="11"
+			cy="11"
+			r="7.25"
+			stroke="currentColor"
+			strokeWidth="1.5"
+		/>
+		<Path d="M16 16L20 20" stroke="currentColor" strokeWidth="1.5" />
+		<Path d="M8 11H14" stroke="currentColor" strokeWidth="1.5" />
+	</SVG>
+);
+
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 
@@ -78,15 +109,6 @@ export const Layout = () => {
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
 		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
 	);
-
-	const { deviceType } = useSelect( ( select ) => {
-		// @ts-ignore No types for this exist yet.
-		const { getDeviceType } = select( editorStore );
-
-		return {
-			deviceType: getDeviceType(),
-		};
-	} );
 
 	useEffect( () => {
 		setShowAiOfflineModal(
@@ -119,17 +141,6 @@ export const Layout = () => {
 
 	// @ts-expect-error No types for this exist yet.
 	const { setDeviceType } = useDispatch( editorStore );
-
-	const onDeviceClick = ( device: string ) => {
-		if ( isZoomedOut ) {
-			toggleZoomOut();
-			setTimeout( () => {
-				setDeviceType( device );
-			}, ANIMATION_DURATION * 1000 );
-		} else {
-			setDeviceType( device );
-		}
-	};
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
@@ -246,7 +257,7 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Desktop"
 												onClick={ () => {
-													onDeviceClick( 'Desktop' );
+													setDeviceType( 'Desktop' );
 												} }
 											>
 												<Icon
@@ -259,7 +270,7 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Tablet"
 												onClick={ () => {
-													onDeviceClick( 'Tablet' );
+													setDeviceType( 'Tablet' );
 												} }
 											>
 												<Icon
@@ -272,7 +283,7 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Mobile"
 												onClick={ () => {
-													onDeviceClick( 'Mobile' );
+													setDeviceType( 'Mobile' );
 												} }
 											>
 												<Icon
@@ -285,23 +296,15 @@ export const Layout = () => {
 												className="components-button has-icon woocommerce-customize-store__resize-button"
 												aria-label="Zoom out"
 												onClick={ () => {
-													// Set the device type to Desktop before zooming out to avoid issues with the editors calculations.
-													if (
-														deviceType !== 'Desktop'
-													) {
-														setDeviceType(
-															'Desktop'
-														);
-														setTimeout( () => {
-															toggleZoomOut();
-														}, ANIMATION_DURATION * 1000 );
-													} else {
-														toggleZoomOut();
-													}
+													toggleZoomOut();
 												} }
 											>
 												<Icon
-													icon={ search }
+													icon={
+														isZoomedOut
+															? zoomIn
+															: zoomOut
+													}
 													size={ 30 }
 													className="woocommerce-customize-store__resize-icon"
 												/>

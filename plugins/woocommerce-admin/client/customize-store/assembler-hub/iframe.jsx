@@ -30,6 +30,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import { getCompatibilityStyles } from './get-compatibility-styles';
+import { ZoomOutContext } from './context/zoom-out-context';
 
 function bubbleEvent( event, Constructor, frame ) {
 	const init = {};
@@ -456,19 +457,20 @@ function Iframe( {
 }
 
 function IframeIfReady( props, ref ) {
-	const { isInitialised, isZoomOutMode } = useSelect( ( select ) => {
-		const { getSettings, __unstableGetEditorMode } =
-			select( blockEditorStore );
-		const { __internalIsInitialized } = getSettings();
+	const isInitialised = useSelect(
+		( select ) =>
+			select( blockEditorStore ).getSettings().__internalIsInitialized,
+		[]
+	);
 
-		return {
-			isInitialised: __internalIsInitialized,
-			isZoomOutMode: __unstableGetEditorMode() === 'zoom-out',
-		};
-	}, [] );
+	const { isZoomedOut } = useContext( ZoomOutContext );
 
-	console.log( 'isInitialised', isInitialised );
-	console.log( 'isZoomOutMode', isZoomOutMode );
+	const zoomOutProps = isZoomedOut
+		? {
+				scale: 'default',
+				frameSize: '48px',
+		  }
+		: {};
 
 	// We shouldn't render the iframe until the editor settings are initialised.
 	// The initial settings are needed to get the styles for the srcDoc, which
@@ -479,7 +481,12 @@ function IframeIfReady( props, ref ) {
 		return null;
 	}
 
-	return <Iframe { ...props } forwardedRef={ ref } />;
+	const iframeProps = {
+		...props,
+		...zoomOutProps,
+	};
+
+	return <Iframe { ...iframeProps } forwardedRef={ ref } />;
 }
 
 export default forwardRef( IframeIfReady );
