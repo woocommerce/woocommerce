@@ -132,6 +132,5 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$expected = '<span class="woocommerce-help-tip" tabindex="0" aria-label="Strong text regular text" data-tip="&lt;strong&gt;Strong text&lt;/strong&gt; regular text"></span>';
 		$this->assertEquals( $expected, wc_help_tip( '<strong>Strong text</strong> regular text', false ) );
 		$this->assertEquals( $expected, wc_help_tip( '<strong>Strong text</strong> regular text', true ) );
-
 	}
 }
