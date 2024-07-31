@@ -57,7 +57,7 @@
           "menu_title": "Slot and Fill",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
-          "hash": "bfa7993ed4199c56504d33a0e368efa76c2eb0b3d69ca454a1ab03291d4f4bc6",
+          "hash": "f83a5fbef86e5ef6b0ec1d63fdbcbf4742f54de1125e535fa0f32f5f80ec794a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/slot-fills.md",
           "id": "e388101586765dd9aca752d66d667d74951a1504"
         },
@@ -118,7 +118,7 @@
               "menu_title": "Totals Footer Item",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
-              "hash": "3629f2fff69f40d4eaf264c1fb9bb8a825674bde9792473d3927d1edf4e6e863",
+              "hash": "3a9869d7d7beadb8117c100c3b58675e416e16386ee753f78e1a9087e768053f",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
               "id": "90a9b8df374082f1713866a58b810303adb4d3da"
             },
@@ -136,7 +136,7 @@
               "menu_title": "Coupons",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/coupons.md",
-              "hash": "825c97646d49559e4f0425590f1d968f2c861c47484b90fc633eefe5f50e432e",
+              "hash": "9ce61079d75f991137c771f044812c385db165256723a814ed44ba9caf297f13",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/coupons.md",
               "id": "5a022617f3d0267c9b771374f28970e779a6e99d"
             },
@@ -145,7 +145,7 @@
               "menu_title": "Checkout and Place Order Button",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
-              "hash": "6a929bcd5913474cad10a17022d1b1895e4d25b26f8459bab3a8e688585765d2",
+              "hash": "9ef672160e407cebef3b163414834a6f6f67cd7d677aa399a4312883e0827131",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
               "id": "c97ca710c2e8107bf90915e038a34c8a1016c63a"
             },
@@ -154,7 +154,7 @@
               "menu_title": "Cart Line Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "hash": "209ec069232c46e73f381c5a1b7dd5254db14f8247750febd3976ae1518e6876",
+              "hash": "e2a3543efe12c2a10e53b826fd8cb4c8a89a55473fb8d7586b3a4f04fd80e6c4",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
               "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2"
             },
@@ -163,7 +163,7 @@
               "menu_title": "Inner Block Types",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
-              "hash": "b5a770c1a7ba08c49dffea772cf2437765b69f6d5366dadb59befe9e27dcd330",
+              "hash": "10534fe4d38115dd95efb4d791593c3b32db0317239b49ca8101ad744c22fd32",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
               "id": "3167c9602b1bd3b206226a0d4415944a5f647495"
             }
@@ -1581,5 +1581,5 @@
       "categories": []
     }
   ],
-  "hash": "08b0c8c4ff66676e6dd74a56a0e667744a3811b5aa31e0baf4364871981276f3"
+  "hash": "47eb63ff8d29228ecc17fe0f528e296c9ed8b12b216b30eac543a75f3bf1b2ff"
 }

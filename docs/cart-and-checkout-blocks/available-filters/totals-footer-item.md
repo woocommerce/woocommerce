@@ -46,7 +46,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -91,7 +91,7 @@ registerCheckoutFilters( 'my-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 

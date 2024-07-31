@@ -17,8 +17,8 @@ The following Cart Line Items filters are available:
 
 The following objects are shared between the filters:
 
--   [Cart object](#cart-object)
--   [Cart Item object](#cart-item-object)
+-   Cart object
+-   Cart Item object
 
 The following screenshot shows which parts the individual filters affect:
 
@@ -35,8 +35,8 @@ The `cartItemClass` filter allows to change the cart item class.
 -   _defaultValue_ `object` (default: `''`) - The default cart item class.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
 ### Returns <!-- omit in toc -->
@@ -93,7 +93,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -113,8 +113,8 @@ The `cartItemPrice` filter allows to format the cart item price.
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
@@ -172,7 +172,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -191,8 +191,8 @@ The `itemName` filter allows to change the cart item name.
 -   _defaultValue_ `string` - The default cart item name.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
 ### Returns <!-- omit in toc -->
@@ -249,7 +249,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -268,8 +268,8 @@ The `saleBadgePriceFormat` filter allows to format the cart item sale badge pric
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item sale badge price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
@@ -335,7 +335,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -355,8 +355,8 @@ The `showRemoveItemLink` is used to show or hide the cart item remove link.
 -   _defaultValue_ (type: `boolean`, default: `true`) - The default value of the remove link.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
 ### Returns <!-- omit in toc -->
@@ -413,7 +413,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -434,8 +434,8 @@ The `subtotalPriceFormat` filter allows to format the cart item subtotal price.
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item subtotal price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see [Cart Item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
@@ -503,7 +503,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> Filters can be also combined. See [Combined filters](./available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -534,7 +534,7 @@ The Cart object of the filters above has the following keys:
 -   _cartHasCalculatedShipping_ `boolean` - Whether the cart has calculated shipping.
 -   _cartIsLoading_ `boolean` - Whether the cart is loading.
 -   _cartItemErrors_ `array` - The cart item errors array.
--   _cartItems_ `array` - The cart items array with cart item objects, see [Cart Item object](#cart-item-object).
+-   _cartItems_ `array` - The cart items array with cart item objects, see Cart Item object.
 -   _cartItemsCount_ `number` - The cart items count.
 -   _cartItemsWeight_ `number` - The cart items weight.
 -   _cartNeedsPayment_ `boolean` - Whether the cart needs payment.
