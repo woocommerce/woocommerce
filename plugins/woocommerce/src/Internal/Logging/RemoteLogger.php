@@ -39,10 +39,9 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @param \WC_Logger_Interface|null $logger Logger instance.
 	 */
 	public function __construct( \WC_Logger_Interface $logger = null ) {
-		if ( null === $logger ) {
-			$this->local_logger = wc_get_logger();
-		}
-		$this->local_logger = $logger;
+		$this->local_logger = null === $logger
+			? wc_get_logger()
+			: $logger;
 	}
 
 	/**
