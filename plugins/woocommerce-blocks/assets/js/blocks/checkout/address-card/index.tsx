@@ -52,6 +52,10 @@ const AddressCard = ( {
 		address,
 		formatToUse
 	);
+	const label =
+		target === 'shipping'
+			? __( 'Edit shipping address', 'woocommerce' )
+			: __( 'Edit billing address', 'woocommerce' );
 
 	return (
 		<div className="wc-block-components-address-card">
@@ -82,7 +86,7 @@ const AddressCard = ( {
 					className="wc-block-components-address-card__edit"
 					aria-controls={ target }
 					aria-expanded={ isExpanded }
-					aria-label={ __( 'Edit address', 'woocommerce' ) }
+					aria-label={ label }
 					onClick={ ( e ) => {
 						e.preventDefault();
 						onEdit();
