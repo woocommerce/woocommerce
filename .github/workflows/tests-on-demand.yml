@@ -4,11 +4,32 @@ on:
   workflow_dispatch:
     inputs:
       trigger:
+        type: choice
         description: 'Event name. It will be used to filter the jobs to run in ci.yml. It can be anything, as long as the job you want to run has this event configured in the `events` list. Example: daily-checks, pull_request, on-demand, etc.'
         required: true
-        default: ''
+        options:
+          - pull_request
+          - push
+          - daily-checks
+          - pre-release
+          - on-demand
+          - custom
+        default: on-demand
+      custom-trigger:
+        type: string
+        description: 'Custom event name. In case the `trigger` is set to `custom`, this field is required.'
+        required: false
 
 jobs:
+  validate-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check inputs'
+        run: |
+          if [ "${{ inputs.trigger }}" == "custom" ] && [ -z "${{ inputs.custom-trigger }}" ]; then
+            echo "Custom trigger is required when trigger is set to custom."
+            exit 1
+          fi
   run-tests:
     name: 'Run tests'
     uses: ./.github/workflows/ci.yml
