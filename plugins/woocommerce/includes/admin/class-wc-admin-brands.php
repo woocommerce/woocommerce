@@ -35,9 +35,9 @@ class WC_Brands_Admin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'styles' ) );
 		add_action( 'product_brand_add_form_fields', array( $this, 'add_thumbnail_field' ) );
-		add_action( 'product_brand_edit_form_fields', array( $this, 'edit_thumbnail_field' ), 10, 2 );
-		add_action( 'created_term', array( $this, 'thumbnail_field_save' ), 10, 3 );
-		add_action( 'edit_term', array( $this, 'thumbnail_field_save' ), 10, 3 );
+		add_action( 'product_brand_edit_form_fields', array( $this, 'edit_thumbnail_field' ), 10, 1 );
+		add_action( 'created_term', array( $this, 'thumbnail_field_save' ), 10, 1 );
+		add_action( 'edit_term', array( $this, 'thumbnail_field_save' ), 10, 1 );
 		add_action( 'product_brand_pre_add_form', array( $this, 'taxonomy_description' ) );
 		add_filter( 'woocommerce_sortable_taxonomies', array( $this, 'sort_brands' ) );
 		add_filter( 'manage_edit-product_brand_columns', array( $this, 'columns' ) );
@@ -100,7 +100,7 @@ class WC_Brands_Admin {
 	 * @param array $current_section Current section.
 	 */
 	public function add_settings_section( $settings, $current_section ) {
-		if ( 'brands' == $current_section ) {
+		if ( 'brands' === $current_section ) {
 			$settings = $this->settings;
 		}
 		return $settings;
@@ -141,7 +141,7 @@ class WC_Brands_Admin {
 
 				if ( $categories ) {
 					foreach ( $categories as $cat ) {
-						echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids, true ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
 					}
 				}
 				?>
@@ -164,7 +164,7 @@ class WC_Brands_Admin {
 
 				if ( $categories ) {
 					foreach ( $categories as $cat ) {
-						echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
+						echo '<option value="' . esc_attr( $cat->term_id ) . '"' . selected( in_array( $cat->term_id, $category_ids, true ), true, false ) . '>' . esc_html( $cat->name ) . '</option>';
 					}
 				}
 				?>
@@ -251,7 +251,7 @@ class WC_Brands_Admin {
 			);
 		}
 
-		if ( in_array( $screen->id, array( 'edit-product_brand' ) ) ) {
+		if ( in_array( $screen->id, array( 'edit-product_brand' ), true ) ) {
 			wp_enqueue_media();
 			wp_enqueue_style( 'woocommerce_admin_styles' );
 		}
@@ -279,6 +279,7 @@ class WC_Brands_Admin {
 	 * Save admin settings function.
 	 */
 	public function save_admin_settings() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['section'] ) && 'brands' === $_GET['section'] ) {
 			woocommerce_update_options( $this->settings );
 		}
@@ -359,9 +360,8 @@ class WC_Brands_Admin {
 	 * Edit thumbnail field row.
 	 *
 	 * @param WP_Term $term     Current taxonomy term object.
-	 * @param string  $taxonomy Current taxonomy slug.
 	 */
-	public function edit_thumbnail_field( $term, $taxonomy ) {
+	public function edit_thumbnail_field( $term ) {
 		global $woocommerce;
 
 		$image        = '';
@@ -444,12 +444,10 @@ class WC_Brands_Admin {
 	 * Saves thumbnail field.
 	 *
 	 * @param int    $term_id Term ID.
-	 * @param int    $tt_id Term taxonomy ID.
-	 * @param string $taxonomy Taxonomy.
 	 *
 	 * @return void
 	 */
-	public function thumbnail_field_save( $term_id, $tt_id, $taxonomy ) {
+	public function thumbnail_field_save( $term_id ) {
 		if ( isset( $_POST['product_cat_thumbnail_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}

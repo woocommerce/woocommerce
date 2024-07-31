@@ -73,7 +73,7 @@ class Packages {
 
 		// Display a notice in the Plugins tab next to plugins already merged into WooCommerce core.
 		add_filter( 'all_plugins', array( __CLASS__, 'mark_merged_plugins_as_pending_update' ), 10, 1 );
-		add_action( 'after_plugin_row', array( __CLASS__, 'display_notice_for_merged_plugins' ), 10, 2 );
+		add_action( 'after_plugin_row', array( __CLASS__, 'display_notice_for_merged_plugins' ), 10, 1 );
 	}
 
 	/**
@@ -184,9 +184,8 @@ class Packages {
 	 * Requires 'mark_merged_plugins_as_pending_update' to properly display this notice.
 	 *
 	 * @param string $plugin_file Plugin file.
-	 * @param array  $plugin_data Plugin data.
 	 */
-	public static function display_notice_for_merged_plugins( $plugin_file, $plugin_data ) {
+	public static function display_notice_for_merged_plugins( $plugin_file ) {
 		global $wp_list_table;
 
 		$plugin_dir    = basename( dirname( $plugin_file ) );

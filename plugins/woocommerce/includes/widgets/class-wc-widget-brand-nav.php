@@ -32,6 +32,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	 * @param array $cat_args Category arguments.
 	 */
 	public function filter_out_cats( $cat_args ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['filter_product_brand'] ) ) {
 			return array( 'taxonomy' => '' );
 		}
@@ -273,7 +274,6 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-
 		return esc_url( $link );
 	}
 

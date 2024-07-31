@@ -16,7 +16,7 @@ class WC_Brands_Coupons {
 		// Coupon validation and error handling.
 		add_filter( 'woocommerce_coupon_is_valid', array( $this, 'is_coupon_valid' ), 10, 3 );
 		add_filter( 'woocommerce_coupon_is_valid_for_product', array( $this, 'is_valid_for_product' ), 10, 3 );
-		add_filter( 'woocommerce_coupon_error', array( $this, 'brand_exclusion_error' ), 10, 3 );
+		add_filter( 'woocommerce_coupon_error', array( $this, 'brand_exclusion_error' ), 10, 2 );
 	}
 
 	/**
@@ -118,11 +118,10 @@ class WC_Brands_Coupons {
 	 *
 	 * @param  string $err      The error message.
 	 * @param  string $err_code The error code.
-	 * @param  object $coupon   Coupon object.
 	 * @return string
 	 */
-	public function brand_exclusion_error( $err, $err_code, $coupon ) {
-		if ( self::E_WC_COUPON_EXCLUDED_BRANDS != $err_code ) {
+	public function brand_exclusion_error( $err, $err_code ) {
+		if ( self::E_WC_COUPON_EXCLUDED_BRANDS !== $err_code ) {
 			return $err;
 		}
 

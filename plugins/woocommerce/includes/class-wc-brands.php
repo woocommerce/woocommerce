@@ -57,7 +57,7 @@ class WC_Brands {
 			add_action( 'woocommerce_archive_description', array( $this, 'brand_description' ) );
 		}
 
-		add_filter( 'woocommerce_product_query_tax_query', array( $this, 'update_product_query_tax_query' ), 10, 2 );
+		add_filter( 'woocommerce_product_query_tax_query', array( $this, 'update_product_query_tax_query' ), 10, 1 );
 
 		// REST API.
 		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_maybe_set_brands' ), 10, 2 );
@@ -130,11 +130,10 @@ class WC_Brands {
 	 * Update the main product fetch query to filter by selected brands.
 	 *
 	 * @param array    $tax_query array of current taxonomy filters.
-	 * @param WC_Query $wc_query WC_Query object.
 	 *
 	 * @return array
 	 */
-	public function update_product_query_tax_query( array $tax_query, WC_Query $wc_query ) {
+	public function update_product_query_tax_query( array $tax_query ) {
 		if ( isset( $_GET['filter_product_brand'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$filter_product_brand = wc_clean( wp_unslash( $_GET['filter_product_brand'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$brands_filter        = array_filter( array_map( 'absint', explode( ',', $filter_product_brand ) ) );
@@ -231,7 +230,7 @@ class WC_Brands {
 		$shop_page_id = wc_get_page_id( 'shop' );
 
 		$base_slug     = $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
-		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) == 'yes' ? trailingslashit( $base_slug ) : '';
+		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) === 'yes' ? trailingslashit( $base_slug ) : '';
 
 		$slug = $category_base . __( 'brand', 'woocommerce' );
 		if ( '' === $category_base ) {
