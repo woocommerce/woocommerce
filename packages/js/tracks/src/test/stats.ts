@@ -1,0 +1,62 @@
+/**
+ * Internal dependencies
+ */
+import { bumpStat } from '../stats';
+
+jest.mock( '../utils', () => ( {
+	isDevelopmentMode: false,
+} ) );
+
+declare global {
+	interface Window {
+		Image: typeof Image;
+	}
+}
+
+describe( 'bumpStat', () => {
+	let originalImage: typeof Image;
+	let mockImage: { src: string };
+
+	beforeEach( () => {
+		originalImage = window.Image;
+		mockImage = { src: '' };
+		window.Image = jest.fn( () => mockImage ) as unknown as typeof Image;
+	} );
+
+	afterEach( () => {
+		window.Image = originalImage;
+		jest.resetAllMocks();
+	} );
+
+	it( 'should bump a single stat', () => {
+		const result = bumpStat( 'group', 'name' );
+
+		expect( result ).toBe( true );
+		expect( window.Image ).toHaveBeenCalledTimes( 1 );
+		expect( mockImage.src ).toMatch(
+			/^https?:\/\/pixel\.wp\.com\/g\.gif\?v=wpcom-no-pv&x_woocommerce-group=name&t=/
+		);
+	} );
+
+	it( 'should bump multiple stats', () => {
+		const result = bumpStat( { stat1: 'value1', stat2: 'value2' } );
+
+		expect( result ).toBe( true );
+		expect( window.Image ).toHaveBeenCalledTimes( 1 );
+		expect( mockImage.src ).toMatch(
+			/^https?:\/\/pixel\.wp\.com\/g\.gif\?v=wpcom-no-pv&x_woocommerce-stat1=value1&x_woocommerce-stat2=value2&t=/
+		);
+	} );
+
+	it( 'should not bump stats in development mode', () => {
+		jest.resetModules();
+		jest.doMock( '../utils', () => ( {
+			isDevelopmentMode: true,
+		} ) );
+		const { bumpStat: bumpStatDev } = require( '../stats' );
+
+		const result = bumpStatDev( 'group', 'name' );
+		expect( result ).toBe( false );
+		expect( window.Image ).not.toHaveBeenCalled();
+	} );
+} );
