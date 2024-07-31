@@ -172,7 +172,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				const productIdMatch = productIdRegex.exec( url );
 				productId = productIdMatch ? productIdMatch[ 1 ] : null;
 
-				await expect( productId ).toBeDefined();
+				expect( productId ).toBeDefined();
 				await expect( title ).toHaveText( productData.name );
 			} );
 		} );
