@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce\RestApi
  * @extends WC_REST_Product_Categories_Controller
  */
-class WC_REST_Product_Brands_V1_Controller extends WC_REST_Product_Categories_Controller {
+class WC_REST_Product_Brands_V1_Controller extends WC_REST_Product_Categories_V1_Controller {
 
 	/**
 	 * Route base.
