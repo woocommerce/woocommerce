@@ -104,7 +104,7 @@ The following methods are available on all repositories if the corresponding met
 - `read( objectId )` - Read a single object of the model type
 - `update( objectId, {...properties} )` - Update a single object of the model type
 
-#### Child Repositories
+#### Child Repositories Use
 
 In child model repositories, each method requires the `parentId` as the first parameter:
 
