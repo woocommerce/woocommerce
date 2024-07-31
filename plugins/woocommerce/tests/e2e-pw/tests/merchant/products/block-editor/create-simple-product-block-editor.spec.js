@@ -46,11 +46,15 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 		);
 
 		test( 'can create a simple product', async ( { page } ) => {
-			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
-			await clickOnTab( 'General', page );
-			await page
-				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
-				.fill( productData.name );
+			await test.step( 'add new product', async () => {
+				await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+			} );
+
+			await test.step( 'add product name, description, and summary', async () => {
+				await clickOnTab( 'General', page );
+				await page
+					.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
+					.fill( productData.name );
 
 			await page
 				.locator(
@@ -115,55 +119,62 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			).toBeVisible();
 
 			await page
-				.locator(
-					'[data-template-block-id="basic-details"] .components-summary-control'
-				)
-				.last()
-				.fill( productData.summary );
+					.locator(
+						'[data-template-block-id="basic-details"] .components-summary-control'
+					)
+					.last()
+					.fill( productData.summary );
 
-			// We blur the summary field to hide the toolbar before clicking on the regular price field.
-			await page
-				.locator(
-					'[data-template-block-id="basic-details"] .components-summary-control'
-				)
-				.last()
-				.blur();
+				// Blur the summary field to hide the toolbar before clicking on the regular price field.
+				await page
+					.locator(
+						'[data-template-block-id="basic-details"] .components-summary-control'
+					)
+					.last()
+					.blur();
+			} );
 
-			const regularPrice = page
-				.locator( 'input[name="regular_price"]' )
-				.first();
-			await regularPrice.waitFor( { state: 'visible' } );
-			await regularPrice.click();
-			await regularPrice.fill( productData.productPrice );
+			await test.step( 'add product price', async () => {
+				const regularPrice = page
+					.locator( 'input[name="regular_price"]' )
+					.first();
+				await regularPrice.waitFor( { state: 'visible' } );
+				await regularPrice.click();
+				await regularPrice.fill( productData.productPrice );
 
-			const salePrice = page
-				.locator( 'input[name="sale_price"]' )
-				.first();
-			await salePrice.waitFor( { state: 'visible' } );
-			await salePrice.click();
-			await salePrice.fill( productData.salePrice );
+				const salePrice = page
+					.locator( 'input[name="sale_price"]' )
+					.first();
+				await salePrice.waitFor( { state: 'visible' } );
+				await salePrice.click();
+				await salePrice.fill( productData.salePrice );
+			} );
 
-			await page
-				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
+			await test.step( 'publish the product', async () => {
+				await page
+					.locator( '.woocommerce-product-header__actions' )
+					.getByRole( 'button', {
+						name: 'Publish',
+					} )
+					.click();
 
-			await expect(
-				page.getByLabel( 'Dismiss this notice' )
-			).toContainText( 'Product published' );
+				await expect(
+					page.getByLabel( 'Dismiss this notice' )
+				).toContainText( 'Product published' );
 
-			const title = page.locator( '.woocommerce-product-header__title' );
+				const title = page.locator(
+					'.woocommerce-product-header__title'
+				);
 
-			// Save product ID
-			const productIdRegex = /product%2F(\d+)/;
-			const url = page.url();
-			const productIdMatch = productIdRegex.exec( url );
-			productId = productIdMatch ? productIdMatch[ 1 ] : null;
+				// Save product ID
+				const productIdRegex = /product%2F(\d+)/;
+				const url = page.url();
+				const productIdMatch = productIdRegex.exec( url );
+				productId = productIdMatch ? productIdMatch[ 1 ] : null;
 
-			await expect( productId ).toBeDefined();
-			await expect( title ).toHaveText( productData.name );
+				await expect( productId ).toBeDefined();
+				await expect( title ).toHaveText( productData.name );
+			} );
 		} );
 
 		test( 'can not create a product with duplicated SKU', async ( {
