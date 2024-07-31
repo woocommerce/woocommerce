@@ -5,6 +5,7 @@ import debugFactory from 'debug';
 import { getSetting } from '@woocommerce/settings';
 import TraceKit from 'tracekit';
 import { applyFilters } from '@wordpress/hooks';
+import { bumpStat } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -186,6 +187,9 @@ export class RemoteLogger {
 			debug( 'Irrelevant error. Skipping handling.', error );
 			return;
 		}
+
+		// Bump the stat for unhandled JS errors to track the frequency of these errors.
+		bumpStat( 'error', 'unhandled-js-errors' );
 
 		if ( this.isRateLimited() ) {
 			return;
