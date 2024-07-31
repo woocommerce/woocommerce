@@ -201,12 +201,10 @@ function wc_clear_cart_after_payment() {
 	/**
 	 * Determine whether the cart should be cleared after payment.
 	 *
-	 * @since 9.2.0
+	 * @since 9.3.0
 	 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
-	 * @param WC_Order $order The order.
-	 * @return bool Whether the cart should be cleared after payment.
 	 */
-	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment, $order );
+	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
 
 	if ( $should_clear_cart_after_payment ) {
 		WC()->cart->empty_cart();
