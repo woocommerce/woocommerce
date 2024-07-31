@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/product-filters-overlay-navigation",
-	"title": "Navigation (Experimental)",
+	"title": "Overlay Navigation (Experimental)",
 	"description": "Display overlay navigation controls.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
