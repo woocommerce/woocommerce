@@ -36,7 +36,7 @@ jobs:
                   npm install dotenv@16.4.5
 
             - name: Create key.json
-              run: echo '${{ secrets.FLAKY_TESTS_GOOGLE_SHEETS_CREDENTIALS }}' > ./.github/workflows/scripts/key.json
+              run: echo '${{ secrets.FLAKY_TESTS_GOOGLE_SHEETS_CREDENTIALS }}' > ./key.json
 
             - name: Run flaky test tracker
               run: node ./.github/workflows/scripts/flaky-test-manager.mjs
