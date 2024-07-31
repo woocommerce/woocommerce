@@ -283,7 +283,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 	 * @return array
 	 */
 	public function get_chosen_attributes() {
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! empty( $_GET['filter_product_brand'] ) ) {
 			$filter_product_brand = wc_clean( wp_unslash( $_GET['filter_product_brand'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return array_map( 'intval', explode( ',', $filter_product_brand ) );
