@@ -40,8 +40,8 @@ jobs:
       - name: 'Fetch git-history'
         shell: bash
         run: |
-          PR_COMMITS=$( ${{ github.event.pull_request.commits }} )
-          GIT_FETCH_DEPTH=$( ${PR_COMMITS} + 1 )
+          PR_COMMITS=$(( ${{ github.event.pull_request.commits }} ))
+          GIT_FETCH_DEPTH=$(( ${PR_COMMITS} + 1 ))
           GIT_BRANCH="${{ github.event.pull_request.head.ref || github.base_ref }}"
           GIT_BASE="${{ github.event.pull_request.base.ref || github.base_ref }}"
           
