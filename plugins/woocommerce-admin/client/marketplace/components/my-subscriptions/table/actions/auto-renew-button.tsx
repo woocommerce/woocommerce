@@ -18,7 +18,7 @@ interface AutoRenewProps {
 
 export default function AutoRenewButton( props: AutoRenewProps ) {
 	function recordTracksEvent() {
-		queueRecordEvent( 'marketplace_autor_renew_button_clicked', {
+		queueRecordEvent( 'marketplace_auto_renew_button_clicked', {
 			order_id: props.subscription.order_id,
 			product_id: props.subscription.product_id,
 		} );
