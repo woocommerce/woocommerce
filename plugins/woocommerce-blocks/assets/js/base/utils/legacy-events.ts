@@ -59,6 +59,13 @@ export const triggerAddedToCartEvent = ( {
 	} );
 };
 
+export const triggerProductListRenderedEvent = (): void => {
+	dispatchEvent( 'wc-blocks_product_list_rendered', {
+		bubbles: true,
+		cancelable: true,
+	} );
+};
+
 /**
  * Function that listens to a jQuery event and dispatches a native JS event.
  * Useful to convert WC Core events into events that can be read by blocks.
