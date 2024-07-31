@@ -181,13 +181,13 @@ export class RemoteLogger {
 	 * @param error - The error to handle.
 	 */
 	private async handleError( error: Error ) {
-		if ( this.isRateLimited() ) {
+		const trace = TraceKit.computeStackTrace( error );
+		if ( ! this.shouldHandleError( error, trace.stack ) ) {
+			debug( 'Irrelevant error. Skipping handling.', error );
 			return;
 		}
 
-		const trace = TraceKit.computeStackTrace( error );
-		if ( ! this.shouldHandleError( error, trace.stack ) ) {
-			debug( 'Skipping error:', error );
+		if ( this.isRateLimited() ) {
 			return;
 		}
 
