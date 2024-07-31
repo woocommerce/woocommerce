@@ -44,7 +44,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_attribute() );
+			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_product_attribute() );
 		}
 	}
 
@@ -361,9 +361,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 	/**
 	 * Get the attribute if with most term but closest to 30 terms.
 	 *
-	 * @return int
+	 * @return object
 	 */
-	private function get_default_attribute() {
+	private function get_default_product_attribute() {
 		$cached = get_transient( 'wc_block_product_filter_attribute_default_attribute' );
 
 		if ( $cached ) {
@@ -403,9 +403,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 		}
 
-		$default_attribute = array(
-			'id'    => 0,
-			'label' => __( 'Attribute', 'woocommerce' ),
+		$default_attribute = (object) array(
+			'attribute_id'      => '0',
+			'attribute_name'    => 'attribute',
+			'attribute_label'   => __( 'Attribute', 'woocommerce' ),
+			'attribute_type'    => 'select',
+			'attribute_orderby' => 'menu_order',
+			'attribute_public'  => 0,
 		);
 
 		if ( $attribute_id ) {
