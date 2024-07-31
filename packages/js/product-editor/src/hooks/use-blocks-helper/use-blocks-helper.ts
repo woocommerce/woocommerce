@@ -22,7 +22,12 @@ export function useBlocksHelper() {
 		return attributes?.id;
 	}
 
-	function getParentTabId( clientId?: string ) {
+	function getClientIdByField( field: HTMLElement ) {
+		const ancestorWithAttribute = field.closest( '[data-block]' );
+		return ancestorWithAttribute?.getAttribute( 'data-block' );
+	}
+
+	function getParentTabId( clientId?: string | null ) {
 		if ( clientId ) {
 			return getClosestParentTabId( clientId );
 		}
@@ -41,6 +46,7 @@ export function useBlocksHelper() {
 	}
 
 	return {
+		getClientIdByField,
 		getParentTabId,
 		getParentTabIdByBlockName,
 	};
