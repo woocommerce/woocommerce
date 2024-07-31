@@ -41,7 +41,7 @@ import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
-import { Icon, desktop, tablet, mobile, search } from '@wordpress/icons';
+import { Icon, desktop, tablet, mobile } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -74,6 +74,7 @@ export const zoomIn = (
 			cx="11"
 			cy="11"
 			r="7.25"
+			fill="transparent"
 			stroke="currentColor"
 			strokeWidth="1.5"
 		/>
@@ -88,6 +89,7 @@ export const zoomOut = (
 			cx="11"
 			cy="11"
 			r="7.25"
+			fill="transparent"
 			stroke="currentColor"
 			strokeWidth="1.5"
 		/>
