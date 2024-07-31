@@ -17,6 +17,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Hook - woocommerce_before_edit_account_form.
+ *
+ * @since 9.3.0
+ */
 do_action( 'woocommerce_before_edit_account_form' );
 ?>
 
@@ -27,7 +32,7 @@ do_action( 'woocommerce_before_edit_account_form' );
 
 	<p class="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">
 		<label for="account_first_name">
-			<?php esc_html_e( 'First name', 'woocommerce' )?>
+			<?php esc_html_e( 'First name', 'woocommerce' ); ?>
 			<span class="asterisk"><span class="asterisk-line"></span><span class="asterisk-line"></span><span class="asterisk-line"></span></span>
 		</label>
 		<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="account_first_name" id="account_first_name" autocomplete="given-name" value="<?php echo esc_attr( $user->first_name ); ?>" aria-required="true" />
