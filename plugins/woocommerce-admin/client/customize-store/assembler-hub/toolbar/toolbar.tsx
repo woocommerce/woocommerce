@@ -155,7 +155,7 @@ export const Toolbar = () => {
 
 				const rect = window.document
 					.querySelector(
-						'.woocommerce-customize-store-assembler > iframe[name="editor-canvas"]'
+						'.woocommerce-customize-store-assembler > .block-editor-iframe__container iframe[name="editor-canvas"]'
 					)
 					?.getBoundingClientRect();
 
