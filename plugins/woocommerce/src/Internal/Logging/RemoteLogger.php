@@ -286,8 +286,6 @@ class RemoteLogger extends \WC_Log_Handler {
 			}
 		}
 
-		$is_third_party_error = true;
-
 		/**
 		 * Filter to allow other plugins to overwrite the result of the third-party error check for remote logging.
 		 *
@@ -297,7 +295,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		 * @param string $message              The error message.
 		 * @param array  $context              The error context.
 		 */
-		return apply_filters( 'woocommerce_remote_logging_is_third_party_error', $is_third_party_error, $message, $context );
+		return apply_filters( 'woocommerce_remote_logging_is_third_party_error', true, $message, $context );
 	}
 
 	/**
