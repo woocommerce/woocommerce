@@ -40,12 +40,13 @@ jobs:
       - name: 'Fetch git-history'
         shell: bash
         run: |
-          GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))
+          PR_COMMITS=$( ${{ github.event.pull_request.commits }} )
+          GIT_FETCH_DEPTH=$( ${PR_COMMITS} + 1 )
           GIT_BRANCH="${{ github.event.pull_request.head.ref || github.base_ref }}"
           GIT_BASE="${{ github.event.pull_request.base.ref || github.base_ref }}"
           
           git fetch --depth ${GIT_FETCH_DEPTH} origin ${GIT_BRANCH}
-          BRANCHED_AT=$(git show -s --format=%ci HEAD~${GIT_FETCH_DEPTH})
+          BRANCHED_AT=$(git show -s --format=%ci HEAD~${PR_COMMITS})
           git fetch --shallow-since="${BRANCHED_AT}" origin ${GIT_BASE}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
