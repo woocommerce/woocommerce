@@ -1,5 +1,5 @@
 ---
-post_title: Cart and Checkout - Available filters
+post_title: Cart and Checkout Filters - Available filters
 menu_title: Available Filters
 tags: reference
 ---
@@ -88,7 +88,7 @@ const modifyCartItemPrice = ( defaultValue, extensions, args ) => {
 
 const modifyItemName = ( defaultValue, extensions, args ) => {
 	if ( isOrderSummaryContext( args ) ) {
-		return `🪴 ${ defaultValue } 🪴`;
+		return `${ defaultValue }`;
 	}
 	return defaultValue;
 };

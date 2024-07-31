@@ -1,5 +1,5 @@
 ---
-post_title: Cart and Checkout - Totals footer item
+post_title: Cart and Checkout Filters - Totals footer item
 menu_title: Totals Footer Item
 tags: reference
 ---

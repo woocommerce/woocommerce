@@ -1,5 +1,5 @@
 ---
-post_title: Cart and Checkout - Inner block types
+post_title: Cart and Checkout Filters - Inner block types
 menu_title: Inner Block Types
 tags: reference
 ---
