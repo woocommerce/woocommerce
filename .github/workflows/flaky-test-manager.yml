@@ -2,8 +2,7 @@ name: Flaky Test Manager
 
 on:
     pull_request:
-        types:
-            - labeled
+        types: [synchronize]
     schedule:
         - cron: '0 * * * *' # Run every hour
     workflow_dispatch: # Allow manual triggering
@@ -24,13 +23,16 @@ jobs:
               with:
                   node-version: '18'
 
+            - name: Install pnpm
+              run: npm install -g pnpm
+
             - name: Install dependencies
               run: |
-                  pnpm install @octokit/rest@21.0.1
-                  pnpm install axios@1.7.2
-                  pnpm install google-auth-library@9.11.0
-                  pnpm install googleapis@140.0.1
-                  pnpm install dotenv@16.4.5
+                  pnpm add @octokit/rest@21.0.1
+                  pnpm add axios@1.7.2
+                  pnpm add google-auth-library@9.11.0
+                  pnpm add googleapis@140.0.1
+                  pnpm add dotenv@16.4.5
 
             - name: Create key.json
               run: echo '${{ secrets.FLAKY_TESTS_GOOGLE_SHEETS_CREDENTIALS }}' > ./.github/workflows/scripts/key.json
