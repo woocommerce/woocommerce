@@ -114,11 +114,11 @@
           "category_title": "Available Filters",
           "posts": [
             {
-              "post_title": "Cart and Checkout - Totals footer item",
+              "post_title": "Cart and Checkout Filters - Totals footer item",
               "menu_title": "Totals Footer Item",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
-              "hash": "628eec63db5f53987c508509e4929b4635725313701d6c5f9600d1e82746acb3",
+              "hash": "3629f2fff69f40d4eaf264c1fb9bb8a825674bde9792473d3927d1edf4e6e863",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/totals-footer-item.md",
               "id": "90a9b8df374082f1713866a58b810303adb4d3da"
             },
@@ -141,29 +141,29 @@
               "id": "5a022617f3d0267c9b771374f28970e779a6e99d"
             },
             {
-              "post_title": "Cart and Checkout - Checkout and place order button",
+              "post_title": "Cart and Checkout Filters - Checkout and place order button",
               "menu_title": "Checkout and Place Order Button",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
-              "hash": "b3d0568c6e4d17fcc6bb2446e6c606d8fc5b790af92920e5d6dd71f2b31c2e8f",
+              "hash": "6a929bcd5913474cad10a17022d1b1895e4d25b26f8459bab3a8e688585765d2",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/checkout-and-place-order-button.md",
               "id": "c97ca710c2e8107bf90915e038a34c8a1016c63a"
             },
             {
-              "post_title": "Cart and Checkout - Cart line items",
+              "post_title": "Cart and Checkout Filters - Cart line items",
               "menu_title": "Cart Line Items",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
-              "hash": "9ebdcd49f202977deebd4becb550797e6adecf33f2dcbf65e5467ed77e20473d",
+              "hash": "209ec069232c46e73f381c5a1b7dd5254db14f8247750febd3976ae1518e6876",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
               "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2"
             },
             {
-              "post_title": "Cart and Checkout - Available filters",
+              "post_title": "Cart and Checkout Filters - Available filters",
               "menu_title": "Available Filters",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/available-filters.md",
-              "hash": "ae465e5f3d46a9c17295e3ce3228906e55f57fdb96e7e5ada65cff4adac8a7e9",
+              "hash": "dbf46c624c0eaf6dade45b26c89c744c4f4d9301f5128ae58de1f2a45c7d2007",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/available-filters.md",
               "id": "d88f29ca4697eace597ea00ea41b6f25b4a4dee1",
               "links": {
@@ -176,11 +176,11 @@
               }
             },
             {
-              "post_title": "Cart and Checkout - Inner block types",
+              "post_title": "Cart and Checkout Filters - Inner block types",
               "menu_title": "Inner Block Types",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
-              "hash": "3ea3113a1686f0749ceac3ede28c865630563ccca6d18431d7efb0f6f463cc09",
+              "hash": "b5a770c1a7ba08c49dffea772cf2437765b69f6d5366dadb59befe9e27dcd330",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/additional-cart-checkout-inner-block-types.md",
               "id": "3167c9602b1bd3b206226a0d4415944a5f647495"
             }
@@ -1598,5 +1598,5 @@
       "categories": []
     }
   ],
-  "hash": "2549c9b53cf15a43a88b8263cb1df6ed4a9fdfb9e9207083e568cf825bc7b279"
+  "hash": "26861ce876fc1e2cadb8caffbbc0b3aa9f879ebf1edbf7133c41dc9e1cde5608"
 }
