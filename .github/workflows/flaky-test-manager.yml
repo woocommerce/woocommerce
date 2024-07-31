@@ -1,9 +1,6 @@
 name: Flaky Test Manager
 
 on:
-    pull_request:
-        types:
-            - labeled
     schedule:
         - cron: '0 * * * *' # Run every hour
     workflow_dispatch: # Allow manual triggering
