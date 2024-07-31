@@ -309,10 +309,11 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			// by the product editor.
 			window.location.href = getNewPath( {}, `/product/${ productId }` );
 		} catch ( error ) {
-			const { message, errorProps } = getProductErrorMessageAndProps(
-				errorHandler( error as WPError, productStatus ) as WPError,
-				selectedTab
-			);
+			const { message, errorProps } =
+				await getProductErrorMessageAndProps(
+					errorHandler( error as WPError, productStatus ) as WPError,
+					selectedTab
+				);
 			createErrorNotice( message, errorProps );
 		}
 	}
