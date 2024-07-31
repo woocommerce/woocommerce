@@ -11,7 +11,6 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 import attributes from './attributes';
 import { Edit, Save } from './edit';
 import './style.scss';
-import metadata from './block.json';
 
 const blockConfig: BlockConfiguration = {
 	icon: {
@@ -22,7 +21,7 @@ const blockConfig: BlockConfiguration = {
 			/>
 		),
 	},
-	attributes: { ...attributes, ...metadata.attributes },
+	attributes,
 	save: Save,
 	edit: Edit,
 };
