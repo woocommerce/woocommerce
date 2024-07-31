@@ -90,7 +90,7 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          # the woocommerce package uses phpcs-changed for linting, which requires non-shallow git-history
+          # the WooCommerce plugin package uses phpcs-changed for linting, which requires non-shallow git-history.
           fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
