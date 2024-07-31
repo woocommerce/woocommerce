@@ -38,9 +38,17 @@ export class ErrorBoundary extends Component<
 	componentDidCatch( error: Error, errorInfo: ErrorInfo ) {
 		this.setState( { errorInfo } );
 
+		// Limit the component stack to 10 calls so we don't send too much data.
+		const componentStack = errorInfo.componentStack
+			.trim()
+			.split( '\n' )
+			.slice( 0, 10 )
+			.map( ( line ) => line.trim() );
+
 		captureException( error, {
+			severity: 'critical',
 			extra: {
-				componentStack: errorInfo.componentStack,
+				componentStack,
 			},
 		} );
 	}
