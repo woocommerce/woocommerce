@@ -5,7 +5,7 @@ on:
     inputs:
       trigger:
         type: choice
-        description: 'Event name. It will be used to filter the jobs to run in ci.yml. It can be anything, as long as the job you want to run has this event configured in the `events` list. Example: daily-checks, pull_request, on-demand, etc.'
+        description: 'Event name. It will be used to filter the jobs to run in ci.yml.'
         required: true
         options:
           - pull_request
@@ -17,7 +17,7 @@ on:
         default: on-demand
       custom-trigger:
         type: string
-        description: 'Custom event name. In case the `trigger` is set to `custom`, this field is required.'
+        description: 'Custom event name. In case the `trigger` choice is `custom`, this field is required.'
         required: false
 
 jobs:
