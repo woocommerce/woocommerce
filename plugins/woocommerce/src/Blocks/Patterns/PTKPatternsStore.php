@@ -91,11 +91,13 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		if ( as_has_scheduled_action( $action ) ) {
+		$last_request = get_transient( 'last_fetch_patterns_request' );
+		if ( as_has_scheduled_action( $action ) || false !== $last_request ) {
 			return;
 		}
 
 		as_schedule_single_action( time(), $action );
+		set_transient( 'last_fetch_patterns_request', time(), HOUR_IN_SECONDS );
 	}
 
 	/**

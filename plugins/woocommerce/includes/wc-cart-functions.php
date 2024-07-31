@@ -188,7 +188,7 @@ function wc_clear_cart_after_payment() {
 	}
 
 	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
-	if ( WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
+	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {

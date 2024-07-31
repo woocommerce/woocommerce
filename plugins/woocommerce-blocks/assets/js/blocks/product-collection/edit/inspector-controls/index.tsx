@@ -36,7 +36,10 @@ import {
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
-import InheritQueryControl from './inherit-query-control';
+import {
+	InheritQueryControl,
+	FilterableControl,
+} from './use-page-context-control';
 import OrderByControl from './order-by-control';
 import OnSaleControl from './on-sale-control';
 import StockStatusControl from './stock-status-control';
@@ -79,6 +82,8 @@ const ProductCollectionInspectorControls = (
 	const showQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
+	const showFilterableControl =
+		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
 	const showOrderControl =
 		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
@@ -128,6 +133,9 @@ const ProductCollectionInspectorControls = (
 			>
 				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
+				) }
+				{ showFilterableControl && (
+					<FilterableControl { ...queryControlProps } />
 				) }
 				<LayoutOptionsControl { ...displayControlProps } />
 				<ColumnsControl { ...displayControlProps } />

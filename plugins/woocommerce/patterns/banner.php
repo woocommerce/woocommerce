@@ -27,9 +27,9 @@ $second_description = $content['descriptions'][1]['default'] ?? '';
 			<p class="has-base-color has-text-color" style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:18px"><strong><?php echo esc_html( $first_description ); ?></strong> </p>
 			<!-- /wp:paragraph -->
 
-			<!-- wp:paragraph {"style":{"typography":{"fontSize":"48px"},"spacing":{"margin":{"top":"0px","right":"0px","bottom":"0px","left":"0px"},"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}, "textColor":"base"} -->
-			<p class="has-base-color has-text-color" style="margin-top:0px;margin-right:0px;margin-bottom:0px;margin-left:0px;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;font-size:48px"><strong><?php echo esc_html( $banner_title ); ?></strong> </p>
-			<!-- /wp:paragraph -->
+			<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"48px"}},"textColor":"base"} -->
+			<h3 class="wp-block-heading has-base-color has-text-color" style="font-size:48px"><?php echo esc_html( $banner_title ); ?></h3>
+			<!-- /wp:heading -->
 
 			<!-- wp:paragraph {"style":{"typography":{"fontSize":"24px"},"spacing":{"margin":{"top":"0","right":"0","bottom":"0","left":"0"}}}, "textColor":"base"} -->
 			<p class="has-base-color has-text-color" style="margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;font-size:24px"><?php echo esc_html( $second_description ); ?></p>
