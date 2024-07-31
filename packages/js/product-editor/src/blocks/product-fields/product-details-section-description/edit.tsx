@@ -187,10 +187,14 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					template: productTemplate.id,
 				} );
 			} catch ( error ) {
-				const { message, errorProps } = getProductErrorMessageAndProps(
-					errorHandler( error as WPError, productStatus ) as WPError,
-					selectedTab
-				);
+				const { message, errorProps } =
+					await getProductErrorMessageAndProps(
+						errorHandler(
+							error as WPError,
+							productStatus
+						) as WPError,
+						selectedTab
+					);
 				createErrorNotice( message, errorProps );
 			}
 
