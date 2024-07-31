@@ -28,8 +28,7 @@ jobs:
 
             - name: Install dependencies # ignore package.json in the repo
               run: |
-                  echo '{}' > temp-package.json
-                  npm init -y
+                  echo '{}' > package.json
                   npm install @octokit/rest@21.0.1
                   npm install axios@1.7.2
                   npm install google-auth-library@9.11.0
