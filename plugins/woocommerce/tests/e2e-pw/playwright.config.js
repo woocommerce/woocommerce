@@ -1,3 +1,4 @@
+const { devices } = require( '@playwright/test' );
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
 const testsRootPath = __dirname;
@@ -87,7 +88,18 @@ const config = {
 		navigationTimeout: 20 * 1000,
 	},
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
-	projects: [],
+	projects: [
+		{
+			name: 'ui',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testIgnore: '**/api-tests/**',
+		},
+		{
+			name: 'api',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testMatch: '**/api-tests/**',
+		},
+	],
 };
 
 module.exports = config;

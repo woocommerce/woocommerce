@@ -48,6 +48,9 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
+            // Intended behaviour of the jobs generation:
+            // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
+            // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
@@ -87,7 +90,8 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          fetch-depth: 0
+          # the WooCommerce plugin package uses phpcs-changed for linting, which requires non-shallow git-history.
+          fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
@@ -119,7 +123,7 @@ jobs:
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
-          build-type: ${{ ( ( matrix.testType == 'unit:php' || matrix.testType == 'api' ) && 'backend' ) || 'full' }}
+          build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
           pull-package-deps: '${{ matrix.projectName }}'
 
