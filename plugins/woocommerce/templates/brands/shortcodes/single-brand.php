@@ -25,7 +25,7 @@
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @usedby  [product_brand]
- * @version x.x.x
+ * @version 9.3.0
  */
 ?>
 <a href="<?php echo esc_url( get_term_link( $term, 'product_brand' ) ); ?>">

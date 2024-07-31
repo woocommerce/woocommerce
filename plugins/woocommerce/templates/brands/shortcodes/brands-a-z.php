@@ -13,7 +13,7 @@
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @usedby [product_brand_list]
- * @version x.x.x
+ * @version 9.3.0
  */
 
 ?>
