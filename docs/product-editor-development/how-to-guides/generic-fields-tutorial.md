@@ -8,7 +8,7 @@ Using a generic block is pretty easy. We have created an template API that allow
 
 Lets say we want to add something to the basic details section, we can do so by making use of the above mentioned hook:
 
-This will add a number field called **Animal age** to each template thta has a `basic-details` section.
+This will add a number field called **Animal age** to each template that has a `basic-details` section.
 
 ```php
 add_action(
