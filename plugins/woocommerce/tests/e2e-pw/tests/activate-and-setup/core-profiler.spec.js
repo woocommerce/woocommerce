@@ -326,20 +326,11 @@ test.describe( 'Store owner can complete the core profiler', () => {
 					} )
 				)
 				.toBeVisible( { timeout: 30000 } );
-			await expect
-				.soft(
-					page.getByRole( 'heading', {
-						name: 'Turning on the lights',
-					} )
-				)
-				.toBeVisible( { timeout: 30000 } );
-			await expect
-				.soft(
-					page.getByRole( 'heading', {
-						name: 'Turning on the lights',
-					} )
-				)
-				.toBeHidden( { timeout: 30000 } );
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Welcome to WooCommerce Core E2E Test Suite',
+				} )
+			).toBeVisible( { timeout: 30000 } );
 			// go to the plugins page to make sure that extensions were installed
 			await page.goto( 'wp-admin/plugins.php' );
 			await expect(
