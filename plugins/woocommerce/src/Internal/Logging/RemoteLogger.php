@@ -88,7 +88,7 @@ class RemoteLogger extends \WC_Log_Handler {
 				'params' => wp_json_encode( $log_data ),
 			);
 
-			\WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
+			WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
 
 			$response = wp_safe_remote_post(
 				self::LOG_ENDPOINT,
