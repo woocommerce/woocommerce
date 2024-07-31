@@ -211,7 +211,7 @@ test.skip( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 		}
 	} );
 
-	test.describe( 'Homepage tracking banner', () => {
+	test.describe( 'Homepage tracking banner', { tag: '@external' }, () => {
 		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
 			pageObject,
 			baseURL,

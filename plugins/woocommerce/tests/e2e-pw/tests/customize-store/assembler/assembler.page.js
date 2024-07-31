@@ -16,9 +16,10 @@ export class AssemblerPage {
 			'.cys-fullscreen-iframe[style="opacity: 1;"]'
 		);
 
+		// wait for longer to support multi env testing
 		await frame
 			.getByRole( 'button', { name: 'Save' } )
-			.waitFor( { timeout: 25000 } );
+			.waitFor( { timeout: 40000 } );
 	}
 
 	/**
