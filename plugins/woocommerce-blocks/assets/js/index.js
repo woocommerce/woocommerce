@@ -18,7 +18,7 @@ import './atomic/utils/blocks-registration-manager';
 // Icons are set on the front-end to make use of WordPress SVG primitive,
 // See: https://developer.wordpress.org/block-editor/reference-guides/filters/block-filters/#wp-blocks-updatecategory
 
-updateCategory('woocommerce', { icon: <Icon icon={ woo } /> });
+updateCategory( 'woocommerce', { icon: <Icon icon={ woo } /> } );
 updateCategory( 'woocommerce-product-elements', {
 	icon: (
 		<Icon icon={ woo } className="wc-block-editor-components-block-icon" />
