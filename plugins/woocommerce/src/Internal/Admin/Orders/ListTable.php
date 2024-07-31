@@ -801,7 +801,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return array List of year-months.
 	 */
-	private function get_and_maybe_update_months_filter_cache(): array {
+	protected function get_and_maybe_update_months_filter_cache(): array {
 		global $wpdb;
 
 		// We cache in the options table since it's won't be invalidated soon.
@@ -812,11 +812,11 @@ class ListTable extends WP_List_Table {
 
 		// new day, new cache.
 		if ( 0 === $cached_timestamp || gmdate( 'j', time() ) !== gmdate( 'j', $cached_timestamp ) || ( time() - $cached_timestamp ) > 60 * 60 * 24 ) {
-			delete_option( $cache_option_date_name );
-			delete_option( $cache_option_value_name );
+			$cached_value = false;
+		} else {
+			$cached_value = get_option( $cache_option_value_name );
 		}
 
-		$cached_value = get_option( $cache_option_value_name );
 		if ( $cached_value ) {
 			// Always add current year month for cache stability. This allows us to not hydrate the cache on every order update.
 			$current_year_month        = new \stdClass();
