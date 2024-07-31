@@ -1,3 +1,6 @@
+// Reference: https://github.com/WordPress/gutenberg/blob/trunk/packages/block-editor/src/components/iframe/get-compatibility-styles.js
+// This is a copy of the getCompatibilityStyles function from the block editor iframe. Its not exposed within the package and is used in iframe.jsx which is also forked.
+
 let compatibilityStyles = null;
 
 /**
