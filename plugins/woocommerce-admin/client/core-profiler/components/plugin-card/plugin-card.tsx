@@ -16,7 +16,7 @@ export const PluginCard = ( {
 	installed = false,
 	icon,
 	title,
-	onChange,
+	onChange = () => {},
 	checked = false,
 	description,
 	learnMoreLink,
@@ -28,24 +28,24 @@ export const PluginCard = ( {
 	title: string | ReactNode;
 	description: string | ReactNode;
 	checked?: boolean;
-	onChange?: () => void;
+	onChange: () => void;
 	learnMoreLink?: ReactNode;
 } ) => {
-	const onToggle = onChange ? onChange : () => {};
 	return (
 		// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
 		<div
 			className={ clsx( 'woocommerce-profiler-plugins-plugin-card', {
 				'is-installed': installed,
 			} ) }
-			onClick={ onToggle }
+			onClick={ onChange }
 		>
 			<div className="woocommerce-profiler-plugin-card-top">
 				{ ! installed && (
 					<CheckboxControl
 						className="core-profiler__checkbox"
 						checked={ checked }
-						onChange={ onToggle }
+						onChange={ onChange }
+						onClick={ ( e ) => e.stopPropagation() }
 					/>
 				) }
 				{ icon }
