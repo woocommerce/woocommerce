@@ -111,8 +111,9 @@ class ExportWCShipping implements StepExporter {
 			$locations_by_zone_id[ $location->zone_id ][] = $location->location_id;
 		}
 
+
 		// Create a new SetWCShipping step with the fetched data.
-		$step = new SetWCShipping( $methods, $locations, $zones, $classes, $terms, $local_pickup );
+		$step = new SetWCShipping( $methods, $locations, $zones, $terms, $classes, $local_pickup );
 		$step->set_meta_values(
 			array(
 				'plugin' => 'woocommerce',
