@@ -1,5 +1,7 @@
 // Reference: https://github.com/WordPress/gutenberg/blob/f91b4fb4a12e41dd39c9594f24ea1a1a4e23dade/packages/block-editor/src/components/iframe/index.js#L1
 // We fork the code from the above link to reduce the unnecessary network requests and improve the performance.
+// Some of the code is not used in the project and is removed.
+// We've also made some changes to the code to make it work with the Zoom Out feature.
 
 /**
  * External dependencies
