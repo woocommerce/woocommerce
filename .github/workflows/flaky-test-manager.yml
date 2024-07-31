@@ -23,11 +23,10 @@ jobs:
               with:
                   node-version: '18'
 
-            - name: Install npm 7
-              run: npm install -g npm@7
-
-            - name: Install dependencies
+            - name: Install dependencies # ignore package.json in the repo
               run: |
+                  echo '{}' > temp-package.json
+                  npm init -y
                   npm install @octokit/rest@21.0.1
                   npm install axios@1.7.2
                   npm install google-auth-library@9.11.0
