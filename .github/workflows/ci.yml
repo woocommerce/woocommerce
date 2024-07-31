@@ -36,19 +36,17 @@ jobs:
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.event.pull_request.base.ref || github.base_ref }})"
-        with:
-          ref: ${{ github.event.pull_request.base.ref || github.base_ref }}
-          fetch-depth: 500
-      - name: 'Checkout (calculating --depth)'
+        name: "Checkout"
+      - name: 'Fetch git-history'
         shell: bash
         run: |
-          echo "GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))" >> "${GITHUB_ENV}"
-      - uses: 'actions/checkout@v4'
-        name: "Checkout (${{ github.event.pull_request.head.ref || 'auto' }})"
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: ${{ env.GIT_FETCH_DEPTH }}
+          GIT_FETCH_DEPTH=$(( ${{ github.event.pull_request.commits }} + 1 ))
+          GIT_BRANCH="${{ github.event.pull_request.head.ref || github.base_ref }}"
+          GIT_BASE="${{ github.event.pull_request.base.ref || github.base_ref }}"
+          
+          git fetch --depth ${GIT_FETCH_DEPTH} origin ${GIT_BRANCH}
+          BRANCHED_AT=$(git show -s --format=%ci HEAD~${GIT_FETCH_DEPTH})
+          git fetch --shallow-since="${BRANCHED_AT}" origin ${GIT_BASE}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
