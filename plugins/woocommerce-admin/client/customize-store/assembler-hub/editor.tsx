@@ -14,7 +14,7 @@ import { BlockContextProvider } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
 import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 // @ts-ignore No types for this exist yet.
-import CanvasSpinner from '@wordpress/edit-site/build-module/components/canvas-spinner';
+import CanvasLoader from '@wordpress/edit-site/build-module/components/canvas-loader';
 // @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
@@ -25,6 +25,7 @@ import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/componen
  */
 import { editorIsLoaded } from '../utils';
 import { BlockEditorContainer } from './block-editor-container';
+import { useInstanceId } from '@wordpress/compose';
 
 export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 	const { context, hasPageContentFocus } = useSelect( ( select ) => {
@@ -66,9 +67,18 @@ export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 		}
 	}, [ isLoading ] );
 
+	const loadingProgressId = useInstanceId(
+		CanvasLoader,
+		'edit-site-editor__loading-progress'
+	);
+
+	console.log( 'canvas-loader-id', CanvasLoader );
+
 	return (
 		<>
-			{ isLoading ? <CanvasSpinner /> : null }
+			{ isLoading && CanvasLoader ? (
+				<CanvasLoader id={ loadingProgressId } />
+			) : null }
 
 			<BlockContextProvider value={ blockContext }>
 				<InterfaceSkeleton

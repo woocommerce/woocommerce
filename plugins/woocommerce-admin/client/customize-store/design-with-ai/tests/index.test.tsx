@@ -25,12 +25,14 @@ jest.mock( '@woocommerce/ai', () => ( {
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
-jest.mock(
-	'@wordpress/edit-site/build-module/components/global-styles/global-styles-provider',
-	() => ( {
+jest.mock( '@wordpress/edit-site/build-module/lock-unlock', () => {
+	const unlock = jest.fn( () => ( {
 		mergeBaseAndUserConfigs: jest.fn(),
-	} )
-);
+	} ) );
+	return {
+		unlock,
+	};
+} );
 
 jest.mock( '~/customize-store/utils', () => ( {
 	navigateOrParent: jest.fn(),

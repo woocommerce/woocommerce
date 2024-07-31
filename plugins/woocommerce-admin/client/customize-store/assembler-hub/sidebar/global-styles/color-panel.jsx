@@ -5,8 +5,8 @@
 import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { useContext } from '@wordpress/element';
-import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
 import { debounce } from 'lodash';
+import { privateApis as editorPrivateApis } from '@wordpress/editor';
 
 const {
 	useGlobalStyle,
@@ -15,6 +15,8 @@ const {
 	ColorPanel: StylesColorPanel,
 	GlobalStylesContext,
 } = unlock( blockEditorPrivateApis );
+
+const { mergeBaseAndUserConfigs } = unlock( editorPrivateApis );
 
 export const ColorPanel = () => {
 	const { setUserConfig } = useContext( GlobalStylesContext );

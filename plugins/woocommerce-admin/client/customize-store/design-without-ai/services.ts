@@ -7,7 +7,10 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 import { Sender } from 'xstate';
 // @ts-expect-error -- No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
+import { privateApis as editorPrivateApis } from '@wordpress/editor';
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error -- No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { store as coreStore } from '@wordpress/core-data';
@@ -27,6 +30,8 @@ import { installAndActivateTheme as setTheme } from '../data/service';
 import { trackEvent } from '../tracking';
 import { DesignWithoutAIStateMachineContext, Theme } from './types';
 import { installFontFamilies as installDefaultFontFamilies } from '../assembler-hub/utils/fonts';
+
+const { mergeBaseAndUserConfigs } = unlock( editorPrivateApis );
 
 const assembleSite = async () => {
 	await updateTemplate( {
