@@ -1,11 +1,12 @@
 name: Flaky Test Manager
+
 on:
     schedule:
         - cron: '0 * * * *' # Run every hour
     workflow_dispatch: # Allow manual triggering
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    group: ${{ github.workflow }}-schedule
     cancel-in-progress: true
 
 jobs:
@@ -40,4 +41,4 @@ jobs:
                   GOOGLE_SERVICE_ACCOUNT_EMAIL: ${{ secrets.FLAKY_TESTS_GOOGLE_SERVICE_ACCOUNT_EMAIL }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   GITHUB_REPO_OWNER: ${{ github.repository_owner }}
-                  GITHUB_REPO_NAME: ${{ github.repository.name }}
+                  GITHUB_REPO_NAME: ${{ github.repository }}
