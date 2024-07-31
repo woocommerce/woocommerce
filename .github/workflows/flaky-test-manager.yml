@@ -26,11 +26,11 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  npm install @octokit/rest@21.0.1
-                  npm install axios@1.7.2
-                  npm install google-auth-library@9.11.0
-                  npm install googleapis@140.0.1
-                  npm install dotenv@16.4.5
+                  pnpm install @octokit/rest@21.0.1
+                  pnpm install axios@1.7.2
+                  pnpm install google-auth-library@9.11.0
+                  pnpm install googleapis@140.0.1
+                  pnpm install dotenv@16.4.5
 
             - name: Create key.json
               run: echo '${{ secrets.FLAKY_TESTS_GOOGLE_SHEETS_CREDENTIALS }}' > ./.github/workflows/scripts/key.json
