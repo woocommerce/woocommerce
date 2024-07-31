@@ -19,10 +19,6 @@ on:
         type: string
         description: 'Custom event name. In case the `Event name` choice is `custom`, this field is required.'
         required: false
-        
-concurrency:
-  group: ${{ inputs.trigger }}-${{ inputs.custom-trigger }}
-  cancel-in-progress: true
 
 jobs:
   validate-input:
