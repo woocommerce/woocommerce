@@ -23,8 +23,8 @@ jobs:
               with:
                   node-version: '18'
 
-            - name: Install updated npm
-              run: npm install npm@latest
+            - name: Install npm latest
+              run: npm install -g npm@latest
 
             - name: Install dependencies # ignore package.json in the repo
               run: |
