@@ -193,7 +193,7 @@ function wc_clear_cart_after_payment() {
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
 			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
-			$did_order_succeed = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
+			$did_order_succeed               = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
 			$should_clear_cart_after_payment = $did_order_succeed;
 		}
 	}
