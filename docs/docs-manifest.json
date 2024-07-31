@@ -109,7 +109,7 @@
       ],
       "categories": [
         {
-          "content": "\n\n\n",
+          "content": "\nThis document lists the filters that are currently available to extensions and offers usage information for each one of them. Information on registering filters can be found on the [Checkout - Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/filter-registry/README.md) page.\n\n## Cart Line Items filters\n\nThe following [Cart Line Items filters](./cart-line-items.md) are available:\n\n-   `cartItemClass`\n-   `cartItemPrice`\n-   `itemName`\n-   `saleBadgePriceFormat`\n-   `showRemoveItemLink`\n-   `subtotalPriceFormat`\n\nThe following screenshot shows which parts the individual filters affect:\n\n![Cart Line Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-13.12.33.png)\n\n## Order Summary Items filters\n\nThe following [Order Summary Items filters](./order-summary-items.md) are available:\n\n-   `cartItemClass`\n-   `cartItemPrice`\n-   `itemName`\n-   `subtotalPriceFormat`\n\nThe following screenshot shows which parts the individual filters affect:\n\n![Order Summary Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-16.29.45.png)\n\n## Totals Footer Item filter\n\nThe following [Totals Footer Item filter](./totals-footer-item.md) is available:\n\n-   `totalLabel`\n-   `totalValue`\n\n## Checkout and place order button filters\n\nThe following [Checkout and place order button filters](./checkout-and-place-order-button.md) are available:\n\n-   `proceedToCheckoutButtonLabel`\n-   `proceedToCheckoutButtonLink`\n-   `placeOrderButtonLabel`\n\n## Coupon filters\n\nThe following [Coupon filters](./coupons.md) are available:\n\n-   `coupons`\n-   `showApplyCouponNotice`\n-   `showRemoveCouponNotice`\n\n## Additional Cart and Checkout inner block types filter\n\nThe following [Additional Cart and Checkout inner block types filter](./additional-cart-checkout-inner-block-types.md) is available:\n\n-   `additionalCartCheckoutInnerBlockTypes`\n\n## Combined filters\n\nFilters can also be combined. The following example shows how to combine some of the available filters.\n\n```tsx\nconst { registerCheckoutFilters } = window.wc.blocksCheckout;\n\nconst isOrderSummaryContext = ( args ) => args?.context === 'summary';\n\nconst modifyCartItemClass = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn 'my-custom-class';\n\t}\n\treturn defaultValue;\n};\n\nconst modifyCartItemPrice = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn '<price/> for all items';\n\t}\n\treturn defaultValue;\n};\n\nconst modifyItemName = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn `${ defaultValue }`;\n\t}\n\treturn defaultValue;\n};\n\nconst modifySubtotalPriceFormat = ( defaultValue, extensions, args ) => {\n\tif ( isOrderSummaryContext( args ) ) {\n\t\treturn '<price/> per item';\n\t}\n\treturn defaultValue;\n};\n\nregisterCheckoutFilters( 'example-extension', {\n\tcartItemClass: modifyCartItemClass,\n\tcartItemPrice: modifyCartItemPrice,\n\titemName: modifyItemName,\n\tsubtotalPriceFormat: modifySubtotalPriceFormat,\n} );\n```\n\n## Troubleshooting\n\nIf you are logged in to the store as an administrator, you should be shown an error like this if your filter is not\nworking correctly. The error will also be shown in your console.\n\n![Troubleshooting](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-30-at-10.52.53.png)\n\n\n",
           "category_slug": "cart-and-checkout-available-filters",
           "category_title": "Available Filters",
           "posts": [
@@ -157,23 +157,6 @@
               "hash": "209ec069232c46e73f381c5a1b7dd5254db14f8247750febd3976ae1518e6876",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/cart-line-items.md",
               "id": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2"
-            },
-            {
-              "post_title": "Cart and Checkout Filters - Available filters",
-              "menu_title": "Available Filters",
-              "tags": "reference",
-              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-filters/available-filters.md",
-              "hash": "dbf46c624c0eaf6dade45b26c89c744c4f4d9301f5128ae58de1f2a45c7d2007",
-              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-filters/available-filters.md",
-              "id": "d88f29ca4697eace597ea00ea41b6f25b4a4dee1",
-              "links": {
-                "./cart-line-items.md": "97881b973dc1d08a54c54e0a04ecb75ee48dcee2",
-                "./order-summary-items.md": "78eb3b135f82a3624a49979e3e93334295abd060",
-                "./totals-footer-item.md": "90a9b8df374082f1713866a58b810303adb4d3da",
-                "./checkout-and-place-order-button.md": "c97ca710c2e8107bf90915e038a34c8a1016c63a",
-                "./coupons.md": "5a022617f3d0267c9b771374f28970e779a6e99d",
-                "./additional-cart-checkout-inner-block-types.md": "3167c9602b1bd3b206226a0d4415944a5f647495"
-              }
             },
             {
               "post_title": "Cart and Checkout Filters - Inner block types",
@@ -1598,5 +1581,5 @@
       "categories": []
     }
   ],
-  "hash": "26861ce876fc1e2cadb8caffbbc0b3aa9f879ebf1edbf7133c41dc9e1cde5608"
+  "hash": "08b0c8c4ff66676e6dd74a56a0e667744a3811b5aa31e0baf4364871981276f3"
 }
