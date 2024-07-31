@@ -56,7 +56,7 @@ In this case the `edit` function is the part that will get rendered in the form.
 } )( window.wp );
 ```
 
-**In React**
+##### In React
 
 ```jsx
 import { registerBlockType } from '@wordpress/blocks';
@@ -203,7 +203,7 @@ function ( { attributes } ) {
 },
 ```
 
-**In React**
+##### In React
 
 ```jsx
 import { createElement, useState } from '@wordpress/element';
@@ -238,7 +238,7 @@ function Edit( { attributes } ) {
 }
 ```
 
-### Save field data to the product data.
+### Save field data to the product data
 
 We can make use of the `__experimentalUseProductEntityProp` for saving the field input to the product.
 The function does rely on `postType`, we can hardcode this to `product`, but the `postType` is also exposed through a context. We can do so by adding `"usesContext": [ "postType" ],` to the `block.json` and getting it from the `context` passed into the `edit` function props.
