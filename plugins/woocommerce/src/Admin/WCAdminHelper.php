@@ -230,8 +230,14 @@ class WCAdminHelper {
 			}
 		}
 
-		return false;
-	}
+		/**
+		 * Filter if a URL is a store page.
+		 *
+		 * @since 9.2.0
+		 * @param bool   $is_store_page Whether or not the URL is a store page.
+		 * @param string $url           URL to check.
+		 */
+		return apply_filters( 'woocommerce_is_store_page', false, $url );	}
 
 	/**
 	 * Get normalized URL path.
