@@ -2860,7 +2860,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$args = apply_filters( 'woocommerce_form_field_args', $args, $key, $value );
 
 		$is_required = (bool) $args['required'];
-		$asterisk   = '';
+		$asterisk    = '';
 
 		if ( $is_required ) {
 			$asterisk = '<span class="asterisk"><span class="asterisk-line"></span><span class="asterisk-line"></span><span class="asterisk-line"></span></span>';
