@@ -35,6 +35,8 @@ jobs:
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       report-jobs: ${{ steps.project-jobs.outputs.report-jobs }}
     steps:
+      - uses: 'actions/checkout@v4'
+        name: "Checkout"
       - name: 'Fetch git-history'
         shell: bash
         run: |
@@ -43,8 +45,7 @@ jobs:
           GIT_BRANCH="${{ github.event.pull_request.head.ref || github.base_ref }}"
           GIT_BASE="${{ github.event.pull_request.base.ref || github.base_ref }}"
           
-          git fetch --depth ${GIT_FETCH_DEPTH} origin ${GIT_BRANCH}
-          git checkout ${GIT_BRANCH}
+          git pull --depth ${GIT_FETCH_DEPTH}
           BRANCHED_AT=$(git show -s --format=%ci HEAD~${PR_COMMITS})
           git fetch --shallow-since="${BRANCHED_AT}" origin ${GIT_BASE}
       - uses: './.github/actions/setup-woocommerce-monorepo'
