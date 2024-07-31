@@ -97,7 +97,6 @@ class WC_Brands_Coupons {
 		if ( ! is_a( $product, 'WC_Product' ) ) {
 			return $valid;
 		}
-		
 		$this->set_brand_settings_on_coupon( $coupon );
 
 		$product_id     = $this->get_product_id( $product );
