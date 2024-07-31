@@ -129,7 +129,7 @@ class WC_Brands {
 	/**
 	 * Update the main product fetch query to filter by selected brands.
 	 *
-	 * @param array    $tax_query array of current taxonomy filters.
+	 * @param array $tax_query array of current taxonomy filters.
 	 *
 	 * @return array
 	 */

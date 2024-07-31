@@ -443,7 +443,7 @@ class WC_Brands_Admin {
 	/**
 	 * Saves thumbnail field.
 	 *
-	 * @param int    $term_id Term ID.
+	 * @param int $term_id Term ID.
 	 *
 	 * @return void
 	 */
