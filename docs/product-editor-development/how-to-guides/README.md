@@ -11,3 +11,4 @@ To see how you can make use of these fields you can follow the [generic fields t
 ## Writing a custom field
 
 It is also possible to write your own custom field and render those within the product form. This is helpful if the generic fields don't quite fit your use case.
+To see an example of how to create a basic dropdown field in the product form you can follow [this tutorial](https://github.com/woocommerce/woocommerce/blob/trunk/docs/product-editor-development/how-to-guides/custom-field-tutorial.md).

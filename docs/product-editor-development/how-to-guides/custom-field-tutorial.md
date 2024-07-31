@@ -67,8 +67,8 @@ function Edit() {
 
 registerBlockType( 'tutorial/new-product-form-field', {
     title: 'Product form field',
-	attributes: {},
-	edit: Edit,
+    attributes: {},
+    edit: Edit,
 } );
 ```
 
@@ -153,6 +153,8 @@ So lets add this to our `index.js` attributes:
 },
 ```
 
+Dropdown options, these can live outside of the `edit` function:
+
 ```javascript
 const DROPDOWN_OPTIONS = [
 	{
@@ -169,6 +171,8 @@ const DROPDOWN_OPTIONS = [
 	},
 ];
 ```
+
+The updated `edit` function:
 
 ```javascript
 // edit function.
