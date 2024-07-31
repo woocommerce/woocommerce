@@ -1,6 +1,7 @@
 /**
  * Internal dependencies
  */
+import { format } from '../../keywords/format';
 import { maxLength } from '../../keywords/max-length';
 import { minLength } from '../../keywords/min-length';
 import { pattern } from '../../keywords/pattern';
@@ -13,6 +14,7 @@ export function parseString( schema: StringSchema, data: unknown, path: string )
 
     const keywordErrors = validateKeywords< string, StringSchema >(
         [
+            format,
             maxLength,
             minLength,
             pattern,
