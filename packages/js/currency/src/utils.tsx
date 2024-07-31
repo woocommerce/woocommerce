@@ -67,6 +67,13 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 
 	function stripTags( str: string ) {
 		const tmp = document.createElement( 'template' );
+
+		// Throw if the borwser does not support TemplateElement to avoid executing any JS.
+		if ( ! ( 'content' in tmp ) ) {
+			throw Error(
+				'TemplateElement is not supported in this browser, cannot safely `stripTags`.'
+			);
+		}
 		tmp.innerHTML = str;
 		return tmp.content.textContent;
 	}
