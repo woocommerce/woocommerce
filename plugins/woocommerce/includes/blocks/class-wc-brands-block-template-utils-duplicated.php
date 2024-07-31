@@ -310,7 +310,7 @@ class BlockTemplateUtilsDuplicated {
 	 * @return boolean
 	 */
 	public static function theme_has_template( $template_name ) {
-		return ! ! self::get_theme_template_path( $template_name, 'wp_template' );
+		return (bool) self::get_theme_template_path( $template_name, 'wp_template' );
 	}
 
 	/**
@@ -320,7 +320,7 @@ class BlockTemplateUtilsDuplicated {
 	 * @return boolean
 	 */
 	public static function theme_has_template_part( $template_name ) {
-		return ! ! self::get_theme_template_path( $template_name, 'wp_template_part' );
+		return (bool) self::get_theme_template_path( $template_name, 'wp_template_part' );
 	}
 
 	/**
