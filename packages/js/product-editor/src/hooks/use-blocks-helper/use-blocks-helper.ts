@@ -23,8 +23,10 @@ export function useBlocksHelper() {
 	}
 
 	function getClientIdByField( field: HTMLElement ) {
-		const ancestorWithAttribute = field.closest( '[data-block]' );
-		return ancestorWithAttribute?.getAttribute( 'data-block' );
+		const parentBlockElement = field.closest(
+			'[data-block]'
+		) as HTMLElement;
+		return parentBlockElement?.dataset.block;
 	}
 
 	function getParentTabId( clientId?: string | null ) {
