@@ -12,26 +12,27 @@ import {
 import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { Button, Modal, CheckboxControl } from '@wordpress/components';
+import { Button, Modal, CheckboxControl, Spinner } from '@wordpress/components';
 import interpolateComponents from '@automattic/interpolate-components';
 
 /**
  * Internal dependencies
  */
-import { SidebarNavigationScreen } from './sidebar-navigation-screen';
+import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { FontPairing } from './global-styles';
-import { CustomizeStoreContext } from '..';
+import { FontPairing } from '../global-styles';
+import { CustomizeStoreContext } from '../..';
 import { FlowType } from '~/customize-store/types';
-import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { trackEvent } from '~/customize-store/tracking';
+import { installFontFamilies } from '../../utils/fonts';
+import { enableTracking } from '~/customize-store/design-without-ai/services';
 
 export const SidebarNavigationScreenTypography = ( {
 	onNavigateBackClick,
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context, sendEvent } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
@@ -89,6 +90,8 @@ export const SidebarNavigationScreenTypography = ( {
 
 	const openModal = () => setIsModalOpen( true );
 	const closeModal = () => setIsModalOpen( false );
+
+	const [ isFetchingFonts, setIsFetchingFonts ] = useState( false );
 
 	const [ OptInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
@@ -207,22 +210,23 @@ export const SidebarNavigationScreenTypography = ( {
 											{ __( 'Cancel', 'woocommerce' ) }
 										</Button>
 										<Button
-											onClick={ () => {
+											onClick={ async () => {
 												optIn();
-												if ( isIframe( window ) ) {
-													sendMessageToParent( {
-														type: 'INSTALL_FONTS',
-													} );
-												} else {
-													sendEvent(
-														'INSTALL_FONTS'
-													);
-												}
+												setIsFetchingFonts( true );
+												await enableTracking();
+												await installFontFamilies();
+
+												closeModal();
+												setIsFetchingFonts( false );
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }
 										>
-											{ __( 'Opt in', 'woocommerce' ) }
+											{ isFetchingFonts ? (
+												<Spinner />
+											) : (
+												__( 'Opt in', 'woocommerce' )
+											) }
 										</Button>
 									</div>
 								</Modal>

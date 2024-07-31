@@ -47,6 +47,13 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				'woocommerce_customize_store_onboarding_tour_hidden',
 				'yes'
 			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -73,6 +80,13 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				request,
 				baseURL,
 				'woocommerce_admin_customize_store_completed',
+				'no'
+			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
 				'no'
 			);
 
@@ -299,5 +313,34 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 		await expect( emptyPatternsBlock ).toBeHidden();
 		await expect( defaultPattern ).toBeVisible();
+	} );
+
+	test( 'Clicking opt-in new patterns should be available', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+
+		await assembler.getByText( 'Usage tracking' ).click();
+		await expect(
+			assembler.getByText( 'Access more patterns' )
+		).toBeVisible();
+
+		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
+
+		await assembler
+			.getByText( 'Access more patterns' )
+			.waitFor( { state: 'hidden' } );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list'
+		);
+
+		await sidebarPattern.waitFor( { state: 'visible' } );
+
+		await expect(
+			assembler.locator( '.block-editor-block-patterns-list__list-item' )
+		).toHaveCount( 10 );
 	} );
 } );
