@@ -31,6 +31,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
 		add_action( 'deleted_transient', array( $this, 'delete_default_attribute_id_transient' ) );
+		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 	}
 
 	/**
@@ -424,5 +425,51 @@ final class ProductFilterAttribute extends AbstractBlock {
 		set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute );
 
 		return $default_attribute;
+	}
+
+	/**
+	 * Register pattern for default product attribute.
+	 */
+	public function register_block_patterns() {
+		$default_attribute = $this->get_default_product_attribute();
+		register_block_pattern(
+			'woocommerce/default-attribute-filter',
+			array(
+				'title'      => '',
+				'inserter'   => false,
+				'content'    => sprintf(
+					'
+<!-- wp:woocommerce/product-filter {"filterType":"attribute-filter","attributeId":%1$s} -->
+<!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group">
+	<!-- wp:heading {"level":3} -->
+	<h3 class="wp-block-heading">%2$s</h3>
+	<!-- /wp:heading -->
+
+	<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true,"move":false}} -->
+	<!-- wp:buttons {"layout":{"type":"flex"}} -->
+	<div class="wp-block-buttons">
+		<!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
+		<div
+			class="wp-block-button wc-block-product-filter-clear-button is-style-outline"
+			style="text-decoration: underline"
+		>
+			<a class="wp-block-button__link wp-element-button" style="border-style: none; border-width: 0px">Clear</a>
+		</div>
+		<!-- /wp:button -->
+	</div>
+	<!-- /wp:buttons -->
+	<!-- /wp:woocommerce/product-filter-clear-button -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:woocommerce/product-filter-attribute {"attributeId":%1$s,"lock":{"remove":true}} /-->
+<!-- /wp:woocommerce/product-filter -->
+					',
+					$default_attribute->attribute_id,
+					$default_attribute->attribute_label
+				),
+			)
+		);
 	}
 }
