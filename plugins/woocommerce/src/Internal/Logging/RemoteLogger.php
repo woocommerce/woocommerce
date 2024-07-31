@@ -134,7 +134,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			'severity'   => $level,
 			'message'    => $this->sanitize( $message ),
 			'host'       => wp_parse_url( home_url(), PHP_URL_HOST ),
-			'tags'       => array( 'woocommerce' ),
+			'tags'       => array( 'woocommerce', 'php' ),
 			'properties' => array(
 				'wc_version'  => WC()->version,
 				'php_version' => phpversion(),
