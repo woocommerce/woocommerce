@@ -151,6 +151,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'menu_order',
 			'meta_data',
 			'post_password',
+			'brands',
 		);
 	}
 
