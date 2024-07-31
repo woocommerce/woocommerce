@@ -56,7 +56,7 @@ In this case the `edit` function is the part that will get rendered in the form.
 } )( window.wp );
 ```
 
-##### In React
+In react:
 
 ```jsx
 import { registerBlockType } from '@wordpress/blocks';
@@ -203,7 +203,7 @@ function ( { attributes } ) {
 },
 ```
 
-##### In React
+In React:
 
 ```jsx
 import { createElement, useState } from '@wordpress/element';
