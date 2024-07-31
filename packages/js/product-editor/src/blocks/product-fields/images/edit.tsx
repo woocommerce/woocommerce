@@ -182,7 +182,7 @@ export function ImageBlockEdit( {
 
 		if ( Array.isArray( propertyValue ) ) {
 			const remainingImages = propertyValue.filter(
-				( image ) => image.id === removedItem.props.id
+				( image ) => String( image.id ) !== removedItem.props.id
 			);
 			setPropertyValue( remainingImages );
 		} else {
