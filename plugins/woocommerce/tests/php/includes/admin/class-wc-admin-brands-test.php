@@ -90,7 +90,7 @@ class WC_Admin_Brands_Test extends WP_UnitTestCase {
 			)
 		);
 
-		wp_set_post_terms( $simple_product->get_id(), [ $term_a_id, $term_b_id, $term_c_id ], 'product_brand' );
+		wp_set_post_terms( $simple_product->get_id(), array( $term_a_id, $term_b_id, $term_c_id ), 'product_brand' );
 
 		add_filter(
 			'woocommerce_product_brand_filter_threshold',
