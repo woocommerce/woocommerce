@@ -202,7 +202,11 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			// from product-create-simple.spec.js, as both tests are just verifying that the
 			// product was created correctly by looking at the front end.
 			await test.step( 'verify the saved product in frontend', async () => {
-				await page.goto( `/?post_type=product&p=${ productId }` );
+				const permalink = await page
+					.locator( '.product-details-section__product-link a' )
+					.getAttribute( 'href' );
+
+				await page.goto( permalink );
 
 				// Verify product name
 				await expect(
