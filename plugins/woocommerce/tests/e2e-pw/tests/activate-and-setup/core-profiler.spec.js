@@ -264,22 +264,13 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			} catch ( e ) {
 				console.log( 'Checkbox not present for MailPoet' );
 			}
-			try {
-				await page
-					.getByText(
-						'Drive sales with Google for WooCommerceReach millions of active shoppers across'
-					)
-					.getByRole( 'checkbox' )
-					.check( { timeout: 2000 } );
-			} catch ( e ) {
-				// Temporary fix until rebranding is done.
-				await page
-					.getByText(
-						'Drive sales with Google Listings & AdsReach millions of active shoppers across'
-					)
-					.getByRole( 'checkbox' )
-					.check( { timeout: 2000 } );
-			}
+
+			await page
+				.getByText(
+					'Drive sales with Google for WooCommerceReach millions of active shoppers across'
+				)
+				.getByRole( 'checkbox' )
+				.check( { timeout: 2000 } );
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
 
@@ -319,11 +310,13 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 
 			await expect(
-				page.getByText(
-					/(Google for WooCommerce|Google Listings & Ads)/,
-					{ exact: true }
-				)
+				page
+					.getByRole( 'cell', {
+						name: 'Google for WooCommerce Get',
+					} )
+					.getByRole( 'strong' )
 			).toBeVisible();
+
 			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
 			await expect( page.getByText( 'Jetpack' ) ).toBeHidden();
 		} );
