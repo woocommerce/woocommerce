@@ -49,7 +49,7 @@ test.describe( 'Single Product template', () => {
 		await admin.visitSiteEditor( {
 			postType: testData.templateType,
 		} );
-		await editor.revertTemplateCreation( testData.templateName );
+		await editor.revertTemplate( { templateName: testData.templateName } );
 		await page.goto( testData.permalink );
 
 		// Verify the edits are no longer visible.
