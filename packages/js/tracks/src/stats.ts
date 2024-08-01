@@ -64,7 +64,12 @@ export function bumpStat(
 		tracksDebug( 'Bumping stat %s:%s', group, name );
 	}
 
-	if ( isDevelopmentMode ) {
+	const shouldBumpStat =
+		! isDevelopmentMode &&
+		!! window.wcTracks &&
+		!! window.wcTracks.isEnabled;
+
+	if ( ! shouldBumpStat ) {
 		return false;
 	}
 
