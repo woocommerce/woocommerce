@@ -4,10 +4,8 @@
 import { renderParentBlock } from '@woocommerce/atomic-utils';
 import Drawer from '@woocommerce/base-components/drawer';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import {
-	getValidBlockAttributes,
-	translateJQueryEventToNative,
-} from '@woocommerce/base-utils';
+import { getValidBlockAttributes } from '@woocommerce/base-utils';
+import { translateJQueryEventToNative } from '@woocommerce/base-events';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 import {
 	formatPrice,

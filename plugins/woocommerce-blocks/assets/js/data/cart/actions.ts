@@ -12,11 +12,11 @@ import type {
 	CartShippingRate,
 } from '@woocommerce/types';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
+import { camelCaseKeys } from '@woocommerce/base-utils';
 import {
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
-	camelCaseKeys,
-} from '@woocommerce/base-utils';
+} from '@woocommerce/base-events';
 
 /**
  * Internal dependencies

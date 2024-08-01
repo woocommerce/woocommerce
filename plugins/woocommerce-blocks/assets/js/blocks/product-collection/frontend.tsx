@@ -8,7 +8,7 @@ import {
 	getElement,
 	getContext,
 } from '@woocommerce/interactivity';
-import { triggerProductListRenderedEvent } from '@woocommerce/base-utils';
+import { triggerProductListRenderedEvent } from '@woocommerce/base-events';
 
 /**
  * Internal dependencies

@@ -4,10 +4,8 @@
 import { useEffect } from '@wordpress/element';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
 import { dispatch } from '@wordpress/data';
-import {
-	translateJQueryEventToNative,
-	getNavigationType,
-} from '@woocommerce/base-utils';
+import { getNavigationType } from '@woocommerce/base-utils';
+import { translateJQueryEventToNative } from '@woocommerce/base-events';
 
 interface StoreCartListenersType {
 	// Counts the number of consumers of this hook so we can remove listeners when no longer needed.
