@@ -13,7 +13,9 @@ mkdir -p "$DEST_PATH"
 echo "Cleaning up assets..."
 find "$PROJECT_PATH/assets/css/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/client/." ! -name '.gitkeep' -type f -exec rm -f {} + && find "$PROJECT_PATH/assets/js/." ! -name '.gitkeep' -type f -exec rm -f {} +
 
-echo "Installing JS dependencies..."
+echo "Installing JS and PHP dependencies (with dev-dependencies)..."
+# parallel installation of PHP/JS dependencies - we covered by JS building step to ensure both finished timely.
+composer install --quiet &
 pnpm install --frozen-lockfile --ignore-scripts
 
 if [ -z "${NODE_ENV}" ]; then
@@ -22,7 +24,7 @@ fi
 echo "Running JS Build (${NODE_ENV})..."
 pnpm --filter='@woocommerce/plugin-woocommerce' build || exit "$?"
 
-echo "Installing PHP dependencies (production)..."
+echo "Reinstalling PHP dependencies (production)..."
 composer install --no-dev --quiet --optimize-autoloader || exit "$?"
 
 echo "Run makepot..."
