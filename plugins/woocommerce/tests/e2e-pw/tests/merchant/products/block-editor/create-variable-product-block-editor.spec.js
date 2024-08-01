@@ -290,17 +290,17 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.getByRole( 'tab', { name: 'General' } )
 				.click();
 
-			await page.getByLabel( 'Regular price', { exact: true } ).click();
-
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
 				.waitFor( { state: 'visible' } );
 
 			await waitResponse;
 
+			await page.getByLabel( 'Regular price', { exact: true } ).click();
+
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.pressSequentially( '100' );
+				.fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
@@ -308,7 +308,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.click();
 
 			await page
-				.locator( '#inspector-input-control-2' )
+				.locator( '[name="woocommerce-product-sku"]' )
 				.fill( `product-sku-${ new Date().getTime().toString() }` );
 
 			await page

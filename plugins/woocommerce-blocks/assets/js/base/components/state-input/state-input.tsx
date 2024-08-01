@@ -1,18 +1,17 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { useCallback, useMemo, useEffect, useRef } from '@wordpress/element';
-import clsx from 'clsx';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
+import { clsx } from 'clsx';
 
 /**
  * Internal dependencies
  */
-import Combobox from '../combobox';
 import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';
+import { Select, SelectOption } from '../select';
 
 const optionMatcher = (
 	value: string,
@@ -36,19 +35,17 @@ const StateInput = ( {
 	autoComplete = 'off',
 	value = '',
 	required = false,
-	errorId = '',
 }: StateInputWithStatesProps ): JSX.Element => {
 	const countryStates = states[ country ];
-	const options = useMemo(
-		() =>
-			countryStates
-				? Object.keys( countryStates ).map( ( key ) => ( {
-						value: key,
-						label: decodeEntities( countryStates[ key ] ),
-				  } ) )
-				: [],
-		[ countryStates ]
-	);
+	const options = useMemo< SelectOption[] >( () => {
+		if ( countryStates && Object.keys( countryStates ).length > 0 ) {
+			return Object.keys( countryStates ).map( ( key ) => ( {
+				value: key,
+				label: decodeEntities( countryStates[ key ] ),
+			} ) );
+		}
+		return [];
+	}, [ countryStates ] );
 
 	/**
 	 * Handles state selection onChange events. Finds a matching state by key or value.
@@ -91,20 +88,18 @@ const StateInput = ( {
 
 	if ( options.length > 0 ) {
 		return (
-			<Combobox
+			<Select
 				className={ clsx(
 					className,
 					'wc-block-components-state-input'
 				) }
-				id={ id }
-				label={ label }
-				onChange={ onChangeState }
 				options={ options }
+				label={ label || '' }
+				id={ id }
+				onChange={ onChangeState }
 				value={ value }
-				errorMessage={ __( 'Please select a state.', 'woocommerce' ) }
-				errorId={ errorId }
-				required={ required }
 				autoComplete={ autoComplete }
+				required={ required }
 			/>
 		);
 	}

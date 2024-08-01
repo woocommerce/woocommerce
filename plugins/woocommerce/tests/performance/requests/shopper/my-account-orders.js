@@ -92,7 +92,7 @@ export function myAccountOrders() {
 		my_account_order_id = findBetween(
 			response.body,
 			'my-account/view-order/',
-			'/">'
+			'/"'
 		);
 	} );
 

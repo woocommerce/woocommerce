@@ -15,7 +15,7 @@ import { useShortcut } from '@wordpress/keyboard-shortcuts';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-product-error-message-and-props';
+import { WPError } from '../../../../hooks/use-error-handler';
 import { SaveDraftButtonProps } from '../../save-draft-button';
 import { recordProductEvent } from '../../../../utils/record-product-event';
 import { errorHandler } from '../../../../hooks/use-product-manager';
