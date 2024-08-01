@@ -20,6 +20,9 @@ const productData = {
 	descriptionSimple: 'This is a product simple description',
 	productPrice: '100',
 	salePrice: '90',
+	customFields: [
+		{ name: `custom-field_${ Date.now() }`, value: 'custom_1' },
+	],
 	sku: `sku_${ Date.now() }`,
 	gtin: `gtin_${ Date.now() }`,
 	shipping: {
@@ -157,6 +160,73 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await salePrice.waitFor( { state: 'visible' } );
 				await salePrice.click();
 				await salePrice.fill( productData.salePrice );
+			} );
+
+			await test.step( 'add custom fields', async () => {
+				await clickOnTab( 'Organization', page );
+
+				const customFieldsToggle = page.getByRole( 'checkbox', {
+					name: 'Show custom fields',
+				} );
+
+				// When re-running the test without resetting the env,
+				// the custom fields toggle might be already checked,
+				// so we need to check if it is checked before clicking it.
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				if ( ! customFieldsToggle.isChecked() ) {
+					await customFieldsToggle.click();
+				}
+
+				await customFieldsToggle.isEnabled();
+
+				await expect( customFieldsToggle ).toBeChecked();
+
+				await page
+					.getByLabel( 'Block: Product custom fields toggle control' )
+					.getByRole( 'button', { name: 'Add new' } )
+					.click();
+
+				// Add custom fields modal
+				const modal = page.locator(
+					'.woocommerce-product-custom-fields__create-modal'
+				);
+
+				await expect(
+					modal.getByText( 'Add custom fields' )
+				).toBeVisible();
+
+				const nameInput = modal.getByLabel( 'Name' );
+				// Have to use pressSequentially in order to get the dropdown to show up and be able to select the option
+				await nameInput.pressSequentially(
+					productData.customFields[ 0 ].name
+				);
+
+				await expect(
+					modal.getByRole(
+						'option',
+						productData.customFields[ 0 ].name
+					)
+				).toBeVisible();
+
+				await nameInput.press( 'Enter' );
+
+				const valueInput = modal.getByLabel( 'Value' );
+				await valueInput.fill( productData.customFields[ 0 ].value );
+
+				await modal
+					.getByRole( 'button', { name: 'Add', exact: true } )
+					.click();
+
+				await expect(
+					modal.getByText( 'Add custom fields' )
+				).toBeHidden();
+
+				await expect(
+					page.getByText( productData.customFields[ 0 ].name )
+				).toBeVisible();
+				await expect(
+					page.getByText( productData.customFields[ 0 ].value )
+				).toBeVisible();
 			} );
 
 			await test.step( 'add inventory details', async () => {
