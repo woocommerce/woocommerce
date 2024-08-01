@@ -176,8 +176,8 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
  * This message will be shown when the usesReference isn't available on the Editor side, but is available on the Frontend.
  */
 export const getUsesReferencePreviewMessage = (
-	usesReference: string[],
-	location: WooCommerceBlockLocation
+	location: WooCommerceBlockLocation,
+	usesReference?: string[]
 ) => {
 	if ( ! ( Array.isArray( usesReference ) && usesReference.length > 0 ) ) {
 		return '';
@@ -230,7 +230,7 @@ export const useSetPreviewState = ( {
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
-	usesReference: string[];
+	usesReference?: string[] | undefined;
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
@@ -240,15 +240,16 @@ export const useSetPreviewState = ( {
 			},
 		} );
 	};
-	const isCollectionUsesReference = usesReference?.length > 0;
+	const isCollectionUsesReference =
+		usesReference && usesReference?.length > 0;
 
 	/**
 	 * When usesReference is available on Frontend but not on Editor side,
 	 * we want to show a preview label to indicate that the block is in preview mode.
 	 */
 	const usesReferencePreviewMessage = getUsesReferencePreviewMessage(
-		usesReference,
-		location
+		location,
+		usesReference
 	);
 	useLayoutEffect( () => {
 		if ( isCollectionUsesReference ) {

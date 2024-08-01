@@ -100,11 +100,11 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
-		preview: {
+		preview?: {
 			initialPreviewState?: PreviewState;
 			setPreviewState?: SetPreviewState;
 		};
-		usesReference: string[];
+		usesReference?: string[];
 		context: {
 			templateSlug: string;
 		};
