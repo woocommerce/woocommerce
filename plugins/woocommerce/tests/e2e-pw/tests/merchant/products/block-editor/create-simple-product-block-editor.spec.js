@@ -20,6 +20,8 @@ const productData = {
 	descriptionSimple: 'This is a product simple description',
 	productPrice: '100',
 	salePrice: '90',
+	sku: `sku_${ Date.now() }`,
+	gtin: `gtin_${ Date.now() }`,
 	shipping: {
 		weight: '2',
 		length: '20',
@@ -156,6 +158,17 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await salePrice.fill( productData.salePrice );
 			} );
 
+			await test.step( 'add inventory details', async () => {
+				await clickOnTab( 'Inventory', page );
+
+				await page
+					.getByLabel( 'SKU (Stock Keeping Unit)' )
+					.fill( productData.sku );
+				await page
+					.getByLabel( 'GTIN, UPC, EAN, or ISBN' )
+					.fill( productData.gtin );
+			} );
+
 			await test.step( 'add shipping details', async () => {
 				await clickOnTab( 'Shipping', page );
 				await page
@@ -228,6 +241,12 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					page.getByText( productData.summary )
 				).toBeVisible();
 
+				// Verify inventory details
+				await expect(
+					page.getByText( `SKU: ${ productData.sku }` )
+				).toBeVisible();
+				// Note: GTIN is not displayed in the front end in the theme used in the test
+
 				// Verify shipping dimensions
 				await expect(
 					page.getByText( `Weight ${ productData.shipping.weight }` )
@@ -243,33 +262,46 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 		test( 'can not create a product with duplicated SKU', async ( {
 			page,
 		} ) => {
-			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
-			await clickOnTab( 'General', page );
-			await page
-				.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
-				.fill( productData.name );
-			await page
-				.locator(
-					'[data-template-block-id="basic-details"] .components-summary-control'
-				)
-				.fill( productData.summary );
+			await test.step( 'add new product', async () => {
+				await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+			} );
 
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-regular-price-field"]'
-				)
-				.first()
-				.fill( productData.productPrice );
-			await page
-				.locator( '.woocommerce-product-header__actions' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
+			await test.step( 'add product name', async () => {
+				await clickOnTab( 'General', page );
+				await page
+					.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
+					.fill( productData.name );
+			} );
 
-			await expect(
-				page.locator( '.components-snackbar__content' )
-			).toContainText( 'Invalid or duplicated SKU.' );
+			await test.step( 'add product price', async () => {
+				const regularPrice = page
+					.locator( 'input[name="regular_price"]' )
+					.first();
+				await regularPrice.waitFor( { state: 'visible' } );
+				await regularPrice.click();
+				await regularPrice.fill( productData.productPrice );
+			} );
+
+			await test.step( 'add inventory details', async () => {
+				await clickOnTab( 'Inventory', page );
+
+				await page
+					.getByLabel( 'SKU (Stock Keeping Unit)' )
+					.fill( productData.sku );
+			} );
+
+			await test.step( 'publish the product', async () => {
+				await page
+					.locator( '.woocommerce-product-header__actions' )
+					.getByRole( 'button', {
+						name: 'Publish',
+					} )
+					.click();
+
+				await expect(
+					page.locator( '.components-snackbar__content' )
+				).toContainText( 'Invalid or duplicated SKU.' );
+			} );
 		} );
 
 		// Note for future refactoring: It would be good to reuse the verification step
