@@ -7,12 +7,10 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
-use Automattic\WooCommerce\Internal\Admin\Survey;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
-use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 /**
  * Contains logic for the Navigation
@@ -34,26 +32,11 @@ class Init {
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
-		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
-		add_action( 'woocommerce_settings_saved', array( $this, 'maybe_reload_page' ) );
-
 		if ( Features::is_enabled( 'navigation' ) ) {
 			Menu::instance()->init();
 			CoreMenu::instance()->init();
 			Screen::instance()->init();
 		}
-	}
-
-	/**
-	 * Add the feature toggle to the features settings.
-	 *
-	 * @deprecated 7.0 The WooCommerce Admin features are now handled by the WooCommerce features engine (see the FeaturesController class).
-	 *
-	 * @param array $features Feature sections.
-	 * @return array
-	 */
-	public static function add_feature_toggle( $features ) {
-		return $features;
 	}
 
 	/**
@@ -82,35 +65,5 @@ class Init {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Reloads the page when the option is toggled to make sure all nav features are loaded.
-	 *
-	 * @param string $old_value Old value.
-	 * @param string $value     New value.
-	 */
-	public static function reload_page_on_toggle( $old_value, $value ) {
-		if ( $old_value === $value ) {
-			return;
-		}
-
-		if ( 'yes' !== $value ) {
-			update_option( 'woocommerce_navigation_show_opt_out', 'yes' );
-		}
-
-		self::$is_updated = true;
-	}
-
-	/**
-	 * Reload the page if the setting has been updated.
-	 */
-	public static function maybe_reload_page() {
-		if ( ! isset( $_SERVER['REQUEST_URI'] ) || ! self::$is_updated ) {
-			return;
-		}
-
-		wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-		exit();
 	}
 }
