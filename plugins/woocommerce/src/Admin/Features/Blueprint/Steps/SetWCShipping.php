@@ -85,12 +85,12 @@ class SetWCShipping extends Step {
 		return array(
 			'step'   => static::get_step_name(),
 			'values' => array(
-				'shipping_methods'      => $this->methods,
-				'shipping_locations'    => $this->locations,
-				'shipping_zones'        => $this->zones,
-				'terms'        => $this->terms,
-				'classes'      => $this->classes,
-				'local_pickup' => $this->local_pickup,
+				'shipping_methods'   => $this->methods,
+				'shipping_locations' => $this->locations,
+				'shipping_zones'     => $this->zones,
+				'terms'              => $this->terms,
+				'classes'            => $this->classes,
+				'local_pickup'       => $this->local_pickup,
 			),
 		);
 	}
