@@ -77,8 +77,8 @@ class WC_Brands_Block_Templates {
 		}
 
 		$template_path = BlockTemplateUtilsDuplicated::should_use_blockified_product_grid_templates()
-			? WC()->plugin_path() . '/templates/brands/blockified/taxonomy-product_brand.html'
-			: WC()->plugin_path() . '/templates/brands/taxonomy-product_brand.html';
+			? WC()->plugin_path() . '/templates/templates/blockified/taxonomy-product_brand.html'
+			: WC()->plugin_path() . '/templates/templates/taxonomy-product_brand.html';
 
 		$template_file = BlockTemplateUtilsDuplicated::create_new_block_template_object( $template_path, $template_type, 'taxonomy-product_brand', false );
 
