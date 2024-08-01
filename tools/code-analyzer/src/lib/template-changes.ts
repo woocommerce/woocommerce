@@ -28,7 +28,7 @@ export const scanForTemplateChanges = async (
 		return changes;
 	}
 
-	const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
+	const matchPatches = /^a\/(.+)\/templates\/(.+)\.php/g;
 	const patches = getPatches( content, matchPatches );
 	const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${ version.replace(
 		/\./g,
@@ -46,7 +46,7 @@ export const scanForTemplateChanges = async (
 
 		let lineNumber = 1;
 		let code = 'warning';
-		let message = `This template may require a version bump! Expected ${ version } File ${ filePath }`;
+		let message = `This template may require a version bump! Expected ${ version }`;
 
 		for ( const l in lines ) {
 			const line = lines[ l ];
