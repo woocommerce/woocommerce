@@ -1007,6 +1007,7 @@ class WC_Helper {
 		self::_flush_authentication_cache();
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::_flush_product_feature_restrictions_cache();
 	}
 
 	/**
@@ -2173,6 +2174,13 @@ class WC_Helper {
 	}
 
 	/**
+	 * Flush product feature restrictions cache.
+	 */
+	public static function _flush_product_feature_restrictions_cache() {
+		delete_transient( '_woocommerce_helper_product_feature_restrictions' );
+	}
+
+	/**
 	 * Flush auth cache.
 	 */
 	public static function _flush_authentication_cache() {
@@ -2271,6 +2279,7 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::_flush_product_feature_restrictions_cache();
 	}
 
 	/**
@@ -2360,6 +2369,7 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::_flush_product_feature_restrictions_cache();
 	}
 
 	/**
@@ -2411,6 +2421,68 @@ class WC_Helper {
 		}
 
 		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+		return $data;
+	}
+
+	/**
+	 * Get the connected user's subscriptions.
+	 *
+	 * @return array
+	 */
+	public static function get_product_feature_restrictions() {
+		$cache_key = '_woocommerce_helper_product_feature_restrictions';
+		$data      = get_transient( $cache_key );
+		if ( false !== $data ) {
+			return $data;
+		}
+
+		$product_ids = array();
+		// Scan subscriptions.
+		foreach ( self::get_subscriptions() as $subscription ) {
+			if ( ! in_array( (int) $subscription['product_id'], $product_ids, true ) ) {
+				$product_ids[] = (int) $subscription['product_id'];
+			}
+		}
+
+		// Scan local plugins which may or may not have a subscription.
+		foreach ( self::get_local_woo_plugins() as $data ) {
+			if ( ! in_array( (int) $data['_product_id'], $product_ids, true ) ) {
+				$product_ids[] = (int) $data['_product_id'];
+			}
+		}
+
+		// Scan local themes.
+		foreach ( self::get_local_woo_themes() as $data ) {
+			if ( ! in_array( (int) $data['_product_id'], $product_ids, true ) ) {
+				$product_ids[] = (int) $data['_product_id'];
+			}
+		}
+
+		if ( empty( $product_ids ) ) {
+			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+			return array();
+		}
+
+		// Obtain the connected user info.
+		$request = WC_Helper_API::post(
+			'product-feature-restrictions',
+			array(
+				'authenticated' => true,
+				'body'          => wp_json_encode( array( 'product_ids' => $product_ids ) ),
+			)
+		);
+
+		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+			return array();
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $request ), true );
+		if ( empty( $data ) || ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
 		return $data;
 	}
 }
