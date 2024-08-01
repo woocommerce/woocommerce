@@ -136,11 +136,15 @@ jobs:
           build-type: 'full'
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
           pull-package-deps: '${{ matrix.projectName }}'
+          
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        if: ${{ matrix.testType == 'e2e' }}
+        name: 'Install'
       
-      - name: 'Install and build'
+      - name: 'Build and install for e2e'
         if: ${{ matrix.testType == 'e2e' }}
         run: |
-          pnpm install
+          pnpm i
           pnpm --filter="${{ matrix.projectName }}" build
 
       - name: 'Update wp-env config'
