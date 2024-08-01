@@ -4,7 +4,7 @@
 import preloadScript from '@woocommerce/base-utils/preload-script';
 import lazyLoadScript from '@woocommerce/base-utils/lazy-load-script';
 import getNavigationType from '@woocommerce/base-utils/get-navigation-type';
-import { translateJQueryEventToNative } from '@woocommerce/base-events';
+import { EVENT, translateJQueryEventToNative } from '@woocommerce/base-events';
 
 /**
  * Internal dependencies
@@ -56,15 +56,15 @@ window.addEventListener( 'load', () => {
 	// Make it so we can read jQuery events triggered by WC Core elements.
 	const removeJQueryAddingToCartEvent = translateJQueryEventToNative(
 		'adding_to_cart',
-		'wc-blocks_adding_to_cart'
+		EVENT.WC_BLOCKS_ADDING_TO_CART
 	);
 	const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 		'added_to_cart',
-		'wc-blocks_added_to_cart'
+		EVENT.WC_BLOCKS_ADDED_TO_CART
 	);
 	const removeJQueryRemovedFromCartEvent = translateJQueryEventToNative(
 		'removed_from_cart',
-		'wc-blocks_removed_from_cart'
+		EVENT.WC_BLOCKS_REMOVED_FROM_CART
 	);
 
 	const loadScripts = async () => {
@@ -76,7 +76,7 @@ window.addEventListener( 'load', () => {
 
 		// Remove adding to cart event handler.
 		document.body.removeEventListener(
-			'wc-blocks_adding_to_cart',
+			EVENT.WC_BLOCKS_ADDING_TO_CART,
 			loadScripts
 		);
 		removeJQueryAddingToCartEvent();
@@ -91,7 +91,10 @@ window.addEventListener( 'load', () => {
 		}
 	};
 
-	document.body.addEventListener( 'wc-blocks_adding_to_cart', loadScripts );
+	document.body.addEventListener(
+		EVENT.WC_BLOCKS_ADDING_TO_CART,
+		loadScripts
+	);
 
 	// Load scripts if a page is reloaded via the back button (potentially out of date cart data).
 	// Based on refreshCachedCartData() in assets/js/base/context/cart-checkout/cart/index.js.
@@ -126,12 +129,12 @@ window.addEventListener( 'load', () => {
 				loadScripts();
 			}
 			document.body.removeEventListener(
-				'wc-blocks_added_to_cart',
+				EVENT.WC_BLOCKS_ADDED_TO_CART,
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
 				funcOnAddToCart
 			);
 			document.body.removeEventListener(
-				'wc-blocks_removed_from_cart',
+				EVENT.WC_BLOCKS_REMOVED_FROM_CART,
 				// eslint-disable-next-line @typescript-eslint/no-use-before-define
 				loadContentsWithRefresh
 			);
@@ -185,11 +188,11 @@ window.addEventListener( 'load', () => {
 		// only one opens when adding a product to the cart.
 		if ( i === 0 ) {
 			document.body.addEventListener(
-				'wc-blocks_added_to_cart',
+				EVENT.WC_BLOCKS_ADDED_TO_CART,
 				funcOnAddToCart
 			);
 			document.body.addEventListener(
-				'wc-blocks_removed_from_cart',
+				EVENT.WC_BLOCKS_REMOVED_FROM_CART,
 				loadContentsWithRefresh
 			);
 		}

@@ -8,6 +8,8 @@ import type { AddToCartEventDetail } from '@woocommerce/types';
  */
 import { EVENT } from './events';
 
+export { EVENT };
+
 const CustomEvent = window.CustomEvent || null;
 
 interface DispatchedEventProperties {

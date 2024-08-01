@@ -13,6 +13,7 @@ import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
+import { EVENT } from '@woocommerce/base-events';
 import { default as fetchMock } from 'jest-fetch-mock';
 import userEvent from '@testing-library/user-event';
 
@@ -163,7 +164,9 @@ describe( 'Testing Mini-Cart', () => {
 
 		mockEmptyCart();
 		// eslint-disable-next-line no-undef
-		const removedFromCartEvent = new Event( 'wc-blocks_removed_from_cart' );
+		const removedFromCartEvent = new Event(
+			EVENT.WC_BLOCKS_REMOVED_FROM_CART
+		);
 		act( () => {
 			document.body.dispatchEvent( removedFromCartEvent );
 		} );
@@ -185,7 +188,7 @@ describe( 'Testing Mini-Cart', () => {
 
 		mockFullCart();
 		// eslint-disable-next-line no-undef
-		const addedToCartEvent = new Event( 'wc-blocks_added_to_cart' );
+		const addedToCartEvent = new Event( EVENT.WC_BLOCKS_ADDED_TO_CART );
 		act( () => {
 			document.body.dispatchEvent( addedToCartEvent );
 		} );

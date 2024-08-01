@@ -7,7 +7,7 @@ import { useEffect } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
-import { translateJQueryEventToNative } from '@woocommerce/base-events';
+import { EVENT, translateJQueryEventToNative } from '@woocommerce/base-events';
 import withScrollToTop from '@woocommerce/base-hocs/with-scroll-to-top';
 import {
 	CartEventsProvider,
@@ -47,11 +47,11 @@ const ScrollOnError = ( { scrollToTop } ) => {
 		// Make it so we can read jQuery events triggered by WC Core elements.
 		const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 			'added_to_cart',
-			'wc-blocks_added_to_cart'
+			EVENT.WC_BLOCKS_ADDED_TO_CART
 		);
 
 		document.body.addEventListener(
-			'wc-blocks_added_to_cart',
+			EVENT.WC_BLOCKS_ADDED_TO_CART,
 			scrollToTop
 		);
 
@@ -59,7 +59,7 @@ const ScrollOnError = ( { scrollToTop } ) => {
 			removeJQueryAddedToCartEvent();
 
 			document.body.removeEventListener(
-				'wc-blocks_added_to_cart',
+				EVENT.WC_BLOCKS_ADDED_TO_CART,
 				scrollToTop
 			);
 		};

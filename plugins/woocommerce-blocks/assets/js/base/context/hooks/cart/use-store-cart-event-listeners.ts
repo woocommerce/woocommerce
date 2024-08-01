@@ -5,7 +5,7 @@ import { useEffect } from '@wordpress/element';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
 import { dispatch } from '@wordpress/data';
 import { getNavigationType } from '@woocommerce/base-utils';
-import { translateJQueryEventToNative } from '@woocommerce/base-events';
+import { EVENT, translateJQueryEventToNative } from '@woocommerce/base-events';
 
 interface StoreCartListenersType {
 	// Counts the number of consumers of this hook so we can remove listeners when no longer needed.
@@ -69,30 +69,33 @@ const addListeners = (): void => {
 		window.wcBlocksStoreCartListeners.count++;
 		return;
 	}
-	document.body.addEventListener( 'wc-blocks_added_to_cart', refreshData );
 	document.body.addEventListener(
-		'wc-blocks_removed_from_cart',
+		EVENT.WC_BLOCKS_ADDED_TO_CART,
+		refreshData
+	);
+	document.body.addEventListener(
+		EVENT.WC_BLOCKS_REMOVED_FROM_CART,
 		refreshData
 	);
 	window.addEventListener( 'pageshow', refreshCachedCartData );
 
 	const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 		'added_to_cart',
-		`wc-blocks_added_to_cart`
+		EVENT.WC_BLOCKS_ADDED_TO_CART
 	) as () => () => void;
 	const removeJQueryRemovedFromCartEvent = translateJQueryEventToNative(
 		'removed_from_cart',
-		`wc-blocks_removed_from_cart`
+		EVENT.WC_BLOCKS_REMOVED_FROM_CART
 	) as () => () => void;
 
 	window.wcBlocksStoreCartListeners.count = 1;
 	window.wcBlocksStoreCartListeners.remove = () => {
 		document.body.removeEventListener(
-			'wc-blocks_added_to_cart',
+			EVENT.WC_BLOCKS_ADDED_TO_CART,
 			refreshData
 		);
 		document.body.removeEventListener(
-			'wc-blocks_removed_from_cart',
+			EVENT.WC_BLOCKS_REMOVED_FROM_CART,
 			refreshData
 		);
 		window.removeEventListener( 'pageshow', refreshCachedCartData );
