@@ -1,38 +1,37 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
-import { useBlockProps } from '@wordpress/block-editor';
-import { getSetting } from '@woocommerce/settings';
 import {
 	useCollection,
 	useCollectionData,
 } from '@woocommerce/base-context/hooks';
+import { getSetting } from '@woocommerce/settings';
 import {
 	AttributeSetting,
 	AttributeTerm,
 	objectHasProp,
 } from '@woocommerce/types';
-import { Disabled, withSpokenMessages, Notice } from '@wordpress/components';
-import { dispatch, useSelect } from '@wordpress/data';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { EditProps, isAttributeCounts } from './types';
-import { NoAttributesPlaceholder } from './components/placeholder';
-import { getAttributeFromId } from './utils';
-import { Inspector } from './components/inspector';
 import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
+import { Inspector } from './components/inspector';
+import { NoAttributesPlaceholder } from './components/placeholder';
 import { attributeOptionsPreview } from './constants';
 import './style.scss';
+import { EditProps, isAttributeCounts } from './types';
+import { getAttributeFromId } from './utils';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const Edit = ( props: EditProps ) => {
-	const { attributes: blockAttributes, clientId } = props;
+	const { attributes: blockAttributes } = props;
 
 	const {
 		attributeId,
@@ -50,8 +49,6 @@ const Edit = ( props: EditProps ) => {
 		AttributeTerm[]
 	>( [] );
 
-	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
-
 	const { results: attributeTerms } = useCollection< AttributeTerm >( {
 		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes/terms',
@@ -68,47 +65,6 @@ const Edit = ( props: EditProps ) => {
 		queryState: {},
 		isEditor: true,
 	} );
-
-	const { productFilterWrapperBlockId, productFilterWrapperHeadingBlockId } =
-		useSelect(
-			( select ) => {
-				if ( ! clientId )
-					return {
-						productFilterWrapperBlockId: undefined,
-						productFilterWrapperHeadingBlockId: undefined,
-					};
-
-				const { getBlockParentsByBlockName, getBlock } =
-					select( 'core/block-editor' );
-
-				const parentBlocksByBlockName = getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/product-filter'
-				);
-
-				if ( parentBlocksByBlockName.length === 0 )
-					return {
-						productFilterWrapperBlockId: undefined,
-						productFilterWrapperHeadingBlockId: undefined,
-					};
-
-				const parentBlockId = parentBlocksByBlockName[ 0 ];
-
-				const parentBlock = getBlock( parentBlockId );
-				const headerGroupBlock = parentBlock?.innerBlocks.find(
-					( block ) => block.name === 'core/group'
-				);
-				const headingBlock = headerGroupBlock?.innerBlocks.find(
-					( block ) => block.name === 'core/heading'
-				);
-
-				return {
-					productFilterWrapperBlockId: parentBlockId,
-					productFilterWrapperHeadingBlockId: headingBlock?.clientId,
-				};
-			},
-			[ clientId ]
-		);
 
 	useEffect( () => {
 		const termIdHasProducts =
@@ -142,36 +98,6 @@ const Edit = ( props: EditProps ) => {
 				} )
 		);
 	}, [ attributeTerms, filteredCounts, sortOrder, hideEmpty ] );
-
-	useEffect( () => {
-		if ( productFilterWrapperBlockId ) {
-			updateBlockAttributes( productFilterWrapperBlockId, {
-				heading:
-					attributeObject?.label ?? __( 'Attribute', 'woocommerce' ),
-				metadata: {
-					name: sprintf(
-						/* translators: %s is referring to the filter attribute name. For example: Color, Size, etc. */
-						__( '%s (Experimental)', 'woocommerce' ),
-						attributeObject?.label ??
-							__( 'Attribute', 'woocommerce' )
-					),
-				},
-			} );
-		}
-		if ( productFilterWrapperHeadingBlockId ) {
-			updateBlockAttributes( productFilterWrapperHeadingBlockId, {
-				content:
-					attributeObject?.label ?? __( 'Attribute', 'woocommerce' ),
-			} );
-		}
-	}, [
-		attributeId,
-		attributeObject?.id,
-		attributeObject?.label,
-		productFilterWrapperBlockId,
-		productFilterWrapperHeadingBlockId,
-		updateBlockAttributes,
-	] );
 
 	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
 		<div { ...useBlockProps() }>
