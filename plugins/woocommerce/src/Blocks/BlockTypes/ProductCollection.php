@@ -156,6 +156,13 @@ class ProductCollection extends AbstractBlock {
 		return $location_context;
 	}
 
+	/**
+	 * Attach the init directive to Product Collection block.
+	 *
+	 * @param string $block_content The HTML content of the block.
+	 *
+	 * @return string Updated HTML content.
+	 */
 	private function add_init_directive( $block_content ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
@@ -170,6 +177,14 @@ class ProductCollection extends AbstractBlock {
 		return $p->get_updated_html();
 	}
 
+	/**
+	 * Attach all the Interactivity API directives responsible
+	 * for client-side navigation.
+	 *
+	 * @param string $block_content The HTML content of the block.
+	 *
+	 * @return string Updated HTML content.
+	 */
 	private function enable_client_side_naviagation( $block_content ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
