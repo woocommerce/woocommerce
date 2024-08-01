@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1);
 
 use Automattic\WooCommerce\Internal\Admin\Orders\ListTable;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
