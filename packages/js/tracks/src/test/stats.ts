@@ -45,6 +45,7 @@ describe( 'bumpStat', () => {
 		jest.doMock( '../utils', () => ( {
 			isDevelopmentMode: true,
 		} ) );
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const { bumpStat: bumpStatDev } = require( '../stats' );
 
 		const result = bumpStatDev( 'group', 'name' );
