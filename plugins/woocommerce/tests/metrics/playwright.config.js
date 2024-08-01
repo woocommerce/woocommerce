@@ -11,9 +11,7 @@ process.env.STORAGE_STATE_PATH ??= path.join(
 process.env.WP_BASE_URL ??= 'http://localhost:8086';
 
 const config = defineConfig( {
-	reporter: process.env.CI
-		? './config/performance-reporter.ts'
-		: [ [ 'list' ], [ './config/performance-reporter.ts' ] ],
+	reporter: [ [ 'list' ], [ './config/performance-reporter.ts' ] ],
 	forbidOnly: !! process.env.CI,
 	fullyParallel: false,
 	workers: 1,
@@ -24,7 +22,7 @@ const config = defineConfig( {
 	testDir: './specs',
 	outputDir: path.join( process.env.WP_ARTIFACTS_PATH, 'test-results' ),
 	snapshotPathTemplate:
-		'{testDir}/{testFileDir}/__snapshots__/{arg}-{projectName}{ext}',  
+		'{testDir}/{testFileDir}/__snapshots__/{arg}-{projectName}{ext}',
 	globalSetup: fileURLToPath(
 		new URL( './config/global-setup.ts', 'file:' + __filename ).href
 	),
