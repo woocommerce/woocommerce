@@ -36,8 +36,8 @@ class Brands {
 			include_once WC_ABSPATH . 'includes/blocks/class-wc-brands-block-template-utils-duplicated.php';
 		}
 
-		if ( is_admin() ) {
-			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-brands.php';
-		}
+//		if ( is_admin() ) {
+//			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-brands.php';
+//		}
 	}
 }
