@@ -188,9 +188,11 @@ class WC_Helper_Updater {
 	public static function add_connect_woocom_plugin_message() {
 		$connect_page_url = add_query_arg(
 			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => rawurlencode( '/extensions' ),
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_plugin_screen_connect',
 			),
 			admin_url( 'admin.php' )
 		);
