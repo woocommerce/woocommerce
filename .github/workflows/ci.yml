@@ -16,7 +16,7 @@ on:
         type: string
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
+  group: '${{ github.workflow }}-${{ github.ref }}-${{ inputs.trigger }}'
   cancel-in-progress: true
 
 env:
