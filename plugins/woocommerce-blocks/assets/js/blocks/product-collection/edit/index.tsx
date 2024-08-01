@@ -51,6 +51,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			Component = EditorProductPicker;
 			break;
 		case ProductCollectionUIStatesInEditor.VALID:
+		case ProductCollectionUIStatesInEditor.USES_REFERENCE_PREVIEW_MODE:
 			Component = ProductCollectionContent;
 			break;
 		default:
