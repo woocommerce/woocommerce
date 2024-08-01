@@ -646,7 +646,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	public function search_custom_fields( $wp ) {
 		global $pagenow;
 
-		if ( 'edit.php' !== $pagenow || 'shop_order' !== $wp->query_vars['post_type'] ) { // phpcs:ignore  WordPress.Security.NonceVerification.Recommended
+		if ( 'edit.php' !== $pagenow || ! $wp->is_main_query() || 'shop_order' !== $wp->query_vars['post_type'] ) { // phpcs:ignore  WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
