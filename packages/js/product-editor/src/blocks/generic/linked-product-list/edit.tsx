@@ -70,7 +70,7 @@ export function EmptyStateImage( {
 	}
 }
 
-async function searchProducts(
+async function getProductsBySearchValue(
 	searchValue = '',
 	excludedIds: number[] = []
 ): Promise< Product[] > {
@@ -117,38 +117,34 @@ export function LinkedProductListBlockEdit( {
 			linkedProductIds &&
 			linkedProductIds.length > 0
 		) {
-			loadLinkedProductsDispatcher( linkedProductIds ?? [] );
+			loadLinkedProductsDispatcher( linkedProductIds );
 		}
 	}, [ linkedProductIds, state.selectedProduct ] );
 
-	const debouncedFilter = useDebounce( function filter( search = '' ) {
+	function searchProducts( search = '', excludedIds: number[] = [] ) {
 		setSearchValue( search );
 		setIsSearching( true );
-		searchProducts( search, [ ...( linkedProductIds || [] ), productId ] )
+		return getProductsBySearchValue( search, excludedIds )
 			.then( ( products ) => {
 				setSearchedProducts( products );
 			} )
 			.finally( () => {
 				setIsSearching( false );
 			} );
+	}
+
+	const debouncedFilter = useDebounce( function filter( search = '' ) {
+		searchProducts( search, [ ...( linkedProductIds || [] ), productId ] );
 	}, 300 );
 
 	useEffect( () => {
-		// Only filter when the tab is selected.
+		// Only filter when the tab is selected and initial search results haven't been loaded yet.
 		if ( ! isInSelectedTab || loadInitialSearchResults.current ) {
 			return;
 		}
 
 		loadInitialSearchResults.current = true;
-		setSearchValue( '' );
-		setIsSearching( true );
-		searchProducts( '', [ ...( linkedProductIds || [] ), productId ] )
-			.then( ( products ) => {
-				setSearchedProducts( products );
-			} )
-			.finally( () => {
-				setIsSearching( false );
-			} );
+		searchProducts( '', [ ...( linkedProductIds || [] ), productId ] );
 	}, [
 		isInSelectedTab,
 		loadInitialSearchResults,
@@ -170,15 +166,10 @@ export function LinkedProductListBlockEdit( {
 			);
 
 			setLinkedProductIds( newLinkedProductIds );
-			setSearchValue( '' );
-			setIsSearching( true );
-			searchProducts( '', [ ...( linkedProductIds || [] ), productId ] )
-				.then( ( products ) => {
-					setSearchedProducts( products );
-				} )
-				.finally( () => {
-					setIsSearching( false );
-				} );
+			searchProducts( '', [
+				...( newLinkedProductIds || [] ),
+				productId,
+			] );
 
 			recordEvent( 'linked_products_product_add', {
 				source: TRACKS_SOURCE,
@@ -197,15 +188,7 @@ export function LinkedProductListBlockEdit( {
 		);
 
 		setLinkedProductIds( newLinkedProductIds );
-		setSearchValue( '' );
-		setIsSearching( true );
-		searchProducts( '', [ ...( linkedProductIds || [] ), productId ] )
-			.then( ( products ) => {
-				setSearchedProducts( products );
-			} )
-			.finally( () => {
-				setIsSearching( false );
-			} );
+		searchProducts( '', [ ...( newLinkedProductIds || [] ), productId ] );
 
 		recordEvent( 'linked_products_product_remove', {
 			source: TRACKS_SOURCE,
