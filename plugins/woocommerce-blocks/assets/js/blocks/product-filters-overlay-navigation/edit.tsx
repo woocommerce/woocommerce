@@ -118,12 +118,37 @@ export const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< BlockAttributes > ) => {
-	const { navigationStyle, buttonStyle, iconSize, style } = attributes;
+	const { navigationStyle, buttonStyle, iconSize, style, triggerType } =
+		attributes;
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters-overlay-navigation', {
 			'wp-block-button__link wp-element-button': buttonStyle !== 'link',
 		} ),
 	} );
+	const {
+		isWithinProductFiltersTemplatePart,
+	}: { isWithinProductFiltersTemplatePart: boolean } = useSelect(
+		( select ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
+			const { getCurrentPostId } = select( 'core/editor' );
+			const currentPostId = getCurrentPostId< string >();
+			const currentPostIdParts = currentPostId?.split( '//' );
+			let isProductFiltersTemplatePart = false;
+
+			if ( currentPostIdParts?.length > 1 ) {
+				const [ , postId ] = currentPostIdParts;
+				isProductFiltersTemplatePart = postId === 'product-filters';
+			}
+
+			return {
+				isWithinProductFiltersTemplatePart:
+					isProductFiltersTemplatePart,
+			};
+		}
+	);
+	const shouldHideBlock =
+		! isWithinProductFiltersTemplatePart && triggerType === 'open-overlay';
 	// We need useInnerBlocksProps because Gutenberg only applies layout classes
 	// to parent block. We don't have any inner blocks but we want to use the
 	// layout controls.
@@ -133,6 +158,10 @@ export const Edit = ( {
 		( select ) => select( blocksStore ).getBlockStyles( 'core/button' ),
 		[]
 	);
+
+	if ( shouldHideBlock ) {
+		return null;
+	}
 
 	const buttonStyles = [
 		{ value: 'link', label: __( 'Link', 'woocommerce' ) },
@@ -160,10 +189,10 @@ export const Edit = ( {
 		>
 			<div { ...innerBlocksProps }>
 				<OverlayNavigationContent
-					variation={ attributes.triggerType }
-					iconSize={ attributes.iconSize }
-					navigationStyle={ attributes.navigationStyle }
-					style={ attributes.style }
+					variation={ triggerType }
+					iconSize={ iconSize }
+					navigationStyle={ navigationStyle }
+					style={ style }
 				/>
 			</div>
 			<InspectorControls group="styles">
