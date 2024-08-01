@@ -11,7 +11,6 @@ use WC_Tax;
  */
 class ProductCollection extends AbstractBlock {
 
-
 	/**
 	 * Block name.
 	 *
