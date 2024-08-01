@@ -573,9 +573,14 @@ body.woocommerce-assembler {
 	}
 
 	.woocommerce-customize-store__resize-button {
-		&:hover {
+		&:hover,
+		&.is-selected {
 			.woocommerce-customize-store__resize-icon {
 				fill: initial;
+
+				&--zoom {
+					stroke: rgb(0, 0, 0);
+				}
 			}
 		}
 	}
@@ -584,8 +589,8 @@ body.woocommerce-assembler {
 		margin-right: 10px;
 		fill: #757575;
 
-		&.is-selected {
-			fill: initial;
+		&--zoom {
+			stroke: #757575;
 		}
 
 		&:last-of-type {
