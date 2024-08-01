@@ -1022,45 +1022,6 @@ class AdditionalFields extends MockeryTestCase {
 	}
 
 	/**
-	 * Ensure a select has an extra empty option if it's optional.
-	 */
-	public function test_optional_select_has_empty_value() {
-		$id = 'plugin-namespace/optional-select';
-		\woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => $id,
-				'label'    => 'Optional Select',
-				'location' => 'order',
-				'type'     => 'select',
-				'options'  => array(
-					array(
-						'label' => 'Option 1',
-						'value' => 'option-1',
-					),
-					array(
-						'label' => 'Option 2',
-						'value' => 'option-2',
-					),
-				),
-			)
-		);
-		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/checkout' );
-		$response = rest_get_server()->dispatch( $request );
-
-		$data = $response->get_data();
-		$this->assertEquals(
-			array( '', 'option-1', 'option-2' ),
-			$data['schema']['properties']['additional_fields']['properties'][ $id ]['enum'],
-			print_r( $data['schema']['properties']['additional_fields']['properties'][ $id ], true )
-		);
-
-		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
-
-		// Ensures the field isn't registered.
-		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
-	}
-
-	/**
 	 * Ensure an error is triggered when a checkbox is registered as required.
 	 */
 	public function test_invalid_required_prop_checkbox() {

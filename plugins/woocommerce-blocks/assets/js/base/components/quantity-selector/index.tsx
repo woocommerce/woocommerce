@@ -47,9 +47,13 @@ export interface QuantitySelectorProps {
 	 */
 	itemName?: string;
 	/**
-	 * Whether the component should be interactable or not
+	 * Whether the component should be interactable
 	 */
 	disabled: boolean;
+	/**
+	 * Whether the component should be editable
+	 */
+	editable: boolean;
 }
 
 const QuantitySelector = ( {
@@ -61,6 +65,7 @@ const QuantitySelector = ( {
 	step = 1,
 	itemName = '',
 	disabled,
+	editable,
 }: QuantitySelectorProps ): JSX.Element => {
 	const classes = clsx( 'wc-block-components-quantity-selector', className );
 
@@ -158,6 +163,7 @@ const QuantitySelector = ( {
 				ref={ inputRef }
 				className="wc-block-components-quantity-selector__input"
 				disabled={ disabled }
+				readOnly={ ! editable }
 				type="number"
 				step={ step }
 				min={ minimum }
@@ -184,54 +190,64 @@ const QuantitySelector = ( {
 					itemName
 				) }
 			/>
-			<button
-				ref={ decreaseButtonRef }
-				aria-label={ sprintf(
-					/* translators: %s refers to the item name in the cart. */
-					__( 'Reduce quantity of %s', 'woocommerce' ),
-					itemName
-				) }
-				className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
-				disabled={ ! canDecrease }
-				onClick={ () => {
-					const newQuantity = quantity - step;
-					onChange( newQuantity );
-					speak(
-						sprintf(
-							/* translators: %s refers to the item's new quantity in the cart. */
-							__( 'Quantity reduced to %s.', 'woocommerce' ),
-							newQuantity
-						)
-					);
-					normalizeQuantity( newQuantity );
-				} }
-			>
-				&#65293;
-			</button>
-			<button
-				ref={ increaseButtonRef }
-				aria-label={ sprintf(
-					/* translators: %s refers to the item's name in the cart. */
-					__( 'Increase quantity of %s', 'woocommerce' ),
-					itemName
-				) }
-				disabled={ ! canIncrease }
-				className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
-				onClick={ () => {
-					const newQuantity = quantity + step;
-					onChange( newQuantity );
-					speak(
-						sprintf(
-							/* translators: %s refers to the item's new quantity in the cart. */
-							__( 'Quantity increased to %s.', 'woocommerce' ),
-							newQuantity
-						)
-					);
-					normalizeQuantity( newQuantity );
-				} }
-			>
-				&#65291;
-			</button>
+			{ editable && (
+				<>
+					<button
+						ref={ decreaseButtonRef }
+						aria-label={ sprintf(
+							/* translators: %s refers to the item name in the cart. */
+							__( 'Reduce quantity of %s', 'woocommerce' ),
+							itemName
+						) }
+						className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus"
+						disabled={ ! canDecrease }
+						onClick={ () => {
+							const newQuantity = quantity - step;
+							onChange( newQuantity );
+							speak(
+								sprintf(
+									/* translators: %s refers to the item's new quantity in the cart. */
+									__(
+										'Quantity reduced to %s.',
+										'woocommerce'
+									),
+									newQuantity
+								)
+							);
+							normalizeQuantity( newQuantity );
+						} }
+					>
+						&#65293;
+					</button>
+					<button
+						ref={ increaseButtonRef }
+						aria-label={ sprintf(
+							/* translators: %s refers to the item's name in the cart. */
+							__( 'Increase quantity of %s', 'woocommerce' ),
+							itemName
+						) }
+						disabled={ ! canIncrease }
+						className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus"
+						onClick={ () => {
+							const newQuantity = quantity + step;
+							onChange( newQuantity );
+							speak(
+								sprintf(
+									/* translators: %s refers to the item's new quantity in the cart. */
+									__(
+										'Quantity increased to %s.',
+										'woocommerce'
+									),
+									newQuantity
+								)
+							);
+							normalizeQuantity( newQuantity );
+						} }
+					>
+						&#65291;
+					</button>
+				</>
+			) }
 		</div>
 	);
 };
