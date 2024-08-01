@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * Main WooCommerce Class.
@@ -408,6 +409,9 @@ final class WooCommerce {
 			$mc_stats  = $container->get( McStats::class );
 			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
 			$mc_stats->do_server_side_stats();
+
+			$remote_logger = $container->get( RemoteLogger::class );
+			$remote_logger->handle( time(), WC_Log_Levels::CRITICAL, $message, $context );
 
 			/**
 			 * Action triggered when there are errors during shutdown.
