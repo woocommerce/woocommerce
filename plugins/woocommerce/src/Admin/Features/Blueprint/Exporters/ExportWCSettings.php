@@ -178,7 +178,7 @@ class ExportWCSettings implements StepExporter, HasAlias {
 	 * @param array $option_info The option information array.
 	 * @return array
 	 */
-	public function add_site_visibility_setttings( array $options, array $pages, array $option_info ) {
+	public function add_site_visibility_settings( array $options, array $pages, array $option_info ) {
 		$pages['site_visibility'] = array(
 			'label'    => 'Site Visibility',
 			'sections' => array(
