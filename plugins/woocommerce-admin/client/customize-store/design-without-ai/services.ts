@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { Sender } from 'xstate';
-import apiFetch from '@wordpress/api-fetch';
-import { resolveSelect, dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import apiFetch from '@wordpress/api-fetch';
+import { dispatch, resolveSelect } from '@wordpress/data';
+import { Sender } from 'xstate';
 // @ts-expect-error -- No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
@@ -15,24 +15,18 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * Internal dependencies
  */
-import { updateTemplate } from '../data/actions';
-import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
-import { installAndActivateTheme as setTheme } from '../data/service';
-import { THEME_SLUG } from '../data/constants';
-import { FontFace, FontFamily } from '../types/font';
-import {
-	FontCollectionResponse,
-	installFontFace,
-	installFontFamily,
-	getFontFamiliesAndFontFaceToInstall,
-} from './fonts';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
 import {
 	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
 	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
-import { DesignWithoutAIStateMachineContext, Theme } from './types';
+import { updateTemplate } from '../data/actions';
+import { THEME_SLUG } from '../data/constants';
+import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+import { installAndActivateTheme as setTheme } from '../data/service';
 import { trackEvent } from '../tracking';
+import { DesignWithoutAIStateMachineContext, Theme } from './types';
+import { installFontFamilies as installDefaultFontFamilies } from '../assembler-hub/utils/fonts';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -128,6 +122,20 @@ const updateGlobalStylesWithDefaultValues = async (
 	);
 };
 
+const updateShowOnFront = async () => {
+	try {
+		await apiFetch( {
+			path: '/wp/v2/settings',
+			method: 'POST',
+			data: {
+				show_on_front: 'posts',
+			},
+		} );
+	} catch ( error ) {
+		throw error;
+	}
+};
+
 const installAndActivateTheme = async (
 	context: DesignWithoutAIStateMachineContext
 ) => {
@@ -179,66 +187,7 @@ const installFontFamilies = async () => {
 	}
 
 	try {
-		const installedFontFamily = ( await resolveSelect(
-			'core'
-		).getEntityRecords( 'postType', 'wp_font_family', {
-			per_page: -1,
-		} ) ) as Array< {
-			id: number;
-			font_faces: Array< number >;
-			font_family_settings: FontFamily;
-		} >;
-
-		const installedFontFamiliesWithFontFaces = await Promise.all(
-			installedFontFamily.map( async ( fontFamily ) => {
-				const fontFaces = await apiFetch< Array< FontFace > >( {
-					path: `/wp/v2/font-families/${ fontFamily.id }/font-faces`,
-					method: 'GET',
-				} );
-
-				return {
-					...fontFamily,
-					font_face: fontFaces,
-				};
-			} )
-		);
-
-		const fontCollection = await apiFetch< FontCollectionResponse >( {
-			path: `/wp/v2/font-collections/google-fonts`,
-			method: 'GET',
-		} );
-
-		const { fontFacesToInstall, fontFamiliesWithFontFacesToInstall } =
-			getFontFamiliesAndFontFaceToInstall(
-				fontCollection,
-				installedFontFamiliesWithFontFaces
-			);
-
-		const fontFamiliesWithFontFaceToInstallPromises =
-			fontFamiliesWithFontFacesToInstall.map( async ( fontFamily ) => {
-				const fontFamilyResponse = await installFontFamily(
-					fontFamily
-				);
-				return Promise.all(
-					fontFamily.fontFace.map( async ( fontFace, index ) => {
-						installFontFace(
-							{
-								...fontFace,
-								fontFamilyId: fontFamilyResponse.id,
-							},
-							index
-						);
-					} )
-				);
-			} );
-
-		const fontFacesToInstallPromises =
-			fontFacesToInstall.map( installFontFace );
-
-		await Promise.all( [
-			...fontFamiliesWithFontFaceToInstallPromises,
-			...fontFacesToInstallPromises,
-		] );
+		await installDefaultFontFamilies();
 	} catch ( error ) {
 		throw error;
 	}
@@ -281,4 +230,5 @@ export const services = {
 	installPatterns,
 	updateGlobalStylesWithDefaultValues,
 	enableTracking,
+	updateShowOnFront,
 };

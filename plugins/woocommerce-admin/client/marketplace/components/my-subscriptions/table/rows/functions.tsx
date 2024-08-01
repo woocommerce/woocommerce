@@ -14,6 +14,7 @@ import { StatusLevel, Subscription } from '../../types';
 import ConnectButton from '../actions/connect-button';
 import Install from '../actions/install';
 import RenewButton from '../actions/renew-button';
+import AutoRenewButton from '../actions/auto-renew-button';
 import SubscribeButton from '../actions/subscribe-button';
 import Update from '../actions/update';
 import StatusPopover from './status-popover';
@@ -23,6 +24,7 @@ import {
 	appendURLParams,
 	renewUrl,
 	subscribeUrl,
+	enableAutorenewalUrl,
 } from '../../../../utils/functions';
 import {
 	MARKETPLACE_COLLABORATION_PATH,
@@ -60,7 +62,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 					),
 					sharing: (
 						<a
-							href={ MARKETPLACE_COLLABORATION_PATH }
+							href={ MARKETPLACE_SHARING_PATH }
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -78,16 +80,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 			),
 		};
 	}
-	if ( subscription.local.installed && ! subscription.active ) {
-		return {
-			text: __( 'Not connected', 'woocommerce' ),
-			level: StatusLevel.Warning,
-			explanation: __(
-				'To receive updates and support, please connect your subscription to this store.',
-				'woocommerce'
-			),
-		};
-	}
+
 	if ( subscription.expired ) {
 		return {
 			text: __( 'Expired', 'woocommerce' ),
@@ -108,7 +101,57 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 					),
 					sharing: (
 						<a
+							href={ MARKETPLACE_SHARING_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+					transferring: (
+						<a
 							href={ MARKETPLACE_COLLABORATION_PATH }
+							rel="nofollow noopener noreferrer"
+						>
+							sharing
+						</a>
+					),
+				}
+			),
+		};
+	}
+
+	if ( subscription.local.installed && ! subscription.active ) {
+		return {
+			text: __( 'Not connected', 'woocommerce' ),
+			level: StatusLevel.Warning,
+			explanation: __(
+				'To receive updates and support, please connect your subscription to this store.',
+				'woocommerce'
+			),
+		};
+	}
+
+	if ( subscription.expiring && ! subscription.autorenew ) {
+		return {
+			text: __( 'Expires soon', 'woocommerce' ),
+			level: StatusLevel.Error,
+			explanation: createInterpolateElement(
+				__(
+					'To receive updates and support, please <renew>renew</renew> this subscription before it expires or use a subscription from another account by <sharing>sharing</sharing> or <transferring>transferring</transferring>.',
+					'woocommerce'
+				),
+				{
+					renew: (
+						<a
+							href={ enableAutorenewalUrl( subscription ) }
+							rel="nofollow noopener noreferrer"
+						>
+							renew
+						</a>
+					),
+					sharing: (
+						<a
+							href={ MARKETPLACE_SHARING_PATH }
 							rel="nofollow noopener noreferrer"
 						>
 							sharing
@@ -183,8 +226,6 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 		);
 	}
 
-	const statusBadge = getStatusBadge( subscription );
-
 	const displayElement = (
 		<div className="woocommerce-marketplace__my-subscriptions__product">
 			<a
@@ -205,13 +246,6 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 				{ subscription.product_name }
 			</a>
 			<span className="woocommerce-marketplace__my-subscriptions__product-statuses">
-				{ statusBadge && (
-					<StatusPopover
-						text={ statusBadge.text }
-						level={ statusBadge.level }
-						explanation={ statusBadge.explanation ?? '' }
-					/>
-				) }
 				{ subscription.is_shared && (
 					<StatusPopover
 						text={ __( 'Shared with you', 'woocommerce' ) }
@@ -289,12 +323,26 @@ export function expiry( subscription: Subscription ): TableRow {
 	};
 }
 
-export function autoRenew( subscription: Subscription ): TableRow {
+export function subscriptionStatus( subscription: Subscription ): TableRow {
+	function getStatus() {
+		const statusBadge = getStatusBadge( subscription );
+		if ( statusBadge ) {
+			return (
+				<StatusPopover
+					text={ statusBadge.text }
+					level={ statusBadge.level }
+					explanation={ statusBadge.explanation ?? '' }
+					explanationOnHover
+				/>
+			);
+		}
+
+		return subscription.autorenew
+			? __( 'Active', 'woocommerce' )
+			: __( 'Cancelled', 'woocommerce' );
+	}
 	return {
-		display: subscription.autorenew
-			? __( 'On', 'woocommerce' )
-			: __( 'Off', 'woocommerce' ),
-		value: subscription.autorenew,
+		display: getStatus(),
 	};
 }
 
@@ -322,7 +370,10 @@ export function actions( subscription: Subscription ): TableRow {
 		actionButton = (
 			<ConnectButton subscription={ subscription } variant="link" />
 		);
+	} else if ( ! subscription.autorenew ) {
+		actionButton = <AutoRenewButton subscription={ subscription } />;
 	}
+
 	return {
 		display: (
 			<div className="woocommerce-marketplace__my-subscriptions__actions">
