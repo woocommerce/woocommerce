@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix clicking outside of the attribute modal triggers an error
