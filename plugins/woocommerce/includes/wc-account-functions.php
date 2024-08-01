@@ -32,7 +32,7 @@ function wc_lostpassword_url( $default_url = '' ) {
 	$is_account_page        = get_the_permalink() === wc_get_page_permalink( 'myaccount' );
 	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
 
-	// Change the URL on front-end screens only.
+	// Change the URL on My Account page only.
 	if ( $wc_account_page_exists && $is_account_page && ! empty( $lost_password_endpoint ) ) {
 		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_account_page_url );
 	} else {
