@@ -1609,7 +1609,6 @@ test.describe( 'Product Collection', () => {
 			} );
 
 			await pageObject.publishAndGoToFrontend();
-			await page.waitForLoadState();
 
 			await expect
 				.poll( async () => await page.evaluate( 'window.eventFired' ) )
