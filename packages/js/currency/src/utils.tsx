@@ -75,7 +75,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 			);
 		}
 		tmp.innerHTML = str;
-		return tmp.content.textContent;
+		return tmp.content.textContent || '';
 	}
 
 	/**
