@@ -648,7 +648,7 @@ function wc_create_refund( $args = array() ) {
 
 			// delete downloads that were refunded using order and product id, if present.
 			if ( ! empty( $refunded_order_and_products ) ) {
-				foreach ( $refunded_order_and_products as $item_id => $refunded_order_and_product ) {
+				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
 					$download_data_store = WC_Data_Store::load( 'customer-download' );
 					$downloads           = $download_data_store->get_downloads( $refunded_order_and_product );
 					if ( ! empty( $downloads ) ) {
