@@ -150,7 +150,7 @@ class Screen {
 	 */
 	public function add_body_class( $classes ) {
 		if ( self::is_woocommerce_page() ) {
-			// $classes .= ' has-woocommerce-navigation';
+			$classes .= ' has-woocommerce-navigation';
 
 			/**
 			 * Adds the ability to skip disabling of the WP toolbar.

@@ -34,13 +34,17 @@ class Init {
 	 */
 	public function __construct() {
 		if ( Features::is_enabled( 'navigation' ) ) {
-			
+			// Disable the option to turn off the feature.
+			update_option( self::TOGGLE_OPTION_NAME, 'no' );
+
 			if ( class_exists( 'WC_Tracks' ) ) {
 				WC_Tracks::record_event( 'deprecated_navigation_in_use' );
 			}
-			// Menu::instance()->init();
-			// CoreMenu::instance()->init();
-			// Screen::instance()->init();
+
+			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+				wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+				exit();
+			}
 		}
 	}
 
