@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Blocks E2E: Fix DB snapshot removal step in setup script.

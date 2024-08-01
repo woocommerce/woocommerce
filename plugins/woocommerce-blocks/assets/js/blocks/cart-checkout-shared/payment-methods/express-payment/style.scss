@@ -30,7 +30,7 @@ $border-width: 1px;
 	.wc-block-components-express-payment__event-buttons {
 		list-style: none;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(calc(33% - 10px), 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 		grid-gap: 10px;
 
 		@include breakpoint("<782px") {
@@ -111,7 +111,7 @@ $border-width: 1px;
 	align-items: center;
 	text-align: center;
 	padding: 0 $gap-large;
-	margin: $gap-larger 0 ( 3.5 * $grid-unit );
+	margin: $gap-larger 0 (3.5 * $grid-unit);
 
 	&::before {
 		margin-right: 10px;
@@ -142,7 +142,8 @@ $border-width: 1px;
 
 // For Twenty Twenty we need to increase specificity of the title.
 .theme-twentytwenty {
-	.wc-block-components-express-payment .wc-block-components-express-payment__title {
+	.wc-block-components-express-payment
+	.wc-block-components-express-payment__title {
 		padding-left: $gap-small;
 		padding-right: $gap-small;
 	}

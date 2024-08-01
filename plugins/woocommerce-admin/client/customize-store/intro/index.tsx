@@ -25,6 +25,7 @@ import {
 	DesignChangeWarningModal,
 	StartNewDesignWarningModal,
 	StartOverWarningModal,
+	ThemeSwitchWarningModal,
 } from './warning-modals';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import './intro.scss';
@@ -38,6 +39,7 @@ import {
 	NoAIBanner,
 	ExistingNoAiThemeBanner,
 	ClassicThemeBanner,
+	NonDefaultBlockThemeBanner,
 } from './intro-banners';
 import welcomeTourImg from '../assets/images/design-your-own.svg';
 import professionalThemeImg from '../assets/images/professional-theme.svg';
@@ -45,6 +47,7 @@ import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
 import { trackEvent } from '~/customize-store/tracking';
+import { isNoAIFlow as isNoAiFlowGuard } from '../guards';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -69,6 +72,7 @@ const BANNER_COMPONENTS = {
 	[ FlowType.noAI ]: NoAIBanner,
 	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	'classic-theme': ClassicThemeBanner,
+	'non-default-block-theme': NonDefaultBlockThemeBanner,
 	default: DefaultBanner,
 };
 
@@ -145,11 +149,17 @@ const ThemeCards = ( {
 
 const CustomizedThemeBanners = ( {
 	isBlockTheme,
+	isDefaultTheme,
+	isNoAiFlow,
 	sendEvent,
 }: {
 	isBlockTheme: boolean | undefined;
+	isDefaultTheme: boolean | undefined;
+	isNoAiFlow: boolean;
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
 	return (
 		<>
 			<p className="select-theme-text">
@@ -179,7 +189,7 @@ const CustomizedThemeBanners = ( {
 											: 'classic',
 									}
 								);
-								if ( isBlockTheme ) {
+								if ( isDefaultTheme && isNoAiFlow ) {
 									navigateOrParent(
 										window,
 										getNewPath(
@@ -189,10 +199,7 @@ const CustomizedThemeBanners = ( {
 										)
 									);
 								} else {
-									navigateOrParent(
-										window,
-										'customize.php?return=/wp-admin/themes.php'
-									);
+									setIsModalOpen( true );
 								}
 							} }
 						>
@@ -234,6 +241,19 @@ const CustomizedThemeBanners = ( {
 					</div>
 				</div>
 			</div>
+			{ isModalOpen && (
+				<ThemeSwitchWarningModal
+					setIsModalOpen={ setIsModalOpen }
+					isNoAiFlow={ isNoAiFlow }
+					redirectToCYSFlow={ () =>
+						sendEvent( {
+							type: isNoAiFlow
+								? 'DESIGN_WITHOUT_AI'
+								: 'DESIGN_WITH_AI',
+						} )
+					}
+				/>
+			) }
 		</>
 	);
 };
@@ -283,17 +303,16 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
 			break;
-		case ! isBlockTheme:
+		case context.flowType === FlowType.noAI && ! isBlockTheme:
 			bannerStatus = 'classic-theme';
 			break;
 		case context.flowType === FlowType.noAI &&
-			! customizeStoreTaskCompleted:
-			bannerStatus = FlowType.noAI;
-			break;
-		case context.flowType === FlowType.noAI &&
-			customizeStoreTaskCompleted &&
 			isBlockTheme &&
 			! isDefaultTheme:
+			bannerStatus = 'non-default-block-theme';
+			break;
+		case context.flowType === FlowType.noAI &&
+			! customizeStoreTaskCompleted:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
@@ -412,16 +431,17 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						sendEvent={ sendEvent }
 					/>
 
-					{ customizeStoreTaskCompleted &&
-					( isDefaultTheme || ! isBlockTheme ) ? (
-						<CustomizedThemeBanners
-							isBlockTheme={ isBlockTheme }
-							sendEvent={ sendEvent }
-						/>
-					) : (
+					{ isDefaultTheme && ! customizeStoreTaskCompleted ? (
 						<ThemeCards
 							sendEvent={ sendEvent }
 							themeData={ themeData }
+						/>
+					) : (
+						<CustomizedThemeBanners
+							isBlockTheme={ isBlockTheme }
+							isDefaultTheme={ isDefaultTheme }
+							sendEvent={ sendEvent }
+							isNoAiFlow={ isNoAiFlowGuard( context.flowType ) }
 						/>
 					) }
 				</div>

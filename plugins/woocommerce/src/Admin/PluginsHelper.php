@@ -593,9 +593,11 @@ class PluginsHelper {
 
 		$connect_page_url = add_query_arg(
 			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => rawurlencode( '/extensions' ),
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_setting_screen_connect',
 			),
 			admin_url( 'admin.php' )
 		);

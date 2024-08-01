@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Avoid Product Search Results block template to fall back to the Product Catalog template from the theme
