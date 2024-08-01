@@ -54,7 +54,7 @@ function _wc_beta_tester_bootstrap() {
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-admin-notices.php';
 		$notices = new WC_Beta_Tester_Admin_Notices();
 
-		add_action( 'admin_notices', array( $notices, 'woocoommerce_not_installed' ) );
+		add_action( 'admin_notices', array( $notices, 'woocommerce_not_installed' ) );
 	} elseif ( ! class_exists( 'WC_Beta_Tester' ) ) {
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester.php';
 		// Settings.
