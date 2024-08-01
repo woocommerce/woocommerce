@@ -108,6 +108,10 @@
 					"name": "PHP: 8.0 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy",
+						"--testsuite=wc-phpunit-main"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -137,6 +141,10 @@
 					"name": "PHP WP: latest - 1",
 					"testType": "unit:php",
 					"command": "test:php:env",
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy",
+						"--testsuite=wc-phpunit-main"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -162,37 +170,13 @@
 					]
 				},
 				{
-					"name": "PHP WP: latest - 2",
-					"testType": "unit:php",
-					"command": "test:php:env",
-					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
-					],
-					"testEnv": {
-						"start": "env:test",
-						"config": {
-							"wpVersion": "latest-2"
-						}
-					},
-					"events": [
-						"pull_request",
-						"push"
-					]
-				},
-				{
 					"name": "PHP WP: nightly",
 					"testType": "unit:php",
 					"command": "test:php:env",
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy",
+						"--testsuite=wc-phpunit-main"
+					],
 					"optional": true,
 					"changes": [
 						"client/admin/config/*.json",
