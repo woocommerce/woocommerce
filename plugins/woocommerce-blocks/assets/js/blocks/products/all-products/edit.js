@@ -148,8 +148,8 @@ const Edit = ( {
 
 		const onReset = () => {
 			const newBlocks = [];
-			DEFAULT_PRODUCT_LIST_LAYOUT.map( ( [ name, attributes ] ) => {
-				newBlocks.push( createBlock( name, attributes ) );
+			DEFAULT_PRODUCT_LIST_LAYOUT.map( ( [ name, blockAttributes ] ) => {
+				newBlocks.push( createBlock( name, blockAttributes ) );
 				return true;
 			} );
 			replaceInnerBlocks( block.clientId, newBlocks, false );
