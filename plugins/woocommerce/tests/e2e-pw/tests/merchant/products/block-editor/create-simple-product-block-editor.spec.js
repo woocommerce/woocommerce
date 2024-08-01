@@ -197,6 +197,33 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				expect( productId ).toBeDefined();
 				await expect( title ).toHaveText( productData.name );
 			} );
+
+			// Note for future refactoring: It would be good to reuse the verification step
+			// from product-create-simple.spec.js, as both tests are just verifying that the
+			// product was created correctly by looking at the front end.
+			await test.step( 'verify the saved product in frontend', async () => {
+				await page.goto( `/?post_type=product&p=${ productId }` );
+
+				// Verify product name
+				await expect(
+					page.getByRole( 'heading', {
+						name: productData.name,
+					} )
+				).toBeVisible();
+
+				// Verify price
+				await expect(
+					page.getByText( productData.productPrice ).first()
+				).toBeVisible();
+				await expect(
+					page.getByText( productData.salePrice ).first()
+				).toBeVisible();
+
+				// Verify summary
+				await expect(
+					page.getByText( productData.summary )
+				).toBeVisible();
+			} );
 		} );
 
 		test( 'can not create a product with duplicated SKU', async ( {
@@ -231,30 +258,13 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			).toContainText( 'Invalid or duplicated SKU.' );
 		} );
 
+		// Note for future refactoring: It would be good to reuse the verification step
+		// from product-create-simple.spec.js, as both tests are just verifying that the
+		// product that was created can be added to the cart in the front end.
 		test( 'can a shopper add the simple product to the cart', async ( {
 			page,
 		} ) => {
 			await page.goto( `/?post_type=product&p=${ productId }` );
-			await expect(
-				page.getByRole( 'heading', { name: productData.name } )
-			).toBeVisible();
-
-			await expect
-				.soft(
-					await page
-						.locator( 'del' )
-						.getByText( `$${ productData.productPrice }` )
-						.count()
-				)
-				.toBeGreaterThan( 0 );
-			await expect
-				.soft(
-					await page
-						.locator( 'ins' )
-						.getByText( `$${ productData.salePrice }` )
-						.count()
-				)
-				.toBeGreaterThan( 0 );
 
 			await page.locator( 'button[name="add-to-cart"]' ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
