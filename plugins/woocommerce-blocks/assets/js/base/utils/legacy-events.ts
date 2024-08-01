@@ -67,7 +67,6 @@ export const triggerProductListRenderedEvent = (): void => {
 };
 
 export const triggerViewedProductEvent = (): void => {
-	console.log( 'triggered' );
 	dispatchEvent( 'wc-blocks_viewed_product', {
 		bubbles: true,
 		cancelable: true,
