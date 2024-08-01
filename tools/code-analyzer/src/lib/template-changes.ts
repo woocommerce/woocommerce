@@ -24,8 +24,6 @@ export const scanForTemplateChanges = async (
 	repositoryPath?: string
 ) => {
 	const changes: Map< string, TemplateChangeDescription > = new Map();
-console.log( "Scanning for changes" );
-console.log( content );
 	if ( ! content.match( /diff --git a\/(.+)\/templates\/(.+)\.php/g ) ) {
 		return changes;
 	}
@@ -48,7 +46,7 @@ console.log( content );
 
 		let lineNumber = 1;
 		let code = 'warning';
-		let message = `This template may require a version bump! Expected ${ version }`;
+		let message = `This template may require a version bump! Expected ${ version } File ${ filePath }`;
 
 		for ( const l in lines ) {
 			const line = lines[ l ];
