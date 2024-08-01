@@ -94,6 +94,13 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
+// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
+// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
+require( 'fs-extra' ).ensureSymlinkSync(
+	path.join( __dirname, '/node_modules/xstate5' ),
+	path.join( __dirname, '/node_modules/@xstate5/react/node_modules/xstate' )
+);
+
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: getEntryPoints(),
