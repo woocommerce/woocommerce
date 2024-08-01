@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { BlockVariation } from '@wordpress/blocks';
 import {
 	productFilterActive,
@@ -10,6 +10,10 @@ import {
 	productFilterRating,
 	productFilterStockStatus,
 } from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
+import { AttributeSetting } from '@woocommerce/types';
+
+const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const variations: BlockVariation[] = [
 	{
@@ -89,6 +93,34 @@ const variations: BlockVariation[] = [
 variations.forEach( ( variation ) => {
 	// @ts-expect-error: `isActive` is currently typed wrong in `@wordpress/blocks`.
 	variation.isActive = [ 'filterType' ];
+} );
+
+ATTRIBUTES.forEach( ( attribute ) => {
+	variations.push( {
+		name: `product-filter-attribute-${ attribute.attribute_name }`,
+		title: `${ attribute.attribute_label } (Experimental)`,
+		description: sprintf(
+			// translators: %s is the attribute label.
+			__(
+				`Enable customers to filter the product collection by selecting one or more %s attributes.`,
+				'woocommerce'
+			),
+			attribute.attribute_label
+		),
+		attributes: {
+			filterType: 'attribute-filter',
+			heading: attribute.attribute_label,
+			attributeId: parseInt( attribute.attribute_id, 10 ),
+		},
+		icon: productFilterAttribute,
+		// Can be `isActive: [ 'filterType', 'attributeId' ]`, but the API is available from 6.6.
+		isActive: ( blockAttributes, variationAttributes ) => {
+			return (
+				blockAttributes.filterType === variationAttributes.filterType &&
+				blockAttributes.attributeId === variationAttributes.attributeId
+			);
+		},
+	} );
 } );
 
 export const blockVariations = variations;
