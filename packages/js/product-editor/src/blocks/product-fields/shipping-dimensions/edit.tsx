@@ -223,7 +223,7 @@ export function Edit( {
 					/>
 					<NumberControl
 						label={ createInterpolateElement(
-							__( 'Width <Side />', 'woocommerce' ),
+							__( 'Length <Side />', 'woocommerce' ),
 							{ Side: <span>B</span> }
 						) }
 						error={ dimensionsLengthValidationError }
