@@ -24,11 +24,11 @@ export const scanForTemplateChanges = async (
 	repositoryPath?: string
 ) => {
 	const changes: Map< string, TemplateChangeDescription > = new Map();
-	if ( ! content.match( /diff --git (.+)\/templates\/(.+)\.php/g ) ) {
+	if ( ! content.match( /diff --git a\/(.+)\/templates\/(.+)\.php/g ) ) {
 		return changes;
 	}
 
-	const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
+	const matchPatches = /^a\/(.+)\/templates\/(.+)\.php/g;
 	const patches = getPatches( content, matchPatches );
 	const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${ version.replace(
 		/\./g,
