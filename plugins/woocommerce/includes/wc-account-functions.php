@@ -37,8 +37,10 @@ function wc_lostpassword_url( $default_url = '' ) {
 		return $default_url;
 	}
 }
-
-add_filter( 'lostpassword_url', 'wc_lostpassword_url', 10, 1 );
+// Change the URL on front-end screens only.
+if ( function_exists( 'is_login' ) && ! is_login() ) {
+	add_filter( 'lostpassword_url', 'wc_lostpassword_url', 10, 1 );
+}
 
 /**
  * Get the link to the edit account details page.
