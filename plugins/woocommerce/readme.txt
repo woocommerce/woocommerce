@@ -288,6 +288,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Expose __experimentalRegisterProductCollection in @woocommerce/blocks-registry Package [#48141](https://github.com/woocommerce/woocommerce/pull/48141)
 * Add - Improvements in the handling of feature compatibility for plugins [#48169](https://github.com/woocommerce/woocommerce/pull/48169)
 * Add - Product Collection: Rename "Sync with current query" option to "Use page context" and make it working in non-archive context as well [#49627](https://github.com/woocommerce/woocommerce/pull/49627)
+* Update - Prevent creation of password-protected coupons. [#50236](https://github.com/woocommerce/woocommerce/pull/50236)
 * Update - Add a link to the Theming docs from the blockified templates README.md file [#48538](https://github.com/woocommerce/woocommerce/pull/48538)
 * Update - Add a new icon style to the "Customer Account" block. [#48979](https://github.com/woocommerce/woocommerce/pull/48979)
 * Update - Adds setting to control the visibility of product count in Mini cart block [#48545](https://github.com/woocommerce/woocommerce/pull/48545)
