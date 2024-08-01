@@ -20,6 +20,12 @@ const productData = {
 	descriptionSimple: 'This is a product simple description',
 	productPrice: '100',
 	salePrice: '90',
+	shipping: {
+		weight: '2',
+		length: '20',
+		width: '10',
+		height: '30',
+	},
 };
 
 test.describe.configure( { mode: 'serial' } );
@@ -148,6 +154,22 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await salePrice.waitFor( { state: 'visible' } );
 				await salePrice.click();
 				await salePrice.fill( productData.salePrice );
+			} );
+
+			await test.step( 'add shipping details', async () => {
+				await clickOnTab( 'Shipping', page );
+				await page
+					.getByLabel( 'Width A' )
+					.fill( productData.shipping.width );
+				await page
+					.getByLabel( 'Length B' )
+					.fill( productData.shipping.length );
+				await page
+					.getByLabel( 'Height C' )
+					.fill( productData.shipping.height );
+				await page
+					.getByLabel( 'Weight' )
+					.fill( productData.shipping.weight );
 			} );
 
 			await test.step( 'publish the product', async () => {
