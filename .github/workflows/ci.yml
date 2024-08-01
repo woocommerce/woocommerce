@@ -123,7 +123,7 @@ jobs:
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
-          build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || 'full' }}
+          build-type: 'full'
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
           pull-package-deps: '${{ matrix.projectName }}'
 
