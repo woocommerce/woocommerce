@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\Features\Navigation;
 use Automattic\WooCommerce\Admin\Features\Navigation\Favorites;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
+use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 
 /**
  * Contains logic for the WooCommerce Navigation menu.
@@ -134,38 +135,9 @@ class Menu {
 	 *    ).
 	 */
 	private static function add_category( $args ) {
-		if ( ! isset( $args['id'] ) || isset( self::$menu_items[ $args['id'] ] ) ) {
-			return;
-		}
+		Init::deprecation_notice( 'Menu::add_category' );
 
-		$defaults           = array(
-			'id'         => '',
-			'title'      => '',
-			'order'      => 100,
-			'migrate'    => true,
-			'menuId'     => 'primary',
-			'isCategory' => true,
-		);
-		$menu_item          = wp_parse_args( $args, $defaults );
-		$menu_item['title'] = wp_strip_all_tags( wp_specialchars_decode( $menu_item['title'] ) );
-		unset( $menu_item['url'] );
-		unset( $menu_item['capability'] );
-
-		if ( ! isset( $menu_item['parent'] ) ) {
-			$menu_item['parent']          = 'woocommerce';
-			$menu_item['backButtonLabel'] = __(
-				'WooCommerce Home',
-				'woocommerce'
-			);
-		}
-
-		self::$menu_items[ $menu_item['id'] ]       = $menu_item;
-		self::$categories[ $menu_item['id'] ]       = array();
-		self::$categories[ $menu_item['parent'] ][] = $menu_item['id'];
-
-		if ( isset( $args['url'] ) ) {
-			self::$callbacks[ $args['url'] ] = $menu_item['migrate'];
-		}
+		return;
 	}
 
 	/**
@@ -185,49 +157,9 @@ class Menu {
 	 *    ).
 	 */
 	private static function add_item( $args ) {
-		if ( ! isset( $args['id'] ) ) {
-			return;
-		}
+		Init::deprecation_notice( 'Menu::add_item' );
 
-		if ( isset( self::$menu_items[ $args['id'] ] ) ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					/* translators: 1: Duplicate menu item path. */
-					esc_html__( 'You have attempted to register a duplicate item with WooCommerce Navigation: %1$s', 'woocommerce' ),
-					'`' . $args['id'] . '`'
-				),
-				'6.5.0'
-			);
-
-			return;
-		}
-
-		$defaults           = array(
-			'id'         => '',
-			'title'      => '',
-			'capability' => 'manage_woocommerce',
-			'url'        => '',
-			'order'      => 100,
-			'migrate'    => true,
-			'menuId'     => 'primary',
-		);
-		$menu_item          = wp_parse_args( $args, $defaults );
-		$menu_item['title'] = wp_strip_all_tags( wp_specialchars_decode( $menu_item['title'] ) );
-		$menu_item['url']   = self::get_callback_url( $menu_item['url'] );
-
-		if ( ! isset( $menu_item['parent'] ) ) {
-			$menu_item['parent'] = 'woocommerce';
-		}
-
-		$menu_item['menuId'] = self::get_item_menu_id( $menu_item );
-
-		self::$menu_items[ $menu_item['id'] ]       = $menu_item;
-		self::$categories[ $menu_item['parent'] ][] = $menu_item['id'];
-
-		if ( isset( $args['url'] ) ) {
-			self::$callbacks[ $args['url'] ] = $menu_item['migrate'];
-		}
+		return;
 	}
 
 	/**
@@ -265,25 +197,9 @@ class Menu {
 	 *    ).
 	 */
 	public static function add_plugin_category( $args ) {
-		$category_args = array_merge(
-			$args,
-			array(
-				'menuId' => 'plugins',
-			)
-		);
+		Init::deprecation_notice( 'Menu::add_plugin_category' );
 
-		if ( ! isset( $category_args['parent'] ) ) {
-			unset( $category_args['order'] );
-		}
-
-		$menu_id = self::get_item_menu_id( $category_args );
-		if ( ! in_array( $menu_id, array( 'plugins', 'favorites' ), true ) ) {
-			return;
-		}
-
-		$category_args['menuId'] = $menu_id;
-
-		self::add_category( $category_args );
+		return;
 	}
 
 	/**
@@ -302,24 +218,9 @@ class Menu {
 	 *    ).
 	 */
 	public static function add_plugin_item( $args ) {
-		if ( ! isset( $args['parent'] ) ) {
-			unset( $args['order'] );
-		}
+		Init::deprecation_notice( 'Menu::add_plugin_item' );
 
-		$item_args = array_merge(
-			$args,
-			array(
-				'menuId' => 'plugins',
-			)
-		);
-
-		$menu_id = self::get_item_menu_id( $item_args );
-
-		if ( 'plugins' !== $menu_id ) {
-			return;
-		}
-
-		self::add_item( $item_args );
+		return;
 	}
 
 	/**
@@ -335,27 +236,9 @@ class Menu {
 	 *    ).
 	 */
 	public static function add_setting_item( $args ) {
-		unset( $args['order'] );
+		Init::deprecation_notice( 'Menu::add_setting_item' );
 
-		if ( isset( $args['parent'] ) || isset( $args['menuId'] ) ) {
-			error_log(  // phpcs:ignore
-				sprintf(
-					/* translators: 1: Duplicate menu item path. */
-					esc_html__( 'The item ID %1$s attempted to register using an invalid option. The arguments `menuId` and `parent` are not allowed for add_setting_item()', 'woocommerce' ),
-					'`' . $args['id'] . '`'
-				)
-			);
-		}
-
-		$item_args = array_merge(
-			$args,
-			array(
-				'menuId' => 'secondary',
-				'parent' => 'woocommerce-settings',
-			)
-		);
-
-		self::add_item( $item_args );
+		return;
 	}
 
 

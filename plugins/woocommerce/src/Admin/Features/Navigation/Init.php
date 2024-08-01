@@ -44,6 +44,17 @@ class Init {
 	}
 
 	/**
+	 * Create a deprecation notice.
+	 */
+	public function deprecation_notice( $function ) {
+		wp_trigger_error( 
+			'Automattic\WooCommerce\Admin\Features\Navigation\\' . $function, 
+			__( 'WooCommerce Navigation feature has been disabled. This class will be remove in WooCommerce 9.4', 'woocommerce' ), 
+			E_USER_DEPRECATED 
+		);
+	}
+
+	/**
 	 * Determine if sufficient versions are present to support Navigation feature
 	 */
 	public function is_nav_compatible() {
