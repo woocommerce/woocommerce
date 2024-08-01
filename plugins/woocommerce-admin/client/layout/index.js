@@ -124,15 +124,10 @@ function _Layout( {
 	usePageClasses( page );
 
 	function recordPageViewTrack() {
-		const navigationFlag = {
-			has_navigation: !! window.wcNavigation,
-		};
-
 		if ( isEmbedded ) {
 			const path = document.location.pathname + document.location.search;
 			recordPageView( path, {
 				is_embedded: true,
-				...navigationFlag,
 			} );
 			return;
 		}
@@ -154,7 +149,6 @@ function _Layout( {
 			jetpack_installed: installedPlugins.includes( 'jetpack' ),
 			jetpack_active: activePlugins.includes( 'jetpack' ),
 			jetpack_connected: isJetpackConnected,
-			...navigationFlag,
 		} );
 	}
 
@@ -255,9 +249,6 @@ function _Layout( {
 				{ showPluginArea && (
 					<>
 						<PluginArea scope="woocommerce-admin" />
-						{ window.wcAdminFeatures.navigation && (
-							<PluginArea scope="woocommerce-navigation" />
-						) }
 						<PluginArea scope="woocommerce-tasks" />
 					</>
 				) }
