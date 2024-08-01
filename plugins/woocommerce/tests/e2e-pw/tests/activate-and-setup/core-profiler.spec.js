@@ -120,11 +120,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
 			).toBeHidden();
 			await expect(
-				page
-					.getByRole( 'cell', {
-						name: 'Google for WooCommerce Get',
-					} )
-					.getByRole( 'strong' )
+				page.getByText( 'Google for WooCommerce', { exact: true } )
 			).toBeHidden();
 		} );
 
@@ -268,22 +264,13 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			} catch ( e ) {
 				console.log( 'Checkbox not present for MailPoet' );
 			}
-			try {
-				await page
-					.getByText(
-						'Drive sales with Google for WooCommerceReach millions of active shoppers across'
-					)
-					.getByRole( 'checkbox' )
-					.check( { timeout: 2000 } );
-			} catch ( e ) {
-				// Temporary fix until rebranding is done.
-				await page
-					.getByText(
-						'Drive sales with Google Listings & AdsReach millions of active shoppers across'
-					)
-					.getByRole( 'checkbox' )
-					.check( { timeout: 2000 } );
-			}
+
+			await page
+				.getByText(
+					'Drive sales with Google for WooCommerceReach millions of active shoppers across'
+				)
+				.getByRole( 'checkbox' )
+				.check( { timeout: 2000 } );
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
 
@@ -320,6 +307,14 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			// confirm that the optional plugins are present
 			await expect(
 				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
+			).toBeVisible();
+
+			await expect(
+				page
+					.getByRole( 'cell', {
+						name: 'Google for WooCommerce Get',
+					} )
+					.getByRole( 'strong' )
 			).toBeVisible();
 
 			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
