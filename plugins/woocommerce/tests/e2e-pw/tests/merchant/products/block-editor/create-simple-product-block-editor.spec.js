@@ -227,6 +227,16 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await expect(
 					page.getByText( productData.summary )
 				).toBeVisible();
+
+				// Verify shipping dimensions
+				await expect(
+					page.getByText( `Weight ${ productData.shipping.weight }` )
+				).toBeVisible();
+				await expect(
+					page.getByText(
+						`Dimensions ${ productData.shipping.length } × ${ productData.shipping.width } × ${ productData.shipping.height }`
+					)
+				).toBeVisible();
 			} );
 		} );
 
