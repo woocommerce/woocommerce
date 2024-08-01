@@ -48,32 +48,43 @@ jobs:
         id: 'project-jobs'
         with:
           script: |
+            // Intended behaviour of the jobs generation:
+            // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
+            // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
+
+            // github.base_ref is only available for pull_request events
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
             }
-            
+
             let githubEvent = ${{ toJson( github.event_name ) }};
-            
+
             const refType = ${{ toJson( github.ref_type ) }};
             const refName = ${{ toJson( github.ref_name ) }};
-            
+
             if ( refType === 'tag' && refName !== 'nightly' ) {
               githubEvent = 'release-checks';
             }
-            
+
             if ( refType === 'tag' && refName === 'nightly' ) {
               githubEvent = 'nightly-checks';
             }
-            
+
             let trigger = ${{ toJson( inputs.trigger ) }};
             if ( trigger ) {
               githubEvent = trigger;
             }
-            
+
+            // `pre-release` should trigger `release-checks`, but without a 'tag' ref.
+            // This will run all release-checks against the branch the workflow targeted, instead of a release artifact.
+            if ( trigger === 'pre-release' ) {
+              githubEvent = 'release-checks';
+            }
+
             const child_process = require( 'node:child_process' );
             child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
-  
+
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
     runs-on: 'ubuntu-20.04'
@@ -98,7 +109,7 @@ jobs:
 
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
-  
+
   project-test-jobs:
     name: "${{ matrix.name }}"
     runs-on: 'ubuntu-20.04'
@@ -192,7 +203,7 @@ jobs:
         with:
           name: metrics-results
           path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
-  
+
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
     # Since we are dynamically generating a matrix for the project jobs, however, we can't
@@ -218,15 +229,15 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Check if project-jobs was successful. Fail for any other status, including skipped. 
+          # Check if project-jobs was successful. Fail for any other status, including skipped.
           result="${{ needs.project-jobs.result }}"
           if [[ $result != "success" ]]; then
             echo "Generating CI jobs was not successful."
             exit 1
           fi
-          
+
           node .github/workflows/scripts/evaluate-jobs-conclusions.js
-  
+
   alert-on-failure:
     name: 'Report results on Slack'
     runs-on: 'ubuntu-20.04'
@@ -255,17 +266,17 @@ jobs:
           RUN_TYPE: ${{ github.ref_type == 'tag' && (github.ref_name == 'nightly' && 'nightly-checks' || 'release-checks') || '' }}
         run: |
           COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
-          
+
           if [[ -n "${INPUT_TRIGGER}" ]]; then
               CHECKS_TYPE="${INPUT_TRIGGER}"
           else
               CHECKS_TYPE="${RUN_TYPE}"
           fi
-          
+
           pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE Build jobs matrix" -m "$COMMIT_MESSAGE"
           pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE Linting" -m "$COMMIT_MESSAGE"
           pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE Tests" -m "$COMMIT_MESSAGE"
-  
+
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
     needs:
@@ -281,7 +292,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ARTIFACT_NAME: ${{ matrix.report }}-attempt-${{ github.run_attempt }}
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -314,7 +325,7 @@ jobs:
             REPORT_TITLE="$EVENT_NAME"
             REF_NAME="$GITHUB_REF_NAME"
           fi
-          
+
           gh workflow run report.yml \
             -f artifact="$ARTIFACT_NAME" \
             -f run_id="$GITHUB_RUN_ID" \
@@ -327,7 +338,7 @@ jobs:
             -f suite="$REPORT_NAME" \
             -f report_title="$REPORT_TITLE" \
             --repo woocommerce/woocommerce-test-reports
-  
+
   report-flaky-tests:
     name: 'Create issues for flaky tests'
     if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
@@ -336,7 +347,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    
+
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -351,7 +362,7 @@ jobs:
       - name: 'Merge flaky tests reports'
         run: |
           downloadPath='${{ steps.download-artifact.outputs.download-path || './flaky-tests' }}'
-          # make dir so that next step doesn't fail if it doesn't exist 
+          # make dir so that next step doesn't fail if it doesn't exist
           mkdir -p $downloadPath
           # any output means there are reports
           echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
