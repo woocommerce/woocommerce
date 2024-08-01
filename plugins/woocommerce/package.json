@@ -47,7 +47,6 @@
 		"lint:php:changes:branch": "composer run-script lint-branch",
 		"lint:php:changes:staged": "composer run-script lint-staged",
 		"lint:php:fix": "composer run-script phpcbf",
-		"lint:php:fix:changes:branch": "composer run-script fix-branch",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"makepot": "composer run-script makepot",
 		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
