@@ -786,6 +786,14 @@ class WC_Helper {
 			$redirect_url_args['install'] = sanitize_text_field( wp_unslash( $_GET['install'] ) );
 		}
 
+		if ( isset( $_GET['utm_source'] ) ) {
+			$redirect_url_args['utm_source'] = wc_clean( wp_unslash( $_GET['utm_source'] ) );
+		}
+
+		if ( isset( $_GET['utm_campaign'] ) ) {
+			$redirect_url_args['utm_campaign'] = wc_clean( wp_unslash( $_GET['utm_campaign'] ) );
+		}
+
 		$redirect_uri = add_query_arg(
 			$redirect_url_args,
 			admin_url( 'admin.php' )
