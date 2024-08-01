@@ -9,6 +9,16 @@ import { type AttributeMetadata } from '@woocommerce/types';
  */
 import { WooCommerceBlockLocation } from '../product-template/utils';
 
+export enum ProductCollectionUIStatesInEditor {
+	PRODUCT_CONTEXT_PICKER = 'product_context_picker',
+	USES_REFERENCE_PREVIEW_MODE = 'uses_reference_preview_mode',
+	COLLECTION_CHOOSER = 'collection_chooser',
+	VALID = 'valid',
+	// Future states
+	// ERROR_STATE = 'error_state',
+	// DELETED_PRODUCT_STATE = 'deleted_product_state',
+}
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -114,6 +124,8 @@ export type ProductCollectionEditComponentProps =
 		context: {
 			templateSlug: string;
 		};
+		productCollectionUIStateInEditor: ProductCollectionUIStatesInEditor;
+		location: WooCommerceBlockLocation;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';

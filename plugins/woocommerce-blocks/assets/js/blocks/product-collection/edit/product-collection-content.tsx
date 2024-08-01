@@ -10,7 +10,6 @@ import { useInstanceId } from '@wordpress/compose';
 import { useEffect, useRef, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
@@ -73,14 +72,14 @@ const ProductCollectionContent = ( {
 }: ProductCollectionEditComponentProps ) => {
 	const isInitialAttributesSet = useRef( false );
 	const { clientId, attributes, setAttributes } = props;
-	const location = useGetLocation( props.context, props.clientId );
+	const location = props.location;
 
 	useSetPreviewState( {
 		setPreviewState,
 		setAttributes,
 		location,
 		attributes,
-		usesReference,
+		productCollectionUIState: props.productCollectionUIStateInEditor,
 	} );
 
 	const blockProps = useBlockProps();
