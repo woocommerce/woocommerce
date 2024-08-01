@@ -13,7 +13,12 @@ const formatValidators: FormatValidators = {
         return !! data.match( "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?" );
     },
     'uri': ( data: string ) => {
-        return !! data.match( "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?" );
+        try {
+            new URL( data );
+            return true;
+        } catch {
+            return false;
+        }
     }
 };
 
