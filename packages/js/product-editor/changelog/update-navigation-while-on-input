@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow popovers to exceed modal's limits in taxonomy
