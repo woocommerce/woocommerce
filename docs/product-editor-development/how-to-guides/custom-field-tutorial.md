@@ -8,7 +8,7 @@ If you are already familiar with writing blocks for the WordPress site editor th
 To get started we would recommend reading through the [fundamentals of block development docs](https://developer.wordpress.org/block-editor/getting-started/fundamentals/) in WordPress. This gives a good overview of working with blocks, the block structure, and the [JavaScript build process](https://developer.wordpress.org/block-editor/getting-started/fundamentals/javascript-in-the-block-editor/).
 
 This tutorial will use vanilla JavaScript to render a new field in the product form for those that already have a plugin and may not have a JavaScript build process set up yet.
-If you wanted to create a plugin from scratch with the necessary build tools I recommend using the `@wordpress/create-block` script, we also have a specific template for the product form: [README](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/create-product-editor-block/README.md).
+If you want to create a plugin from scratch with the necessary build tools, we recommend using the `@wordpress/create-block` script. We also have a specific template for the product form: [README](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/create-product-editor-block/README.md).
 
 ## Creating a custom field
 
@@ -16,7 +16,7 @@ If you wanted to create a plugin from scratch with the necessary build tools I r
 
 Adding and registering our custom field is very similar as creating a brand new block.
 
-Inside a new folder within your plugin lets create a `block.json` file with the contents below. The only main difference between this `block.json` and a `block.json` for the site editor is that we will set `supports.inserter` to false, so it doesn't show up there. We will also be registering this slightly different.
+Inside a new folder within your plugin, let's create a `block.json` file with the contents below. The only main difference between this `block.json` and a `block.json` for the site editor is that we will set `supports.inserter` to false, so it doesn't show up there. We will also be registering this slightly different.
 
 ```json
 {
@@ -39,7 +39,7 @@ Inside a new folder within your plugin lets create a `block.json` file with the 
 }
 ```
 
-In the same directory create a `index.js` file, which we can keep simple by just outputting a hello world.
+In the same directory, create a `index.js` file, which we can keep simple by just outputting a hello world.
 In this case the `edit` function is the part that will get rendered in the form. We are wrapping it with the `createElement` function to keep support for React.
 
 ```javascript
@@ -56,23 +56,23 @@ In this case the `edit` function is the part that will get rendered in the form.
 } )( window.wp );
 ```
 
-In react:
+In React:
 
 ```jsx
 import { registerBlockType } from '@wordpress/blocks';
 
 function Edit() {
-    return <p>Hello World (from the editor).<p>;
+	return <p>Hello World (from the editor).</p>;
 }
 
 registerBlockType( 'tutorial/new-product-form-field', {
-    title: 'Product form field',
-    attributes: {},
-    edit: Edit,
+	title: 'Product form field',
+	attributes: {},
+	edit: Edit,
 } );
 ```
 
-Lastly in order to make this work the block registration needs to know about the JavaScript dependencies, we can do so by adding a `index.asset.php` file with the below contents:
+Lastly, in order to make this work the block registration needs to know about the JavaScript dependencies, we can do so by adding a `index.asset.php` file with the below contents:
 
 ```php
 <?php return array('dependencies' => array('react', 'wc-product-editor', 'wp-blocks' ) );
@@ -96,7 +96,7 @@ add_action( 'init', 'example_custom_product_form_init' );
 
 We can add it to the product form by hooking into the `woocommerce_layout_template_after_instantiation` action ( see [block addition and removal](https://github.com/woocommerce/woocommerce/blob/trunk/docs/product-editor-development/block-template-lifecycle.md#block-addition-and-removal) ).
 
-What I did was the following ( see [here](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md#usage) for more related functions ):
+What we did was the following ( see [here](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Admin/Features/ProductBlockEditor/ProductTemplates/README.md#usage) for more related functions ):
 
 -   Get a group by the `general` id, this is the General tab.
 -   Create a new section on the general tab called `Tutorial Section`
@@ -138,7 +138,7 @@ add_action(
 
 We recommend using components from `@wordpress/components` as this will also keep the styling consistent. We will use the [ComboboxControl](https://wordpress.github.io/gutenberg/?path=/docs/components-comboboxcontrol--docs) core component in this field.
 
-We can add it to our `edit` function pretty easily by making use of `wp.components`. I will also add a constant for the filter options.
+We can add it to our `edit` function pretty easily by making use of `wp.components`. We will also add a constant for the filter options.
 **Note:** I also added the `blockProps` to the top element, we still recommend using this as some of these props are being used in the product form. When we add the block props we need to also let the form know it is an interactive element. We do this by adding at-least one attribute with the `__experimentalRole` set to `content`.
 So lets add this to our `index.js` attributes:
 

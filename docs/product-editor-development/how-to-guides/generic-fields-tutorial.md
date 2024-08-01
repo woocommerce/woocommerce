@@ -6,7 +6,7 @@ We have large list of generic fields that a plugin can use to extend the new pro
 
 Using a generic block is pretty easy. We have created an template API that allows you to add new fields, the API refers to them as `blocks`. There are a couple actions that allow us to interact with these templates. There is the `woocommerce_layout_template_after_instantiation` that is triggered when a new template is registered. There are also other actions triggered when a specific field/block is added ( see [block addition and removal](https://github.com/woocommerce/woocommerce/blob/trunk/docs/product-editor-development/block-template-lifecycle.md#block-addition-and-removal) ).
 
-Lets say we want to add something to the basic details section, we can do so by making use of the above mentioned hook:
+Let's say we want to add something to the basic details section, we can do so by making use of the above mentioned hook:
 
 This will add a number field called **Animal age** to each template that has a `basic-details` section.
 
