@@ -22,10 +22,11 @@
 		self.$form.off( '.wc-variation-form' );
 
 		// Methods.
-		self.getChosenAttributes    = self.getChosenAttributes.bind( self );
-		self.findMatchingVariations = self.findMatchingVariations.bind( self );
-		self.isMatch                = self.isMatch.bind( self );
-		self.toggleResetLink        = self.toggleResetLink.bind( self );
+		self.getChosenAttributes        = self.getChosenAttributes.bind( self );
+		self.findMatchingVariations     = self.findMatchingVariations.bind( self );
+		self.isMatch                    = self.isMatch.bind( self );
+		self.toggleResetLink            = self.toggleResetLink.bind( self );
+		self.showNoMatchingVariationsMsg = self.showNoMatchingVariationsMsg.bind( self );
 
 		// Events.
 		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: self }, self.onReset );
@@ -185,14 +186,7 @@
 							attributes.chosenCount = 0;
 
 							if ( ! form.loading ) {
-								form.$form
-									.find( '.single_variation' )
-									.after(
-										'<p class="wc-no-matching-variations woocommerce-info" role="alert">' +
-										wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
-										'</p>'
-									);
-								form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+								form.showNoMatchingVariationsMsg();
 							}
 						}
 					},
@@ -213,14 +207,7 @@
 					attributes.chosenCount = 0;
 
 					if ( ! form.loading ) {
-						form.$form
-							.find( '.single_variation' )
-							.after(
-								'<p class="wc-no-matching-variations woocommerce-info" role="alert">' +
-								wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
-								'</p>'
-							);
-						form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+						form.showNoMatchingVariationsMsg();
 					}
 				}
 			}
@@ -567,6 +554,25 @@
 		} else {
 			this.$resetVariations.css( 'visibility', 'hidden' );
 		}
+	};
+
+	/**
+	 * Show no matching variation message.
+	 */
+	VariationForm.prototype.showNoMatchingVariationsMsg = function() {
+		this.$form
+			.find( '.single_variation' )
+			.after(
+				'<p class="wc-no-matching-variations woocommerce-info">' +
+				wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
+				'</p>'
+			)
+			.next( '.wc-no-matching-variations' )
+			.slideDown( 200 )
+			.delay( 500 )
+			.queue( function( ) {
+				$( this ).attr( 'role', 'alert' ).dequeue();
+			} );
 	};
 
 	/**
