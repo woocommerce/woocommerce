@@ -3,6 +3,8 @@
  * Brands class file.
  */
 
+declare( strict_types = 1);
+
 namespace Automattic\WooCommerce\Internal;
 
 defined( 'ABSPATH' ) || exit;

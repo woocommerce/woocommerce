@@ -15,6 +15,8 @@
  * @version 9.3.0
  */
 
+declare( strict_types = 1);
+
 $image_size = wc_get_image_size( 'shop_catalog' ); ?>
 <div class="term-description brand-description">
 

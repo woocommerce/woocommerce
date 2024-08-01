@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1);
+
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps
 /**
  * Utils for compatibility with WooCommerce Full Site Editor Blocks

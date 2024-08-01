@@ -7,4 +7,6 @@
  * @version 9.3.0
  */
 
+declare( strict_types = 1);
+
 wc_get_template( 'archive-product.php' );

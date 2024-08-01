@@ -6,6 +6,8 @@
  * @package WooCommerce
  */
 
+declare( strict_types = 1);
+
 /**
  * Helper function :: get_brand_thumbnail_url function.
  *

@@ -1,5 +1,8 @@
 <?php
 //phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
+
+declare( strict_types = 1);
+
 /**
  * Brand settings manager.
  *

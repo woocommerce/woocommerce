@@ -6,6 +6,8 @@
  * @version x.x.x
  */
 
+declare( strict_types = 1);
+
 use Automattic\Jetpack\Constants;
 
 /**

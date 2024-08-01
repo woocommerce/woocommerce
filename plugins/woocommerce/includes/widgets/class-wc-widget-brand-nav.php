@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1);
+
 /**
  * Layered Navigation Widget for brands WC 2.6 version
  *

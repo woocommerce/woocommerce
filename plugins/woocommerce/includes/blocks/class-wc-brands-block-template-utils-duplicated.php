@@ -1,5 +1,7 @@
 <?php // phpcs:disable WordPress.Files.FileName.InvalidClassFileName
 
+declare( strict_types = 1);
+
 use Automattic\WooCommerce\Blocks\Options;
 
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch

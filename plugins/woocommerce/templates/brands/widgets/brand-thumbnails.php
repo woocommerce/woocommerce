@@ -15,6 +15,8 @@
  * @version 9.3.0
  */
 
+declare( strict_types = 1);
+
 $wrapper_class = 'fluid-columns';
 if ( ! $fluid_columns && in_array( $columns, array( 1, 2, 3, 4, 5, 6 ), true ) ) {
 	$wrapper_class = 'columns-' . $columns;

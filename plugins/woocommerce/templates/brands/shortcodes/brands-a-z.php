@@ -16,6 +16,7 @@
  * @version 9.3.0
  */
 
+declare( strict_types = 1);
 ?>
 <div id="brands_a_z">
 

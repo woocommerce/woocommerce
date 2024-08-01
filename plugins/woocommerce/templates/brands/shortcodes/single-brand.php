@@ -27,6 +27,8 @@
  * @usedby  [product_brand]
  * @version 9.3.0
  */
+
+declare( strict_types = 1);
 ?>
 <a href="<?php echo esc_url( get_term_link( $term, 'product_brand' ) ); ?>">
 	<img src="<?php echo esc_url( $thumbnail ); ?>"

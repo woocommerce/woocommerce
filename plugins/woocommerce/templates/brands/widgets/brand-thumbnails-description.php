@@ -15,6 +15,7 @@
  * @version 9.3.0
  */
 
+declare( strict_types = 1);
 ?>
 <ul class="brand-thumbnails-description">
 
