@@ -128,7 +128,12 @@ class ProductImage extends AbstractBlock {
 		$pointer_events = false === $attributes['showProductLink'] ? 'pointer-events: none;' : '';
 
 		return sprintf(
-			'<a href="%1$s" style="%2$s">%3$s %4$s</a>',
+			'<a
+				data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-image&quot;}"
+				data-wc-on--click="actions.triggerEvent"
+				href="%1$s"
+				style="%2$s"
+			>%3$s %4$s</a>',
 			$product_permalink,
 			$pointer_events,
 			$on_sale_badge,
