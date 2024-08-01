@@ -29,18 +29,17 @@ function wc_lostpassword_url( $default_url = '' ) {
 
 	$wc_account_page_url    = wc_get_page_permalink( 'myaccount' );
 	$wc_account_page_exists = wc_get_page_id( 'myaccount' ) > 0;
+	$is_account_page        = get_the_permalink() === wc_get_page_permalink( 'myaccount' );
 	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
 
-	if ( $wc_account_page_exists && ! empty( $lost_password_endpoint ) ) {
+	// Change the URL on front-end screens only.
+	if ( $wc_account_page_exists && $is_account_page && ! empty( $lost_password_endpoint ) ) {
 		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_account_page_url );
 	} else {
 		return $default_url;
 	}
 }
-// Change the URL on front-end screens only.
-if ( function_exists( 'is_login' ) && ! is_login() ) {
-	add_filter( 'lostpassword_url', 'wc_lostpassword_url', 10, 1 );
-}
+add_filter( 'lostpassword_url', 'wc_lostpassword_url', 10, 1 );
 
 /**
  * Get the link to the edit account details page.
