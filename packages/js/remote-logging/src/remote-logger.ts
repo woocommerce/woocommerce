@@ -399,6 +399,8 @@ export function init( config: RemoteLoggerConfig ) {
 	try {
 		logger = new RemoteLogger( config );
 		logger.initializeErrorHandlers();
+
+		debug( 'RemoteLogger initialized.' );
 	} catch ( error ) {
 		errorLog( 'Failed to initialize RemoteLogger:', error );
 	}
