@@ -66,7 +66,11 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await clickOnTab( 'General', page );
 				await page
 					.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
-					.fill( productData.name );
+					// Have to use pressSequentially in order for the SKU to be auto-updated
+					// before we move to the SKU field and attempt to fill it in; otherwise,
+					// the SKU field can sometimes end up getting auto-updated after we have filled it in,
+					// wiping out the value we entered.
+					.pressSequentially( productData.name );
 
 			await page
 				.locator(
@@ -374,7 +378,11 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await clickOnTab( 'General', page );
 				await page
 					.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
-					.fill( productData.name );
+					// Have to use pressSequentially in order for the SKU to be auto-updated
+					// before we move to the SKU field and attempt to fill it in; otherwise,
+					// the SKU field can sometimes end up getting auto-updated after we have filled it in,
+					// wiping out the value we entered.
+					.pressSequentially( productData.name );
 			} );
 
 			await test.step( 'add product price', async () => {
