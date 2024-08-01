@@ -9,18 +9,24 @@
 	.components-checkbox-control__input-container {
 		width: 16px;
 		height: 16px;
+		align-self: center;
 	}
 
 	.components-checkbox-control__input[type="checkbox"] {
 		width: 16px !important;
 		height: 16px !important;
+		border-color: #757575;
+
+		&:checked {
+			border-color: transparent;
+		}
 	}
 
 	svg.components-checkbox-control__checked {
 		width: 20px;
 		height: 20px;
 
-		@include breakpoint( "<600px" ) {
+		@include breakpoint("<600px") {
 			width: 16px;
 			height: 16px;
 		}

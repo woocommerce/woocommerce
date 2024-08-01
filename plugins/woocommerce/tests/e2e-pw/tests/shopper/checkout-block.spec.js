@@ -440,7 +440,7 @@ test.describe(
 
 			// verify shipping details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 			await expect(
@@ -471,7 +471,7 @@ test.describe(
 
 			// verify billing details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit billing address', { exact: true } )
 				.last()
 				.click();
 			await expect(
@@ -782,7 +782,7 @@ test.describe(
 			).toBeVisible();
 
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 

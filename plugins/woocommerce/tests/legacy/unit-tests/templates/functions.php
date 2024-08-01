@@ -193,4 +193,86 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_html, $actual_html );
 
 	}
+
+	/**
+	 * Test: test_radio_not_required_field.
+	 */
+	public function test_radio_not_required_field() {
+		$actual_html = woocommerce_form_field(
+			'test',
+			array(
+				'type'     => 'radio',
+				'id'       => 'test',
+				'required' => false,
+				'options'  => array(
+					'1' => 'Option 1',
+					'2' => 'Option 2',
+				),
+				'return'   => true,
+			),
+			'1'
+		);
+
+		$this->assertStringNotContainsString( 'aria-required', $actual_html );
+	}
+
+	/**
+	 * Test: test_radio_required_field.
+	 */
+	public function test_radio_required_field() {
+		$actual_html   = woocommerce_form_field(
+			'test',
+			array(
+				'type'     => 'radio',
+				'id'       => 'test_radio',
+				'required' => true,
+				'options'  => array(
+					'1' => 'Option 1',
+					'2' => 'Option 2',
+				),
+				'return'   => true,
+			),
+			'1'
+		);
+		$expected_html = '<p class="form-row validate-required" id="test_radio_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="radio" class="input-radio " value="1" name="test" aria-required="true" id="test_radio_1" checked=\'checked\' /><label for="test_radio_1" class="radio ">Option 1</label><input type="radio" class="input-radio " value="2" name="test" aria-required="true" id="test_radio_2" /><label for="test_radio_2" class="radio ">Option 2</label></span></p>';
+
+		$this->assertEquals( $expected_html, $actual_html );
+	}
+
+	/**
+	 * Test: test_checkbox_not_required_field.
+	 */
+	public function test_checkbox_not_required_field() {
+		$actual_html = woocommerce_form_field(
+			'test',
+			array(
+				'type'     => 'checkbox',
+				'required' => false,
+				'label'    => 'Checkbox',
+				'return'   => true,
+			),
+			'1'
+		);
+
+		$this->assertStringNotContainsString( 'aria-required', $actual_html );
+	}
+
+	/**
+	 * Test: test_checkbox_required_field.
+	 */
+	public function test_checkbox_required_field() {
+		$actual_html   = woocommerce_form_field(
+			'test',
+			array(
+				'type'     => 'checkbox',
+				'required' => true,
+				'label'    => 'Checkbox',
+				'return'   => true,
+			),
+			'1'
+		);
+		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<abbr class="required" title="required">*</abbr></label></span></p>';
+
+		$this->assertEquals( $expected_html, $actual_html );
+	}
 }

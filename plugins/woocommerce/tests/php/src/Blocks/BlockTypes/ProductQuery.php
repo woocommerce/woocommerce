@@ -339,7 +339,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				array(
 					'key'     => '_price',
 					'value'   => 100,
-					'compare' => '<',
+					'compare' => '<=',
 					'type'    => 'numeric',
 				),
 				array(),
@@ -388,7 +388,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				array(
 					'key'     => '_price',
 					'value'   => 100,
-					'compare' => '<',
+					'compare' => '<=',
 					'type'    => 'numeric',
 				),
 				array(
@@ -512,7 +512,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				array(
 					'key'     => '_price',
 					'value'   => 100,
-					'compare' => '<',
+					'compare' => '<=',
 					'type'    => 'numeric',
 				),
 				array(
