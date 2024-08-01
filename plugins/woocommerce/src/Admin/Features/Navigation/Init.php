@@ -36,7 +36,6 @@ class Init {
 	public function __construct() {
 		add_action( 'update_option_' . self::TOGGLE_OPTION_NAME, array( $this, 'reload_page_on_toggle' ), 10, 2 );
 		add_action( 'woocommerce_settings_saved', array( $this, 'maybe_reload_page' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'maybe_enqueue_opt_out_scripts' ) );
 
 		if ( Features::is_enabled( 'navigation' ) ) {
 			Menu::instance()->init();
@@ -113,25 +112,5 @@ class Init {
 
 		wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		exit();
-	}
-
-	/**
-	 * Enqueue the opt out scripts.
-	 */
-	public function maybe_enqueue_opt_out_scripts() {
-		if ( get_option( 'woocommerce_navigation_show_opt_out', 'no' ) !== 'yes' ) {
-			return;
-		}
-
-		WCAdminAssets::register_style( 'navigation-opt-out', 'style', array( 'wp-components' ) );
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'navigation-opt-out', true );
-		wp_localize_script(
-			'wc-admin-navigation-opt-out',
-			'surveyData',
-			array(
-				'url' => Survey::get_url( '/new-navigation-opt-out' ),
-			)
-		);
-		delete_option( 'woocommerce_navigation_show_opt_out' );
 	}
 }
