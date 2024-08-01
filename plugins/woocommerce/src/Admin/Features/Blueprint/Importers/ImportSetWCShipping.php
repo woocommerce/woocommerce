@@ -39,7 +39,19 @@ class ImportSetWCShipping implements StepProcessor {
 
 		foreach ( $fields as $name => $data ) {
 			if ( isset( $schema->values->{$name} ) ) {
-				$this->insert( $data[0], $data[1], $schema->values->{$name} );
+				$filter_method = 'filter_' . $name . '_data';
+				if ( method_exists( $this, $filter_method ) ) {
+					$insert_values = $this->$filter_method( $schema->values->{$name} );
+				} else {
+					$insert_values = $schema->values->{$name};
+				}
+
+				$this->insert( $data[0], $data[1], $insert_values );
+				// check if function with process_$name exist and call it
+				$method = 'post_process_' . $name;
+				if ( method_exists( $this, $method ) ) {
+					$this->$method( $schema->values->{$name} );
+				}
 			}
 		}
 
@@ -48,6 +60,24 @@ class ImportSetWCShipping implements StepProcessor {
 		}
 
 		return $result;
+	}
+
+	protected function filter_shipping_methods_data( $methods ) {
+		return array_map(
+			function ( $method ) {
+				unset( $method->settings );
+				return $method;
+			},
+			$methods
+		);
+	}
+
+	protected function post_process_shipping_methods( $methods ) {
+		foreach ( $methods as $method ) {
+			if ( isset( $method->settings ) ) {
+				update_option( $method->option_name, $method->option_value );
+			}
+		}
 	}
 
 	/**

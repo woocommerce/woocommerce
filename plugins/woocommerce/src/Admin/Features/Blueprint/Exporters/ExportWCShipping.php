@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\Steps\SetWCShipping;
 use Automattic\WooCommerce\Blueprint\Exporters\StepExporter;
+use Automattic\WooCommerce\Blueprint\Util;
 
 /**
  * Class ExportWCShipping
@@ -83,6 +84,35 @@ class ExportWCShipping implements StepExporter {
         "
 		);
 
+		// Fetch shipping method options.
+		// Each method has a corresponding option in the options table.
+		$method_options = $wpdb->get_results(
+			"
+			SELECT *
+			FROM {$wpdb->prefix}options
+			WHERE option_name LIKE 'woocommerce_flat_rate_%_settings'
+			or option_name LIKE 'woocommerce_free_shipping_%_settings'
+		",
+			ARRAY_A
+		);
+
+		$method_options = Util::index_array(
+			$method_options,
+			function ( $key, $option ) {
+				return $option['option_name'];
+			}
+		);
+
+		foreach ( $methods as $method ) {
+			$key_name = 'woocommerce_' . $method->method_id . '_' . $method->instance_id . '_settings';
+			if ( isset( $method_options[ $key_name ] ) ) {
+				$method->settings = array(
+					'option_name'  => $key_name,
+					'option_value' => maybe_unserialize( $method_options[ $key_name ]['option_value'] ),
+				);
+			}
+		}
+
 		$methods_by_zone_id = array();
 
 		// Organize methods by zone ID.
@@ -110,7 +140,6 @@ class ExportWCShipping implements StepExporter {
 			}
 			$locations_by_zone_id[ $location->zone_id ][] = $location->location_id;
 		}
-
 
 		// Create a new SetWCShipping step with the fetched data.
 		$step = new SetWCShipping( $methods, $locations, $zones, $terms, $classes, $local_pickup );
