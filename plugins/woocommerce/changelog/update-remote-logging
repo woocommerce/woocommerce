@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Move remote logger to `./src` and improve `fetch_latest_woocommerce_version()` logic

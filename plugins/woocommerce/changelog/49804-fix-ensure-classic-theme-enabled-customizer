@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-CYS: Ensure that the button in the Intro page redirects to the Customizer when a classic theme is enabled.
