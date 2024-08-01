@@ -19,7 +19,7 @@ import { ComboboxControl, ComboboxControlOption } from '../combobox-control';
  * Map the product item to the Combobox core option.
  *
  * @param {Product} attr - Product item.
- * @return {ComboboxControlOption}               Combobox option.
+ * @return {ComboboxControlOption} Combobox option.
  */
 function mapItemToOption(
 	attr: Product
@@ -34,7 +34,7 @@ function mapItemToOption(
 /**
  * ComboboxControlOption component.
  *
- * @return {JSX.Element}                       Component item.
+ * @return {JSX.Element} Component item.
  */
 function ComboboxControlOption( props: {
 	item: ComboboxControlOption & { product?: Product };
