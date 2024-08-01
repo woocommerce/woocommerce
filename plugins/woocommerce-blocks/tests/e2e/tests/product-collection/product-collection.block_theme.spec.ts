@@ -1590,6 +1590,62 @@ test.describe( 'Product Collection', () => {
 			await expect( products ).toHaveText( expectedProducts );
 		} );
 	} );
+
+	test.describe( 'Extensibility - JS events', () => {
+		test( 'emits event about block rendered', async ( {
+			pageObject,
+			page,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					() => {
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+			await page.waitForLoadState();
+
+			const eventFired = await page.evaluate( async () => {
+				return window.eventFired;
+			} );
+
+			expect( eventFired ).toBe( 1 );
+		} );
+
+		test( 'emits 1 event per 1 block', async ( { pageObject, page } ) => {
+			// Adding three blocks in total
+			await pageObject.createNewPostAndInsertBlock();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					() => {
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+			await page.waitForLoadState();
+
+			const eventFired = await page.evaluate( async () => {
+				return window.eventFired;
+			} );
+
+			expect( eventFired ).toBe( 3 );
+		} );
+	} );
 } );
 
 /**
