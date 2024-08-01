@@ -47,6 +47,9 @@ class Init {
 	 * Create a deprecation notice.
 	 */
 	public function deprecation_notice( $function ) {
+		if ( Features::is_enabled( 'navigation' ) ) {
+			return;
+		}
 		wp_trigger_error( 
 			'Automattic\WooCommerce\Admin\Features\Navigation\\' . $function, 
 			__( 'WooCommerce Navigation feature has been disabled. This class will be remove in WooCommerce 9.4', 'woocommerce' ), 
