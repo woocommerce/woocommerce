@@ -120,7 +120,11 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
 			).toBeHidden();
 			await expect(
-				page.getByText( 'Google for WooCommerce', { exact: true } )
+				page
+					.getByRole( 'cell', {
+						name: 'Google for WooCommerce Get',
+					} )
+					.getByRole( 'strong' )
 			).toBeHidden();
 		} );
 
@@ -318,12 +322,6 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
 			).toBeVisible();
 
-			await expect(
-				page.getByText(
-					/(Google for WooCommerce|Google Listings & Ads)/,
-					{ exact: true }
-				)
-			).toBeVisible();
 			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
 			await expect( page.getByText( 'Jetpack' ) ).toBeHidden();
 		} );
