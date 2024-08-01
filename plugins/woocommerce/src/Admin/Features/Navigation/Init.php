@@ -46,7 +46,42 @@ class Init {
 	/**
 	 * Create a deprecation notice.
 	 */
-	public static function deprecation_notice( $function ) {
-		error_log( 'Automattic\WooCommerce\Admin\Features\Navigation\\' . $function . ' is deprecated. This class will be removed in WooCommerce 9.4' );
+	public function deprecation_notice( $function ) {
+		if ( Features::is_enabled( 'navigation' ) ) {
+			return;
+		}
+		wp_trigger_error( 
+			'Automattic\WooCommerce\Admin\Features\Navigation\\' . $function, 
+			__( 'WooCommerce Navigation feature has been disabled. This class will be remove in WooCommerce 9.4', 'woocommerce' ), 
+			E_USER_DEPRECATED 
+		);
+	}
+
+	/**
+	 * Determine if sufficient versions are present to support Navigation feature
+	 */
+	public function is_nav_compatible() {
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		$gutenberg_minimum_version = '9.0.0'; // https://github.com/WordPress/gutenberg/releases/tag/v9.0.0.
+		$wp_minimum_version        = '5.6';
+		$has_gutenberg             = is_plugin_active( 'gutenberg/gutenberg.php' );
+		$gutenberg_version         = $has_gutenberg ? get_plugin_data( WP_PLUGIN_DIR . '/gutenberg/gutenberg.php' )['Version'] : false;
+
+		if ( $gutenberg_version && version_compare( $gutenberg_version, $gutenberg_minimum_version, '>=' ) ) {
+			return true;
+		}
+
+		// Get unmodified $wp_version.
+		include ABSPATH . WPINC . '/version.php';
+
+		// Strip '-src' from the version string. Messes up version_compare().
+		$wp_version = str_replace( '-src', '', $wp_version );
+
+		if ( version_compare( $wp_version, $wp_minimum_version, '>=' ) ) {
+			return true;
+		}
+
+		return false;
 	}
 }
