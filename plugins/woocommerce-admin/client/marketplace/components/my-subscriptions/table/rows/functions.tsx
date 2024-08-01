@@ -130,7 +130,7 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 			),
 		};
 	}
-	
+
 	if ( subscription.expiring && ! subscription.autorenew ) {
 		return {
 			text: __( 'Expires soon', 'woocommerce' ),
