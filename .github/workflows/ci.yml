@@ -116,7 +116,7 @@ jobs:
     name: "${{ matrix.name }}"
     runs-on: 'ubuntu-20.04'
     needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.test-jobs != '[]' && matrix.testType == 'e2e' }}
+    if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
