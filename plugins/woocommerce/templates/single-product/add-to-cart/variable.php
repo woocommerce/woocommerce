@@ -45,17 +45,15 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 										'product'   => $product,
 									)
 								);
-							?>
+                            ?>
 						</td>
 					</tr>
+                    <tr>
+                        <td colspan="2">
+                            <?php echo end( $attribute_keys ) === $attribute_name ? wp_kses_post( apply_filters( 'woocommerce_reset_variations_link', '<button class="reset_variations"  aria-label="' . esc_html__( 'Clear options', 'woocommerce' ) . '">' . esc_html__( 'Clear', 'woocommerce' ) . '</button>' ) ) : ''; ?>
+                        </td>
+                    </tr>
 				<?php endforeach; ?>
-				<tr>
-					<td colspan="2">
-						<button class="reset_variations wp-element-button" aria-label="<?php echo esc_html__( 'Clear options', 'woocommerce' ); ?>">
-							<?php echo esc_html__( 'Clear', 'woocommerce' ); ?>
-						</button>
-					</td>
-				</tr>
 			</tbody>
 		</table>
 		<div class="reset_variations_alert screen-reader-text" aria-live="assertive"></div>
