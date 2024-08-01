@@ -23,6 +23,7 @@ const productData = {
 	sku: `sku_${ Date.now() }`,
 	gtin: `gtin_${ Date.now() }`,
 	shipping: {
+		shippingClassName: `shipping-class_${ Date.now() }`,
 		weight: '2',
 		length: '20',
 		width: '10',
@@ -171,6 +172,37 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 
 			await test.step( 'add shipping details', async () => {
 				await clickOnTab( 'Shipping', page );
+
+				// Shipping class
+				await page
+					.getByLabel( 'Shipping class', { exact: true } )
+					//.locator( 'select[name="shipping_class"]' )
+					.selectOption( 'Add new shipping class' );
+
+				// New shipping class modal
+				const modal = page.locator(
+					'.woocommerce-add-new-shipping-class-modal'
+				);
+
+				await expect(
+					modal.getByText( 'New shipping class' )
+				).toBeVisible();
+
+				await modal
+					.getByLabel( 'Name (Required)' )
+					.fill( productData.shipping.shippingClassName );
+
+				await modal.getByText( 'Add' ).click();
+
+				await expect(
+					modal.getByText( 'New shipping class' )
+				).toBeHidden();
+
+				await expect(
+					page.getByLabel( 'Shipping class', { exact: true } )
+				).toHaveValue( productData.shipping.shippingClassName );
+
+				// Shipping dimensions
 				await page
 					.getByLabel( 'Width A' )
 					.fill( productData.shipping.width );
@@ -246,6 +278,8 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					page.getByText( `SKU: ${ productData.sku }` )
 				).toBeVisible();
 				// Note: GTIN is not displayed in the front end in the theme used in the test
+
+				// Note: Shipping class is not displayed in the front end in the theme used in the test
 
 				// Verify shipping dimensions
 				await expect(
