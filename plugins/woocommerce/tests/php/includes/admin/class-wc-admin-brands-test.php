@@ -4,6 +4,7 @@
  *
  * @package woocommerce-brands
  */
+declare( strict_types = 1);
 
 require_once WC_ABSPATH . '/includes/admin/class-wc-admin-brands.php';
 
