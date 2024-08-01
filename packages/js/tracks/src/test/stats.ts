@@ -21,11 +21,35 @@ describe( 'bumpStat', () => {
 		originalImage = window.Image;
 		mockImage = { src: '' };
 		window.Image = jest.fn( () => mockImage ) as unknown as typeof Image;
+		window.wcTracks = {
+			isEnabled: true,
+			validateEvent: jest.fn(),
+			recordEvent: jest.fn(),
+		};
 	} );
 
 	afterEach( () => {
 		window.Image = originalImage;
 		jest.resetAllMocks();
+	} );
+
+	it( 'should not bump stats when wcTracks is not enabled', () => {
+		window.wcTracks.isEnabled = false;
+		const result = bumpStat( 'group', 'name' );
+		expect( result ).toBe( false );
+		expect( window.Image ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should not bump stats in development mode', () => {
+		jest.resetModules();
+		jest.doMock( '../utils', () => ( {
+			isDevelopmentMode: true,
+		} ) );
+		const { bumpStat: bumpStatDev } = require( '../stats' );
+
+		const result = bumpStatDev( 'group', 'name' );
+		expect( result ).toBe( false );
+		expect( window.Image ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should bump a single stat', () => {
@@ -46,17 +70,5 @@ describe( 'bumpStat', () => {
 		expect( mockImage.src ).toMatch(
 			/^https?:\/\/pixel\.wp\.com\/g\.gif\?v=wpcom-no-pv&x_woocommerce-stat1=value1&x_woocommerce-stat2=value2&t=/
 		);
-	} );
-
-	it( 'should not bump stats in development mode', () => {
-		jest.resetModules();
-		jest.doMock( '../utils', () => ( {
-			isDevelopmentMode: true,
-		} ) );
-		const { bumpStat: bumpStatDev } = require( '../stats' );
-
-		const result = bumpStatDev( 'group', 'name' );
-		expect( result ).toBe( false );
-		expect( window.Image ).not.toHaveBeenCalled();
 	} );
 } );
