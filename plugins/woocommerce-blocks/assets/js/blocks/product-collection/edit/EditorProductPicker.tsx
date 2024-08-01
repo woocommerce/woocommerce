@@ -53,6 +53,9 @@ const EditorProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 							},
 						} );
 					} }
+					messages={ {
+						search: __( 'Select a product', 'woocommerce' ),
+					} }
 				/>
 			</Placeholder>
 		</div>
