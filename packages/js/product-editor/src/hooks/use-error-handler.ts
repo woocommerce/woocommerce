@@ -82,6 +82,9 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 			return null;
 		}
 		const field = await getFieldByValidatorId( validatorId );
+		if ( ! field ) {
+			return null;
+		}
 		return getClientIdByField( field );
 	}
 
