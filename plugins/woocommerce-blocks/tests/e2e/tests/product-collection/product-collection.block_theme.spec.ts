@@ -1611,11 +1611,9 @@ test.describe( 'Product Collection', () => {
 			await pageObject.publishAndGoToFrontend();
 			await page.waitForLoadState();
 
-			const eventFired = await page.evaluate( async () => {
-				return window.eventFired;
-			} );
-
-			expect( eventFired ).toBe( 1 );
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 1 );
 		} );
 
 		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
@@ -1640,13 +1638,10 @@ test.describe( 'Product Collection', () => {
 			} );
 
 			await pageObject.publishAndGoToFrontend();
-			await page.waitForLoadState();
 
-			const eventFired = await page.evaluate( async () => {
-				return window.eventFired;
-			} );
-
-			expect( eventFired ).toBe( 3 );
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 3 );
 		} );
 	} );
 } );
