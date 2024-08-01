@@ -51,6 +51,8 @@ jobs:
             // Intended behaviour of the jobs generation:
             // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
             // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
+            
+            // github.base_ref is only available for pull_request events
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
@@ -72,6 +74,12 @@ jobs:
             let trigger = ${{ toJson( inputs.trigger ) }};
             if ( trigger ) {
               githubEvent = trigger;
+            }
+            
+            // `pre-release` should trigger `release-checks`, but without a 'tag' ref. 
+            // This will run all release-checks against the branch the workflow targeted, instead of a release artifact.
+            if ( trigger === 'pre-release' ) {
+              githubEvent = 'release-checks';
             }
             
             const child_process = require( 'node:child_process' );
