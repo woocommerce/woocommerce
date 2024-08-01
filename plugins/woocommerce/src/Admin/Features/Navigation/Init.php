@@ -40,11 +40,6 @@ class Init {
 			if ( class_exists( 'WC_Tracks' ) ) {
 				WC_Tracks::record_event( 'deprecated_navigation_in_use' );
 			}
-
-			if ( isset( $_SERVER['REQUEST_URI'] ) ) {
-				wp_safe_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ) );
-				exit();
-			}
 		}
 	}
 
