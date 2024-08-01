@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
+use WC_Tracks;
 
 /**
  * Contains logic for the Navigation
@@ -33,6 +34,10 @@ class Init {
 	 */
 	public function __construct() {
 		if ( Features::is_enabled( 'navigation' ) ) {
+			
+			if ( class_exists( 'WC_Tracks' ) ) {
+				WC_Tracks::record_event( 'deprecated_navigation_in_use' );
+			}
 			Menu::instance()->init();
 			CoreMenu::instance()->init();
 			Screen::instance()->init();
