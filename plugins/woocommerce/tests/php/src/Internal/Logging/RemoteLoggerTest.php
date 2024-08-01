@@ -269,7 +269,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 
 		// Tags.
 		$this->assertArrayHasKey( 'tags', $formatted_log );
-		$this->assertEquals( array( 'woocommerce', 'tag1', 'tag2' ), $formatted_log['tags'] );
+		$this->assertEquals( array( 'woocommerce', 'php', 'tag1', 'tag2' ), $formatted_log['tags'] );
 
 		// Properties.
 		$this->assertEquals( WC()->version, $formatted_log['properties']['wc_version'] );
