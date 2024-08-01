@@ -7,6 +7,9 @@ if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	exit 1
 fi
 
+echo "Installing dependencies"
+pnpm install --filter="compare-perf"
+
 if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   	echo "Comparing performance with trunk"
   	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA trunk --tests-branch $GITHUB_SHA
