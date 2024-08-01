@@ -53,6 +53,13 @@ describe( 'bumpStat', () => {
 		expect( window.Image ).not.toHaveBeenCalled();
 	} );
 
+	it( 'should not bump stats when name is empty given group is a string', () => {
+		const result = bumpStat( 'group', '' );
+
+		expect( result ).toBe( false );
+		expect( window.Image ).not.toHaveBeenCalled();
+	} );
+
 	it( 'should bump a single stat', () => {
 		const result = bumpStat( 'group', 'name' );
 
