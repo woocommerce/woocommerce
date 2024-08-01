@@ -144,9 +144,13 @@ export function HeaderToolbar( {
 							icon={ plus }
 							label={
 								! isInserterOpened
-									? __( 'Add', 'woocommerce' )
+									? __(
+											'Toggle block inserter',
+											'woocommerce'
+									  )
 									: __( 'Close', 'woocommerce' )
 							}
+							aria-expanded={ isInserterOpened }
 							showTooltip
 						/>
 						{ isLargeViewport && (
