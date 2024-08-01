@@ -545,6 +545,19 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_catalog_section->add_block(
 			array(
+				'id'         => 'woocommerce-brands-select',
+				'blockName'  => 'woocommerce/product-taxonomy-field',
+				'order'      => 15,
+				'attributes' => array(
+					'label'       => __( 'Brands', 'woocommerce' ),
+					'createTitle' => __( 'Create new brand', 'woocommerce' ),
+					'slug'        => 'product_brand',
+					'property'    => 'brands',
+				),
+			)
+		);
+		$product_catalog_section->add_block(
+			array(
 				'id'         => 'product-tags',
 				'blockName'  => 'woocommerce/product-tag-field',
 				'attributes' => array(
