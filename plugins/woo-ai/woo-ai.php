@@ -42,7 +42,7 @@ function _woo_ai_bootstrap(): void {
 		include dirname( __FILE__ ) . '/includes/class-woo-ai-admin-notices.php';
 		$notices = new Woo_AI_Admin_Notices();
 
-		add_action( 'admin_notices', array( $notices, 'woocoommerce_not_installed' ) );
+		add_action( 'admin_notices', array( $notices, 'woocommerce_not_installed' ) );
 
 		// Stop here.
 		return;
