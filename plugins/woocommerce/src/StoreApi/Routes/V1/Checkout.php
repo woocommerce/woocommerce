@@ -62,7 +62,7 @@ class Checkout extends AbstractCartRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		return true;
+		return ! $this->has_cart_token( $request );
 	}
 
 	/**
