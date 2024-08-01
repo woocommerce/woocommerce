@@ -162,7 +162,6 @@
 	border: none;
 	cursor: pointer;
 	padding: 2px $grid-unit-10;
-	margin-left: $grid-unit-15;
 	margin-bottom: $grid-unit-05;
 	text-align: left;
 	white-space: nowrap;
@@ -171,21 +170,11 @@
 	&--error {
 		color: var(--wp-red-red-70, #8a2424);
 		background: var(--wp-red-red-0, #fcf0f1);
-
-		& > svg {
-			margin-right: 2px;
-			fill: var(--wp-red-red-70, #8a2424);
-		}
 	}
 
 	&--warning {
 		color: var(--wp-yellow-yellow-70, #614200);
 		background: var(--wp-yellow-yellow-0, #fcf9e8);
-
-		& > svg {
-			margin-right: 2px;
-			color: var(--wp-yellow-yellow-70, #614200);
-		}
 	}
 }
 
