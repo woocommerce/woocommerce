@@ -1592,7 +1592,7 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Extensibility - JS events', () => {
-		test( 'emits event about block rendered', async ( {
+		test( 'emits wc-blocks_product_list_rendered event on init', async ( {
 			pageObject,
 			page,
 		} ) => {
@@ -1618,7 +1618,10 @@ test.describe( 'Product Collection', () => {
 			expect( eventFired ).toBe( 1 );
 		} );
 
-		test( 'emits 1 event per 1 block', async ( { pageObject, page } ) => {
+		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
+			pageObject,
+			page,
+		} ) => {
 			// Adding three blocks in total
 			await pageObject.createNewPostAndInsertBlock();
 			await pageObject.insertProductCollection();
