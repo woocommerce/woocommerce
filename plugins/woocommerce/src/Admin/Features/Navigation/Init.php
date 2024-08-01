@@ -38,9 +38,9 @@ class Init {
 			if ( class_exists( 'WC_Tracks' ) ) {
 				WC_Tracks::record_event( 'deprecated_navigation_in_use' );
 			}
-			Menu::instance()->init();
-			CoreMenu::instance()->init();
-			Screen::instance()->init();
+			// Menu::instance()->init();
+			// CoreMenu::instance()->init();
+			// Screen::instance()->init();
 		}
 	}
 

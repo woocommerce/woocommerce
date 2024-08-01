@@ -53,7 +53,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import { usePageClasses } from './hooks/use-page-classes';
 import '~/activity-panel';
 import '~/mobile-banner';
-import './navigation';
 
 const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )

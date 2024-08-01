@@ -97,11 +97,7 @@ class Menu {
 	 * Init.
 	 */
 	public function init() {
-		add_action( 'admin_menu', array( $this, 'add_core_items' ), 100 );
-		add_filter( 'admin_enqueue_scripts', array( $this, 'enqueue_data' ), 20 );
-
-		add_filter( 'admin_menu', array( $this, 'migrate_core_child_items' ), PHP_INT_MAX - 1 );
-		add_filter( 'admin_menu', array( $this, 'migrate_menu_items' ), PHP_INT_MAX - 2 );
+		return;
 	}
 
 	/**
@@ -111,17 +107,7 @@ class Menu {
 	 * @return string
 	 */
 	public static function get_callback_url( $callback ) {
-		// Return the full URL.
-		if ( strpos( $callback, 'http' ) === 0 ) {
-			return $callback;
-		}
-
-		$pos  = strpos( $callback, '?' );
-		$file = $pos > 0 ? substr( $callback, 0, $pos ) : $callback;
-		if ( file_exists( ABSPATH . "/wp-admin/$file" ) ) {
-			return $callback;
-		}
-		return 'admin.php?page=' . $callback;
+		return;
 	}
 
 	/**
@@ -131,26 +117,7 @@ class Menu {
 	 * @return string|null
 	 */
 	public static function get_parent_key( $callback ) {
-		global $submenu;
-
-		if ( ! $submenu ) {
-			return null;
-		}
-
-		// This is already a parent item.
-		if ( isset( $submenu[ $callback ] ) ) {
-			return null;
-		}
-
-		foreach ( $submenu as $key => $menu ) {
-			foreach ( $menu as $item ) {
-				if ( $item[ self::CALLBACK ] === $callback ) {
-					return $key;
-				}
-			}
-		}
-
-		return null;
+		return;
 	}
 
 	/**
