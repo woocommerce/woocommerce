@@ -132,7 +132,9 @@ jQuery( function( $ ) {
 				.first()
 				.attr( 'tabindex', '-1' )
 				.delay( 500 ) // Wait for the element to get the tabindex attribute so it can be focused.
-				.focus();
+				.queue( function() {
+					$( this ).focus().dequeue();
+				} );
 		}
 	} );
 });
