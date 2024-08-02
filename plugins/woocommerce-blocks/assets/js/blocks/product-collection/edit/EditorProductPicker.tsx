@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Icon, info } from '@wordpress/icons';
 import ProductControl from '@woocommerce/editor-components/product-control';
+import { SelectedOption } from '@woocommerce/block-hocs';
 import {
 	Placeholder,
 	// @ts-expect-error Using experimental features
@@ -42,16 +43,20 @@ const EditorProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 					</Text>
 				</HStack>
 				<ProductControl
-					selected={ attributes.selectedReference?.id || 0 }
+					selected={
+						attributes.selectedReference?.id as SelectedOption
+					}
 					showVariations
 					onChange={ ( value = [] ) => {
-						const id = value[ 0 ] ? value[ 0 ].id : 0;
-						props.setAttributes( {
-							selectedReference: {
-								type: 'product',
-								id,
-							},
-						} );
+						const isValidId = ( value[ 0 ].id ?? null ) !== null;
+						if ( isValidId ) {
+							props.setAttributes( {
+								selectedReference: {
+									type: 'product',
+									id: value[ 0 ].id,
+								},
+							} );
+						}
 					} }
 					messages={ {
 						search: __( 'Select a product', 'woocommerce' ),
