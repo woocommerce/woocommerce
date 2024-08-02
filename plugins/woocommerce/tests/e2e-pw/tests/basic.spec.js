@@ -2,7 +2,8 @@ const { test, expect } = require( '@playwright/test' );
 const { logIn } = require( '../utils/login' );
 const { admin, customer } = require( '../test-data/data' );
 
-test( 'Load the home page', async ( { page } ) => {
+test( 'Load the home page', async ( { page }, testInfo ) => {
+	expect( testInfo.retry ).toBe( 1 );
 	await page.goto( '/' );
 	await expect(
 		await page

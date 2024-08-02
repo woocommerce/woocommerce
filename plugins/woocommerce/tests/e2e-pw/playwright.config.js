@@ -41,6 +41,10 @@ const reporter = [
 		`${ testsRootPath }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
 	],
+	[
+		`${ testsRootPath }/reporters/flaky-tests-reporter.js`,
+		{ outputFolder: `${ testsRootPath }/test-results/flaky-tests` },
+	],
 ];
 
 if ( process.env.CI ) {
