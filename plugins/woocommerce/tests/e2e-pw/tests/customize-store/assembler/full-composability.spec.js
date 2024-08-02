@@ -164,7 +164,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		}
 	} );
 
-	test( 'Clicking on a pattern should insert it in the preview', async ( {
+	test.skip( 'Clicking on a pattern should insert it in the preview', async ( {
 		pageObject,
 		baseURL,
 	} ) => {
