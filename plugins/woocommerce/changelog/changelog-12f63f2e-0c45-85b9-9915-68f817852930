@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is not allowed
