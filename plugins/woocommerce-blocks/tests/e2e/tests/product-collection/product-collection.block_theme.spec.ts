@@ -9,6 +9,7 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
  */
 import ProductCollectionPage, {
 	BLOCK_LABELS,
+	Collections,
 	SELECTORS,
 } from './product-collection.page';
 
@@ -1592,7 +1593,7 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Extensibility - JS events', () => {
-		test( 'emits wc-blocks_product_list_rendered event on init', async ( {
+		test( 'emits wc-blocks_product_list_rendered event on init and on page change', async ( {
 			pageObject,
 			page,
 		} ) => {
@@ -1602,18 +1603,30 @@ test.describe( 'Product Collection', () => {
 				let eventFired = 0;
 				window.document.addEventListener(
 					'wc-blocks_product_list_rendered',
-					() => {
+					( e ) => {
+						const { collection } = e.detail;
+						window.eventPayload = collection;
 						window.eventFired = ++eventFired;
 					}
 				);
 			} );
 
 			await pageObject.publishAndGoToFrontend();
-			await page.waitForLoadState();
 
+			await expect
+				.poll(
+					async () => await page.evaluate( 'window.eventPayload' )
+				)
+				.toBe( 'woocommerce/product-collection/product-catalog' );
 			await expect
 				.poll( async () => await page.evaluate( 'window.eventFired' ) )
 				.toBe( 1 );
+
+			await page.getByRole( 'link', { name: 'Next Page' } ).click();
+
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 2 );
 		} );
 
 		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
@@ -1906,4 +1919,104 @@ test.describe( 'Testing registerProductCollection', () => {
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 	} );
+} );
+
+test.describe( 'Testing "usesReference" argument in "registerProductCollection"', () => {
+	const MY_REGISTERED_COLLECTIONS = {
+		myCustomCollectionWithProductContext: {
+			name: 'My Custom Collection - Product Context',
+			label: 'Block: My Custom Collection - Product Context',
+			previewLabelTemplate: [ 'woocommerce/woocommerce//single-product' ],
+		},
+		myCustomCollectionWithCartContext: {
+			name: 'My Custom Collection - Cart Context',
+			label: 'Block: My Custom Collection - Cart Context',
+			previewLabelTemplate: [ 'woocommerce/woocommerce//page-cart' ],
+		},
+		myCustomCollectionWithOrderContext: {
+			name: 'My Custom Collection - Order Context',
+			label: 'Block: My Custom Collection - Order Context',
+			previewLabelTemplate: [
+				'woocommerce/woocommerce//order-confirmation',
+			],
+		},
+		myCustomCollectionWithArchiveContext: {
+			name: 'My Custom Collection - Archive Context',
+			label: 'Block: My Custom Collection - Archive Context',
+			previewLabelTemplate: [
+				'woocommerce/woocommerce//taxonomy-product_cat',
+			],
+		},
+		myCustomCollectionMultipleContexts: {
+			name: 'My Custom Collection - Multiple Contexts',
+			label: 'Block: My Custom Collection - Multiple Contexts',
+			previewLabelTemplate: [
+				'woocommerce/woocommerce//single-product',
+				'woocommerce/woocommerce//order-confirmation',
+			],
+		},
+	};
+
+	// Activate plugin which registers custom product collections
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'register-product-collection-tester'
+		);
+	} );
+
+	Object.entries( MY_REGISTERED_COLLECTIONS ).forEach(
+		( [ key, collection ] ) => {
+			for ( const template of collection.previewLabelTemplate ) {
+				test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate(
+						key as Collections
+					);
+
+					const block = editor.canvas.getByLabel( collection.label );
+					const previewButtonLocator = block.getByTestId(
+						SELECTORS.previewButtonTestID
+					);
+
+					await expect( previewButtonLocator ).toBeVisible();
+				} );
+			}
+
+			test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
+				pageObject,
+				editor,
+			} ) => {
+				await pageObject.createNewPostAndInsertBlock(
+					key as Collections
+				);
+
+				const block = editor.canvas.getByLabel( collection.label );
+				const previewButtonLocator = block.getByTestId(
+					SELECTORS.previewButtonTestID
+				);
+
+				await expect( previewButtonLocator ).toBeHidden();
+			} );
+
+			test( `Collection "${ collection.name }" should not show preview label in Product Catalog template`, async ( {
+				pageObject,
+				editor,
+			} ) => {
+				await pageObject.goToProductCatalogAndInsertCollection(
+					key as Collections
+				);
+
+				const block = editor.canvas.getByLabel( collection.label );
+				const previewButtonLocator = block.getByTestId(
+					SELECTORS.previewButtonTestID
+				);
+
+				await expect( previewButtonLocator ).toBeHidden();
+			} );
+		}
+	);
 } );

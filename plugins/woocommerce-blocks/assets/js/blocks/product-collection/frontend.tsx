@@ -13,6 +13,7 @@ import { triggerProductListRenderedEvent } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
+import type { CoreCollectionNames } from './types';
 import './style.scss';
 
 export type ProductCollectionStoreContext = {
@@ -21,6 +22,7 @@ export type ProductCollectionStoreContext = {
 	accessibilityMessage: string;
 	accessibilityLoadingMessage: string;
 	accessibilityLoadedMessage: string;
+	collection: CoreCollectionNames;
 };
 
 const isValidLink = ( ref: HTMLAnchorElement ) =>
@@ -137,6 +139,10 @@ const productCollectionStore = {
 				ctx.isPrefetchNextOrPreviousLink = !! ref.href;
 
 				scrollToFirstProductIfNotVisible( wcNavigationId );
+
+				triggerProductListRenderedEvent( {
+					collection: ctx.collection,
+				} );
 			}
 		},
 		/**
@@ -181,7 +187,12 @@ const productCollectionStore = {
 			}
 		},
 		*onRender() {
-			yield triggerProductListRenderedEvent();
+			const { collection } =
+				getContext< ProductCollectionStoreContext >();
+
+			triggerProductListRenderedEvent( {
+				collection,
+			} );
 		},
 	},
 };

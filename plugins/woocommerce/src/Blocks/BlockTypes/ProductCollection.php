@@ -159,10 +159,11 @@ class ProductCollection extends AbstractBlock {
 	 * Attach the init directive to Product Collection block.
 	 *
 	 * @param string $block_content The HTML content of the block.
+	 * @param string $collection Collection type.
 	 *
 	 * @return string Updated HTML content.
 	 */
-	private function add_init_directive( $block_content ) {
+	private function add_init_directive( $block_content, $collection ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-init to the product collection block so we trigger JS event on render.
@@ -170,6 +171,15 @@ class ProductCollection extends AbstractBlock {
 			$p->set_attribute(
 				'data-wc-init',
 				'callbacks.onRender'
+			);
+			$p->set_attribute(
+				'data-wc-context',
+				wp_json_encode(
+					array(
+						'collection' => $collection,
+					),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				)
 			);
 		}
 
@@ -184,7 +194,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @return string Updated HTML content.
 	 */
-	private function enable_client_side_naviagation( $block_content ) {
+	private function enable_client_side_navigation( $block_content ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-wc-navigation-id to the product collection block.
@@ -193,11 +203,12 @@ class ProductCollection extends AbstractBlock {
 				'data-wc-navigation-id',
 				'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 			);
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ), true );
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
 					array(
+						...$current_context,
 						// The message to be announced by the screen reader when the page is loading or loaded.
 						'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
 						'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
@@ -254,14 +265,20 @@ class ProductCollection extends AbstractBlock {
 		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
 
 		if ( $is_product_collection_block ) {
-			// Enqueue the Interactivity API runtime.
+			// Enqueue the Interactivity API runtime and set the namespace.
 			wp_enqueue_script( 'wc-interactivity' );
+			$p = new \WP_HTML_Tag_Processor( $block_content );
+			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
+				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			}
+			$block_content = $p->get_updated_html();
 
-			$block_content = $this->add_init_directive( $block_content );
+			$collection    = $block['attrs']['collection'] ?? 'unknown';
+			$block_content = $this->add_init_directive( $block_content, $collection );
 
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 			if ( $is_enhanced_pagination_enabled ) {
-				$block_content = $this->enable_client_side_naviagation( $block_content );
+				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
 
