@@ -139,6 +139,10 @@ const productCollectionStore = {
 				ctx.isPrefetchNextOrPreviousLink = !! ref.href;
 
 				scrollToFirstProductIfNotVisible( wcNavigationId );
+
+				triggerProductListRenderedEvent( {
+					collection: ctx.collection,
+				} );
 			}
 		},
 		/**
@@ -186,7 +190,7 @@ const productCollectionStore = {
 			const { collection } =
 				getContext< ProductCollectionStoreContext >();
 
-			yield triggerProductListRenderedEvent( {
+			triggerProductListRenderedEvent( {
 				collection,
 			} );
 		},
