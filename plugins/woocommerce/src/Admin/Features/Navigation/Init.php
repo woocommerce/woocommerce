@@ -2,6 +2,7 @@
 /**
  * Navigation Experience
  *
+ * @deprecated 
  * @package Woocommerce Admin
  */
 
@@ -23,13 +24,6 @@ class Init {
 	const TOGGLE_OPTION_NAME = 'woocommerce_navigation_enabled';
 
 	/**
-	 * Determines if the feature has been toggled on or off.
-	 *
-	 * @var boolean
-	 */
-	protected static $is_updated = false;
-
-	/**
 	 * Hook into WooCommerce.
 	 */
 	public function __construct() {
@@ -47,6 +41,6 @@ class Init {
 	 * Create a deprecation notice.
 	 */
 	public static function deprecation_notice( $function ) {
-		error_log( 'Automattic\WooCommerce\Admin\Features\Navigation\\' . $function . ' is deprecated. This class will be removed in WooCommerce 9.4' );
+		error_log( 'Automattic\WooCommerce\Admin\Features\Navigation\\' . $function . ' is deprecated since 9.3 with no alternative. Navigation classes will be removed in WooCommerce 9.4' );
 	}
 }
