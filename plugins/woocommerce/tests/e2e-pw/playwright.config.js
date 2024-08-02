@@ -41,10 +41,13 @@ const reporter = [
 		`${ testsRootPath }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
 	],
+	[
+		`${ testsRootPath }/reporters/flaky-tests-reporter.js`,
+		{ outputFolder: `${ testsRootPath }/test-results/flaky-tests` },
+	],
 ];
 
 if ( process.env.CI ) {
-	reporter.push( [ 'github' ] );
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ testsRootPath }/reporters/skipped-tests.js` ] );
 } else {

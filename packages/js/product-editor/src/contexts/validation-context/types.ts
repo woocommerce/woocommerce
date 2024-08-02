@@ -26,7 +26,7 @@ export type ValidationProviderProps = {
 };
 
 export type ValidationError =
-	| { message?: string; context?: string; validatorId?: string }
+	| { message?: string; validatorId?: string }
 	| undefined;
 export type ValidationErrors = Record< string, ValidationError >;
 
