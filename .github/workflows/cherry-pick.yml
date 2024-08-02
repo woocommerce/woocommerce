@@ -103,7 +103,6 @@ jobs:
                       // Means this workflow was triggered manually.
                       if ( event.inputs && event.inputs.release_branch ) {
                         const releaseBranch = '${{ inputs.release_branch }}'
-                        console.log("Setting release branch to ", releaseBranch);
                         core.setOutput( 'release', releaseBranch )
                       } else if ( event.action === 'milestoned' ) {
                         const version = '${{ github.event.issue.milestone.title }}'
@@ -131,8 +130,6 @@ jobs:
               uses: actions/github-script@v6
               with:
                 script: |
-                  
-                  console.log("Received", '${{ steps.prep-inputs.outputs .release }}');
                   const firstReleaseBranch = '${{ steps.prep-inputs.outputs.release }}';
                   console.log("Building for ", firstReleaseBranch);
                   if ( ! /^release\/\d+\.\d+$/.test( firstReleaseBranch ) ) {
@@ -169,7 +166,7 @@ jobs:
                     console.error("Really? Ok, ask an admin to manually run this workflow with the force input set to true.");
                     throw new Error('Cannot create more than three PRs');
                   } else {
-                    core.setOutput('releaseBranches', toJSON(releaseBranches));
+                    core.setOutput('releaseBranches', '["' + releaseBranches.join('","') + '"]');
                   }
 
     cherry-pick-run:
@@ -181,6 +178,7 @@ jobs:
           pull-requests: write
         needs: prep
         strategy:
+          fail-fast: false
           matrix:
             release: ${{ fromJson(needs.prep.outputs.release-branches) }}
         if: success()
