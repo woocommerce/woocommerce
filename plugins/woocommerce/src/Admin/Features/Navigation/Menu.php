@@ -1,7 +1,7 @@
 <?php
 /**
  * WooCommerce Navigation Menu
- * 
+ *
  * @deprecated 9.3.0 Navigation is no longer a feature and its classes will be removed in WooCommerce 9.4.
  * @package Woocommerce Navigation
  */
@@ -124,18 +124,8 @@ class Menu {
 
 	/**
 	 * Adds a top level menu item to the navigation.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'      => (string) The unique ID of the menu item. Required.
-	 *      'title'   => (string) Title of the menu item. Required.
-	 *      'url'     => (string) URL or callback to be used. Required.
-	 *      'order'   => (int) Menu item order.
-	 *      'migrate' => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'menuId'  => (string) The ID of the menu to add the category to.
-	 *    ).
 	 */
-	private static function add_category( $args ) {
+	private static function add_category() {
 		Init::deprecation_notice( 'Menu::add_category' );
 
 		return;
@@ -143,21 +133,8 @@ class Menu {
 
 	/**
 	 * Adds a child menu item to the navigation.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'              => (string) The unique ID of the menu item. Required.
-	 *      'title'           => (string) Title of the menu item. Required.
-	 *      'parent'          => (string) Parent menu item ID.
-	 *      'capability'      => (string) Capability to view this menu item.
-	 *      'url'             => (string) URL or callback to be used. Required.
-	 *      'order'           => (int) Menu item order.
-	 *      'migrate'         => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'menuId'          => (string) The ID of the menu to add the item to.
-	 *      'matchExpression' => (string) A regular expression used to identify if the menu item is active.
-	 *    ).
 	 */
-	private static function add_item( $args ) {
+	private static function add_item() {
 		Init::deprecation_notice( 'Menu::add_item' );
 
 		return;
@@ -187,17 +164,8 @@ class Menu {
 
 	/**
 	 * Adds a plugin category.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'      => (string) The unique ID of the menu item. Required.
-	 *      'title'   => (string) Title of the menu item. Required.
-	 *      'url'     => (string) URL or callback to be used. Required.
-	 *      'migrate' => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'order'   => (int) Menu item order.
-	 *    ).
 	 */
-	public static function add_plugin_category( $args ) {
+	public static function add_plugin_category() {
 		Init::deprecation_notice( 'Menu::add_plugin_category' );
 
 		return;
@@ -205,20 +173,8 @@ class Menu {
 
 	/**
 	 * Adds a plugin item.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'              => (string) The unique ID of the menu item. Required.
-	 *      'title'           => (string) Title of the menu item. Required.
-	 *      'parent'          => (string) Parent menu item ID.
-	 *      'capability'      => (string) Capability to view this menu item.
-	 *      'url'             => (string) URL or callback to be used. Required.
-	 *      'migrate'         => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'order'           => (int) Menu item order.
-	 *      'matchExpression' => (string) A regular expression used to identify if the menu item is active.
-	 *    ).
 	 */
-	public static function add_plugin_item( $args ) {
+	public static function add_plugin_item() {
 		Init::deprecation_notice( 'Menu::add_plugin_item' );
 
 		return;
@@ -226,17 +182,8 @@ class Menu {
 
 	/**
 	 * Adds a plugin setting item.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'         => (string) The unique ID of the menu item. Required.
-	 *      'title'      => (string) Title of the menu item. Required.
-	 *      'capability' => (string) Capability to view this menu item.
-	 *      'url'        => (string) URL or callback to be used. Required.
-	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
-	 *    ).
 	 */
-	public static function add_setting_item( $args ) {
+	public static function add_setting_item() {
 		Init::deprecation_notice( 'Menu::add_setting_item' );
 
 		return;

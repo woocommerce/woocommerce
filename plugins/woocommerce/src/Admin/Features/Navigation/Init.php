@@ -2,7 +2,7 @@
 /**
  * Navigation Experience
  *
- * @deprecated 
+ * @deprecated 9.3.0 Navigation is no longer a feature and its classes will be removed in WooCommerce 9.4.
  * @package Woocommerce Admin
  */
 
@@ -39,8 +39,10 @@ class Init {
 
 	/**
 	 * Create a deprecation notice.
+	 * 
+	 * @param string $fn The function that is deprecated.
 	 */
-	public static function deprecation_notice( $function ) {
-		error_log( 'Automattic\WooCommerce\Admin\Features\Navigation\\' . $function . ' is deprecated since 9.3 with no alternative. Navigation classes will be removed in WooCommerce 9.4' );
+	public static function deprecation_notice( $fn ) {
+		error_log( 'Automattic\WooCommerce\Admin\Features\Navigation\\' . $fn . ' is deprecated since 9.3 with no alternative. Navigation classes will be removed in WooCommerce 9.4' );
 	}
 }

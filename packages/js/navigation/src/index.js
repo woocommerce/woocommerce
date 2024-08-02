@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useState,
-	useEffect,
-	useLayoutEffect,
-} from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick } from 'lodash';

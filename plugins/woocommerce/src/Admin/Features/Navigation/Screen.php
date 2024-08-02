@@ -222,10 +222,8 @@ class Screen {
 
 	/**
 	 * Register post type for use in WooCommerce Navigation screens.
-	 *
-	 * @param string $post_type Post type to add.
 	 */
-	public static function register_post_type( $post_type ) {
+	public static function register_post_type() {
 		Init::deprecation_notice( 'Screen::register_post_type' );
 
 		return;
@@ -233,10 +231,8 @@ class Screen {
 
 	/**
 	 * Register taxonomy for use in WooCommerce Navigation screens.
-	 *
-	 * @param string $taxonomy Taxonomy to add.
 	 */
-	public static function register_taxonomy( $taxonomy ) {
+	public static function register_taxonomy() {
 		Init::deprecation_notice( 'Screen::register_taxonomy' );
 
 		return;
