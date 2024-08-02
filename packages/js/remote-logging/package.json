@@ -1,0 +1,163 @@
+{
+	"name": "@woocommerce/remote-logging",
+	"version": "0.0.1",
+	"description": "WooCommerce remote logging for Automattic based projects",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^20.11.1",
+		"pnpm": "^9.1.0"
+	},
+	"keywords": [
+		"wordpress",
+		"woocommerce",
+		"remote-logging"
+	],
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/remote-logging/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types",
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
+	"scripts": {
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"changelog": "composer install && composer exec -- changelogger",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"prepack": "pnpm build",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:cjs": "wireit",
+		"watch:build:project:esm": "wireit"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test-staged"
+		]
+	},
+	"dependencies": {
+		"@woocommerce/tracks": "workspace:*",
+		"@wordpress/hooks": "wp-6.0",
+		"debug": "^4.3.4",
+		"tracekit": "^0.4.6"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.23.5",
+		"@types/debug": "^4.1.12",
+		"@types/jest": "^27.5.2",
+		"@types/node": "^16.18.68",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"@wordpress/jest-console": "^5.4.0",
+		"concurrently": "^7.6.0",
+		"eslint": "^8.55.0",
+		"jest": "~27.5.1",
+		"jest-cli": "~27.5.1",
+		"rimraf": "5.0.5",
+		"ts-jest": "~29.1.1",
+		"typescript": "^5.3.3",
+		"wireit": "0.14.3"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"babel.config.js",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}",
+						"typings/**/*.ts"
+					],
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
+	},
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json --watch",
+			"service": true
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:esm": {
+			"command": "tsc --project tsconfig.json --watch",
+			"service": true
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/tracks/build",
+				"node_modules/@woocommerce/tracks/build-module",
+				"node_modules/@woocommerce/tracks/build-types",
+				"package.json"
+			]
+		}
+	}
+}
