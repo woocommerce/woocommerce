@@ -2,12 +2,18 @@
  * External dependencies
  */
 import '@wordpress/notices';
-import { render, createRoot } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { CustomerEffortScoreTracksContainer } from '@woocommerce/customer-effort-score';
 import {
 	withCurrentUserHydration,
 	withSettingsHydration,
 } from '@woocommerce/data';
+/**
+ * Internal dependencies
+ */
+import { initRemoteLogging } from './lib/init-remote-logging';
+// Initialize remote logging early to log any errors that occur during initialization.
+initRemoteLogging();
 
 /**
  * Internal dependencies
@@ -55,11 +61,11 @@ if ( appRoot ) {
 		HydratedPageLayout =
 			withCurrentUserHydration( hydrateUser )( HydratedPageLayout );
 	}
-	render(
+
+	createRoot( appRoot ).render(
 		<ErrorBoundary>
 			<HydratedPageLayout />
-		</ErrorBoundary>,
-		appRoot
+		</ErrorBoundary>
 	);
 } else if ( embeddedRoot ) {
 	let HydratedEmbedLayout = withSettingsHydration(
@@ -71,7 +77,7 @@ if ( appRoot ) {
 			withCurrentUserHydration( hydrateUser )( HydratedEmbedLayout );
 	}
 	// Render the header.
-	render( <HydratedEmbedLayout />, embeddedRoot );
+	createRoot( embeddedRoot ).render( <HydratedEmbedLayout /> );
 
 	embeddedRoot.classList.remove( 'is-embed-loading' );
 
@@ -84,17 +90,16 @@ if ( appRoot ) {
 		wpBody.querySelector( '.wrap' );
 	const noticeContainer = document.createElement( 'div' );
 
-	render(
+	createRoot( wpBody.insertBefore( noticeContainer, wrap ) ).render(
 		<div className="woocommerce-layout">
 			<NoticeArea />
-		</div>,
-		wpBody.insertBefore( noticeContainer, wrap )
+		</div>
 	);
 	const embeddedBodyContainer = document.createElement( 'div' );
-	render(
-		<EmbeddedBodyLayout />,
+
+	createRoot(
 		wpBody.insertBefore( embeddedBodyContainer, wrap.nextSibling )
-	);
+	).render( <EmbeddedBodyLayout /> );
 
 	possiblyRenderSettingsSlots();
 
@@ -117,11 +122,9 @@ if (
 	// Set up customer effort score survey.
 	( function () {
 		const root = appRoot || embeddedRoot;
-
-		render(
-			<CustomerEffortScoreTracksContainer />,
+		createRoot(
 			root.insertBefore( document.createElement( 'div' ), null )
-		);
+		).render( <CustomerEffortScoreTracksContainer /> );
 	} )();
 }
 

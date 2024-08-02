@@ -10,7 +10,7 @@ const wcPages = [
 				name: 'Home',
 				heading: 'Home',
 				element:
-					'.wooocommerce-inbox-card__header > .components-truncate',
+					'.woocommerce-inbox-card__header > .components-truncate',
 				text: 'Inbox',
 			},
 			{
