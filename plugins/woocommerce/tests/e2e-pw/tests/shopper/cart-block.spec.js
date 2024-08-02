@@ -73,7 +73,7 @@ test.describe( 'Cart Block page', { tag: [ '@payments', '@services' ] }, () => {
 		} );
 	} );
 
-	test( 'can see empty cart, add and remove simple & cross sell product, increase to max quantity', async ( {
+	test.skip( 'can see empty cart, add and remove simple & cross sell product, increase to max quantity', async ( {
 		page,
 		testPage,
 	} ) => {

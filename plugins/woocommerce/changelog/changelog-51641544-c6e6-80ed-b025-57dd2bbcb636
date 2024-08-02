@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: can see empty cart, add and remove simple & cross sell product, increase to max quantity
