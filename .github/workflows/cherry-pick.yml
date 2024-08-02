@@ -91,6 +91,7 @@ jobs:
         outputs:
             release-branches: ${{ steps.identify-release-branches.outputs.releaseBranches }}
             pr: ${{ steps.prep-inputs.outputs.pr }}
+            release: ${{ steps.prep-inputs.outputs.release }}
         steps:
             - name: Prep inputs
               id: prep-inputs
@@ -130,7 +131,9 @@ jobs:
               uses: actions/github-script@v6
               with:
                 script: |
-                  const firstReleaseBranch = ${{ steps.prep-inputs.outputs.release }};
+                  
+                  console.log("Received", '${{ steps.prep-inputs.outputs .release }}');
+                  const firstReleaseBranch = '${{ steps.prep-inputs.outputs.release }}';
                   console.log("Building for ", firstReleaseBranch);
                   if ( ! /^release\/\d+\.\d+$/.test( firstReleaseBranch ) ) {
                     throw new Error( 'Invalid release branch, it must be release/X.Y' );
@@ -166,7 +169,7 @@ jobs:
                     console.error("Really? Ok, ask an admin to manually run this workflow with the force input set to true.");
                     throw new Error('Cannot create more than three PRs');
                   } else {
-                    core.setOutput('releaseBranches', releaseBranches);
+                    core.setOutput('releaseBranches', toJSON(releaseBranches));
                   }
 
     cherry-pick-run:
@@ -179,7 +182,7 @@ jobs:
         needs: prep
         strategy:
           matrix:
-            release: ${{ needs.prep.outputs.releaseBranches }}
+            release: ${{ fromJson(needs.prep.outputs.release-branches) }}
         if: success()
         steps:
             - name: Check for release branch
