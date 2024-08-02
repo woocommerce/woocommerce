@@ -9,7 +9,7 @@ import { applyFilters } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { mergeLogData } from './utils';
+import { mergeLogData, isDevelopmentEnvironment } from './utils';
 import { LogData, ErrorData, RemoteLoggerConfig } from './types';
 
 const debug = debugFactory( 'wc:remote-logging' );
@@ -80,7 +80,36 @@ export class RemoteLogger {
 			...extraData,
 		} );
 
+		debug( 'Logging:', logData );
 		await this.sendLog( logData );
+	}
+
+	/**
+	 * Logs an error to Logstash.
+	 *
+	 * @param  error     - The error to log.
+	 * @param  extraData - Optional additional data to include in the log.
+	 *
+	 * @return {Promise<void>} - A promise that resolves when the error is logged.
+	 */
+	public async error( error: Error, extraData?: Partial< LogData > ) {
+		if ( this.isRateLimited() ) {
+			return;
+		}
+
+		const errorData: ErrorData = {
+			...mergeLogData( DEFAULT_LOG_DATA, {
+				message: error.message,
+				severity: 'error',
+				...extraData,
+			} ),
+			trace: this.getFormattedStackFrame(
+				TraceKit.computeStackTrace( error )
+			),
+		};
+
+		debug( 'Logging error:', errorData );
+		await this.sendError( errorData );
 	}
 
 	/**
@@ -115,6 +144,11 @@ export class RemoteLogger {
 	 * @param logData - The log data to be sent.
 	 */
 	private async sendLog( logData: LogData ): Promise< void > {
+		if ( isDevelopmentEnvironment ) {
+			debug( 'Skipping send log in development environment' );
+			return;
+		}
+
 		const body = new window.FormData();
 		body.append( 'params', JSON.stringify( logData ) );
 
@@ -142,24 +176,18 @@ export class RemoteLogger {
 	}
 
 	/**
-	 * Handles an error and prepares it for sending to the remote API.
+	 * Handles an uncaught error and sends it to the remote API.
 	 *
 	 * @param error - The error to handle.
 	 */
 	private async handleError( error: Error ) {
-		const currentTime = Date.now();
-
-		if (
-			currentTime - this.lastErrorSentTime <
-			this.config.errorRateLimitMs
-		) {
-			debug( 'Rate limit reached. Skipping send error', error );
+		const trace = TraceKit.computeStackTrace( error );
+		if ( ! this.shouldHandleError( error, trace.stack ) ) {
+			debug( 'Irrelevant error. Skipping handling.', error );
 			return;
 		}
 
-		const trace = TraceKit.computeStackTrace( error );
-		if ( ! this.shouldSendError( error, trace.stack ) ) {
-			debug( 'Skipping error:', error );
+		if ( this.isRateLimited() ) {
 			return;
 		}
 
@@ -196,12 +224,15 @@ export class RemoteLogger {
 	 * @param error - The error data to be sent.
 	 */
 	private async sendError( error: ErrorData ) {
+		if ( isDevelopmentEnvironment ) {
+			debug( 'Skipping send error in development environment' );
+			return;
+		}
+
 		const body = new window.FormData();
 		body.append( 'error', JSON.stringify( error ) );
 
 		try {
-			debug( 'Sending error to API:', error );
-
 			/**
 			 * Filters the JS error endpoint URL.
 			 *
@@ -211,6 +242,8 @@ export class RemoteLogger {
 				REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
 				'https://public-api.wordpress.com/rest/v1.1/js-error'
 			) as string;
+
+			debug( 'Sending error to API:', error );
 
 			await window.fetch( endpoint, {
 				method: 'POST',
@@ -279,13 +312,13 @@ export class RemoteLogger {
 	}
 
 	/**
-	 * Determines whether an error should be sent to the remote API.
+	 * Determines whether an error should be handled.
 	 *
 	 * @param error       - The error to check.
 	 * @param stackFrames - The stack frames of the error.
-	 * @return Whether the error should be sent.
+	 * @return Whether the error should be handled.
 	 */
-	private shouldSendError(
+	private shouldHandleError(
 		error: Error,
 		stackFrames: TraceKit.StackFrame[]
 	) {
@@ -310,9 +343,40 @@ export class RemoteLogger {
 			stackFrames
 		) as boolean;
 	}
+
+	private isRateLimited(): boolean {
+		const currentTime = Date.now();
+		if (
+			currentTime - this.lastErrorSentTime <
+			this.config.errorRateLimitMs
+		) {
+			debug( 'Rate limit reached. Skipping send error' );
+			return true;
+		}
+		return false;
+	}
 }
 
 let logger: RemoteLogger | null = null;
+
+/**
+ * Checks if remote logging is enabled and if the logger is initialized.
+ *
+ * @return {boolean} - Returns true if remote logging is enabled and the logger is initialized, otherwise false.
+ */
+function canLog(): boolean {
+	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
+		debug( 'Remote logging is disabled.' );
+		return false;
+	}
+
+	if ( ! logger ) {
+		warnLog( 'RemoteLogger is not initialized. Call init() first.' );
+		return false;
+	}
+
+	return true;
+}
 
 /**
  * Initializes the remote logging and error handlers.
@@ -321,9 +385,9 @@ let logger: RemoteLogger | null = null;
  * @param config - Configuration object for the RemoteLogger.
  *
  */
-export function init( config: RemoteLoggerConfig ): void {
-	if ( ! window.wcTracks || ! window.wcTracks.isEnabled ) {
-		debug( 'Tracks is not enabled.' );
+export function init( config: RemoteLoggerConfig ) {
+	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
+		debug( 'Remote logging is disabled.' );
 		return;
 	}
 
@@ -335,38 +399,56 @@ export function init( config: RemoteLoggerConfig ): void {
 	try {
 		logger = new RemoteLogger( config );
 		logger.initializeErrorHandlers();
+
+		debug( 'RemoteLogger initialized.' );
 	} catch ( error ) {
 		errorLog( 'Failed to initialize RemoteLogger:', error );
 	}
 }
 
 /**
- * Logs a message or error, respecting rate limiting.
+ * Logs a message or error.
  *
  * This function is inefficient because the data goes over the REST API, so use sparingly.
  *
  * @param severity  - The severity of the log.
  * @param message   - The message to log.
  * @param extraData - Optional additional data to include in the log.
+ *
  */
 export async function log(
 	severity: Exclude< LogData[ 'severity' ], undefined >,
 	message: string,
 	extraData?: Partial< Exclude< LogData, 'message' | 'severity' > >
-) {
-	if ( ! window.wcTracks || ! window.wcTracks.isEnabled ) {
-		debug( 'Tracks is not enabled.' );
-		return;
-	}
-
-	if ( ! logger ) {
-		warnLog( 'RemoteLogger is not initialized. Call init() first.' );
+): Promise< void > {
+	if ( ! canLog() ) {
 		return;
 	}
 
 	try {
-		await logger.log( severity, message, extraData );
+		await logger?.log( severity, message, extraData );
 	} catch ( error ) {
 		errorLog( 'Failed to send log:', error );
+	}
+}
+
+/**
+ * Captures an error and sends it to the remote API. Respects the error rate limit.
+ *
+ * @param error     - The error to capture.
+ * @param extraData - Optional additional data to include in the log.
+ */
+export async function captureException(
+	error: Error,
+	extraData?: Partial< LogData >
+) {
+	if ( ! canLog() ) {
+		return;
+	}
+
+	try {
+		await logger?.error( error, extraData );
+	} catch ( _error ) {
+		errorLog( 'Failed to send log:', _error );
 	}
 }

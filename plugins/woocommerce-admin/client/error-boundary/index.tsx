@@ -4,6 +4,7 @@
 import { Component, ReactNode, ErrorInfo } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { captureException } from '@woocommerce/remote-logging';
 /**
  * Internal dependencies
  */
@@ -34,9 +35,22 @@ export class ErrorBoundary extends Component<
 		return { hasError: true, error };
 	}
 
-	componentDidCatch( _error: Error, errorInfo: ErrorInfo ) {
+	componentDidCatch( error: Error, errorInfo: ErrorInfo ) {
 		this.setState( { errorInfo } );
-		// TODO: Log error to error tracking service
+
+		// Limit the component stack to 10 calls so we don't send too much data.
+		const componentStack = errorInfo.componentStack
+			.trim()
+			.split( '\n' )
+			.slice( 0, 10 )
+			.map( ( line ) => line.trim() );
+
+		captureException( error, {
+			severity: 'critical',
+			extra: {
+				componentStack,
+			},
+		} );
 	}
 
 	handleRefresh = () => {
