@@ -180,7 +180,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: '${{ last-run }}__${{ strategy.job-index }}'
-          path: ${{ env.ARTIFACTS_PATH }}/.last-run.json
+          path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
 
       - name: 'Run tests (${{ matrix.testType }})'
         env:
@@ -214,7 +214,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: '${{ last-run }}__${{ strategy.job-index }}'
-          path: ${{ env.ARTIFACTS_PATH }}/.last-run.json
+          path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
+          if-no-files-found: ignore
 
       - name: 'Archive metrics results'
         if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
