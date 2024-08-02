@@ -7,7 +7,7 @@ on:
     workflow_dispatch:
         inputs:
             release_branch:
-                description: Provide the release branch you want to cherry pick into. Example release/6.9
+                description: Provide the earliest release branch you want to cherry pick into. Example release/6.9
                 default: ''
                 required: true
             pull_requests:
@@ -23,6 +23,11 @@ on:
                 description: 'Slack Channel Override: The channel ID to send the Slack ping about the code freeze violation'
                 required: false
                 default: ''
+            force:
+                description: 'Force: set this to true when creating more than three PRs.'
+                type: boolean
+                required: false
+                default: false
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -84,9 +89,8 @@ jobs:
         needs: verify
         if: needs.verify.outputs.run == 'true'
         outputs:
-            release: ${{ steps.prep-inputs.outputs.release }}
+            release-branches: ${{ steps.identify-release-branches.outputs.releaseBranches }}
             pr: ${{ steps.prep-inputs.outputs.pr }}
-            version: ${{ steps.prep-inputs.outputs.version }}
         steps:
             - name: Prep inputs
               id: prep-inputs
@@ -98,21 +102,16 @@ jobs:
                       // Means this workflow was triggered manually.
                       if ( event.inputs && event.inputs.release_branch ) {
                         const releaseBranch = '${{ inputs.release_branch }}'
-                        const version = releaseBranch.replace( 'release/', '' )
-
-                        core.setOutput( 'version', version )
                         core.setOutput( 'release', releaseBranch )
                       } else if ( event.action === 'milestoned' ) {
                         const version = '${{ github.event.issue.milestone.title }}'
                         const release = version.substring( 0, 3 )
 
-                        core.setOutput( 'version', version )
                         core.setOutput( 'release', `release/${release}` )
                       } else {
                         const version = '${{ github.event.pull_request.milestone.title }}'
                         const release = version.substring( 0, 3 )
 
-                        core.setOutput( 'version', version )
                         core.setOutput( 'release', `release/${release}` )
                       }
 
@@ -124,10 +123,62 @@ jobs:
                       } else {
                         core.setOutput( 'pr', '${{ github.event.pull_request.number }}' )
                       }
-    check-release-branch-exists:
-        name: Check for existence of release branch
+
+            - name: Identify release branches
+              id: identify-release-branches
+              uses: actions/github-script@v6
+              with:
+                script: |
+                  const firstReleaseBranch = steps.prep-inputs.outputs.release;
+                  if ( ! /^release\/\d+\.\d+$/.test( firstReleaseBranch ) ) {
+                    throw new Error( 'Invalid release branch, it must be release/X.Y' );
+                  }
+                  const firstRelease = firstReleaseBranch.split('/')[1];
+                  let page = 1;
+                  const releaseBranches = [];
+
+                  while(true) {
+                    const milestones = await github.rest.issues.listMilestones({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      state: 'all',
+                      per_page: 100,
+                      page: page
+                    });
+                    if ( milestones.data.length === 0) {
+                      break;
+                    }
+                    for (const milestone of milestones.data) {
+                      if (/^[0-9]+\.[0-9]+/.test(milestone.title) && milestone.title.localeCompare(firstRelease) >= 0) {
+                        let releaseBranchId = milestone.title.split('.');
+                        releaseBranches.push(`release/${releaseBranchId[0]}.${releaseBranchId[1]}`);
+                      }
+                    }
+                    page++;
+                  }
+
+                  if ( releaseBranches.length === 0 ) {
+                    throw new Error('No release branches found');
+                  } else if ( releaseBranches.length > 3 && !inputs.force ) {
+                    console.error("Creating more than three PRs? Yeah, right.");
+                    console.error("Really? Ok, ask an admin to manually run this workflow with the force input set to true.");
+                    throw new Error('Cannot create more than three PRs');
+                  } else {
+                    core.setOutput('releaseBranches', releaseBranches);
+                  }
+
+    cherry-pick-run:
+        name: Run cherry pick tool
         runs-on: ubuntu-20.04
+        permissions:
+          actions: write
+          contents: write
+          pull-requests: write
         needs: prep
+        strategy:
+          matrix:
+            release: ${{ needs.prep.outputs.releaseBranches }}
+        if: success()
         steps:
             - name: Check for release branch
               id: release-breanch-check
@@ -138,31 +189,22 @@ jobs:
                       await github.request( 'GET /repos/{owner}/{repo}/branches/{branch}', {
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        branch: '${{ needs.prep.outputs.release }}',
+                        branch: '${{ matrix.release }}',
                       } );
-    cherry-pick-run:
-        name: Run cherry pick tool
-        runs-on: ubuntu-20.04
-        permissions:
-          actions: write
-          contents: write
-          pull-requests: write
-        needs: [prep, check-release-branch-exists]
-        if: success()
-        steps:
+
             - name: Checkout release branch
               uses: actions/checkout@v3
               with:
                   fetch-depth: 0
 
             - name: Git fetch the release branch
-              run: git fetch origin ${{ needs.prep.outputs.release }}
+              run: git fetch origin ${{ matrix.release }}
 
             - name: Checkout release branch
-              run: git checkout ${{ needs.prep.outputs.release }}
+              run: git checkout ${{ matrix.release }}
 
             - name: Create a cherry pick branch based on release branch
-              run: git checkout -b cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
+              run: git checkout -b cherry-pick-${{ matrix.release }}/${{ needs.prep.outputs.pr }}
 
             - name: Get commit sha from PR
               id: commit-sha
@@ -291,7 +333,7 @@ jobs:
               run: git commit --no-verify -am "Prep for cherry pick ${{ needs.prep.outputs.pr }}"
 
             - name: Push cherry pick branch up
-              run: git push origin cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}
+              run: git push origin cherry-pick-${{ matrix.release }}/${{ needs.prep.outputs.pr }}
 
             - name: Create the PR for cherry pick branch
               id: cherry-pick-pr
@@ -305,9 +347,9 @@ jobs:
                       const pr = await github.rest.pulls.create({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
-                        title: "Cherry pick ${{ needs.prep.outputs.pr }} into ${{ needs.prep.outputs.release }}",
-                        head: "cherry-pick-${{ needs.prep.outputs.version }}/${{ needs.prep.outputs.pr }}",
-                        base: "${{ needs.prep.outputs.release }}",
+                        title: "Cherry pick ${{ needs.prep.outputs.pr }} into ${{ matrix.release }}",
+                        head: "cherry-pick-${{ matrix.release }}/${{ needs.prep.outputs.pr }}",
+                        base: "${{ matrix.release }}",
                         body: cherryPickPRBody
                       })
 
@@ -366,9 +408,9 @@ jobs:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
-                      :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
+                      :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ matrix.release }}' :ice_cube:
 
-                      An attempt to cherry pick PR(s) into outgoing release '${{ needs.prep.outputs.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
+                      An attempt to cherry pick PR(s) into outgoing release '${{ matrix.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
 
             - name: Notify Slack on success
               if: ${{ success() && inputs.skipSlackPing != true }}
@@ -377,7 +419,7 @@ jobs:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
                   slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
                   slack-text: |
-                      :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
+                      :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ matrix.release }}' :ice_cube:
 
                       Release lead please review:
 
