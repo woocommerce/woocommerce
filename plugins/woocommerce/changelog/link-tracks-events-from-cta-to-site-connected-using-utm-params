@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Use UTM parameters to link Tracks events from connect notice CTA and successful site connection

@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
 import { createElement, createInterpolateElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-
+import { Product } from '@woocommerce/data';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -20,6 +20,7 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ProductEditorBlockEditProps } from '../../../types';
+import { useValidation } from '../../../contexts/validation-context';
 
 /**
  * Internal dependencies
@@ -35,6 +36,14 @@ export function Edit( {
 		'postType',
 		context.postType,
 		'sku'
+	);
+
+	const { ref: skuRef } = useValidation< Product >(
+		'sku',
+		async function skuValidator() {
+			return undefined;
+		},
+		[ sku ]
 	);
 
 	return (
@@ -54,6 +63,7 @@ export function Edit( {
 				) }
 			>
 				<InputControl
+					ref={ skuRef }
 					name={ 'woocommerce-product-sku' }
 					onChange={ setSku }
 					value={ sku || '' }
