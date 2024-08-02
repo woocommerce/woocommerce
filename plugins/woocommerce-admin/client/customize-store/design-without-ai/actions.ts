@@ -30,11 +30,11 @@ const redirectToIntroWithError = sendParent<
 >( ( context, event ) => {
 	const errorEvent = event as {
 		type: string;
-		data: { data: { status: number } };
+		data?: { data?: { status: number } };
 	};
 	return {
 		type: 'NO_AI_FLOW_ERROR',
-		errorStatus: errorEvent?.data?.data?.status || undefined,
+		errorStatus: errorEvent?.data?.data?.status,
 	};
 } );
 
