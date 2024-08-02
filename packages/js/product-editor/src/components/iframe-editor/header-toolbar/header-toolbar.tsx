@@ -142,14 +142,10 @@ export function HeaderToolbar( {
 							onClick={ toggleInserter }
 							disabled={ ! isInserterEnabled }
 							icon={ plus }
-							label={
-								! isInserterOpened
-									? __(
-											'Toggle block inserter',
-											'woocommerce'
-									  )
-									: __( 'Close', 'woocommerce' )
-							}
+							label={ __(
+								'Toggle block inserter',
+								'woocommerce'
+							) }
 							aria-expanded={ isInserterOpened }
 							showTooltip
 						/>
