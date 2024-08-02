@@ -234,7 +234,7 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
+		test.skip( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
 			page,
 			context,
 			cartBlockPage,

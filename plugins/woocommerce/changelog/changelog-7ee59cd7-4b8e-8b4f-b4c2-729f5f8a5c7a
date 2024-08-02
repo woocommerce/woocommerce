@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: should show correct total cart block price with 2 different products and flat rate/local pickup
