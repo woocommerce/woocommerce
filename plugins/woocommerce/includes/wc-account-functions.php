@@ -42,6 +42,7 @@ function wc_lostpassword_url( $default_url = '' ) {
 		return $default_url;
 	}
 }
+
 add_filter( 'lostpassword_url', 'wc_lostpassword_url', 10, 1 );
 
 /**
