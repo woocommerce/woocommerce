@@ -181,6 +181,7 @@ jobs:
         with:
           name: 'last-run__${{ strategy.job-index }}'
           path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
+          continue-on-error: true
 
       - name: 'Run tests (${{ matrix.testType }})'
         env:
