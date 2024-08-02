@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Improve performance of maybe_assign_default_product_cat by only dropping cache and term recounting if changes were made in the database

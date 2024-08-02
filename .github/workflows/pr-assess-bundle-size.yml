@@ -52,7 +52,7 @@ jobs:
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce-blocks}/{build,build-style}/**/*.{js,css}'
-                  install-script: 'pnpm install --filter="@woocommerce/plugin-woocommerce..." --frozen-lockfile --config.dedupe-peer-dependents=false'
+                  install-script: 'pnpm install --filter="@woocommerce/plugin-woocommerce..." --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts'
                   build-script: '--filter="@woocommerce/plugin-woocommerce" build'
                   clean-script: '--if-present buildclean'
                   minimum-change-threshold: 100

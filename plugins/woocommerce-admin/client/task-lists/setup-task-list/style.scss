@@ -8,13 +8,13 @@
 		width: 100%;
 	}
 
-	.wooocommerce-task-card__header-container {
+	.woocommerce-task-card__header-container {
 		display: flex;
 		position: relative;
 		border-bottom: 1px solid $studio-gray-5;
 	}
 
-	.wooocommerce-task-card__header {
+	.woocommerce-task-card__header {
 		width: 100%;
 		flex: 1;
 	}
@@ -41,7 +41,7 @@
 			}
 		}
 
-		.wooocommerce-task-card__header {
+		.woocommerce-task-card__header {
 			align-self: inherit;
 		}
 
@@ -85,7 +85,7 @@
 		margin-bottom: $gap-small;
 	}
 
-	.wooocommerce-task-card__header {
+	.woocommerce-task-card__header {
 		display: block;
 		text-align: center;
 	}
