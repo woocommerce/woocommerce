@@ -162,7 +162,7 @@ class RestApi {
 				} else {
 					$blueprint = ImportSchema::create_from_json( $uploaded_file );
 				}
-			} catch ( \InvalidArgumentException $e ) {
+			} catch ( \Exception $e ) {
 				return new \WP_HTTP_Response(
 					array(
 						'status'  => 'error',
