@@ -161,7 +161,7 @@ jobs:
 
                   if ( releaseBranches.length === 0 ) {
                     throw new Error('No release branches found');
-                  } else if ( releaseBranches.length > 3 && !inputs.force ) {
+                  } else if ( releaseBranches.length > 3 && ! ${{ inputs.force }} ) {
                     console.error("Creating more than three PRs? Yeah, right.");
                     console.error("Really? Ok, ask an admin to manually run this workflow with the force input set to true.");
                     throw new Error('Cannot create more than three PRs');
