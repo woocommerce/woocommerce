@@ -10,13 +10,13 @@ import { type AttributeMetadata } from '@woocommerce/types';
 import { WooCommerceBlockLocation } from '../product-template/utils';
 
 export enum ProductCollectionUIStatesInEditor {
-	PRODUCT_CONTEXT_PICKER = 'product_context_picker',
-	USES_REFERENCE_PREVIEW_MODE = 'uses_reference_preview_mode',
-	COLLECTION_CHOOSER = 'collection_chooser',
+	COLLECTION_PICKER = 'collection_chooser',
+	PRODUCT_REFERENCE_PICKER = 'product_context_picker',
+	VALID_WITH_PREVIEW = 'uses_reference_preview_mode',
 	VALID = 'valid',
 	// Future states
-	// ERROR_STATE = 'error_state',
-	// DELETED_PRODUCT_STATE = 'deleted_product_state',
+	// INVALID = 'invalid',
+	// DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',
 }
 
 export interface ProductCollectionAttributes {

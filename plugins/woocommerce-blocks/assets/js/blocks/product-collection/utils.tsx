@@ -217,7 +217,7 @@ export const getProductCollectionUIStateInEditor = ( {
 		! isProductContextSelected &&
 		isCollectionSelected
 	) {
-		return ProductCollectionUIStatesInEditor.PRODUCT_CONTEXT_PICKER;
+		return ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER;
 	}
 
 	/**
@@ -242,7 +242,7 @@ export const getProductCollectionUIStateInEditor = ( {
 			! isArchiveLocationWithTermId &&
 			! isProductLocationWithProductId
 		) {
-			return ProductCollectionUIStatesInEditor.USES_REFERENCE_PREVIEW_MODE;
+			return ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW;
 		}
 	}
 
@@ -250,7 +250,7 @@ export const getProductCollectionUIStateInEditor = ( {
 	 * Case 3: Collection chooser
 	 */
 	if ( ! hasInnerBlocks && ! isCollectionSelected ) {
-		return ProductCollectionUIStatesInEditor.COLLECTION_CHOOSER;
+		return ProductCollectionUIStatesInEditor.COLLECTION_PICKER;
 	}
 
 	return ProductCollectionUIStatesInEditor.VALID;

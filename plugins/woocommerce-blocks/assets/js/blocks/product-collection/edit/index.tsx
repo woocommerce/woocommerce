@@ -48,16 +48,16 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	let Component,
 		isUsesReferencePreviewMode = false;
 	switch ( productCollectionUIStateInEditor ) {
-		case ProductCollectionUIStatesInEditor.COLLECTION_CHOOSER:
+		case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
 			Component = ProductCollectionPlaceholder;
 			break;
-		case ProductCollectionUIStatesInEditor.PRODUCT_CONTEXT_PICKER:
+		case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
 			Component = ProductPicker;
 			break;
 		case ProductCollectionUIStatesInEditor.VALID:
 			Component = ProductCollectionContent;
 			break;
-		case ProductCollectionUIStatesInEditor.USES_REFERENCE_PREVIEW_MODE:
+		case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
 			Component = ProductCollectionContent;
 			isUsesReferencePreviewMode = true;
 			break;
