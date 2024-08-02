@@ -6,22 +6,7 @@ use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 
 class Util {
-	public static function snake_to_camel( $string ) {
-		// Split the string by underscores
-		$words = explode( '_', $string );
-
-		// Capitalize the first letter of each word
-		$words = array_map( 'ucfirst', $words );
-
-		// Join the words back together
-		return implode( '', $words );
-	}
-
-	public static function array_flatten($array) {
-		return new RecursiveIteratorIterator(new RecursiveArrayIterator($array));
-	}
-
-	public static function ensure_wp_content_path($path) {
+	public static function ensure_wp_content_path( $path ) {
 		$path = realpath( $path );
 		if ( $path === false || strpos( $path, WP_CONTENT_DIR ) !== 0 ) {
 			throw new \InvalidArgumentException( "Invalid path: $path" );
@@ -30,23 +15,10 @@ class Util {
 		return $path;
 	}
 
-	public static function camel_to_snake( $input ) {
-		// Replace all uppercase letters with an underscore followed by the lowercase version of the letter
-		$pattern     = '/([a-z])([A-Z])/';
-		$replacement = '$1_$2';
-		$snake       = preg_replace( $pattern, $replacement, $input );
-
-		// Replace spaces with underscores
-		$snake = str_replace( ' ', '_', $snake );
-
-		// Convert the entire string to lowercase
-		return strtolower( $snake );
-	}
-
 	public static function index_array( $array, $callback ) {
 		$result = array();
 		foreach ( $array as $key => $value ) {
-			$new_key = $callback( $key, $value );
+			$new_key            = $callback( $key, $value );
 			$result[ $new_key ] = $value;
 		}
 		return $result;
@@ -61,14 +33,14 @@ class Util {
 		return false;
 	}
 
-	public static function delete_dir( $dirPath ) {
-		if ( ! is_dir( $dirPath ) ) {
-			throw new \InvalidArgumentException( "$dirPath must be a directory" );
+	public static function delete_dir( $dir_path ) {
+		if ( ! is_dir( $dir_path ) ) {
+			throw new \InvalidArgumentException( "$dir_path must be a directory" );
 		}
-		if ( substr( $dirPath, strlen( $dirPath ) - 1, 1 ) != '/' ) {
-			$dirPath .= '/';
+		if ( substr( $dir_path, strlen( $dir_path ) - 1, 1 ) !== '/' ) {
+			$dir_path .= '/';
 		}
-		$files = glob( $dirPath . '*', GLOB_MARK );
+		$files = glob( $dir_path . '*', GLOB_MARK );
 		foreach ( $files as $file ) {
 			if ( is_dir( $file ) ) {
 				static::delete_dir( $file );
@@ -76,6 +48,6 @@ class Util {
 				unlink( $file );
 			}
 		}
-		rmdir( $dirPath );
+		rmdir( $dir_path );
 	}
 }
