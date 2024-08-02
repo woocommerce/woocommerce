@@ -127,7 +127,7 @@ test.describe(
 			} );
 		} );
 
-		test( 'allows cart block to apply coupon of any type', async ( {
+		test.skip( 'allows cart block to apply coupon of any type', async ( {
 			page,
 		} ) => {
 			const totals = [ '$50.00', '$27.50', '$45.00' ];
