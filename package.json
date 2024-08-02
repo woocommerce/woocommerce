@@ -79,5 +79,6 @@
 		"patchedDependencies": {
 			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch"
 		}
-	}
+	},
+	"packageManager": "pnpm@^9.1.0"
 }
