@@ -22,6 +22,11 @@ function wc_lostpassword_url( $default_url = '' ) {
 		return $default_url;
 	}
 
+	// Don't change the admin form.
+	if ( did_action( 'login_form_login' ) ) {
+		return $default_url;
+	}
+
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
 	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
 		return $default_url;
@@ -29,11 +34,9 @@ function wc_lostpassword_url( $default_url = '' ) {
 
 	$wc_account_page_url    = wc_get_page_permalink( 'myaccount' );
 	$wc_account_page_exists = wc_get_page_id( 'myaccount' ) > 0;
-	$is_account_page        = get_the_permalink() === $wc_account_page_url;
 	$lost_password_endpoint = get_option( 'woocommerce_myaccount_lost_password_endpoint' );
 
-	// Change the URL on My Account page only.
-	if ( $wc_account_page_exists && $is_account_page && ! empty( $lost_password_endpoint ) ) {
+	if ( $wc_account_page_exists && ! empty( $lost_password_endpoint ) ) {
 		return wc_get_endpoint_url( $lost_password_endpoint, '', $wc_account_page_url );
 	} else {
 		return $default_url;
