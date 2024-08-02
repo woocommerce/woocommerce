@@ -176,6 +176,13 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				// When re-running the test without resetting the env,
 				// the custom fields toggle might be already checked,
 				// so we need to check if it is checked before clicking it.
+				//
+				// Additionally, click() is used instead of check() because
+				// Playwright sometimes has issues with custom checkboxes:
+				// - https://github.com/microsoft/playwright/issues/13470
+				// - https://github.com/microsoft/playwright/issues/20893
+				// - https://github.com/microsoft/playwright/issues/27016
+				//
 				// eslint-disable-next-line playwright/no-conditional-in-test
 				if ( ! customFieldsToggle.isChecked() ) {
 					await customFieldsToggle.click();
