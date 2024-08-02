@@ -9,17 +9,17 @@ import { uniqueId, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 const DateInput = ( {
-	disabled,
+	disabled = false,
 	value,
 	onChange,
 	dateFormat,
 	label,
 	describedBy,
 	error,
-	onFocus,
-	onBlur,
-	onKeyDown,
-	errorPosition,
+	onFocus = () => {},
+	onBlur = () => {},
+	onKeyDown = noop,
+	errorPosition = 'bottom center',
 } ) => {
 	const classes = classnames( 'woocommerce-calendar__input', {
 		'is-empty': value.length === 0,
@@ -73,12 +73,5 @@ DateInput.propTypes = {
 	onKeyDown: PropTypes.func,
 };
 
-DateInput.defaultProps = {
-	disabled: false,
-	onFocus: () => {},
-	onBlur: () => {},
-	errorPosition: 'bottom center',
-	onKeyDown: noop,
-};
 
 export default DateInput;
