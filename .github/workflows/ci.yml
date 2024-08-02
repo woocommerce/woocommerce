@@ -38,7 +38,8 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          fetch-depth: 0
+          # If 'base_ref' is available, the 'Build Matrix' step requires non-shallow git-history to identify changed files.
+          fetch-depth: ${{ ( ( github.base_ref && '0' ) || '1' ) }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
