@@ -714,6 +714,11 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
 
 		/**
+		 * Product Usage
+		 */
+		include_once WC_ABSPATH . 'includes/product-usage/class-wc-product-usage.php';
+
+		/**
 		 * Libraries and packages.
 		 */
 		include_once WC_ABSPATH . 'packages/action-scheduler/action-scheduler.php';
