@@ -49,5 +49,4 @@ ViewMoreList.propTypes = {
 	items: PropTypes.arrayOf( PropTypes.node ),
 };
 
-
 export default ViewMoreList;

@@ -73,5 +73,4 @@ DateInput.propTypes = {
 	onKeyDown: PropTypes.func,
 };
 
-
 export default DateInput;
