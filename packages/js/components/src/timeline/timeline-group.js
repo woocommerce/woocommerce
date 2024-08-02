@@ -11,8 +11,12 @@ import { createElement } from '@wordpress/element';
 import TimelineItem from './timeline-item';
 import { sortByDateUsing } from './util';
 
-const TimelineGroup = ( props ) => {
-	const { group, className, orderBy, clockFormat } = props;
+const TimelineGroup = ( { 
+	group,
+	className = '',
+	orderBy = 'desc',
+	clockFormat
+} ) => {
 	const groupClassName = classnames(
 		'woocommerce-timeline-group',
 		className
@@ -102,13 +106,5 @@ TimelineGroup.propTypes = {
 	clockFormat: PropTypes.string,
 };
 
-TimelineGroup.defaultProps = {
-	className: '',
-	group: {
-		title: '',
-		items: [],
-	},
-	orderBy: 'desc',
-};
 
 export default TimelineGroup;
