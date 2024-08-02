@@ -34,7 +34,7 @@ const redirectToIntroWithError = sendParent<
 	};
 	return {
 		type: 'NO_AI_FLOW_ERROR',
-		errorStatus: errorEvent.data.data.status,
+		errorStatus: errorEvent?.data?.data?.status || undefined,
 	};
 } );
 

@@ -280,7 +280,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const errorMessage =
 		context.intro.errorStatus === 403
 			? __(
-					"Sorry, you don't have permissions to update the theme.",
+					"Sorry, you don't have permission to update the theme.",
 					'woocommerce'
 			  )
 			: __(
