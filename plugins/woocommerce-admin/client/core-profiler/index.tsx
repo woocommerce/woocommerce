@@ -43,6 +43,7 @@ import CurrencyFactory from '@woocommerce/currency';
  * Internal dependencies
  */
 import { findComponentMeta } from '~/utils/xstate/find-component';
+import { initRemoteLogging } from '~/lib/init-remote-logging';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -330,6 +331,7 @@ const updateTrackingOption = fromPromise(
 			) {
 				window.wcTracks.enable( () => {
 					initializeExPlat();
+					initRemoteLogging();
 					resolve(); // resolve the promise only after explat is enabled by the callback
 				} );
 			} else {
