@@ -188,29 +188,31 @@ jobs:
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
         run: |
           # Move and rename the downloaded file to the expected name
-          FILE_PATH="$ARTIFACTS_PATH/.last-run.json"
-          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}/.last-run__${{ strategy.job-index }}.json" ]; then
+          ls -lh
+          downloadedFile="${{ steps.download-last-run-info.outputs.download-path }}/.last-run__${{ strategy.job-index }}.json"
+          lastRunFilePath="$ARTIFACTS_PATH/.last-run.json"
+          if [ -f "$downloadedFile" ]; then
             ls -lh "${{ steps.download-last-run-info.outputs.download-path }}"
-            mv "${{ steps.download-last-run-info.outputs.download-path }}/.last-run__${{ strategy.job-index }}.json" "$FILE_PATH"
+            mv "$downloadedFile" "$lastRunFilePath"
             ls -lh "$ARTIFACTS_PATH"
           fi
           
-          LAST_RUN_FLAG=""
-          if [ -f "$FILE_PATH" ]; then
-            cat "$FILE_PATH"
+          lastRunFlag=""
+          if [ -f "$lastRunFilePath" ]; then
+            cat "$lastRunFilePath"
             # Playwright last run info is available, parse the file and check if there are failed tests
-            FAILED_TESTS=$(jq '.failedTests | length' "$FILE_PATH")
+            failedTests=$(jq '.failedTests | length' "$lastRunFilePath")
           
             # Only if there are failed tests, we want to use the --last-failed flag. 
             # The run will fail if we're using the flag and there are no failed tests.
-            if [ "$FAILED_TESTS" -gt 0 ]; then
+            if [ "$failedTests" -gt 0 ]; then
               echo "Found failed tests, running only failed tests"
-              LAST_RUN_FLAG="--last-failed"
+              lastRunFlag="--last-failed"
             fi
           fi
           
           # Finally, run the tests
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $LAST_RUN_FLAG
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
           
       - name: 'Upload Playwright last run info'
         if: ${{ failure() && matrix.report.resultsPath != '' }}
