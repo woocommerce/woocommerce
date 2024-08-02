@@ -138,6 +138,7 @@ class RestApi {
 			);
 		}
 
+
 		// phpcs:ignore
 		if ( ! empty( $_FILES['file'] ) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
 			// phpcs:ignore
@@ -145,7 +146,7 @@ class RestApi {
 
 			try {
 				// phpcs:ignore
-				if ( $_FILES['file']['type'] === 'application/zip' ) {
+				if ( mime_content_type( $uploaded_file ) === 'application/zip' ) {
 					// phpcs:ignore
 					if ( ! function_exists( 'wp_handle_upload' ) ) {
 						require_once ABSPATH . 'wp-admin/includes/file.php';
