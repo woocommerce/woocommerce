@@ -252,10 +252,8 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        with:
-          php-version: false
+      - name: 'Setup PNPM'
+        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
 
       - name: 'Send messages for failed jobs'
         env:
