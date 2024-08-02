@@ -27,7 +27,7 @@ class RestApi {
 	/**
 	 * Register routes.
 	 *
-	 * @since 9.x.x
+	 * @since 9.3.0
 	 */
 	public function register_routes() {
 		register_rest_route(
