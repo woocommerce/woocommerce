@@ -170,7 +170,7 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
  * Get the message to show in the preview label when the block is in preview mode based
  * on the `usesReference` value.
  */
-export const getUsesReferencePreviewLabelMessage = (
+export const getUsesReferencePreviewMessage = (
 	location: WooCommerceBlockLocation,
 	isUsesReferencePreviewMode: boolean
 ) => {
@@ -285,7 +285,7 @@ export const useSetPreviewState = ( {
 	 * When usesReference is available on Frontend but not on Editor side,
 	 * we want to show a preview label to indicate that the block is in preview mode.
 	 */
-	const usesReferencePreviewMessage = getUsesReferencePreviewLabelMessage(
+	const usesReferencePreviewMessage = getUsesReferencePreviewMessage(
 		location,
 		isUsesReferencePreviewMode
 	);
