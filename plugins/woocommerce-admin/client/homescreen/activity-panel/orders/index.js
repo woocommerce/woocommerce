@@ -367,10 +367,4 @@ OrdersPanel.propTypes = {
 	orderStatuses: PropTypes.array,
 };
 
-OrdersPanel.defaultProps = {
-	orders: [],
-	isError: false,
-	isRequesting: false,
-};
-
 export default OrdersPanel;
