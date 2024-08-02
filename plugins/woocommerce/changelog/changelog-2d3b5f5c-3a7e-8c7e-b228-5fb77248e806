@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed
