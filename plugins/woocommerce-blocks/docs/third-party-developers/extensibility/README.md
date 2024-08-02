@@ -2,7 +2,7 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Imports and dependency extration](#imports-and-dependency-extration)
+-   [Imports and dependency extraction](#imports-and-dependency-extraction)
 -   [Hooks (actions and filters)](#hooks-actions-and-filters)
 -   [REST API](#rest-api)
 -   [Checkout Payment Methods](#checkout-payment-methods)
@@ -10,7 +10,7 @@
 
 These documents are all dealing with extensibility in the various WooCommerce Blocks.
 
-## Imports and dependency extration
+## Imports and dependency extraction
 
 The documentation in this section will use window globals in code examples, for example:
 
