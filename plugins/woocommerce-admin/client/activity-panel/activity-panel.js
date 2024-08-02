@@ -503,8 +503,4 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	);
 };
 
-ActivityPanel.defaultProps = {
-	getHistory,
-};
-
 export default ActivityPanel;
