@@ -5,14 +5,35 @@ namespace Automattic\WooCommerce\Blueprint\Exporters;
 use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 
+/**
+ * Class ExportInstallPluginSteps
+ *
+ * @package Automattic\WooCommerce\Blueprint\Exporters
+ */
 class ExportInstallPluginSteps implements StepExporter {
 	use UseWPFunctions;
+
+	/**
+	 * Whether to include private plugins in the export.
+	 *
+	 * @var bool Whether to include private plugins in the export.
+	 */
 	private bool $include_private_plugins = false;
 
+	/**
+	 * Set whether to include private plugins in the export.
+	 *
+	 * @param bool $boolean Whether to include private plugins.
+	 */
 	public function include_private_plugins( bool $boolean ) {
 		$this->include_private_plugins = $boolean;
 	}
 
+	/**
+	 * Export the steps required to install plugins.
+	 *
+	 * @return array The array of InstallPlugin steps.
+	 */
 	public function export() {
 		$plugins = $this->wp_get_plugins();
 
@@ -29,8 +50,8 @@ class ExportInstallPluginSteps implements StepExporter {
 				continue;
 			}
 			$slug = dirname( $path );
-			// single-file plugin
-			if ( $slug === '.' ) {
+			// single-file plugin.
+			if ( '.' === $slug ) {
 				$slug = pathinfo( $path )['filename'];
 			}
 			$info = $this->wp_plugins_api(
@@ -44,7 +65,7 @@ class ExportInstallPluginSteps implements StepExporter {
 			);
 
 			$has_download_link = isset( $info->download_link );
-			if ( $this->include_private_plugins === false && ! $has_download_link ) {
+			if ( false === $this->include_private_plugins && ! $has_download_link ) {
 				continue;
 			}
 
@@ -61,6 +82,11 @@ class ExportInstallPluginSteps implements StepExporter {
 		return $steps;
 	}
 
+	/**
+	 * Get the name of the step.
+	 *
+	 * @return string The step name.
+	 */
 	public function get_step_name() {
 		return InstallPlugin::get_step_name();
 	}

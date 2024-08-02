@@ -9,7 +9,6 @@ use Automattic\WooCommerce\Blueprint\Steps\Step;
  *
  * A Step Exporter is responsible collecting data needed for a Step object and exporting it.
  * Refer to the Step class for the data needed as each step may require different data.
- *
  */
 interface StepExporter {
 	/**

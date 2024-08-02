@@ -5,16 +5,36 @@ namespace Automattic\WooCommerce\Blueprint;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 
+/**
+ * Utility functions.
+ */
 class Util {
+	/**
+	 * Ensure that the given path is a valid path within the WP_CONTENT_DIR.
+	 *
+	 * @param string $path The path to be validated.
+	 *
+	 * @return string
+	 * @throws \InvalidArgumentException If the path is invalid.
+	 */
 	public static function ensure_wp_content_path( $path ) {
 		$path = realpath( $path );
-		if ( $path === false || strpos( $path, WP_CONTENT_DIR ) !== 0 ) {
+		if ( false === $path || strpos( $path, WP_CONTENT_DIR ) !== 0 ) {
 			throw new \InvalidArgumentException( "Invalid path: $path" );
 		}
 
 		return $path;
 	}
 
+	/**
+	 * Index an array using a callback function.
+	 *
+	 * @param array    $array The array to be indexed.
+	 * @param callable $callback The callback function to be called for each element.
+	 *
+	 * @return array
+	 */
+	// phpcs:ignore
 	public static function index_array( $array, $callback ) {
 		$result = array();
 		foreach ( $array as $key => $value ) {
@@ -24,8 +44,15 @@ class Util {
 		return $result;
 	}
 
+	/**
+	 * Check to see if given string is a valid WordPress plugin slug.
+	 *
+	 * @param string $slug The slug to be validated.
+	 *
+	 * @return bool
+	 */
 	public static function is_valid_wp_plugin_slug( $slug ) {
-		// Check if the slug only contains allowed characters
+		// Check if the slug only contains allowed characters.
 		if ( preg_match( '/^[a-z0-9-]+$/', $slug ) ) {
 			return true;
 		}
@@ -33,6 +60,14 @@ class Util {
 		return false;
 	}
 
+	/**
+	 * Recursively delete a directory.
+	 *
+	 * @param string $dir_path The path to the directory.
+	 *
+	 * @return void
+	 * @throws \InvalidArgumentException If $dir_path is not a directory.
+	 */
 	public static function delete_dir( $dir_path ) {
 		if ( ! is_dir( $dir_path ) ) {
 			throw new \InvalidArgumentException( "$dir_path must be a directory" );
@@ -45,9 +80,11 @@ class Util {
 			if ( is_dir( $file ) ) {
 				static::delete_dir( $file );
 			} else {
+				// phpcs:ignore
 				unlink( $file );
 			}
 		}
+		// phpcs:ignore
 		rmdir( $dir_path );
 	}
 }

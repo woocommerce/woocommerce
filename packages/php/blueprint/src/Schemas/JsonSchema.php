@@ -2,15 +2,30 @@
 
 namespace Automattic\WooCommerce\Blueprint\Schemas;
 
+/**
+ * Class JsonSchema
+ */
 class JsonSchema {
+	/**
+	 * The schema.
+	 *
+	 * @var object The schema.
+	 */
 	protected $schema;
 
+	/**
+	 * JsonSchema constructor.
+	 *
+	 * @param string $json_path The path to the JSON file.
+	 * @throws \InvalidArgumentException If the JSON is invalid or missing 'steps' field.
+	 */
 	public function __construct( $json_path ) {
-		$schema = json_decode( file_get_contents( $json_path ) );
+		// phpcs:ignore
+		$schema       = json_decode( file_get_contents( $json_path ) );
 		$this->schema = $schema;
 
 		if ( ! $this->validate() ) {
-			throw new \InvalidArgumentException("Invalid JSON or missing 'steps' field." );
+			throw new \InvalidArgumentException( "Invalid JSON or missing 'steps' field." );
 		}
 	}
 
@@ -26,7 +41,7 @@ class JsonSchema {
 	/**
 	 * Returns steps by name.
 	 *
-	 * @param $name
+	 * @param string $name The name of the step.
 	 *
 	 * @return array
 	 */

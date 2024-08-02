@@ -24,24 +24,39 @@ class StepProcessorResult {
 	 */
 	private bool $success;
 
+	/**
+	 * Step name
+	 *
+	 * @var string $step_name
+	 */
 	private string $step_name;
 
 	/**
 	 * Construct.
 	 *
-	 * @param bool $success Indicate whether the process was success or not.
+	 * @param bool   $success Indicate whether the process was success or not.
+	 * @param string $step_name The name of the step.
 	 */
 	public function __construct( bool $success, string $step_name ) {
 		$this->success   = $success;
 		$this->step_name = $step_name;
 	}
 
+	/**
+	 * Get messages.
+	 *
+	 * @param string $step_name The name of the step.
+	 *
+	 * @return void
+	 */
 	public function set_step_name( $step_name ) {
 		$this->step_name = $step_name;
 	}
 
 	/**
 	 * Create a new instance with $success = true.
+	 *
+	 * @param string $stp_name The name of the step.
 	 *
 	 * @return StepProcessorResult
 	 */
@@ -131,6 +146,11 @@ class StepProcessorResult {
 		return true === $this->success && 0 === count( $this->get_messages( 'error' ) );
 	}
 
+	/**
+	 * Get the name of the step.
+	 *
+	 * @return string The name of the step.
+	 */
 	public function get_step_name() {
 		return $this->step_name;
 	}

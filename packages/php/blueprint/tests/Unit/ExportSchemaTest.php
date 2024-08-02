@@ -9,13 +9,23 @@ use Automattic\WooCommerce\Blueprint\Tests\TestCase;
 use Mockery;
 use Mockery\Mock;
 
+/**
+ * Class ExportSchemaTest
+ */
 class ExportSchemaTest extends TestCase {
 
+	/**
+	 * Get a mock of the ExportSchema class.
+	 *
+	 * @param boolean $partial Whether to make the mock partial.
+	 *
+	 * @return ExportSchema|Mockery\MockInterface&Mockery\LegacyMockInterface
+	 */
 	public function get_mock( $partial = false ) {
-	    $mock = Mock( ExportSchema::class );
+		$mock = Mock( ExportSchema::class );
 		if ( $partial ) {
-	        $mock->makePartial();
-	    }
+			$mock->makePartial();
+		}
 
 		return $mock;
 	}
@@ -25,22 +35,21 @@ class ExportSchemaTest extends TestCase {
 	 * with the built-in exporters.
 	 */
 	public function test_it_uses_exporters_passed_to_the_constructor() {
-		$empty_exporter = new EmptySetSiteOptionsExporter();
-		$mock = Mock( ExportSchema::class, [ [ $empty_exporter ] ] );
-		$built_in_exporters = (new BuiltInExporters())->get_all();
+		$empty_exporter     = new EmptySetSiteOptionsExporter();
+		$mock               = Mock( ExportSchema::class, array( array( $empty_exporter ) ) );
+		$built_in_exporters = ( new BuiltInExporters() )->get_all();
 		$mock->makePartial();
 		// Make sure wooblueprint_exporters filter passes the empty exporter + built-in exporters.
 		// and then return only the empty exporter to test that it is used.
 		// We're removing the built-in exporters as some of them make network calls.
-		$mock->shouldReceive('wp_apply_filters')
-			->with('wooblueprint_exporters', array_merge([ $empty_exporter ], $built_in_exporters) )
-			->andReturn([$empty_exporter]);
+		$mock->shouldReceive( 'wp_apply_filters' )
+			->with( 'wooblueprint_exporters', array_merge( array( $empty_exporter ), $built_in_exporters ) )
+			->andReturn( array( $empty_exporter ) );
 
 		$result = $mock->export();
-		$this->assertCount(1, $result['steps']);
-		$this->assertEquals('setSiteOptions', $result['steps'][0]['step']);
-		$this->assertEquals([], $result['steps'][0]['options']);
-
+		$this->assertCount( 1, $result['steps'] );
+		$this->assertEquals( 'setSiteOptions', $result['steps'][0]['step'] );
+		$this->assertEquals( array(), $result['steps'][0]['options'] );
 	}
 
 	/**
@@ -48,16 +57,16 @@ class ExportSchemaTest extends TestCase {
 	 */
 	public function test_wooblueprint_export_landingpage_filter() {
 		$exporter = $this->get_mock( true );
-		$exporter->shouldReceive('wp_apply_filters')
-			->with('wooblueprint_exporters', Mockery::any())
-			->andReturn([]);
+		$exporter->shouldReceive( 'wp_apply_filters' )
+			->with( 'wooblueprint_exporters', Mockery::any() )
+			->andReturn( array() );
 
-		$exporter->shouldReceive('wp_apply_filters')
-			->with('wooblueprint_export_landingpage', Mockery::any())
-			->andReturn('test');
+		$exporter->shouldReceive( 'wp_apply_filters' )
+			->with( 'wooblueprint_export_landingpage', Mockery::any() )
+			->andReturn( 'test' );
 
 		$result = $exporter->export();
-		$this->assertEquals('test', $result['landingPage']);
+		$this->assertEquals( 'test', $result['landingPage'] );
 	}
 
 	/**
@@ -66,7 +75,6 @@ class ExportSchemaTest extends TestCase {
 	 * @return void
 	 */
 	public function test_wooblueprint_exporters_filter() {
-
 	}
 
 	/**
@@ -75,7 +83,6 @@ class ExportSchemaTest extends TestCase {
 	 * @return void
 	 */
 	public function test_it_only_uses_exporters_specified_by_steps_argment() {
-
 	}
 
 	/**
@@ -85,6 +92,5 @@ class ExportSchemaTest extends TestCase {
 	 * @return void
 	 */
 	public function test_it_calls_include_private_plugins_for_zip_export() {
-
 	}
 }

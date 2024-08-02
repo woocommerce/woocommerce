@@ -7,12 +7,24 @@ use Automattic\WooCommerce\Blueprint\StepProcessorResult;
 use Automattic\WooCommerce\Blueprint\Steps\ActivatePlugin;
 use Automattic\WooCommerce\Blueprint\UsePluginHelpers;
 
+/**
+ * Class ImportActivatePlugin
+ */
 class ImportActivatePlugin implements StepProcessor {
 	use UsePluginHelpers;
 
+	/**
+	 * Process the schema.
+	 *
+	 * @param object $schema The schema to process.
+	 *
+	 * @return StepProcessorResult
+	 */
 	public function process( $schema ): StepProcessorResult {
 		$result = StepProcessorResult::success( ActivatePlugin::get_step_name() );
-		$name   = $schema->pluginName;
+
+		// phpcs:ignore
+		$name = $schema->pluginName;
 
 		$activate = $this->activate_plugin_by_slug( $name );
 		if ( $activate ) {
@@ -24,6 +36,11 @@ class ImportActivatePlugin implements StepProcessor {
 		return $result;
 	}
 
+	/**
+	 * Get the step class.
+	 *
+	 * @return string
+	 */
 	public function get_step_class(): string {
 		return ActivatePlugin::class;
 	}

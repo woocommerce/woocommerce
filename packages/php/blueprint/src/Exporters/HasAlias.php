@@ -29,5 +29,10 @@ namespace Automattic\WooCommerce\Blueprint\Exporters;
  * Interface HasAlias
  */
 interface HasAlias {
+	/**
+	 * Get the alias for the step.
+	 *
+	 * @return string The alias for the step.
+	 */
 	public function get_alias();
 }

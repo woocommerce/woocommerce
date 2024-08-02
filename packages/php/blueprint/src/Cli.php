@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Blueprint\Cli\ExportCli;
 use Automattic\WooCommerce\Blueprint\Cli\ImportCli;
 
 $autoload_path = __DIR__ . '/../vendor/autoload.php';
-if (file_exists($autoload_path)) {
+if ( file_exists( $autoload_path ) ) {
 	require_once $autoload_path;
 }
 /**
@@ -16,6 +16,11 @@ if (file_exists($autoload_path)) {
  * WP CLI commands.
  */
 class Cli {
+	/**
+	 * Register WP CLI commands.
+	 *
+	 * @return void
+	 */
 	public static function register_commands() {
 		\WP_CLI::add_command(
 			'wc blueprint import',

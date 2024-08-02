@@ -5,12 +5,33 @@ namespace Automattic\WooCommerce\Blueprint\Cli;
 use Automattic\WooCommerce\Blueprint\CliResultFormatter;
 use Automattic\WooCommerce\Blueprint\ImportSchema;
 
+/**
+ * Class ImportCli
+ */
 class ImportCli {
+	/**
+	 * Schema path
+	 *
+	 * @var string $schema_path The path to the schema file.
+	 */
 	private $schema_path;
+
+	/**
+	 * ImportCli constructor.
+	 *
+	 * @param string $schema_path The path to the schema file.
+	 */
 	public function __construct( $schema_path ) {
 		$this->schema_path = $schema_path;
 	}
 
+	/**
+	 * Run the import process.
+	 *
+	 * @param array $optional_args Optional arguments.
+	 *
+	 * @return void
+	 */
 	public function run( $optional_args ) {
 		$blueprint = ImportSchema::create_from_file( $this->schema_path );
 		$results   = $blueprint->import();

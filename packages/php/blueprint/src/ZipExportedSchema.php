@@ -5,59 +5,104 @@ namespace Automattic\WooCommerce\Blueprint;
 use Automattic\WooCommerce\Blueprint\Steps\InstallPlugin;
 use Automattic\WooCommerce\Blueprint\Steps\InstallTheme;
 
+/**
+ * Class ZipExportedSchema
+ *
+ * Handles the creation of a ZIP archive from a schema.
+ */
 class ZipExportedSchema {
-	// exported schema from ExportSchema class
+	/**
+	 * Exported schema from ExportSchema class.
+	 *
+	 * @var array
+	 */
 	protected array $schema;
 
-	// Full path for the zip file
+	/**
+	 * Full path for the ZIP file.
+	 *
+	 * @var string
+	 */
 	protected string $destination;
 
-	// base path
+	/**
+	 * Base path for working directory.
+	 *
+	 * @var string
+	 */
 	protected string $dir;
 
-	// a unique dir name for a single session
+	/**
+	 * Unique directory name for a single session.
+	 *
+	 * @var string
+	 */
 	protected string $working_dir;
 
+	/**
+	 * Array of files to be included in the ZIP archive.
+	 *
+	 * @var array
+	 */
 	protected array $files;
 
 	/**
-	 * @param $schema
-	 * @param $destination
+	 * Constructor.
+	 *
+	 * @param array       $schema Exported schema array.
+	 * @param string|null $destination Optional. Path to the destination ZIP file.
 	 */
 	public function __construct( $schema, $destination = null ) {
 		$this->schema = $schema;
 
 		$this->dir         = $this->get_default_destination_dir();
-		$this->destination = $destination === null ? $this->dir . '/woo-blueprint.zip' : Util::ensure_wp_content_path( $destination );
-		$this->working_dir = $this->dir . '/' . date( 'Ymd' ) . '_' . time();
+		$this->destination = null === $destination ? $this->dir . '/woo-blueprint.zip' : Util::ensure_wp_content_path( $destination );
+		$this->working_dir = $this->dir . '/' . gmdate( 'Ymd' ) . '_' . time();
 
 		if ( ! class_exists( 'PclZip' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/class-pclzip.php';
 		}
 	}
 
+	/**
+	 * Returns the full path for a file in the working directory.
+	 *
+	 * @param string $filename The name of the file.
+	 * @return string Full path to the file.
+	 */
 	protected function get_working_dir_path( $filename ) {
 		return $this->working_dir . '/' . $filename;
 	}
 
+	/**
+	 * Creates a directory if it does not exist.
+	 *
+	 * @param string $dir Directory path.
+	 */
 	protected function maybe_create_dir( $dir ) {
 		if ( ! is_dir( $dir ) ) {
+			// phpcs:ignore
 			mkdir( $dir, 0777, true );
 		}
 	}
 
+	/**
+	 * Creates a ZIP archive of the schema and resources.
+	 *
+	 * @return string Path to the created ZIP file.
+	 * @throws \Exception If there is an error creating the ZIP archive.
+	 */
 	public function zip() {
-
 		$this->maybe_create_dir( $this->working_dir );
 
-		// create .json file
+		// Create .json file.
 		$this->files[] = $this->create_json_schema_file();
 		$this->files   = array_merge( $this->files, $this->add_resource( InstallPlugin::get_step_name(), 'plugins' ) );
 		$this->files   = array_merge( $this->files, $this->add_resource( InstallTheme::get_step_name(), 'themes' ) );
 
 		$archive = new \PclZip( $this->destination );
-		if ( $archive->create( $this->files, PCLZIP_OPT_REMOVE_PATH, $this->working_dir ) == 0 ) {
-			throw new \Exception( 'Error : ' . $archive->errorInfo( true );
+		if ( $archive->create( $this->files, PCLZIP_OPT_REMOVE_PATH, $this->working_dir ) === 0 ) {
+			throw new \Exception( 'Error : ' . $archive->errorInfo( true ) );
 		}
 
 		$this->clean();
@@ -65,10 +110,21 @@ class ZipExportedSchema {
 		return $this->destination;
 	}
 
+	/**
+	 * Returns the default destination directory for the ZIP file.
+	 *
+	 * @return string Default destination directory path.
+	 */
 	protected function get_default_destination_dir() {
 		return WP_CONTENT_DIR . '/uploads/blueprint';
 	}
 
+	/**
+	 * Finds steps in the schema matching the given step name.
+	 *
+	 * @param string $step_name Name of the step to find.
+	 * @return array|null Array of matching steps, or null if none found.
+	 */
 	protected function find_steps( $step_name ) {
 		$steps = array_filter(
 			$this->schema['steps'],
@@ -82,22 +138,30 @@ class ZipExportedSchema {
 		return null;
 	}
 
+	/**
+	 * Adds resources to the list of files for the ZIP archive.
+	 *
+	 * @param string $step Step name to find resources for.
+	 * @param string $type Type of resources ('plugins' or 'themes').
+	 * @return array Array of file paths to include in the ZIP archive.
+	 *
+	 * @throws \Exception If there is an error creating the ZIP archive.
+	 * @throws \InvalidArgumentException If the given slug is not a valid plugin or theme.
+	 */
 	protected function add_resource( $step, $type ) {
-
-		// check if we have any plugins with resource = self/plugins
-		// if not, we should just skip
 		$steps = $this->find_steps( $step );
-		if ( $steps === null ) {
+		if ( null === $steps ) {
 			return array();
 		}
 
 		$steps = array_filter(
 			$steps,
-			function ( $plugin ) use ( $type ) {
-				if ( $type === 'plugins' ) {
-					return $plugin['pluginZipFile']['resource'] === 'self/plugins';
-				} else if ( $type === 'themes' ) {
-					return $plugin['themeZipFile']['resource'] === 'self/themes';
+			// phpcs:ignore
+			function ( $resource ) use ( $type ) {
+				if ( 'plugins' === $type ) {
+					return 'self/plugins' === $resource['pluginZipFile']['resource'];
+				} elseif ( 'themes' === $type ) {
+					return 'self/themes' === $resource['themeZipFile']['resource'];
 				}
 
 				return false;
@@ -108,33 +172,29 @@ class ZipExportedSchema {
 			return array();
 		}
 
-		// create 'plugins' dir
+		// Create 'plugins' or 'themes' directory.
 		$this->maybe_create_dir( $this->working_dir . '/' . $type );
 
 		$files = array();
 
 		foreach ( $steps as $step ) {
-			$resource   = $step[ $type === 'plugins' ? 'pluginZipFile' : 'themeZipFile' ];
-			// This is unlikely to happen since we validate the schema before using this class
-			// but just in case.
+			$resource = $step[ 'plugins' === $type ? 'pluginZipFile' : 'themeZipFile' ];
 			if ( ! Util::is_valid_wp_plugin_slug( $resource['slug'] ) ) {
-				throw new \InvalidArgumentException( 'Invalid plugin slug: ' . $resource['slug']);
+				throw new \InvalidArgumentException( 'Invalid plugin slug: ' . $resource['slug'] );
 			}
 
 			$destination = $this->working_dir . '/' . $type . '/' . $resource['slug'] . '.zip';
 			$plugin_dir  = WP_CONTENT_DIR . '/' . $type . '/' . $resource['slug'];
 			if ( ! is_dir( $plugin_dir ) ) {
-				// if dir does not exist, see if it's a single file plugin
 				$plugin_dir = $plugin_dir . '.php';
 				if ( ! file_exists( $plugin_dir ) ) {
-					// @todo handle error
 					continue;
 				}
 			}
 			$archive = new \PclZip( $destination );
 			$result  = $archive->create( $plugin_dir, PCLZIP_OPT_REMOVE_PATH, WP_CONTENT_DIR . '/' . $type );
-			if ( $result === 0 ) {
-				die( $archive->errorInfo( true ) );
+			if ( 0 === $result ) {
+				throw new \Exception( $archive->errorInfo( true ) );
 			}
 			$files[] = $destination;
 		}
@@ -142,12 +202,21 @@ class ZipExportedSchema {
 		return $files;
 	}
 
+	/**
+	 * Creates a JSON file from the schema.
+	 *
+	 * @return string Path to the created JSON schema file.
+	 */
 	private function create_json_schema_file() {
 		$schema_file = $this->get_working_dir_path( 'woo-blueprint.json' );
+		// phpcs:ignore
 		file_put_contents( $schema_file, json_encode( $this->schema, JSON_PRETTY_PRINT ) );
 		return $schema_file;
 	}
 
+	/**
+	 * Cleans up the working directory by deleting it.
+	 */
 	private function clean() {
 		Util::delete_dir( $this->working_dir );
 	}

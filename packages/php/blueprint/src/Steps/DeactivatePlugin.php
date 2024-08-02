@@ -2,21 +2,47 @@
 
 namespace Automattic\WooCommerce\Blueprint\Steps;
 
+/**
+ * Class DeactivatePlugin
+ */
 class DeactivatePlugin extends Step {
+	/**
+	 * The plugin name.
+	 *
+	 * @var string $plugin_name The plugin name.
+	 */
 	private string $plugin_name;
-	public function __construct($plugin_name) {
-	    $this->plugin_name = $plugin_name;
+
+	/**
+	 * DeactivatePlugin constructor.
+	 *
+	 * @param string $plugin_name string The plugin name.
+	 */
+	public function __construct( $plugin_name ) {
+		$this->plugin_name = $plugin_name;
 	}
 
-	public static function get_step_name() {
+	/**
+	 * Get the step name.
+	 *
+	 * @return string
+	 */
+	public static function get_step_name(): string {
 		return 'deactivatePlugin';
 	}
 
-	public static function get_schema( $version = 1 ) {
+	/**
+	 * Get the schema for this step.
+	 *
+	 * @param int $version The schema version.
+	 *
+	 * @return array
+	 */
+	public static function get_schema( int $version = 1 ): array {
 		return array(
-			'type' => 'object',
+			'type'       => 'object',
 			'properties' => array(
-				'step' => array(
+				'step'       => array(
 					'type' => 'string',
 					'enum' => array( static::get_step_name() ),
 				),
@@ -24,15 +50,19 @@ class DeactivatePlugin extends Step {
 					'type' => 'string',
 				),
 			),
-			'required' => array( 'step', 'pluginName' ),
+			'required'   => array( 'step', 'pluginName' ),
 		);
 	}
 
-	public function prepare_json_array() {
+	/**
+	 * Prepare the JSON array for this step.
+	 *
+	 * @return array
+	 */
+	public function prepare_json_array(): array {
 		return array(
-			'step' => static::get_step_name(),
+			'step'       => static::get_step_name(),
 			'pluginName' => $this->plugin_name,
 		);
 	}
 }
-

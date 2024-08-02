@@ -18,16 +18,22 @@ class ImportSchema {
 	use UseWPFunctions;
 
 	/**
+	 * JsonSchema object.
+	 *
 	 * @var JsonSchema The schema instance.
 	 */
 	private JsonSchema $schema;
 
 	/**
+	 * Validator object.
+	 *
 	 * @var Validator The JSON schema validator instance.
 	 */
 	private Validator $validator;
 
 	/**
+	 * Built-in step processors.
+	 *
 	 * @var BuiltInStepProcessors The built-in step processors instance.
 	 */
 	private BuiltInStepProcessors $builtin_step_processors;
@@ -49,6 +55,11 @@ class ImportSchema {
 		$this->builtin_step_processors = new BuiltInStepProcessors( $schema );
 	}
 
+	/**
+	 * Get the schema.
+	 *
+	 * @return JsonSchema The schema.
+	 */
 	public function get_schema() {
 		return $this->schema;
 	}
@@ -63,7 +74,7 @@ class ImportSchema {
 		// @todo check for mime type
 		// @todo check for allowed types -- json or zip
 		$path_info = pathinfo( $file );
-		$is_zip    = $path_info['extension'] === 'zip';
+		$is_zip    = 'zip' === $path_info['extension'];
 
 		return $is_zip ? self::create_from_zip( $file ) : self::create_from_json( $file );
 	}
@@ -119,7 +130,7 @@ class ImportSchema {
 			}
 		);
 
-		// validate steps before processing
+		// validate steps before processing.
 		$this->validate_step_schemas( $indexed_step_processors, $result );
 
 		if ( count( $result->get_messages( 'error' ) ) !== 0 ) {
@@ -127,18 +138,26 @@ class ImportSchema {
 		}
 
 		foreach ( $this->schema->get_steps() as $step_schema ) {
-			$stepProcessor = $indexed_step_processors[ $step_schema->step ] ?? null;
-			if ( ! $stepProcessor instanceof StepProcessor ) {
+			$step_processor = $indexed_step_processors[ $step_schema->step ] ?? null;
+			if ( ! $step_processor instanceof StepProcessor ) {
 				$result->add_error( "Unable to create a step processor for {$step_schema->step}" );
 				continue;
 			}
 
-			$results[] = $stepProcessor->process( $step_schema );
+			$results[] = $step_processor->process( $step_schema );
 		}
 
 		return $results;
 	}
 
+	/**
+	 * Validate the step schemas.
+	 *
+	 * @param array               $indexed_step_processors Array of step processors indexed by step name.
+	 * @param StepProcessorResult $result The result object to add messages to.
+	 *
+	 * @return void
+	 */
 	protected function validate_step_schemas( array $indexed_step_processors, StepProcessorResult $result ) {
 		$step_schemas = array_map(
 			function ( $step_processor ) {
@@ -154,6 +173,7 @@ class ImportSchema {
 				continue;
 			}
 
+			// phpcs:ignore
 			$validate = $this->validator->validate( $step_json, json_encode( $step_schema ) );
 
 			if ( ! $validate->isValid() ) {

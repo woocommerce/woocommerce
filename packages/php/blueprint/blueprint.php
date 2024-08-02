@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: Blueprint
  * Plugin URI: https://woocommerce.com/
