@@ -143,10 +143,20 @@ class RestApi {
 		if ( ! empty( $_FILES['file'] ) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
 			// phpcs:ignore
 			$uploaded_file = $_FILES['file']['tmp_name'];
+			$mime_type = mime_content_type( $uploaded_file );
+			if ( $mime_type !== 'application/json' && $mime_type !== 'application/zip' ) {
+				return new \WP_HTTP_Response(
+					array(
+						'status'  => 'error',
+						'message' => __( 'Invalid file type', 'woocommerce' ),
+					),
+					400
+				);
+			}
 
 			try {
 				// phpcs:ignore
-				if ( mime_content_type( $uploaded_file ) === 'application/zip' ) {
+				if ( $mime_type === 'application/zip' ) {
 					// phpcs:ignore
 					if ( ! function_exists( 'wp_handle_upload' ) ) {
 						require_once ABSPATH . 'wp-admin/includes/file.php';
