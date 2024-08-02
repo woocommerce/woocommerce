@@ -33,10 +33,6 @@
 	width: 1em;
 }
 
-.wc-block-interactivity-components-checkbox-list__input:focus {
-	outline-width: 1px;
-}
-
 :where(.wc-block-interactivity-components-checkbox-list__mark) {
 	box-sizing: border-box;
 	display: none;
@@ -46,4 +42,12 @@
 	position: absolute;
 	top: 0;
 	width: 1em;
+}
+
+.wc-block-interactivity-components-checkbox-list__item .wc-block-interactivity-components-checkbox-list__label {
+  margin-bottom: 0;
+}
+
+.wc-block-interactivity-components-checkbox-list__input:focus {
+	outline-width: 1px;
 }

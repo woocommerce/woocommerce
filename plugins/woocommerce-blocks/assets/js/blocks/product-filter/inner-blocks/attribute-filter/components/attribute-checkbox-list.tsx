@@ -1,29 +1,26 @@
 /**
  * External dependencies
  */
-import FilterElementLabel from '@woocommerce/base-components/filter-element-label';
-import { CheckboxList } from '@woocommerce/blocks-components';
 import { AttributeTerm } from '@woocommerce/types';
+
+/**
+ * Internal dependencies
+ */
+import CheckboxListPreview from './checkbox-list-preview';
 
 type Props = {
 	attributeTerms: AttributeTerm[];
 	showCounts?: boolean;
 };
+
 export const AttributeCheckboxList = ( {
 	attributeTerms,
 	showCounts,
 }: Props ) => (
-	<CheckboxList
-		className="wc-block-attribute-filter style-list"
-		onChange={ () => null }
-		options={ attributeTerms.map( ( term ) => ( {
-			label: (
-				<FilterElementLabel
-					name={ term.name }
-					count={ showCounts ? term.count : null }
-				/>
-			),
-			value: term.slug,
-		} ) ) }
+	<CheckboxListPreview
+		items={ attributeTerms.map( ( term ) => {
+			if ( showCounts ) return `${ term.name } (${ term.count })`;
+			return term.name;
+		} ) }
 	/>
 );
