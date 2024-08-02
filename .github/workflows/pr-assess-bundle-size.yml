@@ -42,6 +42,7 @@ jobs:
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   # Both install and build are handled by compressed-size-action.
+                  php-version: false
                   install: false
                   build: false
                   pull-package-deps: '@woocommerce/plugin-woocommerce'
