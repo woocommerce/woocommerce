@@ -44,7 +44,6 @@ const reporter = [
 ];
 
 if ( process.env.CI ) {
-	reporter.push( [ 'github' ] );
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ testsRootPath }/reporters/skipped-tests.js` ] );
 } else {
