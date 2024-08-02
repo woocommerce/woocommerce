@@ -131,7 +131,7 @@ jQuery( function( $ ) {
 			$notice
 				.first()
 				.attr( 'tabindex', '-1' )
-				.delay( 100 ) // Wait for the element to get the tabindex attribute so it can be focused.
+				.delay( 500 ) // Wait for the element to get the tabindex attribute so it can be focused.
 				.focus();
 		}
 	} );
