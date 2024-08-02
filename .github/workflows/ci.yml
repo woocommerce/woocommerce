@@ -176,7 +176,7 @@ jobs:
 
       - name: 'Download Playwright last run info'
         id: 'download-last-run-info'
-        if: ${{ always() && matrix.report.resultsPath != '' }}
+        if: ${{ always() && matrix.report.resultsPath != '' && matrix.testType == 'e2e' }}
         uses: actions/download-artifact@v4
         with:
           pattern: 'last-run__${{ strategy.job-index }}'
