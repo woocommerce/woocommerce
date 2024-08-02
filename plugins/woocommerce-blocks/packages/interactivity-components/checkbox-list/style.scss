@@ -1,33 +1,49 @@
-//  Import styles we need to render the checkbox list and checkbox control.
-@import "../../../packages/components/checkbox-list/style";
-@import "../../../packages/components/checkbox-control/style";
+.wc-block-interactivity-components-checkbox-list__input:checked + .wc-block-interactivity-components-checkbox-list__mark {
+	display: block;
+}
 
-.wc-block-stock-filter-list {
+:where(.wc-block-interactivity-components-checkbox-list) {
+	list-style: none outside;
 	margin: 0;
+	padding: 0;
+}
 
-	li {
-		label {
-			cursor: pointer;
-		}
+:where(.wc-block-interactivity-components-checkbox-list__label) {
+	align-items: center;
+	display: flex;
+	gap: 0.625em;
+}
 
-		input {
-			cursor: pointer;
-			display: inline-block;
-		}
-	}
+:where(.wc-block-interactivity-components-checkbox-list__input-wrapper) {
+	display: block;
+	position: relative;
+}
 
-	.wc-block-components-checkbox-list {
-		margin: 0;
+:where(.wc-block-interactivity-components-checkbox-list__input) {
+	appearance: none;
+	background: currentColor;
+	border-radius: 2px;
+	border: none;
+	color: inherit;
+	display: block;
+	font-size: inherit;
+	height: 1em;
+	margin: 0;
+	opacity: 0.1;
+	width: 1em;
+}
 
-		li {
-			label {
-				cursor: pointer;
-			}
+.wc-block-interactivity-components-checkbox-list__input:focus {
+	outline-width: 1px;
+}
 
-			input {
-				cursor: pointer;
-				display: inline-block;
-			}
-		}
-	}
+:where(.wc-block-interactivity-components-checkbox-list__mark) {
+	box-sizing: border-box;
+	display: none;
+	height: 1em;
+	left: 0;
+	padding: 0.2em;
+	position: absolute;
+	top: 0;
+	width: 1em;
 }
