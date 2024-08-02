@@ -16,7 +16,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_lostpassword_url() {
-		$this->go_to( admin_url( '/wp-login.php' ) );
+		do_action( 'login_form_login' ); // Simulate admin login screen.
 
 		// Admin URL is expected.
 		$expected_url = admin_url( '/wp-login.php?action=lostpassword' );
