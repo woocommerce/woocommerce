@@ -864,7 +864,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$database_version = wc_get_server_database_version();
-		$log_directory    = LoggingUtil::get_log_directory();
+		$log_directory    = LoggingUtil::get_log_directory( false );
 
 		// Return all environment info. Described by JSON Schema.
 		return array(

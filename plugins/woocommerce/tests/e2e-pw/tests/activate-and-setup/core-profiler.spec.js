@@ -306,19 +306,26 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 			// confirm that the optional plugins are present
 			await expect(
-				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
+				page.locator( '.plugin-title', {
+					hasText: 'Pinterest for WooCommerce',
+				} )
+			).toBeVisible();
+			await expect(
+				page.locator( '.plugin-title', {
+					hasText: /Google for WooCommerce|Google Listings & Ads/,
+				} )
 			).toBeVisible();
 
 			await expect(
-				page
-					.getByRole( 'cell', {
-						name: 'Google for WooCommerce Get',
-					} )
-					.getByRole( 'strong' )
-			).toBeVisible();
-
-			await expect( page.getByText( 'MailPoet' ) ).toBeHidden();
-			await expect( page.getByText( 'Jetpack' ) ).toBeHidden();
+				page.locator( '.plugin-title', {
+					hasText: 'MailPoet',
+				} )
+			).toBeHidden();
+			await expect(
+				page.locator( '.plugin-title', {
+					hasText: 'Jetpack',
+				} )
+			).toBeHidden();
 		} );
 
 		await test.step( 'Confirm that information from core profiler saved', async () => {
