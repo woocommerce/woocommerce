@@ -184,7 +184,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				// - https://github.com/microsoft/playwright/issues/27016
 				//
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( ! customFieldsToggle.isChecked() ) {
+				if ( ! ( await customFieldsToggle.isChecked() ) ) {
 					await customFieldsToggle.click();
 				}
 
