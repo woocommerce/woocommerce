@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: Clicking on "Design your homepage" should open the Intro sidebar by default

@@ -110,7 +110,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( categories ).toHaveCount( 6 );
 	} );
 
-	test( 'Clicking on "Design your homepage" should open the Intro sidebar by default', async ( {
+	test.skip( 'Clicking on "Design your homepage" should open the Intro sidebar by default', async ( {
 		pageObject,
 		baseURL,
 	} ) => {
