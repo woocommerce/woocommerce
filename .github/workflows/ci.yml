@@ -151,29 +151,20 @@ jobs:
         env: ${{ matrix.testEnv.envVars }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
-      - name: 'Get commit message'
-        id: 'get_commit_message'
+      - name: 'Determine BuildKite Analytics Message'
         env:
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+            MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            COMMIT_MESSAGE="$PR_TITLE"
+            MESSAGE="$PR_TITLE"
           else
-            COMMIT_MESSAGE="${{ github.event_name }}"
+            MESSAGE="${{ github.event_name }}"
           fi
-          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_OUTPUT"
         shell: bash
-
-      - name: 'Run tests (${{ matrix.testType }})'
-        env:
-          E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
-          BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
-          BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
-          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -182,6 +173,27 @@ jobs:
         env:
           ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
         run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+
+      - name: 'Download Playwright last run info'
+        id: 'download-last-run-info'
+        if: ${{ always() && matrix.report.resultsPath != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: '${{ last-run }}__${{ strategy.job-index }}'
+          path: ${{ env.ARTIFACTS_PATH }}/.last-run.json
+
+      - name: 'Run tests (${{ matrix.testType }})'
+        env:
+          E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
+          BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
+          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
+        run: |
+          RUN_TESTS_CMD="pnpm --filter=\"${{ matrix.projectName }}\" ${{ matrix.command }}"
+          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}" ]; then
+            RUN_TESTS_CMD="$RUN_TESTS_CMD --last-failed"
+          fi
+          
+          $RUN_TESTS_CMD
 
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -196,6 +208,13 @@ jobs:
           name: flaky-tests-${{ strategy.job-index }}
           path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
           if-no-files-found: ignore
+          
+      - name: 'Upload Playwright last run info'
+        if: ${{ always() && matrix.report.resultsPath != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ last-run }}__${{ strategy.job-index }}'
+          path: ${{ env.ARTIFACTS_PATH }}/.last-run.json
 
       - name: 'Archive metrics results'
         if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above

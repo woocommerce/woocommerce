@@ -3,6 +3,7 @@ const { logIn } = require( '../utils/login' );
 const { admin, customer } = require( '../test-data/data' );
 
 test( 'Load the home page', async ( { page } ) => {
+	expect( 1 ).toBe( 2 );
 	await page.goto( '/' );
 	await expect(
 		await page
