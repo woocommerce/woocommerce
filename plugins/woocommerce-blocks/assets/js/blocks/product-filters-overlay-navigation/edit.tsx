@@ -127,28 +127,38 @@ export const Edit = ( {
 	} );
 	const {
 		isWithinProductFiltersTemplatePart,
-	}: { isWithinProductFiltersTemplatePart: boolean } = useSelect(
-		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			const { getCurrentPostId } = select( 'core/editor' );
-			const currentPostId = getCurrentPostId< string >();
-			const currentPostIdParts = currentPostId?.split( '//' );
-			let isProductFiltersTemplatePart = false;
+		isWithinTemplate,
+	}: {
+		isWithinProductFiltersTemplatePart: boolean;
+		isWithinTemplate: boolean;
+	} = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		const { getCurrentPostId, getCurrentPostType } =
+			select( 'core/editor' );
+		const currentPostId = getCurrentPostId< string >();
+		const currentPostIdParts = currentPostId?.split( '//' );
+		const currentPostType = getCurrentPostType< string >();
+		let isProductFiltersTemplatePart = false;
+		const isTemplate = currentPostType === 'wp_template';
 
-			if ( currentPostIdParts?.length > 1 ) {
-				const [ , postId ] = currentPostIdParts;
-				isProductFiltersTemplatePart = postId === 'product-filters';
-			}
-
-			return {
-				isWithinProductFiltersTemplatePart:
-					isProductFiltersTemplatePart,
-			};
+		if (
+			currentPostType === 'wp_template_part' &&
+			currentPostIdParts?.length > 1
+		) {
+			const [ , postId ] = currentPostIdParts;
+			isProductFiltersTemplatePart = postId === 'product-filters';
 		}
-	);
-	const shouldHideBlock =
-		! isWithinProductFiltersTemplatePart && triggerType === 'open-overlay';
+
+		return {
+			isWithinProductFiltersTemplatePart: isProductFiltersTemplatePart,
+			isWithinTemplate: isTemplate,
+		};
+	} );
+	const shouldHideBlock = isWithinTemplate
+		? false
+		: ! isWithinProductFiltersTemplatePart &&
+		  triggerType === 'open-overlay';
 	// We need useInnerBlocksProps because Gutenberg only applies layout classes
 	// to parent block. We don't have any inner blocks but we want to use the
 	// layout controls.

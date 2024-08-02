@@ -19,6 +19,7 @@ if ( isExperimentalBlocksEnabled() ) {
 		edit: Edit,
 		save: Save,
 		icon: <Icon icon={ navigation } />,
+		attributes: metadata.attributes,
 		variations: blockVariations,
 	} );
 }

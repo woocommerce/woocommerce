@@ -7,10 +7,7 @@ import { BlockVariation } from '@wordpress/blocks';
 const variations: BlockVariation[] = [
 	{
 		name: 'product-filters-overlay-navigation-open-trigger',
-		title: __(
-			'Product Filters Overlay Navigation (Experimental)',
-			'woocommerce'
-		),
+		title: __( 'Navigation (Experimental)', 'woocommerce' ),
 		attributes: {
 			triggerType: 'open-overlay',
 		},
