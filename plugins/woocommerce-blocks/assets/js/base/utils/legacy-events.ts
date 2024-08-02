@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { AddToCartEventDetail } from '@woocommerce/types';
+import type { CoreCollectionNames } from '@woocommerce/blocks/product-collection/types';
 
 const CustomEvent = window.CustomEvent || null;
 
@@ -59,10 +60,13 @@ export const triggerAddedToCartEvent = ( {
 	} );
 };
 
-export const triggerProductListRenderedEvent = (): void => {
+export const triggerProductListRenderedEvent = ( payload: {
+	collection: CoreCollectionNames | string;
+} ) => {
 	dispatchEvent( 'wc-blocks_product_list_rendered', {
 		bubbles: true,
 		cancelable: true,
+		detail: payload,
 	} );
 };
 
