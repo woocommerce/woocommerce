@@ -489,7 +489,7 @@
 					],
 					"report": {
 						"resultsBlobName": "core-metrics-report",
-						"resultsPath": "tests/metrics/test-results"
+						"resultsPath": "../../tools/compare-perf/artifacts/test-results/"
 					}
 				},
 				{
