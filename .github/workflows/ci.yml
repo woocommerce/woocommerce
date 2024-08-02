@@ -188,7 +188,7 @@ jobs:
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
         run: |
           # Move and rename the downloaded file to the expected name
-          $FILE_PATH="$ARTIFACTS_PATH"/.last-run.json
+          FILE_PATH="$ARTIFACTS_PATH/.last-run.json"
           if [ -f "${{ steps.download-last-run-info.outputs.download-path }}" ]; then
             mv "${{ steps.download-last-run-info.outputs.download-path }}" "$FILE_PATH"
           fi
@@ -206,6 +206,7 @@ jobs:
             fi
           fi
           
+          # Finally, run the tests
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $LAST_RUN_FLAG
           
       - name: 'Upload Playwright last run info'
