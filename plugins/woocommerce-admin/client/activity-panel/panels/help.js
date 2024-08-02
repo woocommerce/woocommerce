@@ -15,7 +15,7 @@ import {
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { compose } from 'redux';
-import { recordEvent } from '@woocommerce/tracks';
+import { recordEvent as fallbackRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -359,9 +359,9 @@ function getListItems( props ) {
 	} ) );
 }
 
-export const HelpPanel = ( { 
+export const HelpPanel = ( {
 	taskName,
-	recordEvent = () => {},
+	recordEvent = fallbackRecordEvent,
 	...props
 } ) => {
 	useEffect( () => {
@@ -384,7 +384,6 @@ export const HelpPanel = ( {
 		</Fragment>
 	);
 };
-
 
 export default compose(
 	withSelect( ( select ) => {
