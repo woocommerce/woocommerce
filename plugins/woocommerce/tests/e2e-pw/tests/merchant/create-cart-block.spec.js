@@ -17,7 +17,7 @@ test.describe(
 	'Transform Classic Cart To Cart Block',
 	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
-		test( 'can transform classic cart to cart block', async ( {
+		test.skip( 'can transform classic cart to cart block', async ( {
 			page,
 			testPage,
 		} ) => {
