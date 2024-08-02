@@ -238,7 +238,7 @@ class WCAdminHelper {
 		 * @param string $url           URL to check.
 		 */
 		$is_store_page = apply_filters( 'woocommerce_is_store_page', false, $url );
-		
+
 		return filter_var( $is_store_page, FILTER_VALIDATE_BOOL );
 	}
 
