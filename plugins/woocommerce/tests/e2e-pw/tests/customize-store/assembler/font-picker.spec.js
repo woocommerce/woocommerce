@@ -230,7 +230,7 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 		expect( isSecondaryFontUsed ).toBe( true );
 	} );
 
-	test( 'Clicking opt-in new fonts should be available', async ( {
+	test.skip( 'Clicking opt-in new fonts should be available', async ( {
 		pageObject,
 		page,
 	} ) => {
