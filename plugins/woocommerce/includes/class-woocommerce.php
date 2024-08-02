@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * Main WooCommerce Class.
@@ -409,6 +410,9 @@ final class WooCommerce {
 			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
 			$mc_stats->do_server_side_stats();
 
+			$remote_logger = $container->get( RemoteLogger::class );
+			$remote_logger->handle( time(), WC_Log_Levels::CRITICAL, $message, $context );
+
 			/**
 			 * Action triggered when there are errors during shutdown.
 			 *
@@ -422,8 +426,6 @@ final class WooCommerce {
 	 * Define WC Constants.
 	 */
 	private function define_constants() {
-		$upload_dir = wp_upload_dir( null, false );
-
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
 		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( WC_PLUGIN_FILE ) );
 		$this->define( 'WC_VERSION', $this->version );
@@ -442,8 +444,9 @@ final class WooCommerce {
 		 */
 		if ( defined( 'WC_LOG_DIR' ) ) {
 			$this->define( 'WC_LOG_DIR_CUSTOM', true );
+		} else {
+			$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory( false ) );
 		}
-		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );

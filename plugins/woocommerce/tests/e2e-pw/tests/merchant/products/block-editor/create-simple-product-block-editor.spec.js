@@ -51,6 +51,14 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				.last()
 				.fill( productData.summary );
 
+			// We blur the summary field to hide the toolbar before clicking on the regular price field.
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.blur();
+
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )
 				.first();
