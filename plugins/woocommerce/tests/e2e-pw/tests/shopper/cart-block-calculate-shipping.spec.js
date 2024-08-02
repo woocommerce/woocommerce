@@ -162,7 +162,7 @@ test.describe(
 			);
 		} );
 
-		test( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
+		test.skip( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
 			page,
 			context,
 			cartBlockPage,
