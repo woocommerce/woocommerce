@@ -15,7 +15,7 @@ const test = base.extend( {
 
 test.describe(
 	'Store owner can view the Intro page',
-	{ tag: '@gutenberg' },
+	{ tag: [ '@gutenberg', '@external' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -58,69 +58,51 @@ test.describe(
 			);
 		} );
 
-		test(
-			'it shows the "offline banner" when the network is offline',
-			{ tag: '@external' },
-			async ( { page, context } ) => {
-				await page.goto( CUSTOMIZE_STORE_URL );
-				await expect(
-					page.locator( 'text=Design your own' )
-				).toBeVisible();
-				await context.setOffline( true );
+		test( 'it shows the "offline banner" when the network is offline', async ( {
+			page,
+			context,
+		} ) => {
+			await page.goto( CUSTOMIZE_STORE_URL );
+			await expect(
+				page.locator( 'text=Design your own' )
+			).toBeVisible();
+			await context.setOffline( true );
 
-				await expect( page.locator( '.offline-banner' ) ).toBeVisible();
-				await expect(
-					page.locator(
-						'text=Looking to design your store using AI?'
-					)
-				).toBeVisible();
-			}
-		);
+			await expect( page.locator( '.offline-banner' ) ).toBeVisible();
+			await expect(
+				page.locator( 'text=Looking to design your store using AI?' )
+			).toBeVisible();
+		} );
 
-		test(
-			'it shows the "no AI" banner on Core when the task is not completed',
-			{ tag: '@external' },
-			async ( { page } ) => {
-				await page.goto( CUSTOMIZE_STORE_URL );
+		test( 'it shows the "no AI" banner on Core when the task is not completed', async ( {
+			page,
+		} ) => {
+			await page.goto( CUSTOMIZE_STORE_URL );
 
-				await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
-				await expect(
-					page.locator( 'text=Design your own' )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'button', { name: 'Start designing' } )
-				).toBeVisible();
-			}
-		);
+			await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
+			await expect(
+				page.locator( 'text=Design your own' )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'button', { name: 'Start designing' } )
+			).toBeVisible();
+		} );
 
-		test(
-			'it shows the "no AI customize theme" banner when the task is completed',
-			{ tag: '@external' },
-			async ( { page, baseURL } ) => {
-				try {
-					await setOption(
-						request,
-						baseURL,
-						'woocommerce_admin_customize_store_completed',
-						'yes'
-					);
-				} catch ( error ) {
-					console.log( 'Store completed option not updated' );
-				}
-				await page.goto( CUSTOMIZE_STORE_URL );
-
-				await expect(
-					page.locator( '.existing-no-ai-theme-banner' )
-				).toBeVisible();
-				await expect( page.locator( 'h1' ) ).toHaveText(
-					'Customize your theme'
+		test( 'it shows the "no AI customize theme" banner when the task is completed', async ( {
+			page,
+			baseURL,
+		} ) => {
+			try {
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_admin_customize_store_completed',
+					'yes'
 				);
-				// to support multi env testing checking for the button only
-				await expect(
-					page.locator( '.banner-actions' ).getByRole( 'button' )
-				).toBeVisible();
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
 			}
-		);
+			await page.goto( CUSTOMIZE_STORE_URL );
 
 			await expect(
 				page.locator( '.existing-no-ai-theme-banner' )
@@ -159,6 +141,7 @@ test.describe(
 				.getByRole( 'button', { name: 'Go to the Customizer' } )
 				.click();
 
+			await page.waitForNavigation();
 			await expect( page.url() ).toContain( 'customize.php' );
 		} );
 	}

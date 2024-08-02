@@ -52,26 +52,26 @@ test.describe(
 
 		test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		try {
-			// In some environments the tour blocks clicking other elements.
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_customize_store_onboarding_tour_hidden',
-				'yes'
-			);
+		test.beforeAll( async ( { baseURL } ) => {
+			try {
+				// In some environments the tour blocks clicking other elements.
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_customize_store_onboarding_tour_hidden',
+					'yes'
+				);
 
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
-			);
-		} catch ( error ) {
-			console.log( 'Store completed option not updated' );
-		}
-	} );
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_allow_tracking',
+					'no'
+				);
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
+			}
+		} );
 
 		test.afterAll( async ( { baseURL } ) => {
 			try {
@@ -86,6 +86,13 @@ test.describe(
 					request,
 					baseURL,
 					'woocommerce_admin_customize_store_completed',
+					'no'
+				);
+
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_allow_tracking',
 					'no'
 				);
 
@@ -112,19 +119,11 @@ test.describe(
 			await expect( fontPickers ).toHaveCount( 2 );
 		} );
 
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
-			);
-
-			// Reset theme back to default.
-			await activateTheme( DEFAULT_THEME );
-		} catch ( error ) {
-			console.log( 'Store completed option not updated' );
-		}
-	} );
+		test( 'Picking a font should trigger an update of fonts on the site preview', async ( {
+			pageObject,
+		} ) => {
+			const assembler = await pageObject.getAssembler();
+			const editor = await pageObject.getEditor();
 
 			await assembler
 				.locator(
@@ -228,93 +227,27 @@ test.describe(
 			expect( isPrimaryFontUsed ).toBe( true );
 			expect( isSecondaryFontUsed ).toBe( true );
 		} );
+
+		test( 'Clicking opt-in new fonts should be available', async ( {
+			pageObject,
+		} ) => {
+			const assembler = await pageObject.getAssembler();
+
+			await assembler.getByText( 'Usage tracking' ).click();
+			await expect(
+				assembler.getByText( 'Access more fonts' )
+			).toBeVisible();
+
+			await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
+
+			await assembler
+				.getByText( 'Access more fonts' )
+				.waitFor( { state: 'hidden' } );
+
+			const fontPickers = assembler.locator(
+				'.woocommerce-customize-store_global-styles-variations_item'
+			);
+			await expect( fontPickers ).toHaveCount( 10 );
+		} );
 	}
 );
-
-	test( 'Font pickers should be focused when a font is picked', async ( {
-		pageObject,
-	} ) => {
-		const assembler = await pageObject.getAssembler();
-		const fontPicker = assembler
-			.locator(
-				'.woocommerce-customize-store_global-styles-variations_item'
-			)
-			.first();
-
-		await fontPicker.click();
-		await expect( fontPicker ).toHaveClass( /is-active/ );
-	} );
-
-	test( 'Selected font palette should be applied on the frontend', async ( {
-		pageObject,
-		page,
-		baseURL,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
-		const assembler = await pageObject.getAssembler();
-		const fontPicker = assembler
-			.locator(
-				'.woocommerce-customize-store_global-styles-variations_item'
-			)
-			.last();
-
-		await fontPicker.click();
-
-		const [ primaryFont, secondaryFont ] = (
-			await fontPicker.getAttribute( 'aria-label' )
-		 )
-			.split( '+' )
-			.map( ( e ) => e.trim() );
-
-		await assembler.locator( '[aria-label="Back"]' ).click();
-
-		const saveButton = assembler.getByText( 'Save' );
-
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-				response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await page.goto( baseURL );
-
-		const usedFonts = await getUsedFonts( page );
-
-		const isPrimaryFontUsed = usedFonts.primaryFont.some( ( font ) =>
-			primaryFont.includes( slugFontMap[ font ] )
-		);
-
-		const isSecondaryFontUsed = usedFonts.secondaryFont.some( ( font ) =>
-			secondaryFont.includes( slugFontMap[ font ] )
-		);
-
-		expect( isPrimaryFontUsed ).toBe( true );
-		expect( isSecondaryFontUsed ).toBe( true );
-	} );
-
-	test( 'Clicking opt-in new fonts should be available', async ( {
-		pageObject,
-	} ) => {
-		const assembler = await pageObject.getAssembler();
-
-		await assembler.getByText( 'Usage tracking' ).click();
-		await expect(
-			assembler.getByText( 'Access more fonts' )
-		).toBeVisible();
-
-		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
-
-		await assembler
-			.getByText( 'Access more fonts' )
-			.waitFor( { state: 'hidden' } );
-
-		const fontPickers = assembler.locator(
-			'.woocommerce-customize-store_global-styles-variations_item'
-		);
-		await expect( fontPickers ).toHaveCount( 10 );
-	} );
-} );

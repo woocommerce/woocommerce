@@ -36,7 +36,7 @@ test.describe( 'Manage webhooks', { tag: '@external' }, () => {
 
 		await expect(
 			page.getByText( 'Webhook updated successfully.' )
-		).toBeVisible( { timeout: 1 } );
+		).toBeVisible();
 
 		await page.goto( WEBHOOKS_SCREEN_URI );
 
@@ -59,10 +59,10 @@ test.describe( 'Manage webhooks', { tag: '@external' }, () => {
 
 		await expect(
 			page.getByText( 'webhook permanently deleted' )
-		).toBeHidden( { timeout: 1 } );
+		).toBeHidden();
 
 		await expect(
 			page.getByText( 'The link you followed has expired.' )
-		).toBeVisible( { timeout: 1 } );
+		).toBeVisible();
 	} );
 } );

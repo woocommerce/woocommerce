@@ -79,7 +79,9 @@ test.describe(
 				await assemblerPageObject.setupSite( baseURL );
 				await assemblerPageObject.waitForLoadingScreenFinish();
 				const assembler = await assemblerPageObject.getAssembler();
-				await assembler.getByText( 'Add your logo' ).click();
+				await assembler
+					.getByText( 'Add your logo', { exact: true } )
+					.click();
 			}
 		);
 
@@ -177,8 +179,8 @@ test.describe(
 			const emptyLogoLocator =
 				logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 			await expect( emptyLogoLocator ).toBeHidden();
-			await assembler.getByLabel( 'Options' ).click();
-			await assembler.getByText( 'Delete' ).click();
+			await assembler.getByLabel( 'Options', { exact: true } ).click();
+			await assembler.getByText( 'Delete', { exact: true } ).click();
 			await expect( emptyLogoLocator ).toBeVisible();
 		} );
 
@@ -191,8 +193,8 @@ test.describe(
 				logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 			await emptyLogoPicker.click();
 			await logoPickerPageObject.pickImage( assembler );
-			await assembler.getByLabel( 'Options' ).click();
-			await assembler.getByText( 'Replace' ).click();
+			await assembler.getByLabel( 'Options', { exact: true } ).click();
+			await assembler.getByText( 'Replace', { exact: true } ).click();
 			await expect(
 				assembler.getByText( 'Media Library' )
 			).toBeVisible();
@@ -209,9 +211,11 @@ test.describe(
 			await emptyLogoPicker.click();
 			await logoPickerPageObject.pickImage( assembler );
 
-			await assembler.getByLabel( 'Back' ).click();
+			await assembler.getByLabel( 'Back', { exact: true } ).click();
 
-			await assembler.getByText( 'Choose your header' ).click();
+			await assembler
+				.getByText( 'Choose your header', { exact: true } )
+				.click();
 
 			const header = assembler
 				.locator( '.block-editor-block-patterns-list__list-item' )
@@ -221,9 +225,11 @@ test.describe(
 
 			await header.click();
 
-			await assembler.getByLabel( 'Back' ).click();
+			await assembler.getByLabel( 'Back', { exact: true } ).click();
 
-			await assembler.getByText( 'Add your logo' ).click();
+			await assembler
+				.getByText( 'Add your logo', { exact: true } )
+				.click();
 			const emptyLogoLocator =
 				logoPickerPageObject.getPlaceholderPreview( assembler );
 
