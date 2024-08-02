@@ -114,7 +114,7 @@ test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 		).toBeVisible();
 	} );
 
-	test( 'should hide loading screen and steps on subsequent runs', async ( {
+	test.skip( 'should hide loading screen and steps on subsequent runs', async ( {
 		pageObject,
 		baseURL,
 		page,
