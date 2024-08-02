@@ -61,26 +61,6 @@ class Util {
 		return false;
 	}
 
-	public static function array_filter_by_field( $array, $field_name, $force_convert = false ) {
-		if ( ! is_array( $array ) && $force_convert ) {
-			$array = json_decode( json_encode( $array ), true );
-		}
-		$result = array();
-		foreach ( $array as $item ) {
-			if ( is_array( $item ) ) {
-				if ( isset( $item[ $field_name ] ) ) {
-					$result[] = $item;
-				}
-				// Recursively search in nested arrays
-				$nestedResult = static::array_filter_by_field( $item, $field_name, $force_convert );
-				if ( ! empty( $nestedResult ) ) {
-					$result = array_merge( $result, $nestedResult );
-				}
-			}
-		}
-		return $result;
-	}
-
 	public static function delete_dir( $dirPath ) {
 		if ( ! is_dir( $dirPath ) ) {
 			throw new \InvalidArgumentException( "$dirPath must be a directory" );
