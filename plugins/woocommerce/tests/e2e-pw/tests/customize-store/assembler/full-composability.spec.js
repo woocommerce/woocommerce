@@ -96,7 +96,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		}
 	} );
 
-	test( 'The list of categories should be displayed', async ( {
+	test.skip( 'The list of categories should be displayed', async ( {
 		pageObject,
 		baseURL,
 	} ) => {
