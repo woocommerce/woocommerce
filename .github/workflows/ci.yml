@@ -188,14 +188,14 @@ jobs:
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
         run: |
-          
-          RUN_TESTS_CMD="pnpm --filter=\"${{ matrix.projectName }}\" ${{ matrix.command }}"
-          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}" ]; then
-            RUN_TESTS_CMD="$RUN_TESTS_CMD --last-failed"
-          fi
-          
-          echo "Running tests: $RUN_TESTS_CMD"
-          $RUN_TESTS_CMD
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}
+#          RUN_TESTS_CMD="pnpm --filter=\"${{ matrix.projectName }}\" ${{ matrix.command }}"
+#          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}" ]; then
+#            RUN_TESTS_CMD="$RUN_TESTS_CMD --last-failed"
+#          fi
+#          
+#          echo "Running tests: $RUN_TESTS_CMD"
+#          $RUN_TESTS_CMD
 
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
