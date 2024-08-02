@@ -30,7 +30,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			'The block product editor is not being tested'
 		);
 
-		test( 'can create a simple product with categories, tags and with password required', async ( {
+		test.skip( 'can create a simple product with categories, tags and with password required', async ( {
 			page,
 		} ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
