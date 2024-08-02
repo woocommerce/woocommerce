@@ -4,7 +4,7 @@
  *
  * @class    WC_Admin
  * @package  WooCommerce\Admin
- * @version  2.6.0
+ * @version  x.x.x
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -65,6 +65,7 @@ class WC_Admin {
 		include_once __DIR__ . '/class-wc-admin-pointers.php';
 		include_once __DIR__ . '/class-wc-admin-importers.php';
 		include_once __DIR__ . '/class-wc-admin-exporters.php';
+		include_once __DIR__ . '/class-wc-admin-brands.php';
 
 		// Help Tabs.
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {

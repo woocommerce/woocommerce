@@ -267,7 +267,7 @@ class WC_Brands_Admin {
 	 */
 	public function styles() {
 		$version = Constants::get_constant( 'WC_VERSION' );
-		wp_enqueue_style( 'brands-styles', WC() > plugins_url() . '/assets/css/admin.css', array(), $version );
+		wp_enqueue_style( 'brands-styles', WC()->plugin_url() . '/assets/css/admin.css', array(), $version );
 	}
 
 	/**
