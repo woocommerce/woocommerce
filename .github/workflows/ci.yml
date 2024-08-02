@@ -180,7 +180,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: 'last-run__${{ strategy.job-index }}'
-          path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
+          path: '${{ env.ARTIFACTS_PATH }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
         env:
@@ -189,12 +189,30 @@ jobs:
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
         run: |
           LAST_RUN_FLAG=""
-          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}" ]; then
-            echo "Found last run info, running only failed tests"
-            LAST_RUN_FLAG="--last-failed"
+          FILE_PATH="${{ steps.download-last-run-info.outputs.download-path }}"
+          
+          if [ -f "$FILE_PATH" ]; then
+            # Playwright last run info is available, parse the file and check if there are failed tests
+            FAILED_TESTS=$(jq '.failedTests | length' "$FILE_PATH")
+          
+            # Only if there are failed tests, we want to use the --last-failed flag. 
+            # The run will fail if we're using the flag and there are no failed tests.
+            if [ "$FAILED_TESTS" -gt 0 ]; then
+              echo "Found failed tests, running only failed tests"
+              LAST_RUN_FLAG="--last-failed"
+            fi
           fi
           
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $LAST_RUN_FLAG
+          
+      - name: 'Upload Playwright last run info'
+        if: ${{ failure() && matrix.report.resultsPath != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'last-run__${{ strategy.job-index }}/.last-run.json'
+          path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
+          if-no-files-found: ignore
+          overwrite: true
 
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -210,13 +228,6 @@ jobs:
           path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
           if-no-files-found: ignore
           
-      - name: 'Upload Playwright last run info'
-        if: ${{ always() && matrix.report.resultsPath != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: 'last-run__${{ strategy.job-index }}'
-          path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
-          if-no-files-found: ignore
 
       - name: 'Archive metrics results'
         if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
