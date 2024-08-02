@@ -71,15 +71,20 @@ const ProductCollectionContent = ( {
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const isInitialAttributesSet = useRef( false );
-	const { clientId, attributes, setAttributes } = props;
-	const location = props.location;
+	const {
+		clientId,
+		attributes,
+		setAttributes,
+		location,
+		isUsesReferencePreviewMode,
+	} = props;
 
 	useSetPreviewState( {
 		setPreviewState,
 		setAttributes,
 		location,
 		attributes,
-		isUsesReferencePreviewMode: props.isUsesReferencePreviewMode,
+		isUsesReferencePreviewMode,
 	} );
 
 	const blockProps = useBlockProps();
