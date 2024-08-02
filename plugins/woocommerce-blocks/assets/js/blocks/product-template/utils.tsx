@@ -63,14 +63,56 @@ const prepareIsInGenericTemplate =
 	( entitySlug: string ): boolean =>
 		templateSlug === entitySlug;
 
-export type WooCommerceBlockLocation = ReturnType<
-	typeof createLocationObject
->;
+interface BaseLocation {
+	type: LocationType;
+	sourceData?: object;
+}
+
+interface ProductLocation extends BaseLocation {
+	type: LocationType.Product;
+	sourceData?: {
+		productId: number;
+	};
+}
+
+interface ArchiveLocation extends BaseLocation {
+	type: LocationType.Archive;
+	sourceData?: {
+		taxonomy: string;
+		termId: number;
+	};
+}
+
+interface CartLocation extends BaseLocation {
+	type: LocationType.Cart;
+	sourceData?: {
+		productIds: number[];
+	};
+}
+
+interface OrderLocation extends BaseLocation {
+	type: LocationType.Order;
+	sourceData?: {
+		orderId: number;
+	};
+}
+
+interface SiteLocation extends BaseLocation {
+	type: LocationType.Site;
+	sourceData?: object;
+}
+
+export type WooCommerceBlockLocation =
+	| ProductLocation
+	| ArchiveLocation
+	| CartLocation
+	| OrderLocation
+	| SiteLocation;
 
 const createLocationObject = (
 	type: LocationType,
-	sourceData: Record< string, unknown > = {}
-) => ( {
+	sourceData: object = {}
+): BaseLocation => ( {
 	type,
 	sourceData,
 } );

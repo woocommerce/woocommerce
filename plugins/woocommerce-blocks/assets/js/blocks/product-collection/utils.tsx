@@ -335,11 +335,14 @@ export const useSetPreviewState = ( {
 	 * - Products by tag
 	 * - Products by attribute
 	 */
+	const termId =
+		location.type === LocationType.Archive
+			? location.sourceData?.termId
+			: null;
 	useLayoutEffect( () => {
 		if ( ! setPreviewState && ! isUsesReferencePreviewMode ) {
 			const isGenericArchiveTemplate =
-				location.type === LocationType.Archive &&
-				location.sourceData?.termId === null;
+				location.type === LocationType.Archive && termId === null;
 
 			setAttributes( {
 				__privatePreviewState: {
@@ -356,7 +359,7 @@ export const useSetPreviewState = ( {
 	}, [
 		attributes?.query?.inherit,
 		usesReferencePreviewMessage,
-		location.sourceData?.termId,
+		termId,
 		location.type,
 		setAttributes,
 		setPreviewState,
