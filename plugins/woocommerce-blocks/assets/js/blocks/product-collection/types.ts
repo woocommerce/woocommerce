@@ -7,7 +7,7 @@ import { type AttributeMetadata } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { WooCommerceBlockLocation } from '../product-template/utils';
+import { WooCommerceBaseLocation } from '../product-template/utils';
 
 export enum ProductCollectionUIStatesInEditor {
 	PRODUCT_CONTEXT_PICKER = 'product_context_picker',
@@ -125,7 +125,7 @@ export type ProductCollectionEditComponentProps =
 			templateSlug: string;
 		};
 		productCollectionUIStateInEditor: ProductCollectionUIStatesInEditor;
-		location: WooCommerceBlockLocation;
+		location: WooCommerceBaseLocation;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -186,6 +186,6 @@ export interface PreviewState {
 
 export type SetPreviewState = ( args: {
 	setState: ( previewState: PreviewState ) => void;
-	location: WooCommerceBlockLocation;
+	location: WooCommerceBaseLocation;
 	attributes: ProductCollectionAttributes;
 } ) => void | ( () => void );

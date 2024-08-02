@@ -4,7 +4,10 @@
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
+import {
+	useGetLocation,
+	WooCommerceBlockLocation,
+} from '@woocommerce/blocks/product-template/utils';
 
 /**
  * Internal dependencies
@@ -33,9 +36,9 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 
 	const productCollectionUIStateInEditor =
 		getProductCollectionUIStateInEditor( {
-			location,
-			attributes: props.attributes,
 			hasInnerBlocks,
+			location: location as WooCommerceBlockLocation,
+			attributes: props.attributes,
 			usesReference: props.usesReference,
 		} );
 
