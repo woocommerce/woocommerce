@@ -1593,18 +1593,18 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Extensibility - JS events', () => {
-		test( 'emits wc-blocks_product_list_rendered event on init', async ( {
+		test( 'emits wc-blocks_product_list_rendered event on init with proper payload', async ( {
 			pageObject,
 			page,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock();
 
 			await page.addInitScript( () => {
-				let eventFired = 0;
 				window.document.addEventListener(
 					'wc-blocks_product_list_rendered',
-					() => {
-						window.eventFired = ++eventFired;
+					( e ) => {
+						const { collection } = e.detail;
+						window.eventPayload = collection;
 					}
 				);
 			} );
@@ -1612,8 +1612,10 @@ test.describe( 'Product Collection', () => {
 			await pageObject.publishAndGoToFrontend();
 
 			await expect
-				.poll( async () => await page.evaluate( 'window.eventFired' ) )
-				.toBe( 1 );
+				.poll(
+					async () => await page.evaluate( 'window.eventPayload' )
+				)
+				.toBe( 'woocommerce/product-collection/product-catalog' );
 		} );
 
 		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
