@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 /**
  * Class WC_Cache_Helper_Tests. Tests for WC_Cache_Helper class.
  */
