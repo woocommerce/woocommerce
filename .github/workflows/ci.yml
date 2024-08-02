@@ -40,6 +40,8 @@ jobs:
         with:
           # If 'base_ref' is available, the 'Build Matrix' step requires non-shallow git-history to identify changed files.
           fetch-depth: ${{ ( ( github.base_ref && '0' ) || '1' ) }}
+      - name: 'Setup PNPM'
+        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
       - uses: actions/github-script@v7
         name: 'Build Matrix'
         id: 'project-jobs'
@@ -80,7 +82,7 @@ jobs:
             }
             
             const child_process = require( 'node:child_process' );
-            child_process.execSync( `./tools/monorepo-utils/bin/run ci-jobs ${ baseRef } --event ${ githubEvent }` );
+            child_process.execSync( `node ./tools/monorepo-utils/bin/run ci-jobs ${ baseRef } --event ${ githubEvent }` );
   
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ matrix.optional && ' (optional)' || ''}}"
