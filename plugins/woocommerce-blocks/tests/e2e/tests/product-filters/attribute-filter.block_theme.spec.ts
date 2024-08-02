@@ -49,7 +49,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas
-			.getByLabel( 'Block: Attribute (Experimental)' )
+			.getByLabel( 'Block: Color (Experimental)' )
 			.getByLabel( 'Block: Filter Options' );
 
 		await expect( block ).toBeVisible();
@@ -83,7 +83,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas
-			.getByLabel( 'Block: Attribute (Experimental)' )
+			.getByLabel( 'Block: Color (Experimental)' )
 			.getByLabel( 'Block: Filter Options' );
 
 		await expect( block ).toBeVisible();
@@ -113,7 +113,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas
-			.getByLabel( 'Block: Attribute (Experimental)' )
+			.getByLabel( 'Block: Color (Experimental)' )
 			.getByLabel( 'Block: Filter Options' );
 
 		await editor.openDocumentSettingsSidebar();
@@ -139,7 +139,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( productFilterAttributeSizeBlockListItem ).toBeVisible();
 
 		const productFilterAttributeWrapperBlock = editor.canvas.getByLabel(
-			'Block: Attribute (Experimental)'
+			'Block: Size Attribute (Experimental)'
 		);
 		await editor.selectBlocks( productFilterAttributeWrapperBlock );
 		await expect( productFilterAttributeWrapperBlock ).toBeVisible();
