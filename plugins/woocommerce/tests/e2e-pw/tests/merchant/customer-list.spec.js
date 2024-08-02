@@ -119,14 +119,16 @@ test.describe(
 				let x = 1;
 				for ( const customer of customers ) {
 					await page
-						.locator(
-							'#woocommerce-select-control-0__control-input'
-						)
+						.getByRole( 'combobox', {
+							expanded: false,
+							disabled: false,
+						} )
 						.click();
 					await page
-						.locator(
-							'#woocommerce-select-control-0__control-input'
-						)
+						.getByRole( 'combobox', {
+							expanded: false,
+							disabled: false,
+						} )
 						.pressSequentially(
 							`${ customer.first_name } ${ customer.last_name }`
 						);
@@ -161,21 +163,16 @@ test.describe(
 
 			await test.step( 'Hide and display columns', async () => {
 				await page
-					.getByRole( 'combobox', {
-						expanded: false,
-						disabled: false,
+					.getByRole( 'button', {
+						name: 'Choose which values to display',
 					} )
 					.click();
 				// hide a few columns
 				await page.getByRole( 'menu' ).getByText( 'Username' ).click();
 				await page
-					.getByRole( 'combobox', {
-						expanded: false,
-						disabled: false,
-					} )
-					.pressSequentially(
-						`${ customer.first_name } ${ customer.last_name }`
-					);
+					.getByRole( 'menu' )
+					.getByText( 'Last active' )
+					.click();
 				await page
 					.getByRole( 'menu' )
 					.getByText( 'Total spend' )
@@ -312,7 +309,8 @@ test.describe(
 					.getByRole( 'button' )
 					.click();
 				await page
-					.locator( '#woocommerce-select-control-1__control-input' )
+					.getByRole( 'group', { name: 'Email' } )
+					.getByRole( 'combobox', { expanded: false } )
 					.fill( customers[ 1 ].email );
 				await page
 					.getByRole( 'option', {
@@ -331,7 +329,8 @@ test.describe(
 					.getByRole( 'button' )
 					.click();
 				await page
-					.locator( '#woocommerce-select-control-2__control-input' )
+					.getByRole( 'group', { name: 'Country / Region' } )
+					.getByRole( 'combobox', { expanded: false } )
 					.fill( 'US' );
 				await page
 					.getByRole( 'option', { name: 'United States (US)' } )
@@ -355,54 +354,3 @@ test.describe(
 		} );
 	}
 );
-
-		await test.step( 'Add a filter for email', async () => {
-			await page.getByRole( 'button', { name: 'Add a filter' } ).click();
-			await page
-				.locator( 'li' )
-				.filter( { hasText: 'Email' } )
-				.getByRole( 'button' )
-				.click();
-			await page
-				.getByRole( 'group', { name: 'Email' } )
-				.getByRole( 'combobox', { expanded: false } )
-				.fill( customers[ 1 ].email );
-			await page
-				.getByRole( 'option', {
-					name: `${ customers[ 1 ].email }`,
-				} )
-				.click();
-		} );
-
-		await test.step( 'Add a filter for country', async () => {
-			await page.getByRole( 'button', { name: 'Add a filter' } ).click();
-			await page
-				.locator( 'li' )
-				.filter( { hasText: 'Country / Region' } )
-				.getByRole( 'button' )
-				.click();
-			await page
-				.getByRole( 'group', { name: 'Country / Region' } )
-				.getByRole( 'combobox', { expanded: false } )
-				.fill( 'US' );
-			await page
-				.getByRole( 'option', { name: 'United States (US)' } )
-				.click();
-		} );
-
-		await test.step( 'Apply the filters', async () => {
-			await page
-				.getByRole( 'link', { name: 'Filter', exact: true } )
-				.click();
-		} );
-
-		await test.step( 'Check that the filter is applied', async () => {
-			await expect(
-				page.getByRole( 'cell', { name: customers[ 1 ].email } )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'cell', { name: customers[ 0 ].email } )
-			).toBeHidden();
-		} );
-	} );
-} );

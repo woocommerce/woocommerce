@@ -51,8 +51,11 @@ const slugFontMap = {
 	'Raleway, sans-serif': 'Raleway',
 };
 
-test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+test.describe(
+	'Assembler -> Font Picker',
+	{ tag: [ '@gutenberg', '@external' ] },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
 			try {
@@ -232,8 +235,10 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 
 		test( 'Clicking opt-in new fonts should be available', async ( {
 			pageObject,
+			page,
 		} ) => {
 			const assembler = await pageObject.getAssembler();
+			const editor = await pageObject.getEditor();
 
 			await assembler.getByText( 'Usage tracking' ).click();
 			await expect(
@@ -246,102 +251,47 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 				.getByText( 'Access more fonts' )
 				.waitFor( { state: 'hidden' } );
 
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wp-json/wp/v2/font-families' ) &&
+					response.status() === 200
+			);
+
 			const fontPickers = assembler.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			);
 			await expect( fontPickers ).toHaveCount( 10 );
+
+			await assembler
+				.locator(
+					'.woocommerce-customize-store_global-styles-variations_item'
+				)
+				.waitFor( {
+					strict: false,
+				} );
+
+			for ( const fontPicker of await fontPickers.all() ) {
+				await fontPicker.waitFor();
+				await fontPicker.click();
+				const [ primaryFont, secondaryFont ] = (
+					await fontPicker.getAttribute( 'aria-label' )
+				 )
+					.split( '+' )
+					.map( ( e ) => e.trim() );
+
+				const usedFonts = await getUsedFonts( editor );
+
+				const isPrimaryFontUsed = usedFonts.primaryFont.some(
+					( font ) => primaryFont.includes( slugFontMap[ font ] )
+				);
+
+				const isSecondaryFontUsed = usedFonts.secondaryFont.some(
+					( font ) => secondaryFont.includes( slugFontMap[ font ] )
+				);
+
+				expect( isPrimaryFontUsed ).toBe( true );
+				expect( isSecondaryFontUsed ).toBe( true );
+			}
 		} );
 	}
 );
-
-		await assembler.locator( '[aria-label="Back"]' ).click();
-
-		const saveButton = assembler.getByText( 'Save' );
-
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-				response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await page.goto( baseURL );
-
-		const usedFonts = await getUsedFonts( page );
-
-		const isPrimaryFontUsed = usedFonts.primaryFont.some( ( font ) =>
-			primaryFont.includes( slugFontMap[ font ] )
-		);
-
-		const isSecondaryFontUsed = usedFonts.secondaryFont.some( ( font ) =>
-			secondaryFont.includes( slugFontMap[ font ] )
-		);
-
-		expect( isPrimaryFontUsed ).toBe( true );
-		expect( isSecondaryFontUsed ).toBe( true );
-	} );
-
-	test( 'Clicking opt-in new fonts should be available', async ( {
-		pageObject,
-		page,
-	} ) => {
-		const assembler = await pageObject.getAssembler();
-		const editor = await pageObject.getEditor();
-
-		await assembler.getByText( 'Usage tracking' ).click();
-		await expect(
-			assembler.getByText( 'Access more fonts' )
-		).toBeVisible();
-
-		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
-
-		await assembler
-			.getByText( 'Access more fonts' )
-			.waitFor( { state: 'hidden' } );
-
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( '/wp-json/wp/v2/font-families' ) &&
-				response.status() === 200
-		);
-
-		const fontPickers = assembler.locator(
-			'.woocommerce-customize-store_global-styles-variations_item'
-		);
-		await expect( fontPickers ).toHaveCount( 10 );
-
-		await assembler
-			.locator(
-				'.woocommerce-customize-store_global-styles-variations_item'
-			)
-			.waitFor( {
-				strict: false,
-			} );
-
-		for ( const fontPicker of await fontPickers.all() ) {
-			await fontPicker.waitFor();
-			await fontPicker.click();
-			const [ primaryFont, secondaryFont ] = (
-				await fontPicker.getAttribute( 'aria-label' )
-			 )
-				.split( '+' )
-				.map( ( e ) => e.trim() );
-
-			const usedFonts = await getUsedFonts( editor );
-
-			const isPrimaryFontUsed = usedFonts.primaryFont.some( ( font ) =>
-				primaryFont.includes( slugFontMap[ font ] )
-			);
-
-			const isSecondaryFontUsed = usedFonts.secondaryFont.some(
-				( font ) => secondaryFont.includes( slugFontMap[ font ] )
-			);
-
-			expect( isPrimaryFontUsed ).toBe( true );
-			expect( isSecondaryFontUsed ).toBe( true );
-		}
-	} );
-} );
