@@ -187,9 +187,11 @@ jobs:
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
         run: |
-          # Rename the downloaded file to the expected name
+          # Move and rename the downloaded file to the expected name
           $FILE_PATH="$ARTIFACTS_PATH"/.last-run.json
-          mv "${{ steps.download-last-run-info.outputs.download-path }}" "$FILE_PATH" || true
+          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}" ]; then
+            mv "${{ steps.download-last-run-info.outputs.download-path }}" "$FILE_PATH"
+          fi
           
           LAST_RUN_FLAG=""
           if [ -f "$FILE_PATH" ]; then
