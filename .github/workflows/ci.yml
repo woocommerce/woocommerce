@@ -189,8 +189,8 @@ jobs:
         run: |
           # Move and rename the downloaded file to the expected name
           FILE_PATH="$ARTIFACTS_PATH/.last-run.json"
-          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}" ]; then
-            mv "${{ steps.download-last-run-info.outputs.download-path }}" "$FILE_PATH"
+          if [ -f "${{ steps.download-last-run-info.outputs.download-path }}/.last-run__${{ strategy.job-index }}.json" ]; then
+            mv "${{ steps.download-last-run-info.outputs.download-path }}/.last-run__${{ strategy.job-index }}.json" "$FILE_PATH"
           fi
           
           LAST_RUN_FLAG=""
