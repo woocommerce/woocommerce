@@ -12,7 +12,13 @@
   },
   "scripts": {
 	"test:setup": "wp-env start",
-	"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/blueprint ./vendor/bin/phpunit"
+	"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/blueprint ./vendor/bin/phpunit",
+	"phpcs": [
+	  "phpcs -s -p"
+	],
+	"phpcbf": [
+	  "phpcbf -p"
+	]
   },
   "require-dev": {
 	"phpunit/phpunit": "^9",
