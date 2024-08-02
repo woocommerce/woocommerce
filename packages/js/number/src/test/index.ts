@@ -50,7 +50,7 @@ describe( 'numberFormat', () => {
 } );
 
 describe( 'parseNumber', () => {
-	it( 'should remove thousand seperator before parsing number', () => {
+	it( 'should remove thousand separator before parsing number', () => {
 		const config = {
 			decimalSeparator: ',',
 			thousandSeparator: '.',

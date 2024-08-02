@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A Psuedo WCPay gateway class.
+ * A pseudo WCPay gateway class.
  *
  * @extends WC_Payment_Gateway
  */

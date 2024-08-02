@@ -30,11 +30,11 @@ export interface PriceSliderProps {
 	 */
 	currency: Currency;
 	/**
-	 * Whether values are loading or not.
+	 * Whether values are loading.
 	 */
 	isLoading?: boolean;
 	/**
-	 * Whether values are updating or not. The update starts when the price slider is changed.
+	 * Whether values are updating. The update starts when the price slider is changed.
 	 */
 	isUpdating?: boolean;
 	/**
@@ -66,11 +66,11 @@ export interface PriceSliderProps {
 	 */
 	showFilterButton?: boolean;
 	/**
-	 * Whether to show input fields for the values or not.
+	 * Whether to show input fields for the values.
 	 */
 	showInputFields?: boolean;
 	/**
-	 * Whether to show input fields inline with the slider or not.
+	 * Whether to show input fields inline with the slider.
 	 */
 	inlineInput?: boolean;
 	/**
@@ -78,7 +78,7 @@ export interface PriceSliderProps {
 	 */
 	step?: number;
 	/**
-	 * Wheter we're in the editor or not.
+	 * Whether we're in the editor.
 	 */
 	isEditor?: boolean;
 }

@@ -440,7 +440,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
 		}
 
-		// Add event listner to the button which will insert a default pattern
+		// Add event listener to the button which will insert a default pattern
 		// when there are no patterns inserted in the block preview.
 		const removePatternButtonClickListener = addPatternButtonClickListener(
 			documentElement,

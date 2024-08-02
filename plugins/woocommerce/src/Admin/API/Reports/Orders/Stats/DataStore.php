@@ -82,7 +82,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
-		// Avoid ambigious columns in SQL query.
+		// Avoid ambiguous columns in SQL query.
 		$refunds     = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
 		$gross_sales =
 			"( SUM({$table_name}.total_sales)" .
@@ -351,7 +351,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
-			// @todo Remove these assignements when refactoring segmenter classes to use query objects.
+			// @todo Remove these assignments when refactoring segmenter classes to use query objects.
 			$totals_query    = array(
 				'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 				'where_time_clause' => $where_time,
