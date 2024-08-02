@@ -261,7 +261,7 @@ export const useSetPreviewState = ( {
 	location,
 	attributes,
 	setAttributes,
-	productCollectionUIState,
+	isUsesReferencePreviewMode,
 }: {
 	setPreviewState?: SetPreviewState | undefined;
 	location: WooCommerceBlockLocation;
@@ -270,7 +270,7 @@ export const useSetPreviewState = ( {
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
 	usesReference?: string[] | undefined;
-	productCollectionUIState: ProductCollectionUIStatesInEditor;
+	isUsesReferencePreviewMode: boolean;
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
@@ -280,9 +280,6 @@ export const useSetPreviewState = ( {
 			},
 		} );
 	};
-	const isUsesReferencePreviewMode =
-		productCollectionUIState ===
-		ProductCollectionUIStatesInEditor.USES_REFERENCE_PREVIEW_MODE;
 
 	/**
 	 * When usesReference is available on Frontend but not on Editor side,

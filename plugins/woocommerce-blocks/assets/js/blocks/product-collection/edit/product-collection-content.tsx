@@ -79,7 +79,7 @@ const ProductCollectionContent = ( {
 		setAttributes,
 		location,
 		attributes,
-		productCollectionUIState: props.productCollectionUIStateInEditor,
+		isUsesReferencePreviewMode: props.isUsesReferencePreviewMode,
 	} );
 
 	const blockProps = useBlockProps();

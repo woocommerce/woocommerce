@@ -45,7 +45,8 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	/**
 	 * Component to render based on the UI state.
 	 */
-	let Component;
+	let Component,
+		isUsesReferencePreviewMode = false;
 	switch ( productCollectionUIStateInEditor ) {
 		case ProductCollectionUIStatesInEditor.COLLECTION_CHOOSER:
 			Component = ProductCollectionPlaceholder;
@@ -54,8 +55,11 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			Component = ProductPicker;
 			break;
 		case ProductCollectionUIStatesInEditor.VALID:
+			Component = ProductCollectionContent;
+			break;
 		case ProductCollectionUIStatesInEditor.USES_REFERENCE_PREVIEW_MODE:
 			Component = ProductCollectionContent;
+			isUsesReferencePreviewMode = true;
 			break;
 		default:
 			// By default showing collection chooser.
@@ -69,9 +73,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				openCollectionSelectionModal={ () =>
 					setIsSelectionModalOpen( true )
 				}
-				productCollectionUIStateInEditor={
-					productCollectionUIStateInEditor
-				}
+				isUsesReferencePreviewMode={ isUsesReferencePreviewMode }
 				location={ location }
 			/>
 			{ isSelectionModalOpen && (

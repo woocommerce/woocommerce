@@ -63,43 +63,51 @@ const prepareIsInGenericTemplate =
 	( entitySlug: string ): boolean =>
 		templateSlug === entitySlug;
 
-export interface WooCommerceBaseLocation {
+interface WooCommerceBaseLocation {
 	type: LocationType;
-	sourceData?: object;
+	sourceData?: object | undefined;
 }
 
 interface ProductLocation extends WooCommerceBaseLocation {
 	type: LocationType.Product;
-	sourceData?: {
-		productId: number;
-	};
+	sourceData?:
+		| {
+				productId: number;
+		  }
+		| undefined;
 }
 
 interface ArchiveLocation extends WooCommerceBaseLocation {
 	type: LocationType.Archive;
-	sourceData?: {
-		taxonomy: string;
-		termId: number;
-	};
+	sourceData?:
+		| {
+				taxonomy: string;
+				termId: number;
+		  }
+		| undefined;
 }
 
 interface CartLocation extends WooCommerceBaseLocation {
 	type: LocationType.Cart;
-	sourceData?: {
-		productIds: number[];
-	};
+	sourceData?:
+		| {
+				productIds: number[];
+		  }
+		| undefined;
 }
 
 interface OrderLocation extends WooCommerceBaseLocation {
 	type: LocationType.Order;
-	sourceData?: {
-		orderId: number;
-	};
+	sourceData?:
+		| {
+				orderId: number;
+		  }
+		| undefined;
 }
 
 interface SiteLocation extends WooCommerceBaseLocation {
 	type: LocationType.Site;
-	sourceData?: object;
+	sourceData?: object | undefined;
 }
 
 export type WooCommerceBlockLocation =
@@ -109,13 +117,11 @@ export type WooCommerceBlockLocation =
 	| OrderLocation
 	| SiteLocation;
 
-const createLocationObject = (
-	type: LocationType,
-	sourceData: object = {}
-): WooCommerceBaseLocation => ( {
-	type,
-	sourceData,
-} );
+const createLocationObject = ( type: LocationType, sourceData: object = {} ) =>
+	( {
+		type,
+		sourceData,
+	} as WooCommerceBlockLocation );
 
 type ContextProperties = {
 	templateSlug: string;
@@ -125,7 +131,7 @@ type ContextProperties = {
 export const useGetLocation = < T, >(
 	context: Context< T & ContextProperties >,
 	clientId: string
-) => {
+): WooCommerceBlockLocation => {
 	const templateSlug = context.templateSlug || '';
 	const postId = context.postId || null;
 
