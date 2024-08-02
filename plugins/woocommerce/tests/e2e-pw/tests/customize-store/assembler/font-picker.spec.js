@@ -278,8 +278,6 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 
 			const usedFonts = await getUsedFonts( editor );
 
-			console.log( usedFonts );
-
 			const isPrimaryFontUsed = usedFonts.primaryFont.some( ( font ) =>
 				primaryFont.includes( slugFontMap[ font ] )
 			);
