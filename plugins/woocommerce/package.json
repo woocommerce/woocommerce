@@ -486,7 +486,11 @@
 					],
 					"events": [
 						"pull_request"
-					]
+					],
+					"report": {
+						"resultsBlobName": "core-metrics-report",
+						"resultsPath": "tests/metrics/test-results"
+					}
 				},
 				{
 					"name": "Blocks e2e tests",

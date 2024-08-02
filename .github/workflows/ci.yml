@@ -195,7 +195,7 @@ jobs:
           WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
         with:
           name: metrics-results
-          path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
+          path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results.json
   
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
