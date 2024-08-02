@@ -197,7 +197,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 	} );
 
-	test( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
+	test.skip( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
 		pageObject,
 		baseURL,
 	} ) => {

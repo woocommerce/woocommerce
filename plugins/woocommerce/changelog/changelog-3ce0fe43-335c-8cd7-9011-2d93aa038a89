@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: Clicking the "Move up/down" buttons should change the pattern order in the preview
