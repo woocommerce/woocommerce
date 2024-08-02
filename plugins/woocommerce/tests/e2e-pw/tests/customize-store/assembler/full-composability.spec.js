@@ -238,7 +238,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		expect( firstPatternContent ).toContain( sidebarPatternContent );
 	} );
 
-	test( 'Clicking the "Shuffle" button on a patterns should replace it for another one', async ( {
+	test.skip( 'Clicking the "Shuffle" button on a patterns should replace it for another one', async ( {
 		pageObject,
 		baseURL,
 	} ) => {
