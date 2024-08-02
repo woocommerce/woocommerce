@@ -1,41 +1,90 @@
-.woocommerce-product-select {
-	&__menu {
-		&-loading {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: $grid-unit;
-			height: $grid-unit-60 + 2px;
+.woocommerce-product-combobox {
+	position: relative;
+	background-color: white;
+
+	.components-base-control__field {
+		height: 36px;
+	}
+	.components-form-token-field__suggestions-list {
+		max-height: 260px;
+	}
+
+	.components-combobox-control__suggestions-container {
+		position: absolute;
+		padding: 0;
+		background-color: white;
+
+		> .components-flex {
+			height: 34px;
+		}
+	}
+
+	.components-form-token-field__suggestion {
+		padding: 0;
+		min-height: 32px;
+		display: flex;
+		align-items: center;
+
+		.item-wrapper {
+			padding: 0 12px;
+			height: 36px;
+			line-height: 36px;
+			width: 100%;
+
+			&.is-disabled {
+				background-color: #fafafa;
+				color: #949494;
+				cursor: default;
+			}
 		}
 
-		&-item {
+		&.is-selected .item-wrapper .is-disabled {
+			background-color: #fafafa;
+		}
+	}
+
+	.woocommerce-product-select__menu-item {
+		display: flex;
+		align-items: center;
+		padding: $grid-unit;
+		gap: $grid-unit + $grid-unit-05;
+
+		&-image {
+			flex-shrink: 0;
+		}
+
+		&-content {
 			display: flex;
-			align-items: center;
-			padding: $grid-unit;
-			gap: $grid-unit + $grid-unit-05;
+			flex-direction: column;
+			gap: 2px;
+		}
 
-			&-image {
-				flex-shrink: 0;
-			}
+		&-title {
+			color: $gray-900;
+		}
 
-			&-content {
-				display: flex;
-				flex-direction: column;
-				gap: 2px;
-			}
-
-			&-title {
-				color: $gray-900;
-			}
-
-			&-description {
-				color: $gray-700;
-				font-size: 11px;
-			}
+		&-description {
+			color: $gray-700;
+			font-size: 11px;
 		}
 	}
 
 	.woocommerce-experimental-select-control__combo-box-wrapper {
 		margin-bottom: 0;
+	}
+	.woocommerce-product-combobox-help {
+		display: flex;
+		align-items: center;
+
+		> svg {
+			fill: #949494;
+		}
+
+		.components-spinner {
+			margin: 0 4px 0 0;
+			padding: 2px;
+			width: 18px;
+			height: 18px;
+		}
 	}
 }

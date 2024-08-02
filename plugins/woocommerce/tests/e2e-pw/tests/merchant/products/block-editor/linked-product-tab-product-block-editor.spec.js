@@ -74,7 +74,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					'.wp-block-woocommerce-product-linked-list-field__form-group-content'
 				)
 				.first()
-				.getByPlaceholder( 'Search for products' )
+				.getByRole( 'combobox' )
 				.fill( linkedProductsData[ 0 ].name );
 
 			await page.getByText( linkedProductsData[ 0 ].name ).click();
@@ -84,7 +84,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					response
 						.url()
 						.includes(
-							'/wp-json/wc/v3/products?search=&orderby=title&order=asc&per_page='
+							'/wp-json/wc/v3/products/suggested-products'
 						) && response.status() === 200
 			);
 
@@ -106,7 +106,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					'.wp-block-woocommerce-product-linked-list-field__form-group-content'
 				)
 				.last()
-				.getByPlaceholder( 'Search for products' )
+				.getByRole( 'combobox' )
 				.fill( linkedProductsData[ 1 ].name );
 
 			await page

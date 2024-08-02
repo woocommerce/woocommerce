@@ -19,8 +19,17 @@ import { speak } from '@wordpress/a11y';
 /**
  * Internal dependencies
  */
-import { useLinkedTree } from '../experimental-tree-control/hooks/use-linked-tree';
-import { Item, TreeControlProps } from '../experimental-tree-control/types';
+import {
+	toggleNode,
+	createLinkedTree,
+	getVisibleNodeIndex as getVisibleNodeIndex,
+	getNodeDataByIndex,
+} from '../experimental-tree-control/linked-tree-utils';
+import {
+	Item,
+	LinkedTree,
+	TreeControlProps,
+} from '../experimental-tree-control/types';
 import { SelectedItems } from '../experimental-select-control/selected-items';
 import { ComboBox } from '../experimental-select-control/combo-box';
 import { SuffixIcon } from '../experimental-select-control/suffix-icon';
@@ -55,7 +64,17 @@ export const SelectTree = function SelectTree( {
 	onClear = () => {},
 	...props
 }: SelectTreeProps ) {
-	const linkedTree = useLinkedTree( items );
+	const [ linkedTree, setLinkedTree ] = useState< LinkedTree[] >( [] );
+	const [ highlightedIndex, setHighlightedIndex ] = useState( -1 );
+
+	// whenever the items change, the linked tree needs to be recalculated
+	useEffect( () => {
+		setLinkedTree( createLinkedTree( items, props.createValue ) );
+	}, [ items.length ] );
+
+	// reset highlighted index when the input value changes
+	useEffect( () => setHighlightedIndex( -1 ), [ props.createValue ] );
+
 	const selectTreeInstanceId = useInstanceId(
 		SelectTree,
 		'woocommerce-experimental-select-tree-control__dropdown'
@@ -111,6 +130,19 @@ export const SelectTree = function SelectTree( {
 		}
 	}, [ isFocused ] );
 
+	// Scroll the newly highlighted item into view
+	useEffect(
+		() =>
+			document
+				.querySelector(
+					'.experimental-woocommerce-tree-item--highlighted'
+				)
+				?.scrollIntoView?.( {
+					block: 'nearest',
+				} ),
+		[ highlightedIndex ]
+	);
+
 	let placeholder: string | undefined = '';
 	if ( Array.isArray( props.selected ) ) {
 		placeholder = props.selected.length === 0 ? props.placeholder : '';
@@ -118,12 +150,30 @@ export const SelectTree = function SelectTree( {
 		placeholder = props.placeholder;
 	}
 
+	// reset highlighted index when the input value changes
+	useEffect( () => {
+		if (
+			highlightedIndex === items.length &&
+			! shouldShowCreateButton?.( props.createValue )
+		) {
+			setHighlightedIndex( items.length - 1 );
+		}
+	}, [ props.createValue ] );
+
 	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
 		className: 'woocommerce-experimental-select-control__input',
 		id: `${ props.id }-input`,
 		'aria-autocomplete': 'list',
-		'aria-controls': `${ props.id }-menu`,
+		'aria-activedescendant':
+			highlightedIndex >= 0
+				? `woocommerce-experimental-tree-control__menu-item-${ highlightedIndex }`
+				: undefined,
+		'aria-controls': menuInstanceId,
+		'aria-owns': menuInstanceId,
+		role: 'combobox',
 		autoComplete: 'off',
+		'aria-expanded': isOpen,
+		'aria-haspopup': 'tree',
 		disabled,
 		onFocus: ( event ) => {
 			if ( props.multiple ) {
@@ -159,40 +209,121 @@ export const SelectTree = function SelectTree( {
 			setIsOpen( true );
 			if ( event.key === 'ArrowDown' ) {
 				event.preventDefault();
-				// focus on the first element from the Popover
-				(
-					document.querySelector(
-						`#${ menuInstanceId } input, #${ menuInstanceId } button`
-					) as HTMLInputElement | HTMLButtonElement
-				 )?.focus();
+				if (
+					// is advancing from the last menu item to the create button
+					highlightedIndex === items.length - 1 &&
+					shouldShowCreateButton?.( props.createValue )
+				) {
+					setHighlightedIndex( items.length );
+				} else {
+					const visibleNodeIndex = getVisibleNodeIndex(
+						linkedTree,
+						Math.min( highlightedIndex + 1, items.length ),
+						'down'
+					);
+					if ( visibleNodeIndex !== undefined ) {
+						setHighlightedIndex( visibleNodeIndex );
+					}
+				}
+			} else if ( event.key === 'ArrowUp' ) {
+				event.preventDefault();
+				if ( highlightedIndex > 0 ) {
+					const visibleNodeIndex = getVisibleNodeIndex(
+						linkedTree,
+						Math.max( highlightedIndex - 1, -1 ),
+						'up'
+					);
+					if ( visibleNodeIndex !== undefined ) {
+						setHighlightedIndex( visibleNodeIndex );
+					}
+				} else {
+					setHighlightedIndex( -1 );
+				}
 			} else if ( event.key === 'Tab' || event.key === 'Escape' ) {
 				setIsOpen( false );
 				recalculateInputValue();
-			} else if ( event.key === ',' || event.key === 'Enter' ) {
+			} else if ( event.key === 'Enter' || event.key === ',' ) {
 				event.preventDefault();
-				const item = items.find(
-					( i ) => i.label === escapeHTML( inputValue )
-				);
-				const isAlreadySelected =
-					Array.isArray( props.selected ) &&
-					Boolean(
-						props.selected.find(
-							( i ) => i.label === escapeHTML( inputValue )
-						)
+				if (
+					highlightedIndex === items.length &&
+					shouldShowCreateButton
+				) {
+					props.onCreateNew?.();
+				} else if (
+					// is selecting an item
+					highlightedIndex !== -1
+				) {
+					const nodeData = getNodeDataByIndex(
+						linkedTree,
+						highlightedIndex
 					);
-				if ( props.onSelect && item && ! isAlreadySelected ) {
-					props.onSelect( item );
-					setInputValue( '' );
-					recalculateInputValue();
+					if ( ! nodeData ) {
+						return;
+					}
+					if ( props.multiple && Array.isArray( props.selected ) ) {
+						if (
+							! Boolean(
+								props.selected.find(
+									( i ) => i.label === nodeData.label
+								)
+							)
+						) {
+							if ( props.onSelect ) {
+								props.onSelect( nodeData );
+							}
+						} else if ( props.onRemove ) {
+							props.onRemove( nodeData );
+						}
+						setInputValue( '' );
+					} else {
+						onInputChange?.( nodeData.label );
+						props.onSelect?.( nodeData );
+						setIsOpen( false );
+						setIsFocused( false );
+						focusOnInput();
+					}
+				} else if ( inputValue ) {
+					// no highlighted item, but there is an input value, check if it matches any item
+
+					const item = items.find(
+						( i ) => i.label === escapeHTML( inputValue )
+					);
+					const isAlreadySelected = Array.isArray( props.selected )
+						? Boolean(
+								props.selected.find(
+									( i ) =>
+										i.label === escapeHTML( inputValue )
+								)
+						  )
+						: props.selected?.label === escapeHTML( inputValue );
+					if ( item && ! isAlreadySelected ) {
+						props.onSelect?.( item );
+						setInputValue( '' );
+						recalculateInputValue();
+					}
 				}
 			} else if (
-				( event.key === 'ArrowLeft' || event.key === 'Backspace' ) &&
+				event.key === 'Backspace' &&
 				// test if the cursor is at the beginning of the input with nothing selected
 				( event.target as HTMLInputElement ).selectionStart === 0 &&
 				( event.target as HTMLInputElement ).selectionEnd === 0 &&
 				selectedItemsFocusHandle.current
 			) {
 				selectedItemsFocusHandle.current();
+			} else if ( event.key === 'ArrowRight' ) {
+				setLinkedTree(
+					toggleNode( linkedTree, highlightedIndex, true )
+				);
+			} else if ( event.key === 'ArrowLeft' ) {
+				setLinkedTree(
+					toggleNode( linkedTree, highlightedIndex, false )
+				);
+			} else if ( event.key === 'Home' ) {
+				event.preventDefault();
+				setHighlightedIndex( 0 );
+			} else if ( event.key === 'End' ) {
+				event.preventDefault();
+				setHighlightedIndex( items.length - 1 );
 			}
 		},
 		onChange: ( event ) => {
@@ -248,10 +379,6 @@ export const SelectTree = function SelectTree( {
 								comboBoxProps={ {
 									className:
 										'woocommerce-experimental-select-control__combo-box-wrapper',
-									role: 'combobox',
-									'aria-expanded': isOpen,
-									'aria-haspopup': 'tree',
-									'aria-owns': `${ props.id }-menu`,
 								} }
 								inputProps={ inputProps }
 								suffix={
@@ -281,7 +408,11 @@ export const SelectTree = function SelectTree( {
 								<SelectedItems
 									isReadOnly={ isReadOnly }
 									ref={ selectedItemsFocusHandle }
-									items={ ( props.selected as Item[] ) || [] }
+									items={
+										! Array.isArray( props.selected )
+											? [ props.selected ]
+											: props.selected
+									}
 									getItemLabel={ ( item ) =>
 										item?.label || ''
 									}
@@ -290,6 +421,7 @@ export const SelectTree = function SelectTree( {
 									}
 									onRemove={ ( item ) => {
 										if (
+											item &&
 											! Array.isArray( item ) &&
 											props.onRemove
 										) {
@@ -346,6 +478,12 @@ export const SelectTree = function SelectTree( {
 							isEventOutside={ isEventOutside }
 							isLoading={ isLoading }
 							isOpen={ isOpen }
+							highlightedIndex={ highlightedIndex }
+							onExpand={ ( index, value ) => {
+								setLinkedTree(
+									toggleNode( linkedTree, index, value )
+								);
+							} }
 							items={ linkedTree }
 							shouldShowCreateButton={ shouldShowCreateButton }
 							onEscape={ () => {
