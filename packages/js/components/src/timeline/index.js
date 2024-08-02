@@ -18,8 +18,10 @@ const Timeline = ( {
 	items = [],
 	groupBy = 'day',
 	orderBy = 'desc',
+	/* translators: PHP date format string used to display dates, see php.net/date. */
 	dateFormat = __( 'F j, Y', 'woocommerce' ),
-	clockFormat = __( 'g:ia', 'woocommerce' )
+	/* translators: PHP clock format string used to display times, see php.net/date. */
+	clockFormat = __( 'g:ia', 'woocommerce' ),
 } ) => {
 	const timelineClassName = classnames( 'woocommerce-timeline', className );
 
@@ -115,7 +117,6 @@ Timeline.propTypes = {
 	 */
 	clockFormat: PropTypes.string,
 };
-
 
 export { orderByOptions, groupByOptions } from './util';
 export default Timeline;
