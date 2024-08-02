@@ -169,33 +169,41 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await test.step( 'add custom fields', async () => {
 				await clickOnTab( 'Organization', page );
 
-				const customFieldsToggle = page.getByRole( 'checkbox', {
-					name: 'Show custom fields',
-				} );
-
-				await customFieldsToggle.scrollIntoViewIfNeeded();
+				const customFieldsAddNewButton = page
+					.getByLabel( 'Block: Product custom fields toggle control' )
+					.getByRole( 'button', { name: 'Add new' } );
 
 				// When re-running the test without resetting the env,
 				// the custom fields toggle might be already checked,
-				// so we need to check if it is checked before clicking it.
-				//
-				// Additionally, click() is used instead of check() because
-				// Playwright sometimes has issues with custom checkboxes:
-				// - https://github.com/microsoft/playwright/issues/13470
-				// - https://github.com/microsoft/playwright/issues/20893
-				// - https://github.com/microsoft/playwright/issues/27016
+				// so we need to check if the "Add new" button is already visible.
 				//
 				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( ! ( await customFieldsToggle.isChecked() ) ) {
-					await customFieldsToggle.click();
+				if ( ! ( await customFieldsAddNewButton.isVisible() ) ) {
+					// Toggle the "Show custom fields" so that the "Add new" button is visible
+
+					const customFieldsToggle = page.getByRole( 'checkbox', {
+						name: 'Show custom fields',
+					} );
+
+					await customFieldsToggle.scrollIntoViewIfNeeded();
+
+					// click() is used instead of check() because
+					// Playwright sometimes has issues with custom checkboxes:
+					// - https://github.com/microsoft/playwright/issues/13470
+					// - https://github.com/microsoft/playwright/issues/20893
+					// - https://github.com/microsoft/playwright/issues/27016
+					//
+					// eslint-disable-next-line playwright/no-conditional-in-test
+					if ( ! ( await customFieldsToggle.isChecked() ) ) {
+						await customFieldsToggle.click();
+					}
+
+					await customFieldsToggle.isEnabled();
 				}
 
-				await customFieldsToggle.isEnabled();
+				await expect( customFieldsAddNewButton ).toBeVisible();
 
-				await page
-					.getByLabel( 'Block: Product custom fields toggle control' )
-					.getByRole( 'button', { name: 'Add new' } )
-					.click();
+				await customFieldsAddNewButton.click();
 
 				// Add custom fields modal
 				const modal = page.locator(
