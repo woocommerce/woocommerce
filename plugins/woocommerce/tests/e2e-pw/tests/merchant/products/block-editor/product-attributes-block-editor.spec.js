@@ -115,7 +115,7 @@ test(
 
 			await page
 				// Using a selector because there are many "Add new" buttons on the page
-				.locator( 'woocommerce-add-attribute-list-item__add-button' )
+				.locator( '.woocommerce-add-attribute-list-item__add-button' )
 				.click();
 
 			await page
