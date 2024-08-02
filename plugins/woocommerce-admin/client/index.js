@@ -8,6 +8,12 @@ import {
 	withCurrentUserHydration,
 	withSettingsHydration,
 } from '@woocommerce/data';
+/**
+ * Internal dependencies
+ */
+import { initRemoteLogging } from './lib/init-remote-logging';
+// Initialize remote logging early to log any errors that occur during initialization.
+initRemoteLogging();
 
 /**
  * Internal dependencies
