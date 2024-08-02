@@ -57,7 +57,6 @@ export function Edit( {
 						'Stock quantity must be a positive number.',
 						'woocommerce'
 					),
-					context: clientId,
 				};
 			}
 		},
