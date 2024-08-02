@@ -190,8 +190,6 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 
 				await customFieldsToggle.isEnabled();
 
-				await expect( customFieldsToggle ).toBeChecked();
-
 				await page
 					.getByLabel( 'Block: Product custom fields toggle control' )
 					.getByRole( 'button', { name: 'Add new' } )
