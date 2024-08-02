@@ -179,9 +179,8 @@ jobs:
         if: ${{ always() && matrix.report.resultsPath != '' }}
         uses: actions/download-artifact@v4
         with:
-          name: 'last-run__${{ strategy.job-index }}'
+          pattern: 'last-run__${{ strategy.job-index }}'
           path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
-          merge-multiple: true
 
       - name: 'Run tests (${{ matrix.testType }})'
         env:
