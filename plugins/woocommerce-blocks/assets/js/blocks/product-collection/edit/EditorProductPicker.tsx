@@ -48,7 +48,7 @@ const EditorProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 					}
 					showVariations
 					onChange={ ( value = [] ) => {
-						const isValidId = ( value[ 0 ].id ?? null ) !== null;
+						const isValidId = ( value[ 0 ]?.id ?? null ) !== null;
 						if ( isValidId ) {
 							props.setAttributes( {
 								selectedReference: {
