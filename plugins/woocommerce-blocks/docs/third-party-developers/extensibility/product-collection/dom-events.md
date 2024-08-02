@@ -4,10 +4,7 @@
 
 -   [WooCommerce core events in WooCommerce Blocks](#woocommerce-core-events-in-woocommerce-blocks)
 -   [WooCommerce Blocks events](#woocommerce-blocks-events)
-    -   [`wc-blocks_adding_to_cart`](#wc-blocks_adding_to_cart)
-    -   [`wc-blocks_added_to_cart`](#wc-blocks_added_to_cart)
-        -   [`detail` parameters:](#detail-parameters)
-    -   [`wc-blocks_removed_from_cart`](#wc-blocks_removed_from_cart)
+    -   [`wc-blocks_product_list_rendered`](#wc-blocks_product_list_rendered)
 
 ## WooCommerce core events in WooCommerce Blocks
 
