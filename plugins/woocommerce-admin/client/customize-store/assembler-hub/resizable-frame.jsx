@@ -14,7 +14,7 @@ import {
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { __experimentalUseResizeCanvas as useResizeCanvas } from '@wordpress/block-editor';
 
@@ -105,26 +105,24 @@ function ResizableFrame( {
 			deviceType: getDeviceType(),
 		};
 	} );
+	const { setDeviceType } = useDispatch( editorStore );
 
 	const deviceStyles = useResizeCanvas( deviceType );
 
 	useEffect( () => {
-		if ( deviceType !== previousDeviceType ) {
-			if ( deviceType === 'Desktop' ) {
-				setFrameSize( INITIAL_FRAME_SIZE );
-			} else {
-				const { width, height, marginLeft, marginRight } = deviceStyles;
-				setIsOversized( width > defaultSize.width );
-				setFrameSize( {
-					width: isOversized ? '100%' : width,
-					height: isOversized ? '100%' : height,
-					marginLeft,
-					marginRight,
-				} );
-			}
-			setPreviousDeviceType( deviceType );
+		if ( deviceType === 'Desktop' ) {
+			setFrameSize( INITIAL_FRAME_SIZE );
+		} else {
+			const { width, height, marginLeft, marginRight } = deviceStyles;
+			setIsOversized( width > defaultSize.width );
+			setFrameSize( {
+				width: isOversized ? '100%' : width,
+				height: isOversized ? '100%' : height,
+				marginLeft,
+				marginRight,
+			} );
 		}
-	}, [ deviceType, deviceStyles, previousDeviceType, isOversized ] );
+	}, [ deviceType ] );
 
 	const handleResizeStart = ( _event, _direction, ref ) => {
 		// Remember the starting width so we don't have to get `ref.offsetWidth` on
@@ -132,6 +130,9 @@ function ResizableFrame( {
 		setStartingWidth( ref.offsetWidth );
 		setIsResizing( true );
 	};
+
+	const tabletStyles = useResizeCanvas( 'Tablet' );
+	const mobileStyles = useResizeCanvas( 'Mobile' );
 
 	// Calculate the frame size based on the window width as its resized.
 	const handleResize = ( _event, _direction, _ref, delta ) => {
@@ -150,6 +151,18 @@ function ResizableFrame( {
 		const updatedWidth = startingWidth + delta.width;
 
 		setIsOversized( updatedWidth > defaultSize.width );
+
+		if ( updatedWidth >= tabletStyles.width ) {
+			setDeviceType( 'Desktop' );
+		}
+
+		if ( updatedWidth <= tabletStyles.width ) {
+			setDeviceType( 'Tablet' );
+		}
+
+		if ( updatedWidth <= mobileStyles.width ) {
+			setDeviceType( 'Mobile' );
+		}
 
 		// Width will be controlled by the library (via `resizeRatio`),
 		// so we only need to update the height.

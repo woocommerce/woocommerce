@@ -40,7 +40,6 @@ const zoomOut = (
 	</SVG>
 );
 
-const ANIMATION_DURATION = 0.3;
 const BUTTON_CLASS_NAMES =
 	'components-button has-icon woocommerce-customize-store__resize-button';
 const ICON_CLASS_NAMES = 'woocommerce-customize-store__resize-icon';
@@ -64,12 +63,8 @@ export function DeviceToolbar() {
 	const switchDeviceType = ( newDeviceType: string ) => {
 		if ( isZoomedOut ) {
 			toggleZoomOut();
-			setTimeout( () => {
-				setDeviceType( newDeviceType );
-			}, ANIMATION_DURATION * 1000 );
-		} else {
-			setDeviceType( newDeviceType );
 		}
+		setDeviceType( newDeviceType );
 	};
 
 	return (
@@ -128,12 +123,8 @@ export function DeviceToolbar() {
 				className={ clsx( BUTTON_CLASS_NAMES ) }
 				aria-label="Zoom out"
 				onClick={ () => {
-					if ( deviceType !== 'Desktop' ) {
-						setDeviceType( 'Desktop' );
-						setTimeout( toggleZoomOut, ANIMATION_DURATION * 1000 );
-					} else {
-						toggleZoomOut();
-					}
+					setDeviceType( 'Desktop' );
+					toggleZoomOut();
 				} }
 			>
 				<Icon
