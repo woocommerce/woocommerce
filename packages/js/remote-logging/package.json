@@ -53,6 +53,7 @@
 		]
 	},
 	"dependencies": {
+		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/hooks": "wp-6.0",
 		"debug": "^4.3.4",
 		"tracekit": "^0.4.6"
@@ -152,6 +153,9 @@
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/tracks/build",
+				"node_modules/@woocommerce/tracks/build-module",
+				"node_modules/@woocommerce/tracks/build-types",
 				"package.json"
 			]
 		}
