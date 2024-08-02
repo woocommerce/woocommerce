@@ -184,7 +184,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @return string Updated HTML content.
 	 */
-	private function enable_client_side_naviagation( $block_content ) {
+	private function enable_client_side_navigation( $block_content ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-wc-navigation-id to the product collection block.
@@ -261,7 +261,7 @@ class ProductCollection extends AbstractBlock {
 
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 			if ( $is_enhanced_pagination_enabled ) {
-				$block_content = $this->enable_client_side_naviagation( $block_content );
+				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
 
