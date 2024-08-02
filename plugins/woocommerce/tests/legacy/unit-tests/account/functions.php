@@ -16,6 +16,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_lostpassword_url() {
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'login_form_login' ); // Simulate admin login screen.
 
 		// Admin URL is expected.
