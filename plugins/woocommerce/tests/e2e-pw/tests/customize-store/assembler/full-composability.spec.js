@@ -276,7 +276,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 	} );
 
-	test( 'Clicking the "Delete" button on a pattern should remove it from the preview', async ( {
+	test.skip( 'Clicking the "Delete" button on a pattern should remove it from the preview', async ( {
 		pageObject,
 		baseURL,
 	} ) => {

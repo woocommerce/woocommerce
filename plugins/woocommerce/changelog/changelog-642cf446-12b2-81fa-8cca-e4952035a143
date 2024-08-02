@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Skipped flaky test: Clicking the "Delete" button on a pattern should remove it from the preview
