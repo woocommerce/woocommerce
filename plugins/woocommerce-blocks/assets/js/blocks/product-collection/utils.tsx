@@ -18,13 +18,14 @@ import {
  * Internal dependencies
  */
 import {
-	ProductCollectionAttributes,
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
-	ProductCollectionQuery,
-	ProductCollectionDisplayLayout,
-	PreviewState,
-	SetPreviewState,
+	type ProductCollectionAttributes,
+	type TProductCollectionOrder,
+	type TProductCollectionOrderBy,
+	type ProductCollectionQuery,
+	type ProductCollectionDisplayLayout,
+	type PreviewState,
+	type SetPreviewState,
+	CoreCollectionNames,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -272,6 +273,7 @@ export const getDefaultProductCollection = () =>
 				inherit: getDefaultValueOfInherit(),
 				filterable: getDefaultValueOfFilterable(),
 			},
+			collection: CoreCollectionNames.PRODUCT_CATALOG,
 		},
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
 	);
