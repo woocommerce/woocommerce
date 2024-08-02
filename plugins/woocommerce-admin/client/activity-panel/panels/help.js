@@ -359,15 +359,18 @@ function getListItems( props ) {
 	} ) );
 }
 
-export const HelpPanel = ( props ) => {
-	const { taskName } = props;
+export const HelpPanel = ( { 
+	taskName,
+	recordEvent = () => {},
+	...props
+} ) => {
 	useEffect( () => {
-		props.recordEvent( 'help_panel_open', {
+		recordEvent( 'help_panel_open', {
 			task_name: taskName || 'homescreen',
 		} );
-	}, [ taskName ] );
+	}, [ taskName, recordEvent ] );
 
-	const listItems = getListItems( props );
+	const listItems = getListItems( { taskName, recordEvent, ...props } );
 
 	return (
 		<Fragment>
@@ -382,9 +385,6 @@ export const HelpPanel = ( props ) => {
 	);
 };
 
-HelpPanel.defaultProps = {
-	recordEvent,
-};
 
 export default compose(
 	withSelect( ( select ) => {
