@@ -241,8 +241,6 @@ class Menu {
 		return;
 	}
 
-
-
 	/**
 	 * Get menu item templates for a given post type.
 	 *
