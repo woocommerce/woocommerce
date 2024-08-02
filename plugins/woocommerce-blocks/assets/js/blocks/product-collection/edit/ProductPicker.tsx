@@ -20,7 +20,7 @@ import {
 import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
 
-const EditorProductPicker = ( props: ProductCollectionEditComponentProps ) => {
+const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 	const blockProps = useBlockProps();
 	const attributes = props.attributes;
 
@@ -67,4 +67,4 @@ const EditorProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 	);
 };
 
-export default EditorProductPicker;
+export default ProductPicker;

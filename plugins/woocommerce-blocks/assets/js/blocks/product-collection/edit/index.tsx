@@ -18,7 +18,7 @@ import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
 import { getProductCollectionUIStateInEditor } from '../utils';
-import EditorProductPicker from './EditorProductPicker';
+import ProductPicker from './ProductPicker';
 
 const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes } = props;
@@ -48,7 +48,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			Component = ProductCollectionPlaceholder;
 			break;
 		case ProductCollectionUIStatesInEditor.PRODUCT_CONTEXT_PICKER:
-			Component = EditorProductPicker;
+			Component = ProductPicker;
 			break;
 		case ProductCollectionUIStatesInEditor.VALID:
 		case ProductCollectionUIStatesInEditor.USES_REFERENCE_PREVIEW_MODE:
