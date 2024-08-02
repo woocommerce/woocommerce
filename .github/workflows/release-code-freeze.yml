@@ -31,7 +31,6 @@ jobs:
             issues: write
             pull-requests: write
         outputs:
-            pnpmVersion: ${{ steps.read-pnpm-version.outputs.version }}
             isTodayAcceleratedFreeze: ${{ steps.get-versions.outputs.isTodayAcceleratedFreeze }}
             isTodayMonthlyFreeze: ${{ steps.get-versions.outputs.isTodayMonthlyFreeze }}
             acceleratedVersion: ${{ steps.get-versions.outputs.acceleratedVersion }}
@@ -47,18 +46,8 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: Read PNPM Version
-              id: read-pnpm-version
-              shell: bash
-              run: |
-                version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)
-                echo "version=$version" >> $GITHUB_OUTPUT
-                echo "PNPM Version: $version"
-
             - name: Setup PNPM
               uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ steps.read-pnpm-version.outputs.version }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -150,8 +139,6 @@ jobs:
 
             - name: Setup PNPM
               uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -276,8 +263,6 @@ jobs:
 
             - name: Setup PNPM
               uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
@@ -347,8 +332,6 @@ jobs:
 
             - name: Setup PNPM
               uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: ${{ needs.code-freeze-prep.outputs.pnpmVersion }}
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
