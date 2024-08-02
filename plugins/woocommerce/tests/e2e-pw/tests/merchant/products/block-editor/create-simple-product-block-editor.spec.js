@@ -173,6 +173,8 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					name: 'Show custom fields',
 				} );
 
+				await customFieldsToggle.scrollIntoViewIfNeeded();
+
 				// When re-running the test without resetting the env,
 				// the custom fields toggle might be already checked,
 				// so we need to check if it is checked before clicking it.
