@@ -44,10 +44,16 @@ jobs:
                   # Both install and build are handled by compressed-size-action.
                   install: false
                   build: false
+                  pull-package-deps: '@woocommerce/plugin-woocommerce'
+
             - uses: preactjs/compressed-size-action@f780fd104362cfce9e118f9198df2ee37d12946c
+              env:
+                  BROWSERSLIST_IGNORE_OLD_DATA: true
               with:
                   repo-token: '${{ secrets.GITHUB_TOKEN }}'
                   pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce-blocks}/{build,build-style}/**/*.{js,css}'
-                  clean-script: '--if-present distclean'
+                  install-script: 'pnpm install --filter="@woocommerce/plugin-woocommerce..." --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts'
+                  build-script: '--filter="@woocommerce/plugin-woocommerce" build'
+                  clean-script: '--if-present buildclean'
                   minimum-change-threshold: 100
                   omit-unchanged: true

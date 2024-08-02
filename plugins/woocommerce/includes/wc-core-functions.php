@@ -1580,6 +1580,8 @@ function wc_help_tip( $tip, $allow_html = false ) {
 		$sanitized_tip = esc_attr( $tip );
 	}
 
+	$aria_label = wp_strip_all_tags( $tip );
+
 	/**
 	 * Filter the help tip.
 	 *
@@ -1592,7 +1594,7 @@ function wc_help_tip( $tip, $allow_html = false ) {
 	 *
 	 * @return string
 	 */
-	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-label="' . $sanitized_tip . '" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
+	return apply_filters( 'wc_help_tip', '<span class="woocommerce-help-tip" tabindex="0" aria-label="' . esc_attr( $aria_label ) . '" data-tip="' . $sanitized_tip . '"></span>', $sanitized_tip, $tip, $allow_html );
 }
 
 /**

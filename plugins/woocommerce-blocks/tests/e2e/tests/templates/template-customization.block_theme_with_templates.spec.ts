@@ -39,14 +39,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 				// Verify template name didn't change.
 				// See: https://github.com/woocommerce/woocommerce/issues/42221
 				await expect(
@@ -60,6 +62,24 @@ test.describe( 'Template customization', () => {
 				await expect(
 					page.getByText( userText ).first()
 				).toBeVisible();
+
+				// Revert edition and verify the template from the theme is used.
+				await admin.visitSiteEditor( {
+					postType: testData.templateType,
+				} );
+				await editor.revertTemplate( {
+					templateName: testData.templateName,
+				} );
+				await testData.visitPage( { frontendUtils, page } );
+
+				await expect(
+					page
+						.getByText(
+							`${ testData.templateName } template loaded from theme`
+						)
+						.first()
+				).toBeVisible();
+				await expect( page.getByText( userText ) ).toHaveCount( 0 );
 			} );
 
 			if ( testData.fallbackTemplate ) {
@@ -74,8 +94,8 @@ test.describe( 'Template customization', () => {
 					await admin.visitSiteEditor( {
 						postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.fallbackTemplate?.templatePath }`,
 						postType: testData.templateType,
+						canvas: 'edit',
 					} );
-					await editor.enterEditMode();
 
 					await editor.insertBlock( {
 						name: 'core/paragraph',
@@ -83,7 +103,9 @@ test.describe( 'Template customization', () => {
 							content: fallbackTemplateUserText,
 						},
 					} );
-					await editor.saveSiteEditorEntities();
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
 					await testData.visitPage( { frontendUtils, page } );
 					await expect(
 						page.getByText( fallbackTemplateUserText )

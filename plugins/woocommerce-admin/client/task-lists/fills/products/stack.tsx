@@ -15,7 +15,9 @@ import { ProductType } from './constants';
 import './stack.scss';
 import useRecordCompletionTime from '../use-record-completion-time';
 
-type StackProps = {
+type StackProps = StackWithLoadSampleBlurb | StackWithoutText;
+
+type StackWithLoadSampleBlurb = {
 	items: ( ProductType & {
 		onClick: () => void;
 	} )[];
@@ -24,9 +26,18 @@ type StackProps = {
 	isTaskListItemClicked?: boolean;
 };
 
+type StackWithoutText = {
+	items: ( ProductType & {
+		onClick: () => void;
+	} )[];
+	showOtherOptions: false;
+	onClickLoadSampleProduct?: () => void;
+	isTaskListItemClicked?: boolean;
+};
+
 const Stack: React.FC< StackProps > = ( {
 	items,
-	onClickLoadSampleProduct,
+	onClickLoadSampleProduct = () => {},
 	showOtherOptions = true,
 	isTaskListItemClicked = false,
 } ) => {

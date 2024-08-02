@@ -626,7 +626,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_status( $new_status ) {
 		$old_status = $this->get_status();
-		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+		$new_status = OrderUtil::remove_status_prefix( $new_status );
 
 		$status_exceptions = array( 'auto-draft', 'trash' );
 

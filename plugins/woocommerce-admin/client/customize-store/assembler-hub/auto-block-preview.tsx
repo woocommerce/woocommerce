@@ -6,7 +6,7 @@
  * External dependencies
  */
 import { useResizeObserver, pure } from '@wordpress/compose';
-import { useContext, useMemo, useState } from '@wordpress/element';
+import { useContext, useEffect, useMemo, useState } from '@wordpress/element';
 import { Disabled, Popover } from '@wordpress/components';
 import {
 	__unstableEditorStyles as EditorStyles,
@@ -38,6 +38,9 @@ import { IsResizingContext } from './resizable-frame';
 import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
 import clsx from 'clsx';
+import { SelectedBlockContext } from './context/selected-block-ref-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
+import { useInsertPatternByName } from './hooks/use-insert-pattern-by-name';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -109,6 +112,39 @@ function ScaledBlockPreview( {
 	// @ts-expect-error No types for this exist yet.
 	const { getBlockParents } = useSelect( blockEditorStore );
 
+	const { setSelectedBlockRef } = useContext( SelectedBlockContext );
+
+	const selectedBlockClientId = useSelect( ( select ) => {
+		const block = select( 'core/block-editor' ).getSelectedBlock();
+
+		// @ts-expect-error No types for this exist yet.
+		return block?.clientId;
+	} );
+
+	useEffect( () => {
+		if ( selectedBlockClientId && iframeRef ) {
+			const el = iframeRef.querySelector(
+				`#block-${ selectedBlockClientId }`
+			) as HTMLElement;
+
+			if ( ! el ) {
+				return;
+			}
+
+			const observer = new MutationObserver( () => {
+				setSelectedBlockRef( el );
+			} );
+
+			observer.observe( el, {
+				attributes: true,
+			} );
+
+			return () => {
+				observer.disconnect();
+			};
+		}
+	}, [ iframeRef, selectedBlockClientId, setSelectedBlockRef ] );
+
 	// Avoid scrollbars for pattern previews.
 	const editorStyles = useMemo( () => {
 		if ( ! isScrollable && settings.styles ) {
@@ -135,6 +171,8 @@ function ScaledBlockPreview( {
 	const isResizing = useContext( IsResizingContext );
 	const query = useQuery();
 
+	const { insertPatternByName } = useInsertPatternByName();
+
 	useAddAutoBlockPreviewEventListenersAndObservers(
 		{
 			documentElement: iframeRef,
@@ -153,6 +191,7 @@ function ScaledBlockPreview( {
 			updatePopoverPosition,
 			setLogoBlockIds,
 			setContentHeight,
+			insertPatternByName,
 		}
 	);
 
@@ -207,7 +246,9 @@ function ScaledBlockPreview( {
 						// @ts-ignore disabled prop exists
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
-						readonly={ false }
+						readonly={
+							! isFullComposabilityFeatureAndAPIAvailable()
+						}
 						style={
 							autoScale
 								? {
@@ -259,6 +300,23 @@ function ScaledBlockPreview( {
 							pointer-events: all !important;
 							cursor: pointer !important;
 						}
+
+						.components-resizable-box__handle {
+							display: none !important;
+						}
+
+						footer.is-selected::after,
+						header.is-selected::after {
+							outline-color: var(--wp-admin-theme-color) !important;
+						}
+
+						header.is-selected::after {
+						    border-top-left-radius: 20px;
+					    }
+
+						footer.is-selected::after {
+						    border-bottom-left-radius: 20px;
+					    }
 
 						${ additionalStyles }
 					` }

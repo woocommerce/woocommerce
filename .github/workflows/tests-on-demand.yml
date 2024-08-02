@@ -1,0 +1,38 @@
+name: 'On demand tests run'
+
+on:
+  workflow_dispatch:
+    inputs:
+      trigger:
+        type: choice
+        description: 'Event name: it will be used to filter the jobs to run in ci.yml.'
+        required: true
+        options:
+          - push
+          - daily-checks
+          - pre-release
+          - on-demand
+          - custom
+        default: on-demand
+      custom-trigger:
+        type: string
+        description: 'Custom event name: In case the `Event name` choice is `custom`, this field is required.'
+        required: false
+
+jobs:
+  validate-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Validate input'
+        run: |
+          if [ "${{ inputs.trigger }}" == "custom" ] && [ -z "${{ inputs.custom-trigger }}" ]; then
+            echo "Custom event name is required when event name choice `custom`."
+            exit 1
+          fi
+
+  run-tests:
+    name: 'Run tests'
+    uses: ./.github/workflows/ci.yml
+    with:
+      trigger: ${{ inputs.trigger == 'custom' && inputs.custom-trigger || inputs.trigger }}
+    secrets: inherit

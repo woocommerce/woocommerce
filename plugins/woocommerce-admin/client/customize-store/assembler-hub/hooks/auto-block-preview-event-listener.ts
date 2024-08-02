@@ -8,11 +8,38 @@ import { useEffect } from '@wordpress/element';
  */
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
+export const DISABLE_CLICK_CLASS = 'disable-click';
+
+export const ENABLE_CLICK_CLASS = 'enable-click';
+
 const setStyle = ( documentElement: HTMLElement ) => {
 	const element = documentElement.ownerDocument.documentElement;
 	element.classList.add( 'block-editor-block-preview__content-iframe' );
 	element.style.position = 'absolute';
 	element.style.width = '100%';
+
+	// Necessary for us to prevent the block editor from showing the focus outline on blocks that we've enabled interaction on.
+	const styleBlockId = 'enable-click-styles';
+	if (
+		! documentElement.ownerDocument.head.querySelector(
+			`#${ styleBlockId }`
+		)
+	) {
+		const styleBlock =
+			documentElement.ownerDocument.createElement( 'style' );
+		styleBlock.setAttribute( 'type', 'text/css' );
+		styleBlock.setAttribute( 'id', styleBlockId );
+		styleBlock.innerHTML = `
+			.${ ENABLE_CLICK_CLASS }[data-type="core/button"]:hover {
+				cursor: pointer;
+			}
+			.${ ENABLE_CLICK_CLASS }:focus::after,
+			.${ ENABLE_CLICK_CLASS }.is-selected::after {
+				content: none !important;
+			}
+		`;
+		documentElement.ownerDocument.head.appendChild( styleBlock );
+	}
 
 	// Necessary for contentResizeListener to work.
 	documentElement.style.boxSizing = 'border-box';
@@ -86,8 +113,6 @@ const findAndSetLogoBlock = (
 	return observer;
 };
 
-export const DISABLE_CLICK_CLASS = 'disable-click';
-
 const makeInert = ( element: Element ) => {
 	element.setAttribute( 'inert', 'true' );
 };
@@ -105,18 +130,26 @@ const addInertToAssemblerPatterns = (
 	const interactiveBlocks: Record< string, string > = {
 		'/customize-store/assembler-hub/header': `header[data-type='core/template-part']`,
 		'/customize-store/assembler-hub/footer': `footer[data-type='core/template-part']`,
-		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part'])`,
+		'/customize-store/assembler-hub/homepage': `[data-is-parent-block='true']:not([data-type='core/template-part']):not(.${ DISABLE_CLICK_CLASS })`,
 	};
+
+	const pathInteractiveBlocks = page.includes(
+		'/customize-store/assembler-hub/homepage'
+	)
+		? interactiveBlocks[ '/customize-store/assembler-hub/homepage' ]
+		: interactiveBlocks[ page ];
 
 	const addInertToTemplateParts = () => {
 		for ( const disableClick of documentElement.querySelectorAll(
 			`[data-is-parent-block='true']`
 		) ) {
-			makeInert( disableClick );
+			if ( ! disableClick.classList.contains( ENABLE_CLICK_CLASS ) ) {
+				makeInert( disableClick );
+			}
 		}
 
 		for ( const element of documentElement.querySelectorAll(
-			interactiveBlocks[ page ]
+			pathInteractiveBlocks
 		) ) {
 			makeInteractive( element );
 		}
@@ -151,9 +184,11 @@ const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 		}
 
 		for ( const disableClick of documentElement.querySelectorAll(
-			`[data-is-parent-block='true'] *, header *, footer *, .${ DISABLE_CLICK_CLASS }`
+			`[data-is-parent-block='true'] *`
 		) ) {
-			makeInert( disableClick );
+			if ( ! disableClick.classList.contains( ENABLE_CLICK_CLASS ) ) {
+				makeInert( disableClick );
+			}
 		}
 	} );
 
@@ -195,6 +230,7 @@ const updateSelectedBlock = (
 			hoveredBlockClientId: null,
 			clickedBlockClientId: clickedBlockClientId as string,
 		} );
+		( event.target as HTMLElement ).focus();
 	};
 
 	const handleMouseMove = ( event: MouseEvent ) => {
@@ -226,9 +262,17 @@ export const hidePopoverWhenMouseLeaveIframe = (
 	iframeRef: HTMLElement,
 	{
 		hidePopover,
-	}: Pick< useAutoBlockPreviewEventListenersCallbacks, 'hidePopover' >
+		selectBlock,
+	}: Pick<
+		useAutoBlockPreviewEventListenersCallbacks,
+		'hidePopover' | 'selectBlock'
+	>
 ) => {
-	const handleMouseLeave = () => {
+	const handleMouseLeave = ( event: MouseEvent ) => {
+		/// Deselect the block if the mouse exits the iframe unless it's moving towards the Block Toolbar.
+		if ( event.clientX < 0 || event.clientY < 0 ) {
+			selectBlock( '' );
+		}
 		hidePopover();
 	};
 
@@ -239,6 +283,33 @@ export const hidePopoverWhenMouseLeaveIframe = (
 	return () => {
 		if ( iframeRef ) {
 			iframeRef.removeEventListener( 'mouseleave', handleMouseLeave );
+		}
+	};
+};
+
+const addPatternButtonClickListener = (
+	documentElement: HTMLElement,
+	insertPatternByName: ( pattern: string ) => void
+) => {
+	const DEFAULT_PATTTERN_NAME =
+		'woocommerce-blocks/centered-content-with-image-below';
+	const handlePatternButtonClick = () => {
+		insertPatternByName( DEFAULT_PATTTERN_NAME );
+	};
+
+	const patternButton = documentElement.querySelector(
+		'.no-blocks-insert-pattern-button'
+	);
+	if ( patternButton ) {
+		patternButton.addEventListener( 'click', handlePatternButtonClick );
+	}
+
+	return () => {
+		if ( patternButton ) {
+			patternButton.removeEventListener(
+				'click',
+				handlePatternButtonClick
+			);
 		}
 	};
 };
@@ -275,6 +346,7 @@ type useAutoBlockPreviewEventListenersCallbacks = {
 	setLogoBlockIds: ( logoBlockIds: string[] ) => void;
 	setContentHeight: ( contentHeight: number | null ) => void;
 	hidePopover: () => void;
+	insertPatternByName: ( pattern: string ) => void;
 };
 
 /**
@@ -298,6 +370,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		setLogoBlockIds,
 		setContentHeight,
 		hidePopover,
+		insertPatternByName,
 	}: useAutoBlockPreviewEventListenersCallbacks
 ) => {
 	useEffect( () => {
@@ -323,16 +396,14 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 
 		setStyle( documentElement );
 
-		if ( logoBlockIds.length === 0 ) {
-			const logoObserver = findAndSetLogoBlock(
-				{ autoScale, documentElement },
-				{
-					setLogoBlockIds,
-				}
-			);
+		const logoObserver = findAndSetLogoBlock(
+			{ autoScale, documentElement },
+			{
+				setLogoBlockIds,
+			}
+		);
 
-			observers.push( logoObserver );
-		}
+		observers.push( logoObserver );
 
 		if (
 			isFullComposabilityFeatureAndAPIAvailable() &&
@@ -341,7 +412,9 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			const removeEventListenerHidePopover =
 				hidePopoverWhenMouseLeaveIframe( documentElement, {
 					hidePopover,
+					selectBlock,
 				} );
+
 			const removeEventListenersSelectedBlock = updateSelectedBlock(
 				documentElement,
 				{
@@ -366,6 +439,14 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
 		}
+
+		// Add event listner to the button which will insert a default pattern
+		// when there are no patterns inserted in the block preview.
+		const removePatternButtonClickListener = addPatternButtonClickListener(
+			documentElement,
+			insertPatternByName
+		);
+		unsubscribeCallbacks.push( removePatternButtonClickListener );
 
 		return () => {
 			observers.forEach( ( observer ) => observer.disconnect() );

@@ -4,12 +4,17 @@
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
+import { removeAllFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { Products } from '..';
-import { defaultSurfacedProductTypes, productTypes } from '../constants';
+import {
+	SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
+	defaultSurfacedProductTypes,
+	productTypes,
+} from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 jest.mock( '@wordpress/data', () => ( {
@@ -42,6 +47,8 @@ const confirmModalText =
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		// @ts-expect-error -- outdated type definition
+		removeAllFilters( SETUP_TASKLIST_PRODUCTS_AFTER_FILTER );
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -65,10 +72,11 @@ describe( 'Products', () => {
 				product_types: [ 'downloads' ],
 			},
 		} ) );
-		const { queryByText, queryByRole } = render( <Products /> );
+		const { queryByText, queryAllByRole } = render( <Products /> );
 
+		const productTypeList = queryAllByRole( 'menu' )?.[ 0 ];
 		expect( queryByText( 'Digital product' ) ).toBeInTheDocument();
-		expect( queryByRole( 'menu' )?.childElementCount ).toBe( 1 );
+		expect( productTypeList?.childElementCount ).toBe( 1 );
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
 	} );
 
@@ -109,7 +117,9 @@ describe( 'Products', () => {
 				product_types: [ 'downloads' ],
 			},
 		} ) );
-		const { queryByText, getByRole, queryByRole } = render( <Products /> );
+		const { queryByText, getByRole, queryAllByRole } = render(
+			<Products />
+		);
 
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
 
@@ -117,11 +127,13 @@ describe( 'Products', () => {
 			getByRole( 'button', { name: 'View more product types' } )
 		);
 
-		await waitFor( () =>
-			expect( queryByRole( 'menu' )?.childElementCount ).toBe(
+		await waitFor( () => {
+			const productTypeList = queryAllByRole( 'menu' )?.[ 0 ];
+			expect( productTypeList?.childElementCount ).toBe(
 				productTypes.length
-			)
-		);
+			);
+		} );
+
 		userEvent.click(
 			getByRole( 'menuitem', {
 				name: 'Grouped product A collection of related products.',
@@ -155,7 +167,9 @@ describe( 'Products', () => {
 				product_types: [ 'downloads' ],
 			},
 		} ) );
-		const { queryByText, getByRole, queryByRole } = render( <Products /> );
+		const { queryByText, getByRole, queryAllByRole } = render(
+			<Products />
+		);
 
 		expect( queryByText( 'View more product types' ) ).toBeInTheDocument();
 
@@ -163,11 +177,12 @@ describe( 'Products', () => {
 			getByRole( 'button', { name: 'View more product types' } )
 		);
 
-		await waitFor( () =>
-			expect( queryByRole( 'menu' )?.childElementCount ).toBe(
+		await waitFor( () => {
+			const productTypeList = queryAllByRole( 'menu' )?.[ 0 ];
+			expect( productTypeList?.childElementCount ).toBe(
 				productTypes.length
-			)
-		);
+			);
+		} );
 
 		expect( queryByText( 'View less product types' ) ).toBeInTheDocument();
 	} );
@@ -230,8 +245,10 @@ describe( 'Products', () => {
 
 	it( 'should render stacked layout', async () => {
 		const { container } = render( <Products /> );
+
 		expect(
 			container.getElementsByClassName( 'woocommerce-products-stack' )
-		).toHaveLength( 1 );
+				.length
+		).toBeGreaterThanOrEqual( 1 );
 	} );
 } );

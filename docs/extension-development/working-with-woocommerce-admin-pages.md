@@ -48,7 +48,7 @@ If your extension adds new pages with tabs or subsections, be sure to use the `w
 
 You can also use the `wc_admin_current_screen_id` filter to make any changes necessary to the screen ID generation behavior.
 
-## Registering a Rect-powered page
+## Registering a React-powered page
 
 To register a React-powered page, use the [`wc_admin_register_page()`](https://woocommerce.github.io/code-reference/namespaces/default.html#function_wc_admin_register_page) function. It accepts an array of arguments:
 

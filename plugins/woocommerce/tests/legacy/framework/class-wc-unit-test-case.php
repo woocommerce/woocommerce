@@ -43,7 +43,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			CodeHacker::disable();
 			self::$code_hacker_temporary_disables_requested = 1;
 		} elseif ( self::$code_hacker_temporary_disables_requested > 0 ) {
-			self::$code_hacker_temporary_disables_requested++;
+			++self::$code_hacker_temporary_disables_requested;
 		}
 	}
 
@@ -53,7 +53,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	protected static function reenable_code_hacker() {
 		if ( self::$code_hacker_temporary_disables_requested > 0 ) {
-			self::$code_hacker_temporary_disables_requested--;
+			--self::$code_hacker_temporary_disables_requested;
 			if ( 0 === self::$code_hacker_temporary_disables_requested ) {
 				CodeHacker::enable();
 			}
@@ -388,6 +388,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		return $matches;
+	}
+
+	/**
+	 * Clear recorded tracks event.
+	 */
+	public function clear_tracks_events() {
+		$events = WC_Tracks_Footer_Pixel::clear_events();
 	}
 
 	/**

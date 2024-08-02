@@ -33,7 +33,7 @@ class WC_Helper {
 	 * @return string The absolute path to the view file.
 	 */
 	public static function get_view_filename( $view ) {
-		return dirname( __FILE__ ) . "/views/$view";
+		return __DIR__ . "/views/$view";
 	}
 
 	/**
@@ -63,6 +63,7 @@ class WC_Helper {
 		include_once __DIR__ . '/class-wc-helper-admin.php';
 		include_once __DIR__ . '/class-wc-helper-subscriptions-api.php';
 		include_once __DIR__ . '/class-wc-helper-orders-api.php';
+		include_once __DIR__ . '/class-wc-product-usage-notice.php';
 	}
 
 	/**
@@ -119,7 +120,7 @@ class WC_Helper {
 		$subscriptions_list_data   = self::get_subscription_list_data();
 		$subscriptions             = array_filter(
 			$subscriptions_list_data,
-			function( $subscription ) {
+			function ( $subscription ) {
 				return ! empty( $subscription['product_key'] );
 			}
 		);
@@ -362,9 +363,9 @@ class WC_Helper {
 	 */
 	public static function add_utm_params_to_url_for_subscription_link( $url, $utm_content ) {
 		$utm_params = 'utm_source=subscriptionsscreen&' .
-					  'utm_medium=product&' .
-					  'utm_campaign=wcaddons&' .
-					  'utm_content=' . $utm_content;
+						'utm_medium=product&' .
+						'utm_campaign=wcaddons&' .
+						'utm_content=' . $utm_content;
 
 		// there are already some URL parameters
 		if ( strpos( $url, '?' ) ) {
@@ -785,6 +786,14 @@ class WC_Helper {
 			$redirect_url_args['install'] = sanitize_text_field( wp_unslash( $_GET['install'] ) );
 		}
 
+		if ( isset( $_GET['utm_source'] ) ) {
+			$redirect_url_args['utm_source'] = wc_clean( wp_unslash( $_GET['utm_source'] ) );
+		}
+
+		if ( isset( $_GET['utm_campaign'] ) ) {
+			$redirect_url_args['utm_campaign'] = wc_clean( wp_unslash( $_GET['utm_campaign'] ) );
+		}
+
 		$redirect_uri = add_query_arg(
 			$redirect_url_args,
 			admin_url( 'admin.php' )
@@ -879,7 +888,8 @@ class WC_Helper {
 		$request = WC_Helper_API::post(
 			'oauth/access_token',
 			array(
-				'body' => array(
+				'timeout' => 30,
+				'body'    => array(
 					'request_token' => wp_unslash( $_GET['request_token'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					'home_url'      => home_url(),
 				),
@@ -1296,6 +1306,60 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get the user's connected subscriptions that are installed on the current
+	 * site.
+	 *
+	 * @return array
+	 */
+	public static function get_installed_subscriptions() {
+		static $installed_subscriptions = null;
+
+		// Cache installed_subscriptions in the current request.
+		if ( is_null( $installed_subscriptions ) ) {
+			$auth    = WC_Helper_Options::get( 'auth' );
+			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
+			if ( 0 === $site_id ) {
+				$installed_subscriptions = array();
+				return $installed_subscriptions;
+			}
+
+			$installed_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'], true );
+				}
+			);
+		}
+
+		return $installed_subscriptions;
+	}
+
+	/**
+	 * Get subscription state of a given product ID.
+	 *
+	 * @since TBD
+	 *
+	 * @param int $product_id The product id.
+	 *
+	 * @return array Array of state_name => (bool) state
+	 */
+	public static function get_product_subscription_state( $product_id ) {
+		$product_subscriptions = wp_list_filter( self::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+
+		$subscription = ! empty( $product_subscriptions )
+			? array_shift( $product_subscriptions )
+			: array();
+
+		return array(
+			'unregistered' => empty( $subscription ),
+			'expired'      => ( isset( $subscription['expired'] ) && $subscription['expired'] ),
+			'expiring'     => ( isset( $subscription['expiring'] ) && $subscription['expiring'] ),
+			'key'          => $subscription['product_key'] ?? '',
+			'order_id'     => $subscription['order_id'] ?? '',
+		);
+	}
+
+	/**
 	 * Get a subscription entry from product_id. If multiple subscriptions are
 	 * found with the same product id and $single is set to true, will return the
 	 * first one in the list, so you can use this method to get things like extension
@@ -1482,6 +1546,41 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get rules for displaying notice regarding marketplace product usage.
+	 *
+	 * @return array
+	 */
+	public static function get_product_usage_notice_rules() {
+		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
+		$data      = get_transient( $cache_key );
+		if ( false !== $data ) {
+			return $data;
+		}
+
+		$request = WC_Helper_API::get(
+			'product-usage-notice-rules',
+			array(
+				'authenticated' => false,
+			)
+		);
+
+		// Retry in 15 minutes for non-200 response.
+		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+			set_transient( $cache_key, array(), 15 * MINUTE_IN_SECONDS );
+			return array();
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $request ), true );
+		if ( empty( $data ) || ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+		return $data;
+	}
+
+
+	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
@@ -1554,28 +1653,36 @@ class WC_Helper {
 	}
 
 	/**
-	 * Get the connected user's subscription list data.
-	 * This is used by the My Subscriptions page.
+	 * Get the connected user's subscription list data. Here, we merge connected
+	 * subscriptions with locally installed Woo plugins and themes. We also
+	 * add in information about available updates.
+	 *
+	 * Used by the My Subscriptions page.
 	 *
 	 * @return array
 	 */
 	public static function get_subscription_list_data() {
+		// First, connected subscriptions.
 		$subscriptions = self::get_subscriptions();
 
-		// Installed plugins and themes, with or without an active subscription.
+		// Then, installed plugins and themes, with or without an active subscription.
 		$woo_plugins = self::get_local_woo_plugins();
 		$woo_themes  = self::get_local_woo_themes();
 
+		// Get the product IDs of the subscriptions.
 		$subscriptions_product_ids = wp_list_pluck( $subscriptions, 'product_id' );
 
+		// Get the site ID.
 		$auth    = WC_Helper_Options::get( 'auth' );
 		$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
 
-		// Installed products without a subscription.
+		// Now, merge installed products without a subscription.
 		foreach ( array_merge( $woo_plugins, $woo_themes ) as $filename => $data ) {
 			if ( in_array( $data['_product_id'], $subscriptions_product_ids, true ) ) {
 				continue;
 			}
+
+			// We add these as subscriptions to the previous connected subscriptions list.
 			$subscriptions[] = array(
 				'product_key'       => '',
 				'product_id'        => $data['_product_id'],
@@ -1587,6 +1694,7 @@ class WC_Helper {
 				'key_type_label'    => '',
 				'lifetime'          => false,
 				'product_status'    => 'publish',
+				// Connections is empty because this is not a connected subscription.
 				'connections'       => array(),
 				'expires'           => 0,
 				'expired'           => true,
@@ -1598,10 +1706,12 @@ class WC_Helper {
 			);
 		}
 
+		// Fetch updates so we can refine subscriptions with information about updates.
+		$updates = WC_Helper_Updater::get_update_data();
+
+		// Add local data to merged subscriptions list (both locally installed and purchased).
 		foreach ( $subscriptions as &$subscription ) {
 			$subscription['active'] = in_array( $site_id, $subscription['connections'], true );
-
-			$updates = WC_Helper_Updater::get_update_data();
 
 			$subscription['local'] = self::get_subscription_local_data( $subscription );
 
@@ -1613,12 +1723,17 @@ class WC_Helper {
 			if ( ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['version'] = $updates[ $subscription['product_id'] ]['version'];
 			}
+
+			// If the update endpoint returns a URL, we prefer it over the default PluginURI.
+			if ( ! empty( $updates[ $subscription['product_id'] ]['url'] ) ) {
+				$subscription['product_url'] = $updates[ $subscription['product_id'] ]['url'];
+			}
 		}
 
 		// Sort subscriptions by name and expiration date.
 		usort(
 			$subscriptions,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				$compare_value = strcasecmp( $a['product_name'], $b['product_name'] );
 				if ( 0 === $compare_value ) {
 					return strcasecmp( $a['expires'], $b['expires'] );
@@ -1720,8 +1835,22 @@ class WC_Helper {
 			return false;
 		}
 
-		// If there are multiple subscriptions, but no active subscriptions, then mark the first one as installed.
-		$product_subscription = array_shift( $product_subscriptions );
+		// Find subscriptions that can be activated.
+		$product_subscriptions_without_maxed_connections = wp_list_filter(
+			$product_subscriptions,
+			array(
+				'maxed' => false,
+			)
+		);
+
+		if ( 0 < count( $product_subscriptions_without_maxed_connections ) ) {
+			// Pick the first subscription available for activation.
+			$product_subscription = array_shift( $product_subscriptions_without_maxed_connections );
+		} else {
+			// If there are multiple subscriptions, but no active subscriptions, then mark the first one as installed.
+			$product_subscription = array_shift( $product_subscriptions );
+		}
+
 		if ( $product_subscription['product_key'] === $subscription['product_key'] ) {
 			return true;
 		}
@@ -1938,7 +2067,7 @@ class WC_Helper {
 			);
 
 			if ( wp_remote_retrieve_response_code( $deactivation_response ) === 200 ) {
-				$deactivated++;
+				++$deactivated;
 
 				/**
 				 * Fires when the Helper activates a product successfully.
@@ -2011,7 +2140,7 @@ class WC_Helper {
 
 			$product_id = $data['_product_id'];
 			if ( version_compare( $updates[ $product_id ]['version'], $data['Version'], '>' ) ) {
-				$available++;
+				++$available;
 			}
 		}
 
@@ -2065,6 +2194,7 @@ class WC_Helper {
 			'oauth/me',
 			array(
 				'authenticated' => true,
+				'timeout'       => 30,
 			)
 		);
 

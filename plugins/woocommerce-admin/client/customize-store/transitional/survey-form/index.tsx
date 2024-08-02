@@ -85,18 +85,28 @@ export const SurveyForm = ( {
 			! isOtherChecked );
 
 	const sendData = () => {
-		const surveyCompleteEvent = showAISurvey
-			? 'customize_your_store_transitional_survey_complete'
-			: 'customize_your_store_on_core_transitional_survey_complete';
-		trackEvent( surveyCompleteEvent, {
-			rating,
-			choose_streamline: isStreamlineChecked,
-			choose_dislike_themes: isDislikeThemesChecked,
-			choose_themes_not_match: isThemeNoMatchChecked,
-			choose_other: isOtherChecked,
-			feedback: feedbackText,
-			spill_beans: spillBeansText,
-		} );
+		if ( showAISurvey ) {
+			trackEvent( 'customize_your_store_transitional_survey_complete', {
+				rating,
+				choose_streamline: isStreamlineChecked,
+				choose_dislike_themes: isDislikeThemesChecked,
+				choose_themes_not_match: isThemeNoMatchChecked,
+				choose_other: isOtherChecked,
+				feedback: feedbackText,
+				spill_beans: spillBeansText,
+			} );
+		} else {
+			trackEvent( 'ces_feedback', {
+				action: 'customize_your_store_on_core_transitional_survey_complete',
+				rating,
+				choose_design_my_own_theme: isStreamlineChecked,
+				choose_dislike_themes: isDislikeThemesChecked,
+				choose_themes_not_match: isThemeNoMatchChecked,
+				choose_other: isOtherChecked,
+				feedback: feedbackText,
+				spill_beans: spillBeansText,
+			} );
+		}
 
 		onSend();
 		createSuccessNotice(

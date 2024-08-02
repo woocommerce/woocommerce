@@ -97,6 +97,16 @@ export const __internalSetCustomerId = ( customerId: number ) => ( {
 } );
 
 /**
+ * Set the customer password
+ *
+ * @param customerPassword Account password for the customer when creating accounts
+ */
+export const __internalSetCustomerPassword = ( customerPassword: string ) => ( {
+	type: types.SET_CUSTOMER_PASSWORD,
+	customerPassword,
+} );
+
+/**
  * Whether to use the shipping address as the billing address
  *
  * @param useShippingAsBilling True if shipping address should be the same as billing, false otherwise
@@ -170,6 +180,7 @@ export type CheckoutAction =
 			| typeof __internalIncrementCalculating
 			| typeof __internalDecrementCalculating
 			| typeof __internalSetCustomerId
+			| typeof __internalSetCustomerPassword
 			| typeof __internalSetUseShippingAsBilling
 			| typeof __internalSetShouldCreateAccount
 			| typeof __internalSetOrderNotes

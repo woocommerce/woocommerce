@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
-use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil };
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 
 /**
  * System status controller class.
@@ -486,7 +486,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'readonly'    => true,
 					'properties'  => array(
 						'api_enabled'                    => array(
-							'description' => __( 'REST API enabled?', 'woocommerce' ),
+							'description' => __( 'Legacy REST API enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -864,7 +864,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$database_version = wc_get_server_database_version();
-		$log_directory    = LoggingUtil::get_log_directory();
+		$log_directory    = LoggingUtil::get_log_directory( false );
 
 		// Return all environment info. Described by JSON Schema.
 		return array(
@@ -1044,16 +1044,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				return array();
 			}
 
-			$active_plugins = (array) get_option( 'active_plugins', array() );
-			if ( is_multisite() ) {
-				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
-				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
-			}
+			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
+			$active_plugins_data  = array();
 
-			$active_plugins_data = array();
-
-			foreach ( $active_plugins as $plugin ) {
-				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			foreach ( $active_valid_plugins as $plugin ) {
+				$data                  = get_plugin_data( $plugin );
 				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 			}
 
@@ -1407,36 +1402,39 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$shortcode_required = false;
 			$block_present      = false;
 			$block_required     = false;
+			$page               = false;
 
 			// Page checks.
 			if ( $page_id ) {
 				$page_set = true;
-			}
-			if ( get_post( $page_id ) ) {
-				$page_exists = true;
-			}
-			if ( 'publish' === get_post_status( $page_id ) ) {
-				$page_visible = true;
+				$page     = get_post( $page_id );
+
+				if ( $page ) {
+					$page_exists = true;
+
+					if ( 'publish' === $page->post_status ) {
+						$page_visible = true;
+					}
+				}
 			}
 
 			// Shortcode checks.
-			if ( $values['shortcode'] && get_post( $page_id ) ) {
+			if ( $values['shortcode'] && $page ) {
 				$shortcode_required = true;
-				$page               = get_post( $page_id );
-				if ( strstr( $page->post_content, $values['shortcode'] ) ) {
+				if ( has_shortcode( $page->post_content, trim( $values['shortcode'], '[]' ) ) ) {
 					$shortcode_present = true;
+				}
+
+				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
+				if ( ! $shortcode_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
+					$shortcode_present = has_block( 'woocommerce/classic-shortcode', $page->post_content );
 				}
 			}
 
 			// Block checks.
-			if ( $values['block'] && get_post( $page_id ) ) {
+			if ( $values['block'] && $page ) {
 				$block_required = true;
-				$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, $values['block'] );
-
-				// Compatibility with the classic shortcode block which can be used instead of shortcodes.
-				if ( ! $block_present && ( 'woocommerce/checkout' === $values['block'] || 'woocommerce/cart' === $values['block'] ) ) {
-					$block_present = WC_Blocks_Utils::has_block_in_page( $page_id, 'woocommerce/classic-shortcode', true );
-				}
+				$block_present  = has_block( $values['block'], $page->post_content );
 			}
 
 			// Wrap up our findings into an output array.

@@ -6,6 +6,8 @@ import ProductIcon from 'gridicons/dist/product';
 import CloudOutlineIcon from 'gridicons/dist/cloud-outline';
 import TypesIcon from 'gridicons/dist/types';
 import { Icon, chevronRight } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -13,6 +15,8 @@ import { Icon, chevronRight } from '@wordpress/icons';
 import Link from './icon/link_24px.js';
 import Widget from './icon/widgets_24px.js';
 import LightBulb from './icon/lightbulb_24px.js';
+import PrintfulIcon from './icon/printful.png';
+import Upload from './icon/upload_40px.js';
 
 export const productTypes = Object.freeze( [
 	{
@@ -73,9 +77,64 @@ export const LoadSampleProductType = {
 	className: 'woocommerce-products-list__item-load-sample-product',
 };
 
+export const PrintfulAdvertProductPlacement = {
+	key: 'printful-advert' as const,
+	title: (
+		<span className="printful-sponsored__text">
+			{ __( 'Print-on-demand products', 'woocommerce' ) }
+			<div className="woocommerce-label">
+				{ __( 'Promoted', 'woocommerce' ) }
+			</div>
+		</span>
+	),
+	content: __(
+		'Design and easily sell custom print products online with Printful.',
+		'woocommerce'
+	),
+	className: 'woocommerce-products-list__item-advert',
+	before: (
+		<img
+			className="printful-sponsored__icon"
+			alt="Printful"
+			src={ PrintfulIcon }
+		/>
+	),
+	after: <Icon icon={ chevronRight } />,
+	onClick: () => {
+		recordEvent( 'tasklist_product_printful_advert_click' );
+		window.open( 'https://woocommerce.com/products/printful', '_blank' );
+	},
+};
+
+export const ImportCSVItem = {
+	key: 'import-csv' as const,
+	title: (
+		<span className="printful-sponsored__text">
+			{ __( 'Are you already selling somewhere else?', 'woocommerce' ) }
+		</span>
+	),
+	content: __( 'Import your products from a CSV file.', 'woocommerce' ),
+	className: 'woocommerce-products-list__item-advert',
+	before: <Upload />,
+	after: <Icon icon={ chevronRight } />,
+	onClick: () => {
+		recordEvent( 'tasklist_add_product', {
+			method: 'import',
+		} );
+		window.location.href = getAdminLink(
+			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
+		);
+	},
+};
+
+export type SponsoredProductPlacementType =
+	| typeof PrintfulAdvertProductPlacement
+	| typeof ImportCSVItem;
+
 export type ProductType =
 	| ( typeof productTypes )[ number ]
-	| typeof LoadSampleProductType;
+	| typeof LoadSampleProductType
+	| SponsoredProductPlacementType;
 export type ProductTypeKey = ProductType[ 'key' ];
 
 export const onboardingProductTypesToSurfaced: Readonly<
@@ -93,3 +152,6 @@ export const supportedOnboardingProductTypes = [ 'physical', 'downloads' ];
 
 export const SETUP_TASKLIST_PRODUCT_TYPES_FILTER =
 	'experimental_woocommerce_tasklist_product_types';
+
+export const SETUP_TASKLIST_PRODUCTS_AFTER_FILTER =
+	'woocommerce_admin_task_products_after';

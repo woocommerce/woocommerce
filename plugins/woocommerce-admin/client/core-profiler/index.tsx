@@ -43,6 +43,7 @@ import CurrencyFactory from '@woocommerce/currency';
  * Internal dependencies
  */
 import { findComponentMeta } from '~/utils/xstate/find-component';
+import { initRemoteLogging } from '~/lib/init-remote-logging';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -260,9 +261,14 @@ const assignCurrentUserEmail = assign( {
 const assignOnboardingProfile = assign( {
 	onboardingProfile: ( {
 		event,
+		context,
 	}: {
 		event: DoneActorEvent< OnboardingProfile | undefined >;
-	} ) => event.output,
+		context: CoreProfilerStateMachineContext;
+	} ) =>
+		! event.output || typeof event.output !== 'object'
+			? context.onboardingProfile // if the onboarding profile is not an object, keep the existing context
+			: event.output,
 } );
 
 const getGeolocation = fromPromise(
@@ -325,6 +331,7 @@ const updateTrackingOption = fromPromise(
 			) {
 				window.wcTracks.enable( () => {
 					initializeExPlat();
+					initRemoteLogging();
 					resolve(); // resolve the promise only after explat is enabled by the callback
 				} );
 			} else {

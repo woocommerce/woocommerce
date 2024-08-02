@@ -45,26 +45,6 @@ export class Editor extends CoreEditor {
 		}
 	}
 
-	async enterEditMode() {
-		await this.page
-			.getByRole( 'button', {
-				name: 'Edit',
-				exact: true,
-			} )
-			.dispatchEvent( 'click' );
-
-		const sidebar = this.page.locator( '.edit-site-layout__sidebar' );
-		const canvasLoader = this.page.locator( '.edit-site-canvas-loader' );
-
-		await sidebar.waitFor( {
-			state: 'hidden',
-		} );
-
-		await canvasLoader.waitFor( {
-			state: 'hidden',
-		} );
-	}
-
 	async transformIntoBlocks() {
 		// Select the block, so the button is visible.
 		const block = this.canvas
@@ -85,8 +65,26 @@ export class Editor extends CoreEditor {
 			await transformButton.click();
 
 			// save changes
-			await this.saveSiteEditorEntities();
+			await this.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		}
+	}
+
+	async revertTemplate( { templateName }: { templateName: string } ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+		await this.page.getByLabel( templateName, { exact: true } ).click();
+
+		await this.page.getByLabel( 'Actions' ).click();
+		await this.page
+			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
+			.click();
+		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await this.page
+			.getByLabel( 'Dismiss this notice' )
+			.getByText( /reset|deleted/ )
+			.waitFor();
 	}
 
 	async publishAndVisitPost() {

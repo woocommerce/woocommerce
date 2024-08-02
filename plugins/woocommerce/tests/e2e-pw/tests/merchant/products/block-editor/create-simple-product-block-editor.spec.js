@@ -17,7 +17,7 @@ const productData = {
 
 test.describe.configure( { mode: 'serial' } );
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Simple product form', () => {
 		test( 'renders each block without error', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
@@ -50,6 +50,14 @@ test.describe( 'General tab', () => {
 				)
 				.last()
 				.fill( productData.summary );
+
+			// We blur the summary field to hide the toolbar before clicking on the regular price field.
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.blur();
 
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )

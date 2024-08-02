@@ -164,7 +164,7 @@ class WC_Admin_Notices {
 	 * and the Legacy REST API plugin is not installed.
 	 */
 	private static function maybe_add_legacy_api_removal_notice() {
-		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 && is_null( WC()->api ) ) {
+		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 && ! WC()->legacy_rest_api_is_available() ) {
 			self::add_custom_notice(
 				'legacy_webhooks_unsupported_in_woo_90',
 				sprintf(
@@ -189,7 +189,7 @@ class WC_Admin_Notices {
 	 * Remove the admin notice about the unsupported webhooks if the Legacy REST API plugin is installed.
 	 */
 	private static function maybe_remove_legacy_api_removal_notice() {
-		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( ! is_null( WC()->api ) || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
+		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( WC()->legacy_rest_api_is_available() || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
 			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
 		}
 	}

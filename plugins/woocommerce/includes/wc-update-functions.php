@@ -2671,7 +2671,7 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
+ * If it exists, remove the inbox note that asks users to connect to `Woo.com`.
  */
 function wc_update_890_update_connect_to_woocommerce_note() {
 	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
@@ -2685,8 +2685,6 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 		return;
 	}
 	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
-	$new_note = WooSubscriptionsNotes::get_note();
-	$new_note->save();
 }
 
 /**
@@ -2730,4 +2728,90 @@ function wc_update_891_create_plugin_autoinstall_history_option() {
  */
 function wc_update_910_add_launch_your_store_tour_option() {
 	add_option( 'woocommerce_show_lys_tour', 'yes' );
+}
+
+/**
+ * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
+ */
+function wc_update_920_add_wc_hooked_blocks_version_option() {
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name );
+
+	// If the option already exists, we don't need to do anything.
+	if ( false !== $option_value ) {
+		return;
+	}
+
+	/**
+	 * A list of theme slugs to execute this with.
+	 * We are applying this filter to allow for the list to be extended by third-parties who were already using it.
+	 *
+	 * @since 8.4.0
+	 */
+	$theme_include_list               = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+	$active_theme_name                = wp_get_theme()->get( 'Name' );
+	$should_set_hooked_blocks_version = in_array( $active_theme_name, $theme_include_list, true );
+
+	if ( $should_set_hooked_blocks_version ) {
+		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
+		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
+		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
+		add_option( $option_name, '8.4.0' );
+	} else {
+		// For block themes that aren't approved themes set this option to "no" to completely disable hooked blocks.
+		// This means we can assume the absence of the option is when a site is switching from a classic theme to a block theme for the first time.
+		// Note: We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
+		add_option( $option_name, 'no' );
+	}
+}
+
+/**
+ * Remove user meta associated with the keys '_last_order', '_order_count' and '_money_spent'.
+ *
+ * New keys are now used for these, to improve compatibility with multisite networks.
+ *
+ * @return void
+ */
+function wc_update_910_remove_obsolete_user_meta() {
+	global $wpdb;
+
+	$deletions = $wpdb->query( "
+		DELETE FROM $wpdb->usermeta
+		WHERE meta_key IN (
+			'_last_order',
+			'_order_count',
+			'_money_spent'
+		)
+	" );
+
+	$logger = wc_get_logger();
+
+	if ( null === $logger ) {
+		return;
+	}
+
+	if ( false === $deletions ) {
+		$logger->notice(
+			'During the update to 9.1.0, WooCommerce attempted to remove user meta with the keys "_last_order", "_order_count" and "_money_spent" but was unable to do so.',
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	} else {
+		$logger->info(
+			sprintf(
+				1 === $deletions
+					? 'During the update to 9.1.0, WooCommerce removed %d user meta row associated with the meta keys "_last_order", "_order_count" or "_money_spent".'
+					: 'During the update to 9.1.0, WooCommerce removed %d user meta rows associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
+				number_format_i18n( $deletions )
+			),
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	}
 }

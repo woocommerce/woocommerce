@@ -161,6 +161,9 @@ export const setFlags = async () => {
 				online: isAiOnline ? 'yes' : 'no',
 			} );
 
+			// @ts-expect-error temp workaround;
+			window.cys_aiFlow = true;
+
 			return isAiOnline ? FlowType.AIOnline : FlowType.AIOffline;
 		} catch ( e ) {
 			// @ts-expect-error temp workaround;

@@ -11,12 +11,13 @@ import {
 	lazy,
 	Suspense,
 } from '@wordpress/element';
-import { dispatch, select, useSelect } from '@wordpress/data';
+import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
+import { getPath, getQuery } from '@woocommerce/navigation';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -296,12 +297,42 @@ export function BlockEditor( {
 			settings,
 			productTemplate,
 			productFormTemplate,
+			productId,
 		]
 	);
 
 	useEffect( () => {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading ] );
+
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { editEntityRecord } = useDispatch( 'core' );
+
+	useEffect( function maybeSetProductTemplateFromURL() {
+		const query: { template?: string } = getQuery();
+		const isAddProduct = getPath().endsWith( 'add-product' );
+		if ( isAddProduct && query.template ) {
+			const productTemplates =
+				window.productBlockEditorSettings?.productTemplates ?? [];
+			const selectedProductTemplate = productTemplates.find(
+				( t ) => t.id === query.template
+			);
+			if ( selectedProductTemplate ) {
+				editEntityRecord( 'postType', postType, productId, {
+					...selectedProductTemplate.productData,
+					meta_data: [
+						...( selectedProductTemplate.productData.meta_data ??
+							[] ),
+						{
+							key: '_product_template_id',
+							value: selectedProductTemplate.id,
+						},
+					],
+				} );
+			}
+		}
+	}, [] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( selectCore ) => {
@@ -324,6 +355,11 @@ export function BlockEditor( {
 						dispatch( productEditorUiStore ).closeModalEditor
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
+					name={
+						product.name === 'AUTO-DRAFT'
+							? __( '(no product name)', 'woocommerce' )
+							: product.name
+					}
 				/>
 			</Suspense>
 		);

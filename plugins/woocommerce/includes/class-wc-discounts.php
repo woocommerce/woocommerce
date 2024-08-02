@@ -970,7 +970,7 @@ class WC_Discounts {
 		}
 
 		$user         = wp_get_current_user();
-		$check_emails = array( $user->get_billing_email(), $user->get_email() );
+		$check_emails = array( $user->user_email );
 
 		if ( $this->object instanceof WC_Cart ) {
 			$check_emails[] = $this->object->get_customer()->get_billing_email();

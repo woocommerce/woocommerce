@@ -79,19 +79,14 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice:
-					isInSelectedTab && productHasOptions
-						? getProductVariationsTotalCount< number >(
-								totalCountWithoutPriceRequestParams
-						  )
-						: 0,
+				totalCountWithoutPrice: productHasOptions
+					? getProductVariationsTotalCount< number >(
+							totalCountWithoutPriceRequestParams
+					  )
+					: 0,
 			};
 		},
-		[
-			isInSelectedTab,
-			productHasOptions,
-			totalCountWithoutPriceRequestParams,
-		]
+		[ productHasOptions, totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
@@ -125,10 +120,12 @@ export function Edit( {
 						},
 					} );
 				}
-				return __(
-					'Set variation prices before adding this product.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Set variation prices before adding this product.',
+						'woocommerce'
+					),
+				};
 			}
 		},
 		[ totalCountWithoutPrice ]

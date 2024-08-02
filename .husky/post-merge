@@ -1,4 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env bash
 . "$(dirname "$0")/_/husky.sh"
 
-pnpm install
+changedManifests=$( ( git diff --name-only HEAD ORIG_HEAD  | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
+if [ -n "$changedManifests" ]; then
+	printf "It was a change in the following file(s) - refreshing dependencies:\n"
+	printf "    %s\n" $changedManifests
+
+	pnpm install --frozen-lockfile
+fi

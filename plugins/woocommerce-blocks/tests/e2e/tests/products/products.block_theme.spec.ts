@@ -65,8 +65,8 @@ test.describe( `${ blockData.name } Block `, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		await editor.setContent( '' );
 		await insertProductsQuery( editor );
 		const block = await editor.getBlockByName( blockData.name );
@@ -104,14 +104,16 @@ for ( const {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ slug }`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 			await editor.setContent( '' );
 			await insertProductsQuery( editor );
 			await editor.insertBlock( { name: legacyBlockName } );
 			await editor.canvas.locator( 'body' ).click();
 
-			await editor.saveSiteEditorEntities();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await page.goto( frontendPage );
 

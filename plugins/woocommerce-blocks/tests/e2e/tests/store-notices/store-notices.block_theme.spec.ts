@@ -20,8 +20,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editor.enterEditMode();
 		const block = await editor.getBlockByName( blockData.slug );
 		await expect( block ).toBeVisible();
 		await expect( block ).toHaveText(

@@ -30,6 +30,33 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
+		add_action( 'deleted_transient', array( $this, 'delete_default_attribute_id_transient' ) );
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = array() ) {
+		parent::enqueue_data( $attributes );
+
+		if ( is_admin() ) {
+			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_attribute() );
+		}
+	}
+
+	/**
+	 * Delete the default attribute id transient when the attribute taxonomies are deleted.
+	 *
+	 * @param string $transient The transient name.
+	 */
+	public function delete_default_attribute_id_transient( $transient ) {
+		if ( 'wc_attribute_taxonomies' === $transient ) {
+			delete_transient( 'wc_block_product_filter_attribute_default_attribute' );
+		}
 	}
 
 	/**
@@ -43,7 +70,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
 		$attribute_param_keys = array_filter(
 			$url_param_keys,
-			function( $param ) {
+			function ( $param ) {
 				return strpos( $param, 'filter_' ) === 0 || strpos( $param, 'query_type_' ) === 0;
 			}
 		);
@@ -64,7 +91,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	public function register_active_filters_data( $data, $params ) {
 		$product_attributes_map = array_reduce(
 			wc_get_attribute_taxonomies(),
-			function( $acc, $attribute_object ) {
+			function ( $acc, $attribute_object ) {
 				$acc[ $attribute_object->attribute_name ] = $attribute_object->attribute_label;
 				return $acc;
 			},
@@ -73,7 +100,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$active_product_attributes = array_reduce(
 			array_keys( $params ),
-			function( $acc, $attribute ) {
+			function ( $acc, $attribute ) {
 				if ( strpos( $attribute, 'filter_' ) === 0 ) {
 					$acc[] = str_replace( 'filter_', '', $attribute );
 				}
@@ -84,7 +111,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$active_product_attributes = array_filter(
 			$active_product_attributes,
-			function( $item ) use ( $product_attributes_map ) {
+			function ( $item ) use ( $product_attributes_map ) {
 				return in_array( $item, array_keys( $product_attributes_map ), true );
 			}
 		);
@@ -96,7 +123,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 			// Get attribute term by slug.
 			$terms = array_map(
-				function( $term ) use ( $product_attribute, $action_namespace ) {
+				function ( $term ) use ( $product_attribute, $action_namespace ) {
 					$term_object = get_term_by( 'slug', $term, "pa_{$product_attribute}" );
 					return array(
 						'title'      => $term_object->name,
@@ -107,7 +134,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 									'value'         => $term,
 									'attributeSlug' => $product_attribute,
 									'queryType'     => get_query_var( "query_type_{$product_attribute}" ),
-								)
+								),
+								JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 							),
 						),
 					);
@@ -146,7 +174,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				'<div %s></div>',
 				get_block_wrapper_attributes(
 					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 						'data-has-filter'     => 'no',
 					)
 				),
@@ -168,7 +196,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		$attribute_options = array_map(
-			function( $term ) use ( $attribute_counts, $selected_terms ) {
+			function ( $term ) use ( $attribute_counts, $selected_terms ) {
 				$term             = (array) $term;
 				$term['count']    = $attribute_counts[ $term['term_id'] ];
 				$term['selected'] = in_array( $term['slug'], $selected_terms, true );
@@ -179,7 +207,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$filtered_options = array_filter(
 			$attribute_options,
-			function( $option ) {
+			function ( $option ) {
 				return $option['count'] > 0;
 			}
 		);
@@ -191,15 +219,15 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$context = array(
 			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
 			'queryType'     => $attributes['queryType'],
-			'selectType'    => $attributes['selectType'],
+			'selectType'    => 'multiple',
 		);
 
 		return sprintf(
 			'<div %1$s>%2$s%3$s</div>',
 			get_block_wrapper_attributes(
 				array(
-					'data-wc-context'     => wp_json_encode( $context ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 					'data-has-filter'     => 'yes',
 				)
 			),
@@ -242,7 +270,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				'items'          => $list_items,
 				'action'         => "{$this->get_full_block_name()}::actions.navigate",
 				'selected_items' => $selected_items,
-				'select_type'    => $attributes['selectType'] ?? 'multiple',
+				'select_type'    => 'multiple',
 				// translators: %s is a product attribute name.
 				'placeholder'    => sprintf( __( 'Select %s', 'woocommerce' ), $product_attribute->name ),
 			)
@@ -264,7 +292,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$show_counts = $attributes['showCounts'] ?? false;
 
 		$list_options = array_map(
-			function( $option ) use ( $show_counts ) {
+			function ( $option ) use ( $show_counts ) {
 				return array(
 					'id'      => $option['slug'] . '-' . $option['term_id'],
 					'checked' => $option['selected'],
@@ -320,13 +348,72 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$attribute_counts = array_reduce(
 			$attribute_counts,
-			function( $acc, $count ) {
+			function ( $acc, $count ) {
 				$acc[ $count['term'] ] = $count['count'];
 				return $acc;
 			},
-			[]
+			array()
 		);
 
 		return $attribute_counts;
+	}
+
+	/**
+	 * Get the attribute if with most term but closest to 30 terms.
+	 *
+	 * @return int
+	 */
+	private function get_default_attribute() {
+		$cached = get_transient( 'wc_block_product_filter_attribute_default_attribute' );
+
+		if ( $cached ) {
+			return $cached;
+		}
+
+		$attributes = wc_get_attribute_taxonomies();
+
+		$attributes_count = array_map(
+			function ( $attribute ) {
+				return intval(
+					wp_count_terms(
+						array(
+							'taxonomy'   => 'pa_' . $attribute->attribute_name,
+							'hide_empty' => false,
+						)
+					)
+				);
+			},
+			$attributes
+		);
+
+		asort( $attributes_count );
+
+		$search       = 30;
+		$closest      = null;
+		$attribute_id = null;
+
+		foreach ( $attributes_count as $id => $count ) {
+			if ( null === $closest || abs( $search - $closest ) > abs( $count - $search ) ) {
+				$closest      = $count;
+				$attribute_id = $id;
+			}
+
+			if ( $closest && $count >= $search ) {
+				break;
+			}
+		}
+
+		$default_attribute = array(
+			'id'    => 0,
+			'label' => __( 'Attribute', 'woocommerce' ),
+		);
+
+		if ( $attribute_id ) {
+			$default_attribute = $attributes[ $attribute_id ];
+		}
+
+		set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute );
+
+		return $default_attribute;
 	}
 }
