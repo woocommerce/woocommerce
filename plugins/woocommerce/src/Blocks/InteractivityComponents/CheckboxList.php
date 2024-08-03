@@ -28,25 +28,44 @@ class CheckboxList {
 		$items                 = $props['items'] ?? array();
 		$checkbox_list_context = array( 'items' => $items );
 		$on_change             = $props['on_change'] ?? '';
+		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
-		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
-
+		$checked_items               = array_filter(
+			$items,
+			function ( $item ) {
+				return $item['checked'];
+			}
+		);
+		$show_initially              = $props['show_initially'] ?? 15;
+		$remaining_initial_unchecked = count( $checked_items ) > $show_initially ? count( $checked_items ) : $show_initially - count( $checked_items );
+		$count                       = 0;
 		ob_start();
 		?>
-		<div data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'>
-			<ul
-				class="wc-block-interactivity-components-checkbox-list"
-				data-wc-context='<?php echo wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>'
-			>
-				<?php foreach ( $items as $item ) { ?>
+		<div
+			class="wc-block-interactivity-components-checkbox-list"
+			data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'
+			data-wc-context='<?php echo wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>'
+		>
+			<ul class="wc-block-interactivity-components-checkbox-list__list">
+			<?php foreach ( $items as $item ) { ?>
 					<?php
 					$item['id'] = $item['id'] ?? uniqid( 'checkbox-' );
 					// translators: %s: checkbox label.
 					$i18n_label = sprintf( __( 'Checkbox: %s', 'woocommerce' ), $item['aria_label'] ?? '' );
 					?>
 					<li
-						class="wc-block-interactivity-components-checkbox-list__item"
 						data-wc-key="<?php echo esc_attr( $item['id'] ); ?>"
+						<?php
+						if ( ! $item['checked'] ) :
+							if ( $count >= $remaining_initial_unchecked ) :
+								?>
+								class="wc-block-interactivity-components-checkbox-list__item hidden"
+								data-wc-class--hidden="!context.showAll"
+							<?php else : ?>
+								class="wc-block-interactivity-components-checkbox-list__item"
+								<?php ++$count; ?>
+							<?php endif; ?>
+							<?php endif; ?>
 					>
 						<label
 							class="wc-block-interactivity-components-checkbox-list__label"
@@ -69,14 +88,22 @@ class CheckboxList {
 								</svg>
 							</span>
 							<span class="wc-block-interactivity-components-checkbox-list__text">
-								<?php // The label can be HTML, so we don't want to escape it. ?>
-								<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								<?php echo $item['label']; ?>
+								<?php echo wp_kses_post( $item['label'] ); ?>
 							</span>
 						</label>
 					</li>
 				<?php } ?>
 			</ul>
+					<?php if ( count( $items ) > $show_initially ) : ?>
+				<span
+					role="button"
+					class="wc-block-interactivity-components-checkbox-list__show-more"
+					data-wc-class--hidden="context.showAll"
+					data-wc-on--click="actions.showAllItems"
+				>
+					<small role="presentation"><?php echo esc_html__( 'Show more...', 'woocommerce' ); ?></small>
+				</span>
+				<?php endif; ?>
 		</div>
 		<?php
 		return ob_get_clean();

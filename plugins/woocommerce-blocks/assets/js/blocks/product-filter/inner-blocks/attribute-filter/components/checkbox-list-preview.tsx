@@ -11,8 +11,8 @@ const CheckboxListPreview = ( { items }: { items: string[] } ) => {
 	const threshold = 15;
 	const isLongList = items.length > threshold;
 	return (
-		<div>
-			<ul className="wc-block-interactivity-components-checkbox-list">
+		<div className="wc-block-interactivity-components-checkbox-list">
+			<ul className="wc-block-interactivity-components-checkbox-list__list">
 				{ ( isLongList ? items.slice( 0, threshold ) : items ).map(
 					( item, index ) => (
 						<li
@@ -52,10 +52,9 @@ const CheckboxListPreview = ( { items }: { items: string[] } ) => {
 					)
 				) }
 			</ul>
-			<small>
-				{ /* eslint-disable-next-line jsx-a11y/anchor-is-valid */ }
-				<a href="#">{ __( 'Show more…', 'woocommerce' ) }</a>
-			</small>
+			<span className="wc-block-interactivity-components-checkbox-list__show-more">
+				<small>{ __( 'Show more…', 'woocommerce' ) }</small>
+			</span>
 		</div>
 	);
 };
