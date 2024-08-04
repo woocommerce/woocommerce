@@ -22,7 +22,6 @@ const config: PlaywrightTestConfig = {
 	forbidOnly: !! CI,
 	reporter: process.env.CI
 		? [
-				[ 'github' ],
 				[ 'list' ],
 				[ './flaky-tests-reporter.ts' ],
 				[

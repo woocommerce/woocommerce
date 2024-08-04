@@ -38,6 +38,7 @@ describe( 'Intro Banners', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -78,6 +79,7 @@ describe( 'Intro Banners', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -124,6 +126,7 @@ describe( 'Intro Banners', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
