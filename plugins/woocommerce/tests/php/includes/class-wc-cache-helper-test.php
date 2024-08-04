@@ -42,7 +42,7 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 				),
 			),
 			array(
-				'd6a2e7e49ac0',
+				'edd7a1221c2e',
 				array(
 					'country'  => 'FI',
 					'state'    => '',
@@ -62,11 +62,11 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 	 * @param array  $location Location data to test.
 	 */
 	public function test_geolocation_ajax_get_location_hash( string $expected, array $location ) {
+		WC()->session->set( 'customer', null );
+		update_option( 'woocommerce_default_country', $location['country'] );
+
 		$session = new WC_Customer( 0, true );
-		$session->set_billing_country( $location['country'] );
-		$session->set_billing_state( $location['state'] );
-		$session->set_billing_postcode( $location['postcode'] );
-		$session->set_billing_city( $location['city'] );
+		$session->set_billing_location( $location['country'], $location['state'], $location['postcode'], $location['city'] );
 		$session->save();
 
 		$this->assertSame(
