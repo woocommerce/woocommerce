@@ -245,6 +245,7 @@ trait SchedulerTraits {
 		if ( $blocking_job ) {
 			$next_action_time = self::get_next_action_time( $blocking_job );
 
+			// Some actions, like single actions, don't have a next action time.
 			if ( ! is_a( $next_action_time, 'DateTime' ) || $next_action_time < new \DateTime() ) {
 				$next_action_time = new \DateTime();
 			}
