@@ -74,4 +74,5 @@ module.exports = {
 ### Build
 
 Run `webpack --config webpack.config.js` (don't forget about `npm install` before that).
+
 Use the generated files under `packages/report-flaky-tests/dist` to update the bundled distribution in this repository.
