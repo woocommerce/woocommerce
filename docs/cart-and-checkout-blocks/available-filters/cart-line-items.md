@@ -1,45 +1,47 @@
 ---
-post_title: Cart and Checkout Filters - Order Summary Items
-menu_title: Order Summary Items
-tags: reference, checkout-available-filters
+post_title: Cart and Checkout Filters - Cart line items
+menu_title: Cart Line Items
+tags: reference
 ---
+
 <!-- markdownlint-disable MD024 -->
-# Order Summary Items
 
-The following Order Summary Items filters are available:
+The following Cart Line Items filters are available:
 
--   [`cartItemClass`](#cartitemclass)
--   [`cartItemPrice`](#cartitemprice)
--   [`itemName`](#itemname)
--   [`subtotalPriceFormat`](#subtotalpriceformat)
+-   `cartItemClass`
+-   `cartItemPrice`
+-   `itemName`
+-   `saleBadgePriceFormat`
+-   `showRemoveItemLink`
+-   `subtotalPriceFormat`
 
 The following objects are shared between the filters:
 
--   [Cart object](#cart-object)
--   [Cart Item object](#cart-item-object)
+-   Cart object
+-   Cart Item object
 
 The following screenshot shows which parts the individual filters affect:
 
-![Order Summary Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-16.29.45.png)
+![Cart Line Items](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-26-at-13.12.33.png)
 
 ## `cartItemClass`
 
 ### Description <!-- omit in toc -->
 
-The `cartItemClass` filter allows to change the order summary item class.
+The `cartItemClass` filter allows to change the cart item class.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ `string` (default: `''`) - The default order summary item class.
+-   _defaultValue_ `object` (default: `''`) - The default cart item class.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified order summary item class, or an empty string.
+-   `string` - The modified cart item class, or an empty string.
 
 ### Code examples <!-- omit in toc -->
 
@@ -49,9 +51,9 @@ The `cartItemClass` filter allows to change the order summary item class.
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemClass = ( defaultValue, extensions, args ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
@@ -69,9 +71,9 @@ registerCheckoutFilters( 'example-extension', {
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemClass = ( defaultValue, extensions, args ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
@@ -91,33 +93,34 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ff555a84-8d07-4889-97e1-8f7d50d47350) |![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/183809d8-03dc-466d-a415-d8d2062d880f) |
+|![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a587a6ce-d051-4ed0-bba5-815b5d72179d) |![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/9b25eeae-6d81-4e28-b177-32f942e1d0c2) |
+
 
 ## `cartItemPrice`
 
 ### Description <!-- omit in toc -->
 
-The `cartItemPrice` filter allows to format the order summary item price.
+The `cartItemPrice` filter allows to format the cart item price.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ `string` (default: `<price/>`) - The default order summary item price.
+-   _defaultValue_ `string` (default: `&lt;price/&gt;`) - The default cart item price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
--   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
+-   _validation_ `boolean` - Checks if the return value contains the substring `&lt;price/&gt;`.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified format of the order summary item price, which must contain the substring `<price/>`, or the original price format.
+-   `string` - The modified format of the cart item price, which must contain the substring `&lt;price/&gt;`, or the original price format.
 
 ### Code examples <!-- omit in toc -->
 
@@ -127,13 +130,13 @@ The `cartItemPrice` filter allows to format the order summary item price.
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
-	return '<price/> for all items';
+	return '&lt;price/&gt; for all items';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -147,21 +150,21 @@ registerCheckoutFilters( 'example-extension', {
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
 	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
-		return '<price/> to keep you ☀️';
+		return '&lt;price/&gt; to keep you warm';
 	}
 
 	if ( args?.cartItem?.name === 'Sunglasses' ) {
-		return '<price/> to keep you ❄️';
+		return '&lt;price/&gt; to keep you cool';
 	}
 
-	return '<price/> for all items';
+	return '&lt;price/&gt; for all items';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -169,32 +172,32 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/58137fc4-884d-4783-9275-5f78abec1473) |![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb502b74-6447-49a8-8d35-241e738f089d) |
+|![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) |![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/bbaeb68a-492e-41e7-87b7-4b8b05ca3709) |
 
 ## `itemName`
 
 ### Description <!-- omit in toc -->
 
-The `itemName` filter allows to change the order summary item name.
+The `itemName` filter allows to change the cart item name.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ `string` - The default order summary item name.
+-   _defaultValue_ `string` - The default cart item name.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The original or modified order summary item name.
+-   `string` - The original or modified cart item name.
 
 ### Code examples <!-- omit in toc -->
 
@@ -204,9 +207,9 @@ The `itemName` filter allows to change the order summary item name.
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyItemName = ( defaultValue, extensions, args ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
@@ -224,9 +227,9 @@ registerCheckoutFilters( 'example-extension', {
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyItemName = ( defaultValue, extensions, args ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
@@ -246,33 +249,199 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3dc0bda7-fccf-4f35-a2e2-aa04e616563a) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c96b8394-03a7-45f6-813b-5335f4bf83b5) |
+|![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/97d0f501-138e-4448-93df-a4d865b524e6) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/69381932-d064-4e8f-b378-c2477fef56ae) |
+
+## `saleBadgePriceFormat`
+
+### Description <!-- omit in toc -->
+
+The `saleBadgePriceFormat` filter allows to format the cart item sale badge price.
+
+### Parameters <!-- omit in toc -->
+
+-   _defaultValue_ `string` (default: `&lt;price/&gt;`) - The default cart item sale badge price.
+-   _extensions_ `object` (default: `{}`) - The extensions object.
+-   _args_ `object` - The arguments object with the following keys:
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
+    -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
+-   _validation_ `boolean` - Checks if the return value contains the substring `&lt;price/&gt;`.
+
+### Returns <!-- omit in toc -->
+
+-   `string` - The modified format of the cart item sale badge price, which must contain the substring `&lt;price/&gt;`, or the original price format.
+
+### Code examples <!-- omit in toc -->
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifySaleBadgePriceFormat = (
+	defaultValue,
+	extensions,
+	args,
+	validation
+) => {
+	const isCartContext = args?.context === 'cart';
+
+	if ( ! isCartContext ) {
+		return defaultValue;
+	}
+
+	return '&lt;price/&gt; per item';
+};
+
+registerCheckoutFilters( 'example-extension', {
+	saleBadgePriceFormat: modifySaleBadgePriceFormat,
+} );
+```
+
+#### Advanced example <!-- omit in toc -->
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifySaleBadgePriceFormat = (
+	defaultValue,
+	extensions,
+	args,
+	validation
+) => {
+	const isCartContext = args?.context === 'cart';
+
+	if ( ! isCartContext ) {
+		return defaultValue;
+	}
+
+	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
+		return '&lt;price/&gt; per item while keeping warm';
+	}
+
+	if ( args?.cartItem?.name === 'Sunglasses' ) {
+		return '&lt;price/&gt; per item while looking cool';
+	}
+
+	return '&lt;price/&gt; per item';
+};
+
+registerCheckoutFilters( 'example-extension', {
+	saleBadgePriceFormat: modifySaleBadgePriceFormat,
+} );
+```
+
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
+
+### Screenshots <!-- omit in toc -->
+
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/d2aeb206-e620-44e0-93c1-31484cfcdca6) |![After applying the Sale Badge Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/6b929695-5d89-433b-8694-b9201a7c0519) |
+
+
+## `showRemoveItemLink`
+
+### Description <!-- omit in toc -->
+
+The `showRemoveItemLink` is used to show or hide the cart item remove link.
+
+### Parameters <!-- omit in toc -->
+
+-   _defaultValue_ (type: `boolean`, default: `true`) - The default value of the remove link.
+-   _extensions_ `object` (default: `{}`) - The extensions object.
+-   _args_ `object` - The arguments object with the following keys:
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
+    -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
+
+### Returns <!-- omit in toc -->
+
+-   `boolean` - `true` if the cart item remove link should be shown, `false` otherwise.
+
+### Code examples <!-- omit in toc -->
+
+#### Basic example <!-- omit in toc -->
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifyShowRemoveItemLink = ( defaultValue, extensions, args ) => {
+	const isCartContext = args?.context === 'cart';
+
+	if ( ! isCartContext ) {
+		return defaultValue;
+	}
+
+	return false;
+};
+
+registerCheckoutFilters( 'example-extension', {
+	showRemoveItemLink: modifyShowRemoveItemLink,
+} );
+```
+
+#### Advanced example <!-- omit in toc -->
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifyShowRemoveItemLink = ( defaultValue, extensions, args ) => {
+	const isCartContext = args?.context === 'cart';
+
+	if ( ! isCartContext ) {
+		return defaultValue;
+	}
+
+	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
+		return false;
+	}
+
+	if ( args?.cartItem?.name === 'Sunglasses' ) {
+		return false;
+	}
+
+	return true;
+};
+
+registerCheckoutFilters( 'example-extension', {
+	showRemoveItemLink: modifyShowRemoveItemLink,
+} );
+```
+
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
+
+### Screenshots <!-- omit in toc -->
+
+| Before                                                                 | After                                                                 |
+|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
+|![Before applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a4254f3b-f056-47ad-b34a-d5f6d5500e56) |![After applying the Show Remove Item Link filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/32c55dc7-ef65-4f35-ab90-9533bc79d362) |
+
+
 
 ## `subtotalPriceFormat`
 
 ### Description <!-- omit in toc -->
 
-The `subtotalPriceFormat` filter allows to format the order summary item subtotal price.
+The `subtotalPriceFormat` filter allows to format the cart item subtotal price.
 
 ### Parameters <!-- omit in toc -->
 
--   _defaultValue_ `string` (default: `<price/>`) - The default order summary item subtotal price.
+-   _defaultValue_ `string` (default: `&lt;price/&gt;`) - The default cart item subtotal price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
-    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
-    -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see Cart object.
+    -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
--   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
+-   _validation_ `boolean` - Checks if the return value contains the substring `&lt;price/&gt;`.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified format of the order summary item subtotal price, which must contain the substring `<price/>`, or the original price format.
+-   `string` - The modified format of the cart item subtotal price, which must contain the substring `&lt;price/&gt;`, or the original price format.
 
 ### Code examples <!-- omit in toc -->
 
@@ -287,13 +456,13 @@ const modifySubtotalPriceFormat = (
 	args,
 	validation
 ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
-	return '<price/> per item';
+	return '&lt;price/&gt; per item';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -312,21 +481,21 @@ const modifySubtotalPriceFormat = (
 	args,
 	validation
 ) => {
-	const isOrderSummaryContext = args?.context === 'summary';
+	const isCartContext = args?.context === 'cart';
 
-	if ( ! isOrderSummaryContext ) {
+	if ( ! isCartContext ) {
 		return defaultValue;
 	}
 
 	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
-		return '<price/> per warm beanie';
+		return '&lt;price/&gt; per warm beanie';
 	}
 
 	if ( args?.cartItem?.name === 'Sunglasses' ) {
-		return '<price/> per cool sunglasses';
+		return '&lt;price/&gt; per cool sunglasses';
 	}
 
-	return '<price/> per item';
+	return '&lt;price/&gt; per item';
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -334,13 +503,13 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3574e7ae-9857-4651-ac9e-e6b597e3a589) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/94e18439-6d6b-44a4-ade1-8302c5984641) |
+|![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a392cb24-4c40-4e25-8396-bf4971830e22) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/af69b26f-662a-4ef9-a288-3713b6e46373) |
 
 ## Cart object
 
@@ -365,7 +534,7 @@ The Cart object of the filters above has the following keys:
 -   _cartHasCalculatedShipping_ `boolean` - Whether the cart has calculated shipping.
 -   _cartIsLoading_ `boolean` - Whether the cart is loading.
 -   _cartItemErrors_ `array` - The cart item errors array.
--   _cartItems_ `array` - The cart items array with cart item objects, see [Cart Item object](#cart-item-object).
+-   _cartItems_ `array` - The cart items array with cart item objects, see Cart Item object.
 -   _cartItemsCount_ `number` - The cart items count.
 -   _cartItemsWeight_ `number` - The cart items weight.
 -   _cartNeedsPayment_ `boolean` - Whether the cart needs payment.
