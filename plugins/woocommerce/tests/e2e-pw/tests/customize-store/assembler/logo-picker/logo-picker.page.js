@@ -72,7 +72,7 @@ export class LogoPickerPage {
 		} );
 	}
 
-	async Finish customizingLogoSettings( assemblerLocator ) {
+	async saveLogoSettings( assemblerLocator ) {
 		const waitForLogoResponse = this.page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
