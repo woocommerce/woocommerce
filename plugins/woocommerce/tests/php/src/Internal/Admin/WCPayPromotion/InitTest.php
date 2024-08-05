@@ -103,7 +103,8 @@ class InitTest extends WC_Unit_Test_Case {
 	 * Test that non-matching suggestions are not shown.
 	 */
 	public function test_non_matching_extensions() {
-		update_option( 'woocommerce_default_country', 'US' );
+		// Use a bogus country code so that no suggestions match.
+		update_option( 'woocommerce_default_country', 'XX' );
 		$promotions = WCPayPromotion::get_promotions();
 		$this->assertCount( 0, $promotions );
 	}
@@ -115,5 +116,16 @@ class InitTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', 'ZA' );
 		$promotions = WCPayPromotion::get_promotions();
 		$this->assertEquals( 'mock-gateway', $promotions[0]->id );
+	}
+
+	/**
+	 * Test that empty suggestions fallback to default ones.
+	 */
+	public function test_fallback_to_default_suggestions() {
+		update_option( 'woocommerce_default_country', 'US' );
+		$promotions = WCPayPromotion::get_promotions();
+		// There are two default suggestions, one for WooPay-eligible country and
+		// one for the rest of WooPayments-eligible countries.
+		$this->assertCount( 2, $promotions );
 	}
 }
