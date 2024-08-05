@@ -75,7 +75,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.check();
 			await checkoutPageObject.page
 				.getByRole( 'group', {
-					name: 'Shipping address',
+					name: 'Shipping address ',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
@@ -148,28 +148,28 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'Government ID', { exact: true } )
 			).toHaveValue( '12345' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'Confirm Government ID' )
 			).toHaveValue( '12345' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'Can a truck fit down your road?' )
 			).toBeChecked();
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'How wide is your road?' )
 			).toHaveValue( 'wide' );
@@ -266,7 +266,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			// Check both "Can a truck fit down your road?" checkboxes (one in shipping, one in billing).
 			await checkoutPageObject.page
 				.getByRole( 'group', {
-					name: 'Shipping address',
+					name: 'Shipping address ',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
@@ -286,7 +286,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.uncheck();
 			await checkoutPageObject.page
 				.getByRole( 'group', {
-					name: 'Shipping address',
+					name: 'Shipping address ',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
@@ -406,7 +406,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.check();
 			await checkoutPageObject.page
 				.getByRole( 'group', {
-					name: 'Shipping address',
+					name: 'Shipping address ',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
@@ -479,28 +479,28 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'Government ID', { exact: true } )
 			).toHaveValue( '12345' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'Confirm Government ID' )
 			).toHaveValue( '12345' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'Can a truck fit down your road?' )
 			).toBeChecked();
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
-						name: 'Shipping address',
+						name: 'Shipping address ',
 					} )
 					.getByLabel( 'How wide is your road?' )
 			).toHaveValue( 'wide' );
@@ -664,7 +664,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			// Check checkboxes manually since checking them as part of fillInCheckoutWithTestData is not supported.
 			await checkoutPageObject.page
 				.getByRole( 'group', {
-					name: 'Shipping address',
+					name: 'Shipping address ',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
@@ -790,7 +790,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await checkoutPageObject.page.getByText( 'Save address' ).click();
 
 			const shippingTitle =
-				checkoutPageObject.page.getByText( 'Shipping address' );
+				checkoutPageObject.page.getByText( 'Shipping address ' );
 			const shippingEdit = checkoutPageObject.page
 				.locator( '.woocommerce-Address-title' )
 				.filter( { has: shippingTitle } )
