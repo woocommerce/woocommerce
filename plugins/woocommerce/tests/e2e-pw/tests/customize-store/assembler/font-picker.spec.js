@@ -38,14 +38,20 @@ const slugFontMap = {
 		'System Sans-serif',
 	'-apple-system, BlinkMacSystemFont, "avenir next", avenir, "segoe ui", "helvetica neue", helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif':
 		'System Sans-serif',
+	'"Bodoni Moda", serif': 'Bodoni Moda',
+	'Overpass, sans-serif': 'Overpass',
+	'"Albert Sans", sans-serif': 'Albert Sans',
+	'Lora, serif': 'Lora',
+	'Montserrat, sans-serif': 'Montserrat',
+	'Arvo, serif': 'Arvo',
+	'Rubik, sans-serif': 'Rubik',
+	'Newsreader, serif': 'Newsreader',
+	'Cormorant, serif': 'Cormorant',
+	'"Work Sans", sans-serif': 'Work Sans',
+	'Raleway, sans-serif': 'Raleway',
 };
 
 test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
-	test.skip(
-		process.env.WP_ENV_CORE && process.env.WP_ENV_CORE.includes( '6.4' ),
-		'Skipping, font picker not available in WP 6.4'
-	);
-
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -226,8 +232,10 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 
 	test( 'Clicking opt-in new fonts should be available', async ( {
 		pageObject,
+		page,
 	} ) => {
 		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
 
 		await assembler.getByText( 'Usage tracking' ).click();
 		await expect(
@@ -240,9 +248,46 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 			.getByText( 'Access more fonts' )
 			.waitFor( { state: 'hidden' } );
 
+		await page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wp-json/wp/v2/font-families' ) &&
+				response.status() === 200
+		);
+
 		const fontPickers = assembler.locator(
 			'.woocommerce-customize-store_global-styles-variations_item'
 		);
 		await expect( fontPickers ).toHaveCount( 10 );
+
+		await assembler
+			.locator(
+				'.woocommerce-customize-store_global-styles-variations_item'
+			)
+			.waitFor( {
+				strict: false,
+			} );
+
+		for ( const fontPicker of await fontPickers.all() ) {
+			await fontPicker.waitFor();
+			await fontPicker.click();
+			const [ primaryFont, secondaryFont ] = (
+				await fontPicker.getAttribute( 'aria-label' )
+			 )
+				.split( '+' )
+				.map( ( e ) => e.trim() );
+
+			const usedFonts = await getUsedFonts( editor );
+
+			const isPrimaryFontUsed = usedFonts.primaryFont.some( ( font ) =>
+				primaryFont.includes( slugFontMap[ font ] )
+			);
+
+			const isSecondaryFontUsed = usedFonts.secondaryFont.some(
+				( font ) => secondaryFont.includes( slugFontMap[ font ] )
+			);
+
+			expect( isPrimaryFontUsed ).toBe( true );
+			expect( isSecondaryFontUsed ).toBe( true );
+		}
 	} );
 } );
