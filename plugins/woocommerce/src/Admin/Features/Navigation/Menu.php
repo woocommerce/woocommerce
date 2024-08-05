@@ -108,7 +108,7 @@ class Menu {
 	 * @param string $callback Menu callback.
 	 * @return string
 	 */
-	public static function get_callback_url( $callback ) {
+	public static function get_callback_url() {
 		return;
 	}
 
@@ -118,7 +118,7 @@ class Menu {
 	 * @param string $callback Callback or URL.
 	 * @return string|null
 	 */
-	public static function get_parent_key( $callback ) {
+	public static function get_parent_key() {
 		return;
 	}
 
