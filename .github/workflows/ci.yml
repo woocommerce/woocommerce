@@ -207,6 +207,8 @@ jobs:
             if [ "$failedTests" -gt 0 ]; then
               echo "Found failed tests, running only failed tests"
               lastRunFlag="--last-failed"
+            else
+                echo "No failed tests found, running all tests"
             fi
           fi
           
