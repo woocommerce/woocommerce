@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
 import { useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
+import { compose } from '@wordpress/compose';
 import {
 	useCollection,
 	useCollectionData,
@@ -20,7 +21,7 @@ import { dispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { EditProps, isAttributeCounts } from './types';
+import { BlockAttributes, EditProps, isAttributeCounts } from './types';
 import { NoAttributesPlaceholder } from './components/placeholder';
 import { getAttributeFromId } from './utils';
 import { Inspector } from './components/inspector';
@@ -29,6 +30,8 @@ import { attributeOptionsPreview } from './constants';
 import './style.scss';
 import {
 	Preview as CheckboxListPreview,
+	Inspector as CheckboxListInspector,
+	withCheckboxListColors,
 } from './components/checkbox-list-editor';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
@@ -178,6 +181,7 @@ const Edit = ( props: EditProps ) => {
 	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
 		<div { ...useBlockProps() }>
 			<Inspector { ...props } />
+			<CheckboxListInspector< BlockAttributes > { ...props } />
 			{ children }
 		</div>
 	);
@@ -258,4 +262,6 @@ const Edit = ( props: EditProps ) => {
 	);
 };
 
-export default withSpokenMessages( Edit );
+export default compose( [ withSpokenMessages, withCheckboxListColors ] )(
+	Edit
+);

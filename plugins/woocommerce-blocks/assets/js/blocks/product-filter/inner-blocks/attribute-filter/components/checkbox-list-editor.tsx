@@ -70,6 +70,75 @@ export const Preview = ( { items }: { items: string[] } ) => {
 	);
 };
 
+type Color = {
+	slug: string;
+	class: string;
+	name: string;
+	color: string;
+};
+
+export type EditProps = {
+	optionBorder: Color;
+	setOptionBorder: ( value: string ) => void;
+	optionBackground: Color;
+	setOptionBackground: ( value: string ) => void;
+	optionSelected: Color;
+	setOptionSelected: ( value: string ) => void;
+};
+
+export type Attributes = {
+	optionBorder: string;
+	customOptionBorder: string;
+	opionBackground: string;
+	customOptionBackground: string;
+	optionSelected: string;
+	customOptionSelected: string;
+};
+
+export const attributesConfig = {
+	optionBorder: {
+		type: 'string',
+	},
+	customOptionBorder: {
+		type: 'string',
+	},
+	optionBackground: {
+		type: 'string',
+	},
+	customOptionBackground: {
+		type: 'string',
+	},
+	optionSelected: {
+		type: 'string',
+	},
+	customOptionSelected: {
+		type: 'string',
+	},
+};
+
+export const Inspector = < T extends Record< string, unknown > >(
+	props: BlockEditProps< T | Attributes > & EditProps
+) => {
+	const {
+		attributes,
+		setAttributes,
+		optionBorder,
+		setOptionBorder,
+		optionBackground,
+		setOptionBackground,
+		optionSelected,
+		setOptionSelected,
+		clientId,
+	} = props;
+
+	const { customOptionBorder, customOptionBackground, customOptionSelected } =
+		attributes;
+	const colorGradientSettings = useMultipleOriginColorsAndGradients();
+
+	return (
+		<InspectorControls group="color">
+			<ColorGradientSettingsDropdown
+				settings={ [
 					{
 						label: __( 'Option Element Border', 'woocommerce' ),
 						colorValue: optionBorder.color || customOptionBorder,
@@ -110,3 +179,8 @@ export const Preview = ( { items }: { items: string[] } ) => {
 	);
 };
 
+export const withCheckboxListColors = withColors( {
+	optionBorder: 'option-border',
+	optionBackground: 'option-background',
+	optionSelected: 'option-selected',
+} );

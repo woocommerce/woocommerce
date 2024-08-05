@@ -7,8 +7,14 @@ import { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { sortOrders } from './constants';
+import {
+	EditProps as CheckboxListEditProps,
+	Attributes as CheckboxListAttributes,
+} from './components/checkbox-list-editor';
 
-export type BlockAttributes = {
+export interface BlockAttributes
+	extends Record< string, unknown >,
+		CheckboxListAttributes {
 	attributeId: number;
 	showCounts: boolean;
 	queryType: 'or' | 'and';
@@ -18,9 +24,11 @@ export type BlockAttributes = {
 	sortOrder: keyof typeof sortOrders;
 	hideEmpty: boolean;
 	clearButton: boolean;
-};
+}
 
-export interface EditProps extends BlockEditProps< BlockAttributes > {
+export interface EditProps
+	extends BlockEditProps< BlockAttributes >,
+		CheckboxListEditProps {
 	debouncedSpeak: ( label: string ) => void;
 }
 

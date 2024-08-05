@@ -13,6 +13,7 @@ import { AttributeSetting } from '@woocommerce/types';
 import metadata from './block.json';
 import Edit from './edit';
 import './style.scss';
+import { attributesConfig as checkboxListAttributesConfig } from './components/checkbox-list-editor';
 
 if ( isExperimentalBlocksEnabled() ) {
 	const defaultAttribute = getSetting< AttributeSetting >(
@@ -24,6 +25,7 @@ if ( isExperimentalBlocksEnabled() ) {
 		icon: productFilterOptions,
 		attributes: {
 			...metadata.attributes,
+			...checkboxListAttributesConfig,
 			attributeId: {
 				...metadata.attributes.attributeId,
 				default: parseInt( defaultAttribute.attribute_id, 10 ),
