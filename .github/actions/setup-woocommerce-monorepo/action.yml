@@ -22,10 +22,6 @@ inputs:
 runs:
     using: 'composite'
     steps:
-        - name: 'Read PNPM Version'
-          id: 'read-pnpm-version'
-          shell: 'bash'
-          run: 'echo "version=''" >> $GITHUB_OUTPUT'
         - name: 'Setup PNPM'
           uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
         - name: 'Setup Node'
@@ -40,8 +36,7 @@ runs:
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
-        - name: 'Cache: identify pnpm caching directory'
-          if: ${{ inputs.pull-package-deps != 'false' }}
+        - name: 'Cache: identify PNPM caching directory'
           shell: 'bash'
           run: |
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
