@@ -127,7 +127,7 @@ class Init {
 		$editor_settings = $this->get_product_editor_settings();
 
 		$script_handle = 'wc-admin-edit-product';
-		wp_register_script( $script_handle, '', array(), '0.1.0', true );
+		wp_register_script( $script_handle, '', array( 'wp-blocks' ), '0.1.0', true );
 		wp_enqueue_script( $script_handle );
 		wp_add_inline_script(
 			$script_handle,

@@ -36,11 +36,9 @@ export function PreviewButton( {
 				navigateTo( { url } );
 			}
 		},
-		onSaveError( error ) {
-			const { message, errorProps } = getProductErrorMessageAndProps(
-				error,
-				visibleTab
-			);
+		async onSaveError( error ) {
+			const { message, errorProps } =
+				await getProductErrorMessageAndProps( error, visibleTab );
 			createErrorNotice( message, errorProps );
 		},
 	} );

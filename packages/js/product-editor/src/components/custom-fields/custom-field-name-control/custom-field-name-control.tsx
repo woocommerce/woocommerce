@@ -3,24 +3,20 @@
  */
 import type { ForwardedRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
-import { ComboboxControl } from '@wordpress/components';
-import { useDebounce, useInstanceId } from '@wordpress/compose';
+import { useDebounce } from '@wordpress/compose';
 import {
 	createElement,
 	forwardRef,
 	useCallback,
-	useEffect,
-	useLayoutEffect,
 	useMemo,
-	useRef,
 	useState,
 } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
+import { ComboboxControl, ComboboxControlProps } from '../../combobox-control';
 import type { ComboboxControlOption } from '../../attribute-combobox-field/types';
 import type { CustomFieldNameControlProps } from './types';
 
@@ -56,35 +52,13 @@ async function searchCustomFieldNames( search?: string ) {
 	} );
 }
 
-/**
- * This is a wrapper + a work around the Combobox to
- * expose important properties and events from the
- * internal input element that are required when
- * validating the field in the context of a form
- */
 export const CustomFieldNameControl = forwardRef(
 	function ForwardedCustomFieldNameControl(
-		{
-			allowReset,
-			className,
-			help,
-			hideLabelFromVision,
-			label,
-			messages,
-			value,
-			onChange,
-			onBlur,
-		}: CustomFieldNameControlProps,
+		{ value, onBlur, ...props }: CustomFieldNameControlProps,
 		ref: ForwardedRef< HTMLInputElement >
 	) {
-		const inputElementRef = useRef< HTMLInputElement >();
-		const id = useInstanceId(
-			CustomFieldNameControl,
-			'woocommerce-custom-field-name'
-		);
-
 		const [ customFieldNames, setCustomFieldNames ] = useState<
-			ComboboxControl.Props[ 'options' ]
+			ComboboxControlProps[ 'options' ]
 		>( [] );
 
 		const options = useMemo(
@@ -109,29 +83,6 @@ export const CustomFieldNameControl = forwardRef(
 			[ customFieldNames, value ]
 		);
 
-		useLayoutEffect(
-			/**
-			 * The Combobox component does not expose the ref to the
-			 * internal native input element removing the ability to
-			 * focus the element when validating it in the context
-			 * of a form
-			 */
-			function initializeRefs() {
-				inputElementRef.current = document.querySelector(
-					`.${ id } [role="combobox"]`
-				) as HTMLInputElement;
-
-				if ( ref ) {
-					if ( typeof ref === 'function' ) {
-						ref( inputElementRef.current );
-					} else {
-						ref.current = inputElementRef.current;
-					}
-				}
-			},
-			[ id, ref ]
-		);
-
 		const handleFilterValueChange = useDebounce(
 			useCallback(
 				function onFilterValueChange( search: string ) {
@@ -144,50 +95,19 @@ export const CustomFieldNameControl = forwardRef(
 			250
 		);
 
-		useEffect(
-			function overrideBlur() {
-				/**
-				 * The Combobox component clear the value of its internal
-				 * input control when losing the focus, even when the
-				 * selected value is set, afecting the validation behavior
-				 * on bluring
-				 */
-				function handleBlur( event: FocusEvent ) {
-					setCustomFieldNames( [] );
-					if ( inputElementRef.current ) {
-						inputElementRef.current.value = value;
-					}
-					onBlur?.( event as never );
-				}
-
-				inputElementRef.current?.addEventListener( 'blur', handleBlur );
-
-				return () => {
-					inputElementRef.current?.removeEventListener(
-						'blur',
-						handleBlur
-					);
-				};
-			},
-			[ value, onBlur ]
-		);
+		function handleBlur( event: React.FocusEvent< HTMLInputElement > ) {
+			setCustomFieldNames( [] );
+			onBlur?.( event );
+		}
 
 		return (
 			<ComboboxControl
-				allowReset={ allowReset }
-				help={ help }
-				hideLabelFromVision={ hideLabelFromVision }
-				label={ label }
-				messages={ messages }
+				{ ...props }
+				ref={ ref }
 				value={ value }
 				options={ options }
-				onChange={ onChange }
 				onFilterValueChange={ handleFilterValueChange }
-				className={ classNames(
-					id,
-					'woocommerce-custom-field-name-control',
-					className
-				) }
+				onBlur={ handleBlur }
 			/>
 		);
 	}

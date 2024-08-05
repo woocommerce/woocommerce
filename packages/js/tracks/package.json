@@ -47,6 +47,7 @@
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint src",
 		"prepack": "pnpm build",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:cjs": "wireit",
@@ -55,7 +56,10 @@
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
 		"@types/debug": "^4.1.12",
+		"@types/node": "^16.18.68",
+		"@types/jest": "^27.5.2",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
 		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
@@ -121,6 +125,9 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

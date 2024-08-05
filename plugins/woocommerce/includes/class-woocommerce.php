@@ -26,10 +26,10 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
-use Automattic\WooCommerce\Admin\WCAdminHelper;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * Main WooCommerce Class.
@@ -45,7 +45,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.2.0';
+	public $version = '9.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -54,7 +54,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $db_version = '430';
+	public $db_version = '920';
 
 	/**
 	 * The single instance of the class.
@@ -309,6 +309,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 
+		self::add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 
 		// These classes set up hooks on instantiation.
@@ -403,6 +404,15 @@ final class WooCommerce {
 				$context
 			);
 
+			// Record fatal error stats.
+			$container = wc_get_container();
+			$mc_stats  = $container->get( McStats::class );
+			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
+			$mc_stats->do_server_side_stats();
+
+			$remote_logger = $container->get( RemoteLogger::class );
+			$remote_logger->handle( time(), WC_Log_Levels::CRITICAL, $message, $context );
+
 			/**
 			 * Action triggered when there are errors during shutdown.
 			 *
@@ -416,8 +426,6 @@ final class WooCommerce {
 	 * Define WC Constants.
 	 */
 	private function define_constants() {
-		$upload_dir = wp_upload_dir( null, false );
-
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
 		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( WC_PLUGIN_FILE ) );
 		$this->define( 'WC_VERSION', $this->version );
@@ -436,8 +444,9 @@ final class WooCommerce {
 		 */
 		if ( defined( 'WC_LOG_DIR' ) ) {
 			$this->define( 'WC_LOG_DIR_CUSTOM', true );
+		} else {
+			$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory( false ) );
 		}
-		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
@@ -1037,6 +1046,43 @@ final class WooCommerce {
 			$this->session = new $session_class();
 			$this->session->init();
 		}
+	}
+
+	/**
+	 * Tell bots not to index some WooCommerce-created directories.
+	 *
+	 * We try to detect the default "User-agent: *" added by WordPress and add our rules to that group, because
+	 * it's possible that some bots will only interpret the first group of rules if there are multiple groups with
+	 * the same user agent.
+	 *
+	 * @param string $output The contents that WordPress will output in a robots.txt file.
+	 *
+	 * @return string
+	 */
+	private function robots_txt( $output ) {
+		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
+
+		$lines       = preg_split( '/\r\n|\r|\n/', $output );
+		$agent_index = array_search( 'User-agent: *', $lines, true );
+
+		if ( false !== $agent_index ) {
+			$above = array_slice( $lines, 0, $agent_index + 1 );
+			$below = array_slice( $lines, $agent_index + 1 );
+		} else {
+			$above = $lines;
+			$below = array();
+
+			$above[] = '';
+			$above[] = 'User-agent: *';
+		}
+
+		$above[] = "Disallow: $path/wp-content/uploads/wc-logs/";
+		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_transient_files/";
+		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
+
+		$lines = array_merge( $above, $below );
+
+		return implode( PHP_EOL, $lines );
 	}
 
 	/**

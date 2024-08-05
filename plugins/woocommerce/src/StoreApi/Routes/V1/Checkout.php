@@ -1,14 +1,14 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
-use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\AdditionalFields;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
@@ -64,7 +64,7 @@ class Checkout extends AbstractCartRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		return true;
+		return ! $this->has_cart_token( $request );
 	}
 
 	/**
@@ -147,6 +147,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( is_wp_error( $response ) ) {
 			$response = $this->error_to_response( $response );
+
+			// If we encountered an exception, free up stock.
+			if ( $this->order ) {
+				wc_release_stock_for_order( $this->order );
+			}
 		}
 
 		return $this->add_response_headers( $response );
@@ -172,6 +177,54 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Validate required additional fields on request.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @throws RouteException When a required additional field is missing.
+	 */
+	public function validate_required_additional_fields( \WP_REST_Request $request ) {
+		$contact_fields           = $this->additional_fields_controller->get_fields_for_location( 'contact' );
+		$order_fields             = $this->additional_fields_controller->get_fields_for_location( 'order' );
+		$order_and_contact_fields = array_merge( $contact_fields, $order_fields );
+
+		if ( ! empty( $order_and_contact_fields ) ) {
+			foreach ( $order_and_contact_fields as $field_key => $order_and_contact_field ) {
+				if ( $order_and_contact_field['required'] && ! isset( $request['additional_fields'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided additional fields: %s is required', 'woocommerce' ), $order_and_contact_field['label'] ) ),
+						400
+					);
+				}
+			}
+		}
+
+		$address_fields = $this->additional_fields_controller->get_fields_for_location( 'address' );
+		if ( ! empty( $address_fields ) ) {
+			foreach ( $address_fields as $field_key => $address_field ) {
+				if ( $address_field['required'] && ! isset( $request['billing_address'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided billing address: %s is required', 'woocommerce' ), $address_field['label'] ) ),
+						400
+					);
+				}
+				if ( $address_field['required'] && ! isset( $request['shipping_address'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided shipping address: %s is required', 'woocommerce' ), $address_field['label'] ) ),
+						400
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Process an order.
 	 *
 	 * 1. Obtain Draft Order
@@ -181,7 +234,6 @@ class Checkout extends AbstractCartRoute {
 	 * 5. Process Payment
 	 *
 	 * @throws RouteException On error.
-	 * @throws InvalidStockLevelsInCartException On error.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -195,34 +247,60 @@ class Checkout extends AbstractCartRoute {
 		$this->cart_controller->calculate_totals();
 
 		/**
-		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
-		 * the customer.
+		 * Validate items and fix violations before the order is processed.
 		 */
 		$this->cart_controller->validate_cart();
 
 		/**
-		 * Obtain Draft Order and process request data.
-		 *
-		 * Note: Customer data is persisted from the request first so that OrderController::update_addresses_from_cart
+		 * Validate additional fields on request.
+		 */
+		$this->validate_required_additional_fields( $request );
+
+		/**
+		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
 		 * uses the up to date customer address.
 		 */
 		$this->update_customer_from_request( $request );
-		$this->create_or_update_draft_order( $request );
-		$this->update_order_from_request( $request );
 
 		/**
-		 * Process customer data.
-		 *
-		 * Update order with customer details, and sign up a user account as necessary.
+		 * Create (or update) Draft Order and process request data.
 		 */
+		$this->create_or_update_draft_order( $request );
+		$this->update_order_from_request( $request );
 		$this->process_customer( $request );
 
 		/**
-		 * Validate order.
-		 *
-		 * This logic ensures the order is valid before payment is attempted.
+		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
+
+		/**
+		 * Reserve stock for the order.
+		 *
+		 * In the shortcode based checkout, when POSTing the checkout form the order would be created and fire the
+		 * `woocommerce_checkout_order_created` action. This in turn would trigger the `wc_reserve_stock_for_order`
+		 * function so that stock would be held pending payment.
+		 *
+		 * Via the block based checkout and Store API we already have a draft order, but when POSTing to the /checkout
+		 * endpoint we do the same; reserve stock for the order to allow time to process payment.
+		 *
+		 * Note, stock is only "held" while the order has the status wc-checkout-draft or pending. Stock is freed when
+		 * the order changes status, or there is an exception.
+		 *
+		 * @see ReserveStock::get_query_for_reserved_stock()
+		 *
+		 * @since 9.2 Stock is no longer held for all draft orders, nor on non-POST requests. See https://github.com/woocommerce/woocommerce/issues/44231
+		 * @since 9.2 Uses wc_reserve_stock_for_order() instead of using the ReserveStock class directly.
+		 */
+		try {
+			wc_reserve_stock_for_order( $this->order );
+		} catch ( ReserveStockException $e ) {
+			throw new RouteException(
+				esc_html( $e->getErrorCode() ),
+				esc_html( $e->getMessage() ),
+				esc_html( $e->getCode() )
+			);
+		}
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -402,24 +480,6 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
-
-		/**
-		 * Try to reserve stock for the order.
-		 *
-		 * If creating a draft order on checkout entry, set the timeout to 10 mins.
-		 * If POSTing to the checkout (attempting to pay), set the timeout to 60 mins (using the woocommerce_hold_stock_minutes option).
-		 */
-		try {
-			$reserve_stock = new ReserveStock();
-			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : 10;
-			$reserve_stock->reserve_stock_for_order( $this->order, $duration );
-		} catch ( ReserveStockException $e ) {
-			throw new RouteException(
-				$e->getErrorCode(),
-				$e->getMessage(),
-				$e->getCode()
-			);
-		}
 	}
 
 	/**
