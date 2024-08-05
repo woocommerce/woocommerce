@@ -179,7 +179,7 @@ jobs:
         if: ${{ always() && matrix.report.resultsPath != '' && matrix.testType == 'e2e' }}
         uses: actions/download-artifact@v4
         with:
-          pattern: '.last-run__${{ strategy.job-index }}.json'
+          pattern: '.last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
         env:
@@ -187,21 +187,23 @@ jobs:
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
         run: |
-          # Move and rename the downloaded file to the expected name
-          ls -lh
-          downloadedFile="${{ steps.download-last-run-info.outputs.download-path }}/.last-run__${{ strategy.job-index }}.json"
-          lastRunFilePath="$ARTIFACTS_PATH/.last-run.json"
-          if [ -f "$downloadedFile" ]; then
-            ls -lh "${{ steps.download-last-run-info.outputs.download-path }}"
-            mv "$downloadedFile" "$lastRunFilePath"
-            ls -lh "$ARTIFACTS_PATH"
+          lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
+          lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
+          
+          if [ -f "$lastRunFile" ]; then
+              echo "Found last run info file: \"$lastRunFile\""
+              echo "Moving to destination: \"$lastRunFileDest\""
+              mkdir -p "$ARTIFACTS_PATH"
+              mv "$lastRunFile" "$lastRunFileDest"
+          else
+              echo "No last run info file found. Searched for: \"$lastRunFile\""
           fi
           
           lastRunFlag=""
-          if [ -f "$lastRunFilePath" ]; then
-            cat "$lastRunFilePath"
+          if [ -f "$lastRunFileDest" ]; then
+            cat "$lastRunFileDest"
             # Playwright last run info is available, parse the file and check if there are failed tests
-            failedTests=$(jq '.failedTests | length' "$lastRunFilePath")
+            failedTests=$(jq '.failedTests | length' "$lastRunFileDest")
           
             # Only if there are failed tests, we want to use the --last-failed flag. 
             # The run will fail if we're using the flag and there are no failed tests.
@@ -218,7 +220,7 @@ jobs:
         if: ${{ failure() && matrix.report.resultsPath != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: '.last-run__${{ strategy.job-index }}.json'
+          name: '.last-run__${{ strategy.job-index }}'
           path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
           if-no-files-found: ignore
           overwrite: true
