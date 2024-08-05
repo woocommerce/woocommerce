@@ -8,10 +8,7 @@ const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
-const {
-	defaultRequestToExternal,
-	defaultRequestToHandle,
-} = require( '@wordpress/dependency-extraction-webpack-plugin/lib/util' );
+const SpecialDEWP = require( './special-dewp' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 const CreateFileWebpack = require( 'create-file-webpack' );
@@ -46,6 +43,7 @@ const getSharedPlugins = ( {
 	requestToExternalFn = requestToExternal,
 	requestToHandleFn = requestToHandle,
 	dewpFallbackToDefault = true,
+	useDewp = true,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -62,14 +60,15 @@ const getSharedPlugins = ( {
 				analyzerPort: initialBundleAnalyzerPort++,
 				reportTitle: bundleAnalyzerReportTitle,
 			} ),
-		new DependencyExtractionWebpackPlugin( {
-			injectPolyfill: true,
-			combineAssets: ASSET_CHECK,
-			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			useDefaults: dewpFallbackToDefault,
-			requestToExternal: requestToExternalFn,
-			requestToHandle: requestToHandleFn,
-		} ),
+		useDewp &&
+			new DependencyExtractionWebpackPlugin( {
+				injectPolyfill: true,
+				combineAssets: ASSET_CHECK,
+				outputFormat: ASSET_CHECK ? 'json' : 'php',
+				useDefaults: dewpFallbackToDefault,
+				requestToExternal: requestToExternalFn,
+				requestToHandle: requestToHandleFn,
+			} ),
 	].filter( Boolean );
 
 /**
@@ -308,13 +307,6 @@ const getMainConfig = ( options = {} ) => {
 						},
 					},
 				],
-			} ),
-			new DependencyExtractionWebpackPlugin( {
-				requestToExternalModule( request ) {
-					if ( request === '@wordpress/interactivity' ) {
-						return request;
-					}
-				},
 			} ),
 		],
 		resolve: {
@@ -1129,7 +1121,14 @@ const getInteractivityBlocksConfig = ( options = {} ) => {
 			path: path.resolve( __dirname, '../build/' ),
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
 			uniqueName: 'webpackWcInteractivityBlocksFrontendJsonp',
+
+			// Modules
 			module: true,
+			chunkFormat: 'module',
+			environment: { module: true },
+			library: {
+				type: 'module',
+			},
 		},
 		experiments: {
 			outputModule: true,
@@ -1207,11 +1206,16 @@ const getInteractivityBlocksConfig = ( options = {} ) => {
 		},
 		plugins: [
 			...getSharedPlugins( {
+				useDewp: false,
 				bundleAnalyzerReportTitle: 'Interactivity Blocks Frontend',
 			} ),
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'Interactivity Blocks Frontend' )
 			),
+			new SpecialDEWP( {
+				requestToExternal,
+				requestToHandle,
+			} ),
 		],
 		resolve: {
 			...resolve,
