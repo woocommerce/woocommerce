@@ -28,7 +28,7 @@
 			"@woocommerce/atomic-blocks/*": [
 				"assets/js/base/atomic/blocks/*"
 			],
-			"@woocommerce/blocks/utils": [ "assets/js/blocks/utils" ],
+			"@woocommerce/blocks-utils": [ "assets/js/blocks/utils" ],
 			"@woocommerce/base-components/*": [ "assets/js/base/components/*" ],
 			"@woocommerce/base-context": [ "assets/js/base/context" ],
 			"@woocommerce/base-context/*": [ "assets/js/base/context/*" ],

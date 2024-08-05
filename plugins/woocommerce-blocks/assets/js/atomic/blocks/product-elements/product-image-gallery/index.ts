@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { gallery as icon } from '@wordpress/icons';
-import { registerBlockSingleProductTemplate } from '@woocommerce/blocks/utils';
+import { registerBlockSingleProductTemplate } from '@woocommerce/blocks-utils';
 import { createBlock } from '@wordpress/blocks';
 
 /**

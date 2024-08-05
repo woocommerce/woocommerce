@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { box as icon } from '@wordpress/icons';
-import { registerBlockSingleProductTemplate } from '@woocommerce/blocks/utils';
+import { registerBlockSingleProductTemplate } from '@woocommerce/blocks-utils';
 
 /**
  * Internal dependencies

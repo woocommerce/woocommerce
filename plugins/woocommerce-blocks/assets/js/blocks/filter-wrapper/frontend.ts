@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { renderParentBlock } from '@woocommerce/blocks/utils';
+import { renderParentBlock } from '@woocommerce/blocks-utils';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 
 /**

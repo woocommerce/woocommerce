@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { registerBlockType, type BlockConfiguration } from '@wordpress/blocks';
-import { registerBlockSingleProductTemplate } from '@woocommerce/blocks/utils';
+import { registerBlockSingleProductTemplate } from '@woocommerce/blocks-utils';
 
 /**
  * Internal dependencies
