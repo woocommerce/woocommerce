@@ -1,27 +1,15 @@
 ---
-post_title: Cart and Checkout - Available Slots
+post_title: Cart and Checkout - Available slots
 menu_title: Available Slots
 tags: reference
 ---
 <!-- markdownlint-disable MD024 -->
-# Available Slots <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [ExperimentalOrderMeta](#experimentalordermeta)
-    -   [Passed parameters](#passed-parameters)
--   [ExperimentalOrderShippingPackages](#experimentalordershippingpackages)
-    -   [Passed parameters](#passed-parameters-1)
--   [ExperimentalOrderLocalPickupPackages](#experimentalorderlocalpickuppackages)
-    -   [Passed parameters](#passed-parameters-2)
--   [ExperimentalDiscountsMeta](#experimentaldiscountsmeta)
-    -   [Passed parameters](#passed-parameters-3)
 
 This document presents the list of available Slots that you can use for adding your custom content (Fill).
 
-If you want to add a new SlotFill component, check the [Checkout - Slot Fill document](../../../../packages/checkout/slot/README.md). To read more about Slot and Fill, check the [Slot and Fill document](./slot-fills.md).
+If you want to add a new SlotFill component, check the [Checkout - Slot Fill document](https://github.com/woocommerce/woocommerce/blob/1675c63bba94c59703f57c7ef06e7deff8fd6bba/plugins/woocommerce-blocks/packages/checkout/slot/README.md). To read more about Slot and Fill, check the [Slot and Fill document](./cart-and-checkout-slot-and-fill/).
 
-**Note About Naming:** Slots that are prefixed with `Experimental` are experimental and subject to change or remove. Once they graduate from the experimental stage, the naming would change and the `Experimental` prefix would be dropped. Check the [Feature Gating document](../../../internal-developers/blocks/feature-flags-and-experimental-interfaces.md) from more information.
+**Note About Naming:** Slots that are prefixed with `Experimental` are experimental and subject to change or remove. Once they graduate from the experimental stage, the naming would change and the `Experimental` prefix would be dropped. Check the [Feature Gating document](https://github.com/woocommerce/woocommerce/blob/1675c63bba94c59703f57c7ef06e7deff8fd6bba/plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md) from more information.
 
 ## ExperimentalOrderMeta
 
