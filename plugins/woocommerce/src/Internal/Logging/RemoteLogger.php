@@ -89,8 +89,7 @@ class RemoteLogger extends \WC_Log_Handler {
 
 			WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
 
-			if ( ! in_array( wp_get_environment_type(), array( 'development', 'local' ), true ) ) {
-				// Do not send logs in development or local environments.
+			if ( $this->is_dev_or_local_environment() ) {
 				return false;
 			}
 
@@ -411,5 +410,16 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		return implode( "\n", $sanitized_trace );
+	}
+
+	/**
+	 * Check if the current environment is development or local.
+	 *
+	 * Creates a helper method so we can easily mock this in tests.
+	 *
+	 * @return bool
+	 */
+	protected function is_dev_or_local_environment() {
+		return in_array( wp_get_environment_type(), array( 'development', 'local' ), true );
 	}
 }
