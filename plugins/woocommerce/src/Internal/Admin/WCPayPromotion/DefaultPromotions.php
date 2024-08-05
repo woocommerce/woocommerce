@@ -2,6 +2,7 @@
 /**
  * Gets a list of fallback promotions if remote fetching is disabled.
  */
+
 declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
