@@ -71,7 +71,7 @@ class Packages {
 	 * @return boolean
 	 */
 	public static function package_exists( $package ) {
-		return file_exists( dirname( __DIR__ ) . '/packages/' . $package );
+		return file_exists( dirname(__DIR__) . '/packages/' . $package );
 	}
 
 	/**
