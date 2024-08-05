@@ -702,11 +702,11 @@ test.describe.serial(
 					).toBeVisible();
 
 					await page
-						.getByLabel( 'First name *' )
+						.getByLabel( 'First name' )
 						.first()
 						.fill( customer.billing.us.first_name );
 					await page
-						.getByLabel( 'Last name *' )
+						.getByLabel( 'Last name' )
 						.first()
 						.fill( customer.billing.us.last_name );
 					await page
@@ -714,19 +714,19 @@ test.describe.serial(
 						.first()
 						.fill( customer.billing.us.address );
 					await page
-						.getByLabel( 'Town / City *' )
+						.getByLabel( 'Town / City' )
 						.first()
 						.pressSequentially( 'Sacramento' );
 					await page
-						.getByLabel( 'ZIP Code *' )
+						.getByLabel( 'ZIP Code' )
 						.first()
 						.pressSequentially( '55555' );
 					await page
-						.getByLabel( 'Phone *' )
+						.getByLabel( 'Phone' )
 						.first()
 						.fill( customer.billing.us.phone );
 					await page
-						.getByLabel( 'Email address *' )
+						.getByLabel( 'Email address' )
 						.first()
 						.fill( customer.billing.us.email );
 
@@ -797,11 +797,11 @@ test.describe.serial(
 					).toBeVisible();
 
 					await page
-						.getByLabel( 'First name *' )
+						.getByLabel( 'First name' )
 						.first()
 						.fill( customer.billing.us.first_name );
 					await page
-						.getByLabel( 'Last name *' )
+						.getByLabel( 'Last name' )
 						.first()
 						.fill( customer.billing.us.last_name );
 					await page
@@ -809,19 +809,19 @@ test.describe.serial(
 						.first()
 						.fill( customer.billing.us.address );
 					await page
-						.getByLabel( 'Town / City *' )
+						.getByLabel( 'Town / City' )
 						.first()
 						.pressSequentially( customer.billing.us.city );
 					await page
-						.getByLabel( 'ZIP Code *' )
+						.getByLabel( 'ZIP Code' )
 						.first()
 						.pressSequentially( customer.billing.us.zip );
 					await page
-						.getByLabel( 'Phone *' )
+						.getByLabel( 'Phone' )
 						.first()
 						.fill( customer.billing.us.phone );
 					await page
-						.getByLabel( 'Email address *' )
+						.getByLabel( 'Email address' )
 						.first()
 						.fill( customer.billing.us.email );
 
