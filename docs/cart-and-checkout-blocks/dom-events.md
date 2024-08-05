@@ -1,19 +1,8 @@
 ---
-post_title: Cart and Checkout - Dom Events
-menu_title: Dom Events
+post_title: Cart and Checkout - DOM events
+menu_title: DOM Events
 tags: reference
 ---
-
-# DOM Events <!-- omit in toc -->
-
-## Table of Contents <!-- omit in toc -->
-
--   [WooCommerce core events in WooCommerce Blocks](#woocommerce-core-events-in-woocommerce-blocks)
--   [WooCommerce Blocks events](#woocommerce-blocks-events)
-    -   [`wc-blocks_adding_to_cart`](#wc-blocks_adding_to_cart)
-    -   [`wc-blocks_added_to_cart`](#wc-blocks_added_to_cart)
-        -   [`detail` parameters:](#detail-parameters)
-    -   [`wc-blocks_removed_from_cart`](#wc-blocks_removed_from_cart)
 
 Some blocks need to react to certain events in order to display the most up to date data or behave in a certain way. That's the case of the Cart block, for example, that must listen to 'add to cart' events in order to update the cart contents; or the Mini-Cart block, that gets opened every time a product is added to the cart.
 
