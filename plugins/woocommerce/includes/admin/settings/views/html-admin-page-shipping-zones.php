@@ -8,7 +8,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<span><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></span>
 	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add zone', 'woocommerce' ); ?></a>
 </h2>
-<p class="wc-shipping-zone-heading-help-text"><?php echo esc_html_e( 'A shipping zone consists of the region(s) you\'d like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we\'ll use their shipping address to show them the methods available in their area.', 'woocommerce' ); ?></p>
+<p class="wc-shipping-zone-heading-help-text">
+	<?php
+	echo wp_kses_post(
+		sprintf(
+			/* translators: %s: URL to local pickup settings */
+			__(
+				"A shipping zone consists of the region(s) you'd like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we'll use their shipping address to show them the methods available in their area. To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
+				'woocommerce'
+			),
+			esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+		)
+	);
+	?>
+</p>
 <table class="wc-shipping-zones widefat">
 	<thead>
 		<tr>
@@ -56,14 +69,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( 0 === $method_count ) : ?>
 		<tr>
 			<td class="wc-shipping-zones-blank-state" colspan="5">
-				<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
-				<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
+				<p class="main"><?php esc_html_e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
+				<p><?php esc_html_e( 'For example:', 'woocommerce' ); ?></p>
 				<ul>
-					<li><?php _e( 'Local zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
-					<li><?php _e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
-					<li><?php _e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php esc_html_e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php esc_html_e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
 				</ul>
-				<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
+				<p><?php esc_html_e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
 				<a class="button button-primary wc-shipping-zone-add" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
 			</td>
 		</tr>
@@ -95,9 +107,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<h1><?php _e( 'Add shipping method', 'woocommerce' ); ?></h1>
+					<h1><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
-						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
 				<article>

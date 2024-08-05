@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0](https://www.npmjs.com/package/@woocommerce/onboarding/v/3.6.0) - 2024-07-29 
+
+-   Minor - Add a new shared component to display logos of payment methods supported by WooPayments. [#49300]
+-   Minor - Added Task Referral system for wc-admin onboarding tasks. [#47654]
+-   Patch - Update events that should trigger the test job(s) [#47612]
+-   Patch - Update pnpm to 9.1.0 [#47385]
+-   Minor - Fix typo in findCountryOption test [#48648]
+
 ## [3.5.0](https://www.npmjs.com/package/@woocommerce/onboarding/v/3.5.0) - 2024-04-26 
 
 -   Minor - Branding rollout - change WooCommerce Payments to WooPayments [#39188]
