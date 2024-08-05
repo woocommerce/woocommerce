@@ -40,8 +40,8 @@ A Collection is defined by an object that can contain the following fields:
 - `title` (type `string`): The title of the collection, which will be displayed in various places including the block inserter and collection chooser.
 - `description` (optional, type `string`): A human-readable description of the collection.
 - `innerBlocks` (optional, type `Array[]`): An array of inner blocks that will be added to the collection. If not provided, the default inner blocks will be used.
-- `isDefault`: ⚠️ It's set to `false` for all collections. Third party developers don't need to pass this argument.
-- `isActive`: ⚠️ It will be managed by us. Third party developers don't need to pass this argument.
+- `isDefault`: It's set to `false` for all collections. Third party developers don't need to pass this argument.
+- `isActive`: It will be managed by us. Third party developers don't need to pass this argument.
 - `usesReference` (optional, type `Array[]`): An array of strings specifying the required reference for the collection. Acceptable values are `product`, `archive`, `cart`, and `order`. When the required reference isn't available on Editor side but will be available in Frontend, we will show a preview label.
 
 ### Attributes
