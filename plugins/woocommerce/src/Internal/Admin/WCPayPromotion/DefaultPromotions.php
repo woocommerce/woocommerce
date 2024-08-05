@@ -27,7 +27,7 @@ class DefaultPromotions {
 				'id'              => 'woocommerce_payments:woopay',
 				'title'           => __( 'WooPayments', 'woocommerce' ),
 				'content'         => __( 'Payments made simple — including WooPay, a new express checkout feature.', 'woocommerce' ),
-				'image'           => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
+				'image'           => plugins_url( 'assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
 				'plugins'         => array( 'woocommerce-payments' ),
 				'is_visible'      => array(
 					DefaultPaymentGateways::get_rules_for_cbd( false ),
@@ -39,7 +39,7 @@ class DefaultPromotions {
 				'id'              => 'woocommerce_payments',
 				'title'           => __( 'WooPayments', 'woocommerce' ),
 				'content'         => __( 'Payments made simple, with no monthly fees – designed exclusively for WooCommerce stores. Accept credit cards, debit cards, and other popular payment methods.', 'woocommerce' ),
-				'image'           =>  WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay.svg',
+				'image'           =>  plugins_url( 'assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
 				'plugins'         => array( 'woocommerce-payments' ),
 				'is_visible'      => array(
 					DefaultPaymentGateways::get_rules_for_cbd( false ),
@@ -76,7 +76,7 @@ class DefaultPromotions {
 			return sprintf(
 				'<img class="wcpay-%s-icon wcpay-icon" src="%s" alt="%s">',
 				$icon,
-				WC_ADMIN_IMAGES_FOLDER_URL . "/payment-methods/$icon.svg",
+				plugins_url( "assets/images/payment-methods/$icon.svg", WC_PLUGIN_FILE ),
 				ucfirst( $icon )
 			);
 		};

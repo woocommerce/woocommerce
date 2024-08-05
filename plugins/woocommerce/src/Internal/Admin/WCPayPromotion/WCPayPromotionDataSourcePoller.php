@@ -2,10 +2,10 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 /**
- * Specs data source poller class for WooCommerce Payment Promotion.
+ * Specs data source poller class for WooPayments Promotion.
  */
 class WCPayPromotionDataSourcePoller extends DataSourcePoller {
 
@@ -36,7 +36,7 @@ class WCPayPromotionDataSourcePoller extends DataSourcePoller {
 				function( $url ) use ( $base_location ) {
 					return add_query_arg(
 						'country',
-						$base_location['country'],
+						$base_location['country'] ?? '',
 						$url
 					);
 				},
