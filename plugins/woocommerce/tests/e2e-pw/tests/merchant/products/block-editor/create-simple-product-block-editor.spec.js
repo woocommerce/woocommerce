@@ -2,6 +2,10 @@ const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
 
 const { clickOnTab } = require( '../../../../utils/simple-products' );
+const {
+	getInstalledWordPressVersion,
+} = require( '../../../../utils/wordpress' );
+const { insertBlock } = require( '../../../../utils/editor' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -11,6 +15,9 @@ const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 const productData = {
 	name: `Simple product Name ${ new Date().getTime().toString() }`,
 	summary: 'This is a product summary',
+	descriptionTitle: 'Product Description title',
+	descriptionParagraph: 'This is a product description',
+	descriptionSimple: 'This is a product simple description',
 	productPrice: '100',
 	salePrice: '90',
 };
@@ -44,12 +51,83 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await page
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
+
+			await page
+				.locator(
+					'[data-template-block-id="product-description__content"] > p'
+				)
+				.fill( productData.descriptionSimple );
+
+			await page.getByText( 'Full editor' ).click();
+
+			const wordPressVersion = await getInstalledWordPressVersion();
+			await insertBlock( page, 'Heading', wordPressVersion );
+
+			const editorCanvasLocator = page.frameLocator(
+				'iframe[name="editor-canvas"]'
+			);
+
+			await editorCanvasLocator
+				.locator( '[data-title="Heading"]' )
+				.fill( productData.descriptionTitle );
+
+			await editorCanvasLocator
+				.locator( '[data-title="Heading"]' )
+				.blur();
+
+			await insertBlock( page, 'Paragraph', wordPressVersion );
+
+			await editorCanvasLocator
+				.locator( '[data-title="Paragraph"]' )
+				.last()
+				.fill( productData.descriptionParagraph );
+
+			await page.getByRole( 'button', { name: 'Done' } ).click();
+
+			const previewContainerIframe = page
+				.locator( '.block-editor-block-preview__container' )
+				.frameLocator( 'iframe[title="Editor canvas"]' );
+
+			const descriptionTitle = previewContainerIframe.locator(
+				'[data-title="Heading"]'
+			);
+			const descriptionInitialParagraph = previewContainerIframe
+				.locator( '[data-title="Paragraph"]' )
+				.first();
+			const descriptionSecondParagraph = previewContainerIframe
+				.locator( '[data-title="Paragraph"]' )
+				.last();
+
+			await expect( descriptionTitle ).toHaveText(
+				productData.descriptionTitle
+			);
+			await expect( descriptionInitialParagraph ).toHaveText(
+				productData.descriptionSimple
+			);
+			await expect( descriptionSecondParagraph ).toHaveText(
+				productData.descriptionParagraph
+			);
+
+			await descriptionTitle.click();
+
+			await expect(
+				page.getByText( 'Edit in full editor' )
+			).toBeVisible();
+
 			await page
 				.locator(
 					'[data-template-block-id="basic-details"] .components-summary-control'
 				)
 				.last()
 				.fill( productData.summary );
+
+			// We blur the summary field to hide the toolbar before clicking on the regular price field.
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.blur();
 
 			const regularPrice = page
 				.locator( 'input[name="regular_price"]' )

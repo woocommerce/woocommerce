@@ -36,6 +36,7 @@ A Collection is defined by an object that can contain the following fields:
 - `innerBlocks` (optional, type `Array[]`): An array of inner blocks that will be added to the collection. If not provided, the default inner blocks will be used.
 - `isDefault`: ⚠️ It's set to `false` for all collections. 3PDs doesn't need to pass this argument.
 - `isActive`: ⚠️ It will be managed by us. 3PDs doesn't need to pass this argument.
+- `usesReference` (optional, type `Array[]`): An array of strings specifying the required reference for the collection. Acceptable values are `product`, `archive`, `cart`, and `order`. When the required reference isn't available on Editor side but will be available in Frontend, we will show a preview label.
 
 ### Attributes
 
@@ -238,6 +239,38 @@ This will create a collection with a heading, product image, and product price. 
 
 > [!TIP]
 > You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
+
+### Example 5: Collection with `usesReference` argument
+
+When a collection requires a reference to work properly, you can specify it using the `usesReference` argument. In the example below, we are defining a collection that requires a `product` reference.
+
+```tsx
+__experimentalRegisterProductCollection({
+  name: "your-plugin-name/product-collection/my-custom-collection",
+  title: "My Custom Collection",
+  icon: "games",
+  description: "This is a custom collection.",
+  keywords: ["custom collection", "product collection"],
+  usesReference: ["product"],
+});
+```
+
+This will create a collection that requires a `product` reference. If the required reference isn't available on the Editor side but will be available in the Frontend, we will show a preview label.
+
+When a collection need one of the multiple references, you can specify it using the `usesReference` argument. In the example below, we are defining a collection that requires either a `product` or `order` reference.
+
+```tsx
+__experimentalRegisterProductCollection({
+  name: "your-plugin-name/product-collection/my-custom-collection",
+  title: "My Custom Collection",
+  icon: "games",
+  description: "This is a custom collection.",
+  keywords: ["custom collection", "product collection"],
+  usesReference: ["product", "order"],
+});
+```
+
+---
 
 > [!TIP]
 > You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.
