@@ -379,6 +379,19 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					page.getByText( productData.summary )
 				).toBeVisible();
 
+				// Verify description
+				await page.getByRole( 'tab', { name: 'Description' } ).click();
+
+				await expect(
+					page.getByText( productData.descriptionTitle )
+				).toBeVisible();
+				await expect(
+					page.getByText( productData.descriptionSimple )
+				).toBeVisible();
+				await expect(
+					page.getByText( productData.descriptionParagraph )
+				).toBeVisible();
+
 				// Verify inventory details
 				await expect(
 					page.getByText( `SKU: ${ productData.sku }` )
@@ -388,6 +401,10 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				// Note: Shipping class is not displayed in the front end in the theme used in the test
 
 				// Verify shipping dimensions
+				await page
+					.getByRole( 'tab', { name: 'Additional information' } )
+					.click();
+
 				await expect(
 					page.getByText( `Weight ${ productData.shipping.weight }` )
 				).toBeVisible();
