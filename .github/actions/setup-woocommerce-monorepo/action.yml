@@ -24,6 +24,11 @@ runs:
     steps:
         - name: 'Setup PNPM'
           uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+        # Next step is rudimentary - fixes a know composite action bug during post-actions:
+        # Error: Index was out of range. Must be non-negative and less than the size of the collection.
+        - name: 'Read PNPM version'
+          shell: 'bash'
+          run: 'echo "version=$(pnpm --version)" >> $GITHUB_OUTPUT'
         - name: 'Setup Node'
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
@@ -36,7 +41,8 @@ runs:
           with:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
-        - name: 'Cache: identify PNPM caching directory'
+        - name: 'Cache: identify pnpm caching directory'
+          if: ${{ inputs.pull-package-deps != 'false' }}
           shell: 'bash'
           run: |
               echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
