@@ -672,9 +672,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByRole( 'group', {
 					name: 'Contact information',
 				} )
-				.getByLabel(
-					'Do you want to subscribe to our newsletter?'
-				)
+				.getByLabel( 'Do you want to subscribe to our newsletter?' )
 				.check();
 
 			await checkoutPageObject.page
