@@ -249,16 +249,16 @@ test.describe.serial(
 					).toBeVisible();
 
 					await page
-						.getByRole( 'textbox', { name: 'First name *' } )
+						.getByRole( 'textbox', { name: 'First name' } )
 						.fill( customer.billing.us.first_name );
 					await page
-						.getByRole( 'textbox', { name: 'Last name *' } )
+						.getByRole( 'textbox', { name: 'Last name' } )
 						.fill( customer.billing.us.last_name );
 					await page
-						.getByRole( 'textbox', { name: 'Street address *' } )
+						.getByRole( 'textbox', { name: 'Street address' } )
 						.fill( customer.billing.us.address );
 					await page
-						.getByRole( 'textbox', { name: 'Town / City *' } )
+						.getByRole( 'textbox', { name: 'Town / City' } )
 						.type( customer.billing.us.city );
 					await page
 						.locator( '#billing_country' )
@@ -267,13 +267,13 @@ test.describe.serial(
 						.locator( '#billing_state' )
 						.selectOption( customer.billing.us.state );
 					await page
-						.getByRole( 'textbox', { name: 'ZIP Code *' } )
+						.getByRole( 'textbox', { name: 'ZIP Code' } )
 						.type( customer.billing.us.zip );
 					await page
-						.getByLabel( 'Phone *' )
+						.getByLabel( 'Phone' )
 						.fill( customer.billing.us.phone );
 					await page
-						.getByLabel( 'Email address *' )
+						.getByLabel( 'Email address' )
 						.fill( customer.billing.us.email );
 
 					await expect(
@@ -982,25 +982,25 @@ test.describe.serial(
 					).toBeVisible();
 
 					await page
-						.getByRole( 'textbox', { name: 'First name *' } )
+						.getByRole( 'textbox', { name: 'First name' } )
 						.fill( customer.billing.us.first_name );
 					await page
-						.getByRole( 'textbox', { name: 'Last name *' } )
+						.getByRole( 'textbox', { name: 'Last name' } )
 						.fill( customer.billing.us.last_name );
 					await page
-						.getByRole( 'textbox', { name: 'Street address *' } )
+						.getByRole( 'textbox', { name: 'Street address' } )
 						.fill( customer.billing.us.address );
 					await page
-						.getByRole( 'textbox', { name: 'Town / City *' } )
+						.getByRole( 'textbox', { name: 'Town / City' } )
 						.type( customer.billing.us.city );
 					await page
-						.getByRole( 'textbox', { name: 'ZIP Code *' } )
+						.getByRole( 'textbox', { name: 'ZIP Code' } )
 						.type( customer.billing.us.zip );
 					await page
-						.getByLabel( 'Phone *' )
+						.getByLabel( 'Phone' )
 						.fill( customer.billing.us.phone );
 					await page
-						.getByLabel( 'Email address *' )
+						.getByLabel( 'Email address' )
 						.fill( customer.billing.us.email );
 
 					await expect(
