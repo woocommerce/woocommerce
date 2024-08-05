@@ -998,6 +998,23 @@
       "categories": []
     },
     {
+      "content": "",
+      "category_slug": "product-collection",
+      "category_title": "Product Collection Block",
+      "posts": [
+        {
+          "post_title": "Registering custom collections in product collection block",
+          "menu_title": "Registering custom collections",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
+          "hash": "88445929a9f76512e1e8ff60be7beff7e912f31fbad552abf18862ed85f00585",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
+          "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
+        }
+      ],
+      "categories": []
+    },
+    {
       "content": "\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.",
       "category_slug": "product-editor",
       "category_title": "Product Editor",
@@ -1680,5 +1697,5 @@
       "categories": []
     }
   ],
-  "hash": "aba0ae4b152f1007f64966aa21601ba73786ce4b1be4219f18ecbf295ee10221"
+  "hash": "c24136612fe16fc7dee435a2ad2198ce242ab63dbba483fd0a18efd88dc3a289"
 }

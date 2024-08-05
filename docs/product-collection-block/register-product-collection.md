@@ -1,6 +1,12 @@
+---
+post_title: Registering custom collections in product collection block
+menu_title: Registering custom collections
+tags: how-to
+---
+
 # Register Product Collection
 
-The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows 3PDs to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
+The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
 
 > [!WARNING]
 > It's experimental and may change in the future. Please use it with caution.
@@ -34,8 +40,8 @@ A Collection is defined by an object that can contain the following fields:
 - `title` (type `string`): The title of the collection, which will be displayed in various places including the block inserter and collection chooser.
 - `description` (optional, type `string`): A human-readable description of the collection.
 - `innerBlocks` (optional, type `Array[]`): An array of inner blocks that will be added to the collection. If not provided, the default inner blocks will be used.
-- `isDefault`: ⚠️ It's set to `false` for all collections. 3PDs doesn't need to pass this argument.
-- `isActive`: ⚠️ It will be managed by us. 3PDs doesn't need to pass this argument.
+- `isDefault`: It's set to `false` for all collections. Third party developers don't need to pass this argument.
+- `isActive`: It will be managed by us. Third party developers don't need to pass this argument.
 - `usesReference` (optional, type `Array[]`): An array of strings specifying the required reference for the collection. Acceptable values are `product`, `archive`, `cart`, and `order`. When the required reference isn't available on Editor side but will be available in Frontend, we will show a preview label.
 
 ### Attributes
@@ -91,7 +97,7 @@ The `preview` attribute is optional, and it is used to set the preview state of 
     - `attributes` (type `object`): The current attributes of the collection.
     - `location` (type `object`): The location of the collection. Accepted values are `product`, `archive`, `cart`, `order`, `site`.
 
-For more info, you may check PR #46369, in which the Preview feature was added
+For more info, you may check [PR #46369](https://github.com/woocommerce/woocommerce/pull/46369), in which the Preview feature was added
 
 ## Examples
 
