@@ -157,7 +157,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 
 		await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const Finish customizingButton = assembler.getByText( 'Finish customizing' );
+		const saveButton = assembler.getByText( 'Finish customizing' );
 
 		const waitResponse = page.waitForResponse(
 			( response ) =>
@@ -168,7 +168,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 					) && response.status() === 200
 		);
 
-		await Finish customizingButton.click();
+		await saveButton.click();
 
 		await waitResponse;
 
