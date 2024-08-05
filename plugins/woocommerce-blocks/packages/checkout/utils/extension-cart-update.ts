@@ -24,6 +24,6 @@ export const extensionCartUpdate = (
 		if ( error?.code === 'woocommerce_rest_cart_extensions_error' ) {
 			processErrorResponse( error );
 		}
-		return Promise.resolve( false );
+		return Promise.reject( error );
 	} );
 };
