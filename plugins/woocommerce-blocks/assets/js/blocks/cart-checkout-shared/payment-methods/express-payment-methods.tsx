@@ -144,16 +144,17 @@ const ExpressPaymentMethods = () => {
 
 	// In the editor, we apply styles to the button containers to show the changes of the height and border-radius controls,
 	// which would be passed to the payment APIs on the front-end
-	const stylesForButtonContainers =
-		isEditor && showButtonStyles
-			? {
-					height: `${ buttonHeight }px`,
-					borderRadius: `${ buttonBorderRadius }px`,
-					pointerEvents: 'none',
-					userSelect: 'none',
-					ariaDisabled: true,
-			  }
-			: {};
+	const stylesForButtonContainers = isEditor
+		? {
+				height: `${ showButtonStyles ? buttonHeight : '48' }px`,
+				borderRadius: `${
+					showButtonStyles ? buttonBorderRadius : '4'
+				}px`,
+				pointerEvents: 'none',
+				userSelect: 'none',
+				ariaDisabled: true,
+		  }
+		: {};
 
 	/**
 	 * @todo Find a way to Memoize Express Payment Method Content
