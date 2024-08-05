@@ -24,6 +24,8 @@ runs:
     steps:
         - name: 'Setup PNPM'
           uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+          with:
+              version: false
         - name: 'Setup Node'
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
