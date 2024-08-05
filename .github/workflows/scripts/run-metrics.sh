@@ -10,11 +10,11 @@ fi
 echo "Installing dependencies"
 pnpm install --filter="compare-perf"
 
-if [[ "$GITHUB_EVENT_NAME" == "__DISABLED__" ]]; then
+if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   	echo "Comparing performance with trunk"
   	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA trunk --tests-branch $GITHUB_SHA
 
-elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
   	echo "Comparing performance with base branch"
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
 	# Updating the WP version used for performance jobs means there’s a high
@@ -32,9 +32,9 @@ elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
 	WP_MAJOR="${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}"
 	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA $BASE_SHA --tests-branch $GITHUB_SHA --wp-version "$WP_MAJOR"
 
-	# echo "Publish results to CodeVitals"
-	# COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
-    # pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
+	echo "Publish results to CodeVitals"
+	COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
+    pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
 else
   	echo "Unsupported event: $GITHUB_EVENT_NAME"
 fi
