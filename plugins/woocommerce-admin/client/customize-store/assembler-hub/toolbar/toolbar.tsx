@@ -145,7 +145,7 @@ export const Toolbar = () => {
 	const blockPopoverRef = useRef< HTMLDivElement | null >( null );
 
 	// Note: This feature is only available when the full composability feature flag is enabled.
-	const isEligableForZoomOutFeature =
+	const isEligibleForZoomOutFeature =
 		isFullComposabilityFeatureAndAPIAvailable();
 
 	const popoverAnchor = useMemo( () => {
@@ -169,7 +169,7 @@ export const Toolbar = () => {
 					iframeHtmlElement?.getBoundingClientRect();
 
 				const isZoomedOut =
-					isEligableForZoomOutFeature &&
+					isEligibleForZoomOutFeature &&
 					iframeHtmlElement?.classList.contains( 'is-zoomed-out' );
 
 				if ( ! iframeRect ) {
@@ -183,7 +183,7 @@ export const Toolbar = () => {
 						: iframeRect?.left + 10;
 
 				// Here we need to account for when the zoom out feature is eligible because a toolbar is added to the top of the iframe.
-				const rectTop = isEligableForZoomOutFeature
+				const rectTop = isEligibleForZoomOutFeature
 					? Math.max( top + 70 + iframeRect.top, 140 )
 					: Math.max( top + 70 + iframeRect.top, 100 );
 
