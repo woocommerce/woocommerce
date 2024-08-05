@@ -60,6 +60,13 @@
 		</properties>
 	</rule>
 
+	<rule ref="Generic.PHP.RequireStrictTypes">
+		<include-pattern>includes/</include-pattern>
+		<include-pattern>lib/</include-pattern>
+		<include-pattern>src/</include-pattern>
+		<include-pattern>tests/</include-pattern>
+	</rule>
+
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
 		<exclude-pattern>tests/src</exclude-pattern>
 	</rule>
