@@ -1,11 +1,11 @@
-# ReportError
+# AnalyticsError
 
 Standard error message with reload action used in Analytics pages.
 
 ## Usage
 
 ```jsx
-<ReportError />
+<AnalyticsError />
 ```
 
 ### Props

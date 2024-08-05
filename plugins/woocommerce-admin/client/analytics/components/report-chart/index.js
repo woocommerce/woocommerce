@@ -8,7 +8,7 @@ import { format as formatDate } from '@wordpress/date';
 import { withSelect } from '@wordpress/data';
 import { get, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
-import { Chart, ReportError } from '@woocommerce/components';
+import { Chart, AnalyticsError } from '@woocommerce/components';
 import {
 	getReportChartData,
 	getTooltipValueFormat,
@@ -196,7 +196,7 @@ export class ReportChart extends Component {
 		const { isRequesting, primaryData } = this.props;
 
 		if ( primaryData.isError ) {
-			return <ReportError />;
+			return <AnalyticsError />;
 		}
 
 		const isChartRequesting = isRequesting || primaryData.isRequesting;
@@ -213,7 +213,7 @@ export class ReportChart extends Component {
 		const { isRequesting, primaryData, secondaryData } = this.props;
 
 		if ( ! primaryData || primaryData.isError || secondaryData.isError ) {
-			return <ReportError />;
+			return <AnalyticsError />;
 		}
 
 		const isChartRequesting =

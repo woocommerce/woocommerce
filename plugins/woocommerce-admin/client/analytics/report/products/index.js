@@ -6,7 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
-import { ReportError } from '@woocommerce/components';
+import { AnalyticsError } from '@woocommerce/components';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -57,7 +57,7 @@ class ProductsReport extends Component {
 			this.props;
 
 		if ( isError ) {
-			return <ReportError />;
+			return <AnalyticsError />;
 		}
 
 		const chartQuery = {

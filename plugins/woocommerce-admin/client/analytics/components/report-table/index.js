@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import {
 	CompareButton,
-	ReportError,
+	AnalyticsError,
 	Search,
 	TableCard,
 } from '@woocommerce/components';
@@ -87,7 +87,7 @@ const ReportTable = ( props ) => {
 	const isError = tableData.isError || primaryData.isError;
 
 	if ( isError ) {
-		return <ReportError />;
+		return <AnalyticsError />;
 	}
 
 	let userPrefColumns = [];
@@ -487,7 +487,7 @@ ReportTable.propTypes = {
 	 * For example, if `taxes` is provided, data will be fetched from the report
 	 * `taxes` endpoint (ie: `/wc-analytics/reports/taxes` and `/wc/v4/reports/taxes/stats`).
 	 * If the provided endpoint doesn't exist, an error will be shown to the user
-	 * with `ReportError`.
+	 * with `AnalyticsError`.
 	 */
 	endpoint: PropTypes.string,
 	/**

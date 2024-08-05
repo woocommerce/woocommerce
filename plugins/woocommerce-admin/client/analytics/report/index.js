@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import { find } from 'lodash';
 import { getQuery, getSearchWords } from '@woocommerce/navigation';
 import { searchItemsByString, ITEMS_STORE_NAME } from '@woocommerce/data';
-import { ReportError } from '@woocommerce/components';
+import { AnalyticsError } from '@woocommerce/components';
 import {
 	CurrencyContext,
 	getFilteredCurrencyInstance,
@@ -83,7 +83,7 @@ class Report extends Component {
 		const { isError } = this.props;
 
 		if ( isError ) {
-			return <ReportError />;
+			return <AnalyticsError />;
 		}
 
 		const reportParam = getReportParam( this.props );

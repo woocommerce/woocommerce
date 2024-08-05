@@ -1,1 +1,1 @@
-export { default as ReportError } from './report-error';
+export { default as AnalyticsError } from './error';

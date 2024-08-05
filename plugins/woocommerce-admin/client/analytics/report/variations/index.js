@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { ReportError } from '@woocommerce/components';
+import { AnalyticsError } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -35,7 +35,7 @@ const VariationsReport = ( props ) => {
 	const { path, query, isError, isRequesting } = props;
 
 	if ( isError ) {
-		return <ReportError />;
+		return <AnalyticsError />;
 	}
 
 	const chartQuery = {
