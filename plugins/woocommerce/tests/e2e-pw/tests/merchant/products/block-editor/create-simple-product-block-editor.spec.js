@@ -62,7 +62,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 			} );
 
-			await test.step( 'add product name, description, and summary', async () => {
+			await test.step( 'add product name', async () => {
 				await clickOnTab( 'General', page );
 				await page
 					.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
@@ -71,70 +71,79 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					// the SKU field can sometimes end up getting auto-updated after we have filled it in,
 					// wiping out the value we entered.
 					.pressSequentially( productData.name );
+			} );
 
-			await page
-				.locator(
+			await test.step( 'add product description', async () => {
+				const descriptionSimpleParagraph = page.locator(
 					'[data-template-block-id="product-description__content"] > p'
-				)
-				.fill( productData.descriptionSimple );
+				);
 
-			await page.getByText( 'Full editor' ).click();
+				await descriptionSimpleParagraph.fill(
+					productData.descriptionSimple
+				);
 
-			const wordPressVersion = await getInstalledWordPressVersion();
-			await insertBlock( page, 'Heading', wordPressVersion );
+				// Helps to ensure that block toolbar appears
+				await descriptionSimpleParagraph.click();
 
-			const editorCanvasLocator = page.frameLocator(
-				'iframe[name="editor-canvas"]'
-			);
+				await page.getByText( 'Full editor' ).click();
 
-			await editorCanvasLocator
-				.locator( '[data-title="Heading"]' )
-				.fill( productData.descriptionTitle );
+				const wordPressVersion = await getInstalledWordPressVersion();
+				await insertBlock( page, 'Heading', wordPressVersion );
 
-			await editorCanvasLocator
-				.locator( '[data-title="Heading"]' )
-				.blur();
+				const editorCanvasLocator = page.frameLocator(
+					'iframe[name="editor-canvas"]'
+				);
 
-			await insertBlock( page, 'Paragraph', wordPressVersion );
+				await editorCanvasLocator
+					.locator( '[data-title="Heading"]' )
+					.fill( productData.descriptionTitle );
 
-			await editorCanvasLocator
-				.locator( '[data-title="Paragraph"]' )
-				.last()
-				.fill( productData.descriptionParagraph );
+				await editorCanvasLocator
+					.locator( '[data-title="Heading"]' )
+					.blur();
 
-			await page.getByRole( 'button', { name: 'Done' } ).click();
+				await insertBlock( page, 'Paragraph', wordPressVersion );
 
-			const previewContainerIframe = page
-				.locator( '.block-editor-block-preview__container' )
-				.frameLocator( 'iframe[title="Editor canvas"]' );
+				await editorCanvasLocator
+					.locator( '[data-title="Paragraph"]' )
+					.last()
+					.fill( productData.descriptionParagraph );
 
-			const descriptionTitle = previewContainerIframe.locator(
-				'[data-title="Heading"]'
-			);
-			const descriptionInitialParagraph = previewContainerIframe
-				.locator( '[data-title="Paragraph"]' )
-				.first();
-			const descriptionSecondParagraph = previewContainerIframe
-				.locator( '[data-title="Paragraph"]' )
-				.last();
+				await page.getByRole( 'button', { name: 'Done' } ).click();
 
-			await expect( descriptionTitle ).toHaveText(
-				productData.descriptionTitle
-			);
-			await expect( descriptionInitialParagraph ).toHaveText(
-				productData.descriptionSimple
-			);
-			await expect( descriptionSecondParagraph ).toHaveText(
-				productData.descriptionParagraph
-			);
+				const previewContainerIframe = page
+					.locator( '.block-editor-block-preview__container' )
+					.frameLocator( 'iframe[title="Editor canvas"]' );
 
-			await descriptionTitle.click();
+				const descriptionTitle = previewContainerIframe.locator(
+					'[data-title="Heading"]'
+				);
+				const descriptionInitialParagraph = previewContainerIframe
+					.locator( '[data-title="Paragraph"]' )
+					.first();
+				const descriptionSecondParagraph = previewContainerIframe
+					.locator( '[data-title="Paragraph"]' )
+					.last();
 
-			await expect(
-				page.getByText( 'Edit in full editor' )
-			).toBeVisible();
+				await expect( descriptionTitle ).toHaveText(
+					productData.descriptionTitle
+				);
+				await expect( descriptionInitialParagraph ).toHaveText(
+					productData.descriptionSimple
+				);
+				await expect( descriptionSecondParagraph ).toHaveText(
+					productData.descriptionParagraph
+				);
 
-			await page
+				await descriptionTitle.click();
+
+				await expect(
+					page.getByText( 'Edit in full editor' )
+				).toBeVisible();
+			} );
+
+			await test.step( 'add product summary', async () => {
+				await page
 					.locator(
 						'[data-template-block-id="basic-details"] .components-summary-control'
 					)
