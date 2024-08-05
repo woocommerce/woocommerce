@@ -153,19 +153,34 @@ export const Toolbar = () => {
 				const { top, width, height } =
 					selectedBlockRef.getBoundingClientRect();
 
-				const rect = window.document
-					.querySelector(
-						'.woocommerce-customize-store-assembler > .block-editor-iframe__container iframe[name="editor-canvas"]'
-					)
-					?.getBoundingClientRect();
+				const iframe = window.document.querySelector(
+					'.woocommerce-customize-store-assembler > .block-editor-iframe__container iframe[name="editor-canvas"]'
+				);
+				const iframeHtmlElement =
+					// @ts-expect-error missing type
+					iframe?.contentDocument?.documentElement;
+				const iframeRect = iframe?.getBoundingClientRect();
+				const iframeHtmlElementRect =
+					iframeHtmlElement?.getBoundingClientRect();
 
-				if ( ! rect ) {
+				const isZoomedOut =
+					iframeHtmlElement?.classList.contains( 'is-zoomed-out' );
+
+				if ( ! iframeRect ) {
 					return new window.DOMRect( 0, 0, 0, 0 );
 				}
 
+				const left =
+					isZoomedOut && iframeHtmlElementRect
+						? iframeRect?.left +
+						  10 +
+						  iframeHtmlElementRect.left +
+						  50
+						: iframeRect?.left + 10;
+
 				return new window.DOMRect(
-					rect?.left + 10,
-					Math.max( top + 70 + rect.top, 100 ),
+					left,
+					Math.max( top + 70 + iframeRect.top, 100 ),
 					width,
 					height
 				);
