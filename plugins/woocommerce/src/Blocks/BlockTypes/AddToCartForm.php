@@ -108,8 +108,104 @@ class AddToCartForm extends AbstractBlock {
 		);
 
 		$product = $previous_product;
+		$product_type = $product->get_type();
 
-		return $form;
+		if ( ! in_array( $product_type, array( 'simple', 'variable', 'grouped', 'external', 'virtual', 'downloadable' ) ) ) {
+			return $form;
+		}
+
+		$grouped_product_columns = apply_filters(
+			'woocommerce_grouped_product_columns',
+			array(
+				'quantity',
+				'label',
+				'price',
+			),
+			$product
+		);
+		$grouped_product_column_hooks = array();
+
+		if ( 'grouped' === $product_type ) {
+			foreach( $grouped_product_columns as $column_id ) {
+				$grouped_product_column_hooks = array_merge(
+					$grouped_product_column_hooks,
+					array(
+						'woocommerce_grouped_product_list_before_' . $column_id,
+						'woocommerce_grouped_product_list_after_' . $column_id,
+						'woocommerce_grouped_product_list_column_' . $column_id,
+					)
+				);
+			}
+		}
+
+		$extensions_hook_into_add_to_cart_form = false;
+		$hooks_to_check = array(
+			'simple' => array(
+				'woocommerce_before_add_to_cart_form',
+				'woocommerce_before_add_to_cart_button',
+				'woocommerce_before_add_to_cart_quantity',
+				'woocommerce_after_add_to_cart_quantity',
+				'woocommerce_after_add_to_cart_button',
+				'woocommerce_after_add_to_cart_form',
+			),
+			'external' => array(
+				'woocommerce_before_add_to_cart_form',
+				'woocommerce_before_add_to_cart_button',
+				'woocommerce_after_add_to_cart_button',
+				'woocommerce_after_add_to_cart_form',
+			),
+			'grouped' => array_merge(
+				array(
+					'woocommerce_before_add_to_cart_form',
+					'woocommerce_before_add_to_cart_button',
+					'woocommerce_before_add_to_cart_quantity',
+					'woocommerce_after_add_to_cart_quantity',
+					'woocommerce_after_add_to_cart_button',
+					'woocommerce_after_add_to_cart_form',
+					'woocommerce_add_to_cart_form_action',
+					'woocommerce_grouped_product_columns',
+					'woocommerce_grouped_product_list_before',
+					'woocommerce_grouped_product_list_after',
+					'woocommerce_grouped_product_list_link',
+				),
+				$grouped_product_column_hooks,
+			),
+			'variable' => array(
+				'woocommerce_before_add_to_cart_form',
+				'woocommerce_before_add_to_cart_button',
+				'woocommerce_before_add_to_cart_quantity',
+				'woocommerce_after_add_to_cart_quantity',
+				'woocommerce_after_add_to_cart_button',
+				'woocommerce_after_add_to_cart_form',
+				'woocommerce_before_variations_form',
+				'woocommerce_after_variations_table',
+				'woocommerce_before_single_variation',
+				'woocommerce_single_variation', // This has a hook from core, so it always returns true.
+				'woocommerce_after_single_variation',
+				'woocommerce_after_variations_form',
+			),
+		);
+		foreach( $hooks_to_check[ $product_type ] as $hook_to_check ) {
+			if ( has_action( $hook_to_check ) ) {
+				$extensions_hook_into_add_to_cart_form = true;
+				break;
+			}
+		}
+		if ( has_action( 'woocommerce_' . $product_type . '_add_to_cart' ) ) { // This has a hook from core, so it always returns true.
+			/*global $wp_filter;
+			$hooks = $wp_filter['woocommerce_' . $product_type . '_add_to_cart']->callbacks;
+
+			// Print or inspect the array of hooks
+			echo '<pre>';
+			print_r( $hooks );
+			echo '</pre>';
+			return 'has action for woocommerce_' . $product_type . '_add_to_cart';*/
+		}
+		if ( ! $extensions_hook_into_add_to_cart_form ) {
+			return 'Blockified form with iAPI active';
+		} else {
+			return 'Blockified form with iAPI inactive';
+		}
 	}
 
 	/**
