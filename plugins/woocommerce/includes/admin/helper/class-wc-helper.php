@@ -2430,6 +2430,10 @@ class WC_Helper {
 	 * @return array
 	 */
 	public static function get_product_feature_restrictions() {
+		if ( ! self::is_site_connected() ) {
+			return array();
+		}
+
 		$cache_key = '_woocommerce_helper_product_feature_restrictions';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {

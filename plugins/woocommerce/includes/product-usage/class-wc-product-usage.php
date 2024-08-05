@@ -21,7 +21,6 @@ class WC_Product_Usage {
 	private const RULE_FEATURE_RESTRICTIONS_ENABLED    = 'feature_restrictions_enabled';
 	private const RULE_GRACE_PERIOD_AFTER_EXPIRY       = 'grace_period_after_expiry';
 	private const RULE_RESTRICT_IF_NOT_CONNECTED       = 'restrict_if_not_connected';
-	private const RULE_RESTRICT_IF_NO_WCCOM_CONNECTION = 'restrict_if_no_wccom_connection';
 	private const RULE_RESTRICT_IF_NO_SUBSCRIPTION     = 'restrict_if_no_subscription';
 
 	/**
@@ -56,16 +55,6 @@ class WC_Product_Usage {
 
 		if ( 0 === $rules[ self::RULE_FEATURE_RESTRICTIONS_ENABLED ] ) {
 			return null;
-		}
-
-		if ( ! WC_Helper::is_site_connected() && 0 === $rules[ self::RULE_RESTRICT_IF_NO_WCCOM_CONNECTION ] ) {
-			// Skip applying restrictions when no WCCOM connection is found, only if restrict_if_no_wccom_connection_found is 0.
-			return null;
-		}
-
-		if ( ! WC_Helper::is_site_connected() ) {
-			// Return the rule set if site is not connected, to restrict the product usage.
-			return new WC_Product_Usage_Rule_Set( $rules );
 		}
 
 		if ( 1 === $rules[ self::RULE_RESTRICT_IF_NO_SUBSCRIPTION ] && ! WC_Helper::has_product_subscription( $product_id ) ) {
