@@ -78,6 +78,7 @@ const blocks = {
 	'product-average-rating': {},
 	'product-rating-stars': {},
 	'product-rating-counter': {},
+	'product-rating': {},
 	'reviews-by-category': {
 		customDir: 'reviews/reviews-by-category',
 	},

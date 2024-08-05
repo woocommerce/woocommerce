@@ -27,7 +27,7 @@ import {
 	InnerBlockLayoutContextProvider,
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
-import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getBlockMap } from '@woocommerce/blocks/utils';
 import { previewProducts } from '@woocommerce/resource-previews';
 import { getSetting } from '@woocommerce/settings';
 import { blocksConfig } from '@woocommerce/block-settings';

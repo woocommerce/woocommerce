@@ -13,7 +13,7 @@ import '../css/style.scss';
 import './filters/block-list-block';
 import './filters/get-block-attributes';
 import './base/components/notice-banner/style.scss';
-import './atomic/utils/blocks-registration-manager';
+import './blocks/utils/blocks-registration-manager/index';
 
 // Icons are set on the front-end to make use of WordPress SVG primitive,
 // See: https://developer.wordpress.org/block-editor/reference-guides/filters/block-filters/#wp-blocks-updatecategory

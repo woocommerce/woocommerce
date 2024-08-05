@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
 import { Icon, button } from '@wordpress/icons';
+import { registerBlockSingleProductTemplate } from '@woocommerce/blocks/utils';
 
 /**
  * Internal dependencies

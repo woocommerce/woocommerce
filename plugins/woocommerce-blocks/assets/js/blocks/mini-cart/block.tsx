@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { renderParentBlock } from '@woocommerce/atomic-utils';
+import { renderParentBlock } from '@woocommerce/blocks/utils';
 import Drawer from '@woocommerce/base-components/drawer';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import {

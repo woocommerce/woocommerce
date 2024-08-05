@@ -71,16 +71,6 @@ class ProductRating extends AbstractBlock {
 	}
 
 	/**
-	 * Overwrite parent method to prevent script registration.
-	 *
-	 * It is necessary to register and enqueues assets during the render
-	 * phase because we want to load assets only if the block has the content.
-	 */
-	protected function register_block_type_assets() {
-		return null;
-	}
-
-	/**
 	 * Get the frontend style handle for this block type.
 	 *
 	 * @return null
@@ -132,7 +122,7 @@ class ProductRating extends AbstractBlock {
 			 * @param int    $count  Total number of ratings.
 			 * @return string
 			 */
-			$filter_rating_html = function( $html, $rating, $count ) use ( $post_id, $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
+			$filter_rating_html = function ( $html, $rating, $count ) use ( $post_id, $product_rating, $product_reviews_count, $is_descendent_of_single_product_block, $is_descendent_of_single_product_template ) {
 				$product_permalink = get_permalink( $post_id );
 				$reviews_count     = $count;
 				$average_rating    = $rating;

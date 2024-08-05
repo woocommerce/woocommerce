@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getBlockMap } from '@woocommerce/blocks/utils';
 import { Suspense } from '@wordpress/element';
 import { ProductResponseItem } from '@woocommerce/types';
 

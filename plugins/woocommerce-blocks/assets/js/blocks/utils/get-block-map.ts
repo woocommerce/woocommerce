@@ -7,7 +7,7 @@ import type { RegisteredBlockComponent } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import '../blocks/component-init';
+import '../../atomic/blocks/component-init';
 
 /**
  * Map named Blocks to defined React Components to render on the frontend.

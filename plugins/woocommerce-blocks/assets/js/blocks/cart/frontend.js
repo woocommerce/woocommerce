@@ -6,7 +6,7 @@ import { Children, cloneElement, isValidElement } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 
-import { renderParentBlock } from '@woocommerce/atomic-utils';
+import { renderParentBlock } from '@woocommerce/blocks/utils';
 
 /**
  * Internal dependencies

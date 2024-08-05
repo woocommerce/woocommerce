@@ -4,7 +4,6 @@
 import './product-elements/title';
 import './product-elements/price';
 import './product-elements/image';
-import './product-elements/rating';
 import './product-elements/rating-stars';
 import './product-elements/rating-counter';
 import './product-elements/average-rating';
