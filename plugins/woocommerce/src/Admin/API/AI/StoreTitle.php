@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\API;
+namespace Automattic\WooCommerce\Admin\API\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
@@ -52,9 +52,10 @@ class StoreTitle {
 			'/' . $this->rest_base . '/store-title',
 			array(
 				array(
-					'methods'  => \WP_REST_Server::CREATABLE,
-					'callback' => array( $this, 'update_store_title' ),
-					'args'     => array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'update_store_title' ),
+					'permission_callback' => array( Middleware::class, 'is_authorized' ),
+					'args'                => array(
 						'business_description' => array(
 							'description' => __( 'The business description for a given store.', 'woocommerce' ),
 							'type'        => 'string',

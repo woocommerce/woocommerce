@@ -86,7 +86,7 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\NavigationFavorites',
 				'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
 				'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
-				'Automattic\WooCommerce\Admin\API\StoreTitle',
+				'Automattic\WooCommerce\Admin\API\AI\StoreTitle',
 			);
 		}
 
