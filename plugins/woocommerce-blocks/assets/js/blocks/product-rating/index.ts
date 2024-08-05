@@ -20,6 +20,9 @@ const blockConfig: BlockConfiguration = {
 	edit,
 };
 
-console.log( 'ci entro?' );
-
-registerBlockType( metadata, blockConfig );
+registerBlockSingleProductTemplate( {
+	blockName: 'woocommerce/product-rating',
+	blockMetadata: metadata,
+	blockSettings: blockConfig,
+	isAvailableOnPostEditor: true,
+} );
