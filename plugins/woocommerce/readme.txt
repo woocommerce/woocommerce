@@ -268,6 +268,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Show variations only for the selected product's variations [#49470](https://github.com/woocommerce/woocommerce/pull/49470)
 * Fix - Tooltips message is now selected based on the order status instead of the label of the order status, which would break if the current WordPress language was not English. Also passes the order object to the woocommerce_get_order_status_labels filter to allow for more personalized tooltips. [#49812](https://github.com/woocommerce/woocommerce/pull/49812)
 * Fix - Update allowed statuses in legacy payment handler for checkout block. [#48788](https://github.com/woocommerce/woocommerce/pull/48788)
+* Add - Use UTM parameters to link Tracks events from connect notice CTA and successful site connection [#50126](https://github.com/woocommerce/woocommerce/pull/50126)
 * Add - Add a generic function to determine remote logging eligibility [#49371](https://github.com/woocommerce/woocommerce/pull/49371)
 * Add - Add a rest api to manage the product custom fields [#48504](https://github.com/woocommerce/woocommerce/pull/48504)
 * Add - Add column `global_unique_id` to `wc_product_meta_lookup` table
