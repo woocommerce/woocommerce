@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles wcpay promotion
+ * Handles WooPayments promotion.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**
- * WC Pay Promotion engine.
+ * WooPayments Promotion engine.
  */
 class Init extends RemoteSpecsEngine {
 	/**
@@ -34,9 +34,9 @@ class Init extends RemoteSpecsEngine {
 	/**
 	 * Possibly registers the pre-install WooPayments promoted gateway.
 	 *
-	 * @param array $gateways list of gateway classes.
+	 * @param array $gateways List of gateway classes.
 	 *
-	 * @return array list of gateway classes.
+	 * @return array List of gateway classes.
 	 */
 	public static function possibly_register_pre_install_wc_pay_promotion_gateway( $gateways ) {
 		if ( self::can_show_promotion() && ! WCPaymentGatewayPreInstallWCPayPromotion::is_dismissed() ) {
@@ -48,7 +48,7 @@ class Init extends RemoteSpecsEngine {
 	/**
 	 * Checks if promoted gateway can be registered.
 	 *
-	 * @return boolean if promoted gateway should be registered.
+	 * @return boolean If promoted gateway should be registered.
 	 */
 	public static function can_show_promotion() {
 		// Don't show if WooPayments is enabled.
