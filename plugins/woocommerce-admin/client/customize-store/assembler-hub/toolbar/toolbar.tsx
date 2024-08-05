@@ -33,6 +33,7 @@ import Delete from './delete';
 import './style.scss';
 import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
 import { SelectedBlockContext } from '../context/selected-block-ref-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
 const isHomepageUrl = ( path: string ) => {
 	return path.includes( '/customize-store/assembler-hub/homepage' );
@@ -143,6 +144,10 @@ export const Toolbar = () => {
 
 	const blockPopoverRef = useRef< HTMLDivElement | null >( null );
 
+	// Note: This feature is only available when the full composability feature flag is enabled.
+	const isEligableForZoomOutFeature =
+		isFullComposabilityFeatureAndAPIAvailable();
+
 	const popoverAnchor = useMemo( () => {
 		if ( ! selectedBlockRef || ! selectedBlockClientId ) {
 			return undefined;
@@ -164,26 +169,25 @@ export const Toolbar = () => {
 					iframeHtmlElement?.getBoundingClientRect();
 
 				const isZoomedOut =
+					isEligableForZoomOutFeature &&
 					iframeHtmlElement?.classList.contains( 'is-zoomed-out' );
 
 				if ( ! iframeRect ) {
 					return new window.DOMRect( 0, 0, 0, 0 );
 				}
 
-				const left =
+				// Here we need to account for when the iframe is zoomed out as the width changes.
+				const rectLeft =
 					isZoomedOut && iframeHtmlElementRect
-						? iframeRect?.left +
-						  10 +
-						  iframeHtmlElementRect.left +
-						  50
+						? iframeRect?.left + iframeHtmlElementRect.left + 60
 						: iframeRect?.left + 10;
 
-				return new window.DOMRect(
-					left,
-					Math.max( top + 70 + iframeRect.top, 100 ),
-					width,
-					height
-				);
+				// Here we need to account for when the zoom out feature is eligible because a toolbar is added to the top of the iframe.
+				const rectTop = isEligableForZoomOutFeature
+					? Math.max( top + 70 + iframeRect.top, 140 )
+					: Math.max( top + 70 + iframeRect.top, 100 );
+
+				return new window.DOMRect( rectLeft, rectTop, width, height );
 			},
 		};
 	}, [ selectedBlockRef, selectedBlockClientId ] );
