@@ -11,6 +11,14 @@
 	align-items: flex-start;
 	flex: 0 0 48%;
 
+	&:hover {
+		cursor: pointer;
+	}
+
+	&.is-installed:hover {
+		cursor: initial;
+	}
+
 	@include breakpoint( "<782px" ) {
 		width: 100%;
 		padding: 16px;
