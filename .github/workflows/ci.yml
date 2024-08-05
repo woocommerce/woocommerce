@@ -214,7 +214,8 @@ jobs:
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
           
       - name: 'Upload Playwright last run info'
-        if: ${{ failure() && matrix.report.resultsPath != '' }}
+        # always upload the last run info, even if the test run passed
+        if: ${{ always() && matrix.report.resultsPath != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: 'last-run__${{ strategy.job-index }}'
