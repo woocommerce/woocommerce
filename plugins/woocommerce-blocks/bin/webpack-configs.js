@@ -1129,7 +1129,14 @@ const getInteractivityBlocksConfig = ( options = {} ) => {
 			path: path.resolve( __dirname, '../build/' ),
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
 			uniqueName: 'webpackWcInteractivityBlocksFrontendJsonp',
+
+			// Modules
 			module: true,
+			chunkFormat: 'module',
+			environment: { module: true },
+			library: {
+				type: 'module',
+			},
 		},
 		experiments: {
 			outputModule: true,
