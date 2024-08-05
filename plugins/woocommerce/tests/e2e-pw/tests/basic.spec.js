@@ -3,7 +3,9 @@ const { logIn } = require( '../utils/login' );
 const { admin, customer } = require( '../test-data/data' );
 
 test( 'Load the home page', async ( { page } ) => {
-	expect( 1 ).toBe( 2 );
+	expect(
+		parseInt( process.env.GITHUB_RUN_ATTEMPT, 10 ) % 2 === 0
+	).toBeTruthy();
 	await page.goto( '/' );
 	await expect(
 		await page
@@ -18,6 +20,9 @@ test( 'Load the home page', async ( { page } ) => {
 } );
 
 test( 'Load wp-admin as admin', async ( { page } ) => {
+	expect(
+		parseInt( process.env.GITHUB_RUN_ATTEMPT, 10 ) % 2 === 0
+	).toBeFalsy();
 	await page.context().clearCookies();
 	await page.goto( '/wp-admin' );
 	await logIn( page, admin.username, admin.password );
