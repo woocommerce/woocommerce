@@ -114,9 +114,10 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				await waitForGlobalAttributesLoaded( page );
 
 				// Attribute combobox input
-				const attributeInputLocator = page.locator(
-					'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
-				);
+				const attributeInputLocator = page
+					.getByRole( 'dialog' )
+					.getByRole( 'combobox' )
+					.first();
 
 				await attributeInputLocator.fill( sizeAttribute.name );
 
