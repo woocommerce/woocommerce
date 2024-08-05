@@ -3,7 +3,7 @@ const { logIn } = require( '../utils/login' );
 const { admin, customer } = require( '../test-data/data' );
 
 test( 'Load the home page', async ( { page } ) => {
-	expect( process.env.GITHUB_RUN_ATTEMPT ).toBe( '1' );
+	expect( process.env.GITHUB_RUN_ATTEMPT ).toBe( '2' );
 	await page.goto( '/' );
 	await expect(
 		await page
@@ -18,7 +18,7 @@ test( 'Load the home page', async ( { page } ) => {
 } );
 
 test( 'Load wp-admin as admin', async ( { page } ) => {
-	expect( process.env.GITHUB_RUN_ATTEMPT ).toBe( '2' );
+	expect( process.env.GITHUB_RUN_ATTEMPT ).toBe( '3' );
 	await page.context().clearCookies();
 	await page.goto( '/wp-admin' );
 	await logIn( page, admin.username, admin.password );
@@ -28,7 +28,7 @@ test( 'Load wp-admin as admin', async ( { page } ) => {
 } );
 
 test( 'Load my account page as customer', async ( { page } ) => {
-	expect( process.env.GITHUB_RUN_ATTEMPT ).toBe( '3' );
+	expect( process.env.GITHUB_RUN_ATTEMPT ).toBe( '4' );
 	await page.context().clearCookies();
 	await page.goto( '/my-account' );
 	await logIn( page, customer.username, customer.password, false );
