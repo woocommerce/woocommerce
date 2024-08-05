@@ -199,7 +199,6 @@ jobs:
           
           lastRunFlag=""
           if [ -f "$lastRunFileDest" ]; then
-            cat "$lastRunFileDest"
             # Playwright last run info is available, parse the file and check if there are failed tests
             failedTests=$(jq '.failedTests | length' "$lastRunFileDest")
           
