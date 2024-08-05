@@ -20,32 +20,30 @@ class DefaultPromotions {
 	 * @return array Suggestion specs.
 	 */
 	public static function get_all() {
-		$woopay_available_countries = self::get_woopay_available_countries();
-
 		return array(
 			array(
-				'id'              => 'woocommerce_payments:woopay',
-				'title'           => __( 'WooPayments', 'woocommerce' ),
-				'content'         => __( 'Payments made simple — including WooPay, a new express checkout feature.', 'woocommerce' ),
-				'image'           => plugins_url( 'assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
-				'plugins'         => array( 'woocommerce-payments' ),
-				'is_visible'      => array(
+				'id'         => 'woocommerce_payments:woopay',
+				'title'      => __( 'WooPayments', 'woocommerce' ),
+				'content'    => __( 'Payments made simple — including WooPay, a new express checkout feature.', 'woocommerce' ),
+				'image'      => plugins_url( 'assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
+				'plugins'    => array( 'woocommerce-payments' ),
+				'is_visible' => array(
 					DefaultPaymentGateways::get_rules_for_cbd( false ),
-					DefaultPaymentGateways::get_rules_for_countries( $woopay_available_countries ),
+					DefaultPaymentGateways::get_rules_for_countries( self::get_woopay_available_countries() ),
 				),
-				'sub_title'       => self::get_wcpay_payment_icons(),
+				'sub_title'  => self::get_wcpay_payment_icons(),
 			),
 			array(
-				'id'              => 'woocommerce_payments',
-				'title'           => __( 'WooPayments', 'woocommerce' ),
-				'content'         => __( 'Payments made simple, with no monthly fees – designed exclusively for WooCommerce stores. Accept credit cards, debit cards, and other popular payment methods.', 'woocommerce' ),
-				'image'           =>  plugins_url( 'assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
-				'plugins'         => array( 'woocommerce-payments' ),
-				'is_visible'      => array(
+				'id'         => 'woocommerce_payments',
+				'title'      => __( 'WooPayments', 'woocommerce' ),
+				'content'    => __( 'Payments made simple, with no monthly fees – designed exclusively for WooCommerce stores. Accept credit cards, debit cards, and other popular payment methods.', 'woocommerce' ),
+				'image'      => plugins_url( 'assets/images/onboarding/wcpay.svg', WC_PLUGIN_FILE ),
+				'plugins'    => array( 'woocommerce-payments' ),
+				'is_visible' => array(
 					DefaultPaymentGateways::get_rules_for_cbd( false ),
 					DefaultPaymentGateways::get_rules_for_countries( DefaultPaymentGateways::get_wcpay_countries() ),
 				),
-				'sub_title'       => self::get_wcpay_payment_icons(),
+				'sub_title'  => self::get_wcpay_payment_icons(),
 			),
 		);
 	}
@@ -56,7 +54,7 @@ class DefaultPromotions {
 	 * @return array The list of WooPay available countries.
 	 */
 	private static function get_woopay_available_countries() {
-		return [ 'US' ];
+		return array( 'US' );
 	}
 
 	/**
@@ -65,7 +63,7 @@ class DefaultPromotions {
 	 * @return string Payment icons as HTML img tags.
 	 */
 	private static function get_wcpay_payment_icons() {
-		$icons = array(
+		$icons              = array(
 			'visa',
 			'mastercard',
 			'amex',

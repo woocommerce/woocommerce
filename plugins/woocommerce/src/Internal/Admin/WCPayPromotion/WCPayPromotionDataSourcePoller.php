@@ -33,7 +33,7 @@ class WCPayPromotionDataSourcePoller extends DataSourcePoller {
 			// Add country query param to data sources.
 			$base_location = wc_get_base_location();
 			$data_sources  = array_map(
-				function( $url ) use ( $base_location ) {
+				function ( $url ) use ( $base_location ) {
 					return add_query_arg(
 						'country',
 						$base_location['country'] ?? '',

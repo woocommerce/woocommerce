@@ -111,8 +111,8 @@ class Init extends RemoteSpecsEngine {
 	public static function get_promotions() {
 		$locale = get_user_locale();
 
-		$specs   = self::get_specs();
-		$results = EvaluateSuggestion::evaluate_specs( $specs, array( 'source' => 'wc-wcpay-promotions' ) );
+		$specs           = self::get_specs();
+		$results         = EvaluateSuggestion::evaluate_specs( $specs, array( 'source' => 'wc-wcpay-promotions' ) );
 		$specs_to_return = $results['suggestions'];
 		$specs_to_save   = null;
 
