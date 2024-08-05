@@ -9,7 +9,7 @@ Commit ID: ce803384250671d01fde6c7d6d2aa83075fcc726
 
 ## How to build
 
-After checking the repository, navigate to packages/report-flaky-tests and do some modifications:
+After checking out the repository, navigate to packages/report-flaky-tests and do some modifications:
 
 ### package.json file
 
