@@ -36,7 +36,7 @@
 		"./assets/js/templates/revert-button/index.tsx",
 		"./assets/js/settings/blocks/index.ts",
 		"./assets/js/blocks/utils/**",
-		"./assets/js/blocks/product-rating/index.ts",
+		"./assets/js/blocks/utils/blocks-registration-manager/index.ts",
 		"./packages/**/*.{tsx,ts,js}"
 	],
 	"repository": {
