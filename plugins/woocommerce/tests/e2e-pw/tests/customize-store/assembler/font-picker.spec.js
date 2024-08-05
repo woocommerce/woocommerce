@@ -202,7 +202,7 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 
 		await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const saveButton = assembler.getByText( 'Save' );
+		const Finish customizingButton = assembler.getByText( 'Finish customizing' );
 
 		const waitResponse = page.waitForResponse(
 			( response ) =>
@@ -210,7 +210,7 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 				response.status() === 200
 		);
 
-		await saveButton.click();
+		await Finish customizingButton.click();
 
 		await waitResponse;
 

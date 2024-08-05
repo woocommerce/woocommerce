@@ -302,7 +302,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 			await assembler.locator( '[aria-label="Back"]' ).click();
 
-			const saveButton = assembler.getByText( 'Save' );
+			const Finish customizingButton = assembler.getByText( 'Finish customizing' );
 
 			const waitResponse = page.waitForResponse(
 				( response ) =>
@@ -391,7 +391,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 				expect( element.color ).toEqual( 'rgb(255, 255, 255)' );
 			}
 
-			await saveButton.click();
+			await Finish customizingButton.click();
 
 			await waitResponse;
 		} );
@@ -427,7 +427,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 		await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const saveButton = assembler.getByText( 'Save' );
+		const Finish customizingButton = assembler.getByText( 'Finish customizing' );
 
 		const waitResponseGlobalStyles = page.waitForResponse(
 			( response ) =>
@@ -437,7 +437,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 		const wordPressVersion = await getInstalledWordPressVersion();
 
-		await saveButton.click();
+		await Finish customizingButton.click();
 
 		await Promise.all( [
 			waitResponseGlobalStyles,

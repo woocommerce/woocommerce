@@ -72,7 +72,7 @@ export class LogoPickerPage {
 		} );
 	}
 
-	async saveLogoSettings( assemblerLocator ) {
+	async Finish customizingLogoSettings( assemblerLocator ) {
 		const waitForLogoResponse = this.page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
@@ -80,11 +80,11 @@ export class LogoPickerPage {
 		);
 		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
 		await assemblerLocator
-			.getByRole( 'button', { name: 'Save', exact: true } )
+			.getByRole( 'button', { name: 'Finish customizing', exact: true } )
 			.waitFor();
 		await Promise.all( [
 			waitForLogoResponse,
-			assemblerLocator.getByText( 'Save' ).click(),
+			assemblerLocator.getByText( 'Finish customizing' ).click(),
 		] );
 		await assemblerLocator.getByText( 'Your store looks great!' ).waitFor();
 	}

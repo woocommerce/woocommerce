@@ -149,7 +149,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 				.getByLabel( 'Block: Site Logo' )
 		).toHaveCSS( 'width', '100px' );
 
-		await logoPickerPageObject.saveLogoSettings( assembler );
+		await logoPickerPageObject.Finish customizingLogoSettings( assembler );
 		const imageFrontend = await logoPickerPageObject.getLogoLocator( page );
 		await page.goto( baseURL );
 		await expect( imageFrontend ).toHaveAttribute( 'width', '100' );
@@ -230,7 +230,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await emptyLogoPicker.click();
 		await logoPickerPageObject.pickImage( assembler );
 		await assembler.getByText( 'Use as site icon' ).click();
-		await logoPickerPageObject.saveLogoSettings( assembler );
+		await logoPickerPageObject.Finish customizingLogoSettings( assembler );
 
 		// alternative way to verify new site icon on the site
 		// verifying site icon shown in the new tab is impossible in headless mode
@@ -254,7 +254,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 
 		await emptyLogoPicker.click();
 		await logoPickerPageObject.pickImage( assembler );
-		await logoPickerPageObject.saveLogoSettings( assembler );
+		await logoPickerPageObject.Finish customizingLogoSettings( assembler );
 
 		await page.goto( baseURL );
 
