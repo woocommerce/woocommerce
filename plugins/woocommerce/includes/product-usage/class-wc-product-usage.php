@@ -18,10 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Product usage.
  */
 class WC_Product_Usage {
-	private const RULE_FEATURE_RESTRICTIONS_ENABLED    = 'feature_restrictions_enabled';
-	private const RULE_GRACE_PERIOD_AFTER_EXPIRY       = 'grace_period_after_expiry';
-	private const RULE_RESTRICT_IF_NOT_CONNECTED       = 'restrict_if_not_connected';
-	private const RULE_RESTRICT_IF_NO_SUBSCRIPTION     = 'restrict_if_no_subscription';
+	private const RULE_FEATURE_RESTRICTIONS_ENABLED = 'feature_restrictions_enabled';
+	private const RULE_GRACE_PERIOD_AFTER_EXPIRY    = 'grace_period_after_expiry';
+	private const RULE_RESTRICT_IF_NOT_CONNECTED    = 'restrict_if_not_connected';
+	private const RULE_RESTRICT_IF_NO_SUBSCRIPTION  = 'restrict_if_no_subscription';
 
 	/**
 	 * Load Product Usage class.
@@ -63,9 +63,8 @@ class WC_Product_Usage {
 		}
 
 		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
-		if ( empty( $subscriptions ) && 0 === $rules[ self::RULE_RESTRICT_IF_NOT_CONNECTED ] ) {
-			// No connected product subscription and rule mentions not to restrict products that are not connected.
-			return null;
+		if ( empty( $subscriptions ) && 1 === $rules[ self::RULE_RESTRICT_IF_NOT_CONNECTED ] ) {
+			return new WC_Product_Usage_Rule_Set( $rules );
 		}
 
 		// Product should only have a single connected subscription on current store.
@@ -84,7 +83,7 @@ class WC_Product_Usage {
 			return new WC_Product_Usage_Rule_Set( $rules );
 		}
 
-		return new WC_Product_Usage_Rule_Set( $rules );
+		return null;
 	}
 
 	/**
