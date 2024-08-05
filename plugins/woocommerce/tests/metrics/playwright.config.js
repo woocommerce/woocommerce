@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { defineConfig, devices } from '@playwright/test';
 
 process.env.ASSETS_PATH = path.join( __dirname, 'assets' );
-process.env.WP_ARTIFACTS_PATH ??= path.join( __dirname, 'test-results' );
+process.env.WP_ARTIFACTS_PATH ??= path.join( process.cwd(), 'artifacts' );
 process.env.STORAGE_STATE_PATH ??= path.join(
 	process.env.WP_ARTIFACTS_PATH,
 	'storage-states/admin.json'
