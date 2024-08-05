@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Ideally, this component should belong  to packages/interactivity-components.
  * But we haven't export it as a packages so we place it here temporary.
  */
-const CheckboxListPreview = ( { items }: { items: string[] } ) => {
+export const Preview = ( { items }: { items: string[] } ) => {
 	const threshold = 15;
 	const isLongList = items.length > threshold;
 	return (
@@ -58,5 +58,3 @@ const CheckboxListPreview = ( { items }: { items: string[] } ) => {
 		</div>
 	);
 };
-
-export default CheckboxListPreview;

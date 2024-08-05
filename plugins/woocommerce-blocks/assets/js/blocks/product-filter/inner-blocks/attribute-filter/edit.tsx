@@ -24,10 +24,10 @@ import { EditProps, isAttributeCounts } from './types';
 import { NoAttributesPlaceholder } from './components/placeholder';
 import { getAttributeFromId } from './utils';
 import { Inspector } from './components/inspector';
-import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
 import { attributeOptionsPreview } from './constants';
 import './style.scss';
+import { Preview as CheckboxListPreview } from './components/checkbox-list-editor';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -184,9 +184,12 @@ const Edit = ( props: EditProps ) => {
 		return (
 			<Wrapper>
 				<Disabled>
-					<AttributeCheckboxList
-						showCounts={ showCounts }
-						attributeTerms={ attributeOptionsPreview }
+					<CheckboxListPreview
+						items={ attributeOptionsPreview.map( ( term ) => {
+							if ( showCounts )
+								return `${ term.name } (${ term.count })`;
+							return term.name;
+						} ) }
 					/>
 				</Disabled>
 			</Wrapper>
@@ -240,11 +243,14 @@ const Edit = ( props: EditProps ) => {
 						}
 					/>
 				) : (
-					<AttributeCheckboxList
-						showCounts={ showCounts }
-						attributeTerms={ attributeOptions }
+					<CheckboxListPreview
+						items={ attributeOptions.map( ( term ) => {
+							if ( showCounts )
+								return `${ term.name } (${ term.count })`;
+							return term.name;
+						} ) }
 					/>
-				) }{ ' ' }
+				) }
 			</Disabled>
 		</Wrapper>
 	);
