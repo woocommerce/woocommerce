@@ -52,6 +52,7 @@ import { useQuery } from '@woocommerce/navigation';
 import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
 import { DeviceToolbar } from './components/device-toolbar';
@@ -204,7 +205,9 @@ export const Layout = () => {
 
 								{ ! isMobileViewport && (
 									<div className="edit-site-layout__canvas-container">
-										<DeviceToolbar />
+										{ isFullComposabilityFeatureAndAPIAvailable() && (
+											<DeviceToolbar />
+										) }
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
@@ -237,7 +240,7 @@ export const Layout = () => {
 															setIsResizableFrameOversized
 														}
 														isResizingHandleEnabled={
-															false
+															! isFullComposabilityFeatureAndAPIAvailable()
 														}
 														innerContentStyle={ {
 															background:

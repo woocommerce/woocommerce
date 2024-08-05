@@ -523,6 +523,14 @@ body.woocommerce-assembler {
 		padding: 0;
 		background: #ddd;
 		border-radius: 0 0 12px 12px;
+
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-customize-store__step-designWithAi & {
+			top: 16px;
+			padding: 0 4px 0 16px;
+			border-radius: 0;
+			background: transparent;
+		}
 	}
 
 	.edit-site-resizable-frame__handle {
@@ -535,12 +543,22 @@ body.woocommerce-assembler {
 		/* new frame */
 		box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
 		transition: all 0.3s ease 0s;
+
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-customize-store__step-designWithAi & {
+			transition: none;
+		}
 	}
 
 	.woocommerce-customize-store__block-editor,
 	.edit-site-layout:not(.is-full-canvas)
 	.edit-site-layout__canvas > div
 	.interface-interface-skeleton__content {
+		 // Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-customize-store__step-designWithAi & {
+			border-radius: 12px;
+		}
+
 		.woocommerce-customize-store__block-editor,
 		.woocommerce-block-preview-container,
 		.auto-block-preview__container {
@@ -557,9 +575,14 @@ body.woocommerce-assembler {
 	.customize-your-store-edit-site-resizable-frame__inner-content {
 		height: 100%;
 		border-radius: 0 0 12px 12px;
+
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-customize-store__step-designWithAi & {
+			border-radius: 12px;
+		}
 	}
 
-	.woocommerce-customize-store__resize-menu {
+	.woocommerce-customize-store__device-toolbar {
 		padding: 10px 8px;
 		text-align: center;
 		background-color: #fff;
@@ -572,10 +595,10 @@ body.woocommerce-assembler {
 		left: 6px;
 	}
 
-	.woocommerce-customize-store__resize-button {
+	.woocommerce-customize-store__device-button {
 		&:hover,
 		&.is-selected {
-			.woocommerce-customize-store__resize-icon {
+			.woocommerce-customize-store__device-icon {
 				fill: initial;
 
 				&--zoom {
@@ -585,7 +608,7 @@ body.woocommerce-assembler {
 		}
 	}
 
-	.woocommerce-customize-store__resize-icon {
+	.woocommerce-customize-store__device-icon {
 		margin-right: 10px;
 		fill: #757575;
 

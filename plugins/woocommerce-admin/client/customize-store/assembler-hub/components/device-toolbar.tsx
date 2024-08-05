@@ -41,8 +41,8 @@ const zoomOut = (
 );
 
 const BUTTON_CLASS_NAMES =
-	'components-button has-icon woocommerce-customize-store__resize-button';
-const ICON_CLASS_NAMES = 'woocommerce-customize-store__resize-icon';
+	'components-button has-icon woocommerce-customize-store__device-button';
+const ICON_CLASS_NAMES = 'woocommerce-customize-store__device-icon';
 
 export function DeviceToolbar() {
 	// @ts-expect-error No types for this exist yet.
@@ -69,7 +69,7 @@ export function DeviceToolbar() {
 
 	return (
 		<NavigableMenu
-			className="woocommerce-customize-store__resize-menu"
+			className="woocommerce-customize-store__device-toolbar"
 			orientation="horizontal"
 			role="toolbar"
 			aria-label={ __( 'Resize', 'woocommerce' ) }
