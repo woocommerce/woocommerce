@@ -65,6 +65,9 @@
 		<include-pattern>lib/</include-pattern>
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/</include-pattern>
+		<include-pattern>plugins/woocommerce/includes/admin/views/</include-pattern>
+		<include-pattern>plugins/woocommerce/includes/emails/</include-pattern>
+		<include-pattern>plugins/woocommerce/includes/react-admin/emails/</include-pattern>
 	</rule>
 
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
