@@ -89,7 +89,7 @@ export type EditProps = {
 export type Attributes = {
 	optionBorder: string;
 	customOptionBorder: string;
-	opionBackground: string;
+	optionBackground: string;
 	customOptionBackground: string;
 	optionSelected: string;
 	customOptionSelected: string;
@@ -116,8 +116,8 @@ export const attributesConfig = {
 	},
 };
 
-export const Inspector = < T extends Record< string, unknown > >(
-	props: BlockEditProps< T | Attributes > & EditProps
+export const Inspector = (
+	props: BlockEditProps< Attributes > & EditProps
 ) => {
 	const {
 		attributes,
@@ -184,3 +184,25 @@ export const withCheckboxListColors = withColors( {
 	optionBackground: 'option-background',
 	optionSelected: 'option-selected',
 } );
+
+export const getCheckboxListStyles = (
+	props: BlockEditProps< Attributes > & EditProps
+): Record< string, string > => {
+	const { attributes, optionBackground, optionSelected, optionBorder } =
+		props;
+	const { customOptionBorder, customOptionBackground, customOptionSelected } =
+		attributes;
+	return {
+		'--wc-checkbox-list-option-border': optionBorder.slug
+			? `var( --wp--preset--color--${ optionBorder.slug } )`
+			: customOptionBorder,
+		'--wc-checkbox-list-option-background': optionBackground.slug
+			? `var( --wp--preset--color--${ optionBackground.slug } )`
+			: customOptionBackground,
+		'--wc-checkbox-list-option-background-opacity':
+			optionBackground.slug || customOptionBackground ? '1' : '',
+		'--wc-checkbox-list-option-selected': optionSelected.slug
+			? `var( --wp--preset--color--${ optionSelected.slug } )`
+			: customOptionSelected,
+	};
+};

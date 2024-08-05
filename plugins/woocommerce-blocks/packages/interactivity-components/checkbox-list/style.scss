@@ -26,7 +26,7 @@
 
 :where(.wc-block-interactivity-components-checkbox-list__input) {
 	appearance: none;
-	background: currentColor;
+	background: var(--wc-checkbox-list-option-background, currentColor);
 	border-radius: 2px;
 	border: none;
 	color: inherit;
@@ -34,9 +34,11 @@
 	font-size: inherit;
 	height: 1em;
 	margin: 0;
-	opacity: 0.1;
+	opacity: var(--wc-checkbox-list-option-background-opacity, 0.1);
 	width: 1em;
+	border-color: var(--wc-checkbox-list-option-border, currentColor);
 }
+
 
 .wc-block-interactivity-components-checkbox-list__input:checked + .wc-block-interactivity-components-checkbox-list__mark {
 	display: block;
@@ -55,6 +57,7 @@
 	position: absolute;
 	top: 0;
 	width: 1em;
+	stroke: var(--wc-checkbox-list-option-selected, currentColor);
 }
 
 :where(.wc-block-interactivity-components-checkbox-list__show-more) {

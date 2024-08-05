@@ -21,7 +21,7 @@ import { dispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { BlockAttributes, EditProps, isAttributeCounts } from './types';
+import { EditProps, isAttributeCounts } from './types';
 import { NoAttributesPlaceholder } from './components/placeholder';
 import { getAttributeFromId } from './utils';
 import { Inspector } from './components/inspector';
@@ -32,12 +32,13 @@ import {
 	Preview as CheckboxListPreview,
 	Inspector as CheckboxListInspector,
 	withCheckboxListColors,
+	getCheckboxListStyles,
 } from './components/checkbox-list-editor';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const Edit = ( props: EditProps ) => {
-	const { attributes: blockAttributes, clientId } = props;
+	const { attributes: blockAttributes, clientId, style } = props;
 
 	const {
 		attributeId,
@@ -177,11 +178,19 @@ const Edit = ( props: EditProps ) => {
 		productFilterWrapperHeadingBlockId,
 		updateBlockAttributes,
 	] );
+	const blockProps = useBlockProps( {
+		style: {
+			...style,
+			...getCheckboxListStyles( props ),
+		},
+	} );
 
 	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
-		<div { ...useBlockProps() }>
+		<div { ...blockProps }>
 			<Inspector { ...props } />
-			<CheckboxListInspector< BlockAttributes > { ...props } />
+			{ displayStyle === 'list' && (
+				<CheckboxListInspector { ...props } />
+			) }
 			{ children }
 		</div>
 	);

@@ -30,6 +30,7 @@ export interface EditProps
 	extends BlockEditProps< BlockAttributes >,
 		CheckboxListEditProps {
 	debouncedSpeak: ( label: string ) => void;
+	style: Record< string, string >;
 }
 
 type AttributeCount = {
