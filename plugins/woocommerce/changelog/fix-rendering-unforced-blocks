@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Allow blocks with parents in the "woocommerce" namespace to be added to the Checkout block without requiring them to be added to the "__experimental_woocommerce_blocks_add_data_attributes_to_block" hook.
