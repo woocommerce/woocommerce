@@ -62,10 +62,10 @@ class CheckboxList {
 								class="wc-block-interactivity-components-checkbox-list__item hidden"
 								data-wc-class--hidden="!context.showAll"
 							<?php else : ?>
-								class="wc-block-interactivity-components-checkbox-list__item"
 								<?php ++$count; ?>
 							<?php endif; ?>
-							<?php endif; ?>
+						<?php endif; ?>
+						class="wc-block-interactivity-components-checkbox-list__item"
 					>
 						<label
 							class="wc-block-interactivity-components-checkbox-list__label"
