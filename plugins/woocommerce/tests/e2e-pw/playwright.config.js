@@ -95,7 +95,7 @@ const config = {
 		{
 			name: 'ui',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: [ '**basic.spec.js', '**/product-*spec.js' ],
+			testIgnore: '**/api-tests/**',
 		},
 		{
 			name: 'api',
