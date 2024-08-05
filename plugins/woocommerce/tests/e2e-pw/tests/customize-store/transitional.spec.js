@@ -72,7 +72,7 @@ test.describe(
 			await expect( page.url() ).toBe( `${ baseURL }${ INTRO_URL }` );
 		} );
 
-		test( 'Clicking on "Save" in the assembler should go to the transitional page', async ( {
+		test( 'Clicking on "Finish customizing" in the assembler should go to the transitional page', async ( {
 			pageObject,
 			baseURL,
 		} ) => {
@@ -80,7 +80,9 @@ test.describe(
 			await pageObject.waitForLoadingScreenFinish();
 
 			const assembler = await pageObject.getAssembler();
-			await assembler.getByRole( 'button', { name: 'Save' } ).click();
+			await assembler
+				.getByRole( 'button', { name: 'Finish customizing' } )
+				.click();
 
 			await expect(
 				assembler.locator( 'text=Your store looks great!' )
