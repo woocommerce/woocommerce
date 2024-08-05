@@ -1,3 +1,9 @@
+---
+post_title: WooCommerce performance best practices
+menu_title: Registering product collection block
+tags: how-to
+---
+
 # Register Product Collection
 
 The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows 3PDs to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
