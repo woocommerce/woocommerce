@@ -27,6 +27,7 @@ runs:
         # Next step is rudimentary - fixes a know composite action bug during post-actions:
         # Error: Index was out of range. Must be non-negative and less than the size of the collection.
         - name: 'Read PNPM version'
+          id: 'read-pnpm-version'
           shell: 'bash'
           run: 'echo "version=$(pnpm --version)" >> $GITHUB_OUTPUT'
         - name: 'Setup Node'
