@@ -46,6 +46,7 @@ interface UseCollectionDataProps {
 	queryStock?: boolean;
 	queryRating?: boolean;
 	queryState: Record< string, unknown >;
+	queryCategory?: number;
 	isEditor?: boolean;
 }
 
@@ -55,6 +56,7 @@ export const useCollectionData = ( {
 	queryStock,
 	queryRating,
 	queryState,
+	queryCategory,
 	isEditor = false,
 }: UseCollectionDataProps ) => {
 	let context = useQueryStateContext();
@@ -72,10 +74,17 @@ export const useCollectionData = ( {
 	const [ calculateRatingQueryState, setCalculateRatingQueryState ] =
 		useQueryStateByKey( 'calculate_rating_counts', null, context );
 
+	const [ categoryQueryState, setCategoryQueryState ] = useQueryStateByKey(
+		'category',
+		null,
+		context
+	);
+
 	const currentQueryAttribute = useShallowEqual( queryAttribute || {} );
 	const currentQueryPrices = useShallowEqual( queryPrices );
 	const currentQueryStock = useShallowEqual( queryStock );
 	const currentQueryRating = useShallowEqual( queryRating );
+	const currentCategory = useShallowEqual( queryCategory );
 
 	useEffect( () => {
 		if (
@@ -136,6 +145,19 @@ export const useCollectionData = ( {
 			currentQueryRating !== undefined
 		) {
 			setCalculateRatingQueryState( currentQueryRating );
+		}
+	}, [
+		currentQueryRating,
+		setCalculateRatingQueryState,
+		calculateRatingQueryState,
+	] );
+
+	useEffect( () => {
+		if (
+			categoryQueryState !== currentCategory &&
+			currentCategory !== undefined
+		) {
+			setCategoryQueryState( currentCategory );
 		}
 	}, [
 		currentQueryRating,

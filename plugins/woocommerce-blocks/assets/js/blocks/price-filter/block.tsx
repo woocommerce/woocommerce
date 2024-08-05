@@ -71,6 +71,14 @@ function formatPrice( value: unknown, minorUnit: number ) {
 	return Number( value ) * 10 ** minorUnit;
 }
 
+// TODO There *has* to be a better way of getting this... Currently depending on `body` to get the `term-XYZ` CSS class...
+const getCategoryId = () =>
+	// @ts-ignore TS doesn't think `DOMTokenList` is iterable?
+	[ ...document.body.classList ]
+		.map( ( className ) => /term-(\d+)/.exec( className ) )
+		.filter( ( match ) => match !== null )
+		.map( ( match ) => match[ 1 ] )[ 0 ];
+
 interface PriceFilterBlockProps {
 	/**
 	 * The attributes for this block.
@@ -114,6 +122,7 @@ const PriceFilterBlock = ( {
 	const [ queryState ] = useQueryStateByContext();
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
+		queryCategory: getCategoryId(),
 		queryState,
 		isEditor,
 	} );
