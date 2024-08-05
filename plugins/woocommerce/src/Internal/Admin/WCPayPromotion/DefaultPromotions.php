@@ -2,6 +2,7 @@
 /**
  * Gets a list of fallback promotions if remote fetching is disabled.
  */
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
@@ -19,7 +20,7 @@ class DefaultPromotions {
 	 *
 	 * @return array Suggestion specs.
 	 */
-	public static function get_all() {
+	public static function get_all(): array {
 		return array(
 			array(
 				'id'         => 'woocommerce_payments:woopay',
@@ -53,7 +54,7 @@ class DefaultPromotions {
 	 *
 	 * @return array The list of WooPay available countries.
 	 */
-	private static function get_woopay_available_countries() {
+	private static function get_woopay_available_countries(): array {
 		return array( 'US' );
 	}
 
@@ -62,7 +63,7 @@ class DefaultPromotions {
 	 *
 	 * @return string Payment icons as HTML img tags.
 	 */
-	private static function get_wcpay_payment_icons() {
+	private static function get_wcpay_payment_icons(): string {
 		$icons              = array(
 			'visa',
 			'mastercard',
