@@ -15,6 +15,9 @@ $border-width: 1px;
 			margin: 0;
 			width: 100%;
 			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 
 			> img {
 				width: 100%;
@@ -144,7 +147,7 @@ $border-width: 1px;
 // For Twenty Twenty we need to increase specificity of the title.
 .theme-twentytwenty {
 	.wc-block-components-express-payment
-	.wc-block-components-express-payment__title {
+		.wc-block-components-express-payment__title {
 		padding-left: $gap-small;
 		padding-right: $gap-small;
 	}
