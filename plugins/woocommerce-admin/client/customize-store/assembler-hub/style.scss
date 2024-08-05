@@ -525,7 +525,7 @@ body.woocommerce-assembler {
 		border-radius: 0 0 12px 12px;
 
 		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
-		.woocommerce-customize-store__step-designWithAi & {
+		.woocommerce-assembler--with-ai & {
 			top: 16px;
 			padding: 0 4px 0 16px;
 			border-radius: 0;
@@ -545,7 +545,7 @@ body.woocommerce-assembler {
 		transition: all 0.3s ease 0s;
 
 		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
-		.woocommerce-customize-store__step-designWithAi & {
+		.woocommerce-assembler--with-ai & {
 			transition: none;
 		}
 	}

@@ -51,6 +51,7 @@ import { onBackButtonClicked } from '../utils';
 import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
 import { ZoomOutContextProvider } from './context/zoom-out-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 
 import './tracking';
 
@@ -151,7 +152,15 @@ const initializeAssembleHub = () => {
 export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	const isInitializedRef = useRef( false );
 
+	// @ts-expect-error temp fix
+	const isAiFlow = window.parent?.window.cys_aiFlow ? true : false;
+
 	useBodyClass( 'woocommerce-assembler' );
+	useBodyClass(
+		isAiFlow
+			? 'woocommerce-assembler--with-ai'
+			: 'woocommerce-assembler--without-ai'
+	);
 
 	if ( ! isInitializedRef.current ) {
 		initializeAssembleHub();
