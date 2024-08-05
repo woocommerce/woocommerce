@@ -81,11 +81,11 @@ function ResizableFrame( {
 	defaultSize,
 	innerContentStyle,
 	isHandleVisibleByDefault = false,
+	isResizingHandleEnabled = true,
 } ) {
 	const [ frameSize, setFrameSize ] = useState( INITIAL_FRAME_SIZE );
 	// The width of the resizable frame when a new resize gesture starts.
 	const [ startingWidth, setStartingWidth ] = useState();
-	const [ previousDeviceType, setPreviousDeviceType ] = useState();
 	const [ isResizing, setIsResizing ] = useState( false );
 	const [ shouldShowHandle, setShouldShowHandle ] = useState( false );
 	const [ resizeRatio, setResizeRatio ] = useState( 1 );
@@ -298,7 +298,7 @@ function ResizableFrame( {
 				right: false,
 				bottom: false,
 				// Resizing will be disabled until the editor content is loaded.
-				left: isReady,
+				left: isReady && isResizingHandleEnabled,
 				topRight: false,
 				bottomRight: false,
 				bottomLeft: false,

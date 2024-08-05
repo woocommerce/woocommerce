@@ -236,6 +236,9 @@ export const Layout = () => {
 														setIsOversized={
 															setIsResizableFrameOversized
 														}
+														isResizingHandleEnabled={
+															false
+														}
 														innerContentStyle={ {
 															background:
 																gradientValue ??
