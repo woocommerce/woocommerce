@@ -1,17 +1,15 @@
 ---
-post_title: Cart and Checkout - Totals Footer Item
+post_title: Cart and Checkout Filters - Totals footer item
 menu_title: Totals Footer Item
-tags: reference, checkout-available-filters
+tags: reference
 ---
 
 <!-- markdownlint-disable MD024 -->
 
-# Totals Footer Item
-
 The following Totals Footer Item filter are available:
 
--   [`totalLabel`](#totallabel)
--   [`totalValue`](#totalvalue)
+-   `totalLabel`
+-   `totalValue`
 
 ## `totalLabel`
 
@@ -48,7 +46,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
@@ -93,7 +91,7 @@ registerCheckoutFilters( 'my-extension', {
 } );
 ```
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
