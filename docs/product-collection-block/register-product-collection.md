@@ -1,6 +1,6 @@
 ---
-post_title: Registering the product collection block
-menu_title: Registering the Product Collection Block
+post_title:  Registering custom collections in product collection block
+menu_title: Registering custom collections
 tags: how-to
 ---
 
