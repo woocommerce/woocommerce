@@ -1,15 +1,12 @@
 ---
-post_title: Cart and Checkout - Inner Block Types
+post_title: Cart and Checkout Filters - Inner block types
 menu_title: Inner Block Types
-tags: reference, checkout-available-filters
+tags: reference
 ---
-
-
-# Additional Cart and Checkout inner block types
 
 The following Additional Cart and Checkout inner block types filter is available:
 
--   [`additionalCartCheckoutInnerBlockTypes`](#additionalcartcheckoutinnerblocktypes)
+-   `additionalCartCheckoutInnerBlockTypes`
 
 ## `additionalCartCheckoutInnerBlockTypes`
 
@@ -69,7 +66,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 To call this filter within the editor, wrap the filter registration in a `DOMContentLoaded` event listener and ensure the code runs in the admin panel.
 
-> 💡 Filters can be also combined. See [Combined filters](../available-filters.md#combined-filters) for an example.
+> Filters can be also combined. See [Combined filters](./category/cart-and-checkout-blocks/available-filters/) for an example.
 
 ### Screenshots <!-- omit in toc -->
 
