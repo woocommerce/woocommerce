@@ -73,13 +73,19 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					.pressSequentially( productData.name );
 			} );
 
-			await test.step( 'add product description', async () => {
+			await test.step( 'add simple product description', async () => {
 				const descriptionSimpleParagraph = page.locator(
 					'[data-template-block-id="product-description__content"] > p'
 				);
 
 				await descriptionSimpleParagraph.fill(
 					productData.descriptionSimple
+				);
+			} );
+
+			await test.step( 'add full product description', async () => {
+				const descriptionSimpleParagraph = page.locator(
+					'[data-template-block-id="product-description__content"] > p'
 				);
 
 				// Helps to ensure that block toolbar appears
@@ -110,7 +116,9 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					.fill( productData.descriptionParagraph );
 
 				await page.getByRole( 'button', { name: 'Done' } ).click();
+			} );
 
+			await test.step( 'verify full product description', async () => {
 				const previewContainerIframe = page
 					.locator( '.block-editor-block-preview__container' )
 					.frameLocator( 'iframe[title="Editor canvas"]' );
