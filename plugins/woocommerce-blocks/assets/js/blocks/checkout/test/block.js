@@ -98,7 +98,11 @@ const CheckoutBlock = () => {
 				<Payment />
 				<AdditionalInformation />
 				<OrderNote />
-				<Terms checkbox={ true } text={ termsCheckboxDefaultText } />
+				<Terms
+					checkbox={ true }
+					showSeparator={ false }
+					text={ termsCheckboxDefaultText }
+				/>
 				<Actions />
 			</Fields>
 			<Totals>
@@ -148,7 +152,7 @@ describe( 'Testing Checkout', () => {
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'Renders the address card if the address is filled', async () => {
+	it( 'Renders the shipping address card if the address is filled and the cart contains a shippable product', async () => {
 		act( () => {
 			const cartWithAddress = {
 				...previewCart,
@@ -190,7 +194,7 @@ describe( 'Testing Checkout', () => {
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		expect(
-			screen.getByRole( 'button', { name: 'Edit address' } )
+			screen.getByRole( 'button', { name: 'Edit shipping address' } )
 		).toBeInTheDocument();
 
 		expect(
@@ -256,6 +260,30 @@ describe( 'Testing Checkout', () => {
 		).toBeInTheDocument();
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {
+		act( () => {
+			const cartWithVirtualProduct = {
+				...previewCart,
+				needs_shipping: false,
+			};
+			fetchMock.mockResponse( ( req ) => {
+				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
+					return Promise.resolve(
+						JSON.stringify( cartWithVirtualProduct )
+					);
+				}
+				return Promise.resolve( '' );
+			} );
+		} );
+		render( <CheckoutBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		expect(
+			screen.getByRole( 'button', { name: 'Edit billing address' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'Ensures checkbox labels have unique IDs', async () => {

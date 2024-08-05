@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, navigation } from '@wordpress/icons';
+import { Icon } from '@wordpress/icons';
+import { closeSquareShadow } from '@woocommerce/icons';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 
 /**
@@ -18,7 +19,7 @@ if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		edit: Edit,
 		save: Save,
-		icon: <Icon icon={ navigation } />,
+		icon: <Icon icon={ closeSquareShadow } />,
 		attributes: metadata.attributes,
 		variations: blockVariations,
 	} );
