@@ -89,6 +89,11 @@ class RemoteLogger extends \WC_Log_Handler {
 
 			WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
 
+			if ( ! in_array( wp_get_environment_type(), array( 'development', 'local' ), true ) ) {
+				// Do not send logs in development or local environments.
+				return false;
+			}
+
 			$response = wp_safe_remote_post(
 				self::LOG_ENDPOINT,
 				array(

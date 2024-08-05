@@ -65,6 +65,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		remove_all_filters( 'plugins_api' );
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'woocommerce_remote_logger_formatted_log_data' );
+		remove_all_filters( 'wp_get_environment_type' );
 	}
 
 	/**
@@ -452,6 +453,90 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 	}
 
+		/**
+		 * @testdox Test handle() method does not send logs in development environment
+		 */
+	public function test_handle_does_not_send_logs_in_development_environment() {
+		$this->set_environment_type( 'development' );
+
+		$this->sut = $this->getMockBuilder( RemoteLogger::class )
+			->onlyMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
+		// Mock wp_safe_remote_post using pre_http_request filter.
+		add_filter(
+			'pre_http_request',
+			function () {
+				$this->fail( 'wp_safe_remote_post should not be called in development environment' );
+			},
+			10,
+			3
+		);
+
+		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @testdox Test handle() method does not send logs in local environment
+	 */
+	public function test_handle_does_not_send_logs_in_local_environment() {
+		$this->set_environment_type( 'local' );
+
+		$this->sut = $this->getMockBuilder( RemoteLogger::class )
+			->onlyMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
+		// Mock wp_safe_remote_post using pre_http_request filter.
+		add_filter(
+			'pre_http_request',
+			function () {
+				$this->fail( 'wp_safe_remote_post should not be called in local environment' );
+			},
+			10,
+			3
+		);
+
+		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @testdox Test handle() method sends logs in production environment
+	 */
+	public function test_handle_sends_logs_in_production_environment() {
+		$this->set_environment_type( 'production' );
+
+		$this->sut = $this->getMockBuilder( RemoteLogger::class )
+			->onlyMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
+		// Mock wp_safe_remote_post using pre_http_request filter.
+		add_filter(
+			'pre_http_request',
+			function () {
+				return array(
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'body'     => wp_json_encode( array( 'success' => true ) ),
+				);
+			},
+			10,
+			3
+		);
+
+		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
+		$this->assertTrue( $result );
+	}
+
 	/**
 	 * @testdox Test is_third_party_error method.
 	 *
@@ -549,5 +634,19 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$method     = $reflection->getMethod( $method_name );
 		$method->setAccessible( true );
 		return $method->invokeArgs( $obj, $parameters );
+	}
+
+	/**
+	 * A helper to set environment type.
+	 *
+	 * @param string $type The environment type to set.
+	 */
+	private function set_environment_type( $type ) {
+		add_filter(
+			'wp_get_environment_type',
+			function () use ( $type ) {
+				return $type;
+			}
+		);
 	}
 }
