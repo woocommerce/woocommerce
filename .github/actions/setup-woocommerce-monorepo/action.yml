@@ -22,6 +22,10 @@ inputs:
 runs:
     using: 'composite'
     steps:
+        - name: 'Read PNPM Version'
+          id: 'read-pnpm-version'
+          shell: 'bash'
+          run: 'echo "version=''" >> $GITHUB_OUTPUT'
         - name: 'Setup PNPM'
           uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
         - name: 'Setup Node'
@@ -37,16 +41,15 @@ runs:
               php-version: '${{ inputs.php-version }}'
               coverage: 'none'
         - name: 'Cache: identify pnpm caching directory'
-          id: 'pnpm-store-path'
           if: ${{ inputs.pull-package-deps != 'false' }}
           shell: 'bash'
           run: |
-              echo "path=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+              echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
         - name: 'Cache: pnpm downloads'
           if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
-              path: '${{ steps.pnpm-store-path.outputs.path }}'
+              path: "${{ env.PNPM_STORE_PATH }}"
               key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
               restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
         - name: 'Cache: node cache'
