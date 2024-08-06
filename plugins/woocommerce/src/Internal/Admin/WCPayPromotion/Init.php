@@ -164,7 +164,13 @@ class Init extends RemoteSpecsEngine {
 			return DefaultPromotions::get_all();
 		}
 
-		return WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
+		$specs = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
+		// On empty remote specs, fallback to default ones.
+		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+			$specs = DefaultPromotions::get_all();
+		}
+
+		return $specs;
 	}
 
 	/**
