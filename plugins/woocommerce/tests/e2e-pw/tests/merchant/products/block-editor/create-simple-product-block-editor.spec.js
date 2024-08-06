@@ -346,6 +346,10 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				const productIdRegex = /product%2F(\d+)/;
 				const url = page.url();
 				const productIdMatch = productIdRegex.exec( url );
+				// This isn't really a conditional branch in the test;
+				// just making sure we don't blow up if the regex doesn't match
+				// (it will be caught in the expect below).
+				// eslint-disable-next-line playwright/no-conditional-in-test
 				productId = productIdMatch ? productIdMatch[ 1 ] : null;
 
 				expect( productId ).toBeDefined();
