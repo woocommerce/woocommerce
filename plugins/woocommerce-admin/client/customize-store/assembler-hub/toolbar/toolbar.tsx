@@ -184,8 +184,11 @@ export const Toolbar = () => {
 
 				// Here we need to account for when the zoom out feature is eligible because a toolbar is added to the top of the iframe.
 				const rectTop = isEligibleForZoomOutFeature
-					? Math.max( top + 70 + iframeRect.top, 140 )
-					: Math.max( top + 70 + iframeRect.top, 100 );
+					? Math.max( top + 70 + iframeRect.top, iframeRect.top + 60 )
+					: Math.max(
+							top + 70 + iframeRect.top,
+							iframeRect.top + 60
+					  );
 
 				return new window.DOMRect( rectLeft, rectTop, width, height );
 			},
