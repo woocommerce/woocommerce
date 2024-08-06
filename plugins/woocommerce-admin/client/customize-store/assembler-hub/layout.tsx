@@ -34,6 +34,9 @@ import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
+// @ts-ignore No types for this exist yet.
+import { store as editorStore } from '@wordpress/editor';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -73,6 +76,15 @@ export const Layout = () => {
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
 		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
 	);
+
+	const { deviceType } = useSelect( ( select ) => {
+		// @ts-ignore No types for this exist yet.
+		const { getDeviceType } = select( editorStore );
+
+		return {
+			deviceType: getDeviceType(),
+		};
+	} );
 
 	useEffect( () => {
 		setShowAiOfflineModal(
@@ -247,6 +259,9 @@ export const Layout = () => {
 																gradientValue ??
 																backgroundColor,
 														} }
+														deviceType={
+															deviceType
+														}
 													>
 														{ editor }
 													</ResizableFrame>

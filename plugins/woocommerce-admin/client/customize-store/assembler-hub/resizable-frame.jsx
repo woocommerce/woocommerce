@@ -14,8 +14,6 @@ import {
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 import { __experimentalUseResizeCanvas as useResizeCanvas } from '@wordpress/block-editor';
 
 // Removes the inline styles in the drag handles.
@@ -82,6 +80,8 @@ function ResizableFrame( {
 	innerContentStyle,
 	isHandleVisibleByDefault = false,
 	isResizingHandleEnabled = true,
+	/** Passing as a prop because the LYS feature does not have access to the editor data store, but CYS feature does. */
+	deviceType = null,
 } ) {
 	const [ frameSize, setFrameSize ] = useState( INITIAL_FRAME_SIZE );
 	// The width of the resizable frame when a new resize gesture starts.
@@ -98,17 +98,13 @@ function ResizableFrame( {
 	);
 	const defaultAspectRatio = defaultSize.width / defaultSize.height;
 
-	const { deviceType } = useSelect( ( select ) => {
-		const { getDeviceType } = select( editorStore );
-
-		return {
-			deviceType: getDeviceType(),
-		};
-	} );
-
 	const deviceStyles = useResizeCanvas( deviceType );
 
 	useEffect( () => {
+		if ( ! deviceType ) {
+			return;
+		}
+
 		if ( deviceType === 'Desktop' ) {
 			setFrameSize( INITIAL_FRAME_SIZE );
 		} else {
