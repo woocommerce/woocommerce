@@ -219,7 +219,7 @@ class InitTest extends WC_Unit_Test_Case {
 
 		add_filter(
 			'locale',
-			function ( $_locale ) {
+			function () {
 				return 'zh_TW';
 			}
 		);
