@@ -92,14 +92,8 @@
 				"command": "lint:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
-					"includes/**/*.php",
-					"patterns/**/*.php",
-					"src/**/*.php",
-					"templates/**/*.php",
-					"tests/php/**/*.php",
-					"tests/legacy/unit-tests/**/*.php",
-					"tests/unit-tests/**/*.php",
-					"tests/**/*.js"
+					"**/*.php",
+					"**/*.js"
 				]
 			},
 			"tests": [
