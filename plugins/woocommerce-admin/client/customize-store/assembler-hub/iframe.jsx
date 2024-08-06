@@ -74,7 +74,7 @@ function Iframe( {
 			// be added in the editor too, which we'll somehow have to get from
 			// the server in the future (which will run the PHP filters).
 			setBodyClasses(
-				Array.from( ownerDocument.body.classList ).filter(
+				Array.from( ownerDocument?.body.classList ).filter(
 					( name ) =>
 						name.startsWith( 'admin-color-' ) ||
 						name.startsWith( 'post-type-' ) ||
