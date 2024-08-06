@@ -130,9 +130,11 @@ export const Edit = ( {
 	} );
 	const {
 		isWithinProductFiltersTemplatePart,
+		isWithinProductFiltersOverlayTemplatePart,
 		isWithinTemplate,
 	}: {
 		isWithinProductFiltersTemplatePart: boolean;
+		isWithinProductFiltersOverlayTemplatePart: boolean;
 		isWithinTemplate: boolean;
 	} = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -143,6 +145,7 @@ export const Edit = ( {
 		const currentPostIdParts = currentPostId?.split( '//' );
 		const currentPostType = getCurrentPostType< string >();
 		let isProductFiltersTemplatePart = false;
+		let isProductFiltersOverlayTemplatePart = false;
 		const isTemplate = currentPostType === 'wp_template';
 
 		if (
@@ -151,10 +154,14 @@ export const Edit = ( {
 		) {
 			const [ , postId ] = currentPostIdParts;
 			isProductFiltersTemplatePart = postId === 'product-filters';
+			isProductFiltersOverlayTemplatePart =
+				postId === 'product-filters-overlay';
 		}
 
 		return {
 			isWithinProductFiltersTemplatePart: isProductFiltersTemplatePart,
+			isWithinProductFiltersOverlayTemplatePart:
+				isProductFiltersOverlayTemplatePart,
 			isWithinTemplate: isTemplate,
 		};
 	} );
@@ -199,6 +206,13 @@ export const Edit = ( {
 
 		if (
 			isWithinProductFiltersTemplatePart &&
+			triggerType === 'open-overlay'
+		) {
+			return true;
+		}
+
+		if (
+			isWithinProductFiltersOverlayTemplatePart &&
 			triggerType === 'open-overlay'
 		) {
 			return true;
