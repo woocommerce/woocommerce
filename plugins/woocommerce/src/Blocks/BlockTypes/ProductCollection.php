@@ -176,14 +176,15 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Attach the init directive to Product Collection block.
+	 * Attach the init directive to Product Collection block to call
+	 * the onRender callback.
 	 *
 	 * @param string $block_content The HTML content of the block.
 	 * @param string $collection Collection type.
 	 *
 	 * @return string Updated HTML content.
 	 */
-	private function add_init_directive( $block_content, $collection ) {
+	private function add_rendering_callback( $block_content, $collection ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-init to the product collection block so we trigger JS event on render.
@@ -294,7 +295,7 @@ class ProductCollection extends AbstractBlock {
 			$block_content = $p->get_updated_html();
 
 			$collection    = $block['attrs']['collection'] ?? 'unknown';
-			$block_content = $this->add_init_directive( $block_content, $collection );
+			$block_content = $this->add_rendering_callback( $block_content, $collection );
 
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 			if ( $is_enhanced_pagination_enabled ) {
