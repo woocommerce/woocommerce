@@ -554,7 +554,7 @@ body.woocommerce-assembler {
 	.edit-site-layout:not(.is-full-canvas)
 	.edit-site-layout__canvas > div
 	.interface-interface-skeleton__content {
-		 // Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
 		.woocommerce-customize-store__step-designWithAi & {
 			border-radius: 12px;
 		}
@@ -587,9 +587,9 @@ body.woocommerce-assembler {
 		text-align: center;
 		background-color: #fff;
 		box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
-    	position: relative;
+		position: relative;
 		top: 16px;
-    	z-index: 10;
+		z-index: 10;
 		border-radius: 12px 12px 0 0;
 		width: calc(100% - 16px);
 		left: 6px;
