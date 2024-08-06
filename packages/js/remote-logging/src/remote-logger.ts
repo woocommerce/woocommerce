@@ -69,10 +69,10 @@ export class RemoteLogger {
 		severity: Exclude< LogData[ 'severity' ], undefined >,
 		message: string,
 		extraData?: Partial< Exclude< LogData, 'message' | 'severity' > >
-	) {
+	): Promise< boolean > {
 		if ( ! message ) {
 			debug( 'Empty message' );
-			return;
+			return false;
 		}
 
 		const logData: LogData = mergeLogData( DEFAULT_LOG_DATA, {
@@ -82,7 +82,7 @@ export class RemoteLogger {
 		} );
 
 		debug( 'Logging:', logData );
-		await this.sendLog( logData );
+		return await this.sendLog( logData );
 	}
 
 	/**
@@ -144,10 +144,10 @@ export class RemoteLogger {
 	 *
 	 * @param logData - The log data to be sent.
 	 */
-	private async sendLog( logData: LogData ): Promise< void > {
+	private async sendLog( logData: LogData ): Promise< boolean > {
 		if ( isDevelopmentEnvironment ) {
 			debug( 'Skipping send log in development environment' );
-			return;
+			return false;
 		}
 
 		const body = new window.FormData();
@@ -166,13 +166,19 @@ export class RemoteLogger {
 				'https://public-api.wordpress.com/rest/v1.1/logstash'
 			) as string;
 
-			await window.fetch( endpoint, {
+			const response = await window.fetch( endpoint, {
 				method: 'POST',
 				body,
 			} );
+			if ( ! response.ok ) {
+				throw new Error( `response body: ${ response.body }` );
+			}
+
+			return true;
 		} catch ( error ) {
 			// eslint-disable-next-line no-console
 			console.error( 'Failed to send log to API:', error );
+			return false;
 		}
 	}
 
@@ -368,13 +374,13 @@ let logger: RemoteLogger | null = null;
  *
  * @return {boolean} - Returns true if remote logging is enabled and the logger is initialized, otherwise false.
  */
-function canLog(): boolean {
+function canLog( _logger: RemoteLogger | null ): _logger is RemoteLogger {
 	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
 		debug( 'Remote logging is disabled.' );
 		return false;
 	}
 
-	if ( ! logger ) {
+	if ( ! _logger ) {
 		warnLog( 'RemoteLogger is not initialized. Call init() first.' );
 		return false;
 	}
@@ -424,15 +430,16 @@ export async function log(
 	severity: Exclude< LogData[ 'severity' ], undefined >,
 	message: string,
 	extraData?: Partial< Exclude< LogData, 'message' | 'severity' > >
-): Promise< void > {
-	if ( ! canLog() ) {
-		return;
+): Promise< boolean > {
+	if ( ! canLog( logger ) ) {
+		return false;
 	}
 
 	try {
-		await logger?.log( severity, message, extraData );
+		return await logger.log( severity, message, extraData );
 	} catch ( error ) {
 		errorLog( 'Failed to send log:', error );
+		return false;
 	}
 }
 
@@ -446,12 +453,12 @@ export async function captureException(
 	error: Error,
 	extraData?: Partial< LogData >
 ) {
-	if ( ! canLog() ) {
-		return;
+	if ( ! canLog( logger ) ) {
+		return false;
 	}
 
 	try {
-		await logger?.error( error, extraData );
+		await logger.error( error, extraData );
 	} catch ( _error ) {
 		errorLog( 'Failed to send log:', _error );
 	}
