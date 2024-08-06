@@ -24,7 +24,7 @@ import { ACTION_TYPES as types } from './action-types';
 import { apiFetchWithHeaders } from '../shared-controls';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
 import { CartDispatchFromMap, CartSelectFromMap } from './index';
-import { Thunks } from './thunks';
+import type { Thunks } from './thunks';
 
 // Thunks are functions that can be dispatched, similar to actions creators
 // @todo Many of the functions that return promises in this file need to be moved to thunks.ts.
