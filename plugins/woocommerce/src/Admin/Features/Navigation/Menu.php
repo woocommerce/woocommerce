@@ -97,10 +97,10 @@ class Menu {
 
 	/**
 	 * Init.
-	 * 
+	 *
 	 * @internal
 	 */
-	public final function init() {}
+	final public function init() {}
 
 	/**
 	 * Convert a WordPress menu callback to a URL.
