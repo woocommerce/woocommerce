@@ -43,7 +43,9 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 			)
 		);
 
-		do_action( 'qm/debug', $classes_and_styles );
+		if ( 'never' === $attributes['overlayMode'] || ( ! wp_is_mobile() && 'mobile' === $attributes['overlayMode'] ) ) {
+			return null;
+		}
 
 		$html_content = strtr(
 			'<div {{wrapper_attributes}}>
