@@ -146,7 +146,6 @@ test.describe( 'Editor Performance', () => {
 			await perfUtils.loadBlocksForLargePost();
 			await editor.insertBlock( { name: 'core/paragraph' } );
 			draftId = await perfUtils.saveDraft();
-			console.log( draftId );
 		} );
 
 		test( 'Run the test', async ( { admin, page, perfUtils, metrics } ) => {

@@ -262,13 +262,7 @@ test.describe(
 			);
 			await expect( fontPickers ).toHaveCount( 10 );
 
-			await assembler
-				.locator(
-					'.woocommerce-customize-store_global-styles-variations_item'
-				)
-				.waitFor( {
-					strict: false,
-				} );
+		const saveButton = assembler.getByText( 'Finish customizing' );
 
 			for ( const fontPicker of await fontPickers.all() ) {
 				await fontPicker.waitFor();
