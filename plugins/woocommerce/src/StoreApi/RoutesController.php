@@ -66,9 +66,6 @@ class RoutesController {
 				Routes\V1\ProductsById::IDENTIFIER       => Routes\V1\ProductsById::class,
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
 			],
-			'private' => [
-				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
-			],
 		];
 	}
 

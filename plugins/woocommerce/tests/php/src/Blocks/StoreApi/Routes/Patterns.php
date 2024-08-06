@@ -26,7 +26,7 @@ class Patterns extends ControllerTestCase {
 	public function test_post_endpoint_when_tracking_is_not_allowed() {
 		update_option( 'woocommerce_allow_tracking', 'no' );
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'POST', '/wc/private/patterns' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'POST', '/wc-admin/patterns' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -44,7 +44,7 @@ class Patterns extends ControllerTestCase {
 	public function test_post_endpoint_when_tracking_is_allowed() {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'POST', '/wc/private/patterns' ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'POST', '/wc-admin/patterns' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );

@@ -284,7 +284,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											<Button
 												onClick={ async () => {
 													await apiFetch( {
-														path: `/wc/private/patterns`,
+														path: `/wc-admin/patterns`,
 														method: 'POST',
 													} );
 
@@ -350,7 +350,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 													await apiFetch< {
 														success: boolean;
 													} >( {
-														path: `/wc/private/patterns`,
+														path: `/wc-admin/patterns`,
 														method: 'POST',
 													} );
 													invalidateCache();

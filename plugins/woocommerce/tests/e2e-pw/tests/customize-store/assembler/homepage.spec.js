@@ -253,7 +253,7 @@ test.describe( 'Homepage tracking banner', () => {
 	} ) => {
 		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
 
-		await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
+		await page.route( '**/wp-json/wc-admin/patterns*', ( route ) => {
 			route.fulfill( {
 				status: 500,
 			} );
