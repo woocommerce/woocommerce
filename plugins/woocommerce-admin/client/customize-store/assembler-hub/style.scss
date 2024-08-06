@@ -595,9 +595,13 @@ body.woocommerce-assembler {
 		left: 6px;
 	}
 
+	.woocommerce-customize-store__device-button:not([disabled]):focus {
+		box-shadow: none;
+		outline: none;
+	}
+
 	.woocommerce-customize-store__device-button:not([disabled]) {
 		&:hover,
-		&:focus,
 		&.is-selected {
 			box-shadow: none;
 			outline: none;
