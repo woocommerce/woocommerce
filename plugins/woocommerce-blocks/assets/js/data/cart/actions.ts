@@ -15,7 +15,6 @@ import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 import {
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
-	camelCaseKeys,
 } from '@woocommerce/base-utils';
 
 /**
@@ -25,7 +24,7 @@ import { ACTION_TYPES as types } from './action-types';
 import { apiFetchWithHeaders } from '../shared-controls';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
 import { CartDispatchFromMap, CartSelectFromMap } from './index';
-import type { Thunks } from './thunks';
+import { Thunks } from './thunks';
 
 // Thunks are functions that can be dispatched, similar to actions creators
 // @todo Many of the functions that return promises in this file need to be moved to thunks.ts.
@@ -54,27 +53,6 @@ export const setErrorData = (
 	return {
 		type: types.SET_ERROR_DATA,
 		error,
-	};
-};
-
-/**
- * Returns an action object used in updating the store with the provided cart.
- *
- * This omits the customer addresses so that only updates to cart items and totals are received. This is useful when
- * currently editing address information to prevent it being overwritten from the server.
- *
- * This is a generic response action.
- *
- * @param {CartResponse} response
- */
-export const receiveCartContents = (
-	response: CartResponse
-): { type: string; response: Partial< Cart > } => {
-	const cart = camelCaseKeys( response ) as unknown as Cart;
-	const { shippingAddress, billingAddress, ...cartWithoutAddress } = cart;
-	return {
-		type: types.SET_CART_DATA,
-		response: cartWithoutAddress,
 	};
 };
 
@@ -503,7 +481,6 @@ type Actions =
 	| typeof itemIsPendingDelete
 	| typeof itemIsPendingQuantity
 	| typeof receiveApplyingCoupon
-	| typeof receiveCartContents
 	| typeof receiveCartItem
 	| typeof receiveRemovingCoupon
 	| typeof removeCoupon
