@@ -51,7 +51,6 @@ import { onBackButtonClicked } from '../utils';
 import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
 import { ZoomOutContextProvider } from './context/zoom-out-context';
-import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 
 import './tracking';
 
