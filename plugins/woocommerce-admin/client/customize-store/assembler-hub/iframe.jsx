@@ -267,31 +267,6 @@ function Iframe( {
 				// content.
 				src={ src }
 				title={ title }
-				onKeyDown={ ( event ) => {
-					if ( props.onKeyDown ) {
-						props.onKeyDown( event );
-					}
-					// If the event originates from inside the iframe, it means
-					// it bubbled through the portal, but only with React
-					// events. We need to to bubble native events as well,
-					// though by doing so we also trigger another React event,
-					// so we need to stop the propagation of this event to avoid
-					// duplication.
-					if (
-						event.currentTarget.ownerDocument !==
-						event.target.ownerDocument
-					) {
-						// We should only stop propagation of the React event,
-						// the native event should further bubble inside the
-						// iframe to the document and window.
-						// Alternatively, we could consider redispatching the
-						// native event in the iframe.
-						const { stopPropagation } = event.nativeEvent;
-						event.nativeEvent.stopPropagation = () => {};
-						event.stopPropagation();
-						event.nativeEvent.stopPropagation = stopPropagation;
-					}
-				} }
 				name="editor-canvas"
 			>
 				{ iframeDocument &&
