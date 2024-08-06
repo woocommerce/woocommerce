@@ -16,8 +16,8 @@ on:
         type: string
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}-${{ inputs.trigger }}'
-  cancel-in-progress: ${{ github.ref != 'trunk' }}
+  group: ci-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}-${{ inputs.trigger }}
+  cancel-in-progress: true
 
 env:
   FORCE_COLOR: 1
