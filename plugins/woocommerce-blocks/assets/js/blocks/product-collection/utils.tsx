@@ -25,7 +25,6 @@ import {
 	type ProductCollectionDisplayLayout,
 	type PreviewState,
 	type SetPreviewState,
-	CoreCollectionNames,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
