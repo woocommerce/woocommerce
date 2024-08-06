@@ -97,20 +97,18 @@ class Menu {
 
 	/**
 	 * Init.
+	 * 
+	 * @internal
 	 */
-	public function init() {}
+	public final function init() {}
 
 	/**
 	 * Convert a WordPress menu callback to a URL.
-	 *
-	 * @return string
 	 */
 	public static function get_callback_url() {}
 
 	/**
 	 * Get the parent key if one exists.
-	 *
-	 * @return string|null
 	 */
 	public static function get_parent_key() {}
 
