@@ -81,7 +81,7 @@ class PluginsHelper {
 	 *
 	 * @param string $slug Plugin slug to get path for.
 	 *
-	 * @return string|false
+	 * @return string|false The plugin path or false if the plugin is not installed.
 	 */
 	public static function get_plugin_path_from_slug( $slug ) {
 		$plugins = get_plugins();
@@ -183,7 +183,7 @@ class PluginsHelper {
 	public static function is_plugin_active( $plugin ) {
 		$plugin_path = self::get_plugin_path_from_slug( $plugin );
 
-		return $plugin_path && ( in_array( $plugin_path, (array) get_option( 'active_plugins', array() ), true ) || is_plugin_active_for_network( $plugin_path ) );
+		return $plugin_path && \is_plugin_active( $plugin_path );
 	}
 
 	/**
