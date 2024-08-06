@@ -205,7 +205,7 @@ test.describe(
 
 			await assembler.locator( '[aria-label="Back"]' ).click();
 
-			const saveButton = assembler.getByText( 'Save' );
+			const saveButton = assembler.getByText( 'Finish customizing' );
 
 			const waitResponse = page.waitForResponse(
 				( response ) =>
@@ -261,6 +261,14 @@ test.describe(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			);
 			await expect( fontPickers ).toHaveCount( 10 );
+
+			await assembler
+				.locator(
+					'.woocommerce-customize-store_global-styles-variations_item'
+				)
+				.waitFor( {
+					strict: false,
+				} );
 
 			for ( const fontPicker of await fontPickers.all() ) {
 				await fontPicker.waitFor();
