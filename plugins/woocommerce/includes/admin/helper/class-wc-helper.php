@@ -786,6 +786,14 @@ class WC_Helper {
 			$redirect_url_args['install'] = sanitize_text_field( wp_unslash( $_GET['install'] ) );
 		}
 
+		if ( isset( $_GET['utm_source'] ) ) {
+			$redirect_url_args['utm_source'] = wc_clean( wp_unslash( $_GET['utm_source'] ) );
+		}
+
+		if ( isset( $_GET['utm_campaign'] ) ) {
+			$redirect_url_args['utm_campaign'] = wc_clean( wp_unslash( $_GET['utm_campaign'] ) );
+		}
+
 		$redirect_uri = add_query_arg(
 			$redirect_url_args,
 			admin_url( 'admin.php' )
@@ -1298,6 +1306,35 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get the user's connected subscriptions that are installed on the current
+	 * site.
+	 *
+	 * @return array
+	 */
+	public static function get_installed_subscriptions() {
+		static $installed_subscriptions = null;
+
+		// Cache installed_subscriptions in the current request.
+		if ( is_null( $installed_subscriptions ) ) {
+			$auth    = WC_Helper_Options::get( 'auth' );
+			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
+			if ( 0 === $site_id ) {
+				$installed_subscriptions = array();
+				return $installed_subscriptions;
+			}
+
+			$installed_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return in_array( $site_id, $subscription['connections'], true );
+				}
+			);
+		}
+
+		return $installed_subscriptions;
+	}
+
+	/**
 	 * Get subscription state of a given product ID.
 	 *
 	 * @since TBD
@@ -1307,7 +1344,11 @@ class WC_Helper {
 	 * @return array Array of state_name => (bool) state
 	 */
 	public static function get_product_subscription_state( $product_id ) {
-		$subscription = self::_get_subscriptions_from_product_id( $product_id, true );
+		$product_subscriptions = wp_list_filter( self::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+
+		$subscription = ! empty( $product_subscriptions )
+			? array_shift( $product_subscriptions )
+			: array();
 
 		return array(
 			'unregistered' => empty( $subscription ),
@@ -1794,8 +1835,22 @@ class WC_Helper {
 			return false;
 		}
 
-		// If there are multiple subscriptions, but no active subscriptions, then mark the first one as installed.
-		$product_subscription = array_shift( $product_subscriptions );
+		// Find subscriptions that can be activated.
+		$product_subscriptions_without_maxed_connections = wp_list_filter(
+			$product_subscriptions,
+			array(
+				'maxed' => false,
+			)
+		);
+
+		if ( 0 < count( $product_subscriptions_without_maxed_connections ) ) {
+			// Pick the first subscription available for activation.
+			$product_subscription = array_shift( $product_subscriptions_without_maxed_connections );
+		} else {
+			// If there are multiple subscriptions, but no active subscriptions, then mark the first one as installed.
+			$product_subscription = array_shift( $product_subscriptions );
+		}
+
 		if ( $product_subscription['product_key'] === $subscription['product_key'] ) {
 			return true;
 		}

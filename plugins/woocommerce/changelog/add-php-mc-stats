@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Use MC Stats for PHP fatal error counting
