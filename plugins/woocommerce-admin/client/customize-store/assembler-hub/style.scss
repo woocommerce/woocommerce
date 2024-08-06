@@ -595,7 +595,7 @@ body.woocommerce-assembler {
 		left: 6px;
 	}
 
-	.woocommerce-customize-store__device-button {
+	.woocommerce-customize-store__device-button:not([disabled]) {
 		&:hover,
 		&:focus,
 		&.is-selected {
