@@ -88,8 +88,9 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 					'[data-template-block-id="product-description__content"] > p'
 				);
 
-				// Helps to ensure that block toolbar appears
-				await descriptionSimpleParagraph.click();
+				// Helps to ensure that block toolbar appears, by letting the editor
+				// know that the user is done typing.
+				await page.keyboard.press( 'Escape' );
 
 				await page.getByText( 'Full editor' ).click();
 
