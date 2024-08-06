@@ -56,10 +56,10 @@ class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 		// Phpunit test environment active plugins option is empty.
 		$this->assertEquals( array(), $active_slugs, 'Should not be any active slugs.' );
 
-		// Get facebook plugin path.
+		// Get Akismet plugin path.
 		$akismet_path = PluginsHelper::get_plugin_path_from_slug( 'akismet' );
 
-		// Activate facebook plugin.
+		// Activate Akismet plugin.
 		activate_plugin( $akismet_path );
 
 		// Get active slugs.
