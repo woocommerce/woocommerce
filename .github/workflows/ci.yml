@@ -16,6 +16,7 @@ on:
         type: string
 
 concurrency:
+  # Cancel concurrent jobs but not push event. For push use the run_id to have a unique group.
   group: ci-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}-${{ inputs.trigger }}
   cancel-in-progress: true
 
