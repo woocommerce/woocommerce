@@ -36,6 +36,7 @@
 		$form.on( 'click', '.single_add_to_cart_button', { variationForm: self }, self.onAddToCart );
 		$form.on( 'reset_data', { variationForm: self }, self.onResetDisplayedVariation );
 		$form.on( 'announce_reset', { variationForm: self }, self.onAnnounceReset );
+		$form.on( 'clear_reset_announcement', { variationForm: self }, self.onClearResetAnnouncement );
 		$form.on( 'reset_image', { variationForm: self }, self.onResetImage );
 		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: self }, self.onChange );
 		$form.on( 'found_variation.wc-variation-form', { variationForm: self }, self.onFoundVariation );
@@ -159,6 +160,11 @@
 	VariationForm.prototype.onAnnounceReset = function( event ) {
 		event.data.variationForm.$resetAlert.text( wc_add_to_cart_variation_params.i18n_reset_alert_text );
 		event.data.variationForm.$resetAlert.focus();
+	}
+
+	/** Clear reset announcement */
+	VariationForm.prototype.onClearResetAnnouncement = function( event ) {
+		event.data.variationForm.$resetAlert.text( '' );
 	}
 
 	/**
@@ -339,6 +345,7 @@
 		var form = event.data.variationForm;
 
 		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).trigger( 'change' );
+		form.$form.trigger( 'clear_reset_announcement' );
 		form.$form.find( '.wc-no-matching-variations' ).remove();
 
 		if ( form.useAjax ) {
