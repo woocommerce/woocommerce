@@ -194,15 +194,6 @@ jobs:
           name: flaky-tests-${{ strategy.job-index }}
           path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
           if-no-files-found: ignore
-
-      - name: 'Archive metrics results'
-        if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
-        uses: actions/upload-artifact@v4
-        env:
-          WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
-        with:
-          name: metrics-results
-          path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
   
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
