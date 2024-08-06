@@ -5,7 +5,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { useState, useRef, createContext } from '@wordpress/element';
+import { useState, useRef, createContext, useEffect } from '@wordpress/element';
 import {
 	ResizableBox,
 	Tooltip,
@@ -14,6 +14,7 @@ import {
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { __experimentalUseResizeCanvas as useResizeCanvas } from '@wordpress/block-editor';
 
 // Removes the inline styles in the drag handles.
 const HANDLE_STYLES_OVERRIDE = {
@@ -78,6 +79,9 @@ function ResizableFrame( {
 	defaultSize,
 	innerContentStyle,
 	isHandleVisibleByDefault = false,
+	isResizingHandleEnabled = true,
+	/** Passing as a prop because the LYS feature does not have access to the editor data store, but CYS feature does. */
+	deviceType = null,
 } ) {
 	const [ frameSize, setFrameSize ] = useState( INITIAL_FRAME_SIZE );
 	// The width of the resizable frame when a new resize gesture starts.
@@ -93,6 +97,27 @@ function ResizableFrame( {
 		'edit-site-resizable-frame-handle-help'
 	);
 	const defaultAspectRatio = defaultSize.width / defaultSize.height;
+
+	const deviceStyles = useResizeCanvas( deviceType );
+
+	useEffect( () => {
+		if ( ! deviceType ) {
+			return;
+		}
+
+		if ( deviceType === 'Desktop' ) {
+			setFrameSize( INITIAL_FRAME_SIZE );
+		} else {
+			const { width, height, marginLeft, marginRight } = deviceStyles;
+			setIsOversized( width > defaultSize.width );
+			setFrameSize( {
+				width: isOversized ? '100%' : width,
+				height: isOversized ? '100%' : height,
+				marginLeft,
+				marginRight,
+			} );
+		}
+	}, [ deviceType ] );
 
 	const handleResizeStart = ( _event, _direction, ref ) => {
 		// Remember the starting width so we don't have to get `ref.offsetWidth` on
@@ -253,7 +278,7 @@ function ResizableFrame( {
 				right: false,
 				bottom: false,
 				// Resizing will be disabled until the editor content is loaded.
-				left: isReady,
+				left: isReady && isResizingHandleEnabled,
 				topRight: false,
 				bottomRight: false,
 				bottomLeft: false,

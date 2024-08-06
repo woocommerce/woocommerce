@@ -32,7 +32,6 @@ import { EmptyState } from '../../../components/empty-state';
 
 export function Edit( {
 	attributes,
-	clientId,
 	context: { isInSelectedTab },
 }: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDimissed = useRef( false );
@@ -126,7 +125,6 @@ export function Edit( {
 						'Set variation prices before adding this product.',
 						'woocommerce'
 					),
-					context: clientId,
 				};
 			}
 		},
