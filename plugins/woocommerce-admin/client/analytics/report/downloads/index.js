@@ -3,6 +3,8 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { ReportSummary } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -11,7 +13,6 @@ import { charts, filters, advancedFilters } from './config';
 import DownloadsReportTable from './table';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
-import ReportSummary from '../../components/report-summary';
 import ReportFilters from '../../components/report-filters';
 
 export default class DownloadsReport extends Component {
@@ -34,6 +35,7 @@ export default class DownloadsReport extends Component {
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
 					advancedFilters={ advancedFilters }
+					recordEvent={ recordEvent }
 				/>
 				<ReportChart
 					charts={ charts }

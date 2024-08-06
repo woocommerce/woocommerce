@@ -2,26 +2,25 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, createElement } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import { getNewPath } from '@woocommerce/navigation';
-import {
-	AnalyticsError,
-	SummaryList,
-	SummaryListPlaceholder,
-	SummaryNumber,
-} from '@woocommerce/components';
+import { getNewPath } from '@woocommerce/navigation';;
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getSummaryNumbers, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { getDateParamsFromQuery } from '@woocommerce/date';
-import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
+import { AnalyticsError } from '../'
+import {
+	SummaryList,
+	SummaryListPlaceholder,
+	SummaryNumber,
+} from '../../'
 
 /**
  * Component to render summary numbers in reports.
@@ -60,6 +59,7 @@ export class ReportSummary extends Component {
 			endpoint,
 			report,
 			defaultDateRange,
+			recordEvent,
 		} = this.props;
 		const { isError, isRequesting } = summaryData;
 
@@ -183,6 +183,10 @@ ReportSummary.propTypes = {
 	 * Report name, if different than the endpoint.
 	 */
 	report: PropTypes.string,
+	/**
+	 * Function to record tracking event, like `{ recordEvent } from '@woocommerce/tracks'`.
+	 */
+	recordEvent: PropTypes.func,
 };
 
 ReportSummary.defaultProps = {
@@ -193,6 +197,7 @@ ReportSummary.defaultProps = {
 		},
 		isError: false,
 	},
+	recordEvent: () => {},
 };
 
 ReportSummary.contextType = CurrencyContext;

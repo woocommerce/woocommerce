@@ -4,6 +4,8 @@
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
+import { ReportSummary } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -12,7 +14,6 @@ import { advancedFilters, charts, filters } from './config';
 import CategoriesReportTable from './table';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
-import ReportSummary from '../../components/report-summary';
 import ProductsReportTable from '../products/table';
 import ReportFilters from '../../components/report-filters';
 
@@ -80,6 +81,7 @@ class CategoriesReport extends Component {
 					filters={ filters }
 					advancedFilters={ advancedFilters }
 					report="categories"
+					recordEvent={ recordEvent }
 				/>
 				<ReportChart
 					charts={ charts }
