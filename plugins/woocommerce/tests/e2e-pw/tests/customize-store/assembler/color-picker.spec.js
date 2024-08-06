@@ -306,7 +306,7 @@ test.describe(
 
 				await assembler.locator( '[aria-label="Back"]' ).click();
 
-				const saveButton = assembler.getByText( 'Save' );
+				const saveButton = assembler.getByText( 'Finish customizing' );
 
 				const waitResponse = page.waitForResponse(
 					( response ) =>
@@ -529,49 +529,22 @@ test.describe(
 
 			await colorPicker.click();
 
-		await colorPicker.click();
-
-		await assembler.locator( '[aria-label="Back"]' ).click();
-
-		const saveButton = assembler.getByText( 'Finish customizing' );
-
-		const waitResponseGlobalStyles = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-				response.status() === 200
-		);
-
-		const wordPressVersion = await getInstalledWordPressVersion();
-
-		await saveButton.click();
-
-		await Promise.all( [
-			waitResponseGlobalStyles,
-			wordPressVersion < 6.6
-				? page.waitForResponse(
-						( response ) =>
-							response.url().includes(
-								// When CYS will support all block themes, this URL will change.
-								'wp-json/wp/v2/templates/twentytwentyfour//home'
-							) && response.status() === 200
-				  )
-				: Promise.resolve(),
-		] );
-
-		await page.goto( baseURL );
-
-		const paragraphs = await page
-			.locator(
-				'p.wp-block.wp-block-paragraph:not([aria-label="Empty block; start writing or type forward slash to choose a block"])'
-			)
-			.evaluateAll( ( elements ) =>
-				elements.map( ( element ) => {
-					const style = window.getComputedStyle( element );
-					return {
-						background: style.backgroundColor,
-						color: style.color,
-					};
-				} )
+			// Check if Gutenberg is installed
+			const apiContext = await request.newContext( {
+				baseURL,
+				extraHTTPHeaders: {
+					Authorization: `Basic ${ encodeCredentials(
+						admin.username,
+						admin.password
+					) }`,
+					cookie: '',
+				},
+			} );
+			const listPluginsResponse = await apiContext.get(
+				`/wp-json/wp/v2/plugins`,
+				{
+					failOnStatusCode: true,
+				}
 			);
 			const pluginsList = await listPluginsResponse.json();
 			const gutenbergPlugin = pluginsList.find(

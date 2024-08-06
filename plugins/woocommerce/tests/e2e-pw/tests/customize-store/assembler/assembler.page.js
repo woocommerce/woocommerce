@@ -19,7 +19,7 @@ export class AssemblerPage {
 		// wait for longer to support multi env testing
 		await frame
 			.getByRole( 'button', { name: 'Finish customizing' } )
-			.waitFor( { timeout: 25000 } );
+			.waitFor( { timeout: 40000 } );
 	}
 
 	/**
