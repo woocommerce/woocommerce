@@ -360,10 +360,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 }
 
 OrdersPanel.propTypes = {
-	isError: PropTypes.bool,
-	isRequesting: PropTypes.bool,
 	unreadOrdersCount: PropTypes.number,
-	orders: PropTypes.array.isRequired,
 	orderStatuses: PropTypes.array,
 };
 
