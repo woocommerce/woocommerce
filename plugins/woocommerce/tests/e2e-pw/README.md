@@ -1,6 +1,6 @@
 # WooCommerce Playwright End-to-End Tests
 
-This is the documentation for the e2e testing setup based on Playwright and `wp-env`.
+This is the documentation for the e2e testing setup based on Playwright and `wp-env`
 
 ## Table of contents
 
