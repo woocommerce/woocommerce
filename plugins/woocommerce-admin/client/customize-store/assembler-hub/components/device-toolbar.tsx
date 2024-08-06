@@ -44,7 +44,7 @@ const BUTTON_CLASS_NAMES =
 	'components-button has-icon woocommerce-customize-store__device-button';
 const ICON_CLASS_NAMES = 'woocommerce-customize-store__device-icon';
 
-export function DeviceToolbar() {
+export function DeviceToolbar( { isEditorLoading = false } ) {
 	// @ts-expect-error expect error
 	const { setDeviceType } = useDispatch( editorStore );
 	const { toggleZoomOut, isZoomedOut } = useContext( ZoomOutContext );
@@ -75,6 +75,7 @@ export function DeviceToolbar() {
 			aria-label={ __( 'Resize', 'woocommerce' ) }
 		>
 			<button
+				disabled={ isEditorLoading }
 				className={ clsx( BUTTON_CLASS_NAMES, {
 					'is-selected': deviceType === 'Desktop',
 				} ) }
@@ -90,6 +91,7 @@ export function DeviceToolbar() {
 				/>
 			</button>
 			<button
+				disabled={ isEditorLoading }
 				className={ clsx( BUTTON_CLASS_NAMES, {
 					'is-selected': deviceType === 'Tablet',
 				} ) }
@@ -105,6 +107,7 @@ export function DeviceToolbar() {
 				/>
 			</button>
 			<button
+				disabled={ isEditorLoading }
 				className={ clsx( BUTTON_CLASS_NAMES, {
 					'is-selected': deviceType === 'Mobile',
 				} ) }
@@ -120,6 +123,7 @@ export function DeviceToolbar() {
 				/>
 			</button>
 			<button
+				disabled={ isEditorLoading }
 				className={ clsx( BUTTON_CLASS_NAMES ) }
 				aria-label="Zoom out"
 				onClick={ () => {

@@ -218,7 +218,11 @@ export const Layout = () => {
 								{ ! isMobileViewport && (
 									<div className="edit-site-layout__canvas-container">
 										{ isFullComposabilityFeatureAndAPIAvailable() && (
-											<DeviceToolbar />
+											<DeviceToolbar
+												isEditorLoading={
+													isEditorLoading
+												}
+											/>
 										) }
 										{ canvasResizer }
 										{ !! canvasSize.width && (
