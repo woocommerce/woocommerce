@@ -157,7 +157,6 @@ const updateCustomerData = (): void => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
 			localState.doingPush = false;
-			removeAllNotices();
 		} )
 		.catch( ( response ) => {
 			localState.doingPush = false;
