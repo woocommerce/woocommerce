@@ -58,9 +58,11 @@ export const Preview = ( { items }: { items: string[] } ) => {
 					)
 				) }
 			</ul>
-			<span className="wc-block-interactivity-components-checkbox-list__show-more">
-				<small>{ __( 'Show more…', 'woocommerce' ) }</small>
-			</span>
+			{ isLongList && (
+				<span className="wc-block-interactivity-components-checkbox-list__show-more">
+					<small>{ __( 'Show more…', 'woocommerce' ) }</small>
+				</span>
+			) }
 		</div>
 	);
 };
