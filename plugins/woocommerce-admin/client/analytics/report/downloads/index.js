@@ -3,7 +3,7 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { ReportSummary } from '@woocommerce/components';
+import { AnalyticsSummary } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -28,7 +28,7 @@ export default class DownloadsReport extends Component {
 					advancedFilters={ advancedFilters }
 					report="downloads"
 				/>
-				<ReportSummary
+				<AnalyticsSummary
 					charts={ charts }
 					endpoint="downloads"
 					query={ query }

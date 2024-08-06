@@ -6,7 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
-import { AnalyticsError, ReportSummary } from '@woocommerce/components';
+import { AnalyticsError, AnalyticsSummary } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { withSelect } from '@wordpress/data';
 
@@ -78,7 +78,7 @@ class ProductsReport extends Component {
 					advancedFilters={ advancedFilters }
 					report="products"
 				/>
-				<ReportSummary
+				<AnalyticsSummary
 					mode={ mode }
 					charts={ charts }
 					endpoint="products"

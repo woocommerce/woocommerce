@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { AnalyticsError, ReportSummary } from '@woocommerce/components';
+import { AnalyticsError, AnalyticsSummary } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -55,7 +55,7 @@ const VariationsReport = ( props ) => {
 				advancedFilters={ advancedFilters }
 				report="variations"
 			/>
-			<ReportSummary
+			<AnalyticsSummary
 				mode={ mode }
 				charts={ charts }
 				endpoint="variations"

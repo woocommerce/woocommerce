@@ -23,9 +23,9 @@ import {
 } from '../../'
 
 /**
- * Component to render summary numbers in reports.
+ * Component to render summary numbers for WooCommerce Analytics reports.
  */
-export class ReportSummary extends Component {
+export class AnalyticsSummary extends Component {
 	formatVal( val, type ) {
 		const { formatAmount, getCurrencyConfig } = this.context;
 		return type === 'currency'
@@ -129,7 +129,7 @@ export class ReportSummary extends Component {
 	}
 }
 
-ReportSummary.propTypes = {
+AnalyticsSummary.propTypes = {
 	/**
 	 * Properties of all the charts available for that report.
 	 */
@@ -189,7 +189,7 @@ ReportSummary.propTypes = {
 	recordEvent: PropTypes.func,
 };
 
-ReportSummary.defaultProps = {
+AnalyticsSummary.defaultProps = {
 	summaryData: {
 		totals: {
 			primary: {},
@@ -200,7 +200,7 @@ ReportSummary.defaultProps = {
 	recordEvent: () => {},
 };
 
-ReportSummary.contextType = CurrencyContext;
+AnalyticsSummary.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {
@@ -246,4 +246,4 @@ export default compose(
 			defaultDateRange,
 		};
 	} )
-)( ReportSummary );
+)( AnalyticsSummary );

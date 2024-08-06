@@ -4,7 +4,7 @@
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
-import { ReportSummary } from '@woocommerce/components';
+import { AnalyticsSummary } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -67,7 +67,7 @@ class CategoriesReport extends Component {
 					advancedFilters={ advancedFilters }
 					report="categories"
 				/>
-				<ReportSummary
+				<AnalyticsSummary
 					charts={ charts }
 					endpoint="products"
 					isRequesting={ isRequesting }
