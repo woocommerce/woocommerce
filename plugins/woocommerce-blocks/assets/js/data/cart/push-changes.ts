@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { removeAllNotices, debounce, pick } from '@woocommerce/base-utils';
+import { debounce, pick } from '@woocommerce/base-utils';
 import {
 	CartBillingAddress,
 	CartShippingAddress,
