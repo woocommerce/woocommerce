@@ -14,7 +14,7 @@ import {
 } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { __experimentalUseResizeCanvas as useResizeCanvas } from '@wordpress/block-editor';
 
@@ -105,7 +105,6 @@ function ResizableFrame( {
 			deviceType: getDeviceType(),
 		};
 	} );
-	const { setDeviceType } = useDispatch( editorStore );
 
 	const deviceStyles = useResizeCanvas( deviceType );
 
@@ -131,9 +130,6 @@ function ResizableFrame( {
 		setIsResizing( true );
 	};
 
-	const tabletStyles = useResizeCanvas( 'Tablet' );
-	const mobileStyles = useResizeCanvas( 'Mobile' );
-
 	// Calculate the frame size based on the window width as its resized.
 	const handleResize = ( _event, _direction, _ref, delta ) => {
 		const normalizedDelta = delta.width / resizeRatio;
@@ -151,18 +147,6 @@ function ResizableFrame( {
 		const updatedWidth = startingWidth + delta.width;
 
 		setIsOversized( updatedWidth > defaultSize.width );
-
-		if ( updatedWidth >= tabletStyles.width ) {
-			setDeviceType( 'Desktop' );
-		}
-
-		if ( updatedWidth <= tabletStyles.width ) {
-			setDeviceType( 'Tablet' );
-		}
-
-		if ( updatedWidth <= mobileStyles.width ) {
-			setDeviceType( 'Mobile' );
-		}
 
 		// Width will be controlled by the library (via `resizeRatio`),
 		// so we only need to update the height.
