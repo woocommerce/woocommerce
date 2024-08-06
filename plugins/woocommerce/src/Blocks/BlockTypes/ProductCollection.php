@@ -46,6 +46,12 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
+	/**
+	 * Whether the block should render or not.
+	 *
+	 * @var bool
+	 */
+	private $should_render = true;
 
 	/**
 	 * Initialize this block type.
@@ -80,14 +86,55 @@ class ProductCollection extends AbstractBlock {
 		// Provide location context into block's context.
 		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
 
+		// Disable block render if the ProductTemplate block is empty.
+		add_filter(
+			'render_block_woocommerce/product-template',
+			function ( $html ) {
+				$this->should_render = '' !== $html;
+
+				return $html;
+			},
+			10,
+			1
+		);
+
+		// Enable block render if the ProductCollectionNoResults block is rendered.
+		add_filter(
+			'render_block_woocommerce/product-collection-no-results',
+			function ( $html ) {
+				$this->should_render = true;
+
+				return $html;
+			},
+			11,
+			1
+		);
+
 		// Interactivity API: Add navigation directives to the product collection block.
-		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
+		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_product_collection_rendering' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
+	}
+
+	/**
+	 * Handle the rendering of the block.
+	 *
+	 * @param string $block_content The block content about to be rendered.
+	 * @param array  $block The block being rendered.
+	 *
+	 * @return string
+	 */
+	public function handle_product_collection_rendering( $block_content, $block ) {
+		if ( ! $this->should_render ) {
+			// Prevent rendering of the block. Print an empty div instead.
+			return '<div class="wp-block-woocommerce-product-collection"></div>';
+		}
+
+		return $this->enhance_product_collection_with_interactivity( $block_content, $block );
 	}
 
 	/**
