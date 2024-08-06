@@ -159,9 +159,6 @@
 	VariationForm.prototype.onAnnounceReset = function( event ) {
 		event.data.variationForm.$resetAlert.text( wc_add_to_cart_variation_params.i18n_reset_alert_text );
 		event.data.variationForm.$resetAlert.focus();
-		setTimeout( function() {
-			event.data.variationForm.$resetAlert.text("");
-		}, 1000 );
 	}
 
 	/**
@@ -574,6 +571,7 @@
 	 * Show or hide the reset button.
 	 */
 	VariationForm.prototype.toggleResetLink = function( on ) {
+		this.$resetAlert.text( '' );
 		if ( on ) {
 			if ( this.$resetVariations.css( 'visibility' ) === 'hidden' ) {
 				this.$resetVariations.css( 'visibility', 'visible' ).hide().fadeIn();
