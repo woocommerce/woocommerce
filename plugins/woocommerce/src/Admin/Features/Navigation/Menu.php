@@ -98,37 +98,27 @@ class Menu {
 	/**
 	 * Init.
 	 */
-	public function init() {
-		return;
-	}
+	public function init() {}
 
 	/**
 	 * Convert a WordPress menu callback to a URL.
 	 *
-	 * @param string $callback Menu callback.
 	 * @return string
 	 */
-	public static function get_callback_url() {
-		return;
-	}
+	public static function get_callback_url() {}
 
 	/**
 	 * Get the parent key if one exists.
 	 *
-	 * @param string $callback Callback or URL.
 	 * @return string|null
 	 */
-	public static function get_parent_key() {
-		return;
-	}
+	public static function get_parent_key() {}
 
 	/**
 	 * Adds a top level menu item to the navigation.
 	 */
 	private static function add_category() {
 		Init::deprecation_notice( 'Menu::add_category' );
-
-		return;
 	}
 
 	/**
@@ -136,8 +126,6 @@ class Menu {
 	 */
 	private static function add_item() {
 		Init::deprecation_notice( 'Menu::add_item' );
-
-		return;
 	}
 
 	/**
@@ -167,8 +155,6 @@ class Menu {
 	 */
 	public static function add_plugin_category() {
 		Init::deprecation_notice( 'Menu::add_plugin_category' );
-
-		return;
 	}
 
 	/**
@@ -176,8 +162,6 @@ class Menu {
 	 */
 	public static function add_plugin_item() {
 		Init::deprecation_notice( 'Menu::add_plugin_item' );
-
-		return;
 	}
 
 	/**
@@ -185,8 +169,6 @@ class Menu {
 	 */
 	public static function add_setting_item() {
 		Init::deprecation_notice( 'Menu::add_setting_item' );
-
-		return;
 	}
 
 	/**

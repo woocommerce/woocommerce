@@ -40,9 +40,10 @@ class Init {
 	/**
 	 * Create a deprecation notice.
 	 *
-	 * @param string $fn The function that is deprecated.
+	 * @param string $fcn The function that is deprecated.
 	 */
 	public static function deprecation_notice( $fcn ) {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( 'Automattic\WooCommerce\Admin\Features\Navigation\\' . $fcn . ' is deprecated since 9.3 with no alternative. Navigation classes will be removed in WooCommerce 9.4' );
 	}
 }

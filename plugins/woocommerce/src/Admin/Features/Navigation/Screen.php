@@ -225,8 +225,6 @@ class Screen {
 	 */
 	public static function register_post_type() {
 		Init::deprecation_notice( 'Screen::register_post_type' );
-
-		return;
 	}
 
 	/**
@@ -234,7 +232,5 @@ class Screen {
 	 */
 	public static function register_taxonomy() {
 		Init::deprecation_notice( 'Screen::register_taxonomy' );
-
-		return;
 	}
 }
