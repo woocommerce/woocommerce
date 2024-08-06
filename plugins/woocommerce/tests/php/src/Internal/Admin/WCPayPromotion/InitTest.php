@@ -219,7 +219,7 @@ class InitTest extends WC_Unit_Test_Case {
 
 		add_filter(
 			'locale',
-			function( $_locale ) {
+			function ( $_locale ) {
 				return 'zh_TW';
 			}
 		);
@@ -267,7 +267,7 @@ class InitTest extends WC_Unit_Test_Case {
 						'body' => wp_json_encode(
 							array(
 								array(
-									'id' => 'mock-promotion-1',
+									'id'         => 'mock-promotion-1',
 									'is_visible' => (object) array(
 										'type'      => 'base_location_country',
 										'value'     => 'ZA',
@@ -275,7 +275,7 @@ class InitTest extends WC_Unit_Test_Case {
 									),
 								),
 								array(
-									'id' => 'mock-promotion-2',
+									'id'         => 'mock-promotion-2',
 									'is_visible' => (object) array(
 										'type'      => 'base_location_country',
 										'value'     => 'RO',
