@@ -45,12 +45,12 @@ const BUTTON_CLASS_NAMES =
 const ICON_CLASS_NAMES = 'woocommerce-customize-store__device-icon';
 
 export function DeviceToolbar() {
-	// @ts-expect-error No types for this exist yet.
+	// @ts-expect-error expect error
 	const { setDeviceType } = useDispatch( editorStore );
 	const { toggleZoomOut, isZoomedOut } = useContext( ZoomOutContext );
 
 	const { deviceType } = useSelect( ( select ) => {
-		// @ts-ignore No types for this exist yet.
+		// @ts-ignore expect error
 		const { getDeviceType } = select( editorStore );
 
 		return {
