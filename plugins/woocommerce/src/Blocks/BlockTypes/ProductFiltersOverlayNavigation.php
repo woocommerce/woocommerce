@@ -15,15 +15,6 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 	protected $block_name = 'product-filters-overlay-navigation';
 
 	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @see $this->register_block_type()
@@ -44,14 +35,23 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+		$classes            = $classes_and_styles['classes'] . ' wc-block-product-filters-overlay-navigation';
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => trim( $classes ),
+				'style' => trim( $classes_and_styles['style'] ),
+			)
+		);
+
+		do_action( 'qm/debug', $classes_and_styles );
 
 		$html_content = strtr(
-			'<div class="wp-block-woocommerce-product-filters-overlay-navigation wc-block-product-filters-overlay-navigation alignright">
+			'<div {{wrapper_attributes}}>
 				{{primary_content}}
 				{{secondary_content}}
 			</div>',
 			array(
-				'{{classes_and_styles}}' => $classes_and_styles,
+				'{{wrapper_attributes}}' => $wrapper_attributes,
 				'{{primary_content}}'    => 'open-overlay' === $attributes['triggerType'] ? $this->render_icon( $attributes ) : $this->render_label( $attributes ),
 				'{{secondary_content}}'  => 'open-overlay' === $attributes['triggerType'] ? $this->render_label( $attributes ) : $this->render_icon( $attributes ),
 			)

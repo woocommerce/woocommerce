@@ -22,6 +22,10 @@
 		"iconSize": {
 			"type": "string"
 		},
+		"overlayMode": {
+			"type": "string",
+			"default": "never"
+		},
 		"style": {
 			"type": "object",
 			"default": {

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import {
 	useBlockProps,
@@ -25,6 +26,7 @@ import { Icon, close } from '@wordpress/icons';
  */
 import type { BlockAttributes, BlockVariationTriggerType } from './types';
 import { default as productFiltersIcon } from '../product-filters/icon';
+import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/types';
 import './editor.scss';
 
 const OverlayNavigationLabel = ( {
@@ -117,6 +119,7 @@ const OverlayNavigationContent = ( {
 export const Edit = ( {
 	attributes,
 	setAttributes,
+	clientId,
 }: BlockEditProps< BlockAttributes > ) => {
 	const { navigationStyle, buttonStyle, iconSize, style, triggerType } =
 		attributes;
@@ -155,10 +158,54 @@ export const Edit = ( {
 			isWithinTemplate: isTemplate,
 		};
 	} );
-	const shouldHideBlock = isWithinTemplate
-		? false
-		: ! isWithinProductFiltersTemplatePart &&
-		  triggerType === 'open-overlay';
+	const {
+		productFiltersOverlayMode,
+	}: {
+		productFiltersOverlayMode: ProductFiltersBlockOverlayAttribute;
+	} = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		const { getBlock } = select( 'core/editor' );
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		const { getBlockParentsByBlockName } = select( 'core/block-editor' );
+
+		const [ productFiltersClientId ] = getBlockParentsByBlockName(
+			clientId,
+			'woocommerce/product-filters',
+			true
+		);
+		const productFiltersBlock = getBlock< {
+			attributes: { overlay: ProductFiltersBlockOverlayAttribute };
+		} >( productFiltersClientId );
+
+		return {
+			productFiltersOverlayMode: productFiltersBlock?.attributes?.overlay,
+		};
+	} );
+
+	useEffect( () => {
+		setAttributes( { overlayMode: productFiltersOverlayMode } );
+	}, [ productFiltersOverlayMode, setAttributes ] );
+
+	const shouldHideBlock = () => {
+		if (
+			productFiltersOverlayMode ===
+				ProductFiltersBlockOverlayAttribute.NEVER &&
+			triggerType === 'open-overlay'
+		) {
+			return true;
+		}
+
+		if (
+			isWithinProductFiltersTemplatePart &&
+			triggerType === 'open-overlay'
+		) {
+			return true;
+		}
+
+		return false;
+	};
 	// We need useInnerBlocksProps because Gutenberg only applies layout classes
 	// to parent block. We don't have any inner blocks but we want to use the
 	// layout controls.
@@ -169,7 +216,7 @@ export const Edit = ( {
 		[]
 	);
 
-	if ( shouldHideBlock ) {
+	if ( shouldHideBlock() ) {
 		return null;
 	}
 

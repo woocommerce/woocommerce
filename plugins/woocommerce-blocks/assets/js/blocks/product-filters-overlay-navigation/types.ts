@@ -1,3 +1,5 @@
+import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/types';
+
 type BorderRadius = {
 	bottomLeft: string;
 	bottomRight: string;
@@ -14,6 +16,7 @@ export type BlockAttributes = {
 	navigationStyle: 'label-and-icon' | 'label-only' | 'icon-only';
 	buttonStyle: string;
 	iconSize?: number;
+	overlayMode: ProductFiltersBlockOverlayAttribute;
 	triggerType: BlockVariationTriggerType;
 	style: {
 		border?: {
