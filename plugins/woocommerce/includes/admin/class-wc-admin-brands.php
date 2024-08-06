@@ -35,7 +35,6 @@ class WC_Brands_Admin {
 	public function __construct() {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'styles' ) );
 		add_action( 'product_brand_add_form_fields', array( $this, 'add_thumbnail_field' ) );
 		add_action( 'product_brand_edit_form_fields', array( $this, 'edit_thumbnail_field' ), 10, 1 );
 		add_action( 'created_term', array( $this, 'thumbnail_field_save' ), 10, 1 );
@@ -257,17 +256,6 @@ class WC_Brands_Admin {
 			wp_enqueue_media();
 			wp_enqueue_style( 'woocommerce_admin_styles' );
 		}
-	}
-
-	/**
-	 * Add admin styles.
-	 *
-	 * @since x.x.x
-	 * @return void
-	 */
-	public function styles() {
-		$version = Constants::get_constant( 'WC_VERSION' );
-		wp_enqueue_style( 'brands-styles', WC()->plugin_url() . '/assets/css/admin.css', array(), $version );
 	}
 
 	/**
