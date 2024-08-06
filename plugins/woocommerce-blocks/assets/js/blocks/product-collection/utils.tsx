@@ -210,7 +210,7 @@ export const getProductCollectionUIStateInEditor = ( {
 	 */
 	const isProductContextRequired = usesReference?.includes( 'product' );
 	const isProductContextSelected =
-		( attributes.selectedReference?.id ?? null ) !== null;
+		( attributes.query?.productReference ?? null ) !== null;
 	if (
 		isProductContextRequired &&
 		! isInRequiredLocation &&

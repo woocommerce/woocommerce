@@ -33,7 +33,7 @@ import {
 import './editor.scss';
 import { getDefaultStockStatuses } from '../product-collection/constants';
 
-const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'selectedReference' ];
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(

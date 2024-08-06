@@ -44,16 +44,16 @@ const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 				</HStack>
 				<ProductControl
 					selected={
-						attributes.selectedReference?.id as SelectedOption
+						attributes.query?.productReference as SelectedOption
 					}
 					showVariations
 					onChange={ ( value = [] ) => {
 						const isValidId = ( value[ 0 ]?.id ?? null ) !== null;
 						if ( isValidId ) {
 							props.setAttributes( {
-								selectedReference: {
-									type: 'product',
-									id: value[ 0 ].id,
+								query: {
+									...attributes.query,
+									productReference: value[ 0 ].id,
 								},
 							} );
 						}
