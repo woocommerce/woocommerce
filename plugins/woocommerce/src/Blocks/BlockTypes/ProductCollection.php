@@ -131,7 +131,7 @@ class ProductCollection extends AbstractBlock {
 	public function handle_product_collection_rendering( $block_content, $block ) {
 		if ( ! $this->should_render ) {
 			// Prevent rendering of the block. Print an empty div instead.
-			return '<div class="wp-block-woocommerce-product-collection"></div>';
+			return '<div class="wp-block-woocommerce-product-collection wp-block-woocommerce-product-collection--empty"></div>';
 		}
 
 		return $this->enhance_product_collection_with_interactivity( $block_content, $block );
