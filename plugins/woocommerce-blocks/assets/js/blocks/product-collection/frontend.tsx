@@ -13,7 +13,7 @@ import { triggerProductListRenderedEvent } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import type { CoreCollectionNames } from './types';
+import { CoreCollectionNames } from './types';
 import './style.scss';
 
 export type ProductCollectionStoreContext = {
@@ -191,7 +191,7 @@ const productCollectionStore = {
 				getContext< ProductCollectionStoreContext >();
 
 			triggerProductListRenderedEvent( {
-				collection,
+				collection: collection || CoreCollectionNames.PRODUCT_CATALOG,
 			} );
 		},
 	},

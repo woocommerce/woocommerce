@@ -25,7 +25,6 @@ import {
 	type ProductCollectionDisplayLayout,
 	type PreviewState,
 	type SetPreviewState,
-	CoreCollectionNames,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -354,7 +353,6 @@ export const getDefaultProductCollection = () =>
 				inherit: getDefaultValueOfInherit(),
 				filterable: getDefaultValueOfFilterable(),
 			},
-			collection: CoreCollectionNames.PRODUCT_CATALOG,
 		},
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
 	);

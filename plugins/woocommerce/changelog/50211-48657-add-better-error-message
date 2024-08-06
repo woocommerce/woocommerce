@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS - Improve the error when a request fails due to permissions
