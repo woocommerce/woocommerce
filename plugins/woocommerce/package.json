@@ -529,8 +529,12 @@
 						".wp-env.json"
 					],
 					"events": [
-						"disabled"
-					]
+						"push"
+					],
+					"report": {
+						"resultsBlobName": "core-metrics-report",
+						"resultsPath": "../../tools/compare-perf/artifacts/"
+					}
 				},
 				{
 					"name": "Blocks e2e tests",
