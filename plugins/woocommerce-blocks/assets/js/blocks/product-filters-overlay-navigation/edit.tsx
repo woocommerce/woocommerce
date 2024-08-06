@@ -131,11 +131,9 @@ export const Edit = ( {
 	const {
 		isWithinProductFiltersTemplatePart,
 		isWithinProductFiltersOverlayTemplatePart,
-		isWithinTemplate,
 	}: {
 		isWithinProductFiltersTemplatePart: boolean;
 		isWithinProductFiltersOverlayTemplatePart: boolean;
-		isWithinTemplate: boolean;
 	} = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -146,7 +144,6 @@ export const Edit = ( {
 		const currentPostType = getCurrentPostType< string >();
 		let isProductFiltersTemplatePart = false;
 		let isProductFiltersOverlayTemplatePart = false;
-		const isTemplate = currentPostType === 'wp_template';
 
 		if (
 			currentPostType === 'wp_template_part' &&
@@ -162,7 +159,6 @@ export const Edit = ( {
 			isWithinProductFiltersTemplatePart: isProductFiltersTemplatePart,
 			isWithinProductFiltersOverlayTemplatePart:
 				isProductFiltersOverlayTemplatePart,
-			isWithinTemplate: isTemplate,
 		};
 	} );
 	const {

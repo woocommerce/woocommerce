@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/types';
 
 type BorderRadius = {
