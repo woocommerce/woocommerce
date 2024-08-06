@@ -156,6 +156,26 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
+	 * Check if next tag is a PC block.
+	 *
+	 * @param WP_HTML_Tag_processor $p Initial tag processor.
+	 *
+	 * @return bool Answer if PC block is available.
+	 */
+	private function is_next_tag_product_collection( $p ) {
+		return $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) );
+	}
+
+	/**
+	 * Set PC block namespace for Interactivity API.
+	 *
+	 * @param WP_HTML_Tag_processor $p Initial tag processor.
+	 */
+	private function set_product_collection_namespace( $p ) {
+		$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+	}
+
+	/**
 	 * Attach the init directive to Product Collection block.
 	 *
 	 * @param string $block_content The HTML content of the block.
@@ -167,7 +187,7 @@ class ProductCollection extends AbstractBlock {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-init to the product collection block so we trigger JS event on render.
-		if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
+		if ( $this->is_next_tag_product_collection( $p ) ) {
 			$p->set_attribute(
 				'data-wc-init',
 				'callbacks.onRender'
@@ -198,7 +218,7 @@ class ProductCollection extends AbstractBlock {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-wc-navigation-id to the product collection block.
-		if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
+		if ( $this->is_next_tag_product_collection( $p ) ) {
 			$p->set_attribute(
 				'data-wc-navigation-id',
 				'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
@@ -268,8 +288,8 @@ class ProductCollection extends AbstractBlock {
 			// Enqueue the Interactivity API runtime and set the namespace.
 			wp_enqueue_script( 'wc-interactivity' );
 			$p = new \WP_HTML_Tag_Processor( $block_content );
-			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
-				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			if ( $this->is_next_tag_product_collection( $p ) ) {
+				$this->set_product_collection_namespace( $p );
 			}
 			$block_content = $p->get_updated_html();
 
@@ -350,7 +370,7 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$this->set_product_collection_namespace( $processor );
 			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
 			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
