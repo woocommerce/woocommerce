@@ -63,7 +63,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		);
 
 		// Act.
-		$specs    = PaymentGatewaySuggestions::get_specs();
+		$specs = PaymentGatewaySuggestions::get_specs();
 
 		// Assert.
 		$defaults = DefaultPaymentGateways::get_all();
