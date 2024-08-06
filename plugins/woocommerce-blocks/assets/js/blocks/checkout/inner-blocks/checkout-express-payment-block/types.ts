@@ -8,3 +8,9 @@ export type ExpressCheckoutAttributes = {
 		remove: boolean;
 	};
 };
+
+export type ExpressCheckoutSettings = {
+	showButtonStyles: boolean;
+	buttonHeight: string;
+	buttonBorderRadius: string;
+};

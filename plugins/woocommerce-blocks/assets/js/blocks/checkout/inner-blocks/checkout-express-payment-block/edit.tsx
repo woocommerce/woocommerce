@@ -10,17 +10,18 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
-import { ADMIN_URL } from '@woocommerce/settings';
+import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import './editor.scss';
-import { ExpressCheckoutAttributes } from './types';
+import { ExpressCheckoutAttributes, ExpressCheckoutSettings } from './types';
 import { ExpressCheckoutContext } from './context';
 
 export const Edit = ( {
@@ -42,6 +43,16 @@ export const Edit = ( {
 		),
 		attributes,
 	} );
+
+	useEffect( () => {
+		const { showButtonStyles, buttonHeight, buttonBorderRadius } =
+			getSetting< ExpressCheckoutSettings >( 'expressCheckout' );
+		setAttributes( {
+			showButtonStyles,
+			buttonHeight,
+			buttonBorderRadius,
+		} );
+	}, [ setAttributes ] );
 
 	if ( ! isInitialized || ! hasExpressPaymentMethods ) {
 		return null;
