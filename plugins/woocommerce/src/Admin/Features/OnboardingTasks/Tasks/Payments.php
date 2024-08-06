@@ -77,8 +77,12 @@ class Payments extends Task {
 	 */
 	public function can_view() {
 		$woocommerce_payments = $this->task_list->get_task( 'woocommerce-payments' );
-		// Make sure the task is mutually exclusive with the WooPayments task.
-		return Features::is_enabled( 'payment-gateway-suggestions' ) && ! $woocommerce_payments->can_view();
+		// Make sure the task is mutually exclusive with the WooPayments task
+		//and WooPayments is not installed.
+		return Features::is_enabled( 'payment-gateway-suggestions' ) && (
+			! WooCommercePayments::is_installed() ||
+			! $woocommerce_payments->can_view()
+			);
 	}
 
 	/**
