@@ -262,8 +262,6 @@ test.describe(
 			);
 			await expect( fontPickers ).toHaveCount( 10 );
 
-		const saveButton = assembler.getByText( 'Finish customizing' );
-
 			for ( const fontPicker of await fontPickers.all() ) {
 				await fontPicker.waitFor();
 				await fontPicker.click();

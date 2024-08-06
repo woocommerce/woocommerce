@@ -111,7 +111,7 @@ test.describe(
 
 			await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const saveButton = assembler.getByText( 'Finish customizing' );
+			const saveButton = assembler.getByText( 'Finish customizing' );
 
 			const waitResponse = page.waitForResponse(
 				( response ) =>

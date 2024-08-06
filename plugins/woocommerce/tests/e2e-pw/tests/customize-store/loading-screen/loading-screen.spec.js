@@ -125,14 +125,14 @@ test.describe(
 			await pageObject.setupSite( baseURL );
 			await pageObject.waitForLoadingScreenFinish();
 
-		const assembler = await pageObject.getAssembler();
-		await assembler
-			.getByRole( 'button', { name: 'Finish customizing' } )
-			.click();
-		await assembler.getByText( 'Your store looks great!' ).waitFor();
-		// Abort any additional unnecessary requests
-		await page.evaluate( () => window.stop() );
-		await pageObject.setupSite( baseURL );
+			const assembler = await pageObject.getAssembler();
+			await assembler
+				.getByRole( 'button', { name: 'Finish customizing' } )
+				.click();
+			await assembler.getByText( 'Your store looks great!' ).waitFor();
+			// Abort any additional unnecessary requests
+			await page.evaluate( () => window.stop() );
+			await pageObject.setupSite( baseURL );
 
 			const requestToSetupStore = createRequestsToSetupStoreDictionary();
 
