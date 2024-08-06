@@ -597,7 +597,11 @@ body.woocommerce-assembler {
 
 	.woocommerce-customize-store__device-button {
 		&:hover,
+		&:focus,
 		&.is-selected {
+			box-shadow: none;
+			outline: none;
+
 			.woocommerce-customize-store__device-icon {
 				fill: initial;
 
