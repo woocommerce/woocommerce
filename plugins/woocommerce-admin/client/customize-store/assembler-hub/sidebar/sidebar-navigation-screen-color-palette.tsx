@@ -71,11 +71,11 @@ export const SidebarNavigationScreenColorPalette = ( {
 		: __( 'Choose your color palette', 'woocommerce' );
 	const description = aiOnline
 		? __(
-				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in Editor | <StyleLink>Styles</StyleLink>.',
 				'woocommerce'
 		  )
 		: __(
-				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in Editor | <StyleLink>Styles</StyleLink>.',
 				'woocommerce'
 		  );
 
@@ -84,24 +84,6 @@ export const SidebarNavigationScreenColorPalette = ( {
 			title={ title }
 			onNavigateBackClick={ onNavigateBackClick }
 			description={ createInterpolateElement( description, {
-				EditorLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_editor_link_click',
-								{
-									source: 'color-palette',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
-				),
 				StyleLink: (
 					<Link
 						onClick={ () => {

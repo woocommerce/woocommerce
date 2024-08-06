@@ -4,14 +4,11 @@
 import { Button, Modal } from '@wordpress/components';
 import { Sender } from 'xstate';
 import { __ } from '@wordpress/i18n';
-import { Link } from '@woocommerce/components';
-import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '..';
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { trackEvent } from '../tracking';
 export const DesignChangeWarningModal = ( {
 	setOpenDesignChangeWarningModal,
@@ -33,25 +30,9 @@ export const DesignChangeWarningModal = ( {
 			shouldCloseOnClickOutside={ false }
 		>
 			<p>
-				{ createInterpolateElement(
-					__(
-						"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
-						'woocommerce'
-					),
-					{
-						EditorLink: (
-							<Link
-								onClick={ () => {
-									window.open(
-										`${ ADMIN_URL }site-editor.php`,
-										'_blank'
-									);
-									return false;
-								} }
-								href=""
-							/>
-						),
-					}
+				{ __(
+					"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the Editor.",
+					'woocommerce'
 				) }
 			</p>
 			<div className="woocommerce-customize-store__design-change-warning-modal-footer">
@@ -92,25 +73,9 @@ export const StartNewDesignWarningModal = ( {
 			shouldCloseOnClickOutside={ false }
 		>
 			<p>
-				{ createInterpolateElement(
-					__(
-						"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
-						'woocommerce'
-					),
-					{
-						EditorLink: (
-							<Link
-								onClick={ () => {
-									window.open(
-										`${ ADMIN_URL }site-editor.php`,
-										'_blank'
-									);
-									return false;
-								} }
-								href=""
-							/>
-						),
-					}
+				{ __(
+					"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the Editor.",
+					'woocommerce'
 				) }
 			</p>
 			<div className="woocommerce-customize-store__design-change-warning-modal-footer">
@@ -151,25 +116,9 @@ export const StartOverWarningModal = ( {
 			shouldCloseOnClickOutside={ false }
 		>
 			<p>
-				{ createInterpolateElement(
-					__(
-						"You'll be asked to provide your business info again, and will lose your existing AI design. If you want to customize your existing design, you can do so via the <EditorLink>Editor</EditorLink>.",
-						'woocommerce'
-					),
-					{
-						EditorLink: (
-							<Link
-								onClick={ () => {
-									window.open(
-										`${ ADMIN_URL }site-editor.php`,
-										'_blank'
-									);
-									return false;
-								} }
-								href=""
-							/>
-						),
-					}
+				{ __(
+					"You'll be asked to provide your business info again, and will lose your existing AI design. If you want to customize your existing design, you can do so via the Editor.",
+					'woocommerce'
 				) }
 			</p>
 			<div className="woocommerce-customize-store__design-change-warning-modal-footer">
@@ -222,25 +171,9 @@ export const ThemeSwitchWarningModal = ( {
 							'Your active theme will be changed and you could lose any changes you’ve made to it.',
 							'woocommerce'
 					  )
-					: createInterpolateElement(
-							__(
-								"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
-								'woocommerce'
-							),
-							{
-								EditorLink: (
-									<Link
-										onClick={ () => {
-											window.open(
-												`${ ADMIN_URL }site-editor.php`,
-												'_blank'
-											);
-											return false;
-										} }
-										href=""
-									/>
-								),
-							}
+					: __(
+							"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the Editor.",
+							'woocommerce'
 					  ) }
 			</p>
 			<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
