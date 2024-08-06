@@ -41,7 +41,7 @@ jobs:
           # If 'base_ref' is available, the 'Build Matrix' step requires non-shallow git-history to identify changed files.
           fetch-depth: ${{ ( ( github.base_ref && '0' ) || '1' ) }}
       - name: 'Setup PNPM'
-        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+        uses: 'pnpm/action-setup@18ac635edf3d6cd3e88d281bceecc25c4dbc1e73'
       - uses: actions/github-script@v7
         name: 'Build Matrix'
         id: 'project-jobs'
@@ -253,7 +253,7 @@ jobs:
         name: 'Checkout'
 
       - name: 'Setup PNPM'
-        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+        uses: 'pnpm/action-setup@18ac635edf3d6cd3e88d281bceecc25c4dbc1e73'
 
       - name: 'Send messages for failed jobs'
         env:

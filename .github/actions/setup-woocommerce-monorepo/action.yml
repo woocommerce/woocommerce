@@ -27,7 +27,7 @@ runs:
           shell: 'bash'
           run: 'echo "version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)" >> $GITHUB_OUTPUT'
         - name: 'Setup PNPM'
-          uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+          uses: 'pnpm/action-setup@18ac635edf3d6cd3e88d281bceecc25c4dbc1e73'
           with:
               version: ${{ steps.read-pnpm-version.outputs.version }}
         - name: 'Setup Node'
