@@ -27,10 +27,10 @@ const ProductsControl = ( {
 	error,
 	onChange,
 	onSearch,
-	selected,
-	products,
-	isLoading,
-	isCompact,
+	selected = [],
+	products = [],
+	isLoading = true,
+	isCompact = false,
 } ) => {
 	const messages = {
 		clear: __( 'Clear all products', 'woocommerce' ),
@@ -88,13 +88,6 @@ ProductsControl.propTypes = {
 	products: PropTypes.array,
 	isCompact: PropTypes.bool,
 	isLoading: PropTypes.bool,
-};
-
-ProductsControl.defaultProps = {
-	selected: [],
-	products: [],
-	isCompact: false,
-	isLoading: true,
 };
 
 export default withSearchedProducts( ProductsControl );

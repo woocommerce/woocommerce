@@ -34,6 +34,9 @@ import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
+// @ts-ignore No types for this exist yet.
+import { store as editorStore } from '@wordpress/editor';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -52,12 +55,14 @@ import { useQuery } from '@woocommerce/navigation';
 import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
+import { DeviceToolbar } from './components/device-toolbar';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
-const ANIMATION_DURATION = 0.5;
+const ANIMATION_DURATION = 0.3;
 
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
@@ -71,6 +76,15 @@ export const Layout = () => {
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
 		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
 	);
+
+	const { deviceType } = useSelect( ( select ) => {
+		// @ts-ignore No types for this exist yet.
+		const { getDeviceType } = select( editorStore );
+
+		return {
+			deviceType: getDeviceType(),
+		};
+	} );
 
 	useEffect( () => {
 		setShowAiOfflineModal(
@@ -203,6 +217,13 @@ export const Layout = () => {
 
 								{ ! isMobileViewport && (
 									<div className="edit-site-layout__canvas-container">
+										{ isFullComposabilityFeatureAndAPIAvailable() && (
+											<DeviceToolbar
+												isEditorLoading={
+													isEditorLoading
+												}
+											/>
+										) }
 										{ canvasResizer }
 										{ !! canvasSize.width && (
 											<motion.div
@@ -234,11 +255,17 @@ export const Layout = () => {
 														setIsOversized={
 															setIsResizableFrameOversized
 														}
+														isResizingHandleEnabled={
+															! isFullComposabilityFeatureAndAPIAvailable()
+														}
 														innerContentStyle={ {
 															background:
 																gradientValue ??
 																backgroundColor,
 														} }
+														deviceType={
+															deviceType
+														}
 													>
 														{ editor }
 													</ResizableFrame>
