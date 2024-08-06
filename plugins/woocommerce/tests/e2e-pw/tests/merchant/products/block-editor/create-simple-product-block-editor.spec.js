@@ -53,6 +53,8 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 		let productId;
 
 		test.skip(
+			// skip(condition, description) can be used at runtime to skip a test
+			// eslint-disable-next-line jest/valid-title
 			isTrackingSupposedToBeEnabled,
 			'The block product editor is not being tested'
 		);
