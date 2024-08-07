@@ -48,7 +48,7 @@ let simpleProductId,
 
 test.describe(
 	'WooCommerce Orders > Add new order',
-	{ tag: [ '@services', '@external' ] },
+	{ tag: '@services' },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

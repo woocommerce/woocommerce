@@ -23,7 +23,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Shopper Account Email Receiving',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		test.beforeEach( async ( { page, user } ) => {
 			await page.goto(
@@ -197,7 +197,7 @@ test.describe(
 
 test.describe(
 	'Shopper Password Reset Email Receiving',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		test.beforeEach( async ( { page } ) => {
 			await page.goto(

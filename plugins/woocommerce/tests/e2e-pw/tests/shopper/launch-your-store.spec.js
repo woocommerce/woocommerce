@@ -3,7 +3,7 @@ const { setOption } = require( '../../utils/options' );
 
 test.describe(
 	'Launch Your Store front end - logged out',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@local' ] },
 	() => {
 		test.afterEach( async ( { baseURL } ) => {
 			try {

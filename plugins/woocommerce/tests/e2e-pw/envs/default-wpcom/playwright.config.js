@@ -7,7 +7,7 @@ config = {
 		{
 			name: 'default wpcom',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			grep: /@external/,
+			grepInvert: /@external/,
 		},
 	],
 };

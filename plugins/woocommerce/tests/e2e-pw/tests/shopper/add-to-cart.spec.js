@@ -7,7 +7,7 @@ const productPrice = '13.99';
 
 test.describe(
 	'Add to Cart behavior',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		let productId;
 

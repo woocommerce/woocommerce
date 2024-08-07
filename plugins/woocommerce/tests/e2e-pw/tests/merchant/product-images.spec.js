@@ -73,7 +73,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Products > Product Images',
-	{ tag: [ '@gutenberg', '@services', '@external' ] },
+	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
 		test( 'can set product image', async ( { page, product } ) => {
 			await test.step( 'Navigate to product edit page', async () => {

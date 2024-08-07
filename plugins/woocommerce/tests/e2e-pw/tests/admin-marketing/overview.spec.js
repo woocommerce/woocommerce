@@ -1,6 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 
-test.describe( 'Marketing page', { tag: '@external' }, () => {
+test.describe( 'Marketing page', { tag: '@local' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test( 'A user can view the Marketing > Overview page without it crashing', async ( {

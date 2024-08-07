@@ -41,7 +41,7 @@ let productId_editVariations,
 	productId_deleteVariations,
 	productId_singleVariation;
 
-test.describe( 'Variations tab', { tag: [ '@gutenberg', '@external' ] }, () => {
+test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Create variable products', () => {
 		test.beforeAll( async ( { browser } ) => {
 			productId_editVariations = await createVariableProduct(

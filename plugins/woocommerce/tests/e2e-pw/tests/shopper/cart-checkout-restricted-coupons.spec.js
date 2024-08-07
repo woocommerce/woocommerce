@@ -10,7 +10,7 @@ const excludedCategoryName = 'Excluded Category';
 
 test.describe(
 	'Cart & Checkout Restricted Coupons',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		let firstProductId,
 			secondProductId,

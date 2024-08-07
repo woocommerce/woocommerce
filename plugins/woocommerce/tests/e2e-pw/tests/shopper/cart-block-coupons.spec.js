@@ -59,7 +59,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Cart Block Applying Coupons',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		const couponBatchId = [];
 

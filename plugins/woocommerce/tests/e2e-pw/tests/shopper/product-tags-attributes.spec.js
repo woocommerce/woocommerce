@@ -30,7 +30,7 @@ let product1Id,
 
 test.describe(
 	'Browse product tags and attributes from the product page',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

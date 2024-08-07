@@ -3,7 +3,7 @@ const { test, expect } = require( '@playwright/test' );
 // test case for bug https://github.com/woocommerce/woocommerce/pull/46429
 test.describe(
 	'Check the title of the shop page after the page has been deleted',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 		test.beforeEach( async ( { page } ) => {

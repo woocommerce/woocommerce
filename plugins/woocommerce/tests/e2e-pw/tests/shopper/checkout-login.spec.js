@@ -24,7 +24,7 @@ const customer = {
 
 test.describe(
 	'Shopper Checkout Login Account',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		let productId, orderId, shippingZoneId, customerId;
 

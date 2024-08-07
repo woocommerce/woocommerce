@@ -70,57 +70,51 @@ const test = baseTest.extend( {
 	},
 } );
 
-test(
-	'can add images',
-	{ tag: [ '@gutenberg', '@external' ] },
-	async ( { page, product } ) => {
-		const images = [ 'image-01', 'image-02' ];
+test( 'can add images', { tag: '@gutenberg' }, async ( { page, product } ) => {
+	const images = [ 'image-01', 'image-02' ];
 
-		await test.step( 'navigate to product edit page', async () => {
-			await page.goto(
-				`wp-admin/post.php?post=${ product.id }&action=edit`
-			);
-		} );
+	await test.step( 'navigate to product edit page', async () => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+	} );
 
-		await test.step( 'add images', async () => {
-			await page.getByText( 'Choose an image' ).click();
-			const dataIds = await selectImagesInLibrary( page, images );
+	await test.step( 'add images', async () => {
+		await page.getByText( 'Choose an image' ).click();
+		const dataIds = await selectImagesInLibrary( page, images );
 
+		await expect(
+			page.getByLabel( 'Block: Product images' ).locator( 'img' )
+		).toHaveCount( images.length );
+
+		for ( const dataId of dataIds ) {
 			await expect(
-				page.getByLabel( 'Block: Product images' ).locator( 'img' )
-			).toHaveCount( images.length );
+				page
+					.getByLabel( 'Block: Product images' )
+					.locator( `img[id="${ dataId }"]` )
+			).toBeVisible();
+		}
+	} );
 
-			for ( const dataId of dataIds ) {
-				await expect(
-					page
-						.getByLabel( 'Block: Product images' )
-						.locator( `img[id="${ dataId }"]` )
-				).toBeVisible();
-			}
-		} );
+	await test.step( 'update the product', async () => {
+		await page.getByRole( 'button', { name: 'Update' } ).click();
+		// Verify product was updated
+		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
+			'Product updated'
+		);
+	} );
 
-		await test.step( 'update the product', async () => {
-			await page.getByRole( 'button', { name: 'Update' } ).click();
-			// Verify product was updated
-			await expect(
-				page.getByLabel( 'Dismiss this notice' )
-			).toContainText( 'Product updated' );
-		} );
+	await test.step( 'verify product image was set', async () => {
+		// Verify image in store frontend
+		await page.goto( product.permalink );
 
-		await test.step( 'verify product image was set', async () => {
-			// Verify image in store frontend
-			await page.goto( product.permalink );
-
-			for ( const image of images ) {
-				await expect( page.getByTitle( image ) ).toBeVisible();
-			}
-		} );
-	}
-);
+		for ( const image of images ) {
+			await expect( page.getByTitle( image ) ).toBeVisible();
+		}
+	} );
+} );
 
 test(
 	'can replace an image',
-	{ tag: [ '@gutenberg', '@external' ] },
+	{ tag: '@gutenberg' },
 	async ( { page, productWithGallery } ) => {
 		const initialImagesCount = productWithGallery.images.length;
 		const newImageName = 'image-01';
@@ -173,7 +167,7 @@ test(
 
 test(
 	'can remove an image',
-	{ tag: [ '@gutenberg', '@external' ] },
+	{ tag: '@gutenberg' },
 	async ( { page, productWithGallery } ) => {
 		const initialImagesCount = productWithGallery.images.length;
 		const removedImgLocator = page
@@ -224,7 +218,7 @@ test(
 
 test(
 	'can set an image as cover',
-	{ tag: [ '@gutenberg', '@external' ] },
+	{ tag: '@gutenberg' },
 	async ( { page, productWithGallery } ) => {
 		const newCoverImgLocator = page
 			.getByLabel( 'Block: Product images' )

@@ -16,7 +16,7 @@ const orderStatus = [
 
 test.describe(
 	'WooCommerce Orders > Filter Order by Status',
-	{ tag: [ '@services', '@external' ] },
+	{ tag: '@services' },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

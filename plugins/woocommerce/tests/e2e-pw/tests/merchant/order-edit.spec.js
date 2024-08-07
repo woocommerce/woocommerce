@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
 
-test.describe( 'Edit order', { tag: [ '@services', '@external' ] }, () => {
+test.describe( 'Edit order', { tag: '@services' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	let orderId, orderToCancel;
@@ -286,7 +286,7 @@ test.describe( 'Edit order', { tag: [ '@services', '@external' ] }, () => {
 
 test.describe(
 	'Edit order > Downloadable product permissions',
-	{ tag: [ '@services', '@external' ] },
+	{ tag: '@services' },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

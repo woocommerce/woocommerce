@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'Payment setup task', { tag: '@external' }, () => {
+test.describe( 'Payment setup task', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeEach( async ( { baseURL } ) => {

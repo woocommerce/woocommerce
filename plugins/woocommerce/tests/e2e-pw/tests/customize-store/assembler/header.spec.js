@@ -18,155 +18,150 @@ const test = base.extend( {
 	},
 } );
 
-test.describe(
-	'Assembler -> headers',
-	{ tag: [ '@gutenberg', '@external' ] },
-	() => {
-		test.use( { storageState: process.env.ADMINSTATE } );
+test.describe( 'Assembler -> headers', { tag: '@gutenberg' }, () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			try {
-				// In some environments the tour blocks clicking other elements.
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_customize_store_onboarding_tour_hidden',
-					'yes'
-				);
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
-			}
-		} );
+	test.beforeAll( async ( { baseURL } ) => {
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'yes'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
+	} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			try {
-				// In some environments the tour blocks clicking other elements.
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_customize_store_onboarding_tour_hidden',
-					'no'
-				);
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_admin_customize_store_completed',
-					'no'
-				);
-
-				await activateTheme( DEFAULT_THEME );
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
-			}
-		} );
-
-		test.beforeEach( async ( { baseURL, assemblerPage } ) => {
-			await assemblerPage.setupSite( baseURL );
-			await assemblerPage.waitForLoadingScreenFinish();
-			const assembler = await assemblerPage.getAssembler();
-			await assembler.getByText( 'Choose your header' ).click();
-		} );
-
-		test( 'Available headers should be displayed', async ( {
-			assemblerPage,
-		} ) => {
-			const assembler = await assemblerPage.getAssembler();
-
-			const headers = assembler.locator(
-				'.block-editor-block-patterns-list__list-item'
+	test.afterAll( async ( { baseURL } ) => {
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'no'
+			);
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_admin_customize_store_completed',
+				'no'
 			);
 
-			await expect( headers ).toHaveCount( 4 );
-		} );
+			await activateTheme( DEFAULT_THEME );
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
+	} );
 
-		test( 'The selected header should be focused when is clicked', async ( {
-			assemblerPage,
-		} ) => {
-			const assembler = await assemblerPage.getAssembler();
-			const header = assembler
-				.locator( '.block-editor-block-patterns-list__item' )
-				.nth( 2 );
+	test.beforeEach( async ( { baseURL, assemblerPage } ) => {
+		await assemblerPage.setupSite( baseURL );
+		await assemblerPage.waitForLoadingScreenFinish();
+		const assembler = await assemblerPage.getAssembler();
+		await assembler.getByText( 'Choose your header' ).click();
+	} );
 
-			await header.click();
-			await expect( header ).toHaveClass( /is-selected/ );
-		} );
+	test( 'Available headers should be displayed', async ( {
+		assemblerPage,
+	} ) => {
+		const assembler = await assemblerPage.getAssembler();
 
-		test( 'The selected header should be applied on the frontend', async ( {
-			assemblerPage,
-			page,
-			baseURL,
-		} ) => {
-			const assembler = await assemblerPage.getAssembler();
-			const header = assembler
-				.locator( '.block-editor-block-patterns-list__list-item' )
-				.nth( 1 )
+		const headers = assembler.locator(
+			'.block-editor-block-patterns-list__list-item'
+		);
+
+		await expect( headers ).toHaveCount( 4 );
+	} );
+
+	test( 'The selected header should be focused when is clicked', async ( {
+		assemblerPage,
+	} ) => {
+		const assembler = await assemblerPage.getAssembler();
+		const header = assembler
+			.locator( '.block-editor-block-patterns-list__item' )
+			.nth( 2 );
+
+		await header.click();
+		await expect( header ).toHaveClass( /is-selected/ );
+	} );
+
+	test( 'The selected header should be applied on the frontend', async ( {
+		assemblerPage,
+		page,
+		baseURL,
+	} ) => {
+		const assembler = await assemblerPage.getAssembler();
+		const header = assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.nth( 1 )
+			.frameLocator( 'iframe' )
+			.locator( '.wc-blocks-header-pattern' );
+
+		const expectedHeaderClass = extractHeaderClass(
+			await header.getAttribute( 'class' )
+		);
+
+		await header.click();
+
+		await assembler.locator( '[aria-label="Back"]' ).click();
+
+		const saveButton = assembler.getByText( 'Finish customizing' );
+
+		const waitResponse = page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'wp-json/wp/v2/template-parts' ) &&
+				response.status() === 200
+		);
+
+		await saveButton.click();
+
+		await waitResponse;
+
+		await page.goto( baseURL );
+		const selectedHeaderClasses = await page
+			.locator( 'header div.wc-blocks-header-pattern' )
+			.getAttribute( 'class' );
+
+		expect( selectedHeaderClasses ).toContain( expectedHeaderClass );
+	} );
+
+	test( 'Picking a header should trigger an update on the site preview', async ( {
+		assemblerPage,
+	} ) => {
+		const assembler = await assemblerPage.getAssembler();
+		const editor = await assemblerPage.getEditor();
+
+		await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.waitFor( {
+				strict: false,
+			} );
+
+		const headerPickers = await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.all();
+
+		for ( const headerPicker of headerPickers ) {
+			await headerPicker.waitFor();
+			await headerPicker.click();
+
+			const headerPickerClass = await headerPicker
 				.frameLocator( 'iframe' )
-				.locator( '.wc-blocks-header-pattern' );
-
-			const expectedHeaderClass = extractHeaderClass(
-				await header.getAttribute( 'class' )
-			);
-
-			await header.click();
-
-			await assembler.locator( '[aria-label="Back"]' ).click();
-
-			const saveButton = assembler.getByText( 'Finish customizing' );
-
-			const waitResponse = page.waitForResponse(
-				( response ) =>
-					response.url().includes( 'wp-json/wp/v2/template-parts' ) &&
-					response.status() === 200
-			);
-
-			await saveButton.click();
-
-			await waitResponse;
-
-			await page.goto( baseURL );
-			const selectedHeaderClasses = await page
-				.locator( 'header div.wc-blocks-header-pattern' )
+				.locator( '.wc-blocks-header-pattern' )
 				.getAttribute( 'class' );
 
-			expect( selectedHeaderClasses ).toContain( expectedHeaderClass );
-		} );
+			const expectedHeaderClass = extractHeaderClass( headerPickerClass );
 
-		test( 'Picking a header should trigger an update on the site preview', async ( {
-			assemblerPage,
-		} ) => {
-			const assembler = await assemblerPage.getAssembler();
-			const editor = await assemblerPage.getEditor();
+			const headerPattern = editor.locator(
+				'header div.wc-blocks-header-pattern'
+			);
 
-			await assembler
-				.locator( '.block-editor-block-patterns-list__list-item' )
-				.waitFor( {
-					strict: false,
-				} );
-
-			const headerPickers = await assembler
-				.locator( '.block-editor-block-patterns-list__list-item' )
-				.all();
-
-			for ( const headerPicker of headerPickers ) {
-				await headerPicker.waitFor();
-				await headerPicker.click();
-
-				const headerPickerClass = await headerPicker
-					.frameLocator( 'iframe' )
-					.locator( '.wc-blocks-header-pattern' )
-					.getAttribute( 'class' );
-
-				const expectedHeaderClass =
-					extractHeaderClass( headerPickerClass );
-
-				const headerPattern = editor.locator(
-					'header div.wc-blocks-header-pattern'
-				);
-
-				await expect(
-					await headerPattern.getAttribute( 'class' )
-				).toContain( expectedHeaderClass );
-			}
-		} );
-	}
-);
+			await expect(
+				await headerPattern.getAttribute( 'class' )
+			).toContain( expectedHeaderClass );
+		}
+	} );
+} );

@@ -59,7 +59,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Checkout Block page',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {

@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'WooCommerce Shipping Settings', { tag: '@external' }, () => {
+test.describe( 'WooCommerce Shipping Settings', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {

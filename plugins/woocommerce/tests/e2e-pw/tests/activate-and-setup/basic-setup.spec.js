@@ -3,7 +3,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe(
 	'Store owner can finish initial store setup',
-	{ tag: [ '@gutenberg', '@payments', '@services', '@external' ] },
+	{ tag: [ '@gutenberg', '@payments', '@services' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

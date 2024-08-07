@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 
 test.describe(
 	'Store owner can login and make sure WooCommerce is activated',
-	{ tag: '@external' },
+	{ tag: '@local' },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

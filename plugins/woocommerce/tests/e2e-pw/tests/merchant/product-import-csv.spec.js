@@ -94,7 +94,7 @@ const errorMessage =
 
 test.describe.serial(
 	'Import Products from a CSV file',
-	{ tag: [ '@gutenberg', '@services', '@external' ] },
+	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

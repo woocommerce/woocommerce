@@ -113,7 +113,7 @@ for ( const currentPage of wcPages ) {
 	};
 	test.describe(
 		`WooCommerce Page Load > Load ${ currentPage.name } sub pages`,
-		{ tag: [ '@gutenberg', '@services', '@external' ] },
+		{ tag: [ '@gutenberg', '@services' ] },
 		() => {
 			test.use( { storageState: process.env.ADMINSTATE } );
 

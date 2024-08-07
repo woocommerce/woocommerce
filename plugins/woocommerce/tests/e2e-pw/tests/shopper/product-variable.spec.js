@@ -134,7 +134,7 @@ let variableProductId, totalPrice;
 
 test.describe(
 	'Variable Product Page',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
 
@@ -244,7 +244,7 @@ test.describe(
 
 test.describe(
 	'Shopper > Update variable product',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
 		test.beforeAll( async ( { baseURL } ) => {

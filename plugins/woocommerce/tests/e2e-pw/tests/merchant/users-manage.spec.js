@@ -81,7 +81,7 @@ async function userDeletionTest( page, username ) {
 
 test(
 	`can update customer data`,
-	{ tag: [ '@services', '@external' ] },
+	{ tag: '@services' },
 	async ( { page, customer } ) => {
 		await page.goto( `wp-admin/user-edit.php?user_id=${ customer.id }` );
 		await expect( page ).toHaveTitle( /Edit User/ );
@@ -296,7 +296,7 @@ test(
 
 test(
 	`can update shop manager data`,
-	{ tag: [ '@services', '@external' ] },
+	{ tag: '@services' },
 	async ( { page, manager } ) => {
 		await page.goto( `wp-admin/user-edit.php?user_id=${ manager.id }` );
 		await expect( page ).toHaveTitle( /Edit User/ );
@@ -329,7 +329,7 @@ test(
 
 test(
 	`can delete a customer`,
-	{ tag: [ '@services', '@external' ] },
+	{ tag: '@services' },
 	async ( { page, customer } ) => {
 		expect(
 			await userDeletionTest( page, customer.username )
@@ -339,7 +339,7 @@ test(
 
 test(
 	`can delete a shop manager`,
-	{ tag: [ '@services', '@external' ] },
+	{ tag: '@services' },
 	async ( { page, manager } ) => {
 		expect( await userDeletionTest( page, manager.username ) ).toBeTruthy();
 	}

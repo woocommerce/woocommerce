@@ -22,7 +22,7 @@ const storeName = 'WooCommerce Core E2E Test Suite';
 
 test.describe(
 	'Shopper Order Email Receiving',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

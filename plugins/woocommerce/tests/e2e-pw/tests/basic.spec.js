@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const { logIn } = require( '../utils/login' );
 const { admin, customer } = require( '../test-data/data' );
 
-test( 'Load the home page', async ( { page } ) => {
+test( 'Load the home page', { tag: '@local' }, async ( { page } ) => {
 	await page.goto( '/' );
 	await expect(
 		await page
@@ -16,7 +16,7 @@ test( 'Load the home page', async ( { page } ) => {
 	).toBeVisible();
 } );
 
-test( 'Load wp-admin as admin', async ( { page } ) => {
+test( 'Load wp-admin as admin', { tag: '@local' }, async ( { page } ) => {
 	await page.context().clearCookies();
 	await page.goto( '/wp-admin' );
 	await logIn( page, admin.username, admin.password );
@@ -25,11 +25,15 @@ test( 'Load wp-admin as admin', async ( { page } ) => {
 	).toBeVisible();
 } );
 
-test( 'Load my account page as customer', async ( { page } ) => {
-	await page.context().clearCookies();
-	await page.goto( '/my-account' );
-	await logIn( page, customer.username, customer.password, false );
-	await expect(
-		page.getByRole( 'heading', { name: 'My Account' } )
-	).toBeVisible();
-} );
+test(
+	'Load my account page as customer',
+	{ tag: '@local' },
+	async ( { page } ) => {
+		await page.context().clearCookies();
+		await page.goto( '/my-account' );
+		await logIn( page, customer.username, customer.password, false );
+		await expect(
+			page.getByRole( 'heading', { name: 'My Account' } )
+		).toBeVisible();
+	}
+);

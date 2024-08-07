@@ -22,206 +22,212 @@ async function prepareAssembler( pageObject, baseURL ) {
 		.waitFor( { state: 'hidden' } );
 }
 
-test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+test.describe(
+	'Assembler -> Homepage',
+	{ tag: [ '@gutenberg', '@local' ] },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		try {
-			// In some environments the tour blocks clicking other elements.
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_customize_store_onboarding_tour_hidden',
-				'yes'
-			);
-		} catch ( error ) {
-			console.log( 'Store completed option not updated' );
-		}
-
-		const wordPressVersion = await getInstalledWordPressVersion();
-
-		if ( wordPressVersion > 6.5 ) {
-			test.skip(
-				'Skipping Assembler Homepage tests: WordPress version is above 6.5, which does not support this feature.'
-			);
-		}
-	} );
-
-	test.afterAll( async ( { baseURL } ) => {
-		try {
-			// In some environments the tour blocks clicking other elements.
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_customize_store_onboarding_tour_hidden',
-				'no'
-			);
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_admin_customize_store_completed',
-				'no'
-			);
-
-			await activateTheme( DEFAULT_THEME );
-		} catch ( error ) {
-			console.log( 'Store completed option not updated' );
-		}
-	} );
-
-	test( 'Available homepage should be displayed', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-
-		const assembler = await pageObject.getAssembler();
-
-		const homepages = assembler.locator(
-			'.block-editor-block-patterns-list__list-item'
-		);
-
-		await expect( homepages ).toHaveCount( 3 );
-	} );
-
-	test( 'The selected homepage should be focused when is clicked', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-
-		const assembler = await pageObject.getAssembler();
-		const homepage = assembler
-			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 2 );
-
-		await homepage.click();
-		await expect( homepage ).toHaveClass( /is-selected/ );
-	} );
-
-	test( 'The selected homepage should be visible on the site preview', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-
-		const assembler = await pageObject.getAssembler();
-		const editor = await pageObject.getEditor();
-
-		const homepages = await assembler
-			.locator(
-				'.block-editor-block-patterns-list__item:not(.is-selected)'
-			)
-			.all();
-
-		const selectedHomepage = await assembler
-			.locator( '.block-editor-block-patterns-list__item.is-selected' )
-			.all();
-
-		// This is necessary to ensure that the trigger works correctly for all the templates in the list because if the pattern is already selected, the trigger doesn't run.
-		const allHomepages = [ ...homepages, ...selectedHomepage ];
-
-		for ( const homepage of allHomepages ) {
-			await homepage.click();
-			const homepageElements = await homepage
-				.locator( '.block-editor-block-list__layout > *' )
-				.all();
-
-			const homepageElementsIds = await Promise.all(
-				homepageElements.map( ( element ) =>
-					element.getAttribute( 'id' )
-				)
-			);
-
-			for ( const elementId of homepageElementsIds ) {
-				const element = editor.locator( `#${ elementId }` );
-				await expect( element ).toBeVisible();
+		test.beforeAll( async ( { baseURL } ) => {
+			try {
+				// In some environments the tour blocks clicking other elements.
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_customize_store_onboarding_tour_hidden',
+					'yes'
+				);
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
 			}
-		}
-	} );
 
-	test( 'Selected homepage should be applied on the frontend', async ( {
-		pageObject,
-		page,
-		baseURL,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
-		await prepareAssembler( pageObject, baseURL );
+			const wordPressVersion = await getInstalledWordPressVersion();
 
-		const assembler = await pageObject.getAssembler();
-		const homepage = assembler
-			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 2 );
-
-		await homepage.click();
-
-		await assembler.locator( '[aria-label="Back"]' ).click();
-
-		const saveButton = assembler.getByText( 'Finish customizing' );
-
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response
-					.url()
-					.includes(
-						'wp-json/wp/v2/templates/twentytwentyfour//home'
-					) && response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await page.goto( baseURL );
-
-		// Check if Gutenberg is installed
-		const apiContext = await request.newContext( {
-			baseURL,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
-				) }`,
-				cookie: '',
-			},
+			if ( wordPressVersion > 6.5 ) {
+				test.skip(
+					'Skipping Assembler Homepage tests: WordPress version is above 6.5, which does not support this feature.'
+				);
+			}
 		} );
-		const listPluginsResponse = await apiContext.get(
-			`/wp-json/wp/v2/plugins`,
-			{
-				failOnStatusCode: true,
-			}
-		);
-		const pluginsList = await listPluginsResponse.json();
-		const withGutenbergPlugin = pluginsList.find(
-			( { textdomain } ) => textdomain === 'gutenberg'
-		);
 
-		// if testing with Gutenberg, perform Gutenberg-specific testing
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( withGutenbergPlugin ) {
-			// Get all the content between the header and the footer.
-			const homepageHTML = await page
+		test.afterAll( async ( { baseURL } ) => {
+			try {
+				// In some environments the tour blocks clicking other elements.
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_customize_store_onboarding_tour_hidden',
+					'no'
+				);
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_admin_customize_store_completed',
+					'no'
+				);
+
+				await activateTheme( DEFAULT_THEME );
+			} catch ( error ) {
+				console.log( 'Store completed option not updated' );
+			}
+		} );
+
+		test( 'Available homepage should be displayed', async ( {
+			pageObject,
+			baseURL,
+		} ) => {
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+
+			const homepages = assembler.locator(
+				'.block-editor-block-patterns-list__list-item'
+			);
+
+			await expect( homepages ).toHaveCount( 3 );
+		} );
+
+		test( 'The selected homepage should be focused when is clicked', async ( {
+			pageObject,
+			baseURL,
+		} ) => {
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			const homepage = assembler
+				.locator( '.block-editor-block-patterns-list__item' )
+				.nth( 2 );
+
+			await homepage.click();
+			await expect( homepage ).toHaveClass( /is-selected/ );
+		} );
+
+		test( 'The selected homepage should be visible on the site preview', async ( {
+			pageObject,
+			baseURL,
+		} ) => {
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			const editor = await pageObject.getEditor();
+
+			const homepages = await assembler
 				.locator(
-					'//header/following-sibling::*[following-sibling::footer]'
+					'.block-editor-block-patterns-list__item:not(.is-selected)'
 				)
 				.all();
 
-			let index = 0;
-			for ( const element of homepageHTML ) {
-				await expect(
-					await element.getAttribute( 'class' )
-				).toMatchSnapshot( {
-					name: `${
-						withGutenbergPlugin ? 'gutenberg' : ''
-					}-selected-homepage-blocks-class-frontend-${ index }`,
-				} );
-				index++;
-			}
-		}
-	} );
-} );
+			const selectedHomepage = await assembler
+				.locator(
+					'.block-editor-block-patterns-list__item.is-selected'
+				)
+				.all();
 
-test.describe( 'Homepage tracking banner', () => {
+			// This is necessary to ensure that the trigger works correctly for all the templates in the list because if the pattern is already selected, the trigger doesn't run.
+			const allHomepages = [ ...homepages, ...selectedHomepage ];
+
+			for ( const homepage of allHomepages ) {
+				await homepage.click();
+				const homepageElements = await homepage
+					.locator( '.block-editor-block-list__layout > *' )
+					.all();
+
+				const homepageElementsIds = await Promise.all(
+					homepageElements.map( ( element ) =>
+						element.getAttribute( 'id' )
+					)
+				);
+
+				for ( const elementId of homepageElementsIds ) {
+					const element = editor.locator( `#${ elementId }` );
+					await expect( element ).toBeVisible();
+				}
+			}
+		} );
+
+		test( 'Selected homepage should be applied on the frontend', async ( {
+			pageObject,
+			page,
+			baseURL,
+		}, testInfo ) => {
+			testInfo.snapshotSuffix = '';
+			await prepareAssembler( pageObject, baseURL );
+
+			const assembler = await pageObject.getAssembler();
+			const homepage = assembler
+				.locator( '.block-editor-block-patterns-list__item' )
+				.nth( 2 );
+
+			await homepage.click();
+
+			await assembler.locator( '[aria-label="Back"]' ).click();
+
+			const saveButton = assembler.getByText( 'Finish customizing' );
+
+			const waitResponse = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							'wp-json/wp/v2/templates/twentytwentyfour//home'
+						) && response.status() === 200
+			);
+
+			await saveButton.click();
+
+			await waitResponse;
+
+			await page.goto( baseURL );
+
+			// Check if Gutenberg is installed
+			const apiContext = await request.newContext( {
+				baseURL,
+				extraHTTPHeaders: {
+					Authorization: `Basic ${ encodeCredentials(
+						'admin',
+						'password'
+					) }`,
+					cookie: '',
+				},
+			} );
+			const listPluginsResponse = await apiContext.get(
+				`/wp-json/wp/v2/plugins`,
+				{
+					failOnStatusCode: true,
+				}
+			);
+			const pluginsList = await listPluginsResponse.json();
+			const withGutenbergPlugin = pluginsList.find(
+				( { textdomain } ) => textdomain === 'gutenberg'
+			);
+
+			// if testing with Gutenberg, perform Gutenberg-specific testing
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( withGutenbergPlugin ) {
+				// Get all the content between the header and the footer.
+				const homepageHTML = await page
+					.locator(
+						'//header/following-sibling::*[following-sibling::footer]'
+					)
+					.all();
+
+				let index = 0;
+				for ( const element of homepageHTML ) {
+					await expect(
+						await element.getAttribute( 'class' )
+					).toMatchSnapshot( {
+						name: `${
+							withGutenbergPlugin ? 'gutenberg' : ''
+						}-selected-homepage-blocks-class-frontend-${ index }`,
+					} );
+					index++;
+				}
+			}
+		} );
+	}
+);
+
+test.describe( 'Homepage tracking banner', { tag: '@local' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {

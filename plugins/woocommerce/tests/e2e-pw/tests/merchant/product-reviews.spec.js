@@ -49,7 +49,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Product Reviews > Edit Product Review',
-	{ tag: [ '@gutenberg', '@services', '@external' ] },
+	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
 		test( 'can view products reviews list', async ( { page, reviews } ) => {
 			await page.goto(

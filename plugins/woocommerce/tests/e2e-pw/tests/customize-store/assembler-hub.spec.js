@@ -17,7 +17,7 @@ const test = base.extend( {
 
 test.describe(
 	'Store owner can view Assembler Hub for store customization',
-	{ tag: [ '@gutenberg', '@external' ] },
+	{ tag: '@gutenberg' },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

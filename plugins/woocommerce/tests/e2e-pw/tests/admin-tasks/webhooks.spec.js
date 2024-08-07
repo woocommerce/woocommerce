@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-test.describe( 'Manage webhooks', { tag: '@external' }, () => {
+test.describe( 'Manage webhooks', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.afterAll( async ( { baseURL } ) => {

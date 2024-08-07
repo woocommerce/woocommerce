@@ -9,7 +9,7 @@ const productPrice = '9.99';
 
 test.describe(
 	'Products > Search and View a product',
-	{ tag: [ '@gutenberg', '@services', '@external' ] },
+	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

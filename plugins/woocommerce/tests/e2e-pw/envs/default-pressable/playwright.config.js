@@ -7,7 +7,7 @@ config = {
 		{
 			name: 'default pressable',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			grep: /@external/,
+			grepInvert: /@external/,
 		},
 	],
 };

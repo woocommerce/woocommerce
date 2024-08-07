@@ -19,7 +19,7 @@ const shippingCountryFR = 'FR';
 
 test.describe(
 	'Cart Calculate Shipping',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		let firstProductId, secondProductId, shippingZoneDEId, shippingZoneFRId;
 

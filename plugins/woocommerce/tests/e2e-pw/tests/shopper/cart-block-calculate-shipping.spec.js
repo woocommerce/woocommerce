@@ -35,7 +35,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Cart Block Calculate Shipping',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		let product1Id, product2Id, shippingZoneNLId, shippingZonePTId;
 

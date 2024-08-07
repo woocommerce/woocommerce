@@ -8,7 +8,7 @@ const billingEmail = 'marge-test-account@example.com';
 
 test.describe(
 	'Shopper Checkout Create Account',
-	{ tag: [ '@payments', '@services', '@external' ] },
+	{ tag: [ '@payments', '@services' ] },
 	() => {
 		let productId, orderId, shippingZoneId;
 
