@@ -233,13 +233,15 @@ final class BlockTypesController {
 			return $content;
 		}
 
-		$attributes              = (array) $block['attrs'];
-		$exclude_attributes      = array( 'className', 'align' );
-		$escaped_data_attributes = array(
-			'data-block-name="' . esc_attr( $block['blockName'] ) . '"',
-		);
+		$attributes         = (array) $block['attrs'];
+		$exclude_attributes = array( 'className', 'align' );
 
-		foreach ( $attributes as $key => $value ) {
+		$processor = new \WP_HTML_Tag_Processor( $content );
+		if ( false === $processor->next_tag( 'DIV' ) ) {
+			return $content;
+		}
+
+		foreach ( $attributes as $key  => $value ) {
 			if ( in_array( $key, $exclude_attributes, true ) ) {
 				continue;
 			}
@@ -249,10 +251,14 @@ final class BlockTypesController {
 			if ( ! is_scalar( $value ) ) {
 				$value = wp_json_encode( $value );
 			}
-			$escaped_data_attributes[] = 'data-' . esc_attr( strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) ) ) . '="' . esc_attr( $value ) . '"';
+			// Attribute updates with invalid attribute names will not be added.
+			$processor->set_attribute( "data-{$key}", $value );
 		}
 
-		return preg_replace( '/^<div /', '<div ' . implode( ' ', $escaped_data_attributes ) . ' ', trim( $content ) );
+		// Set this last to prevent user-input from overriding it.
+		$processor->set_attribute( 'data-block-name', $block['blockName'] );
+
+		return $processor->get_updated_html();
 	}
 
 	/**
