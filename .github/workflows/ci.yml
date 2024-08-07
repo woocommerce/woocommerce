@@ -171,7 +171,10 @@ jobs:
         # https://github.com/actions/upload-artifact/issues/176
         env:
           ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
-        run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+        run: |
+          # first runs will probably not have the directory, so we need to create it so that realpath doesn't fail
+          mkdir -p $ARTIFACTS_PATH
+          echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
 
       - name: 'Download Playwright last run info'
         id: 'download-last-run-info'
