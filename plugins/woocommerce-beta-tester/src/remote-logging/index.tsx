@@ -5,7 +5,7 @@
 import { useState, useEffect } from '@wordpress/element';
 import { Button, ToggleControl, Notice, Spinner } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import { log } from '@woocommerce/remote-logging';
+import { log, init as initRemoteLogging } from '@woocommerce/remote-logging';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore no types
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -69,6 +69,12 @@ function RemoteLogging() {
 				message: `Failed to update remote logging status. ${ JSON.stringify(
 					error
 				) }`,
+			} );
+		}
+
+		if ( window.wcSettings.isRemoteLoggingEnabled ) {
+			initRemoteLogging( {
+				errorRateLimitMs: 60000, // 1 minute
 			} );
 		}
 	};

@@ -375,7 +375,7 @@ let logger: RemoteLogger | null = null;
  * @return {boolean} - Returns true if remote logging is enabled and the logger is initialized, otherwise false.
  */
 function canLog( _logger: RemoteLogger | null ): _logger is RemoteLogger {
-	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
+	if ( ! window.wcSettings?.isRemoteLoggingEnabled ) {
 		debug( 'Remote logging is disabled.' );
 		return false;
 	}
@@ -396,7 +396,7 @@ function canLog( _logger: RemoteLogger | null ): _logger is RemoteLogger {
  *
  */
 export function init( config: RemoteLoggerConfig ) {
-	if ( ! getSetting( 'isRemoteLoggingEnabled', false ) ) {
+	if ( ! window.wcSettings?.isRemoteLoggingEnabled ) {
 		debug( 'Remote logging is disabled.' );
 		return;
 	}
