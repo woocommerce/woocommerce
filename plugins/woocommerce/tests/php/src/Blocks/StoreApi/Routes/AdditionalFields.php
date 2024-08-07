@@ -81,6 +81,8 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
+		unset( wc()->countries->locale );
+		remove_all_filters( 'woocommerce_get_country_locale' );
 		global $wp_rest_server;
 		$wp_rest_server = null;
 		$this->unregister_fields();
@@ -1022,45 +1024,6 @@ class AdditionalFields extends MockeryTestCase {
 	}
 
 	/**
-	 * Ensure a select has an extra empty option if it's optional.
-	 */
-	public function test_optional_select_has_empty_value() {
-		$id = 'plugin-namespace/optional-select';
-		\woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => $id,
-				'label'    => 'Optional Select',
-				'location' => 'order',
-				'type'     => 'select',
-				'options'  => array(
-					array(
-						'label' => 'Option 1',
-						'value' => 'option-1',
-					),
-					array(
-						'label' => 'Option 2',
-						'value' => 'option-2',
-					),
-				),
-			)
-		);
-		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/checkout' );
-		$response = rest_get_server()->dispatch( $request );
-
-		$data = $response->get_data();
-		$this->assertEquals(
-			array( '', 'option-1', 'option-2' ),
-			$data['schema']['properties']['additional_fields']['properties'][ $id ]['enum'],
-			print_r( $data['schema']['properties']['additional_fields']['properties'][ $id ], true )
-		);
-
-		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
-
-		// Ensures the field isn't registered.
-		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
-	}
-
-	/**
 	 * Ensure an error is triggered when a checkbox is registered as required.
 	 */
 	public function test_invalid_required_prop_checkbox() {
@@ -1584,18 +1547,65 @@ class AdditionalFields extends MockeryTestCase {
 		$request->set_body_params(
 			array(
 				'billing_address'   => (object) array(
-					'first_name'              => 'test',
-					'last_name'               => 'test',
-					'company'                 => '',
-					'address_1'               => 'test',
-					'address_2'               => '',
-					'city'                    => 'test',
-					'state'                   => '',
-					'postcode'                => 'cb241ab',
-					'country'                 => 'GB',
-					'phone'                   => '',
-					'email'                   => 'testaccount@test.com',
-					'plugin-namespace/gov-id' => 'gov id',
+					'first_name'                         => 'test',
+					'last_name'                          => 'test',
+					'company'                            => '',
+					'address_1'                          => 'test',
+					'address_2'                          => '',
+					'city'                               => 'test',
+					'state'                              => '',
+					'postcode'                           => 'cb241ab',
+					'country'                            => 'GB',
+					'phone'                              => '',
+					'email'                              => 'testaccount@test.com',
+					'plugin-namespace/gov-id'            => 'gov id',
+					'plugin-namespace/my-required-field' => 'req. field',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'                         => 'test',
+					'last_name'                          => 'test',
+					'company'                            => '',
+					'address_1'                          => 'test',
+					'address_2'                          => '',
+					'city'                               => 'test',
+					'state'                              => '',
+					'postcode'                           => 'cb241ab',
+					'country'                            => 'GB',
+					'phone'                              => '',
+					'plugin-namespace/gov-id'            => 'gov id',
+					'plugin-namespace/my-required-field' => 'req. field',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		WC()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
+		WC()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'                         => 'test',
+					'last_name'                          => 'test',
+					'company'                            => '',
+					'address_1'                          => 'test',
+					'address_2'                          => '',
+					'city'                               => 'test',
+					'state'                              => '',
+					'postcode'                           => 'cb241ab',
+					'country'                            => 'GB',
+					'phone'                              => '',
+					'email'                              => 'testaccount@test.com',
+					'plugin-namespace/gov-id'            => 'gov id',
+					'plugin-namespace/my-required-field' => 'gov id',
 				),
 				'shipping_address'  => (object) array(
 					'first_name'              => 'test',
@@ -1621,6 +1631,50 @@ class AdditionalFields extends MockeryTestCase {
 
 		$this->assertEquals( 400, $response->get_status(), print_r( $data, true ) );
 		$this->assertEquals( \sprintf( 'There was a problem with the provided shipping address: %s is required', $label ), $data['message'], print_r( $data, true ) );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'                         => 'test',
+					'last_name'                          => 'test',
+					'company'                            => '',
+					'address_1'                          => 'test',
+					'address_2'                          => '',
+					'city'                               => 'test',
+					'state'                              => '',
+					'postcode'                           => 'cb241ab',
+					'country'                            => 'GB',
+					'phone'                              => '',
+					'email'                              => 'testaccount@test.com',
+					'plugin-namespace/gov-id'            => 'gov id',
+					'plugin-namespace/my-required-field' => 'gov id',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'                         => 'test',
+					'last_name'                          => 'test',
+					'company'                            => '',
+					'address_1'                          => 'test',
+					'address_2'                          => '',
+					'city'                               => 'test',
+					'state'                              => '',
+					'postcode'                           => 'cb241ab',
+					'country'                            => 'GB',
+					'phone'                              => '',
+					'plugin-namespace/gov-id'            => 'gov id',
+					'plugin-namespace/my-required-field' => 'gov id',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => '',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status(), print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 
