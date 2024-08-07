@@ -113,7 +113,10 @@ test(
 				.getByRole( 'heading', { name: 'Attributes' } )
 				.isVisible();
 
-			await page.getByRole( 'button', { name: 'Add new' } ).click();
+			await page
+				// Using a selector because there are many "Add new" buttons on the page
+				.locator( '.woocommerce-add-attribute-list-item__add-button' )
+				.click();
 
 			await page
 				.getByRole( 'heading', { name: 'Add variation options' } )
@@ -279,10 +282,7 @@ test(
 		} );
 
 		await test.step( 'add an existing attribute', async () => {
-			await page
-				.getByLabel( 'Block: Product custom fields toggle control' )
-				.getByRole( 'button', { name: 'Add new' } )
-				.click();
+			await page.getByRole( 'button', { name: 'Add new' } ).click();
 
 			await page.waitForLoadState( 'domcontentloaded' );
 
