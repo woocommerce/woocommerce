@@ -251,13 +251,11 @@ final class BlockTypesController {
 			if ( ! is_scalar( $value ) ) {
 				$value = wp_json_encode( $value );
 			}
-			// Attribute updates with invalid attribute names will not be added.
 			$processor->set_attribute( "data-{$key}", $value );
 		}
 
 		// Set this last to prevent user-input from overriding it.
 		$processor->set_attribute( 'data-block-name', $block['blockName'] );
-
 		return $processor->get_updated_html();
 	}
 
