@@ -53,7 +53,7 @@ const Edit = ( props: EditProps ) => {
 		namespace: '/wc/store/v1',
 		resourceName: 'products/attributes/terms',
 		resourceValues: [ attributeObject?.id || 0 ],
-		shouldSelect: blockAttributes.attributeId > 0,
+		shouldSelect: !! attributeObject?.id,
 		query: { orderby: 'menu_order', hide_empty: hideEmpty },
 	} );
 
