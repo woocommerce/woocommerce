@@ -227,9 +227,8 @@ final class BlockTypesController {
 	 * @return string
 	 */
 	public function add_data_attributes( $content, $block ) {
-		$block_name = $block['blockName'];
 
-		if ( ! $this->block_should_have_data_attributes( $block_name ) ) {
+		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
 
