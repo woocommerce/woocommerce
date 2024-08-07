@@ -108,13 +108,13 @@ describe( 'currency.formatDecimalString', () => {
 
 		expect(
 			currency.getPriceFormat( {
-				priceFormat: '<b>format</b>',
+				priceFormat: '<b>tag</b>format',
 			} )
-		).toBe( 'format' );
+		).toBe( 'tagformat' );
 
 		expect(
 			currency.getPriceFormat( {
-				priceFormat: '<script>format</script>',
+				priceFormat: '<script>tag</script>format',
 			} )
 		).toBe( 'format' );
 	} );
