@@ -107,7 +107,7 @@ test.describe(
 			await page.locator( 'label[for=order_status] > a' ).click();
 
 			// pay for the order
-			await page.locator( 'button#place_order' ).dispatchEvent( 'click' );
+			await page.locator( 'button#place_order' ).click();
 
 			// Verify we landed on the order received page
 			await expect(
