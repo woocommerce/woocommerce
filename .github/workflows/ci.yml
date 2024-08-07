@@ -188,6 +188,7 @@ jobs:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
+          LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
@@ -210,8 +211,12 @@ jobs:
             # Only if there are failed tests, we want to use the --last-failed flag. 
             # The run will fail if we're using the flag and there are no failed tests.
             if [ "$failedTests" -gt 0 ]; then
-              echo "Found failed tests, running only failed tests"
-              lastRunFlag="--last-failed"
+              if [ "$LAST_FAILED_RUN" == "1" ]; then
+                echo "Found failed tests, running only failed tests"
+                lastRunFlag="--last-failed"
+              else
+                echo "Found failed tests, but LAST_FAILED_RUN is switched off. Running all tests."
+              fi
             else
                 echo "No failed tests found, running all tests"
             fi
@@ -222,7 +227,7 @@ jobs:
           
       - name: 'Upload Playwright last run info'
         # always upload the last run info, even if the test run passed
-        if: ${{ always() && matrix.report.resultsPath != '' && vars.LAST_FAILED_RUN == '1' }}
+        if: ${{ always() && matrix.report.resultsPath != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: 'last-run__${{ strategy.job-index }}'
