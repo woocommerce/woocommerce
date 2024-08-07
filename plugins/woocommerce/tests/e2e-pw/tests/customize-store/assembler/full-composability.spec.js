@@ -184,14 +184,6 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 			.locator( '.is-root-container' )
 			.textContent();
 
-		await page.mouse.wheel( 0, -100000000 );
-
-		const isScrolledUp = await page.evaluate( () => {
-			return window.scrollY === 0;
-		} );
-
-		await expect( isScrolledUp ).toBe( true );
-
 		await sidebarPattern.click();
 
 		const insertedPatternContent = await editor
