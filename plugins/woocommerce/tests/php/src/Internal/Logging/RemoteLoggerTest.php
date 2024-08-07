@@ -42,7 +42,11 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
 	}
 
-
+	/**
+	 * Cleanup filters used in tests.
+	 *
+	 * @return void
+	 */
 	private function cleanup_filters() {
 		$filters = array(
 			'option_woocommerce_admin_remote_feature_enabled',
@@ -69,6 +73,9 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Remote logging is not allowed under various conditions
 	 * @dataProvider remote_logging_disallowed_provider
+	 *
+	 * @param string   $condition      The condition being tested.
+	 * @param callable $setup_callback Callback to set up the test condition.
 	 */
 	public function test_remote_logging_not_allowed( $condition, $setup_callback ) {
 		$this->setup_remote_logging_conditions( true );
@@ -76,23 +83,28 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
 
+	/**
+	 * Data provider for test_remote_logging_not_allowed.
+	 *
+	 * @return array[] Test cases with conditions and setup callbacks.
+	 */
 	public function remote_logging_disallowed_provider() {
 		return array(
 			'feature flag disabled'   => array(
 				'condition' => 'feature flag disabled',
-				'setup'     => fn( $test ) => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
+				'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 			),
 			'tracking opted out'      => array(
 				'condition' => 'tracking opted out',
-				'setup'     => fn( $test ) => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
+				'setup'     => fn() => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
 			),
 			'outdated version'        => array(
 				'condition' => 'outdated version',
-				'setup'     => fn( $test ) => WC()->version = '9.0.0',
+				'setup'     => fn() => WC()->version = '9.0.0',
 			),
 			'high variant assignment' => array(
 				'condition' => 'high variant assignment',
-				'setup'     => fn( $test ) => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
+				'setup'     => fn() => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
 			),
 		);
 	}
@@ -114,6 +126,11 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox get_formatted_log method returns expected array structure
 	 * @dataProvider get_formatted_log_provider
+	 *
+	 * @param string $level    The log level.
+	 * @param string $message  The log message.
+	 * @param array  $context  The log context.
+	 * @param array  $expected The expected formatted log array.
 	 */
 	public function test_get_formatted_log( $level, $message, $context, $expected ) {
 		$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
@@ -123,6 +140,11 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Data provider for test_get_formatted_log.
+	 *
+	 * @return array[] Test cases with log data and expected formatted output.
+	 */
 	public function get_formatted_log_provider() {
 		return array(
 			'basic log data'            => array(
@@ -164,6 +186,10 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox should_handle method behaves correctly under different conditions
 	 * @dataProvider should_handle_provider
+	 *
+	 * @param callable $setup   Function to set up the test environment.
+	 * @param string   $level   Log level to test.
+	 * @param bool     $expected Expected result of should_handle method.
 	 */
 	public function test_should_handle( $setup, $level, $expected ) {
 		$this->sut = $this->getMockBuilder( RemoteLogger::class )
@@ -179,20 +205,25 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $expected, $result );
 	}
 
+	/**
+	 * Data provider for test_should_handle method.
+	 *
+	 * @return array Test cases for should_handle method.
+	 */
 	public function should_handle_provider() {
 		return array(
 			'throttled'                 => array(
-				fn( $test ) => WC_Rate_Limiter::set_rate_limit( RemoteLogger::RATE_LIMIT_ID, 10 ),
+				fn() => WC_Rate_Limiter::set_rate_limit( RemoteLogger::RATE_LIMIT_ID, 10 ),
 				'critical',
 				false,
 			),
 			'less severe than critical' => array(
-				fn( $test ) => null,
+				fn() => null,
 				'error',
 				false,
 			),
 			'critical level'            => array(
-				fn( $test ) => null,
+				fn() => null,
 				'critical',
 				true,
 			),
@@ -242,7 +273,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'pre_http_request',
-			function ( $preempt, $args, $url ) {
+			function ( $preempt, $args ) {
 				$this->assertArrayHasKey( 'body', $args );
 				$this->assertArrayHasKey( 'headers', $args );
 				return array(
@@ -291,12 +322,20 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox is_third_party_error method correctly identifies third-party errors
 	 * @dataProvider is_third_party_error_provider
+	 * @param string $message The error message to check.
+	 * @param array  $context The context of the error.
+	 * @param bool   $expected_result The expected result of the check.
 	 */
 	public function test_is_third_party_error( $message, $context, $expected_result ) {
 		$result = $this->invoke_private_method( $this->sut, 'is_third_party_error', array( $message, $context ) );
 		$this->assertEquals( $expected_result, $result );
 	}
 
+	/**
+	 * Data provider for test_is_third_party_error.
+	 *
+	 * @return array[] Test cases.
+	 */
 	public function is_third_party_error_provider() {
 		return array(
 			array( 'Fatal error in ' . WC_ABSPATH . 'file.php', array(), false ),
@@ -361,7 +400,9 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Setup common conditions for remote logging tests
+	 * Setup common conditions for remote logging tests.
+	 *
+	 * @param bool $enabled Whether remote logging is enabled.
 	 */
 	private function setup_remote_logging_conditions( $enabled = true ) {
 		update_option( 'woocommerce_feature_remote_logging_enabled', $enabled ? 'yes' : 'no' );
@@ -397,7 +438,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 }
 
 
-//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
 /**
  * Mock class that extends RemoteLogger to allow overriding is_dev_or_local_environment.
  */
@@ -425,4 +466,4 @@ class RemoteLoggerWithEnvironmentOverride extends RemoteLogger {
 		return $this->is_dev_or_local;
 	}
 }
-//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
