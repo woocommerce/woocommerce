@@ -83,14 +83,18 @@ export function NameBlockEdit( {
 		'name',
 		async function nameValidator() {
 			if ( ! name || name === AUTO_DRAFT_NAME ) {
-				return __( 'Product name is required.', 'woocommerce' );
+				return {
+					message: __( 'Product name is required.', 'woocommerce' ),
+				};
 			}
 
 			if ( name.length > 120 ) {
-				return __(
-					'Please enter a product name shorter than 120 characters.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'Please enter a product name shorter than 120 characters.',
+						'woocommerce'
+					),
+				};
 			}
 		},
 		[ name ]

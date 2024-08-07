@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Accessibility: Prevent shipping losing focus when making selections during checkout.

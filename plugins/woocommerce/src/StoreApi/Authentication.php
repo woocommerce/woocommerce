@@ -33,7 +33,6 @@ class Authentication {
 	public function allowed_cors_headers( $allowed_headers ) {
 		$allowed_headers[] = 'Cart-Token';
 		$allowed_headers[] = 'Nonce';
-		$allowed_headers[] = 'X-WC-Store-API-Nonce';
 		return $allowed_headers;
 	}
 

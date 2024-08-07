@@ -31,11 +31,16 @@ import { objectHasProp } from '@woocommerce/types';
  */
 import { AddressFormProps, AddressFormFields } from './types';
 import prepareFormFields from './prepare-form-fields';
-import validateShippingCountry from './validate-shipping-country';
+import validateCountry from './validate-country';
 import customValidationHandler from './custom-validation-handler';
-import Combobox from '../../combobox';
 import AddressLineFields from './address-line-fields';
-import { createFieldProps, getFieldData } from './utils';
+import {
+	createFieldProps,
+	createCheckboxFieldProps,
+	getFieldData,
+} from './utils';
+import { Select } from '../../select';
+import { validateState } from './validate-state';
 
 /**
  * Checkout form.
@@ -48,8 +53,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	addressType = 'shipping',
 	values,
 	children,
+	isEditing,
 }: AddressFormProps< T > ): JSX.Element => {
 	const instanceId = useInstanceId( Form );
+	const isFirstRender = useRef( true );
 
 	// Track incoming props.
 	const currentFields = useShallowEqual( fields );
@@ -91,20 +98,62 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		}
 	}, [ onChange, addressFormFields, values ] );
 
-	// Maybe validate country when other fields change so user is notified that it's required.
+	// Maybe validate country and state when other fields change so user is notified that they're required.
 	useEffect( () => {
-		if (
-			addressType === 'shipping' &&
-			objectHasProp( values, 'country' )
-		) {
-			validateShippingCountry( values );
+		if ( objectHasProp( values, 'country' ) ) {
+			validateCountry( addressType, values );
 		}
-	}, [ values, addressType ] );
+
+		if ( objectHasProp( values, 'state' ) ) {
+			const stateField = addressFormFields.fields.find(
+				( f ) => f.key === 'state'
+			);
+
+			if ( stateField ) {
+				validateState( addressType, values, stateField );
+			}
+		}
+	}, [ values, addressType, addressFormFields ] );
 
 	// Changing country may change format for postcodes.
 	useEffect( () => {
 		fieldsRef.current?.postcode?.revalidate();
 	}, [ currentCountry ] );
+
+	// Focus the first input when opening the form.
+	useEffect( () => {
+		let timeoutId: ReturnType< typeof setTimeout >;
+
+		if ( ! isFirstRender.current && isEditing && fieldsRef.current ) {
+			const firstField = addressFormFields.fields.find(
+				( field ) => field.hidden === false
+			);
+
+			if ( ! firstField ) {
+				return;
+			}
+
+			const { id: firstFieldId } = createFieldProps(
+				firstField,
+				id || `${ instanceId }`,
+				addressType
+			);
+			const firstFieldEl = document.getElementById( firstFieldId );
+
+			if ( firstFieldEl ) {
+				// Focus the first field after a short delay to ensure the form is rendered.
+				timeoutId = setTimeout( () => {
+					firstFieldEl.focus();
+				}, 300 );
+			}
+		}
+
+		isFirstRender.current = false;
+
+		return () => {
+			clearTimeout( timeoutId );
+		};
+	}, [ isEditing, addressFormFields, id, instanceId, addressType ] );
 
 	id = id || `${ instanceId }`;
 
@@ -116,6 +165,8 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				}
 
 				const fieldProps = createFieldProps( field, id, addressType );
+				const checkboxFieldProps =
+					createCheckboxFieldProps( fieldProps );
 
 				if ( field.key === 'email' ) {
 					fieldProps.id = 'email';
@@ -133,7 +184,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 									[ field.key ]: checked,
 								} );
 							} }
-							{ ...fieldProps }
+							{ ...checkboxFieldProps }
 						/>
 					);
 				}
@@ -228,9 +279,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 					}
 
 					return (
-						<Combobox
+						<Select
 							key={ field.key }
 							{ ...fieldProps }
+							label={ fieldProps.label || '' }
 							className={ clsx(
 								'wc-block-components-select-input',
 								`wc-block-components-select-input-${ field.key }`.replaceAll(
@@ -246,6 +298,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 								} );
 							} }
 							options={ field.options }
+							required={ field.required }
+							errorMessage={
+								fieldProps.errorMessage || undefined
+							}
 						/>
 					);
 				}

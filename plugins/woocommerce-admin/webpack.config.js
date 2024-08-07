@@ -10,8 +10,6 @@ const BundleAnalyzerPlugin =
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
-const NormalModuleReplacementPlugin =
-	require( 'webpack' ).NormalModuleReplacementPlugin;
 
 /**
  * Internal dependencies
@@ -44,6 +42,7 @@ const wcAdminPackages = [
 	'onboarding',
 	'block-templates',
 	'product-editor',
+	'remote-logging',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
@@ -78,6 +77,7 @@ const wpAdminScripts = [
 	'woo-enable-autorenew',
 	'woo-renew-subscription',
 	'woo-subscriptions-notice',
+	'woo-product-usage-notice',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -94,6 +94,13 @@ const getEntryPoints = () => {
 
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
+
+// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
+// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
+require( 'fs-extra' ).ensureSymlinkSync(
+	path.join( __dirname, './node_modules/xstate5' ),
+	path.join( __dirname, './node_modules/@xstate5/react/node_modules/xstate' )
+);
 
 const webpackConfig = {
 	mode: NODE_ENV,
@@ -127,8 +134,8 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
-					// Exclude node_modules/.pnpm
-					/node_modules(\/|\\)\.pnpm(\/|\\)/,
+					/[\/\\]node_modules[\/\\]\.pnpm[\/\\]/,
+					/[\/\\](changelog|bin|build|docs|test)[\/\\]/,
 				],
 				use: {
 					loader: 'babel-loader',
@@ -152,6 +159,11 @@ const webpackConfig = {
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 						].filter( Boolean ),
+						cacheDirectory: path.resolve(
+							__dirname,
+							'../../node_modules/.cache/babel-loader'
+						),
+						cacheCompression: false,
 					},
 				},
 			},
@@ -178,14 +190,6 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
-		// Workaround for Gutenberg private API consent string differences between WP 6.3 and 6.4+
-		// The modified version checks for the WP version and replaces the consent string with the correct one.
-		// This can be removed once we drop support for WP 6.3 in the "Customize Your Store" task.
-		// See this PR for details: https://github.com/woocommerce/woocommerce/pull/40884
-		new NormalModuleReplacementPlugin(
-			/@wordpress\/edit-site\/build-module\/lock-unlock\.js/,
-			path.resolve( __dirname, 'bin/modified-editsite-lock-unlock.js' )
-		),
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),

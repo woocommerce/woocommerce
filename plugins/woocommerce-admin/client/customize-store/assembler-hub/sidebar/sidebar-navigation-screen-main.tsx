@@ -38,6 +38,7 @@ import {
 	SidebarNavigationAnimationDirection,
 	SidebarNavigationContext,
 } from '../components/sidebar';
+import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
 export const SidebarNavigationScreenMain = () => {
 	const {
@@ -213,11 +214,18 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ home }
 							onClick={ () => {
-								const homepageUrl = getNewPath(
-									{ customizing: true },
-									'/customize-store/assembler-hub/homepage',
-									{}
-								);
+								const homepageUrl =
+									isFullComposabilityFeatureAndAPIAvailable()
+										? getNewPath(
+												{ customizing: true },
+												'/customize-store/assembler-hub/homepage/intro',
+												{}
+										  )
+										: getNewPath(
+												{ customizing: true },
+												'/customize-store/assembler-hub/homepage',
+												{}
+										  );
 
 								navigateTo( { url: homepageUrl } );
 								navigate(

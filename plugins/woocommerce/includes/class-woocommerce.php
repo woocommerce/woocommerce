@@ -26,10 +26,10 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
-use Automattic\WooCommerce\Admin\WCAdminHelper;
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * Main WooCommerce Class.
@@ -45,7 +45,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.2.0';
+	public $version = '9.3.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -54,7 +54,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $db_version = '430';
+	public $db_version = '920';
 
 	/**
 	 * The single instance of the class.
@@ -81,11 +81,11 @@ final class WooCommerce {
 	/**
 	 * API instance
 	 *
-	 * @deprecated 9.0.0 The Legacy REST API has been removed from WooCommerce core. This property will be null unless the WooCommerce Legacy REST API plugin is installed.
+	 * @deprecated 9.0.0 The Legacy REST API has been removed from WooCommerce core. Now this property points to a RestApiUtil instance, unless the Legacy REST API plugin is installed.
 	 *
 	 * @var WC_API
 	 */
-	public $api;
+	private $api;
 
 	/**
 	 * Product factory instance.
@@ -179,15 +179,55 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Auto-load in-accessible properties on demand.
+	 * Autoload inaccessible or non-existing properties on demand.
 	 *
 	 * @param mixed $key Key name.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
+		if ( 'api' === $key ) {
+			// The Legacy REST API was removed from WooCommerce core as of version 9.0 (moved to a dedicated plugin),
+			// but some plugins are still using wc()->api->get_endpoint_data. This method now lives in the RestApiUtil class,
+			// but we expose it through LegacyRestApiStub to limit the scope of what can be done via WC()->api.
+			//
+			// On the other hand, if the dedicated plugin is installed it will set the $api property by itself
+			// to an instance of the old WC_API class, which of course still has the get_endpoint_data method.
+			if ( is_null( $this->api ) && ! $this->legacy_rest_api_is_available() ) {
+				$this->api = wc_get_container()->get( LegacyRestApiStub::class );
+			}
+
+			return $this->api;
+		}
+
 		if ( in_array( $key, array( 'payment_gateways', 'shipping', 'mailer', 'checkout' ), true ) ) {
 			return $this->$key();
 		}
+	}
+
+	/**
+	 * Set the value of an inaccessible or non-existing property.
+	 *
+	 * @param string $key Property name.
+	 * @param mixed  $value Property value.
+	 */
+	public function __set( string $key, $value ) {
+		if ( 'api' === $key ) {
+			$this->api = $value;
+		} elseif ( property_exists( $this, $key ) ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( 'Cannot access private property WooCommerce::$' . esc_html( $key ), E_USER_ERROR );
+		} else {
+			$this->$key = $value;
+		}
+	}
+
+	/**
+	 * Check if the Legacy REST API plugin is active (and thus the Legacy REST API is available).
+	 *
+	 * @return bool
+	 */
+	public function legacy_rest_api_is_available() {
+		return class_exists( 'WC_Legacy_REST_API_Plugin', false );
 	}
 
 	/**
@@ -267,7 +307,9 @@ final class WooCommerce {
 		self::add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
+		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 
+		self::add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 
 		// These classes set up hooks on instantiation.
@@ -362,6 +404,15 @@ final class WooCommerce {
 				$context
 			);
 
+			// Record fatal error stats.
+			$container = wc_get_container();
+			$mc_stats  = $container->get( McStats::class );
+			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
+			$mc_stats->do_server_side_stats();
+
+			$remote_logger = $container->get( RemoteLogger::class );
+			$remote_logger->handle( time(), WC_Log_Levels::CRITICAL, $message, $context );
+
 			/**
 			 * Action triggered when there are errors during shutdown.
 			 *
@@ -375,8 +426,6 @@ final class WooCommerce {
 	 * Define WC Constants.
 	 */
 	private function define_constants() {
-		$upload_dir = wp_upload_dir( null, false );
-
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
 		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( WC_PLUGIN_FILE ) );
 		$this->define( 'WC_VERSION', $this->version );
@@ -395,8 +444,9 @@ final class WooCommerce {
 		 */
 		if ( defined( 'WC_LOG_DIR' ) ) {
 			$this->define( 'WC_LOG_DIR_CUSTOM', true );
+		} else {
+			$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory( false ) );
 		}
-		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
@@ -689,8 +739,6 @@ final class WooCommerce {
 
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
-
-		LegacyRestApiStub::setup();
 	}
 
 	/**
@@ -998,6 +1046,43 @@ final class WooCommerce {
 			$this->session = new $session_class();
 			$this->session->init();
 		}
+	}
+
+	/**
+	 * Tell bots not to index some WooCommerce-created directories.
+	 *
+	 * We try to detect the default "User-agent: *" added by WordPress and add our rules to that group, because
+	 * it's possible that some bots will only interpret the first group of rules if there are multiple groups with
+	 * the same user agent.
+	 *
+	 * @param string $output The contents that WordPress will output in a robots.txt file.
+	 *
+	 * @return string
+	 */
+	private function robots_txt( $output ) {
+		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
+
+		$lines       = preg_split( '/\r\n|\r|\n/', $output );
+		$agent_index = array_search( 'User-agent: *', $lines, true );
+
+		if ( false !== $agent_index ) {
+			$above = array_slice( $lines, 0, $agent_index + 1 );
+			$below = array_slice( $lines, $agent_index + 1 );
+		} else {
+			$above = $lines;
+			$below = array();
+
+			$above[] = '';
+			$above[] = 'User-agent: *';
+		}
+
+		$above[] = "Disallow: $path/wp-content/uploads/wc-logs/";
+		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_transient_files/";
+		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
+
+		$lines = array_merge( $above, $below );
+
+		return implode( PHP_EOL, $lines );
 	}
 
 	/**

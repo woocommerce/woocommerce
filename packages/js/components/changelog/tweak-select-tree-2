@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Use inline popover for select tree and allow selecting items through ENTER or comma

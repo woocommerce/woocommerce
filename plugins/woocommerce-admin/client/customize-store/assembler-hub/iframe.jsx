@@ -1,5 +1,7 @@
 // Reference: https://github.com/WordPress/gutenberg/blob/f91b4fb4a12e41dd39c9594f24ea1a1a4e23dade/packages/block-editor/src/components/iframe/index.js#L1
 // We fork the code from the above link to reduce the unnecessary network requests and improve the performance.
+// Some of the code is not used in the project and is removed.
+// We've also made some changes to the code to make it work with the Zoom Out feature.
 
 /**
  * External dependencies
@@ -11,6 +13,8 @@ import {
 	forwardRef,
 	useMemo,
 	useEffect,
+	useRef,
+	useContext,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -21,8 +25,12 @@ import {
 } from '@wordpress/compose';
 import { __experimentalStyleProvider as StyleProvider } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-
 import { store as blockEditorStore } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { ZoomOutContext } from './context/zoom-out-context';
 
 function Iframe( {
 	contentRef,
@@ -30,34 +38,108 @@ function Iframe( {
 	tabIndex = 0,
 	scale = 1,
 	frameSize = 0,
-	expand = false,
 	readonly,
 	forwardedRef: ref,
-	loadStyles = true,
-	loadScripts = false,
+	title = __( 'Editor canvas', 'woocommerce' ),
 	...props
 } ) {
-	const [ iframeDocument, setIframeDocument ] = useState();
-
 	const { resolvedAssets } = useSelect( ( select ) => {
-		const settings = select( blockEditorStore ).getSettings();
-
+		const { getSettings } = select( blockEditorStore );
+		const settings = getSettings();
 		return {
 			resolvedAssets: settings.__unstableResolvedAssets,
 		};
 	}, [] );
-	const { styles = '', scripts = '' } = resolvedAssets;
 
+	const { styles = '', scripts = '' } = resolvedAssets;
+	const [ iframeDocument, setIframeDocument ] = useState();
+	const prevContainerWidth = useRef( 0 );
+	const [ bodyClasses, setBodyClasses ] = useState( [] );
 	const [ contentResizeListener, { height: contentHeight } ] =
 		useResizeObserver();
+	const [ containerResizeListener, { width: containerWidth } ] =
+		useResizeObserver();
+
 	const setRef = useRefEffect( ( node ) => {
 		node._load = () => {
 			setIframeDocument( node.contentDocument );
 		};
+		function onLoad() {
+			const { contentDocument, ownerDocument } = node;
+			const { documentElement } = contentDocument;
+
+			documentElement.classList.add( 'block-editor-iframe__html' );
+
+			// Ideally ALL classes that are added through get_body_class should
+			// be added in the editor too, which we'll somehow have to get from
+			// the server in the future (which will run the PHP filters).
+			setBodyClasses(
+				Array.from( ownerDocument?.body.classList ).filter(
+					( name ) =>
+						name.startsWith( 'admin-color-' ) ||
+						name.startsWith( 'post-type-' ) ||
+						name === 'wp-embed-responsive'
+				)
+			);
+
+			contentDocument.dir = ownerDocument.dir;
+		}
+
+		node.addEventListener( 'load', onLoad );
+
+		return () => {
+			delete node._load;
+			node.removeEventListener( 'load', onLoad );
+		};
 	}, [] );
 
+	const [ iframeWindowInnerHeight, setIframeWindowInnerHeight ] = useState();
+
+	const iframeResizeRef = useRefEffect( ( node ) => {
+		const nodeWindow = node.ownerDocument.defaultView;
+
+		setIframeWindowInnerHeight( nodeWindow.innerHeight );
+		const onResize = () => {
+			setIframeWindowInnerHeight( nodeWindow.innerHeight );
+		};
+		nodeWindow.addEventListener( 'resize', onResize );
+		return () => {
+			nodeWindow.removeEventListener( 'resize', onResize );
+		};
+	}, [] );
+
+	const [ windowInnerWidth, setWindowInnerWidth ] = useState();
+
+	const windowResizeRef = useRefEffect( ( node ) => {
+		const nodeWindow = node.ownerDocument.defaultView;
+
+		setWindowInnerWidth( nodeWindow.innerWidth );
+		const onResize = () => {
+			setWindowInnerWidth( nodeWindow.innerWidth );
+		};
+		nodeWindow.addEventListener( 'resize', onResize );
+		return () => {
+			nodeWindow.removeEventListener( 'resize', onResize );
+		};
+	}, [] );
+
+	const isZoomedOut = scale !== 1;
+
+	useEffect( () => {
+		if ( ! isZoomedOut && ! prevContainerWidth.current ) {
+			prevContainerWidth.current = containerWidth;
+		}
+	}, [ containerWidth, isZoomedOut ] );
+
 	const disabledRef = useDisabled( { isDisabled: ! readonly } );
-	const bodyRef = useMergeRefs( [ contentRef, disabledRef ] );
+	const bodyRef = useMergeRefs( [
+		contentRef,
+		disabledRef,
+		// Avoid resize listeners when not needed, these will trigger
+		// unnecessary re-renders when animating the iframe width, or when
+		// expanding preview iframes.
+		isZoomedOut ? iframeResizeRef : null,
+	] );
 
 	// Correct doctype is required to enable rendering in standards
 	// mode. Also preload the styles to avoid a flash of unstyled
@@ -65,10 +147,23 @@ function Iframe( {
 	const html = `<!doctype html>
 <html>
 	<head>
+		<meta charset="utf-8">
 		<script>window.frameElement._load()</script>
-		<style>html{height:auto!important;min-height:100%;}body{margin:0}</style>
-		${ loadStyles ? styles : '' }
-		${ loadScripts ? scripts : '' }
+		<style>
+			html{
+				height: auto !important;
+				min-height: 100%;
+			}
+			/* Lowest specificity to not override global styles */
+			:where(body) {
+				margin: 0;
+				/* Default background color in case zoom out mode background
+				colors the html element */
+				background-color: white;
+			}
+		</style>
+		${ styles }
+		${ scripts }
 	</head>
 	<body>
 		<script>document.currentScript.parentElement.remove()</script>
@@ -84,30 +179,85 @@ function Iframe( {
 
 	useEffect( () => cleanup, [ cleanup ] );
 
-	// We need to counter the margin created by scaling the iframe. If the scale
-	// is e.g. 0.45, then the top + bottom margin is 0.55 (1 - scale). Just the
-	// top or bottom margin is 0.55 / 2 ((1 - scale) / 2).
-	const marginFromScaling = ( contentHeight * ( 1 - scale ) ) / 2;
+	useEffect( () => {
+		if ( ! iframeDocument || ! isZoomedOut ) {
+			return;
+		}
 
-	return (
+		const maxWidth = 800;
+
+		iframeDocument.documentElement.classList.add( 'is-zoomed-out' );
+
+		iframeDocument.documentElement.style.setProperty(
+			'--wp-block-editor-iframe-zoom-out-scale',
+			scale === 'default'
+				? Math.min( containerWidth, maxWidth ) /
+						prevContainerWidth.current
+				: scale
+		);
+		iframeDocument.documentElement.style.setProperty(
+			'--wp-block-editor-iframe-zoom-out-frame-size',
+			typeof frameSize === 'number' ? `${ frameSize }px` : frameSize
+		);
+		iframeDocument.documentElement.style.setProperty(
+			'--wp-block-editor-iframe-zoom-out-content-height',
+			`${ contentHeight }px`
+		);
+		iframeDocument.documentElement.style.setProperty(
+			'--wp-block-editor-iframe-zoom-out-inner-height',
+			`${ iframeWindowInnerHeight }px`
+		);
+		iframeDocument.documentElement.style.setProperty(
+			'--wp-block-editor-iframe-zoom-out-container-width',
+			`${ containerWidth }px`
+		);
+		iframeDocument.documentElement.style.setProperty(
+			'--wp-block-editor-iframe-zoom-out-prev-container-width',
+			`${ prevContainerWidth.current }px`
+		);
+
+		return () => {
+			iframeDocument.documentElement.classList.remove( 'is-zoomed-out' );
+
+			iframeDocument.documentElement.style.removeProperty(
+				'--wp-block-editor-iframe-zoom-out-scale'
+			);
+			iframeDocument.documentElement.style.removeProperty(
+				'--wp-block-editor-iframe-zoom-out-frame-size'
+			);
+			iframeDocument.documentElement.style.removeProperty(
+				'--wp-block-editor-iframe-zoom-out-content-height'
+			);
+			iframeDocument.documentElement.style.removeProperty(
+				'--wp-block-editor-iframe-zoom-out-inner-height'
+			);
+			iframeDocument.documentElement.style.removeProperty(
+				'--wp-block-editor-iframe-zoom-out-container-width'
+			);
+			iframeDocument.documentElement.style.removeProperty(
+				'--wp-block-editor-iframe-zoom-out-prev-container-width'
+			);
+		};
+	}, [
+		scale,
+		frameSize,
+		iframeDocument,
+		iframeWindowInnerHeight,
+		contentHeight,
+		containerWidth,
+		windowInnerWidth,
+		isZoomedOut,
+	] );
+
+	const iframe = (
 		<>
+			{ /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */ }
 			<iframe
 				{ ...props }
 				style={ {
+					border: 0,
 					...props.style,
-					height: expand ? contentHeight : props.style?.height,
-					marginTop:
-						scale !== 1
-							? -marginFromScaling + frameSize
-							: props.style?.marginTop,
-					marginBottom:
-						scale !== 1
-							? -marginFromScaling + frameSize
-							: props.style?.marginBottom,
-					transform:
-						scale !== 1
-							? `scale( ${ scale } )`
-							: props.style?.transform,
+					height: props.style?.height,
 					transition: 'all .3s',
 				} }
 				ref={ useMergeRefs( [ ref, setRef ] ) }
@@ -116,7 +266,7 @@ function Iframe( {
 				// mode. Also preload the styles to avoid a flash of unstyled
 				// content.
 				src={ src }
-				title={ __( 'Editor canvas', 'woocommerce' ) }
+				title={ title }
 				name="editor-canvas"
 			>
 				{ iframeDocument &&
@@ -125,7 +275,8 @@ function Iframe( {
 							ref={ bodyRef }
 							className={ clsx(
 								'block-editor-iframe__body',
-								'editor-styles-wrapper'
+								'editor-styles-wrapper',
+								...bodyClasses
 							) }
 						>
 							{ contentResizeListener }
@@ -138,6 +289,26 @@ function Iframe( {
 			</iframe>
 		</>
 	);
+
+	return (
+		<div className="block-editor-iframe__container" ref={ windowResizeRef }>
+			{ containerResizeListener }
+			<div
+				className={ clsx(
+					'block-editor-iframe__scale-container',
+					isZoomedOut && 'is-zoomed-out'
+				) }
+				style={ {
+					'--wp-block-editor-iframe-zoom-out-container-width':
+						isZoomedOut && `${ containerWidth }px`,
+					'--wp-block-editor-iframe-zoom-out-prev-container-width':
+						isZoomedOut && `${ prevContainerWidth.current }px`,
+				} }
+			>
+				{ iframe }
+			</div>
+		</div>
+	);
 }
 
 function IframeIfReady( props, ref ) {
@@ -146,6 +317,15 @@ function IframeIfReady( props, ref ) {
 			select( blockEditorStore ).getSettings().__internalIsInitialized,
 		[]
 	);
+
+	const { isZoomedOut } = useContext( ZoomOutContext );
+
+	const zoomOutProps = isZoomedOut
+		? {
+				scale: 'default',
+				frameSize: '48px',
+		  }
+		: {};
 
 	// We shouldn't render the iframe until the editor settings are initialised.
 	// The initial settings are needed to get the styles for the srcDoc, which
@@ -156,7 +336,12 @@ function IframeIfReady( props, ref ) {
 		return null;
 	}
 
-	return <Iframe { ...props } forwardedRef={ ref } />;
+	const iframeProps = {
+		...props,
+		...zoomOutProps,
+	};
+
+	return <Iframe { ...iframeProps } forwardedRef={ ref } />;
 }
 
 export default forwardRef( IframeIfReady );

@@ -97,37 +97,6 @@ class OnboardingFreeExtensions extends WC_REST_Data_Controller {
 			}
 		}
 
-		$extensions = $this->replace_jetpack_with_jetpack_boost_for_treatment( $extensions );
-
 		return new WP_REST_Response( $extensions );
-	}
-
-	private function replace_jetpack_with_jetpack_boost_for_treatment( array $extensions ) {
-		$is_treatment = \WooCommerce\Admin\Experimental_Abtest::in_treatment( 'woocommerce_jetpack_copy' );
-
-		if ( ! $is_treatment ) {
-			return $extensions;
-		}
-
-		$has_core_profiler = array_search( 'obw/core-profiler', array_column( $extensions, 'key' ) );
-
-		if ( $has_core_profiler === false ) {
-			return $extensions;
-		}
-
-		$has_jetpack = array_search( 'jetpack', array_column( $extensions[ $has_core_profiler ]['plugins'], 'key' ) );
-
-		if ( $has_jetpack === false ) {
-			return $extensions;
-		}
-
-		$jetpack                  = &$extensions[ $has_core_profiler ]['plugins'][ $has_jetpack ];
-		$jetpack->key             = 'jetpack-boost';
-		$jetpack->name            = 'Jetpack Boost';
-		$jetpack->label           = __( 'Optimize store performance with Jetpack Boost', 'woocommerce' );
-		$jetpack->description     = __( 'Speed up your store and improve your SEO with performance-boosting tools from Jetpack. Learn more', 'woocommerce' );
-		$jetpack->learn_more_link = 'https://jetpack.com/boost/';
-
-		return $extensions;
 	}
 }

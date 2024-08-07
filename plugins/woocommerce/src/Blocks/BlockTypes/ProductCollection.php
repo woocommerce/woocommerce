@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 use WP_Query;
 use WC_Tax;
 
@@ -76,6 +77,9 @@ class ProductCollection extends AbstractBlock {
 		// Extend allowed `collection_params` for the REST API.
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
+		// Provide location context into block's context.
+		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
+
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
@@ -84,6 +88,71 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
+	}
+
+	/**
+	 * Provides the location context to each inner block of the product collection block.
+	 * Hint: Only blocks using the 'query' context will be affected.
+	 *
+	 * The sourceData structure depends on the context type as follows:
+	 * - site:    [ ]
+	 * - order:   [ 'orderId'    => int ]
+	 * - cart:    [ 'productIds' => int[] ]
+	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
+	 * - product: [ 'productId'  => int ]
+	 *
+	 * @example array(
+	 *   'type'       => 'product',
+	 *   'sourceData' => array( 'productId' => 123 ),
+	 * )
+	 *
+	 * @param array $context  The block context.
+	 * @return array $context {
+	 *     The block context including the product collection location context.
+	 *
+	 *     @type array $productCollectionLocation {
+	 *         @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 *         @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order viewed, etc. See structure above for more details.
+	 *     }
+	 * }
+	 */
+	public function provide_location_context_for_inner_blocks( $context ) {
+		// Run only on frontend.
+		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
+		if ( is_admin() || \WC()->is_rest_api_request() ) {
+			return $context;
+		}
+
+		// Target only product collection's inner blocks that use the 'query' context.
+		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
+			return $context;
+		}
+
+		$is_in_single_product                 = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
+		$context['productCollectionLocation'] = $is_in_single_product ? array(
+			'type'       => 'product',
+			'sourceData' => array(
+				'productId' => absint( $context['postId'] ),
+			),
+		) : $this->get_location_context();
+
+		return $context;
+	}
+
+	/**
+	 * Get the global location context.
+	 * Serve as a runtime cache for the location context.
+	 *
+	 * @see ProductCollectionUtils::parse_frontend_location_context()
+	 *
+	 * @return array The location context.
+	 */
+	private function get_location_context() {
+		static $location_context = null;
+		if ( null === $location_context ) {
+			$location_context = ProductCollectionUtils::parse_frontend_location_context();
+		}
+		return $location_context;
 	}
 
 	/**
@@ -112,7 +181,7 @@ class ProductCollection extends AbstractBlock {
 					'data-wc-navigation-id',
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
-				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 				$p->set_attribute(
 					'data-wc-context',
 					wp_json_encode(
@@ -124,7 +193,7 @@ class ProductCollection extends AbstractBlock {
 							// This way we avoid prefetching when the page loads.
 							'isPrefetchNextOrPreviousLink' => false,
 						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 					)
 				);
 				$block_content = $p->get_updated_html();
@@ -226,7 +295,7 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
 			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
@@ -451,10 +520,14 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$block_context_query = $block->context['query'];
+
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
-		$is_exclude_applied_filters = ! ( $block->context['query']['inherit'] ?? false );
+		$inherit    = $block->context['query']['inherit'] ?? false;
+		$filterable = $block->context['query']['filterable'] ?? false;
+
+		$is_exclude_applied_filters = ! ( $inherit || $filterable );
 
 		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
 	}
@@ -1019,7 +1092,7 @@ class ProductCollection extends AbstractBlock {
 		$max_price_query = empty( $max_price ) ? array() : array(
 			'key'     => '_price',
 			'value'   => $max_price,
-			'compare' => '<',
+			'compare' => '<=',
 			'type'    => 'numeric',
 		);
 
