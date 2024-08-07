@@ -387,13 +387,29 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test handle() method does not send logs in dev environment
+	 */
+	public function test_handle_does_not_send_logs_in_dev_environment() {
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
+			->setMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->set_is_dev_or_local( true );
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
+
+		$this->assertFalse( $result, 'Handle should return false in dev environment' );
+	}
+
+	/**
 	 * @testdox Test handle() method successfully sends log.
 	 */
 	public function test_handle_successful() {
-		$this->sut = $this->getMockBuilder( RemoteLogger::class )
-							->onlyMethods( array( 'is_remote_logging_allowed' ) )
-							->getMock();
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
+			->setMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
 
+		$this->sut->set_is_dev_or_local( false );
 		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
 		// Mock wp_safe_remote_post using pre_http_request filter.
@@ -427,11 +443,12 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$mock_local_logger->expects( $this->once() )
 			->method( 'error' );
 
-		$this->sut = $this->getMockBuilder( RemoteLogger::class )
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
 			->setConstructorArgs( array( $mock_local_logger ) )
 			->onlyMethods( array( 'is_remote_logging_allowed' ) )
 			->getMock();
 
+		$this->sut->set_is_dev_or_local( false );
 		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
 		// Mock wp_safe_remote_post to throw an exception using pre_http_request filter.
@@ -551,3 +568,34 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		return $method->invokeArgs( $obj, $parameters );
 	}
 }
+
+
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch
+/**
+ * Mock class that extends RemoteLogger to allow overriding is_dev_or_local_environment.
+ */
+class RemoteLoggerWithEnvironmentOverride extends RemoteLogger {
+	/**
+	 * The is_dev_or_local value.
+	 *
+	 * @var bool
+	 */
+	private $is_dev_or_local = false;
+
+	/**
+	 * Set the is_dev_or_local value.
+	 *
+	 * @param bool $value The value to set.
+	 */
+	public function set_is_dev_or_local( $value ) {
+		$this->is_dev_or_local = $value;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function is_dev_or_local_environment() {
+		return $this->is_dev_or_local;
+	}
+}
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch
