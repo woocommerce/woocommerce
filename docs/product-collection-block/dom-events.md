@@ -27,3 +27,27 @@ window.document.addEventListener(
   }
 );
 ```
+
+## `wc-blocks_viewed_product`
+
+This event is triggered when some blocks are clicked in order to view product (redirect to product page).
+
+### `detail` parameters
+
+| Parameter          | Type    | Default value | Description                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------ | ------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `collection` | string | `''`       | Collection type. Core collections can be of type: `woocommerce/product-collection/product-catalog`, `woocommerce/product-collection/best-sellers`, `woocommerce/product-collection/featured`, `woocommerce/product-collection/new-arrivals`, `woocommerce/product-collection/on-sale`, `woocommerce/product-collection/top-rated`. For custom collection it will hold their name. |
+| `product` | object | `{}`       | Product object |
+
+### Example usage
+
+```javascript
+window.document.addEventListener(
+  'wc-blocks_product_list_rendered',
+  ( e ) => {
+    const { collection } = e.detail;
+    console.log( collection ) // -> collection name, e.g. woocommerce/product-collection/on-sale
+    console.log( product ) // -> product object
+  }
+);
+```
