@@ -66,13 +66,6 @@ class ProductImage extends AbstractBlock {
 	}
 
 	/**
-	 * It is necessary to register and enqueues assets during the render phase because we want to load assets only if the block has the content.
-	 */
-	protected function register_block_type_assets() {
-		return null;
-	}
-
-	/**
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
@@ -217,7 +210,6 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
 			$this->register_chunk_translations( [ $this->block_name ] );
 			return $content;
 		}
