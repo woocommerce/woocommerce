@@ -315,7 +315,7 @@
 		var form = event.data.variationForm;
 
 		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).trigger( 'change' );
-		form.$form.find( '.wc-no-matching-variations' ).remove();
+		form.$form.find( '.wc-no-matching-variations' ).parent().remove();
 
 		if ( form.useAjax ) {
 			form.$form.trigger( 'check_variations' );
@@ -563,16 +563,15 @@
 		this.$form
 			.find( '.single_variation' )
 			.after(
-				'<p class="wc-no-matching-variations woocommerce-info">' +
-				wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
-				'</p>'
+				'<div role="alert">' +
+					'<p class="wc-no-matching-variations woocommerce-info">' +
+						wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
+					'</p>' +
+				'</div>'
 			)
-			.next( '.wc-no-matching-variations' )
-			.slideDown( 200 )
-			.delay( 500 )
-			.queue( function( ) {
-				$( this ).attr( 'role', 'alert' ).dequeue();
-			} );
+			.next( 'div' )
+			.find( '.wc-no-matching-variations' )
+			.slideDown( 200 );
 	};
 
 	/**
