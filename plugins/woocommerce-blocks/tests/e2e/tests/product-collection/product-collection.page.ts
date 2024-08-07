@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Locator, Page } from '@playwright/test';
+import { FrameLocator, Locator, Page } from '@playwright/test';
 import { Editor, Admin } from '@woocommerce/e2e-utils';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
@@ -62,6 +62,7 @@ export const SELECTORS = {
 	previewButtonTestID: 'product-collection-preview-button',
 	collectionPlaceholder:
 		'[data-type="woocommerce/product-collection"] .components-placeholder',
+	productPicker: '.wc-blocks-product-collection__editor-product-picker',
 };
 
 export type Collections =
@@ -163,6 +164,8 @@ class ProductCollectionPage {
 			chooseCollectionFromPlaceholder(),
 			chooseCollectionFromDropdown(),
 		] );
+
+		await this.chooseProductInEditorProductPicker( this.admin.page );
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -196,6 +199,24 @@ class ProductCollectionPage {
 			await this.editor.canvas
 				.locator( SELECTORS.collectionPlaceholder )
 				.getByRole( 'button', { name: buttonName, exact: true } )
+				.click();
+		}
+
+		await this.chooseProductInEditorProductPicker( this.editor.canvas );
+	}
+
+	async chooseProductInEditorProductPicker(
+		pageReference: Page | FrameLocator
+	) {
+		const editorProductPicker = pageReference.locator(
+			SELECTORS.productPicker
+		);
+		if ( await editorProductPicker.count() ) {
+			await editorProductPicker
+				.locator( 'label' )
+				.filter( {
+					hasText: 'Album',
+				} )
 				.click();
 		}
 	}
