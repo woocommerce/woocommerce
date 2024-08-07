@@ -68,8 +68,6 @@ const config = {
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
 	outputDir: testsResultsPath,
-	globalSetup: require.resolve( './global-setup' ),
-	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: `${ testsRootPath }/tests`,
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
@@ -92,15 +90,28 @@ const config = {
 	},
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
 	projects: [
-		{
-			name: 'ui',
-			use: { ...devices[ 'Desktop Chrome' ] },
-			testIgnore: '**/api-tests/**',
-		},
+		// API: REST API testing. Requires NO global setup/teardown.
 		{
 			name: 'api',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: '**/api-tests/**',
+		},
+		// UI: E2E testing. Requires global setup/teardown.
+		{
+			name: 'ui',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testIgnore: '**/api-tests/**',
+			dependencies: [ 'global-setup.js' ],
+		},
+		// Pseudo-projects: global setup/teardown, which hooks in as per projects needs.
+		{
+			name: 'global-setup.js',
+			testMatch: /global-setup\.js/,
+			teardown: 'global-teardown.js',
+		},
+		{
+			name: 'global-teardown.js',
+			testMatch: /global-teardown\.js/,
 		},
 	],
 };
