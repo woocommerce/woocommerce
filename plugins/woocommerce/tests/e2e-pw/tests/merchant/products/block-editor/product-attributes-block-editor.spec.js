@@ -279,7 +279,10 @@ test(
 		} );
 
 		await test.step( 'add an existing attribute', async () => {
-			await page.getByRole( 'button', { name: 'Add new' } ).click();
+			await page
+				.getByLabel( 'Block: Product custom fields toggle control' )
+				.getByRole( 'button', { name: 'Add new' } )
+				.click();
 
 			await page.waitForLoadState( 'domcontentloaded' );
 
