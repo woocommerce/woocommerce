@@ -253,7 +253,7 @@ final class BlockTypesController {
 			}
 
 			// For output consistency, we convert camelCase to kebab-case and output in lowercase.
-			$key = strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) );
+			$key = strtolower( preg_replace( '/(?<!^|\ )[A-Z]/', '-$0', $key ) );
 
 			$processor->set_attribute( "data-{$key}", $value );
 		}
