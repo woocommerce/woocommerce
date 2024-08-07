@@ -84,10 +84,9 @@ class RestApi {
 	 * @return bool|\WP_Error
 	 */
 	public function check_permission() {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
+		if ( ! current_user_can( 'install_plugins' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
 	}
 
