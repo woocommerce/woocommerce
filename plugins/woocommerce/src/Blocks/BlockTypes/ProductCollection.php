@@ -294,7 +294,7 @@ class ProductCollection extends AbstractBlock {
 			}
 			$block_content = $p->get_updated_html();
 
-			$collection    = $block['attrs']['collection'] ?? 'unknown';
+			$collection    = $block['attrs']['collection'] ?? 'woocommerce/product-collection/product-catalog';
 			$block_content = $this->add_rendering_callback( $block_content, $collection );
 
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
