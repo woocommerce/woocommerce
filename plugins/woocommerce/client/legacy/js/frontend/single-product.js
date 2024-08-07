@@ -213,7 +213,16 @@ jQuery( function( $ ) {
 		// But only zoom if the img is larger than its container.
 		if ( zoomEnabled ) {
 			var zoom_options = $.extend( {
-				touch: false
+				touch: false,
+				callback: function() {
+					var zoomImg = this;
+					
+					setTimeout( function() {
+						zoomImg.removeAttribute( 'role' );
+						zoomImg.setAttribute( 'alt', '' );
+						zoomImg.setAttribute( 'aria-hidden', 'true' );
+					}, 100 );
+				}
 			}, wc_single_product_params.zoom_options );
 
 			if ( 'ontouchstart' in document.documentElement ) {
