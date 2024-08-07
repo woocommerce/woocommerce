@@ -154,7 +154,8 @@
 				}
 
 				.coupon-error-notice {
-					color: $red;
+					clear: left;
+					color: var(--wc-red);
 					float: left;
 					font-size: 0.75em;
 					margin-bottom: 0;

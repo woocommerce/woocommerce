@@ -1308,13 +1308,11 @@ p.demo_store,
 
 	form.checkout_coupon {
 		.coupon-error-notice {
-			color: $red;
-			display: block;
-			font-size: 0.75em;
+			@include coupon-error-notice-checkout();
 		}
 
 		.input-text.has-error:focus {
-			border-color: $red;
+			border-color: var(--wc-red);
 		}
 	}
 
@@ -1989,13 +1987,7 @@ p.demo_store,
 		}
 
 		td.actions .coupon .coupon-error-notice {
-			color: $red;
-			flex-basis: 100%;
-			float: none;
-			font-size: 0.75em;
-			margin-bottom: 0;
-			text-align: left;
-			width: auto;
+			@include coupon-error-notice-cart();
 		}
 
 		input {
