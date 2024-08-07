@@ -171,6 +171,7 @@ function wc_clear_cart_after_payment() {
 	global $wp;
 
 	$should_clear_cart_after_payment = false;
+	$after_payment                   = false;
 
 	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
@@ -183,6 +184,7 @@ function wc_clear_cart_after_payment() {
 
 			if ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) {
 				$should_clear_cart_after_payment = true;
+				$after_payment                   = true;
 			}
 		}
 	}
@@ -193,9 +195,14 @@ function wc_clear_cart_after_payment() {
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
 			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
-			$did_order_succeed               = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
-			$should_clear_cart_after_payment = $did_order_succeed;
+			$should_clear_cart_after_payment = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
+			$after_payment                   = true;
 		}
+	}
+
+	// If it doesn't look like a payment happened, bail early.
+	if ( ! $after_payment ) {
+		return;
 	}
 
 	/**
