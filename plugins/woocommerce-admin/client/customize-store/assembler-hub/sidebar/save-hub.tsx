@@ -190,7 +190,11 @@ export const SaveHub = () => {
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
 				>
-					{ isResolving ? <Spinner /> : __( 'Save', 'woocommerce' ) }
+					{ isResolving ? (
+						<Spinner />
+					) : (
+						__( 'Finish customizing', 'woocommerce' )
+					) }
 				</Button>
 			</HStack>
 		);

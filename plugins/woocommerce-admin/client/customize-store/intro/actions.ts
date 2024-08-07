@@ -130,8 +130,13 @@ export const assignNoAIFlowError = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents
 >( {
-	intro: ( context ) => {
-		return { ...context.intro, hasErrors: true };
+	intro: ( context, event: unknown ) => {
+		const { errorStatus } = event as { errorStatus: number | undefined };
+		return {
+			...context.intro,
+			hasErrors: true,
+			errorStatus,
+		};
 	},
 } );
 
