@@ -17,8 +17,13 @@
 
 .wp-block-woocommerce-customer-account {
 	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	overflow: hidden;
 
 	a {
+		flex: 1;
+		overflow: hidden;
 		text-decoration: none !important;
 		align-items: center;
 		display: flex;
