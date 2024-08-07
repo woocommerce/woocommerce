@@ -204,6 +204,7 @@ jobs:
           lastRunFlag=""
           if [ -f "$lastRunFileDest" ]; then
             # Playwright last run info is available, parse the file and check if there are failed tests
+            cat "$lastRunFileDest"
             failedTests=$(jq '.failedTests | length' "$lastRunFileDest")
           
             # Only if there are failed tests, we want to use the --last-failed flag. 
