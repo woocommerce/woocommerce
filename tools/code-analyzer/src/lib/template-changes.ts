@@ -29,7 +29,7 @@ export const scanForTemplateChanges = async (
 		return changes;
 	}
 
-	const matchPatches = /^a\/(.+)\/templates\/(.+)\.php/g;
+	const matchPatches = /^a\/(.+)\/templates\/(.+)/g;
 	const patches = getPatches( content, matchPatches );
 	const matchVersion = `^(\\+.+\\*.+)(@version)\\s+(${ version.replace(
 		/\./g,
