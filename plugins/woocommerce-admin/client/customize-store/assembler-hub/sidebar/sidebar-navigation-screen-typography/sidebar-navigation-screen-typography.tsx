@@ -41,11 +41,11 @@ export const SidebarNavigationScreenTypography = ( {
 		: __( 'Choose fonts', 'woocommerce' );
 	const label = aiOnline
 		? __(
-				"AI has selected a font pairing that's the best fit for your business. If you'd like to change them, select a new option below now, or later in Editor | <StyleLink>Styles</StyleLink>.",
+				"AI has selected a font pairing that's the best fit for your business. If you'd like to change them, select a new option below now, or later in Editor.",
 				'woocommerce'
 		  )
 		: __(
-				'Select the pair of fonts that best suits your brand. The larger font will be used for headings, and the smaller for supporting content. You can change your font at any time in Editor | <StyleLink>Styles</StyleLink>.',
+				'Select the pair of fonts that best suits your brand. The larger font will be used for headings, and the smaller for supporting content. You can change your font at any time in Editor.',
 				'woocommerce'
 		  );
 
@@ -100,26 +100,7 @@ export const SidebarNavigationScreenTypography = ( {
 		<SidebarNavigationScreen
 			title={ title }
 			onNavigateBackClick={ onNavigateBackClick }
-			description={ createInterpolateElement( label, {
-				StyleLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_style_link_click',
-								{
-									source: 'typography',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php?path=%2Fwp_global_styles`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
-				),
-			} ) }
+			description={ label }
 			content={
 				<div className="woocommerce-customize-store_sidebar-typography-content">
 					{ isFontLibraryAvailable && <FontPairing /> }

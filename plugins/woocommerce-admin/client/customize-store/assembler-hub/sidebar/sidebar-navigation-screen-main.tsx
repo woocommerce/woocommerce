@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
@@ -23,13 +23,11 @@ import {
 } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
-import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
