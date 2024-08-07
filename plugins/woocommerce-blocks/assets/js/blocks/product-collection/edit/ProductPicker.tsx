@@ -24,7 +24,7 @@ const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 	const blockProps = useBlockProps();
 	const attributes = props.attributes;
 
-	const collection = getCollectionByName( props.attributes.collection );
+	const collection = getCollectionByName( attributes.collection );
 	if ( ! collection ) {
 		return;
 	}

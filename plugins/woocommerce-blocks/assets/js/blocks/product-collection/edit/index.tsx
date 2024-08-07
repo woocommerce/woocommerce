@@ -4,17 +4,14 @@
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import {
-	useGetLocation,
-	WooCommerceBlockLocation,
-} from '@woocommerce/blocks/product-template/utils';
+import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 
 /**
  * Internal dependencies
  */
 import {
+	ProductCollectionEditComponentProps,
 	ProductCollectionUIStatesInEditor,
-	type ProductCollectionEditComponentProps,
 } from '../types';
 import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
@@ -37,7 +34,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const productCollectionUIStateInEditor =
 		getProductCollectionUIStateInEditor( {
 			hasInnerBlocks,
-			location: location as WooCommerceBlockLocation,
+			location,
 			attributes: props.attributes,
 			usesReference: props.usesReference,
 		} );
