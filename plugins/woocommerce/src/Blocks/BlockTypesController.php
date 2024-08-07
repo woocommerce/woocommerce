@@ -251,6 +251,10 @@ final class BlockTypesController {
 			if ( ! is_scalar( $value ) ) {
 				$value = wp_json_encode( $value );
 			}
+
+			// For output consistency, we convert camelCase to kebab-case and output in lowercase.
+			$key = strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) );
+
 			$processor->set_attribute( "data-{$key}", $value );
 		}
 
