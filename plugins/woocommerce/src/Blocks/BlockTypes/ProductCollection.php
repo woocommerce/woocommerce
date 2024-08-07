@@ -303,21 +303,20 @@ class ProductCollection extends AbstractBlock {
 				$processor->set_attribute( 'data-wc-watch', 'callbacks.prefetch' );
 				$processor->set_attribute( 'data-wc-on--mouseenter', 'actions.prefetchOnHover' );
 			} else {
-				$innerText = __( 'Page ', 'woocommerce' );
+				$inner_text = __( 'Page ', 'woocommerce' );
 				$processor->set_bookmark( 'page_number' );
 				while ( $processor->next_token() ) {
 					if ( '#text' === $processor->get_token_type() ) {
 						$page = trim( $processor->get_modifiable_text() );
 						if ( is_numeric( $page ) ) {
-							$innerText .= $page;
+							$inner_text .= $page;
 							break;
 						}
 					}
 				}
 				$processor->seek( 'page_number' );
-				$processor->set_attribute( 'aria-label', $innerText );
+				$processor->set_attribute( 'aria-label', $inner_text );
 			}
-
 		}
 	}
 
