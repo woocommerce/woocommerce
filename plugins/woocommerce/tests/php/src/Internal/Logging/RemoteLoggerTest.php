@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Logging;
 
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use WC_Rate_Limiter;
+use WC_Cache_Helper;
 
 /**
  * Class RemoteLoggerTest.
@@ -41,6 +43,13 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_feature_remote_logging_enabled' );
 		delete_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT );
+
+		global $wpdb;
+		$wpdb->query(
+			"DELETE FROM {$wpdb->prefix}wc_rate_limits"
+		);
+
+		WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
 	}
 
 	/**
@@ -54,6 +63,8 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		remove_all_filters( 'option_woocommerce_version' );
 		remove_all_filters( 'option_woocommerce_remote_variant_assignment' );
 		remove_all_filters( 'plugins_api' );
+		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'woocommerce_remote_logger_formatted_log_data' );
 	}
 
 	/**
@@ -233,4 +244,358 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$this->sut->is_remote_logging_allowed();
 		$this->assertEquals( 3, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
 	}
+
+	/**
+	 * @testdox Test get_formatted_log method with basic log data returns expected array.
+	 */
+	public function test_get_formatted_log_basic() {
+		$level   = 'error';
+		$message = 'Fatal error occurred at line 123 in ' . ABSPATH . 'wp-content/file.php';
+		$context = array( 'tags' => array( 'tag1', 'tag2' ) );
+
+		$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
+
+		$this->assertArrayHasKey( 'feature', $formatted_log );
+		$this->assertArrayHasKey( 'severity', $formatted_log );
+		$this->assertArrayHasKey( 'message', $formatted_log );
+		$this->assertArrayHasKey( 'host', $formatted_log );
+		$this->assertArrayHasKey( 'tags', $formatted_log );
+		$this->assertArrayHasKey( 'properties', $formatted_log );
+
+		$this->assertEquals( 'woocommerce_core', $formatted_log['feature'] );
+		$this->assertEquals( 'error', $formatted_log['severity'] );
+		$this->assertEquals( 'Fatal error occurred at line 123 in **/wp-content/file.php', $formatted_log['message'] );
+		$this->assertEquals( wp_parse_url( home_url(), PHP_URL_HOST ), $formatted_log['host'] );
+
+		// Tags.
+		$this->assertArrayHasKey( 'tags', $formatted_log );
+		$this->assertEquals( array( 'woocommerce', 'php', 'tag1', 'tag2' ), $formatted_log['tags'] );
+
+		// Properties.
+		$this->assertEquals( WC()->version, $formatted_log['properties']['wc_version'] );
+		$this->assertEquals( get_bloginfo( 'version' ), $formatted_log['properties']['wp_version'] );
+		$this->assertEquals( phpversion(), $formatted_log['properties']['php_version'] );
+	}
+
+	/**
+	 * @testdox Test get_formatted_log method sanitizes backtrace.
+	 */
+	public function test_get_formatted_log_with_backtrace() {
+		$level   = 'error';
+		$message = 'Test error message';
+		$context = array( 'backtrace' => ABSPATH . 'wp-content/file.php' );
+
+		$result = $this->sut->get_formatted_log( $level, $message, $context );
+		$this->assertEquals( '**/wp-content/file.php', $result['trace'] );
+
+		$context = array( 'backtrace' => ABSPATH . 'wp-content/plugins/woocommerce/file.php' );
+		$result  = $this->sut->get_formatted_log( $level, $message, $context );
+		$this->assertEquals( '**/woocommerce/file.php', $result['trace'] );
+
+		$context = array( 'backtrace' => true );
+		$result  = $this->sut->get_formatted_log( $level, $message, $context );
+
+		$this->assertIsString( $result['trace'] );
+		$this->assertStringContainsString( '**/woocommerce/tests/php/src/Internal/Logging/RemoteLoggerTest.php', $result['trace'] );
+	}
+
+
+	/**
+	 * @testdox Test get_formatted_log method log extra attributes.
+	 */
+	public function test_get_formatted_log_with_extra() {
+		$level   = 'error';
+		$message = 'Test error message';
+		$context = array(
+			'extra' => array(
+				'key1' => 'value1',
+				'key2' => 'value2',
+			),
+		);
+
+		$result = $this->sut->get_formatted_log( $level, $message, $context );
+
+		$this->assertArrayHasKey( 'extra', $result );
+		$this->assertEquals( 'value1', $result['extra']['key1'] );
+		$this->assertEquals( 'value2', $result['extra']['key2'] );
+	}
+
+
+	/**
+	 * @testdox Test handle() method when throttled.
+	 *
+	 * @return void
+	 */
+	public function test_handle_returns_false_when_throttled() {
+		$mock_local_logger = $this->createMock( \WC_Logger::class );
+		$mock_local_logger->expects( $this->once() )
+			->method( 'info' )
+			->with( 'Remote logging throttled.', array( 'source' => 'wc-remote-logger' ) );
+
+		$this->sut = $this->getMockBuilder( RemoteLogger::class )
+			->setConstructorArgs( array( $mock_local_logger ) )
+			->onlyMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
+		// Set rate limit to simulate exceeded limit.
+		WC_Rate_Limiter::set_rate_limit( RemoteLogger::RATE_LIMIT_ID, 10 );
+		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
+		$this->assertFalse( $result );
+	}
+
+
+	/**
+	 * @testdox Test handle() method applies filter.
+	 *
+	 * @return void
+	 */
+	public function test_handle_filtered_log_null() {
+		$this->sut = $this->getMockBuilder( RemoteLogger::class )
+							->onlyMethods( array( 'is_remote_logging_allowed' ) )
+							->getMock();
+
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
+		add_filter(
+			'woocommerce_remote_logger_formatted_log_data',
+			function ( $log_data, $level, $message, $context ) {
+				$this->assertEquals( 'Test message', $log_data['message'] );
+				$this->assertEquals( 'error', $level );
+				$this->assertEquals( 'Test message', $message );
+				$this->assertEquals( array(), $context );
+
+				return null;
+			},
+			10,
+			4
+		);
+
+		// Mock wp_safe_remote_post using pre_http_request filter.
+		add_filter(
+			'pre_http_request',
+			function () {
+				// assert not called.
+				$this->assertFalse( true );
+			},
+			10,
+			3
+		);
+
+		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+	}
+
+	/**
+	 * @testdox Test handle() method does not send logs in dev environment
+	 */
+	public function test_handle_does_not_send_logs_in_dev_environment() {
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
+			->setMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->set_is_dev_or_local( true );
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
+
+		$this->assertFalse( $result, 'Handle should return false in dev environment' );
+	}
+
+	/**
+	 * @testdox Test handle() method successfully sends log.
+	 */
+	public function test_handle_successful() {
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
+			->setMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->set_is_dev_or_local( false );
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
+		// Mock wp_safe_remote_post using pre_http_request filter.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+					$this->assertArrayHasKey( 'body', $args );
+					$this->assertArrayHasKey( 'headers', $args );
+					return array(
+						'response' => array(
+							'code'    => 200,
+							'message' => 'OK',
+						),
+						'body'     => wp_json_encode( array( 'success' => true ) ),
+					);
+			},
+			10,
+			3
+		);
+
+		$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+		// Verify that rate limit was set.
+		$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
+	}
+
+	/**
+	 * @testdox Test handle method when remote logging fails.
+	 **/
+	public function test_handle_remote_logging_failure() {
+		$mock_local_logger = $this->createMock( \WC_Logger::class );
+		$mock_local_logger->expects( $this->once() )
+			->method( 'error' );
+
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
+			->setConstructorArgs( array( $mock_local_logger ) )
+			->onlyMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->set_is_dev_or_local( false );
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
+		// Mock wp_safe_remote_post to throw an exception using pre_http_request filter.
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				if ( 'https://public-api.wordpress.com/rest/v1.1/logstash' === $url ) {
+					throw new \Exception( 'Remote logging failed: A valid URL was not provided.' );
+				}
+				return $preempt;
+			},
+			10,
+			3
+		);
+
+		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+		// Verify that rate limit was set.
+		$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
+	}
+
+	/**
+	 * @testdox Test is_third_party_error method.
+	 *
+	 * @dataProvider data_provider_for_is_third_party_error
+	 *
+	 * @param string $message         Error message.
+	 * @param array  $context         Context.
+	 * @param bool   $expected_result  Expected result.
+	 */
+	public function test_is_third_party_error( $message, $context, $expected_result ) {
+		$result = $this->invoke_private_method( $this->sut, 'is_third_party_error', array( $message, $context ) );
+
+		$this->assertEquals( $expected_result, $result );
+	}
+
+	/**
+	 * Data provider for third party error test.
+	 *
+	 * @return array
+	 */
+	public function data_provider_for_is_third_party_error() {
+		return array(
+			array(
+				'Fatal error occurred at line 123 in' . WC_ABSPATH . 'file.php',
+				array(),
+				false,
+			),
+			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/file.php',
+				array(),
+				false,  // source is not.
+			),
+			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/file.php',
+				array( 'source' => 'fatal-errors' ),
+				false, // backtrace is not set.
+			),
+			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
+				array(
+					'source'    => 'fatal-errors',
+					'backtrace' => array(
+						'/home/user/path/wp-content/plugins/3rd-plugin/file.php',
+						WC_ABSPATH . 'file.php',
+					),
+				),
+				false,
+			),
+			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/woocommerce-3rd-plugin/file.php',
+				array(
+					'source'    => 'fatal-errors',
+					'backtrace' => array(
+						WP_PLUGIN_DIR . 'woocommerce-3rd-plugin/file.php',
+					),
+				),
+				true,
+			),
+			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
+				array(
+					'source'    => 'fatal-errors',
+					'backtrace' => array(
+						WP_PLUGIN_DIR . '3rd-plugin/file.php',
+					),
+				),
+				true,
+			),
+			array(
+				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
+				array(
+					'source'    => 'fatal-errors',
+					'backtrace' => array(
+						array(
+							'file' => WP_PLUGIN_DIR . '3rd-plugin/file.php',
+						),
+					),
+				),
+				true,
+			),
+		);
+	}
+
+
+	/**
+	 * Helper method to invoke private methods.
+	 *
+	 * @param object $obj     Object instance.
+	 * @param string $method_name Name of the private method.
+	 * @param array  $parameters  Parameters to pass to the method.
+	 * @return mixed
+	 */
+	private function invoke_private_method( $obj, $method_name, $parameters = array() ) {
+		$reflection = new \ReflectionClass( get_class( $obj ) );
+		$method     = $reflection->getMethod( $method_name );
+		$method->setAccessible( true );
+		return $method->invokeArgs( $obj, $parameters );
+	}
 }
+
+
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch
+/**
+ * Mock class that extends RemoteLogger to allow overriding is_dev_or_local_environment.
+ */
+class RemoteLoggerWithEnvironmentOverride extends RemoteLogger {
+	/**
+	 * The is_dev_or_local value.
+	 *
+	 * @var bool
+	 */
+	private $is_dev_or_local = false;
+
+	/**
+	 * Set the is_dev_or_local value.
+	 *
+	 * @param bool $value The value to set.
+	 */
+	public function set_is_dev_or_local( $value ) {
+		$this->is_dev_or_local = $value;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function is_dev_or_local_environment() {
+		return $this->is_dev_or_local;
+	}
+}
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch

@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Track frequency of unhandled JS errors with MC Stats

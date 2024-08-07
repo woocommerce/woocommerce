@@ -162,10 +162,12 @@ export function ImageBlockEdit( {
 	} ) {
 		recordEvent( 'product_images_replace_image_button_click' );
 
-		if (
-			Array.isArray( propertyValue ) &&
-			! propertyValue.some( ( img ) => media.id === img.id )
-		) {
+		if ( Array.isArray( propertyValue ) ) {
+			// Ignore the media if it is replaced by itseft.
+			if ( propertyValue.some( ( img ) => media.id === img.id ) ) {
+				return;
+			}
+
 			const image = mapUploadImageToImage( media );
 			if ( image ) {
 				const newImages = [ ...propertyValue ];
@@ -182,7 +184,7 @@ export function ImageBlockEdit( {
 
 		if ( Array.isArray( propertyValue ) ) {
 			const remainingImages = propertyValue.filter(
-				( image ) => image.id === removedItem.props.id
+				( image ) => String( image.id ) !== removedItem.props.id
 			);
 			setPropertyValue( remainingImages );
 		} else {

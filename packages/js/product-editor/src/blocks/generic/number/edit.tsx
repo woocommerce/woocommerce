@@ -17,7 +17,6 @@ import { useProductEdits } from '../../../hooks/use-product-edits';
 
 export function Edit( {
 	attributes,
-	clientId,
 	context: { postType },
 }: ProductEditorBlockEditProps< NumberBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
@@ -57,7 +56,6 @@ export function Edit( {
 						),
 						min
 					),
-					context: clientId,
 				};
 			}
 			if (
@@ -74,13 +72,11 @@ export function Edit( {
 						),
 						min
 					),
-					context: clientId,
 				};
 			}
 			if ( required && ! value ) {
 				return {
 					message: __( 'This field is required.', 'woocommerce' ),
-					context: clientId,
 				};
 			}
 		},
