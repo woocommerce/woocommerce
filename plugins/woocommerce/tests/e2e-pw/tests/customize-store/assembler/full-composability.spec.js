@@ -167,6 +167,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 	test( 'Clicking on a pattern should insert it in the preview', async ( {
 		pageObject,
 		baseURL,
+		page,
 	} ) => {
 		await prepareAssembler( pageObject, baseURL );
 		const assembler = await pageObject.getAssembler();
@@ -183,6 +184,14 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 			.locator( '.is-root-container' )
 			.textContent();
 
+		await page.mouse.wheel( 0, -100000000 );
+
+		const isScrolledUp = await page.evaluate( () => {
+			return window.scrollY === 0;
+		} );
+
+		await expect( isScrolledUp ).toBe( true );
+
 		await sidebarPattern.click();
 
 		const insertedPatternContent = await editor
@@ -195,6 +204,34 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( insertedPatternContent ).toContain(
 			sidebarPatternContent
 		);
+	} );
+
+	test( 'Clicking on a pattern should always scroll the page to the inserted pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list__list-item'
+		);
+
+		// add first 3 patterns
+		for ( let i = 0; i < 4; i++ ) {
+			await sidebarPattern.nth( i ).click();
+		}
+
+		const insertedPattern = editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.nth( 3 );
+
+		await expect( insertedPattern ).toBeInViewport();
 	} );
 
 	test( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
