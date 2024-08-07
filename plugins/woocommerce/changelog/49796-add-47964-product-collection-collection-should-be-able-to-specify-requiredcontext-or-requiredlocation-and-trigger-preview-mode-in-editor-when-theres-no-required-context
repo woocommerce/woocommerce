@@ -1,0 +1,4 @@
+Significance: major
+Type: add
+
+Product Collection: Enable Context-Aware Previews by Adding `usesReference` to `registerProductCollection`

@@ -157,11 +157,11 @@ export const TaskListCompletedHeader: React.FC<
 					className="woocommerce-task-card woocommerce-homescreen-card completed"
 				>
 					<CardHeader size="medium">
-						<div className="wooocommerce-task-card__header">
+						<div className="woocommerce-task-card__header">
 							<img
 								src={ HeaderImage }
 								alt="Completed"
-								className="wooocommerce-task-card__finished-header-image"
+								className="woocommerce-task-card__finished-header-image"
 							/>
 
 							<Text size="title" as="h2" lineHeight={ 1.4 }>
@@ -175,7 +175,7 @@ export const TaskListCompletedHeader: React.FC<
 								as="p"
 								size="13"
 								lineHeight="16px"
-								className="wooocommerce-task-card__header-subtitle"
+								className="woocommerce-task-card__header-subtitle"
 							>
 								{ __(
 									'Congratulations! Take a moment to celebrate and look out for the first sale.',
@@ -224,7 +224,7 @@ export const TaskListCompletedHeader: React.FC<
 							/>
 						) }
 					{ hasSubmittedScore && ! hideCustomerEffortScore && (
-						<div className="wooocommerce-task-card__header-ces-feedback">
+						<div className="woocommerce-task-card__header-ces-feedback">
 							<Text
 								variant="subtitle.small"
 								as="p"

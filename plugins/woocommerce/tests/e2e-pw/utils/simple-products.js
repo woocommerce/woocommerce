@@ -22,22 +22,32 @@ async function isBlockProductEditorEnabled( page ) {
 /**
  * This function is typically used for enabling/disabling the block product editor in settings page.
  *
- * @param {string} action The action that will be performed.
- * @param {import('@playwright/test').Page}   page
+ * @param {string}                          action The action that will be performed.
+ * @param {import('@playwright/test').Page} page
  */
 async function toggleBlockProductEditor( action = 'enable', page ) {
 	await page.goto( SETTINGS_URL );
-	if ( action === 'disable' ) {
-		await page
-			.locator( '#woocommerce_feature_product_block_editor_enabled' )
-			.uncheck();
-	} else {
-		await page
-			.locator( '#woocommerce_feature_product_block_editor_enabled' )
-			.check();
+
+	const enableProductEditor = page.locator(
+		'#woocommerce_feature_product_block_editor_enabled'
+	);
+	const isEnabled = await enableProductEditor.isChecked();
+
+	if (
+		( action === 'enable' && isEnabled ) ||
+		( action === 'disable' && ! isEnabled )
+	) {
+		// No need to toggle the setting.
+		return;
 	}
+
+	if ( action === 'enable' ) {
+		await enableProductEditor.check();
+	} else if ( action === 'disable' ) {
+		await enableProductEditor.uncheck();
+	}
+
 	await page
-		.locator( '.submit' )
 		.getByRole( 'button', {
 			name: 'Save changes',
 		} )
@@ -81,7 +91,7 @@ async function expectBlockProductEditor( page ) {
 /**
  * Click on a block editor tab.
  *
- * @param {string}													tabName
+ * @param {string}                          tabName
  * @param {import('@playwright/test').Page} page
  */
 async function clickOnTab( tabName, page ) {
