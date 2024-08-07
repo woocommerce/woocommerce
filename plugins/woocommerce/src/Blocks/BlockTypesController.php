@@ -228,7 +228,14 @@ final class BlockTypesController {
 	 */
 	public function add_data_attributes( $content, $block ) {
 
+		$content = trim( $content );
+
 		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
+			return $content;
+		}
+
+		// Check if the content starts with '<div', and return unchanged content early if not.
+		if ( strpos( $content, '<div' ) !== 0 ) {
 			return $content;
 		}
 
@@ -236,9 +243,6 @@ final class BlockTypesController {
 		$exclude_attributes = array( 'className', 'align' );
 
 		$processor = new \WP_HTML_Tag_Processor( $content );
-		if ( false === $processor->next_tag( 'DIV' ) ) {
-			return $content;
-		}
 
 		foreach ( $attributes as $key  => $value ) {
 			if ( ! is_string( $key ) || in_array( $key, $exclude_attributes, true ) ) {
