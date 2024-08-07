@@ -67,6 +67,12 @@ function toggle_remote_logging( $request ) {
 
 	if ( $enable ) {
 		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
+
+		if ( null === get_option( 'woocommerce_allow_tracking', null ) ) {
+			// Set the tracking option so that we can apply the filters.
+			add_option( 'woocommerce_allow_tracking', 'no' );
+		}
+
 		add_filter(
 			'option_woocommerce_allow_tracking',
 			function () {
