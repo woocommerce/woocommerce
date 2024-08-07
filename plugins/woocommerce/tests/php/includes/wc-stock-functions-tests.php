@@ -371,7 +371,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		wc_update_product_stock( $product->get_id(), $initial_stock );
 
 		$action_fired = false;
-		$callback     = function() use ( &$action_fired ) {
+		$callback     = function () use ( &$action_fired ) {
 			$action_fired = true;
 		};
 		add_action( 'woocommerce_low_stock', $callback );
@@ -409,7 +409,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		wc_update_product_stock( $product->get_id(), $initial_stock );
 
 		$action_fired = false;
-		$callback     = function() use ( &$action_fired ) {
+		$callback     = function () use ( &$action_fired ) {
 			$action_fired = true;
 		};
 		add_action( 'woocommerce_no_stock', $callback );
