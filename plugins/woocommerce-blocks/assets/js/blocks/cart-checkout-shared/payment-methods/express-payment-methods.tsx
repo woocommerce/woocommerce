@@ -22,14 +22,14 @@ import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
  */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
-import { useExpressCheckoutContext } from '../../checkout/inner-blocks/checkout-express-payment-block/context';
+import { useExpressPaymentContext } from '../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
 
 	const { hasDarkControls } = useCheckoutBlockContext();
 	const { showButtonStyles, buttonHeight, buttonBorderRadius } =
-		useExpressCheckoutContext();
+		useExpressPaymentContext();
 
 	// API for passing styles to express payment buttons
 	const buttonAttributes = showButtonStyles

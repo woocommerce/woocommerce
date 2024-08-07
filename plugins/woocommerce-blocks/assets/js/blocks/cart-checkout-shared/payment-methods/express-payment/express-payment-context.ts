@@ -3,19 +3,19 @@
  */
 import { useContext, createContext } from '@wordpress/element';
 
-type ExpressCheckoutContextProps = {
+type ExpressPaymentContextProps = {
 	showButtonStyles: boolean;
 	buttonHeight: string;
 	buttonBorderRadius: string;
 };
 
-export const ExpressCheckoutContext: React.Context< ExpressCheckoutContextProps > =
-	createContext< ExpressCheckoutContextProps >( {
+export const ExpressPaymentContext: React.Context< ExpressPaymentContextProps > =
+	createContext< ExpressPaymentContextProps >( {
 		showButtonStyles: true,
 		buttonHeight: '48',
 		buttonBorderRadius: '4',
 	} );
 
-export const useExpressCheckoutContext = () => {
-	return useContext( ExpressCheckoutContext );
+export const useExpressPaymentContext = () => {
+	return useContext( ExpressPaymentContext );
 };

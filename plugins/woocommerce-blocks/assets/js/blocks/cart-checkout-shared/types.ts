@@ -9,7 +9,14 @@ export type ExpressCheckoutAttributes = {
 	};
 };
 
-export type ExpressCheckoutSettings = {
+export type ExpressCartAttributes = {
+	className: string;
+	buttonHeight: string;
+	showButtonStyles: boolean;
+	buttonBorderRadius: string;
+};
+
+export type ExpressPaymentSettings = {
 	showButtonStyles: boolean;
 	buttonHeight: string;
 	buttonBorderRadius: string;
