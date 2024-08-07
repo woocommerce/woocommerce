@@ -360,17 +360,8 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 }
 
 OrdersPanel.propTypes = {
-	isError: PropTypes.bool,
-	isRequesting: PropTypes.bool,
 	unreadOrdersCount: PropTypes.number,
-	orders: PropTypes.array.isRequired,
 	orderStatuses: PropTypes.array,
-};
-
-OrdersPanel.defaultProps = {
-	orders: [],
-	isError: false,
-	isRequesting: false,
 };
 
 export default OrdersPanel;
