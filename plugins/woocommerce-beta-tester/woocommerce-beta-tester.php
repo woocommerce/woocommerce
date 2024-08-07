@@ -153,9 +153,9 @@ $simulate_error = get_option( 'wc_beta_tester_simulate_woocommerce_php_error', f
 if ( $simulate_error ) {
 	delete_option( 'wc_beta_tester_simulate_woocommerce_php_error' );
 
-	if ( $simulate_error === 'core' ) {
+	if ( 'core' === $simulate_error ) {
 		add_action( 'woocommerce_loaded', 'simulate_woocommerce_error' );
-	} elseif ( $simulate_error === 'beta-tester' ) {
+	} elseif ( 'beta-tester' === $simulate_error ) {
 		throw new Exception( 'Test PHP exception from WooCommerce Beta Tester' );
 	}
 }

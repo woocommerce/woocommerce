@@ -39,11 +39,16 @@ register_woocommerce_admin_test_helper_rest_route(
 	'/remote-logging/reset-rate-limit',
 	'reset_php_rate_limit',
 	array(
-		'methods'  => 'POST',
+		'methods' => 'POST',
 	)
 );
 
 
+/**
+ * Get the remote logging status.
+ *
+ * @return WP_REST_Response The response object.
+ */
 function get_remote_logging_status() {
 	$remote_logger = wc_get_container()->get( RemoteLogger::class );
 
@@ -90,9 +95,9 @@ function toggle_remote_logging( $request ) {
  */
 function log_remote_event() {
 	$remote_logger = wc_get_container()->get( RemoteLogger::class );
-	$result = $remote_logger->handle(
+	$result        = $remote_logger->handle(
 		time(),
-		'info',
+		'critical',
 		'Test PHP event from WC Beta Tester',
 		array( 'source' => 'wc-beta-tester' )
 	);
@@ -104,6 +109,11 @@ function log_remote_event() {
 	}
 }
 
+/**
+ * Reset the PHP rate limit.
+ *
+ * @return WP_REST_Response The response object.
+ */
 function reset_php_rate_limit() {
 	global $wpdb;
 	$wpdb->query(
