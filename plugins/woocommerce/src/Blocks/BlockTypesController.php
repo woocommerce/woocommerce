@@ -242,7 +242,7 @@ final class BlockTypesController {
 		}
 
 		foreach ( $attributes as $key  => $value ) {
-			if ( in_array( $key, $exclude_attributes, true ) ) {
+			if ( ! is_string( $key ) || in_array( $key, $exclude_attributes, true ) ) {
 				continue;
 			}
 			if ( is_bool( $value ) ) {
