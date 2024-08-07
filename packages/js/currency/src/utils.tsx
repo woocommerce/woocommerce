@@ -66,16 +66,17 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 	let currency: Currency;
 
 	function stripTags( str: string ) {
-		const tmp = document.createElement( 'template' );
+		// sanitize Polyfill - see https://github.com/WordPress/WordPress/blob/master/wp-includes/js/wp-sanitize.js
+		const stripedStr = str
+			.replace( /<!--[\s\S]*?(-->|$)/g, '' )
+			.replace( /<(script|style)[^>]*>[\s\S]*?(<\/\1>|$)/gi, '' )
+			.replace( /<\/?[a-z][\s\S]*?(>|$)/gi, '' );
 
-		// Throw if the browser does not support TemplateElement to avoid executing any JS.
-		if ( ! ( 'content' in tmp ) ) {
-			throw Error(
-				'TemplateElement is not supported in this browser, cannot safely `stripTags`.'
-			);
+		if ( stripedStr !== str ) {
+			return stripTags( stripedStr );
 		}
-		tmp.innerHTML = str;
-		return tmp.content.textContent || '';
+
+		return stripedStr;
 	}
 
 	/**

@@ -102,4 +102,20 @@ describe( 'currency.formatDecimalString', () => {
 		// @ts-expect-error formatAccount expects a number or string;
 		expect( currency.formatDecimalString( null ) ).toBe( '' );
 	} );
+
+	it( 'should strip tags in getPriceFormat', () => {
+		const currency = Currency();
+
+		expect(
+			currency.getPriceFormat( {
+				priceFormat: '<b>format</b>',
+			} )
+		).toBe( 'format' );
+
+		expect(
+			currency.getPriceFormat( {
+				priceFormat: '<script>format</script>',
+			} )
+		).toBe( 'format' );
+	} );
 } );
