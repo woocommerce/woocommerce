@@ -167,7 +167,6 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 	test( 'Clicking on a pattern should insert it in the preview', async ( {
 		pageObject,
 		baseURL,
-		page,
 	} ) => {
 		await prepareAssembler( pageObject, baseURL );
 		const assembler = await pageObject.getAssembler();
