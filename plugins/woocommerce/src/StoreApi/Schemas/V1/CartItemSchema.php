@@ -90,7 +90,7 @@ class CartItemSchema extends ItemSchema {
 	protected function get_cart_images( \WC_Product $product, array $cart_item, string $cart_item_key ) {
 		// Get the images for the product
 		$product_images = $this->get_images( $product );
-
+	
 		/**
 		 * Filter the cart product images
 		 *
@@ -100,7 +100,34 @@ class CartItemSchema extends ItemSchema {
 		 * @param array  $cart_item      Cart item array.
 		 * @param string $cart_item_key  Cart item key.
 		 */
-		return apply_filters( 'woocommerce_cart_item_images', $product_images, $cart_item, $cart_item_key );
+		$filtered_images = apply_filters( 'woocommerce_cart_item_images', $product_images, $cart_item, $cart_item_key );
+	
+		// Return the original images if the filtered image has no thumbnail URL.
+		$guarded_images = array();
+		$logger = wc_get_logger();
+		foreach ( $filtered_images as $key => $image ) {
+			// Check if thumbnail is a valid url
+			if ( empty( $image->thumbnail ) || ! filter_var( $image->thumbnail, FILTER_VALIDATE_URL ) ) {
+				$logger->warning( "After passing through woocommerce_cart_item_images filter, image with id $image->id did not have a valid thumbnail property." );
+				continue;
+			}
+			// Check if src property is a valid url
+			if ( empty( $image->src) || ! filter_var( $image->src, FILTER_VALIDATE_URL ) ) {
+				$logger->warning( "After passing through woocommerce_cart_item_images filter, image with id $image->id did not have a valid src property." );
+				continue;
+			}
+	
+			// Image is valid, add to resulting array
+			$guarded_images[] = $image;
+		}
+	
+		// If there are no valid images remaining, return original array
+		if ( count($guarded_images) == 0 ) {
+			return $product_images;
+		}
+	
+		// Return the filtered guarded images.
+		return $guarded_images;
 	}
 
 	/**
