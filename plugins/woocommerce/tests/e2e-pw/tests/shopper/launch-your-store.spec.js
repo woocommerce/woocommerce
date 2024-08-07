@@ -5,7 +5,7 @@ test.describe(
 	'Launch Your Store front end - logged out',
 	{ tag: [ '@payments', '@services', '@local' ] },
 	() => {
-		test.afterEach( async ( { baseURL } ) => {
+		test.beforeEach( async ( { baseURL } ) => {
 			try {
 				await setOption(
 					request,
