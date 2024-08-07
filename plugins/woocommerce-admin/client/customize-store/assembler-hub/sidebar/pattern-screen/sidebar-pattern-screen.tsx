@@ -154,7 +154,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		};
 	}, [ isLoading, blocks, isSpinnerVisible ] );
 
-	const { insertPattern, blockToScroll } = useInsertPattern();
+	const { insertPattern, insertedPattern: blockToScroll } =
+		useInsertPattern();
 
 	useEffect( () => {
 		if ( isEditorLoading ) {
