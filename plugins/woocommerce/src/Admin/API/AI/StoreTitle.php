@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class StoreTitle {
+class StoreTitle extends AIEndpoint {
 	/**
 	 * The store title option name.
 	 *
@@ -30,26 +30,18 @@ class StoreTitle {
 	const DEFAULT_TITLE = 'Site Title';
 
 	/**
-	 * Endpoint namespace.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
+	protected $endpoint = 'store-title';
 
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/store-title',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
