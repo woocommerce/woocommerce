@@ -44,6 +44,42 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
+	test( 'Can be migrated to from Products (Beta) block', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		await admin.createNewPost();
+
+		await editor.insertBlock( {
+			name: 'core/query',
+			attributes: {
+				namespace: 'woocommerce/product-query',
+			},
+		} );
+
+		await expect(
+			page.getByLabel( 'Block: Products (Beta)' )
+		).toBeVisible();
+
+		await page.getByRole( 'button', { name: 'Start blank' } ).click();
+		await page.getByLabel( 'Title & Date' ).click();
+
+		await page
+			.getByRole( 'button', { name: 'Upgrade to Product Collection' } )
+			.click();
+
+		await expect(
+			page.getByLabel( 'Block: Products (Beta)' )
+		).toBeHidden();
+		await expect(
+			page.getByLabel( 'Block: Product Collection' ).first()
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Choose collection' } )
+		).toBeVisible();
+	} );
+
 	test.describe( 'Renders correctly with all Product Elements', () => {
 		const expectedProductContent = [
 			'Beanie', // core/post-title
