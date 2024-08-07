@@ -67,7 +67,7 @@ class Init extends RemoteSpecsEngine {
 
 	/**
 	 * By default, new payment gateways are put at the bottom of the list on the admin "Payments" settings screen.
-	 * For visibility, we want WooCommerce Payments to be at the top of the list.
+	 * For visibility, we want WooPayments to be at the top of the list.
 	 *
 	 * @param array $ordering Existing ordering of the payment gateways.
 	 *
@@ -166,7 +166,7 @@ class Init extends RemoteSpecsEngine {
 
 		$specs = WCPayPromotionDataSourcePoller::get_instance()->get_specs_from_data_sources();
 		// On empty remote specs, fallback to default ones.
-		if ( false === $specs || ! is_array( $specs ) || 0 === count( $specs ) ) {
+		if ( ! is_array( $specs ) || 0 === count( $specs ) ) {
 			$specs = DefaultPromotions::get_all();
 		}
 
