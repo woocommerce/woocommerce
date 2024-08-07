@@ -34,7 +34,6 @@ class WC_Brands_Admin {
 	 */
 	public function __construct() {
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
 		add_action( 'product_brand_add_form_fields', array( $this, 'add_thumbnail_field' ) );
 		add_action( 'product_brand_edit_form_fields', array( $this, 'edit_thumbnail_field' ), 10, 1 );
 		add_action( 'created_term', array( $this, 'thumbnail_field_save' ), 10, 1 );
@@ -225,37 +224,6 @@ class WC_Brands_Admin {
 				),
 			)
 		);
-	}
-
-
-	/**
-	 * Scripts function.
-	 *
-	 * @return void
-	 */
-	public function scripts() {
-		$screen  = get_current_screen();
-		$version = Constants::get_constant( 'WC_VERSION' );
-
-		if ( 'edit-product' === $screen->id ) {
-			wp_localize_script(
-				'wc-brands-enhanced-select',
-				'wc_brands_enhanced_select_params',
-				array( 'ajax_url' => get_rest_url() . 'brands/search' )
-			);
-			wp_enqueue_script(
-				'wc-brands-enhanced-select',
-				plugins_url( '/assets/js/admin/wc-brands-enhanced-select.js', __DIR__ ),
-				array( 'jquery', 'selectWoo', 'wc-enhanced-select', 'wp-api' ),
-				$version,
-				false
-			);
-		}
-
-		if ( in_array( $screen->id, array( 'edit-product_brand' ), true ) ) {
-			wp_enqueue_media();
-			wp_enqueue_style( 'woocommerce_admin_styles' );
-		}
 	}
 
 	/**

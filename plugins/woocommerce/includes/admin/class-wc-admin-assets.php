@@ -240,8 +240,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_localize_script( 'woocommerce_admin', 'woocommerce_admin', $params );
 			}
 
-			// Edit product category pages.
-			if ( in_array( $screen_id, array( 'edit-product_cat' ) ) ) {
+			// Edit product category/brands pages.
+			if ( in_array( $screen_id, array( 'edit-product_cat', 'edit-product_brand' ) ) ) {
 				wp_enqueue_media();
 			}
 
@@ -313,6 +313,20 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 
 				wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
+
+				wp_register_script(
+					'wc-brands-enhanced-select',
+					WC()->plugin_url() . '/assets/js/admin/wc-brands-enhanced-select' . $suffix . '.js',
+					array( 'jquery', 'selectWoo', 'wc-enhanced-select', 'wp-api' ),
+					$version,
+					true
+				);
+				wp_localize_script(
+					'wc-brands-enhanced-select',
+					'wc_brands_enhanced_select_params',
+					[ 'ajax_url' => get_rest_url() . 'brands/search' ]
+				);
+				wp_enqueue_script('wc-brands-enhanced-select' );
 			}
 			/* phpcs: enable */
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
