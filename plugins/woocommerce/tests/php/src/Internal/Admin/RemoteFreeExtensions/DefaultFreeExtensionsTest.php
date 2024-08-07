@@ -156,7 +156,7 @@ class DefaultFreeExtensionsTest extends WC_Unit_Test_Case {
 		// Clean up.
 		self::rmdir( dirname( $shipping_plugin_file_path ) );
 		self::delete_folders( dirname( $shipping_plugin_file_path ) );
-		self::rmdir( dirname(  $tax_plugin_file_path ) );
+		self::rmdir( dirname( $tax_plugin_file_path ) );
 		self::delete_folders( dirname( $tax_plugin_file_path ) );
 	}
 

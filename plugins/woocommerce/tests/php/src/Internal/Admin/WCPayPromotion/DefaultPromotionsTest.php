@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\WCPayPromotion;
 
@@ -7,9 +8,9 @@ use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\DefaultPromotions;
 use WC_Unit_Test_Case;
 
 /**
- * DefaultFreeExtensions test.
+ * DefaultPromotionsTest test.
  *
- * @class DefaultFreeExtensionsTest
+ * @covers \Automattic\WooCommerce\Internal\Admin\WCPayPromotion\DefaultPromotions
  */
 class DefaultPromotionsTest extends WC_Unit_Test_Case {
 
