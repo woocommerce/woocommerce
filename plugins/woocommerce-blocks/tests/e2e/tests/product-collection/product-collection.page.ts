@@ -164,8 +164,6 @@ class ProductCollectionPage {
 			chooseCollectionFromPlaceholder(),
 			chooseCollectionFromDropdown(),
 		] );
-
-		await this.chooseProductInEditorProductPicker( this.admin.page );
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -201,8 +199,6 @@ class ProductCollectionPage {
 				.getByRole( 'button', { name: buttonName, exact: true } )
 				.click();
 		}
-
-		await this.chooseProductInEditorProductPicker( this.editor.canvas );
 	}
 
 	async chooseProductInEditorProductPicker(
@@ -225,6 +221,8 @@ class ProductCollectionPage {
 		await this.admin.createNewPost();
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
+		// If product picker is available, choose a product.
+		await this.chooseProductInEditorProductPicker( this.admin.page );
 		await this.refreshLocators( 'editor' );
 		await this.editor.openDocumentSettingsSidebar();
 	}
@@ -366,6 +364,8 @@ class ProductCollectionPage {
 		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
+		// If product picker is available, choose a product.
+		await this.chooseProductInEditorProductPicker( this.editor.canvas );
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -589,6 +589,30 @@ class ProductCollectionPage {
 		// Open the display settings.
 		await this.page
 			.getByRole( 'button', { name: 'Display settings' } )
+			.click();
+	}
+
+	async changeCollectionUsingToolbar( collection: Collections ) {
+		// Click "Choose collection" button in the toolbar.
+		await this.admin.page
+			.getByRole( 'toolbar', { name: 'Block Tools' } )
+			.getByRole( 'button', { name: 'Choose collection' } )
+			.click();
+
+		// Select the collection from the modal.
+		const collectionChooserModal = this.admin.page.locator(
+			'.wc-blocks-product-collection__modal'
+		);
+		await collectionChooserModal
+			.getByRole( 'button', {
+				name: collectionToButtonNameMap[ collection ],
+			} )
+			.click();
+
+		await collectionChooserModal
+			.getByRole( 'button', {
+				name: 'Continue',
+			} )
 			.click();
 	}
 
