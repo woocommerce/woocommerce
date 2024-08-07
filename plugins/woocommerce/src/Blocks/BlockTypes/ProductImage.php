@@ -125,17 +125,19 @@ class ProductImage extends AbstractBlock {
 	private function render_anchor( $product, $on_sale_badge, $product_image, $attributes ) {
 		$product_permalink = $product->get_permalink();
 
-		$pointer_events = false === $attributes['showProductLink'] ? 'pointer-events: none;' : '';
+		$is_link        = true === $attributes['showProductLink'];
+		$pointer_events = $is_link ? '' : 'pointer-events: none;';
+		$directives     = $is_link ? 'data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-image&quot;}" data-wc-on--click="actions.triggerEvent"' : '';
 
 		return sprintf(
 			'<a
-				data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-image&quot;}"
-				data-wc-on--click="actions.triggerEvent"
 				href="%1$s"
 				style="%2$s"
-			>%3$s %4$s</a>',
+				%3$s
+			>%4$s %5$s</a>',
 			$product_permalink,
 			$pointer_events,
+			$directives,
 			$on_sale_badge,
 			$product_image
 		);

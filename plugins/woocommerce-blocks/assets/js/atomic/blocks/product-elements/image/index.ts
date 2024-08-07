@@ -30,6 +30,7 @@ const blockConfig: BlockConfiguration = {
 	textdomain: 'woocommerce',
 	attributes,
 	supports,
+	viewScript: [ 'wc-product-image-interactivity-frontend' ],
 	edit,
 };
 
