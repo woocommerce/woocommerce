@@ -42,7 +42,7 @@ export const useInsertPattern = () => {
 	const blockToScroll = useRef< string | null >( null );
 
 	// @ts-expect-error No types for this exist yet.
-	const { insertBlocks } = useDispatch( blockEditorStore );
+	const { insertBlocks, removeBlock } = useDispatch( blockEditorStore );
 
 	const insertableIndex = useMemo( () => {
 		return blocks.findLastIndex(
@@ -108,7 +108,31 @@ export const useInsertPattern = () => {
 		[ insertBlocks, insertableIndex, isActiveNewNeutralVariation ]
 	);
 
+	const getPatternAddedByName = useCallback(
+		( patterName: string ) => {
+			return blocks.find( ( block ) => {
+				const blockPatternName = block.attributes.metadata?.patternName;
+				return blockPatternName === patterName;
+			} );
+		},
+		[ blocks ]
+	);
+
+	const removePattern = useCallback(
+		( pattern: BlockInstance ) => {
+			removeBlock( pattern.clientId, false );
+			trackEvent(
+				'customize_your_store_assembler_pattern_sidebar_click',
+				{ pattern: pattern.name }
+			);
+		},
+
+		[ removeBlock ]
+	);
+
 	return {
 		insertPattern,
+		getPatternAddedByName,
+		removePattern,
 	};
 };

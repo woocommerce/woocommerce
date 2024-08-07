@@ -8,7 +8,7 @@ import { BlockInstance } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { capitalize } from 'lodash';
+import { capitalize, remove } from 'lodash';
 import { Button, Spinner } from '@wordpress/components';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -190,7 +190,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		};
 	}, [ isEditorLoading ] );
 
-	const { insertPattern } = useInsertPattern();
+	const { insertPattern, getPatternAddedByName, removePattern } =
+		useInsertPattern();
 
 	return (
 		<div
@@ -255,7 +256,16 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 						0,
 						patternPagination
 					) }
-					onClickPattern={ insertPattern }
+					onClickPattern={ ( pattern ) => {
+						const foundPattern = getPatternAddedByName(
+							pattern.name
+						);
+						if ( foundPattern ) {
+							removePattern( foundPattern );
+						} else {
+							insertPattern( pattern );
+						}
+					} }
 					label={ 'Homepage' }
 					orientation="vertical"
 					category={ category }
