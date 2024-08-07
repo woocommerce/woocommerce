@@ -82,6 +82,64 @@ test.describe( 'Product Collection', () => {
 		).toBeVisible();
 	} );
 
+	test( 'Is hidden when empty unless product-collection-no-results block is present', async ( {
+		admin,
+		page,
+		pageObject,
+	} ) => {
+		await admin.createNewPost();
+
+		await pageObject.insertProductCollection();
+		await pageObject.chooseCollectionInPost( 'featured' );
+		await pageObject.addFilter( 'Price Range' );
+		await pageObject.setPriceRange( {
+			max: '1',
+		} );
+
+		const featuredBlock = page.getByLabel( 'Block: Featured' );
+
+		await expect(
+			featuredBlock.getByText( 'Featured products' )
+		).toBeVisible();
+		await expect(
+			featuredBlock.getByText( 'No results found' )
+		).toBeVisible();
+
+		await pageObject.insertProductCollection();
+		await pageObject.chooseCollectionInPost( 'productCatalog' );
+		await pageObject.addFilter( 'Price Range' );
+		await pageObject.setPriceRange( {
+			max: '1',
+		} );
+
+		const productCatalogBlock = page.getByLabel(
+			'Block: Product Collection'
+		);
+
+		await expect(
+			productCatalogBlock.getByText( 'No results found' )
+		).toBeVisible();
+
+		await pageObject.publishAndGoToFrontend();
+
+		const collectionBlocks = page.locator(
+			'.wp-block-woocommerce-product-collection'
+		);
+
+		await expect( collectionBlocks ).toHaveCount( 2 );
+
+		await expect( collectionBlocks.first() ).toBeHidden();
+		await expect( collectionBlocks.first() ).toBeEmpty();
+		await expect( collectionBlocks.first() ).toHaveClass(
+			/wp-block-woocommerce-product-collection--empty/
+		);
+
+		await expect( collectionBlocks.last() ).toBeVisible();
+		await expect( collectionBlocks.last() ).toContainText(
+			'No results found'
+		);
+	} );
+
 	test.describe( 'Renders correctly with all Product Elements', () => {
 		const expectedProductContent = [
 			'Beanie', // core/post-title
