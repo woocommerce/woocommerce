@@ -22,6 +22,22 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected $api_version = '2';
 
+
+	/**
+	 * Get the frontend script handle for this block type.
+	 *
+	 * @param string $key Data to get, or default to everything.
+	 */
+	protected function get_block_type_script( $key = null ) {
+		$script = [
+			'handle'       => 'wc-' . $this->block_name . '-interactivity-frontend',
+			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-interactivity-frontend' ),
+			'dependencies' => [ 'wc-interactivity' ],
+		];
+
+		return $key ? $script[ $key ] : $script;
+	}
+
 	/**
 	 * Get block supports. Shared with the frontend.
 	 * IMPORTANT: If you change anything here, make sure to update the JS file too.

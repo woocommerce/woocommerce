@@ -255,6 +255,8 @@ const entries = {
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
 		'product-button-interactivity':
 			'./assets/js/atomic/blocks/product-elements/button/frontend.tsx',
+		'product-image-interactivity':
+			'./assets/js/atomic/blocks/product-elements/image/view.ts',
 	},
 	payments: {
 		'wc-payment-method-cheque':
