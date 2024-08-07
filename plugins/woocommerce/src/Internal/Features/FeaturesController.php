@@ -253,7 +253,7 @@ class FeaturesController {
 						'Enable this feature to log errors and related data to Automattic servers for debugging purposes and to improve WooCommerce',
 						'woocommerce'
 					),
-					'enabled_by_default' => false,
+					'enabled_by_default' => true,
 					'disable_ui'         => true,
 					'is_legacy'          => false,
 					'is_experimental'    => true,
