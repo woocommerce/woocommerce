@@ -25,6 +25,13 @@ class StoreTitle extends AIEndpoint {
 	const STORE_TITLE_OPTION_NAME = 'blogname';
 
 	/**
+	 * The AI generated store title option name.
+	 *
+	 * @var string
+	 */
+	const AI_STORE_TITLE_OPTION_NAME = 'ai_generated_site_title';
+
+	/**
 	 * The default store title.
 	 *
 	 * @var string
@@ -80,7 +87,7 @@ class StoreTitle extends AIEndpoint {
 		}
 
 		$store_title                 = html_entity_decode( get_option( self::STORE_TITLE_OPTION_NAME ) );
-		$previous_ai_generated_title = html_entity_decode( get_option( 'ai_generated_site_title' ) );
+		$previous_ai_generated_title = html_entity_decode( get_option( self::AI_STORE_TITLE_OPTION_NAME ) );
 
 		if ( strtolower( trim( self::DEFAULT_TITLE ) ) === strtolower( trim( $store_title ) ) || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
 			return rest_ensure_response( array( 'ai_content_generated' => false ) );
@@ -91,7 +98,7 @@ class StoreTitle extends AIEndpoint {
 			return $ai_generated_title;
 		}
 
-		update_option( 'ai_generated_site_title', $ai_generated_title );
+		update_option( self::AI_STORE_TITLE_OPTION_NAME, $ai_generated_title );
 		update_option( self::STORE_TITLE_OPTION_NAME, $ai_generated_title );
 
 		return rest_ensure_response(
