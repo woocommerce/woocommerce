@@ -1093,7 +1093,7 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
-	test.describe( 'Location is recognised', () => {
+	test.describe( 'Location is recognized', () => {
 		const filterRequest = ( request: Request ) => {
 			const url = request.url();
 			return (
@@ -1109,7 +1109,9 @@ test.describe( 'Product Collection', () => {
 			return (
 				url.includes( 'wp/v2/product' ) &&
 				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
-				!! searchParams.get( `location[sourceData][productId]` )
+				!! searchParams.get(
+					`productCollectionLocation[sourceData][productId]`
+				)
 			);
 		};
 
@@ -1121,26 +1123,30 @@ test.describe( 'Product Collection', () => {
 
 			if ( locationType === 'product' ) {
 				return {
-					type: searchParams.get( 'location[type]' ),
+					type: searchParams.get( 'productCollectionLocation[type]' ),
 					productId: searchParams.get(
-						`location[sourceData][productId]`
+						`productCollectionLocation[sourceData][productId]`
 					),
 				};
 			}
 
 			if ( locationType === 'archive' ) {
 				return {
-					type: searchParams.get( 'location[type]' ),
+					type: searchParams.get( 'productCollectionLocation[type]' ),
 					taxonomy: searchParams.get(
-						`location[sourceData][taxonomy]`
+						`productCollectionLocation[sourceData][taxonomy]`
 					),
-					termId: searchParams.get( `location[sourceData][termId]` ),
+					termId: searchParams.get(
+						`productCollectionLocation[sourceData][termId]`
+					),
 				};
 			}
 
 			return {
-				type: searchParams.get( 'location[type]' ),
-				sourceData: searchParams.get( `location[sourceData]` ),
+				type: searchParams.get( 'productCollectionLocation[type]' ),
+				sourceData: searchParams.get(
+					`productCollectionLocation[sourceData]`
+				),
 			};
 		};
 
@@ -1173,10 +1179,10 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			const locationReuqestPromise =
+			const locationRequestPromise =
 				page.waitForRequest( filterProductRequest );
 			await pageObject.chooseCollectionInTemplate( 'featured' );
-			const locationRequest = await locationReuqestPromise;
+			const locationRequest = await locationRequestPromise;
 
 			const { type, productId } = getLocationDetailsFromRequest(
 				locationRequest,
