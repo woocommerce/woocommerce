@@ -2824,6 +2824,9 @@ importers:
 
   packages/js/remote-logging:
     dependencies:
+      '@woocommerce/tracks':
+        specifier: workspace:*
+        version: link:../tracks
       '@wordpress/hooks':
         specifier: wp-6.0
         version: 3.6.1
@@ -2892,9 +2895,18 @@ importers:
       '@types/debug':
         specifier: ^4.1.12
         version: 4.1.12
+      '@types/jest':
+        specifier: ^27.5.2
+        version: 27.5.2
+      '@types/node':
+        specifier: ^16.18.68
+        version: 16.18.68
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
+      '@woocommerce/internal-js-tests':
+        specifier: workspace:*
+        version: link:../internal-js-tests
       concurrently:
         specifier: ^7.6.0
         version: 7.6.0
@@ -3147,8 +3159,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2(@babel/core@7.12.9)
       '@wordpress/e2e-test-utils-playwright':
-        specifier: wp-6.4
-        version: 0.10.13(@playwright/test@1.45.1)(encoding@0.1.13)(typescript@5.3.3)
+        specifier: wp-6.6
+        version: 1.0.1(@playwright/test@1.45.1)(encoding@0.1.13)(typescript@5.3.3)
       '@wordpress/env':
         specifier: ^9.7.0
         version: 9.7.0
@@ -3600,6 +3612,9 @@ importers:
       '@woocommerce/product-editor':
         specifier: workspace:*
         version: link:../../packages/js/product-editor
+      '@woocommerce/remote-logging':
+        specifier: workspace:*
+        version: link:../../packages/js/remote-logging
       '@woocommerce/tracks':
         specifier: workspace:*
         version: link:../../packages/js/tracks
@@ -11081,12 +11096,6 @@ packages:
     resolution: {integrity: sha512-wdWBzfxU8iUPpxxTACkFpYbEoC0f+Hqs24IYOkhn/8ERp2LFpUdFcwF7/DmY6agSpUs8iWT/2hSGdUz9Lw2f0w==}
     engines: {node: '>=12'}
 
-  '@wordpress/e2e-test-utils-playwright@0.10.13':
-    resolution: {integrity: sha512-5zqIsG6Nn6N0DBlK9GyvYKxUrK7dEBHFInRnIqqfimWAQmz07iBCJU34njs9lQi+/GzKfXS+2XgBI7dDQnbfwQ==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      '@playwright/test': '>=1'
-
   '@wordpress/e2e-test-utils-playwright@1.0.1':
     resolution: {integrity: sha512-DNR45Q0px6p3XLnJzRXANIXSQ1OKLdWCwQLQctuSmhVyqSyKS0VZApiYVoaPTKLEdxl+WeJ7jN153q1vUa5Lcg==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
@@ -16824,10 +16833,6 @@ packages:
     resolution: {integrity: sha512-n2hY8YdoRE1i7r6M0w9DIw5GgZN0G25P8zLCRQ8rjXtTU3vsNFBI/vWK/UIeE6g5MUUz6avwAPXmL6Fy9D/90w==}
     engines: {node: '>= 6'}
 
-  http-proxy-agent@7.0.0:
-    resolution: {integrity: sha512-+ZT+iBxVUQ1asugqnD6oWoRiS25AkjNfG085dKJGtGxkdwLQrMKU5wJr2bOOFAXzKcTuqq+7fZlTMgG3SRfIYQ==}
-    engines: {node: '>= 14'}
-
   http-proxy-agent@7.0.2:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
     engines: {node: '>= 14'}
@@ -17121,9 +17126,6 @@ packages:
   ip-regex@2.1.0:
     resolution: {integrity: sha512-58yWmlHpp7VYfcdTwMTvwMmqx/Elfxjd9RXTDyMsbL7lLWmhMylLEqiYVLKuLzOZqVgiWXD9MfR62Vv89VRxkw==}
     engines: {node: '>=4'}
-
-  ip@1.1.8:
-    resolution: {integrity: sha512-PuExPYUiu6qMBQb4l06ecm6T6ujzhmh+MeJcW9wa89PoAz5pvd4zPgN5WJV104mb6S2T1AwNIAaB70JNrLQWhg==}
 
   ip@1.1.9:
     resolution: {integrity: sha512-cyRxvOEpNHNtchU3Ln9KC/auJgup87llfQpQ+t5ghoC/UhL16SWzbueiCsdTnWmqAWl7LadfuwhlqmtOaqMHdQ==}
@@ -22768,10 +22770,6 @@ packages:
   socks-proxy-agent@7.0.0:
     resolution: {integrity: sha512-Fgl0YPZ902wEsAyiQ+idGd1A7rSFx/ayC1CQVMw5P+EQx2V0SgpGtf6OKFhVjPflPUl9YMmEOnmfjCdMUsygww==}
     engines: {node: '>= 10'}
-
-  socks-proxy-agent@8.0.2:
-    resolution: {integrity: sha512-8zuqoLv1aP/66PHF5TqwJ7Czm3Yv32urJQHrVyhD7mmA6d61Zv8cIXQYPTWwmg6qlupnPvs/QKDmfa4P/qct2g==}
-    engines: {node: '>= 14'}
 
   socks-proxy-agent@8.0.3:
     resolution: {integrity: sha512-VNegTZKhuGq5vSD6XNKlbqWhyt/40CgoEw8XxD6dhnm8Jq9IEa3nIa4HwnM8XOqU0CdB0BwWVXusqiFXfHB3+A==}
@@ -38477,7 +38475,7 @@ snapshots:
       '@wordpress/icons': 9.48.0
       '@wordpress/is-shallow-equal': 4.47.0
       '@wordpress/keyboard-shortcuts': 4.24.0(react@17.0.2)
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       '@wordpress/notices': 4.15.0(react@17.0.2)
       '@wordpress/preferences': 3.24.0(@babel/helper-module-imports@7.24.7)(@babel/types@7.24.7)(@types/react@17.0.71)(babel-plugin-macros@3.1.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@wordpress/private-apis': 0.29.0
@@ -38538,7 +38536,7 @@ snapshots:
       '@wordpress/icons': 9.48.0
       '@wordpress/is-shallow-equal': 4.47.0
       '@wordpress/keyboard-shortcuts': 4.24.0(react@18.3.1)
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       '@wordpress/notices': 4.15.0(react@18.3.1)
       '@wordpress/preferences': 3.24.0(@babel/helper-module-imports@7.24.7)(@babel/types@7.24.7)(@types/react@17.0.71)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/private-apis': 0.29.0
@@ -38782,7 +38780,7 @@ snapshots:
       '@wordpress/i18n': 4.47.0
       '@wordpress/icons': 9.48.0
       '@wordpress/interactivity': 3.0.1(@preact/signals-core@1.5.1)
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       '@wordpress/notices': 4.15.0(react@17.0.2)
       '@wordpress/primitives': 3.45.0
       '@wordpress/private-apis': 0.29.0
@@ -39411,7 +39409,7 @@ snapshots:
       '@wordpress/i18n': 4.54.0
       '@wordpress/icons': 9.48.0
       '@wordpress/is-shallow-equal': 4.47.0
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       '@wordpress/primitives': 3.45.0
       '@wordpress/private-apis': 0.29.0
       '@wordpress/rich-text': 6.24.0(react@17.0.2)
@@ -40439,24 +40437,6 @@ snapshots:
       '@babel/runtime': 7.23.5
       lodash: 4.17.21
 
-  '@wordpress/e2e-test-utils-playwright@0.10.13(@playwright/test@1.45.1)(encoding@0.1.13)(typescript@5.3.3)':
-    dependencies:
-      '@playwright/test': 1.45.1
-      '@wordpress/api-fetch': 6.44.0
-      '@wordpress/keycodes': 3.47.0
-      '@wordpress/url': 3.48.0
-      change-case: 4.1.2
-      form-data: 4.0.0
-      get-port: 5.1.1
-      lighthouse: 10.4.0(encoding@0.1.13)(typescript@5.3.3)
-      mime: 3.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - typescript
-      - utf-8-validate
-
   '@wordpress/e2e-test-utils-playwright@1.0.1(@playwright/test@1.45.1)(encoding@0.1.13)(typescript@5.3.2)':
     dependencies:
       '@playwright/test': 1.45.1
@@ -40467,6 +40447,25 @@ snapshots:
       form-data: 4.0.0
       get-port: 5.1.1
       lighthouse: 10.4.0(encoding@0.1.13)(typescript@5.3.2)
+      mime: 3.0.0
+      web-vitals: 3.5.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - typescript
+      - utf-8-validate
+
+  '@wordpress/e2e-test-utils-playwright@1.0.1(@playwright/test@1.45.1)(encoding@0.1.13)(typescript@5.3.3)':
+    dependencies:
+      '@playwright/test': 1.45.1
+      '@wordpress/api-fetch': 7.0.1
+      '@wordpress/keycodes': 4.0.1
+      '@wordpress/url': 4.0.1
+      change-case: 4.1.2
+      form-data: 4.0.0
+      get-port: 5.1.1
+      lighthouse: 10.4.0(encoding@0.1.13)(typescript@5.3.3)
       mime: 3.0.0
       web-vitals: 3.5.2
     transitivePeerDependencies:
@@ -40795,7 +40794,7 @@ snapshots:
       '@wordpress/i18n': 4.47.0
       '@wordpress/icons': 9.48.0
       '@wordpress/keyboard-shortcuts': 4.24.0(react@17.0.2)
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       '@wordpress/media-utils': 4.38.0
       '@wordpress/notices': 4.15.0(react@17.0.2)
       '@wordpress/patterns': 1.8.0(@babel/helper-module-imports@7.24.7)(@babel/types@7.24.7)(@types/react@17.0.71)(babel-plugin-macros@3.1.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
@@ -41492,7 +41491,7 @@ snapshots:
       '@babel/runtime': 7.24.7
       '@wordpress/data': 9.17.0(react@17.0.2)
       '@wordpress/element': 5.34.0
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       react: 17.0.2
       rememo: 4.0.2
 
@@ -41501,7 +41500,7 @@ snapshots:
       '@babel/runtime': 7.24.7
       '@wordpress/data': 9.17.0(react@18.3.1)
       '@wordpress/element': 5.34.0
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       react: 18.3.1
       rememo: 4.0.2
 
@@ -42025,7 +42024,7 @@ snapshots:
       '@wordpress/element': 5.34.0
       '@wordpress/escape-html': 2.47.0
       '@wordpress/i18n': 4.57.0
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       memize: 2.1.0
       react: 17.0.2
       rememo: 4.0.2
@@ -42040,7 +42039,7 @@ snapshots:
       '@wordpress/element': 5.34.0
       '@wordpress/escape-html': 2.47.0
       '@wordpress/i18n': 4.57.0
-      '@wordpress/keycodes': 3.47.0
+      '@wordpress/keycodes': 3.57.0
       memize: 2.1.0
       react: 18.3.1
       rememo: 4.0.2
@@ -49902,13 +49901,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy-agent@7.0.0:
-    dependencies:
-      agent-base: 7.1.0
-      debug: 4.3.5
-    transitivePeerDependencies:
-      - supports-color
-
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.1
@@ -50243,8 +50235,6 @@ snapshots:
       sprintf-js: 1.1.3
 
   ip-regex@2.1.0: {}
-
-  ip@1.1.8: {}
 
   ip@1.1.9: {}
 
@@ -55464,20 +55454,20 @@ snapshots:
   pac-proxy-agent@7.0.1:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
-      agent-base: 7.1.0
+      agent-base: 7.1.1
       debug: 4.3.5
       get-uri: 6.0.2
-      http-proxy-agent: 7.0.0
+      http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.4
       pac-resolver: 7.0.0
-      socks-proxy-agent: 8.0.2
+      socks-proxy-agent: 8.0.3
     transitivePeerDependencies:
       - supports-color
 
   pac-resolver@7.0.0:
     dependencies:
       degenerator: 5.0.1
-      ip: 1.1.8
+      ip: 1.1.9
       netmask: 2.0.2
 
   package-json@4.0.1:
@@ -56611,14 +56601,14 @@ snapshots:
 
   proxy-agent@6.3.0:
     dependencies:
-      agent-base: 7.1.0
+      agent-base: 7.1.1
       debug: 4.3.5
-      http-proxy-agent: 7.0.0
+      http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.4
       lru-cache: 7.18.3
       pac-proxy-agent: 7.0.1
       proxy-from-env: 1.1.0
-      socks-proxy-agent: 8.0.2
+      socks-proxy-agent: 8.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -59202,14 +59192,6 @@ snapshots:
   socks-proxy-agent@7.0.0:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.5
-      socks: 2.7.1
-    transitivePeerDependencies:
-      - supports-color
-
-  socks-proxy-agent@8.0.2:
-    dependencies:
-      agent-base: 7.1.0
       debug: 4.3.5
       socks: 2.7.1
     transitivePeerDependencies:

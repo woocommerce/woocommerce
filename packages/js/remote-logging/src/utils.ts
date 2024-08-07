@@ -39,3 +39,5 @@ export function mergeLogData( target: LogData, source: Partial< LogData > ) {
 	}
 	return result;
 }
+
+export const isDevelopmentEnvironment = process.env.NODE_ENV === 'development';
