@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Fixes a regression in a new PR that's not yet shipped.
-
