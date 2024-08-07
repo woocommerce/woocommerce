@@ -110,5 +110,6 @@ export const useInsertPattern = () => {
 
 	return {
 		insertPattern,
+		blockToScroll,
 	};
 };

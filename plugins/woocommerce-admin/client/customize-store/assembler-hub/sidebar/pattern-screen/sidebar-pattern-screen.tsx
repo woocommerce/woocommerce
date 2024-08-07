@@ -120,8 +120,6 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		currentTemplate?.id ?? ''
 	);
 
-	const blockToScroll = useRef< string | null >( null );
-
 	const isEditorLoading = useIsSiteEditorLoading();
 
 	const isSpinnerVisible = isLoading || isEditorLoading;
@@ -156,6 +154,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		};
 	}, [ isLoading, blocks, isSpinnerVisible ] );
 
+	const { insertPattern, blockToScroll } = useInsertPattern();
+
 	useEffect( () => {
 		if ( isEditorLoading ) {
 			return;
@@ -188,9 +188,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		return () => {
 			observer.disconnect();
 		};
-	}, [ isEditorLoading ] );
-
-	const { insertPattern } = useInsertPattern();
+	}, [ blockToScroll, isEditorLoading ] );
 
 	return (
 		<div
