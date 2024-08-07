@@ -85,10 +85,10 @@ class StoreTitle {
 			);
 		}
 
-		$store_title                 = html_entity_decode( get_option( 'blogname' ) );
+		$store_title                 = html_entity_decode( get_option( self::STORE_TITLE_OPTION_NAME ) );
 		$previous_ai_generated_title = html_entity_decode( get_option( 'ai_generated_site_title' ) );
 
-		if ( self::DEFAULT_TITLE === $store_title || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
+		if ( strtolower( trim( self::DEFAULT_TITLE ) ) === strtolower( trim( $store_title ) ) || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
 			return rest_ensure_response( array( 'ai_content_generated' => false ) );
 		}
 
