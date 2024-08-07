@@ -110,7 +110,7 @@ class AddToCartForm extends AbstractBlock {
 		$product = $previous_product;
 		$product_type = $product->get_type();
 
-		if ( ! in_array( $product_type, array( 'simple', 'variable', 'grouped', 'external', 'virtual', 'downloadable' ) ) ) {
+		if ( ! in_array( $product_type, array( 'simple', 'variable', 'grouped', 'external' ) ) ) {
 			return $form;
 		}
 
