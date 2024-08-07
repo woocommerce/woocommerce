@@ -42,5 +42,19 @@
 	position: absolute;
 	top: 29px;
 	right: 12px;
-	color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+	color: var(
+		--wp-components-color-accent,
+		var(--wp-admin-theme-color, #3858e9)
+	);
+}
+
+// Center images rendered in place of buttons in the editor
+.wc-block-components-express-payment {
+	.wc-block-components-express-payment__event-buttons {
+		> li {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
 }

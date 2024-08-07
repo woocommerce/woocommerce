@@ -32,3 +32,14 @@
 		display: block;
 	}
 }
+
+// Center images rendered in place of buttons in the editor
+.wc-block-components-express-payment {
+	.wc-block-components-express-payment__event-buttons {
+		> li {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+}
