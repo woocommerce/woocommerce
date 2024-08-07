@@ -162,26 +162,4 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 		self::rmdir( dirname( $tax_plugin_file_path ) );
 		self::delete_folders( dirname( $tax_plugin_file_path ) );
 	}
-
-	/**
-	 * Writes the contents to a file and creates the directories if they don't exist.
-	 *
-	 * @see https://www.php.net/manual/en/function.file-put-contents.php#123657
-	 *
-	 * @param string $full_path The file path.
-	 * @param string $contents  The file contents.
-	 * @param int    $flags     The flags to pass to file_put_contents.
-	 *
-	 * @return void
-	 */
-	private function file_force_contents( $full_path, $contents, $flags = 0 ) {
-		$parts = explode( '/', $full_path );
-		array_pop( $parts );
-		$dir = implode( '/', $parts );
-
-		if ( ! is_dir( $dir ) ) {
-			mkdir( $dir, 0777, true );
-		}
-		file_put_contents( $full_path, $contents, $flags );
-	}
 }
