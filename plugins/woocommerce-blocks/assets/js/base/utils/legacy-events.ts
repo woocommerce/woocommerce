@@ -70,10 +70,13 @@ export const triggerProductListRenderedEvent = ( payload: {
 	} );
 };
 
-export const triggerViewedProductEvent = (): void => {
+export const triggerViewedProductEvent = ( payload: {
+	productId: number;
+} ): void => {
 	dispatchEvent( 'wc-blocks_viewed_product', {
 		bubbles: true,
 		cancelable: true,
+		detail: payload,
 	} );
 };
 

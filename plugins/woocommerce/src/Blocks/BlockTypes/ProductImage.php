@@ -136,7 +136,16 @@ class ProductImage extends AbstractBlock {
 
 		$is_link        = true === $attributes['showProductLink'];
 		$pointer_events = $is_link ? '' : 'pointer-events: none;';
-		$directives     = $is_link ? 'data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-image&quot;}" data-wc-on--click="actions.triggerEvent"' : '';
+
+		$directives = '';
+		if ( $is_link ) {
+			$context    = array( 'productId' => $product->get_id() );
+			$directives = '
+				data-wc-interactive=\'' . wp_json_encode( array( 'namespace' => 'woocommerce/product-image' ), JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				data-wc-on--click=actions.triggerEvent
+			';
+		}
 
 		return sprintf(
 			'<a

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store } from '@woocommerce/interactivity';
+import { store, getContext } from '@woocommerce/interactivity';
 import { triggerViewedProductEvent } from '@woocommerce/base-utils';
 
 interface Store {
@@ -10,10 +10,17 @@ interface Store {
 	};
 }
 
+interface Context {
+	productId: number;
+}
+
 store< Store >( 'woocommerce/product-image', {
 	actions: {
 		*triggerEvent() {
-			triggerViewedProductEvent();
+			const context = getContext< Context >();
+			const { productId } = context;
+
+			triggerViewedProductEvent( { productId } );
 		},
 	},
 } );
