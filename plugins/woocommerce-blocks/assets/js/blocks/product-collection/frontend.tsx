@@ -8,7 +8,10 @@ import {
 	getElement,
 	getContext,
 } from '@woocommerce/interactivity';
-import { triggerProductListRenderedEvent } from '@woocommerce/base-utils';
+import {
+	triggerProductListRenderedEvent,
+	triggerViewedProductEvent,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -163,6 +166,12 @@ const productCollectionStore = {
 			if ( isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
+		},
+		*viewProduct() {
+			const context = getContext< Context >();
+			const { productId } = context;
+
+			triggerViewedProductEvent( { productId } );
 		},
 	},
 	callbacks: {

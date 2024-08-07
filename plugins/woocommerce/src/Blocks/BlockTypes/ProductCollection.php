@@ -83,6 +83,7 @@ class ProductCollection extends AbstractBlock {
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
+		add_filter( 'render_block_core/post-title', array( $this, 'add_click_event_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
 
@@ -325,6 +326,41 @@ class ProductCollection extends AbstractBlock {
 		// enhaced pagination is enabled and query IDs match.
 		if ( $is_product_collection_block && $is_enhanced_pagination_enabled && $query_id === $parsed_query_id ) {
 			$block_content = $this->process_pagination_links( $block_content );
+		}
+
+		return $block_content;
+	}
+
+	/**
+	 * Add interactive links to all anchors inside the Query Pagination block.
+	 * This enabled client-side navigation for the product collection block.
+	 *
+	 * @param string    $block_content The block content.
+	 * @param array     $block         The full block, including name and attributes.
+	 * @param \WP_Block $instance      The block instance.
+	 */
+	public function add_click_event_directives( $block_content, $block, $instance ) {
+		$is_link                     = $instance->attributes['isLink'] ?? false;
+		$namespace                   = $instance->attributes['__woocommerceNamespace'] ?? '';
+		$is_product_collection_block = 'woocommerce/product-collection/product-title' === $namespace;
+
+		// Only proceed if the block is a product collection block,
+		// enhaced pagination is enabled and query IDs match.
+		if ( $is_product_collection_block && $is_link ) {
+			$p = new \WP_HTML_Tag_Processor( $block_content );
+			$p->next_tag( array( 'class_name' => 'wp-block-post-title' ) );
+			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
+
+			if ( $is_anchor ) {
+				$namespace = array( 'namespace' => 'woocommerce/product-collection' );
+				$context   = array( 'productId' => $instance->context['postId'] );
+
+				$p->set_attribute( 'data-wc-interactive', wp_json_encode( $namespace, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+				$p->set_attribute( 'data-wc-context', wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+				$p->set_attribute( 'data-wc-on--click', 'actions.viewProduct' );
+
+				$block_content = $p->get_updated_html();
+			}
 		}
 
 		return $block_content;
