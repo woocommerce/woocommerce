@@ -45,7 +45,7 @@ class SetWCTaxRates extends Step {
 	 *
 	 * @return array The JSON array.
 	 */
-	public function prepare_json_array() {
+	public function prepare_json_array(): array {
 		return array(
 			'step'   => static::get_step_name(),
 			'values' => array(
@@ -60,7 +60,7 @@ class SetWCTaxRates extends Step {
 	 *
 	 * @return string
 	 */
-	public static function get_step_name() {
+	public static function get_step_name(): string {
 		return 'setWCTaxRates';
 	}
 
@@ -70,7 +70,7 @@ class SetWCTaxRates extends Step {
 	 * @param int $version Optional version number of the schema.
 	 * @return array The schema array.
 	 */
-	public static function get_schema( $version = 1 ) {
+	public static function get_schema( $version = 1 ): array {
 		return array(
 			'type'       => 'object',
 			'properties' => array(

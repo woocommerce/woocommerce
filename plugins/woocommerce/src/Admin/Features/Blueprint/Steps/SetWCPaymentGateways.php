@@ -52,7 +52,7 @@ class SetWCPaymentGateways extends Step {
 	 *
 	 * @return string
 	 */
-	public static function get_step_name() {
+	public static function get_step_name(): string {
 		return 'setWCPaymentGateways';
 	}
 
@@ -62,7 +62,7 @@ class SetWCPaymentGateways extends Step {
 	 * @param int $version Optional version number of the schema.
 	 * @return array The schema array.
 	 */
-	public static function get_schema( $version = 1 ) {
+	public static function get_schema( $version = 1 ): array {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
@@ -102,7 +102,7 @@ class SetWCPaymentGateways extends Step {
 	 *
 	 * @return array The JSON array.
 	 */
-	public function prepare_json_array() {
+	public function prepare_json_array(): array {
 		return array(
 			'step'             => static::get_step_name(),
 			'payment_gateways' => $this->payment_gateways,
