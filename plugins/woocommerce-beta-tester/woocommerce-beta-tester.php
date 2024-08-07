@@ -148,15 +148,15 @@ function simulate_woocommerce_error() {
 	throw new Exception( 'Simulated WooCommerce error for remote logging test' );
 }
 
-$simulate_error = get_option('wc_beta_tester_simulate_woocommerce_php_error', false);
+$simulate_error = get_option( 'wc_beta_tester_simulate_woocommerce_php_error', false );
 
-if ($simulate_error) {
-	delete_option('wc_beta_tester_simulate_woocommerce_php_error');
+if ( $simulate_error ) {
+	delete_option( 'wc_beta_tester_simulate_woocommerce_php_error' );
 
-	if ($simulate_error === 'core') {
+	if ( $simulate_error === 'core' ) {
 		add_action( 'woocommerce_loaded', 'simulate_woocommerce_error' );
-	} elseif ($simulate_error === 'beta-tester') {
-		throw new Exception('Test PHP exception from WooCommerce Beta Tester');
+	} elseif ( $simulate_error === 'beta-tester' ) {
+		throw new Exception( 'Test PHP exception from WooCommerce Beta Tester' );
 	}
 }
 
