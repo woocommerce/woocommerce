@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Fix image gallery state conflict with external consumer state
