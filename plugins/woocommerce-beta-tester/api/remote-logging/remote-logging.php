@@ -93,7 +93,7 @@ function log_remote_event() {
 	$result = $remote_logger->handle(
 		time(),
 		'info',
-		'Test event from WC Beta Tester',
+		'Test PHP event from WC Beta Tester',
 		array( 'source' => 'wc-beta-tester' )
 	);
 
