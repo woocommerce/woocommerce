@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import {
 	useBlockProps,
@@ -24,7 +23,11 @@ import { Icon, close } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import type { BlockAttributes, BlockVariationTriggerType } from './types';
+import type {
+	BlockAttributes,
+	BlockContext,
+	BlockVariationTriggerType,
+} from './types';
 import { default as productFiltersIcon } from '../product-filters/icon';
 import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/types';
 import './editor.scss';
@@ -116,13 +119,15 @@ const OverlayNavigationContent = ( {
 	return null;
 };
 
-export const Edit = ( {
-	attributes,
-	setAttributes,
-	clientId,
-}: BlockEditProps< BlockAttributes > ) => {
+type BlockProps = BlockEditProps< BlockAttributes > & { context: BlockContext };
+
+export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 	const { navigationStyle, buttonStyle, iconSize, style, triggerType } =
 		attributes;
+	const {
+		'woocommerce/product-filters-overlay-navigation/overlay':
+			productFiltersOverlayMode,
+	} = context;
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters-overlay-navigation', {
 			'wp-block-button__link wp-element-button': buttonStyle !== 'link',
@@ -161,35 +166,6 @@ export const Edit = ( {
 				isProductFiltersOverlayTemplatePart,
 		};
 	} );
-	const {
-		productFiltersOverlayMode,
-	}: {
-		productFiltersOverlayMode: ProductFiltersBlockOverlayAttribute;
-	} = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const { getBlock } = select( 'core/editor' );
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		const { getBlockParentsByBlockName } = select( 'core/block-editor' );
-
-		const [ productFiltersClientId ] = getBlockParentsByBlockName(
-			clientId,
-			'woocommerce/product-filters',
-			true
-		);
-		const productFiltersBlock = getBlock< {
-			attributes: { overlay: ProductFiltersBlockOverlayAttribute };
-		} >( productFiltersClientId );
-
-		return {
-			productFiltersOverlayMode: productFiltersBlock?.attributes?.overlay,
-		};
-	} );
-
-	useEffect( () => {
-		setAttributes( { overlayMode: productFiltersOverlayMode } );
-	}, [ productFiltersOverlayMode, setAttributes ] );
 
 	const shouldHideBlock = () => {
 		if (

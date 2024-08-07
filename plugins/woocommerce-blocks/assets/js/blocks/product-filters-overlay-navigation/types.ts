@@ -13,6 +13,12 @@ type BorderSide = {
 	color: string;
 	width: string;
 };
+
+export interface BlockContext {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	'woocommerce/product-filters-overlay-navigation/overlay': ProductFiltersBlockOverlayAttribute;
+}
+
 export type BlockVariationTriggerType = 'open-overlay' | 'close-overlay';
 
 export type BlockAttributes = {

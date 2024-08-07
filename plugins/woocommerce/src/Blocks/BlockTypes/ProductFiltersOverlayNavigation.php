@@ -15,6 +15,15 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 	protected $block_name = 'product-filters-overlay-navigation';
 
 	/**
+	 *  Register the context
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'woocommerce/product-filters-overlay-navigation/overlay' ];
+	}
+
+	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @see $this->register_block_type()
@@ -42,8 +51,9 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 				'style' => trim( $classes_and_styles['style'] ),
 			)
 		);
+		$overlay_mode       = $block->context['woocommerce/product-filters-overlay-navigation/overlay'];
 
-		if ( 'never' === $attributes['overlayMode'] || ( ! wp_is_mobile() && 'mobile' === $attributes['overlayMode'] ) ) {
+		if ( 'never' === $overlay_mode || ( ! wp_is_mobile() && 'mobile' === $overlay_mode ) ) {
 			return null;
 		}
 

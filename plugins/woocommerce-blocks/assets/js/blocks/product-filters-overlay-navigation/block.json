@@ -95,6 +95,7 @@
 			}
 		}
 	},
+	"usesContext": [ "woocommerce/product-filters-overlay-navigation/overlay"],
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3
 }
