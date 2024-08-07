@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * ProductFilters class.
  */
@@ -43,12 +41,9 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-		$classes            = $classes_and_styles['classes'] . ' wc-block-product-filters-overlay-navigation';
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => trim( $classes ),
-				'style' => trim( $classes_and_styles['style'] ),
+				'class' => 'wc-block-product-filters-overlay-navigation',
 			)
 		);
 		$overlay_mode       = $block->context['woocommerce/product-filters-overlay-navigation/overlay'];
