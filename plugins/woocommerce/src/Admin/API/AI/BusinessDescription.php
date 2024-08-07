@@ -13,28 +13,19 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class BusinessDescription {
+class BusinessDescription extends AIEndpoint {
 	/**
-	 * Endpoint namespace.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
+	protected $endpoint = 'business-description';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/business-description',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
