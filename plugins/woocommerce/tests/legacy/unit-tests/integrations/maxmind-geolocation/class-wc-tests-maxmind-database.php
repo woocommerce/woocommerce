@@ -8,7 +8,7 @@
 /**
  * Class WC_Tests_MaxMind_Database
  */
-class WC_Tests_MaxMind_Database extends WC_Unit_Test_Case {
+class WC_Tests_MaxMind_Database extends WP_HTTP_TestCase {
 
 	/**
 	 * Run setup code for unit tests.
