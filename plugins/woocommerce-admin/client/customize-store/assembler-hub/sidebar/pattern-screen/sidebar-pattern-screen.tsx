@@ -176,7 +176,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				);
 
 				if ( block ) {
-					block.scrollIntoView();
+					block.scrollIntoView( {
+						behavior: 'smooth',
+						block: 'end',
+					} );
 					blockToScroll.current = null;
 				}
 			}
