@@ -32,7 +32,6 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
 /**
  * Internal dependencies
  */
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { trackEvent } from '~/customize-store/tracking';
 import { CustomizeStoreContext } from '../..';
@@ -181,7 +180,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 	const title = __( 'Design your homepage', 'woocommerce' );
 
 	const sidebarMessage = __(
-		'Create an engaging homepage by adding and combining different patterns and layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
+		'Create an engaging homepage by adding and combining different patterns and layouts. You can continue customizing this page, including the content, later via the Editor.',
 		'woocommerce'
 	);
 
@@ -191,26 +190,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		<SidebarNavigationScreen
 			title={ title }
 			onNavigateBackClick={ onNavigateBackClick }
-			description={ createInterpolateElement( sidebarMessage, {
-				EditorLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_editor_link_click',
-								{
-									source: 'homepage',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
-				),
-			} ) }
+			description={ sidebarMessage }
 			content={
 				<div className="woocommerce-customize-store__sidebar-homepage-content">
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage">
