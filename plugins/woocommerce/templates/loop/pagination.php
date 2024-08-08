@@ -19,10 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$total   = isset( $total ) ? $total : wc_get_loop_prop( 'total_pages' );
-$current = isset( $current ) ? $current : wc_get_loop_prop( 'current_page' );
-$base    = isset( $base ) ? $base : esc_url_raw( str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
-$format  = isset( $format ) ? $format : '';
+$total   = $total ?? wc_get_loop_prop('total_pages');
+$current = $current ?? wc_get_loop_prop('current_page');
+$base    = $base ?? esc_url_raw(str_replace(999999999, '%#%', remove_query_arg('add-to-cart', get_pagenum_link(999999999, false))));
+$format  = $format ?? '';
+$next_text = __( 'Next Page', 'woocommerce' );
+$prev_text = __( 'Previous Page', 'woocommerce' );
+$page_text = __( 'Page', 'woocommerce' );
 
 if ( $total <= 1 ) {
 	return;
@@ -34,16 +37,17 @@ if ( $total <= 1 ) {
 		apply_filters(
 			'woocommerce_pagination_args',
 			array( // WPCS: XSS ok.
-				'base'      => $base,
-				'format'    => $format,
-				'add_args'  => false,
-				'current'   => max( 1, $current ),
-				'total'     => $total,
-				'prev_text' => is_rtl() ? '&rarr;' : '&larr;',
-				'next_text' => is_rtl() ? '&larr;' : '&rarr;',
-				'type'      => 'list',
-				'end_size'  => 3,
-				'mid_size'  => 3,
+				'base'               => $base,
+				'format'             => $format,
+				'add_args'           => false,
+				'current'            => max( 1, $current ),
+				'total'              => $total,
+				'prev_text'          => is_rtl() ? $prev_text . '&rarr;' : '&larr;' . $prev_text,
+				'next_text'          => is_rtl() ? '&larr;' . $next_text : $next_text . '&rarr;',
+				'before_page_number' => '<span class="screen-reader-text">' . $page_text . ' </span>',
+				'type'               => 'list',
+				'end_size'           => 3,
+				'mid_size'           => 3,
 			)
 		)
 	);
