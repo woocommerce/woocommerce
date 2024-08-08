@@ -3,7 +3,8 @@
  * Handle frontend scripts
  *
  * @package WooCommerce\Classes
- * @version 2.3.0
+ * @version 3.9.0
+ * @since 2.3.0
  */
 
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
