@@ -46,51 +46,59 @@ const merchantPages = [
 	},
 ];
 
-test.describe( 'Keeps track of the number of JS files included on key shopper pages', () => {
-	for ( const row of shopperPages ) {
-		const url = row.url;
-		const name = row.name;
-		const expectedCount = parseInt( row.expectedCount );
+test.describe(
+	'Keeps track of the number of JS files included on key shopper pages',
+	{ tag: '@local' },
+	() => {
+		for ( const row of shopperPages ) {
+			const url = row.url;
+			const name = row.name;
+			const expectedCount = parseInt( row.expectedCount );
 
-		test( `Check that ${ name } has ${ expectedCount } JS files`, async ( {
-			page,
-		} ) => {
-			await page.goto( url, { waitUntil: 'networkidle' } );
-			const javascriptFiles = await page.$$eval(
-				'script[src]',
-				( scripts ) => scripts.length
-			);
-			await expect
-				.soft(
-					javascriptFiles,
-					`${ url } loaded ${ javascriptFiles }, expected ${ expectedCount }`
-				)
-				.toBeLessThanOrEqual( expectedCount );
-		} );
+			test( `Check that ${ name } has ${ expectedCount } JS files`, async ( {
+				page,
+			} ) => {
+				await page.goto( url, { waitUntil: 'networkidle' } );
+				const javascriptFiles = await page.$$eval(
+					'script[src]',
+					( scripts ) => scripts.length
+				);
+				await expect
+					.soft(
+						javascriptFiles,
+						`${ url } loaded ${ javascriptFiles }, expected ${ expectedCount }`
+					)
+					.toBeLessThanOrEqual( expectedCount );
+			} );
+		}
 	}
-} );
+);
 
-test.describe( 'Keeps track of the number of JS files on key admin pages', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
-	for ( const row of merchantPages ) {
-		const url = row.url;
-		const name = row.name;
-		const expectedCount = parseInt( row.expectedCount );
+test.describe(
+	'Keeps track of the number of JS files on key admin pages',
+	{ tag: '@local' },
+	() => {
+		test.use( { storageState: process.env.ADMINSTATE } );
+		for ( const row of merchantPages ) {
+			const url = row.url;
+			const name = row.name;
+			const expectedCount = parseInt( row.expectedCount );
 
-		test( `Check that ${ name } has ${ expectedCount } JS files`, async ( {
-			page,
-		} ) => {
-			await page.goto( url, { waitUntil: 'networkidle' } );
-			const javascriptFiles = await page.$$eval(
-				'script[src]',
-				( scripts ) => scripts.length
-			);
-			await expect
-				.soft(
-					javascriptFiles,
-					`${ url } loaded ${ javascriptFiles }, expected ${ expectedCount }`
-				)
-				.toBeLessThanOrEqual( expectedCount );
-		} );
+			test( `Check that ${ name } has ${ expectedCount } JS files`, async ( {
+				page,
+			} ) => {
+				await page.goto( url, { waitUntil: 'networkidle' } );
+				const javascriptFiles = await page.$$eval(
+					'script[src]',
+					( scripts ) => scripts.length
+				);
+				await expect
+					.soft(
+						javascriptFiles,
+						`${ url } loaded ${ javascriptFiles }, expected ${ expectedCount }`
+					)
+					.toBeLessThanOrEqual( expectedCount );
+			} );
+		}
 	}
-} );
+);
