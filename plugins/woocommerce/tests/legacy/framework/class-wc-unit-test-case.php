@@ -132,7 +132,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 9.3.0
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
-		// Step 1: let tests to process request first.
+		// Step 1: let tests to mock/process the request first.
 		$response = parent::http_request_listner( false, $request, $url );
 		if ( false !== $response ) {
 			return $response;
@@ -140,23 +140,50 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		$url_domain = parse_url( $url, PHP_URL_HOST );
 
-		// Step 2: route localhost-addressed requests (REST-testing and more).
+		// Step 2: route localhost-addressed requests (REST-testing and co).
 		if ( $url_domain === 'localhost' ) {
 			return $preempt;
 		}
 
 		// Step 3: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
-		echo PHP_EOL, $url, PHP_EOL;
+		// Main suit:
+		//	https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json?country=IN&locale=en_US
+		//	https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json?locale=en_US
+		//	https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0
+		//	https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	https://tracking.woocommerce.com/v1/
+		//	https://api-3t.paypal.com/nvp
+		//	https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json?locale=en_US
+		//	https://public-api.wordpress.com/rest/v1.1/logstash
+		// Legacy suit:
+		//	http://cldup.com/Dr1Bczxq4q.png
+		//	https://www.paypal.com/cgi-bin/webscr
+		//	https://woocommerce.com/wc-api/product-key-api?request=ping&network=0
+		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	https://woocommerce.com/wp-json/wccom-extensions/1.0/search?locale=en_US
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113836-efdbde32-7863-4a24-9d2d-979025b51260.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113854-b669deff-4c3e-4bb0-b00f-96cfbdc4087e.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113857-839785e4-d25a-45f0-b647-cd8d9be8bc2d.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113861-531ebbcd-f9b5-4c18-b5c7-a878d5017ca2.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113864-14d59cf5-1233-4053-8193-070413ea3434.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113817-0fd3751e-b81b-4def-be53-040d8fa049f2.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296.jpeg
+		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113811-0be977aa-edfe-4a09-b36d-a62f02de4a29.jpeg
+		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=invalid-theme-name&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=control&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1723120609&test=test
+		//	https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=test_experiment_name&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1723120609
+		//	https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json?locale=en_US
+		// Injection needs corrections
+		//	payment-gateway-suggestions-data-source.json?locale=en_US
+		//	bad-data-source.json?locale=en_US
+		//	payment-gateway-suggestions-data-source2.json?locale=en_US
+		//	mock-payment-gateway-suggestions-data-source.json?locale=en_US
+		//  mock-woopayments-promotions-data-source.json?locale=en_US
 
-//		if ( in_array( $url_domain, [ 'cldup.com', 'somedomain.com', 'wordpress.tv', 'demo.woothemes.com', 'download.maxmind.com' ] ) ) {
-//			// download.maxmind.com: covered by \WC_Tests_MaxMind_Database::mock_http_responses
-//			// demo.woothemes.com: at least partially covered by \WC_Tests_Product_CSV_Importer::mock_http_responses
-//			// wordpress.tv:  covered by \WC_Tests_Formatting_Functions::mock_http_responses
-//			// somedomain.com: covered by \WC_Tests_API_Functions::mock_http_responses
-//			// cldup.com: doesn't seem to be covered with mocks
-//			return $preempt;
-//		}
-
+		// TODO: stop loading only above URLs and return $preempt for the rest.
 		return [
 			'body'          => '',
 			'response'      => [

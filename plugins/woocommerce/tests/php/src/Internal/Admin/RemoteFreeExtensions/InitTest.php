@@ -80,15 +80,6 @@ class InitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @inheritDoc
-	 * @since 9.3.0
-	 */
-	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
-		// Let the`https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json?locale=en_US` requests go though .
-		return $response;
-	}
-
-	/**
 	 * Test that default extensions are provided when remote sources don't exist.
 	 */
 	public function test_get_default_specs() {

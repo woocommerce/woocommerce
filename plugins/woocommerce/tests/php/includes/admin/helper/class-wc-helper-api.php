@@ -16,15 +16,6 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @inheritDoc
-	 * @since 9.3.0
-	 */
-	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
-		// Covered in \WC_Tests_Helper_API::mock_http_responses, no external requests.
-		return $response;
-	}
-
-	/**
 	 * Test that the url method returns the correct WooCommerce.com path.
 	 */
 	public function test_api_url() {
