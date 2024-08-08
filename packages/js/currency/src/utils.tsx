@@ -76,7 +76,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 			return stripTags( stripedStr );
 		}
 
-		return stripedStr;
+		return strippedStr;
 	}
 
 	/**
