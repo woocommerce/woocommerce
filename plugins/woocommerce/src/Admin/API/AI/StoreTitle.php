@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Admin\API\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
@@ -14,13 +16,20 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class StoreTitle {
+class StoreTitle extends AIEndpoint {
 	/**
 	 * The store title option name.
 	 *
 	 * @var string
 	 */
 	const STORE_TITLE_OPTION_NAME = 'blogname';
+
+	/**
+	 * The AI generated store title option name.
+	 *
+	 * @var string
+	 */
+	const AI_STORE_TITLE_OPTION_NAME = 'ai_generated_site_title';
 
 	/**
 	 * The default store title.
@@ -30,26 +39,18 @@ class StoreTitle {
 	const DEFAULT_TITLE = 'Site Title';
 
 	/**
-	 * Endpoint namespace.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
+	protected $endpoint = 'store-title';
 
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/store-title',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
@@ -85,10 +86,10 @@ class StoreTitle {
 			);
 		}
 
-		$store_title                 = html_entity_decode( get_option( 'blogname' ) );
-		$previous_ai_generated_title = html_entity_decode( get_option( 'ai_generated_site_title' ) );
+		$store_title                 = html_entity_decode( get_option( self::STORE_TITLE_OPTION_NAME ) );
+		$previous_ai_generated_title = html_entity_decode( get_option( self::AI_STORE_TITLE_OPTION_NAME ) );
 
-		if ( self::DEFAULT_TITLE === $store_title || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
+		if ( strtolower( trim( self::DEFAULT_TITLE ) ) === strtolower( trim( $store_title ) ) || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
 			return rest_ensure_response( array( 'ai_content_generated' => false ) );
 		}
 
@@ -97,7 +98,7 @@ class StoreTitle {
 			return $ai_generated_title;
 		}
 
-		update_option( 'ai_generated_site_title', $ai_generated_title );
+		update_option( self::AI_STORE_TITLE_OPTION_NAME, $ai_generated_title );
 		update_option( self::STORE_TITLE_OPTION_NAME, $ai_generated_title );
 
 		return rest_ensure_response(
