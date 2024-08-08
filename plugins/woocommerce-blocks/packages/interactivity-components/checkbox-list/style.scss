@@ -5,7 +5,7 @@
 }
 
 .wc-block-interactivity-components-checkbox-list__item.hidden {
-  display: none;
+	display: none;
 }
 
 
@@ -16,7 +16,7 @@
 }
 
 .wc-block-interactivity-components-checkbox-list__item .wc-block-interactivity-components-checkbox-list__label {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 :where(.wc-block-interactivity-components-checkbox-list__input-wrapper) {
@@ -58,11 +58,11 @@
 }
 
 :where(.wc-block-interactivity-components-checkbox-list__show-more) {
-  cursor: pointer;
-  text-decoration: underline;
+	cursor: pointer;
+	text-decoration: underline;
 }
 
 .wc-block-interactivity-components-checkbox-list__show-more.hidden {
-  display: none;
+	display: none;
 }
 
