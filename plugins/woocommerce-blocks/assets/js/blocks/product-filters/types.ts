@@ -1,8 +1,7 @@
-export const BlockOverlayAttribute = {
-	NEVER: 'never',
-	MOBILE: 'mobile',
-	ALWAYS: 'always',
-} as const;
+/**
+ * Internal dependencies
+ */
+import { BlockOverlayAttribute } from './constants';
 
 export type BlockOverlayAttributeOptions =
 	( typeof BlockOverlayAttribute )[ keyof typeof BlockOverlayAttribute ];
