@@ -131,6 +131,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$sku,
 			$sku
 		);
+
+		/**
+		 * Filter to bail early on the SKU lock query.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param bool|null  $locked  Set to a boolean value to short-circuit the SKU lock query.
+		 * @param WC_Product $product The product being created.
+		 */
+		$locked = apply_filters( 'wc_product_pre_lock_on_sku', null, $product );
+		if ( ! is_null( $locked ) ) {
+			return boolval( $locked );
+		}
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->query( $query );
 
