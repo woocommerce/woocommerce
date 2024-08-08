@@ -108,10 +108,10 @@ test.describe(
 				.click();
 
 			await expect(
-				page.getByText( 'Receiver wordpress@example.com' )
+				page.getByText( `Receiver ${ admin.email }` )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Subject [WooCommerce Core E2E' )
+				page.getByText( `Subject [${ storeName }]` )
 			).toBeVisible();
 			await page.getByRole( 'link', { name: 'json' } ).click();
 			await expect(
