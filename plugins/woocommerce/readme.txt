@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Customer Account - Maintain the size of the icon in smaller screens. [#50410](https://github.com/woocommerce/woocommerce/pull/50410)
 * Fix - Accessibility: Prevent shipping losing focus when making selections during checkout. [#48370](https://github.com/woocommerce/woocommerce/pull/48370)
 * Fix - Add aria-label to mini-cart button on first render to improve accessibility [#48329](https://github.com/woocommerce/woocommerce/pull/48329)
 * Fix - Add missing script dependencies to product variation generation script. [#49595](https://github.com/woocommerce/woocommerce/pull/49595)
