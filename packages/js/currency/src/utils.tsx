@@ -67,7 +67,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 
 	function stripTags( str: string ) {
 		// sanitize Polyfill - see https://github.com/WordPress/WordPress/blob/master/wp-includes/js/wp-sanitize.js
-		const stripedStr = str
+		const strippedStr = str
 			.replace( /<!--[\s\S]*?(-->|$)/g, '' )
 			.replace( /<(script|style)[^>]*>[\s\S]*?(<\/\1>|$)/gi, '' )
 			.replace( /<\/?[a-z][\s\S]*?(>|$)/gi, '' );
