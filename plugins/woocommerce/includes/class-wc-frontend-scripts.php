@@ -537,7 +537,7 @@ class WC_Frontend_Scripts {
 							'showAnimationDuration' => 0,
 						)
 					),
-					'flexslider_enabled'        => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
+					'flexslider_enabled'                => apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) ),
 				);
 				break;
 			case 'wc-checkout':
