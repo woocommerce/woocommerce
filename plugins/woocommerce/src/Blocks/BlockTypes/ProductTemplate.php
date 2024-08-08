@@ -27,16 +27,6 @@ class ProductTemplate extends AbstractBlock {
 	}
 
 	/**
-	 * Get extra block settings. Some protected properties are always overriden in
-	 * AbstractBlock::register_block_type().
-	 *
-	 * @return array
-	 */
-	protected function get_extra_block_settings() {
-		return array( 'skip_inner_blocks' => true );
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
