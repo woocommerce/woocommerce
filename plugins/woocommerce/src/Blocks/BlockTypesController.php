@@ -234,15 +234,14 @@ final class BlockTypesController {
 			return $content;
 		}
 
-		// Check if the content starts with '<div', and return unchanged content early if not.
-		if ( strpos( $content, '<div' ) !== 0 ) {
-			return $content;
-		}
-
 		$attributes         = (array) $block['attrs'];
 		$exclude_attributes = array( 'className', 'align' );
 
 		$processor = new \WP_HTML_Tag_Processor( $content );
+
+		if ( false === $processor->next_tag( 'DIV' ) ) {
+			return $content;
+		}
 
 		foreach ( $attributes as $key  => $value ) {
 			if ( ! is_string( $key ) || in_array( $key, $exclude_attributes, true ) ) {
