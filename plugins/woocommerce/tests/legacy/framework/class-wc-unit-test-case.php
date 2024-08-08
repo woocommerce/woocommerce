@@ -86,7 +86,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
 
-		add_filter( 'woocommerce_get_geolocation', [ $this, 'mock_woocommerce_get_geolocation' ], 10, 2 );
+		// Mock/isolate interaction with external services during tests by default (possible to override via methods override).
+		add_filter( 'woocommerce_get_geolocation', [ $this, 'intercept_woocommerce_get_geolocation' ], 10, 2 );
+		add_filter( 'pre_http_request', [ $this, 'intercept_pre_http_request' ], 10, 3 );
 	}
 
 	/**
@@ -97,7 +99,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter( 'woocommerce_get_geolocation', [ $this, 'mock_woocommerce_get_geolocation' ], 10, 2 );
+		remove_filter( 'woocommerce_get_geolocation', [ $this, 'intercept_woocommerce_get_geolocation' ], 10, 2 );
+		remove_filter( 'pre_http_request', [ $this, 'intercept_pre_http_request' ], 10, 3 );
 	}
 
 	/**
@@ -122,9 +125,34 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 *
 	 * @since 9.3.0
 	 */
-	public function mock_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array
+	public function intercept_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array
 	{
 		return $geolocation;
+	}
+
+	/**
+	 * Intercept external requests and mimic unavailable response.
+	 *
+	 * @see WP_Http::request()
+	 *
+	 * @param false|array|WP_Error $response    A preemptive return value of an HTTP request. Default false.
+	 * @param array                $parsed_args HTTP request arguments.
+	 * @param string               $url         The request URL.
+	 *
+	 * @return array
+	 *
+	 * @since 9.3.0
+	 */
+	public function intercept_pre_http_request( $response, array $parsed_args, string $url ): array {
+		return [
+			'body'          => '',
+			'response'      => [
+				'code' => WP_Http::SERVICE_UNAVAILABLE,
+			],
+			'headers'       => [],
+			'cookies'       => [],
+			'http_response' => null,
+		];
 	}
 
 	/**
