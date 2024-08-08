@@ -46,9 +46,7 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	 * @since 9.3.0
 	 */
 	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
-		echo ' [plugins] ', $url, ' ', PHP_EOL;
-
-		// Let the requests go though and hit ?.
+		// Let the `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&...` requests go though.
 		return $response;
 	}
 
