@@ -239,9 +239,11 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		// alternative way to verify new site icon on the site
 		// verifying site icon shown in the new tab is impossible in headless mode
 		const date = new Date();
+		const year = date.getFullYear();
+		const month = ( date.getMonth() + 1 ).toString().padStart( 2, '0' );
 		await expect(
 			page.goto(
-				`/wp-content/uploads/${ date.getFullYear() }/${ date.getMonth() }/image-03-100x100.png`
+				`/wp-content/uploads/${ year }/${ month }/image-03-100x100.png`
 			)
 		).toBeTruthy();
 	} );
