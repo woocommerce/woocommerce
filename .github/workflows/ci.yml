@@ -205,13 +205,13 @@ jobs:
           lastRunFlag=""
           if [ -f "$lastRunFileDest" ]; then
             # Playwright last run info is available, parse the file and check if there are failed tests
-            cat "$lastRunFileDest"
+            cat "$lastRunFileDest" && echo ""
             failedTests=$(jq '.failedTests | length' "$lastRunFileDest")
             
             # Only if there are failed tests, we want to use the --last-failed flag. 
             # The run will fail if we're using the flag and there are no failed tests.
             if [ "$failedTests" -gt 0 ]; then
-              if [ "$LAST_FAILED_RUN" == "1" ]; then
+              if [ "$LAST_FAILED_RUN_" == "1" ]; then
                 echo "Found failed tests, running only failed tests"
                 lastRunFlag="--last-failed"
               else
@@ -223,6 +223,7 @@ jobs:
           fi
           
           # Finally, run the tests
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} --list $lastRunFlag
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
           
       - name: 'Upload Playwright last run info'
