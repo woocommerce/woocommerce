@@ -86,9 +86,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
 
-		// Mock/isolate interaction with external services during tests by default (possible to override via methods override).
 		add_filter( 'woocommerce_get_geolocation', [ $this, 'intercept_woocommerce_get_geolocation' ], 10, 2 );
-		add_filter( 'pre_http_request', [ $this, 'intercept_pre_http_request' ], 10, 3 );
 	}
 
 	/**
@@ -100,7 +98,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		parent::tearDown();
 
 		remove_filter( 'woocommerce_get_geolocation', [ $this, 'intercept_woocommerce_get_geolocation' ], 10, 2 );
-		remove_filter( 'pre_http_request', [ $this, 'intercept_pre_http_request' ], 10, 3 );
 	}
 
 	/**
@@ -131,38 +128,35 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * Intercept external requests and mimic unavailable response.
-	 *
-	 * @see WP_Http::request()
-	 *
-	 * @param false|array|WP_Error $response    A preemptive return value of an HTTP request. Default false.
-	 * @param array                $parsed_args HTTP request arguments.
-	 * @param string               $url         The request URL.
-	 *
-	 * @return false|array|WP_Error
-	 *
+	 * @inheritDoc
 	 * @since 9.3.0
 	 */
-	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
-		// TODO: drop new code and override `http_request_listner`:
-		// - check if parent `http_request_listner` processed the request
-		// - if not, prevent interaction with domains below + woocommerce.com, api.wordpress.org and paypal
+	public function http_request_listner( $preempt, $request, $url ) {
+		// Step 1: let tests to process request first.
+		$response = parent::http_request_listner( false, $request, $url );
+		if ( false !== $response ) {
+			return $response;
+		}
 
 		$url_domain = parse_url( $url, PHP_URL_HOST );
+
+		// Step 2: route localhost-addressed requests (REST-testing and more).
 		if ( $url_domain === 'localhost' ) {
-			// Internal REST-requests: don't intercept and let them be processed.
-			return $response;
-		}
-		if ( in_array( $url_domain, [ 'cldup.com', 'somedomain.com', 'wordpress.tv', 'demo.woothemes.com', 'download.maxmind.com' ] ) ) {
-			// download.maxmind.com: covered by \WC_Tests_MaxMind_Database::mock_http_responses
-			// demo.woothemes.com: at least partially covered by \WC_Tests_Product_CSV_Importer::mock_http_responses
-			// wordpress.tv:  covered by \WC_Tests_Formatting_Functions::mock_http_responses
-			// somedomain.com: covered by \WC_Tests_API_Functions::mock_http_responses
-			// cldup.com: doesn't seem to be covered with mocks
-			return $response;
+			return $preempt;
 		}
 
-		// echo $url, ' ', PHP_EOL;
+		// Step 3: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
+		echo PHP_EOL, $url, PHP_EOL;
+
+//		if ( in_array( $url_domain, [ 'cldup.com', 'somedomain.com', 'wordpress.tv', 'demo.woothemes.com', 'download.maxmind.com' ] ) ) {
+//			// download.maxmind.com: covered by \WC_Tests_MaxMind_Database::mock_http_responses
+//			// demo.woothemes.com: at least partially covered by \WC_Tests_Product_CSV_Importer::mock_http_responses
+//			// wordpress.tv:  covered by \WC_Tests_Formatting_Functions::mock_http_responses
+//			// somedomain.com: covered by \WC_Tests_API_Functions::mock_http_responses
+//			// cldup.com: doesn't seem to be covered with mocks
+//			return $preempt;
+//		}
+
 		return [
 			'body'          => '',
 			'response'      => [
