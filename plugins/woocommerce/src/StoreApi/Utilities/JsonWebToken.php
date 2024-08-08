@@ -50,6 +50,10 @@ final class JsonWebToken {
 	 * @return bool
 	 */
 	public static function validate( string $token, string $secret ) {
+		if ( ! $token ) {
+			return false;
+		}
+
 		/**
 		 * Confirm the structure of a JSON Web Token, it has three parts separated
 		 * by dots and complies with Base64URL standards.

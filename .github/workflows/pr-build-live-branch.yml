@@ -8,6 +8,8 @@ on:
             - '**/changelog/**'
             - '**/tests/**'
             - '**/*.md'
+            - '.github/**'
+            - '!.github/workflows/pr-build-live-branch.yml'
 
 concurrency:
     # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the latter.
