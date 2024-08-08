@@ -29,7 +29,7 @@ import type {
 	BlockVariationTriggerType,
 } from './types';
 import { default as productFiltersIcon } from '../product-filters/icon';
-import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/types';
+import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/constants';
 import './editor.scss';
 
 const OverlayNavigationLabel = ( {
