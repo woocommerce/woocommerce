@@ -59,6 +59,13 @@ test.describe(
 				consumerSecret: process.env.CONSUMER_SECRET,
 				version: 'wc/v3',
 			} );
+			// ensure default shop address is shop based
+			await api.put(
+				'settings/general/woocommerce_default_customer_address',
+				{
+					value: 'base',
+				}
+			);
 			// enable taxes on the account
 			await api.put( 'settings/general/woocommerce_calc_taxes', {
 				value: 'yes',
@@ -379,7 +386,7 @@ test.describe(
 			orderId = orderId[ 0 ].toString();
 
 			// Select customer
-			await page.getByText( 'Guest' ).click();
+			await page.getByText( 'Guest', { exact: true } ).click();
 			await page
 				.locator( 'input[aria-owns="select2-customer_user-results"]' )
 				.fill( 'sideshowbob@' );

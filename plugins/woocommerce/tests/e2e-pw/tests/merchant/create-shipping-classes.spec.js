@@ -50,8 +50,6 @@ test.describe( 'Merchant can add shipping classes', () => {
 				.fill( description );
 
 			await page.getByRole( 'button', { name: 'Create' } ).click();
-
-			await page.waitForLoadState( 'networkidle' );
 		}
 
 		// Set the expected auto-generated slug

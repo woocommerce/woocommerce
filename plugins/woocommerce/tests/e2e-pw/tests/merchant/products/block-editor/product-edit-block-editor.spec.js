@@ -129,7 +129,9 @@ test.describe( 'Publish dropdown options', { tag: '@gutenberg' }, () => {
 		).toContainText( 'Product successfully duplicated' );
 
 		await expect(
-			page.getByRole( 'heading', { name: `${ product.name } (Copy)` } )
+			page.getByRole( 'heading', {
+				name: `${ product.name } (Copy)`,
+			} )
 		).toBeVisible();
 
 		await expect(

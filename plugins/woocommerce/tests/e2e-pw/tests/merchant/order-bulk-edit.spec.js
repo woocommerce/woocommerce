@@ -70,33 +70,33 @@ test.describe( 'Bulk edit orders', { tag: '@services' }, () => {
 		// expect order status 'processing' to show
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })` )
-				.getByText( 'Processing' )
-				.nth( 1 )
+				.locator( `#order-${ orderId1 }` )
+				.getByRole( 'cell', { name: 'Processing' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })` )
-				.getByText( 'Processing' )
-				.nth( 1 )
+				.locator( `#order-${ orderId2 }` )
+				.getByRole( 'cell', { name: 'Processing' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })` )
-				.getByText( 'Processing' )
-				.nth( 1 )
+				.locator( `#order-${ orderId3 }` )
+				.getByRole( 'cell', { name: 'Processing' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })` )
-				.getByText( 'Processing' )
-				.nth( 1 )
+				.locator( `#order-${ orderId4 }` )
+				.getByRole( 'cell', { name: 'Processing' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })` )
-				.getByText( 'Processing' )
-				.nth( 1 )
+				.locator( `#order-${ orderId5 }` )
+				.getByRole( 'cell', { name: 'Processing' } )
+				.locator( 'span' )
 		).toBeVisible();
 
 		await page.locator( '#cb-select-all-1' ).click();
@@ -108,33 +108,33 @@ test.describe( 'Bulk edit orders', { tag: '@services' }, () => {
 		// expect order status 'completed' to show
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })` )
-				.getByText( 'Completed' )
-				.nth( 1 )
+				.locator( `#order-${ orderId1 }` )
+				.getByRole( 'cell', { name: 'Completed' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })` )
-				.getByText( 'Completed' )
-				.nth( 1 )
+				.locator( `#order-${ orderId2 }` )
+				.getByRole( 'cell', { name: 'Completed' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })` )
-				.getByText( 'Completed' )
-				.nth( 1 )
+				.locator( `#order-${ orderId3 }` )
+				.getByRole( 'cell', { name: 'Completed' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })` )
-				.getByText( 'Completed' )
-				.nth( 1 )
+				.locator( `#order-${ orderId4 }` )
+				.getByRole( 'cell', { name: 'Completed' } )
+				.locator( 'span' )
 		).toBeVisible();
 		await expect(
 			page
-				.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })` )
-				.getByText( 'Completed' )
-				.nth( 1 )
+				.locator( `#order-${ orderId5 }` )
+				.getByRole( 'cell', { name: 'Completed' } )
+				.locator( 'span' )
 		).toBeVisible();
 	} );
 } );

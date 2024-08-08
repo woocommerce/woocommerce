@@ -7,7 +7,7 @@ config = {
 		{
 			name: 'default wpcom',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: '**basic.spec.js',
+			grepInvert: /@local/,
 		},
 	],
 };

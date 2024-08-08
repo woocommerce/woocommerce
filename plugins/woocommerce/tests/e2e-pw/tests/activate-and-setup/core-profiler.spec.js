@@ -15,7 +15,9 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByRole( 'heading', { name: 'Welcome to Woo!' } )
 			).toBeVisible();
 			await page
-				.getByRole( 'checkbox', { name: 'I agree to share my data' } )
+				.getByRole( 'checkbox', {
+					name: 'I agree to share my data',
+				} )
 				.uncheck();
 			await page
 				.getByRole( 'button', { name: 'Set up my store' } )
@@ -29,7 +31,9 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: "I'm just starting my business" } )
+				.getByRole( 'radio', {
+					name: "I'm just starting my business",
+				} )
 				.first()
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
@@ -95,7 +99,9 @@ test.describe( 'Store owner can complete the core profiler', () => {
 		await test.step( 'Confirm that core profiler was completed and no extensions installed', async () => {
 			// intermediate page shown
 			await expect(
-				page.getByRole( 'heading', { name: 'Turning on the lights' } )
+				page.getByRole( 'heading', {
+					name: 'Turning on the lights',
+				} )
 			).toBeVisible();
 			await expect(
 				page.locator( '.woocommerce-onboarding-progress-bar__filler' )
@@ -108,16 +114,26 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 
 			// go to the plugins page to make sure that extensions weren't installed
-			await page.goto( 'wp-admin/plugins.php' );
+			// we are checking the active tab to support multi envs testing
+			await page.goto( 'wp-admin/plugins.php?plugin_status=active' );
 			await expect(
-				page.getByRole( 'heading', { name: 'Plugins', exact: true } )
+				page.getByRole( 'heading', {
+					name: 'Plugins',
+					exact: true,
+				} )
 			).toBeVisible();
 			// confirm that some of the optional extensions aren't present
 			await expect(
-				page.getByText( 'MailPoet for WooCommerce', { exact: true } )
+				page.getByText( 'MailPoet for WooCommerce', {
+					exact: true,
+				} )
 			).toBeHidden();
 			await expect(
-				page.getByText( 'Pinterest for WooCommerce', { exact: true } )
+				page
+					.locator( '.plugin-title' )
+					.getByText( 'Pinterest for WooCommerce', {
+						exact: true,
+					} )
 			).toBeHidden();
 			await expect(
 				page.getByText( 'Google for WooCommerce', { exact: true } )
@@ -132,7 +148,9 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'textbox', { name: 'Australian dollar ($)' } )
+				page.getByRole( 'textbox', {
+					name: 'Australian dollar ($)',
+				} )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'textbox', { name: 'Left' } )
@@ -149,251 +167,261 @@ test.describe( 'Store owner can complete the core profiler', () => {
 		} );
 	} );
 
-	test( 'Can complete the core profiler installing default extensions', async ( {
-		page,
-	} ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
-		);
+	test(
+		'Can complete the core profiler installing default extensions',
+		{ tag: '@local' },
+		async ( { page } ) => {
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
+			);
 
-		await test.step( 'Intro page and opt in to data sharing', async () => {
-			await expect(
-				page.getByRole( 'heading', { name: 'Welcome to Woo!' } )
-			).toBeVisible();
-			await page
-				.getByRole( 'checkbox', { name: 'I agree to share my data' } )
-				.uncheck();
-			await page
-				.getByRole( 'button', { name: 'Set up my store' } )
-				.click();
-		} );
-
-		await test.step( 'User profile information', async () => {
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Which one of these best describes you?',
-				} )
-			).toBeVisible();
-			await page
-				.getByRole( 'radio', { name: "I'm already selling" } )
-				.first()
-				.click();
-			await page.getByLabel( 'Select an option' ).click();
-			await page
-				.getByRole( 'option', { name: "No, I'm selling offline" } )
-				.click();
-			await page.getByRole( 'button', { name: 'Continue' } ).click();
-		} );
-
-		await test.step( 'Business Information', async () => {
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Tell us a bit about your store',
-				} )
-			).toBeVisible();
-			await expect(
-				page.getByPlaceholder( 'Ex. My awesome store' )
-			).toHaveValue( 'WooCommerce Core E2E Test Suite' );
-			await page
-				.locator(
-					'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
-				)
-				.first()
-				.click();
-			// select food and drink
-			await page
-				.getByRole( 'option', { name: 'Food and drink' } )
-				.click();
-			// select a WooPayments incompatible location
-			await page
-				.locator(
-					'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
-				)
-				.last()
-				.click();
-			await page.getByRole( 'option', { name: 'Afghanistan' } ).click();
-
-			await page
-				.getByPlaceholder( 'wordpress@example.com' )
-				.fill( 'merchant@example.com' );
-			await page.getByLabel( 'Opt-in to receive tips,' ).uncheck();
-			await page.getByRole( 'button', { name: 'Continue' } ).click();
-		} );
-
-		await test.step( 'Extensions -- install some suggested extensions', async () => {
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Get a boost with our free features',
-				} )
-			).toBeVisible();
-			// check that WooPayments is not displayed because Afghanistan is not a supported country
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Get paid with WooPayments',
-				} )
-			).not.toBeAttached();
-
-			// select and install the rest of the extentions
-			try {
+			await test.step( 'Intro page and opt in to data sharing', async () => {
+				await expect(
+					page.getByRole( 'heading', { name: 'Welcome to Woo!' } )
+				).toBeVisible();
 				await page
-					.getByText(
-						'Boost content creation with Jetpack AI AssistantSave time on content creation'
+					.getByRole( 'checkbox', {
+						name: 'I agree to share my data',
+					} )
+					.uncheck();
+				await page
+					.getByRole( 'button', { name: 'Set up my store' } )
+					.click();
+			} );
+
+			await test.step( 'User profile information', async () => {
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Which one of these best describes you?',
+					} )
+				).toBeVisible();
+				await page
+					.getByRole( 'radio', { name: "I'm already selling" } )
+					.first()
+					.click();
+				await page.getByLabel( 'Select an option' ).click();
+				await page
+					.getByRole( 'option', { name: "No, I'm selling offline" } )
+					.click();
+				await page.getByRole( 'button', { name: 'Continue' } ).click();
+			} );
+
+			await test.step( 'Business Information', async () => {
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Tell us a bit about your store',
+					} )
+				).toBeVisible();
+				await expect(
+					page.getByPlaceholder( 'Ex. My awesome store' )
+				).toHaveValue( 'WooCommerce Core E2E Test Suite' );
+				await page
+					.locator(
+						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
 					)
-					.getByRole( 'checkbox' )
-					.uncheck( { timeout: 2000 } );
-			} catch ( e ) {
-				console.log( 'Checkbox not present for Jetpack AI Assistant' );
-			}
-			try {
+					.first()
+					.click();
+				// select food and drink
+				await page
+					.getByRole( 'option', { name: 'Food and drink' } )
+					.click();
+				// select a WooPayments incompatible location
+				await page
+					.locator(
+						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
+					)
+					.last()
+					.click();
+				await page
+					.getByRole( 'option', { name: 'Afghanistan' } )
+					.click();
+
+				await page
+					.getByPlaceholder( 'wordpress@example.com' )
+					.fill( 'merchant@example.com' );
+				await page.getByLabel( 'Opt-in to receive tips,' ).uncheck();
+				await page.getByRole( 'button', { name: 'Continue' } ).click();
+			} );
+
+			await test.step( 'Extensions -- install some suggested extensions', async () => {
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Get a boost with our free features',
+					} )
+				).toBeVisible();
+				// check that WooPayments is not displayed because Afghanistan is not a supported country
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Get paid with WooPayments',
+					} )
+				).not.toBeAttached();
+
+				// select and install the rest of the extentions
+				try {
+					await page
+						.getByText(
+							'Boost content creation with Jetpack AI AssistantSave time on content creation'
+						)
+						.getByRole( 'checkbox' )
+						.uncheck( { timeout: 2000 } );
+				} catch ( e ) {
+					console.log(
+						'Checkbox not present for Jetpack AI Assistant'
+					);
+				}
+				try {
+					await page
+						.getByText(
+							'Showcase your products with PinterestGet your products in front of a highly'
+						)
+						.getByRole( 'checkbox' )
+						.check( { timeout: 2000 } );
+				} catch ( e ) {
+					console.log( 'Checkbox not present for Pinterest' );
+				}
+				try {
+					await page
+						.getByText(
+							'Reach your customers with MailPoetSend purchase follow-up emails, newsletters,'
+						)
+						.getByRole( 'checkbox' )
+						.uncheck( { timeout: 2000 } );
+				} catch ( e ) {
+					console.log( 'Checkbox not present for MailPoet' );
+				}
+
 				await page
 					.getByText(
-						'Showcase your products with PinterestGet your products in front of a highly'
+						'Drive sales with Google for WooCommerceReach millions of active shoppers across'
 					)
 					.getByRole( 'checkbox' )
 					.check( { timeout: 2000 } );
-			} catch ( e ) {
-				console.log( 'Checkbox not present for Pinterest' );
-			}
-			try {
-				await page
-					.getByText(
-						'Reach your customers with MailPoetSend purchase follow-up emails, newsletters,'
+				await page.getByRole( 'button', { name: 'Continue' } ).click();
+			} );
+
+			await test.step( 'Confirm that core profiler was completed and a couple of default extensions installed', async () => {
+				page.on( 'dialog', ( dialog ) => dialog.accept() );
+				// intermediate page shown
+				// the next two are soft assertions because depending on the extensions selected, they may or may not appear
+				// and we want the test to complete in order for cleanup to happen
+				await expect
+					.soft(
+						page.getByRole( 'heading', {
+							name: "Woo! Let's get your features ready",
+						} )
 					)
-					.getByRole( 'checkbox' )
-					.uncheck( { timeout: 2000 } );
-			} catch ( e ) {
-				console.log( 'Checkbox not present for MailPoet' );
-			}
-
-			await page
-				.getByText(
-					'Drive sales with Google for WooCommerceReach millions of active shoppers across'
-				)
-				.getByRole( 'checkbox' )
-				.check( { timeout: 2000 } );
-			await page.getByRole( 'button', { name: 'Continue' } ).click();
-		} );
-
-		await test.step( 'Confirm that core profiler was completed and a couple of default extensions installed', async () => {
-			page.on( 'dialog', ( dialog ) => dialog.accept() );
-			// intermediate page shown
-			// the next two are soft assertions because depending on the extensions selected, they may or may not appear
-			// and we want the test to complete in order for cleanup to happen
-			await expect
-				.soft(
-					page.getByRole( 'heading', {
-						name: "Woo! Let's get your features ready",
-					} )
-				)
-				.toBeVisible( { timeout: 30000 } );
-			await expect
-				.soft(
-					page.getByRole( 'heading', {
-						name: "Extending your store's capabilities",
-					} )
-				)
-				.toBeVisible( { timeout: 30000 } );
-			// dashboard shown
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Welcome to WooCommerce Core E2E Test Suite',
-				} )
-			).toBeVisible( { timeout: 30000 } );
-			// go to the plugins page to make sure that extensions were installed
-			await page.goto( 'wp-admin/plugins.php' );
-			await expect(
-				page.getByRole( 'heading', { name: 'Plugins', exact: true } )
-			).toBeVisible();
-			// confirm that the optional plugins are present
-			await expect(
-				page.locator( '.plugin-title', {
-					hasText: 'Pinterest for WooCommerce',
-				} )
-			).toBeVisible();
-			await expect(
-				page.locator( '.plugin-title', {
-					hasText: /Google for WooCommerce|Google Listings & Ads/,
-				} )
-			).toBeVisible();
-
-			await expect(
-				page.locator( '.plugin-title', {
-					hasText: 'MailPoet',
-				} )
-			).toBeHidden();
-			await expect(
-				page.locator( '.plugin-title', {
-					hasText: 'Jetpack',
-				} )
-			).toBeHidden();
-		} );
-
-		await test.step( 'Confirm that information from core profiler saved', async () => {
-			await page.goto( 'wp-admin/admin.php?page=wc-settings' );
-			await expect(
-				page.getByRole( 'textbox', { name: 'Afghanistan' } )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'textbox', { name: 'Afghan afghani (؋)' } )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'textbox', { name: 'Left with space' } )
-			).toBeVisible();
-			await expect(
-				page.getByLabel( 'Thousand separator', { exact: true } )
-			).toHaveValue( '.' );
-			await expect(
-				page.getByLabel( 'Decimal separator', { exact: true } )
-			).toHaveValue( ',' );
-			await expect( page.getByLabel( 'Number of decimals' ) ).toHaveValue(
-				'0'
-			);
-		} );
-
-		await test.step( 'Clean up installed extensions', async () => {
-			await page.goto( 'wp-admin/plugins.php' );
-			await page.getByLabel( 'Deactivate Google' ).click();
-			await expect(
-				page.getByText( 'Plugin deactivated.' )
-			).toBeVisible();
-			// delete plugin regularly or, if attempted, accept deleting data as well
-			try {
-				await page.getByLabel( 'Delete Google' ).click();
+					.toBeVisible( { timeout: 30000 } );
+				await expect
+					.soft(
+						page.getByRole( 'heading', {
+							name: "Extending your store's capabilities",
+						} )
+					)
+					.toBeVisible( { timeout: 30000 } );
 				await expect(
-					page.getByText( 'was successfully deleted.' )
-				).toBeVisible( { timeout: 5000 } );
-			} catch ( e ) {
-				await page
-					.getByText( 'Yes, delete these files and data' )
-					.click();
-				await page
-					.getByText( 'The selected plugin has been deleted.' )
-					.waitFor();
-			}
-			await expect( page.getByLabel( 'Delete Google' ) ).toBeHidden();
-			await page.getByLabel( 'Deactivate Pinterest for' ).click();
-			await expect(
-				page.getByText( 'Plugin deactivated.' )
-			).toBeVisible();
-			// delete plugin regularly or, if attempted, accept deleting data as well
-			try {
-				await page.getByLabel( 'Delete Pinterest for' ).click();
+					page.getByRole( 'heading', {
+						name: 'Welcome to WooCommerce Core E2E Test Suite',
+					} )
+				).toBeVisible( { timeout: 30000 } );
+				// go to the plugins page to make sure that extensions were installed
+				await page.goto( 'wp-admin/plugins.php' );
 				await expect(
-					page.getByText( 'was successfully deleted.' )
-				).toBeVisible( { timeout: 5000 } );
-			} catch ( e ) {
-				await page
-					.getByText( 'Yes, delete these files and data' )
-					.click();
-				await page
-					.getByText( 'The selected plugin has been deleted.' )
-					.waitFor();
-			}
-			await expect(
-				page.getByLabel( 'Delete Pinterest for' )
-			).toBeHidden();
-		} );
-	} );
+					page.getByRole( 'heading', {
+						name: 'Plugins',
+						exact: true,
+					} )
+				).toBeVisible();
+				// confirm that the optional plugins are present
+				await expect(
+					page.locator( '.plugin-title', {
+						hasText: 'Pinterest for WooCommerce',
+					} )
+				).toBeVisible();
+				await expect(
+					page.locator( '.plugin-title', {
+						hasText: /Google for WooCommerce|Google Listings & Ads/,
+					} )
+				).toBeVisible();
+
+				await expect(
+					page.locator( '.plugin-title', {
+						hasText: 'MailPoet',
+					} )
+				).toBeHidden();
+				await expect(
+					page.locator( '.plugin-title', {
+						hasText: 'Jetpack',
+					} )
+				).toBeHidden();
+			} );
+
+			await test.step( 'Confirm that information from core profiler saved', async () => {
+				await page.goto( 'wp-admin/admin.php?page=wc-settings' );
+				await expect(
+					page.getByRole( 'textbox', { name: 'Afghanistan' } )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'textbox', { name: 'Afghan afghani (؋)' } )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'textbox', { name: 'Left with space' } )
+				).toBeVisible();
+				await expect(
+					page.getByLabel( 'Thousand separator', { exact: true } )
+				).toHaveValue( '.' );
+				await expect(
+					page.getByLabel( 'Decimal separator', { exact: true } )
+				).toHaveValue( ',' );
+				await expect(
+					page.getByLabel( 'Number of decimals' )
+				).toHaveValue( '0' );
+			} );
+
+			await test.step( 'Clean up installed extensions', async () => {
+				await page.goto( 'wp-admin/plugins.php' );
+				await page.getByLabel( 'Deactivate Google' ).click();
+				await expect(
+					page.getByText( 'Plugin deactivated.' )
+				).toBeVisible();
+				// delete plugin regularly or, if attempted, accept deleting data as well
+				try {
+					await page.getByLabel( 'Delete Google' ).click();
+					await expect(
+						page.getByText( 'was successfully deleted.' )
+					).toBeVisible( { timeout: 5000 } );
+				} catch ( e ) {
+					await page
+						.getByText( 'Yes, delete these files and data' )
+						.click();
+					await page
+						.getByText( 'The selected plugin has been deleted.' )
+						.waitFor();
+				}
+				await expect( page.getByLabel( 'Delete Google' ) ).toBeHidden();
+				await page.getByLabel( 'Deactivate Pinterest for' ).click();
+				await expect(
+					page.getByText( 'Plugin deactivated.' )
+				).toBeVisible();
+				// delete plugin regularly or, if attempted, accept deleting data as well
+				try {
+					await page.getByLabel( 'Delete Pinterest for' ).click();
+					await expect(
+						page.getByText( 'was successfully deleted.' )
+					).toBeVisible( { timeout: 5000 } );
+				} catch ( e ) {
+					await page
+						.getByText( 'Yes, delete these files and data' )
+						.click();
+					await page
+						.getByText( 'The selected plugin has been deleted.' )
+						.waitFor();
+				}
+				await expect(
+					page.getByLabel( 'Delete Pinterest for' )
+				).toBeHidden();
+			} );
+		}
+	);
 } );
 
 test.describe( 'Store owner can skip the core profiler', () => {
@@ -413,7 +441,9 @@ test.describe( 'Store owner can skip the core profiler', () => {
 		).toBeVisible();
 		await page.getByLabel( 'Select country/region' ).click();
 		await page
-			.getByRole( 'option', { name: 'United States (US) — California' } )
+			.getByRole( 'option', {
+				name: 'United States (US) — California',
+			} )
 			.click();
 		await page.getByRole( 'button', { name: 'Go to my store' } ).click();
 

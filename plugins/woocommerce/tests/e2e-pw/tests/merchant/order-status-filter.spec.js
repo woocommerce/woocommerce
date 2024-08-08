@@ -2,7 +2,6 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const orderBatchId = [];
-const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
 const orderStatus = [
@@ -57,8 +56,13 @@ test.describe(
 
 		test( 'should filter by All', async ( { page } ) => {
 			await page.goto( '/wp-admin/admin.php?page=wc-orders' );
-
 			await page.locator( 'li.all > a' ).click();
+			await page
+				.getByRole( 'cell' )
+				.getByRole( 'mark' )
+				.first()
+				.waitFor();
+
 			// because tests are running in parallel, we can't know how many orders there
 			// are beyond the ones we created here.
 			for ( let i = 0; i < orderStatus.length; i++ ) {
@@ -75,10 +79,16 @@ test.describe(
 				await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 				await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
-				const countElements = await page
-					.locator( statusColumnTextSelector )
-					.count();
-				await expect( countElements ).toBeGreaterThan( 0 );
+
+				await page
+					.getByRole( 'cell', { name: orderStatus[ i ][ 0 ] } )
+					.locator( 'span' )
+					.waitFor();
+				await expect(
+					page
+						.getByRole( 'cell', { name: orderStatus[ i ][ 0 ] } )
+						.locator( 'span' )
+				).toBeVisible();
 			} );
 		}
 	}

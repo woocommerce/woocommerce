@@ -1,4 +1,5 @@
 const { encodeCredentials } = require( '../../../../utils/plugin-utils' );
+const { admin } = require( '../../../../test-data/data' );
 
 export class LogoPickerPage {
 	page;
@@ -43,7 +44,8 @@ export class LogoPickerPage {
 			.getByRole( 'tab', { name: 'Media Library' } )
 			.click();
 
-		await assemblerLocator.getByLabel( 'image-03' ).first().click();
+		await assemblerLocator.getByLabel( 'Search media' ).fill( 'image-03' );
+		await assemblerLocator.getByLabel( 'image-03' ).click();
 		await assemblerLocator
 			.getByRole( 'button', { name: 'Select', exact: true } )
 			.click();
@@ -58,8 +60,8 @@ export class LogoPickerPage {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},

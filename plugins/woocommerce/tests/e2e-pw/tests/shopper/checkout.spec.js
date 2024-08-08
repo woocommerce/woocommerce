@@ -97,7 +97,9 @@ test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 			await api.delete( `orders/${ guestOrderId }`, { force: true } );
 		}
 		if ( customerOrderId ) {
-			await api.delete( `orders/${ customerOrderId }`, { force: true } );
+			await api.delete( `orders/${ customerOrderId }`, {
+				force: true,
+			} );
 		}
 	} );
 
@@ -333,8 +335,8 @@ test.describe( 'Checkout page', { tag: [ '@payments', '@services' ] }, () => {
 			await page
 				.getByRole( 'textbox', { name: 'ZIP Code *' } )
 				.fill( '97403' );
-			await page.getByLabel( 'Phone *' ).fill( '555 555-5555' );
-			await page.getByLabel( 'Email address *' ).fill( guestEmail );
+			await page.getByLabel( 'Phone *' ).fill( '555 555-5555' );
+			await page.getByLabel( 'Email address *' ).fill( guestEmail );
 
 			await page.getByText( 'Cash on delivery' ).click();
 

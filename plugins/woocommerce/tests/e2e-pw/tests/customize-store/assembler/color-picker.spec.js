@@ -1,4 +1,5 @@
 const { test: base, expect, request } = require( '@playwright/test' );
+const { admin } = require( '../../../test-data/data' );
 const { AssemblerPage } = require( './assembler.page' );
 const { CustomizeStorePage } = require( '../customize-store.page' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
@@ -528,8 +529,8 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},

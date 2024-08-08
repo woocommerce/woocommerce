@@ -1,60 +1,84 @@
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlockByShortcut,
+	publishPage,
+	closeChoosePatternModal,
+} = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { random } = require( '../../utils/helpers' );
 
-const firstProductName = 'Coupon test product';
+const simpleProductName = `Checkout Coupons Product ${ random() }`;
+const singleProductFullPrice = '110.00';
+const singleProductSalePrice = '55.00';
 const coupons = [
 	{
-		code: 'fixed-cart-off',
+		code: '5fixedcheckout',
 		discount_type: 'fixed_cart',
 		amount: '5.00',
 	},
 	{
-		code: 'percent-off',
+		code: '50percoffcheckout',
 		discount_type: 'percent',
 		amount: '50',
 	},
 	{
-		code: 'fixed-product-off',
+		code: '10fixedproductcheckout',
 		discount_type: 'fixed_product',
-		amount: '7.00',
+		amount: '10.00',
 	},
 ];
+const couponLimitedCode = '10fixedcheckoutlimited';
+const customerBilling = {
+	email: 'john.doe.merchant.test@example.com',
+};
 
-const discounts = [ '$5.00', '$10.00', '$7.00' ];
-const totals = [ '$15.00', '$10.00', '$13.00' ];
+let productId, orderId, limitedCouponId;
+
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	testPageTitlePrefix: 'Checkout Block',
+	page: async ( { context, page, testPage }, use ) => {
+		await goToPageEditor( { page } );
+		await closeChoosePatternModal( { page } );
+		await fillPageTitle( page, testPage.title );
+		await insertBlockByShortcut( page, 'Checkout' );
+		await publishPage( page, testPage.title );
+
+		await context.clearCookies();
+
+		await addAProductToCart( page, productId );
+		await page.goto( testPage.slug );
+		await expect(
+			page.getByRole( 'heading', { name: testPage.title } )
+		).toBeVisible();
+
+		await use( page );
+	},
+} );
 
 test.describe(
-	'Cart & Checkout applying coupons',
+	'Checkout Block Applying Coupons',
 	{ tag: [ '@payments', '@services' ] },
 	() => {
-		let firstProductId;
 		const couponBatchId = [];
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { api } ) => {
 			// make sure the currency is USD
 			await api.put( 'settings/general/woocommerce_currency', {
 				value: 'USD',
 			} );
-			// enable COD
-			await api.put( 'payment_gateways/cod', {
-				enabled: true,
-			} );
-			// add product
+			// add a product
 			await api
 				.post( 'products', {
-					name: firstProductName,
+					name: simpleProductName,
 					type: 'simple',
-					regular_price: '20.00',
+					regular_price: singleProductFullPrice,
+					sale_price: singleProductSalePrice,
 				} )
 				.then( ( response ) => {
-					firstProductId = response.data.id;
+					productId = response.data.id;
 				} );
 			// add coupons
 			await api
@@ -66,300 +90,172 @@ test.describe(
 						couponBatchId.push( response.data.create[ i ].id );
 					}
 				} );
-		} );
-
-		test.beforeEach( async ( { context } ) => {
-			// Shopping cart is very sensitive to cookies, so be explicit
-			await context.clearCookies();
-		} );
-
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.delete( `products/${ firstProductId }`, {
-				force: true,
-			} );
-			await api.post( 'coupons/batch', { delete: [ ...couponBatchId ] } );
-			await api.put( 'payment_gateways/cod', {
-				enabled: false,
-			} );
-		} );
-
-		for ( let i = 0; i < coupons.length; i++ ) {
-			test( `allows applying coupon of type ${ coupons[ i ].discount_type }`, async ( {
-				page,
-				context,
-			} ) => {
-				await test.step( 'Load cart page and apply coupons', async () => {
-					await addAProductToCart( page, firstProductId );
-
-					await page.goto( '/cart/' );
-					await page
-						.locator( '#coupon_code' )
-						.fill( coupons[ i ].code );
-					await page
-						.locator( '.blockOverlay' )
-						.first()
-						.waitFor( { state: 'hidden' } );
-					await page
-						.getByRole( 'button', { name: 'Apply coupon' } )
-						.click();
-
-					await expect(
-						page.getByText( 'Coupon code applied successfully.' )
-					).toBeVisible();
-					// Checks the coupon amount is credited properly
-					await expect(
-						page.locator( '.cart-discount .amount' )
-					).toContainText( discounts[ i ] );
-					// Checks that the cart total is updated
-					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( totals[ i ] );
+			// add limited coupon
+			await api
+				.post( 'coupons', {
+					code: couponLimitedCode,
+					discount_type: 'fixed_cart',
+					amount: '10.00',
+					usage_limit: 1,
+					usage_count: 1,
+				} )
+				.then( ( response ) => {
+					limitedCouponId = response.data.id;
 				} );
-
-				await context.clearCookies();
-
-				await test.step( 'Load checkout page and apply coupons', async () => {
-					await addAProductToCart( page, firstProductId );
-
-					await page.goto( '/checkout' );
-					await page
-						.locator( 'text=Click here to enter your code' )
-						.click();
-					await page
-						.locator( '#coupon_code' )
-						.fill( coupons[ i ].code );
-					await page
-						.locator( '.blockOverlay' )
-						.first()
-						.waitFor( { state: 'hidden' } );
-					await page.locator( 'text=Apply coupon' ).click();
-
-					await expect(
-						page.getByText( 'Coupon code applied successfully.' )
-					).toBeVisible();
-					await expect(
-						page.locator( '.cart-discount .amount' )
-					).toContainText( discounts[ i ] );
-					await expect(
-						page.locator( '.order-total .amount' )
-					).toContainText( totals[ i ] );
+			// add order with applied limited coupon
+			await api
+				.post( 'orders', {
+					status: 'processing',
+					billing: customerBilling,
+					coupon_lines: [
+						{
+							code: couponLimitedCode,
+						},
+					],
+				} )
+				.then( ( response ) => {
+					orderId = response.data.id;
 				} );
+		} );
+
+		test.afterAll( async ( { api } ) => {
+			await api.post( 'products/batch', {
+				delete: [ productId ],
 			} );
-		}
-
-		test( 'prevents applying same coupon twice', async ( {
-			page,
-			context,
-		} ) => {
-			await test.step( 'Load cart page and try applying same coupon twice', async () => {
-				await addAProductToCart( page, firstProductId );
-
-				await page.goto( '/cart/' );
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page
-					.getByRole( 'button', { name: 'Apply coupon' } )
-					.click();
-				// successful first time
-				await expect(
-					page.getByText( 'Coupon code applied successfully.' )
-				).toBeVisible();
-
-				// try to apply the same coupon
-				await page.goto( '/cart/' );
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page
-					.getByRole( 'button', { name: 'Apply coupon' } )
-					.click();
-
-				// error received
-				await expect(
-					page.getByText( 'Coupon code already applied!' )
-				).toBeVisible();
-				// check cart total
-				await expect(
-					page.locator( '.cart-discount .amount' )
-				).toContainText( discounts[ 0 ] );
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( totals[ 0 ] );
+			await api.post( 'coupons/batch', {
+				delete: [ ...couponBatchId, limitedCouponId ],
 			} );
-
-			await context.clearCookies();
-
-			await test.step( 'Load checkout page and try applying same coupon twice', async () => {
-				await addAProductToCart( page, firstProductId );
-
-				await page.goto( '/checkout/' );
-				await page
-					.locator( 'text=Click here to enter your code' )
-					.click();
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page.locator( 'text=Apply coupon' ).click();
-				// successful first time
-				await expect(
-					page.getByText( 'Coupon code applied successfully.' )
-				).toBeVisible();
-				// try to apply the same coupon
-				await page
-					.locator( 'text=Click here to enter your code' )
-					.click();
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page.locator( 'text=Apply coupon' ).click();
-				// error received
-				await expect(
-					page.getByText( 'Coupon code already applied!' )
-				).toBeVisible();
-				// check cart total
-				await expect(
-					page.locator( '.cart-discount .amount' )
-				).toContainText( discounts[ 0 ] );
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( totals[ 0 ] );
+			await api.post( 'orders/batch', {
+				delete: [ orderId ],
 			} );
 		} );
 
-		test( 'allows applying multiple coupons', async ( {
+		test( 'allows checkout block to apply coupon of any type', async ( {
 			page,
-			context,
 		} ) => {
-			await test.step( 'Load cart page and try applying multiple coupons', async () => {
-				await addAProductToCart( page, firstProductId );
+			const totals = [ '$50.00', '$27.50', '$45.00' ];
 
-				await page.goto( '/cart/' );
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+			// apply all coupon types
+			for ( let i = 0; i < coupons.length; i++ ) {
 				await page
-					.getByRole( 'button', { name: 'Apply coupon' } )
+					.getByRole( 'button', { name: 'Add a coupon' } )
 					.click();
-				// successful
+				await page.getByLabel( 'Enter code' ).fill( coupons[ i ].code );
+				await page.getByText( 'Apply', { exact: true } ).click();
 				await expect(
-					page.getByText( 'Coupon code applied successfully.' )
+					page
+						.locator(
+							'.wc-block-components-notice-banner__content'
+						)
+						.getByText(
+							`Coupon code "${ coupons[ i ].code }" has been applied to your cart.`
+						)
 				).toBeVisible();
-
-				// If not waiting the next coupon is not applied correctly. This should be temporary, we need a better way to handle this.
-				await page.waitForTimeout( 2000 );
-
-				await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
+				await expect(
+					page.locator(
+						'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+					)
+				).toHaveText( totals[ i ] );
 				await page
-					.getByRole( 'button', { name: 'Apply coupon' } )
+					.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
 					.click();
-				// successful
 				await expect(
-					page.getByText( 'Coupon code applied successfully.' )
+					page
+						.locator(
+							'.wc-block-components-notice-banner__content'
+						)
+						.getByText(
+							`Coupon code "${ coupons[ i ].code }" has been removed from your cart.`
+						)
 				).toBeVisible();
-				// check cart total
-				await expect(
-					page.locator( '.cart-discount .amount >> nth=0' )
-				).toContainText( discounts[ 0 ] );
-				await expect(
-					page.locator( '.cart-discount .amount >> nth=1' )
-				).toContainText( discounts[ 2 ] );
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( '$8.00' );
-			} );
-
-			await context.clearCookies();
-
-			await test.step( 'Load checkout page and try applying multiple coupons', async () => {
-				await addAProductToCart( page, firstProductId );
-
-				await page.goto( '/checkout/' );
-				await page
-					.locator( 'text=Click here to enter your code' )
-					.click();
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page.locator( 'text=Apply coupon' ).click();
-				// successful
-				await expect(
-					page.getByText( 'Coupon code applied successfully.' )
-				).toBeVisible();
-
-				// If not waiting the next coupon is not applied correctly. This should be temporary, we need a better way to handle this.
-				await page.waitForTimeout( 2000 );
-
-				await page
-					.locator( 'text=Click here to enter your code' )
-					.click();
-				await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
-				await page.locator( 'text=Apply coupon' ).click();
-				// successful
-				await expect(
-					page.getByText( 'Coupon code applied successfully.' )
-				).toBeVisible();
-				// check cart total
-				await expect(
-					page.locator( '.cart-discount .amount >> nth=0' )
-				).toContainText( discounts[ 0 ] );
-				await expect(
-					page.locator( '.cart-discount .amount >> nth=1' )
-				).toContainText( discounts[ 2 ] );
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( '$8.00' );
-			} );
+			}
 		} );
 
-		test( 'restores total when coupons are removed', async ( {
+		test( 'allows checkout block to apply multiple coupons', async ( {
 			page,
-			context,
 		} ) => {
-			await test.step( 'Load cart page and try restoring total when removed coupons', async () => {
-				await addAProductToCart( page, firstProductId );
+			const totals = [ '$50.00', '$22.50', '$12.50' ];
+			const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
+			const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
 
-				await page.goto( '/cart/' );
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
+			// add all coupons and verify prices
+			for ( let i = 0; i < coupons.length; i++ ) {
 				await page
-					.getByRole( 'button', { name: 'Apply coupon' } )
+					.getByRole( 'button', { name: 'Add a coupon' } )
 					.click();
-
-				// confirm numbers
+				await page.getByLabel( 'Enter code' ).fill( coupons[ i ].code );
+				await page.getByText( 'Apply', { exact: true } ).click();
 				await expect(
-					page.locator( '.cart-discount .amount' )
-				).toContainText( discounts[ 0 ] );
+					page
+						.locator(
+							'.wc-block-components-notice-banner__content'
+						)
+						.getByText(
+							`Coupon code "${ coupons[ i ].code }" has been applied to your cart.`
+						)
+				).toBeVisible();
 				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( totals[ 0 ] );
-
-				await page.locator( 'a.woocommerce-remove-coupon' ).click();
-
+					page.locator(
+						'.wc-block-components-totals-discount > .wc-block-components-totals-item__value'
+					)
+				).toHaveText( discounts[ i ] );
 				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( '$20.00' );
-			} );
+					page.locator(
+						'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+					)
+				).toHaveText( totals[ i ] );
+			}
 
-			await context.clearCookies();
-
-			await test.step( 'Load checkout page and try restoring total when removed coupons', async () => {
-				await addAProductToCart( page, firstProductId );
-
-				await page.goto( '/checkout/' );
+			for ( let i = 0; i < coupons.length; i++ ) {
 				await page
-					.locator( 'text=Click here to enter your code' )
+					.getByLabel( `Remove coupon "${ coupons[ i ].code }"` )
 					.click();
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page.locator( 'text=Apply coupon' ).click();
-
-				// confirm numbers
 				await expect(
-					page.locator( '.cart-discount .amount' )
-				).toContainText( discounts[ 0 ] );
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( totals[ 0 ] );
+					page.locator(
+						'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+					)
+				).toHaveText( totalsReverse[ i ] );
+			}
+		} );
 
-				await page.locator( 'a.woocommerce-remove-coupon' ).click();
+		test( 'prevents checkout block applying same coupon twice', async ( {
+			page,
+		} ) => {
+			// try to add two same coupons and verify the error message
+			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+			await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
+			await page.getByText( 'Apply', { exact: true } ).click();
+			await expect(
+				page
+					.locator( '.wc-block-components-notice-banner__content' )
+					.getByText(
+						`Coupon code "${ coupons[ 0 ].code }" has been applied to your cart.`
+					)
+			).toBeVisible();
+			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+			await page.getByLabel( 'Enter code' ).fill( coupons[ 0 ].code );
+			await page.getByText( 'Apply', { exact: true } ).click();
+			await expect(
+				page
+					.getByRole( 'alert' )
+					.getByText(
+						`Coupon code "${ coupons[ 0 ].code }" has already been applied.`
+					)
+			).toBeVisible();
+		} );
 
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( '$20.00' );
-			} );
+		test( 'prevents checkout block applying coupon with usage limit', async ( {
+			page,
+		} ) => {
+			// add coupon with usage limit
+			await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
+			await page.getByLabel( 'Enter code' ).fill( couponLimitedCode );
+			await page.getByText( 'Apply', { exact: true } ).click();
+			await expect(
+				page
+					.getByRole( 'alert' )
+					.getByText( 'Coupon usage limit has been reached.' )
+			).toBeVisible();
 		} );
 	}
 );

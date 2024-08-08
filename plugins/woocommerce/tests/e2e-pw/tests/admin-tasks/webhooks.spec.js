@@ -26,23 +26,19 @@ test.describe( 'Manage webhooks', () => {
 	test( 'Webhook cannot be bulk deleted without nonce', async ( {
 		page,
 	} ) => {
-		await page.goto( WEBHOOKS_SCREEN_URI, { waitUntil: 'networkidle' } );
+		await page.goto( WEBHOOKS_SCREEN_URI );
 
 		await page.getByRole( 'link', { name: 'Add webhook' } ).click();
-
-		await page.waitForLoadState( 'networkidle' );
 
 		await page.getByRole( 'textbox', { name: 'Name' } ).fill( 'Webhook 1' );
 
 		await page.getByRole( 'button', { name: 'Save webhook' } ).click();
 
-		await page.waitForLoadState( 'networkidle' );
-
 		await expect(
 			page.getByText( 'Webhook updated successfully.' )
-		).toBeVisible( { timeout: 1 } );
+		).toBeVisible();
 
-		await page.goto( WEBHOOKS_SCREEN_URI, { waitUntil: 'networkidle' } );
+		await page.goto( WEBHOOKS_SCREEN_URI );
 
 		await expect(
 			page.getByRole( 'row', { name: 'Webhook 1' } )
@@ -59,14 +55,14 @@ test.describe( 'Manage webhooks', () => {
 		actionURI.searchParams.set( 'action', 'delete' );
 		actionURI.searchParams.set( 'webhook[]', webhookID );
 
-		await page.goto( actionURI.toString(), { waitUntil: 'networkidle' } );
+		await page.goto( actionURI.toString() );
 
 		await expect(
 			page.getByText( 'webhook permanently deleted' )
-		).toBeHidden( { timeout: 1 } );
+		).toBeHidden();
 
 		await expect(
 			page.getByText( 'The link you followed has expired.' )
-		).toBeVisible( { timeout: 1 } );
+		).toBeVisible();
 	} );
 } );
