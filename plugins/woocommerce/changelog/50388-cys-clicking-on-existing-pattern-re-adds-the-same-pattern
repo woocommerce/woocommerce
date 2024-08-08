@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+For the CYS experience if a pattern has already been added, and the thumbnail is clicked again then we remove the pattern
