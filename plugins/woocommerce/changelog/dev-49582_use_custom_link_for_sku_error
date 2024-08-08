@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Fix E2E tests SKU field id #49729

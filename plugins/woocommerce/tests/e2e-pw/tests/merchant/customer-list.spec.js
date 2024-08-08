@@ -116,10 +116,16 @@ test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 			let x = 1;
 			for ( const customer of customers ) {
 				await page
-					.locator( '#woocommerce-select-control-0__control-input' )
+					.getByRole( 'combobox', {
+						expanded: false,
+						disabled: false,
+					} )
 					.click();
 				await page
-					.locator( '#woocommerce-select-control-0__control-input' )
+					.getByRole( 'combobox', {
+						expanded: false,
+						disabled: false,
+					} )
 					.pressSequentially(
 						`${ customer.first_name } ${ customer.last_name }`
 					);
@@ -282,7 +288,8 @@ test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 				.getByRole( 'button' )
 				.click();
 			await page
-				.locator( '#woocommerce-select-control-1__control-input' )
+				.getByRole( 'group', { name: 'Email' } )
+				.getByRole( 'combobox', { expanded: false } )
 				.fill( customers[ 1 ].email );
 			await page
 				.getByRole( 'option', {
@@ -299,7 +306,8 @@ test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 				.getByRole( 'button' )
 				.click();
 			await page
-				.locator( '#woocommerce-select-control-2__control-input' )
+				.getByRole( 'group', { name: 'Country / Region' } )
+				.getByRole( 'combobox', { expanded: false } )
 				.fill( 'US' );
 			await page
 				.getByRole( 'option', { name: 'United States (US)' } )

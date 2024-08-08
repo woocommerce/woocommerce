@@ -47,6 +47,13 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				'woocommerce_customize_store_onboarding_tour_hidden',
 				'yes'
 			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -73,6 +80,13 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				request,
 				baseURL,
 				'woocommerce_admin_customize_store_completed',
+				'no'
+			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
 				'no'
 			);
 
@@ -276,5 +290,91 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
 		);
 		await expect( emptyPatternsBlock ).toBeVisible();
+	} );
+
+	test( 'Clicking the "Add patterns" button on the No Blocks view should add a default pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+		const addPatternsButton = editor.locator(
+			'.no-blocks-insert-pattern-button'
+		);
+		await addPatternsButton.click();
+		const emptyPatternsBlock = editor.getByText(
+			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
+		);
+		const defaultPattern = editor.locator(
+			'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+		);
+		await expect( emptyPatternsBlock ).toBeHidden();
+		await expect( defaultPattern ).toBeVisible();
+	} );
+
+	test( 'Clicking buttons in resize and zoom toolbar changes the frame size', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		const toolbar = assembler.locator( '[aria-label="Resize Options"]' );
+		const resizeContainer = assembler.locator(
+			'.components-resizable-box__container'
+		);
+		const tabletBtn = assembler.locator( '[aria-label="Tablet View"]' );
+		const mobileBtn = assembler.locator( '[aria-label="Mobile View"]' );
+
+		await mobileBtn.click();
+		const mobileWidth = await resizeContainer.evaluate( ( element ) =>
+			window.getComputedStyle( element ).getPropertyValue( 'width' )
+		);
+
+		await tabletBtn.click();
+		const tabletWidth = await resizeContainer.evaluate( ( element ) =>
+			window.getComputedStyle( element ).getPropertyValue( 'width' )
+		);
+
+		await assembler.locator( '[aria-label="Zoom Out View"]' ).click();
+
+		await expect( editor.locator( '.is-zoomed-out' ) ).toBeVisible();
+		await expect( parseFloat( tabletWidth ) ).toBeGreaterThan(
+			parseFloat( mobileWidth )
+		);
+		await expect( toolbar ).toBeVisible();
+	} );
+
+	test( 'Clicking opt-in new patterns should be available', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+
+		await assembler.getByText( 'Usage tracking' ).click();
+		await expect(
+			assembler.getByText( 'Access more patterns' )
+		).toBeVisible();
+
+		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
+
+		await assembler
+			.getByText( 'Access more patterns' )
+			.waitFor( { state: 'hidden' } );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list'
+		);
+
+		await sidebarPattern.waitFor( { state: 'visible' } );
+
+		await expect(
+			assembler.locator( '.block-editor-block-patterns-list__list-item' )
+		).toHaveCount( 10 );
 	} );
 } );

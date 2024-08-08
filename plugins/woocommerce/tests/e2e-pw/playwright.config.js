@@ -1,3 +1,4 @@
+const { devices } = require( '@playwright/test' );
 require( 'dotenv' ).config( { path: __dirname + '/.env' } );
 
 const testsRootPath = __dirname;
@@ -40,10 +41,13 @@ const reporter = [
 		`${ testsRootPath }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
 	],
+	[
+		`${ testsRootPath }/reporters/flaky-tests-reporter.js`,
+		{ outputFolder: `${ testsRootPath }/test-results/flaky-tests` },
+	],
 ];
 
 if ( process.env.CI ) {
-	reporter.push( [ 'github' ] );
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ testsRootPath }/reporters/skipped-tests.js` ] );
 } else {
@@ -52,7 +56,7 @@ if ( process.env.CI ) {
 		{
 			outputFolder:
 				PLAYWRIGHT_HTML_REPORT ??
-				`${ testsResultsPath }/playwright-report`,
+				`${ testsResultsPath }/reports/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
@@ -63,7 +67,7 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: `${ testsResultsPath }/results-data`,
+	outputDir: testsResultsPath,
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: `${ testsRootPath }/tests`,
@@ -87,7 +91,18 @@ const config = {
 		navigationTimeout: 20 * 1000,
 	},
 	snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}',
-	projects: [],
+	projects: [
+		{
+			name: 'ui',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testIgnore: '**/api-tests/**',
+		},
+		{
+			name: 'api',
+			use: { ...devices[ 'Desktop Chrome' ] },
+			testMatch: '**/api-tests/**',
+		},
+	],
 };
 
 module.exports = config;

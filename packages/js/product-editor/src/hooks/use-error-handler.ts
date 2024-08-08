@@ -24,7 +24,6 @@ export type WPError = {
 	code: WPErrorCode;
 	message: string;
 	validatorId?: string;
-	context?: string;
 };
 
 type ErrorProps = {
@@ -41,10 +40,10 @@ type UseErrorHandlerTypes = {
 	getProductErrorMessageAndProps: (
 		error: WPError,
 		visibleTab: string | null
-	) => {
+	) => Promise< {
 		message: string;
 		errorProps: ErrorProps;
-	};
+	} >;
 };
 
 function getUrl( tab: string ): string {
@@ -54,18 +53,19 @@ function getUrl( tab: string ): string {
 function getErrorPropsWithActions(
 	errorContext = '',
 	validatorId: string,
-	focusByValidatorId: ( validatorId: string ) => void
+	focusByValidatorId: ( validatorId: string ) => void,
+	label: string = __( 'View error', 'woocommerce' )
 ): ErrorProps {
 	return {
 		explicitDismiss: true,
 		actions: [
 			{
-				label: __( 'View error', 'woocommerce' ),
-				onClick: () => {
+				label,
+				onClick: async () => {
+					await focusByValidatorId( validatorId );
 					navigateTo( {
 						url: getUrl( errorContext ),
 					} );
-					focusByValidatorId( validatorId );
 				},
 			},
 		],
@@ -73,26 +73,39 @@ function getErrorPropsWithActions(
 }
 
 export const useErrorHandler = (): UseErrorHandlerTypes => {
-	const { focusByValidatorId } = useValidations();
-	const { getParentTabId } = useBlocksHelper();
+	const { focusByValidatorId, getFieldByValidatorId } = useValidations();
+	const { getClientIdByField, getParentTabId, getParentTabIdByBlockName } =
+		useBlocksHelper();
+
+	async function getClientIdByValidatorId( validatorId: string ) {
+		if ( ! validatorId ) {
+			return null;
+		}
+		const field = await getFieldByValidatorId( validatorId );
+		if ( ! field ) {
+			return null;
+		}
+		return getClientIdByField( field );
+	}
 
 	const getProductErrorMessageAndProps = useCallback(
-		( error: WPError, visibleTab: string | null ) => {
+		async ( error: WPError, visibleTab: string | null ) => {
 			const response = {
 				message: '',
 				errorProps: {} as ErrorProps,
 			};
-			const {
-				code,
-				context = '',
-				message: errorMessage,
-				validatorId = '',
-			} = error;
-			const errorContext = getParentTabId( context );
+			const { code, message: errorMessage, validatorId = '' } = error;
+
+			const clientId = await getClientIdByValidatorId( validatorId );
+			const errorContext = getParentTabId( clientId );
+
 			switch ( code ) {
 				case 'variable_product_no_variation_prices':
 					response.message = errorMessage;
-					if ( visibleTab !== 'variations' ) {
+					if (
+						visibleTab !== 'variations' &&
+						errorContext !== null
+					) {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
 							validatorId,
@@ -102,7 +115,10 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 					break;
 				case 'product_form_field_error':
 					response.message = errorMessage;
-					if ( visibleTab !== errorContext ) {
+					if (
+						visibleTab !== errorContext &&
+						errorContext !== null
+					) {
 						response.errorProps = getErrorPropsWithActions(
 							errorContext,
 							validatorId,
@@ -115,11 +131,18 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						'Invalid or duplicated SKU.',
 						'woocommerce'
 					);
-					if ( visibleTab !== 'inventory' ) {
+					const errorSkuContext = getParentTabIdByBlockName(
+						'woocommerce/product-sku-field'
+					);
+					if (
+						visibleTab !== errorSkuContext &&
+						errorSkuContext !== null
+					) {
 						response.errorProps = getErrorPropsWithActions(
-							'inventory',
-							validatorId,
-							focusByValidatorId
+							errorSkuContext,
+							'sku',
+							focusByValidatorId,
+							__( 'View SKU field', 'woocommerce' )
 						);
 					}
 					break;
@@ -128,11 +151,13 @@ export const useErrorHandler = (): UseErrorHandlerTypes => {
 						'Invalid or duplicated GTIN, UPC, EAN or ISBN.',
 						'woocommerce'
 					);
-					if ( visibleTab !== 'inventory' ) {
+					const errorUniqueIdContext = errorContext || 'inventory';
+					if ( visibleTab !== errorUniqueIdContext ) {
 						response.errorProps = getErrorPropsWithActions(
-							'inventory',
-							validatorId,
-							focusByValidatorId
+							errorUniqueIdContext,
+							'global_unique_id',
+							focusByValidatorId,
+							__( 'View identifier field', 'woocommerce' )
 						);
 					}
 					break;
