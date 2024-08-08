@@ -144,6 +144,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 9.3.0
 	 */
 	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
+		// TODO: drop new code and override `http_request_listner`:
+		// - check if parent `http_request_listner` processed the request
+		// - if not, prevent interaction with domains below + woocommerce.com, api.wordpress.org and paypal
+
 		$url_domain = parse_url( $url, PHP_URL_HOST );
 		if ( $url_domain === 'localhost' ) {
 			// Internal REST-requests: don't intercept and let them be processed.
