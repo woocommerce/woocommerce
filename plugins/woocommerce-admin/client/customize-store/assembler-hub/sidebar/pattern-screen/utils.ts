@@ -19,7 +19,9 @@ export const addIsAddedClassToPatternPreview = (
 	blocks: BlockInstance[]
 ) => {
 	patternListEl.querySelectorAll( '.is-added' ).forEach( ( element ) => {
-		element.classList.remove( 'is-added' );
+		const htmlElement = element as HTMLElement;
+		htmlElement.blur();
+		htmlElement.classList.remove( 'is-added' );
 	} );
 
 	blocks.forEach( ( block ) => {

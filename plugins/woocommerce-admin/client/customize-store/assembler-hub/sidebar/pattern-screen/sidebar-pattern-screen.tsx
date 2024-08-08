@@ -43,6 +43,8 @@ import {
 } from './utils';
 import { trackEvent } from '~/customize-store/tracking';
 import { useInsertPattern } from '../../hooks/use-insert-pattern';
+import { usePatternByName } from '../../hooks/use-pattern-by-name';
+import { Pattern } from '~/customize-store/types/pattern';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
@@ -190,7 +192,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		};
 	}, [ isEditorLoading ] );
 
-	const { insertPattern } = useInsertPattern();
+	const { insertPattern, removePattern } = useInsertPattern();
+	const { getPatternByName } = usePatternByName();
 
 	return (
 		<div
@@ -255,7 +258,14 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 						0,
 						patternPagination
 					) }
-					onClickPattern={ insertPattern }
+					onClickPattern={ ( pattern: Pattern ) => {
+						const foundPattern = getPatternByName( pattern.name );
+						if ( foundPattern ) {
+							removePattern( foundPattern );
+						} else {
+							insertPattern( pattern );
+						}
+					} }
 					label={ 'Homepage' }
 					orientation="vertical"
 					category={ category }
