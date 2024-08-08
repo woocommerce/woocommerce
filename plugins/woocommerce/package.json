@@ -97,6 +97,7 @@
 					"src/**/*.php",
 					"templates/**/*.php",
 					"tests/php/**/*.php",
+					"tests/legacy/framework/**/*.php",
 					"tests/legacy/unit-tests/**/*.php",
 					"tests/unit-tests/**/*.php",
 					"tests/**/*.js"
@@ -120,6 +121,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/framework/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						".wp-env.json"
@@ -153,6 +155,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/framework/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						".wp-env.json"
@@ -186,6 +189,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/framework/**/*.php",
 						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						".wp-env.json"
