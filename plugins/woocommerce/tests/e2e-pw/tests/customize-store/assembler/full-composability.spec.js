@@ -292,7 +292,7 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( emptyPatternsBlock ).toBeVisible();
 	} );
 
-	test.only( 'Clicking the thumbnail of an already inserted pattern should remove it', async ( {
+	test( 'Clicking the thumbnail of an already inserted pattern should remove it', async ( {
 		pageObject,
 		baseURL,
 	} ) => {
@@ -306,8 +306,24 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.first();
 
+		const sidebarPatternContent = await sidebarPattern
+			.frameLocator( 'iframe' )
+			.locator( '.is-root-container' )
+			.textContent();
+
 		// Add it
 		await sidebarPattern.click();
+
+		const insertedPatternContent = await editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.first()
+			.textContent();
+
+		await expect( insertedPatternContent ).toContain(
+			sidebarPatternContent
+		);
 
 		// Remove it
 		await sidebarPattern.click();
