@@ -239,7 +239,11 @@ final class BlockTypesController {
 
 		$processor = new \WP_HTML_Tag_Processor( $content );
 
-		if ( false === $processor->next_tag( 'DIV' ) ) {
+		if (
+			false === $processor->next_token() ||
+			'DIV' !== $processor->get_token_name() ||
+			$processor->is_tag_closer()
+		) {
 			return $content;
 		}
 
