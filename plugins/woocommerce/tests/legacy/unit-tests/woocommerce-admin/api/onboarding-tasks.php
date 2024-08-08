@@ -66,6 +66,17 @@ class WC_Admin_Tests_API_Onboarding_Tasks extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @inheritDoc
+	 * @since 9.3.0
+	 */
+	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
+		echo ' [onboarding-themes] ', $url, ' ', PHP_EOL;
+
+		// Let the requests go though and hit ?.
+		return $response;
+	}
+
+	/**
 	 * Remove product attributes that where created in previous tests.
 	 */
 	public function remove_color_or_logo_attribute_taxonomy() {

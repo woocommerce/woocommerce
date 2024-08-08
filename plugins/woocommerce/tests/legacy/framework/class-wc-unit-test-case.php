@@ -149,12 +149,12 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// Internal REST-requests: don't intercept and let them be processed.
 			return $response;
 		}
-		if ( in_array( $url_domain, [ 'cldup.com', 'somedomain.com', 'wordpress.tv', 'demo.woothemes.com' ] ) ) {
+		if ( in_array( $url_domain, [ 'cldup.com', 'somedomain.com', 'wordpress.tv', 'demo.woothemes.com', 'download.maxmind.com' ] ) ) {
 			// TODO: revisit the sourcing tests - they should be updated with corresponding mocking.
 			return $response;
 		}
 
-		echo $url, PHP_EOL;
+		// echo $url, ' ', PHP_EOL;
 		return [
 			'body'          => '',
 			'response'      => [

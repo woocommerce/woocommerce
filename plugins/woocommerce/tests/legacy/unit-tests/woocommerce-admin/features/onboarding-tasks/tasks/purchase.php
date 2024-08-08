@@ -71,6 +71,17 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @inheritDoc
+	 * @since 9.3.0
+	 */
+	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
+		echo ' [purchase] ', $url, ' ', PHP_EOL;
+
+		// Let the requests go though and hit ?.
+		return $response;
+	}
+
+	/**
 	 * Test is_complete function of Purchase task.
 	 */
 	public function test_is_complete_if_no_remaining_products() {
