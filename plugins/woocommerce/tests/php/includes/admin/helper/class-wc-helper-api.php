@@ -3,7 +3,7 @@
 /**
  * Test class for WC_Helper_API.
  */
-class WC_Tests_Helper_API extends WC_Unit_Test_Case {
+class WC_Tests_Helper_API extends WP_HTTP_TestCase {
 
 	/**
 	 * Set up mock responses for all API calls.
