@@ -30,7 +30,8 @@ import {
  * Internal dependencies
  */
 import './editor.scss';
-import { BlockOverlayAttribute, type BlockAttributes } from './types';
+import { type BlockAttributes } from './types';
+import { BlockOverlayAttribute } from './constants';
 
 const defaultAttribute = getSetting< AttributeSetting >(
 	'defaultProductFilterAttribute'
