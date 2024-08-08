@@ -214,6 +214,7 @@ jobs:
               if [ "$LAST_FAILED_RUN_" == "1" ]; then
                 echo "Found failed tests, running only failed tests"
                 lastRunFlag="--last-failed"
+                pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} --list $lastRunFlag
               else
                 echo "Found failed tests, but LAST_FAILED_RUN is switched off. Running all tests."
               fi
@@ -223,7 +224,6 @@ jobs:
           fi
           
           # Finally, run the tests
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} --list $lastRunFlag
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
           
       - name: 'Upload Playwright last run info'
