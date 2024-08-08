@@ -150,7 +150,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			return $response;
 		}
 		if ( in_array( $url_domain, [ 'cldup.com', 'somedomain.com', 'wordpress.tv', 'demo.woothemes.com', 'download.maxmind.com' ] ) ) {
-			// TODO: revisit the sourcing tests - they should be updated with corresponding mocking.
+			// download.maxmind.com: covered by \WC_Tests_MaxMind_Database::mock_http_responses
+			// demo.woothemes.com: at least partially covered by \WC_Tests_Product_CSV_Importer::mock_http_responses
+			// wordpress.tv:  covered by \WC_Tests_Formatting_Functions::mock_http_responses
+			// somedomain.com: covered by \WC_Tests_API_Functions::mock_http_responses
+			// cldup.com: doesn't seem to be covered with mocks
 			return $response;
 		}
 
