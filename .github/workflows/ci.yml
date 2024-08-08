@@ -211,7 +211,7 @@ jobs:
             # Only if there are failed tests, we want to use the --last-failed flag. 
             # The run will fail if we're using the flag and there are no failed tests.
             if [ "$failedTests" -gt 0 ]; then
-              if [ "$LAST_FAILED_RUN" == "1" ]; then
+              if [ "$LAST_FAILED_RUN" == "2" ]; then
                 echo "Found failed tests, running only failed tests"
                 # Add shard 1/1 to override the default shard value. No tests will run for shards > 1.
                 # The clean way would be to replace the shard flag from the command, but this also works.
