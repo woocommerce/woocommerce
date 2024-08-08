@@ -114,9 +114,10 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				await waitForGlobalAttributesLoaded( page );
 
 				// Attribute combobox input
-				const attributeInputLocator = page.locator(
-					'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
-				);
+				const attributeInputLocator = page
+					.getByRole( 'dialog' )
+					.getByRole( 'combobox' )
+					.first();
 
 				await attributeInputLocator.fill( sizeAttribute.name );
 
@@ -164,17 +165,6 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					);
 
 					/*
-					 * Check the option being added to the list,
-					 * by checking the token with validating state.
-					 */
-					const newValidatingTokenLocator =
-						FormTokenFieldLocator.locator( '.is-validating' );
-
-					await newValidatingTokenLocator.waitFor( {
-						state: 'visible',
-					} );
-
-					/*
 					 * Wait for the async POST request
 					 * that creates the new attribute term to finish.
 					 */
@@ -189,9 +179,6 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 						);
 					} );
 				}
-
-				// Wait for the last term to be validated/added
-				await expect( page.locator( '.is-validating' ) ).toBeHidden();
 
 				await page
 					.locator( '.woocommerce-new-attribute-modal__buttons' )
@@ -283,6 +270,16 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 			await getVariationsResponsePromise;
 
+			// Wait for response only to avoid flaky filling regular price below in Inventory tab
+			const waitResponse = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							'wp-json/wc-admin/options?options=woocommerce_dimension_unit'
+						) && response.status() === 200
+			);
+
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
 				.first()
@@ -294,15 +291,17 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.getByRole( 'tab', { name: 'General' } )
 				.click();
 
-			await page.getByLabel( 'Regular price', { exact: true } ).click();
-
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
 				.waitFor( { state: 'visible' } );
 
+			await waitResponse;
+
+			await page.getByLabel( 'Regular price', { exact: true } ).click();
+
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.pressSequentially( '100' );
+				.fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
@@ -310,7 +309,7 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				.click();
 
 			await page
-				.locator( '#inspector-input-control-2' )
+				.locator( '[name="woocommerce-product-sku"]' )
 				.fill( `product-sku-${ new Date().getTime().toString() }` );
 
 			await page

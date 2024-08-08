@@ -295,8 +295,8 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 					size="large"
 					className="woocommerce-task-card woocommerce-homescreen-card"
 				>
-					<div className="wooocommerce-task-card__header-container">
-						<div className="wooocommerce-task-card__header">
+					<div className="woocommerce-task-card__header-container">
+						<div className="woocommerce-task-card__header">
 							{ hasTaskListHeaderSlotFills ? (
 								<WooOnboardingTaskListHeader.Slot
 									id={ selectedHeaderCard?.id }

@@ -18,7 +18,13 @@ const {
 const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
-const newAccountEmail = 'marge-test-account@example.com';
+const newAccountEmail = `marge-${ new Date()
+	.getTime()
+	.toString() }@woocommercecoree2etestsuite.com`;
+const newAccountEmailWithCustomPassword = `homer-${ new Date()
+	.getTime()
+	.toString() }@woocommercecoree2etestsuite.com`;
+const newAccountCustomPassword = 'supersecurepassword123';
 
 const simpleProductName = 'Very Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor.';
@@ -134,22 +140,6 @@ test.describe(
 			await api.put( 'payment_gateways/cod', {
 				enabled: true,
 			} );
-			// make sure there's no pre-existing customer that has the same email we're going to use for account creation
-			const { data: customersList } = await api.get( 'customers', {
-				email: newAccountEmail,
-			} );
-
-			if ( customersList && customersList.length ) {
-				const customerId = customersList[ 0 ].id;
-
-				console.log(
-					`Customer with email ${ newAccountEmail } exists! Deleting it before starting test...`
-				);
-
-				await api.delete( `customers/${ customerId }`, {
-					force: true,
-				} );
-			}
 			// make sure our customer user has a pre-defined billing/shipping address
 			await api.put( `customers/2`, {
 				shipping: {
@@ -208,6 +198,12 @@ test.describe(
 					value: 'no',
 				}
 			);
+			await api.put(
+				'settings/account/woocommerce_registration_generate_password',
+				{
+					value: 'yes',
+				}
+			);
 			// delete the orders we created
 			if ( guestOrderId1 ) {
 				await api.delete( `orders/${ guestOrderId1 }`, {
@@ -233,7 +229,10 @@ test.describe(
 			await api.get( 'customers' ).then( async ( response ) => {
 				for ( let i = 0; i < response.data.length; i++ ) {
 					if (
-						response.data[ i ].billing.email === newAccountEmail
+						[
+							newAccountEmail,
+							newAccountEmailWithCustomPassword,
+						].includes( response.data[ i ].billing.email )
 					) {
 						await api.delete(
 							`customers/${ response.data[ i ].id }`,
@@ -376,12 +375,8 @@ test.describe(
 			await expect(
 				page.getByText( '+ Add apartment, suite, etc.' )
 			).toBeEnabled();
-			await expect(
-				page.getByLabel( 'United States (US), Country/Region' )
-			).toBeEditable();
-			await expect(
-				page.getByLabel( 'California, State' )
-			).toBeEditable();
+			await expect( page.getByLabel( 'Country/Region' ) ).toBeEnabled();
+			await expect( page.getByLabel( 'State' ) ).toBeEnabled();
 			await expect( page.getByLabel( 'City' ) ).toBeEditable();
 			await expect( page.getByLabel( 'ZIP Code' ) ).toBeEnabled();
 			await expect(
@@ -445,7 +440,7 @@ test.describe(
 
 			// verify shipping details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 			await expect(
@@ -476,7 +471,7 @@ test.describe(
 
 			// verify billing details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit billing address', { exact: true } )
 				.last()
 				.click();
 			await expect(
@@ -774,7 +769,7 @@ test.describe(
 				.waitFor( { state: 'visible' } );
 
 			// click to log in and make sure you are on the same page after logging in
-			await page.locator( 'text=Log in.' ).click();
+			await page.locator( 'text=Log in' ).click();
 			await page
 				.locator( 'input[name="username"]' )
 				.fill( customer.username );
@@ -787,7 +782,7 @@ test.describe(
 			).toBeVisible();
 
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 
@@ -870,11 +865,11 @@ test.describe(
 
 			// check create account during checkout
 			await expect(
-				page.getByLabel( 'Create an account?' )
+				page.getByLabel( 'Create an account' )
 			).toBeVisible();
-			await page.getByLabel( 'Create an account?' ).check();
+			await page.getByLabel( 'Create an account' ).check();
 			await expect(
-				page.getByLabel( 'Create an account?' )
+				page.getByLabel( 'Create an account' )
 			).toBeChecked();
 
 			// For flakiness, sometimes the email address is not filled
@@ -924,6 +919,109 @@ test.describe(
 			await expect( page.locator( 'tbody#the-list' ) ).toContainText(
 				newAccountEmail
 			);
+		} );
+
+		test( 'can create an account during checkout with custom password', async ( {
+			page,
+			testPage,
+			baseURL,
+		} ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+			// Password generation off
+			await api.put(
+				'settings/account/woocommerce_registration_generate_password',
+				{
+					value: 'no',
+				}
+			);
+			await addAProductToCart( page, productId );
+			await page.goto( testPage.slug );
+
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+
+			// wait for product price to show up in the summary
+			await page
+				.locator(
+					'.wc-block-components-order-summary-item__individual-prices'
+				)
+				.waitFor( { state: 'visible' } );
+
+			// check create account during checkout
+			await expect(
+				page.getByLabel( 'Create an account' )
+			).toBeVisible();
+			await page.getByLabel( 'Create an account' ).check();
+			await expect(
+				page.getByLabel( 'Create an account' )
+			).toBeChecked();
+
+			// Fill password field.
+			await expect(
+				page.getByLabel( 'Create a password' )
+			).toBeVisible();
+			await page.getByLabel( 'Create a password' ).click();
+			await page
+				.getByLabel( 'Create a password' )
+				.fill( newAccountCustomPassword );
+
+			// For flakiness, sometimes the email address is not filled
+			await page.getByLabel( 'Email address' ).click();
+			await page
+				.getByLabel( 'Email address' )
+				.fill( newAccountEmailWithCustomPassword );
+			await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
+				newAccountEmailWithCustomPassword
+			);
+
+			// fill shipping address and check cash on delivery method
+			await fillShippingCheckoutBlocks( page, 'Marge' );
+			await page.getByLabel( 'Cash on delivery' ).check();
+			await expect( page.getByLabel( 'Cash on delivery' ) ).toBeChecked();
+
+			// add note to the order
+			await page.getByLabel( 'Add a note to your order' ).check();
+			await page
+				.getByPlaceholder(
+					'Notes about your order, e.g. special notes for delivery.'
+				)
+				.fill( 'This is to avoid flakiness' );
+
+			// place an order
+			await page.getByRole( 'button', { name: 'Place order' } ).click();
+			await expect(
+				page.getByText( 'Your order has been received' )
+			).toBeVisible();
+
+			// get order ID from the page
+			newAccountOrderId = getOrderIdFromUrl( page );
+
+			// confirms that an account was created
+			await page.goto( '/my-account/' );
+			await expect(
+				page.getByRole( 'heading', { name: 'My account' } )
+			).toBeVisible();
+			await page
+				.getByRole( 'navigation' )
+				.getByRole( 'link', { name: 'Log out' } )
+				.click();
+
+			// Log in again.
+			await page.goto( '/my-account/' );
+			await page
+				.locator( '#username' )
+				.fill( newAccountEmailWithCustomPassword );
+			await page.locator( '#password' ).fill( newAccountCustomPassword );
+			await page.locator( 'text=Log in' ).click();
+			await expect(
+				page.getByRole( 'heading', { name: 'My account' } )
+			).toBeVisible();
 		} );
 	}
 );

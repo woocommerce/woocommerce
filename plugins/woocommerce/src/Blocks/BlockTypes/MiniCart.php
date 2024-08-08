@@ -65,6 +65,7 @@ class MiniCart extends AbstractBlock {
 			'position' => 'after',
 			'anchor'   => 'core/navigation',
 			'area'     => 'header',
+			'version'  => '8.4.0',
 		),
 	);
 
@@ -459,7 +460,7 @@ class MiniCart extends AbstractBlock {
 
 			// It is not necessary to load the Mini-Cart Block on Cart and Checkout page.
 			return '<div class="' . esc_attr( $wrapper_classes ) . '" style="visibility:hidden" aria-hidden="true">
-				<button class="wc-block-mini-cart__button" disabled>' . $button_html . '</button>
+				<button class="wc-block-mini-cart__button" disabled aria-label="' . __( 'Cart', 'woocommerce' ) . '">' . $button_html . '</button>
 			</div>';
 		}
 
@@ -487,7 +488,7 @@ class MiniCart extends AbstractBlock {
 		}
 
 		return '<div class="' . esc_attr( $wrapper_classes ) . '" style="' . esc_attr( $wrapper_styles ) . '">
-			<button class="wc-block-mini-cart__button">' . $button_html . '</button>
+			<button class="wc-block-mini-cart__button" aria-label="' . __( 'Cart', 'woocommerce' ) . '">' . $button_html . '</button>
 			<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 					<div class="wc-block-components-drawer__content">
@@ -546,7 +547,7 @@ class MiniCart extends AbstractBlock {
 				'tax_label'                         => $tax_label,
 				'display_cart_prices_including_tax' => false,
 			);
-		};
+		}
 
 		return array(
 			'tax_label'                         => '',

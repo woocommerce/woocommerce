@@ -16,6 +16,10 @@ export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;
 };
 
+export const getCustomerPassword = ( state: CheckoutState ) => {
+	return state.customerPassword;
+};
+
 export const getOrderId = ( state: CheckoutState ) => {
 	return state.orderId;
 };

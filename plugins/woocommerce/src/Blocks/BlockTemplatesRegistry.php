@@ -10,8 +10,6 @@ use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ComingSoonEntireSiteTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ComingSoonStoreOnlyTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
@@ -19,6 +17,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductFiltersTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductFiltersOverlayTemplate;
 
 /**
@@ -59,10 +58,14 @@ class BlockTemplatesRegistry {
 		}
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(
-				MiniCartTemplate::SLUG              => new MiniCartTemplate(),
-				CheckoutHeaderTemplate::SLUG        => new CheckoutHeaderTemplate(),
-				ProductFiltersOverlayTemplate::SLUG => new ProductFiltersOverlayTemplate(),
+				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
+				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
+
+			if ( Features::is_enabled( 'experimental-blocks' ) ) {
+				$template_parts[ ProductFiltersTemplate::SLUG ]        = new ProductFiltersTemplate();
+				$template_parts[ ProductFiltersOverlayTemplate::SLUG ] = new ProductFiltersOverlayTemplate();
+			}
 		} else {
 			$template_parts = array();
 		}

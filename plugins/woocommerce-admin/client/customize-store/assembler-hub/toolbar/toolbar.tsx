@@ -33,6 +33,7 @@ import Delete from './delete';
 import './style.scss';
 import { useIsNoBlocksPlaceholderPresent } from '../hooks/block-placeholder/use-is-no-blocks-placeholder-present';
 import { SelectedBlockContext } from '../context/selected-block-ref-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 
 const isHomepageUrl = ( path: string ) => {
 	return path.includes( '/customize-store/assembler-hub/homepage' );
@@ -143,6 +144,10 @@ export const Toolbar = () => {
 
 	const blockPopoverRef = useRef< HTMLDivElement | null >( null );
 
+	// Note: This feature is only available when the full composability feature flag is enabled.
+	const isEligibleForZoomOutFeature =
+		isFullComposabilityFeatureAndAPIAvailable();
+
 	const popoverAnchor = useMemo( () => {
 		if ( ! selectedBlockRef || ! selectedBlockClientId ) {
 			return undefined;
@@ -153,22 +158,39 @@ export const Toolbar = () => {
 				const { top, width, height } =
 					selectedBlockRef.getBoundingClientRect();
 
-				const rect = window.document
-					.querySelector(
-						'.woocommerce-customize-store-assembler > iframe[name="editor-canvas"]'
-					)
-					?.getBoundingClientRect();
+				const iframe = window.document.querySelector(
+					'.woocommerce-customize-store-assembler > .block-editor-iframe__container iframe[name="editor-canvas"]'
+				);
+				const iframeHtmlElement =
+					// @ts-expect-error missing type
+					iframe?.contentDocument?.documentElement;
+				const iframeRect = iframe?.getBoundingClientRect();
+				const iframeHtmlElementRect =
+					iframeHtmlElement?.getBoundingClientRect();
 
-				if ( ! rect ) {
+				const isZoomedOut =
+					isEligibleForZoomOutFeature &&
+					iframeHtmlElement?.classList.contains( 'is-zoomed-out' );
+
+				if ( ! iframeRect ) {
 					return new window.DOMRect( 0, 0, 0, 0 );
 				}
 
-				return new window.DOMRect(
-					rect?.left + 10,
-					Math.max( top + 90, 110 ),
-					width,
-					height
-				);
+				// Here we need to account for when the iframe is zoomed out as the width changes.
+				const rectLeft =
+					isZoomedOut && iframeHtmlElementRect
+						? iframeRect?.left + iframeHtmlElementRect.left + 60
+						: iframeRect?.left + 10;
+
+				// Here we need to account for when the zoom out feature is eligible because a toolbar is added to the top of the iframe.
+				const rectTop = isEligibleForZoomOutFeature
+					? Math.max( top + 70 + iframeRect.top, iframeRect.top + 60 )
+					: Math.max(
+							top + 70 + iframeRect.top,
+							iframeRect.top + 60
+					  );
+
+				return new window.DOMRect( rectLeft, rectTop, width, height );
 			},
 		};
 	}, [ selectedBlockRef, selectedBlockClientId ] );
@@ -214,6 +236,7 @@ export const Toolbar = () => {
 						<Shuffle clientId={ selectedBlockClientId } />
 						<Delete
 							clientId={ selectedBlockClientId }
+							currentBlockName={ currentBlock?.name }
 							nextBlockClientId={ nextBlock?.clientId }
 						/>
 					</>
