@@ -139,18 +139,18 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @param array                $parsed_args HTTP request arguments.
 	 * @param string               $url         The request URL.
 	 *
-	 * @return array
+	 * @return false|array|WP_Error
 	 *
 	 * @since 9.3.0
 	 */
-	public function intercept_pre_http_request( $response, array $parsed_args, string $url ): array {
+	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
 		$url_domain = parse_url( $url, PHP_URL_HOST );
 		if ( $url_domain === 'localhost' ) {
 			// Internal REST-requests: don't intercept and let them be processed.
 			return $response;
 		}
 		if ( in_array( $url_domain, [ 'cldup.com', 'somedomain.com', 'wordpress.tv', 'demo.woothemes.com' ] ) ) {
-			// TODO: revisit the sourcing tests - they should be update with corresponding mocking.
+			// TODO: revisit the sourcing tests - they should be updated with corresponding mocking.
 			return $response;
 		}
 
