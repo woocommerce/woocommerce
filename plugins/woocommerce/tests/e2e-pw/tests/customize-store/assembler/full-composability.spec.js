@@ -292,6 +292,33 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( emptyPatternsBlock ).toBeVisible();
 	} );
 
+	test.only( 'Clicking the thumbnail of an already inserted pattern should remove it', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.first();
+
+		// Add it
+		await sidebarPattern.click();
+
+		// Remove it
+		await sidebarPattern.click();
+
+		const noPatternsView = editor.getByText(
+			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
+		);
+
+		await expect( noPatternsView ).toBeVisible();
+	} );
+
 	test( 'Clicking the "Add patterns" button on the No Blocks view should add a default pattern', async ( {
 		pageObject,
 		baseURL,
