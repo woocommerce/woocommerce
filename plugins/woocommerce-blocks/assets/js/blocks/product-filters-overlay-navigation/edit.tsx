@@ -124,10 +124,8 @@ type BlockProps = BlockEditProps< BlockAttributes > & { context: BlockContext };
 export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 	const { navigationStyle, buttonStyle, iconSize, style, triggerType } =
 		attributes;
-	const {
-		'woocommerce/product-filters-overlay-navigation/overlay':
-			productFiltersOverlayMode,
-	} = context;
+	const { 'woocommerce/product-filters/overlay': productFiltersOverlayMode } =
+		context;
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters-overlay-navigation', {
 			'wp-block-button__link wp-element-button': buttonStyle !== 'link',

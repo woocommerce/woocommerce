@@ -16,7 +16,7 @@ type BorderSide = {
 
 export interface BlockContext {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
-	'woocommerce/product-filters-overlay-navigation/overlay': ProductFiltersBlockOverlayAttributeOptions;
+	'woocommerce/product-filters/overlay': ProductFiltersBlockOverlayAttributeOptions;
 }
 
 export type BlockVariationTriggerType = 'open-overlay' | 'close-overlay';

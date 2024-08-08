@@ -45,7 +45,7 @@
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
 	"providesContext": {
-		"woocommerce/product-filters-overlay-navigation/overlay": "overlay"
+		"woocommerce/product-filters/overlay": "overlay"
 	},
 	"attributes": {
 		"overlay": {
