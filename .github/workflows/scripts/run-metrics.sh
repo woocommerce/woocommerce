@@ -8,7 +8,7 @@ if [[ -z "$GITHUB_EVENT_NAME" ]]; then
 fi
 
 echo "Installing dependencies"
-pnpm install --filter="compare-perf"
+pnpm install --frozen-lockfile --filter="compare-perf"
 
 if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   	echo "Comparing performance with trunk"
