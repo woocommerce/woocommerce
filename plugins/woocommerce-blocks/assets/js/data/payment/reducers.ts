@@ -129,14 +129,8 @@ const reducer: Reducer< PaymentState > = (
 			break;
 
 		case ACTION_TYPES.SET_ACTIVE_PAYMENT_METHOD:
-			const activeSavedToken =
-				typeof state.paymentMethodData === 'object' &&
-				objectHasProp( action.paymentMethodData, 'token' )
-					? action.paymentMethodData.token + ''
-					: '';
 			newState = {
 				...state,
-				activeSavedToken,
 				activePaymentMethod: action.activePaymentMethod,
 				paymentMethodData:
 					action.paymentMethodData || state.paymentMethodData,
