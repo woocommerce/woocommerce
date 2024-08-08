@@ -41,6 +41,7 @@ const getCanvas = async ( page ) => {
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 	await disableWelcomeModal( { page } );
+	await closeChoosePatternModal( { page } );
 	await page.waitForResponse(
 		( response ) =>
 			response.url().includes( '//page' ) && response.status() === 200

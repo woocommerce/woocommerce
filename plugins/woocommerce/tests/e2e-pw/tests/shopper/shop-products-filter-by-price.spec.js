@@ -5,7 +5,6 @@ const {
 	insertBlock,
 	insertBlockByShortcut,
 	publishPage,
-	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
@@ -71,7 +70,6 @@ test.describe(
 			const sortingProductsDropdown = '.wc-block-sort-select__select';
 
 			await goToPageEditor( { page } );
-			await closeChoosePatternModal( { page } );
 			await fillPageTitle( page, testPage.title );
 			await insertBlockByShortcut( page, 'Filter by Price' );
 			const wordPressVersion = await getInstalledWordPressVersion();

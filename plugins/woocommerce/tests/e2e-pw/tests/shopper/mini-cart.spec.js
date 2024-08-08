@@ -1,9 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const {
-	disableWelcomeModal,
-	openEditorSettings,
-	closeChoosePatternModal,
-} = require( '../../utils/editor' );
+const { goToPageEditor, openEditorSettings } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
 
@@ -133,11 +129,7 @@ test.describe(
 			const greenColor = '00cc09';
 
 			// go to create a new page
-			await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-			await disableWelcomeModal( { page } );
-
-			await closeChoosePatternModal( { page } );
+			await goToPageEditor( { page } );
 
 			// add page title and mini cart block
 			await page

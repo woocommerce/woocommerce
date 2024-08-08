@@ -7,7 +7,6 @@ const {
 	transformIntoBlocks,
 	publishPage,
 	openEditorSettings,
-	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
@@ -74,8 +73,6 @@ test.describe(
 			testPage,
 		} ) => {
 			await goToPageEditor( { page } );
-
-			await closeChoosePatternModal( { page } );
 
 			await fillPageTitle( page, testPage.title );
 			const wordPressVersion = await getInstalledWordPressVersion();

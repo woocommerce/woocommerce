@@ -1,10 +1,7 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const pageTitle = 'Product Showcase';
-const {
-	goToPageEditor,
-	closeChoosePatternModal,
-} = require( '../../utils/editor' );
+const { goToPageEditor } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const singleProductPrice1 = '5.00';
@@ -284,8 +281,6 @@ test.describe(
 		test( 'can see products showcase', async ( { page } ) => {
 			// create as a merchant a new page with Product Collection block
 			await goToPageEditor( { page } );
-
-			await closeChoosePatternModal( { page } );
 
 			await page
 				.getByRole( 'textbox', { name: 'Add Title' } )
