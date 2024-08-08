@@ -72,7 +72,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 			.replace( /<(script|style)[^>]*>[\s\S]*?(<\/\1>|$)/gi, '' )
 			.replace( /<\/?[a-z][\s\S]*?(>|$)/gi, '' );
 
-		if ( stripedStr !== str ) {
+		if ( strippedStr !== str ) {
 			return stripTags( strippedStr );
 		}
 
