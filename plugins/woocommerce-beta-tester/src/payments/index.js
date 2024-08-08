@@ -145,9 +145,11 @@ const Payments = () => {
 					</tr>
 				</thead>
 				<tbody>
-					{ ! isRequesting &&
-						orders?.length &&
-						renderOrders( orders ) }
+					{ ! isRequesting && orders?.length ? (
+						renderOrders( orders )
+					) : (
+						<p>There are no orders</p>
+					) }
 				</tbody>
 			</table>
 		</>
