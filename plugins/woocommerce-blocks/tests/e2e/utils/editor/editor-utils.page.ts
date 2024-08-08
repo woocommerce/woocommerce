@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Editor as CoreEditor } from '@wordpress/e2e-test-utils-playwright';
-import { expect } from '@woocommerce/e2e-utils';
 
 export class Editor extends CoreEditor {
 	async getBlockByName( name: string ) {
@@ -72,60 +71,20 @@ export class Editor extends CoreEditor {
 		}
 	}
 
-	async revertTemplateCreation( templateName: string ) {
+	async revertTemplate( { templateName }: { templateName: string } ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+		await this.page.getByLabel( templateName, { exact: true } ).click();
 
-		const deletedNotice = this.page
+		await this.page.getByLabel( 'Actions' ).click();
+		await this.page
+			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
+			.click();
+		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await this.page
 			.getByLabel( 'Dismiss this notice' )
-			.getByText( `"${ templateName }" deleted.` );
-
-		// Wait until search has finished.
-		const searchResults = this.page.getByLabel( 'Actions' );
-		const initialSearchResultsCount = await searchResults.count();
-		await expect
-			.poll( async () => await searchResults.count() )
-			.toBeLessThan( initialSearchResultsCount );
-
-		await searchResults.first().click();
-		await this.page.getByRole( 'menuitem', { name: 'Delete' } ).click();
-		await this.page.getByRole( 'button', { name: 'Delete' } ).click();
-
-		await expect( deletedNotice ).toBeVisible();
-	}
-
-	async revertTemplateCustomizations( {
-		templateName,
-		templateType,
-	}: {
-		templateName: string;
-		templateType: 'wp_template' | 'wp_template_part';
-	} ) {
-		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
-
-		const resetNotice = this.page
-			.getByLabel( 'Dismiss this notice' )
-			.getByText(
-				templateType === 'wp_template'
-					? `"${ templateName }" reset.`
-					: `"${ templateName }" deleted.`
-			);
-		const savedButton = this.page.getByRole( 'button', {
-			name: 'Saved',
-		} );
-
-		// Wait until search has finished.
-		const searchResults = this.page.getByLabel( 'Actions' );
-		const initialSearchResultsCount = await searchResults.count();
-		await expect
-			.poll( async () => await searchResults.count() )
-			.toBeLessThan( initialSearchResultsCount );
-
-		await searchResults.first().click();
-		await this.page.getByRole( 'menuitem', { name: 'Reset' } ).click();
-		await this.page.getByRole( 'button', { name: 'Reset' } ).click();
-
-		await expect( resetNotice ).toBeVisible();
-		await expect( savedButton ).toBeVisible();
+			.getByText( /reset|deleted/ )
+			.waitFor();
 	}
 
 	async publishAndVisitPost() {

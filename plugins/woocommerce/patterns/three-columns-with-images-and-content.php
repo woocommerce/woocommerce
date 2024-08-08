@@ -23,8 +23,8 @@ $image_2       = PatternsHelper::get_image_url( $images, 0, 'assets/images/patte
 <!-- /wp:spacer -->
 
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"full"} -->
-<h2 class="wp-block-heading alignfull has-text-align-left"><?php echo esc_html( $header ); ?></h2>
+<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"full","style":{"typography":{"fontStyle":"normal"}}} -->
+<h2 class="wp-block-heading alignfull has-text-align-left" style="font-style:normal;"><?php echo esc_html( $header ); ?></h2>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
@@ -43,8 +43,8 @@ $image_2       = PatternsHelper::get_image_url( $images, 0, 'assets/images/patte
 <!-- /wp:spacer -->
 
 <!-- wp:group {"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"level":3,"className":"is-service-name","fontSize":"medium"} -->
-<h3 class="wp-block-heading is-service-name has-medium-font-size"><?php echo esc_html( $product_title ); ?></h3>
+<div class="wp-block-group"><!-- wp:heading {"level":3,"className":"is-service-name","style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"medium"} -->
+<h3 class="wp-block-heading is-service-name has-medium-font-size" style="font-style:normal;font-weight:700"><?php echo esc_html( $product_title ); ?></h3>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
@@ -63,8 +63,8 @@ $image_2       = PatternsHelper::get_image_url( $images, 0, 'assets/images/patte
 <!-- /wp:spacer -->
 
 <!-- wp:group {"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"level":3,"className":"is-service-name","fontSize":"medium"} -->
-<h3 class="wp-block-heading is-service-name has-medium-font-size"><?php echo esc_html( $product_title ); ?></h3>
+<div class="wp-block-group"><!-- wp:heading {"level":3,"className":"is-service-name","style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"medium"} -->
+<h3 class="wp-block-heading is-service-name has-medium-font-size" style="font-style:normal;font-weight:700"><?php echo esc_html( $product_title ); ?></h3>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
@@ -83,8 +83,8 @@ $image_2       = PatternsHelper::get_image_url( $images, 0, 'assets/images/patte
 <!-- /wp:spacer -->
 
 <!-- wp:group {"layout":{"type":"default"}} -->
-<div class="wp-block-group"><!-- wp:heading {"level":3,"className":"is-service-name","fontSize":"medium"} -->
-<h3 class="wp-block-heading is-service-name has-medium-font-size"><?php echo esc_html( $product_title ); ?></h3>
+<div class="wp-block-group"><!-- wp:heading {"level":3,"className":"is-service-name","style":{"typography":{"fontStyle":"normal","fontWeight":"700"}},"fontSize":"medium"} -->
+<h3 class="wp-block-heading is-service-name has-medium-font-size" style="font-style:normal;font-weight:700"><?php echo esc_html( $product_title ); ?></h3>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 

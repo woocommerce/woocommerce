@@ -106,6 +106,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
+		add_action( 'woocommerce_removed_coupon', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_removed', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_restored', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
@@ -715,7 +716,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		return $return;
-
 	}
 
 	/**

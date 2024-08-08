@@ -53,9 +53,8 @@ test.describe( 'Single Product Template', () => {
 		await admin.visitSiteEditor( {
 			postType: testData.templateType,
 		} );
-		await editor.revertTemplateCustomizations( {
+		await editor.revertTemplate( {
 			templateName: testData.templateName,
-			templateType: testData.templateType,
 		} );
 		await page.goto( testData.permalink );
 

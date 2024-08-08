@@ -30,6 +30,12 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		// Switch to a block theme and initialize template logic.
 		switch_theme( 'twentytwentytwo' );
 		$this->container = Package::container();
+		$this->container->register(
+			BlockTemplatesRegistry::class,
+			function () {
+				return new BlockTemplatesRegistry();
+			}
+		);
 		$this->container->get( BlockTemplatesRegistry::class )->init();
 
 		// Reset options.
@@ -343,6 +349,25 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		check_theme_switched();
 
 		$this->assertTrue( BlockTemplateUtils::should_use_blockified_product_grid_templates() );
+	}
+
+	/**
+	 * Test switching between block themes when the option is already defined.
+	 */
+	public function test_switching_between_block_themes_should_change_usage_of_blockified_templates() {
+		// Switching block themes when the option is already true.
+		update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( true ) );
+		switch_theme( 'twentytwentytwo' );
+		check_theme_switched();
+		$this->assertTrue( BlockTemplateUtils::should_use_blockified_product_grid_templates() );
+
+		// Switching block themes when the option is false.
+		update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+		switch_theme( 'twentytwentytwo' );
+		check_theme_switched();
+		$this->assertFalse( BlockTemplateUtils::should_use_blockified_product_grid_templates() );
+
+		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
 	}
 
 	/**

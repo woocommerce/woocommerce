@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { createSlotFill, SlotFillProvider } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
 
@@ -28,14 +28,13 @@ export const possiblyRenderSettingsSlots = () => {
 		const slotDomElement = document.getElementById( slot.id );
 
 		if ( slotDomElement ) {
-			render(
+			createRoot( slotDomElement ).render(
 				<>
 					<SlotFillProvider>
 						<Slot />
 						<PluginArea scope={ slot.scope } />
 					</SlotFillProvider>
-				</>,
-				slotDomElement
+				</>
 			);
 		}
 	} );

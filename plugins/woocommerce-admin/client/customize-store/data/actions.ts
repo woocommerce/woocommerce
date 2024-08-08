@@ -259,8 +259,8 @@ export const updateTemplate = async ( {
 	homepageTemplateId: keyof typeof HOMEPAGE_TEMPLATES;
 } ) => {
 	if ( isFullComposabilityFeatureAndAPIAvailable() ) {
-		updateTemplatePTK();
+		await updateTemplatePTK();
 	} else {
-		updateTemplatePrePTK( { homepageTemplateId } );
+		await updateTemplatePrePTK( { homepageTemplateId } );
 	}
 };

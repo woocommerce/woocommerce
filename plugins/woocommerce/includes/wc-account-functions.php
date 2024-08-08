@@ -22,6 +22,11 @@ function wc_lostpassword_url( $default_url = '' ) {
 		return $default_url;
 	}
 
+	// Don't change the admin form.
+	if ( did_action( 'login_form_login' ) ) {
+		return $default_url;
+	}
+
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
 	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
 		return $default_url;
@@ -176,11 +181,13 @@ function wc_get_account_endpoint_url( $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
 	}
 
+	$url = wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
+
 	if ( 'customer-logout' === $endpoint ) {
-		return wc_logout_url();
+		return wp_nonce_url( $url, 'customer-logout' );
 	}
 
-	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
+	return $url;
 }
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\ReceiptRendering;
+namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\StringUtil;

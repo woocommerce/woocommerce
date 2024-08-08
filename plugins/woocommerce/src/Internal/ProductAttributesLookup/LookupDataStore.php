@@ -431,9 +431,14 @@ class LookupDataStore {
 	 * Create all the necessary lookup data for a given variation.
 	 *
 	 * @param \WC_Product_Variation $variation The variation to create entries for.
+	 * @throws \Exception Can't retrieve the details of the parent product.
 	 */
 	private function create_data_for_variation( \WC_Product_Variation $variation ) {
 		$main_product = WC()->call_function( 'wc_get_product', $variation->get_parent_id() );
+		if ( false === $main_product ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new \Exception( "The product is a variation, and the retrieval of data for the parent product (id {$variation->get_parent_id()}) failed." );
+		}
 
 		$product_attributes_data   = $this->get_attribute_taxonomies( $main_product );
 		$variation_attributes_data = array_filter(

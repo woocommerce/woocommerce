@@ -44,8 +44,13 @@
 		color: #333;
 	}
 	&.wc-block-checkout__shipping-method-option--selected {
-		outline: 2px solid currentColor !important; // Overwriting previous !important statement
+		outline: 1px solid $universal-border-strong;
 		background-color: $universal-background;
+
+		&:focus {
+			outline: 1px solid $universal-border-strong;
+			background-color: $universal-background;
+		}
 	}
 }
 

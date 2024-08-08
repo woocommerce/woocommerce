@@ -122,7 +122,7 @@ const renderNotes = ( {
 		<Card size="large">
 			{ showHeader && (
 				<CardHeader size="medium">
-					<div className="wooocommerce-inbox-card__header">
+					<div className="woocommerce-inbox-card__header">
 						<Text size="20" lineHeight="28px" variant="title.small">
 							{ __( 'Inbox', 'woocommerce' ) }
 						</Text>
@@ -180,7 +180,7 @@ const renderNotes = ( {
 
 						return (
 							<CardFooter
-								className="wooocommerce-inbox-card__footer"
+								className="woocommerce-inbox-card__footer"
 								size="medium"
 							>
 								<Button

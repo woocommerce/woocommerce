@@ -33,10 +33,7 @@ import { ProductEditorSettings } from '../../../components';
 import { BlockFill } from '../../../components/block-slot-fill';
 import { useValidations } from '../../../contexts/validation-context';
 import { TRACKS_SOURCE } from '../../../constants';
-import {
-	WPError,
-	getProductErrorMessageAndProps,
-} from '../../../utils/get-product-error-message-and-props';
+import { WPError, useErrorHandler } from '../../../hooks/use-error-handler';
 import type {
 	ProductEditorBlockEditProps,
 	ProductFormPostProps,
@@ -45,7 +42,7 @@ import type {
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
 import isProductFormTemplateSystemEnabled from '../../../utils/is-product-form-template-system-enabled';
-import { errorHandler } from '../../../hooks/use-product-manager';
+import { formatProductError } from '../../../utils/format-product-error';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -53,6 +50,8 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	context: { selectedTab },
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
+
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
@@ -188,10 +187,14 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					template: productTemplate.id,
 				} );
 			} catch ( error ) {
-				const { message, errorProps } = getProductErrorMessageAndProps(
-					errorHandler( error as WPError, productStatus ) as WPError,
-					selectedTab
-				);
+				const { message, errorProps } =
+					await getProductErrorMessageAndProps(
+						formatProductError(
+							error as WPError,
+							productStatus
+						) as WPError,
+						selectedTab
+					);
 				createErrorNotice( message, errorProps );
 			}
 
@@ -306,10 +309,14 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			// by the product editor.
 			window.location.href = getNewPath( {}, `/product/${ productId }` );
 		} catch ( error ) {
-			const { message, errorProps } = getProductErrorMessageAndProps(
-				errorHandler( error as WPError, productStatus ) as WPError,
-				selectedTab
-			);
+			const { message, errorProps } =
+				await getProductErrorMessageAndProps(
+					formatProductError(
+						error as WPError,
+						productStatus
+					) as WPError,
+					selectedTab
+				);
 			createErrorNotice( message, errorProps );
 		}
 	}

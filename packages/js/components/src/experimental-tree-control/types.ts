@@ -4,10 +4,15 @@ export interface Item {
 	label: string;
 }
 
+export type AugmentedItem = Item & {
+	isExpanded: boolean;
+};
+
 export interface LinkedTree {
 	parent?: LinkedTree;
-	data: Item;
+	data: AugmentedItem;
 	children: LinkedTree[];
+	index?: number;
 }
 
 export type CheckedStatus = 'checked' | 'unchecked' | 'indeterminate';
@@ -18,6 +23,11 @@ type BaseTreeProps = {
 	 * a list of items if it is true.
 	 */
 	selected?: Item | Item[];
+
+	onExpand?( index: number, value: boolean ): void;
+
+	highlightedIndex?: number;
+
 	/**
 	 * Whether the tree items are single or multiple selected.
 	 */
@@ -76,6 +86,12 @@ type BaseTreeProps = {
 	 * Called when the create button is clicked to help closing any related popover.
 	 */
 	onTreeBlur?(): void;
+
+	onFirstItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
+	/**
+	 * Called when the escape key is pressed.
+	 */
+	onEscape?(): void;
 };
 
 export type TreeProps = BaseTreeProps &
@@ -131,6 +147,7 @@ export type TreeItemProps = BaseTreeProps &
 		item: LinkedTree;
 		index: number;
 		isFocused?: boolean;
+		isHighlighted?: boolean;
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
 		onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;

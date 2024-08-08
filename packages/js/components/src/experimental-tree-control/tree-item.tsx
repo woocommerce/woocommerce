@@ -24,14 +24,27 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		treeItemProps,
 		headingProps,
 		treeProps,
-		expander: { isExpanded, onToggleExpand },
 		selection,
-		highlighter: { isHighlighted },
 		getLabel,
 	} = useTreeItem( {
 		...props,
 		ref,
 	} );
+
+	function handleKeyDown( event: React.KeyboardEvent< HTMLElement > ) {
+		if ( event.key === 'Escape' && props.onEscape ) {
+			event.preventDefault();
+			props.onEscape();
+		} else if ( event.key === 'ArrowLeft' ) {
+			if ( item.index !== undefined ) {
+				props.onExpand?.( item.index, false );
+			}
+		} else if ( event.key === 'ArrowRight' ) {
+			if ( item.index !== undefined ) {
+				props.onExpand?.( item.index, true );
+			}
+		}
+	}
 
 	return (
 		<li
@@ -41,7 +54,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				'experimental-woocommerce-tree-item',
 				{
 					'experimental-woocommerce-tree-item--highlighted':
-						isHighlighted,
+						props.isHighlighted,
 				}
 			) }
 		>
@@ -58,6 +71,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							}
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
+							onKeyDown={ handleKeyDown }
 							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 							// @ts-ignore __nextHasNoMarginBottom is a valid prop
 							__nextHasNoMarginBottom={ true }
@@ -70,6 +84,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							onChange={ ( event ) =>
 								selection.onSelectChild( event.target.checked )
 							}
+							onKeyDown={ handleKeyDown }
 						/>
 					) }
 
@@ -83,11 +98,21 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{ Boolean( item.children?.length ) && (
 					<div className="experimental-woocommerce-tree-item__expander">
 						<Button
-							icon={ isExpanded ? chevronUp : chevronDown }
-							onClick={ onToggleExpand }
+							icon={
+								item.data.isExpanded ? chevronUp : chevronDown
+							}
+							onClick={ () => {
+								if ( item.index !== undefined ) {
+									props.onExpand?.(
+										item.index,
+										! item.data.isExpanded
+									);
+								}
+							} }
+							onKeyDown={ handleKeyDown }
 							className="experimental-woocommerce-tree-item__expander"
 							aria-label={
-								isExpanded
+								item.data.isExpanded
 									? __( 'Collapse', 'woocommerce' )
 									: __( 'Expand', 'woocommerce' )
 							}
@@ -96,8 +121,13 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				) }
 			</div>
 
-			{ Boolean( item.children.length ) && isExpanded && (
-				<Tree { ...treeProps } />
+			{ Boolean( item.children.length ) && item.data.isExpanded && (
+				<Tree
+					{ ...treeProps }
+					highlightedIndex={ props.highlightedIndex }
+					onExpand={ props.onExpand }
+					onEscape={ props.onEscape }
+				/>
 			) }
 		</li>
 	);

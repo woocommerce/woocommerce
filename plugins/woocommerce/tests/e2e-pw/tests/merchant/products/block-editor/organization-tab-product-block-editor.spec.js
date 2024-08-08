@@ -62,9 +62,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 
 			await clickOnTab( 'Organization', page );
 
-			await page
-				.locator( '[id^="woocommerce-taxonomy-select-"]' )
-				.click();
+			await page.getByLabel( 'Categories' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 
@@ -80,7 +78,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				} )
 				.click();
 
-			await page.locator( '[id^="tag-field-"]' ).click();
+			await page.getByLabel( 'Tags' ).click();
 
 			await page.locator( 'text=Create new' ).click();
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only attempt to fetch layout template in useLayoutTemplate when layout template id is provided.
