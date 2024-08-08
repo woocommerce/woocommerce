@@ -66,7 +66,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 2.2
 	 */
 	public function setUp(): void {
-
 		parent::setUp();
 
 		// Add custom factories.
@@ -86,6 +85,19 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Reset the instance of MockableLegacyProxy that was registered during bootstrap,
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		add_filter( 'woocommerce_get_geolocation', [ $this, 'mock_woocommerce_get_geolocation' ], 10, 2 );
+	}
+
+	/**
+	 * Tear down test case.
+	 *
+	 * @since 9.3.0
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		remove_filter( 'woocommerce_get_geolocation', [ $this, 'mock_woocommerce_get_geolocation' ], 10, 2 );
 	}
 
 	/**
@@ -98,6 +110,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
 		WC_Install::create_terms();
+	}
+
+	/**
+	 * Intercept geolocation requests and return mock data.
+	 *
+	 * @param array $geolocation
+	 * @param string $ip_address
+	 *
+	 * @return array
+	 *
+	 * @since 9.3.0
+	 */
+	public function mock_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array
+	{
+		return $geolocation;
 	}
 
 	/**
