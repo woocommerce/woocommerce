@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { Reducer } from 'redux';
-import { objectHasProp, PaymentResult } from '@woocommerce/types';
+import { PaymentResult } from '@woocommerce/types';
 
 /**
  * Internal dependencies
