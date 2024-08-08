@@ -252,7 +252,8 @@ $tt2-gray: #f7f7f7;
 		div.woocommerce-product-gallery {
 			position: relative;
 
-			a.woocommerce-product-gallery__trigger {
+			.woocommerce-product-gallery__trigger {
+				padding: 0;
 				position: absolute;
 				top: 1rem;
 				right: 1rem;
