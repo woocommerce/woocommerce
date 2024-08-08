@@ -471,7 +471,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	public function get_order_id_by_order_key( $order_key ) {
 		global $wpdb;
-		return $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->prefix}postmeta WHERE meta_key = '_order_key' AND meta_value = %s", $order_key ) );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() || OrderUtil::is_custom_order_tables_in_sync() ) {
+			return $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM {$wpdb->prefix}wc_order_operational_data WHERE order_key = %s", $order_key ) );
+		}
+
+		return $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->prefix}posts WHERE post_password = %s", $order_key ) );
 	}
 
 	/**
