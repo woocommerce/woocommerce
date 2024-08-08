@@ -523,10 +523,10 @@ class WC_Frontend_Scripts {
 							'allowOneSlide'  => false,
 						)
 					),
-					'zoom_enabled'              => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
-					'zoom_options'              => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
-					'photoswipe_enabled'        => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
-					'photoswipe_options'        => apply_filters(
+					'zoom_enabled'                      => apply_filters( 'woocommerce_single_product_zoom_enabled', get_theme_support( 'wc-product-gallery-zoom' ) ),
+					'zoom_options'                      => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
+					'photoswipe_enabled'                => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
+					'photoswipe_options'                => apply_filters(
 						'woocommerce_single_product_photoswipe_options',
 						array(
 							'shareEl'               => false,
