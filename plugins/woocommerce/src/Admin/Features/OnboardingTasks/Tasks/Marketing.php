@@ -57,25 +57,12 @@ class Marketing extends Task {
 	}
 
 	/**
-	 * Task completion.
-	 *
-	 * @return bool
-	 */
-	public function is_complete() {
-		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::has_installed_extensions();
-		}
-
-		return $this->is_complete_result;
-	}
-
-	/**
 	 * Task visibility.
 	 *
 	 * @return bool
 	 */
 	public function can_view() {
-		return Features::is_enabled( 'remote-free-extensions' ) && count( self::get_plugins() ) > 0;
+		return Features::is_enabled( 'remote-free-extensions' );
 	}
 
 	/**
