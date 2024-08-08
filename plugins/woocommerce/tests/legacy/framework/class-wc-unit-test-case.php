@@ -144,6 +144,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 9.3.0
 	 */
 	public function intercept_pre_http_request( $response, array $parsed_args, string $url ): array {
+		if ( parse_url( $url, PHP_URL_HOST ) === 'cldup.com' || parse_url( $url, PHP_URL_HOST ) === 'somedomain.com' ) {
+			// TODO: revisit the sourcing tests - they should be update with corresponding mocking.
+			return $response;
+		}
+
+		echo $url, PHP_EOL;
+
 		return [
 			'body'          => '',
 			'response'      => [

@@ -58,8 +58,11 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 	 * @since 9.3.0
 	 */
 	public function intercept_pre_http_request( $response, array $parsed_args, string $url ): array {
-		echo $url;
-		
+		if ( parse_url( $url, PHP_URL_HOST) === 'localhost' ) {
+			// Internal REST-requests: don't intercept and let them be processed.
+			return $response;
+		}
+
 		return parent::intercept_pre_http_request( $response, $parsed_args, $url );
 	}
 
