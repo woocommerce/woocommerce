@@ -300,7 +300,6 @@ const exitToWooHome = fromPromise( async () => {
 } );
 
 const redirectToJetpackAuthPage = ( {
-	context,
 	event,
 }: {
 	context: CoreProfilerStateMachineContext;
@@ -308,16 +307,7 @@ const redirectToJetpackAuthPage = ( {
 } ) => {
 	const url = new URL( event.output.url );
 	url.searchParams.set( 'installed_ext_success', '1' );
-	const jetpackSelectedOrInstalled =
-		context.pluginsSelected.find( ( plugin ) => plugin === 'jetpack' ) ||
-		context.pluginsAvailable.find(
-			( plugin ) => plugin.key === 'jetpack' && plugin.is_installed
-		);
-
-	if ( jetpackSelectedOrInstalled ) {
-		url.searchParams.set( 'plugin_name', 'jetpack-ai' );
-	}
-
+	url.searchParams.set( 'plugin_name', 'jetpack-ai' );
 	window.location.href = url.toString();
 };
 
