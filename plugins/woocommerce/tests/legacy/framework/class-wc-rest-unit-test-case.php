@@ -45,28 +45,6 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Intercept external requests and mimic unavailable response.
-	 *
-	 * @see WP_Http::request()
-	 *
-	 * @param false|array|WP_Error $response    A preemptive return value of an HTTP request. Default false.
-	 * @param array                $parsed_args HTTP request arguments.
-	 * @param string               $url         The request URL.
-	 *
-	 * @return array
-	 *
-	 * @since 9.3.0
-	 */
-	public function intercept_pre_http_request( $response, array $parsed_args, string $url ): array {
-		if ( parse_url( $url, PHP_URL_HOST) === 'localhost' ) {
-			// Internal REST-requests: don't intercept and let them be processed.
-			return $response;
-		}
-
-		return parent::intercept_pre_http_request( $response, $parsed_args, $url );
-	}
-
-	/**
 	 * Perform a REST request.
 	 *
 	 * @param string     $url The endpopint url, if it doesn't start with '/' it'll be prepended with '/wc/v3/'.
