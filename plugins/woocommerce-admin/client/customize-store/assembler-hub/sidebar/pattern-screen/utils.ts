@@ -18,9 +18,10 @@ export const addIsAddedClassToPatternPreview = (
 	patternListEl: HTMLElement,
 	blocks: BlockInstance[]
 ) => {
-	console.log( 'si trigghera?' );
 	patternListEl.querySelectorAll( '.is-added' ).forEach( ( element ) => {
-		element.classList.remove( 'is-added' );
+		const htmlElement = element as HTMLElement;
+		htmlElement.blur();
+		htmlElement.classList.remove( 'is-added' );
 	} );
 
 	blocks.forEach( ( block ) => {

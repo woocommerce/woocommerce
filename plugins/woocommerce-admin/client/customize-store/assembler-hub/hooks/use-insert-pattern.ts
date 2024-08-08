@@ -108,16 +108,6 @@ export const useInsertPattern = () => {
 		[ insertBlocks, insertableIndex, isActiveNewNeutralVariation ]
 	);
 
-	const getPatternAddedByName = useCallback(
-		( patterName: string ) => {
-			return blocks.find( ( block ) => {
-				const blockPatternName = block.attributes.metadata?.patternName;
-				return blockPatternName === patterName;
-			} );
-		},
-		[ blocks ]
-	);
-
 	const removePattern = useCallback(
 		( pattern: BlockInstance ) => {
 			removeBlock( pattern.clientId, false );
@@ -132,7 +122,6 @@ export const useInsertPattern = () => {
 
 	return {
 		insertPattern,
-		getPatternAddedByName,
 		removePattern,
 	};
 };

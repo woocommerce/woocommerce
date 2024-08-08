@@ -40,7 +40,7 @@ import { useQuery } from '@woocommerce/navigation';
 import clsx from 'clsx';
 import { SelectedBlockContext } from './context/selected-block-ref-context';
 import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
-import { useInsertPatternByName } from './hooks/use-insert-pattern-by-name';
+import { usePatternByName } from './hooks/use-pattern-by-name';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -171,7 +171,7 @@ function ScaledBlockPreview( {
 	const isResizing = useContext( IsResizingContext );
 	const query = useQuery();
 
-	const { insertPatternByName } = useInsertPatternByName();
+	const { insertPatternByName } = usePatternByName();
 
 	useAddAutoBlockPreviewEventListenersAndObservers(
 		{

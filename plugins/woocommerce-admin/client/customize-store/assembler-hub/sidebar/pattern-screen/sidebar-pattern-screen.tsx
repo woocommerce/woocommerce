@@ -8,7 +8,7 @@ import { BlockInstance } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { capitalize, remove } from 'lodash';
+import { capitalize } from 'lodash';
 import { Button, Spinner } from '@wordpress/components';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -43,6 +43,8 @@ import {
 } from './utils';
 import { trackEvent } from '~/customize-store/tracking';
 import { useInsertPattern } from '../../hooks/use-insert-pattern';
+import { usePatternByName } from '../../hooks/use-pattern-by-name';
+import { Pattern } from '~/customize-store/types/pattern';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
@@ -190,8 +192,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		};
 	}, [ isEditorLoading ] );
 
-	const { insertPattern, getPatternAddedByName, removePattern } =
-		useInsertPattern();
+	const { insertPattern, removePattern } = useInsertPattern();
+	const { getPatternByName } = usePatternByName();
 
 	return (
 		<div
@@ -256,10 +258,8 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 						0,
 						patternPagination
 					) }
-					onClickPattern={ ( pattern ) => {
-						const foundPattern = getPatternAddedByName(
-							pattern.name
-						);
+					onClickPattern={ ( pattern: Pattern ) => {
+						const foundPattern = getPatternByName( pattern.name );
 						if ( foundPattern ) {
 							removePattern( foundPattern );
 						} else {
