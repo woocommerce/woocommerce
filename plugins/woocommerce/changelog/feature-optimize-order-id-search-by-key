@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Use `wc_order_operational_data` or `posts` tables to search order ID by its key
