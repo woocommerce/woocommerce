@@ -56,7 +56,7 @@ if ( process.env.CI ) {
 		{
 			outputFolder:
 				PLAYWRIGHT_HTML_REPORT ??
-				`${ testsResultsPath }/playwright-report`,
+				`${ testsResultsPath }/reports/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
