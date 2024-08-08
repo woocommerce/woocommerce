@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\Logging;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use WC_Rate_Limiter;
+use WC_Log_Levels;
 
 /**
  * WooCommerce Remote Logger
@@ -26,25 +27,6 @@ class RemoteLogger extends \WC_Log_Handler {
 	const FETCH_LATEST_VERSION_RETRY  = 'fetch_latest_woocommerce_version_retry';
 
 	/**
-	 * The logger instance.
-	 *
-	 * @var \WC_Logger_Interface|null
-	 */
-	private $local_logger;
-
-	/**
-	 * Remote logger constructor.
-	 *
-	 * @internal
-	 * @param \WC_Logger_Interface|null $logger Logger instance.
-	 */
-	public function __construct( \WC_Logger_Interface $logger = null ) {
-		$this->local_logger = null === $logger
-			? wc_get_logger()
-			: $logger;
-	}
-
-	/**
 	 * Handle a log entry.
 	 *
 	 * @param int    $timestamp Log timestamp.
@@ -57,62 +39,12 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
-		if ( ! \WC_Log_Levels::is_valid_level( $level ) ) {
-			/* translators: 1: WC_Remote_Logger::log 2: level */
-			wc_doing_it_wrong( __METHOD__, sprintf( __( '%1$s was called with an invalid level "%2$s".', 'woocommerce' ), '<code>WC_Remote_Logger::handle</code>', $level ), '9.2.0' );
-		}
-
-		if ( ! $this->is_remote_logging_allowed() ) {
+		if ( ! $this->should_handle( $level, $message, $context ) ) {
 			return false;
 		}
 
-		if ( $this->is_third_party_error( (string) $message, (array) $context ) ) {
-			return false;
-		}
-
-		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
-			$this->local_logger->info( 'Remote logging throttled.', array( 'source' => 'wc-remote-logger' ) );
-			return false;
-		}
-
-		try {
-			$log_data = $this->get_formatted_log( $level, $message, $context );
-
-			// Ensure the log data is valid.
-			if ( ! is_array( $log_data ) || empty( $log_data['message'] ) || empty( $log_data['feature'] ) ) {
-				return false;
-			}
-
-			$body = array(
-				'params' => wp_json_encode( $log_data ),
-			);
-
-			WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
-
-			$response = wp_safe_remote_post(
-				self::LOG_ENDPOINT,
-				array(
-					'body'     => wp_json_encode( $body ),
-					'timeout'  => 2,
-					'headers'  => array(
-						'Content-Type' => 'application/json',
-					),
-					'blocking' => false,
-				)
-			);
-
-			if ( is_wp_error( $response ) ) {
-				throw new \Exception( $response->get_error_message() );
-			}
-
-			return true;
-		} catch ( \Exception $e ) {
-			// Log the error locally if the remote logging fails.
-			$this->local_logger->error( 'Remote logging failed: ' . $e->getMessage() );
-			return false;
-		}
+		return $this->log( $level, $message, $context );
 	}
-
 
 	/**
 	 * Get formatted log data to be sent to the remote logging service.
@@ -222,6 +154,90 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Determine whether to handle or ignore log.
+	 *
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
+	 * @param string $message Log message to be recorded.
+	 * @param array  $context Additional information for log handlers.
+	 *
+	 * @return bool True if the log should be handled.
+	 */
+	protected function should_handle( $level, $message, $context ) {
+		if ( ! $this->is_remote_logging_allowed() ) {
+			return false;
+		}
+		// Ignore logs that are less severe than critical. This is temporary to prevent sending too many logs to the remote logging service. We can consider remove this if the remote logging service can handle more logs.
+		if ( WC_Log_Levels::get_level_severity( $level ) < WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
+			return false;
+		}
+
+		if ( $this->is_third_party_error( (string) $message, (array) $context ) ) {
+			return false;
+		}
+
+		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
+			error_log( 'Remote logging throttled.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
+
+		return true;
+	}
+
+
+	/**
+	 * Send the log to the remote logging service.
+	 *
+	 * @param string $level   Log level (e.g., 'error', 'warning', 'info').
+	 * @param string $message Log message to be recorded.
+	 * @param array  $context Optional. Additional information for log handlers, such as 'backtrace', 'tags', 'extra', and 'error'.
+	 *
+	 * @throws \Exception If the remote logging fails. The error is caught and logged locally.
+	 * @return bool
+	 */
+	private function log( $level, $message, $context ) {
+		try {
+			$log_data = $this->get_formatted_log( $level, $message, $context );
+
+			// Ensure the log data is valid.
+			if ( ! is_array( $log_data ) || empty( $log_data['message'] ) || empty( $log_data['feature'] ) ) {
+				return false;
+			}
+
+			$body = array(
+				'params' => wp_json_encode( $log_data ),
+			);
+
+			WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
+
+			if ( $this->is_dev_or_local_environment() ) {
+				return false;
+			}
+
+			$response = wp_safe_remote_post(
+				self::LOG_ENDPOINT,
+				array(
+					'body'     => wp_json_encode( $body ),
+					'timeout'  => 2,
+					'headers'  => array(
+						'Content-Type' => 'application/json',
+					),
+					'blocking' => false,
+				)
+			);
+
+			if ( is_wp_error( $response ) ) {
+				throw new \Exception( $response->get_error_message() );
+			}
+
+			return true;
+		} catch ( \Exception $e ) {
+			// Log the error locally if the remote logging fails.
+			error_log( 'Remote logging failed: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			return false;
+		}
 	}
 
 	/**
@@ -406,5 +422,16 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		return implode( "\n", $sanitized_trace );
+	}
+
+	/**
+	 * Check if the current environment is development or local.
+	 *
+	 * Creates a helper method so we can easily mock this in tests.
+	 *
+	 * @return bool
+	 */
+	protected function is_dev_or_local_environment() {
+		return in_array( wp_get_environment_type(), array( 'development', 'local' ), true );
 	}
 }
