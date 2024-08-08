@@ -18,11 +18,6 @@ import Payments from '../payments';
 
 const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 	{
-		name: 'woocommerce-payments',
-		title: 'WCPay',
-		content: <Payments />,
-	},
-	{
 		name: 'options',
 		title: 'Options',
 		content: <Options />,
@@ -56,6 +51,11 @@ const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
 		name: 'remote-logging',
 		title: 'Remote Logging',
 		content: <RemoteLogging />,
+	},
+	{
+		name: 'woocommerce-payments',
+		title: 'WCPay',
+		content: <Payments />,
 	},
 ] );
 
