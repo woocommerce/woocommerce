@@ -110,7 +110,7 @@ test.describe(
 
 				// Verify image in store frontend
 				await page.goto( product.permalink );
-				await expect( page.getByAltText( `image-01` ) ).toBeVisible();
+				await expect( page.getByTitle( `image-01` ) ).toBeVisible();
 			} );
 		} );
 
