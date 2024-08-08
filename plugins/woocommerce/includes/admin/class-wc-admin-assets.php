@@ -241,7 +241,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Edit product category/brands pages.
-			if ( in_array( $screen_id, array( 'edit-product_cat', 'edit-product_brand' ) ) ) {
+			if ( in_array( $screen_id, array( 'edit-product_cat', 'edit-product_brand' ), true ) ) {
 				wp_enqueue_media();
 			}
 
