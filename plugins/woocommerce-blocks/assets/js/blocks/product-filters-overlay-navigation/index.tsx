@@ -20,7 +20,6 @@ if ( isExperimentalBlocksEnabled() ) {
 		edit: Edit,
 		save: Save,
 		icon: <Icon icon={ closeSquareShadow } />,
-		attributes: metadata.attributes,
 		variations: blockVariations,
 	} );
 }
