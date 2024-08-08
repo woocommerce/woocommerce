@@ -19,10 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$total   = $total ?? wc_get_loop_prop('total_pages');
-$current = $current ?? wc_get_loop_prop('current_page');
-$base    = $base ?? esc_url_raw(str_replace(999999999, '%#%', remove_query_arg('add-to-cart', get_pagenum_link(999999999, false))));
-$format  = $format ?? '';
+$total     = $total ?? wc_get_loop_prop( 'total_pages' );
+$current   = $current ?? wc_get_loop_prop( 'current_page' );
+$base      = $base ?? esc_url_raw(str_replace( 999999999, '%#%', remove_query_arg( 'add-to-cart', get_pagenum_link( 999999999, false ) ) ) );
+$format    = $format ?? '';
 $next_text = __( 'Next Page', 'woocommerce' );
 $prev_text = __( 'Previous Page', 'woocommerce' );
 $page_text = __( 'Page', 'woocommerce' );
