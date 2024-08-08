@@ -166,26 +166,21 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 	} );
 
 	const shouldHideBlock = () => {
-		if (
-			productFiltersOverlayMode ===
-				ProductFiltersBlockOverlayAttribute.NEVER &&
-			triggerType === 'open-overlay'
-		) {
-			return true;
-		}
+		if ( triggerType === 'open-overlay' ) {
+			if (
+				productFiltersOverlayMode ===
+				ProductFiltersBlockOverlayAttribute.NEVER
+			) {
+				return true;
+			}
 
-		if (
-			isWithinProductFiltersTemplatePart &&
-			triggerType === 'open-overlay'
-		) {
-			return true;
-		}
+			if ( isWithinProductFiltersTemplatePart ) {
+				return true;
+			}
 
-		if (
-			isWithinProductFiltersOverlayTemplatePart &&
-			triggerType === 'open-overlay'
-		) {
-			return true;
+			if ( isWithinProductFiltersOverlayTemplatePart ) {
+				return true;
+			}
 		}
 
 		return false;
