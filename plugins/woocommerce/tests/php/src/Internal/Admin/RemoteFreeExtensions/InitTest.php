@@ -84,9 +84,7 @@ class InitTest extends WC_Unit_Test_Case {
 	 * @since 9.3.0
 	 */
 	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
-		echo ' [init] ', $url, ' ', PHP_EOL;
-
-		// Let the `https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/*.jpeg` requests go though .
+		// Let the `https://woocommerce.com/wp-json/helper/1.0/*`, `https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json?locale=en_US` requests go though .
 		return $response;
 	}
 

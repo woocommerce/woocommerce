@@ -38,9 +38,7 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 	 * @since 9.3.0
 	 */
 	public function intercept_pre_http_request( $response, array $parsed_args, string $url ) {
-		echo ' [onboarding-themes] ', $url, ' ', PHP_EOL;
-
-		// Let the `https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/*.jpeg` requests go though .
+		// Let the `https://api.wordpress.org/themes/info/1.2/?action=theme_information&...` requests go though .
 		return $response;
 	}
 
