@@ -213,7 +213,7 @@ async function runPerformanceTests( branches, options ) {
 	await runShellScript(
 		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.getSetupTestRunner(
 			testRunnerDir
-		) }"`,
+		) } 2>&1"`,
 		testRunnerDir
 	);
 
