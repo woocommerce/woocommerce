@@ -154,7 +154,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			return $response;
 		}
 
-		//echo $url, PHP_EOL;
+		echo $url, PHP_EOL;
 		return [
 			'body'          => '',
 			'response'      => [
