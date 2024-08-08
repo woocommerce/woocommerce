@@ -92,7 +92,11 @@ const config = {
 		{
 			name: 'ui',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testIgnore: '**/api-tests/**',
+			testMatch: [
+				'**basic.spec.js',
+				'**/product-*spec.js',
+				'**/wordpress-post.spec.js',
+			],
 		},
 		{
 			name: 'api',

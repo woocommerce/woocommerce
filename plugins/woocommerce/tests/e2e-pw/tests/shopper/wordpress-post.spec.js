@@ -8,6 +8,7 @@ test(
 	'logged-in customer can comment on a post',
 	{ tag: [ '@gutenberg', '@payments', '@services' ] },
 	async ( { page } ) => {
+		expect( process.env.GITHUB_RUN_ATTEMPT ).toBe( '2' );
 		await page.goto( 'hello-world/' );
 		await expect(
 			page.getByRole( 'heading', { name: 'Hello world!', exact: true } )
