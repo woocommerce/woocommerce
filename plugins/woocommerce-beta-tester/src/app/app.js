@@ -14,8 +14,14 @@ import { default as Features } from '../features';
 import { default as RestAPIFilters } from '../rest-api-filters';
 import RemoteInboxNotifications from '../remote-inbox-notifications';
 import RemoteLogging from '../remote-logging';
+import Payments from '../payments';
 
 const tabs = applyFilters( 'woocommerce_admin_test_helper_tabs', [
+	{
+		name: 'woocommerce-payments',
+		title: 'WCPay',
+		content: <Payments />,
+	},
 	{
 		name: 'options',
 		title: 'Options',
