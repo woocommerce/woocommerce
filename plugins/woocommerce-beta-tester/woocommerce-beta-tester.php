@@ -138,5 +138,28 @@ add_action(
 	}
 );
 
+
+/**
+ * Simulate a WooCommerce error for remote logging testing.
+ *
+ * @throws Exception A simulated WooCommerce error if the option is set.
+ */
+function simulate_woocommerce_error() {
+	throw new Exception( 'Simulated WooCommerce error for remote logging test' );
+}
+
+$simulate_error = get_option( 'wc_beta_tester_simulate_woocommerce_php_error', false );
+
+if ( $simulate_error ) {
+	delete_option( 'wc_beta_tester_simulate_woocommerce_php_error' );
+
+	if ( 'core' === $simulate_error ) {
+		add_action( 'woocommerce_loaded', 'simulate_woocommerce_error' );
+	} elseif ( 'beta-tester' === $simulate_error ) {
+		throw new Exception( 'Test PHP exception from WooCommerce Beta Tester' );
+	}
+}
+
+
 // Initialize the live branches feature.
 require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-live-branches.php';
