@@ -18,12 +18,12 @@ const config = {
 	getSetupTestRunner: ( sourceDir ) => {
 		const pnpmPackage = getPnpmPackage( sourceDir );
 
-		return `npm install -g ${ pnpmPackage } && pnpm install --frozen-lockfile --filter="@woocommerce/plugin-woocommerce" &> /dev/null && cd plugins/woocommerce && pnpm exec playwright install chromium`;
+		return `npm install -g ${ pnpmPackage } && pnpm install --frozen-lockfile --filter="@woocommerce/plugin-woocommerce" && cd plugins/woocommerce && pnpm exec playwright install chromium`;
 	},
 	getSetupCommand: ( sourceDir ) => {
 		const pnpmPackage = getPnpmPackage( sourceDir );
 
-		return `npm install -g ${ pnpmPackage } && pnpm install --frozen-lockfile &> /dev/null && pnpm build &> /dev/null`;
+		return `npm install -g ${ pnpmPackage } && pnpm install --frozen-lockfile && pnpm build`;
 	},
 	getTestCommand: ( sourceDir ) => {
 		const pnpmPackage = getPnpmPackage( sourceDir );
