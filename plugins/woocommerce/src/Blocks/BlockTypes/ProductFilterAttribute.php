@@ -443,15 +443,15 @@ final class ProductFilterAttribute extends AbstractBlock {
 		register_block_pattern(
 			'woocommerce/default-attribute-filter',
 			array(
-				'title'      => '',
-				'inserter'   => false,
-				'content'    => sprintf(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => strtr(
 					'
-<!-- wp:woocommerce/product-filter {"filterType":"attribute-filter","attributeId":%1$s} -->
+<!-- wp:woocommerce/product-filter {"filterType":"attribute-filter","attributeId":{{attribute_id}}} -->
 <!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 <div class="wp-block-group">
 	<!-- wp:heading {"level":3} -->
-	<h3 class="wp-block-heading">%2$s</h3>
+	<h3 class="wp-block-heading">{{attribute_label}}</h3>
 	<!-- /wp:heading -->
 
 	<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true,"move":false}} -->
@@ -471,11 +471,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 </div>
 <!-- /wp:group -->
 
-<!-- wp:woocommerce/product-filter-attribute {"attributeId":%1$s,"lock":{"remove":true}} /-->
+<!-- wp:woocommerce/product-filter-attribute {"attributeId":{{attribute_id}},"lock":{"remove":true}} /-->
 <!-- /wp:woocommerce/product-filter -->
 					',
-					esc_html( $default_attribute->attribute_id ),
-					esc_html( $default_attribute->attribute_label )
+					array(
+						'{{attribute_id}}'    => intval( $default_attribute->attribute_id ),
+						'{{attribute_label}}' => esc_html( $default_attribute->attribute_label ),
+					)
 				),
 			)
 		);
