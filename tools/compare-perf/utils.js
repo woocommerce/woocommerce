@@ -16,7 +16,7 @@ const chalk = require( 'chalk' );
  */
 function runShellScript( script, cwd, env = {} ) {
 	return new Promise( ( resolve, reject ) => {
-		childProcess.exec(
+		const child = childProcess.exec(
 			script,
 			{
 				cwd,
@@ -29,10 +29,6 @@ function runShellScript( script, cwd, env = {} ) {
 				},
 			},
 			function ( error, stdout, stderr ) {
-				console.log( error );
-				console.log( stdout );
-				console.log( stderr );
-
 				if ( error ) {
 					console.log( stdout ); // Sometimes the error message is thrown via stdout.
 					console.log( stderr );
@@ -42,6 +38,14 @@ function runShellScript( script, cwd, env = {} ) {
 				}
 			}
 		);
+
+		child.stdout.on( 'data', ( data ) => {
+			process.stdout.write( data );
+		} );
+
+		child.stderr.on( 'data', ( data ) => {
+			process.stderr.write( data );
+		} );
 	} );
 }
 

@@ -18,7 +18,7 @@ const config = {
 	getSetupTestRunner: ( sourceDir ) => {
 		const pnpmPackage = getPnpmPackage( sourceDir );
 
-		return `npm install -g ${ pnpmPackage }`; // && pnpm install --frozen-lockfile --filter="@woocommerce/plugin-woocommerce" && cd plugins/woocommerce && pnpm exec playwright install chromium`;
+		return `npm install -g ${ pnpmPackage } && pnpm install --frozen-lockfile --filter="@woocommerce/plugin-woocommerce" && cd plugins/woocommerce && pnpm exec playwright install chromium`;
 	},
 	getSetupCommand: ( sourceDir ) => {
 		const pnpmPackage = getPnpmPackage( sourceDir );
