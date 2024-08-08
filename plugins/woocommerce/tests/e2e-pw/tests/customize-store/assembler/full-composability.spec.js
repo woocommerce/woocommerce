@@ -197,6 +197,34 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 	} );
 
+	test( 'Clicking on a pattern should always scroll the page to the inserted pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list__list-item'
+		);
+
+		// add first 3 patterns
+		for ( let i = 0; i < 4; i++ ) {
+			await sidebarPattern.nth( i ).click();
+		}
+
+		const insertedPattern = editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.nth( 3 );
+
+		await expect( insertedPattern ).toBeInViewport();
+	} );
+
 	test( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
 		pageObject,
 		baseURL,
