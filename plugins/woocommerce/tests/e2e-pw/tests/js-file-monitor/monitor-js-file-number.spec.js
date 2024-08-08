@@ -53,12 +53,12 @@ test.describe(
 		for ( const row of shopperPages ) {
 			const url = row.url;
 			const name = row.name;
-			const expectedCount = parseInt( row.expectedCount );
+			const expectedCount = parseInt( row.expectedCount, 10 );
 
 			test( `Check that ${ name } has ${ expectedCount } JS files`, async ( {
 				page,
 			} ) => {
-				await page.goto( url, { waitUntil: 'networkidle' } );
+				await page.goto( url );
 				const javascriptFiles = await page.$$eval(
 					'script[src]',
 					( scripts ) => scripts.length
@@ -82,12 +82,12 @@ test.describe(
 		for ( const row of merchantPages ) {
 			const url = row.url;
 			const name = row.name;
-			const expectedCount = parseInt( row.expectedCount );
+			const expectedCount = parseInt( row.expectedCount, 10 );
 
 			test( `Check that ${ name } has ${ expectedCount } JS files`, async ( {
 				page,
 			} ) => {
-				await page.goto( url, { waitUntil: 'networkidle' } );
+				await page.goto( url );
 				const javascriptFiles = await page.$$eval(
 					'script[src]',
 					( scripts ) => scripts.length
