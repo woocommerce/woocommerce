@@ -14,13 +14,13 @@ import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
+
 /**
  * Internal dependencies
  */
 import { FontFamily, FontFace } from '../../types/font';
 import { usePatterns } from '../hooks/use-patterns';
 import { installFontFamilies } from '../utils/fonts';
-
 import { FONT_FAMILIES_TO_INSTALL } from '../sidebar/global-styles/font-pairing-variations/constants';
 import { OptInContext, OPTIN_FLOW_STATUS } from './context';
 
@@ -43,10 +43,6 @@ export const OptInSubscribe = () => {
 	const {
 		// @ts-expect-error No types for this exist yet.
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
-		// @ts-expect-error No types for this exist yet.
-		invalidateResolutionForStoreSelector,
-		// @ts-expect-error No types for this exist yet.
-		invalidateResolution,
 	} = useDispatch( coreStore );
 
 	const installPatterns = async () => {
@@ -66,7 +62,8 @@ export const OptInSubscribe = () => {
 			select( coreStore ).__experimentalGetCurrentGlobalStylesId();
 
 		const installedFontFamilies = ( await resolveSelect(
-			'core'
+			coreStore
+			// @ts-expect-error No types for this exist yet.
 		).getEntityRecords( 'postType', 'wp_font_family', {
 			_embed: true,
 			per_page: -1,
