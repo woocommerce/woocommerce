@@ -44,57 +44,116 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
-	test( 'Is not rendered when empty unless No Results block is present', async ( {
-		admin,
-		page,
-		pageObject,
-	} ) => {
-		await admin.createNewPost();
-
-		await pageObject.insertProductCollection();
-		await pageObject.chooseCollectionInPost( 'featured' );
-		await pageObject.addFilter( 'Price Range' );
-		await pageObject.setPriceRange( {
-			max: '1',
+	test.describe( 'when no results are found', () => {
+		test.beforeEach( async ( { admin } ) => {
+			await admin.createNewPost();
 		} );
 
-		const featuredBlock = page.getByLabel( 'Block: Featured' );
+		test( 'does not render', async ( { page, pageObject } ) => {
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				max: '1',
+			} );
 
-		await expect(
-			featuredBlock.getByText( 'Featured products' )
-		).toBeVisible();
-		// The "No results found" info is rendered in editor for all collections.
-		await expect(
-			featuredBlock.getByText( 'No results found' )
-		).toBeVisible();
+			const featuredBlock = page.getByLabel( 'Block: Featured' );
 
-		await pageObject.insertProductCollection();
-		await pageObject.chooseCollectionInPost( 'productCatalog' );
-		await pageObject.addFilter( 'Price Range' );
-		await pageObject.setPriceRange( {
-			max: '1',
+			await expect(
+				featuredBlock.getByText( 'Featured products' )
+			).toBeVisible();
+			// The "No results found" info is rendered in editor for all collections.
+			await expect(
+				featuredBlock.getByText( 'No results found' )
+			).toBeVisible();
+
+			await pageObject.publishAndGoToFrontend();
+
+			const content = page.locator( 'main' );
+
+			await expect( content ).not.toContainText( 'Featured products' );
+			await expect( content ).not.toContainText( 'No results found' );
 		} );
 
-		const productCatalogBlock = page.getByLabel(
-			'Block: Product Collection'
-		);
+		test( 'does not prevent subsequent blocks from render', async ( {
+			page,
+			pageObject,
+		} ) => {
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				max: '1',
+			} );
 
-		await expect(
-			productCatalogBlock.getByText( 'No results found' )
-		).toBeVisible();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'topRated' );
 
-		await pageObject.publishAndGoToFrontend();
+			await pageObject.refreshLocators( 'editor' );
+			await expect( pageObject.products ).toHaveCount( 5 );
 
-		const collectionBlock = page.locator(
-			'.wp-block-woocommerce-product-collection'
-		);
+			await pageObject.publishAndGoToFrontend();
 
-		await expect( collectionBlock ).toHaveCount( 1 );
-		await expect( collectionBlock ).not.toContainText(
-			'Featured products'
-		);
-		await expect( collectionBlock ).toBeVisible();
-		await expect( collectionBlock ).toContainText( 'No results found' );
+			await pageObject.refreshLocators( 'frontend' );
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( page.locator( 'main' ) ).not.toContainText(
+				'Featured products'
+			);
+		} );
+
+		test( 'renders if No Results block is present', async ( {
+			page,
+			pageObject,
+		} ) => {
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'productCatalog' );
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				max: '1',
+			} );
+
+			const noResultsFoundText = page.getByText( 'No results found' );
+
+			await expect( noResultsFoundText ).toBeVisible();
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( noResultsFoundText ).toBeVisible();
+		} );
+
+		// See https://github.com/woocommerce/woocommerce/pull/50404#discussion_r1709377484
+		test( 'renders if No Results block is above the Product Template block', async ( {
+			page,
+			editor,
+			pageUtils,
+			pageObject,
+		} ) => {
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'productCatalog' );
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				max: '1',
+			} );
+
+			const noResultsBlockSelector =
+				'[data-type="woocommerce/product-collection-no-results"]';
+			const productTemplateBlockSelector =
+				'[data-type="woocommerce/product-template"]';
+
+			// Move the No Results block to the top.
+			await editor.selectBlocks( page.locator( noResultsBlockSelector ) );
+			await pageUtils.pressKeys( 'secondary+t', { times: 2 } );
+
+			await expect(
+				page.locator(
+					`${ noResultsBlockSelector }:above(${ productTemplateBlockSelector })`
+				)
+			).toBeVisible();
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( page.getByText( 'No results found' ) ).toBeVisible();
+		} );
 	} );
 
 	test.describe( 'Renders correctly with all Product Elements', () => {
