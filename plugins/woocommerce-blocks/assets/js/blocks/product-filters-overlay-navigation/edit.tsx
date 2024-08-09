@@ -132,10 +132,8 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 		} ),
 	} );
 	const {
-		isWithinProductFiltersTemplatePart,
 		isWithinProductFiltersOverlayTemplatePart,
 	}: {
-		isWithinProductFiltersTemplatePart: boolean;
 		isWithinProductFiltersOverlayTemplatePart: boolean;
 	} = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -145,7 +143,6 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 		const currentPostId = getCurrentPostId< string >();
 		const currentPostIdParts = currentPostId?.split( '//' );
 		const currentPostType = getCurrentPostType< string >();
-		let isProductFiltersTemplatePart = false;
 		let isProductFiltersOverlayTemplatePart = false;
 
 		if (
@@ -153,13 +150,11 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 			currentPostIdParts?.length > 1
 		) {
 			const [ , postId ] = currentPostIdParts;
-			isProductFiltersTemplatePart = postId === 'product-filters';
 			isProductFiltersOverlayTemplatePart =
 				postId === 'product-filters-overlay';
 		}
 
 		return {
-			isWithinProductFiltersTemplatePart: isProductFiltersTemplatePart,
 			isWithinProductFiltersOverlayTemplatePart:
 				isProductFiltersOverlayTemplatePart,
 		};
@@ -171,10 +166,6 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 				productFiltersOverlayMode ===
 				ProductFiltersBlockOverlayAttribute.NEVER
 			) {
-				return true;
-			}
-
-			if ( isWithinProductFiltersTemplatePart ) {
 				return true;
 			}
 
