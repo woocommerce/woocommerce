@@ -5,6 +5,8 @@ import { Cart, CartItem } from '@woocommerce/types';
 import { dispatch, select } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __, sprintf } from '@wordpress/i18n';
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis, @woocommerce/dependency-group
+import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 
 /**
  * Internal dependencies
@@ -26,6 +28,9 @@ const isWithinQuantityLimits = ( cartItem: CartItem ) => {
 	);
 };
 
+const stripAndDecode = ( text: string ) => {
+	return stripHTML( decodeEntities( text ) );
+};
 const notifyIfQuantityLimitsChanged = ( oldCart: Cart, newCart: Cart ) => {
 	newCart.items.forEach( ( cartItem ) => {
 		const oldCartItem = oldCart.items.find( ( item ) => {
@@ -65,7 +70,7 @@ const notifyIfQuantityLimitsChanged = ( oldCart: Cart, newCart: Cart ) => {
 						'The quantity of "%1$s" was changed to %2$d. You must purchase this product in groups of %3$d.',
 						'woocommerce'
 					),
-					decodeEntities( cartItem.name ),
+					stripAndDecode( cartItem.name ),
 					// We round down to the nearest step value here. We need to do it this way because at this point we
 					// don't know the next quantity. That only gets set once the HTML Input field applies its min/max
 					// constraints.
@@ -92,7 +97,7 @@ const notifyIfQuantityLimitsChanged = ( oldCart: Cart, newCart: Cart ) => {
 						'The quantity of "%1$s" was increased to %2$d. This is the minimum required quantity.',
 						'woocommerce'
 					),
-					decodeEntities( cartItem.name ),
+					stripAndDecode( cartItem.name ),
 					cartItem.quantity_limits.minimum
 				),
 				{
@@ -113,7 +118,7 @@ const notifyIfQuantityLimitsChanged = ( oldCart: Cart, newCart: Cart ) => {
 					'The quantity of "%1$s" was decreased to %2$d. This is the maximum allowed quantity.',
 					'woocommerce'
 				),
-				decodeEntities( cartItem.name ),
+				stripAndDecode( cartItem.name ),
 				cartItem.quantity_limits.maximum
 			),
 			{
@@ -154,7 +159,7 @@ const notifyIfQuantityChanged = (
 							'The quantity of "%1$s" was changed to %2$d.',
 							'woocommerce'
 						),
-						decodeEntities( cartItem.name ),
+						stripAndDecode( cartItem.name ),
 						cartItem.quantity
 					),
 					{
@@ -196,13 +201,14 @@ const notifyIfRemoved = (
 				sprintf(
 					/* translators: %s is the name of the item. */
 					__( '"%s" was removed from your cart.', 'woocommerce' ),
-					decodeEntities( oldCartItem.name )
+					stripAndDecode( oldCartItem.name )
 				),
 				{
 					context: 'wc/cart',
 					speak: true,
 					type: 'snackbar',
 					id: `${ oldCartItem.key }-removed`,
+					__unstableHTML: true,
 				}
 			);
 		}
