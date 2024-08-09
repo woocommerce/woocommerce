@@ -45,7 +45,6 @@ import { addFilter } from '@wordpress/hooks';
 import { CustomizeStoreComponent } from '../types';
 import { Layout } from './layout';
 import './style.scss';
-import { PreloadFonts } from './preload-fonts';
 import { GoBackWarningModal } from './go-back-warning-modal';
 import { onBackButtonClicked } from '../utils';
 import { getNewPath } from '@woocommerce/navigation';
@@ -53,6 +52,8 @@ import useBodyClass from '../hooks/use-body-class';
 import { ZoomOutContextProvider } from './context/zoom-out-context';
 
 import './tracking';
+import { OptInSubscribe } from './opt-in/opt-in';
+import { OptInContextProvider } from './opt-in/context';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
@@ -190,14 +191,16 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 			) }
 			<CustomizeStoreContext.Provider value={ props }>
 				<ShortcutProvider style={ { height: '100%' } }>
-					<GlobalStylesProvider>
-						<RouterProvider>
-							<ZoomOutContextProvider>
-								<Layout />
-							</ZoomOutContextProvider>
-						</RouterProvider>
-						<PreloadFonts />
-					</GlobalStylesProvider>
+					<OptInContextProvider>
+						<GlobalStylesProvider>
+							<RouterProvider>
+								<ZoomOutContextProvider>
+									<Layout />
+								</ZoomOutContextProvider>
+							</RouterProvider>
+							<OptInSubscribe />
+						</GlobalStylesProvider>
+					</OptInContextProvider>
 				</ShortcutProvider>
 			</CustomizeStoreContext.Provider>
 		</>
