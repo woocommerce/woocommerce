@@ -308,8 +308,8 @@ function wc_trigger_stock_change_actions( $product ) {
 		do_action( 'woocommerce_low_stock', $product );
 	}
 }
-add_action( 'woocommerce_variation_set_stock', 'wc_trigger_stock_change_actions', 10, 1 );
-add_action( 'woocommerce_product_set_stock', 'wc_trigger_stock_change_actions', 10, 1 );
+add_action( 'woocommerce_variation_set_stock', 'wc_trigger_stock_change_actions' );
+add_action( 'woocommerce_product_set_stock', 'wc_trigger_stock_change_actions' );
 
 /**
  * Increase stock levels for items within an order.
