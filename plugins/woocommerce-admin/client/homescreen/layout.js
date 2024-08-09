@@ -27,7 +27,6 @@ import ActivityHeader from '~/activity-panel/activity-header';
 import { ActivityPanel } from './activity-panel';
 import { Column } from './column';
 import InboxPanel from '../inbox-panel';
-import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
 import {
@@ -162,9 +161,6 @@ export const Layout = ( {
 			>
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
-				{ window.wcAdminFeatures.navigation && (
-					<NavigationIntroModal />
-				) }
 			</div>
 		</>
 	);

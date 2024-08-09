@@ -41,6 +41,7 @@ function Iframe( {
 	readonly,
 	forwardedRef: ref,
 	title = __( 'Editor canvas', 'woocommerce' ),
+	canEnableZoomOutView = false,
 	...props
 } ) {
 	const { resolvedAssets } = useSelect( ( select ) => {
@@ -123,7 +124,7 @@ function Iframe( {
 		};
 	}, [] );
 
-	const isZoomedOut = scale !== 1;
+	const isZoomedOut = scale !== 1 && canEnableZoomOutView;
 
 	useEffect( () => {
 		if ( ! isZoomedOut && ! prevContainerWidth.current ) {
@@ -180,7 +181,7 @@ function Iframe( {
 	useEffect( () => cleanup, [ cleanup ] );
 
 	useEffect( () => {
-		if ( ! iframeDocument || ! isZoomedOut ) {
+		if ( ! canEnableZoomOutView || ! iframeDocument || ! isZoomedOut ) {
 			return;
 		}
 
@@ -247,6 +248,7 @@ function Iframe( {
 		containerWidth,
 		windowInnerWidth,
 		isZoomedOut,
+		canEnableZoomOutView,
 	] );
 
 	const iframe = (
