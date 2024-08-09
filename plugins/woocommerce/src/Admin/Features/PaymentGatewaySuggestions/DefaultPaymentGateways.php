@@ -65,6 +65,13 @@ class DefaultPaymentGateways {
 							'CA',
 						)
 					),
+					(object) array(
+						'type'     => 'or',
+						'operands' => array(
+							self::get_rules_for_wcpay_activated( false ),
+							self::get_rules_for_wcpay_connected( false ),
+						),
+					),
 				),
 				'category_other'      => array(),
 				'category_additional' => array(
@@ -86,6 +93,13 @@ class DefaultPaymentGateways {
 							'CA',
 							'AU',
 						)
+					),
+					(object) array(
+						'type'     => 'or',
+						'operands' => array(
+							self::get_rules_for_wcpay_activated( false ),
+							self::get_rules_for_wcpay_connected( false ),
+						),
 					),
 				),
 				'category_other'      => array(),
@@ -250,6 +264,19 @@ class DefaultPaymentGateways {
 						)
 					),
 					self::get_rules_for_cbd( false ),
+					(object) array(
+						'type'     => 'or',
+						'operands' => array(
+							(object) array(
+								'type'    => 'not',
+								'operand' => array(
+									self::get_rules_for_countries( self::get_wcpay_countries() ),
+								),
+							),
+							self::get_rules_for_wcpay_activated( false ),
+							self::get_rules_for_wcpay_connected( false ),
+						),
+					),
 				),
 				'category_other'      => array(),
 				'category_additional' => array(
@@ -863,6 +890,47 @@ class DefaultPaymentGateways {
 				),
 			),
 			array(
+				'id'          => 'woocommerce_payments:bnpl',
+				'title'       => __( 'Activate BNPL instantly on WooPayments', 'woocommerce' ),
+				'content'     => __(
+					'The world’s favorite buy now, pay later options and many more are right at your fingertips with WooPayments — all from one dashboard, without needing multiple extensions and logins.',
+					'woocommerce'
+				),
+				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay-bnpl.svg',
+				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/wcpay-bnpl.svg',
+				'plugins'     => array( 'woocommerce-payments' ),
+				'is_visible'  => array(
+					self::get_rules_for_countries(
+						array_intersect(
+							array(
+								'US',
+								'CA',
+								'AU',
+								'AT',
+								'BE',
+								'CH',
+								'DK',
+								'ES',
+								'FI',
+								'FR',
+								'DE',
+								'GB',
+								'IT',
+								'NL',
+								'NO',
+								'PL',
+								'SE',
+								'NZ',
+							),
+							self::get_wcpay_countries()
+						),
+					),
+					self::get_rules_for_cbd( false ),
+					self::get_rules_for_wcpay_activated( true ),
+					self::get_rules_for_wcpay_connected( true ),
+				),
+			),
+			array(
 				'id'                  => 'zipmoney',
 				'title'               => __( 'Zip Co - Buy Now, Pay Later', 'woocommerce' ),
 				'content'             => __( 'Give your customers the power to pay later, interest free and watch your sales grow.', 'woocommerce' ),
@@ -976,7 +1044,7 @@ class DefaultPaymentGateways {
 	 * Get default rules for CBD based on given argument.
 	 *
 	 * @param bool $should_have Whether or not the store should have CBD as an industry (true) or not (false).
-	 * @return array Rules to match.
+	 * @return object Rules to match.
 	 */
 	public static function get_rules_for_cbd( $should_have ) {
 		return (object) array(
@@ -1003,6 +1071,62 @@ class DefaultPaymentGateways {
 	}
 
 	/**
+	 * Get default rules for the WooPayments plugin being installed and activated.
+	 *
+	 * @param bool $should_be Whether WooPayments should be activated.
+	 *
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_for_wcpay_activated( $should_be ) {
+		$active_rule = (object) array(
+			'type'    => 'plugins_activated',
+			'plugins' => array( 'woocommerce-payments' ),
+		);
+
+		if ( $should_be ) {
+			return $active_rule;
+		}
+
+		return (object) array(
+			'type'    => 'not',
+			'operand' => array( $active_rule ),
+		);
+	}
+
+	/**
+	 * Get default rules for WooPayments being connected or not.
+	 *
+	 * This does not include the check for the WooPayments plugin to be active.
+	 *
+	 * @param bool $should_be Whether WooPayments should be connected.
+	 *
+	 * @return object Rules to match.
+	 */
+	public static function get_rules_for_wcpay_connected( $should_be ) {
+		return (object) array(
+			'type'         => 'option',
+			'transformers' => array(
+				// Extract only the 'data' key from the option.
+				(object) array(
+					'use'       => 'dot_notation',
+					'arguments' => (object) array(
+						'path' => 'data',
+					),
+				),
+				// Extract the keys from the data array.
+				(object) array(
+					'use' => 'array_keys',
+				),
+			),
+			'option_name'  => 'wcpay_account_data',
+			// The rule will be look for the 'account_id' key in the account data array.
+			'operation'    => $should_be ? 'contains' : '!contains',
+			'value'        => 'account_id',
+			'default'      => array(),
+		);
+	}
+
+	/**
 	 * Get recommendation priority for a given payment gateway by id and country.
 	 * If country is not supported, return null.
 	 *
@@ -1013,6 +1137,8 @@ class DefaultPaymentGateways {
 	private static function get_recommendation_priority( $gateway_id, $country_code ) {
 		$recommendation_priority_map = array(
 			'US' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1023,6 +1149,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 			),
 			'CA' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1032,6 +1160,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 			),
 			'AT' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1041,6 +1171,8 @@ class DefaultPaymentGateways {
 				'amazon_payments_advanced',
 			),
 			'BE' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1049,26 +1181,63 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'BG' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
-			'HR' => array( 'woocommerce_payments', 'ppcp-gateway' ),
+			'BG' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+			),
+			'HR' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'ppcp-gateway',
+			),
 			'CH' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
 			),
-			'CY' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
-			'CZ' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
+			'CY' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'amazon_payments_advanced',
+			),
+			'CZ' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+			),
 			'DK' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'EE' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'airwallex_main' ),
+			'EE' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'airwallex_main',
+			),
 			'ES' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1078,6 +1247,8 @@ class DefaultPaymentGateways {
 				'amazon_payments_advanced',
 			),
 			'FI' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1086,6 +1257,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 			),
 			'FR' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1096,6 +1269,8 @@ class DefaultPaymentGateways {
 				'amazon_payments_advanced',
 			),
 			'DE' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1105,6 +1280,8 @@ class DefaultPaymentGateways {
 				'amazon_payments_advanced',
 			),
 			'GB' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1114,9 +1291,25 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'GR' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'airwallex_main' ),
-			'HU' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'GR' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'airwallex_main',
+			),
+			'HU' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'amazon_payments_advanced',
+			),
 			'IE' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1125,6 +1318,8 @@ class DefaultPaymentGateways {
 				'amazon_payments_advanced',
 			),
 			'IT' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1133,11 +1328,38 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'LV' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
-			'LT' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
-			'LU' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
-			'MT' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
+			'LV' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+			),
+			'LT' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+			),
+			'LU' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'amazon_payments_advanced',
+			),
+			'MT' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+			),
 			'NL' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1146,8 +1368,18 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'NO' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'kco', 'klarna_payments' ),
+			'NO' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'kco',
+				'klarna_payments',
+			),
 			'PL' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1156,16 +1388,39 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 			),
 			'PT' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'airwallex_main',
 				'amazon_payments_advanced',
 			),
-			'RO' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
-			'SK' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
-			'SL' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'RO' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+			),
+			'SK' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+			),
+			'SL' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'amazon_payments_advanced',
+			),
 			'SE' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1194,6 +1449,8 @@ class DefaultPaymentGateways {
 			'UY' => array( 'woo-mercado-pago-custom', 'ppcp-gateway' ),
 			'VE' => array( 'ppcp-gateway' ),
 			'AU' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'airwallex_main',
@@ -1203,6 +1460,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 			),
 			'NZ' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'airwallex_main',
@@ -1210,6 +1469,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 			),
 			'HK' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'airwallex_main',
@@ -1217,13 +1478,22 @@ class DefaultPaymentGateways {
 				'payoneer-checkout',
 			),
 			'JP' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'square_credit_card',
 				'amazon_payments_advanced',
 			),
-			'SG' => array( 'woocommerce_payments', 'stripe', 'airwallex_main', 'ppcp-gateway' ),
+			'SG' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+				'stripe',
+				'airwallex_main',
+				'ppcp-gateway',
+			),
 			'CN' => array( 'airwallex_main', 'ppcp-gateway', 'payoneer-checkout' ),
 			'FJ' => array(),
 			'GU' => array(),
@@ -1232,7 +1502,11 @@ class DefaultPaymentGateways {
 			'ZA' => array( 'payfast', 'paystack' ),
 			'NG' => array( 'paystack' ),
 			'GH' => array( 'paystack' ),
-			'AE' => array( 'woocommerce_payments' ),
+			'AE' => array(
+				'woocommerce_payments:with-in-person-payments',
+				'woocommerce_payments:without-in-person-payments',
+				'woocommerce_payments',
+			),
 		);
 
 		// If the country code is not in the list, return default priority.

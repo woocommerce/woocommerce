@@ -11,8 +11,47 @@ test.describe( 'WooCommerce General Settings', { tag: '@services' }, () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
+		await api.post( 'settings/general/batch', {
+			update: [
+				{
+					id: 'woocommerce_store_address',
+					value: 'addr 1',
+				},
+				{
+					id: 'woocommerce_store_city',
+					value: 'San Francisco',
+				},
+				{
+					id: 'woocommerce_default_country',
+					value: 'US:CA',
+				},
+				{
+					id: 'woocommerce_store_postcode',
+					value: '94107',
+				},
+				{
+					id: 'woocommerce_currency_pos',
+					value: 'left',
+				},
+				{
+					id: 'woocommerce_price_thousand_sep',
+					value: ',',
+				},
+				{
+					id: 'woocommerce_price_decimal_sep',
+					value: '.',
+				},
+				{
+					id: 'woocommerce_price_num_decimals',
+					value: '2',
+				},
+			],
+		} );
 		await api.put( 'settings/general/woocommerce_allowed_countries', {
 			value: 'all',
+		} );
+		await api.put( 'settings/general/woocommerce_currency', {
+			value: 'USD',
 		} );
 	} );
 
@@ -27,7 +66,9 @@ test.describe( 'WooCommerce General Settings', { tag: '@services' }, () => {
 		);
 
 		// See the Save changes button is disabled.
-		await expect( page.locator( 'text=Save changes' ) ).toBeDisabled();
+		await expect(
+			page.getByRole( 'button', { name: 'Save changes' } )
+		).toBeDisabled();
 
 		// Change the base location
 		await page
@@ -51,39 +92,19 @@ test.describe( 'WooCommerce General Settings', { tag: '@services' }, () => {
 			.locator( '#woocommerce_allowed_countries' )
 			.selectOption( 'all_except' );
 
+		// Set the new store address
+		await page.locator( '#woocommerce_store_address' ).fill( '5th Avenue' );
+		await page.locator( '#woocommerce_store_city' ).fill( 'New York' );
+		await page.locator( '#woocommerce_store_postcode' ).fill( '10010' );
+		await page
+			.locator( 'select[name="woocommerce_currency"]' )
+			.selectOption( 'CAD' );
+
 		// Set selling location to all countries first so we can
 		// choose California as base location.
 		await page
 			.locator( '#woocommerce_allowed_countries' )
 			.selectOption( 'all' );
-		await page.locator( 'text=Save changes' ).click();
-
-		// confirm setting saved
-		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
-		await expect(
-			page.locator( '#woocommerce_allowed_countries' )
-		).toHaveValue( 'all' );
-
-		// set the base location with state NC so we can save.
-		await page
-			.locator( 'select[name="woocommerce_default_country"]' )
-			.selectOption( 'US:NC' );
-
-		// set the base location with state CA.
-		await page
-			.locator( 'select[name="woocommerce_default_country"]' )
-			.selectOption( 'US:CA' );
-		await page.locator( 'text=Save changes' ).click();
-
-		// verify the settings have been saved
-		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
-			'Your settings have been saved.'
-		);
-		await expect(
-			page.locator( 'select[name="woocommerce_default_country"]' )
-		).toHaveValue( 'US:CA' );
 
 		// Set selling location to specific countries first, so we can choose U.S as base location (without state).
 		// This will makes specific countries option appears.
@@ -95,26 +116,55 @@ test.describe( 'WooCommerce General Settings', { tag: '@services' }, () => {
 				'select[data-placeholder="Choose countries / regions…"] >> nth=1'
 			)
 			.selectOption( 'US' );
+		await page
+			.locator( 'select[name="woocommerce_default_country"]' )
+			.selectOption( 'US:NY' );
+
+		// Set currency position left with space
+		await page
+			.locator( 'select[name="woocommerce_currency_pos"]' )
+			.selectOption( 'left_space' );
 
 		// Set currency options
-		await page.locator( '#woocommerce_price_thousand_sep' ).fill( ',' );
-		await page.locator( '#woocommerce_price_decimal_sep' ).fill( '.' );
-		await page.locator( '#woocommerce_price_num_decimals' ).fill( '2' );
+		await page.locator( '#woocommerce_price_thousand_sep' ).fill( '.' );
+		await page.locator( '#woocommerce_price_decimal_sep' ).fill( ',' );
+		await page.locator( '#woocommerce_price_num_decimals' ).fill( '1' );
 
-		await page.locator( 'text=Save changes' ).click();
-
-		// verify that settings have been saved
+		// Save settings and verify the changes
+		await page.getByRole( 'button', { name: 'Save changes' } ).click();
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(
 			'Your settings have been saved.'
 		);
+
+		await expect(
+			page.locator( '#woocommerce_store_address' )
+		).toHaveValue( '5th Avenue' );
+		await expect( page.locator( '#woocommerce_store_city' ) ).toHaveValue(
+			'New York'
+		);
+		await expect(
+			page.locator( '#woocommerce_store_postcode' )
+		).toHaveValue( '10010' );
+		await expect(
+			page.locator( 'select[name="woocommerce_default_country"]' )
+		).toHaveValue( 'US:NY' );
+		await expect(
+			page.locator( 'select[name="woocommerce_currency"]' )
+		).toHaveValue( 'CAD' );
+		await expect(
+			page.locator( '#woocommerce_allowed_countries' )
+		).toHaveValue( 'specific' );
 		await expect(
 			page.locator( '#woocommerce_price_thousand_sep' )
-		).toHaveValue( ',' );
+		).toHaveValue( '.' );
+		await expect( page.locator( '#woocommerce_currency_pos' ) ).toHaveValue(
+			'left_space'
+		);
 		await expect(
 			page.locator( '#woocommerce_price_decimal_sep' )
-		).toHaveValue( '.' );
+		).toHaveValue( ',' );
 		await expect(
 			page.locator( '#woocommerce_price_num_decimals' )
-		).toHaveValue( '2' );
+		).toHaveValue( '1' );
 	} );
 } );

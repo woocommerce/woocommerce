@@ -322,7 +322,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/store-title',
+				path: '/wc-admin/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:
@@ -419,8 +419,7 @@ export const assembleSite = async (
 	try {
 		await updateTemplate( {
 			// TODO: Get from context
-			homepageTemplateId: context.aiSuggestions
-				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
+			homepageTemplateId: 'template1' as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
 		trackEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {

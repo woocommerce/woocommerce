@@ -24,9 +24,6 @@
 		"html": false,
 		"align": [ "wide", "full" ],
 		"anchor": true,
-		"__experimentalLayout": {
-			"allowEditing": false
-		},
 		"color": {
 			"gradients": true,
 			"link": true,

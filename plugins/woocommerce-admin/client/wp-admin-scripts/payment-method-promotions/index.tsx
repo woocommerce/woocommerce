@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+// @ts-expect-error -- @wordpress/element doesn't export createRoot until WP6.2
+// eslint-disable-next-line @woocommerce/dependency-group
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -34,7 +36,7 @@ PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
 		);
 		const subTitle = container.getElementsByClassName( 'gateway-subtitle' );
 
-		render(
+		createRoot( container ).render(
 			<PaymentPromotionRow
 				columns={ columns }
 				paymentMethod={ paymentMethod }
@@ -42,8 +44,7 @@ PAYMENT_METHOD_PROMOTIONS.forEach( ( paymentMethod ) => {
 				subTitleContent={
 					subTitle.length === 1 ? subTitle[ 0 ].innerHTML : undefined
 				}
-			/>,
-			container
+			/>
 		);
 	}
 } );

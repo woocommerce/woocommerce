@@ -71,6 +71,22 @@ export class Editor extends CoreEditor {
 		}
 	}
 
+	async revertTemplate( { templateName }: { templateName: string } ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+		await this.page.getByLabel( templateName, { exact: true } ).click();
+
+		await this.page.getByLabel( 'Actions' ).click();
+		await this.page
+			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
+			.click();
+		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await this.page
+			.getByLabel( 'Dismiss this notice' )
+			.getByText( /reset|deleted/ )
+			.waitFor();
+	}
+
 	async publishAndVisitPost() {
 		const postId = await this.publishPost();
 		await this.page.goto( `/?p=${ postId }` );

@@ -43,6 +43,7 @@ declare global {
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
 			'pattern-toolkit-full-composability': boolean;
+			printful: boolean;
 			'product-pre-publish-modal': boolean;
 			'product-custom-fields': boolean;
 			'remote-inbox-notifications': boolean;
@@ -58,6 +59,7 @@ declare global {
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
+			'reactify-classic-payments-settings': boolean;
 		};
 		wp: {
 			updates?: {

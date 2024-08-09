@@ -1,21 +1,40 @@
 /**
  * External dependencies
  */
+import { filter, filterThreeLines } from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
+import { AttributeSetting } from '@woocommerce/types';
 import {
 	InnerBlocks,
+	InspectorControls,
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { useCollection } from '@woocommerce/base-context/hooks';
-import { AttributeTerm } from '@woocommerce/types';
-import { Spinner } from '@wordpress/components';
+import { Icon, menu, settings } from '@wordpress/icons';
+import {
+	ExternalLink,
+	PanelBody,
+	RadioControl,
+	RangeControl,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import type { ProductFiltersBlockAttributes } from './types';
+import './editor.scss';
+import type { BlockAttributes } from './types';
+
+const defaultAttribute = getSetting< AttributeSetting >(
+	'defaultProductFilterAttribute'
+);
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -51,8 +70,8 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		'woocommerce/product-filter',
 		{
 			filterType: 'attribute-filter',
-			heading: __( 'Attribute', 'woocommerce' ),
-			attributeId: 0,
+			heading: defaultAttribute.attribute_label,
+			attributeId: parseInt( defaultAttribute.attribute_id, 10 ),
 		},
 	],
 	[
@@ -62,68 +81,199 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			heading: __( 'Rating', 'woocommerce' ),
 		},
 	],
+	[
+		'core/buttons',
+		{ layout: { type: 'flex' } },
+		[
+			[
+				'core/button',
+				{
+					text: __( 'Apply', 'woocommerce' ),
+					className: 'wc-block-product-filters__apply-button',
+					style: {
+						border: {
+							width: '0px',
+							style: 'none',
+						},
+						typography: {
+							textDecoration: 'none',
+						},
+						outline: 'none',
+						fontSize: 'medium',
+					},
+				},
+			],
+		],
+	],
 ];
 
-const addHighestProductCountAttributeToTemplate = (
-	template: InnerBlockTemplate[],
-	highestProductCountAttribute: AttributeTerm | null
-): InnerBlockTemplate[] => {
-	if ( highestProductCountAttribute === null ) return template;
-
-	return template.map( ( block ) => {
-		const blockNameIndex = 0;
-		const blockAttributesIndex = 1;
-		const blockName = block[ blockNameIndex ];
-		const blockAttributes = block[ blockAttributesIndex ];
-		if (
-			blockName === 'woocommerce/product-filter' &&
-			blockAttributes?.filterType === 'attribute-filter'
-		) {
-			return [
-				blockName,
-				{
-					...blockAttributes,
-					heading: highestProductCountAttribute.name,
-					attributeId: highestProductCountAttribute.id,
-				},
-			];
-		}
-
-		return block;
-	} );
-};
-
-export const Edit = ( {}: BlockEditProps< ProductFiltersBlockAttributes > ) => {
+export const Edit = ( {
+	setAttributes,
+	attributes,
+}: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps();
-	const { results: attributes, isLoading } = useCollection< AttributeTerm >( {
-		namespace: '/wc/store/v1',
-		resourceName: 'products/attributes',
-	} );
 
-	const highestProductCountAttribute =
-		attributes.reduce< AttributeTerm | null >(
-			( attributeWithMostProducts, attribute ) => {
-				if ( attributeWithMostProducts === null ) {
-					return attribute;
-				}
-				return attribute.count > attributeWithMostProducts.count
-					? attribute
-					: attributeWithMostProducts;
-			},
-			null
-		);
-	const updatedTemplate = addHighestProductCountAttributeToTemplate(
-		TEMPLATE,
-		highestProductCountAttribute
+	const templatePartEditUri = getSetting< string >(
+		'templatePartProductFiltersOverlayEditUri',
+		''
 	);
-
-	if ( isLoading ) {
-		return <Spinner />;
-	}
 
 	return (
 		<div { ...blockProps }>
-			<InnerBlocks templateLock={ false } template={ updatedTemplate } />
+			<InspectorControls>
+				<PanelBody title={ __( 'Overlay', 'woocommerce' ) }>
+					<ToggleGroupControl
+						className="wc-block-editor-product-filters__overlay-toggle"
+						isBlock={ true }
+						value={ attributes.overlay }
+						onChange={ ( value: BlockAttributes[ 'overlay' ] ) => {
+							setAttributes( { overlay: value } );
+						} }
+					>
+						<ToggleGroupControlOption
+							value={ 'never' }
+							label={ __( 'Never', 'woocommerce' ) }
+						/>
+						<ToggleGroupControlOption
+							value={ 'mobile' }
+							label={ __( 'Mobile', 'woocommerce' ) }
+						/>
+						<ToggleGroupControlOption
+							value={ 'always' }
+							label={ __( 'Always', 'woocommerce' ) }
+						/>
+					</ToggleGroupControl>
+					{ attributes.overlay === 'mobile' && (
+						<>
+							<RadioControl
+								className="wc-block-editor-product-filters__overlay-button-style-toggle"
+								label={ __( 'Button', 'woocommerce' ) }
+								selected={ attributes.overlayButtonStyle }
+								onChange={ (
+									value: BlockAttributes[ 'overlayButtonStyle' ]
+								) => {
+									setAttributes( {
+										overlayButtonStyle: value,
+									} );
+								} }
+								options={ [
+									{
+										value: 'label-icon',
+										label: __(
+											'Label and icon',
+											'woocommerce'
+										),
+									},
+									{
+										value: 'label',
+										label: __(
+											'Label only',
+											'woocommerce'
+										),
+									},
+									{
+										value: 'icon',
+										label: __( 'Icon only', 'woocommerce' ),
+									},
+								] }
+							/>
+							{ attributes.overlayButtonStyle !== 'label' && (
+								<>
+									<ToggleGroupControl
+										className="wc-block-editor-product-filters__overlay-button-toggle"
+										isBlock={ true }
+										value={ attributes.overlayIcon }
+										onChange={ (
+											value: BlockAttributes[ 'overlayIcon' ]
+										) => {
+											setAttributes( {
+												overlayIcon: value,
+											} );
+										} }
+									>
+										<ToggleGroupControlOption
+											value={ 'filter-icon-1' }
+											aria-label={ __(
+												'Filter icon 1',
+												'woocommerce'
+											) }
+											label={
+												<Icon
+													size={ 32 }
+													icon={ filter }
+												/>
+											}
+										/>
+										<ToggleGroupControlOption
+											value={ 'filter-icon-2' }
+											aria-label={ __(
+												'Filter icon 2',
+												'woocommerce'
+											) }
+											label={
+												<Icon
+													size={ 32 }
+													icon={ filterThreeLines }
+												/>
+											}
+										/>
+										<ToggleGroupControlOption
+											value={ 'filter-icon-3' }
+											aria-label={ __(
+												'Filter icon 3',
+												'woocommerce'
+											) }
+											label={
+												<Icon
+													size={ 32 }
+													icon={ menu }
+												/>
+											}
+										/>
+										<ToggleGroupControlOption
+											value={ 'filter-icon-4' }
+											aria-label={ __(
+												'Filter icon 4',
+												'woocommerce'
+											) }
+											label={
+												<Icon
+													size={ 32 }
+													icon={ settings }
+												/>
+											}
+										/>
+									</ToggleGroupControl>
+									<RangeControl
+										label={ __(
+											'Icon size',
+											'woocommerce'
+										) }
+										className="wc-block-editor-product-filters__overlay-button-size"
+										value={ attributes.overlayIconSize }
+										onChange={ ( value: number ) =>
+											setAttributes( {
+												overlayIconSize: value,
+											} )
+										}
+										min={ 20 }
+										max={ 80 }
+									/>
+								</>
+							) }
+						</>
+					) }
+					{ attributes.overlay !== 'never' && (
+						<ExternalLink
+							href={ templatePartEditUri }
+							className="wc-block-editor-product-filters__overlay-link"
+						>
+							{ __( 'Edit overlay', 'woocommerce' ) }
+						</ExternalLink>
+					) }
+				</PanelBody>
+			</InspectorControls>
+			<InnerBlocks templateLock={ false } template={ TEMPLATE } />
 		</div>
 	);
 };

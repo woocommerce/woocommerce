@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Manually initialize block template registry and controller for non-block themes.
+
