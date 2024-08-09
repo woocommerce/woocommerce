@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Cart block: Decode entities in quantity change notifications.
+Cart block: Strip HTML tags and decode HTML entities in quantity change notifications.
