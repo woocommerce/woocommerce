@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use WP_Block_Patterns_Registry;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Package;
@@ -697,13 +698,49 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Determines whether the provided $content contains a specific block type,
+	 * or if it contains a pattern that contains the block type.
+	 *
+	 * @param string $block_name Full block type to look for.
+	 * @param string $content    Content string.
+	 * @return bool Whether the content contains the specified block.
+	 */
+	private static function has_block_in_content_or_pattern( $block_name, $content ) {
+		if ( has_block( $block_name, $content ) ) {
+			return true;
+		}
+
+		if ( has_block( 'core/pattern', $content ) ) {
+			$template_blocks = parse_blocks( $content );
+
+			$blocks = self::flatten_blocks( $template_blocks );
+
+			foreach ( $blocks as &$block ) {
+				if (
+					'core/pattern' === $block['blockName'] &&
+					isset( $block['attrs']['slug'] )
+				) {
+					$registry = WP_Block_Patterns_Registry::get_instance();
+					$pattern  = $registry->get_registered( $block['attrs']['slug'] );
+
+					if ( self::has_block_in_content_or_pattern( $block_name, $pattern['content'] ) ) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Returns whether the passed `$template` has the legacy template block.
 	 *
 	 * @param object $template The template object.
 	 * @return boolean
 	 */
 	public static function template_has_legacy_template_block( $template ) {
-		return has_block( 'woocommerce/legacy-template', $template->content );
+		return self::has_block_in_content_or_pattern( 'woocommerce/legacy-template', $template->content );
 	}
 
 	/**
