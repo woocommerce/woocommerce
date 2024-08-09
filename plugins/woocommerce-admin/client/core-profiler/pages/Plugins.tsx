@@ -11,11 +11,12 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
+import { CoreProfilerStateMachineContext } from '../index';
 import {
-	CoreProfilerStateMachineContext,
-	PluginsLearnMoreLinkClicked,
-} from '../index';
-import { PluginsInstallationRequestedEvent, PluginsPageSkippedEvent } from '..';
+	PluginsLearnMoreLinkClickedEvent,
+	PluginsInstallationRequestedEvent,
+	PluginsPageSkippedEvent,
+} from '../events';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 import { PluginCard } from '../components/plugin-card/plugin-card';
@@ -45,7 +46,7 @@ export const Plugins = ( {
 		payload:
 			| PluginsInstallationRequestedEvent
 			| PluginsPageSkippedEvent
-			| PluginsLearnMoreLinkClicked
+			| PluginsLearnMoreLinkClickedEvent
 	) => void;
 	navigationProgress: number;
 } ) => {
@@ -173,7 +174,7 @@ export const Plugins = ( {
 					{ context.pluginsAvailable.map( ( plugin ) => {
 						const learnMoreLink = plugin.learn_more_link ? (
 							<Link
-								onClick={ () => {
+								onClick={ ( e ) => {
 									sendEvent( {
 										type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
 										payload: {
@@ -182,6 +183,7 @@ export const Plugins = ( {
 												plugin.learn_more_link ?? '',
 										},
 									} );
+									e.stopPropagation();
 								} }
 								href={ plugin.learn_more_link }
 								target="_blank"

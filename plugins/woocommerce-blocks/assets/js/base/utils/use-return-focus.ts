@@ -26,11 +26,6 @@ export function useFocusReturn(
 			// Set ref to be used when unmounting.
 			ref.current = node;
 
-			// Only set when the node mounts.
-			if ( focusedBeforeMount.current ) {
-				return;
-			}
-
 			focusedBeforeMount.current = node.ownerDocument.activeElement;
 		} else if ( focusedBeforeMount.current ) {
 			const isFocused = ref.current?.contains(

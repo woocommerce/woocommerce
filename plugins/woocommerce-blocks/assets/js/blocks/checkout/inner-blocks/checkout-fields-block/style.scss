@@ -60,3 +60,19 @@
 		}
 	}
 }
+
+.wc-block-components-address-form__address_2-toggle {
+	background: none;
+	border: none;
+	color: inherit;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	margin-top: $gap;
+	text-align: left;
+	width: 100%;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}

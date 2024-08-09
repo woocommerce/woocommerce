@@ -7,16 +7,20 @@ import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { resolveSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
-import classnames from 'classnames';
+import clsx from 'clsx';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 
 /**
  * Internal dependencies
  */
-import { createStorageUtils } from '~/utils/localStorage';
 import { taskCompleteIcon, taskIcons } from './components/icons';
 import { recordEvent } from '@woocommerce/tracks';
+import {
+	accessTaskReferralStorage,
+	createStorageUtils,
+} from '@woocommerce/onboarding';
+import { getAdminLink } from '@woocommerce/settings';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -84,6 +88,19 @@ export function taskClickedAction( event: {
 } ) {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 	saveRecentlyActionedTask( [ ...recentlyActionedTasks, event.task.id ] );
+	window.sessionStorage.setItem( 'lysWaiting', 'yes' );
+
+	const { setWithExpiry: saveTaskReferral } = accessTaskReferralStorage(
+		{ taskId: event.task.id, referralLifetime: 60 * 60 * 24 } // 24 hours
+	);
+
+	saveTaskReferral( {
+		referrer: 'launch-your-store',
+		returnUrl: getAdminLink(
+			'admin.php?page=wc-admin&path=/launch-your-store'
+		),
+	} );
+
 	recordEvent( 'launch_your_store_hub_task_clicked', {
 		task: event.task.id,
 	} );
@@ -101,7 +118,7 @@ export const CompletedTaskItem: React.FC< {
 	classNames?: string;
 } > = ( { task, classNames } ) => (
 	<SidebarNavigationItem
-		className={ classnames( task.id, 'is-complete', classNames ) }
+		className={ clsx( task.id, 'is-complete', classNames ) }
 		icon={ taskCompleteIcon }
 		disabled={ true }
 	>
@@ -115,7 +132,7 @@ export const IncompleteTaskItem: React.FC< {
 	onClick: () => void;
 } > = ( { task, classNames, onClick } ) => (
 	<SidebarNavigationItem
-		className={ classnames( task.id, classNames ) }
+		className={ clsx( task.id, classNames ) }
 		icon={ taskIcons[ task.id ] }
 		withChevron
 		onClick={ onClick }

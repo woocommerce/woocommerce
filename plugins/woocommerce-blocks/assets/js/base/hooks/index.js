@@ -8,3 +8,4 @@ export * from './use-typography-props';
 export * from './use-is-mounted';
 export * from './use-spoken-message';
 export * from './use-style-props';
+export * from './use-observed-viewport';

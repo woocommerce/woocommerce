@@ -112,13 +112,20 @@ class WC_Tracker {
 	 * However, there are version of JP where \Automattic\Jetpack\Status exists, but does *not* contain is_staging_site method,
 	 * so with those, code still needs to use the previous check as a fallback.
 	 *
+	 * After upgrading Jetpack Status to v3.3.2 is_staging_site is also deprecated and in_safe_mode is the new replacement.
+	 * So we check this first of all.
+	 *
 	 * @return bool
 	 */
 	private static function is_jetpack_staging_site() {
 		if ( class_exists( '\Automattic\Jetpack\Status' ) ) {
-			// Preferred way of checking with Jetpack 8.1+.
+
 			$jp_status = new \Automattic\Jetpack\Status();
-			if ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+
+			if ( is_callable( array( $jp_status, 'in_safe_mode' ) ) ) {
+				return $jp_status->in_safe_mode();
+			} elseif ( is_callable( array( $jp_status, 'is_staging_site' ) ) ) {
+				// Preferred way of checking with Jetpack 8.1+.
 				return $jp_status->is_staging_site();
 			}
 		}
@@ -946,7 +953,7 @@ class WC_Tracker {
 			'base_state'                            => WC()->countries->get_base_state(),
 			'base_postcode'                         => WC()->countries->get_base_postcode(),
 			'selling_locations'                     => WC()->countries->get_allowed_countries(),
-			'api_enabled'                           => get_option( 'woocommerce_api_enabled' ),
+			'api_enabled'                           => get_option( 'woocommerce_api_enabled', 'no' ),
 			'weight_unit'                           => get_option( 'woocommerce_weight_unit' ),
 			'dimension_unit'                        => get_option( 'woocommerce_dimension_unit' ),
 			'download_method'                       => get_option( 'woocommerce_file_download_method' ),
@@ -965,6 +972,7 @@ class WC_Tracker {
 			'hpos_transactions_enabled'             => get_option( 'woocommerce_use_db_transactions_for_custom_orders_table_data_sync' ),
 			'hpos_transactions_level'               => get_option( 'woocommerce_db_transactions_isolation_level_for_custom_orders_table_data_sync' ),
 			'show_marketplace_suggestions'          => get_option( 'woocommerce_show_marketplace_suggestions' ),
+			'admin_install_timestamp'               => get_option( 'woocommerce_admin_install_timestamp' ),
 		);
 	}
 
@@ -1162,5 +1170,3 @@ class WC_Tracker {
 		return get_option( 'woocommerce_mobile_app_usage' );
 	}
 }
-
-WC_Tracker::init();

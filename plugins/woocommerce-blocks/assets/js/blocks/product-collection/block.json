@@ -3,10 +3,10 @@
 	"apiVersion": 2,
 	"name": "woocommerce/product-collection",
 	"version": "1.0.0",
-	"title": "Product Collection (Beta)",
+	"title": "Product Collection",
 	"description": "Display a collection of products from your store.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce", "Products (Beta)" ],
+	"keywords": [ "WooCommerce", "Products (Beta)", "products" ],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"queryId": {
@@ -51,7 +51,7 @@
 		"collection": "collection",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
-	"usesContext": [ "templateSlug" ],
+	"usesContext": [ "templateSlug", "postId" ],
 	"supports": {
 		"align": [ "wide", "full" ],
 		"anchor": true,

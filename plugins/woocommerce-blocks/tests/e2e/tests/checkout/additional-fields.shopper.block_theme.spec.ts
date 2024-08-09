@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { customerFile } from '@woocommerce/e2e-utils';
+import { expect, test as base, customerFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -53,10 +52,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: {
@@ -64,26 +65,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						'What is your favourite colour?': 'Blue',
 					},
 				}
-			);
-
-			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
-			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
-			// by label alone is not reliable unless we know the value.
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Shipping address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
-
-			await checkoutPageObject.page.evaluate(
-				'document.activeElement.blur()'
 			);
 
 			await checkoutPageObject.page
@@ -156,7 +137,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Is this a personal purchase or a business purchase?'
 					)
-			).toHaveValue( 'Business' );
+			).toHaveValue( 'business' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
@@ -190,8 +171,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Shipping address',
 					} )
-					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Wide' );
+					.getByLabel( 'How wide is your road? (optional)' )
+			).toHaveValue( 'wide' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
@@ -218,8 +199,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Billing address',
 					} )
-					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Narrow' );
+					.getByLabel( 'How wide is your road? (optional)' )
+			).toHaveValue( 'narrow' );
 		} );
 
 		test( 'Shopper can change the values of fields multiple times and place the order', async ( {
@@ -241,10 +222,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: {
@@ -254,36 +237,23 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				}
 			);
 
-			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
-			// fields until we recreate the Combobox component. This is because the aria-label includes the value so getting
-			// by label alone is not reliable unless we know the value.
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Shipping address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
 			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			// Change the shipping and billing select fields again.
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Shipping address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'super-wide' );
+			await checkoutPageObject.fillInCheckoutWithTestData(
+				{},
+				{
+					address: {
+						shipping: {
+							'How wide is your road? (optional)': 'super-wide',
+						},
+						billing: {
+							'How wide is your road? (optional)': 'wide',
+						},
+					},
+				}
+			);
+
 			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
@@ -342,24 +312,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					},
 					order: {
 						'What is your favourite colour?': 'Red',
+						'How did you hear about us?':
+							'Select a how did you hear about us? (optional)',
 					},
 				}
 			);
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Additional order information',
-				} )
-				.getByLabel( 'How did you hear about us?' )
-				.click();
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Additional order information',
-				} )
-				.locator(
-					'ul.components-form-token-field__suggestions-list > li'
-				)
-				.first()
-				.click();
+
 			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.placeOrder();
@@ -425,10 +383,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': ' 1. 2 3 4 5 ',
 							'Confirm government ID': '1      2345',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': ' 5. 4 3 2 1 ',
 							'Confirm government ID': '543 21',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: {
@@ -436,26 +396,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						'What is your favourite colour?': 'Blue',
 					},
 				}
-			);
-
-			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
-			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
-			// by label alone is not reliable unless we know the value.
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Shipping address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
-
-			await checkoutPageObject.page.evaluate(
-				'document.activeElement.blur()'
 			);
 
 			await checkoutPageObject.page
@@ -528,7 +468,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Is this a personal purchase or a business purchase?'
 					)
-			).toHaveValue( 'Business' );
+			).toHaveValue( 'business' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
@@ -562,8 +502,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Shipping address',
 					} )
-					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Wide' );
+					.getByLabel( 'How wide is your road? (optional)' )
+			).toHaveValue( 'wide' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {
@@ -590,8 +530,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Billing address',
 					} )
-					.getByLabel( 'How wide is your road?' )
-			).toHaveValue( 'Narrow' );
+					.getByLabel( 'How wide is your road? (optional)' )
+			).toHaveValue( 'narrow' );
 		} );
 
 		test( 'Shopper can see server-side validation errors', async ( {
@@ -665,33 +605,16 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: { 'How did you hear about us?': 'Other' },
 				}
-			);
-
-			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
-			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
-			// by label alone is not reliable unless we know the value.
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Shipping address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
-			await checkoutPageObject.page.evaluate(
-				'document.activeElement.blur()'
 			);
 
 			await checkoutPageObject.placeOrder();
@@ -726,10 +649,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: { 'How did you hear about us?': 'Other' },
@@ -759,26 +684,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
 
-			// Fill select fields manually. (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
-			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
-			// by label alone is not reliable unless we know the value.
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Shipping address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'wide' );
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.fill( 'narrow' );
-
-			// Blur after editing the select fields since they need to be blurred to save.
-			await checkoutPageObject.page.evaluate(
-				'document.activeElement.blur()'
-			);
 			await checkoutPageObject.placeOrder();
 
 			expect(
@@ -856,7 +761,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			// Check select in edit mode match the expected value.
 			const roadSizeSelect = checkoutPageObject.page.getByLabel(
-				'How wide is your road?'
+				'How wide is your road? (optional)'
 			);
 			await expect( roadSizeSelect ).toHaveValue( 'narrow' );
 
@@ -919,14 +824,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			// Check select in edit mode match the expected value.
 			const shippingRoadSizeSelect = checkoutPageObject.page.getByLabel(
-				'How wide is your road?'
+				'How wide is your road? (optional)'
 			);
 			await expect( shippingRoadSizeSelect ).toHaveValue( 'wide' );
 
 			await govIdInput.fill( '11111' );
 			await confirmGovIdInput.fill( '11111' );
 			await shippingTruckFittingCheckbox.uncheck();
-			await shippingRoadSizeSelect.selectOption( 'Narrow' );
+			await shippingRoadSizeSelect.selectOption( 'narrow' );
 			await checkoutPageObject.page.getByText( 'Save address' ).click();
 
 			// Check the updated values are visible in the addresses.

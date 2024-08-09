@@ -26,23 +26,26 @@ trait OrderAttributionMeta {
 	 * */
 	private $default_fields = array(
 		// main fields.
-		'source_type'        => 'current.typ',
-		'referrer'           => 'current_add.rf',
+		'source_type'          => 'current.typ',
+		'referrer'             => 'current_add.rf',
 
 		// utm fields.
-		'utm_campaign'       => 'current.cmp',
-		'utm_source'         => 'current.src',
-		'utm_medium'         => 'current.mdm',
-		'utm_content'        => 'current.cnt',
-		'utm_id'             => 'current.id',
-		'utm_term'           => 'current.trm',
+		'utm_campaign'         => 'current.cmp',
+		'utm_source'           => 'current.src',
+		'utm_medium'           => 'current.mdm',
+		'utm_content'          => 'current.cnt',
+		'utm_id'               => 'current.id',
+		'utm_term'             => 'current.trm',
+		'utm_source_platform'  => 'current.plt',
+		'utm_creative_format'  => 'current.fmt',
+		'utm_marketing_tactic' => 'current.tct',
 
 		// additional fields.
-		'session_entry'      => 'current_add.ep',
-		'session_start_time' => 'current_add.fd',
-		'session_pages'      => 'session.pgs',
-		'session_count'      => 'udata.vst',
-		'user_agent'         => 'udata.uag',
+		'session_entry'        => 'current_add.ep',
+		'session_start_time'   => 'current_add.fd',
+		'session_pages'        => 'session.pgs',
+		'session_count'        => 'udata.vst',
+		'user_agent'           => 'udata.uag',
 	);
 
 	/** @var array */

@@ -12,7 +12,7 @@ use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
-
+use WC_Meta_Data;
 use WP_Block_Editor_Context;
 
 /**
@@ -56,11 +56,10 @@ class Init {
 		$this->redirection_controller = new RedirectionController();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
-				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
-				add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
-			}
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
+			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );
+
 			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 			add_filter( 'woocommerce_register_post_type_product_variation', array( $this, 'enable_rest_api_for_product_variation' ) );
@@ -73,6 +72,9 @@ class Init {
 			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
 			add_filter( 'woocommerce_get_block_types', array( $this, 'get_block_types' ), 999, 1 );
 
+			add_filter( 'woocommerce_rest_prepare_product_object', array( $this, 'possibly_add_template_id' ), 10, 2 );
+			add_filter( 'woocommerce_rest_prepare_product_variation_object', array( $this, 'possibly_add_template_id' ), 10, 2 );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -81,6 +83,37 @@ class Init {
 
 			$this->register_product_templates();
 		}
+	}
+
+
+	/**
+	 * Adds the product template ID to the product if it doesn't exist.
+	 *
+	 * @param WP_REST_Response $response The response object.
+	 * @param WC_Product       $product The product.
+	 */
+	public function possibly_add_template_id( $response, $product ) {
+		if ( ! $product ) {
+			return $response;
+		}
+		if ( ! $product->meta_exists( '_product_template_id' ) ) {
+			/**
+			 * Experimental: Allows to determine a product template id based on the product data.
+			 *
+			 * @ignore
+			 * @since 9.1.0
+			 */
+			$product_template_id = apply_filters( 'experimental_woocommerce_product_editor_product_template_id_for_product', '', $product );
+			if ( $product_template_id ) {
+				$response->data['meta_data'][] = new WC_Meta_Data(
+					array(
+						'key'   => '_product_template_id',
+						'value' => $product_template_id,
+					)
+				);
+			}
+		}
+		return $response;
 	}
 
 	/**
@@ -94,7 +127,7 @@ class Init {
 		$editor_settings = $this->get_product_editor_settings();
 
 		$script_handle = 'wc-admin-edit-product';
-		wp_register_script( $script_handle, '', array(), '0.1.0', true );
+		wp_register_script( $script_handle, '', array( 'wp-blocks' ), '0.1.0', true );
 		wp_enqueue_script( $script_handle );
 		wp_add_inline_script(
 			$script_handle,
@@ -117,9 +150,10 @@ class Init {
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_page() ) {
 			return;
 		}
+		wp_enqueue_style( 'wc-product-editor' );
 		wp_enqueue_style( 'wp-edit-blocks' );
 		wp_enqueue_style( 'wp-format-library' );
 		wp_enqueue_editor();
@@ -135,7 +169,7 @@ class Init {
 	 * Dequeue conflicting styles.
 	 */
 	public function dequeue_conflicting_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_page() ) {
 			return;
 		}
 		// Dequeing this to avoid conflicts, until we remove the 'woocommerce-page' class.
@@ -377,6 +411,12 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
+
+		// PFT: Initialize the product form controller.
+		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
+			$product_form_controller = new ProductFormsController();
+			$product_form_controller->init();
+		}
 	}
 
 	/**

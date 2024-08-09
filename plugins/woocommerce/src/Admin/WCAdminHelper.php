@@ -168,6 +168,18 @@ class WCAdminHelper {
 		 */
 		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
 
+		// If the shop page is not set, we will still show the product archive page.
+		// Therefore, we need to check if the URL is a product archive page when the shop page is not set.
+		if ( $store_pages['shop'] <= 0 ) {
+			$product_post_archive_link = get_post_type_archive_link( 'product' );
+
+			if ( is_string( $product_post_archive_link ) &&
+				0 === strpos( $normalized_path, self::get_normalized_url_path( $product_post_archive_link ) )
+			) {
+				return true;
+			}
+		}
+
 		foreach ( $store_pages as $page => $page_id ) {
 			if ( 0 >= $page_id ) {
 				continue;
@@ -218,7 +230,16 @@ class WCAdminHelper {
 			}
 		}
 
-		return false;
+		/**
+		 * Filter if a URL is a store page.
+		 *
+		 * @since 9.3.0
+		 * @param bool   $is_store_page Whether or not the URL is a store page.
+		 * @param string $url           URL to check.
+		 */
+		$is_store_page = apply_filters( 'woocommerce_is_store_page', false, $url );
+
+		return filter_var( $is_store_page, FILTER_VALIDATE_BOOL );
 	}
 
 	/**

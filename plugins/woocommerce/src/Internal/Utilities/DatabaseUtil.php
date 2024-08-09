@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Utilities;
 
 use DateTime;
 use DateTimeZone;
+use Vtiful\Kernel\Format;
 
 /**
  * A class of utilities for dealing with the database.
@@ -266,6 +267,61 @@ $on_duplicate_clause
 		// phpcs:enable
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared.
 		return $wpdb->query( $sql );
+	}
+
+	/**
+	 * Hybrid of $wpdb->update and $wpdb->insert. It will try to update a row, and if it doesn't exist, it will insert it. Unlike `insert_on_duplicate_key_update` it does not require a unique constraint, but also does not guarantee uniqueness on its own.
+	 *
+	 * When a unique constraint is present, it will perform better than the `insert_on_duplicate_key_update` since it needs fewer locks.
+	 *
+	 * Note that it will only update at max just 1 database row, unlike `wpdb->update` which updates everything that matches the `$where` criteria. This is also why it needs a primary_key_column.
+	 *
+	 * @param string $table_name Table Name.
+	 * @param array  $data Data to insert update in array($column_name => $value) format.
+	 * @param array  $where Update conditions in array($column_name => $value) format. Conditions will be joined by AND.
+	 * @param array  $format Format strings for data. Unlike $wpdb->update/insert, this method won't guess the format, and has to be provided explicitly.
+	 * @param array  $where_format Format strings for where conditions. Unlike $wpdb->update/insert, this method won't guess the format, and has to be provided explicitly.
+	 * @param string $primary_key_column Name of the Primary key column.
+	 * @param string $primary_key_format Format for primary key.
+	 *
+	 * @return bool|int Number of rows affected. Boolean false on error.
+	 */
+	public function insert_or_update( $table_name, $data, $where, $format, $where_format, $primary_key_column = 'id', $primary_key_format = '%d' ) {
+		global $wpdb;
+		if ( empty( $data ) || empty( $where ) ) {
+			return 0;
+		}
+
+		// Build select query.
+		$values     = array();
+		$index      = 0;
+		$conditions = array();
+		foreach ( $where as $column => $value ) {
+			if ( is_null( $value ) ) {
+				$conditions[] = "`$column` IS NULL";
+				continue;
+			}
+			$conditions[] = "`$column` = " . $where_format[ $index ];
+			$values[]     = $value;
+			++$index;
+		}
+
+		$conditions = implode( ' AND ', $conditions );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $primary_key_column and $table_name are hardcoded. $conditions is being prepared.
+		$query = $wpdb->prepare( "SELECT `$primary_key_column` FROM `$table_name` WHERE $conditions LIMIT 1", $values );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared above.
+		$row_id = $wpdb->get_var( $query );
+
+		if ( $row_id ) {
+			// Update the row.
+			$result = $wpdb->update( $table_name, $data, array( $primary_key_column => $row_id ), $format, array( $primary_key_format ) );
+		} else {
+			// Insert the row.
+			$result = $wpdb->insert( $table_name, $data, $format );
+		}
+
+		return $result;
 	}
 
 	/**

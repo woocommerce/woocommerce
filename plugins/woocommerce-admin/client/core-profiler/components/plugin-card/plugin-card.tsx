@@ -4,7 +4,7 @@
 import { ReactNode } from 'react';
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ export const PluginCard = ( {
 	installed = false,
 	icon,
 	title,
-	onChange,
+	onChange = () => {},
 	checked = false,
 	description,
 	learnMoreLink,
@@ -32,18 +32,25 @@ export const PluginCard = ( {
 	learnMoreLink?: ReactNode;
 } ) => {
 	return (
-		<div className="woocommerce-profiler-plugins-plugin-card">
+		// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+		<div
+			className={ clsx( 'woocommerce-profiler-plugins-plugin-card', {
+				'is-installed': installed,
+			} ) }
+			onClick={ onChange }
+		>
 			<div className="woocommerce-profiler-plugin-card-top">
 				{ ! installed && (
 					<CheckboxControl
 						className="core-profiler__checkbox"
 						checked={ checked }
-						onChange={ onChange ? onChange : () => {} }
+						onChange={ onChange }
+						onClick={ ( e ) => e.stopPropagation() }
 					/>
 				) }
 				{ icon }
 				<div
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-profiler-plugins-plugin-card-text-header',
 						{
 							installed,
@@ -58,7 +65,7 @@ export const PluginCard = ( {
 			</div>
 
 			<div
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-profiler-plugins-plugin-card-text',
 					{ 'smaller-margin-left': installed }
 				) }

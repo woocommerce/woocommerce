@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { useInstanceId } from '@wordpress/compose';
 
 /**
@@ -32,6 +32,8 @@ export const CheckboxControl = ( {
 	hasError = false,
 	checked = false,
 	disabled = false,
+	errorId,
+	errorMessage,
 	...rest
 }: CheckboxControlProps & Record< string, unknown > ): JSX.Element => {
 	const instanceId = useInstanceId( CheckboxControl );
@@ -39,7 +41,7 @@ export const CheckboxControl = ( {
 
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'wc-block-components-checkbox',
 				{
 					'has-error': hasError,

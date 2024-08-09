@@ -17,6 +17,16 @@ jest.mock( '../../assembler-hub/site-hub', () => ( {
 jest.mock( '~/utils/react-hooks/use-network-status', () => ( {
 	useNetworkStatus: jest.fn(),
 } ) );
+
+jest.mock( '@wordpress/data', () => {
+	const originalModule = jest.requireActual( '@wordpress/data' );
+	return {
+		...originalModule,
+		useSelect: jest.fn( () => ( {
+			is_block_theme: true,
+		} ) ),
+	};
+} );
 describe( 'Intro Modals', () => {
 	it( 'should display DesignChangeWarningModal when activeThemeHasMods and button is clicked', async () => {
 		const sendEventMock = jest.fn();
@@ -26,6 +36,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -44,6 +55,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: true,
 				} }
 				currentState={ 'intro' }
@@ -82,6 +94,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -100,6 +113,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
@@ -136,6 +150,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -154,6 +169,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }

@@ -7,6 +7,11 @@
 		border: 0;
 	}
 
+	.wc-block-components-totals-item strong {
+		text-transform: uppercase;
+	}
+
+
 	.wc-block-components-shipping-address {
 		margin-top: $gap;
 		display: block;

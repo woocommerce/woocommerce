@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, starEmpty } from '@wordpress/icons';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
+import { productFilterOptions } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -10,17 +11,12 @@ import { Icon, starEmpty } from '@wordpress/icons';
 import edit from './edit';
 import metadata from './block.json';
 
-registerBlockType( metadata, {
-	icon: {
-		src: (
-			<Icon
-				icon={ starEmpty }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-	attributes: {
-		...metadata.attributes,
-	},
-	edit,
-} );
+if ( isExperimentalBlocksEnabled() ) {
+	registerBlockType( metadata, {
+		icon: productFilterOptions,
+		attributes: {
+			...metadata.attributes,
+		},
+		edit,
+	} );
+}

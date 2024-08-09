@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { Component } from '@wordpress/element';
 import { Icon } from '@wordpress/icons';
@@ -24,7 +24,7 @@ class ProductIcon extends Component {
 
 		return (
 			<div
-				className={ classnames(
+				className={ clsx(
 					this.props.className,
 					'woocommerce-admin-marketing-product-icon'
 				) }

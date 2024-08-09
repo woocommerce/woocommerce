@@ -73,6 +73,35 @@ exports.test = base.test.extend( {
 			} );
 		}
 	},
+
+	testPostTitlePrefix: [ '', { option: true } ],
+
+	testPost: async ( { wpApi, testPostTitlePrefix }, use ) => {
+		const postTitle = `${ testPostTitlePrefix } Post ${ random() }`;
+		const postSlug = postTitle.replace( / /gi, '-' ).toLowerCase();
+
+		await use( { title: postTitle, slug: postSlug } );
+
+		// Cleanup
+		const posts = await wpApi.get(
+			`/wp-json/wp/v2/posts?slug=${ postSlug }`,
+			{
+				data: {
+					_fields: [ 'id' ],
+				},
+				failOnStatusCode: false,
+			}
+		);
+
+		for ( const post of await posts.json() ) {
+			console.log( `Deleting post ${ post.id }` );
+			await wpApi.delete( `/wp-json/wp/v2/posts/${ post.id }`, {
+				data: {
+					force: true,
+				},
+			} );
+		}
+	},
 } );
 
 exports.expect = base.expect;

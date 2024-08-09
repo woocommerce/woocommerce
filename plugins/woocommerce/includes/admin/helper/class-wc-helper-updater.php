@@ -6,6 +6,8 @@
  * @package WooCommerce\Admin\Helper
  */
 
+use Automattic\WooCommerce\Admin\PluginsHelper;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -26,7 +28,7 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
-		add_action( 'plugins_loaded', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
+		add_action( 'admin_init', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
 	}
 
 	/**
@@ -35,6 +37,18 @@ class WC_Helper_Updater {
 	public static function add_hook_for_modifying_update_notices() {
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() || ! WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
+		}
+		if ( WC_Helper::is_site_connected() ) {
+			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_expired_and_expiring_subscriptions' ), 11 );
+		}
+	}
+
+	/**
+	 * Add the hook for modifying default WPCore update notices on the plugins management page.
+	 */
+	public static function setup_message_for_expired_and_expiring_subscriptions() {
+		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
+			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_notice_for_expired_and_expiring_subscriptions' ), 10, 2 );
 		}
 	}
 
@@ -174,9 +188,11 @@ class WC_Helper_Updater {
 	public static function add_connect_woocom_plugin_message() {
 		$connect_page_url = add_query_arg(
 			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => rawurlencode( '/extensions' ),
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_plugin_screen_connect',
 			),
 			admin_url( 'admin.php' )
 		);
@@ -228,6 +244,94 @@ class WC_Helper_Updater {
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			echo esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
+		}
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, show a message if plugins subscription expired or expiring soon.
+	 *
+	 * @param object $plugin_data An array of plugin metadata.
+	 * @param object $response  An object of metadata about the available plugin update.
+	 *
+	 * @return void.
+	 */
+	public static function display_notice_for_expired_and_expiring_subscriptions( $plugin_data, $response ) {
+		// Extract product ID from the response.
+		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
+
+		// Product subscriptions.
+		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+		if ( empty( $subscriptions ) ) {
+			return;
+		}
+
+		$expired_subscription = current(
+			array_filter(
+				$subscriptions,
+				function ( $subscription ) {
+					return ! empty( $subscription['expired'] ) && ! $subscription['lifetime'];
+				}
+			)
+		);
+
+		$expiring_subscription = current(
+			array_filter(
+				$subscriptions,
+				function ( $subscription ) {
+					return ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'];
+				}
+			)
+		);
+
+		// Prepare the expiry notice based on subscription status.
+		$expiry_notice = '';
+		if ( ! empty( $expired_subscription ) ) {
+
+			$renew_link = add_query_arg(
+				array(
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_plugin_screen_renew',
+				),
+				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
+			);
+
+			/* translators: 1: Product regular price */
+			$product_price = ! empty( $expired_subscription['product_regular_price'] ) ? sprintf( __( 'for %s ', 'woocommerce' ), esc_html( $expired_subscription['product_regular_price'] ) ) : '';
+
+			$expiry_notice = sprintf(
+			/* translators: 1: URL to My Subscriptions page 2: Product price */
+				__( ' Your subscription expired, <a href="%1$s" class="woocommerce-renew-subscription">renew %2$s</a>to update.', 'woocommerce' ),
+				esc_url( $renew_link ),
+				$product_price
+			);
+		} elseif ( ! empty( $expiring_subscription ) ) {
+			$renew_link = add_query_arg(
+				array(
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_plugin_screen_enable_autorenew',
+				),
+				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
+			);
+
+			$expiry_notice = sprintf(
+			/* translators: 1: Expiry date 1: URL to My Subscriptions page */
+				__( ' Your subscription expires on %1$s, <a href="%2$s" class="woocommerce-enable-autorenew">enable auto-renew</a> to continue receiving updates.', 'woocommerce' ),
+				date_i18n( 'F jS', $expiring_subscription['expires'] ),
+				esc_url( $renew_link )
+			);
+		}
+
+		// Display the expiry notice.
+		if ( ! empty( $expiry_notice ) ) {
+			echo wp_kses(
+				$expiry_notice,
+				array(
+					'a' => array(
+						'href'  => array(),
+						'class' => array(),
+					),
+				)
+			);
 		}
 	}
 

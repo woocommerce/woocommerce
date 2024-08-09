@@ -25,7 +25,6 @@ export const notifyCartErrors = (
 				createNotice( 'error', decodeEntities( error.message ), {
 					id: error.code,
 					context: 'wc/cart',
-					isDismissible: false,
 				} );
 			}
 		} );

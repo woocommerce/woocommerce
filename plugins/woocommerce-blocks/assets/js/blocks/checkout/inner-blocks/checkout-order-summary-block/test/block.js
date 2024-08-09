@@ -46,6 +46,19 @@ const defaultUseStoreCartValue = {
 	cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
 };
 
+jest.mock( '@woocommerce/settings', () => ( {
+	...jest.requireActual( '@woocommerce/settings' ),
+	SITE_CURRENCY: {
+		code: 'USD',
+		symbol: '$',
+		thousandSeparator: ',',
+		decimalSeparator: '.',
+		minorUnit: 2,
+		prefix: '$',
+		suffix: '',
+	},
+} ) );
+
 jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	...jest.requireActual( '@woocommerce/base-context/hooks' ),
 
@@ -182,6 +195,15 @@ jest.mock( '@woocommerce/settings', () => {
 
 	return {
 		...originalModule,
+		SITE_CURRENCY: {
+			code: 'USD',
+			symbol: '$',
+			thousandSeparator: ',',
+			decimalSeparator: '.',
+			minorUnit: 2,
+			prefix: '$',
+			suffix: '',
+		},
 		getSetting: jest.fn().mockImplementation( ( setting, ...rest ) => {
 			if ( setting === 'couponsEnabled' ) {
 				return true;
@@ -210,6 +232,12 @@ describe( 'Checkout Order Summary', () => {
 
 	it( 'Renders the standard preview items in the sidebar', async () => {
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
+		expect(
+			await findByText( container, 'Warm hat for winter' )
+		).toBeInTheDocument();
+		expect(
+			await findByText( container, 'Lightweight baseball cap' )
+		).toBeInTheDocument();
 
 		// Checking if variable product is rendered.
 		expect(

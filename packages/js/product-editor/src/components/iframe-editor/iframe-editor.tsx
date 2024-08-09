@@ -30,7 +30,6 @@ import {
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ComplementaryArea,
-	store as interfaceStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/interface';
 
@@ -53,6 +52,7 @@ import {
 	KeyboardShortcuts,
 	RegisterKeyboardShortcuts,
 } from './keyboard-shortcuts';
+import { areBlocksEmpty } from './utils/are-blocks-empty';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -61,6 +61,7 @@ type IframeEditorProps = {
 	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 	showBackButton?: boolean;
+	name: string;
 };
 
 export function IframeEditor( {
@@ -69,6 +70,7 @@ export function IframeEditor( {
 	onInput = () => {},
 	settings: __settings,
 	showBackButton = false,
+	name,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
 	const [ temporalBlocks, setTemporalBlocks ] = useState< BlockInstance[] >(
@@ -84,7 +86,7 @@ export function IframeEditor( {
 		useDispatch( productEditorUiStore );
 
 	const {
-		appendEdit: tempAppendEdit,
+		appendEdit: appendToEditorHistory,
 		hasRedo,
 		hasUndo,
 		redo,
@@ -98,7 +100,7 @@ export function IframeEditor( {
 	 * @todo: probably we can get rid of the initialBlocks prop.
 	 */
 	useEffect( () => {
-		tempAppendEdit( blocks );
+		appendToEditorHistory( blocks );
 		setTemporalBlocks( blocks );
 	}, [] ); // eslint-disable-line
 
@@ -115,18 +117,12 @@ export function IframeEditor( {
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
-	const { hasFixedToolbar, isRightSidebarOpen } = useSelect( ( select ) => {
+	const { hasFixedToolbar } = useSelect( ( select ) => {
 		// @ts-expect-error These selectors are available in the block data store.
 		const { get: getPreference } = select( preferencesStore );
 
-		// @ts-expect-error These selectors are available in the interface data store.
-		const { getActiveComplementaryArea } = select( interfaceStore );
-
 		return {
 			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
-			isRightSidebarOpen: getActiveComplementaryArea(
-				SIDEBAR_COMPLEMENTARY_AREA_SCOPE
-			),
 		};
 	}, [] );
 
@@ -136,6 +132,22 @@ export function IframeEditor( {
 		// @ts-ignore
 		updateSettings( productBlockEditorSettings );
 	}, [] );
+
+	const handleBlockEditorProviderOnChange = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		appendToEditorHistory( updatedBlocks );
+		setTemporalBlocks( updatedBlocks );
+		onChange( updatedBlocks );
+	};
+
+	const handleBlockEditorProviderOnInput = (
+		updatedBlocks: BlockInstance[]
+	) => {
+		appendToEditorHistory( updatedBlocks );
+		setTemporalBlocks( updatedBlocks );
+		onInput( updatedBlocks );
+	};
 
 	const settings = __settings || parentEditorSettings;
 
@@ -164,16 +176,8 @@ export function IframeEditor( {
 						templateLock: false,
 					} }
 					value={ temporalBlocks }
-					onChange={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
-						setTemporalBlocks( updatedBlocks );
-						onChange( updatedBlocks );
-					} }
-					onInput={ ( updatedBlocks: BlockInstance[] ) => {
-						tempAppendEdit( updatedBlocks );
-						setTemporalBlocks( updatedBlocks );
-						onInput( updatedBlocks );
-					} }
+					onChange={ handleBlockEditorProviderOnChange }
+					onInput={ handleBlockEditorProviderOnInput }
 					useSubRegistry={ true }
 				>
 					<RegisterStores />
@@ -183,7 +187,11 @@ export function IframeEditor( {
 
 					<HeaderToolbar
 						onSave={ () => {
-							setBlocks( temporalBlocks );
+							setBlocks(
+								areBlocksEmpty( temporalBlocks )
+									? []
+									: temporalBlocks
+							);
 							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
 							onClose?.();
@@ -249,15 +257,13 @@ export function IframeEditor( {
 								 bounds. */ }
 							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
-						{ isRightSidebarOpen && (
-							<ComplementaryArea.Slot
-								scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
-							/>
-						) }
+						<ComplementaryArea.Slot
+							scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
+						/>
 					</div>
 					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 					<PluginArea scope="woocommerce-product-editor-modal-block-editor" />
-					<SettingsSidebar />
+					<SettingsSidebar smallScreenTitle={ name } />
 				</BlockEditorProvider>
 			</EditorContext.Provider>
 		</div>

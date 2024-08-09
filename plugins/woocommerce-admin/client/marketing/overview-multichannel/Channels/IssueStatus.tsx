@@ -2,7 +2,7 @@
  * External dependencies
  */
 import GridiconNotice from 'gridicons/dist/notice';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -23,7 +23,7 @@ export const IssueStatus: React.FC< IssueStatusPropsType > = ( {
 	if ( registeredChannel.issueType === 'error' ) {
 		return (
 			<div
-				className={ classnames(
+				className={ clsx(
 					issueStatusClassName,
 					`${ issueStatusClassName }__error`
 				) }
@@ -37,7 +37,7 @@ export const IssueStatus: React.FC< IssueStatusPropsType > = ( {
 	if ( registeredChannel.issueType === 'warning' ) {
 		return (
 			<div
-				className={ classnames(
+				className={ clsx(
 					issueStatusClassName,
 					`${ issueStatusClassName }__warning`
 				) }

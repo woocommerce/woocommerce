@@ -177,6 +177,121 @@ baseContextHooks.useStoreCart.mockReturnValue( {
 } );
 
 describe( 'TotalsShipping', () => {
+	it( 'shows FREE if shipping cost is 0', () => {
+		baseContextHooks.useStoreCart.mockReturnValue( {
+			cartItems: mockPreviewCart.items,
+			cartTotals: [ mockPreviewCart.totals ],
+			cartCoupons: mockPreviewCart.coupons,
+			cartFees: mockPreviewCart.fees,
+			cartNeedsShipping: mockPreviewCart.needs_shipping,
+			shippingRates: [
+				{
+					package_id: 0,
+					name: 'Initial Shipment',
+					destination: {
+						address_1: '30 Test Street',
+						address_2: 'Apt 1 Shipping',
+						city: 'Liverpool',
+						state: '',
+						postcode: 'L1 0BP',
+						country: 'GB',
+					},
+					items: [
+						{
+							key: 'acf4b89d3d503d8252c9c4ba75ddbf6d',
+							name: 'Test product',
+							quantity: 1,
+						},
+					],
+					shipping_rates: [
+						{
+							rate_id: 'free_shipping:1',
+							name: 'Free shipping',
+							description: '',
+							delivery_time: '',
+							price: '0',
+							taxes: '0',
+							instance_id: 13,
+							method_id: 'free_shipping',
+							meta_data: [
+								{
+									key: 'Items',
+									value: 'Test product &times; 1',
+								},
+							],
+							selected: false,
+							currency_code: 'USD',
+							currency_symbol: '$',
+							currency_minor_unit: 2,
+							currency_decimal_separator: '.',
+							currency_thousand_separator: ',',
+							currency_prefix: '$',
+							currency_suffix: '',
+						},
+					],
+				},
+			],
+			shippingAddress,
+			billingAddress: mockPreviewCart.billing_address,
+			cartHasCalculatedShipping: mockPreviewCart.has_calculated_shipping,
+			isLoadingRates: false,
+		} );
+
+		const { rerender } = render(
+			<SlotFillProvider>
+				<TotalsShipping
+					currency={ {
+						code: 'USD',
+						symbol: '$',
+						minorUnit: 2,
+						decimalSeparator: '.',
+						prefix: '',
+						suffix: '',
+						thousandSeparator: ', ',
+					} }
+					values={ {
+						total_shipping: '0',
+						total_shipping_tax: '0',
+					} }
+					showCalculator={ true }
+					showRateSelector={ false }
+					isCheckout={ false }
+					className={ '' }
+				/>
+			</SlotFillProvider>
+		);
+		expect(
+			screen.getByText( 'Free', { exact: true } )
+		).toBeInTheDocument();
+		expect( screen.queryByText( '0.00' ) ).not.toBeInTheDocument();
+
+		rerender(
+			<SlotFillProvider>
+				<TotalsShipping
+					currency={ {
+						code: 'USD',
+						symbol: '$',
+						minorUnit: 2,
+						decimalSeparator: '.',
+						prefix: '',
+						suffix: '',
+						thousandSeparator: ', ',
+					} }
+					values={ {
+						total_shipping: '5678',
+						total_shipping_tax: '0',
+					} }
+					showCalculator={ true }
+					showRateSelector={ false }
+					isCheckout={ false }
+					className={ '' }
+				/>
+			</SlotFillProvider>
+		);
+
+		expect( screen.queryByText( 'Free' ) ).not.toBeInTheDocument();
+		expect( screen.getByText( '56.78' ) ).toBeInTheDocument();
+	} );
 	it( 'should show correct calculator button label if address is complete', () => {
 		render(
 			<SlotFillProvider>
@@ -184,8 +299,11 @@ describe( 'TotalsShipping', () => {
 					currency={ {
 						code: 'USD',
 						symbol: '$',
-						position: 'left',
-						precision: 2,
+						minorUnit: 2,
+						decimalSeparator: '.',
+						prefix: '',
+						suffix: '',
+						thousandSeparator: ', ',
 					} }
 					values={ {
 						total_shipping: '0',

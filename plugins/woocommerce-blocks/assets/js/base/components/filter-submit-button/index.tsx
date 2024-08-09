@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Label } from '@woocommerce/blocks-components';
 
 /**
@@ -31,7 +31,7 @@ const FilterSubmitButton = ( {
 	return (
 		<button
 			type="submit"
-			className={ classNames(
+			className={ clsx(
 				'wp-block-button__link',
 				'wc-block-filter-submit-button',
 				'wc-block-components-filter-submit-button',

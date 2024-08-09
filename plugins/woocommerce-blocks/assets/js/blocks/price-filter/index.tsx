@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Icon, currencyDollar } from '@wordpress/icons';
 import { useBlockProps } from '@wordpress/block-editor';
 
@@ -33,7 +33,7 @@ registerBlockType( metadata, {
 		return (
 			<div
 				{ ...useBlockProps.save( {
-					className: classNames( 'is-loading', className ),
+					className: clsx( 'is-loading', className ),
 				} ) }
 			>
 				<span

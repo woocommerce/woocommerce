@@ -42,6 +42,18 @@ jest.mock( '@wordpress/compose', () => ( {
 	useResizeObserver: jest.fn().mockReturnValue( [ null, { width: 0 } ] ),
 } ) );
 
+global.ResizeObserver = jest.fn().mockImplementation( () => ( {
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+} ) );
+
+global.IntersectionObserver = jest.fn().mockImplementation( () => ( {
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+} ) );
+
 jest.mock( '@wordpress/element', () => {
 	return {
 		...jest.requireActual( '@wordpress/element' ),
@@ -50,6 +62,27 @@ jest.mock( '@wordpress/element', () => {
 		},
 	};
 } );
+
+jest.mock( '../context', () => {
+	return {
+		...jest.requireActual( '../context' ),
+		useCheckoutBlockContext: jest.fn().mockReturnValue( {
+			showFormStepNumbers: false,
+			cartPageId: 0,
+			requireCompanyField: false,
+			requirePhoneField: false,
+			showApartmentField: false,
+			showCompanyField: false,
+			showOrderNotes: false,
+			showPhoneField: false,
+			showPolicyLinks: false,
+			showRateAfterTaxName: false,
+			showReturnToCart: false,
+		} ),
+	};
+} );
+
+import { useCheckoutBlockContext } from '../context';
 
 const CheckoutBlock = () => {
 	return (
@@ -65,7 +98,11 @@ const CheckoutBlock = () => {
 				<Payment />
 				<AdditionalInformation />
 				<OrderNote />
-				<Terms checkbox={ true } text={ termsCheckboxDefaultText } />
+				<Terms
+					checkbox={ true }
+					showSeparator={ false }
+					text={ termsCheckboxDefaultText }
+				/>
 				<Actions />
 			</Fields>
 			<Totals>
@@ -83,7 +120,7 @@ const CheckoutBlock = () => {
 	);
 };
 
-describe( 'Testing cart', () => {
+describe( 'Testing Checkout', () => {
 	beforeEach( () => {
 		act( () => {
 			fetchMock.mockResponse( ( req ) => {
@@ -115,7 +152,7 @@ describe( 'Testing cart', () => {
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'Renders the address card if the address is filled', async () => {
+	it( 'Renders the shipping address card if the address is filled and the cart contains a shippable product', async () => {
 		act( () => {
 			const cartWithAddress = {
 				...previewCart,
@@ -157,7 +194,7 @@ describe( 'Testing cart', () => {
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		expect(
-			screen.getByRole( 'button', { name: 'Edit address' } )
+			screen.getByRole( 'button', { name: 'Edit shipping address' } )
 		).toBeInTheDocument();
 
 		expect(
@@ -225,6 +262,30 @@ describe( 'Testing cart', () => {
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
+	it( 'Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {
+		act( () => {
+			const cartWithVirtualProduct = {
+				...previewCart,
+				needs_shipping: false,
+			};
+			fetchMock.mockResponse( ( req ) => {
+				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
+					return Promise.resolve(
+						JSON.stringify( cartWithVirtualProduct )
+					);
+				}
+				return Promise.resolve( '' );
+			} );
+		} );
+		render( <CheckoutBlock /> );
+
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		expect(
+			screen.getByRole( 'button', { name: 'Edit billing address' } )
+		).toBeInTheDocument();
+	} );
+
 	it( 'Ensures checkbox labels have unique IDs', async () => {
 		await act( async () => {
 			// Set required settings
@@ -248,6 +309,82 @@ describe( 'Testing cart', () => {
 		// Ensure all IDs are unique
 		const uniqueIds = new Set( ids );
 		expect( uniqueIds.size ).toBe( ids.length );
+
+		await act( async () => {
+			// Restore initial settings
+			allSettings.checkoutAllowsGuest = undefined;
+			allSettings.checkoutAllowsSignup = undefined;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
+		} );
+	} );
+
+	it( 'Ensures correct classes are applied to FormStep when step numbers are shown/hidden', async () => {
+		const mockReturnValue = {
+			showFormStepNumbers: false,
+			cartPageId: 0,
+			requireCompanyField: false,
+			requirePhoneField: false,
+			showApartmentField: false,
+			showCompanyField: false,
+			showOrderNotes: false,
+			showPhoneField: false,
+			showPolicyLinks: false,
+			showRateAfterTaxName: false,
+			showReturnToCart: false,
+		};
+		useCheckoutBlockContext.mockReturnValue( mockReturnValue );
+		// Render the CheckoutBlock
+		const { container, rerender } = render( <CheckoutBlock /> );
+
+		let formStepsWithNumber = container.querySelectorAll(
+			'.wc-block-components-checkout-step--with-step-number'
+		);
+
+		expect( formStepsWithNumber ).toHaveLength( 0 );
+
+		useCheckoutBlockContext.mockReturnValue( {
+			...mockReturnValue,
+			showFormStepNumbers: true,
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		formStepsWithNumber = container.querySelectorAll(
+			'.wc-block-components-checkout-step--with-step-number'
+		);
+
+		expect( formStepsWithNumber.length ).not.toBe( 0 );
+	} );
+
+	it( 'Shows guest checkout text', async () => {
+		await act( async () => {
+			allSettings.checkoutAllowsGuest = true;
+			allSettings.checkoutAllowsSignup = true;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 0 );
+		} );
+
+		// Render the CheckoutBlock
+		const { rerender, queryByText } = render( <CheckoutBlock /> );
+
+		// Wait for the component to fully load, assuming fetch calls or state updates
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		// Query the text.
+		expect(
+			queryByText( /You are currently checking out as a guest./i )
+		).toBeInTheDocument();
+
+		await act( async () => {
+			allSettings.checkoutAllowsGuest = true;
+			allSettings.checkoutAllowsSignup = true;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
+		} );
+
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			queryByText( /You are currently checking out as a guest./i )
+		).not.toBeInTheDocument();
 
 		await act( async () => {
 			// Restore initial settings

@@ -1,12 +1,12 @@
 export interface StateInputProps {
 	className?: string;
-	label: string;
+	label?: string | undefined;
 	id: string;
-	autoComplete?: string;
+	autoComplete?: string | undefined;
 	value: string;
 	country: string;
 	onChange: ( value: string ) => void;
-	required?: boolean;
+	required?: boolean | undefined;
 	errorMessage?: string | undefined;
 	errorId?: string;
 }

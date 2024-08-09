@@ -7,6 +7,7 @@ import {
 	useCheckoutAddress,
 	useEditorContext,
 	noticeContexts,
+	useShippingData,
 } from '@woocommerce/base-context';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { ShippingAddress, FormFieldsConfig } from '@woocommerce/settings';
@@ -22,15 +23,17 @@ import CustomerAddress from './customer-address';
 
 const Block = ( {
 	showCompanyField = false,
-	showApartmentField = false,
-	showPhoneField = false,
 	requireCompanyField = false,
+	showApartmentField = false,
+	requireApartmentField = false,
+	showPhoneField = false,
 	requirePhoneField = false,
 }: {
 	showCompanyField: boolean;
-	showApartmentField: boolean;
-	showPhoneField: boolean;
 	requireCompanyField: boolean;
+	showApartmentField: boolean;
+	requireApartmentField: boolean;
+	showPhoneField: boolean;
 	requirePhoneField: boolean;
 } ): JSX.Element => {
 	const {
@@ -40,6 +43,7 @@ const Block = ( {
 		useBillingAsShipping,
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
+	const { needsShipping } = useShippingData();
 
 	// Syncs shipping address with billing address if "Force shipping to the customer billing address" is enabled.
 	useEffectOnce( () => {
@@ -69,6 +73,7 @@ const Block = ( {
 			},
 			address_2: {
 				hidden: ! showApartmentField,
+				required: requireApartmentField,
 			},
 			phone: {
 				hidden: ! showPhoneField,
@@ -79,6 +84,7 @@ const Block = ( {
 		showCompanyField,
 		requireCompanyField,
 		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 	] ) as FormFieldsConfig;
@@ -106,7 +112,7 @@ const Block = ( {
 		shippingAddress
 	);
 	const defaultEditingAddress =
-		isEditor || ! hasAddress || billingMatchesShipping;
+		isEditor || ! hasAddress || ( needsShipping && billingMatchesShipping );
 
 	return (
 		<>

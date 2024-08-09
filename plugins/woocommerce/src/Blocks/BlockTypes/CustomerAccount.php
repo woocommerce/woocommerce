@@ -11,9 +11,10 @@ use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 class CustomerAccount extends AbstractBlock {
 	use BlockHooksTrait;
 
-	const TEXT_ONLY   = 'text_only';
-	const ICON_ONLY   = 'icon_only';
-	const DISPLAY_ALT = 'alt';
+	const TEXT_ONLY    = 'text_only';
+	const ICON_ONLY    = 'icon_only';
+	const DISPLAY_ALT  = 'alt';
+	const DISPLAY_LINE = 'line';
 
 	/**
 	 * Block name.
@@ -33,6 +34,7 @@ class CustomerAccount extends AbstractBlock {
 			'anchor'   => 'core/navigation',
 			'area'     => 'header',
 			'callback' => 'should_unhook_block',
+			'version'  => '8.4.0',
 		),
 	);
 
@@ -65,6 +67,7 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
 		$parsed_hooked_block['attrs']['displayStyle'] = 'icon_only';
+		$parsed_hooked_block['attrs']['iconStyle']    = 'line';
 
 		/*
 		* The Mini Cart block (which is hooked into the header) has a margin of 0.5em on the left side.
@@ -116,16 +119,26 @@ class CustomerAccount extends AbstractBlock {
 		$account_link = get_option( 'woocommerce_myaccount_page_id' ) ? wc_get_account_endpoint_url( 'dashboard' ) : wp_login_url();
 
 		$allowed_svg = array(
-			'svg'  => array(
+			'svg'    => array(
 				'class'   => true,
 				'xmlns'   => true,
 				'width'   => true,
 				'height'  => true,
 				'viewbox' => true,
 			),
-			'path' => array(
-				'd'    => true,
-				'fill' => true,
+			'path'   => array(
+				'd'         => true,
+				'fill'      => true,
+				'fill-rule' => true,
+				'clip-rule' => true,
+			),
+			'circle' => array(
+				'cx'           => true,
+				'cy'           => true,
+				'r'            => true,
+				'stroke'       => true,
+				'stroke-width' => true,
+				'fill'         => true,
 			),
 		);
 
@@ -153,8 +166,27 @@ class CustomerAccount extends AbstractBlock {
 			return '';
 		}
 
+		if ( self::DISPLAY_LINE === $attributes['iconStyle'] ) {
+			return '<svg class="' . $attributes['iconClass'] . '" viewBox="5 5 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle
+					cx="16"
+					cy="10.5"
+					r="3.5"
+					stroke="currentColor"
+					stroke-width="2"
+					fill="none"
+				/>
+				<path
+					fill-rule="evenodd"
+					clip-rule="evenodd"
+					d="M11.5 18.5H20.5C21.8807 18.5 23 19.6193 23 21V25.5H25V21C25 18.5147 22.9853 16.5 20.5 16.5H11.5C9.01472 16.5 7 18.5147 7 21V25.5H9V21C9 19.6193 10.1193 18.5 11.5 18.5Z"
+					fill="currentColor"
+				/>
+			</svg>';
+		}
+
 		if ( self::DISPLAY_ALT === $attributes['iconStyle'] ) {
-			return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
+			return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 19 19" width="18" height="18">
 				<path
 					d="M9 0C4.03579 0 0 4.03579 0 9C0 13.9642 4.03579 18 9 18C13.9642 18 18 13.9642 18 9C18 4.03579 13.9642 0 9
 					 	0ZM9 4.32C10.5347 4.32 11.7664 5.57056 11.7664 7.08638C11.7664 8.62109 10.5158 9.85277 9 9.85277C7.4653
@@ -166,7 +198,7 @@ class CustomerAccount extends AbstractBlock {
 			</svg>';
 		}
 
-		return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+		return '<svg class="' . $attributes['iconClass'] . '" xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 17 17" width="16" height="16">
 			<path
 				d="M8.00009 8.34785C10.3096 8.34785 12.1819 6.47909 12.1819 4.17393C12.1819 1.86876 10.3096 0 8.00009 0C5.69055
 				 	0 3.81824 1.86876 3.81824 4.17393C3.81824 6.47909 5.69055 8.34785 8.00009 8.34785ZM0.333496 15.6522C0.333496

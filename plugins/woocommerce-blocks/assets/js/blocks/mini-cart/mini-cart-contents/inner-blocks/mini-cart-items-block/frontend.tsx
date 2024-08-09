@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 type MiniCartItemsBlockProps = {
 	children: JSX.Element;
@@ -14,7 +14,7 @@ const Block = ( {
 }: MiniCartItemsBlockProps ): JSX.Element => {
 	return (
 		<div
-			className={ classNames( className, 'wc-block-mini-cart__items' ) }
+			className={ clsx( className, 'wc-block-mini-cart__items' ) }
 			tabIndex={ -1 }
 		>
 			{ children }

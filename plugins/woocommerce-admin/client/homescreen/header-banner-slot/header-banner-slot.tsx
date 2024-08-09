@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSlot } from '@woocommerce/experimental';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -24,12 +24,7 @@ export const WooHomescreenHeaderBanner = ( {
 		return null;
 	}
 	return (
-		<div
-			className={ classnames(
-				'woocommerce-homescreen__header',
-				className
-			) }
-		>
+		<div className={ clsx( 'woocommerce-homescreen__header', className ) }>
 			<WooHomescreenHeaderBannerItem.Slot />
 		</div>
 	);

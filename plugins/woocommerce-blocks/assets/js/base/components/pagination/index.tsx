@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Label } from '@woocommerce/blocks-components';
 
 /**
@@ -104,7 +104,7 @@ const Pagination = ( {
 			) }
 			{ showFirstPage && (
 				<button
-					className={ classNames(
+					className={ clsx(
 						'wc-block-pagination-page',
 						'wc-block-components-pagination__page',
 						{
@@ -139,7 +139,7 @@ const Pagination = ( {
 				return (
 					<button
 						key={ page }
-						className={ classNames(
+						className={ clsx(
 							'wc-block-pagination-page',
 							'wc-block-components-pagination__page',
 							{
@@ -177,7 +177,7 @@ const Pagination = ( {
 			) }
 			{ showLastPage && (
 				<button
-					className={ classNames(
+					className={ clsx(
 						'wc-block-pagination-page',
 						'wc-block-components-pagination__page',
 						{

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { useMergeRefs } from '@wordpress/compose';
 import { Link } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
 import { createElement, useRef } from '@wordpress/element';
@@ -50,7 +51,11 @@ export function Edit( {
 
 	const inputRef = useRef< HTMLInputElement >( null );
 
-	const { error, validate } = useValidation< Product >(
+	const {
+		error,
+		validate,
+		ref: inputValidatorRef,
+	} = useValidation< Product >(
 		property,
 		async function validator() {
 			if ( ! inputRef.current ) return;
@@ -127,7 +132,9 @@ export function Edit( {
 			input.setCustomValidity( customErrorMessage );
 
 			if ( ! input.validity.valid ) {
-				return input.validationMessage;
+				return {
+					message: customErrorMessage,
+				};
 			}
 		},
 		[ type, required, pattern, minLength, maxLength, min, max ]
@@ -160,7 +167,7 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<TextControl
-				ref={ inputRef }
+				ref={ useMergeRefs( [ inputRef, inputValidatorRef ] ) }
 				type={ type?.value ?? 'text' }
 				value={ value }
 				disabled={ disabled }

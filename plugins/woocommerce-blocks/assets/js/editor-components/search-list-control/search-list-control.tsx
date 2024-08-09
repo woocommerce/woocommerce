@@ -17,7 +17,7 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import { Icon, info } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useInstanceId } from '@wordpress/compose';
 
 /**
@@ -287,7 +287,7 @@ export const SearchListControl = < T extends object = object >(
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-search-list', className, {
+			className={ clsx( 'woocommerce-search-list', className, {
 				'is-compact': isCompact,
 				'is-loading': isLoading,
 				'is-token': type === 'token',

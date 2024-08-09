@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test } from '@woocommerce/e2e-playwright-utils';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Hand-picked Products',
@@ -10,17 +10,16 @@ const blockData = {
 
 test.describe( `${ blockData.slug } Block`, () => {
 	test( 'can be inserted in Post Editor and it is visible on the frontend', async ( {
-		editorUtils,
 		editor,
 		admin,
 		frontendUtils,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.slug } );
-		const blockLocator = await editorUtils.getBlockByName( blockData.slug );
+		const blockLocator = await editor.getBlockByName( blockData.slug );
 		await blockLocator.getByText( 'Album' ).click();
 		await blockLocator.getByText( 'Done' ).click();
-		await editorUtils.publishAndVisitPost();
+		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
 			blockData.slug
 		);

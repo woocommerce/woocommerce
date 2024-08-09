@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/experimental",
-	"version": "3.2.0",
+	"version": "3.3.0",
 	"description": "WooCommerce experimental components.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
@@ -131,7 +131,11 @@
 						"src/**/*.{js,jsx,ts,tsx}",
 						"typings/**/*.ts"
 					],
-					"cascade": "test:js"
+					"cascade": "test:js",
+					"events": [
+						"pull_request",
+						"push"
+					]
 				}
 			]
 		}

@@ -2,10 +2,13 @@
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\BlockTemplatesController;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 
 /**
  * Handles the template_include hook to determine whether the current page needs
- * to be replaced with a comiing soon screen.
+ * to be replaced with a coming soon screen.
  */
 class ComingSoonRequestHandler {
 
@@ -26,6 +29,7 @@ class ComingSoonRequestHandler {
 	final public function init( ComingSoonHelper $coming_soon_helper ) {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
+		add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 	}
 
 
@@ -47,21 +51,41 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
+		$is_fse_theme         = wc_current_theme_is_fse_theme();
+		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
+
+		if ( ! $is_fse_theme && ! current_theme_supports( 'block-template-parts' ) ) {
+			// Initialize block templates for use in classic theme.
+			BlocksPackage::init();
+			$container = BlocksPackage::container();
+			$container->get( BlockTemplatesRegistry::class )->init();
+			$container->get( BlockTemplatesController::class )->init();
+		}
+
 		add_theme_support( 'block-templates' );
 
 		$coming_soon_template = get_query_template( 'coming-soon' );
 
-		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_header();
 		}
 
-		include $coming_soon_template;
+		add_action(
+			'wp_head',
+			function () {
+				echo "<meta name='woo-coming-soon-page' content='yes'>";
+			}
+		);
 
-		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
+			include $coming_soon_template;
+		}
+
+		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_footer();
 		}
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( $is_fse_theme ) {
 			// Since we've already rendered a template, return null to ensure no other template is rendered.
 			return null;
 		} else {
@@ -101,15 +125,101 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
-		// Exclude users with a private link.
-		if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// Persist the share link with a cookie for 90 days.
-			setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		/**
+		 * Check if there is an exclusion.
+		 *
+		 * @since 9.1.0
+		 *
+		 * @param bool $is_excluded If the request should be excluded from Coming soon mode. Defaults to false.
+		 */
+		if ( apply_filters( 'woocommerce_coming_soon_exclude', false ) ) {
 			return false;
 		}
-		if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
-			return false;
+
+		// Check if the private link option is enabled.
+		if ( get_option( 'woocommerce_private_link' ) === 'yes' ) {
+			// Exclude users with a private link.
+			if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				// Persist the share link with a cookie for 90 days.
+				setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90, '/' ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				return false;
+			}
+			if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
+				return false;
+			}
 		}
 		return true;
+	}
+
+	/**
+	 * Filters the theme.json data to add the Inter and Cardo fonts when they don't exist.
+	 *
+	 * @param WP_Theme_JSON $theme_json The theme json object.
+	 */
+	public function experimental_filter_theme_json_theme( $theme_json ) {
+		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+			return $theme_json;
+		}
+
+		$theme_data = $theme_json->get_data();
+		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
+
+		$fonts_to_add = array(
+			array(
+				'fontFamily' => '"Inter", sans-serif',
+				'name'       => 'Inter',
+				'slug'       => 'inter',
+				'fontFace'   => array(
+					array(
+						'fontFamily'  => 'Inter',
+						'fontStretch' => 'normal',
+						'fontStyle'   => 'normal',
+						'fontWeight'  => '300 900',
+						'src'         => array( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ),
+					),
+				),
+			),
+			array(
+				'fontFamily' => 'Cardo',
+				'name'       => 'Cardo',
+				'slug'       => 'cardo',
+				'fontFace'   => array(
+					array(
+						'fontFamily' => 'Cardo',
+						'fontStyle'  => 'normal',
+						'fontWeight' => '400',
+						'src'        => array( WC()->plugin_url() . '/assets/fonts/cardo_normal_400.woff2' ),
+					),
+				),
+			),
+		);
+
+		// Loops through all existing fonts and append when the font's name is not found.
+		foreach ( $fonts_to_add as $font_to_add ) {
+			$found = false;
+			foreach ( $font_data as $font ) {
+				if ( isset( $font['name'] ) && $font['name'] === $font_to_add['name'] ) {
+					$found = true;
+					break;
+				}
+			}
+
+			if ( ! $found ) {
+				$font_data[] = $font_to_add;
+			}
+		}
+
+		$new_data = array(
+			'version'  => 1,
+			'settings' => array(
+				'typography' => array(
+					'fontFamilies' => array(
+						'theme' => $font_data,
+					),
+				),
+			),
+		);
+		$theme_json->update_with( $new_data );
+		return $theme_json;
 	}
 }

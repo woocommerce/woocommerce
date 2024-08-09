@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Utilities\NumberUtil;
  * A collection of tests for the string utility class.
  */
 class NumberUtilTest extends \WC_Unit_Test_Case {
-
 	/**
 	 * @testdox `round` should work as the built-in function of the same name when passing a number.
 	 */
@@ -107,5 +106,46 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 		$actual   = NumberUtil::round( true );
 		$expected = 1;
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Data provider for test_array_sum.
+	 */
+	public function data_provider_for_test_array_sum(): iterable {
+		yield 'all numeric values' => array(
+			array( 0, '0', 1, '1', 1.1, '1.1', ' 1.1 ' ),
+			5.3,
+		);
+		yield 'all integers' => array(
+			array( 1, '1', 2, '2' ),
+			6,
+		);
+		yield 'numeric and non-numeric values' => array(
+			// "4th wall" will convert to a valid float since it begins with a number.
+			array( 1.1, '1.1', 'we 3 kings', '4th wall', null ),
+			6.2,
+		);
+		yield 'all non-numeric values' => array(
+			array( 'macaroni', '&', 'cheese' ),
+			0,
+		);
+		yield 'empty array' => array(
+			array(),
+			0,
+		);
+	}
+
+	/**
+	 * @testdox array_sum should return a sum of the numeric values in an array, ignoring non-numeric
+	 * values, and not triggering any warnings (especially with PHP 8.3+).
+	 *
+	 * @dataProvider data_provider_for_test_array_sum
+	 *
+	 * @param array $arr The input array for generating the actual value.
+	 * @param float $expected The expected result.
+	 */
+	public function test_array_sum( $arr, $expected ) {
+		$actual_sum = NumberUtil::array_sum( $arr );
+		$this->assertFloatEquals( $expected, $actual_sum );
 	}
 }

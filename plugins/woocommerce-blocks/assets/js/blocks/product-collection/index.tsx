@@ -13,7 +13,7 @@ import icon from './icon';
 import registerProductSummaryVariation from './variations/elements/product-summary';
 import registerProductTitleVariation from './variations/elements/product-title';
 import registerCollections from './collections';
-import { addProductCollectionBlockToParentOfPaginationBlock } from './utils';
+import { addProductCollectionToQueryPaginationParentOrAncestor } from './utils';
 
 registerBlockType( metadata, {
 	icon,
@@ -23,4 +23,4 @@ registerBlockType( metadata, {
 registerProductSummaryVariation();
 registerProductTitleVariation();
 registerCollections();
-addProductCollectionBlockToParentOfPaginationBlock();
+addProductCollectionToQueryPaginationParentOrAncestor();

@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { BlockData } from '@woocommerce/e2e-types';
-import { customerFile, guestFile } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	customerFile,
+	guestFile,
+	BlockData,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -67,7 +71,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 		baseURL,
 	} ) => {
 		//Get the login link from checkout page.
-		const loginLink = page.getByRole( 'link', { name: 'Log in.' } );
+		const loginLink = page.getByRole( 'link', { name: 'Log in' } );
 
 		await expect( loginLink ).toHaveAttribute(
 			'href',
@@ -81,10 +85,15 @@ test.describe( 'Shopper → Account (guest user)', () => {
 			path: 'wc/v3/settings/account/woocommerce_enable_signup_and_login_from_checkout',
 			data: { value: 'yes' },
 		} );
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/account/woocommerce_registration_generate_password',
+			data: { value: 'yes' },
+		} );
 
 		await page.reload();
 
-		const createAccount = page.getByLabel( 'Create an account?' );
+		const createAccount = page.getByLabel( 'Create an account' );
 		await createAccount.check();
 
 		const testEmail = `test-${ Date.now() }@example.com`;
@@ -224,6 +233,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 		city: 'San Francisco',
 		state: 'California',
 		country: 'United Kingdom',
+		countryKey: 'GB',
 		postcode: 'SW1 1AA',
 		phone: '123456789',
 		email: 'john.doe@example.com',
@@ -237,18 +247,19 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 		city: 'Los Angeles',
 		phone: '987654321',
 		country: 'Albania',
+		countryKey: 'AL',
 		state: 'Berat',
 		postcode: '1234',
 	};
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { editor, admin, editorUtils, page } ) => {
+	test.beforeEach( async ( { admin, editor, page } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -268,7 +279,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 				'div.wc-block-components-address-form__company'
 			)
 		).toBeVisible();
-		await editorUtils.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities();
 	} );
 
 	test( 'User can add postcodes for different countries', async ( {
@@ -345,7 +356,7 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 			lastname: 'Perez',
 			addressfirstline: '123 Test Street',
 			addresssecondline: 'Apartment 6',
-			country: 'ES',
+			countryKey: 'ES',
 			city: 'Madrid',
 			postcode: '08830',
 			state: 'M',
@@ -498,12 +509,7 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test( 'Enable company field', async ( {
-		page,
-		editor,
-		admin,
-		editorUtils,
-	} ) => {
+	test( 'Enable company field', async ( { page, admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
@@ -526,7 +532,7 @@ test.describe( 'Billing Address Form', () => {
 		const companyInput = editor.canvas.getByLabel( 'Company (optional)' );
 		await expect( companyInput ).toBeVisible();
 
-		await editorUtils.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities();
 	} );
 
 	test.describe( 'Guest user', () => {
@@ -547,6 +553,7 @@ test.describe( 'Billing Address Form', () => {
 				addressfirstline: '123 Easy Street',
 				addresssecondline: 'Testville',
 				country: 'United States (US)',
+				countryKey: 'US',
 				city: 'New York',
 				state: 'New York',
 				postcode: '90210',
@@ -569,17 +576,17 @@ test.describe( 'Billing Address Form', () => {
 				shippingForm.getByLabel( 'Address', { exact: true } )
 			).toHaveValue( '123 Easy Street' );
 			await expect(
-				shippingForm.getByLabel( 'Apartment, suite, etc. (' )
+				shippingForm.getByLabel( 'Apartment, suite, etc. (optional)' )
 			).toHaveValue( 'Testville' );
 			await expect(
-				shippingForm.getByLabel( 'United States (US), Country/' )
-			).toHaveValue( 'United States (US)' );
+				shippingForm.getByLabel( 'Country/Region' )
+			).toHaveValue( 'US' );
 			await expect( shippingForm.getByLabel( 'City' ) ).toHaveValue(
 				'New York'
 			);
-			await expect(
-				shippingForm.getByLabel( 'New York, State' )
-			).toHaveValue( 'New York' );
+			await expect( shippingForm.getByLabel( 'State' ) ).toHaveValue(
+				'NY'
+			);
 			await expect( shippingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
 				'90210'
 			);
@@ -601,15 +608,17 @@ test.describe( 'Billing Address Form', () => {
 				billingForm.getByLabel( 'Address', { exact: true } )
 			).toHaveValue( '' );
 			await expect(
-				billingForm.getByLabel( 'Apartment, suite, etc. (' )
-			).toHaveValue( '' );
+				billingForm.getByRole( 'button', {
+					name: '+ Add apartment, suite, etc.',
+				} )
+			).toBeVisible();
 			await expect(
-				billingForm.getByLabel( 'United States (US), Country/' )
-			).toHaveValue( 'United States (US)' );
+				billingForm.getByLabel( 'Country/Region' )
+			).toHaveValue( 'US' );
 			await expect( billingForm.getByLabel( 'City' ) ).toHaveValue( '' );
-			await expect(
-				billingForm.getByLabel( 'New York, State' )
-			).toHaveValue( 'New York' );
+			await expect( billingForm.getByLabel( 'State' ) ).toHaveValue(
+				'NY'
+			);
 			await expect( billingForm.getByLabel( 'ZIP Code' ) ).toHaveValue(
 				''
 			);

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Fragment } from '@wordpress/element';
 import {
 	Card,
@@ -18,10 +18,7 @@ import { Text } from '@woocommerce/experimental';
 import './List.scss';
 
 const PlaceholderItem = () => {
-	const classes = classnames(
-		'woocommerce-task-payment',
-		'woocommerce-task-card'
-	);
+	const classes = clsx( 'woocommerce-task-payment', 'woocommerce-task-card' );
 
 	return (
 		<Fragment>

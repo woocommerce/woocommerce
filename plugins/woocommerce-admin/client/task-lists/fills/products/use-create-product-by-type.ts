@@ -3,7 +3,7 @@
  */
 import { useDispatch } from '@wordpress/data';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import { loadExperimentAssignment } from '@woocommerce/explat';
 import { useState } from '@wordpress/element';
@@ -16,27 +16,13 @@ import { createNoticesFromResponse } from '../../../lib/notices';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 const EXPERIMENT_NAME =
-	'woocommerce_product_creation_experience_prepublish_panel_202404_v1';
+	'woocommerce_product_creation_experience_pricing_to_general_202406';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( ITEMS_STORE_NAME );
 	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
-	const isNewExperienceEnabled =
-		window.wcAdminFeatures[ 'new-product-management-experience' ];
 
-	const getProductEditPageLink = async (
-		type: ProductTypeKey,
-		classicEditor: boolean
-	) => {
-		if (
-			type === 'physical' ||
-			type === 'variable' ||
-			type === 'digital'
-		) {
-			return classicEditor
-				? getAdminLink( 'post-new.php?post_type=product' )
-				: getNewPath( {}, '/add-product', {} );
-		}
+	const getProductEditPageLink = async ( type: ProductTypeKey ) => {
 		try {
 			const data: {
 				id?: number;
@@ -48,11 +34,9 @@ export const useCreateProductByType = () => {
 				{ _fields: [ 'id' ] }
 			);
 			if ( data && data.id ) {
-				return classicEditor
-					? getAdminLink(
-							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${ type }`
-					  )
-					: getNewPath( {}, '/product/' + data.id, {} );
+				return getAdminLink(
+					`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${ type }`
+				);
 			}
 			throw new Error( 'Unexpected empty data response from server' );
 		} catch ( error ) {
@@ -70,18 +54,11 @@ export const useCreateProductByType = () => {
 			type === 'grouped' ||
 			type === 'external'
 		) {
-			if ( isNewExperienceEnabled ) {
-				const url = await getProductEditPageLink( type, false );
-				if ( url ) {
-					navigateTo( { url } );
-				}
-				return;
-			}
 			const assignment = await loadExperimentAssignment(
 				EXPERIMENT_NAME
 			);
 			if ( assignment.variationName === 'treatment' ) {
-				const url = await getProductEditPageLink( type, true );
+				const url = await getProductEditPageLink( type );
 				const _feature_nonce = getAdminSetting( '_feature_nonce' );
 				window.location.href =
 					url +
@@ -90,7 +67,7 @@ export const useCreateProductByType = () => {
 			}
 		}
 
-		const url = await getProductEditPageLink( type, true );
+		const url = await getProductEditPageLink( type );
 		if ( url ) {
 			navigateTo( { url } );
 		}

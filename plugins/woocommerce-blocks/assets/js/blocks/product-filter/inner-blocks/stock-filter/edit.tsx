@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useMemo } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -30,10 +30,7 @@ type StockStatusCount = {
 
 const Edit = ( props: BlockEditProps< BlockProps > ) => {
 	const blockProps = useBlockProps( {
-		className: classnames(
-			'wc-block-stock-filter',
-			props.attributes.className
-		),
+		className: clsx( 'wc-block-stock-filter', props.attributes.className ),
 	} );
 
 	const { showCounts, displayStyle } = props.attributes;
@@ -80,7 +77,7 @@ const Edit = ( props: BlockEditProps< BlockProps > ) => {
 					<Inspector { ...props } />
 					<Disabled>
 						<div
-							className={ classnames( `style-${ displayStyle }`, {
+							className={ clsx( `style-${ displayStyle }`, {
 								'is-loading': false,
 							} ) }
 						>

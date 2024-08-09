@@ -3,8 +3,6 @@
 		display: block;
 		color: inherit;
 		flex-grow: 1;
-		// Required by IE11.
-		flex-basis: 0;
 	}
 	.wc-block-components-totals-footer-item {
 		margin: 0;
@@ -23,8 +21,10 @@
 
 .is-large {
 	.wc-block-checkout__sidebar {
-		position: sticky;
-		top: $gap-largest;
 		align-self: flex-start;
+		top: $gap-large;
+		&.is-sticky {
+			position: sticky;
+		}
 	}
 }

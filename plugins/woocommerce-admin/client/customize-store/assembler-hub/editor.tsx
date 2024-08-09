@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useEffect, useMemo } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import { InterfaceSkeleton } from '@wordpress/interface';
@@ -73,7 +73,7 @@ export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 			<BlockContextProvider value={ blockContext }>
 				<InterfaceSkeleton
 					enableRegionNavigation={ false }
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-customize-store__edit-site-editor',
 						'edit-site-editor__interface-skeleton',
 						{

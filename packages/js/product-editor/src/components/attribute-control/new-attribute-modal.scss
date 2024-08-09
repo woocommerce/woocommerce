@@ -1,5 +1,7 @@
-.woocommerce-new-attribute-modal {
+.components-modal__frame.woocommerce-new-attribute-modal {
 	min-width: 75%;
+}
+.woocommerce-new-attribute-modal {
 	.components-notice.is-info {
 		margin-left: 0;
 		margin-right: 0;
@@ -29,6 +31,25 @@
 
 		.woocommerce-new-attribute-modal__table-row {
 			min-height: 80px;
+
+			.components-form-token-field__input-container .components-form-token-field__suggestions-list {
+				position: absolute;
+				z-index: 10;
+			}
+
+			.components-form-token-field__token.is-validating {
+				animation: components-button__busy-animation 2s linear infinite;
+				background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 0, #e0e0e0 70%, #fafafa 0);
+				background-size: 100px 100%;
+				box-shadow: 0 0 1px black inset;
+				opacity: 1;
+
+				.components-form-token-field__token-text,
+				.components-form-token-field__remove-token {
+					background-color:transparent;
+					pointer-events: none;
+				}
+			}
 		}
 	}
 
@@ -73,11 +94,13 @@
 			z-index: 0;
 		}
 
+		.components-form-token-field__label {
+			display: none;
+		}
+
 		.components-form-token-field__input-container {
-			position: absolute;
-			top: 0;
-			min-height: 34px;
-			z-index: 1;
+			position: relative;
+			z-index: 10;
 
 			> .components-flex {
 				min-height: 34px;
@@ -143,5 +166,16 @@
 		.components-button.has-icon {
 			padding: 8px;
 		}
+	}
+}
+
+.woocommerce-new-attribute-modal__table-attribute-value-column.has-values {
+	.components-form-token-field__suggestions-list {
+		border: 1px solid var( --wp-admin-theme-color );
+		border-top: 0;
+		width: calc(100% + 2px);
+		margin-left: -1px;
+		margin-top: -1px;
+		background-color: white;
 	}
 }

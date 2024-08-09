@@ -48,7 +48,7 @@ describe( 'Homescreen Layout', () => {
 				requestingTaskList={ false }
 				taskListComplete
 				hasTaskList={ true }
-				query={ {} }
+				query={ { page: 'wc-admin' } }
 				updateOptions={ () => {} }
 			/>
 		);
@@ -92,7 +92,7 @@ describe( 'Homescreen Layout', () => {
 			<Layout
 				requestingTaskList={ false }
 				hasTaskList={ false }
-				query={ {} }
+				query={ { page: 'wc-admin' } }
 				updateOptions={ () => {} }
 			/>
 		);
@@ -107,7 +107,7 @@ describe( 'Homescreen Layout', () => {
 				requestingTaskList={ false }
 				hasTaskList={ true }
 				taskListComplete
-				query={ {} }
+				query={ { page: 'wc-admin' } }
 				updateOptions={ () => {} }
 			/>
 		);
@@ -195,7 +195,7 @@ describe( 'Homescreen Layout', () => {
 				requestingTaskList={ false }
 				taskListComplete
 				hasTaskList={ true }
-				query={ {} }
+				query={ { page: 'wc-admin' } }
 				updateOptions={ () => {} }
 			/>
 		);
@@ -238,7 +238,7 @@ describe( 'Homescreen Layout', () => {
 				taskListComplete
 				hasTaskList={ true }
 				isTaskListHidden={ true }
-				query={ {} }
+				query={ { page: 'wc-admin' } }
 				updateOptions={ () => {} }
 			/>
 		);

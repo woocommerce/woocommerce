@@ -3,7 +3,7 @@
  */
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import PropTypes from 'prop-types';
@@ -24,8 +24,11 @@ const KnowledgeBase = ( {
 	posts,
 	isLoading,
 	error,
-	title,
-	description,
+	title = __( 'WooCommerce knowledge base', 'woocommerce' ),
+	description = __(
+		'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
+		'woocommerce'
+	),
 	category,
 } ) => {
 	const [ page, updatePage ] = useState( 1 );
@@ -62,7 +65,7 @@ const KnowledgeBase = ( {
 			( page - 1 ) * 2,
 			( page - 1 ) * 2 + 2
 		);
-		const pageClass = classNames(
+		const pageClass = clsx(
 			'woocommerce-marketing-knowledgebase-card__page',
 			{
 				'page-with-single-post': currentPosts.length === 1,
@@ -194,7 +197,7 @@ const KnowledgeBase = ( {
 		<Card
 			title={ title }
 			description={ description }
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-marketing-knowledgebase-card',
 				categoryClass
 			) }
@@ -225,14 +228,6 @@ KnowledgeBase.propTypes = {
 	 * Category of extensions to display.
 	 */
 	category: PropTypes.string,
-};
-
-KnowledgeBase.defaultProps = {
-	title: __( 'WooCommerce knowledge base', 'woocommerce' ),
-	description: __(
-		'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
-		'woocommerce'
-	),
 };
 
 export { KnowledgeBase };

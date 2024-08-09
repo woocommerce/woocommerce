@@ -468,7 +468,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Format the order status.
-		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
+		$data['status'] = OrderUtil::remove_status_prefix( $data['status'] );
 
 		// Format line items.
 		foreach ( $format_line_items as $key ) {
@@ -929,6 +929,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
+
+		if ( 'update' === $action ) {
+			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+			wc_maybe_adjust_line_item_product_stock( $item );
+		}
 
 		return $item;
 	}
@@ -1619,7 +1624,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'rate_id'            => array(
 								'description' => __( 'Tax rate ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
