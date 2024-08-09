@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Internal\ComingSoon;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 
 /**
  * Handles the template_include hook to determine whether the current page needs
@@ -51,31 +51,21 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
+		$is_fse_theme         = wc_current_theme_is_fse_theme();
+		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
+
+
+		if ( ! $is_fse_theme ) {
+			// Initialize block templates for use in classic theme.
+			BlocksPackage::init();
+			$container = BlocksPackage::container();
+			$container->get( BlockTemplatesRegistry::class )->init();
+			$container->get( BlockTemplatesController::class )->init();
+		}
+
 		add_theme_support( 'block-templates' );
 
 		$coming_soon_template = get_query_template( 'coming-soon' );
-		// If the coming soon template is not found, register the block templates registry and controller then try again.
-		if ( empty( $coming_soon_template ) ) {
-			$container = Package::container();
-			$container->register(
-				BlockTemplatesRegistry::class,
-				function () {
-					return new BlockTemplatesRegistry();
-				}
-			);
-			$container->register(
-				BlockTemplatesController::class,
-				function () {
-					return new BlockTemplatesController();
-				}
-			);
-			$container->get( BlockTemplatesRegistry::class )->init();
-			$container->get( BlockTemplatesController::class )->init();
-			$coming_soon_template = get_query_template( 'coming-soon' );
-		}
-
-		$is_fse_theme         = wc_current_theme_is_fse_theme();
-		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
 
 		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_header();
