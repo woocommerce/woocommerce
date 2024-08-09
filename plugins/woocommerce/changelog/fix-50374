@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Made changes to run tests for php files in root path (woocommerce.php and uninstall.php)
