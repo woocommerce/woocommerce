@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS: Fix auto scroll when a new block is added.

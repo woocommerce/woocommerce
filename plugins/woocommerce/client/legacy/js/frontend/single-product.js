@@ -31,9 +31,11 @@ jQuery( function( $ ) {
 			var $tabs_wrapper = $tab.closest( '.wc-tabs-wrapper, .woocommerce-tabs' );
 			var $tabs         = $tabs_wrapper.find( '.wc-tabs, ul.tabs' );
 
+			$tabs.find( 'li' ).attr( 'aria-selected', 'false' );
 			$tabs.find( 'li' ).removeClass( 'active' );
 			$tabs_wrapper.find( '.wc-tab, .panel:not(.panel .panel)' ).hide();
 
+			$tab.closest( 'li' ).attr( 'aria-selected', 'true' );
 			$tab.closest( 'li' ).addClass( 'active' );
 			$tabs_wrapper.find( '#' + $tab.attr( 'href' ).split( '#' )[1] ).show();
 		} )
