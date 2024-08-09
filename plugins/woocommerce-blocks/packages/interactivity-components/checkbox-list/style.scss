@@ -40,6 +40,7 @@
 
 .wc-block-interactivity-components-checkbox-list__input:checked + .wc-block-interactivity-components-checkbox-list__mark {
 	display: block;
+	pointer-events: none;
 }
 
 .wc-block-interactivity-components-checkbox-list__input:focus {
