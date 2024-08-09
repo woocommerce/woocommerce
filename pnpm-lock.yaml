@@ -958,13 +958,16 @@ importers:
       '@types/node':
         specifier: ^16.18.68
         version: 16.18.68
-      browser-filesaver:
-        specifier: ^1.1.1
-        version: 1.1.1
+      file-saver:
+        specifier: ^2.0.5
+        version: 2.0.5
     devDependencies:
       '@babel/core':
         specifier: ^7.23.5
         version: 7.23.5
+      '@types/file-saver':
+        specifier: ^2.0.5
+        version: 2.0.7
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -9767,6 +9770,9 @@ packages:
   '@types/express@4.17.21':
     resolution: {integrity: sha512-ejlPM315qwLpaQlQDTjPdsUFSc6ZsP4AN6AlWnogPjQ7CVi7PYF3YVz+CY3jE2pwYf7E/7HlDAN0rV2GxTG0HQ==}
 
+  '@types/file-saver@2.0.7':
+    resolution: {integrity: sha512-dNKVfHd/jk0SkR/exKGj2ggkB45MAkzvWCaqLUUgkyjITkGNzH8H+yUwr+BLJUBjZOe9w8X3wgmXhZDRg1ED6A==}
+
   '@types/find-cache-dir@3.2.1':
     resolution: {integrity: sha512-frsJrz2t/CeGifcu/6uRo4b+SzAwT4NYCVPu1GN8IB9XTzrpPkGuV0tmh9mN+/L0PklAlsC3u5Fxt0ju00LXIw==}
 
@@ -12964,9 +12970,6 @@ packages:
   browser-assert@1.2.1:
     resolution: {integrity: sha512-nfulgvOR6S4gt9UKCeGJOuSGBPGiFT6oQ/2UBnvTY/5aQ1PnksW72fhZkM30DzoRRv2WpwZf1vHHEr3mtuXIWQ==}
 
-  browser-filesaver@1.1.1:
-    resolution: {integrity: sha512-UI4ps3bE/YXvGKlL7BoITvw8bE/SOt7YnvZeCyME7votTLxsDQ0ES0lvQdEWZMvO9aF5/66h+a3PGWn1KOblBA==}
-
   browser-process-hrtime@1.0.0:
     resolution: {integrity: sha512-9o5UecI3GhkpM6DrXr69PblIuWxPKk9Y0jHBRhdocZ2y7YECBFCsHm79Pr3OyR2AvjhDkabFJaDJMYRazHgsow==}
 
@@ -15652,6 +15655,9 @@ packages:
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
+
+  file-saver@2.0.5:
+    resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
 
   file-sync-cmp@0.1.1:
     resolution: {integrity: sha512-0k45oWBokCqh2MOexeYKpyqmGKG+8mQ2Wd8iawx+uWd/weWJQAZ6SoPybagdCI4xFisag8iAR77WPm4h3pTfxA==}
@@ -21598,7 +21604,7 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
-      react: ^17.0.2
+      react: 18.2.0
 
   react-number-format@4.9.3:
     resolution: {integrity: sha512-am1A1xYAbENuKJ+zpM7V+B1oRTSeOHYltqVKExznIVFweBzhLmOBmyb1DfIKjHo90E0bo1p3nzVJ2NgS5xh+sQ==}
@@ -21803,7 +21809,7 @@ packages:
   react-with-direction@1.4.0:
     resolution: {integrity: sha512-ybHNPiAmaJpoWwugwqry9Hd1Irl2hnNXlo/2SXQBwbLn/jGMauMS2y9jw+ydyX5V9ICryCqObNSthNt5R94xpg==}
     peerDependencies:
-      react: ^17.0.2
+      react: ^0.14 || ^15 || ^16
       react-dom: ^0.14 || ^15 || ^16
 
   react-with-styles-interface-css@4.0.3:
@@ -27577,14 +27583,14 @@ snapshots:
     dependencies:
       '@babel/core': 7.23.5
       '@babel/helper-compilation-targets': 7.24.7
-      '@babel/helper-function-name': 7.24.7
+      '@babel/helper-function-name': 7.23.0
       '@babel/helper-plugin-utils': 7.22.5
 
   '@babel/plugin-transform-function-name@7.23.3(@babel/core@7.24.7)':
     dependencies:
       '@babel/core': 7.24.7
       '@babel/helper-compilation-targets': 7.24.7
-      '@babel/helper-function-name': 7.24.7
+      '@babel/helper-function-name': 7.23.0
       '@babel/helper-plugin-utils': 7.22.5
 
   '@babel/plugin-transform-function-name@7.24.7(@babel/core@7.12.9)':
@@ -36735,6 +36741,8 @@ snapshots:
       '@types/qs': 6.9.10
       '@types/serve-static': 1.15.5
 
+  '@types/file-saver@2.0.7': {}
+
   '@types/find-cache-dir@3.2.1': {}
 
   '@types/glob@7.2.0':
@@ -44399,8 +44407,6 @@ snapshots:
 
   browser-assert@1.2.1: {}
 
-  browser-filesaver@1.1.1: {}
-
   browser-process-hrtime@1.0.0: {}
 
   browser-resolve@1.11.3:
@@ -48294,6 +48300,8 @@ snapshots:
       schema-utils: 3.3.0
       webpack: 5.91.0(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
     optional: true
+
+  file-saver@2.0.5: {}
 
   file-sync-cmp@0.1.1: {}
 

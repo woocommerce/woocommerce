@@ -49,10 +49,11 @@
 	},
 	"dependencies": {
 		"@types/node": "^16.18.68",
-		"browser-filesaver": "^1.1.1"
+		"file-saver": "^2.0.5"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
+		"@types/file-saver": "^2.0.5",
 		"@types/jest": "^27.5.2",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",

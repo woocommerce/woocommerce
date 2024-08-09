@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { saveAs } from 'browser-filesaver';
+import { saveAs } from 'file-saver';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ import mockCSVData from '../__mocks__/mock-csv-data';
 import mockHeaders from '../__mocks__/mock-headers';
 import mockRows from '../__mocks__/mock-rows';
 
-jest.mock( 'browser-filesaver', () => ( {
+jest.mock( 'file-saver', () => ( {
 	saveAs: jest.fn(),
 } ) );
 
