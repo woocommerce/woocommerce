@@ -54,7 +54,7 @@ class ComingSoonRequestHandler {
 		$is_fse_theme         = wc_current_theme_is_fse_theme();
 		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
 
-		if ( ! $is_fse_theme ) {
+		if ( ! $is_fse_theme && ! current_theme_supports( 'block-template-parts' ) ) {
 			// Initialize block templates for use in classic theme.
 			BlocksPackage::init();
 			$container = BlocksPackage::container();
