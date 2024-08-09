@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Build: speedup dependencies installation by disabling composer optimize autoloading by default.

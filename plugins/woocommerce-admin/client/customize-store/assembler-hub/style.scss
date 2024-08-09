@@ -73,6 +73,7 @@ body.woocommerce-assembler {
 	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
 		align-items: center;
 		display: flex;
+		color: $gray-900;
 	}
 
 	.edit-site-site-hub__site-title {
@@ -172,6 +173,10 @@ body.woocommerce-assembler {
 			align-self: stretch;
 			width: 100%;
 			border: 1.5px solid transparent;
+
+			svg {
+				color: $gray-800;
+			}
 
 			&:hover,
 			&:active,
@@ -518,9 +523,19 @@ body.woocommerce-assembler {
 	/* Preview Canvas */
 	.edit-site-layout__canvas {
 		bottom: 16px;
-		top: 16px;
+		top: 75px;
 		left: 6px; // the default styles for this undersizes the width by 24px so we want to center this
-		padding: 0 4px 0 16px;
+		padding: 0;
+		background: #ddd;
+		border-radius: 0 0 12px 12px;
+
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-assembler--with-ai & {
+			top: 16px;
+			padding: 0 4px 0 16px;
+			border-radius: 0;
+			background: transparent;
+		}
 	}
 
 	.edit-site-resizable-frame__handle {
@@ -532,13 +547,22 @@ body.woocommerce-assembler {
 		border-radius: 12px;
 		/* new frame */
 		box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
+		transition: all 0.3s ease 0s;
+
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-assembler--with-ai & {
+			transition: none;
+		}
 	}
 
 	.woocommerce-customize-store__block-editor,
 	.edit-site-layout:not(.is-full-canvas)
 	.edit-site-layout__canvas > div
 	.interface-interface-skeleton__content {
-		border-radius: 12px;
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-customize-store__step-designWithAi & {
+			border-radius: 12px;
+		}
 
 		.woocommerce-customize-store__block-editor,
 		.woocommerce-block-preview-container,
@@ -555,7 +579,59 @@ body.woocommerce-assembler {
 
 	.customize-your-store-edit-site-resizable-frame__inner-content {
 		height: 100%;
-		border-radius: 12px;
+		border-radius: 0 0 12px 12px;
+
+		// Design with AI: This is necessary because the design with AI flow does not have the device toolbar.
+		.woocommerce-customize-store__step-designWithAi & {
+			border-radius: 12px;
+		}
+	}
+
+	.woocommerce-customize-store__device-toolbar {
+		padding: 10px 8px;
+		text-align: center;
+		background-color: #fff;
+		box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.05);
+		position: relative;
+		top: 16px;
+		z-index: 10;
+		border-radius: 12px 12px 0 0;
+		width: calc(100% - 16px);
+		left: 6px;
+	}
+
+	.woocommerce-customize-store__device-button:not([disabled]):focus {
+		box-shadow: none;
+		outline: none;
+	}
+
+	.woocommerce-customize-store__device-button:not([disabled]) {
+		&:hover,
+		&.is-selected {
+			box-shadow: none;
+			outline: none;
+
+			.woocommerce-customize-store__device-icon {
+				fill: initial;
+
+				&--zoom {
+					stroke: rgb(0, 0, 0);
+				}
+			}
+		}
+	}
+
+	.woocommerce-customize-store__device-icon {
+		margin-right: 10px;
+		fill: #757575;
+
+		&--zoom {
+			stroke: #757575;
+		}
+
+		&:last-of-type {
+			margin-right: 0;
+		}
 	}
 }
 
@@ -569,6 +645,10 @@ body.woocommerce-assembler {
 }
 
 .woocommerce-customize-store__step-intro {
+	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
+		background-color: #fff;
+	}
+
 	.edit-site-site-hub__view-mode-toggle-container {
 		height: 32px;
 	}

@@ -55,9 +55,7 @@
 		"collection": "collection",
 		"__privateProductCollectionPreviewState": "__privatePreviewState"
 	},
-	"usesContext": [
-		"templateSlug"
-	],
+	"usesContext": [ "templateSlug", "postId" ],
 	"supports": {
 		"align": [
 			"wide",

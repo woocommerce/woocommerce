@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Improve the handling of the deprecated WC()->api property
