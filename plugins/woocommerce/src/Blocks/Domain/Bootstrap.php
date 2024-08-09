@@ -113,20 +113,6 @@ class Bootstrap {
 			$this->package->set_version_stored_on_db();
 		}
 
-		// Register classes with container.
-		$this->container->register(
-			BlockTemplatesRegistry::class,
-			function () {
-				return new BlockTemplatesRegistry();
-			}
-		);
-		$this->container->register(
-			BlockTemplatesController::class,
-			function () {
-				return new BlockTemplatesController();
-			}
-		);
-
 		add_action(
 			'admin_init',
 			function () {
@@ -448,6 +434,18 @@ class Bootstrap {
 			QueryFilters::class,
 			function () {
 				return new QueryFilters();
+			}
+		);
+		$this->container->register(
+			BlockTemplatesRegistry::class,
+			function () {
+				return new BlockTemplatesRegistry();
+			}
+		);
+		$this->container->register(
+			BlockTemplatesController::class,
+			function () {
+				return new BlockTemplatesController();
 			}
 		);
 	}
