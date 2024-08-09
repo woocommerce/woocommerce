@@ -79,7 +79,7 @@ run `pnpm playwright test --help`
 
 ## Test environment
 
-The default environment configuration is stored on the `.wp-env.json` configuration file in the `plugins/woocommerce`
+The default environment configuration can be found in the `.wp-env.json` file in the `plugins/woocommerce`
 folder.
 
 For more information on how to configure the test environment for `wp-env`, please check out
