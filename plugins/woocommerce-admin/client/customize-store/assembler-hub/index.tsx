@@ -50,10 +50,9 @@ import { onBackButtonClicked } from '../utils';
 import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
 import { ZoomOutContextProvider } from './context/zoom-out-context';
-
-import './tracking';
 import { OptInSubscribe } from './opt-in/opt-in';
 import { OptInContextProvider } from './opt-in/context';
+import './tracking';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 
