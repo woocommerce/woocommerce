@@ -150,6 +150,16 @@ class WCAdminHelper {
 		}
 		$normalized_path = self::get_normalized_url_path( $url );
 
+		$exact_matches = array(
+			'?post_type=product'
+		);
+
+		foreach ($exact_matches as $exact_match) {
+			if ( 0 === strpos( $normalized_path, $exact_match ) ) {
+				return true;
+			}
+		}
+
 		// WC store pages.
 		$store_pages = array(
 			'shop'        => wc_get_page_id( 'shop' ),
@@ -186,6 +196,7 @@ class WCAdminHelper {
 			}
 
 			$permalink = get_permalink( $page_id );
+
 			if ( ! $permalink ) {
 				continue;
 			}
@@ -230,16 +241,7 @@ class WCAdminHelper {
 			}
 		}
 
-		/**
-		 * Filter if a URL is a store page.
-		 *
-		 * @since 9.3.0
-		 * @param bool   $is_store_page Whether or not the URL is a store page.
-		 * @param string $url           URL to check.
-		 */
-		$is_store_page = apply_filters( 'woocommerce_is_store_page', false, $url );
-
-		return filter_var( $is_store_page, FILTER_VALIDATE_BOOL );
+		return false;
 	}
 
 	/**
