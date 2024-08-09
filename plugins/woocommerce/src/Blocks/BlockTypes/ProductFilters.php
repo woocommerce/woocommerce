@@ -58,7 +58,7 @@ class ProductFilters extends AbstractBlock {
 		$html = str_replace( $target_div, $product_filters_content_html . $target_div, $html );
 
 		$html = strtr(
-			'<dialog data-wc-bind--open="context.isDialogOpen" data-wc-bind--hidden="!context.isDialogOpen" role="dialog" aria-modal="true" hidden data-wc-class--wc-block-product-filters--dialog-open="context.isDialogOpen">
+			'<dialog hidden role="dialog" aria-modal="true">
 				{{html}}
 			</dialog>',
 			array(
@@ -82,12 +82,14 @@ class ProductFilters extends AbstractBlock {
 		// Find the position of the last </div>.
 		$pos = strrpos( $product_filters_html, '</div>' );
 
-		if ( false !== $pos ) {
+		if ( $pos ) {
 			// Inject the dialog_html at the correct position.
 			$html = substr_replace( $product_filters_html, $dialog_html, $pos, 0 );
 
 			return $html;
 		}
+
+		return $product_filters_html;
 	}
 
 	/**
@@ -109,7 +111,7 @@ class ProductFilters extends AbstractBlock {
 				'data-wc-context',
 				wp_json_encode(
 					array(
-						'isDialogOpen'                    => false,
+						'isDialogOpen' => false,
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
@@ -117,9 +119,9 @@ class ProductFilters extends AbstractBlock {
 			$html = $p->get_updated_html();
 		}
 
-		do_action( 'qm/debug', $html );
+		$dialog_html = $this->render_dialog();
 
-		$html = $this->inject_dialog( $html, $this->render_dialog() );
+		$html = $this->inject_dialog( $html, $dialog_html );
 
 		return $html;
 	}

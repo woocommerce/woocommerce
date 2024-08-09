@@ -35,7 +35,7 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 				'class' => 'wc-block-product-filters-overlay-navigation',
 			)
 		);
-		$overlay_mode       = isset($block->context['woocommerce/product-filters/overlay']) && $block->context['woocommerce/product-filters/overlay'];
+		$overlay_mode       = isset( $block->context['woocommerce/product-filters/overlay'] ) && $block->context['woocommerce/product-filters/overlay'];
 
 		if ( 'never' === $overlay_mode || ( ! wp_is_mobile() && 'mobile' === $overlay_mode ) ) {
 			return null;
@@ -53,8 +53,7 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 			)
 		);
 
-
-		$p    = new \WP_HTML_Tag_Processor( $html );
+		$p = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
@@ -64,7 +63,6 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 			);
 			$html = $p->get_updated_html();
 		}
-
 
 		return $html;
 	}
