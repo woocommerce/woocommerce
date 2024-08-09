@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useInstanceId } from '@wordpress/compose';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useMemo, useState } from '@wordpress/element';
 import clsx from 'clsx';
@@ -9,12 +8,9 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
+import { CheckboxListOptionControl } from './checkbox-list-option-control';
+import type { CheckboxListOptions } from './types';
 import './style.scss';
-import { CheckboxControl } from '../checkbox-control';
-interface CheckboxListOptions {
-	label: React.ReactNode;
-	value: string;
-}
 
 export interface CheckboxListProps {
 	className?: string | undefined;
@@ -169,56 +165,5 @@ const CheckboxList = ( {
 		</ul>
 	);
 };
-
-type CheckboxListOptionControlProps = {
-	option: CheckboxListOptions;
-	shouldTruncateOptions: boolean;
-	showExpanded: boolean;
-	index: number;
-	limit: number;
-	checked: boolean;
-	disabled: boolean;
-	renderedShowMore: false | JSX.Element;
-	onChange: ( value: string ) => void;
-};
-
-function CheckboxListOptionControl( {
-	option,
-	shouldTruncateOptions,
-	showExpanded,
-	index,
-	limit,
-	checked,
-	disabled,
-	renderedShowMore,
-	onChange,
-}: CheckboxListOptionControlProps ) {
-	const checkboxControlInstanceId = useInstanceId(
-		CheckboxListOptionControl,
-		'wc-block-checkbox-list-option'
-	) as string;
-
-	return (
-		<>
-			<li
-				{ ...( shouldTruncateOptions &&
-					! showExpanded &&
-					index >= limit && { hidden: true } ) }
-			>
-				<CheckboxControl
-					id={ checkboxControlInstanceId }
-					className="wc-block-checkbox-list__checkbox"
-					label={ option.label }
-					checked={ checked }
-					onChange={ () => {
-						onChange( option.value );
-					} }
-					disabled={ disabled }
-				/>
-			</li>
-			{ shouldTruncateOptions && index === limit - 1 && renderedShowMore }
-		</>
-	);
-}
 
 export default CheckboxList;
