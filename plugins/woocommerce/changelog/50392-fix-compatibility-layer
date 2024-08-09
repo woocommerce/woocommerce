@@ -1,0 +1,4 @@
+Significance: major
+Type: fix
+
+Compatibility Layer: fix 'woocommerce_before_single_product_summary' hook position.
