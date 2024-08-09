@@ -208,7 +208,6 @@ const notifyIfRemoved = (
 					speak: true,
 					type: 'snackbar',
 					id: `${ oldCartItem.key }-removed`,
-					__unstableHTML: true,
 				}
 			);
 		}
