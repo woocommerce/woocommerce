@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { InnerBlocks } from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -15,17 +15,12 @@ export default function save( { attributes } ) {
 		.forEach( ( key ) => {
 			dataAttributes[ key ] = attributes[ key ];
 		} );
-	const data = {
+	const blockProps = useBlockProps.save( {
+		className: getBlockClassName( 'wc-block-all-products', attributes ),
 		'data-attributes': JSON.stringify( dataAttributes ),
-	};
+	} );
 	return (
-		<div
-			className={ getBlockClassName(
-				'wc-block-all-products',
-				attributes
-			) }
-			{ ...data }
-		>
+		<div { ...blockProps }>
 			<InnerBlocks.Content />
 		</div>
 	);
