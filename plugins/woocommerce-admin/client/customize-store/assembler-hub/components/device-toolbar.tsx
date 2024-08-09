@@ -72,14 +72,14 @@ export function DeviceToolbar( { isEditorLoading = false } ) {
 			className="woocommerce-customize-store__device-toolbar"
 			orientation="horizontal"
 			role="toolbar"
-			aria-label={ __( 'Resize Options', 'woocommerce' ) }
+			aria-label={ __( 'Resize', 'woocommerce' ) }
 		>
 			<button
 				disabled={ isEditorLoading }
 				className={ clsx( BUTTON_CLASS_NAMES, {
 					'is-selected': deviceType === 'Desktop',
 				} ) }
-				aria-label="Desktop View"
+				aria-label="Desktop"
 				onClick={ () => {
 					switchDeviceType( 'Desktop' );
 				} }
@@ -95,7 +95,7 @@ export function DeviceToolbar( { isEditorLoading = false } ) {
 				className={ clsx( BUTTON_CLASS_NAMES, {
 					'is-selected': deviceType === 'Tablet',
 				} ) }
-				aria-label="Tablet View"
+				aria-label="Tablet"
 				onClick={ () => {
 					switchDeviceType( 'Tablet' );
 				} }
@@ -111,7 +111,7 @@ export function DeviceToolbar( { isEditorLoading = false } ) {
 				className={ clsx( BUTTON_CLASS_NAMES, {
 					'is-selected': deviceType === 'Mobile',
 				} ) }
-				aria-label="Mobile View"
+				aria-label="Mobile"
 				onClick={ () => {
 					switchDeviceType( 'Mobile' );
 				} }
@@ -125,7 +125,7 @@ export function DeviceToolbar( { isEditorLoading = false } ) {
 			<button
 				disabled={ isEditorLoading }
 				className={ clsx( BUTTON_CLASS_NAMES ) }
-				aria-label={ isZoomedOut ? 'Zoom In View' : 'Zoom Out View' }
+				aria-label="Zoom out"
 				onClick={ () => {
 					setDeviceType( 'Desktop' );
 					toggleZoomOut();
