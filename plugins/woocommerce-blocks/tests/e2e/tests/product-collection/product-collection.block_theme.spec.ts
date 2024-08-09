@@ -82,7 +82,7 @@ test.describe( 'Product Collection', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Is hidden when empty unless product-collection-no-results block is present', async ( {
+	test( 'Is not rendered when empty unless No Results block is present', async ( {
 		admin,
 		page,
 		pageObject,
@@ -101,6 +101,7 @@ test.describe( 'Product Collection', () => {
 		await expect(
 			featuredBlock.getByText( 'Featured products' )
 		).toBeVisible();
+		// The "No results found" info is rendered in editor for all collections.
 		await expect(
 			featuredBlock.getByText( 'No results found' )
 		).toBeVisible();
@@ -122,22 +123,16 @@ test.describe( 'Product Collection', () => {
 
 		await pageObject.publishAndGoToFrontend();
 
-		const collectionBlocks = page.locator(
+		const collectionBlock = page.locator(
 			'.wp-block-woocommerce-product-collection'
 		);
 
-		await expect( collectionBlocks ).toHaveCount( 2 );
-
-		await expect( collectionBlocks.first() ).toBeHidden();
-		await expect( collectionBlocks.first() ).toBeEmpty();
-		await expect( collectionBlocks.first() ).toHaveClass(
-			/wp-block-woocommerce-product-collection--empty/
+		await expect( collectionBlock ).toHaveCount( 1 );
+		await expect( collectionBlock ).not.toContainText(
+			'Featured products'
 		);
-
-		await expect( collectionBlocks.last() ).toBeVisible();
-		await expect( collectionBlocks.last() ).toContainText(
-			'No results found'
-		);
+		await expect( collectionBlock ).toBeVisible();
+		await expect( collectionBlock ).toContainText( 'No results found' );
 	} );
 
 	test.describe( 'Renders correctly with all Product Elements', () => {
