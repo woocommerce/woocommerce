@@ -25,7 +25,11 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useGetLocation, useProductCollectionQueryContext } from './utils';
+import {
+	useGetLocation,
+	useProductCollectionQueryContext,
+	parseTemplateSlug,
+} from './utils';
 import './editor.scss';
 import { getDefaultStockStatuses } from '../product-collection/constants';
 
@@ -194,15 +198,6 @@ const ProductTemplateEdit = (
 				per_page: -1,
 				context: 'view',
 			} );
-			const templateCategory =
-				inherit &&
-				templateSlug?.startsWith( 'category-' ) &&
-				getEntityRecords( 'taxonomy', 'category', {
-					context: 'view',
-					per_page: 1,
-					_fields: [ 'id' ],
-					slug: templateSlug.replace( 'category-', '' ),
-				} );
 			const query: Record< string, unknown > = {
 				postType,
 				offset: perPage ? perPage * ( page - 1 ) + offset : 0,
@@ -240,8 +235,29 @@ const ProductTemplateEdit = (
 			}
 			// If `inherit` is truthy, adjust conditionally the query to create a better preview.
 			if ( inherit ) {
-				if ( templateCategory ) {
-					query.categories = templateCategory[ 0 ]?.id;
+				const { taxonomy, slug } = parseTemplateSlug( templateSlug );
+
+				if ( taxonomy && slug ) {
+					const taxonomyRecord = getEntityRecords(
+						'taxonomy',
+						taxonomy,
+						{
+							context: 'view',
+							per_page: 1,
+							_fields: [ 'id' ],
+							slug,
+						}
+					);
+
+					if ( taxonomyRecord ) {
+						const taxonomyId = taxonomyRecord[ 0 ]?.id;
+						if ( taxonomy === 'category' ) {
+							query.categories = taxonomyId;
+						} else {
+							// If taxonomy is not `category`, we expect either `product_cat` or `product_tag`
+							query[ taxonomy ] = taxonomyId;
+						}
+					}
 				}
 				query.per_page = loopShopPerPage;
 			}
@@ -306,7 +322,8 @@ const ProductTemplateEdit = (
 		className: clsx(
 			__unstableLayoutClassNames,
 			'wc-block-product-template',
-			customClassName
+			customClassName,
+			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType }
 		),
 	} );
 

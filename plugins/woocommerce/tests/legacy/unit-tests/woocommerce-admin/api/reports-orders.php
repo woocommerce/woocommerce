@@ -92,6 +92,55 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'order', $order_report['_links'] );
 	}
 
+	public function test_get_reports_with_orphaned_refund() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 ); // $25 x 4.
+		// Make sure the order is paid at least a minute ago to avoid issues with the same timestamp - undeterministic order.
+		$order->set_date_paid( $order->get_date_paid()->modify( '-1 minute' ) );
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 100,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		// Since $order->delete() will delete the refund as well and
+		// wp_delete_post($order->get_id()) can be prevented by the following filter: maybe_prevent_deletion_of_post (see https://github.com/woocommerce/woocommerce/blob/97a0d9b16006b089f7d1e98af19d61f6d71b621b/plugins/woocommerce/src/Internal/DataStores/Orders/DataSynchronizer.php#L916 )
+		// we need to update the post_parent to a non-existent order to simulate an orphaned refund.
+		wp_update_post(
+			array(
+				'ID'          => $refund->get_id(),
+				'post_parent' => '99999999',
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $reports ) );
+
+		$refund_report = $reports[0];
+		$order_report  = $reports[1];
+
+		$this->assertEquals( $order->get_id(), $order_report['order_id'] );
+		$this->assertEquals( $refund->get_id(), $refund_report['order_id'] );
+	}
+
 	/**
 	 * Test getting reports without valid permissions.
 	 *
@@ -242,7 +291,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $response_orders ) );
 		$order_ids = array_map(
-			function( $order ) {
+			function ( $order ) {
 				return $order['order_id'];
 			},
 			$response_orders
@@ -502,6 +551,5 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$second_order_from_response   = $response_orders[ $second_order->get_id() ];
 		$second_order_formatted_total = wp_strip_all_tags( html_entity_decode( $second_order->get_formatted_order_total() ), true );
 		$this->assertEquals( $second_order_from_response['total_formatted'], $second_order_formatted_total );
-
 	}
 }

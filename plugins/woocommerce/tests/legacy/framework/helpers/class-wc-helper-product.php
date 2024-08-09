@@ -13,6 +13,14 @@
 class WC_Helper_Product {
 
 	/**
+	 * Counter to insert unique SKU for concurrent tests.
+	 * The starting value ensures no conflicts between existing generators.
+	 *
+	 * @var int $sku_counter
+	 */
+	private static $sku_counter = 0;
+
+	/**
 	 * Delete a product.
 	 *
 	 * @param int $product_id ID to delete.
@@ -39,7 +47,7 @@ class WC_Helper_Product {
 				'name'          => 'Dummy Product',
 				'regular_price' => 10,
 				'price'         => 10,
-				'sku'           => 'DUMMY SKU',
+				'sku'           => 'DUMMY SKU' . self::$sku_counter,
 				'manage_stock'  => false,
 				'tax_status'    => 'taxable',
 				'downloadable'  => false,
@@ -47,6 +55,8 @@ class WC_Helper_Product {
 				'stock_status'  => 'instock',
 				'weight'        => '1.1',
 			);
+
+		++self::$sku_counter;
 
 		$product->set_props( array_merge( $default_props, $props ) );
 

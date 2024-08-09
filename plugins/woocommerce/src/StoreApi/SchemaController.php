@@ -54,7 +54,6 @@ class SchemaController {
 				Schemas\V1\ProductCategorySchema::IDENTIFIER => Schemas\V1\ProductCategorySchema::class,
 				Schemas\V1\ProductCollectionDataSchema::IDENTIFIER => Schemas\V1\ProductCollectionDataSchema::class,
 				Schemas\V1\ProductReviewSchema::IDENTIFIER => Schemas\V1\ProductReviewSchema::class,
-				Schemas\V1\AI\StoreTitleSchema::IDENTIFIER => Schemas\V1\AI\StoreTitleSchema::class,
 				Schemas\V1\AI\ImagesSchema::IDENTIFIER     => Schemas\V1\AI\ImagesSchema::class,
 				Schemas\V1\AI\PatternsSchema::IDENTIFIER   => Schemas\V1\AI\PatternsSchema::class,
 				Schemas\V1\AI\ProductSchema::IDENTIFIER    => Schemas\V1\AI\ProductSchema::class,
