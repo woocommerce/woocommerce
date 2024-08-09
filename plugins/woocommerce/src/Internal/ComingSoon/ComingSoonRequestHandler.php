@@ -88,7 +88,9 @@ class ComingSoonRequestHandler {
 			}
 		);
 
-		include $coming_soon_template;
+		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template  ) ) {
+			include $coming_soon_template;
+		}
 
 		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_footer();
