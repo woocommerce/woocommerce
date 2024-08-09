@@ -139,7 +139,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( productFilterAttributeSizeBlockListItem ).toBeVisible();
 
 		const productFilterAttributeWrapperBlock = editor.canvas.getByLabel(
-			'Block: Size Attribute (Experimental)'
+			'Block: Size (Experimental)'
 		);
 		await editor.selectBlocks( productFilterAttributeWrapperBlock );
 		await expect( productFilterAttributeWrapperBlock ).toBeVisible();
