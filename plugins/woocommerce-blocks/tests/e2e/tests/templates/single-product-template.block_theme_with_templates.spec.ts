@@ -1,19 +1,17 @@
 /**
  * External dependencies
  */
-import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
-
-/**
- * Internal dependencies
- */
-import type { TemplateType } from '../../utils/types';
+import {
+	test,
+	expect,
+	BLOCK_THEME_WITH_TEMPLATES_SLUG,
+} from '@woocommerce/e2e-utils';
 
 const testData = {
 	permalink: '/product/belt',
 	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
-	templateType: 'wp_template' as TemplateType,
+	templateType: 'wp_template' as 'wp_template' | 'wp_template_part',
 };
 
 const userText = 'Hello World in the Belt template';
@@ -27,19 +25,22 @@ test.describe( 'Single Product Template', () => {
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
 		editor,
-		editorUtils,
 		page,
 	} ) => {
 		// Edit the theme template.
-		await editorUtils.visitTemplateEditor(
-			testData.templateName,
-			testData.templateType
-		);
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+			postType: testData.templateType,
+			canvas: 'edit',
+		} );
+
 		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 		await page.goto( testData.permalink );
 
 		// Verify edits are visible in the frontend.
@@ -50,9 +51,11 @@ test.describe( 'Single Product Template', () => {
 
 		// Revert edition and verify the template from the theme is used.
 		await admin.visitSiteEditor( {
-			path: `/${ testData.templateType }/all`,
+			postType: testData.templateType,
 		} );
-		await editorUtils.revertTemplateCustomizations( testData.templateName );
+		await editor.revertTemplate( {
+			templateName: testData.templateName,
+		} );
 		await page.goto( testData.permalink );
 
 		await expect(

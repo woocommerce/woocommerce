@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, box } from '@wordpress/icons';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
+import { productFilterOptions } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -12,16 +12,9 @@ import './style.scss';
 import edit from './edit';
 import metadata from './block.json';
 
-if ( isExperimentalBuild() ) {
+if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
-		icon: {
-			src: (
-				<Icon
-					icon={ box }
-					className="wc-block-editor-components-block-icon"
-				/>
-			),
-		},
+		icon: productFilterOptions,
 		edit,
 	} );
 }

@@ -2,10 +2,13 @@
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\BlockTemplatesController;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 
 /**
  * Handles the template_include hook to determine whether the current page needs
- * to be replaced with a comiing soon screen.
+ * to be replaced with a coming soon screen.
  */
 class ComingSoonRequestHandler {
 
@@ -48,21 +51,41 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
+		$is_fse_theme         = wc_current_theme_is_fse_theme();
+		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
+
+		if ( ! $is_fse_theme && ! current_theme_supports( 'block-template-parts' ) ) {
+			// Initialize block templates for use in classic theme.
+			BlocksPackage::init();
+			$container = BlocksPackage::container();
+			$container->get( BlockTemplatesRegistry::class )->init();
+			$container->get( BlockTemplatesController::class )->init();
+		}
+
 		add_theme_support( 'block-templates' );
 
 		$coming_soon_template = get_query_template( 'coming-soon' );
 
-		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_header();
 		}
 
-		include $coming_soon_template;
+		add_action(
+			'wp_head',
+			function () {
+				echo "<meta name='woo-coming-soon-page' content='yes'>";
+			}
+		);
 
-		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
+			include $coming_soon_template;
+		}
+
+		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_footer();
 		}
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( $is_fse_theme ) {
 			// Since we've already rendered a template, return null to ensure no other template is rendered.
 			return null;
 		} else {
@@ -99,6 +122,17 @@ class ComingSoonRequestHandler {
 		$url = $this->coming_soon_helper->get_url_from_wp( $wp );
 
 		if ( ! $this->coming_soon_helper->is_url_coming_soon( $url ) ) {
+			return false;
+		}
+
+		/**
+		 * Check if there is an exclusion.
+		 *
+		 * @since 9.1.0
+		 *
+		 * @param bool $is_excluded If the request should be excluded from Coming soon mode. Defaults to false.
+		 */
+		if ( apply_filters( 'woocommerce_coming_soon_exclude', false ) ) {
 			return false;
 		}
 
@@ -164,7 +198,7 @@ class ComingSoonRequestHandler {
 		foreach ( $fonts_to_add as $font_to_add ) {
 			$found = false;
 			foreach ( $font_data as $font ) {
-				if ( $font['name'] === $font_to_add['name'] ) {
+				if ( isset( $font['name'] ) && $font['name'] === $font_to_add['name'] ) {
 					$found = true;
 					break;
 				}

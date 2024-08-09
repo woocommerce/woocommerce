@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
-import { useCallback } from 'react';
+import { useCallback } from '@wordpress/element';
 
 export function useProductURL( productType: string ) {
 	const [ permalink ] = useEntityProp< string >(
@@ -10,15 +10,19 @@ export function useProductURL( productType: string ) {
 		productType,
 		'permalink'
 	);
+
 	const getProductURL = useCallback(
 		( isPreview: boolean ) => {
-			const productURL = new URL( permalink ) as URL | undefined;
+			if ( ! permalink ) return undefined;
+
+			const productURL = new URL( permalink );
 			if ( isPreview ) {
-				productURL?.searchParams.append( 'preview', 'true' );
+				productURL.searchParams.append( 'preview', 'true' );
 			}
-			return productURL?.toString() || '';
+			return productURL.toString();
 		},
 		[ permalink ]
 	);
+
 	return { getProductURL };
 }

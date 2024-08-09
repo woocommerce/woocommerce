@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import {
-	cli,
+	expect,
+	test as base,
+	wpCLI,
 	CLASSIC_THEME_SLUG,
 	CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG,
 	CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG,
@@ -26,14 +27,16 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Notice Templates', () => {
-	test.beforeEach( async ( { requestUtils, wpCliUtils, frontendUtils } ) => {
+	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 
-		const cartShortcodeID = await wpCliUtils.getPostIDByTitle(
-			'Cart Shortcode'
+		const cliOutput = await wpCLI(
+			'post list --title="Cart Shortcode" --post_type=page --field=ID'
 		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp option update woocommerce_cart_page_id ${ cartShortcodeID }`
+		const cartShortcodeID = cliOutput.stdout.match( /\d+/g )?.pop();
+
+		await wpCLI(
+			`option update woocommerce_cart_page_id ${ cartShortcodeID }`
 		);
 
 		await frontendUtils.goToShop();

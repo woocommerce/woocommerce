@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { paramCase as kebabCase } from 'change-case';
 import { getCSSRules } from '@wordpress/style-engine';
 import { isObject } from '@woocommerce/types';
@@ -49,7 +49,7 @@ function getBorderClassName( attributes: {
 		? getColorClassName( 'border-color', borderColor )
 		: '';
 
-	return classnames( {
+	return clsx( {
 		'has-border-color': !! borderColor || !! style?.border?.color,
 		[ borderColorClass ]: !! borderColorClass,
 	} );
@@ -85,7 +85,7 @@ export function getColorClassesAndStyles( props: {
 	const hasGradient = gradientClass || style?.color?.gradient;
 
 	// Determine color CSS class name list.
-	const className = classnames( textClass, gradientClass, {
+	const className = clsx( textClass, gradientClass, {
 		// Don't apply the background class if there's a gradient.
 		[ backgroundClass ]: ! hasGradient && !! backgroundClass,
 		'has-text-color': textColor || style?.color?.text,

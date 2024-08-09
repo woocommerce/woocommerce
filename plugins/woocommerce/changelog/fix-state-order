@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use the default ordering of states in the Checkout block

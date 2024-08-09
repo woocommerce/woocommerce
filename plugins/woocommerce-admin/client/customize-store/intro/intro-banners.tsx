@@ -2,13 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
-import { useState } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -17,7 +15,6 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
-import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 import { trackEvent } from '../tracking';
 
 export const BaseIntroBanner = ( {
@@ -45,7 +42,7 @@ export const BaseIntroBanner = ( {
 } ) => {
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-customize-store-banner',
 				bannerClass
 			) }
@@ -223,19 +220,6 @@ export const NoAIBanner = ( {
 }: {
 	redirectToCYSFlow: () => void;
 } ) => {
-	const [ isModalOpen, setIsModalOpen ] = useState( false );
-	interface Theme {
-		stylesheet?: string;
-	}
-
-	const currentTheme = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-
-	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
-
 	return (
 		<>
 			<BaseIntroBanner
@@ -247,20 +231,10 @@ export const NoAIBanner = ( {
 				bannerClass="no-ai-banner"
 				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
 				bannerButtonOnClick={ () => {
-					if ( ! isDefaultTheme ) {
-						setIsModalOpen( true );
-					} else {
-						redirectToCYSFlow();
-					}
+					redirectToCYSFlow();
 				} }
 				showAIDisclaimer={ false }
 			/>
-			{ isModalOpen && (
-				<ThemeSwitchWarningModal
-					setIsModalOpen={ setIsModalOpen }
-					redirectToCYSFlow={ redirectToCYSFlow }
-				/>
-			) }
 		</>
 	);
 };
@@ -324,15 +298,17 @@ export const ExistingNoAiThemeBanner = () => {
 
 	return (
 		<BaseIntroBanner
-			bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
 			bannerText={ __(
-				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
+				'Customize everything from the color palette and the fonts to the page layouts, making sure every detail aligns with your brand.',
 				'woocommerce'
 			) }
 			bannerClass="existing-no-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				trackEvent( 'customize_your_store_intro_customize_click' );
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: 'block',
+				} );
 				navigateOrParent(
 					window,
 					getNewPath(
@@ -342,7 +318,60 @@ export const ExistingNoAiThemeBanner = () => {
 					)
 				);
 			} }
-			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
+			bannerButtonText={ __( 'Customize your store', 'woocommerce' ) }
+			showAIDisclaimer={ false }
+			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
+		></BaseIntroBanner>
+	);
+};
+
+export const ClassicThemeBanner = () => {
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
+			bannerText={ __(
+				'Customize everything from the color palette and the fonts to the page layouts, making sure every detail aligns with your brand.',
+				'woocommerce'
+			) }
+			bannerClass="existing-no-ai-theme-banner"
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: 'classic',
+				} );
+				navigateOrParent(
+					window,
+					'customize.php?return=/wp-admin/themes.php'
+				);
+			} }
+			bannerButtonText={ __( 'Go to the Customizer', 'woocommerce' ) }
+			showAIDisclaimer={ false }
+			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
+		></BaseIntroBanner>
+	);
+};
+
+export const NonDefaultBlockThemeBanner = () => {
+	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
+
+	return (
+		<BaseIntroBanner
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
+			bannerText={ __(
+				'Customize everything from the color palette and the fonts to the page layouts, making sure every detail aligns with your brand.',
+				'woocommerce'
+			) }
+			bannerClass="existing-no-ai-theme-banner"
+			buttonIsLink={ false }
+			bannerButtonOnClick={ () => {
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: 'block',
+				} );
+				navigateOrParent( window, 'site-editor.php' );
+			} }
+			bannerButtonText={ __( 'Go to the Editor', 'woocommerce' ) }
 			showAIDisclaimer={ false }
 			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>

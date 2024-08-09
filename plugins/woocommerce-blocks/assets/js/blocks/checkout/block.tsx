@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createInterpolateElement, useEffect } from '@wordpress/element';
 import {
 	useStoreCart,
@@ -139,7 +139,8 @@ const ScrollOnError = ( {
 			// Scroll after a short timeout to allow a re-render. This will allow focusableSelector to match updated components.
 			scrollToTopTimeout = window.setTimeout( () => {
 				scrollToTop( {
-					focusableSelector: 'input:invalid, .has-error input',
+					focusableSelector:
+						'input:invalid, .has-error input, .has-error select',
 				} );
 			}, 50 );
 		}
@@ -190,7 +191,7 @@ const Block = ( {
 			<SlotFillProvider>
 				<CheckoutProvider>
 					<SidebarLayout
-						className={ classnames( 'wc-block-checkout', {
+						className={ clsx( 'wc-block-checkout', {
 							'has-dark-controls': attributes.hasDarkControls,
 						} ) }
 					>

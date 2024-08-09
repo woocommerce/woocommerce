@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Admin } from '@wordpress/e2e-test-utils-playwright';
+import { Admin } from '@woocommerce/e2e-utils';
 
 export class ShippingUtils {
 	private page: Page;
@@ -27,40 +27,56 @@ export class ShippingUtils {
 	async enableShippingCalculator() {
 		await this.openShippingSettings();
 
-		await this.page
-			.getByLabel( 'Enable the shipping calculator on the cart page' )
-			.check();
+		const enable = this.page.getByLabel(
+			'Enable the shipping calculator on the cart page'
+		);
 
-		await this.saveShippingSettings();
+		if ( ! ( await enable.isChecked() ) ) {
+			await enable.check();
+
+			await this.saveShippingSettings();
+		}
 	}
 
 	async disableShippingCalculator() {
 		await this.openShippingSettings();
 
-		await this.page
-			.getByLabel( 'Enable the shipping calculator on the cart page' )
-			.uncheck();
+		const enable = this.page.getByLabel(
+			'Enable the shipping calculator on the cart page'
+		);
 
-		await this.saveShippingSettings();
+		if ( await enable.isChecked() ) {
+			await enable.uncheck();
+
+			await this.saveShippingSettings();
+		}
 	}
 
 	async enableShippingCostsRequireAddress() {
 		await this.openShippingSettings();
 
-		await this.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.check();
+		const hide = this.page.getByLabel(
+			'Hide shipping costs until an address is entered'
+		);
 
-		await this.saveShippingSettings();
+		if ( ! ( await hide.isChecked() ) ) {
+			await hide.check();
+
+			await this.saveShippingSettings();
+		}
 	}
 
 	async disableShippingCostsRequireAddress() {
 		await this.openShippingSettings();
 
-		await this.page
-			.getByLabel( 'Hide shipping costs until an address is entered' )
-			.uncheck();
+		const hide = this.page.getByLabel(
+			'Hide shipping costs until an address is entered'
+		);
 
-		await this.saveShippingSettings();
+		if ( await hide.isChecked() ) {
+			await hide.uncheck();
+
+			await this.saveShippingSettings();
+		}
 	}
 }

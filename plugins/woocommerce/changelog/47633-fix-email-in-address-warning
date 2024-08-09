@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix an issue in which a warning is emitted when placing an order using Checkout block.

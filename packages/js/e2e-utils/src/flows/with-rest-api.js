@@ -199,7 +199,7 @@ export const withRestApi = {
 	 * @return {Promise} Promise resolving once orders have been deleted.
 	 */
 	deleteAllOrders: async () => {
-		// We need to specfically filter on order status here to make sure we catch all orders to delete.
+		// We need to specifically filter on order status here to make sure we catch all orders to delete.
 		const orderStatuses = [
 			'pending',
 			'processing',
@@ -227,7 +227,7 @@ export const withRestApi = {
 	 * Adds a shipping zone along with a shipping method using the API.
 	 *
 	 * @param {string}  zoneName              Shipping zone name.
-	 * @param {string}  zoneLocation          Shiping zone location. Defaults to country:US. For states use: state:US:CA.
+	 * @param {string}  zoneLocation          Shipping zone location. Defaults to country:US. For states use: state:US:CA.
 	 * @param {string}  zipCode               Shipping zone zip code. Default is no zip code.
 	 * @param {string}  zoneMethod            Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup).
 	 * @param {string}  cost                  Shipping method cost. Default is no cost.

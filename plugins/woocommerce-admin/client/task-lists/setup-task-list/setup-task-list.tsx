@@ -18,7 +18,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { List, useSlot } from '@woocommerce/experimental';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { useLayoutContext } from '@woocommerce/admin-layout';
 
 /**
@@ -287,7 +287,7 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 				<ProgressHeader taskListId={ id } />
 			) : null }
 			<div
-				className={ classnames(
+				className={ clsx(
 					`woocommerce-task-dashboard__container woocommerce-task-list__${ id } setup-task-list`
 				) }
 			>
@@ -295,8 +295,8 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 					size="large"
 					className="woocommerce-task-card woocommerce-homescreen-card"
 				>
-					<div className="wooocommerce-task-card__header-container">
-						<div className="wooocommerce-task-card__header">
+					<div className="woocommerce-task-card__header-container">
+						<div className="woocommerce-task-card__header">
 							{ hasTaskListHeaderSlotFills ? (
 								<WooOnboardingTaskListHeader.Slot
 									id={ selectedHeaderCard?.id }

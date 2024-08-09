@@ -1,44 +1,37 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, starFilled } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
-import {
-	DEFAULT_ATTRIBUTES,
-	INNER_BLOCKS_PRODUCT_TEMPLATE,
-} from '../constants';
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.FEATURED,
 	title: __( 'Featured', 'woocommerce' ),
-	icon: ( <Icon icon={ starFilled } /> ) as BlockIcon,
+	icon: <Icon icon={ starFilled } />,
 	description: __( 'Showcase your featured products.', 'woocommerce' ),
 	keywords: [ 'product collection' ],
 	scope: [],
 };
 
 const attributes = {
-	...DEFAULT_ATTRIBUTES,
 	displayLayout: {
 		type: 'flex',
 		columns: 5,
 		shrinkColumns: true,
 	},
 	query: {
-		...DEFAULT_ATTRIBUTES.query,
-		inherit: false,
 		featured: true,
 		perPage: 5,
 		pages: 1,
 	},
-	collection: collection.name,
-	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.FEATURED ],
+	hideControls: [ CoreFilterNames.FEATURED, CoreFilterNames.FILTERABLE ],
 };
 
 const heading: InnerBlockTemplate = [

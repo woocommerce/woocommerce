@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { PlainText, useBlockProps } from '@wordpress/block-editor';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
@@ -32,7 +32,7 @@ export const FormStepBlock = ( {
 
 	const { title = '', description = '' } = attributes;
 	const blockProps = useBlockProps( {
-		className: classnames( 'wc-block-components-checkout-step', className, {
+		className: clsx( 'wc-block-components-checkout-step', className, {
 			'wc-block-components-checkout-step--with-step-number':
 				showFormStepNumbers,
 		} ),

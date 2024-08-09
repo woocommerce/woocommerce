@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -35,7 +35,7 @@ export const Choice = ( {
 	return (
 		<div
 			role="radio"
-			className={ classNames(
+			className={ clsx(
 				'woocommerce-profiler-choice-container',
 				className
 			) }

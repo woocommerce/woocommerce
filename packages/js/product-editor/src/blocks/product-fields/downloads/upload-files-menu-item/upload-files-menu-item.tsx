@@ -15,10 +15,15 @@ import { UploadFilesMenuItemProps } from './types';
 
 export function UploadFilesMenuItem( {
 	allowedTypes,
-	maxUploadFileSize = 10000000,
+	maxUploadFileSize,
 	onUploadSuccess,
 	onUploadError,
 }: UploadFilesMenuItemProps ) {
+	const resolvedMaxUploadFileSize =
+		maxUploadFileSize ||
+		window.productBlockEditorSettings?.maxUploadFileSize ||
+		10 * 1024 * 1024; // 10 MB by default if not set and not provided by the settings
+
 	function handleFormFileUploadChange(
 		event: ChangeEvent< HTMLInputElement >
 	) {
@@ -27,7 +32,7 @@ export function UploadFilesMenuItem( {
 		uploadMedia( {
 			allowedTypes,
 			filesList,
-			maxUploadFileSize,
+			maxUploadFileSize: resolvedMaxUploadFileSize,
 			onFileChange: onUploadSuccess,
 			onError: onUploadError,
 			additionalData: {

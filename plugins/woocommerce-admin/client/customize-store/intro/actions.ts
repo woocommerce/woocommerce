@@ -130,8 +130,13 @@ export const assignNoAIFlowError = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents
 >( {
-	intro: ( context ) => {
-		return { ...context.intro, hasErrors: true };
+	intro: ( context, event: unknown ) => {
+		const { errorStatus } = event as { errorStatus: number | undefined };
+		return {
+			...context.intro,
+			hasErrors: true,
+			errorStatus,
+		};
 	},
 } );
 
@@ -140,6 +145,19 @@ export const assignIsFontLibraryAvailable = assign<
 	customizeStoreStateMachineEvents
 >( {
 	isFontLibraryAvailable: ( context, event: unknown ) => {
+		return (
+			event as {
+				payload: boolean;
+			}
+		 ).payload;
+	},
+} );
+
+export const assignIsPTKPatternsAPIAvailable = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	isPTKPatternsAPIAvailable: ( context, event: unknown ) => {
 		return (
 			event as {
 				payload: boolean;
@@ -179,6 +197,14 @@ export const assignFlags = assign<
 		const isFontLibraryAvailable =
 			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;
 		return isFontLibraryAvailable;
+	},
+	isPTKPatternsAPIAvailable: () => {
+		if ( ! isIframe( window ) ) {
+			return window.__wcCustomizeStore.isPTKPatternsAPIAvailable;
+		}
+		const isPTKPatternsAPIAvailable =
+			window.parent.__wcCustomizeStore.isPTKPatternsAPIAvailable || false;
+		return isPTKPatternsAPIAvailable;
 	},
 	flowType: ( _context, event ) => {
 		const flowTypeData = event as DoneInvokeEvent< FlowType >;

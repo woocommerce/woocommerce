@@ -146,4 +146,20 @@ class StringUtilTest extends \WC_Unit_Test_Case {
 		$actual_output = StringUtil::class_name_without_namespace( $input );
 		$this->assertEquals( $expected_output, $actual_output );
 	}
+
+	/**
+	 * @testdox 'normalize_local_path_slashes' replaces all the input slashes with DIRECTORY_SEPARATOR.
+	 */
+	public function test_normalize_local_path_slashes() {
+		$actual_output   = StringUtil::normalize_local_path_slashes( "one/two\\three" );
+		$expected_output = 'one' . DIRECTORY_SEPARATOR . 'two' . DIRECTORY_SEPARATOR . 'three';
+		$this->assertEquals( $expected_output, $actual_output );
+	}
+
+	/**
+	 * @testdox 'normalize_local_path_slashes' returns null when it gets null.
+	 */
+	public function test_normalize_local_path_slashes_passing_null() {
+		$this->assertNull( StringUtil::normalize_local_path_slashes( null ) );
+	}
 }

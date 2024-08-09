@@ -27,12 +27,6 @@ const blockConfig: BlockConfiguration = {
 	keywords: [ 'WooCommerce' ],
 	description,
 	usesContext: [ 'query', 'queryId', 'postId' ],
-	ancestor: [
-		'woocommerce/all-products',
-		'woocommerce/single-product',
-		'core/post-template',
-		'woocommerce/product-template',
-	],
 	textdomain: 'woocommerce',
 	attributes,
 	supports,

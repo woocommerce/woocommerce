@@ -14,6 +14,7 @@ import { useMergeRefs } from '@wordpress/compose';
 import { useTree } from './hooks/use-tree';
 import { TreeItem } from './tree-item';
 import { TreeProps } from './types';
+import { countNumberOfNodes } from './linked-tree-utils';
 
 export const Tree = forwardRef( function ForwardedTree(
 	props: TreeProps,
@@ -26,6 +27,8 @@ export const Tree = forwardRef( function ForwardedTree(
 		...props,
 		ref,
 	} );
+
+	const numberOfItems = countNumberOfNodes( items );
 
 	const isCreateButtonVisible =
 		props.shouldShowCreateButton &&
@@ -45,7 +48,12 @@ export const Tree = forwardRef( function ForwardedTree(
 					{ items.map( ( child, index ) => (
 						<TreeItem
 							{ ...treeItemProps }
-							isExpanded={ props.isExpanded }
+							isHighlighted={
+								props.highlightedIndex === child.index
+							}
+							onExpand={ props.onExpand }
+							highlightedIndex={ props.highlightedIndex }
+							isExpanded={ child.data.isExpanded }
 							key={ child.data.value }
 							item={ child }
 							index={ index }
@@ -53,19 +61,31 @@ export const Tree = forwardRef( function ForwardedTree(
 							onLastItemLoop={ () => {
 								(
 									rootListRef.current
-										?.closest( 'ol[role="tree"]' )
+										?.closest( 'ol[role="listbox"]' )
 										?.parentElement?.querySelector(
 											'.experimental-woocommerce-tree__button'
 										) as HTMLButtonElement
 								 )?.focus();
 							} }
+							onFirstItemLoop={ props.onFirstItemLoop }
+							onEscape={ props.onEscape }
 						/>
 					) ) }
 				</ol>
 			) : null }
 			{ isCreateButtonVisible && (
 				<Button
-					className="experimental-woocommerce-tree__button"
+					id={
+						'woocommerce-experimental-tree-control__menu-item-' +
+						numberOfItems
+					}
+					className={ classNames(
+						'experimental-woocommerce-tree__button',
+						{
+							'experimental-woocommerce-tree__button--highlighted':
+								props.highlightedIndex === numberOfItems,
+						}
+					) }
 					onClick={ () => {
 						if ( props.onCreateNew ) {
 							props.onCreateNew();
@@ -94,6 +114,9 @@ export const Tree = forwardRef( function ForwardedTree(
 									)
 									?.focus();
 							}
+						} else if ( event.key === 'Escape' && props.onEscape ) {
+							event.preventDefault();
+							props.onEscape();
 						}
 					} }
 				>

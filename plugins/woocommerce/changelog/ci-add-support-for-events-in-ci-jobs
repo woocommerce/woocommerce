@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo utils: add support for github events in ci-jobs tool

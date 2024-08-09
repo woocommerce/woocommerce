@@ -9,7 +9,7 @@ import {
 	useImperativeHandle,
 	useRef,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
@@ -49,6 +49,8 @@ const ValidatedTextInput = forwardRef<
 			errorMessage: passedErrorMessage = '',
 			value = '',
 			customValidation = () => true,
+			customValidityMessage,
+			feedback = null,
 			customFormatter = ( newValue: string ) => newValue,
 			label,
 			validateOnMount = true,
@@ -122,14 +124,22 @@ const ValidatedTextInput = forwardRef<
 
 				setValidationErrors( {
 					[ errorIdString ]: {
-						message: label
-							? getValidityMessageForInput( label, inputObject )
-							: inputObject.validationMessage,
+						message: getValidityMessageForInput(
+							label,
+							inputObject,
+							customValidityMessage
+						),
 						hidden: errorsHidden,
 					},
 				} );
 			},
-			[ clearValidationError, errorIdString, setValidationErrors, label ]
+			[
+				clearValidationError,
+				errorIdString,
+				setValidationErrors,
+				label,
+				customValidityMessage,
+			]
 		);
 
 		// Allows parent to trigger revalidation.
@@ -225,19 +235,21 @@ const ValidatedTextInput = forwardRef<
 
 		return (
 			<TextInput
-				className={ classnames( className, {
+				className={ clsx( className, {
 					'has-error': hasError,
 				} ) }
 				aria-invalid={ hasError === true }
 				id={ textInputId }
 				type={ type }
 				feedback={
-					showError ? (
+					showError && hasError ? (
 						<ValidationInputError
 							errorMessage={ passedErrorMessage }
 							propertyName={ errorIdString }
 						/>
-					) : null
+					) : (
+						feedback
+					)
 				}
 				ref={ inputRef }
 				onChange={ ( newValue ) => {

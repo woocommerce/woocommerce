@@ -116,6 +116,7 @@ final class StringUtil {
 	 */
 	public static function to_sql_list( array $values ) {
 		if ( empty( $values ) ) {
+            // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new \InvalidArgumentException( self::class_name_without_namespace( __CLASS__ ) . '::' . __FUNCTION__ . ': the values array is empty' );
 		}
 
@@ -132,5 +133,15 @@ final class StringUtil {
 		// A '?:' would convert this to a one-liner, but WP coding standards disallow these :shrug:.
 		$result = substr( strrchr( $class_name, '\\' ), 1 );
 		return $result ? $result : $class_name;
+	}
+
+	/**
+	 * Normalize the slashes (/ and \) of a local filesystem path by converting them to DIRECTORY_SEPARATOR.
+	 *
+	 * @param string|null $path Path to normalize.
+	 * @return string|null Normalized path, or null if the input was null.
+	 */
+	public static function normalize_local_path_slashes( ?string $path ) {
+		return is_null( $path ) ? null : str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, $path );
 	}
 }

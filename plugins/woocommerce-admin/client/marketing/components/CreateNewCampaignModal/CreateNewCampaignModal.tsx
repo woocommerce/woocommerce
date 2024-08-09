@@ -12,7 +12,7 @@ import {
 	FlexItem,
 } from '@wordpress/components';
 import { chevronUp, chevronDown, external } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -59,7 +59,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	return (
 		<Modal
 			{ ...restProps }
-			className={ classnames(
+			className={ clsx(
 				className,
 				'woocommerce-marketing-create-campaign-modal'
 			) }

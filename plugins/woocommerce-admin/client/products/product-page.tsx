@@ -17,6 +17,7 @@ import React, { lazy, Suspense, useContext, useEffect } from 'react';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -39,12 +40,24 @@ const ProductMVPFeedbackModalContainer = lazy( () =>
 );
 
 export default function ProductPage() {
-	const { productId } = useParams();
+	const { productId: productIdSearchParam } = useParams();
 
-	const product = useProductEntityRecord( productId );
-
+	/**
+	 * Only register blocks and unregister them when the product page is being rendered or unmounted.
+	 * Note: Dependency array should stay empty.
+	 */
 	useEffect( () => {
 		document.body.classList.add( 'is-product-editor' );
+
+		const unregisterBlocks = initBlocks();
+
+		return () => {
+			document.body.classList.remove( 'is-product-editor' );
+			unregisterBlocks();
+		};
+	}, [] );
+
+	useEffect( () => {
 		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
@@ -70,8 +83,11 @@ export default function ProductPage() {
 								<Suspense fallback={ <Spinner /> }>
 									<ProductMVPFeedbackModalContainer
 										productId={
-											productId
-												? parseInt( productId, 10 )
+											productIdSearchParam
+												? Number.parseInt(
+														productIdSearchParam,
+														10
+												  )
 												: undefined
 										}
 									/>
@@ -87,21 +103,17 @@ export default function ProductPage() {
 			},
 		} );
 
-		const unregisterBlocks = initBlocks();
-
 		return () => {
-			document.body.classList.remove( 'is-product-editor' );
-			unregisterPlugin( 'wc-admin-more-menu' );
-			unregisterBlocks();
+			unregisterPlugin( 'wc-admin-product-editor' );
 		};
-	}, [ productId ] );
+	}, [ productIdSearchParam ] );
 
 	useEffect(
 		function trackViewEvents() {
-			if ( productId ) {
+			if ( productIdSearchParam ) {
 				recordEvent( 'product_edit_view', {
 					source: TRACKS_SOURCE,
-					product_id: productId,
+					product_id: productIdSearchParam,
 				} );
 			} else {
 				recordEvent( 'product_add_view', {
@@ -109,12 +121,20 @@ export default function ProductPage() {
 				} );
 			}
 		},
-		[ productId ]
+		[ productIdSearchParam ]
 	);
 
-	return (
-		<>
-			<Editor product={ product } />
-		</>
-	);
+	const productId = useProductEntityRecord( productIdSearchParam );
+
+	if ( ! productId ) {
+		return (
+			<div className="woocommerce-layout__loading">
+				<Spinner
+					aria-label={ __( 'Creating the product', 'woocommerce' ) }
+				/>
+			</div>
+		);
+	}
+
+	return <Editor productId={ productId } />;
 }

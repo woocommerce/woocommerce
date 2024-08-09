@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { sprintf, _n } from '@wordpress/i18n';
 import { Label } from '@woocommerce/blocks-components';
 import ProductPrice from '@woocommerce/base-components/product-price';
@@ -41,6 +41,8 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 		permalink,
 		prices,
 		quantity,
+		short_description: shortDescription,
+		description: fullDescription,
 		item_data: itemData,
 		variation,
 		totals,
@@ -122,7 +124,7 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 
 	return (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-components-order-summary-item',
 				cartItemClassNameFilter
 			) }
@@ -173,6 +175,8 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 					)
 				) }
 				<ProductMetadata
+					shortDescription={ shortDescription }
+					fullDescription={ fullDescription }
 					itemData={ itemData }
 					variation={ variation }
 				/>

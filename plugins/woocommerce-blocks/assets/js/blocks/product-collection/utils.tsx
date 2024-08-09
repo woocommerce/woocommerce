@@ -8,17 +8,30 @@ import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { useLayoutEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import {
+	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Guteberg
+	createBlocksFromInnerBlocksTemplate,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import {
-	PreviewState,
 	ProductCollectionAttributes,
+	TProductCollectionOrder,
+	TProductCollectionOrderBy,
 	ProductCollectionQuery,
+	ProductCollectionDisplayLayout,
+	PreviewState,
 	SetPreviewState,
 } from './types';
-import { coreQueryPaginationBlockName } from './constants';
+import {
+	coreQueryPaginationBlockName,
+	DEFAULT_QUERY,
+	DEFAULT_ATTRIBUTES,
+	INNER_BLOCKS_TEMPLATE,
+} from './constants';
 import blockJson from './block.json';
 import {
 	LocationType,
@@ -47,10 +60,17 @@ export function setQueryAttribute(
 const isInProductArchive = () => {
 	const ARCHIVE_PRODUCT_TEMPLATES = [
 		'woocommerce/woocommerce//archive-product',
-		'woocommerce/woocommerce//taxonomy-product_cat',
-		'woocommerce/woocommerce//taxonomy-product_tag',
 		'woocommerce/woocommerce//taxonomy-product_attribute',
 		'woocommerce/woocommerce//product-search-results',
+		// Custom taxonomy templates have structure:
+		// <<THEME>>//taxonomy-product_cat-<<CATEGORY>>
+		// hence we're checking if template ID includes the middle part.
+		//
+		// That includes:
+		// - woocommerce/woocommerce//taxonomy-product_cat
+		// - woocommerce/woocommerce//taxonomy-product_tag
+		'//taxonomy-product_cat',
+		'//taxonomy-product_tag',
 	];
 
 	const currentTemplateId = select(
@@ -62,12 +82,18 @@ const isInProductArchive = () => {
 	 * We want inherit value to be true when block is added to ARCHIVE_PRODUCT_TEMPLATES
 	 * and false when added to somewhere else.
 	 */
-	return currentTemplateId
-		? ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId )
-		: false;
+	if ( currentTemplateId ) {
+		return ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
+			currentTemplateId.includes( template )
+		);
+	}
+
+	return false;
 };
 
-const isFirstBlockThatSyncsWithQuery = () => {
+const isFirstBlockThatUsesPageContext = (
+	property: 'inherit' | 'filterable'
+) => {
 	// We use experimental selector because it's been graduated as stable (`getBlocksByName`)
 	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
 	// available in WordPress 6.5.
@@ -84,15 +110,23 @@ const isFirstBlockThatSyncsWithQuery = () => {
 		( clientId ) => {
 			const block = getBlock( clientId );
 
-			return block.attributes?.query?.inherit;
+			return block.attributes?.query?.[ property ];
 		}
 	);
 
 	return ! blockAlreadySyncedWithQuery;
 };
 
-export function getDefaultValueOfInheritQueryFromTemplate() {
-	return isInProductArchive() ? isFirstBlockThatSyncsWithQuery() : false;
+export function getDefaultValueOfInherit() {
+	return isInProductArchive()
+		? isFirstBlockThatUsesPageContext( 'inherit' )
+		: false;
+}
+
+export function getDefaultValueOfFilterable() {
+	return ! isInProductArchive()
+		? isFirstBlockThatUsesPageContext( 'filterable' )
+		: false;
 }
 
 /**
@@ -131,11 +165,64 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	}
 };
 
+/**
+ * Get the preview message for the Product Collection block based on the usesReference.
+ * There are two scenarios:
+ * 1. When usesReference is product, the preview message will be:
+ * 	  "Actual products will vary depending on the product being viewed."
+ * 2. For all other usesReference, the preview message will be:
+ *    "Actual products will vary depending on the page being viewed."
+ *
+ * This message will be shown when the usesReference isn't available on the Editor side, but is available on the Frontend.
+ */
+export const getUsesReferencePreviewMessage = (
+	location: WooCommerceBlockLocation,
+	usesReference?: string[]
+) => {
+	if ( ! ( Array.isArray( usesReference ) && usesReference.length > 0 ) ) {
+		return '';
+	}
+
+	if ( usesReference.includes( location.type ) ) {
+		/**
+		 * Block shouldn't be in preview mode when:
+		 * 1. Current location is archive and termId is available.
+		 * 2. Current location is product and productId is available.
+		 *
+		 * Because in these cases, we have required context on the editor side.
+		 */
+		const isArchiveLocationWithTermId =
+			location.type === LocationType.Archive &&
+			( location.sourceData?.termId ?? null ) !== null;
+		const isProductLocationWithProductId =
+			location.type === LocationType.Product &&
+			( location.sourceData?.productId ?? null ) !== null;
+		if ( isArchiveLocationWithTermId || isProductLocationWithProductId ) {
+			return '';
+		}
+
+		if ( location.type === LocationType.Product ) {
+			return __(
+				'Actual products will vary depending on the product being viewed.',
+				'woocommerce'
+			);
+		}
+
+		return __(
+			'Actual products will vary depending on the page being viewed.',
+			'woocommerce'
+		);
+	}
+
+	return '';
+};
+
 export const useSetPreviewState = ( {
 	setPreviewState,
 	location,
 	attributes,
 	setAttributes,
+	usesReference,
 }: {
 	setPreviewState?: SetPreviewState | undefined;
 	location: WooCommerceBlockLocation;
@@ -143,6 +230,7 @@ export const useSetPreviewState = ( {
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
+	usesReference?: string[] | undefined;
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
@@ -152,10 +240,35 @@ export const useSetPreviewState = ( {
 			},
 		} );
 	};
+	const isCollectionUsesReference =
+		usesReference && usesReference?.length > 0;
+
+	/**
+	 * When usesReference is available on Frontend but not on Editor side,
+	 * we want to show a preview label to indicate that the block is in preview mode.
+	 */
+	const usesReferencePreviewMessage = getUsesReferencePreviewMessage(
+		location,
+		usesReference
+	);
+	useLayoutEffect( () => {
+		if ( isCollectionUsesReference ) {
+			setAttributes( {
+				__privatePreviewState: {
+					isPreview: usesReferencePreviewMessage.length > 0,
+					previewMessage: usesReferencePreviewMessage,
+				},
+			} );
+		}
+	}, [
+		setAttributes,
+		usesReferencePreviewMessage,
+		isCollectionUsesReference,
+	] );
 
 	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
+		if ( ! setPreviewState && ! isCollectionUsesReference ) {
 			return;
 		}
 
@@ -182,27 +295,64 @@ export const useSetPreviewState = ( {
 	 * - Products by attribute
 	 */
 	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
+		if ( ! setPreviewState && ! isCollectionUsesReference ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive &&
 				location.sourceData?.termId === null;
-			if ( isGenericArchiveTemplate ) {
-				setAttributes( {
-					__privatePreviewState: {
-						isPreview: !! attributes?.query?.inherit,
-						previewMessage: __(
-							'Actual products will vary depending on the page being viewed.',
-							'woocommerce'
-						),
-					},
-				} );
-			}
+
+			setAttributes( {
+				__privatePreviewState: {
+					isPreview: isGenericArchiveTemplate
+						? !! attributes?.query?.inherit
+						: false,
+					previewMessage: __(
+						'Actual products will vary depending on the page being viewed.',
+						'woocommerce'
+					),
+				},
+			} );
 		}
 	}, [
 		attributes?.query?.inherit,
+		usesReferencePreviewMessage,
 		location.sourceData?.termId,
 		location.type,
 		setAttributes,
 		setPreviewState,
+		isCollectionUsesReference,
 	] );
 };
+
+export const getDefaultQuery = (
+	currentQuery: ProductCollectionQuery
+): ProductCollectionQuery => ( {
+	...currentQuery,
+	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
+	order: DEFAULT_QUERY.order as TProductCollectionOrder,
+	inherit: getDefaultValueOfInherit(),
+	filterable: getDefaultValueOfFilterable(),
+} );
+
+export const getDefaultDisplayLayout = () =>
+	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+
+export const getDefaultSettings = (
+	currentAttributes: ProductCollectionAttributes
+): Partial< ProductCollectionAttributes > => ( {
+	displayLayout: getDefaultDisplayLayout(),
+	query: getDefaultQuery( currentAttributes.query ),
+} );
+
+export const getDefaultProductCollection = () =>
+	createBlock(
+		blockJson.name,
+		{
+			...DEFAULT_ATTRIBUTES,
+			query: {
+				...DEFAULT_ATTRIBUTES.query,
+				inherit: getDefaultValueOfInherit(),
+				filterable: getDefaultValueOfFilterable(),
+			},
+		},
+		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
+	);

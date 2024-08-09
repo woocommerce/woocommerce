@@ -22,7 +22,7 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -587,7 +587,7 @@ export class Shipping extends Component {
 								<Button
 									isTertiary
 									onClick={ onShippingPluginInstalltionSkip }
-									className={ classNames(
+									className={ clsx(
 										'woocommerce-task-shipping-recommendations_skip-button',
 										pluginsToPromote.length === 2
 											? 'dual'

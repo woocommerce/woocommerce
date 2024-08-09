@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
 
 /**
  * Internal dependencies
@@ -16,10 +16,8 @@ import {
 	BLOCK_DESCRIPTION as description,
 } from './constants';
 
-const { ancestor, ...configuration } = sharedConfig;
-
 const blockConfig = {
-	...configuration,
+	...sharedConfig,
 	apiVersion: 2,
 	title,
 	description,
@@ -30,4 +28,8 @@ const blockConfig = {
 	edit,
 };
 
-registerBlockType( 'woocommerce/product-price', blockConfig );
+registerBlockSingleProductTemplate( {
+	blockName: 'woocommerce/product-price',
+	blockSettings: blockConfig,
+	isAvailableOnPostEditor: true,
+} );

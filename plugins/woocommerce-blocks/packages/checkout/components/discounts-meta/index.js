@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -20,7 +20,7 @@ const Slot = ( { className, extensions, cart, context } ) => {
 		hasValidFills( fills ) && (
 			<TotalsWrapper slotWrapper={ true }>
 				<DiscountsMetaSlot
-					className={ classnames(
+					className={ clsx(
 						className,
 						'wc-block-components-discounts-meta'
 					) }

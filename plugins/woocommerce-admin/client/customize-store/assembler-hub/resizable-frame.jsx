@@ -4,8 +4,8 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
-import { useState, useRef } from '@wordpress/element';
+import clsx from 'clsx';
+import { useState, useRef, createContext } from '@wordpress/element';
 import {
 	ResizableBox,
 	Tooltip,
@@ -65,6 +65,8 @@ function calculateNewHeight( width, initialAspectRatio ) {
 
 	return width / intermediateAspectRatio;
 }
+
+export const IsResizingContext = createContext( false );
 
 function ResizableFrame( {
 	isFullWidth,
@@ -202,7 +204,7 @@ function ResizableFrame( {
 			key="handle"
 			role="separator"
 			aria-orientation="vertical"
-			className={ classnames( 'edit-site-resizable-frame__handle', {
+			className={ clsx( 'edit-site-resizable-frame__handle', {
 				'is-resizing': isResizing,
 			} ) }
 			variants={ resizeHandleVariants }
@@ -243,13 +245,6 @@ function ResizableFrame( {
 			onAnimationComplete={ ( definition ) => {
 				if ( definition === 'fullWidth' )
 					setFrameSize( { width: '100%', height: '100%' } );
-			} }
-			whileHover={ {
-				scale: 1.005,
-				transition: {
-					duration: 0.5,
-					ease: 'easeOut',
-				},
 			} }
 			transition={ frameTransition }
 			size={ frameSize }
@@ -302,19 +297,21 @@ function ResizableFrame( {
 			onResizeStart={ handleResizeStart }
 			onResize={ handleResize }
 			onResizeStop={ handleResizeStop }
-			className={ classnames( 'edit-site-resizable-frame__inner', {
+			className={ clsx( 'edit-site-resizable-frame__inner', {
 				'is-resizing': isResizing,
 			} ) }
 		>
 			<motion.div
-				className="edit-site-resizable-frame__inner-content"
+				className="customize-your-store-edit-site-resizable-frame__inner-content"
 				animate={ {
 					borderRadius: isFullWidth ? 0 : 8,
 				} }
 				transition={ frameTransition }
 				style={ innerContentStyle }
 			>
-				{ children }
+				<IsResizingContext.Provider value={ isResizing }>
+					{ children }
+				</IsResizingContext.Provider>
 			</motion.div>
 		</ResizableBox>
 	);

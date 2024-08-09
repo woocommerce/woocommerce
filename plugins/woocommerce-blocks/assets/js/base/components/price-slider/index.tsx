@@ -10,7 +10,7 @@ import {
 	useRef,
 	useLayoutEffect,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
 import { Currency, isObject } from '@woocommerce/types';
 import { useDebouncedCallback } from 'use-debounce';
@@ -300,7 +300,7 @@ const PriceSlider = ( {
 
 	const debouncedUpdateQuery = useDebouncedCallback( onSubmit, 600 );
 
-	const classes = classnames(
+	const classes = clsx(
 		'wc-block-price-filter',
 		'wc-block-components-price-slider',
 		showInputFields && 'wc-block-price-filter--has-input-fields',
@@ -332,7 +332,7 @@ const PriceSlider = ( {
 
 	const slider = (
 		<div
-			className={ classnames(
+			className={ clsx(
 				'wc-block-price-filter__range-input-wrapper',
 				'wc-block-components-price-slider__range-input-wrapper',
 				{ 'is-loading': isLoading && isUpdating }
