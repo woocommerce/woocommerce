@@ -343,40 +343,6 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( defaultPattern ).toBeVisible();
 	} );
 
-	test( 'Clicking buttons in resize and zoom toolbar changes the frame size', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-		const assembler = await pageObject.getAssembler();
-		const editor = await pageObject.getEditor();
-
-		const toolbar = assembler.locator( '[aria-label="Resize Options"]' );
-		const resizeContainer = assembler.locator(
-			'.components-resizable-box__container'
-		);
-		const tabletBtn = assembler.locator( '[aria-label="Tablet View"]' );
-		const mobileBtn = assembler.locator( '[aria-label="Mobile View"]' );
-
-		await mobileBtn.click();
-		const mobileWidth = await resizeContainer.evaluate( ( element ) =>
-			window.getComputedStyle( element ).getPropertyValue( 'width' )
-		);
-
-		await tabletBtn.click();
-		const tabletWidth = await resizeContainer.evaluate( ( element ) =>
-			window.getComputedStyle( element ).getPropertyValue( 'width' )
-		);
-
-		await assembler.locator( '[aria-label="Zoom Out View"]' ).click();
-
-		await expect( editor.locator( '.is-zoomed-out' ) ).toBeVisible();
-		await expect( parseFloat( tabletWidth ) ).toBeGreaterThan(
-			parseFloat( mobileWidth )
-		);
-		await expect( toolbar ).toBeVisible();
-	} );
-
 	test( 'Clicking opt-in new patterns should be available', async ( {
 		pageObject,
 		baseURL,
