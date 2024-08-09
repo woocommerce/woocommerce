@@ -38,7 +38,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_withespace                           = preg_replace( '/\s+/', '', $result );
+		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
 		$expected_single_product_template_without_whitespace = preg_replace(
 			'/\s+/',
 			'',
@@ -46,7 +46,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			$result_without_withespace,
+			$result_without_whitespace,
 			$expected_single_product_template_without_whitespace,
 			''
 		);
@@ -81,11 +81,11 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_withespace                          = preg_replace( '/\s+/', '', $result );
-		$result_without_withespace_without_custom_pwbox_ids = preg_replace(
+		$result_without_whitespace                          = preg_replace( '/\s+/', '', $result );
+		$result_without_whitespace_without_custom_pwbox_ids = preg_replace(
 			'/pwbox-\d+/',
 			'',
-			$result_without_withespace
+			$result_without_whitespace
 		);
 
 		$expected_single_product_template_without_whitespace = preg_replace(
@@ -101,7 +101,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			$result_without_withespace_without_custom_pwbox_ids,
+			$result_without_whitespace_without_custom_pwbox_ids,
 			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids,
 			''
 		);
@@ -219,11 +219,11 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 			$default_single_product_template
 		);
 
-		$result_without_withespace                          = preg_replace( '/\s+/', '', $result );
-		$result_without_withespace_without_custom_pwbox_ids = preg_replace(
+		$result_without_whitespace                          = preg_replace( '/\s+/', '', $result );
+		$result_without_whitespace_without_custom_pwbox_ids = preg_replace(
 			'/pwbox-\d+/',
 			'',
-			$result_without_withespace
+			$result_without_whitespace
 		);
 
 		$expected_single_product_template_without_whitespace = preg_replace(
@@ -239,7 +239,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			$result_without_withespace_without_custom_pwbox_ids,
+			$result_without_whitespace_without_custom_pwbox_ids,
 			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids,
 			''
 		);
