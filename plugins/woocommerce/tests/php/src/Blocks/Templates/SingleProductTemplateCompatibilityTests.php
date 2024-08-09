@@ -162,6 +162,70 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the Single Product Template is wrapped in a div with the correct class if it contains a pattern that contains a block related to the Single Product Template.
+	 */
+	public function test_add_compatibility_layer_if_contains_pattern_with_single_product_blocks() {
+		register_block_pattern( 'test-pattern', array(
+			'title'       => 'Test Pattern',
+			'description' => 'Test Pattern Description',
+			'content'     => '<!-- wp:woocommerce/product-image-gallery /-->',
+		) );
+
+		$default_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:pattern {"slug":"test-pattern"} /-->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:group {"className":"woocommerce product", "__wooCommerceIsFirstBlock":true,"__wooCommerceIsLastBlock":true} -->
+		<div class="wp-block-group woocommerce product">
+			<!-- wp:pattern {"slug":"test-pattern"} /-->
+		</div>
+		<!-- /wp:group -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
+
+		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
+		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
+
+		$this->assertEquals( $result_without_whitespace, $expected_single_product_template_without_whitespace, '' );
+	}
+
+	/**
+	 * Test that the Single Product Template is wrapped in a div with the correct class if it contains a pattern that contains an inner block related to the Single Product Template.
+	 */
+	public function test_add_compatibility_layer_if_contains_pattern_with_inner_single_product_blocks() {
+		register_block_pattern( 'test-pattern', array(
+			'title'       => 'Test Pattern',
+			'description' => 'Test Pattern Description',
+			'content'     => '<!-- wp:group --><div class="wp-block-group"><!-- wp:woocommerce/product-image-gallery /--></div><!-- wp:group /-->',
+		) );
+
+		$default_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:pattern {"slug":"test-pattern"} /-->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$expected_single_product_template = '
+		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+		<!-- wp:group {"className":"woocommerce product", "__wooCommerceIsFirstBlock":true,"__wooCommerceIsLastBlock":true} -->
+		<div class="wp-block-group woocommerce product">
+			<!-- wp:pattern {"slug":"test-pattern"} /-->
+		</div>
+		<!-- /wp:group -->
+		<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$result = SingleProductTemplateCompatibility::add_compatibility_layer( $default_single_product_template );
+
+		$result_without_whitespace                           = preg_replace( '/\s+/', '', $result );
+		$expected_single_product_template_without_whitespace = preg_replace( '/\s+/', '', $expected_single_product_template );
+
+		$this->assertEquals( $result_without_whitespace, $expected_single_product_template_without_whitespace, '' );
+	}
+
+	/**
 	 * Test that the Single Product Template is wrapped in a div with the correct class if it contains a block related to the Single Product Template in a nested structure.
 	 */
 	public function test_add_compatibility_layer_without_a_main_wrapper() {

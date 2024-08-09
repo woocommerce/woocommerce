@@ -698,34 +698,30 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Determines whether the provided $content contains a specific block type,
-	 * or if it contains a pattern that contains the block type.
+	 * Determines whether the provided $blocks contains any of the $block_names,
+	 * or if they contain a pattern that contains any of the $block_names.
 	 *
-	 * @param string $block_name Full block type to look for.
-	 * @param string $content    Content string.
+	 * @param string[]   $block_names Full block types to look for.
+	 * @param WP_Block[] $blocks      Array of block objects.
 	 * @return bool Whether the content contains the specified block.
 	 */
-	private static function has_block_in_content_or_pattern( $block_name, $content ) {
-		if ( has_block( $block_name, $content ) ) {
-			return true;
-		}
+	public static function has_block_including_patterns( $block_names, $blocks ) {
+		$flattened_blocks = self::flatten_blocks( $blocks );
 
-		if ( has_block( 'core/pattern', $content ) ) {
-			$template_blocks = parse_blocks( $content );
+		foreach ( $flattened_blocks as &$block ) {
+			if ( isset( $block['blockName'] ) && in_array( $block['blockName'], $block_names, true ) ) {
+				return true;
+			}
+			if (
+				'core/pattern' === $block['blockName'] &&
+				isset( $block['attrs']['slug'] )
+			) {
+				$registry       = WP_Block_Patterns_Registry::get_instance();
+				$pattern        = $registry->get_registered( $block['attrs']['slug'] );
+				$pattern_blocks = parse_blocks( $pattern['content'] );
 
-			$blocks = self::flatten_blocks( $template_blocks );
-
-			foreach ( $blocks as &$block ) {
-				if (
-					'core/pattern' === $block['blockName'] &&
-					isset( $block['attrs']['slug'] )
-				) {
-					$registry = WP_Block_Patterns_Registry::get_instance();
-					$pattern  = $registry->get_registered( $block['attrs']['slug'] );
-
-					if ( self::has_block_in_content_or_pattern( $block_name, $pattern['content'] ) ) {
-						return true;
-					}
+				if ( self::has_block_including_patterns( $block_names, $pattern_blocks ) ) {
+					return true;
 				}
 			}
 		}
@@ -740,7 +736,13 @@ class BlockTemplateUtils {
 	 * @return boolean
 	 */
 	public static function template_has_legacy_template_block( $template ) {
-		return self::has_block_in_content_or_pattern( 'woocommerce/legacy-template', $template->content );
+		if ( has_block( 'woocommerce/legacy-template', $template->content ) ) {
+			return true;
+		}
+
+		$blocks = parse_blocks( $template );
+
+		return self::has_block_including_patterns( array( 'woocommerce/legacy-template' ), $blocks );
 	}
 
 	/**
