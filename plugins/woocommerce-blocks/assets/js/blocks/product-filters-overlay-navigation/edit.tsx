@@ -2,22 +2,10 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import {
-	useBlockProps,
-	useInnerBlocksProps,
-	InspectorControls,
-} from '@wordpress/block-editor';
+import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { BlockEditProps, store as blocksStore } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import {
-	PanelBody,
-	RadioControl,
-	SelectControl,
-	RangeControl,
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-} from '@wordpress/components';
 import { Icon, close } from '@wordpress/icons';
 
 /**
@@ -31,6 +19,7 @@ import type {
 import { default as productFiltersIcon } from '../product-filters/icon';
 import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/constants';
 import './editor.scss';
+import { Inspector } from './inspector-controls';
 
 const OverlayNavigationLabel = ( {
 	variation,
@@ -186,10 +175,6 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 		[]
 	);
 
-	if ( shouldHideBlock() ) {
-		return null;
-	}
-
 	const buttonStyles = [
 		{ value: 'link', label: __( 'Link', 'woocommerce' ) },
 	];
@@ -203,6 +188,16 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 			} );
 		}
 	);
+
+	if ( shouldHideBlock() ) {
+		return (
+			<Inspector
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+				buttonStyles={ buttonStyles }
+			/>
+		);
+	}
 
 	return (
 		<nav
@@ -222,84 +217,11 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 					style={ style }
 				/>
 			</div>
-			<InspectorControls group="styles">
-				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
-					<RadioControl
-						selected={ navigationStyle }
-						options={ [
-							{
-								label: __( 'Label and icon', 'woocommerce' ),
-								value: 'label-and-icon',
-							},
-							{
-								label: __( 'Label only', 'woocommerce' ),
-								value: 'label-only',
-							},
-							{
-								label: __( 'Icon only', 'woocommerce' ),
-								value: 'icon-only',
-							},
-						] }
-						onChange={ (
-							value: BlockAttributes[ 'navigationStyle' ]
-						) =>
-							setAttributes( {
-								navigationStyle: value,
-							} )
-						}
-					/>
-
-					{ buttonStyles.length <= 3 && (
-						<ToggleGroupControl
-							label={ __( 'Button', 'woocommerce' ) }
-							value={ buttonStyle }
-							isBlock
-							onChange={ (
-								value: BlockAttributes[ 'buttonStyle' ]
-							) =>
-								setAttributes( {
-									buttonStyle: value,
-								} )
-							}
-						>
-							{ buttonStyles.map( ( option ) => (
-								<ToggleGroupControlOption
-									key={ option.value }
-									label={ option.label }
-									value={ option.value }
-								/>
-							) ) }
-						</ToggleGroupControl>
-					) }
-					{ buttonStyles.length > 3 && (
-						<SelectControl
-							label={ __( 'Button', 'woocommerce' ) }
-							value={ buttonStyle }
-							options={ buttonStyles }
-							onChange={ (
-								value: BlockAttributes[ 'buttonStyle' ]
-							) =>
-								setAttributes( {
-									buttonStyle: value,
-								} )
-							}
-						/>
-					) }
-
-					{ navigationStyle !== 'label-only' && (
-						<RangeControl
-							className="wc-block-product-filters-overlay-navigation__icon-size-control"
-							label={ __( 'Icon Size', 'woocommerce' ) }
-							value={ iconSize }
-							onChange={ ( newSize: number ) => {
-								setAttributes( { iconSize: newSize } );
-							} }
-							min={ 0 }
-							max={ 300 }
-						/>
-					) }
-				</PanelBody>
-			</InspectorControls>
+			<Inspector
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+				buttonStyles={ buttonStyles }
+			/>
 		</nav>
 	);
 };
