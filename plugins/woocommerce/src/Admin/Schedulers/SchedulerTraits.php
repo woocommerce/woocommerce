@@ -228,20 +228,7 @@ trait SchedulerTraits {
 			)
 		);
 
-		$next_job_schedule = null;
-
-		if ( is_array( $blocking_jobs ) ) {
-			foreach ( $blocking_jobs as $blocking_job ) {
-				$next_job_schedule = self::get_next_action_time( $blocking_job );
-
-				// Ensure that the next schedule is a DateTime (it can be null).
-				if ( is_a( $next_job_schedule, 'DateTime' ) ) {
-					return $blocking_job;
-				}
-			}
-		}
-
-		return false;
+		return reset( $blocking_jobs );
 	}
 
 	/**
@@ -256,9 +243,15 @@ trait SchedulerTraits {
 		// or schedule to run now if no blocking jobs exist.
 		$blocking_job = static::get_next_blocking_job( $action_name );
 		if ( $blocking_job ) {
-			$after = new \DateTime();
+			$next_action_time = self::get_next_action_time( $blocking_job );
+
+			// Some actions, like single actions, don't have a next action time.
+			if ( ! is_a( $next_action_time, 'DateTime' ) ) {
+				$next_action_time = new \DateTime();
+			}
+
 			self::queue()->schedule_single(
-				self::get_next_action_time( $blocking_job )->getTimestamp() + 5,
+				$next_action_time->getTimestamp() + 5,
 				$action_hook,
 				$args,
 				static::$group

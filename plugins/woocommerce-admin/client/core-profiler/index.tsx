@@ -43,6 +43,7 @@ import CurrencyFactory from '@woocommerce/currency';
  * Internal dependencies
  */
 import { findComponentMeta } from '~/utils/xstate/find-component';
+import { initRemoteLogging } from '~/lib/init-remote-logging';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -300,7 +301,6 @@ const exitToWooHome = fromPromise( async () => {
 } );
 
 const redirectToJetpackAuthPage = ( {
-	context,
 	event,
 }: {
 	context: CoreProfilerStateMachineContext;
@@ -308,16 +308,7 @@ const redirectToJetpackAuthPage = ( {
 } ) => {
 	const url = new URL( event.output.url );
 	url.searchParams.set( 'installed_ext_success', '1' );
-	const selectedPlugin = context.pluginsSelected.find(
-		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
-	);
-
-	if ( selectedPlugin ) {
-		const pluginName =
-			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
-		url.searchParams.set( 'plugin_name', pluginName );
-	}
-
+	url.searchParams.set( 'plugin_name', 'jetpack-ai' );
 	window.location.href = url.toString();
 };
 
@@ -331,6 +322,7 @@ const updateTrackingOption = fromPromise(
 			) {
 				window.wcTracks.enable( () => {
 					initializeExPlat();
+					initRemoteLogging();
 					resolve(); // resolve the promise only after explat is enabled by the callback
 				} );
 			} else {
@@ -1597,9 +1589,7 @@ export const CoreProfilerController = ( {
 				hasJetpackSelectedForInstallation: ( { context } ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) =>
-								plugin === 'jetpack' ||
-								plugin === 'jetpack-boost'
+							( plugin ) => plugin === 'jetpack'
 						) !== undefined
 					);
 				},
@@ -1607,9 +1597,7 @@ export const CoreProfilerController = ( {
 					return (
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								( plugin.key === 'jetpack' ||
-									plugin.key === 'jetpack-boost' ) &&
-								plugin.is_activated
+								plugin.key === 'jetpack' && plugin.is_activated
 						) !== undefined
 					);
 				},

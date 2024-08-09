@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update SelectTree and Tree controls to allow highlighting items without focus
