@@ -11,7 +11,7 @@ Nonces are generated numbers used to verify origin and intent of requests for se
 
 ## Store API Endpoints that Require Nonces
 
-POST requests to the `/cart` endpoints and all requests to the `/checkout` endpoints require a nonce to function. Failure to provide a valid nonce will return an error response.
+POST requests to the `/cart` endpoints and all requests to the `/checkout` endpoints require a nonce to function. Failure to provide a valid nonce will return an error response, unless you're using [Cart Tokens](cart-tokens.md) instead.
 
 ## Sending Nonce Tokens with requests
 

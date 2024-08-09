@@ -73,7 +73,12 @@ export type Collections =
 	| 'productCatalog'
 	| 'myCustomCollection'
 	| 'myCustomCollectionWithPreview'
-	| 'myCustomCollectionWithAdvancedPreview';
+	| 'myCustomCollectionWithAdvancedPreview'
+	| 'myCustomCollectionWithProductContext'
+	| 'myCustomCollectionWithOrderContext'
+	| 'myCustomCollectionWithCartContext'
+	| 'myCustomCollectionWithArchiveContext'
+	| 'myCustomCollectionMultipleContexts';
 
 const collectionToButtonNameMap = {
 	newArrivals: 'New Arrivals',
@@ -86,6 +91,14 @@ const collectionToButtonNameMap = {
 	myCustomCollectionWithPreview: 'My Custom Collection with Preview',
 	myCustomCollectionWithAdvancedPreview:
 		'My Custom Collection with Advanced Preview',
+	myCustomCollectionWithProductContext:
+		'My Custom Collection - Product Context',
+	myCustomCollectionWithOrderContext: 'My Custom Collection - Order Context',
+	myCustomCollectionWithCartContext: 'My Custom Collection - Cart Context',
+	myCustomCollectionWithArchiveContext:
+		'My Custom Collection - Archive Context',
+	myCustomCollectionMultipleContexts:
+		'My Custom Collection - Multiple Contexts',
 };
 
 class ProductCollectionPage {

@@ -31,8 +31,8 @@
 		align-items: center;
 		display: flex;
 
-		.woocommerce-iframe-editor-document-tools {
-			&__left {
+		.components-accessible-toolbar {
+			.woocommerce-iframe-editor-document-tools__left {
 				align-items: center;
 				display: inline-flex;
 				gap: 8px;

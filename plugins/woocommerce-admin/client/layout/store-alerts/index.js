@@ -110,7 +110,7 @@ export const StoreAlerts = () => {
 			const variant = idx === 0 ? 'secondary' : 'tertiary';
 			return (
 				<Button
-					key={ action.name }
+					key={ `${ alert.id }-${ action.label }-${ action.name }` }
 					variant={ variant }
 					href={ action.url || undefined }
 					onClick={ async ( event ) => {

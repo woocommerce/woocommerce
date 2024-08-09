@@ -174,7 +174,7 @@ export const Plugins = ( {
 					{ context.pluginsAvailable.map( ( plugin ) => {
 						const learnMoreLink = plugin.learn_more_link ? (
 							<Link
-								onClick={ () => {
+								onClick={ ( e ) => {
 									sendEvent( {
 										type: 'PLUGINS_LEARN_MORE_LINK_CLICKED',
 										payload: {
@@ -183,6 +183,7 @@ export const Plugins = ( {
 												plugin.learn_more_link ?? '',
 										},
 									} );
+									e.stopPropagation();
 								} }
 								href={ plugin.learn_more_link }
 								target="_blank"
