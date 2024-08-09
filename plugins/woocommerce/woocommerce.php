@@ -38,7 +38,7 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 
 /**
- * Returns the main instance of WC.
+ * Returns the main instance of WC. testing
  *
  * @since  2.1
  * @return WooCommerce
