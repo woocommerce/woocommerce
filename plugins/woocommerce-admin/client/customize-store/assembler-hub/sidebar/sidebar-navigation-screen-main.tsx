@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import { useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
@@ -23,13 +23,11 @@ import {
 } from '@wordpress/icons';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
-import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
@@ -51,31 +49,9 @@ export const SidebarNavigationScreenMain = () => {
 		<SidebarNavigationScreen
 			isRoot
 			title={ __( "Let's get creative", 'woocommerce' ) }
-			description={ createInterpolateElement(
-				__(
-					'Use our style and layout tools to customize the design of your store. Content and images can be added or changed via the <EditorLink>Editor</EditorLink> later.',
-					'woocommerce'
-				),
-				{
-					EditorLink: (
-						<Link
-							onClick={ () => {
-								trackEvent(
-									'customize_your_store_assembler_hub_editor_link_click',
-									{
-										source: 'main',
-									}
-								);
-								window.open(
-									`${ ADMIN_URL }site-editor.php`,
-									'_blank'
-								);
-								return false;
-							} }
-							href=""
-						/>
-					),
-				}
+			description={ __(
+				'Use our style and layout tools to customize the design of your store. Content and images can be added or changed via the Editor later.',
+				'woocommerce'
 			) }
 			content={
 				<>
