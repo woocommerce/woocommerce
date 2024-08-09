@@ -19,8 +19,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
+import { Preview as CheckboxListPreview } from './components/checkbox-list-editor';
 import { Inspector } from './components/inspector';
 import { NoAttributesPlaceholder } from './components/placeholder';
 import { attributeOptionsPreview } from './constants';
@@ -110,9 +110,12 @@ const Edit = ( props: EditProps ) => {
 		return (
 			<Wrapper>
 				<Disabled>
-					<AttributeCheckboxList
-						showCounts={ showCounts }
-						attributeTerms={ attributeOptionsPreview }
+					<CheckboxListPreview
+						items={ attributeOptionsPreview.map( ( term ) => {
+							if ( showCounts )
+								return `${ term.name } (${ term.count })`;
+							return term.name;
+						} ) }
 					/>
 				</Disabled>
 			</Wrapper>
@@ -166,11 +169,14 @@ const Edit = ( props: EditProps ) => {
 						}
 					/>
 				) : (
-					<AttributeCheckboxList
-						showCounts={ showCounts }
-						attributeTerms={ attributeOptions }
+					<CheckboxListPreview
+						items={ attributeOptions.map( ( term ) => {
+							if ( showCounts )
+								return `${ term.name } (${ term.count })`;
+							return term.name;
+						} ) }
 					/>
-				) }{ ' ' }
+				) }
 			</Disabled>
 		</Wrapper>
 	);
