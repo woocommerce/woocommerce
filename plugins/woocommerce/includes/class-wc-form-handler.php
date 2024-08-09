@@ -655,7 +655,6 @@ class WC_Form_Handler {
 				wp_safe_redirect( remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) );
 				exit;
 			}
-
 		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
 			// Undo Cart Item.
@@ -665,7 +664,7 @@ class WC_Form_Handler {
 
 			if ( wp_get_referer() ) {
 				wp_safe_redirect( remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) );
-			exit;
+				exit;
 			}
 		}
 
