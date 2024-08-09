@@ -47,11 +47,11 @@ class ProductCollection extends AbstractBlock {
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
 	/**
-	 * Whether the block should render or not.
+	 * Whether the render of the block should be prevented.
 	 *
 	 * @var bool
 	 */
-	private $should_render = true;
+	private $prevent_render = null;
 
 	/**
 	 * Initialize this block type.
@@ -90,11 +90,13 @@ class ProductCollection extends AbstractBlock {
 		add_filter(
 			'render_block_woocommerce/product-template',
 			function ( $html ) {
-				$this->should_render = '' !== $html;
+				if ( null === $this->prevent_render ) {
+					$this->prevent_render = '' === $html;
+				}
 
 				return $html;
 			},
-			10,
+			100,
 			1
 		);
 
@@ -102,11 +104,11 @@ class ProductCollection extends AbstractBlock {
 		add_filter(
 			'render_block_woocommerce/product-collection-no-results',
 			function ( $html ) {
-				$this->should_render = true;
+				$this->prevent_render = false;
 
 				return $html;
 			},
-			11,
+			100,
 			1
 		);
 
@@ -129,12 +131,17 @@ class ProductCollection extends AbstractBlock {
 	 * @return string
 	 */
 	public function handle_product_collection_rendering( $block_content, $block ) {
-		if ( ! $this->should_render ) {
+		if ( true === $this->prevent_render ) {
 			// Prevent rendering of the block. Print an empty div instead.
-			return '<div class="wp-block-woocommerce-product-collection wp-block-woocommerce-product-collection--empty"></div>';
+			$block_content = '<div class="wp-block-woocommerce-product-collection wp-block-woocommerce-product-collection--empty"></div>';
+		} else {
+			$block_content = $this->enhance_product_collection_with_interactivity( $block_content, $block );
 		}
 
-		return $this->enhance_product_collection_with_interactivity( $block_content, $block );
+		// Reset the prevent_render flag.
+		$this->prevent_render = null;
+
+		return $block_content;
 	}
 
 	/**
