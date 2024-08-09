@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
+import { useInstanceId } from '@wordpress/compose';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Fragment, useMemo, useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import clsx from 'clsx';
 
 /**
@@ -126,27 +127,18 @@ const CheckboxList = ( {
 		return (
 			<>
 				{ options.map( ( option, index ) => (
-					<Fragment key={ option.value }>
-						<li
-							{ ...( shouldTruncateOptions &&
-								! showExpanded &&
-								index >= limit && { hidden: true } ) }
-						>
-							<CheckboxControl
-								id={ option.value }
-								className="wc-block-checkbox-list__checkbox"
-								label={ option.label }
-								checked={ checked.includes( option.value ) }
-								onChange={ () => {
-									onChange( option.value );
-								} }
-								disabled={ isDisabled }
-							/>
-						</li>
-						{ shouldTruncateOptions &&
-							index === limit - 1 &&
-							renderedShowMore }
-					</Fragment>
+					<CheckboxListOptionControl
+						key={ option.value }
+						option={ option }
+						shouldTruncateOptions={ shouldTruncateOptions }
+						showExpanded={ showExpanded }
+						index={ index }
+						limit={ limit }
+						checked={ checked.includes( option.value ) }
+						disabled={ isDisabled }
+						renderedShowMore={ renderedShowMore }
+						onChange={ onChange }
+					/>
 				) ) }
 				{ shouldTruncateOptions && renderedShowLess }
 			</>
@@ -177,5 +169,56 @@ const CheckboxList = ( {
 		</ul>
 	);
 };
+
+type CheckboxListOptionControlProps = {
+	option: CheckboxListOptions;
+	shouldTruncateOptions: boolean;
+	showExpanded: boolean;
+	index: number;
+	limit: number;
+	checked: boolean;
+	disabled: boolean;
+	renderedShowMore: false | JSX.Element;
+	onChange: ( value: string ) => void;
+};
+
+function CheckboxListOptionControl( {
+	option,
+	shouldTruncateOptions,
+	showExpanded,
+	index,
+	limit,
+	checked,
+	disabled,
+	renderedShowMore,
+	onChange,
+}: CheckboxListOptionControlProps ) {
+	const checkboxControlInstanceId = useInstanceId(
+		CheckboxListOptionControl,
+		'wc-block-checkbox-list-option'
+	) as string;
+
+	return (
+		<>
+			<li
+				{ ...( shouldTruncateOptions &&
+					! showExpanded &&
+					index >= limit && { hidden: true } ) }
+			>
+				<CheckboxControl
+					id={ checkboxControlInstanceId }
+					className="wc-block-checkbox-list__checkbox"
+					label={ option.label }
+					checked={ checked }
+					onChange={ () => {
+						onChange( option.value );
+					} }
+					disabled={ disabled }
+				/>
+			</li>
+			{ shouldTruncateOptions && index === limit - 1 && renderedShowMore }
+		</>
+	);
+}
 
 export default CheckboxList;
