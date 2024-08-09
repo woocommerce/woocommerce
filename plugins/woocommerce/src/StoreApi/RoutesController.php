@@ -68,10 +68,10 @@ class RoutesController {
 			],
 			// @todo Migrate internal AI routes to WooCommerce Core codebase.
 			'private' => [
-				Routes\V1\AI\Patterns::IDENTIFIER  => Routes\V1\AI\Patterns::class,
-				Routes\V1\AI\Product::IDENTIFIER   => Routes\V1\AI\Product::class,
-				Routes\V1\AI\Products::IDENTIFIER  => Routes\V1\AI\Products::class,
-				Routes\V1\Patterns::IDENTIFIER     => Routes\V1\Patterns::class,
+				Routes\V1\AI\Patterns::IDENTIFIER => Routes\V1\AI\Patterns::class,
+				Routes\V1\AI\Product::IDENTIFIER  => Routes\V1\AI\Product::class,
+				Routes\V1\AI\Products::IDENTIFIER => Routes\V1\AI\Products::class,
+				Routes\V1\Patterns::IDENTIFIER    => Routes\V1\Patterns::class,
 			],
 		];
 	}
