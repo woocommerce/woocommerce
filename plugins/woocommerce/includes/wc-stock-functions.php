@@ -60,8 +60,12 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 
 		// Fire actions to let 3rd parties know the stock changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
 		} else {
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
 			do_action( 'woocommerce_product_set_stock', $product_with_stock );
 		}
 
@@ -260,6 +264,44 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 
 	$order->add_order_note( __( 'Stock levels reduced:', 'woocommerce' ) . ' ' . implode( ', ', $order_notes ) );
 }
+
+/**
+ * Check if a product's stock quantity has reached certain thresholds and trigger appropriate actions.
+ *
+ * This functionality was moved out of `wc_trigger_stock_change_notifications` in order to decouple it from orders,
+ * since stock quantity can also be updated in other ways.
+ *
+ * @param WC_Product $product        The product whose stock level has changed.
+ *
+ * @return void
+ */
+function wc_trigger_stock_change_actions( $product ) {
+	$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
+	$low_stock_amount = absint( wc_get_low_stock_amount( $product ) );
+	$stock_quantity   = $product->get_stock_quantity();
+
+	if ( $stock_quantity <= $no_stock_amount ) {
+		/**
+		 * Action fires when a product's stock quantity reaches the "no stock" threshold.
+		 *
+		 * @since 3.0
+		 *
+		 * @param WC_Product $product The product whose stock quantity has changed.
+		 */
+		do_action( 'woocommerce_no_stock', $product );
+	} elseif ( $stock_quantity <= $low_stock_amount ) {
+		/**
+		 * Action fires when a product's stock quantity reaches the "low stock" threshold.
+		 *
+		 * @since 3.0
+		 *
+		 * @param WC_Product $product The product whose stock quantity has changed.
+		 */
+		do_action( 'woocommerce_low_stock', $product );
+	}
+}
+add_action( 'woocommerce_variation_set_stock', 'wc_trigger_stock_change_actions', 10, 1 );
+add_action( 'woocommerce_product_set_stock', 'wc_trigger_stock_change_actions', 10, 1 );
 
 /**
  * Increase stock levels for items within an order.
