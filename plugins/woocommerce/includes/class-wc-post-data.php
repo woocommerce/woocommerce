@@ -420,7 +420,7 @@ class WC_Post_Data {
 	 */
 	private static function clear_global_unique_id_if_necessary( $id ) {
 		$product = wc_get_product( $id );
-		if ( ! wc_product_has_global_unique_id( $id, $product->get_global_unique_id() ) ) {
+		if ( $product && ! wc_product_has_global_unique_id( $id, $product->get_global_unique_id() ) ) {
 			$product->set_global_unique_id( '' );
 			$product->save();
 		}
