@@ -119,4 +119,19 @@ jQuery( function( $ ) {
 			}
 		} );
 	} );
+
+	$( document ).ready( function() {
+		var $sorted_by_live_region = $( '.woocommerce-result-count[data-is-sorted-by="true"]' );
+
+		if ( $sorted_by_live_region.length > 0 ) {
+			var text = $sorted_by_live_region.first().html();
+			
+			$sorted_by_live_region.delay( 1000 ).queue( function() {
+				$( this )
+					.html( '' )
+					.html( text )
+					.deuqueue();
+			} );
+		}
+	} );	
 });
