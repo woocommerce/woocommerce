@@ -1487,6 +1487,13 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 			return;
 		}
 
+		/**
+			* Filters the default orderby option..
+			*
+			* @since 1.6.4
+			*
+			* @param string  $default_orderby The default orderby option.
+			*/
 		$default_orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
 		$orderby         = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby;
 		// If products follow the default order this doesn't need to be informed.
