@@ -1502,9 +1502,9 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 		/**
 			* Filters ordered by messages.
 			*
-			* @since 9.4.0
+			* @since 9.3.0
 			*
-			* @param string  $orderedby_messages The list of messages per orderby key.
+			* @param array  $orderedby_messages The list of messages per orderby key.
 			*/
 		$catalog_orderedby_options = apply_filters(
 			'woocommerce_catalog_orderedby',
