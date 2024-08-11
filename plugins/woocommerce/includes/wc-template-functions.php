@@ -1495,9 +1495,12 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 			* @param string  $default_orderby The default orderby option.
 			*/
 		$default_orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
-		$orderby         = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby;
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
 		// If products follow the default order this doesn't need to be informed.
-		$orderby         = 'menu_order' === $orderby ? '' : $orderby;
+		$orderby = 'menu_order' === $orderby ? '' : $orderby;
 
 		/**
 			* Filters ordered by messages.
@@ -1517,8 +1520,8 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 				'price-desc' => __( 'Sorted by price: high to low', 'woocommerce' ),
 			)
 		);
-		$orderedby = isset( $catalog_orderedby_options[ $orderby ] ) ? $catalog_orderedby_options[ $orderby ] : '';
-		$args = array(
+		$orderedby                 = isset( $catalog_orderedby_options[ $orderby ] ) ? $catalog_orderedby_options[ $orderby ] : '';
+		$args                      = array(
 			'total'     => wc_get_loop_prop( 'total' ),
 			'per_page'  => wc_get_loop_prop( 'per_page' ),
 			'current'   => wc_get_loop_prop( 'current_page' ),
