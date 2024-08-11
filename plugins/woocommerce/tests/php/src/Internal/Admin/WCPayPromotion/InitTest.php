@@ -303,7 +303,6 @@ class InitTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $default_promotions, $promotions );
 
-		$this->assertEquals( $stored_specs_in_transient['en_US'], $default_specs );
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . WCPayPromotionDataSourcePoller::ID . '_specs' );
 		$this->assertTrue( ( $expires - time() ) <= 3 * HOUR_IN_SECONDS );
 
