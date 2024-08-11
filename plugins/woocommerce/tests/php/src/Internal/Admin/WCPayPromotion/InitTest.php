@@ -301,6 +301,7 @@ class InitTest extends WC_Unit_Test_Case {
 		$default_specs      = DefaultPromotions::get_all();
 		$default_promotions = EvaluateSuggestion::evaluate_specs( $default_specs )['suggestions'];
 
+		$this->assertTrue( count( $stored_specs_in_transient['en_US'] ) === 0 );
 		$this->assertEquals( $default_promotions, $promotions );
 
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . WCPayPromotionDataSourcePoller::ID . '_specs' );
