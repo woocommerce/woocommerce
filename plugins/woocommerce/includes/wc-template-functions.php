@@ -1480,7 +1480,7 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 if ( ! function_exists( 'woocommerce_result_count' ) ) {
 
 	/**
-	 * Output the result count text (Showing x - x of x results - Sorted by x ).
+	 * Output the result count text (Showing x - x of x results).
 	 */
 	function woocommerce_result_count() {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
