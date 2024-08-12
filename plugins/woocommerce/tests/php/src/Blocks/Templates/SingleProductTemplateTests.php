@@ -96,11 +96,14 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	 *
 	 */
 	public function test_dont_update_single_product_content_with_legacy_template_inside_a_pattern() {
-		register_block_pattern( 'test-pattern', array(
-			'title'       => 'Test Pattern',
-			'description' => 'Test Pattern Description',
-			'content'     => '<!-- wp:woocommerce/legacy-template {"template":"single-product"} /-->',
-		) );
+		register_block_pattern(
+			'test-pattern',
+			array(
+				'title'       => 'Test Pattern',
+				'description' => 'Test Pattern Description',
+				'content'     => '<!-- wp:woocommerce/legacy-template {"template":"single-product"} /-->',
+			)
+		);
 		$single_product_template                  = new SingleProductTemplate();
 		$default_single_product_template_content  = '
 			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
@@ -135,11 +138,14 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	 *
 	 */
 	public function test_update_single_product_content_with_legacy_template_inside_a_pattern() {
-		register_block_pattern( 'test-pattern', array(
-			'title'       => 'Test Pattern',
-			'description' => 'Test Pattern Description',
-			'content'     => '<!-- wp:woocommerce/product-image-gallery /-->',
-		) );
+		register_block_pattern(
+			'test-pattern',
+			array(
+				'title'       => 'Test Pattern',
+				'description' => 'Test Pattern Description',
+				'content'     => '<!-- wp:woocommerce/product-image-gallery /-->',
+			)
+		);
 		$single_product_template                  = new SingleProductTemplate();
 		$default_single_product_template_content  = '
 			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->

@@ -165,11 +165,14 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 	 * Test that the Single Product Template is wrapped in a div with the correct class if it contains a pattern that contains a block related to the Single Product Template.
 	 */
 	public function test_add_compatibility_layer_if_contains_pattern_with_single_product_blocks() {
-		register_block_pattern( 'test-pattern', array(
-			'title'       => 'Test Pattern',
-			'description' => 'Test Pattern Description',
-			'content'     => '<!-- wp:woocommerce/product-image-gallery /-->',
-		) );
+		register_block_pattern(
+			'test-pattern',
+			array(
+				'title'       => 'Test Pattern',
+				'description' => 'Test Pattern Description',
+				'content'     => '<!-- wp:woocommerce/product-image-gallery /-->',
+			)
+		);
 
 		$default_single_product_template = '
 		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
@@ -197,11 +200,14 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 	 * Test that the Single Product Template is wrapped in a div with the correct class if it contains a pattern that contains an inner block related to the Single Product Template.
 	 */
 	public function test_add_compatibility_layer_if_contains_pattern_with_inner_single_product_blocks() {
-		register_block_pattern( 'test-pattern', array(
-			'title'       => 'Test Pattern',
-			'description' => 'Test Pattern Description',
-			'content'     => '<!-- wp:group --><div class="wp-block-group"><!-- wp:woocommerce/product-image-gallery /--></div><!-- wp:group /-->',
-		) );
+		register_block_pattern(
+			'test-pattern',
+			array(
+				'title'       => 'Test Pattern',
+				'description' => 'Test Pattern Description',
+				'content'     => '<!-- wp:group --><div class="wp-block-group"><!-- wp:woocommerce/product-image-gallery /--></div><!-- wp:group /-->',
+			)
+		);
 
 		$default_single_product_template = '
 		<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
