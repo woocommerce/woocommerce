@@ -385,6 +385,20 @@
 		}
 	}
 
+	.woocommerce-profiler-plugins__footer {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		@media screen and ( max-height: 900px ) {
+			background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 100%);
+			height: 140px;
+			position: fixed;
+			bottom: 0;
+		}
+	}
+
 	.woocommerce-profiler-plugins-continue-button-container {
 		@include breakpoint("<782px") {
 			width: 100%;
