@@ -2,7 +2,7 @@
 
 declare( strict_types = 1);
 
-namespace php\src\Admin\Features\Blueprint\Importers;
+namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint\Importers;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\Importers\ImportSetWCTaxRates;
 use WC_Unit_Test_Case;
