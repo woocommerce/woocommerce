@@ -4,6 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
+import { useState, useMemo } from '@wordpress/element';
+import { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
 import {
 	PanelBody,
 	PanelRow,
@@ -29,11 +31,29 @@ import {
 const LinkedProductControl = ( {
 	query,
 	setAttributes,
+	location,
+	usesReference,
 }: {
 	query: ProductCollectionQuery;
 	setAttributes: ProductCollectionSetAttributes;
+	location: WooCommerceBlockLocation;
+	usesReference: string[] | undefined;
 } ) => {
+	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
 	const { product, isLoading } = useGetProduct( query.productReference );
+
+	const isShowLinkedProductControl = useMemo( () => {
+		const isInRequiredLocation = usesReference?.includes( location.type );
+		const isProductContextRequired = usesReference?.includes( 'product' );
+		const isProductContextSelected =
+			( query?.productReference ?? null ) !== null;
+
+		return (
+			isProductContextRequired &&
+			! isInRequiredLocation &&
+			isProductContextSelected
+		);
+	}, [ location.type, query?.productReference, usesReference ] );
 
 	const jsxProductButton = ( {
 		isOpen,
@@ -85,6 +105,7 @@ const LinkedProductControl = ( {
 							productReference: value[ 0 ].id,
 						},
 					} );
+					setIsDropdownOpen( false );
 				}
 			} }
 			messages={ {
@@ -92,6 +113,8 @@ const LinkedProductControl = ( {
 			} }
 		/>
 	);
+
+	if ( ! isShowLinkedProductControl ) return null;
 
 	return (
 		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
@@ -104,6 +127,8 @@ const LinkedProductControl = ( {
 						jsxProductButton( { isOpen, onToggle } )
 					}
 					renderContent={ () => jsxPopoverContent }
+					open={ isDropdownOpen }
+					onToggle={ () => setIsDropdownOpen( ! isDropdownOpen ) }
 				/>
 			</PanelRow>
 		</PanelBody>

@@ -71,11 +71,8 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					setIsSelectionModalOpen( true )
 				}
 				isUsesReferencePreviewMode={ isUsesReferencePreviewMode }
-				isShowProductPicker={
-					productCollectionUIStateInEditor ===
-					ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER
-				}
 				location={ location }
+				usesReference={ props.usesReference }
 			/>
 			{ isSelectionModalOpen && (
 				<CollectionSelectionModal

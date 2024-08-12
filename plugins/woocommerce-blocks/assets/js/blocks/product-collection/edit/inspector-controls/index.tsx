@@ -123,12 +123,12 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
-			{ props.isShowProductPicker && (
-				<LinkedProductControl
-					query={ props.attributes.query }
-					setAttributes={ props.setAttributes }
-				/>
-			) }
+			<LinkedProductControl
+				query={ props.attributes.query }
+				setAttributes={ props.setAttributes }
+				usesReference={ props.usesReference }
+				location={ props.location }
+			/>
 
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
