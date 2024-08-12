@@ -160,7 +160,7 @@ test(
 
 			// Verify image in store frontend
 			await page.goto( productWithGallery.permalink );
-			await expect( page.getByAltText( newImageName ) ).toBeVisible();
+			await expect( page.locator( `img[src*="image-01"]` ) ).toBeVisible();
 		} );
 	}
 );
