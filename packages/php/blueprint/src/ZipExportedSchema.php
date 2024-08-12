@@ -180,7 +180,8 @@ class ZipExportedSchema {
 		foreach ( $steps as $step ) {
 			$resource = $step[ 'plugins' === $type ? 'pluginZipFile' : 'themeZipFile' ];
 			if ( ! Util::is_valid_wp_plugin_slug( $resource['slug'] ) ) {
-				throw new \InvalidArgumentException( 'Invalid plugin slug: ' . $resource['slug'] );
+//				throw new \InvalidArgumentException( 'Invalid plugin slug: ' . $resource['slug'] );
+				continue;
 			}
 
 			$destination = $this->working_dir . '/' . $type . '/' . $resource['slug'] . '.zip';
