@@ -74,7 +74,7 @@ class ExportInstallPluginSteps implements StepExporter {
 				$slug,
 				$resource,
 				array(
-					'activate' => $this->wp_is_plugin_active( $path ),
+					'activate' => true,
 				)
 			);
 		}
