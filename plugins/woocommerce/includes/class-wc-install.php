@@ -262,6 +262,9 @@ class WC_Install {
 		'9.2.0' => array(
 			'wc_update_920_add_wc_hooked_blocks_version_option',
 		),
+		'9.3.0' => array(
+			'wc_update_930_add_woocommerce_coming_soon_option',
+		),
 	);
 
 	/**
