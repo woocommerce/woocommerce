@@ -23,6 +23,7 @@ export class CheckoutPage {
 			addressfirstline: '123 Easy Street',
 			addresssecondline: 'Testville',
 			country: 'United States (US)',
+			countryKey: 'US',
 			city: 'New York',
 			state: 'New York',
 			postcode: '90210',
@@ -124,7 +125,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = contactSection.getByLabel( label );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 	}
 
@@ -138,7 +148,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = contactSection.getByLabel( label );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 	}
 
@@ -151,7 +170,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const { label, value } of additionalFields ) {
 			const field = this.page.getByLabel( label );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 	}
 
@@ -337,7 +365,7 @@ export class CheckoutPage {
 		await email.fill( customerBillingDetails.email );
 		await firstName.fill( customerBillingDetails.firstname );
 		await lastName.fill( customerBillingDetails.lastname );
-		await country.fill( customerBillingDetails.country );
+		await country.selectOption( customerBillingDetails.countryKey );
 		await address1.fill( customerBillingDetails.addressfirstline );
 
 		if ( customerBillingDetails.addresssecondline ) {
@@ -360,10 +388,17 @@ export class CheckoutPage {
 			} );
 			const county = billingForm.getByLabel( 'County' );
 
-			await state
-				.or( province )
-				.or( county )
-				.fill( customerBillingDetails.state );
+			const elementToFill = state.or( province ).or( county );
+			const tagName = await elementToFill.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+			if ( tagName === 'select' ) {
+				await elementToFill.selectOption(
+					customerBillingDetails.state
+				);
+			} else {
+				await elementToFill.fill( customerBillingDetails.state );
+			}
 		}
 
 		if ( customerBillingDetails.postcode ) {
@@ -376,7 +411,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = billingForm.getByLabel( label, { exact: true } );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 	}
 
@@ -407,7 +451,7 @@ export class CheckoutPage {
 
 		await firstName.fill( customerShippingDetails.firstname );
 		await lastName.fill( customerShippingDetails.lastname );
-		await country.fill( customerShippingDetails.country );
+		await country.selectOption( customerShippingDetails.country );
 		await address1.fill( customerShippingDetails.addressfirstline );
 
 		if ( customerShippingDetails.addresssecondline ) {
@@ -430,10 +474,17 @@ export class CheckoutPage {
 			} );
 			const county = shippingForm.getByLabel( 'County' );
 
-			await state
-				.or( province )
-				.or( county )
-				.fill( customerShippingDetails.state );
+			const elementToFill = state.or( province ).or( county );
+			const tagName = await elementToFill.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+			if ( tagName === 'select' ) {
+				await elementToFill.selectOption(
+					customerShippingDetails.state
+				);
+			} else {
+				await elementToFill.fill( customerShippingDetails.state );
+			}
 		}
 
 		if ( customerShippingDetails.postcode ) {
@@ -446,7 +497,16 @@ export class CheckoutPage {
 		// Rest of additional data passed in from the overrideData object.
 		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
 			const field = shippingForm.getByLabel( label, { exact: true } );
-			await field.fill( value );
+
+			const tagName = await field.evaluate( ( element ) =>
+				element.tagName.toLowerCase()
+			);
+
+			if ( tagName === 'select' ) {
+				await field.selectOption( value );
+			} else {
+				await field.fill( value );
+			}
 		}
 
 		// Blur active field to trigger customer address update.

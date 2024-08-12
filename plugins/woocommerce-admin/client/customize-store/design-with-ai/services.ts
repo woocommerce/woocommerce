@@ -322,7 +322,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/store-title',
+				path: '/wc-admin/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:

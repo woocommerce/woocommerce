@@ -24,7 +24,6 @@ import {
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { Text } from '@woocommerce/experimental';
 import {
 	navigateTo,
 	parseAdminUrl,
@@ -107,12 +106,12 @@ export const StoreAlerts = () => {
 	}
 
 	function renderActions( alert ) {
-		const actions = alert.actions.map( ( action ) => {
+		const actions = alert.actions.map( ( action, idx ) => {
+			const variant = idx === 0 ? 'secondary' : 'tertiary';
 			return (
 				<Button
-					key={ action.name }
-					isPrimary={ action.primary }
-					isSecondary={ ! action.primary }
+					key={ `${ alert.id }-${ action.label }-${ action.name }` }
+					variant={ variant }
 					href={ action.url || undefined }
 					onClick={ async ( event ) => {
 						const url = event.currentTarget.getAttribute( 'href' );
@@ -315,33 +314,15 @@ export const StoreAlerts = () => {
 
 	return (
 		<Card className={ className } size={ null }>
-			<Button
-				className="woocommerce-store-alerts__close"
-				onClick={ () => onDismiss( alert ) }
+			<CardHeader
+				className="woocommerce-store-alerts__header"
+				isBorderless
 			>
-				<Icon icon={ close } />
-			</Button>
-			<CardHeader isBorderless>
-				<Text
-					variant="title.medium"
-					as="h2"
-					size="18"
-					lineHeight="24px"
-				>
+				<span className="woocommerce-store-alerts__title">
 					{ alert.title }
-				</Text>
+				</span>
 				{ numberOfAlerts > 1 && (
 					<div className="woocommerce-store-alerts__pagination">
-						<Button
-							onClick={ previousAlert }
-							disabled={ currentIndex === 0 }
-							label={ __( 'Previous Alert', 'woocommerce' ) }
-						>
-							<Icon
-								icon={ chevronLeft }
-								className="arrow-left-icon"
-							/>
-						</Button>
 						<span
 							className="woocommerce-store-alerts__pagination-label"
 							role="status"
@@ -365,6 +346,16 @@ export const StoreAlerts = () => {
 							} ) }
 						</span>
 						<Button
+							onClick={ previousAlert }
+							disabled={ currentIndex === 0 }
+							label={ __( 'Previous Alert', 'woocommerce' ) }
+						>
+							<Icon
+								icon={ chevronLeft }
+								className="arrow-left-icon"
+							/>
+						</Button>
+						<Button
 							onClick={ nextAlert }
 							disabled={ numberOfAlerts - 1 === currentIndex }
 							label={ __( 'Next Alert', 'woocommerce' ) }
@@ -376,6 +367,12 @@ export const StoreAlerts = () => {
 						</Button>
 					</div>
 				) }
+				<Button
+					className="woocommerce-store-alerts__close"
+					onClick={ () => onDismiss( alert ) }
+				>
+					<Icon width="18" height="18" icon={ close } />
+				</Button>
 			</CardHeader>
 			<CardBody>
 				<div

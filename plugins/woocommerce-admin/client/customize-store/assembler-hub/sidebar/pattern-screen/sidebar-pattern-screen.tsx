@@ -1,25 +1,15 @@
 /**
  * External dependencies
  */
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { useAsyncList } from '@wordpress/compose';
-import { useSelect, useDispatch, select } from '@wordpress/data';
-import { BlockInstance, cloneBlock } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
+import { BlockInstance } from '@wordpress/blocks';
 import { close } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { capitalize } from 'lodash';
 import { Button, Spinner } from '@wordpress/components';
-import {
-	unlock,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
@@ -31,7 +21,6 @@ import {
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	__experimentalBlockPatternsList as BlockPatternList,
-	store as blockEditorStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 
@@ -43,59 +32,17 @@ import './style.scss';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { PATTERN_CATEGORIES } from './categories';
 import { THEME_SLUG } from '~/customize-store/data/constants';
-import { Pattern } from '~/customize-store/types/pattern';
 import {
-	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+	findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate,
 	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
-} from '../../utils/hero-pattern';
+} from '../../utils/black-background-pattern-update-button';
 import { useIsActiveNewNeutralVariation } from '../../hooks/use-is-active-new-neutral-variation';
-
-/**
- * Sorts patterns by category. For 'intro' and 'about' categories
- * priorizied DotCom Patterns. For intro category, it also prioritizes the "centered-content-with-image-below" pattern.
- * For other categories, it simply sorts patterns to prioritize Woo Patterns.
- */
-const sortPatternsByCategory = (
-	patterns: Pattern[],
-	category: keyof typeof PATTERN_CATEGORIES
-) => {
-	const prefix = 'woocommerce-blocks';
-	if ( category === 'intro' || category === 'about' ) {
-		return patterns.sort( ( a, b ) => {
-			if (
-				a.name ===
-				'woocommerce-blocks/centered-content-with-image-below'
-			) {
-				return -1;
-			}
-
-			if (
-				b.name ===
-				'woocommerce-blocks/centered-content-with-image-below'
-			) {
-				return 1;
-			}
-
-			if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
-				return 1;
-			}
-			if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
-				return -1;
-			}
-			return 0;
-		} );
-	}
-
-	return patterns.sort( ( a, b ) => {
-		if ( a.name.includes( prefix ) && ! b.name.includes( prefix ) ) {
-			return -1;
-		}
-		if ( ! a.name.includes( prefix ) && b.name.includes( prefix ) ) {
-			return 1;
-		}
-		return 0;
-	} );
-};
+import {
+	sortPatternsByCategory,
+	addIsAddedClassToPatternPreview,
+} from './utils';
+import { trackEvent } from '~/customize-store/tracking';
+import { useInsertPattern } from '../../hooks/use-insert-pattern';
 
 export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 	const { patterns, isLoading } = usePatternsByCategory( category );
@@ -112,28 +59,37 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		const patternWithPatchedProductHeroPattern =
 			patternsWithoutThemePatterns.map( ( pattern ) => {
 				if (
-					pattern.name !== 'woocommerce-blocks/just-arrived-full-hero'
+					pattern.name !==
+						'woocommerce-blocks/just-arrived-full-hero' &&
+					pattern.name !==
+						'woocommerce-blocks/featured-category-cover-image'
 				) {
 					return pattern;
 				}
 
 				if ( ! isActiveNewNeutralVariation ) {
 					const blocks =
-						findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+						findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 							pattern.blocks,
-							( block: BlockInstance ) => {
-								block.attributes.style = {};
+							( patternBlocks: BlockInstance[] ) => {
+								patternBlocks.forEach(
+									( block: BlockInstance ) =>
+										( block.attributes.style = {} )
+								);
 							}
 						);
 					return { ...pattern, blocks };
 				}
 
 				const blocks =
-					findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
 						pattern.blocks,
-						( block: BlockInstance ) => {
-							block.attributes.style =
-								PRODUCT_HERO_PATTERN_BUTTON_STYLE;
+						( patternBlocks: BlockInstance[] ) => {
+							patternBlocks.forEach(
+								( block ) =>
+									( block.attributes.style =
+										PRODUCT_HERO_PATTERN_BUTTON_STYLE )
+							);
 						}
 					);
 
@@ -164,11 +120,42 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		currentTemplate?.id ?? ''
 	);
 
-	const blockToScroll = useRef< string | null >( null );
-
 	const isEditorLoading = useIsSiteEditorLoading();
 
 	const isSpinnerVisible = isLoading || isEditorLoading;
+
+	useEffect( () => {
+		if ( isSpinnerVisible || refElement.current === null ) {
+			return;
+		}
+
+		// We want to add the is-added class to the pattern preview when the pattern is loaded in the editor and for each mutation.
+		addIsAddedClassToPatternPreview( refElement.current, blocks );
+
+		const observer = new MutationObserver( () => {
+			addIsAddedClassToPatternPreview(
+				refElement.current as HTMLElement,
+				blocks
+			);
+		} );
+
+		const previewPatternList = document.querySelector(
+			'.woocommerce-customize-store-edit-site-layout__sidebar-extra__pattern .block-editor-block-patterns-list'
+		);
+
+		if ( previewPatternList ) {
+			observer.observe( previewPatternList, {
+				childList: true,
+			} );
+		}
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [ isLoading, blocks, isSpinnerVisible ] );
+
+	const { insertPattern, insertedPattern: blockToScroll } =
+		useInsertPattern();
 
 	useEffect( () => {
 		if ( isEditorLoading ) {
@@ -189,7 +176,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				);
 
 				if ( block ) {
-					block.scrollIntoView();
+					block.scrollIntoView( {
+						behavior: 'smooth',
+						block: 'end',
+					} );
 					blockToScroll.current = null;
 				}
 			}
@@ -202,33 +192,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		return () => {
 			observer.disconnect();
 		};
-	}, [ isEditorLoading ] );
-
-	// @ts-expect-error No types for this exist yet.
-	const { insertBlocks } = useDispatch( blockEditorStore );
-
-	const insertableIndex = useMemo( () => {
-		return blocks.findLastIndex(
-			( block ) => block.name === 'core/template-part'
-		);
-	}, [ blocks ] );
-
-	const onClickPattern = useCallback(
-		( pattern ) => {
-			const parsedPattern = unlock(
-				select( blockEditorStore )
-			).__experimentalGetParsedPattern( pattern.name );
-
-			const cloneBlocks = parsedPattern.blocks.map(
-				( blockInstance: BlockInstance ) => cloneBlock( blockInstance )
-			);
-
-			insertBlocks( cloneBlocks, insertableIndex, undefined, false );
-
-			blockToScroll.current = cloneBlocks[ 0 ].clientId;
-		},
-		[ insertBlocks, insertableIndex ]
-	);
+	}, [ blockToScroll, isEditorLoading ] );
 
 	return (
 		<div
@@ -259,8 +223,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 							`/customize-store/assembler-hub/homepage`,
 							{}
 						);
-
 						navigateTo( { url: homepageUrl } );
+						trackEvent(
+							'customize_your_store_assembler_pattern_sidebar_close'
+						);
 					} }
 					iconSize={ 18 }
 					icon={ close }
@@ -291,7 +257,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 						0,
 						patternPagination
 					) }
-					onClickPattern={ onClickPattern }
+					onClickPattern={ insertPattern }
 					label={ 'Homepage' }
 					orientation="vertical"
 					category={ category }

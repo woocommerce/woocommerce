@@ -8,7 +8,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { connectUrl } from '~/marketplace/utils/functions';
+import { appendURLParams, connectUrl } from '~/marketplace/utils/functions';
 import Notice from '~/marketplace/components/notice/notice';
 import { getAdminSetting } from '~/utils/admin-settings';
 
@@ -73,6 +73,11 @@ export default function ConnectNotice(): JSX.Element | null {
 		recordEvent( 'woo_connect_notice_in_marketplace_shown' );
 	};
 
+	const connectUrlWithUTM = appendURLParams( connectUrl(), [
+		[ 'utm_source', 'pu' ],
+		[ 'utm_campaign', 'pu_in_apps_screen_connect' ],
+	] );
+
 	return (
 		<Notice
 			id="woo-connect-notice"
@@ -83,7 +88,7 @@ export default function ConnectNotice(): JSX.Element | null {
 			onLoad={ handleLoad }
 		>
 			<Button
-				href={ connectUrl() }
+				href={ connectUrlWithUTM }
 				variant="secondary"
 				onClick={ handleClick }
 			>

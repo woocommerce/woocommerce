@@ -117,7 +117,6 @@ class TaskLists {
 			'Payments',
 			'Tax',
 			'Shipping',
-			'Marketing',
 			'LaunchYourStore',
 		);
 
@@ -165,6 +164,7 @@ class TaskLists {
 					),
 				),
 				'tasks'   => array(
+					'Marketing',
 					'ExtendStore',
 					'AdditionalPayments',
 					'GetMobileApp',
