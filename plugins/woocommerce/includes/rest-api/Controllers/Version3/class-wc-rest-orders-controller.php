@@ -188,7 +188,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		if ( ! $item ) {
 			throw new WC_REST_Exception(
 				'woocommerce_rest_invalid_item_id',
-				__( 'Order item ID provided is not associated with order.', 'woocommerce' ),
+				esc_html__( 'Order item ID provided is not associated with order.', 'woocommerce' ),
 				400
 			);
 		}
