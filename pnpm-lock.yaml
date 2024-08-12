@@ -3858,6 +3858,9 @@ importers:
       '@woocommerce/product-editor':
         specifier: workspace:*
         version: link:../../packages/js/product-editor
+      '@woocommerce/remote-logging':
+        specifier: workspace:*
+        version: link:../../packages/js/remote-logging
       '@wordpress/api-fetch':
         specifier: wp-6.0
         version: 6.3.1
@@ -21800,7 +21803,7 @@ packages:
   react-with-direction@1.4.0:
     resolution: {integrity: sha512-ybHNPiAmaJpoWwugwqry9Hd1Irl2hnNXlo/2SXQBwbLn/jGMauMS2y9jw+ydyX5V9ICryCqObNSthNt5R94xpg==}
     peerDependencies:
-      react: ^0.14 || ^15 || ^16
+      react: ^17.0.2
       react-dom: ^0.14 || ^15 || ^16
 
   react-with-styles-interface-css@4.0.3:
