@@ -57,15 +57,20 @@ class SingleProductTemplate extends AbstractTemplate {
 			}
 			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
 
-			// Set `$template` to the template that has the slug `single-product-{post_name}`.
-			// If it doesn't exist, set `$template` to the first query result.
-			$template = null;
-			foreach ( $templates as $t ) {
-				if ( null === $template ) {
-					$template = $t;
-				} elseif ( count( $valid_slugs ) > 1 && $valid_slugs[1] === $t->slug ) {
-					$template = $t;
-					break;
+			if ( count( $templates ) === 0 ) {
+				return;
+			}
+
+			// Use the first template by default.
+			$template = $templates[0];
+
+			// Check if there is a template matching the slug `single-product-{post_name}`.
+			if ( count( $valid_slugs ) > 1 && count( $templates ) > 1 ) {
+				foreach ( $templates as $t ) {
+					if ( $valid_slugs[1] === $t->slug ) {
+						$template = $t;
+						break;
+					}
 				}
 			}
 
