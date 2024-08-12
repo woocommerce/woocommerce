@@ -3858,6 +3858,9 @@ importers:
       '@woocommerce/product-editor':
         specifier: workspace:*
         version: link:../../packages/js/product-editor
+      '@woocommerce/remote-logging':
+        specifier: workspace:*
+        version: link:../../packages/js/remote-logging
       '@wordpress/api-fetch':
         specifier: wp-6.0
         version: 6.3.1
@@ -3916,9 +3919,6 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
-      '@woocommerce/remote-logging':
-        specifier: workspace:*
-        version: link:../../packages/js/remote-logging
       '@wordpress/env':
         specifier: ^9.7.0
         version: 9.7.0

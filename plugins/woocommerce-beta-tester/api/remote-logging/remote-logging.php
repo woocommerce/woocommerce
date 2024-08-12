@@ -119,8 +119,7 @@ function reset_php_rate_limit() {
 	$wpdb->query(
 		"DELETE FROM {$wpdb->prefix}wc_rate_limits"
 	);
-
-	WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
+	wp_cache_flush();
 
 	return new WP_REST_Response( array( 'success' => true ), 200 );
 }

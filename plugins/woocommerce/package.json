@@ -92,14 +92,8 @@
 				"command": "lint:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
-					"includes/**/*.php",
-					"patterns/**/*.php",
-					"src/**/*.php",
-					"templates/**/*.php",
-					"tests/php/**/*.php",
-					"tests/legacy/unit-tests/**/*.php",
-					"tests/unit-tests/**/*.php",
-					"tests/**/*.js"
+					"**/*.php",
+					"**/*.js"
 				]
 			},
 			"tests": [
@@ -115,14 +109,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -148,14 +137,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -181,14 +165,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -222,7 +201,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/e2e-pw/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -442,7 +423,9 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -471,7 +454,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/e2e-pw/bin/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"events": [
 						"push"
@@ -502,7 +487,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/performance/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:perf"
@@ -529,7 +516,7 @@
 						".wp-env.json"
 					],
 					"events": [
-						"push"
+						"disabled"
 					],
 					"report": {
 						"resultsBlobName": "core-metrics-report",
