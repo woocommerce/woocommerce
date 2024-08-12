@@ -57,7 +57,19 @@ class SingleProductTemplate extends AbstractTemplate {
 			}
 			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
 
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
+			// Set `$template` to the template that has the slug `single-product-{post_name}`.
+			// If it doesn't exist, set `$template` to the first query result.
+			$template = null;
+			foreach ( $templates as $t ) {
+				if ( null === $template ) {
+					$template = $t;
+				} elseif ( count( $valid_slugs ) > 1 && $valid_slugs[1] === $t->slug ) {
+					$template = $t;
+					break;
+				}
+			}
+
+			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
