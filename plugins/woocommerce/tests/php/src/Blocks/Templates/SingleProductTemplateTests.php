@@ -17,12 +17,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	 *
 	 */
 	public function test_dont_update_single_product_content_with_legacy_template() {
-		$single_product_template                  = new SingleProductTemplate();
-		$default_single_product_template_content  = '
-			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
-			<!-- wp:woocommerce/legacy-template {"template":"single-product"} /-->
-			<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
-		$expected_single_product_template_content = '
+		$single_product_template                 = new SingleProductTemplate();
+		$default_single_product_template_content = '
 			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
 			<!-- wp:woocommerce/legacy-template {"template":"single-product"} /-->
 			<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
@@ -40,7 +36,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			$expected_single_product_template_content,
+			$default_single_product_template_content,
 			$result[0]->content
 		);
 	}
@@ -104,12 +100,8 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 				'content'     => '<!-- wp:woocommerce/legacy-template {"template":"single-product"} /-->',
 			)
 		);
-		$single_product_template                  = new SingleProductTemplate();
-		$default_single_product_template_content  = '
-			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
-			<!-- wp:pattern {"slug":"test-pattern"} /-->
-			<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
-		$expected_single_product_template_content = '
+		$single_product_template                 = new SingleProductTemplate();
+		$default_single_product_template_content = '
 			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
 			<!-- wp:pattern {"slug":"test-pattern"} /-->
 			<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
@@ -127,7 +119,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			$expected_single_product_template_content,
+			$default_single_product_template_content,
 			$result[0]->content
 		);
 	}
