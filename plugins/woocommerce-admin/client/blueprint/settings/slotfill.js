@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createSlotFill, Button } from '@wordpress/components';
+import { createSlotFill, Button, Notice } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 
 import apiFetch from '@wordpress/api-fetch';
@@ -21,6 +21,7 @@ const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 const Blueprint = () => {
 	const [ exportEnabled, setExportEnabled ] = useState( true );
 	const [ exportAsZip, setExportAsZip ] = useState( false );
+	const [ error, setError ] = useState( null );
 	const steps = {
 		Settings: 'setWCSettings',
 		'Core Profiler Options': 'setWCCoreProfilerOptions',
@@ -48,40 +49,44 @@ const Blueprint = () => {
 		);
 		linkContainer.innerHTML = '';
 
-		const response = await apiFetch( {
-			path: '/blueprint/export',
-			method: 'POST',
-			data: {
-				steps: _steps,
-				export_as_zip: exportAsZip,
-			},
-		} );
+		try {
+			const response = await apiFetch( {
+				path: '/blueprint/export',
+				method: 'POST',
+				data: {
+					steps: _steps,
+					export_as_zip: exportAsZip,
+				},
+			} );
+			const link = document.createElement( 'a' );
+			link.innerHTML =
+				'Click here in case download does not start automatically';
 
-		const link = document.createElement( 'a' );
-		link.innerHTML =
-			'Click here in case download does not start automatically';
+			let url = null;
 
-		let url = null;
+			if ( response.type === 'zip' ) {
+				link.href = response.data;
+				link.target = '_blank';
+			} else {
+				// Create a link element and trigger the download
+				url = window.URL.createObjectURL(
+					new Blob( [ JSON.stringify( response.data, null, 2 ) ] )
+				);
+				link.href = url;
+				link.setAttribute( 'download', 'woo-blueprint.json' );
+			}
 
-		if ( response.type === 'zip' ) {
-			link.href = response.data;
-			link.target = '_blank';
-		} else {
-			// Create a link element and trigger the download
-			url = window.URL.createObjectURL(
-				new Blob( [ JSON.stringify( response.data, null, 2 ) ] )
-			);
-			link.href = url;
-			link.setAttribute( 'download', 'woo-blueprint.json' );
+			linkContainer.appendChild( link );
+
+			link.click();
+			if ( url ) {
+				window.URL.revokeObjectURL( url );
+			}
+			setExportEnabled( true );
+		} catch ( error ) {
+			setError( error.message );
+			setExportEnabled( true );
 		}
-
-		linkContainer.appendChild( link );
-
-		link.click();
-		if ( url ) {
-			window.URL.revokeObjectURL( url );
-		}
-		setExportEnabled( true );
 	};
 
 	// Handle checkbox change
@@ -102,6 +107,17 @@ const Blueprint = () => {
 	} );
 	return (
 		<div className="blueprint-settings-slotfill">
+			{ error && (
+				<Notice
+					status="error"
+					onRemove={ () => {
+						setError( null );
+					} }
+					isDismissible
+				>
+					{ error }
+				</Notice>
+			) }
 			<p className="blueprint-settings-slotfill-description">
 				{ __( 'Import/Export your Blueprint schema.', 'woocommerce' ) }
 			</p>
