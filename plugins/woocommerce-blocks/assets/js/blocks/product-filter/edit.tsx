@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	InnerBlocks,
+	InspectorControls,
+} from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -14,6 +18,10 @@ import './editor.scss';
 import { getAllowedBlocks } from './utils';
 import { BLOCK_NAME_MAP } from './constants';
 import type { FilterType } from './types';
+import {
+	ProductFilterSettingsControlsSlot,
+	ProductFilterStylesControlsSlot,
+} from './components/product-filter-inspector';
 
 const Edit = ( {
 	attributes,
@@ -37,6 +45,16 @@ const Edit = ( {
 	return (
 		<nav { ...blockProps }>
 			{ ! isNested && <Warning /> }
+			<InspectorControls>
+				<ProductFilterSettingsControlsSlot
+					fillProps={ { providedWrapperClientId: clientId } }
+				/>
+			</InspectorControls>
+			<InspectorControls group="styles">
+				<ProductFilterStylesControlsSlot
+					fillProps={ { providedWrapperClientId: clientId } }
+				/>
+			</InspectorControls>
 			<InnerBlocks
 				allowedBlocks={ getAllowedBlocks( [
 					...Object.values( BLOCK_NAME_MAP ),
