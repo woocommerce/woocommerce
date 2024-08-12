@@ -63,6 +63,11 @@ export const SELECTORS = {
 	collectionPlaceholder:
 		'[data-type="woocommerce/product-collection"] .components-placeholder',
 	productPicker: '.wc-blocks-product-collection__editor-product-picker',
+	linkedProductControl: {
+		button: '.wc-block-product-collection-linked-product-control__button',
+		popoverContent:
+			'.wc-block-product-collection-linked-product__popover-content',
+	},
 };
 
 export type Collections =
