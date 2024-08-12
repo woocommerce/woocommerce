@@ -31,15 +31,17 @@ export const useSiteVisibilityTour = () => {
 		};
 	} );
 
-	const onClose = () => {
+	const onClose = async () => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
-		dispatch( 'core' ).saveUser( {
+		await dispatch( 'core' ).saveUser( {
 			id: window?.wcSettings?.currentUserId,
 			meta: {
 				woocommerce_launch_your_store_tour_hidden: 'yes',
 			},
 		} );
+
+		dispatch( 'core' ).invalidateResolution( 'getCurrentUser' );
 	};
 
 	return {
