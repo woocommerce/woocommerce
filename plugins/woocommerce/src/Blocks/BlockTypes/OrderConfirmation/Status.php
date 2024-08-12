@@ -50,10 +50,10 @@ class Status extends AbstractOrderConfirmationBlock {
 
 		if ( $additional_content ) {
 			$block = $block . sprintf(
-					'<div class="wc-block-order-confirmation-status-description %1$s">%2$s</div>',
-					esc_attr( trim( $classname ) ),
-					$additional_content
-				);
+				'<div class="wc-block-order-confirmation-status-description %1$s">%2$s</div>',
+				esc_attr( trim( $classname ) ),
+				$additional_content
+			);
 		}
 
 		return $block;
