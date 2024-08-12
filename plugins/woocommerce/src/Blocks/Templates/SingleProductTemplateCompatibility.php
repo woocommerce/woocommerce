@@ -14,6 +14,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	const IS_FIRST_BLOCK = '__wooCommerceIsFirstBlock';
 	const IS_LAST_BLOCK  = '__wooCommerceIsLastBlock';
 
+
 	/**
 	 * Inject hooks to rendered content of corresponding blocks.
 	 *
