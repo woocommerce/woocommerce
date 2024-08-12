@@ -43,7 +43,7 @@ export class LogoPickerPage {
 			.getByRole( 'tab', { name: 'Media Library' } )
 			.click();
 
-		await assemblerLocator.getByLabel( 'image-03' ).click();
+		await assemblerLocator.getByLabel( 'image-03' ).first().click();
 		await assemblerLocator
 			.getByRole( 'button', { name: 'Select', exact: true } )
 			.click();
