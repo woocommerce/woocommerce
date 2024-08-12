@@ -1488,7 +1488,7 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 		}
 
 		/**
-			* Filters the default orderby option..
+			* Filters the default orderby option.
 			*
 			* @since 1.6.4
 			*
