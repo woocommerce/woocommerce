@@ -153,9 +153,7 @@ const Blueprint = () => {
 				</div>
 			) ) }
 			<br />
-			<p>
-				Export can take a few seconds depending on your network speed.
-			</p>
+			<p>Export may take some time depending on your network speed.</p>
 			<div id="download-link-container"></div>
 			<Button
 				isPrimary
