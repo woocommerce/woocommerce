@@ -210,7 +210,7 @@ async function runPerformanceTests( branches, options ) {
 	await SimpleGit( testRunnerDir ).raw( 'checkout', testRunnerBranch );
 
 	logAtIndent( 2, 'Installing dependencies and building' );
-	await runShellScript( `source $HOME/.nvm/nvm.sh`, testRunnerDir );
+	await runShellScript( `bash -c "source $HOME/.nvm/nvm.sh"`, testRunnerDir );
 
 	logAtIndent( 1, 'Setting up test environments' );
 
