@@ -1488,12 +1488,12 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 		}
 
 		/**
-			* Filters the default orderby option.
-			*
-			* @since 1.6.4
-			*
-			* @param string  $default_orderby The default orderby option.
-			*/
+		 * Filters the default orderby option.
+		 *
+		 * @since 1.6.4
+		 *
+		 * @param string  $default_orderby The default orderby option.
+		 */
 		$default_orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby;
@@ -1503,12 +1503,12 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 		$orderby = 'menu_order' === $orderby ? '' : $orderby;
 
 		/**
-			* Filters ordered by messages.
-			*
-			* @since 9.3.0
-			*
-			* @param array  $orderedby_messages The list of messages per orderby key.
-			*/
+		 * Filters ordered by messages.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param array  $orderedby_messages The list of messages per orderby key.
+		 */
 		$catalog_orderedby_options = apply_filters(
 			'woocommerce_catalog_orderedby',
 			array(
