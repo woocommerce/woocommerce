@@ -120,8 +120,6 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		currentTemplate?.id ?? ''
 	);
 
-	const blockToScroll = useRef< string | null >( null );
-
 	const isEditorLoading = useIsSiteEditorLoading();
 
 	const isSpinnerVisible = isLoading || isEditorLoading;
@@ -156,12 +154,15 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		};
 	}, [ isLoading, blocks, isSpinnerVisible ] );
 
+	const { insertPattern, insertedPattern: blockToScroll } =
+		useInsertPattern();
+
 	useEffect( () => {
 		if ( isEditorLoading ) {
 			return;
 		}
 		const iframe = window.document.querySelector(
-			'.woocommerce-customize-store-assembler > .block-editor-iframe__container iframe[name="editor-canvas"]'
+			'.woocommerce-customize-store-assembler > iframe[name="editor-canvas"]'
 		) as HTMLIFrameElement;
 
 		const blockList = iframe?.contentWindow?.document.body.querySelector(
@@ -175,7 +176,10 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 				);
 
 				if ( block ) {
-					block.scrollIntoView();
+					block.scrollIntoView( {
+						behavior: 'smooth',
+						block: 'end',
+					} );
 					blockToScroll.current = null;
 				}
 			}
@@ -188,9 +192,7 @@ export const SidebarPatternScreen = ( { category }: { category: string } ) => {
 		return () => {
 			observer.disconnect();
 		};
-	}, [ isEditorLoading ] );
-
-	const { insertPattern } = useInsertPattern();
+	}, [ blockToScroll, isEditorLoading ] );
 
 	return (
 		<div
