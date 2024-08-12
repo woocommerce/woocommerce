@@ -61,7 +61,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.selectBlocks( attributeFilter );
 
 		await expect(
-			page.getByRole( 'checkbox', { name: 'Small' } )
+			editor.canvas.getByRole( 'checkbox', { name: 'Small' } )
 		).toBeVisible();
 
 		await page.getByLabel( 'DropDown' ).click();
@@ -73,10 +73,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		).toBeHidden();
 
 		await expect(
-			page.getByRole( 'checkbox', { name: 'Small' } )
+			editor.canvas.getByRole( 'checkbox', { name: 'Small' } )
 		).toBeHidden();
 
-		await expect( page.getByRole( 'combobox' ) ).toBeVisible();
+		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
 	} );
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
