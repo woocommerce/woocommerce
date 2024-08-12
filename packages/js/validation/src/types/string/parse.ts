@@ -2,18 +2,18 @@
  * Internal dependencies
  */
 import { getInvalidTypeError } from '../../errors/get-invalid-type-error';
-import { ValidationError } from '../../types';
+import { Data, ValidationError } from '../../types';
 
-export function parse( data: unknown, path: string ) {
+export function parse( string: unknown, path: string ) {
     let errors = [] as ValidationError[];
 
     // @todo Handle strict cases vs coercion.
-    if ( typeof data !== 'string' && typeof data !== 'number' ) {
+    if ( typeof string !== 'string' && typeof string !== 'number' ) {
         errors.push( getInvalidTypeError( 'string', path ) );
     }
 
     return {
         errors,
-        parsed: errors.length ? '' : String( data ),
+        parsed: errors.length ? '' : String( string ),
     };
 }

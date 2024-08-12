@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { StringSchema } from "../types";
+import { Data } from "../types";
 import { ValidationError } from "../types";
 
 type FormatValidators = {
@@ -22,12 +22,8 @@ const formatValidators: FormatValidators = {
     }
 };
 
-export function format( data: string, schema: StringSchema, path: string ): ValidationError[] {
-    if ( ! schema.hasOwnProperty( 'format' ) ) {
-        return [];
-    }
-
-    if ( typeof schema.format !== 'string' || ! formatValidators.hasOwnProperty( schema.format ) ) {
+export function format( string: string, path: string, operand: Data ): ValidationError[] {
+    if ( typeof operand !== 'string' || ! formatValidators.hasOwnProperty( operand ) ) {
         const formatOptions = Object.keys( formatValidators ).join(', ');
         return [
             {
@@ -39,14 +35,14 @@ export function format( data: string, schema: StringSchema, path: string ): Vali
          ] as ValidationError[];
     }
 
-    const isValid = formatValidators[ schema.format ];
+    const isValid = formatValidators[ operand ];
 
-    if ( ! isValid( data ) ) {
+    if ( ! isValid( string ) ) {
         return [
             {
                 code: 'format',
                 keyword: 'format',
-                message: `${path} is not a valid "${schema.format}" format`,
+                message: `${path} is not a valid "${operand}" format`,
                 path: path,
             }
         ] as ValidationError[];

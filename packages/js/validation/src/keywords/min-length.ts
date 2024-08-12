@@ -1,15 +1,10 @@
 /**
  * Internal dependencies
  */
-import { StringSchema } from "../types";
 import { ValidationError } from "../types";
 
-export function minLength( data: string, schema: StringSchema, path: string ): ValidationError[] {
-    if ( ! schema.hasOwnProperty( 'minLength' ) ) {
-        return [];
-    }
-
-    if ( typeof schema.minLength !== 'number' ) {
+export function minLength( string: string, path: string, operand: unknown ): ValidationError[] {
+    if ( typeof operand !== 'number' ) {
         return [
             {
                 code: 'invalid_keyword_value',
@@ -20,12 +15,12 @@ export function minLength( data: string, schema: StringSchema, path: string ): V
         ] as ValidationError[];
     }
 
-    if ( data.length < schema.minLength ) {
+    if ( string.length < operand ) {
         return [
             {
                 code: 'min_length',
                 keyword: 'minLength',
-                message: `${path} must be at least ${schema.minLength} characters in length`,
+                message: `${path} must be at least ${operand} characters in length`,
                 path: path,
             }
          ] as ValidationError[];

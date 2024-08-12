@@ -1,5 +1,6 @@
 export type Property = {
     type: string;
+    [ key: string ]: any;
 }
 
 export type ObjectSchema = Property & {
@@ -11,8 +12,12 @@ export type ObjectSchema = Property & {
     required?: string[];
 }
 
+export type DataRef = {
+    $data: string;
+}
+
 export type StringSchema = Property & {
-    minLength?: number;
+    minLength?: string | DataRef;
     maxLength?: number;
     pattern?: string;
     format?: string;
@@ -30,5 +35,5 @@ export type ValidationError = {
 }
 
 export interface KeywordInterface< DataType, SchemaType > {
-    ( data: DataType, schema: SchemaType, path: string ): ValidationError[];
+    ( datum: DataType, path: string, data: Data ): ValidationError[];
 }

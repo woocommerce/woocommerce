@@ -4,7 +4,7 @@
 import { Data, ObjectSchema, ValidationError } from "../../types";
 import { parseString } from '../string';
 
-export function parse( data: Data, schema: ObjectSchema, path: string ) {
+export function parse( object: Data, schema: ObjectSchema, path: string, data: Data ) {
     const parsed = {} as Data;
     let errors = [] as ValidationError[];
 
@@ -15,7 +15,7 @@ export function parse( data: Data, schema: ObjectSchema, path: string ) {
 
         switch ( propertySchema.type ) {
             case 'string':
-                const { parsed: parsedString, errors: stringErrors } = parsed[ property ] = parseString( propertySchema, data[ property ], propertyPath );
+                const { parsed: parsedString, errors: stringErrors } = parsed[ property ] = parseString( propertySchema, object[ property ], propertyPath, data );
                 parsed[ property ] = parsedString;
                 errors = [ ...errors,  ...stringErrors as ValidationError[] ]; 
         }

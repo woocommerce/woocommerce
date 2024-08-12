@@ -2,20 +2,20 @@
  * Internal dependencies
  */
 import { ERROR_CODES } from "../errors/constants";
-import { ObjectSchema } from "../types";
+import { Data } from "../types";
 import { ValidationError } from "../types";
 
-export function required( data: object, schema: ObjectSchema, path: string ): ValidationError[] {
-    if ( ! schema.hasOwnProperty( 'required' ) || ! Array.isArray( schema.required ) ) {
+export function required( object: object, path: string, operand: Data ): ValidationError[] {
+    if ( ! Array.isArray( operand ) ) {
         return [];
     }
 
     const errors = [] as ValidationError[];
 
-    if ( schema.required ) {
-        for ( const requiredProperty of schema.required ) {
+    if ( operand ) {
+        for ( const requiredProperty of operand ) {
             const propertyPath = `${path}/${requiredProperty}`;
-            if ( ! data.hasOwnProperty( requiredProperty ) ) {
+            if ( ! object.hasOwnProperty( requiredProperty ) ) {
                 errors.push( {
                     code: ERROR_CODES.MISSING_REQUIRED,
                     keyword: 'required',

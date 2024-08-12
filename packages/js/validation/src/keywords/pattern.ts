@@ -1,15 +1,11 @@
 /**
  * Internal dependencies
  */
-import { StringSchema } from "../types";
+import { Data } from "../types";
 import { ValidationError } from "../types";
 
-export function pattern( data: string, schema: StringSchema, path: string ): ValidationError[] {
-    if ( ! schema.hasOwnProperty( 'pattern' ) ) {
-        return [];
-    }
-
-    if ( typeof schema.pattern !== 'string' ) {
+export function pattern( string: string, path: string, operand: Data ): ValidationError[] {
+    if ( typeof operand !== 'string' ) {
         return [
             {
                 code: 'invalid_keyword_value',
@@ -20,12 +16,12 @@ export function pattern( data: string, schema: StringSchema, path: string ): Val
          ] as ValidationError[];
     }
 
-    if ( ! data.match( schema.pattern ) ) {
+    if ( ! string.match( operand ) ) {
         return [
             {
                 code: 'pattern',
                 keyword: 'pattern',
-                message: `${path} must match the regex pattern ${schema.pattern}`,
+                message: `${path} must match the regex pattern ${operand}`,
                 path: path,
             }
         ] as ValidationError[];
