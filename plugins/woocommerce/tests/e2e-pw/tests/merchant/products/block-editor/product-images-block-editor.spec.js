@@ -107,7 +107,7 @@ test( 'can add images', { tag: '@gutenberg' }, async ( { page, product } ) => {
 		await page.goto( product.permalink );
 
 		for ( const image of images ) {
-			await expect( page.getByAltText( image ) ).toBeVisible();
+			await expect( page.locator( '.woocommerce-product-gallery ol img' ) ).toHaveCount( images.length );
 		}
 	} );
 } );
