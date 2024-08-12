@@ -7,6 +7,12 @@ if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	exit 1
 fi
 
+echo "Installing NVM"
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+nvm -v
+
 echo "Installing dependencies"
 pnpm install --frozen-lockfile --filter="compare-perf"
 
