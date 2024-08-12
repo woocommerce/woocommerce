@@ -130,7 +130,7 @@ jQuery( function( $ ) {
 				$( this )
 					.html( '' )
 					.html( text )
-					.deuqueue();
+					.dequeue();
 			} );
 		}
 	} );	
