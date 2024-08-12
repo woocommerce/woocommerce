@@ -40,7 +40,8 @@ export const useSiteVisibilityTour = () => {
 				woocommerce_launch_your_store_tour_hidden: 'yes',
 			},
 		} );
-
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		dispatch( 'core' ).invalidateResolution( 'getCurrentUser' );
 	};
 
