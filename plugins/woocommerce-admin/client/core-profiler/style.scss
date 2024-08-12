@@ -166,6 +166,7 @@
 		align-items: center;
 		font-size: 14px;
 		font-weight: normal;
+		margin-bottom: 16px;
 
 		@include breakpoint("<782px") {
 			width: 100%;
@@ -179,7 +180,7 @@
 		justify-content: center;
 
 		@include breakpoint("<782px") {
-			margin: 16px auto 20px;
+			margin: 0 auto 20px;
 		}
 
 		.components-checkbox-control__input-container {
