@@ -168,3 +168,30 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
 	}
 }
+
+// Linked Product Control
+.wc-block-product-collection-linked-product-control {
+	width: 100%;
+
+	&__button {
+		width: 100%;
+		height: 100%;
+		padding: 10px;
+		border: 1px solid $gray-300;
+	}
+
+	&__image-container img {
+		display: block;
+		max-width: 100%;
+		max-height: 50px;
+	}
+}
+
+.wc-block-product-collection-linked-product__popover-content .components-popover__content {
+	width: 100%;
+
+	.woocommerce-search-list__search {
+		border: 0;
+		padding: 0;
+	}
+}
