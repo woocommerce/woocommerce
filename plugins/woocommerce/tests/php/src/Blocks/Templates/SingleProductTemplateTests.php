@@ -47,8 +47,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			$result_without_whitespace,
-			$expected_single_product_template_without_whitespace,
-			''
+			$expected_single_product_template_without_whitespace
 		);
 	}
 
@@ -102,8 +101,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			$result_without_whitespace_without_custom_pwbox_ids,
-			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids,
-			''
+			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids
 		);
 	}
 
@@ -240,8 +238,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			$result_without_whitespace_without_custom_pwbox_ids,
-			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids,
-			''
+			$expected_single_product_template_without_whitespace_without_custom_pwbox_ids
 		);
 	}
 }
