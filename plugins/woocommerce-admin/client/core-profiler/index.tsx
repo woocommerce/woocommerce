@@ -300,7 +300,6 @@ const exitToWooHome = fromPromise( async () => {
 } );
 
 const redirectToJetpackAuthPage = ( {
-	context,
 	event,
 }: {
 	context: CoreProfilerStateMachineContext;
@@ -308,16 +307,7 @@ const redirectToJetpackAuthPage = ( {
 } ) => {
 	const url = new URL( event.output.url );
 	url.searchParams.set( 'installed_ext_success', '1' );
-	const selectedPlugin = context.pluginsSelected.find(
-		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
-	);
-
-	if ( selectedPlugin ) {
-		const pluginName =
-			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
-		url.searchParams.set( 'plugin_name', pluginName );
-	}
-
+	url.searchParams.set( 'plugin_name', 'jetpack-ai' );
 	window.location.href = url.toString();
 };
 
@@ -1560,9 +1550,7 @@ export const CoreProfilerController = ( {
 				hasJetpackSelectedForInstallation: ( { context } ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) =>
-								plugin === 'jetpack' ||
-								plugin === 'jetpack-boost'
+							( plugin ) => plugin === 'jetpack'
 						) !== undefined
 					);
 				},
@@ -1570,9 +1558,7 @@ export const CoreProfilerController = ( {
 					return (
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								( plugin.key === 'jetpack' ||
-									plugin.key === 'jetpack-boost' ) &&
-								plugin.is_activated
+								plugin.key === 'jetpack' && plugin.is_activated
 						) !== undefined
 					);
 				},

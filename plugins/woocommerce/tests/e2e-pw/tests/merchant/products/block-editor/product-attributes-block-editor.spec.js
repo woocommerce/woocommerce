@@ -282,7 +282,10 @@ test(
 		} );
 
 		await test.step( 'add an existing attribute', async () => {
-			await page.getByRole( 'button', { name: 'Add new' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add new' } )
+				.first()
+				.click();
 
 			await page.waitForLoadState( 'domcontentloaded' );
 
