@@ -516,7 +516,7 @@
 						".wp-env.json"
 					],
 					"events": [
-						"pull_request"
+						"push"
 					],
 					"report": {
 						"resultsBlobName": "core-metrics-report",
