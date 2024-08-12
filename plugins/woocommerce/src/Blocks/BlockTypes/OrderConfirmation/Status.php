@@ -43,7 +43,11 @@ class Status extends AbstractOrderConfirmationBlock {
 		$account_notice = $this->render_account_notice( $order );
 
 		if ( $account_notice ) {
-			$block = $account_notice . $block;
+			$block = sprintf(
+				'<div class="wc-block-order-confirmation-status-notices %1$s">%2$s</div>',
+				esc_attr( trim( $classname ) ),
+				$account_notice
+			) . $block;
 		}
 
 		$additional_content = $this->render_confirmation_notice( $order );
