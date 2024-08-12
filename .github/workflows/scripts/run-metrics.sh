@@ -12,13 +12,13 @@ if [[ -z "$GITHUB_EVENT_NAME" ]]; then
 fi
 
 title "Installing NVM"
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash > /dev/null
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm -v
+echo "Installed version: $(nvm -v)"
 
 title "Installing dependencies"
-pnpm install --frozen-lockfile --filter="compare-perf"
+pnpm install --frozen-lockfile --filter="compare-perf" > /dev/null
 
 if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   	title "Comparing performance with trunk"
