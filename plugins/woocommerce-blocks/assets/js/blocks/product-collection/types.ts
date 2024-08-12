@@ -120,7 +120,7 @@ export type ProductCollectionEditComponentProps =
 			templateSlug: string;
 		};
 		isUsesReferencePreviewMode: boolean;
-		isShowingProductPicker: boolean;
+		isShowProductPicker: boolean;
 		location: WooCommerceBlockLocation;
 	};
 
