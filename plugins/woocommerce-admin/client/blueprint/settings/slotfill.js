@@ -82,11 +82,11 @@ const Blueprint = () => {
 			if ( url ) {
 				window.URL.revokeObjectURL( url );
 			}
-			setExportEnabled( true );
-		} catch ( error ) {
-			setError( error.message );
-			setExportEnabled( true );
+		} catch ( e ) {
+			setError( e.message );
 		}
+
+		setExportEnabled( true );
 	};
 
 	// Handle checkbox change
