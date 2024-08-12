@@ -49,6 +49,7 @@ export function CheckboxListOptionControl( {
 					className="wc-block-checkbox-list__checkbox"
 					label={ option.label }
 					checked={ checked }
+					value={ option.value }
 					onChange={ () => {
 						onChange( option.value );
 					} }
