@@ -137,14 +137,14 @@ class RestApi {
 			);
 		}
 
-
 		// phpcs:ignore
 		if ( ! empty( $_FILES['file'] ) && $_FILES['file']['error'] === UPLOAD_ERR_OK ) {
 			// phpcs:ignore
 			$uploaded_file = $_FILES['file']['tmp_name'];
-			$mime_type = $_FILES['file']['type'];
+			// phpcs:ignore
+			$mime_type     = $_FILES['file']['type'];
 
-			if ( $mime_type !== 'application/json' && $mime_type !== 'application/zip' ) {
+			if ( 'application/json' !== $mime_type && 'application/zip' !== $mime_type ) {
 				return new \WP_HTTP_Response(
 					array(
 						'status'  => 'error',
