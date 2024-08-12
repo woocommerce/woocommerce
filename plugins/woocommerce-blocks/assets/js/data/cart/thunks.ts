@@ -23,7 +23,7 @@ import { CartDispatchFromMap, CartSelectFromMap } from './index';
  * @param {CartResponse} response
  */
 export const receiveCart =
-	( response: CartResponse ) =>
+	( response: Partial< CartResponse > ) =>
 	( {
 		dispatch,
 		select,
@@ -44,6 +44,22 @@ export const receiveCart =
 	};
 
 /**
+ * Updates the store with the provided cart but omits the customer addresses.
+ *
+ * This is useful when currently editing address information to prevent it being overwritten from the server.
+ *
+ * @param {CartResponse} response
+ */
+export const receiveCartContents =
+	( response: Partial< CartResponse > ) =>
+	( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		const { shipping_address, billing_address, ...cartWithoutAddress } =
+			response;
+		dispatch.receiveCart( cartWithoutAddress );
+	};
+
+/**
  * A thunk used in updating the store with cart errors retrieved from a request.
  */
 export const receiveError =
@@ -58,4 +74,7 @@ export const receiveError =
 		}
 	};
 
-export type Thunks = typeof receiveCart | typeof receiveError;
+export type Thunks =
+	| typeof receiveCart
+	| typeof receiveCartContents
+	| typeof receiveError;
