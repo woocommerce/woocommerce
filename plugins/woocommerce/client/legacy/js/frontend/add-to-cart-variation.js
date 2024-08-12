@@ -35,6 +35,7 @@
 		$form.on( 'show_variation', { variationForm: self }, self.onShow );
 		$form.on( 'click', '.single_add_to_cart_button', { variationForm: self }, self.onAddToCart );
 		$form.on( 'reset_data', { variationForm: self }, self.onResetDisplayedVariation );
+		$form.on( 'reset_focus', { variationForm: self }, self.onResetVariationFocus );
 		$form.on( 'announce_reset', { variationForm: self }, self.onAnnounceReset );
 		$form.on( 'clear_reset_announcement', { variationForm: self }, self.onClearResetAnnouncement );
 		$form.on( 'reset_image', { variationForm: self }, self.onResetImage );
@@ -59,6 +60,7 @@
 		event.data.variationForm.$attributeFields.val( '' ).trigger( 'change' );
 		event.data.variationForm.$form.trigger( 'announce_reset' );
 		event.data.variationForm.$form.trigger( 'reset_data' );
+		event.data.variationForm.$form.trigger( 'reset_focus' );
 	};
 
 	/**
@@ -159,7 +161,13 @@
 	 */
 	VariationForm.prototype.onAnnounceReset = function( event ) {
 		event.data.variationForm.$resetAlert.text( wc_add_to_cart_variation_params.i18n_reset_alert_text );
-		event.data.variationForm.$resetAlert.focus();
+	}
+
+	/**
+	 * Focus variation reset
+	 */
+	VariationForm.prototype.onResetVariationFocus = function( event ) {
+		event.data.variationForm.$attributeFields[0].focus();
 	}
 
 	/** Clear reset announcement */

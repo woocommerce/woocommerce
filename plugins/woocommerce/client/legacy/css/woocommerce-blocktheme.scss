@@ -182,21 +182,6 @@
 		}
 	}
 
-	/**
-	* Variation reset alert
-	* hides the alert that appears when a variation is reset
-	* available to screen readers only
-	*/
-	.reset_variations_alert {
-		border: transparent;
-		clip: rect(1px, 1px, 1px, 1px);
-		clip-path: inset(50%);
-		height: 1px;
-		left: -100%;
-		position: absolute;
-		width: 1px;
-	}
-
 	// Ensure variation label is vertically centered.
 	div.product form.cart table.variations td select {
 		min-width: 70%; // Fix for Safari.
