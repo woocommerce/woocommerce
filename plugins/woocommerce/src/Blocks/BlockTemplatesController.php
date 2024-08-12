@@ -98,7 +98,7 @@ class BlockTemplatesController {
 		$posts          = $template_query->posts;
 
 		// If we have more than one result from the query, it means that the current template is present in the db (has
-		// been customized by the user) and we should not return the `archive-product` template.
+		// been customized by the user) and we should not return the fallback template.
 		if ( count( $posts ) > 1 ) {
 			return null;
 		}
@@ -121,8 +121,7 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Adds the `archive-product` template to the `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute`
-	 * templates to be able to fall back to it.
+	 * Adds the fallback template to the template hierarchy.
 	 *
 	 * @param array $template_hierarchy A list of template candidates, in descending order of priority.
 	 */
@@ -229,7 +228,8 @@ class BlockTemplatesController {
 
 		list( $template_id, $template_slug ) = $template_name_parts;
 
-		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
+		// If the template is not present in the theme but its fallback template is,
+		// let's use the theme's fallback template.
 		if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
 			$registered_template = BlockTemplateUtils::get_template( $template_slug );
 			$template_path       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
@@ -449,7 +449,8 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
+			// If the template is not present in the theme but its fallback template is,
+			// let's use the theme's fallback template.
 			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
 				$registered_template = BlockTemplateUtils::get_template( $template_slug );
 				$template_file       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
