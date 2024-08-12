@@ -740,7 +740,7 @@ class BlockTemplateUtils {
 			return true;
 		}
 
-		$blocks = parse_blocks( $template );
+		$blocks = parse_blocks( $template->content );
 
 		return self::has_block_including_patterns( array( 'woocommerce/legacy-template' ), $blocks );
 	}
