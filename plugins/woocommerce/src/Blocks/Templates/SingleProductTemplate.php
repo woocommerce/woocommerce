@@ -23,7 +23,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	 */
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 11, 3 );
+		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 11, 1 );
 	}
 
 	/**
@@ -68,12 +68,10 @@ class SingleProductTemplate extends AbstractTemplate {
 	/**
 	 * Add the block template objects to be used.
 	 *
-	 * @param array  $query_result Array of template objects.
-	 * @param array  $query Optional. Arguments to retrieve templates.
-	 * @param string $template_type wp_template or wp_template_part.
+	 * @param array $query_result Array of template objects.
 	 * @return array
 	 */
-	public function update_single_product_content( $query_result, $query, $template_type ) {
+	public function update_single_product_content( $query_result ) {
 		$query_result = array_map(
 			function ( $template ) {
 				if ( str_contains( $template->slug, self::SLUG ) ) {
