@@ -753,9 +753,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 * @since 9.2 Added $stock parameter.
 				 *
 				 * @param WC_Product $product The variation whose stock has changed.
-				 * @param int|float  $stock   The new stock value.
 				 */
-				do_action( 'woocommerce_variation_set_stock', $product, $product->get_stock_quantity() );
+				do_action( 'woocommerce_variation_set_stock', $product );
 			} else {
 				/**
 				 * Action to signal that the value of 'stock_quantity' for a product has changed.
@@ -764,9 +763,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 * @since 9.2 Added $stock parameter.
 				 *
 				 * @param WC_Product $product The variation whose stock has changed.
-				 * @param int|float  $stock   The new stock value.
 				 */
-				do_action( 'woocommerce_product_set_stock', $product, $product->get_stock_quantity() );
+				do_action( 'woocommerce_product_set_stock', $product );
 			}
 		}
 

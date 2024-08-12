@@ -24,7 +24,7 @@ const productData = {
 		{ name: `custom-field_${ Date.now() }`, value: 'custom_1' },
 	],
 	sku: `sku_${ Date.now() }`,
-	gtin: `gtin_${ Date.now() }`,
+	gtin: `${ Date.now() }`,
 	shipping: {
 		shippingClassName: `shipping-class_${ Date.now() }`,
 		weight: '2',
