@@ -6,6 +6,7 @@ const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
+const { admin } = require( '../../../test-data/data' );
 
 const test = base.extend( {
 	assemblerPageObject: async ( { page }, use ) => {
@@ -528,8 +529,8 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
