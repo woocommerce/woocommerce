@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Properly detect active plugins in multisite WP installations.

@@ -131,6 +131,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$sku,
 			$sku
 		);
+
+		/**
+		 * Filter to bail early on the SKU lock query.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param bool|null  $locked  Set to a boolean value to short-circuit the SKU lock query.
+		 * @param WC_Product $product The product being created.
+		 */
+		$locked = apply_filters( 'wc_product_pre_lock_on_sku', null, $product );
+		if ( ! is_null( $locked ) ) {
+			return boolval( $locked );
+		}
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->query( $query );
 
@@ -334,7 +348,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->apply_changes();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'woocommerce_update_product', $product->get_id(), $product, $changes );
+		do_action( 'woocommerce_update_product', $product->get_id(), $product );
 	}
 
 	/**
@@ -642,21 +656,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					// Fire actions to let 3rd parties know the stock is about to be changed.
 					if ( $product->is_type( 'variation' ) ) {
 						/**
-						* Action to signal that the value of 'stock_quantity' for a variation is about to change.
-						*
-						* @since 4.9
-						*
-						* @param int $product The variation whose stock is about to change.
-						*/
+						 * Action to signal that the value of 'stock_quantity' for a variation is about to change.
+						 *
+						 * @param WC_Product $product The variation whose stock is about to change.
+						 *
+						 * @since 4.9
+						 */
 						do_action( 'woocommerce_variation_before_set_stock', $product );
 					} else {
 						/**
-						* Action to signal that the value of 'stock_quantity' for a product is about to change.
-						*
-						* @since 4.9
-						*
-						* @param int $product The product whose stock is about to change.
-						*/
+						 * Action to signal that the value of 'stock_quantity' for a product is about to change.
+						 *
+						 * @param WC_Product $product The product whose stock is about to change.
+						 *
+						 * @since 4.9
+						 */
 						do_action( 'woocommerce_product_before_set_stock', $product );
 					}
 					break;
@@ -732,16 +746,50 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Action to signal that the value of 'stock_quantity' for a variation has changed.
+				 *
+				 * @since 3.0
+				 * @since 9.2 Added $stock parameter.
+				 *
+				 * @param WC_Product $product The variation whose stock has changed.
+				 */
 				do_action( 'woocommerce_variation_set_stock', $product );
 			} else {
+				/**
+				 * Action to signal that the value of 'stock_quantity' for a product has changed.
+				 *
+				 * @since 3.0
+				 * @since 9.2 Added $stock parameter.
+				 *
+				 * @param WC_Product $product The variation whose stock has changed.
+				 */
 				do_action( 'woocommerce_product_set_stock', $product );
 			}
 		}
 
 		if ( in_array( 'stock_status', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Action to signal that the `stock_status` for a variation has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param int        $product_id   The ID of the variation.
+				 * @param string     $stock_status The new stock status of the variation.
+				 * @param WC_Product $product      The product object.
+				 */
 				do_action( 'woocommerce_variation_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			} else {
+				/**
+				 * Action to signal that the `stock_status` for a product has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param int        $product_id   The ID of the product.
+				 * @param string     $stock_status The new stock status of the product.
+				 * @param WC_Product $product      The product object.
+				 */
 				do_action( 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			}
 		}
@@ -2237,23 +2285,26 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
-			return array(
-				'product_id'       => absint( $id ),
-				'sku'              => get_post_meta( $id, '_sku', true ),
-				'global_unique_id' => get_post_meta( $id, '_global_unique_id', true ),
-				'virtual'          => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
-				'downloadable'     => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
-				'min_price'        => reset( $price_meta ),
-				'max_price'        => end( $price_meta ),
-				'onsale'           => $sale_price && $price === $sale_price ? 1 : 0,
-				'stock_quantity'   => $stock,
-				'stock_status'     => get_post_meta( $id, '_stock_status', true ),
-				'rating_count'     => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
-				'average_rating'   => get_post_meta( $id, '_wc_average_rating', true ),
-				'total_sales'      => get_post_meta( $id, 'total_sales', true ),
-				'tax_status'       => get_post_meta( $id, '_tax_status', true ),
-				'tax_class'        => get_post_meta( $id, '_tax_class', true ),
+			$product_data = array(
+				'product_id'     => absint( $id ),
+				'sku'            => get_post_meta( $id, '_sku', true ),
+				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
+				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
+				'min_price'      => reset( $price_meta ),
+				'max_price'      => end( $price_meta ),
+				'onsale'         => $sale_price && $price === $sale_price ? 1 : 0,
+				'stock_quantity' => $stock,
+				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
+				'rating_count'   => array_sum( array_map( 'intval', (array) get_post_meta( $id, '_wc_rating_count', true ) ) ),
+				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
+				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
+				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
+				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
+				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			return $product_data;
 		}
 		return array();
 	}

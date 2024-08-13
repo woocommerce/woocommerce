@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Correctly escape the HTML when linking customer orders.

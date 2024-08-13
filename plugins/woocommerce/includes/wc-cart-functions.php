@@ -170,6 +170,10 @@ function wc_format_list_of_items( $items ) {
 function wc_clear_cart_after_payment() {
 	global $wp;
 
+	$should_clear_cart_after_payment = false;
+	$after_payment                   = false;
+
+	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
@@ -179,20 +183,38 @@ function wc_clear_cart_after_payment() {
 			$order = wc_get_order( $order_id );
 
 			if ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) {
-				WC()->cart->empty_cart();
+				$should_clear_cart_after_payment = true;
+				$after_payment                   = true;
 			}
 		}
 	}
 
-	if ( WC()->session->order_awaiting_payment > 0 ) {
+	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
+	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
-			// If the order has not failed, or is not pending, the order must have gone through.
-			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
-				WC()->cart->empty_cart();
-			}
+			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
+			$should_clear_cart_after_payment = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
+			$after_payment                   = true;
 		}
+	}
+
+	// If it doesn't look like a payment happened, bail early.
+	if ( ! $after_payment ) {
+		return;
+	}
+
+	/**
+	 * Determine whether the cart should be cleared after payment.
+	 *
+	 * @since 9.3.0
+	 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
+	 */
+	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
+
+	if ( $should_clear_cart_after_payment ) {
+		WC()->cart->empty_cart();
 	}
 }
 add_action( 'template_redirect', 'wc_clear_cart_after_payment', 20 );
