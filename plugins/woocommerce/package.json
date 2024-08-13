@@ -510,7 +510,7 @@
 						".wp-env.json"
 					],
 					"events": [
-						"disabled"
+						"push"
 					],
 					"report": {
 						"resultsBlobName": "core-metrics-report",
