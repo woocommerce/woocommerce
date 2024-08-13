@@ -217,24 +217,24 @@ test.describe( 'Product Collection', () => {
 			await pageObject.createNewPostAndInsertBlock();
 
 			const allProducts = pageObject.products;
-			const salePoducts = pageObject.products.filter( {
+			const saleProducts = pageObject.products.filter( {
 				hasText: 'Product on sale',
 			} );
 
 			await expect( allProducts ).toHaveCount( 9 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
 				onSale: true,
 			} );
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.publishAndGoToFrontend();
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
