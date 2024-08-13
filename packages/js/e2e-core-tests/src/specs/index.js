@@ -32,7 +32,6 @@ const runCartAndCheckoutConsistentShippingTest = require( './shopper/front-end-c
 // Merchant tests
 const runAddNewShippingZoneTest = require( './merchant/wp-admin-settings-shipping-zones.test' );
 const runAddShippingClassesTest = require( './merchant/wp-admin-settings-shipping-classes.test' );
-const runAddProductBrandsTest = require( './merchant/wp-admin-settings-brands.test' );
 const runCreateCouponTest = require( './merchant/wp-admin-coupon-new.test' );
 const runCreateOrderTest = require( './merchant/wp-admin-order-new.test' );
 const runEditOrderTest = require( './merchant/wp-admin-order-edit.test' );
@@ -93,7 +92,6 @@ const runShopperTests = () => {
 
 const runMerchantTests = () => {
 	runAddShippingClassesTest();
-	runAddProductBrandsTest();
 	runImportProductsTest();
 	runOrderSearchingTest();
 	runAddNewShippingZoneTest();
@@ -168,7 +166,6 @@ module.exports = {
 	runProductBrowseSearchSortTest,
 	runApiTests,
 	runAddShippingClassesTest,
-	runAddProductBrandsTest,
 	runAnalyticsPageLoadsTest,
 	runCheckoutCreateAccountTest,
 	runImportProductsTest,

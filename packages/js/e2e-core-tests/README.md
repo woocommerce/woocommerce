@@ -67,7 +67,6 @@ The functions to access the core tests are:
     - `runAddNewShippingZoneTest` - Merchant can create shipping zones and let shopper test them
     - `runAddSimpleProductTest` - Merchant can create a simple product
     - `runAddVariableProductTest` - Merchant can create a variable product
-    - `runAddProductBrandsTest` - Merchant can create a product brand.
     - `runCreateCouponTest` - Merchant can create coupon
     - `runCreateOrderTest` - Merchant can create order
     - `runMerchantOrdersCustomerPaymentPage` - Merchant can visit the customer payment page
