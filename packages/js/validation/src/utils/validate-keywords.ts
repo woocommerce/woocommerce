@@ -6,7 +6,7 @@ import { ValidationError, Property } from "../types";
 import { getFullPath } from './get-full-path';
 import { getPropertyByPath } from './get-property-by-path';
 
-export function validateKeywords< DataType, SchemaType extends Property >( keywords: { [ keyword: string ] : KeywordInterface< DataType, SchemaType > }, datum: DataType, schema: SchemaType, path: string, data: Data ) {
+export function validateKeywords< DataType, SchemaType extends Property >( keywords: { [ keyword: string ] : KeywordInterface< DataType > }, datum: DataType, schema: SchemaType, path: string, data: Data ) {
     let errors = [] as ValidationError[];
 
     for ( const keyword in keywords ) {

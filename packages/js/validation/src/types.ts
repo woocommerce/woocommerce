@@ -34,6 +34,9 @@ export type ValidationError = {
     path: string;
 }
 
-export interface KeywordInterface< DataType, SchemaType > {
+
+export interface Validator< DataType > {
     ( datum: DataType, path: string, data: Data ): ValidationError[];
 }
+
+export interface KeywordInterface< DataType > extends Validator< DataType > {};

@@ -1,13 +1,14 @@
 /**
  * Internal dependencies
  */
-import { ObjectSchema, Data, ValidationError } from '../../types';
+import { ObjectSchema, Data, ValidationError, Validator } from '../../types';
 import { getInvalidTypeError } from '../../errors/get-invalid-type-error';
 import { validateKeywords } from '../../utils/validate-keywords';
+import { validateFilters } from '../../utils/validate-filters';
 import { required } from '../../keywords/required';
 import { parse } from './parse';
 
-export function parseObject( schema: ObjectSchema, object: Data, path: string, data: Data ) {
+export function parseObject( schema: ObjectSchema, object: Data, path: string, data: Data, filters: Validator< any >[] ) {
     // Throw early if we're not dealing with an object.
     if ( typeof object !== 'object' || object == null ) {
         throw [ getInvalidTypeError( 'object', path ) ];
@@ -25,8 +26,10 @@ export function parseObject( schema: ObjectSchema, object: Data, path: string, d
         data
     );
 
+    const filterErrors = validateFilters( parsed, path, data, filters );
+
     return {
         parsed,
-        errors: [ ...errors, ...keywordErrors ],
+        errors: [ ...errors, ...keywordErrors, ...filterErrors ],
     };
 }
