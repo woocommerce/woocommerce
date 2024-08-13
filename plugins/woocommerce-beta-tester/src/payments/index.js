@@ -19,7 +19,7 @@ const Payments = () => {
 
 		const query = {
 			page: 1,
-			per_page: 5,
+			per_page: 10,
 		};
 		const orders = getOrders( query, null );
 		const isRequesting = hasFinishedResolution( 'getOrders', [ query ] );
