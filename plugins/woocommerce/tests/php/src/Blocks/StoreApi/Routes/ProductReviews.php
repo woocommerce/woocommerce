@@ -47,8 +47,8 @@ class ProductReviews extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		// Assert correct response format.
-		$this->assertEquals( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertEquals( 2, count( $data ), 'Unexpected item count.' );
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 2, count( $data ), 'Unexpected item count.' );
 
 		// Assert response items contain the correct properties.
 		$this->assertArrayHasKey( 'id', $data[0] );
@@ -67,10 +67,10 @@ class ProductReviews extends ControllerTestCase {
 		$this->assertArrayHasKey( 'reviewer_avatar_urls', $data[0] );
 
 		// Assert response items contain the correct review data.
-		$this->assertEquals( 'Test Product 2', $data[0]['product_name'] );
-		$this->assertEquals( 4, $data[0]['rating'] );
-		$this->assertEquals( 'Test Product 1', $data[1]['product_name'] );
-		$this->assertEquals( 5, $data[1]['rating'] );
+		$this->assertSame( 'Test Product 2', $data[0]['product_name'] );
+		$this->assertSame( 4, $data[0]['rating'] );
+		$this->assertSame( 'Test Product 1', $data[1]['product_name'] );
+		$this->assertSame( 5, $data[1]['rating'] );
 	}
 
 	/**
@@ -84,9 +84,9 @@ class ProductReviews extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
 		$this->assertCount( 1, $data, 'Unexpected item count.' );
-		$this->assertEquals( 5, $data[0]['rating'] );
+		$this->assertSame( 5, $data[0]['rating'] );
 	}
 
 	/**
@@ -98,9 +98,9 @@ class ProductReviews extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
 		$this->assertCount( 1, $data, 'Unexpected item count.' );
-		$this->assertEquals( 5, $data[0]['rating'] );
+		$this->assertSame( 5, $data[0]['rating'] );
 	}
 
 	/**
@@ -119,9 +119,9 @@ class ProductReviews extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
 		$this->assertCount( 2, $data, 'Unexpected item count.' );
-		$this->assertEquals( 4, $data[0]['rating'] );
-		$this->assertEquals( 5, $data[1]['rating'] );
+		$this->assertSame( 4, $data[0]['rating'] );
+		$this->assertSame( 5, $data[1]['rating'] );
 	}
 }
