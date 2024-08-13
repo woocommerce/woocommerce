@@ -1,3 +1,4 @@
 /.state
 /test-results
-
+/envs/_default
+/playwright-report
