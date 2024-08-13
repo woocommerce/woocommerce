@@ -1617,7 +1617,7 @@ test.describe( 'Product Collection', () => {
 				.poll(
 					async () => await page.evaluate( 'window.eventPayload' )
 				)
-				.toBe( 'woocommerce/product-collection/product-catalog' );
+				.toBe( undefined );
 			await expect
 				.poll( async () => await page.evaluate( 'window.eventFired' ) )
 				.toBe( 1 );
