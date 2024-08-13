@@ -817,7 +817,7 @@ class ListTable extends WP_List_Table {
 			$cached_value = get_option( $cache_option_value_name );
 		}
 
-		if ( $cached_value ) {
+		if ( false !== $cached_value ) {
 			// Always add current year month for cache stability. This allows us to not hydrate the cache on every order update.
 			$current_year_month        = new \stdClass();
 			$current_year_month->year  = gmdate( 'Y', time() );
