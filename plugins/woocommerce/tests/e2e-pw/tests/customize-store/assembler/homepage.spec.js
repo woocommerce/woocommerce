@@ -3,8 +3,8 @@ const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
-const { setFeatureFlag } = require( '../../../utils/features' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
+const { admin } = require( '../../../test-data/data' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -39,12 +39,13 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 			console.log( 'Store completed option not updated' );
 		}
 
-		await setFeatureFlag(
-			request,
-			baseURL,
-			'pattern-toolkit-full-composability',
-			false
-		);
+		const wordPressVersion = await getInstalledWordPressVersion();
+
+		if ( wordPressVersion > 6.5 ) {
+			test.skip(
+				'Skipping Assembler Homepage tests: WordPress version is above 6.5, which does not support this feature.'
+			);
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -157,7 +158,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 
 		await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const saveButton = assembler.getByText( 'Save' );
+		const saveButton = assembler.getByText( 'Finish customizing' );
 
 		const waitResponse = page.waitForResponse(
 			( response ) =>
@@ -179,8 +180,8 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
@@ -219,145 +220,116 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 			}
 		}
 	} );
-
-	test.describe( 'Homepage tracking banner', () => {
-		test.beforeAll( async ( { baseURL } ) => {
-			await setFeatureFlag(
-				request,
-				baseURL,
-				'pattern-toolkit-full-composability',
-				true
-			);
-		} );
-
-		test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
-			pageObject,
-			baseURL,
-		} ) => {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
-			);
-
-			await prepareAssembler( pageObject, baseURL );
-
-			const assembler = await pageObject.getAssembler();
-			await expect(
-				assembler.getByText( 'Want more patterns?' )
-			).toBeVisible();
-			await expect(
-				assembler.getByText(
-					'Opt in to usage tracking to get access to more patterns.'
-				)
-			).toBeVisible();
-		} );
-
-		test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is not allowed', async ( {
-			context,
-			pageObject,
-			baseURL,
-		} ) => {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
-			);
-
-			await prepareAssembler( pageObject, baseURL );
-
-			await context.setOffline( true );
-
-			const assembler = await pageObject.getAssembler();
-			await expect(
-				assembler.getByText( 'Want more patterns?' )
-			).toBeVisible();
-			await expect(
-				assembler.getByText(
-					"Looks like we can't detect your network. Please double-check your internet connection and refresh the page."
-				)
-			).toBeVisible();
-		} );
-
-		test( 'Should not show the "Want more patterns?" banner when tracking is allowed', async ( {
-			baseURL,
-			pageObject,
-		} ) => {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_allow_tracking',
-				'yes'
-			);
-
-			await prepareAssembler( pageObject, baseURL );
-
-			const assembler = await pageObject.getAssembler();
-			await expect(
-				assembler.getByText( 'Want more patterns?' )
-			).toBeHidden();
-		} );
-	} );
 } );
 
-test.describe(
-	'Assembler -> Homepage -> PTK API is down',
-	{ tag: '@gutenberg' },
-	() => {
-		test.use( { storageState: process.env.ADMINSTATE } );
+test.describe( 'Homepage tracking banner', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const wordPressVersion = await getInstalledWordPressVersion();
-
-			if ( wordPressVersion <= 6.5 ) {
-				test.skip(
-					'Skipping PTK API test: WordPress version is below 6.5, which does not support this feature.'
-				);
-			}
-			try {
-				// In some environments the tour blocks clicking other elements.
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_customize_store_onboarding_tour_hidden',
-					'yes'
-				);
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
-			}
-		} );
-
-		test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
-			baseURL,
-			pageObject,
-			page,
-		} ) => {
+	test.beforeAll( async ( { baseURL } ) => {
+		try {
+			// In some environments the tour blocks clicking other elements.
 			await setOption(
 				request,
 				baseURL,
-				'woocommerce_allow_tracking',
-				'no'
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'yes'
 			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
 
-			await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
-				route.fulfill( {
-					status: 500,
-				} );
+		const wordPressVersion = await getInstalledWordPressVersion();
+
+		if ( wordPressVersion <= 6.5 ) {
+			test.skip(
+				'Skipping PTK API test: WordPress version is below 6.5, which does not support this feature.'
+			);
+		}
+	} );
+
+	test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
+		baseURL,
+		pageObject,
+		page,
+	} ) => {
+		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
+
+		await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
+			route.fulfill( {
+				status: 500,
 			} );
-
-			await prepareAssembler( pageObject, baseURL );
-
-			const assembler = await pageObject.getAssembler();
-			await expect(
-				assembler.getByText( 'Want more patterns?' )
-			).toBeVisible();
-			await expect(
-				assembler.getByText(
-					"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
-				)
-			).toBeVisible();
 		} );
-	}
-);
+
+		await prepareAssembler( pageObject, baseURL );
+
+		const assembler = await pageObject.getAssembler();
+		await expect(
+			assembler.getByText( 'Want more patterns?' )
+		).toBeVisible();
+		await expect(
+			assembler.getByText(
+				"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
+			)
+		).toBeVisible();
+	} );
+
+	test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
+
+		await prepareAssembler( pageObject, baseURL );
+
+		const assembler = await pageObject.getAssembler();
+		await expect(
+			assembler.getByText( 'Want more patterns?' )
+		).toBeVisible();
+		await expect(
+			assembler.getByText(
+				'Opt in to usage tracking to get access to more patterns.'
+			)
+		).toBeVisible();
+	} );
+
+	test( 'Should show the "Want more patterns?" banner with the offline message when the user is offline and tracking is not allowed', async ( {
+		context,
+		pageObject,
+		baseURL,
+	} ) => {
+		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
+
+		await prepareAssembler( pageObject, baseURL );
+
+		await context.setOffline( true );
+
+		const assembler = await pageObject.getAssembler();
+		await expect(
+			assembler.getByText( 'Want more patterns?' )
+		).toBeVisible();
+		await expect(
+			assembler.getByText(
+				"Looks like we can't detect your network. Please double-check your internet connection and refresh the page."
+			)
+		).toBeVisible();
+	} );
+
+	test( 'Should not show the "Want more patterns?" banner when tracking is allowed', async ( {
+		baseURL,
+		pageObject,
+	} ) => {
+		await setOption(
+			request,
+			baseURL,
+			'woocommerce_allow_tracking',
+			'yes'
+		);
+
+		await prepareAssembler( pageObject, baseURL );
+
+		const assembler = await pageObject.getAssembler();
+		await expect(
+			assembler.getByText( 'Want more patterns?' )
+		).toBeHidden();
+	} );
+} );

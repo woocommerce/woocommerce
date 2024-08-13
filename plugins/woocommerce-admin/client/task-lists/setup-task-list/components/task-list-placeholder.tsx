@@ -28,7 +28,7 @@ export const TaskListPlaceholder: React.FC< TasksPlaceholderProps > = (
 		>
 			<div className="components-card is-size-large woocommerce-task-card woocommerce-homescreen-card is-loading">
 				<div className="components-card__header is-size-medium">
-					<div className="wooocommerce-task-card__header">
+					<div className="woocommerce-task-card__header">
 						<div className="is-placeholder"> </div>
 					</div>
 				</div>
