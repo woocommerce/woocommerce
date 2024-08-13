@@ -3,7 +3,7 @@
 /**
  * WordPress dependencies
  */
-import { test, Metrics } from '@wordpress/e2e-test-utils-playwright';
+import { test as base, Metrics } from '@wordpress/e2e-test-utils-playwright';
 
 /**
  * Internal dependencies
@@ -16,16 +16,16 @@ const BROWSER_IDLE_WAIT = 1000;
 
 const results = {};
 
-test.describe( 'Editor Performance', () => {
-	test.use( {
-		perfUtils: async ( { page }, use ) => {
-			await use( new PerfUtils( { page } ) );
-		},
-		metrics: async ( { page }, use ) => {
-			await use( new Metrics( { page } ) );
-		},
-	} );
+const test = base.extend( {
+	perfUtils: async ( { page }, use ) => {
+		await use( new PerfUtils( { page } ) );
+	},
+	metrics: async ( { page }, use ) => {
+		await use( new Metrics( { page } ) );
+	},
+} );
 
+test.describe( 'Editor Performance', () => {
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
 		Object.keys( results ).forEach( ( metric ) => {
@@ -42,7 +42,9 @@ test.describe( 'Editor Performance', () => {
 
 		test( 'Setup the test post', async ( { admin, perfUtils } ) => {
 			await admin.createNewPost();
-			await perfUtils.loadBlocksForLargePost();
+			await perfUtils.loadBlocksFromHtml(
+				'post-with-woocommerce-blocks.html'
+			);
 			draftId = await perfUtils.saveDraft();
 		} );
 
@@ -114,7 +116,9 @@ test.describe( 'Editor Performance', () => {
 
 		test( 'Setup the test post', async ( { admin, perfUtils, editor } ) => {
 			await admin.createNewPost();
-			await perfUtils.loadBlocksForLargePost();
+			await perfUtils.loadBlocksFromHtml(
+				'post-with-woocommerce-blocks.html'
+			);
 			await editor.insertBlock( { name: 'core/paragraph' } );
 			draftId = await perfUtils.saveDraft();
 		} );
