@@ -136,8 +136,9 @@ jQuery( function ( $ ) {
 				$( document.body ).trigger( 'update_checkout' );
 			}
 			
-			// Store the old coupon error message before the 
+			// Store the old coupon error message and value before the 
 			// .woocommerce-cart-form is replaced with the new form.
+			var $old_coupon_field_val = $( '#coupon_code' ).val();
 			var $old_coupon_error_msg = $( '#coupon_code' )
 					.closest( '.coupon' )
 					.find( '.coupon-error-notice' );
@@ -151,6 +152,7 @@ jQuery( function ( $ ) {
 				var $new_coupon_field = $( '.woocommerce-cart-form' ).find( '#coupon_code' );
 				var $new_coupon_field_wrapper = $new_coupon_field.closest( '.coupon' );
 				
+				$new_coupon_field.val( $old_coupon_field_val );
 				// The coupon input with error needs to be focused before adding the live region
 				// with the error message, otherwise the screen reader won't read it.
 				$new_coupon_field.focus();
@@ -605,7 +607,6 @@ jQuery( function ( $ ) {
 				},
 				complete: function () {
 					unblock( $form );
-					$text_field.val( '' );
 					cart.update_cart( true );
 				},
 			} );
