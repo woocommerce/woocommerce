@@ -157,7 +157,7 @@ class WC_Admin_Duplicate_Product {
 			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
 		}
 		if ( '' !== $product->get_global_unique_id( 'edit' ) ) {
-			$duplicate->set_global_unique_id( wc_product_generate_unique_global_unique_id( 0, $product->get_global_unique_id( 'edit' ) ) );
+			$duplicate->set_global_unique_id( '' );
 		}
 		$duplicate->set_status( 'draft' );
 		$duplicate->set_date_created( null );
@@ -199,7 +199,7 @@ class WC_Admin_Duplicate_Product {
 					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
 				}
 				if ( '' !== $child->get_global_unique_id( 'edit' ) ) {
-					$child_duplicate->set_global_unique_id( wc_product_generate_unique_global_unique_id( 0, $child->get_global_unique_id( 'edit' ) ) );
+					$child_duplicate->set_global_unique_id( '' );
 				}
 
 				foreach ( $meta_to_exclude as $meta_key ) {

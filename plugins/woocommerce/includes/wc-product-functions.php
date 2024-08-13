@@ -722,25 +722,6 @@ function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
 }
 
 /**
- * Recursively appends a suffix until a product unique ID is found.
- *
- * @since  9.3.0
- * @param  integer $product_id       Product ID.
- * @param  string  $global_unique_id Product unique ID.
- * @param  integer $index            An optional index that can be added to the product unique ID.
- * @return string
- */
-function wc_product_generate_unique_global_unique_id( $product_id, $global_unique_id, $index = 0 ) {
-	$generated_unique_id = 0 < $index ? $global_unique_id . '-' . $index : $global_unique_id;
-
-	if ( ! wc_product_has_global_unique_id( $product_id, $generated_unique_id ) ) {
-		$generated_unique_id = wc_product_generate_unique_global_unique_id( $product_id, $global_unique_id, ( $index + 1 ) );
-	}
-
-	return $generated_unique_id;
-}
-
-/**
  * Get product ID by SKU.
  *
  * @since  2.3.0
