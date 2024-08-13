@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { admin } = require( '../../test-data/data' );
 
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';

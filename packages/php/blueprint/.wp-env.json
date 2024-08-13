@@ -1,0 +1,26 @@
+{
+	"phpVersion": "7.4",
+	"plugins": [
+	  "."
+	],
+	"config": {
+		"JETPACK_AUTOLOAD_DEV": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": true,
+		"ALTERNATE_WP_CRON": true
+	},
+	"mappings": {
+	},
+	"env": {
+		"development": {},
+		"tests": {
+			"port": 8087,
+			"plugins": [
+			  "."
+			],
+			"themes": [],
+			"config": {
+			}
+		}
+	}
+}

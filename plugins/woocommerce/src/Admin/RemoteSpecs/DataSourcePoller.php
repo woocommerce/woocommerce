@@ -106,9 +106,9 @@ abstract class DataSourcePoller {
 	public function get_specs_from_data_sources() {
 		$locale      = get_user_locale();
 		$specs_group = get_transient( $this->args['transient_name'] ) ?? array();
-		$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : array();
+		$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : null;
 
-		if ( ! is_array( $specs ) || empty( $specs ) ) {
+		if ( ! is_array( $specs ) ) {
 			$this->read_specs_from_data_sources();
 			$specs_group = get_transient( $this->args['transient_name'] );
 			$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : array();

@@ -1,5 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { customer, admin } = require( '../../test-data/data' );
+const { admin, customer } = require( '../../test-data/data' );
 
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentHtml = '#wp-mail-logging-modal-format-html';
