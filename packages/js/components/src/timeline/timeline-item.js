@@ -6,9 +6,7 @@ import { format } from '@wordpress/date';
 import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
 
-const TimelineItem = ( props ) => {
-	const { item, className, clockFormat } = props;
-
+const TimelineItem = ( { item = {}, className = '', clockFormat } ) => {
 	const itemClassName = classnames( 'woocommerce-timeline-item', className );
 	const itemTimeString = format( clockFormat, item.date );
 
@@ -72,11 +70,6 @@ TimelineItem.propTypes = {
 		 */
 		clockFormat: PropTypes.string,
 	} ).isRequired,
-};
-
-TimelineItem.defaultProps = {
-	className: '',
-	item: {},
 };
 
 export default TimelineItem;

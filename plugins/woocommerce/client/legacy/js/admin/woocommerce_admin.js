@@ -292,13 +292,46 @@
 							'i18n_sale_less_than_regular_error',
 						] );
 					} else {
-						$(
-							document.body
-						).triggerHandler( 'wc_remove_error_tip', [
-							$( this ),
-							'i18n_sale_less_than_regular_error',
-						] );
+						$( document.body ).triggerHandler(
+							'wc_remove_error_tip',
+							[ $( this ), 'i18n_sale_less_than_regular_error' ]
+						);
 					}
+				}
+			)
+
+			.on(
+				'keyup',
+				'input[type=text][name*=_global_unique_id]',
+				function () {
+					var global_unique_id = $( this ).val();
+
+					if ( /[^0-9\-]/.test( global_unique_id ) ) {
+						$( document.body ).triggerHandler( 'wc_add_error_tip', [
+							$( this ),
+							'i18n_global_unique_id_error',
+						] );
+					} else {
+						$( document.body ).triggerHandler(
+							'wc_remove_error_tip',
+							[ $( this ), 'i18n_global_unique_id_error' ]
+						);
+					}
+				}
+			)
+
+			.on(
+				'change',
+				'input[type=text][name*=_global_unique_id]',
+				function () {
+					var global_unique_id = $( this ).val();
+					$( this ).val(
+						global_unique_id.replace( /[^0-9\-]/g, '' )
+					);
+					$( document.body ).triggerHandler(
+						'wc_remove_error_tip',
+						[ $( this ), 'i18n_global_unique_id_error' ]
+					);
 				}
 			)
 

@@ -24,8 +24,11 @@ const KnowledgeBase = ( {
 	posts,
 	isLoading,
 	error,
-	title,
-	description,
+	title = __( 'WooCommerce knowledge base', 'woocommerce' ),
+	description = __(
+		'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
+		'woocommerce'
+	),
 	category,
 } ) => {
 	const [ page, updatePage ] = useState( 1 );
@@ -225,14 +228,6 @@ KnowledgeBase.propTypes = {
 	 * Category of extensions to display.
 	 */
 	category: PropTypes.string,
-};
-
-KnowledgeBase.defaultProps = {
-	title: __( 'WooCommerce knowledge base', 'woocommerce' ),
-	description: __(
-		'Learn the ins and outs of successful marketing from the experts at WooCommerce.',
-		'woocommerce'
-	),
 };
 
 export { KnowledgeBase };
