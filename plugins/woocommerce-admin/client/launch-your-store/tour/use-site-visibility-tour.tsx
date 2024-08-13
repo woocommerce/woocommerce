@@ -37,7 +37,7 @@ export const useSiteVisibilityTour = () => {
 		await dispatch( 'core' ).saveUser( {
 			id: window?.wcSettings?.currentUserId,
 			meta: {
-				woocommerce_launch_your_store_tour_hidden: 'yes',
+				[ LYS_TOUR_HIDDEN ]: 'yes',
 			},
 		} );
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
