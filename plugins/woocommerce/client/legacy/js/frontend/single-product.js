@@ -250,7 +250,7 @@ jQuery( function( $ ) {
 			this.$target.prepend(
 				'<button class="woocommerce-product-gallery__trigger" aria-haspopup="dialog" aria-label="'+
 				wc_single_product_params.i18n_product_gallery_trigger_text + '">' +
-				'🔍' +
+					'<span aria-hidden="true">🔍</span>' +
 				'</button>'
 			);
 			this.$target.on( 'click', '.woocommerce-product-gallery__trigger', this.openPhotoswipe );

@@ -167,8 +167,8 @@ a.button {
 }
 
 .onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
-	top: 2.2em;
-	right: 2.2em;
+	top: 1em;
+	right: 1em;
 }
 
 .single-product .type-product.sale > .onsale {
@@ -682,12 +682,9 @@ a.reset_variations {
 	}
 }
 
-.woocommerce-product-gallery__trigger {
-	padding: 0;
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	z-index: 99;
+button.woocommerce-product-gallery__trigger {
+	@include woocommerce-product-gallery__trigger;
+	background: var(--global--color-white) !important;
 }
 
 .woocommerce-tabs {
@@ -2244,12 +2241,6 @@ a.reset_variations {
 		.onsale {
 			font-size: 1rem;
 		}
-
-		.onsale + .woocommerce-product-gallery .woocommerce-product-gallery__trigger {
-			top: 1.8em;
-			right: 1.8em;
-		}
-
 	}
 }
 

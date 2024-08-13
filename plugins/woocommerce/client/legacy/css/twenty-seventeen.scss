@@ -12,6 +12,8 @@
 /**
  * Mixins
  */
+@import "mixins";
+
 @mixin link() {
 	box-shadow: 0 1px 0 rgba(15, 15, 15, 1);
 	transition: box-shadow ease-in-out 130ms;
@@ -431,11 +433,7 @@ table.variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	padding: 0;
-	position: absolute;
-	top: 1em;
-	right: 1em;
-	z-index: 99;
+	@include woocommerce-product-gallery__trigger;
 }
 
 .woocommerce-tabs {

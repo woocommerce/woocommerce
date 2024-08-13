@@ -574,10 +574,7 @@ a.reset_variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	z-index: 99;
+	@include woocommerce-product-gallery__trigger;
 }
 
 .woocommerce-tabs {

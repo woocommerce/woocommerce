@@ -425,11 +425,7 @@ table.variations {
 }
 
 .woocommerce-product-gallery__trigger {
-	padding: 0;
-	position: absolute;
-	top: 1rem;
-	right: 1rem;
-	z-index: 99;
+	@include woocommerce-product-gallery__trigger
 }
 
 .woocommerce-tabs {
