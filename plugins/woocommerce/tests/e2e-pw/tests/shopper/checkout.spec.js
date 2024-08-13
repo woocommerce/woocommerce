@@ -174,27 +174,7 @@ test.describe(
 			).toBeEnabled();
 			await expect( page.locator( '#payment_method_cod' ) ).toBeEnabled();
 		} );
-
-		await test.step( 'Complete the checkout form', async () => {
-			await page
-				.getByRole( 'textbox', { name: 'First name' } )
-				.fill( 'Lisa' );
-			await page
-				.getByRole( 'textbox', { name: 'Last name' } )
-				.fill( 'Simpson' );
-			await page
-				.getByRole( 'textbox', { name: 'Street address' } )
-				.fill( '123 Evergreen Terrace' );
-			await page
-				.getByRole( 'textbox', { name: 'Town / City' } )
-				.fill( 'Springfield' );
-			await page.locator( '#billing_state' ).selectOption( 'OR' );
-			await page
-				.getByRole( 'textbox', { name: 'ZIP Code' } )
-				.fill( '97403' );
-			await page.getByLabel( 'Phone' ).fill( '555 555-5555' );
-			await page.getByLabel( 'Email address' ).fill( guestEmail );
-
+		
 		test( 'allows customer to fill billing details', async ( { page } ) => {
 			// this time we're going to add three products to the cart
 			await addProductsToCart( page, simpleProductName, '3' );
