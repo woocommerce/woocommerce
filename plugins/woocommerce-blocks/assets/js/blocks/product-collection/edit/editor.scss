@@ -155,6 +155,7 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	font-family: var(--wp--preset--font-family--system-sans-serif);
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
+	cursor: default;
 
 	&.is-primary:focus:not(:disabled) {
 		outline: none;
