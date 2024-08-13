@@ -47,4 +47,5 @@ jobs:
           remove-stale-when-updated: true
           exempt-all-assignees: false
           enable-statistics: true
+          ascending: true
           operations-per-run: 120
