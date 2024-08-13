@@ -1,5 +1,4 @@
 const { test: base, expect, request } = require( '@playwright/test' );
-const { admin } = require( '../../../test-data/data' );
 const { AssemblerPage } = require( './assembler.page' );
 const { CustomizeStorePage } = require( '../customize-store.page' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
