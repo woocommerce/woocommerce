@@ -2,10 +2,12 @@
  * Internal dependencies
  */
 import { ERROR_CODES } from "../errors/constants";
-import { Data } from "../types";
+import { Data, ObjectSchema, ParsedContext } from "../types";
 import { ValidationError } from "../types";
 
-export function required( object: object, path: string, operand: Data ): ValidationError[] {
+export function required( context: ParsedContext< ObjectSchema, object >, operand: Data ): ValidationError[] {
+    const { parsed, path } = context;
+
     if ( ! Array.isArray( operand ) ) {
         return [];
     }
@@ -15,7 +17,7 @@ export function required( object: object, path: string, operand: Data ): Validat
     if ( operand ) {
         for ( const requiredProperty of operand ) {
             const propertyPath = `${path}/${requiredProperty}`;
-            if ( ! object.hasOwnProperty( requiredProperty ) ) {
+            if ( ! parsed.hasOwnProperty( requiredProperty ) ) {
                 errors.push( {
                     code: ERROR_CODES.MISSING_REQUIRED,
                     keyword: 'required',

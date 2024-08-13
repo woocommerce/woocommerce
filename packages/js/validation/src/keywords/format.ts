@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { Data } from "../types";
+import { Data, ParsedContext, StringSchema } from "../types";
 import { ValidationError } from "../types";
 
 type FormatValidators = {
@@ -22,7 +22,9 @@ const formatValidators: FormatValidators = {
     }
 };
 
-export function format( string: string, path: string, operand: Data ): ValidationError[] {
+export function format( context: ParsedContext< StringSchema, string >, operand: Data ): ValidationError[] {
+    const { path, parsed } = context;
+
     if ( typeof operand !== 'string' || ! formatValidators.hasOwnProperty( operand ) ) {
         const formatOptions = Object.keys( formatValidators ).join(', ');
         return [
@@ -37,7 +39,7 @@ export function format( string: string, path: string, operand: Data ): Validatio
 
     const isValid = formatValidators[ operand ];
 
-    if ( ! isValid( string ) ) {
+    if ( ! isValid( parsed ) ) {
         return [
             {
                 code: 'format',

@@ -39,7 +39,7 @@ import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 import { HeaderProps, Image } from './types';
-import { validator } from '@woocommerce/validation';
+import { ParsedContext, StringSchema, validator, ValidationError } from '@woocommerce/validation';
 
 const PublishButton = lazy( () =>
 	import( './publish-button' ).then( ( module ) => ( {
@@ -94,15 +94,19 @@ export function Header( {
 			method: 'OPTIONS',
 		} ).then( ( results ) => {
 			const myValidator = validator();
-			myValidator.addFilter( ( parsed, path, data ) => {
+			myValidator.addFilter( ( context: ParsedContext< StringSchema, string > ) => {
+				if ( context.schema.type !== 'string' || context.schema.path !== '/name' || context.parsed !== 'bad' ) {
+					return [];
+				}
+				const { path } = context;
 				return [
 					{
-						code: 'MY ERROR CODE',
-						keyword: null,
-						message: 'my custom error message',
+						code: 'MY_ERROR_CODE',
+						keyword: 'custom_string_error',
+						message: 'Name cannot be "bad"',
 						path,
 					}
-				];
+				] as ValidationError[];
 			} );
 			// @ts-ignore
 			const result = myValidator.parse( results.schema, product );

@@ -1,10 +1,12 @@
 /**
  * Internal dependencies
  */
-import { Data } from "../types";
+import { Data, ParsedContext, StringSchema } from "../types";
 import { ValidationError } from "../types";
 
-export function maxLength( string: string, path: string, operand: Data ): ValidationError[] {
+export function maxLength( context: ParsedContext< StringSchema, string >, operand: Data ): ValidationError[] {
+    const { path, parsed } = context;
+
     if ( typeof operand !== 'number' ) {
         return [
             {
@@ -16,7 +18,7 @@ export function maxLength( string: string, path: string, operand: Data ): Valida
          ] as ValidationError[];
     }
 
-    if ( string.length > operand ) {
+    if ( parsed.length > operand ) {
         return [
             {
                 code: 'max_length',

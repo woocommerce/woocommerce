@@ -5,28 +5,30 @@ import { format } from '../../keywords/format';
 import { maxLength } from '../../keywords/max-length';
 import { minLength } from '../../keywords/min-length';
 import { pattern } from '../../keywords/pattern';
-import { Data, StringSchema } from '../../types';
+import { Context, ParsedContext, StringSchema } from '../../types';
 import { validateKeywords } from '../../utils/validate-keywords';
+import { validateFilters } from '../../utils/validate-filters';
 import { parse } from './parse';
 
-export function parseString( schema: StringSchema, string: unknown, path: string, data: Data ) {
-    const { parsed, errors } = parse( string, path );
+export function parseString( context: Context< StringSchema > ) {
+    const { value, path } = context;
+    const { parsed, errors } = parse( value, path );
+    const parsedContext: ParsedContext< StringSchema, string > = { ...context, parsed };
 
-    const keywordErrors = validateKeywords< string, StringSchema >(
+    const keywordErrors = validateKeywords< StringSchema, string >(
         {
             format,
             maxLength,
             minLength,
             pattern,
         },
-        parsed,
-        schema,
-        path,
-        data
+        parsedContext
     );
 
+    const filterErrors = validateFilters( parsedContext );
+
     return {
-        errors: [ ...errors, ...keywordErrors ],
+        errors: [ ...errors, ...keywordErrors, ...filterErrors ],
         parsed
     };
 }

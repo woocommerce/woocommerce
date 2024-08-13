@@ -1,13 +1,15 @@
 /**
  * Internal dependencies
  */
-import { Data, Validator, ValidationError } from '../types';
+import { ValidationError, ParsedContext } from '../types';
 
-export function validateFilters( parsed: any, path: string, data: Data, filters: Validator< any >[] ) {
+export function validateFilters< SchemaType, ParsedType >( context: ParsedContext< SchemaType, ParsedType > ) {
+    const { filters, path, parsed, data } = context;
+
     let filterErrors = [] as ValidationError[];
     
     filters.forEach( ( filter ) => {
-        filterErrors = [ ...filterErrors, ...filter( parsed, path, data ) ];
+        filterErrors = [ ...filterErrors, ...filter( context ) ];
     } );
 
     return filterErrors;

@@ -1,9 +1,11 @@
 /**
  * Internal dependencies
  */
-import { ValidationError } from "../types";
+import { ParsedContext, StringSchema, ValidationError } from "../types";
 
-export function minLength( string: string, path: string, operand: unknown ): ValidationError[] {
+export function minLength( context: ParsedContext< StringSchema, string >, operand: unknown ): ValidationError[] {
+    const { path, parsed } = context;
+
     if ( typeof operand !== 'number' ) {
         return [
             {
@@ -15,7 +17,7 @@ export function minLength( string: string, path: string, operand: unknown ): Val
         ] as ValidationError[];
     }
 
-    if ( string.length < operand ) {
+    if ( parsed.length < operand ) {
         return [
             {
                 code: 'min_length',

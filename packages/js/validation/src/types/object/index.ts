@@ -1,32 +1,29 @@
 /**
  * Internal dependencies
  */
-import { ObjectSchema, Data, ValidationError, Validator } from '../../types';
-import { getInvalidTypeError } from '../../errors/get-invalid-type-error';
+import { ObjectSchema, Data, Context, ParsedContext } from '../../types';
 import { validateKeywords } from '../../utils/validate-keywords';
 import { validateFilters } from '../../utils/validate-filters';
 import { required } from '../../keywords/required';
 import { parse } from './parse';
 
-export function parseObject( schema: ObjectSchema, object: Data, path: string, data: Data, filters: Validator< any >[] ) {
-    // Throw early if we're not dealing with an object.
-    if ( typeof object !== 'object' || object == null ) {
-        throw [ getInvalidTypeError( 'object', path ) ];
-    }
 
-    const { parsed, errors } = parse( object, schema, path, data );
 
-    const keywordErrors = validateKeywords< object, ObjectSchema >(
+export function parseObject( context: Context< ObjectSchema > ) {
+    const { parsed, errors } = parse( context );
+    const parsedContext = {
+        ...context,
+        parsed
+    } as ParsedContext< ObjectSchema, Data >;
+
+    const keywordErrors = validateKeywords< ObjectSchema, object >(
         {
             required,
         },
-        parsed,
-        schema,
-        path,
-        data
+        parsedContext
     );
 
-    const filterErrors = validateFilters( parsed, path, data, filters );
+    const filterErrors = validateFilters( parsedContext );
 
     return {
         parsed,

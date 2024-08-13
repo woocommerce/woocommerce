@@ -6,15 +6,22 @@ import { parseObject } from './types/object';
 
 
 export function validator() {
-    const filters: Validator<any>[] = [];
+    const filters: Validator[] = [];
 
     return {
-        addFilter< DataType >( val: Validator< DataType > ) {
+        addFilter< SchemaType, DataType >( val: Validator ) {
             filters.push( val );
         },
         filters: [],
         parse: ( schema: ObjectSchema, data: Data ) => {
-            return parseObject( schema, data, '', data, filters );
+            const context = {
+                schema,
+                value: data,
+                path:'',
+                data,
+                filters
+            }
+            return parseObject( context );
         },
     }
 };

@@ -1,12 +1,13 @@
 /**
  * Internal dependencies
  */
-import { Data, KeywordInterface } from "../types";
+import { KeywordInterface, ParsedContext } from "../types";
 import { ValidationError, Property } from "../types";
 import { getFullPath } from './get-full-path';
 import { getPropertyByPath } from './get-property-by-path';
 
-export function validateKeywords< DataType, SchemaType extends Property >( keywords: { [ keyword: string ] : KeywordInterface< DataType > }, datum: DataType, schema: SchemaType, path: string, data: Data ) {
+export function validateKeywords< SchemaType extends Property, DataType >( keywords: { [ keyword: string ] : KeywordInterface< SchemaType, DataType > }, context: ParsedContext< SchemaType, DataType > ) {
+    const { schema, path, data } = context;
     let errors = [] as ValidationError[];
 
     for ( const keyword in keywords ) {
@@ -21,7 +22,7 @@ export function validateKeywords< DataType, SchemaType extends Property >( keywo
         }
 
         const keywordCallback = keywords[ keyword ];
-        const keywordErrors = keywordCallback( datum, path, operand );
+        const keywordErrors = keywordCallback( context, operand );
         errors = [ ...errors, ...keywordErrors as ValidationError[] ];
     }
 

@@ -23,6 +23,18 @@ export type StringSchema = Property & {
     format?: string;
 }
 
+export type Context< SchemaType > = {
+    schema: SchemaType,
+    value: unknown,
+    path: string,
+    data: Data,
+    filters: Validator[],
+}
+
+export type ParsedContext< SchemaType, ParsedType > = Context< SchemaType > & {
+    parsed: ParsedType
+}
+
 export type Data = {
     [key: string]: unknown;
 };
@@ -35,8 +47,10 @@ export type ValidationError = {
 }
 
 
-export interface Validator< DataType > {
-    ( datum: DataType, path: string, data: Data ): ValidationError[];
+export interface Validator {
+    ( context: ParsedContext< any, any > ): ValidationError[];
 }
 
-export interface KeywordInterface< DataType > extends Validator< DataType > {};
+export interface KeywordInterface< SchemaType, DataType > {
+    ( context: ParsedContext< SchemaType, DataType >, operand: Data ): ValidationError[];
+};

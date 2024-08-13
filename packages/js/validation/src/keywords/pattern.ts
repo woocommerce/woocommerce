@@ -1,10 +1,12 @@
 /**
  * Internal dependencies
  */
-import { Data } from "../types";
+import { Data, ParsedContext, StringSchema } from "../types";
 import { ValidationError } from "../types";
 
-export function pattern( string: string, path: string, operand: Data ): ValidationError[] {
+export function pattern( context: ParsedContext< StringSchema, string >, operand: Data ): ValidationError[] {
+    const { path, parsed } = context;
+
     if ( typeof operand !== 'string' ) {
         return [
             {
@@ -16,7 +18,7 @@ export function pattern( string: string, path: string, operand: Data ): Validati
          ] as ValidationError[];
     }
 
-    if ( ! string.match( operand ) ) {
+    if ( ! parsed.match( operand ) ) {
         return [
             {
                 code: 'pattern',
