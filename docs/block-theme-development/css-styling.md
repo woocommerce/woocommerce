@@ -5,7 +5,7 @@
 > [!IMPORTANT]
 > We strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be “private”, and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.
 
-WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](../../contributors/coding-guidelines.md). All classes start with one of these two prefixes:
+WooCommerce Blocks follows BEM for class names, as [stated in our coding guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/contributors/coding-guidelines.md). All classes start with one of these two prefixes:
 
 * `.wc-block-`: class names specific to a single block.
 * `.wc-block-components-`: class names specific to a component. The component might be reused by different blocks.
@@ -38,10 +38,10 @@ Those classes are:
 
 Container width | Class name
 ----------------|------------
-\>700px         | `is-large`
+\&gt;700px         | `is-large`
 521px-700px     | `is-medium`
 401px-520px     | `is-small`
-<=400px         | `is-mobile`
+&lt;=400px         | `is-mobile`
 
 As an example, if we wanted to do the Checkout font size 10% larger when the container has a width of 521px or wider, we could do so with this code:
 
@@ -54,9 +54,9 @@ As an example, if we wanted to do the Checkout font size 10% larger when the con
 
 ## WC Blocks _vs._ theme style conflicts for semantic elements
 
-WooCommerce Blocks uses HTML elements according to their semantic meaning, not their default layout. That means that some times blocks might use an anchor link (`<a>`) but display it as a button. Or the other way around, a `<button>` might be displayed as a text link. Similarly, headings might be displayed as regular text.
+WooCommerce Blocks uses HTML elements according to their semantic meaning, not their default layout. That means that some times blocks might use an anchor link (`&lt;a&gt;`) but display it as a button. Or the other way around, a `&lt;button&gt;` might be displayed as a text link. Similarly, headings might be displayed as regular text.
 
-In these cases, Blocks include some CSS resets to undo most default styles introduced by themes. A `<button>` that is displayed as a text link will probably have resets for the background, border, etc. That will solve most conflicts out-of-the-box but in some occasions those CSS resets might not have effect if the theme has a specific CSS selector with higher specificity. When that happens, we really encourage theme developers to decrease their selectors specificity so Blocks styles have preference, if that's not possible, themes can write CSS resets on top.
+In these cases, Blocks include some CSS resets to undo most default styles introduced by themes. A `&lt;button&gt;` that is displayed as a text link will probably have resets for the background, border, etc. That will solve most conflicts out-of-the-box but in some occasions those CSS resets might not have effect if the theme has a specific CSS selector with higher specificity. When that happens, we really encourage theme developers to decrease their selectors specificity so Blocks styles have preference, if that's not possible, themes can write CSS resets on top.
 
 ## Hidden elements
 
@@ -66,15 +66,3 @@ WC Blocks use the [`hidden` HTML attribute](https://developer.mozilla.org/en-US/
 
 WooCommerce Blocks avoids using legacy unprefixed classes as much as possible. However, you might find some of them that have been added for backwards compatibility. We still encourage themes to use the prefixed classes when possible, this avoids conflicts with other plugins, the editor, etc.
 
-## Blocks
-
-* [Filter blocks](filter-blocks.md)
-* [Cart and Checkout](cart-and-checkout.md)
-
-## Other docs
-
-* [Product grid blocks style update in 2.7.0](product-grid-270.md)
-* [Class names update in 2.8.0](class-names-update-280.md)
-* [Class names update in 3.3.0](class-names-update-330.md)
-* [Class names update in 3.4.0](class-names-update-340.md)
-* [Class names update in 4.6.0](class-names-update-460.md)
