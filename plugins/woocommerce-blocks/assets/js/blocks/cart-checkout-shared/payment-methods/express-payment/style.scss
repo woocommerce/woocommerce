@@ -58,7 +58,7 @@ $border-width: 1px;
 			height: $universal-border-radius - $border-width;
 			margin-right: $gap-small;
 			pointer-events: none;
-			width: #{$gap-large - $gap-small - $border-width * 2};
+			flex-grow: 1;
 		}
 
 		&::after {
@@ -143,7 +143,7 @@ $border-width: 1px;
 // For Twenty Twenty we need to increase specificity of the title.
 .theme-twentytwenty {
 	.wc-block-components-express-payment
-	.wc-block-components-express-payment__title {
+		.wc-block-components-express-payment__title {
 		padding-left: $gap-small;
 		padding-right: $gap-small;
 	}
