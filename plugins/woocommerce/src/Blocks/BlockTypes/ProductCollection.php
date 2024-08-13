@@ -193,15 +193,17 @@ class ProductCollection extends AbstractBlock {
 				'data-wc-init',
 				'callbacks.onRender'
 			);
-			$p->set_attribute(
-				'data-wc-context',
-				wp_json_encode(
-					array(
-						'collection' => $collection,
-					),
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				)
-			);
+			if ( $collection ) {
+				$p->set_attribute(
+					'data-wc-context',
+					wp_json_encode(
+						array(
+							'collection' => $collection,
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					)
+				);
+			}
 		}
 
 		return $p->get_updated_html();
@@ -224,7 +226,7 @@ class ProductCollection extends AbstractBlock {
 				'data-wc-navigation-id',
 				'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 			);
-			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ), true );
+			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ), true ) ?? [];
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
@@ -294,7 +296,7 @@ class ProductCollection extends AbstractBlock {
 			}
 			$block_content = $p->get_updated_html();
 
-			$collection    = $block['attrs']['collection'] ?? 'woocommerce/product-collection/product-catalog';
+			$collection    = $block['attrs']['collection'] ?? '';
 			$block_content = $this->add_rendering_callback( $block_content, $collection );
 
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );

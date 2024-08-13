@@ -61,7 +61,7 @@ export const triggerAddedToCartEvent = ( {
 };
 
 export const triggerProductListRenderedEvent = ( payload: {
-	collection: CoreCollectionNames | string;
+	collection?: CoreCollectionNames | string;
 } ) => {
 	dispatchEvent( 'wc-blocks_product_list_rendered', {
 		bubbles: true,
