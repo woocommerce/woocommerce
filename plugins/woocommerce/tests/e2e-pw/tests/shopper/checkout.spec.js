@@ -174,6 +174,7 @@ test.describe(
 			).toBeEnabled();
 			await expect( page.locator( '#payment_method_cod' ) ).toBeEnabled();
 		} );
+
 		test( 'allows customer to fill billing details', async ( { page } ) => {
 			// this time we're going to add three products to the cart
 			await addProductsToCart( page, simpleProductName, '3' );
