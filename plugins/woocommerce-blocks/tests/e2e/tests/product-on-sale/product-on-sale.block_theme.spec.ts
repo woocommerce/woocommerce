@@ -16,10 +16,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.slug } );
-		// Using V3, <ServerSideRender/> renders the frontend markup in the editor
-		const blockLocator = editor.canvas.locator(
-			`[data-block-name="${ blockData.slug }"]`
-		);
+		const blockLocator = await editor.getBlockByName( blockData.slug );
 		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 6 );
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
