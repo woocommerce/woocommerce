@@ -12,6 +12,7 @@ import {
 	Fragment,
 	lazy,
 	Suspense,
+	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
@@ -39,7 +40,7 @@ import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 import { HeaderProps, Image } from './types';
-import { ParsedContext, StringSchema, validator, ValidationError } from '@woocommerce/validation';
+import { ParsedContext, StringSchema, validator, ValidationError, ObjectSchema } from '@woocommerce/validation';
 
 const PublishButton = lazy( () =>
 	import( './publish-button' ).then( ( module ) => ( {
@@ -60,6 +61,7 @@ export function Header( {
 	const isEditorLoading = useContext( EditorLoadingContext );
 
 	const productId = useEntityId( 'postType', productType );
+	const [ schema, setSchema ] = useState( null );
 
 	const { editedRecord: product } = useEntityRecord< Product >(
 		'postType',
@@ -88,31 +90,39 @@ export function Header( {
 
 	const sidebarWidth = useAdminSidebarWidth();
 
+	const myValidator = validator();
+
+	myValidator.addFilter( ( context: ParsedContext< StringSchema, string > ) => {
+		if ( context.schema.type !== 'string' || context.path !== '/name' || context.parsed !== 'bad' ) {
+			return [];
+		}
+		const { path } = context;
+		return [
+			{
+				code: 'MY_ERROR_CODE',
+				keyword: 'custom_string_error',
+				message: 'Name cannot be "bad"',
+				path,
+			}
+		] as ValidationError[];
+	} );
+
 	useEffect( () => {
 		apiFetch( {
 			path: '/wc/v3/products/',
 			method: 'OPTIONS',
 		} ).then( ( results ) => {
-			const myValidator = validator();
-			myValidator.addFilter( ( context: ParsedContext< StringSchema, string > ) => {
-				if ( context.schema.type !== 'string' || context.schema.path !== '/name' || context.parsed !== 'bad' ) {
-					return [];
-				}
-				const { path } = context;
-				return [
-					{
-						code: 'MY_ERROR_CODE',
-						keyword: 'custom_string_error',
-						message: 'Name cannot be "bad"',
-						path,
-					}
-				] as ValidationError[];
-			} );
 			// @ts-ignore
-			const result = myValidator.parse( results.schema, product );
-			console.log(result);
+			setSchema( results.schema );
 		} );
 	}, [] );
+
+	useEffect( () => {
+		if ( schema && product ) {
+			const result = myValidator.parse( schema as ObjectSchema, product );
+			console.log(result);
+		}
+	}, [schema, product] );
 
 	useEffect( () => {
 		document
