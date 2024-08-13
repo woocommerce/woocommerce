@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Hook - woocommerce_before_edit_account_form.
  *
- * @since 9.3.0
+ * @since 2.6.0
  */
 do_action( 'woocommerce_before_edit_account_form' );
 ?>
