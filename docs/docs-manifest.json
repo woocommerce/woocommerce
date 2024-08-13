@@ -1007,7 +1007,7 @@
           "menu_title": "Registering custom collections",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
-          "hash": "88445929a9f76512e1e8ff60be7beff7e912f31fbad552abf18862ed85f00585",
+          "hash": "e3df65c5eec52e4bb797e34c040dbb8f820ea6571e9ce50b1d518e95ca6cb169",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
           "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
         }
@@ -1177,7 +1177,7 @@
           "menu_title": "Core critical flows",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "fe3f8ccf5f2096b28bb86214b71f0e7232a14bee1b4ad01b45b7ebecf5665de0",
+          "hash": "34109195216ebcb5b23e741391b9f355ba861777a5533d4ef1e341472cb5209e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
@@ -1697,5 +1697,5 @@
       "categories": []
     }
   ],
-  "hash": "c24136612fe16fc7dee435a2ad2198ce242ab63dbba483fd0a18efd88dc3a289"
+  "hash": "47dc2a7e213e1e9d83e93a85dafdf8c7b539cc5474b4166eb6398b734d150ff3"
 }
