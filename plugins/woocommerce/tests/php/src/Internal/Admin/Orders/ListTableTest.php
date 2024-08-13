@@ -60,7 +60,7 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 * @testDox Test that current month is returned.
 	 */
 	public function test_get_and_maybe_update_months_filter_cache_always_return_current_with_order() {
-		WC_Helper_Order::create_order();
+		\WC_Helper_Order::create_order();
 		$year_months = $this->call_get_and_maybe_update_months_filter_cache( $this->sut );
 		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
 		$this->assertEquals( $year_months[0]->month, gmdate( 'n', time() ) );
@@ -70,8 +70,8 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 * @testDox Test that backfilled order is recognized.
 	 */
 	public function test_get_and_maybe_update_months_filter_cache_always_backfilled() {
-		$order = WC_Helper_Order::create_order();
-		$order->set_date_created( new WC_DateTime( '1991-01-01 00:00:00' ) );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_date_created( new \WC_DateTime( '1991-01-01 00:00:00' ) );
 		$order->save();
 
 		$year_months = $this->call_get_and_maybe_update_months_filter_cache( $this->sut );
@@ -83,11 +83,11 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 * @testDox Test that reading from cache works as expected.
 	 */
 	public function test_get_and_maybe_update_months_filter_cache_always_return_current_and_backfilled() {
-		$order = WC_Helper_Order::create_order();
-		$order->set_date_created( new WC_DateTime( '1991-01-01 00:00:00' ) );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_date_created( new \WC_DateTime( '1991-01-01 00:00:00' ) );
 		$order->save();
 
-		WC_Helper_Order::create_order();
+		\WC_Helper_Order::create_order();
 
 		$year_months = $this->call_get_and_maybe_update_months_filter_cache( $this->sut );
 		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
