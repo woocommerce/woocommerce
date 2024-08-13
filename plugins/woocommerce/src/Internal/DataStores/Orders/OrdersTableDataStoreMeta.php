@@ -1,6 +1,8 @@
 <?php
 /**
  * OrdersTableDataStoreMeta class file.
+ *
+ * @phpcs:disable Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
  */
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
@@ -135,7 +137,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 		$meta_data           = array_filter( $meta_data );
 		$uncached_object_ids = array_diff( $object_ids, array_keys( $meta_data ) );
 
-		if ( empty( $uncached_order_ids ) ) {
+		if ( empty( $uncached_object_ids ) ) {
 			return $meta_data;
 		}
 
@@ -157,6 +159,9 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 *                if the contents were not deleted.
 	 */
 	public function clear_cached_data( array $object_ids ): array {
+		if ( ! OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			return array_fill_keys( $object_ids, true );
+		}
 		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
 		$return_values = array();
 		foreach ( $object_ids as $object_id ) {
@@ -174,6 +179,9 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 	 * @return bool Whether the cache as fully invalidated.
 	 */
 	public function clear_all_cached_data(): bool {
+		if ( ! OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			return true;
+		}
 		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
 
 		return $cache_engine->delete_cache_group( $this->get_cache_group() );

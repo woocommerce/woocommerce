@@ -173,7 +173,7 @@ class FeaturesController {
 					'disable_ui'         => false,
 					'is_legacy'          => true,
 				),
-				'product_block_editor' => array(
+				'product_block_editor'   => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 					'is_experimental' => true,

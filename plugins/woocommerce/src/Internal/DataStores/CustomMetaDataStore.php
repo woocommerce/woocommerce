@@ -85,7 +85,8 @@ abstract class CustomMetaDataStore {
 			array(
 				$db_info['meta_id_field']   => $meta_id,
 				$db_info['object_id_field'] => $object->get_id(),
-			)
+			),
+			'%d'
 		);
 	}
 

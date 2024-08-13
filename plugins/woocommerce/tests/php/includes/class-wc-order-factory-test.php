@@ -1,7 +1,6 @@
 <?php
 
 use Automattic\WooCommerce\Caches\OrderCache;
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**

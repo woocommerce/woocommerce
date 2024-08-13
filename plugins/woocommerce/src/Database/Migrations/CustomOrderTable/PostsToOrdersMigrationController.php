@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
-use Automattic\WooCommerce\Caching\WPCacheEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -161,7 +160,7 @@ class PostsToOrdersMigrationController {
 	private function maybe_clear_order_datastore_cache_for_ids( array $order_post_ids ) {
 		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
 			$orders_table_datastore = wc_get_container()->get( OrdersTableDataStore::class );
-			if ( is_callable( $orders_table_datastore, 'clear_caches' ) ) {
+			if ( is_callable( array( $orders_table_datastore, 'clear_cached_data' ) ) ) {
 				$orders_table_datastore->clear_cached_data( $order_post_ids );
 			}
 		}

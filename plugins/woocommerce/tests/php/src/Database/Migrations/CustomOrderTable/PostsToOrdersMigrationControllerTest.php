@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Testing\Tools\DynamicDecorator;
-use Automattic\WooCommerce\Testing\Tools\ReplacementObject;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**

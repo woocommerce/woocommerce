@@ -549,18 +549,24 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *           are bypassed for performance purposes. This interface is not guaranteed.
 	 */
 	public function clear_cached_data( array $order_ids ): array {
+		if ( ! OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			return array_fill_keys( $order_ids, true );
+		}
+
 		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
 		$return_values = array();
+
 		foreach ( $order_ids as $order_id ) {
 			$return_values[ $order_id ] = $cache_engine->delete_cached_object( $order_id, $this->get_cache_group() );
 		}
-		if ( is_callable( $this->data_store_meta, 'clear_cached_data' ) ) {
+		if ( is_callable( array( $this->data_store_meta, 'clear_cached_data' ) ) ) {
 			$successfully_deleted_cache_order_ids = array_keys( array_filter( $return_values ) );
 			$cache_deletion_results               = $this->data_store_meta->clear_cached_data( $successfully_deleted_cache_order_ids );
 			foreach ( $cache_deletion_results as $order_id => $meta_cache_was_deleted ) {
 				$return_values[ $order_id ] = $return_values[ $order_id ] && $meta_cache_was_deleted;
 			}
 		}
+
 		return $return_values;
 	}
 
@@ -573,9 +579,15 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether the cache as fully invalidated.
 	 */
 	public function clear_all_cached_data(): bool {
+		if ( ! OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
+			return true;
+		}
+
 		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
 		$orders_invalidated = $cache_engine->delete_cache_group( $this->get_cache_group() );
-		$meta_invalidated   = $this->data_store_meta->clear_all_cached_data();
+		if ( is_callable( array( $this->data_store_meta, 'clear_cached_data' ) ) ) {
+			$meta_invalidated = $this->data_store_meta->clear_all_cached_data();
+		}
 
 		return $orders_invalidated && $meta_invalidated;
 	}
@@ -1975,7 +1987,6 @@ FROM $order_meta_table
 		$this->update_address_index_meta( $order, $changes );
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
-
 		$this->clear_cached_data( array( $order->get_id() ) );
 	}
 
