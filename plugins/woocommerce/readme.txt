@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Clear product unique ID (`global_unique_id`) when duplicating products. [#50629](https://github.com/woocommerce/woocommerce/pull/50629)
 * Fix - Resolved an issue that caused the page title and content text to display in the incorrect order on the Order Confirmation page. [#50592](https://github.com/woocommerce/woocommerce/pull/50592)
 * Fix - Customer Account - Maintain the size of the icon in smaller screens. [#50410](https://github.com/woocommerce/woocommerce/pull/50410)
 * Fix - Accessibility: Prevent shipping losing focus when making selections during checkout. [#48370](https://github.com/woocommerce/woocommerce/pull/48370)
@@ -291,6 +292,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Expose __experimentalRegisterProductCollection in @woocommerce/blocks-registry Package [#48141](https://github.com/woocommerce/woocommerce/pull/48141)
 * Add - Improvements in the handling of feature compatibility for plugins [#48169](https://github.com/woocommerce/woocommerce/pull/48169)
 * Add - Product Collection: Rename "Sync with current query" option to "Use page context" and make it working in non-archive context as well [#49627](https://github.com/woocommerce/woocommerce/pull/49627)
+* Update - Add pattern validation for global_unique_id [#50501](https://github.com/woocommerce/woocommerce/pull/50501)
 * Update - Clear global_unique_id when restoring a product that doesn't have an unique id [#50496](https://github.com/woocommerce/woocommerce/pull/50496)
 * Update - Use admin password reset on admin login screen [#50200](https://github.com/woocommerce/woocommerce/pull/50200)
 * Update - Prevent creation of password-protected coupons. [#50236](https://github.com/woocommerce/woocommerce/pull/50236)
