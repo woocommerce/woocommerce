@@ -182,7 +182,7 @@ test.describe(
 
 			// Check if Gutenberg is installed
 			const apiContext = await request.newContext( {
-			baseURL,
+				baseURL,
 				extraHTTPHeaders: {
 					Authorization: `Basic ${ encodeCredentials(
 						admin.username,
