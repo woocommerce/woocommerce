@@ -35,7 +35,7 @@ jobs:
         uses: actions/stale@v9.0.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          only-labels: 'metric: flaky e2e test'
+          only-issue-labels: 'metric: flaky e2e test'
           days-before-stale: -1
           days-before-close: -1
           days-before-issue-stale: 5
