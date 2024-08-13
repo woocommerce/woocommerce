@@ -80,6 +80,9 @@
 					"name": "create-variable-product",
 					"functions": [ "runAddVariableProductTest" ]
 				}, {
+					"name": "create-product-brands",
+					"functions": [ "runAddProductBrandsTest" ]
+				}, {
 					"name": "order-coupon",
 					"functions": [ "runOrderApplyCouponTest" ]
 				}, {

@@ -11,15 +11,16 @@ const runAddProductBrandsTest = () => {
 
 		it( 'can add sproduct brands', async () => {
 			await page
-				.locator("#menu-posts-product")
-				.getByRole("link", { name: "Products", exact: true })
+				.locator( '#menu-posts-product' )
+				.getByRole( 'link', { name: 'Products', exact: true } )
 				.click();
-			await page.getByRole("link", { name: "Brands", exact: true }).click();
+			await page
+				.getByRole( 'link', { name: 'Brands', exact: true } )
+				.click();
 
 			// Wait for the Brands page to load.
 			// This is needed so that checking for existing brands would work.
-			await page.waitForLoadState("networkidle");
-			
+			await page.waitForLoadState( 'networkidle' );
 		} );
 	} );
 };
