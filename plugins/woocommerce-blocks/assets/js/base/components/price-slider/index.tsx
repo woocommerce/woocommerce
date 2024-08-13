@@ -251,6 +251,43 @@ const PriceSlider = ( {
 	);
 
 	/**
+	 * Handles price change logic and calls onChange if necessary.
+	 */
+	const handlePriceChange = useDebouncedCallback(
+		(
+			minInsertedPrice: number,
+			maxInsertedPrice: number,
+			isMin: boolean
+		) => {
+			// When the user inserts in the max price input a value less or equal than the current minimum price,
+			// we set to 0 the minimum price.
+			if ( minInsertedPrice >= maxInsertedPrice ) {
+				const values = constrainRangeSliderValues(
+					[ 0, maxInsertedPrice ],
+					null,
+					null,
+					stepValue,
+					isMin
+				);
+				return onChange( [
+					parseInt( values[ 0 ], 10 ),
+					parseInt( values[ 1 ], 10 ),
+				] );
+			}
+
+			const values = constrainRangeSliderValues(
+				[ minInsertedPrice, maxInsertedPrice ],
+				null,
+				null,
+				stepValue,
+				isMin
+			);
+			onChange( values );
+		},
+		400
+	);
+
+	/**
 	 * Called when a price input loses focus - commit changes to slider.
 	 */
 	const priceInputOnBlur = useCallback(
@@ -270,32 +307,13 @@ const PriceSlider = ( {
 				'wc-block-price-filter__amount--min'
 			);
 
-			// When the user inserts in the max price input a value less or equal than the current minimum price,
-			// we set to 0 the minimum price.
-			if ( minPriceInput >= maxPriceInput ) {
-				const values = constrainRangeSliderValues(
-					[ 0, maxPriceInput ],
-					null,
-					null,
-					stepValue,
-					isMin
-				);
-				return onChange( [
-					parseInt( values[ 0 ], 10 ),
-					parseInt( values[ 1 ], 10 ),
-				] );
-			}
-
-			const values = constrainRangeSliderValues(
-				[ minPriceInput, maxPriceInput ],
-				null,
-				null,
-				stepValue,
+			handlePriceChange(
+				minPriceInput as number,
+				maxPriceInput as number,
 				isMin
 			);
-			onChange( values );
 		},
-		[ onChange, stepValue, minPriceInput, maxPriceInput ]
+		[ onChange, stepValue, minPriceInput, maxPriceInput, handlePriceChange ]
 	);
 
 	const debouncedUpdateQuery = useDebouncedCallback( onSubmit, 600 );
@@ -432,6 +450,11 @@ const PriceSlider = ( {
 									return;
 								}
 								setMinPriceInput( value );
+								handlePriceChange(
+									value,
+									maxPriceInput as number,
+									true
+								);
 							} }
 							value={ minPriceInput }
 						/>
@@ -456,6 +479,13 @@ const PriceSlider = ( {
 									return;
 								}
 								setMaxPriceInput( value );
+								// handlePriceChange( false );
+								handlePriceChange(
+									minPriceInput as number,
+									value,
+									true
+								);
+								// onChange( [ minPriceInput as number, value ] );
 							} }
 							value={ maxPriceInput }
 						/>
