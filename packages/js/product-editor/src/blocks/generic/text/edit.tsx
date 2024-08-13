@@ -137,7 +137,7 @@ export function Edit( {
 				};
 			}
 		},
-		[ type, required, pattern, minLength, maxLength, min, max ]
+		[ type, required, pattern, minLength, maxLength, min, max, value ]
 	);
 
 	function getSuffix() {

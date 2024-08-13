@@ -3059,8 +3059,8 @@ importers:
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
       '@wordpress/env':
-        specifier: ^9.7.0
-        version: 9.7.0
+        specifier: ^10.1.0
+        version: 10.5.0
       '@wordpress/prettier-config':
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
@@ -3162,8 +3162,8 @@ importers:
         specifier: wp-6.6
         version: 1.0.1(@playwright/test@1.45.1)(encoding@0.1.13)(typescript@5.3.3)
       '@wordpress/env':
-        specifier: ^9.7.0
-        version: 9.7.0
+        specifier: ^10.1.0
+        version: 10.5.0
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.36.0(postcss@8.4.32)(stylelint@14.16.1)
@@ -3858,6 +3858,9 @@ importers:
       '@woocommerce/product-editor':
         specifier: workspace:*
         version: link:../../packages/js/product-editor
+      '@woocommerce/remote-logging':
+        specifier: workspace:*
+        version: link:../../packages/js/remote-logging
       '@wordpress/api-fetch':
         specifier: wp-6.0
         version: 6.3.1
@@ -3917,8 +3920,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
       '@wordpress/env':
-        specifier: ^9.7.0
-        version: 9.7.0
+        specifier: ^10.1.0
+        version: 10.5.0
       '@wordpress/prettier-config':
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
@@ -4303,8 +4306,8 @@ importers:
         specifier: 5.22.0
         version: 5.22.0
       '@wordpress/env':
-        specifier: ^9.7.0
-        version: 9.7.0
+        specifier: ^10.1.0
+        version: 10.5.0
       '@wordpress/html-entities':
         specifier: 3.24.0
         version: 3.24.0
@@ -4674,8 +4677,8 @@ importers:
   tools/compare-perf:
     dependencies:
       '@wordpress/env':
-        specifier: ^9.7.0
-        version: 9.7.0
+        specifier: ^10.1.0
+        version: 10.5.0
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -11201,8 +11204,9 @@ packages:
     resolution: {integrity: sha512-/d/lWBDYYgzE2yeXYvPnjMSDG1EdQs5TSLdjM/drQVJMxWayFqAPaF/pVczLHCPYfjgyJN4Zc+bneAKj6dEiLw==}
     engines: {node: '>=12'}
 
-  '@wordpress/env@9.7.0':
-    resolution: {integrity: sha512-99VaR3VEZlBsaX30Hx3wKyAWOrtZW/FPZsK5urY4UZbP7kRSlwvIQZdxEs7S17gYOrA72tDg7O4uXsX+IRyQDQ==}
+  '@wordpress/env@10.5.0':
+    resolution: {integrity: sha512-Hx+fi6qTEAuycznulkuMi4d5RDPZ6lPPAxaylpCwXNX2hgx5jrrpgnY4Zn0chBgZMpShO7BbA+zNDq2E6evvTw==}
+    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
     hasBin: true
 
   '@wordpress/escape-html@1.12.2':
@@ -21800,7 +21804,7 @@ packages:
   react-with-direction@1.4.0:
     resolution: {integrity: sha512-ybHNPiAmaJpoWwugwqry9Hd1Irl2hnNXlo/2SXQBwbLn/jGMauMS2y9jw+ydyX5V9ICryCqObNSthNt5R94xpg==}
     peerDependencies:
-      react: ^0.14 || ^15 || ^16
+      react: ^17.0.2
       react-dom: ^0.14 || ^15 || ^16
 
   react-with-styles-interface-css@4.0.3:
@@ -22310,10 +22314,12 @@ packages:
 
   rimraf@2.7.1:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@5.0.5:
@@ -25350,7 +25356,7 @@ snapshots:
       cookie: 0.4.2
       debug: 4.3.5
       hash.js: 1.1.7
-      tslib: 2.6.2
+      tslib: 2.6.3
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -25430,11 +25436,11 @@ snapshots:
 
   '@automattic/format-currency@1.0.1':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@automattic/format-currency@2.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@automattic/i18n-utils@1.2.1':
     dependencies:
@@ -25444,7 +25450,7 @@ snapshots:
       '@wordpress/compose': 6.34.0(react@18.3.1)
       '@wordpress/i18n': 4.57.0
       react: 18.3.1
-      tslib: 2.6.2
+      tslib: 2.6.3
     transitivePeerDependencies:
       - supports-color
 
@@ -29417,7 +29423,7 @@ snapshots:
   '@dnd-kit/accessibility@3.1.0(react@18.3.1)':
     dependencies:
       react: 18.3.1
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@dnd-kit/core@6.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -30876,7 +30882,7 @@ snapshots:
       '@motionone/types': 10.16.3
       '@motionone/utils': 10.16.3
       hey-listen: 1.0.8
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@motionone/easing@10.16.3':
     dependencies:
@@ -31106,7 +31112,7 @@ snapshots:
       chalk: 4.1.2
       strip-ansi: 6.0.1
       supports-color: 8.1.1
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@oclif/core@1.26.2':
     dependencies:
@@ -35584,7 +35590,7 @@ snapshots:
       flat-cache: 3.2.0
       micromatch: 4.0.5
       react-docgen-typescript: 2.2.2(typescript@5.3.2)
-      tslib: 2.6.2
+      tslib: 2.6.3
       typescript: 5.3.2
       webpack: 5.91.0(@swc/core@1.3.100)(esbuild@0.18.20)(webpack-cli@5.1.4)
     transitivePeerDependencies:
@@ -35598,7 +35604,7 @@ snapshots:
       flat-cache: 3.2.0
       micromatch: 4.0.5
       react-docgen-typescript: 2.2.2(typescript@5.3.3)
-      tslib: 2.6.2
+      tslib: 2.6.3
       typescript: 5.3.3
       webpack: 5.91.0(webpack-cli@3.3.12(webpack@5.89.0))
     transitivePeerDependencies:
@@ -35612,7 +35618,7 @@ snapshots:
       flat-cache: 3.2.0
       micromatch: 4.0.5
       react-docgen-typescript: 2.2.2(typescript@5.3.3)
-      tslib: 2.6.2
+      tslib: 2.6.3
       typescript: 5.3.3
       webpack: 5.91.0
     transitivePeerDependencies:
@@ -37520,7 +37526,7 @@ snapshots:
       '@typescript-eslint/scope-manager': 5.62.0
       '@typescript-eslint/types': 5.62.0
       '@typescript-eslint/typescript-estree': 5.62.0(typescript@5.3.2)
-      debug: 4.3.4(supports-color@9.4.0)
+      debug: 4.3.5
       eslint: 8.55.0
     optionalDependencies:
       typescript: 5.3.2
@@ -40898,7 +40904,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@wordpress/env@9.7.0':
+  '@wordpress/env@10.5.0':
     dependencies:
       chalk: 4.1.2
       copy-dir: 1.3.0
@@ -43194,7 +43200,7 @@ snapshots:
 
   ast-types@0.14.2:
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   ast-types@0.15.2:
     dependencies:
@@ -44713,7 +44719,7 @@ snapshots:
   camel-case@4.1.2:
     dependencies:
       pascal-case: 3.1.2
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   camelcase-css@2.0.1: {}
 
@@ -44756,7 +44762,7 @@ snapshots:
   capital-case@1.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
       upper-case-first: 2.0.2
 
   capture-exit@2.0.0:
@@ -45427,7 +45433,7 @@ snapshots:
   constant-case@3.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
       upper-case: 2.0.2
 
   constants-browserify@1.0.0: {}
@@ -46512,7 +46518,7 @@ snapshots:
 
   docker-compose@0.24.7:
     dependencies:
-      yaml: 2.3.4
+      yaml: 2.4.3
 
   doctrine@2.1.0:
     dependencies:
@@ -46612,7 +46618,7 @@ snapshots:
   dot-case@3.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   dot-prop@4.2.1:
     dependencies:
@@ -48765,7 +48771,7 @@ snapshots:
       react: 17.0.2
       react-dom: 18.3.1(react@17.0.2)
       style-value-types: 5.0.0
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@emotion/is-prop-valid': 0.8.8
 
@@ -48778,13 +48784,13 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       style-value-types: 5.0.0
-      tslib: 2.6.2
+      tslib: 2.6.3
     optionalDependencies:
       '@emotion/is-prop-valid': 0.8.8
 
   framesync@6.0.1:
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   fresh@0.5.2: {}
 
@@ -49314,7 +49320,7 @@ snapshots:
   graphql-tag@2.12.6(graphql@16.8.1):
     dependencies:
       graphql: 16.8.1
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   graphql@16.8.1: {}
 
@@ -49648,7 +49654,7 @@ snapshots:
   header-case@2.0.4:
     dependencies:
       capital-case: 1.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   hermes-estree@0.15.0: {}
 
@@ -54728,7 +54734,7 @@ snapshots:
   no-case@3.0.4:
     dependencies:
       lower-case: 2.0.2
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   nocache@3.0.4: {}
 
@@ -55545,7 +55551,7 @@ snapshots:
   param-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   parent-module@1.0.1:
     dependencies:
@@ -55638,7 +55644,7 @@ snapshots:
   pascal-case@3.1.2:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   pascalcase@0.1.1: {}
 
@@ -55658,7 +55664,7 @@ snapshots:
   path-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   path-dirname@1.0.2: {}
 
@@ -55832,7 +55838,7 @@ snapshots:
       framesync: 6.0.1
       hey-listen: 1.0.8
       style-value-types: 5.0.0
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   portfinder@1.0.32:
     dependencies:
@@ -58192,7 +58198,7 @@ snapshots:
       ast-types: 0.14.2
       esprima: 4.0.1
       source-map: 0.6.1
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   recast@0.21.5:
     dependencies:
@@ -58207,7 +58213,7 @@ snapshots:
       ast-types: 0.16.1
       esprima: 4.0.1
       source-map: 0.6.1
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   rechoir@0.6.2:
     dependencies:
@@ -58922,7 +58928,7 @@ snapshots:
   sentence-case@3.0.4:
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
       upper-case-first: 2.0.2
 
   serialize-error@2.1.0: {}
@@ -59150,7 +59156,7 @@ snapshots:
   snake-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   snapdragon-node@2.1.1:
     dependencies:
@@ -59691,7 +59697,7 @@ snapshots:
   style-value-types@5.0.0:
     dependencies:
       hey-listen: 1.0.8
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   stylehacks@4.0.3:
     dependencies:
@@ -62929,7 +62935,7 @@ snapshots:
   yargs@17.7.2:
     dependencies:
       cliui: 8.0.1
-      escalade: 3.1.1
+      escalade: 3.1.2
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3
