@@ -119,22 +119,26 @@ jQuery( function( $ ) {
 			}
 		} );
 	} );
-
-	$( document ).ready( function() {
-		var noticeClasses = [ 'woocommerce-message', 'woocommerce-error', 'wc-block-components-notice-banner' ];
-
-		var $notice = $( noticeClasses.map( function( className ) {
-			return '.' + className + '[role="alert"]';
-		} ).join( ', ' ) );
-
-		if ( $notice.length > 0 ) {
-			$notice
-				.first()
-				.attr( 'tabindex', '-1' )
-				.delay( 500 ) // Wait for the element to get the tabindex attribute so it can be focused.
-				.queue( function() {
-					$( this ).focus().dequeue();
-				} );
-		}
-	} );
 });
+
+document.addEventListener( 'DOMContentLoaded' , function() {
+	var noticeClasses = [ 'woocommerce-message', 'woocommerce-error', 'wc-block-components-notice-banner' ];
+	var noticeSelectors = noticeClasses.map( function( className ) {
+		return '.' + className + '[role="alert"]';
+	} ).join( ', ' );
+	var noticeElements = document.querySelectorAll( noticeSelectors );
+
+	if ( noticeElements.length === 0 ) {
+		return;
+	}
+
+	var firstNotice = noticeElements[0];
+
+	firstNotice.setAttribute( 'tabindex', '-1' );
+
+	// Wait for the element to get the tabindex attribute so it can be focused.
+	var delayFocusNoticeId = setTimeout( function() {
+		firstNotice.focus();
+		clearTimeout( delayFocusNoticeId );
+	}, 500 );
+} );
