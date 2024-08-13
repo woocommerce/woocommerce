@@ -1982,7 +1982,7 @@ p.demo_store,
 			outline: 0;
 
 			&.has-error:focus {
-				border-color: $red;
+				border-color: var(--wc-red);
 			}
 		}
 
