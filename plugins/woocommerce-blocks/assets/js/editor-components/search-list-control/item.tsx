@@ -69,7 +69,7 @@ export const SearchListItem = < T extends object = object >( {
 			'has-breadcrumbs': hasBreadcrumbs,
 			'has-children': hasChildren,
 			'has-count': showCount,
-			'is-expanded': ! isExpanded,
+			'is-expanded': isExpanded,
 			'is-radio-button': isSingle,
 		}
 	);
