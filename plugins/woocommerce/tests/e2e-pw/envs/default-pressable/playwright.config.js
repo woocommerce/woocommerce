@@ -8,7 +8,6 @@ config = {
 			name: 'default pressable',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			grepInvert: /@local/,
-			testIgnore: '**/api-tests/**',
 		},
 	],
 };
