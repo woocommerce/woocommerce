@@ -424,14 +424,16 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 6, $product->get_stock_quantity() );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params( array(
-			'line_items' => array(
-				array(
-					'id'       => $item->get_id(),
-					'quantity' => 5
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => 5,
+					),
 				),
-			),
-		) );
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
@@ -459,14 +461,16 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 6, $product->get_stock_quantity() );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params( array(
-			'line_items' => array(
-				array(
-					'id'       => $item->get_id(),
-					'quantity' => 0
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => 0,
+					),
 				),
-			),
-		) );
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 
