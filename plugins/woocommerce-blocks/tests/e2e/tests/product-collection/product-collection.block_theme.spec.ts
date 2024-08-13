@@ -1744,7 +1744,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollectionWithPreview'
 			);
-			const previewButtonLocator = editor.page.getByTestId(
+			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
 
