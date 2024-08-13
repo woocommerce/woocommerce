@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e481b35f50815040071d81943b40b880",
+    "content-hash": "c8da5eb72ceb5795cf2b72530d57db77",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -553,6 +553,62 @@
                 "source": "https://github.com/Automattic/jetpack-status/tree/v3.3.2"
             },
             "time": "2024-06-24T19:22:37+00:00"
+        },
+        {
+            "name": "automattic/woocommerce-analytics",
+            "version": "v0.1.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/woocommerce-analytics.git",
+                "reference": "5dc036e56072e59062d0db8a5d4e2e7e5591cf2f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/woocommerce-analytics/zipball/5dc036e56072e59062d0db8a5d4e2e7e5591cf2f",
+                "reference": "5dc036e56072e59062d0db8a5d4e2e7e5591cf2f",
+                "shasum": ""
+            },
+            "require": {
+                "automattic/jetpack-connection": "^2.10.2",
+                "automattic/jetpack-constants": "^2.0.3",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "automattic/jetpack-changelogger": "^4.2.4",
+                "yoast/phpunit-polyfills": "1.1.0"
+            },
+            "suggest": {
+                "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+            },
+            "type": "jetpack-library",
+            "extra": {
+                "mirror-repo": "Automattic/woocommerce-analytics",
+                "changelogger": {
+                    "link-template": "https://github.com/Automattic/woocommerce-analytics/compare/v${old}...v${new}"
+                },
+                "autotagger": true,
+                "branch-alias": {
+                    "dev-trunk": "0.1.x-dev"
+                },
+                "textdomain": "woocommerce-analytics",
+                "version-constants": {
+                    "::PACKAGE_VERSION": "src/class-woocommerce-analytics.php"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Enhanced analytics for WooCommerce users.",
+            "support": {
+                "source": "https://github.com/Automattic/woocommerce-analytics/tree/v0.1.7"
+            },
+            "time": "2024-06-26T12:07:04+00:00"
         },
         {
             "name": "composer/installers",
@@ -4932,7 +4988,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-tweak/bump-jetpack-connection",
+            "version": "dev-feature/migration-woocommerce-analytics",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
@@ -5091,5 +5147,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

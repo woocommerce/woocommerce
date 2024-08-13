@@ -31,6 +31,7 @@
 		"automattic/jetpack-config": "1.15.2",
 		"automattic/jetpack-connection": "^2.10.1",
 		"automattic/jetpack-constants": "^2.0.3",
+		"automattic/woocommerce-analytics": "*",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
