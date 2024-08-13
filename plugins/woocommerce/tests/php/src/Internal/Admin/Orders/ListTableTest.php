@@ -44,9 +44,20 @@ class ListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test that current month is returned.
+	 * @testDox Test that current month is returned even there's no order.
 	 */
 	public function test_get_and_maybe_update_months_filter_cache_always_return_current() {
+		$year_months = $this->call_get_and_maybe_update_months_filter_cache( $this->sut );
+		$this->assertEmpty( $year_months );
+		$year_months = $this->call_get_and_maybe_update_months_filter_cache( $this->sut ); // when loaded from cache, we always return current year month.
+		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
+		$this->assertEquals( $year_months[0]->month, gmdate( 'n', time() ) );
+	}
+
+	/**
+	 * @testDox Test that current month is returned.
+	 */
+	public function test_get_and_maybe_update_months_filter_cache_always_return_current_with_order() {
 		WC_Helper_Order::create_order();
 		$year_months = $this->call_get_and_maybe_update_months_filter_cache( $this->sut );
 		$this->assertEquals( $year_months[0]->year, gmdate( 'Y', time() ) );
