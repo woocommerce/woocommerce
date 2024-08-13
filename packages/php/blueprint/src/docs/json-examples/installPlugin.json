@@ -1,0 +1,10 @@
+{
+  "step": "installPlugin",
+  "pluginZipFile": {
+	"resource": "wordpress.org/plugins",
+	"slug": "akismet"
+  },
+  "options": {
+	"activate": true
+  }
+}
