@@ -341,6 +341,10 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'property' => 'global_unique_id',
 					'label'    => __( 'GTIN, UPC, EAN or ISBN', 'woocommerce' ),
 					'tooltip'  => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+					'pattern'  => array(
+						'value'   => '[0-9\-]*',
+						'message' => __( 'Please enter only numbers and hyphens (-).', 'woocommerce' ),
+					),
 				),
 			)
 		);

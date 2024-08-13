@@ -13,6 +13,18 @@ const productData = {
 	summary: 'This is a product summary',
 	productPrice: '100',
 	salePrice: '90',
+	customFields: [
+		{ name: `custom-field_${ Date.now() }`, value: 'custom_1' },
+	],
+	sku: `sku_${ Date.now() }`,
+	gtin: `${ Date.now() }`,
+	shipping: {
+		shippingClassName: `shipping-class_${ Date.now() }`,
+		weight: '2',
+		length: '20',
+		width: '10',
+		height: '30',
+	},
 };
 
 test.describe.configure( { mode: 'serial' } );
