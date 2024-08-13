@@ -15,7 +15,6 @@ const {
 	CI,
 	DEFAULT_TIMEOUT_OVERRIDE,
 	E2E_MAX_FAILURES,
-	PLAYWRIGHT_HTML_REPORT,
 	REPEAT_EACH,
 } = process.env;
 
@@ -54,9 +53,7 @@ if ( process.env.CI ) {
 	reporter.push( [
 		'html',
 		{
-			outputFolder:
-				PLAYWRIGHT_HTML_REPORT ??
-				`${ testsResultsPath }/playwright-report`,
+			outputFolder: `${ testsRootPath }/playwright-report`,
 			open: 'on-failure',
 		},
 	] );

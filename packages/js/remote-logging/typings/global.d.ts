@@ -1,8 +1,8 @@
 declare global {
 	interface Window {
-		wcTracks: {
-			isEnabled: boolean;
-		};
+		wcSettings?: {
+			isRemoteLoggingEnabled: boolean;
+		}
 	}
 }
 

@@ -63,3 +63,4 @@ require 'live-branches/manifest.php';
 require 'live-branches/install.php';
 require 'remote-spec-validator/class-wca-test-helper-remote-spec-validator.php';
 require 'remote-inbox-notifications/class-wca-test-helper-remote-inbox-notifications.php';
+require 'remote-logging/remote-logging.php';
