@@ -31,9 +31,10 @@ jobs:
           only-issue-labels: 'needs: author feedback'
           close-issue-label: "status: can't reproduce"
           ascending: true
-      - name: Close Stale Flaky Test Issues
+      - name: Process Stale Flaky Test Issues
         uses: actions/stale@v9.0.0
         with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           only-labels: 'metric: flaky e2e test'
           days-before-stale: -1
           days-before-close: -1
@@ -46,3 +47,4 @@ jobs:
           remove-stale-when-updated: true
           exempt-all-assignees: false
           enable-statistics: true
+          operations-per-run: 120
