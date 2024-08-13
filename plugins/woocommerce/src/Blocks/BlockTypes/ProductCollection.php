@@ -46,12 +46,16 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
+
 	/**
-	 * Whether the render of the block should be prevented.
+	 * The render state of the product collection block.
 	 *
-	 * @var bool
+	 * @var array
 	 */
-	private $prevent_render = null;
+	private $render_state = array(
+		'has_results'          => false,
+		'has_no_results_block' => false,
+	);
 
 	/**
 	 * Initialize this block type.
@@ -90,10 +94,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter(
 			'render_block_woocommerce/product-template',
 			function ( $html ) {
-				if ( null === $this->prevent_render ) {
-					$this->prevent_render = '' === $html;
-				}
-
+				$this->render_state['has_results'] = ! empty( $html );
 				return $html;
 			},
 			100,
@@ -104,8 +105,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter(
 			'render_block_woocommerce/product-collection-no-results',
 			function ( $html ) {
-				$this->prevent_render = false;
-
+				$this->render_state['has_no_results_block'] = ! empty( $html );
 				return $html;
 			},
 			100,
@@ -131,17 +131,36 @@ class ProductCollection extends AbstractBlock {
 	 * @return string
 	 */
 	public function handle_product_collection_rendering( $block_content, $block ) {
-		if ( true === $this->prevent_render ) {
-			$block_content = '';
-		} else {
-			$block_content = $this->enhance_product_collection_with_interactivity( $block_content, $block );
+		if ( $this->should_prevent_render() ) {
+			return ''; // Prevent rendering.
 		}
 
-		// Reset the prevent_render flag.
-		$this->prevent_render = null;
+		// Reset the render state for the next render.
+		$this->reset_render_state();
 
 		return $block_content;
 	}
+
+	/**
+	 * Check if the block should be prevented from rendering.
+	 *
+	 * @return bool
+	 */
+	private function should_prevent_render() {
+		return ! $this->render_state['has_results'] && ! $this->render_state['has_no_results_block'];
+	}
+
+	/**
+	 * Reset the render state.
+	 */
+	private function reset_render_state() {
+		$this->render_state = array(
+			'has_results'          => false,
+			'has_no_results_block' => false,
+		);
+	}
+
+
 
 	/**
 	 * Provides the location context to each inner block of the product collection block.
