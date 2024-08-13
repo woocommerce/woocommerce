@@ -1010,6 +1010,15 @@
           "hash": "e3df65c5eec52e4bb797e34c040dbb8f820ea6571e9ce50b1d518e95ca6cb169",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
           "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
+        },
+        {
+          "post_title": "DOM Events sent from product collection block",
+          "menu_title": "DOM Events",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/dom-events.md",
+          "hash": "78bce4ab5b5e902232b5ff73fd7a7c197e4f4417a490ccb45c9a27400d003787",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/dom-events.md",
+          "id": "c8d247b91472740075871e6b57a9583d893ac650"
         }
       ],
       "categories": []
