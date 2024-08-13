@@ -40,14 +40,24 @@ class Status extends AbstractOrderConfirmationBlock {
 			return '';
 		}
 
-		$additional_content = $this->render_account_notice( $order ) . $this->render_confirmation_notice( $order );
+		$account_notice = $this->render_account_notice( $order );
+
+		if ( $account_notice ) {
+			$block = sprintf(
+				'<div class="wc-block-order-confirmation-status-notices %1$s">%2$s</div>',
+				esc_attr( trim( $classname ) ),
+				$account_notice
+			) . $block;
+		}
+
+		$additional_content = $this->render_confirmation_notice( $order );
 
 		if ( $additional_content ) {
-			return sprintf(
+			$block = $block . sprintf(
 				'<div class="wc-block-order-confirmation-status-description %1$s">%2$s</div>',
 				esc_attr( trim( $classname ) ),
 				$additional_content
-			) . $block;
+			);
 		}
 
 		return $block;
