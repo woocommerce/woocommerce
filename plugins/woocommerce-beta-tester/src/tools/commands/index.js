@@ -16,6 +16,11 @@ import {
 	UPDATE_COMING_SOON_MODE_ACTION_NAME,
 } from './set-coming-soon-mode';
 
+import {
+	FORCE_WCCOM_ENDPOINT_ERRORS,
+	SetWccomErrros,
+} from './set-wccom-errors';
+
 export default [
 	{
 		command: 'Trigger WCA Install',
@@ -86,5 +91,10 @@ export default [
 		command: 'Force coming soon page to show',
 		description: <SetComingSoonMode />,
 		action: UPDATE_COMING_SOON_MODE_ACTION_NAME,
+	},
+	{
+		command: 'Force timeout errors on woocommerce.com requests',
+		description: <SetWccomErrros />,
+		action: FORCE_WCCOM_ENDPOINT_ERRORS,
 	},
 ];
