@@ -31,7 +31,7 @@ $border-width: 1px;
 		list-style: none;
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		grid-gap: 10px;
+		grid-gap: 14px;
 
 		@include breakpoint("<782px") {
 			grid-template-columns: 1fr;
