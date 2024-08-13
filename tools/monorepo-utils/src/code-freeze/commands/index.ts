@@ -12,7 +12,6 @@ import { branchCommand } from './branch';
 import { versionBumpCommand } from './version-bump';
 import { changelogCommand } from './changelog';
 import { acceleratedPrepCommand } from './accelerated-prep';
-import { labelsCommand } from './labels';
 
 const program = new Command( 'code-freeze' )
 	.description( 'Code freeze utilities' )
@@ -21,7 +20,6 @@ const program = new Command( 'code-freeze' )
 	.addCommand( branchCommand )
 	.addCommand( versionBumpCommand )
 	.addCommand( changelogCommand )
-	.addCommand( acceleratedPrepCommand )
-	.addCommand( labelsCommand );
+	.addCommand( acceleratedPrepCommand );
 
 export default program;
