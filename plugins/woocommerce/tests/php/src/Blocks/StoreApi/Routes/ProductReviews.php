@@ -2,6 +2,9 @@
 /**
  * Controller Tests.
  */
+
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
@@ -107,12 +110,12 @@ class ProductReviews extends ControllerTestCase {
 	 * Test getting reviews from a specific category.
 	 */
 	public function test_get_items_with_category_id_param() {
-		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
+		$request            = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
 		$product_categories = wp_get_post_terms(
 			$this->products[1]->get_id(),
 			'product_cat',
 			array(
-				'fields' => 'ids'
+				'fields' => 'ids',
 			)
 		);
 		$request->set_param( 'category_id', (string) $product_categories[0] );
