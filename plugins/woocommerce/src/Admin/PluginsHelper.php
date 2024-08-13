@@ -14,6 +14,7 @@ use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 use Plugin_Upgrader;
 use WC_Helper;
 use WC_Helper_Updater;
@@ -80,7 +81,7 @@ class PluginsHelper {
 	 *
 	 * @param string $slug Plugin slug to get path for.
 	 *
-	 * @return string|false
+	 * @return string|false The plugin path or false if the plugin is not installed.
 	 */
 	public static function get_plugin_path_from_slug( $slug ) {
 		$plugins = get_plugins();
@@ -137,16 +138,25 @@ class PluginsHelper {
 	/**
 	 * Get an array of active plugin slugs.
 	 *
-	 * @return array
+	 * The list will include both network active and site active plugins.
+	 *
+	 * @return array The list of active plugin slugs.
 	 */
 	public static function get_active_plugin_slugs() {
-		return array_map(
-			function ( $plugin_path ) {
-				$path_parts = explode( '/', $plugin_path );
+		return array_unique(
+			array_map(
+				function ( $absolute_path ) {
+					// Make the path relative to the plugins directory.
+					$plugin_path = str_replace( WP_PLUGIN_DIR . '/', '', $absolute_path );
 
-				return $path_parts[0];
-			},
-			get_option( 'active_plugins', array() )
+					// Split the path to get the plugin slug (aka the directory name).
+					$path_parts = explode( '/', $plugin_path );
+
+					return $path_parts[0];
+				},
+				// Use this method as it is the most bulletproof way to get the active plugins.
+				wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins()
+			)
 		);
 	}
 
@@ -173,7 +183,7 @@ class PluginsHelper {
 	public static function is_plugin_active( $plugin ) {
 		$plugin_path = self::get_plugin_path_from_slug( $plugin );
 
-		return $plugin_path ? in_array( $plugin_path, get_option( 'active_plugins', array() ), true ) : false;
+		return $plugin_path && \is_plugin_active( $plugin_path );
 	}
 
 	/**
@@ -593,9 +603,11 @@ class PluginsHelper {
 
 		$connect_page_url = add_query_arg(
 			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => rawurlencode( '/extensions' ),
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_setting_screen_connect',
 			),
 			admin_url( 'admin.php' )
 		);
@@ -725,7 +737,7 @@ class PluginsHelper {
 			$hyperlink_url = add_query_arg(
 				array(
 					'utm_source'   => 'pu',
-					'utm_campaign' => 'pu_settings_screen_renew',
+					'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
 
 				),
 				self::WOO_SUBSCRIPTION_PAGE_URL
@@ -769,7 +781,7 @@ class PluginsHelper {
 				'product_id'   => $product_id,
 				'type'         => $type,
 				'utm_source'   => 'pu',
-				'utm_campaign' => 'pu_settings_screen_renew',
+				'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
 
 			),
 			self::WOO_SUBSCRIPTION_PAGE_URL
@@ -827,6 +839,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['active']
 						&& $sub['expiring']
 						&& ! $sub['autorenew'];
 			},
@@ -860,14 +873,20 @@ class PluginsHelper {
 			'expiring',
 		);
 
-		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		$button_link = add_query_arg(
+			array(
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_in_apps_screen_enable_autorenew',
+			),
+			self::WOO_SUBSCRIPTION_PAGE_URL
+		);
 		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
 					'product_id' => $notice_data['product_id'],
 					'type'       => 'expiring',
 				),
-				self::WOO_SUBSCRIPTION_PAGE_URL
+				$button_link
 			);
 		}
 
@@ -898,6 +917,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& $sub['active']
 						&& $sub['expired']
 						&& ! $sub['lifetime'];
 			},

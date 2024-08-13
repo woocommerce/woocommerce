@@ -22,14 +22,14 @@ inputs:
 runs:
     using: 'composite'
     steps:
-        - name: 'Read PNPM Version'
-          id: 'read-pnpm-version'
-          shell: 'bash'
-          run: 'echo "version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)" >> $GITHUB_OUTPUT'
         - name: 'Setup PNPM'
           uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
-          with:
-              version: ${{ steps.read-pnpm-version.outputs.version }}
+        # Next step is rudimentary - fixes a know composite action bug during post-actions:
+        # Error: Index was out of range. Must be non-negative and less than the size of the collection.
+        - name: 'Read PNPM version'
+          id: 'read-pnpm-version'
+          shell: 'bash'
+          run: 'echo "version=$(pnpm --version)" >> $GITHUB_OUTPUT'
         - name: 'Setup Node'
           uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
           with:
@@ -52,8 +52,8 @@ runs:
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: "${{ env.PNPM_STORE_PATH }}"
-              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
-              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-'
+              key: "${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-${{ hashFiles( 'pnpm-lock.yaml' ) }}"
+              restore-keys: '${{ runner.os }}-pnpm-${{ inputs.pull-package-deps }}-build:${{ inputs.build-type }}-'
         - name: 'Cache: node cache'
           if: ${{ inputs.pull-package-deps != 'false' }}
           uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
@@ -86,7 +86,15 @@ runs:
           if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
           shell: 'bash'
           # The installation command is a bit odd as it's a workaround for know bug - https://github.com/pnpm/pnpm/issues/6300.
-          run: "pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}"
+          run: |
+            if [[ '${{ inputs.install }}' == '@woocommerce/plugin-woocommerce...' && '${{ inputs.build-type }}' == 'backend' ]]; then
+              # PHPUnit/REST testing optimized installation of the deps: minimalistic and parallellized between PHP/JS.
+              # JS deps installation is abit hard-core, but all we need actually is wp-env and playwright - we are good at that regard.
+              composer install --working-dir=./plugins/woocommerce --quiet &
+              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
+            else
+              pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
+            fi
         # We want to include an option to build projects using this action so that we can make
         # sure that the build cache is always used when building projects.
         - name: 'Cache Build Output'

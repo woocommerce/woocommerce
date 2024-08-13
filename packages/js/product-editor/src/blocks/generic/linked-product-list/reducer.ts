@@ -6,7 +6,6 @@ import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
 
 export type State = {
 	linkedProducts: Product[];
-	searchedProducts: Product[];
 	isLoading?: boolean;
 	selectedProduct?: Product | Product[];
 };
@@ -14,7 +13,6 @@ export type State = {
 export type ActionType =
 	| 'LOADING_LINKED_PRODUCTS'
 	| 'SET_LINKED_PRODUCTS'
-	| 'SET_SEARCHED_PRODUCTS'
 	| 'SELECT_SEARCHED_PRODUCT'
 	| 'REMOVE_LINKED_PRODUCT';
 
@@ -31,7 +29,6 @@ export function reducer( state: State, action: Action ): State {
 				return {
 					...state,
 					...action.payload,
-					searchedProducts: [],
 				};
 			}
 			return state;
@@ -85,33 +82,6 @@ export function getLoadLinkedProductsDispatcher(
 						isLoading: false,
 					},
 				} );
-			} );
-	};
-}
-
-export function getSearchProductsDispatcher(
-	dispatch: ( value: Action ) => void
-) {
-	return async function searchProductsDispatcher(
-		linkedProductIds: number[],
-		search = ''
-	): Promise< Product[] > {
-		return resolveSelect( PRODUCTS_STORE_NAME )
-			.getProducts< Product[] >( {
-				search,
-				orderby: 'title',
-				order: 'asc',
-				per_page: 5,
-				exclude: linkedProductIds,
-			} )
-			.then( ( response ) => {
-				dispatch( {
-					type: 'SET_SEARCHED_PRODUCTS',
-					payload: {
-						searchedProducts: response,
-					},
-				} );
-				return response;
 			} );
 	};
 }

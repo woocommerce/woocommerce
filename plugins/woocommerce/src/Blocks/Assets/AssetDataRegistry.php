@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Exception;
 use InvalidArgumentException;
 
@@ -89,6 +90,7 @@ class AssetDataRegistry {
 			'dateFormat'             => wc_date_format(),
 			'homeUrl'                => esc_url( home_url( '/' ) ),
 			'locale'                 => $this->get_locale_data(),
+			'isRemoteLoggingEnabled' => wc_get_container()->get( RemoteLogger::class )->is_remote_logging_allowed(),
 			'dashboardUrl'           => wc_get_account_endpoint_url( 'dashboard' ),
 			'orderStatuses'          => $this->get_order_statuses(),
 			'placeholderImgSrc'      => wc_placeholder_img_src(),

@@ -181,7 +181,7 @@ class ProductCollection extends AbstractBlock {
 					'data-wc-navigation-id',
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
-				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 				$p->set_attribute(
 					'data-wc-context',
 					wp_json_encode(
@@ -193,7 +193,7 @@ class ProductCollection extends AbstractBlock {
 							// This way we avoid prefetching when the page loads.
 							'isPrefetchNextOrPreviousLink' => false,
 						),
-						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 					)
 				);
 				$block_content = $p->get_updated_html();
@@ -295,7 +295,7 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
+			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
 			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
@@ -524,7 +524,10 @@ class ProductCollection extends AbstractBlock {
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 
-		$is_exclude_applied_filters = ! ( $block->context['query']['inherit'] ?? false );
+		$inherit    = $block->context['query']['inherit'] ?? false;
+		$filterable = $block->context['query']['filterable'] ?? false;
+
+		$is_exclude_applied_filters = ! ( $inherit || $filterable );
 
 		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
 	}
@@ -1089,7 +1092,7 @@ class ProductCollection extends AbstractBlock {
 		$max_price_query = empty( $max_price ) ? array() : array(
 			'key'     => '_price',
 			'value'   => $max_price,
-			'compare' => '<',
+			'compare' => '<=',
 			'type'    => 'numeric',
 		);
 

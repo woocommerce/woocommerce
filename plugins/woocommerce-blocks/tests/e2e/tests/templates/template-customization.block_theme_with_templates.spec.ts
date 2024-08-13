@@ -67,7 +67,7 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postType: testData.templateType,
 				} );
-				await editor.revertTemplateCustomizations( {
+				await editor.revertTemplate( {
 					templateName: testData.templateName,
 				} );
 				await testData.visitPage( { frontendUtils, page } );
