@@ -217,7 +217,7 @@ test.describe( 'Product Collection', () => {
 			await pageObject.createNewPostAndInsertBlock();
 
 			let allProducts = pageObject.products;
-			let salePoducts = pageObject.products.filter( {
+			let saleProducts = pageObject.products.filter( {
 				hasText: 'Product on sale',
 			} );
 
@@ -234,7 +234,7 @@ test.describe( 'Product Collection', () => {
 			await pageObject.publishAndGoToFrontend();
 			await pageObject.refreshLocators( 'frontend' );
 			allProducts = pageObject.products;
-			salePoducts = pageObject.products.filter( {
+			saleProducts = pageObject.products.filter( {
 				hasText: 'Product on sale',
 			} );
 
