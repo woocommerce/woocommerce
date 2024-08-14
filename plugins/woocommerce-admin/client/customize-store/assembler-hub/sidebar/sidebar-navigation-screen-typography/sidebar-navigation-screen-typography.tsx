@@ -24,7 +24,6 @@ import { FontPairing } from '../global-styles';
 import { CustomizeStoreContext } from '../..';
 import { FlowType } from '~/customize-store/types';
 import { trackEvent } from '~/customize-store/tracking';
-import { installFontFamilies } from '../../utils/fonts';
 import { enableTracking } from '~/customize-store/design-without-ai/services';
 
 export const SidebarNavigationScreenTypography = ( {
@@ -91,7 +90,7 @@ export const SidebarNavigationScreenTypography = ( {
 	const openModal = () => setIsModalOpen( true );
 	const closeModal = () => setIsModalOpen( false );
 
-	const [ isFetchingFonts, setIsFetchingFonts ] = useState( false );
+	const [ isSettingTracking, setIsSettingTracking ] = useState( false );
 
 	const [ OptInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
@@ -175,17 +174,15 @@ export const SidebarNavigationScreenTypography = ( {
 										<Button
 											onClick={ async () => {
 												optIn();
-												setIsFetchingFonts( true );
 												await enableTracking();
-												await installFontFamilies();
 
 												closeModal();
-												setIsFetchingFonts( false );
+												setIsSettingTracking( false );
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }
 										>
-											{ isFetchingFonts ? (
+											{ isSettingTracking ? (
 												<Spinner />
 											) : (
 												__( 'Opt in', 'woocommerce' )

@@ -44,6 +44,42 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
+	test( 'Can be migrated to from Products (Beta) block', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		await admin.createNewPost();
+
+		await editor.insertBlock( {
+			name: 'core/query',
+			attributes: {
+				namespace: 'woocommerce/product-query',
+			},
+		} );
+
+		await expect(
+			page.getByLabel( 'Block: Products (Beta)' )
+		).toBeVisible();
+
+		await page.getByRole( 'button', { name: 'Start blank' } ).click();
+		await page.getByLabel( 'Title & Date' ).click();
+
+		await page
+			.getByRole( 'button', { name: 'Upgrade to Product Collection' } )
+			.click();
+
+		await expect(
+			page.getByLabel( 'Block: Products (Beta)' )
+		).toBeHidden();
+		await expect(
+			page.getByLabel( 'Block: Product Collection' ).first()
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Choose collection' } )
+		).toBeVisible();
+	} );
+
 	test.describe( 'Renders correctly with all Product Elements', () => {
 		const expectedProductContent = [
 			'Beanie', // core/post-title
@@ -186,14 +222,14 @@ test.describe( 'Product Collection', () => {
 			} );
 
 			await expect( allProducts ).toHaveCount( 9 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
 				onSale: true,
 			} );
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.publishAndGoToFrontend();
 			await pageObject.refreshLocators( 'frontend' );
@@ -203,7 +239,7 @@ test.describe( 'Product Collection', () => {
 			} );
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
@@ -1590,6 +1626,72 @@ test.describe( 'Product Collection', () => {
 			const products = editor.canvas.getByLabel( 'Block: Title' );
 
 			await expect( products ).toHaveText( expectedProducts );
+		} );
+	} );
+
+	test.describe( 'Extensibility - JS events', () => {
+		test( 'emits wc-blocks_product_list_rendered event on init and on page change', async ( {
+			pageObject,
+			page,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					( e ) => {
+						const { collection } = e.detail;
+						window.eventPayload = collection;
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect
+				.poll(
+					async () => await page.evaluate( 'window.eventPayload' )
+				)
+				.toBe( undefined );
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 1 );
+
+			await page.getByRole( 'link', { name: 'Next Page' } ).click();
+
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 2 );
+		} );
+
+		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
+			pageObject,
+			page,
+		} ) => {
+			// Adding three blocks in total
+			await pageObject.createNewPostAndInsertBlock();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					() => {
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 3 );
 		} );
 	} );
 } );
