@@ -40,7 +40,7 @@ async function updateUserPrefs(
 	user: WCUser,
 	saveUser: ( userToSave: {
 		id: number;
-		woocommerce_meta: { [ key: string ]: boolean };
+		woocommerce_meta: WCUser[ 'woocommerce_meta' ];
 	} ) => WCUser,
 	getLastEntitySaveError: (
 		kind: string,
@@ -75,7 +75,6 @@ async function updateUserPrefs(
 			...metaData,
 		},
 	} );
-
 	// Use saveUser() to update WooCommerce meta values.
 	const updatedUser = await saveUser( {
 		id: user.id,
