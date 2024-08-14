@@ -128,6 +128,11 @@ class LaunchYourStore {
 			return;
 		}
 
+		if ( get_option( 'woocommerce_store_pages_only', false ) ) {
+			// Coming soon already initialized.
+			return false;
+		}
+
 		$coming_soon      = 'yes';
 		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'no' : 'yes';
 		$private_link     = 'no';
