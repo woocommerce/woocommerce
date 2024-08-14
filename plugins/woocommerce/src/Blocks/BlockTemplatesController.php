@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 
@@ -27,7 +26,7 @@ class BlockTemplatesController {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
-		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
+		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_fallback_template_to_hierarchy' ), 10, 1 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
@@ -54,6 +53,10 @@ class BlockTemplatesController {
 	 * This function is used on the `pre_get_block_template` hook to return the fallback template from the db in case
 	 * the template is eligible for it.
 	 *
+	 * Currently, the Products by Category, Products by Tag and Products by Attribute templates fall back to the
+	 * Product Catalog template. That means that if there are customizations in the Product Catalog template,
+	 * they are also reflected in the other templates as long as they haven't been customized as well.
+	 *
 	 * @param \WP_Block_Template|null $template Block template object to short-circuit the default query,
 	 *                                          or null to allow WP to run its normal queries.
 	 * @param string                  $id Template unique identifier (example: theme_slug//template_slug).
@@ -76,13 +79,14 @@ class BlockTemplatesController {
 		$template_name_parts = explode( '//', $id );
 		$theme               = $template_name_parts[0] ?? '';
 		$slug                = $template_name_parts[1] ?? '';
+		$registered_template = BlockTemplateUtils::get_template( $slug );
 
-		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $slug ) ) {
+		if ( empty( $theme ) || empty( $slug ) || ! $registered_template || ! isset( $registered_template->fallback_template ) ) {
 			return null;
 		}
 
 		$wp_query_args  = array(
-			'post_name__in' => array( ProductCatalogTemplate::SLUG, $slug ),
+			'post_name__in' => array( $registered_template->fallback_template, $slug ),
 			'post_type'     => $template_type,
 			'post_status'   => array( 'auto-draft', 'draft', 'publish', 'trash' ),
 			'no_found_rows' => true,
@@ -98,12 +102,12 @@ class BlockTemplatesController {
 		$posts          = $template_query->posts;
 
 		// If we have more than one result from the query, it means that the current template is present in the db (has
-		// been customized by the user) and we should not return the `archive-product` template.
+		// been customized by the user) and we should not return the fallback template.
 		if ( count( $posts ) > 1 ) {
 			return null;
 		}
 
-		if ( count( $posts ) > 0 && ProductCatalogTemplate::SLUG === $posts[0]->post_name ) {
+		if ( count( $posts ) > 0 && $registered_template->fallback_template === $posts[0]->post_name ) {
 			$template = _build_block_template_result_from_post( $posts[0] );
 
 			if ( ! is_wp_error( $template ) ) {
@@ -121,26 +125,21 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Adds the `archive-product` template to the `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute`
-	 * templates to be able to fall back to it.
+	 * Adds the fallback template to the template hierarchy.
 	 *
 	 * @param array $template_hierarchy A list of template candidates, in descending order of priority.
 	 */
-	public function add_archive_product_to_eligible_for_fallback_templates( $template_hierarchy ) {
+	public function add_fallback_template_to_hierarchy( $template_hierarchy ) {
 		$template_slugs = array_map(
 			'_strip_template_file_suffix',
 			$template_hierarchy
 		);
 
-		$templates_eligible_for_fallback = array_filter(
-			$template_slugs,
-			function ( $template_slug ) {
-				return BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug );
+		foreach ( $template_slugs as $template_slug ) {
+			$template = BlockTemplateUtils::get_template( $template_slug );
+			if ( $template && isset( $template->fallback_template ) ) {
+				$template_hierarchy[] = $template->fallback_template;
 			}
-		);
-
-		if ( count( $templates_eligible_for_fallback ) > 0 ) {
-			$template_hierarchy[] = ProductCatalogTemplate::SLUG;
 		}
 
 		return $template_hierarchy;
@@ -233,10 +232,12 @@ class BlockTemplatesController {
 
 		list( $template_id, $template_slug ) = $template_name_parts;
 
-		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-			$template_path   = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
+		// If the template is not present in the theme but its fallback template is,
+		// let's use the theme's fallback template.
+		if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
+			$registered_template = BlockTemplateUtils::get_template( $template_slug );
+			$template_path       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
+			$template_object     = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
 			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 		}
 
@@ -441,7 +442,7 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $already_found_templates ) ) {
+			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_db( $template_slug, $already_found_templates ) ) {
 				$template              = clone BlockTemplateUtils::get_fallback_template_from_db( $template_slug, $already_found_templates );
 				$template_id           = explode( '//', $template->id );
 				$template->id          = $template_id[0] . '//' . $template_slug;
@@ -452,10 +453,12 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-				$template_file = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
+			// If the template is not present in the theme but its fallback template is,
+			// let's use the theme's fallback template.
+			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
+				$registered_template = BlockTemplateUtils::get_template( $template_slug );
+				$template_file       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
+				$templates[]         = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
 				continue;
 			}
 
