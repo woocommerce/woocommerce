@@ -33,6 +33,8 @@ export type UserPreferences = {
 	product_advice_card_dismissed?: {
 		[ key: string ]: 'yes' | 'no';
 	};
+	launch_your_store_tour_hidden?: 'yes' | 'no' | '';
+	coming_soon_banner_dismissed?: 'yes' | 'no' | '';
 };
 
 export type WoocommerceMeta = UserPreferences & {
@@ -40,6 +42,8 @@ export type WoocommerceMeta = UserPreferences & {
 	variable_items_without_price_notice_dismissed?: string;
 	local_attributes_notice_dismissed_ids?: string;
 	product_advice_card_dismissed?: string;
+	launch_your_store_tour_hidden?: string;
+	coming_soon_banner_dismissed?: string;
 };
 
 export type WCUser<
