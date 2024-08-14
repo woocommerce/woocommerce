@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Jetpack_Gutenberg;
 use WP_Post;
 
 /**
