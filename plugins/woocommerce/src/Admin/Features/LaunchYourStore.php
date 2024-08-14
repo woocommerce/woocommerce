@@ -19,9 +19,10 @@ class LaunchYourStore {
 		add_action( 'woocommerce_update_options_site-visibility', array( $this, 'save_site_visibility_options' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
+		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
 		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_coming_soon_global_tracks' ), 10, 2 );
 		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ), 10, 2 );
-		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'register_launch_your_store_user_meta_fields' ) );
+		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 	}
 
 	/**
@@ -161,7 +162,10 @@ class LaunchYourStore {
 			return false;
 		}
 
-		if ( WCAdminUser::get_user_data_field( $current_user_id, self::BANNER_DISMISS_USER_META_KEY ) === 'yes' ) {
+		$has_dismissed_banner = WCAdminUser::get_user_data_field( $current_user_id, self::BANNER_DISMISS_USER_META_KEY )
+				// Remove this check in WC 9.4.
+				|| get_user_meta( $current_user_id, 'woocommerce_' . self::BANNER_DISMISS_USER_META_KEY, true ) === 'yes';
+		if ( $has_dismissed_banner ) {
 			return false;
 		}
 
@@ -200,14 +204,43 @@ class LaunchYourStore {
 	/**
 	 * Register user meta fields for Launch Your Store.
 	 *
-	 * @param array $user_data_fields User data fields.
-	 * @return array
+	 * This should be removed in WC 9.4.
 	 */
-	public function register_launch_your_store_user_meta_fields( $user_data_fields ) {
+	public function register_launch_your_store_user_meta_fields() {
 		if ( ! $this->is_manager_or_admin() ) {
 			return;
 		}
 
+		register_meta(
+			'user',
+			'woocommerce_launch_your_store_tour_hidden',
+			array(
+				'type'         => 'string',
+				'description'  => 'Indicate whether the user has dismissed the site visibility tour on the home screen.',
+				'single'       => true,
+				'show_in_rest' => true,
+			)
+		);
+
+		register_meta(
+			'user',
+			'woocommerce_coming_soon_banner_dismissed',
+			array(
+				'type'         => 'string',
+				'description'  => 'Indicate whether the user has dismissed the coming soon notice or not.',
+				'single'       => true,
+				'show_in_rest' => true,
+			)
+		);
+	}
+
+	/**
+	 * Register user meta fields for Launch Your Store.
+	 *
+	 * @param array $user_data_fields user data fields.
+	 * @return array
+	 */
+	public function add_user_data_fields( $user_data_fields ) {
 		return array_merge(
 			$user_data_fields,
 			array(

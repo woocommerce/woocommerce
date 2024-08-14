@@ -30,7 +30,7 @@ export const useSiteVisibilityTour = () => {
 
 		return (
 			( currentUser as { meta: { [ key: string ]: string } } ).meta
-				.launch_your_store_tour_hidden === 'yes'
+				.woocommerce_launch_your_store_tour_hidden === 'yes'
 		);
 	} );
 
