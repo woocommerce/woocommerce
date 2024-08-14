@@ -317,8 +317,8 @@ class TaskLists {
 	public static function get_lists_by_ids( $ids ) {
 		return array_filter(
 			self::$lists,
-			function ( $list ) use ( $ids ) {
-				return in_array( $list->get_list_id(), $ids, true );
+			function ( $task_list ) use ( $ids ) {
+				return in_array( $task_list->get_list_id(), $ids, true );
 			}
 		);
 	}
