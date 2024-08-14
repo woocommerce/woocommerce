@@ -29,6 +29,8 @@ export const useSiteVisibilityTour = () => {
 		}
 
 		return (
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			( currentUser as { meta: { [ key: string ]: string } } ).meta
 				.woocommerce_launch_your_store_tour_hidden === 'yes'
 		);
