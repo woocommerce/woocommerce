@@ -9,7 +9,7 @@ import { Command } from '@commander-js/extra-typings';
 import { getIssuesByLabel, updateIssue } from '../../../core/github/repo';
 import { Logger } from '../../../core/logger';
 
-export const labelsCommand = new Command( 'replace-labels' )
+export const replaceLabelsCommand = new Command( 'replace-labels' )
 	.description( 'Replace labels of issues' )
 	.option(
 		'-o --owner <owner>',
@@ -46,22 +46,32 @@ export const labelsCommand = new Command( 'replace-labels' )
 			return;
 		}
 
-		Logger.notice( `Querying by label: ${ label }` );
+		Logger.startTask( `Querying by label: "${ label }"` );
 		const { results } = await getIssuesByLabel( { owner, name }, label );
+		Logger.endTask();
+
 		if ( results.length === 0 ) {
-			Logger.warn( `No issues found by label: ${ label }` );
+			Logger.warn( `No issues found by label: "${ label }"` );
 			process.exit( 0 );
 		}
 
 		for ( const issue of results ) {
+			// Get labels by name only and filter out the existing label.
 			const labels = issue.labels
-				.map( ( l ) => l.name )
+				.map( ( l ) => ( typeof l === 'string' ? l : l.name ) )
 				.filter( ( l ) => l !== label );
-			const containsOtherTeamLabel =
+
+			/**
+			 * Check if label with prefix already exists, in that case we only remove the label.
+			 * Ex: Multiple teams may be assigned to one issue, when replace one team for another
+			 * we did want to keep the team that already exists.
+			 */
+			const containsSimilarLabelAlready =
 				removeIfStartsWith &&
 				labels.find( ( l ) => l.startsWith( removeIfStartsWith ) );
-			if ( ! containsOtherTeamLabel ) {
-				labels.push( replacementLabel ); // 'team: Kirigami & Origami' );
+
+			if ( ! containsSimilarLabelAlready ) {
+				labels.push( replacementLabel );
 			}
 			Logger.notice(
 				`Updating issue ${ issue.number } labels to: ${ labels }`
@@ -69,10 +79,12 @@ export const labelsCommand = new Command( 'replace-labels' )
 			const result = await updateIssue( { owner, name }, issue.number, {
 				labels,
 			} );
-			if ( result.status === 200 ) {
+			if ( result && result.status === 200 ) {
 				Logger.notice(
 					`Successfully updated issue ${ issue.number }: ${ result.data.html_url }`
 				);
+			} else {
+				Logger.error( `Failed updating ${ issue.number }` );
 			}
 		}
 

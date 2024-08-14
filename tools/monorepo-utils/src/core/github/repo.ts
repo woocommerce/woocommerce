@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Repository } from '@octokit/graphql-schema';
+import { Endpoints } from '@octokit/types';
 
 /**
  * Internal dependencies
@@ -47,7 +48,9 @@ export const getIssuesByLabel = async (
 	},
 	label: string,
 	state: 'open' | 'closed' | 'all' = 'open'
-): Promise< any > => {
+): Promise< {
+	results: Endpoints[ 'GET /repos/{owner}/{repo}/issues' ][ 'response' ][ 'data' ];
+} > => {
 	const { owner, name, pageSize } = options;
 
 	try {
@@ -65,12 +68,6 @@ export const getIssuesByLabel = async (
 			results: data,
 		};
 	} catch ( e ) {
-		if (
-			e.status === 404 &&
-			e.response.data.message === 'Branch not found'
-		) {
-			return false;
-		}
 		throw new Error( e );
 	}
 };
@@ -84,7 +81,10 @@ export const updateIssue = async (
 	updates: {
 		labels?: string[];
 	}
-): Promise< any > => {
+): Promise<
+	| Endpoints[ 'PATCH /repos/{owner}/{repo}/issues/{issue_number}' ][ 'response' ]
+	| false
+> => {
 	const { owner, name } = options;
 
 	try {

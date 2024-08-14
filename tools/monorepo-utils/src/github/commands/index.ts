@@ -6,10 +6,10 @@ import { Command } from '@commander-js/extra-typings';
 /**
  * Internal dependencies
  */
-import { labelsCommand } from './replace-labels';
+import { replaceLabelsCommand } from './replace-labels';
 
 const program = new Command( 'github' )
 	.description( 'Github utilities' )
-	.addCommand( labelsCommand );
+	.addCommand( replaceLabelsCommand );
 
 export default program;
