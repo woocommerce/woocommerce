@@ -264,6 +264,7 @@ class WC_Install {
 		),
 		'9.3.0' => array(
 			'wc_update_930_add_woocommerce_coming_soon_option',
+			'wc_update_930_update_lys_tour_user_meta',
 		),
 	);
 
