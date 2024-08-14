@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Address a fatal error that could happen if certain properties of the main WooCommerce class were accessed before WooCommerce had finished initializing
