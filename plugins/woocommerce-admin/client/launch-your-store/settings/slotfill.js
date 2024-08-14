@@ -130,7 +130,7 @@ const SiteVisibility = () => {
 					} }
 					options={ [
 						{
-							label: 'Coming soon',
+							label: __( 'Coming soon', 'woocommerce' ),
 							value: 'yes',
 						},
 					] }
@@ -253,7 +253,7 @@ const SiteVisibility = () => {
 					} }
 					options={ [
 						{
-							label: 'Live',
+							label: __( 'Live', 'woocommerce' ),
 							value: 'no',
 						},
 					] }

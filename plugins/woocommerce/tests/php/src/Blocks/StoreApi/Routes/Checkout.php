@@ -24,6 +24,8 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
  * phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r, WooCommerce.Commenting.CommentHooks.MissingHookComment
  */
 class Checkout extends MockeryTestCase {
+
+	const TEST_COUPON_CODE = 'test_coupon_code';
 	/**
 	 * Setup test product data. Called before every test.
 	 */
@@ -33,6 +35,11 @@ class Checkout extends MockeryTestCase {
 		global $wp_rest_server;
 		$wp_rest_server = new \Spy_REST_Server();
 		do_action( 'rest_api_init', $wp_rest_server );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( self::TEST_COUPON_CODE );
+		$coupon->set_amount( 2 );
+		$coupon->save();
 
 		wp_set_current_user( 0 );
 		$customer = get_user_by( 'email', 'testaccount@test.com' );
@@ -91,6 +98,15 @@ class Checkout extends MockeryTestCase {
 					'weight'        => 10,
 				)
 			),
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Virtual Test Product 2',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+					'virtual'       => true,
+				)
+			),
 		);
 		wc_empty_cart();
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
@@ -102,15 +118,576 @@ class Checkout extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
+		unset( WC()->countries->locale );
 		$default_zone     = \WC_Shipping_Zones::get_zone( 0 );
 		$shipping_methods = $default_zone->get_shipping_methods();
 		foreach ( $shipping_methods as $method ) {
 			$default_zone->delete_shipping_method( $method->instance_id );
 		}
 		$default_zone->save();
+		remove_all_filters( 'woocommerce_get_country_locale' );
+
+		$coupon_to_delete = new \WC_Coupon( self::TEST_COUPON_CODE );
+		$coupon_to_delete->delete( true );
 
 		global $wp_rest_server;
 		$wp_rest_server = null;
+	}
+
+	/**
+	 * Ensure that orders can be placed.
+	 */
+	public function test_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that orders can be placed with virtual products.
+	 */
+	public function test_virtual_product_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $this->products[2]->get_id(), 1 );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that orders cannot be placed with invalid payment methods.
+	 */
+	public function test_invalid_payment_method_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'apples',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that orders cannot be placed with out of stock items.
+	 */
+	public function test_out_of_stock_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$product = wc_get_product( $this->products[0]->get_id() );
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that orders cannot be placed with un-owned coupons.
+	 */
+	public function test_unowned_coupon_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		WC()->cart->apply_coupon( 'test' );
+
+		$coupon = new \WC_Coupon( self::TEST_COUPON_CODE );
+
+		// Apply email restriction after adding coupon to cart.
+		$coupon->set_email_restrictions( 'jon@mail.com' );
+		$coupon->save();
+
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 409, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that orders cannot be placed with coupons over their usage limit.
+	 */
+	public function test_usage_limit_coupon_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'test' );
+		$coupon->set_amount( 2 );
+		$coupon->save();
+
+		WC()->cart->apply_coupon( 'test' );
+
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		WC()->cart->apply_coupon( 'test' );
+		$coupon->set_usage_limit( 1 );
+		$coupon->save();
+
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 409, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that orders can be placed with coupons.
+	 */
+	public function test_coupon_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		WC()->cart->apply_coupon( self::TEST_COUPON_CODE );
+
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, wc_get_order( $response->get_data()['order_id'] )->get_data()['discount_total'] );
+	}
+
+	/**
+	 * Ensure that orders cannot be placed with invalid data.
+	 */
+	public function test_invalid_post_data() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		// Test with empty state.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Test with invalid state.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => 'GG',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => 'GG',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Test with no state passed.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => 'test',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that validation respects locale filtering.
+	 */
+	public function test_locale_required_filtering_post_data() {
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) {
+				$locale['US']['state']['required'] = false;
+				return $locale;
+			}
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		// Test that a country that usually requires state can be overridden with woocommerce_get_country_locale filter.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test lane',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '123456',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'phone'      => '123456',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Ensure that labels respect locale filtering.
+	 */
+	public function test_locale_label_filtering_post_data() {
+		add_filter(
+			'woocommerce_get_country_locale',
+			function ( $locale ) {
+				$locale['FR']['state']['label']    = 'French state';
+				$locale['FR']['state']['required'] = true;
+				$locale['DE']['state']['label']    = 'German state';
+				$locale['DE']['state']['required'] = true;
+				return $locale;
+			}
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		// Test that a country that usually requires state can be overridden with woocommerce_get_country_locale filter.
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test lane',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'FR',
+					'phone'      => '123456',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => '90210',
+					'country'    => 'DE',
+					'phone'      => '123456',
+				),
+				'payment_method'   => 'bacs',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 'French state is required', $response->get_data()['data']['errors']['billing'][0] );
+		$this->assertEquals( 'German state is required', $response->get_data()['data']['errors']['shipping'][0] );
 	}
 
 	/**

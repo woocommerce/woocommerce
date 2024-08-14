@@ -68,6 +68,7 @@ const useQueryId = (
 
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
+	usesReference,
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const isInitialAttributesSet = useRef( false );
@@ -79,6 +80,7 @@ const ProductCollectionContent = ( {
 		setAttributes,
 		location,
 		attributes,
+		usesReference,
 	} );
 
 	const blockProps = useBlockProps();

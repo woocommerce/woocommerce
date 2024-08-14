@@ -2,7 +2,7 @@ const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
-const { setFeatureFlag } = require( '../../../utils/features' );
+const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -47,16 +47,24 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				'woocommerce_customize_store_onboarding_tour_hidden',
 				'yes'
 			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
 
-		await setFeatureFlag(
-			request,
-			baseURL,
-			'pattern-toolkit-full-composability',
-			true
-		);
+		const wordPressVersion = await getInstalledWordPressVersion();
+
+		if ( wordPressVersion <= 6.5 ) {
+			test.skip(
+				'Skipping Full Composability tests: WordPress version is below 6.5, which does not support this feature.'
+			);
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -72,6 +80,13 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 				request,
 				baseURL,
 				'woocommerce_admin_customize_store_completed',
+				'no'
+			);
+
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
 				'no'
 			);
 
@@ -182,6 +197,34 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 	} );
 
+	test( 'Clicking on a pattern should always scroll the page to the inserted pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list__list-item'
+		);
+
+		// add first 3 patterns
+		for ( let i = 0; i < 4; i++ ) {
+			await sidebarPattern.nth( i ).click();
+		}
+
+		const insertedPattern = editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.nth( 3 );
+
+		await expect( insertedPattern ).toBeInViewport();
+	} );
+
 	test( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
 		pageObject,
 		baseURL,
@@ -275,5 +318,57 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
 		);
 		await expect( emptyPatternsBlock ).toBeVisible();
+	} );
+
+	test( 'Clicking the "Add patterns" button on the No Blocks view should add a default pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+		const addPatternsButton = editor.locator(
+			'.no-blocks-insert-pattern-button'
+		);
+		await addPatternsButton.click();
+		const emptyPatternsBlock = editor.getByText(
+			'Add one or more of our homepage patterns to create a page that welcomes shoppers.'
+		);
+		const defaultPattern = editor.locator(
+			'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+		);
+		await expect( emptyPatternsBlock ).toBeHidden();
+		await expect( defaultPattern ).toBeVisible();
+	} );
+
+	test( 'Clicking opt-in new patterns should be available', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+
+		await assembler.getByText( 'Usage tracking' ).click();
+		await expect(
+			assembler.getByText( 'Access more patterns' )
+		).toBeVisible();
+
+		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
+
+		await assembler
+			.getByText( 'Access more patterns' )
+			.waitFor( { state: 'hidden' } );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list'
+		);
+
+		await sidebarPattern.waitFor( { state: 'visible' } );
+
+		await expect(
+			assembler.locator( '.block-editor-block-patterns-list__list-item' )
+		).toHaveCount( 10 );
 	} );
 } );

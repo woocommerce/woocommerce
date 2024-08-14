@@ -8,7 +8,7 @@
  * to set via those filters. For example, given the JSON (pretty printed here for clarity):
  *
  *     {
- *         "wooocommerce_system_timeout": 10
+ *         "woocommerce_system_timeout": 10
  *     }
  *
  * Then a filter will be added that returns 10 when 'woocommerce_system_timeout' is invoked. Or, given:

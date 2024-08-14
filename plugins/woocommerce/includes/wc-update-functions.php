@@ -2779,14 +2779,16 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 function wc_update_910_remove_obsolete_user_meta() {
 	global $wpdb;
 
-	$deletions = $wpdb->query( "
+	$deletions = $wpdb->query(
+		"
 		DELETE FROM $wpdb->usermeta
 		WHERE meta_key IN (
 			'_last_order',
 			'_order_count',
 			'_money_spent'
 		)
-	" );
+	"
+	);
 
 	$logger = wc_get_logger();
 
@@ -2814,4 +2816,11 @@ function wc_update_910_remove_obsolete_user_meta() {
 			)
 		);
 	}
+}
+
+/**
+ * Add woocommerce_coming_soon option when it is not currently present.
+ */
+function wc_update_930_add_woocommerce_coming_soon_option() {
+	add_option( 'woocommerce_coming_soon', 'no' );
 }

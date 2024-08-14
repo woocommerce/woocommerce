@@ -9,6 +9,7 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
  */
 import ProductCollectionPage, {
 	BLOCK_LABELS,
+	Collections,
 	SELECTORS,
 } from './product-collection.page';
 
@@ -41,6 +42,42 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.productTitles ).toHaveCount( 9 );
 		await expect( pageObject.productPrices ).toHaveCount( 9 );
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+	} );
+
+	test( 'Can be migrated to from Products (Beta) block', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		await admin.createNewPost();
+
+		await editor.insertBlock( {
+			name: 'core/query',
+			attributes: {
+				namespace: 'woocommerce/product-query',
+			},
+		} );
+
+		await expect(
+			page.getByLabel( 'Block: Products (Beta)' )
+		).toBeVisible();
+
+		await page.getByRole( 'button', { name: 'Start blank' } ).click();
+		await page.getByLabel( 'Title & Date' ).click();
+
+		await page
+			.getByRole( 'button', { name: 'Upgrade to Product Collection' } )
+			.click();
+
+		await expect(
+			page.getByLabel( 'Block: Products (Beta)' )
+		).toBeHidden();
+		await expect(
+			page.getByLabel( 'Block: Product Collection' ).first()
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Choose collection' } )
+		).toBeVisible();
 	} );
 
 	test.describe( 'Renders correctly with all Product Elements', () => {
@@ -180,24 +217,24 @@ test.describe( 'Product Collection', () => {
 			await pageObject.createNewPostAndInsertBlock();
 
 			const allProducts = pageObject.products;
-			const salePoducts = pageObject.products.filter( {
+			const saleProducts = pageObject.products.filter( {
 				hasText: 'Product on sale',
 			} );
 
 			await expect( allProducts ).toHaveCount( 9 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
 				onSale: true,
 			} );
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.publishAndGoToFrontend();
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
@@ -420,6 +457,76 @@ test.describe( 'Product Collection', () => {
 			await pageObject.publishAndGoToFrontend();
 
 			await expect( pageObject.products ).toHaveCount( 4 );
+		} );
+
+		// See https://github.com/woocommerce/woocommerce/pull/49917
+		test( 'Price range is inclusive in both editor and frontend.', async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				min: '45',
+				max: '55',
+			} );
+
+			// Wait for the products to be filtered.
+			await expect( pageObject.products ).not.toHaveCount( 9 );
+
+			await expect(
+				pageObject.products.filter( { hasText: '$45.00' } )
+			).not.toHaveCount( 0 );
+			await expect(
+				pageObject.products.filter( { hasText: '$55.00' } )
+			).not.toHaveCount( 0 );
+
+			// Reset the price range.
+			await pageObject.setPriceRange( {
+				min: '0',
+				max: '0',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await editor.insertBlock( {
+				name: 'woocommerce/filter-wrapper',
+				attributes: { filterType: 'price-filter' },
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await page
+				.getByRole( 'textbox', {
+					name: 'Filter products by minimum',
+				} )
+				.dblclick();
+			await page.keyboard.type( '45' );
+
+			await page
+				.getByRole( 'textbox', {
+					name: 'Filter products by maximum',
+				} )
+				.dblclick();
+			await page.keyboard.type( '55' );
+
+			await page.keyboard.press( 'Tab' );
+
+			// Wait for the products to be filtered.
+			await expect( pageObject.products ).not.toHaveCount( 9 );
+
+			await expect(
+				pageObject.products.filter( { hasText: '$45.00' } )
+			).not.toHaveCount( 0 );
+			await expect(
+				pageObject.products.filter( { hasText: '$55.00' } )
+			).not.toHaveCount( 0 );
 		} );
 
 		test.describe( '"Use page context" control', () => {
@@ -1458,6 +1565,134 @@ test.describe( 'Product Collection', () => {
 			} );
 		} );
 	}
+	test.describe( 'Editor: In taxonomies templates', () => {
+		test( 'Products by specific category template displays products from this category', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			const expectedProducts = [
+				'Hoodie',
+				'Hoodie with Logo',
+				'Hoodie with Zipper',
+			];
+
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Products by Category' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Hoodies`,
+				} )
+				.click();
+			await page
+				.getByRole( 'option', { name: 'Fallback content' } )
+				.click();
+
+			const products = editor.canvas.getByLabel( 'Block: Title' );
+
+			await expect( products ).toHaveText( expectedProducts );
+		} );
+		test( 'Products by specific tag template displays products from this tag', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			const expectedProducts = [ 'Beanie', 'Hoodie' ];
+
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+
+			await page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Products by Tag' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Recommended`,
+				} )
+				.click();
+			await page
+				.getByRole( 'option', { name: 'Fallback content' } )
+				.click();
+
+			const products = editor.canvas.getByLabel( 'Block: Title' );
+
+			await expect( products ).toHaveText( expectedProducts );
+		} );
+	} );
+
+	test.describe( 'Extensibility - JS events', () => {
+		test( 'emits wc-blocks_product_list_rendered event on init and on page change', async ( {
+			pageObject,
+			page,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					( e ) => {
+						const { collection } = e.detail;
+						window.eventPayload = collection;
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect
+				.poll(
+					async () => await page.evaluate( 'window.eventPayload' )
+				)
+				.toBe( undefined );
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 1 );
+
+			await page.getByRole( 'link', { name: 'Next Page' } ).click();
+
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 2 );
+		} );
+
+		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
+			pageObject,
+			page,
+		} ) => {
+			// Adding three blocks in total
+			await pageObject.createNewPostAndInsertBlock();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					() => {
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 3 );
+		} );
+	} );
 } );
 
 /**
@@ -1720,4 +1955,104 @@ test.describe( 'Testing registerProductCollection', () => {
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 	} );
+} );
+
+test.describe( 'Testing "usesReference" argument in "registerProductCollection"', () => {
+	const MY_REGISTERED_COLLECTIONS = {
+		myCustomCollectionWithProductContext: {
+			name: 'My Custom Collection - Product Context',
+			label: 'Block: My Custom Collection - Product Context',
+			previewLabelTemplate: [ 'woocommerce/woocommerce//single-product' ],
+		},
+		myCustomCollectionWithCartContext: {
+			name: 'My Custom Collection - Cart Context',
+			label: 'Block: My Custom Collection - Cart Context',
+			previewLabelTemplate: [ 'woocommerce/woocommerce//page-cart' ],
+		},
+		myCustomCollectionWithOrderContext: {
+			name: 'My Custom Collection - Order Context',
+			label: 'Block: My Custom Collection - Order Context',
+			previewLabelTemplate: [
+				'woocommerce/woocommerce//order-confirmation',
+			],
+		},
+		myCustomCollectionWithArchiveContext: {
+			name: 'My Custom Collection - Archive Context',
+			label: 'Block: My Custom Collection - Archive Context',
+			previewLabelTemplate: [
+				'woocommerce/woocommerce//taxonomy-product_cat',
+			],
+		},
+		myCustomCollectionMultipleContexts: {
+			name: 'My Custom Collection - Multiple Contexts',
+			label: 'Block: My Custom Collection - Multiple Contexts',
+			previewLabelTemplate: [
+				'woocommerce/woocommerce//single-product',
+				'woocommerce/woocommerce//order-confirmation',
+			],
+		},
+	};
+
+	// Activate plugin which registers custom product collections
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'register-product-collection-tester'
+		);
+	} );
+
+	Object.entries( MY_REGISTERED_COLLECTIONS ).forEach(
+		( [ key, collection ] ) => {
+			for ( const template of collection.previewLabelTemplate ) {
+				test( `Collection "${ collection.name }" should show preview label in "${ template }"`, async ( {
+					pageObject,
+					editor,
+				} ) => {
+					await pageObject.goToEditorTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate(
+						key as Collections
+					);
+
+					const block = editor.canvas.getByLabel( collection.label );
+					const previewButtonLocator = block.getByTestId(
+						SELECTORS.previewButtonTestID
+					);
+
+					await expect( previewButtonLocator ).toBeVisible();
+				} );
+			}
+
+			test( `Collection "${ collection.name }" should not show preview label in a post`, async ( {
+				pageObject,
+				editor,
+			} ) => {
+				await pageObject.createNewPostAndInsertBlock(
+					key as Collections
+				);
+
+				const block = editor.canvas.getByLabel( collection.label );
+				const previewButtonLocator = block.getByTestId(
+					SELECTORS.previewButtonTestID
+				);
+
+				await expect( previewButtonLocator ).toBeHidden();
+			} );
+
+			test( `Collection "${ collection.name }" should not show preview label in Product Catalog template`, async ( {
+				pageObject,
+				editor,
+			} ) => {
+				await pageObject.goToProductCatalogAndInsertCollection(
+					key as Collections
+				);
+
+				const block = editor.canvas.getByLabel( collection.label );
+				const previewButtonLocator = block.getByTestId(
+					SELECTORS.previewButtonTestID
+				);
+
+				await expect( previewButtonLocator ).toBeHidden();
+			} );
+		}
+	);
 } );
