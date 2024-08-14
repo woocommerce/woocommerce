@@ -41,16 +41,7 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 				display: inline-block;
 			}
 
-			&:hover {
-				opacity: 1;
-
-				a {
-					color: inherit;
-					border: none;
-					text-decoration: none;
-				}
-			}
-
+			&:hover,
 			&.active {
 				color: inherit;
 				background: inherit;
@@ -68,6 +59,7 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 				display: block;
 				border-left-width: 2px;
 				border-bottom-width: 0;
+				margin-bottom: 2px;
 			}
 
 			&:first-child {
