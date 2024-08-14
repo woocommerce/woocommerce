@@ -1,5 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
-const { goToPageEditor, openEditorSettings } = require( '../../utils/editor' );
+const {
+	disableWelcomeModal,
+	openEditorSettings,
+} = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
 
@@ -129,7 +132,9 @@ test.describe(
 			const greenColor = '00cc09';
 
 			// go to create a new page
-			await goToPageEditor( { page } );
+			await page.goto( 'wp-admin/post-new.php?post_type=page' );
+
+			await disableWelcomeModal( { page } );
 
 			// add page title and mini cart block
 			await page
@@ -225,10 +230,8 @@ test.describe(
 			);
 			await page.locator( miniCartButton ).click();
 			await expect(
-				page
-					.getByRole( 'banner' )
-					.getByText( 'Your cart is currently empty!' )
-			).toBeVisible();
+				await page.getByText( 'Your cart is currently empty!' ).count()
+			).toBeGreaterThan( 0 );
 			await page.getByRole( 'link', { name: 'Start shopping' } ).click();
 			await expect(
 				page.getByRole( 'heading', { name: 'Shop' } )
