@@ -56,18 +56,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test template_is_eligible_for_fallback.
-	 *
-	 * @param string $input    The template slug.
-	 * @param bool   $expected The expected result.
-	 *
-	 * @dataProvider provideFallbackData
-	 */
-	public function test_template_is_eligible_for_fallback( $input, $expected ) {
-		$this->assertEquals( $expected, BlockTemplateUtils::template_is_eligible_for_fallback( $input ) );
-	}
-
-	/**
 	 * Test template_is_eligible_for_fallback_from_db when the template is not eligible.
 	 */
 	public function test_template_is_eligible_for_fallback_from_db_no_eligible_template() {
