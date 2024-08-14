@@ -7,7 +7,7 @@ const productPrice = '15.99';
 
 test.describe(
 	'WooCommerce Merchant Flow: Orders > Customer Payment Page',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@hpos' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
