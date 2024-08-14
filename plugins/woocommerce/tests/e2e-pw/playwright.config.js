@@ -53,7 +53,7 @@ if ( process.env.CI ) {
 	reporter.push( [
 		'html',
 		{
-			outputFolder: `${ testsResultsPath }/playwright-report`,
+			outputFolder: `${ testsRootPath }/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
