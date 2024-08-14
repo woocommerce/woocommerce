@@ -9,7 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { STORE_KEY } from '../data/constants';
 
-export const FORCE_WCCOM_ENDPOINT_ERRORS = 'forceWccomEndpointErrors';
+export const UPDATE_WCCOM_ENDPOINT_ERRORS_MODE = 'wccomRequestErrors';
 
 const OPTIONS = [
 	{ label: 'Timeout requests', value: 'timeout' },
@@ -18,27 +18,27 @@ const OPTIONS = [
 ];
 
 export const SetWccomErrros = () => {
-	const comingSoonMode = useSelect(
-		( select ) => select( STORE_KEY ).getComingSoonMode(),
+	const errorsMode = useSelect(
+		( select ) => select( STORE_KEY ).getWccomRequestErrorsMode(),
 		[]
 	);
 	const { updateCommandParams } = useDispatch( STORE_KEY );
 
 	function onChange( mode ) {
-		updateCommandParams( FORCE_WCCOM_ENDPOINT_ERRORS, {
+		updateCommandParams( UPDATE_WCCOM_ENDPOINT_ERRORS_MODE, {
 			mode,
 		} );
 	}
 
 	return (
 		<div className="select-description">
-			{ ! comingSoonMode ? (
+			{ ! errorsMode ? (
 				<p>Loading ...</p>
 			) : (
 				<SelectControl
 					label="Mode"
 					labelPosition="side"
-					value={ comingSoonMode }
+					value={ errorsMode }
 					onChange={ onChange }
 					options={ OPTIONS }
 				/>
