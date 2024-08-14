@@ -200,14 +200,15 @@ $muriel-box-shadow-8dp: 0 5px 5px -3px rgb(0 0 0 / 20%),
 		}
 
 		&.is-partially-checked {
-
-			.components-checkbox-control__input {
-				background: var(--wp-admin-theme-color);
-				border: $gap-smallest solid $white;
-				box-shadow: 0 0 0 1px #1e1e1e;
-
-				&:focus {
-					box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--wp-admin-theme-color);
+			.components-checkbox-control__input-container {
+				.components-checkbox-control__input[type="checkbox"] {
+					background: var(--wp-admin-theme-color);
+					border: $gap-smallest solid $white;
+					box-shadow: 0 0 0 1px #1e1e1e;
+					
+					&:focus {
+						box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--wp-admin-theme-color);
+					}
 				}
 			}
 		}
@@ -257,7 +258,6 @@ $muriel-box-shadow-8dp: 0 5px 5px -3px rgb(0 0 0 / 20%),
 				}
 			
 				appearance: none;
-				transition: 0.1s border-color ease-in-out;
 				@include reduce-motion("transition");
 			
 				&:checked,
