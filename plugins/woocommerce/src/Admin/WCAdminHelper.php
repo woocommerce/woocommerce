@@ -150,12 +150,12 @@ class WCAdminHelper {
 		}
 		$normalized_path = self::get_normalized_url_path( $url );
 
-		$exact_matches = array(
-			'?post_type=product'
+		$url_contains = array(
+			'post_type=product',
 		);
 
-		foreach ($exact_matches as $exact_match) {
-			if ( 0 === strpos( $normalized_path, $exact_match ) ) {
+		foreach ( $url_contains as $url_contain ) {
+			if ( str_contains( $normalized_path, $url_contain ) ) {
 				return true;
 			}
 		}
