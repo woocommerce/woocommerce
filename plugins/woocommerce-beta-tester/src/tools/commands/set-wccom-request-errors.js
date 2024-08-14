@@ -9,7 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { STORE_KEY } from '../data/constants';
 
-export const UPDATE_WCCOM_ENDPOINT_ERRORS_MODE = 'updateWccomRequestErrorsMode';
+export const UPDATE_WCCOM_REQUEST_ERRORS_MODE = 'updateWccomRequestErrorsMode';
 
 const OPTIONS = [
 	{ label: 'Timeout requests', value: 'timeout' },
@@ -17,7 +17,7 @@ const OPTIONS = [
 	{ label: 'Disabled', value: 'disabled' },
 ];
 
-export const SetWccomErrros = () => {
+export const SetWccomRequestErrros = () => {
 	const errorsMode = useSelect(
 		( select ) => select( STORE_KEY ).getWccomRequestErrorsMode(),
 		[]
@@ -25,7 +25,7 @@ export const SetWccomErrros = () => {
 	const { updateCommandParams } = useDispatch( STORE_KEY );
 
 	function onChange( mode ) {
-		updateCommandParams( UPDATE_WCCOM_ENDPOINT_ERRORS_MODE, {
+		updateCommandParams( UPDATE_WCCOM_REQUEST_ERRORS_MODE, {
 			mode,
 		} );
 	}

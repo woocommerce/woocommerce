@@ -17,9 +17,9 @@ import {
 } from './set-coming-soon-mode';
 
 import {
-	UPDATE_WCCOM_ENDPOINT_ERRORS_MODE,
-	SetWccomErrros,
-} from './set-wccom-errors';
+	UPDATE_WCCOM_REQUEST_ERRORS_MODE,
+	SetWccomRequestErrros,
+} from './set-wccom-request-errors';
 
 export default [
 	{
@@ -94,7 +94,7 @@ export default [
 	},
 	{
 		command: 'Force timeout errors on woocommerce.com requests',
-		description: <SetWccomErrros />,
-		action: UPDATE_WCCOM_ENDPOINT_ERRORS_MODE,
+		description: <SetWccomRequestErrros />,
+		action: UPDATE_WCCOM_REQUEST_ERRORS_MODE,
 	},
 ];
