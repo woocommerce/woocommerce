@@ -34,21 +34,30 @@ class WC_Beta_Tester_WCCOM_Requests {
         }
 
         if ( 'error' === $mode ) {
-            // For now.
-            return;
+            add_filter('pre_http_request', array( $this, 'override_http_request_error' ), 10, 3);
         }
 	}
 
     /**
-     * Override the http request timeout.
+     * Override the http request with a timeout.
      */
     public function override_http_request_timeout( $response, $args, $url ) {
-        if ( strpos( $url, 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions?country=AU' ) !== false ) {
-            error_log( $url );
-            // sleep( 6000 );
+        if ( strpos( $url, 'https://woocommerce.com/wp-json/' ) !== false ) {
+            sleep( 6000 );
         }
 
         // Otherwise, return the original value to allow the request to proceed
+        return $response;
+    }
+   
+    /**
+     * Override the http request with an error.
+     */
+    public function override_http_request_error( $response, $args, $url ) {
+        if ( strpos( $url, 'https://woocommerce.com/wp-json/' ) !== false ) {
+            return new WP_Error( 'timeout', 'Request timed out' );
+        }
+
         return $response;
     }
 }
