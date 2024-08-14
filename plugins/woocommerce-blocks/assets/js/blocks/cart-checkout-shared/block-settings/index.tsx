@@ -5,14 +5,11 @@ import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	ToggleControl,
-	Notice,
 	RadioControl,
 	TextControl,
 } from '@wordpress/components';
-import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { __ } from '@wordpress/i18n';
 import type { BlockAttributes } from '@wordpress/blocks';
-import { ADMIN_URL } from '@woocommerce/settings';
 
 export const BlockSettings = ( {
 	attributes,
@@ -96,24 +93,7 @@ const ExpressPaymentToggle = ( {
 			/>
 		);
 	}
-	return (
-		<Notice
-			status="info"
-			isDismissible={ false }
-			className="show-button-styles-notice"
-		>
-			<p className="wc-block-checkout__controls-text">
-				{ __(
-					'You can change the appearance of individual buttons in the respective payment extension settings page',
-					'woocommerce'
-				) }
-			</p>
-			<ExternalLinkCard
-				href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
-				title="Payment Settings"
-			/>
-		</Notice>
-	);
+	return null;
 };
 
 export const ExpressPaymentControls = ( {
@@ -126,20 +106,15 @@ export const ExpressPaymentControls = ( {
 	return (
 		<InspectorControls>
 			<PanelBody title={ __( 'Button Settings', 'woocommerce' ) }>
-				<p className="wc-block-checkout__controls-text">
-					{ __(
-						'These settings will override the plugin specific styles for these buttons',
-						'woocommerce'
-					) }
-				</p>
 				<ToggleControl
-					label={ __( 'Express Button Styles', 'woocommerce' ) }
+					label={ __( 'Apply uniform styles', 'woocommerce' ) }
 					checked={ attributes.showButtonStyles }
 					onChange={ () =>
 						setAttributes( {
 							showButtonStyles: ! attributes.showButtonStyles,
 						} )
 					}
+					help="Overrides styles set by gateways to ensure all express payment buttons have a consistent appearance."
 				/>
 				<ExpressPaymentToggle
 					attributes={ attributes }
