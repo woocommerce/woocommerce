@@ -45,18 +45,20 @@ export const getIssuesByLabel = async (
 		name?: string;
 		pageSize?: number;
 	},
-	label: string
+	label: string,
+	state: 'open' | 'closed' | 'all' = 'open'
 ): Promise< any > => {
 	const { owner, name, pageSize } = options;
 
 	try {
 		const { data } = await octokitWithAuth().request(
-			'GET /repos/{owner}/{repo}/issues{?labels}',
+			'GET /repos/{owner}/{repo}/issues{?labels,state}',
 			{
 				owner,
 				repo: name,
 				labels: label,
 				per_page: pageSize || 100,
+				state,
 			}
 		);
 		return {
