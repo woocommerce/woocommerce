@@ -128,7 +128,7 @@ class LaunchYourStore {
 			return;
 		}
 
-		if ( get_option( 'woocommerce_store_pages_only', false ) ) {
+		if ( false === get_option( 'woocommerce_store_pages_only', false ) ) {
 			// Coming soon already initialized.
 			return false;
 		}
