@@ -71,6 +71,7 @@ class RemoteLogger extends \WC_Log_Handler {
 				'wc_version'  => WC()->version,
 				'php_version' => phpversion(),
 				'wp_version'  => get_bloginfo( 'version' ),
+				'request_uri' => filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL ),
 			),
 		);
 
