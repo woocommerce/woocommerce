@@ -75,7 +75,7 @@ addFilter(
 ### API Reference
 
 - `init(config: RemoteLoggerConfig): void`: Initializes the remote logger with the given configuration.
-- `log(severity: LogSeverity, message: string, extraData?: object): Promise<void>`: Logs a message with the specified severity and optional extra data.
+- `log(severity: LogSeverity, message: string, extraData?: object): Promise<boolean>`: Logs a message with the specified severity and optional extra data.
 - `captureException(error: Error, extraData?: object): void`: Captures an error and sends it to the remote API.
 
 For more detailed information about types and interfaces, refer to the source code and inline documentation.

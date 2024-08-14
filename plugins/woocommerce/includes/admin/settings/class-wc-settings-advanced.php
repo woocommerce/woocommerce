@@ -38,13 +38,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_own_sections() {
-		return array(
+		$sections = array(
 			''                => __( 'Page setup', 'woocommerce' ),
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
 		);
+
+		if ( Features::is_enabled( 'blueprint' ) ) {
+			$sections['blueprint'] = __( 'Blueprint', 'woocommerce' );
+		}
+
+		return $sections;
 	}
 
 	/**
@@ -424,6 +430,27 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			);
 
 		return apply_filters( 'woocommerce_settings_rest_api', $settings );
+	}
+
+	/**
+	 * Get settings for the Blueprint section.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_blueprint_section() {
+		$settings =
+			array(
+				array(
+					'title' => esc_html__( 'Blueprint', 'woocommerce' ),
+					'type'  => 'title',
+				),
+				array(
+					'id'   => 'wc_settings_blueprint_slotfill',
+					'type' => 'slotfill_placeholder',
+				),
+			);
+
+		return $settings;
 	}
 
 	/**
