@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 /**
  * ProductMeta class.
  */
-class ProductMeta extends AbstractBlock {
+class ProductMeta extends AtomicBlock {
 	/**
 	 * Block name.
 	 *
