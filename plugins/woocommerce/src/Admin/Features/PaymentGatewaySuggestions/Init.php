@@ -62,6 +62,24 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
+	 * Gets the default suggestions.
+	 *
+	 * @return array
+	 */
+	public static function get_default_suggestions() {
+		/**
+		 * Allows filtering of payment gateway suggestion specs
+		 *
+		 * @since 6.4.0
+		 *
+		 * @param array Gateway specs.
+		 */
+		$default_specs = apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', DefaultPaymentGateways::get_all() );
+		$results       = EvaluateSuggestion::evaluate_specs( $default_specs );
+		return $results['suggestions'];
+	}
+
+	/**
 	 * Delete the specs transient.
 	 */
 	public static function delete_specs_transient() {
