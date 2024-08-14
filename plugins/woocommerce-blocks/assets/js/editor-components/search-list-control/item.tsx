@@ -75,7 +75,7 @@ export const SearchListItem = < T extends object = object >( {
 	);
 
 	useEffect( () => {
-		if ( hasChildren ) {
+		if ( hasChildren && isSelected ) {
 			setExpandedPanelId( item.id as number );
 		}
 	}, [ item ] );
