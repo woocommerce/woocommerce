@@ -129,14 +129,14 @@ const transformIntoBlocks = async ( page ) => {
 const publishPage = async ( page, pageTitle ) => {
 	await page
 		.getByRole( 'button', { name: 'Publish', exact: true } )
-		.dispatchEvent( 'click' );
+		.click( 'click' );
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
 		.getByRole( 'button', { name: 'Publish', exact: true } )
 		.click();
 	await expect(
-		page.getByText( `${ pageTitle } is now live.` )
-	).toBeVisible();
+		page.getByRole( 'region', { name: 'Editor publish' } )
+	).toContainText( `${ pageTitle } is now live.` );
 };
 
 module.exports = {
