@@ -297,7 +297,6 @@ class TaskLists {
 				$task_list->add_task( $task );
 			}
 		}
-
 	}
 
 	/**
@@ -318,7 +317,7 @@ class TaskLists {
 	public static function get_lists_by_ids( $ids ) {
 		return array_filter(
 			self::$lists,
-			function( $list ) use ( $ids ) {
+			function ( $list ) use ( $ids ) {
 				return in_array( $list->get_list_id(), $ids, true );
 			}
 		);
@@ -416,7 +415,7 @@ class TaskLists {
 		$remaining_tasks = array_values(
 			array_filter(
 				$setup_list->get_viewable_tasks(),
-				function( $task ) {
+				function ( $task ) {
 					return ! $task->is_complete();
 				}
 			)
@@ -443,7 +442,6 @@ class TaskLists {
 				break;
 			}
 		}
-
 	}
 
 	/**
