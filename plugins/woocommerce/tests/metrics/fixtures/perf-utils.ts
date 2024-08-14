@@ -1,8 +1,21 @@
+/**
+ * External dependencies
+ */
 import fs from 'fs';
 import path from 'path';
-import type { Page } from '@playwright/test';
+import { Page } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { readFile } from '../utils.js';
-import { expect } from '@wordpress/e2e-test-utils-playwright';
+
+declare global {
+	interface Window {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		wp: any;
+	}
+}
 
 type PerfUtilsConstructorProps = {
 	page: Page;
@@ -47,8 +60,8 @@ export class PerfUtils {
 		await this.page.getByRole( 'button', { name: 'Save draft' } ).click();
 
 		const postId = await this.page.waitForFunction( () => {
-			return new URL( window.location.href ).searchParams.get( 'post' )
-		})
+			return new URL( window.location.href ).searchParams.get( 'post' );
+		} );
 
 		return postId;
 	}
@@ -73,7 +86,7 @@ export class PerfUtils {
 	/**
 	 * Loads blocks into the editor canvas from an HTML asset.
 	 *
-	 * @param filepath Path to the HTML fixture.
+	 * @param filename Path to the HTML fixture.
 	 */
 	async loadBlocksFromHtml( filename: string ) {
 		const assetPath = path.join( process.env.ASSETS_PATH!, filename );
@@ -90,7 +103,8 @@ export class PerfUtils {
 			const { dispatch } = window.wp.data;
 			const blocks = parse( html );
 
-			blocks.forEach( ( block: any ) => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			blocks.forEach( ( block: { name: string; attributes: any } ) => {
 				if ( block.name === 'core/image' ) {
 					delete block.attributes.id;
 					delete block.attributes.url;
