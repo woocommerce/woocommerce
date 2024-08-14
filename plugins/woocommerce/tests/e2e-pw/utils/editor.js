@@ -1,6 +1,6 @@
 const { expect } = require( '@playwright/test' );
 
-const closeChoosePatternModal = async ( { page } ) => {
+const handleModal = async ( { page } ) => {
 	const closeModal = page.getByRole( 'button', {
 		name: 'Close',
 		exact: true,
@@ -140,7 +140,7 @@ const publishPage = async ( page, pageTitle ) => {
 };
 
 module.exports = {
-	closeChoosePatternModal,
+	handleModal,
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,

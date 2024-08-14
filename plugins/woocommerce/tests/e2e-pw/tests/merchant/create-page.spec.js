@@ -4,7 +4,7 @@ const {
 	fillPageTitle,
 	getCanvas,
 	publishPage,
-	closeChoosePatternModal,
+	handleModal,
 } = require( '../../utils/editor' );
 
 const test = baseTest.extend( {
@@ -19,7 +19,7 @@ test.describe(
 		test( 'can create new page', async ( { page, testPage } ) => {
 			await goToPageEditor( { page } );
 
-			await closeChoosePatternModal( { page } );
+			await handleModal( { page } );
 
 			await fillPageTitle( page, testPage.title );
 
