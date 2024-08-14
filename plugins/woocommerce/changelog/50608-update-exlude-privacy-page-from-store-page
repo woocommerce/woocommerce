@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Removed the privacy page from the store pages list to make it accessible when the 'Coming Soon' mode is enabled with the 'Restrict to store pages only' option.
-
