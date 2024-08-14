@@ -4,6 +4,7 @@ const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
+const { admin } = require( '../../../test-data/data' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -179,8 +180,8 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
