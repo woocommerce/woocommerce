@@ -919,6 +919,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'minLength'   => 5,
 				),
 				'slug'                  => array(
 					'description' => __( 'Product slug.', 'woocommerce' ),
@@ -995,6 +996,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'description' => __( 'Stock Keeping Unit.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'pattern'     => '^\S*$'
 				),
 				'global_unique_id'      => array(
 					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
@@ -1528,6 +1530,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					),
 				),
 			),
+			'required' => array( 'name' )
 		);
 
 		$post_type_obj = get_post_type_object( $this->post_type );
