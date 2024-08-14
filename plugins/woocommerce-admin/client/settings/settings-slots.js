@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { createSlotFill, SlotFillProvider } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
 
@@ -22,20 +22,23 @@ export const possiblyRenderSettingsSlots = () => {
 			id: 'wc_settings_site_visibility_slotfill',
 			scope: 'woocommerce-site-visibility-settings',
 		},
+		{
+			id: 'wc_settings_blueprint_slotfill',
+			scope: 'woocommerce-blueprint-settings',
+		},
 	];
 
 	slots.forEach( ( slot ) => {
 		const slotDomElement = document.getElementById( slot.id );
 
 		if ( slotDomElement ) {
-			render(
+			createRoot( slotDomElement ).render(
 				<>
 					<SlotFillProvider>
 						<Slot />
 						<PluginArea scope={ slot.scope } />
 					</SlotFillProvider>
-				</>,
-				slotDomElement
+				</>
 			);
 		}
 	} );

@@ -1,6 +1,6 @@
 # WooCommerce Admin Page Controller
 
-Pages rendered with React and pages that include the WooCommmerce Admin header (containing the Activity Panel) need to be registered with the WooCommerce Admin Page Controller.
+Pages rendered with React and pages that include the WooCommerce Admin header (containing the Activity Panel) need to be registered with the WooCommerce Admin Page Controller.
 
 This is the API you will use to add your own React-powered page, or to include the WooCommerce Admin header on your plugin pages.
 

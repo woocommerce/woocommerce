@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
+import { useBlockProps } from '@wordpress/block-editor';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import clsx from 'clsx';
 import { useEffect } from '@wordpress/element';
