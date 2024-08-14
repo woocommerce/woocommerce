@@ -59,21 +59,23 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		await expect(
-			page.getByLabel( 'Block: Products (Beta)' )
+			editor.canvas.getByLabel( 'Block: Products (Beta)' )
 		).toBeVisible();
 
-		await page.getByRole( 'button', { name: 'Start blank' } ).click();
-		await page.getByLabel( 'Title & Date' ).click();
+		await editor.canvas
+			.getByRole( 'button', { name: 'Start blank' } )
+			.click();
+		await editor.canvas.getByLabel( 'Title & Date' ).click();
 
 		await page
 			.getByRole( 'button', { name: 'Upgrade to Product Collection' } )
 			.click();
 
 		await expect(
-			page.getByLabel( 'Block: Products (Beta)' )
+			editor.canvas.getByLabel( 'Block: Products (Beta)' )
 		).toBeHidden();
 		await expect(
-			page.getByLabel( 'Block: Product Collection' ).first()
+			editor.canvas.getByLabel( 'Block: Product Collection' ).first()
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'button', { name: 'Choose collection' } )
