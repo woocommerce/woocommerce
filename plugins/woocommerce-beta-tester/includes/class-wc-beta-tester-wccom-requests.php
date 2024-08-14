@@ -30,11 +30,11 @@ class WC_Beta_Tester_WCCOM_Requests {
 		}
 
         if ( 'timeout' === $mode ) {
-            add_filter('pre_http_request', array( $this, 'override_http_request_timeout' ), 10, 3);
+            add_filter( 'pre_http_request', array( $this, 'override_http_request_timeout' ), 10, 3 );
         }
 
         if ( 'error' === $mode ) {
-            add_filter('pre_http_request', array( $this, 'override_http_request_error' ), 10, 3);
+            add_filter( 'pre_http_request', array( $this, 'override_http_request_error' ), 10, 3 );
         }
 	}
 
@@ -43,11 +43,11 @@ class WC_Beta_Tester_WCCOM_Requests {
      */
     public function override_http_request_timeout( $response, $args, $url ) {
         if ( strpos( $url, 'https://woocommerce.com/wp-json/' ) !== false ) {
-            sleep( 6000 );
+            sleep( 6 ); // 6 seconds
+            return new WP_Error( 'http_request_timeout', 'Mock timeout error' );
         }
 
-        // Otherwise, return the original value to allow the request to proceed
-        return $response;
+        return false;
     }
    
     /**
@@ -55,10 +55,19 @@ class WC_Beta_Tester_WCCOM_Requests {
      */
     public function override_http_request_error( $response, $args, $url ) {
         if ( strpos( $url, 'https://woocommerce.com/wp-json/' ) !== false ) {
-            return new WP_Error( 'timeout', 'Request timed out' );
+            return array(
+                'response' => array(
+                    'code'    => 500,
+                    'message' => 'Internal Server Error',
+                ),
+                'body'       => 'Server Error',
+                'headers'    => array(),
+                'cookies'    => array(),
+                'filename'   => null,
+            );
         }
 
-        return $response;
+        return false;
     }
 }
 
