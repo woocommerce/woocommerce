@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - CYS: avoid to enqueue Jetpack scripts [#50679](https://github.com/woocommerce/woocommerce/pull/50679)
 * Fix - Clear product unique ID (`global_unique_id`) when duplicating products. [#50629](https://github.com/woocommerce/woocommerce/pull/50629)
 * Fix - Resolved an issue that caused the page title and content text to display in the incorrect order on the Order Confirmation page. [#50592](https://github.com/woocommerce/woocommerce/pull/50592)
 * Fix - Customer Account - Maintain the size of the icon in smaller screens. [#50410](https://github.com/woocommerce/woocommerce/pull/50410)
