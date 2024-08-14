@@ -29,6 +29,7 @@ const program = new Command( 'ci-jobs' )
 		''
 	)
 	.option( '--json', 'Save the jobs in a json file.' )
+	.option( '--list', 'List jobs in table format console.' )
 	.action( async ( options ) => {
 		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
@@ -116,6 +117,21 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( `No report jobs to run.` );
 		}
 
+		if ( options.list ) {
+			Object.keys( jobs ).forEach( ( key ) => {
+				const job = jobs[ key ].map(
+					( { name, projectName, optional } ) => ( {
+						name: `${ key } - ${
+							key === 'lint' ? projectName : name
+						}`,
+						optional,
+					} )
+				);
+				// eslint-disable-next-line no-console
+				console.table( job );
+			} );
+		}
+
 		if ( options.json ) {
 			Logger.notice( 'Saving jobs to json file.' );
 
@@ -125,19 +141,30 @@ const program = new Command( 'ci-jobs' )
 						name,
 						projectName,
 						projectPath,
+						testType,
 						optional,
-						events,
 					} ) => ( {
 						name,
 						projectName,
 						projectPath,
+						testType,
 						optional,
-						events,
 					} )
 				);
 			} );
 
-			writeFileSync( 'jobs.json', JSON.stringify( jobs, null, 2 ) );
+			writeFileSync(
+				'jobs.json',
+				JSON.stringify(
+					{
+						baseRef: options.baseRef,
+						event: options.event,
+						...jobs,
+					},
+					null,
+					2
+				)
+			);
 		}
 	} );
 
