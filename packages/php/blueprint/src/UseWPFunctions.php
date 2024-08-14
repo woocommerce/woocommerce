@@ -279,7 +279,9 @@ trait UseWPFunctions {
 	 * @return mixed
 	 */
 	public function wp_filesystem_put_contents( $file_path, $content ) {
+		global $wp_filesystem;
 		$this->wp_init_filesystem();
-		return \wp_filesystem()->put_contents( $file_path, $content );
+
+		return $wp_filesystem->put_contents( $file_path, $content );
 	}
 }
