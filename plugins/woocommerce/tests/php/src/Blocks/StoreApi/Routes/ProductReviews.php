@@ -23,6 +23,12 @@ class ProductReviews extends ControllerTestCase {
 
 		$fixtures = new FixtureData();
 
+		$this->product_category = $fixtures->get_product_category(
+			array(
+				'name' => 'Test Category 1',
+			)
+		);
+
 		$this->products = array(
 			$fixtures->get_simple_product(
 				array(
@@ -34,6 +40,7 @@ class ProductReviews extends ControllerTestCase {
 				array(
 					'name'          => 'Test Product 2',
 					'regular_price' => 100,
+					'category_ids'  => array( $this->product_category['term_id'] ),
 				)
 			),
 		);
@@ -110,21 +117,13 @@ class ProductReviews extends ControllerTestCase {
 	 * Test getting reviews from a specific category.
 	 */
 	public function test_get_items_with_category_id_param() {
-		$request            = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
-		$product_categories = wp_get_post_terms(
-			$this->products[1]->get_id(),
-			'product_cat',
-			array(
-				'fields' => 'ids',
-			)
-		);
-		$request->set_param( 'category_id', (string) $product_categories[0] );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' );
+		$request->set_param( 'category_id', (string) $this->product_category['term_id'] );
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertCount( 2, $data, 'Unexpected item count.' );
+		$this->assertCount( 1, $data, 'Unexpected item count.' );
 		$this->assertSame( 4, $data[0]['rating'] );
-		$this->assertSame( 5, $data[1]['rating'] );
 	}
 }
