@@ -28,7 +28,7 @@ const disableWelcomeModal = async ( { page } ) => {
 const openEditorSettings = async ( { page } ) => {
 	// Open Settings sidebar if closed
 	if ( await page.getByLabel( 'Editor Settings' ).isVisible() ) {
-		console.log( 'Editor Settings is open, skipping action.' );
+		console.log( 'Editor Settings sidebar is already open' );
 	} else {
 		await page.getByLabel( 'Settings', { exact: true } ).click();
 	}
