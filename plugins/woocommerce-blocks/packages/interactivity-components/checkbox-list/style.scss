@@ -1,33 +1,69 @@
-//  Import styles we need to render the checkbox list and checkbox control.
-@import "../../../packages/components/checkbox-list/style";
-@import "../../../packages/components/checkbox-control/style";
-
-.wc-block-stock-filter-list {
+:where(.wc-block-interactivity-components-checkbox-list__list) {
+	list-style: none outside;
 	margin: 0;
-
-	li {
-		label {
-			cursor: pointer;
-		}
-
-		input {
-			cursor: pointer;
-			display: inline-block;
-		}
-	}
-
-	.wc-block-components-checkbox-list {
-		margin: 0;
-
-		li {
-			label {
-				cursor: pointer;
-			}
-
-			input {
-				cursor: pointer;
-				display: inline-block;
-			}
-		}
-	}
+	padding: 0;
 }
+
+.wc-block-interactivity-components-checkbox-list__item.hidden {
+	display: none;
+}
+
+
+:where(.wc-block-interactivity-components-checkbox-list__label) {
+	align-items: center;
+	display: flex;
+	gap: 0.625em;
+}
+
+.wc-block-interactivity-components-checkbox-list__item .wc-block-interactivity-components-checkbox-list__label {
+	margin-bottom: 0;
+}
+
+:where(.wc-block-interactivity-components-checkbox-list__input-wrapper) {
+	display: block;
+	position: relative;
+}
+
+:where(.wc-block-interactivity-components-checkbox-list__input) {
+	appearance: none;
+	background: currentColor;
+	border-radius: 2px;
+	border: none;
+	color: inherit;
+	display: block;
+	font-size: inherit;
+	height: 1em;
+	margin: 0;
+	opacity: 0.1;
+	width: 1em;
+}
+
+.wc-block-interactivity-components-checkbox-list__input:checked + .wc-block-interactivity-components-checkbox-list__mark {
+	display: block;
+	pointer-events: none;
+}
+
+.wc-block-interactivity-components-checkbox-list__input:focus {
+	outline-width: 1px;
+}
+
+:where(.wc-block-interactivity-components-checkbox-list__mark) {
+	box-sizing: border-box;
+	display: none;
+	height: 1em;
+	left: 0;
+	padding: 0.2em;
+	position: absolute;
+	top: 0;
+	width: 1em;
+}
+
+:where(.wc-block-interactivity-components-checkbox-list__show-more) {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.wc-block-interactivity-components-checkbox-list__show-more.hidden {
+	display: none;
+}
+
