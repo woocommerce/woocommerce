@@ -688,6 +688,25 @@ class StyleAttributesUtils {
 	}
 
 	/**
+	 * Get extra CSS classes from attributes.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return array
+	 */
+	public static function get_classes_from_attributes( $attributes ) {
+
+		$extra_css_classes = $attributes['className'] ?? '';
+
+		if ( '' !== $extra_css_classes ) {
+			return array(
+				'class' => $extra_css_classes,
+				'style' => null,
+			);
+		}
+		return self::EMPTY_STYLE;
+	}
+
+	/**
 	 * Get classes and styles from attributes.
 	 *
 	 * Excludes link_color and link_hover_color since those should not apply to the container.
@@ -717,6 +736,7 @@ class StyleAttributesUtils {
 			'text_color'       => self::get_text_color_class_and_style( $attributes ),
 			'text_decoration'  => self::get_text_decoration_class_and_style( $attributes ),
 			'text_transform'   => self::get_text_transform_class_and_style( $attributes ),
+			'extra_classes'    => self::get_classes_from_attributes( $attributes ),
 		);
 
 		if ( ! empty( $properties ) ) {
