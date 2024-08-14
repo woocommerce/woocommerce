@@ -37,6 +37,12 @@ const couponData = {
 		amount: '60',
 		excludeProductCategories: [ 'Uncategorized' ],
 	},
+	excludeProductBrands: {
+		code: `excludeProductBrands-${ new Date().getTime().toString() }`,
+		description: 'Exclude product brands coupon',
+		amount: '65',
+		excludeProductBrands: [ 'WooCommerce Apparels' ],
+	},
 	products: {
 		code: `products-${ new Date().getTime().toString() }`,
 		description: 'Products coupon',
@@ -198,6 +204,22 @@ test.describe( 'Restricted coupon management', { tag: '@services' }, () => {
 						.pressSequentially( 'Uncategorized' );
 					await page
 						.getByRole( 'option', { name: 'Uncategorized' } )
+						.click();
+				} );
+			}
+			// set exclude product brands
+			if ( couponType === 'excludeProductBrands' ) {
+				await test.step( 'set exclude product brands coupon', async () => {
+					await page
+						.getByRole( 'link', {
+							name: 'Usage restriction',
+						} )
+						.click();
+					await page
+						.getByPlaceholder( 'No brands' )
+						.pressSequentially( 'WooCommerce Apparels' );
+					await page
+						.getByRole( 'option', { name: 'WooCommerce Apparels' } )
 						.click();
 				} );
 			}

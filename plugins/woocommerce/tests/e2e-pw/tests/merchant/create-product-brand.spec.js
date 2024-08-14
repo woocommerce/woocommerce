@@ -139,87 +139,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 				.getByRole( 'cell', { name, exact: true } )
 		).toHaveCount( 0 );
 	};
-
-	/**
-	 * Go to the Coupons page.
-	 *
-	 * You must be logged in first in the wp-admin dashboard before calling this function.
-	 *
-	 * This will visit the Marketing page first, and then click on the Coupons submenu item.
-	 * This is to workaround the hover menu for now.
-	 */
-	const goToCouponsPage = async () => {
-		await page.getByRole( 'link', { name: 'Marketing' } ).click();
-		await page
-			.locator( '#toplevel_page_woocommerce-marketing' )
-			.getByRole( 'link', { name: 'Coupons' } )
-			.click();
-
-		// assert that we are now in the Coupons page.
-		await expect(
-			page
-				.locator( '#wpbody-content' )
-				.getByRole( 'heading', { name: 'Coupons', exact: true } )
-		).toBeVisible();
-	};
-
-	/**
-	 * Add a new coupon.
-	 *
-	 * You must be in the Coupons page before calling this function.
-	 * To do so, call `goToCouponsPage()` first.
-	 *
-	 * After adding the coupon, you will be redirected to the Coupons page.
-	 */
-	const addCoupon = async ( {
-		code,
-		description,
-		general: { discountType, couponAmount },
-		usageRestriction: { productBrands, excludeBrands },
-	} ) => {
-		await page.getByRole( 'link', { name: 'Add coupon' } ).click();
-
-		await page.getByLabel( 'Coupon code' ).fill( code );
-		await page
-			.getByPlaceholder( 'Description (optional)' )
-			.fill( description );
-
-		await page.getByLabel( 'Discount type' ).selectOption( discountType );
-		await page.getByLabel( 'Coupon amount' ).fill( couponAmount );
-
-		await page.getByRole( 'link', { name: 'Usage restriction' } ).click();
-
-		for ( const brand of productBrands ) {
-			await page
-				.locator( 'select#product_brands + span.select2' )
-				.getByRole( 'textbox' )
-				.click();
-			await page
-				.getByRole( 'option', { name: brand, exact: true } )
-				.click();
-		}
-
-		for ( const brand of excludeBrands ) {
-			await page
-				.locator( 'select#exclude_product_brands + span.select2' )
-				.getByRole( 'textbox' )
-				.click();
-			await page
-				.getByRole( 'option', { name: brand, exact: true } )
-				.click();
-		}
-
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-
-		// assert that we see the "Coupon updated." notice message.
-		await expect( page.getByText( 'Coupon updated.' ) ).toBeVisible();
-
-		// go back to the Coupons page.
-		await goToCouponsPage();
-	};
-
+	
 	await goToBrandsPage();
 	await createBrandIfNotExist(
 		'WooCommerce',
@@ -258,18 +178,4 @@ test( 'Merchant can add brands', async ( { page } ) => {
 
 	// Delete the dummy child brand "WooCommerce Dummy Edited".
 	await deleteBrand( 'WooCommerce Dummy Edited' );
-
-	await goToCouponsPage();
-	await addCoupon( {
-		code: '10OFFWOOAPPARELS',
-		description: 'USD 10 off for WooCommerce apparels.',
-		general: {
-			discountType: 'Fixed cart discount',
-			couponAmount: '10',
-		},
-		usageRestriction: {
-			productBrands: [ 'WooCommerce Apparels' ],
-			excludeBrands: [],
-		},
-	} );
 } );
