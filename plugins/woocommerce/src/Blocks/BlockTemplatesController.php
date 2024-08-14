@@ -53,6 +53,10 @@ class BlockTemplatesController {
 	 * This function is used on the `pre_get_block_template` hook to return the fallback template from the db in case
 	 * the template is eligible for it.
 	 *
+	 * Currently, the Products by Category, Products by Tag and Products by Attribute templates fall back to the
+	 * Product Catalog template. That means that if there are customizations in the Product Catalog template,
+	 * they are also reflected in the other templates as long as they haven't been customized as well.
+	 *
 	 * @param \WP_Block_Template|null $template Block template object to short-circuit the default query,
 	 *                                          or null to allow WP to run its normal queries.
 	 * @param string                  $id Template unique identifier (example: theme_slug//template_slug).
