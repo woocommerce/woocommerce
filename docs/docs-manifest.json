@@ -19,23 +19,29 @@
       "category_title": "Block Theme Development",
       "posts": [
         {
-          "post_title": "Theming",
+          "post_title": "Theming for Woo blocks",
+          "menu_title": "Theming for Woo Blocks",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/theming-woo-blocks.md",
-          "hash": "fcae63df55027e0307ee1e2e8bab8956c065c13bd05131a0342ab729be6022ac",
+          "hash": "4e0614ad8cb28735cfc8a3e3331c28386d1ceeadb1d1ce8fe529f2846e06b631",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/theming-woo-blocks.md",
           "id": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
         },
         {
-          "post_title": "CSS Styling",
+          "post_title": "CSS styling for themes",
+          "menu_title": "CSS Styling for Themes",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/css-styling.md",
-          "hash": "e6bc4dc895a0884481ee59172ba024797f7f05fde95e4cd56f66e54e530b1224",
+          "hash": "422b2e0008ad1809a50c61851abe5c43c6f6743f216bcd9ba7dc5251f65e749d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/css-styling.md",
           "id": "55b3452119141753ee1eaeee5f8d471ab362945b"
         },
         {
-          "post_title": "Cart and Checkout Blocks Theming <!-- omit in toc -->",
+          "post_title": "Cart and checkout blocks theming",
+          "menu_title": "Cart and Checkout Blocks Theming",
+          "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/cart-and-checkout.md",
-          "hash": "c37cbad9755420c75d41c598ebe48943d59c1a1644e53be899481ebc58c08c6a",
+          "hash": "bb65130caa017d16d84226d0383d5441113ebb1c4a7e5f05c52a6ebf56514aa3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/cart-and-checkout.md",
           "id": "8ff3a904e51ef1a07a0a6b0c77b0134a2cb0a8e5"
         }
@@ -1725,5 +1731,5 @@
       "categories": []
     }
   ],
-  "hash": "631982d472fa145dc945d33f92c6f520605c41665e651aea2569d78907e30897"
+  "hash": "f9d109f3f4a559fd581e0352724943500327c36c821086f3be280e73a6e33fb7"
 }
