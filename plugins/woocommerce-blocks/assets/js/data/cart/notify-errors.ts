@@ -7,12 +7,10 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { dispatch } from '@wordpress/data';
 
 /**
- * This function is used to normalize errors into an array of ApiErrorResponse objects.
+ * This function is used to normalize errors into an array of valid ApiErrorResponse objects.
  */
-const filterValidErrors = ( errors: ApiErrorResponse | ApiErrorResponse[] ) => {
-	return isApiErrorResponse( errors )
-		? [ errors ]
-		: errors.filter( isApiErrorResponse );
+const filterValidErrors = ( errors: ApiErrorResponse[] ) => {
+	return errors.filter( isApiErrorResponse );
 };
 
 /**
@@ -43,8 +41,8 @@ const dismissNoticesFromErrors = ( errors: ApiErrorResponse[] ) => {
  * This function is used to notify the user of cart errors/conflicts.
  */
 export const notifyCartErrors = (
-	errors: ApiErrorResponse | ApiErrorResponse[] | null = null,
-	oldErrors: ApiErrorResponse | ApiErrorResponse[] | null = null
+	errors: ApiErrorResponse[] | null = null,
+	oldErrors: ApiErrorResponse[] | null = null
 ) => {
 	if ( oldErrors !== null ) {
 		dismissNoticesFromErrors( filterValidErrors( oldErrors ) );
