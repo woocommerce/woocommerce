@@ -150,12 +150,14 @@ class WCAdminHelper {
 		}
 		$normalized_path = self::get_normalized_url_path( $url );
 
-		$url_contains = array(
-			'post_type=product',
+		$params = array(
+			'post_type' => 'product',
 		);
 
-		foreach ( $url_contains as $url_contain ) {
-			if ( str_contains( $normalized_path, $url_contain ) ) {
+		parse_str( parse_url( $url, PHP_URL_QUERY ), $url_params );
+
+		foreach ( $params as $key => $param ) {
+			if ( isset( $url_params[ $key ] ) && $url_params[ $key ] === $param ) {
 				return true;
 			}
 		}
