@@ -12,7 +12,7 @@ import { STORE_KEY } from '../data/constants';
 export const UPDATE_WCCOM_REQUEST_ERRORS_MODE = 'updateWccomRequestErrorsMode';
 
 const OPTIONS = [
-	{ label: 'Timeout', value: 'timeout' },
+	{ label: 'Timeout after 6 seconds', value: 'timeout' },
 	{ label: '500', value: 'error' },
 	{ label: 'Disabled', value: 'disabled' },
 ];
