@@ -336,6 +336,7 @@ final class BlockTypesController {
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
+			'ProductMeta',
 			'ProductNew',
 			'ProductOnSale',
 			'ProductPrice',
