@@ -12,8 +12,8 @@ import { STORE_KEY } from '../data/constants';
 export const UPDATE_WCCOM_REQUEST_ERRORS_MODE = 'updateWccomRequestErrorsMode';
 
 const OPTIONS = [
-	{ label: 'Timeout requests', value: 'timeout' },
-	{ label: '500 error', value: 'error' },
+	{ label: 'Timeout', value: 'timeout' },
+	{ label: '500', value: 'error' },
 	{ label: 'Disabled', value: 'disabled' },
 ];
 
@@ -36,7 +36,7 @@ export const SetWccomRequestErrros = () => {
 				<p>Loading ...</p>
 			) : (
 				<SelectControl
-					label="Mode"
+					label="Error Mode"
 					labelPosition="side"
 					value={ errorsMode }
 					onChange={ onChange }

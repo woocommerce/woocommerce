@@ -93,7 +93,7 @@ export default [
 		action: UPDATE_COMING_SOON_MODE_ACTION_NAME,
 	},
 	{
-		command: 'Force timeout errors on woocommerce.com requests',
+		command: 'Force errors on woocommerce.com requests',
 		description: <SetWccomRequestErrros />,
 		action: UPDATE_WCCOM_REQUEST_ERRORS_MODE,
 	},
