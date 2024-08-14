@@ -9,7 +9,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { STORE_KEY } from '../data/constants';
 
-export const UPDATE_WCCOM_ENDPOINT_ERRORS_MODE = 'wccomRequestErrors';
+export const UPDATE_WCCOM_ENDPOINT_ERRORS_MODE = 'updateWccomRequestErrorsMode';
 
 const OPTIONS = [
 	{ label: 'Timeout requests', value: 'timeout' },

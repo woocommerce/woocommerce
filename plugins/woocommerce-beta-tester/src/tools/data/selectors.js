@@ -39,5 +39,5 @@ export function getComingSoonMode( state ) {
 }
 
 export function getWccomRequestErrorsMode( state ) {
-	return state.params.wccomRequestErrors.mode;
+	return state.params.updateWccomRequestErrorsMode.mode;
 }

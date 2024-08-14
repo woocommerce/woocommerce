@@ -13,7 +13,7 @@ const DEFAULT_STATE = {
 		updateComingSoonMode: {},
 		updateBlockTemplateLoggingThreshold: {},
 		runSelectedUpdateCallbacks: {},
-		wccomRequestErrors: {},
+		updateWccomRequestErrorsMode: {},
 	},
 	status: '',
 	dbUpdateVersions: [],
