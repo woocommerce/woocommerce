@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Ensure that the orders REST endpoint behaves the same as the UI when updating an order to remove a line item.
+In respect of restoring stock levels, ensure that the orders REST endpoint behaves the same as the UI when removing line items.
