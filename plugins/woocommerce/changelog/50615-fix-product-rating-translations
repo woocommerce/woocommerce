@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Fix "Related products translations" - Avoid registering blocks in the wrong context.
+Fix translation - Avoid registering blocks in the wrong context.
