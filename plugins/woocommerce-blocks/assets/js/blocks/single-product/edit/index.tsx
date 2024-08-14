@@ -53,8 +53,9 @@ const Editor = ( {
 	const [ isEditing, setIsEditing ] = useState( ! productId );
 	const blockProps = useBlockProps();
 
-	const block = useSelect( ( select ) =>
-		select( 'core/blocks' ).getBlockType( metadata.name )
+	const block = useSelect(
+		( select ) => select( 'core/blocks' ).getBlockType( metadata.name ),
+		[]
 	);
 
 	const productPreview = useSelect( ( select ) => {
