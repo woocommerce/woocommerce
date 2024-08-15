@@ -25,7 +25,8 @@
 			"width": true,
 			"__experimentalSkipSerialization": true
 		},
-		"multiple": true
+		"multiple": true,
+		"interactivity": true
 	},
 	"attributes": {
 		"alt": {
