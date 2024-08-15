@@ -283,6 +283,8 @@ const entries = {
 		blocksComponents: './packages/components/index.ts',
 		'mini-cart-component':
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
+		'mini-cart-interactivity':
+			'./assets/js/blocks/mini-cart-interactivity/frontend.ts',
 	},
 };
 
