@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { createRoot } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
  */
 import { RegionPicker } from './region-picker';
 import { ShippingCurrencyContext } from './currency-context';
-import { recursivelyTransformLabels, decodeHTMLEntities } from './utils';
+import { recursivelyTransformLabels } from './utils';
 
 const shippingZoneRegionPickerRoot = document.getElementById(
 	'wc-shipping-zone-region-picker-root'
@@ -17,7 +18,7 @@ const shippingZoneRegionPickerRoot = document.getElementById(
 const options =
 	recursivelyTransformLabels(
 		window.shippingZoneMethodsLocalizeScript?.region_options,
-		decodeHTMLEntities
+		decodeEntities
 	) ?? [];
 const initialValues = window.shippingZoneMethodsLocalizeScript?.locations ?? [];
 

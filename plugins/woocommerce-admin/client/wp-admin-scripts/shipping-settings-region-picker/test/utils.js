@@ -1,7 +1,11 @@
 /**
+ * External dependencies
+ */
+import { decodeEntities } from '@wordpress/html-entities';
+/**
  * Internal dependencies
  */
-import { recursivelyTransformLabels, decodeHTMLEntities } from '../utils';
+import { recursivelyTransformLabels } from '../utils';
 
 describe( 'recursivelyTransformLabels', () => {
 	function toUpperCase( label ) {
@@ -89,63 +93,7 @@ describe( 'recursivelyTransformLabels', () => {
 	} );
 } );
 
-describe( 'decodeHTMLEntities', () => {
-	test( 'should return the same string if there are no HTML entities', () => {
-		const input = 'Hello, World!';
-		const expectedOutput = 'Hello, World!';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-	test( 'should decode HTML entity for é', () => {
-		const input = '&eacute;';
-		const expectedOutput = 'é';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-
-	test( 'should decode HTML entity for à', () => {
-		const input = '&agrave;';
-		const expectedOutput = 'à';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-
-	test( 'should decode HTML entity for ñ', () => {
-		const input = '&ntilde;';
-		const expectedOutput = 'ñ';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-
-	test( 'should decode HTML entity for ü', () => {
-		const input = '&uuml;';
-		const expectedOutput = 'ü';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-
-	test( 'should decode multiple HTML entities with accents', () => {
-		const input = '&eacute;&agrave;&ntilde;&uuml;';
-		const expectedOutput = 'éàñü';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-
-	test( 'should decode a string with HTML entities representing the word Curaçao', () => {
-		const input = 'Cura&ccedil;ao';
-		const expectedOutput = 'Curaçao';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-
-	test( 'should decode a string with mixed content including HTML entities with accents', () => {
-		const input =
-			'Café &eacute;clair &agrave; la carte &ntilde; and pi&ntilde;a colada';
-		const expectedOutput = 'Café éclair à la carte ñ and piña colada';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-
-	test( 'should decode a string with multiple HTML entities of the same character with accents', () => {
-		const input = '&eacute;&eacute;&eacute;';
-		const expectedOutput = 'ééé';
-		expect( decodeHTMLEntities( input ) ).toBe( expectedOutput );
-	} );
-} );
-
-describe( 'recursivelyTransformLabels and decodeHTMLEntities should work together', () => {
+describe( 'recursivelyTransformLabels and decodeEntities should work together', () => {
 	test( 'Deeply nested nodes', () => {
 		const node = {
 			label: 'root',
@@ -161,7 +109,7 @@ describe( 'recursivelyTransformLabels and decodeHTMLEntities should work togethe
 				{ label: 'branch2' },
 			],
 		};
-		const result = recursivelyTransformLabels( node, decodeHTMLEntities );
+		const result = recursivelyTransformLabels( node, decodeEntities );
 		expect( result.label ).toBe( 'root' );
 		expect( result.children[ 0 ].label ).toBe( 'branch1' );
 		expect( result.children[ 0 ].value ).toBe( 'br1' );
