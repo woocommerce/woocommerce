@@ -170,7 +170,7 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		'woocommerce-MyAccount-navigation-link--' . $endpoint,
 	);
 
-	if ( wc_is_current_account_menu_item( $endpoint) ) {
+	if ( wc_is_current_account_menu_item( $endpoint ) ) {
 		$classes[] = 'is-active';
 	}
 
