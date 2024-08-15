@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Features;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
@@ -163,7 +164,8 @@ class FeaturesController {
 	 */
 	private function get_feature_definitions() {
 		if ( empty( $this->features ) ) {
-			$legacy_features = array(
+			$alpha_feature_testing_is_enabled = Constants::is_true( 'WOOCOMMERCE_ENABLE_ALPHA_FEATURE_TESTING' );
+			$legacy_features                  = array(
 				'analytics'              => array(
 					'name'               => __( 'Analytics', 'woocommerce' ),
 					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
@@ -243,7 +245,22 @@ class FeaturesController {
 					),
 					'is_experimental'    => true,
 					'enabled_by_default' => false,
-					'is_legacy'          => false,
+					'is_legacy'          => true,
+					'disable_ui'         => ! $alpha_feature_testing_is_enabled,
+					'setting'            => array(
+						'disabled' => ! ( $alpha_feature_testing_is_enabled && wp_using_ext_object_cache() ),
+						'desc_tip' => function () {
+							$string = '';
+							if ( ! wp_using_ext_object_cache() ) {
+								$string = __(
+									'⚠ This feature is currently only suggested with the use of external object caching.',
+									'woocommerce'
+								);
+							}
+
+							return $string;
+						},
+					),
 					'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 				),
 				'remote_logging'         => array(
