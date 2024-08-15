@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prevent initializing coming soon feature if it's already initialized
