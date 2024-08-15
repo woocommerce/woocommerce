@@ -6,6 +6,7 @@
  namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\Jetpack\Constants;
 
 /**
  * Contains backend logic for the Settings feature.
@@ -41,6 +42,8 @@ class Settings {
 		// Run this after the original WooCommerce settings have been added.
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 60 );
 		add_action( 'init', array( $this, 'redirect_core_settings_pages' ) );
+
+		wp_enqueue_script( 'wc-jquery-in-react' );
 	}
 
 	/**

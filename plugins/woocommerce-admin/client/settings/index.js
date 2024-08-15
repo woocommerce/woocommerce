@@ -58,6 +58,11 @@ const Settings = ( { params } ) => {
 		setSidebarVisisble( false );
 	}, [ params.page, section ] );
 
+	useEffect( () => {
+		const event = new Event( 'reactRendered' );
+		window.dispatchEvent( event );
+	}, [] );
+
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;
 	}
