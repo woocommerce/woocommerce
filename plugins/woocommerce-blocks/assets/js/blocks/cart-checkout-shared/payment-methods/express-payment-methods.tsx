@@ -15,15 +15,30 @@ import {
 import { useEditorContext } from '@woocommerce/base-context';
 import deprecated from '@wordpress/deprecated';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 /**
  * Internal dependencies
  */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
+import { useExpressCheckoutContext } from '../../checkout/inner-blocks/checkout-express-payment-block/context';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
+
+	const { hasDarkControls } = useCheckoutBlockContext();
+	const { showButtonStyles, buttonHeight, buttonBorderRadius } =
+		useExpressCheckoutContext();
+
+	// API for passing styles to express payment buttons
+	const buttonAttributes = showButtonStyles
+		? {
+				height: buttonHeight,
+				borderRadius: buttonBorderRadius,
+				darkMode: hasDarkControls,
+		  }
+		: undefined;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
@@ -127,6 +142,20 @@ const ExpressPaymentMethods = () => {
 		[ __internalSetExpressPaymentError, onExpressPaymentError ]
 	);
 
+	// In the editor, we apply styles to the button containers to show the changes of the height and border-radius controls,
+	// which would be passed to the payment APIs on the front-end
+	const stylesForButtonContainers = isEditor
+		? {
+				height: `${ showButtonStyles ? buttonHeight : '48' }px`,
+				borderRadius: `${
+					showButtonStyles ? buttonBorderRadius : '4'
+				}px`,
+				pointerEvents: 'none',
+				userSelect: 'none',
+				ariaDisabled: true,
+		  }
+		: {};
+
 	/**
 	 * @todo Find a way to Memoize Express Payment Method Content
 	 *
@@ -142,7 +171,11 @@ const ExpressPaymentMethods = () => {
 					? paymentMethod.edit
 					: paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
-					<li key={ id } id={ `express-payment-method-${ id }` }>
+					<li
+						key={ id }
+						id={ `express-payment-method-${ id }` }
+						style={ stylesForButtonContainers }
+					>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
 							onClick: onExpressPaymentClick( id ),
@@ -150,6 +183,7 @@ const ExpressPaymentMethods = () => {
 							onError: onExpressPaymentError,
 							setExpressPaymentError:
 								deprecatedSetExpressPaymentError,
+							buttonAttributes,
 						} ) }
 					</li>
 				) : null;
