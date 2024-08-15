@@ -72,12 +72,11 @@ function formatPrice( value: unknown, minorUnit: number ) {
 }
 
 // TODO There *has* to be a better way of getting this... Currently depending on `body` to get the `term-XYZ` CSS class...
-const getCategoryId = () =>
-	// @ts-ignore TS doesn't think `DOMTokenList` is iterable?
-	[ ...document.body.classList ]
-		.map( ( className ) => /term-(\d+)/.exec( className ) )
-		.filter( ( match ) => match !== null )
-		.map( ( match ) => match[ 1 ] )[ 0 ];
+const getCategoryId = () => {
+	const categoryIdString =
+		document.body.className.match( /term-(\d+)/ )?.[ 1 ];
+	return categoryIdString ? parseInt( categoryIdString ) : categoryIdString;
+};
 
 interface PriceFilterBlockProps {
 	/**
