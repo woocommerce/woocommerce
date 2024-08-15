@@ -51,7 +51,7 @@ const ExpressPaymentButtonStyleControls = ( {
 	return (
 		<>
 			<RadioControl
-				label={ __( 'Button Size', 'woocommerce' ) }
+				label={ __( 'Button size', 'woocommerce' ) }
 				selected={ buttonHeight }
 				options={ [
 					{ label: 'Small (40px)', value: '40' },
@@ -64,7 +64,7 @@ const ExpressPaymentButtonStyleControls = ( {
 			/>
 			<div className="border-radius-control-container">
 				<TextControl
-					label={ __( 'Button Border Radius', 'woocommerce' ) }
+					label={ __( 'Button border radius', 'woocommerce' ) }
 					value={ buttonBorderRadius }
 					onChange={ ( newValue: string ) =>
 						setAttributes( {
@@ -105,7 +105,7 @@ export const ExpressPaymentControls = ( {
 } ) => {
 	return (
 		<InspectorControls>
-			<PanelBody title={ __( 'Button Settings', 'woocommerce' ) }>
+			<PanelBody title={ __( 'Button settings', 'woocommerce' ) }>
 				<ToggleControl
 					label={ __( 'Apply uniform styles', 'woocommerce' ) }
 					checked={ attributes.showButtonStyles }
@@ -114,7 +114,10 @@ export const ExpressPaymentControls = ( {
 							showButtonStyles: ! attributes.showButtonStyles,
 						} )
 					}
-					help="Overrides styles set by gateways to ensure all express payment buttons have a consistent appearance."
+					help={ __(
+						'Overrides styles set by gateways to ensure all express payment buttons have a consistent appearance.',
+						'woocommerce'
+					) }
 				/>
 				<ExpressPaymentToggle
 					attributes={ attributes }

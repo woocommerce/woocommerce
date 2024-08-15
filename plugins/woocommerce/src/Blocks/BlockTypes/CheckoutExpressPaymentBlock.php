@@ -13,11 +13,12 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 	 * @var string
 	 */
 	protected $block_name = 'checkout-express-payment-block';
-		/**
-		 * Uniform default_styles for the express payment buttons
-		 *
-		 * @var boolean
-		 */
+	
+	/**
+	 * Uniform default_styles for the express payment buttons
+	 *
+	 * @var boolean
+	 */
 	protected $default_styles = null;
 
 	/**
