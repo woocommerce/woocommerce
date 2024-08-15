@@ -190,6 +190,7 @@
 		"babel-plugin-explicit-exports-references": "^1.0.2",
 		"babel-plugin-react-docgen": "4.2.1",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
+		"buildkite-test-collector": "^1.7.1",
 		"chalk": "4.1.2",
 		"circular-dependency-plugin": "5.2.2",
 		"copy-webpack-plugin": "11.0.0",
