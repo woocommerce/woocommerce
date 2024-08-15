@@ -183,46 +183,7 @@ p.demo_store,
 			}
 
 			.woocommerce-product-gallery__trigger {
-				border: none;
-				padding: 0;
-				position: absolute;
-				top: 0.5em;
-				right: 0.5em;
-				font-size: 2em;
-				z-index: 9;
-				width: 36px;
-				height: 36px;
-				background: #fff;
-				text-indent: -9999px;
-				border-radius: 100%;
-				box-sizing: content-box;
-
-				&::before {
-					content: "";
-					display: block;
-					width: 10px;
-					height: 10px;
-					border: 2px solid #000;
-					border-radius: 100%;
-					position: absolute;
-					top: 9px;
-					left: 9px;
-					box-sizing: content-box;
-				}
-
-				&::after {
-					content: "";
-					display: block;
-					width: 2px;
-					height: 8px;
-					background: #000;
-					border-radius: 6px;
-					position: absolute;
-					top: 19px;
-					left: 22px;
-					transform: rotate(-45deg);
-					box-sizing: content-box;
-				}
+				@include woocommerce-product-gallery__trigger;
 			}
 
 			.flex-control-thumbs {
