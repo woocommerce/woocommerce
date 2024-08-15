@@ -96,10 +96,7 @@ test.describe(
 
 			test.afterAll( async () => {
 				// Reset theme to the default.
-				await activateTheme(
-					DEFAULT_THEME,
-					'Block Theme (Twenty Twenty Four)'
-				);
+				await activateTheme( DEFAULT_THEME );
 			} );
 
 			runComingSoonTests( test.step, test.use );
