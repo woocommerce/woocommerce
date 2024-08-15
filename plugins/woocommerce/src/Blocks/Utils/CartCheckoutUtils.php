@@ -159,7 +159,7 @@ class CartCheckoutUtils {
 	 */
 	public static function update_express_payment_settings( $post_id, $post, $cart_or_checkout, $default_settings ) {
 
-		if ( 'cart' !== $cart_or_checkout && 'checkout' !== $cart_or_checkout ) {
+		if ( ! in_array( $cart_or_checkout, array( 'cart', 'checkout' ), true ) ) {
 			return;
 		}
 
