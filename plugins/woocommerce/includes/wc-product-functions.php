@@ -747,7 +747,7 @@ function wc_get_product_id_by_sku( $sku ) {
  */
 function wc_get_product_id_by_global_unique_id( $global_unique_id ) {
 	$data_store = WC_Data_Store::load( 'product' );
-	if ( $data_store->has_callable( 'get_product_id_by_global_unique_idz' ) ) {
+	if ( $data_store->has_callable( 'get_product_id_by_global_unique_id' ) ) {
 		return $data_store->get_product_id_by_global_unique_id( $global_unique_id );
 	} else {
 		$logger = wc_get_logger();
