@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Remove global_unique_id from interface and add warning in case it is not implemented
+
+
