@@ -10,7 +10,7 @@ import type { RegisteredBlockComponent } from '@woocommerce/types';
 import { registeredBlockComponents } from './registered-block-components-init';
 
 /**
- * Get all Registered Block Components.
+ * Get all Registered Block Components for a given block context.
  *
  * WooCommerce Blocks allows React Components to be used on the frontend of the store in place of
  * Blocks instead of just serving static content.
