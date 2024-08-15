@@ -251,7 +251,7 @@ const PriceSlider = ( {
 	);
 
 	/**
-	 * Handles price change logic and calls onChange if necessary.
+	 * Handles price change logic and calls onChange.
 	 */
 	const handlePriceChange = useDebouncedCallback(
 		(
@@ -285,35 +285,6 @@ const PriceSlider = ( {
 			onChange( values );
 		},
 		400
-	);
-
-	/**
-	 * Called when a price input loses focus - commit changes to slider.
-	 */
-	const priceInputOnBlur = useCallback(
-		( event: React.FocusEvent< HTMLInputElement > ) => {
-			// Only refresh when finished editing the min and max fields.
-			if (
-				event.relatedTarget &&
-				( event.relatedTarget as Element ).classList &&
-				( event.relatedTarget as Element ).classList.contains(
-					'wc-block-price-filter__amount'
-				)
-			) {
-				return;
-			}
-
-			const isMin = event.target.classList.contains(
-				'wc-block-price-filter__amount--min'
-			);
-
-			handlePriceChange(
-				minPriceInput as number,
-				maxPriceInput as number,
-				isMin
-			);
-		},
-		[ onChange, stepValue, minPriceInput, maxPriceInput, handlePriceChange ]
 	);
 
 	const debouncedUpdateQuery = useDebouncedCallback( onSubmit, 600 );
@@ -424,7 +395,6 @@ const PriceSlider = ( {
 		displayType: 'input',
 		allowNegative: false,
 		disabled: isLoading || ! hasValidConstraints,
-		onBlur: priceInputOnBlur,
 	};
 
 	return (
@@ -479,13 +449,11 @@ const PriceSlider = ( {
 									return;
 								}
 								setMaxPriceInput( value );
-								// handlePriceChange( false );
 								handlePriceChange(
 									minPriceInput as number,
 									value,
-									true
+									false
 								);
-								// onChange( [ minPriceInput as number, value ] );
 							} }
 							value={ maxPriceInput }
 						/>
