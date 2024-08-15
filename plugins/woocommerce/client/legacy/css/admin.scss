@@ -5583,9 +5583,12 @@ img.help_tip {
 			vertical-align: middle;
 		}
 
-		input[type="checkbox"] {
-			margin-left: 4px;
-			margin-right: 16px;
+		label.has-checkbox {
+			margin-right: 15px;
+		}
+
+		label.has-checkbox > input[type="checkbox"] {
+			margin-right: 3px;
 		}
 
 		select {
