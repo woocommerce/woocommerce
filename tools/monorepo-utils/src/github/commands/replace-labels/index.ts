@@ -30,11 +30,6 @@ export const replaceLabelsCommand = new Command( 'replace-labels' )
 		'--remove-if-starts-with <removeIfStartsWith>',
 		'Only remove the label if it already contains a label that starts with.'
 	)
-	.option(
-		'-s --source <source>',
-		'Branch to create the release branch from. Default: trunk',
-		'trunk'
-	)
 	.action( async ( options ) => {
 		const { label, owner, name, replacementLabel, removeIfStartsWith } =
 			options;
