@@ -359,6 +359,12 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await maxPriceInput.dblclick();
 		await maxPriceInput.fill( '$5' );
+
+		const resetPriceFilterButton = page.getByRole( 'button', {
+			name: 'Reset price filter',
+		} );
+		await expect( resetPriceFilterButton ).toBeVisible();
+
 		await page
 			.getByRole( 'button', { name: 'Apply price filter' } )
 			.click();
