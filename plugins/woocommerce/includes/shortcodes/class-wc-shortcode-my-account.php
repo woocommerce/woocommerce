@@ -34,7 +34,7 @@ class WC_Shortcode_My_Account {
 	public static function output( $atts ) {
 		global $wp;
 
-		// Check cart class is loaded, or abort.
+		// Check cart class is loaded or abort.
 		if ( is_null( WC()->cart ) ) {
 			return;
 		}
