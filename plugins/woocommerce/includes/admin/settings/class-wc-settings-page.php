@@ -180,6 +180,8 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					'label'   => html_entity_decode( $section_label ),
 					'settings' => $section_settings_data,
 				);
+
+				$current_section = $saved_current_section;
 			}
 			$pages[ $this->id ] = array(
 				'label'   => html_entity_decode( $this->label ),
