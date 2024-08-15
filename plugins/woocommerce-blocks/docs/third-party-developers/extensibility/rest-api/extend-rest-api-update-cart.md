@@ -48,6 +48,7 @@ and on the client side:
 
 ```ts
 const { extensionCartUpdate } = wc.blocksCheckout;
+const { processErrorResponse } = wc.wcBlocksData;
 
 extensionCartUpdate( {
 	namespace: 'extension-unique-namespace',
@@ -58,6 +59,11 @@ extensionCartUpdate( {
 			fourth_key: true,
 		},
 	},
+} ).then( () => {
+	// Cart has been updated.
+} ).catch( ( error ) => {
+	// Handle error.
+	processErrorResponse(error);
 } );
 ```
 
