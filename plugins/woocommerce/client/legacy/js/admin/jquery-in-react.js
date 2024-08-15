@@ -12,12 +12,17 @@ function releaseReady() {
 	// Restore the original jQuery.fn.ready method
 	jQuery.fn.ready = originalReady;
 
-	// Execute all queued callbacks
-	while ( callbacks.length ) {
-		callbacks.shift()( jQuery );
+	// Execute all queued callbacks but save them for when switching tabs.
+	const callbacksCopy = [ ...callbacks ];
+	while ( callbacksCopy.length ) {
+		callbacksCopy.shift()( jQuery );
 	}
 }
 
 jQuery( window ).on( 'reactRendered', function () {
-	releaseReady();
+	try {
+		releaseReady();
+	} catch ( error ) {
+		// swallow errors here - I'm sorry.
+	}
 } );

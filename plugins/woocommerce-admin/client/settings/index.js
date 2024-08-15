@@ -44,6 +44,9 @@ const Settings = ( { params } ) => {
 			setSidebarContent,
 			sidebarVisisble
 		);
+
+		const event = new Event( 'reactRendered' );
+		window.dispatchEvent( event );
 	}, [ params.page, section, sidebarVisisble ] );
 
 	// Register the slot fills for the settings page just once.
@@ -57,11 +60,6 @@ const Settings = ( { params } ) => {
 	useEffect( () => {
 		setSidebarVisisble( false );
 	}, [ params.page, section ] );
-
-	useEffect( () => {
-		const event = new Event( 'reactRendered' );
-		window.dispatchEvent( event );
-	}, [] );
 
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;
