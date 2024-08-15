@@ -113,14 +113,14 @@ final class WooCommerce {
 	 *
 	 * @var WC_Cart
 	 */
-	private $cart = null;
+	public $cart = null;
 
 	/**
 	 * Customer instance.
 	 *
 	 * @var WC_Customer
 	 */
-	private $customer = null;
+	public $customer = null;
 
 	/**
 	 * Order factory instance.
@@ -199,7 +199,7 @@ final class WooCommerce {
 			return $this->api;
 		}
 
-		if ( in_array( $key, array( 'payment_gateways', 'shipping', 'mailer', 'checkout', 'customer', 'cart' ), true ) ) {
+		if ( in_array( $key, array( 'payment_gateways', 'shipping', 'mailer', 'checkout' ), true ) ) {
 			return $this->$key();
 		}
 	}
@@ -213,8 +213,6 @@ final class WooCommerce {
 	public function __set( string $key, $value ) {
 		if ( 'api' === $key ) {
 			$this->api = $value;
-		} elseif ( in_array( $key, array( 'customer', 'cart' ), true ) ) {
-			$this->$key = $value;
 		} elseif ( property_exists( $this, $key ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			trigger_error( 'Cannot access private property WooCommerce::$' . esc_html( $key ), E_USER_ERROR );
@@ -1154,28 +1152,6 @@ final class WooCommerce {
 	 */
 	public function shipping() {
 		return WC_Shipping::instance();
-	}
-
-	/**
-	 * Get customer class.
-	 *
-	 * @return WC_Customer
-	 */
-	public function customer() {
-		$this->initialize_cart();
-
-		return $this->customer;
-	}
-
-	/**
-	 * Get cart class.
-	 *
-	 * @return WC_Cart
-	 */
-	public function cart() {
-		$this->initialize_cart();
-
-		return $this->cart;
 	}
 
 	/**
