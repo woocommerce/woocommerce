@@ -527,8 +527,14 @@ class Controller extends GenericController {
 	 */
 	public function format_data_value( $data, $stat, $report, $chart, $query_args ) {
 		if ( 'jetpack/stats' === $report ) {
+			$index  = false;
+			$fields = $data['general']->visits->fields;
+
 			// Get the index of the field to tally.
-			$index = array_search( $chart, $data['general']->visits->fields, true );
+			if ( is_array( $fields ) ) {
+				$index = array_search( $chart, $fields, true );
+			}
+
 			if ( ! $index ) {
 				return null;
 			}
