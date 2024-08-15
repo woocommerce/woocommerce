@@ -263,8 +263,8 @@ class WC_Post_Data {
 				$order_title .= ' &ndash; ' . date_i18n( 'F j, Y @ h:i A', strtotime( $data['post_date'] ) );
 			}
 			$data['post_title'] = $order_title;
-		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // WPCS: input var ok, CSRF ok.
-			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( 'product' === $data['post_type'] && isset( $_POST['product-type'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing
+			$product_type = wc_clean( wp_unslash( $_POST['product-type'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing
 			switch ( $product_type ) {
 				case 'grouped':
 				case 'variable':
@@ -489,7 +489,7 @@ class WC_Post_Data {
 				JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_items.order_item_id = {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id
 				WHERE {$wpdb->prefix}woocommerce_order_items.order_id = '{$postid}';
 				"
-			); // WPCS: unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			do_action( 'woocommerce_deleted_order_items', $postid );
 		}

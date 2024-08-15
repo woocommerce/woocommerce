@@ -76,7 +76,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$sql .= ' AND ' . $search;
 		}
 
-		return absint( $wpdb->get_var( $sql ) ); // WPCS: unprepared SQL ok.
+		return absint( $wpdb->get_var( $sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -98,7 +98,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		ob_start();
 
 		$found         = false;
-		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // WPCS: input var ok, CSRF ok, sanitization ok.
+		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$base_link     = remove_query_arg( 'paged', $this->get_current_page_url() );
 
 		$this->widget_start( $args, $instance );
@@ -131,7 +131,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				)
 			);
 
-			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html ); // WPCS: XSS ok.
+			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
 		echo '</ul>';
@@ -141,7 +141,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 		if ( ! $found ) {
 			ob_end_clean();
 		} else {
-			echo ob_get_clean(); // WPCS: XSS ok.
+			echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 }

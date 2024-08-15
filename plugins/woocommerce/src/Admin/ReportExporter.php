@@ -179,11 +179,11 @@ class ReportExporter {
 		if (
 			isset( $_GET['action'] ) &&
 			! empty( $_GET['filename'] ) &&
-			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) && // WPCS: input var ok, sanitization ok.
+			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) && // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			current_user_can( 'view_woocommerce_reports' )
 		) {
 			$exporter = new ReportCSVExporter();
-			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
+			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$exporter->export();
 		}
 	}

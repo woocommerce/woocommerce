@@ -60,7 +60,7 @@ class WC_Payment_Gateway_ECheck extends WC_Payment_Gateway {
 			<?php do_action( 'woocommerce_echeck_form_start', $this->id ); ?>
 			<?php
 			foreach ( $fields as $field ) {
-				echo $field; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+				echo $field; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 			?>
 			<?php do_action( 'woocommerce_echeck_form_end', $this->id ); ?>

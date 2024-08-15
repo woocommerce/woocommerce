@@ -1948,7 +1948,7 @@ class WC_Order extends WC_Abstract_Order {
 		} else {
 			$comment_author        = __( 'WooCommerce', 'woocommerce' );
 			$comment_author_email  = strtolower( __( 'WooCommerce', 'woocommerce' ) ) . '@';
-			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com'; // WPCS: input var ok.
+			$comment_author_email .= isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) ) : 'noreply.com'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$comment_author_email  = sanitize_email( $comment_author_email );
 		}
 		$commentdata = apply_filters(

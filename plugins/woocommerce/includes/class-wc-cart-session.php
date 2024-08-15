@@ -115,8 +115,8 @@ final class WC_Cart_Session {
 		}
 
 		// Populate cart from order.
-		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
-			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$order_again         = true;
 			$update_cart_session = true;
 		}
@@ -262,7 +262,7 @@ final class WC_Cart_Session {
 		}
 		if ( ! $this->cart->is_empty() ) {
 			$this->set_cart_cookies( true );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
+		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$this->set_cart_cookies( false );
 		}
 		$this->dedupe_cookies();

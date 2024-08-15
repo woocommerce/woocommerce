@@ -90,7 +90,7 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 		$content = ob_get_clean();
 
-		echo $content; // WPCS: XSS ok.
+		echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		$this->cache_widget( $args, $content );
 	}

@@ -471,7 +471,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
 		}
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
-		echo $this->get_admin_options_html(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+		echo $this->get_admin_options_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -570,7 +570,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Check we are processing the correct form for this instance.
-		if ( ! isset( $_REQUEST['instance_id'] ) || absint( $_REQUEST['instance_id'] ) !== $this->instance_id ) { // WPCS: input var ok, CSRF ok.
+		if ( ! isset( $_REQUEST['instance_id'] ) || absint( $_REQUEST['instance_id'] ) !== $this->instance_id ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 			return false;
 		}
 

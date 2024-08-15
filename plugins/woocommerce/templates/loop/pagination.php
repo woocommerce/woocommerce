@@ -33,7 +33,7 @@ if ( $total <= 1 ) {
 	echo paginate_links(
 		apply_filters(
 			'woocommerce_pagination_args',
-			array( // WPCS: XSS ok.
+			array( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				'base'      => $base,
 				'format'    => $format,
 				'add_args'  => false,

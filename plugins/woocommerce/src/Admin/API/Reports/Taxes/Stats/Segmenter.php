@@ -64,7 +64,7 @@ class Segmenter extends ReportsSegmenter {
 					GROUP BY
 						$segmenting_groupby",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Reformat result.
 		$totals_segments = $this->reformat_totals_segments( $totals_segments, $segmenting_groupby );
@@ -111,7 +111,7 @@ class Segmenter extends ReportsSegmenter {
 						time_interval, $segmenting_groupby
 					$segmenting_limit",
 			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Reformat result.
 		$intervals_segments = $this->reformat_intervals_segments( $intervals_segments, $segmenting_groupby );

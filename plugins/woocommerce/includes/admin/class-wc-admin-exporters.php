@@ -110,12 +110,12 @@ class WC_Admin_Exporters {
 	 * Serve the generated file.
 	 */
 	public function download_export_file() {
-		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( wp_unslash( $_GET['nonce'] ), 'product-csv' ) && 'download_product_csv' === wp_unslash( $_GET['action'] ) ) { // WPCS: input var ok, sanitization ok.
+		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( wp_unslash( $_GET['nonce'] ), 'product-csv' ) && 'download_product_csv' === wp_unslash( $_GET['action'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
 			$exporter = new WC_Product_CSV_Exporter();
 
-			if ( ! empty( $_GET['filename'] ) ) { // WPCS: input var ok.
-				$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
+			if ( ! empty( $_GET['filename'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			}
 
 			$exporter->export();
@@ -134,31 +134,31 @@ class WC_Admin_Exporters {
 
 		include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
 
-		$step     = isset( $_POST['step'] ) ? absint( $_POST['step'] ) : 1; // WPCS: input var ok, sanitization ok.
+		$step     = isset( $_POST['step'] ) ? absint( $_POST['step'] ) : 1; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$exporter = new WC_Product_CSV_Exporter();
 
-		if ( ! empty( $_POST['columns'] ) ) { // WPCS: input var ok.
-			$exporter->set_column_names( wp_unslash( $_POST['columns'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_POST['columns'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$exporter->set_column_names( wp_unslash( $_POST['columns'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
-		if ( ! empty( $_POST['selected_columns'] ) ) { // WPCS: input var ok.
-			$exporter->set_columns_to_export( wp_unslash( $_POST['selected_columns'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_POST['selected_columns'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$exporter->set_columns_to_export( wp_unslash( $_POST['selected_columns'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
-		if ( ! empty( $_POST['export_meta'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $_POST['export_meta'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$exporter->enable_meta_export( true );
 		}
 
-		if ( ! empty( $_POST['export_types'] ) ) { // WPCS: input var ok.
-			$exporter->set_product_types_to_export( wp_unslash( $_POST['export_types'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_POST['export_types'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$exporter->set_product_types_to_export( wp_unslash( $_POST['export_types'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
-		if ( ! empty( $_POST['export_category'] ) && is_array( $_POST['export_category'] ) ) {// WPCS: input var ok.
-			$exporter->set_product_category_to_export( wp_unslash( array_values( $_POST['export_category'] ) ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_POST['export_category'] ) && is_array( $_POST['export_category'] ) ) {// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$exporter->set_product_category_to_export( wp_unslash( array_values( $_POST['export_category'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
-		if ( ! empty( $_POST['filename'] ) ) { // WPCS: input var ok.
-			$exporter->set_filename( wp_unslash( $_POST['filename'] ) ); // WPCS: input var ok, sanitization ok.
+		if ( ! empty( $_POST['filename'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$exporter->set_filename( wp_unslash( $_POST['filename'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
 		$exporter->set_page( $step );

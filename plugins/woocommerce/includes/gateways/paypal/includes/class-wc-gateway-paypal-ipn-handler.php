@@ -42,8 +42,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * Check for PayPal IPN Response.
 	 */
 	public function check_response() {
-		if ( ! empty( $_POST ) && $this->validate_ipn() ) { // WPCS: CSRF ok.
-			$posted = wp_unslash( $_POST ); // WPCS: CSRF ok, input var ok.
+		if ( ! empty( $_POST ) && $this->validate_ipn() ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$posted = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			// phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 			do_action( 'valid-paypal-standard-ipn-request', $posted );
@@ -82,7 +82,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
 
 		// Get received values from post data.
-		$validate_ipn        = wp_unslash( $_POST ); // WPCS: CSRF ok, input var ok.
+		$validate_ipn        = wp_unslash( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$validate_ipn['cmd'] = '_notify-validate';
 
 		// Send back post vars to paypal.

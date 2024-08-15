@@ -48,7 +48,7 @@ class WC_Updates_Screen_Updates extends WC_Plugin_Updates {
 		$this->major_untested_plugins = $this->get_untested_plugins( $this->new_version, $version_type );
 
 		if ( ! empty( $this->major_untested_plugins ) ) {
-			echo $this->get_extensions_modal_warning(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+			echo $this->get_extensions_modal_warning(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			$this->update_screen_modal_js();
 		}
 	}

@@ -87,7 +87,7 @@ class WC_Customer_Download_Log_Data_Store implements WC_Customer_Download_Log_Da
 		$table = $wpdb->prefix . self::get_table_name();
 
 		// Query the DB for the download log.
-		$raw_download_log = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE download_log_id = %d", $download_log->get_id() ) ); // WPCS: unprepared SQL ok.
+		$raw_download_log = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE download_log_id = %d", $download_log->get_id() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( ! $raw_download_log ) {
 			throw new Exception( __( 'Invalid download log: not found.', 'woocommerce' ) );

@@ -122,7 +122,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$query           .= $wpdb->prepare( " WHERE tax_rate_id IN ({$tax_placeholders})", $args['include'] );
 			/* phpcs:enable */
 		}
-		return $wpdb->get_results( $query, ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		return $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -176,7 +176,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$db_intervals            = $wpdb->get_col(
 				$this->interval_query->get_query_statement()
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$db_interval_count       = count( $db_intervals );
 			$expected_interval_count = TimeInterval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
 			$total_pages             = (int) ceil( $expected_interval_count / $params['per_page'] );
@@ -191,7 +191,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$totals = $wpdb->get_results(
 				$this->total_query->get_query_statement(),
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			if ( null === $totals ) {
 				return new \WP_Error( 'woocommerce_analytics_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ) );
@@ -225,7 +225,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$intervals = $wpdb->get_results(
 				$this->interval_query->get_query_statement(),
 				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			if ( null === $intervals ) {
 				return new \WP_Error( 'woocommerce_analytics_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'woocommerce' ) );

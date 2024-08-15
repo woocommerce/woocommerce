@@ -16,7 +16,7 @@ $theme = wp_get_theme();
 
 	<p>
 		<?php /* translators: %s: theme name */ ?>
-		<?php printf( __( '<strong>Your theme (%s) contains outdated copies of some WooCommerce template files.</strong> These files may need updating to ensure they are compatible with the current version of WooCommerce. Suggestions to fix this:', 'woocommerce' ), esc_html( $theme['Name'] ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+		<?php printf( __( '<strong>Your theme (%s) contains outdated copies of some WooCommerce template files.</strong> These files may need updating to ensure they are compatible with the current version of WooCommerce. Suggestions to fix this:', 'woocommerce' ), esc_html( $theme['Name'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		<ol>
 			<li><?php esc_html_e( 'Update your theme to the latest version. If no update is available contact your theme author asking about compatibility with the current WooCommerce version.', 'woocommerce' ); ?></li>
 			<li><?php esc_html_e( 'If you copied over a template file to change something, then you will need to copy the new version of the template and apply your changes again.', 'woocommerce' ); ?></li>

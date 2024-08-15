@@ -1507,7 +1507,7 @@ class ListTable extends WP_List_Table {
 
 		// Check if any status changes happened.
 		foreach ( $order_statuses as $slug => $name ) {
-			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // WPCS: input var ok, CSRF ok.
+			if ( 'marked_' . str_replace( 'wc-', '', $slug ) === $bulk_action ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Recommended
 				/* translators: %s: orders count */
 				$message = sprintf( _n( '%s order status changed.', '%s order statuses changed.', $number, 'woocommerce' ), number_format_i18n( $number ) );
 				break;
