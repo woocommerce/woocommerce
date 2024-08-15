@@ -357,4 +357,79 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertIsIntAndEquals( $site_wide_low_stock_amount, wc_get_low_stock_amount( $var1 ) );
 	}
 
+	/**
+	 * @testdox Test that the `woocommerce_low_stock` action fires when a product stock hits the low stock threshold.
+	 */
+	public function test_wc_update_product_stock_low_stock_action() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->save();
+
+		$low_stock_amount = wc_get_low_stock_amount( $product );
+		$initial_stock    = $low_stock_amount + 2;
+
+		wc_update_product_stock( $product->get_id(), $initial_stock );
+
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+		add_action( 'woocommerce_low_stock', $callback );
+
+		// Test with `wc_update_product_stock`.
+		wc_update_product_stock( $product->get_id(), 1, 'decrease' );
+		$this->assertFalse( $action_fired );
+		wc_update_product_stock( $product->get_id(), 1, 'decrease' );
+		$this->assertTrue( $action_fired );
+
+		$action_fired = false;
+
+		// Test with the data store.
+		$product->set_stock_quantity( $initial_stock );
+		$product->save();
+		$this->assertFalse( $action_fired );
+		$product->set_stock_quantity( $low_stock_amount );
+		$product->save();
+		$this->assertTrue( $action_fired );
+
+		remove_action( 'woocommerce_low_stock', $callback );
+	}
+
+	/**
+	 * @testdox Test that the `woocommerce_no_stock` action fires when a product stock hits the no stock threshold.
+	 */
+	public function test_wc_update_product_stock_no_stock_action() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->save();
+
+		$no_stock_amount = get_option( 'woocommerce_notify_no_stock_amount', 0 );
+		$initial_stock   = $no_stock_amount + 2;
+
+		wc_update_product_stock( $product->get_id(), $initial_stock );
+
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+		add_action( 'woocommerce_no_stock', $callback );
+
+		// Test with `wc_update_product_stock`.
+		wc_update_product_stock( $product->get_id(), 1, 'decrease' );
+		$this->assertFalse( $action_fired );
+		wc_update_product_stock( $product->get_id(), 1, 'decrease' );
+		$this->assertTrue( $action_fired );
+
+		$action_fired = false;
+
+		// Test with the data store.
+		$product->set_stock_quantity( $initial_stock );
+		$product->save();
+		$this->assertFalse( $action_fired );
+		$product->set_stock_quantity( $no_stock_amount );
+		$product->save();
+		$this->assertTrue( $action_fired );
+
+		remove_action( 'woocommerce_no_stock', $callback );
+	}
 }

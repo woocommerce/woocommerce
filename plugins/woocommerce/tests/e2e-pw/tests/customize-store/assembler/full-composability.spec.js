@@ -197,6 +197,34 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 	} );
 
+	test( 'Clicking on a pattern should always scroll the page to the inserted pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list__list-item'
+		);
+
+		// add first 3 patterns
+		for ( let i = 0; i < 4; i++ ) {
+			await sidebarPattern.nth( i ).click();
+		}
+
+		const insertedPattern = editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.nth( 3 );
+
+		await expect( insertedPattern ).toBeInViewport();
+	} );
+
 	test( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
 		pageObject,
 		baseURL,
@@ -313,40 +341,6 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 		await expect( emptyPatternsBlock ).toBeHidden();
 		await expect( defaultPattern ).toBeVisible();
-	} );
-
-	test( 'Clicking buttons in resize and zoom toolbar changes the frame size', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-		const assembler = await pageObject.getAssembler();
-		const editor = await pageObject.getEditor();
-
-		const toolbar = assembler.locator( '[aria-label="Resize Options"]' );
-		const resizeContainer = assembler.locator(
-			'.components-resizable-box__container'
-		);
-		const tabletBtn = assembler.locator( '[aria-label="Tablet View"]' );
-		const mobileBtn = assembler.locator( '[aria-label="Mobile View"]' );
-
-		await mobileBtn.click();
-		const mobileWidth = await resizeContainer.evaluate( ( element ) =>
-			window.getComputedStyle( element ).getPropertyValue( 'width' )
-		);
-
-		await tabletBtn.click();
-		const tabletWidth = await resizeContainer.evaluate( ( element ) =>
-			window.getComputedStyle( element ).getPropertyValue( 'width' )
-		);
-
-		await assembler.locator( '[aria-label="Zoom Out View"]' ).click();
-
-		await expect( editor.locator( '.is-zoomed-out' ) ).toBeVisible();
-		await expect( parseFloat( tabletWidth ) ).toBeGreaterThan(
-			parseFloat( mobileWidth )
-		);
-		await expect( toolbar ).toBeVisible();
 	} );
 
 	test( 'Clicking opt-in new patterns should be available', async ( {

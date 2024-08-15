@@ -74,6 +74,10 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 
 		$product = wc_get_product( $post_id );
 
+		if ( ! $product instanceof \WC_Product ) {
+			return '';
+		}
+
 		$product_gallery = $product->get_gallery_image_ids();
 
 		if ( empty( $product_gallery ) ) {

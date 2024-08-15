@@ -2,12 +2,14 @@
 /**
  * WooCommerce Navigation Screen
  *
+ * @deprecated 9.3.0 Navigation is no longer a feature and its classes will be removed in WooCommerce 9.4.
  * @package Woocommerce Navigation
  */
 
 namespace Automattic\WooCommerce\Admin\Features\Navigation;
 
 use Automattic\WooCommerce\Admin\Features\Navigation\Menu;
+use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 
 /**
  * Contains logic for the WooCommerce Navigation menu.
@@ -85,6 +87,8 @@ class Screen {
 	 * @return bool
 	 */
 	public static function is_woocommerce_page() {
+		Init::deprecation_notice( 'Screen::is_woocommerce_page' );
+
 		global $pagenow;
 
 		// Get taxonomy if on a taxonomy screen.
@@ -218,23 +222,15 @@ class Screen {
 
 	/**
 	 * Register post type for use in WooCommerce Navigation screens.
-	 *
-	 * @param string $post_type Post type to add.
 	 */
-	public static function register_post_type( $post_type ) {
-		if ( ! in_array( $post_type, self::$post_types, true ) ) {
-			self::$post_types[] = $post_type;
-		}
+	public static function register_post_type() {
+		Init::deprecation_notice( 'Screen::register_post_type' );
 	}
 
 	/**
 	 * Register taxonomy for use in WooCommerce Navigation screens.
-	 *
-	 * @param string $taxonomy Taxonomy to add.
 	 */
-	public static function register_taxonomy( $taxonomy ) {
-		if ( ! in_array( $taxonomy, self::$taxonomies, true ) ) {
-			self::$taxonomies[] = $taxonomy;
-		}
+	public static function register_taxonomy() {
+		Init::deprecation_notice( 'Screen::register_taxonomy' );
 	}
 }

@@ -30,7 +30,6 @@ import {
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ComplementaryArea,
-	store as interfaceStore,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/interface';
 
@@ -118,18 +117,12 @@ export function IframeEditor( {
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
-	const { hasFixedToolbar, isRightSidebarOpen } = useSelect( ( select ) => {
+	const { hasFixedToolbar } = useSelect( ( select ) => {
 		// @ts-expect-error These selectors are available in the block data store.
 		const { get: getPreference } = select( preferencesStore );
 
-		// @ts-expect-error These selectors are available in the interface data store.
-		const { getActiveComplementaryArea } = select( interfaceStore );
-
 		return {
 			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
-			isRightSidebarOpen: getActiveComplementaryArea(
-				SIDEBAR_COMPLEMENTARY_AREA_SCOPE
-			),
 		};
 	}, [] );
 
@@ -264,11 +257,9 @@ export function IframeEditor( {
 								 bounds. */ }
 							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
-						{ isRightSidebarOpen && (
-							<ComplementaryArea.Slot
-								scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
-							/>
-						) }
+						<ComplementaryArea.Slot
+							scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
+						/>
 					</div>
 					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 					<PluginArea scope="woocommerce-product-editor-modal-block-editor" />
