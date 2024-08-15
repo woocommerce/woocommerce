@@ -207,6 +207,7 @@ $muriel-box-shadow-8dp: 0 5px 5px -3px rgb(0 0 0 / 20%),
 					box-shadow: 0 0 0 1px #1e1e1e;
 					
 					&:focus {
+						border-color: $white;
 						box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--wp-admin-theme-color);
 					}
 				}
