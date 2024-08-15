@@ -170,6 +170,22 @@ const PriceSlider = ( {
 	] );
 
 	/**
+	 * Selects the price field when it is clicked.
+	 *
+	 * @param {Object} event event data.
+	 */
+	const handleSelectOnClick = (
+		event:
+			| React.FocusEvent< HTMLInputElement >
+			| React.MouseEvent< HTMLInputElement >
+	) => {
+		const target = event.currentTarget;
+		if ( target ) {
+			target.select();
+		}
+	};
+
+	/**
 	 * Works around an IE issue where only one range selector is visible by changing the display order
 	 * based on the mouse position.
 	 *
@@ -284,7 +300,7 @@ const PriceSlider = ( {
 			);
 			onChange( values );
 		},
-		400
+		1000
 	);
 
 	const debouncedUpdateQuery = useDebouncedCallback( onSubmit, 600 );
@@ -395,6 +411,7 @@ const PriceSlider = ( {
 		displayType: 'input',
 		allowNegative: false,
 		disabled: isLoading || ! hasValidConstraints,
+		onClick: handleSelectOnClick,
 	};
 
 	return (
