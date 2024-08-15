@@ -150,6 +150,10 @@ final class BlockTypesController {
 		foreach ( $block_types as $block_type ) {
 			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
+			// echo '<pre>';
+			// echo 'instantiating block type: ' . $block_type . PHP_EOL;
+			// echo '</pre>';
+
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
 		}
 	}
@@ -321,6 +325,7 @@ final class BlockTypesController {
 			'FilterWrapper',
 			'HandpickedProducts',
 			'MiniCart',
+			'MiniCartInteractivity',
 			'StoreNotices',
 			'PriceFilter',
 			'ProductBestSellers',
