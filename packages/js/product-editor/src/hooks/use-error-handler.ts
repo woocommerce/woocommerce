@@ -24,7 +24,6 @@ export type WPError = {
 	code: WPErrorCode;
 	message: string;
 	validatorId?: string;
-	context?: string;
 };
 
 type ErrorProps = {
@@ -41,10 +40,10 @@ type UseErrorHandlerTypes = {
 	getProductErrorMessageAndProps: (
 		error: WPError,
 		visibleTab: string | null
-	) => {
+	) => Promise< {
 		message: string;
 		errorProps: ErrorProps;
-	};
+	} >;
 };
 
 function getUrl( tab: string ): string {
@@ -74,22 +73,32 @@ function getErrorPropsWithActions(
 }
 
 export const useErrorHandler = (): UseErrorHandlerTypes => {
-	const { focusByValidatorId } = useValidations();
-	const { getParentTabId, getParentTabIdByBlockName } = useBlocksHelper();
+	const { focusByValidatorId, getFieldByValidatorId } = useValidations();
+	const { getClientIdByField, getParentTabId, getParentTabIdByBlockName } =
+		useBlocksHelper();
+
+	async function getClientIdByValidatorId( validatorId: string ) {
+		if ( ! validatorId ) {
+			return null;
+		}
+		const field = await getFieldByValidatorId( validatorId );
+		if ( ! field ) {
+			return null;
+		}
+		return getClientIdByField( field );
+	}
 
 	const getProductErrorMessageAndProps = useCallback(
-		( error: WPError, visibleTab: string | null ) => {
+		async ( error: WPError, visibleTab: string | null ) => {
 			const response = {
 				message: '',
 				errorProps: {} as ErrorProps,
 			};
-			const {
-				code,
-				context = '',
-				message: errorMessage,
-				validatorId = '',
-			} = error;
-			const errorContext = getParentTabId( context );
+			const { code, message: errorMessage, validatorId = '' } = error;
+
+			const clientId = await getClientIdByValidatorId( validatorId );
+			const errorContext = getParentTabId( clientId );
+
 			switch ( code ) {
 				case 'variable_product_no_variation_prices':
 					response.message = errorMessage;

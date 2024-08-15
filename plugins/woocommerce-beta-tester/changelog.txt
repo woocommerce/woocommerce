@@ -1,5 +1,17 @@
 *** WooCommerce Beta Tester Changelog ***
-2024-06-25 - versio 2.3.2
+2024-08-08 - version 2.4.0
+* Patch - Changed from using React.render to React.createRoot for wc beta tester as it has been deprecated since React 18
+* Minor - Fix "Creation of dynamic property WC_Beta_Tester::$wporg_data is deprecated" on PHP 8.2
+* Patch - Add reactify-classic-payments-settings feature flag
+* Minor - Add remote logging tool
+* Minor - Add tool to force the coming soon landing pages to display on the front-end
+* Minor - Product Editor Dev Tools: Improve expression evaluation tooling support.
+* Patch - Minor tooling tweaks (zip compression level, composer invocation)
+* Patch - Monorepo: minor tweaks in zip building script (use frozen lock file when installing dependecies).
+* Patch - Monorepo: tweak Webpack loaders paths filtering for better build perfromance.
+* Patch - Whitelist line with maybe_unserialize() function call from QIT security tests.
+
+2024-06-25 - version 2.3.2
 * Minor - Adds a new tool to the WCA Test Helper that helps import remote inbox notifications from staging or production for testing purposes #48735
 * Minor - Remove the new old experience #47814
 * Patch - Fix "Live Branches" item not shown in the WooCommerce menu #47691

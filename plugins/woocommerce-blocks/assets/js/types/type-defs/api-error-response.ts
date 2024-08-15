@@ -15,6 +15,7 @@ export type ApiErrorResponseData = {
 	status: number;
 	params: Record< string, string >;
 	details: Record< string, ApiErrorResponseDataDetails >;
+	context?: string;
 	// Some endpoints return cart data to update the client.
 	cart?: CartResponse | undefined;
 } | null;
