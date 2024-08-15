@@ -182,7 +182,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return void
 	 * @throws WC_REST_Exception If item ID is not associated with order.
 	 */
-	protected function remove_item( WC_Order $order, string $item_type, int $item_id ) {
+	protected function remove_item( WC_Order $order, string $item_type, int $item_id ): void {
 		$item = $order->get_item( $item_id );
 
 		if ( ! $item ) {
