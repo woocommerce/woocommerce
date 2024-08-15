@@ -41,6 +41,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$screen    = get_current_screen();
 			$screen_id = $screen ? $screen->id : '';
 
+			if ( strpos( $_GET['path'], '/settings' ) !== false ) {
+				$screen_id = 'woocommerce_page_wc-settings';
+			}
+
 			// Register admin styles.
 			wp_register_style( 'woocommerce_admin_menu_styles', WC()->plugin_url() . '/assets/css/menu.css', array(), $version );
 			wp_register_style( 'woocommerce_admin_styles', WC()->plugin_url() . '/assets/css/admin.css', array(), $version );
