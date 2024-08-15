@@ -6,6 +6,8 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -135,38 +137,43 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				$section_settings = $this->get_settings_for_section( $section_id );
 				$section_settings_data = array();
 
-				foreach( $section_settings as $section_setting ) {
-					if ( isset( $section_setting['id'] ) ) {
-							$section_setting['value'] = isset( $section_setting['default'] ) ? get_option( $section_setting['id'], $section_setting['default'] ) : get_option( $section_setting['id'] );
-					}
+				global $current_section;
+				// Make sure the current section is set to the sectionid here. Reset it after the loop.
+				$saved_current_section = $current_section;
+				$current_section = $section_id;
+				ob_start();
+				do_action( 'woocommerce_settings_' . $this->id );
+				$html = ob_get_contents();
+				ob_end_clean();
+
+				$should_render_section_from_config = 'THIS IS THE PARENT OUTPUT' === $html;
+
+				// We only want to loop through the settings object if the parent class's output method is being rendered.
+				if ( $should_render_section_from_config ) {
+					foreach( $section_settings as $section_setting ) {
+						if ( isset( $section_setting['id'] ) ) {
+								$section_setting['value'] = isset( $section_setting['default'] ) ? get_option( $section_setting['id'], $section_setting['default'] ) : get_option( $section_setting['id'] );
+						}
 						
-					if ( ! in_array( $section_setting['type'], $this->types ) ) {
-						ob_start();
-						do_action( 'woocommerce_admin_field_' . $section_setting['type'], $section_setting);
-						$html = ob_get_contents();
-						$section_setting['content'] = trim( $html );
-						$section_setting['id'] = $section_setting['type'];
-						$section_setting['type'] = 'custom';
-						ob_end_clean();
+						// If the setting is a custom type, we need to render it using the output of the woocommerce_admin_field_ action.
+						if ( ! in_array( $section_setting['type'], $this->types ) ) {
+							ob_start();
+							do_action( 'woocommerce_admin_field_' . $section_setting['type'], $section_setting);
+							$field_html = ob_get_contents();
+							$section_setting['content'] = trim( $field_html );
+							$section_setting['id'] = $section_setting['type'];
+							$section_setting['type'] = 'custom';
+							ob_end_clean();
+						}
+	
+						$section_settings_data[] = $section_setting;
 					}
-
-					$section_settings_data[] = $section_setting;
-				}
-
-				if ( count( $section_settings ) === 0 ) {
-					global $current_section;
-					$saved_current_section = $current_section;
-					$current_section = $section_id;
-					ob_start();
-					do_action( 'woocommerce_settings_' . $this->id );
-					$html = ob_get_contents();
+				// Otherwise, render the page's output method.
+				} else {
 					$section_settings_data[] = array(
 						'type' => 'custom',
 						'content' => trim( $html ),
 					);
-					ob_end_clean();
-
-					$current_section = $saved_current_section;
 				}
 
 				$sections_data[ $section_id ] = array(
@@ -319,6 +326,11 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function output() {
 			global $current_section;
+
+			if ( Features::is_enabled( 'settings' ) ) {
+				echo 'THIS IS THE PARENT OUTPUT';
+				return;
+			}
 
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".
