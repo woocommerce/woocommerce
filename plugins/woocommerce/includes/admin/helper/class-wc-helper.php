@@ -1007,7 +1007,7 @@ class WC_Helper {
 		self::_flush_authentication_cache();
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
-		self::_flush_product_feature_restrictions_cache();
+		self::_flush_product_usage_notice_rules_cache();
 	}
 
 	/**
@@ -2216,10 +2216,10 @@ class WC_Helper {
 	}
 
 	/**
-	 * Flush product feature restrictions cache.
+	 * Flush product-usage-notice-rules cache.
 	 */
-	public static function _flush_product_feature_restrictions_cache() {
-		delete_transient( '_woocommerce_helper_product_feature_restrictions' );
+	public static function _flush_product_usage_notice_rules_cache() {
+		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
 	}
 
 	/**
@@ -2321,7 +2321,7 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
-		self::_flush_product_feature_restrictions_cache();
+		self::_flush_product_usage_notice_rules_cache();
 	}
 
 	/**
@@ -2411,7 +2411,7 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
-		self::_flush_product_feature_restrictions_cache();
+		self::_flush_product_usage_notice_rules_cache();
 	}
 
 	/**
