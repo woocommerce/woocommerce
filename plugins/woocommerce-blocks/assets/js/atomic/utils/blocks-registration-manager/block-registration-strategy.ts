@@ -19,6 +19,9 @@ export interface BlockRegistrationStrategy {
 	unregister( blockName: string, variationName?: string ): boolean;
 }
 
+/**
+ * This strategy is used to register blocks.
+ */
 export class BlockTypeStrategy implements BlockRegistrationStrategy {
 	register(
 		blockNameOrMetadata: string | Partial< BlockConfiguration >,
@@ -35,7 +38,9 @@ export class BlockTypeStrategy implements BlockRegistrationStrategy {
 	}
 }
 
-// Strategy for BlockVariation
+/**
+ * This strategy is used to register block variations.
+ */
 export class BlockVariationStrategy implements BlockRegistrationStrategy {
 	register(
 		blockName: string,

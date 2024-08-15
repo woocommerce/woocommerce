@@ -10,19 +10,19 @@ enum ContentType {
 	NONE = 'none',
 }
 
-interface TemplateChangeDetectorSubject {
-	add( observer: TemplateChangeDetectorObserver ): void;
+interface EditorViewChangeDetectorSubject {
+	add( observer: EditorViewChangeDetectorObserver ): void;
 	getPreviousTemplateId(): string | undefined;
 	getCurrentTemplateId(): string | undefined;
 	notify(): void;
 }
 
-export interface TemplateChangeDetectorObserver {
-	run( subject: TemplateChangeDetectorSubject ): void;
+export interface EditorViewChangeDetectorObserver {
+	run( subject: EditorViewChangeDetectorSubject ): void;
 }
 
 /**
- * This class implements the TemplateChangeDetectorSubject interface and is responsible for detecting changes in the
+ * This class implements the EditorViewChangeDetectorSubject interface and is responsible for detecting changes in the
  * current template or page and notifying any observers of these changes. It maintains a list of observers and provides methods
  * to add observers and notify them of changes.
  *
@@ -31,7 +31,9 @@ export interface TemplateChangeDetectorObserver {
  * The `checkIfTemplateHasChangedAndNotifySubscribers` method is the main method of the class. It checks if the current
  * template has changed and, if so, notifies all observers.
  */
-export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
+export class EditorViewChangeDetector
+	implements EditorViewChangeDetectorSubject
+{
 	private previousTemplateId: string | undefined;
 	private currentTemplateId: string | undefined;
 	private previousContentType: ContentType | undefined;
@@ -39,7 +41,7 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 	private previousPageLocation = '';
 	private currentPageLocation = '';
 
-	private observers: TemplateChangeDetectorObserver[] = [];
+	private observers: EditorViewChangeDetectorObserver[] = [];
 
 	constructor() {
 		subscribe( () => {
@@ -99,7 +101,7 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 		return false;
 	}
 
-	public add( observer: TemplateChangeDetectorObserver ): void {
+	public add( observer: EditorViewChangeDetectorObserver ): void {
 		this.observers.push( observer );
 	}
 
@@ -144,5 +146,9 @@ export class TemplateChangeDetector implements TemplateChangeDetectorSubject {
 		}
 
 		return postId as string;
+	}
+
+	public getIsPostOrPage(): boolean {
+		return this.currentContentType === ContentType.POST_OR_PAGE;
 	}
 }

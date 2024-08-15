@@ -7,9 +7,9 @@ import { getBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import {
-	TemplateChangeDetector,
-	TemplateChangeDetectorObserver,
-} from './template-change-detector';
+	EditorViewChangeDetector,
+	EditorViewChangeDetectorObserver,
+} from './editor-view-change-detector';
 import {
 	BlockRegistrationStrategy,
 	BlockTypeStrategy,
@@ -20,14 +20,14 @@ import { BLOCKS_WITH_RESTRICTION } from './blocks-with-restriction';
 /**
  * Manages the registration and unregistration of blocks based on template or page restrictions.
  *
- * This class implements the TemplateChangeDetectorObserver interface and is responsible for managing the registration and unregistration of blocks based on the restrictions defined in the BLOCKS_WITH_RESTRICTION constant.
+ * This class implements the EditorViewChangeDetectorObserver interface and is responsible for managing the registration and unregistration of blocks based on the restrictions defined in the BLOCKS_WITH_RESTRICTION constant.
  *
  * The class maintains a list of unregistered blocks and uses a block registration strategy to register and unregister blocks as needed. The strategy used depends on whether the block is a variation block or a regular block.
  *
- * The `run` method is the main entry point for the class. It is called with a TemplateChangeDetector object and registers and unregisters blocks based on the current template and whether the editor is in post or page mode.
+ * The `run` method is the main entry point for the class. It is called with a EditorViewChangeDetector object and registers and unregisters blocks based on the current template and whether the editor is in post or page mode.
  */
 export class BlockRegistrationManager
-	implements TemplateChangeDetectorObserver
+	implements EditorViewChangeDetectorObserver
 {
 	private unregisteredBlocks: string[] = [];
 	private blockRegistrationStrategy: BlockRegistrationStrategy;
@@ -162,17 +162,17 @@ export class BlockRegistrationManager
 	/**
 	 * Runs the block registration manager.
 	 *
-	 * This method is the main entry point for the block registration manager. It is called with a TemplateChangeDetector object,
+	 * This method is the main entry point for the block registration manager. It is called with a EditorViewChangeDetector object,
 	 * and registers and unregisters blocks based on the current template and whether the editor is in a post or page.
 	 *
-	 * @param {TemplateChangeDetector} templateChangeDetector - The template change detector object.
+	 * @param {EditorViewChangeDetector} EditorViewChangeDetector - The template change detector object.
 	 */
-	run( templateChangeDetector: TemplateChangeDetector ) {
+	run( editorViewChangeDetector: EditorViewChangeDetector ) {
 		this.registerBlocksAfterLeavingRestrictedArea();
 		this.unregisterBlocksBeforeEnteringRestrictedArea( {
 			currentTemplateId:
-				templateChangeDetector.getCurrentTemplateId() || '',
-			isPostOrPage: templateChangeDetector.getIsPostOrPage(),
+				editorViewChangeDetector.getCurrentTemplateId() || '',
+			isPostOrPage: editorViewChangeDetector.getIsPostOrPage(),
 		} );
 	}
 }
