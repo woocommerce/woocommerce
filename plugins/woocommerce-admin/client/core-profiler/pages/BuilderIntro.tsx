@@ -25,6 +25,7 @@ export const BuilderIntro = ( {
 } ) => {
 	const [ file, setFile ] = useState( null );
 	const [ message, setMessage ] = useState( '' );
+	const [ importing, setImporting ] = useState( false );
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleFileChange = ( event: any ) => {
@@ -36,6 +37,8 @@ export const BuilderIntro = ( {
 			setMessage( 'Please select a file first.' );
 			return;
 		}
+
+		setImporting( true );
 
 		const formData = new FormData();
 		formData.append( 'file', file );
@@ -61,11 +64,14 @@ export const BuilderIntro = ( {
 							data.data.redirect
 					);
 
+					setImporting( false );
+
 					window.setTimeout( () => {
 						// @ts-expect-error tmp
 						window.location.href = data.data.redirect;
 					}, 2000 );
 				} else {
+					setImporting( false );
 					// @ts-expect-error tmp
 					setMessage( `Error: ${ data.message }` );
 					// @ts-expect-error tmp
@@ -78,6 +84,7 @@ export const BuilderIntro = ( {
 				}
 			} )
 			.catch( ( error ) => {
+				setImporting( false );
 				setMessage( `Error: ${ error.message }` );
 			} );
 	};
@@ -106,7 +113,11 @@ export const BuilderIntro = ( {
 					type="file"
 					onChange={ handleFileChange }
 				/>
-				<Button variant="primary" onClick={ handleUpload }>
+				<Button
+					variant="primary"
+					onClick={ handleUpload }
+					isBusy={ importing }
+				>
 					{ __( 'Import', 'woocommerce' ) }
 				</Button>
 				<div>
