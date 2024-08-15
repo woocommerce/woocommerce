@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
-use Automattic\WooCommerce\Admin\API\Reports\ParameterException;
 use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -55,51 +54,27 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get all reports.
+	 * Forwards a Query constructor.
 	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
 	 */
-	public function get_items( $request ) {
-		$query_args    = $this->prepare_reports_query( $request );
-		$coupons_query = new GenericQuery( $query_args, 'coupons-stats' );
-		try {
-			$report_data = $coupons_query->get_data();
-		} catch ( ParameterException $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-
-		$out_data = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'intervals' => array(),
-		);
-
-		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
-			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$out_data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, 'coupons-stats' );
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param mixed           $report  Report data item as returned from Data Store.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = get_object_vars( $report );
+		$response = parent::prepare_item_for_response( $report, $request );
 
-		$response = parent::prepare_item_for_response( $data, $request );
-
+		// Map to `object` for backwards compatibility.
+		$report = (object) $report;
 		/**
 		 * Filter a report returned from the API.
 		 *
@@ -189,15 +164,6 @@ class Controller extends GenericStatsController {
 				'coupon',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['fields']          = array(
-			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'type' => 'string',
-			),
 		);
 
 		return $params;

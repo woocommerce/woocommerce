@@ -62,6 +62,19 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
+	 * Forwards a Query constructor,
+	 * to be able to customize Query class for a specific report.
+	 *
+	 * By default it creates `GenericQuery` with the rest base as name.
+	 *
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
+	 */
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, $this->rest_base );
+	}
+
+	/**
 	 * Get the query params for collections.
 	 *
 	 * @return array
@@ -124,15 +137,51 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 		return $params;
 	}
 
+
 	/**
-	 * Prepare a report object for serialization.
+	 * Get all reports.
 	 *
-	 * @param array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param WP_REST_Request $request Request data.
+	 * @return array|WP_Error
+	 */
+	public function get_items( $request ) {
+		$query_args  = $this->prepare_reports_query( $request );
+		$query       = $this->construct_query( $query_args );
+		$report_data = $query->get_data();
+
+		if ( is_wp_error( $report_data ) ) {
+			return $report_data;
+		}
+
+		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
+			return new \WP_Error( 'woocommerce_rest_reports_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$out_data = array();
+
+		foreach ( $report_data->data as $datum ) {
+			$item       = $this->prepare_item_for_response( $datum, $request );
+			$out_data[] = $this->prepare_response_for_collection( $item );
+		}
+
+		return $this->add_pagination_headers(
+			$request,
+			$out_data,
+			(int) $report_data->total,
+			(int) $report_data->page_no,
+			(int) $report_data->pages
+		);
+	}
+
+	/**
+	 * Prepare a report data item for serialization.
+	 *
+	 * @param mixed           $report_item Report data item as returned from Data Store.
+	 * @param WP_REST_Request $request     Request object.
 	 * @return WP_REST_Response
 	 */
-	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
+	public function prepare_item_for_response( $report_item, $request ) {
+		$data = $report_item;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -140,5 +189,27 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 
 		// Wrap the data in a response object.
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Maps query arguments from the REST request, to be fed to Query.
+	 *
+	 * `WP_REST_Request` does not expose a method to return all params covering defaults,
+	 * as it does for `$request['param']` accessor.
+	 * Therefore, we re-implement defaults resolution.
+	 *
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return array Simplified array of params.
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args = wp_parse_args(
+			array_intersect_key(
+				$request->get_query_params(),
+				$this->get_collection_params()
+			),
+			$request->get_default_params()
+		);
+
+		return $args;
 	}
 }

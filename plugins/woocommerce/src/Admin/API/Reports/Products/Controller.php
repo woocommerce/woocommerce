@@ -42,51 +42,19 @@ class Controller extends GenericController implements ExportableInterface {
 	);
 
 	/**
-	 * Get items.
+	 * Forwards a Products Query constructor.
 	 *
-	 * @param WP_REST_Request $request Request data.
-	 *
-	 * @return array|WP_Error
+	 * @param array $query_args Set of args to be forwarded to the constructor.
+	 * @return GenericQuery
 	 */
-	public function get_items( $request ) {
-		$args       = array();
-		$registered = array_keys( $this->get_collection_params() );
-		foreach ( $registered as $param_name ) {
-			if ( isset( $request[ $param_name ] ) ) {
-				if ( isset( $this->param_mapping[ $param_name ] ) ) {
-					$args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
-				} else {
-					$args[ $param_name ] = $request[ $param_name ];
-				}
-			}
-		}
-
-		$reports       = new GenericQuery( $args, 'products' );
-		$products_data = $reports->get_data();
-
-		$data = array();
-
-		foreach ( $products_data->data as $product_data ) {
-			$item = $this->prepare_item_for_response( $product_data, $request );
-			if ( isset( $item->data['extended_info']['name'] ) ) {
-				$item->data['extended_info']['name'] = wp_strip_all_tags( $item->data['extended_info']['name'] );
-			}
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$data,
-			(int) $products_data->total,
-			(int) $products_data->page_no,
-			(int) $products_data->pages
-		);
+	protected function construct_query( $query_args ) {
+		return new GenericQuery( $query_args, 'products' );
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param Array           $report  Report data.
+	 * @param Array           $report  Report data item as returned from Data Store.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
@@ -102,8 +70,36 @@ class Controller extends GenericController implements ExportableInterface {
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 *
+		 * @since 6.5.0
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_products', $response, $report, $request );
+		$filtered_response = apply_filters( 'woocommerce_rest_prepare_report_products', $response, $report, $request );
+		if ( isset( $filtered_response->data['extended_info']['name'] ) ) {
+			$filtered_response->data['extended_info']['name'] = wp_strip_all_tags( $filtered_response->data['extended_info']['name'] );
+		}
+		return $filtered_response;
+	}
+
+
+	/**
+	 * Maps query arguments from the REST request.
+	 *
+	 * @param array $request Request array.
+	 * @return array
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args       = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$args[ $param_name ] = $request[ $param_name ];
+				}
+			}
+		}
+		return $args;
 	}
 
 	/**

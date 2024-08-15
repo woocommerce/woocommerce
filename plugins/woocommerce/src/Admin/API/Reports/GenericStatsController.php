@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * Generic base for all Stats controllers.
@@ -21,6 +22,15 @@ abstract class GenericStatsController extends GenericController {
 	 */
 	public function get_collection_params() {
 		$params             = parent::get_collection_params();
+		$params['fields']   = array(
+			'description'       => __( 'Limit stats fields to the specified items.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
+			),
+		);
 		$params['interval'] = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
@@ -153,6 +163,40 @@ abstract class GenericStatsController extends GenericController {
 					),
 				),
 			),
+		);
+	}
+
+	/**
+	 * Get all reports.
+	 *
+	 * @param \WP_REST_Request $request Request data.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function get_items( $request ) {
+		$query_args = $this->prepare_reports_query( $request );
+		$query      = $this->construct_query( $query_args );
+		try {
+			$report_data = $query->get_data();
+		} catch ( ParameterException $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+
+		$out_data = array(
+			'totals'    => $report_data->totals ? get_object_vars( $report_data->totals ) : null,
+			'intervals' => array(),
+		);
+
+		foreach ( $report_data->intervals as $interval_data ) {
+			$item                    = $this->prepare_item_for_response( $interval_data, $request );
+			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
+		}
+
+		return $this->add_pagination_headers(
+			$request,
+			$out_data,
+			(int) $report_data->total,
+			(int) $report_data->page_no,
+			(int) $report_data->pages
 		);
 	}
 }
