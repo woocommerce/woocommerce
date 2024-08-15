@@ -42,7 +42,7 @@ class WC_Shortcode_My_Account {
 		self::my_account_add_notices();
 
 		$is_lost_password      = isset( $wp->query_vars['lost-password'] );
-		$is_new_account_action = 'newaccount' === wc_clean( wp_unslash( $_GET['action'] ?? '' ) );
+		$is_new_account_action = 'newaccount' === wc_clean( wp_unslash( $_GET['action'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		// Show the lost password page only if the user is logged out, or they are setting a password for a new account.
 		if ( $is_lost_password && ( ! is_user_logged_in() || $is_new_account_action ) ) {
@@ -81,7 +81,7 @@ class WC_Shortcode_My_Account {
 		}
 
 		// After password reset, add confirmation message.
-		if ( ! empty( $_GET['password-reset'] ) ) {
+		if ( ! empty( $_GET['password-reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
 		}
 
