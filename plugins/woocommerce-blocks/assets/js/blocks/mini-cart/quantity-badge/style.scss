@@ -23,6 +23,11 @@
 	z-index: 1;
 }
 
+// TODO - remove this when we add interactivity specific styles to the mini cart interactivity block.
+.wc-block-mini-cart__badge__hidden {
+	display: none;
+}
+
 :where(.wc-block-mini-cart__badge) {
 	// These values will be overridden in JS.
 	background-color: transparent;
