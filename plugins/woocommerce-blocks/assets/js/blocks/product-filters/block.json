@@ -20,6 +20,7 @@
 			"text": true
 		},
 		"multiple": false,
+		"inserter": false,
 		"interactivity": true,
 		"typography": {
 			"fontSize": true,
@@ -43,7 +44,9 @@
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
-	"providesContext": {},
+	"providesContext": {
+		"woocommerce/product-filters/overlay": "overlay"
+	},
 	"attributes": {
 		"overlay": {
 			"type": "string",
