@@ -12,3 +12,4 @@ export * from './is-widget-editor-page';
 export * from './trim-words';
 export * from './find-block';
 export * from './interactivity';
+export * from './lock-unlock';
