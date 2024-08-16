@@ -386,17 +386,8 @@ class CheckoutFields {
 
 		$field_data['options'] = $cleaned_options;
 
-		// If the field is not required, inject an empty option at the start.
-		if ( isset( $field_data['required'] ) && false === $field_data['required'] && ! in_array( '', $added_values, true ) ) {
-			$field_data['options'] = array_merge(
-				[
-					[
-						'value' => '',
-						'label' => '',
-					],
-				],
-				$field_data['options']
-			);
+		if ( isset( $field_data['placeholder'] ) ) {
+			$field_data['placeholder'] = sanitize_text_field( $field_data['placeholder'] );
 		}
 
 		return $field_data;
@@ -789,7 +780,7 @@ class CheckoutFields {
 	 * @return mixed
 	 */
 	public function update_default_locale_with_fields( $locale ) {
-		foreach ( $this->fields_locations['address'] as $field_id => $additional_field ) {
+		foreach ( $this->get_fields_for_location( 'address' ) as $field_id => $additional_field ) {
 			if ( empty( $locale[ $field_id ] ) ) {
 				$locale[ $field_id ] = $additional_field;
 			}

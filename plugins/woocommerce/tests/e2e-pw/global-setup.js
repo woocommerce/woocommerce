@@ -95,7 +95,7 @@ module.exports = async ( config ) => {
 
 	// While we're here, let's add a consumer token for API access
 	// This step was failing occasionally, and globalsetup doesn't retry, so make it retry
-	const nRetries = 5;
+	const nRetries = 3;
 	for ( let i = 0; i < nRetries; i++ ) {
 		try {
 			console.log( 'Trying to add consumer token...' );
@@ -122,6 +122,10 @@ module.exports = async ( config ) => {
 			console.log(
 				`Failed to add consumer token. Retrying... ${ i }/${ nRetries }`
 			);
+			await adminPage.screenshot( {
+				fullPage: true,
+				path: `tests/e2e-pw/test-results/generate-key-fail-${ i }.png`,
+			} );
 			console.log( e );
 		}
 	}

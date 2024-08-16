@@ -168,7 +168,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		const emptyLogoLocator =
 			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 		await expect( emptyLogoLocator ).toBeHidden();
-		await assembler.getByLabel( 'Options' ).click();
+		await assembler.getByLabel( 'Options', { exact: true } ).click();
 		await assembler.getByText( 'Delete' ).click();
 		await expect( emptyLogoLocator ).toBeVisible();
 	} );
@@ -182,7 +182,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 		await emptyLogoPicker.click();
 		await logoPickerPageObject.pickImage( assembler );
-		await assembler.getByLabel( 'Options' ).click();
+		await assembler.getByLabel( 'Options', { exact: true } ).click();
 		await assembler.getByText( 'Replace' ).click();
 		await expect( assembler.getByText( 'Media Library' ) ).toBeVisible();
 	} );
