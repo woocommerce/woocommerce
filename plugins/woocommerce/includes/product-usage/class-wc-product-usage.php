@@ -15,13 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Product usage.
+ * Product usagee
  */
 class WC_Product_Usage {
-	private const RULE_FEATURE_RESTRICTIONS_ENABLED = 'feature_restrictions_enabled';
 	private const RULE_GRACE_PERIOD_AFTER_EXPIRY    = 'grace_period_after_expiry';
-	private const RULE_RESTRICT_IF_NOT_CONNECTED    = 'restrict_if_not_connected';
-	private const RULE_RESTRICT_IF_NO_SUBSCRIPTION  = 'restrict_if_no_subscription';
 
 	/**
 	 * Load Product Usage class.
@@ -53,33 +50,19 @@ class WC_Product_Usage {
 			return null;
 		}
 
-		if ( 0 === $rules[ self::RULE_FEATURE_RESTRICTIONS_ENABLED ] ) {
-			return null;
-		}
-
-		if ( 1 === $rules[ self::RULE_RESTRICT_IF_NO_SUBSCRIPTION ] && ! WC_Helper::has_product_subscription( $product_id ) ) {
-			// When there is no subscription for the product, restrict usage.
+		// When there is no subscription for the product, restrict usage.
+		if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
 			return new WC_Product_Usage_Rule_Set( $rules );
 		}
 
 		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
-		if ( empty( $subscriptions ) && 1 === $rules[ self::RULE_RESTRICT_IF_NOT_CONNECTED ] ) {
+		if ( empty( $subscriptions ) ) {
 			return new WC_Product_Usage_Rule_Set( $rules );
 		}
 
 		// Product should only have a single connected subscription on current store.
 		$product_subscription = current( $subscriptions );
-
 		if ( $product_subscription['expired'] ) {
-			if ( 0 === $rules[ self::RULE_GRACE_PERIOD_AFTER_EXPIRY ] ) {
-				return new WC_Product_Usage_Rule_Set( $rules );
-			}
-
-			// If the subscription is within the grace period, even if it's expired, avoid returning rule set.
-			if ( (int) $product_subscription['expired'] - strtotime( 'now' ) > DAY_IN_SECONDS * $rules[ self::RULE_GRACE_PERIOD_AFTER_EXPIRY ] ) {
-				return null;
-			}
-
 			return new WC_Product_Usage_Rule_Set( $rules );
 		}
 
@@ -94,9 +77,12 @@ class WC_Product_Usage {
 	 * @since 9.3.0
 	 */
 	private static function get_product_usage_restriction_rule( int $product_id ): ?array {
-		$restrictions = WC_Helper::get_product_feature_restrictions();
+		$rules = WC_Helper::get_product_usage_notice_rules();
+		if ( empty( $rules['restricted_products'][ $product_id ] ) ) {
+			return null;
+		}
 
-		return $restrictions[ $product_id ] ?? null;
+		return $rules['restricted_products'][ $product_id ];
 	}
 }
 
