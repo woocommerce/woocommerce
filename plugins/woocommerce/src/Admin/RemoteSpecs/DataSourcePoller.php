@@ -144,7 +144,7 @@ abstract class DataSourcePoller {
 		 *
 		 * @since 8.8.0
 		 */
-		$specs       = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
+		$specs = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
 
 		return false !== $specs ? $specs : array();
 	}
