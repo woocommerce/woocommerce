@@ -156,56 +156,102 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Enhances the Product Collection block with client-side pagination.
+	 * Check if next tag is a PC block.
 	 *
-	 * This function identifies Product Collection blocks and adds necessary data attributes
-	 * to enable client-side navigation and animation effects. It also enqueues the Interactivity API runtime.
+	 * @param WP_HTML_Tag_processor $p Initial tag processor.
+	 *
+	 * @return bool Answer if PC block is available.
+	 */
+	private function is_next_tag_product_collection( $p ) {
+		return $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) );
+	}
+
+	/**
+	 * Set PC block namespace for Interactivity API.
+	 *
+	 * @param WP_HTML_Tag_processor $p Initial tag processor.
+	 */
+	private function set_product_collection_namespace( $p ) {
+		$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+	}
+
+	/**
+	 * Attach the init directive to Product Collection block to call
+	 * the onRender callback.
 	 *
 	 * @param string $block_content The HTML content of the block.
-	 * @param array  $block         Block details, including its attributes.
+	 * @param string $collection Collection type.
 	 *
-	 * @return string Updated block content with added interactivity attributes.
+	 * @return string Updated HTML content.
 	 */
-	public function enhance_product_collection_with_interactivity( $block_content, $block ) {
-		$is_product_collection_block    = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
-		$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
-		if ( $is_product_collection_block && $is_enhanced_pagination_enabled ) {
-			// Enqueue the Interactivity API runtime.
-			wp_enqueue_script( 'wc-interactivity' );
+	private function add_rendering_callback( $block_content, $collection ) {
+		$p = new \WP_HTML_Tag_Processor( $block_content );
 
-			$p = new \WP_HTML_Tag_Processor( $block_content );
-
-			// Add `data-wc-navigation-id to the product collection block.
-			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
-				$p->set_attribute(
-					'data-wc-navigation-id',
-					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
-				);
-				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+		// Add `data-init to the product collection block so we trigger JS event on render.
+		if ( $this->is_next_tag_product_collection( $p ) ) {
+			$p->set_attribute(
+				'data-wc-init',
+				'callbacks.onRender'
+			);
+			if ( $collection ) {
 				$p->set_attribute(
 					'data-wc-context',
 					wp_json_encode(
 						array(
-							// The message to be announced by the screen reader when the page is loading or loaded.
-							'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
-							'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
-							// We don't prefetch the links if user haven't clicked on pagination links yet.
-							// This way we avoid prefetching when the page loads.
-							'isPrefetchNextOrPreviousLink' => false,
+							'collection' => $collection,
 						),
 						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 					)
 				);
-				$block_content = $p->get_updated_html();
 			}
+		}
 
-			/**
-			 * Add two div's:
-			 * 1. Pagination animation for visual users.
-			 * 2. Accessibility div for screen readers, to announce page load states.
-			 */
-			$last_tag_position                = strripos( $block_content, '</div>' );
-			$accessibility_and_animation_html = '
+		return $p->get_updated_html();
+	}
+
+	/**
+	 * Attach all the Interactivity API directives responsible
+	 * for client-side navigation.
+	 *
+	 * @param string $block_content The HTML content of the block.
+	 *
+	 * @return string Updated HTML content.
+	 */
+	private function enable_client_side_navigation( $block_content ) {
+		$p = new \WP_HTML_Tag_Processor( $block_content );
+
+		// Add `data-wc-navigation-id to the product collection block.
+		if ( $this->is_next_tag_product_collection( $p ) ) {
+			$p->set_attribute(
+				'data-wc-navigation-id',
+				'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
+			);
+			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ) ?? '{}', true );
+			$p->set_attribute(
+				'data-wc-context',
+				wp_json_encode(
+					array(
+						...$current_context,
+						// The message to be announced by the screen reader when the page is loading or loaded.
+						'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
+						'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
+						// We don't prefetch the links if user haven't clicked on pagination links yet.
+						// This way we avoid prefetching when the page loads.
+						'isPrefetchNextOrPreviousLink' => false,
+					),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				)
+			);
+			$block_content = $p->get_updated_html();
+		}
+
+		/**
+		 * Add two div's:
+		 * 1. Pagination animation for visual users.
+		 * 2. Accessibility div for screen readers, to announce page load states.
+		 */
+		$last_tag_position                = strripos( $block_content, '</div>' );
+		$accessibility_and_animation_html = '
 				<div
 					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
 					class="wc-block-product-collection__pagination-animation"
@@ -219,12 +265,44 @@ class ProductCollection extends AbstractBlock {
 					data-wc-text="context.accessibilityMessage">
 				</div>
 			';
-			$block_content                    = substr_replace(
-				$block_content,
-				$accessibility_and_animation_html,
-				$last_tag_position,
-				0
-			);
+		return substr_replace(
+			$block_content,
+			$accessibility_and_animation_html,
+			$last_tag_position,
+			0
+		);
+	}
+
+	/**
+	 * Enhances the Product Collection block with client-side pagination.
+	 *
+	 * This function identifies Product Collection blocks and adds necessary data attributes
+	 * to enable client-side navigation and animation effects. It also enqueues the Interactivity API runtime.
+	 *
+	 * @param string $block_content The HTML content of the block.
+	 * @param array  $block         Block details, including its attributes.
+	 *
+	 * @return string Updated block content with added interactivity attributes.
+	 */
+	public function enhance_product_collection_with_interactivity( $block_content, $block ) {
+		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
+
+		if ( $is_product_collection_block ) {
+			// Enqueue the Interactivity API runtime and set the namespace.
+			wp_enqueue_script( 'wc-interactivity' );
+			$p = new \WP_HTML_Tag_Processor( $block_content );
+			if ( $this->is_next_tag_product_collection( $p ) ) {
+				$this->set_product_collection_namespace( $p );
+			}
+			$block_content = $p->get_updated_html();
+
+			$collection    = $block['attrs']['collection'] ?? '';
+			$block_content = $this->add_rendering_callback( $block_content, $collection );
+
+			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
+			if ( $is_enhanced_pagination_enabled ) {
+				$block_content = $this->enable_client_side_navigation( $block_content );
+			}
 		}
 
 		return $block_content;
@@ -295,7 +373,7 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$this->set_product_collection_namespace( $processor );
 			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
 			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
@@ -328,9 +406,11 @@ class ProductCollection extends AbstractBlock {
 	 */
 	private function is_block_compatible( $block_name ) {
 		// Check for explicitly unsupported blocks.
-		if ( 'core/post-content' === $block_name ||
+		if (
+			'core/post-content' === $block_name ||
 			'woocommerce/mini-cart' === $block_name ||
-			'woocommerce/featured-product' === $block_name ) {
+			'woocommerce/featured-product' === $block_name
+		) {
 			return false;
 		}
 
@@ -849,7 +929,7 @@ class ProductCollection extends AbstractBlock {
 				if ( ! isset( $base[ $key ] ) ) {
 					$base[ $key ] = array();
 				}
-					$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
+				$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
 			} else {
 				$base[ $key ] = $value;
 			}
