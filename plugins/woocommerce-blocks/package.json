@@ -182,7 +182,6 @@
 		"@wordpress/postcss-plugins-preset": "1.6.0",
 		"@wordpress/postcss-themes": "1.0.5",
 		"@wordpress/prettier-config": "1.4.0",
-		"@wordpress/private-apis": "1.5.0",
 		"@wordpress/scripts": "24.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-playwright": "^2.9.2",
