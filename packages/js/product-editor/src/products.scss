@@ -1,0 +1,20 @@
+@include wordpress-admin-schemes();
+
+.woocommerce_page_woocommerce-products-dashboard #wpadminbar,
+.woocommerce_page_woocommerce-products-dashboard #adminmenumain {
+	display: none;
+}
+.woocommerce_page_woocommerce-products-dashboard #wpcontent {
+	margin-left: 0;
+}
+body.woocommerce_page_woocommerce-products-dashboard
+	#woocommerce-products-dashboard {
+	@include wp-admin-reset("#woocommerce-products-dashboard");
+	@include reset;
+	position: absolute !important;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	min-height: 100vh;
+}
