@@ -64,6 +64,8 @@ class WC_Shortcode_My_Account {
 	 * logged out. See `woocommerce_my_account_message`.
 	 */
 	private static function my_account_add_notices() {
+		global $wp;
+
 		if ( ! is_user_logged_in() ) {
 			/**
 			 * Filters the message shown on the 'my account' page when the user is not logged in.
