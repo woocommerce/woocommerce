@@ -99,7 +99,7 @@ abstract class DataSourcePoller {
 	}
 
 	/**
-	 * Gets specs from data sources.
+	 * Reads the data sources for specs and persists those specs.
 	 *
 	 * @return array list of specs.
 	 */
