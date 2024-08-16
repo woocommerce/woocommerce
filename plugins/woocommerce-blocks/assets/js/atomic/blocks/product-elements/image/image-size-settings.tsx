@@ -67,7 +67,7 @@ export const ImageSizeSettings = ( {
 			label={ __( 'Image size', 'woocommerce' ) }
 		>
 			<DimensionsTool
-				value={ { aspectRatio } }
+				value={ { aspectRatio: aspectRatio ?? '1' } }
 				onChange={ ( {
 					aspectRatio: newAspectRatio,
 				}: {
@@ -78,7 +78,7 @@ export const ImageSizeSettings = ( {
 						scale: 'cover',
 					} );
 				} }
-				defaultAspectRatio="auto"
+				defaultAspectRatio="1"
 				tools={ [ 'aspectRatio' ] }
 			/>
 
