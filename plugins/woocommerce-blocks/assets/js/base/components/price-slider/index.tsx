@@ -170,7 +170,7 @@ const PriceSlider = ( {
 	] );
 
 	/**
-	 * Selects the price field when it is clicked.
+	 * Selects the price field when clicked.
 	 *
 	 * @param {Object} event event data.
 	 */
