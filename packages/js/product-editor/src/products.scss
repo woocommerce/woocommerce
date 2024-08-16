@@ -11,7 +11,8 @@ body.woocommerce_page_woocommerce-products-dashboard
 	#woocommerce-products-dashboard {
 	@include wp-admin-reset("#woocommerce-products-dashboard");
 	@include reset;
-	position: absolute !important;
+	display: block !important;
+	position: absolute;
 	top: 0;
 	right: 0;
 	bottom: 0;

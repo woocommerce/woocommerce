@@ -127,9 +127,11 @@ if (
 	// Set up customer effort score survey.
 	( function () {
 		const root = appRoot || embeddedRoot;
-		createRoot(
-			root.insertBefore( document.createElement( 'div' ), null )
-		).render( <CustomerEffortScoreTracksContainer /> );
+		if ( root ) {
+			createRoot(
+				root.insertBefore( document.createElement( 'div' ), null )
+			).render( <CustomerEffortScoreTracksContainer /> );
+		}
 	} )();
 }
 

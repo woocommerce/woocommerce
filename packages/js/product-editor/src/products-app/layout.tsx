@@ -3,11 +3,11 @@
 /**
  * External dependencies
  */
-import { DataViews } from '@wordpress/dataviews';
-import { useEntityRecords } from '@wordpress/core-data';
-import { createElement, useMemo, useState } from '@wordpress/element';
+import { DataViews, DataForm } from '@wordpress/dataviews';
+import { createElement, useState, Fragment } from '@wordpress/element';
+import { __experimentalVStack as VStack } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-
+import { useSelect } from '@wordpress/data';
 const STATUSES = [
 	{ value: 'draft', label: __( 'Draft' ) },
 	{ value: 'future', label: __( 'Scheduled' ) },
@@ -16,6 +16,63 @@ const STATUSES = [
 	{ value: 'publish', label: __( 'Published' ) },
 	{ value: 'trash', label: __( 'Trash' ) },
 ];
+const fields = [
+	{
+		id: 'title',
+		label: 'Title',
+		enableHiding: false,
+		render: ( { item } ) => {
+			return item.title.rendered;
+		},
+	},
+	{
+		id: 'date',
+		label: 'Date',
+		render: ( { item } ) => {
+			return <time>{ item.date }</time>;
+		},
+	},
+	{
+		id: 'author',
+		label: __( 'Author' ),
+		render: ( { item } ) => {
+			return <a href="...">{ item.author }</a>;
+		},
+		elements: [
+			{ value: 1, label: 'Admin' },
+			{ value: 2, label: 'User' },
+		],
+		filterBy: {
+			operators: [ 'is', 'isNot' ],
+		},
+		enableSorting: false,
+	},
+	{
+		label: __( 'Status' ),
+		id: 'status',
+		getValue: ( { item } ) =>
+			STATUSES.find( ( { value } ) => value === item.status )?.label ??
+			item.status,
+		elements: STATUSES,
+		filterBy: {
+			operators: [ 'isAny' ],
+		},
+		enableSorting: false,
+	},
+];
+
+const defaultLayouts = {
+	table: {
+		layout: {
+			primaryKey: 'my-key',
+		},
+	},
+};
+
+const form = {
+	type: 'panel',
+	fields: [ 'title', 'status', 'author' ],
+};
 
 export function Layout() {
 	const [ view, setView ] = useState( {
@@ -27,47 +84,44 @@ export function Layout() {
 			direction: 'desc',
 		},
 		search: '',
-		filters: [
-			{ field: 'author', operator: 'is', value: 2 },
-			{
-				field: 'status',
-				operator: 'isAny',
-				value: [ 'publish', 'draft' ],
-			},
-		],
-		fields: [ 'author', 'status' ],
+		filters: [],
+		fields: [ 'title', 'date', 'author', 'status' ],
 		layout: {},
 	} );
 
-	const queryArgs = useMemo( () => {
-		const filters = {};
-		view.filters.forEach( ( filter ) => {
-			if ( filter.field === 'status' && filter.operator === 'isAny' ) {
-				filters.status = filter.value;
-			}
-			if ( filter.field === 'author' && filter.operator === 'is' ) {
-				filters.author = filter.value;
-			}
-		} );
-		return {
-			per_page: view.perPage,
-			page: view.page,
-			_embed: 'author',
-			order: view.sort?.direction,
-			orderby: view.sort?.field,
-			search: view.search,
-			...filters,
-		};
-	}, [ view ] );
+	const records = useSelect( ( select ) => {
+		return select( 'core' ).getEntityRecords( 'postType', 'product' );
+	} );
 
-	const { records } = useEntityRecords( 'postType', 'page', queryArgs );
+	const onChange = ( edits ) => {
+		// do nothing.
+	};
+
+	if ( ! records ) {
+		return null;
+	}
 
 	return (
-		<DataViews
-			data={ records }
-			view={ view }
-			onChangeView={ setView }
-			// ...
-		/>
+		<>
+			<VStack spacing={ 4 }>
+				<DataForm
+					data={ records[ 0 ] }
+					fields={ fields }
+					form={ form }
+					onChange={ onChange }
+				/>
+			</VStack>
+			<DataViews
+				data={ records || [] }
+				view={ view }
+				onChangeView={ setView }
+				fields={ fields }
+				defaultLayouts={ defaultLayouts }
+				paginationInfo={ {
+					totalItems: ( records || [] ).length,
+					totalPages: 1,
+				} }
+			/>
+		</>
 	);
 }

@@ -186,6 +186,8 @@ const webpackConfig = {
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
 			'~': path.resolve( __dirname + '/client' ),
+			'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
+			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
 		},
 	},
 	plugins: [

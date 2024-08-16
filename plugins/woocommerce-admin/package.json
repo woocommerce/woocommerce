@@ -90,8 +90,6 @@
 		"memize": "^1.1.0",
 		"qrcode.react": "^3.1.0",
 		"qs": "^6.11.2",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
 		"react-router-dom": "~6.3.0",
 		"react-transition-group": "^4.4.5",
 		"react-visibility-sensor": "^5.1.1",
@@ -238,7 +236,9 @@
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "wp-6.0"
+		"@wordpress/data": "wp-6.0",
+		"react": "^18.3.0",
+		"react-dom": "^18.3.0"
 	},
 	"engines": {
 		"node": "^20.11.1",
