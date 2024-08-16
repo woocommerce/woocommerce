@@ -340,7 +340,7 @@ jQuery( function( $ ) {
 		var photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );
 
 		photoswipe.listen( 'afterInit', function() {
-			self.trapFocusPhotoswipe();
+			self.trapFocusPhotoswipe( true );
 		});
 
 		photoswipe.listen( 'close', function() {
@@ -362,7 +362,7 @@ jQuery( function( $ ) {
 	 * 
 	 * @param {boolean} trapFocus - Whether to trap focus or not.
 	 */
-	ProductGallery.prototype.trapFocusPhotoswipe = function( trapFocus = true ) {
+	ProductGallery.prototype.trapFocusPhotoswipe = function( trapFocus ) {
 		var pswp = document.querySelector( '.pswp' );
 
 		if ( ! pswp ) {
@@ -380,9 +380,14 @@ jQuery( function( $ ) {
 	 * Handle keydown event in photoswipe modal.
 	 */
 	ProductGallery.prototype.handlePswpTrapFocus = function( e ) {
-		var allFocusablesEls = e.currentTarget.querySelectorAll( 'button:not([disabled])' ),
-		firstTabStop = allFocusablesEls[0];
-		lastTabStop  = allFocusablesEls[allFocusablesEls.length - 1];
+		var allFocusablesEls = e.currentTarget.querySelectorAll( 'button:not([disabled])' );
+
+		if ( 1 >= allFocusablesEls.length ) {
+			return;
+		}
+
+		var firstTabStop = allFocusablesEls[0];
+		var lastTabStop  = allFocusablesEls[allFocusablesEls.length - 1];
 
 		if ( e.key === 'Tab' ) {
 			if ( e.shiftKey ) {
