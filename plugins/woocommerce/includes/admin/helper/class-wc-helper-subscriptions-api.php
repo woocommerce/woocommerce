@@ -140,7 +140,7 @@ class WC_Helper_Subscriptions_API {
 	public static function refresh() {
 		WC_Helper::refresh_helper_subscriptions();
 		WC_Helper::get_subscriptions();
-		WC_Helper::get_product_feature_restrictions();
+		WC_Helper::get_product_usage_notice_rules();
 		self::get_subscriptions();
 	}
 
