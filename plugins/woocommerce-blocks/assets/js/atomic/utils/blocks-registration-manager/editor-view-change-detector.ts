@@ -134,7 +134,7 @@ export class EditorViewChangeDetector
 
 		if ( isTemplatePage ) {
 			const fullTemplateId = getQueryArg( url, 'postId' ) as string;
-			templateId = fullTemplateId.split( '//' )[ 1 ];
+			templateId = fullTemplateId?.split( '//' )[ 1 ];
 		}
 
 		return templateId as string;
