@@ -35,6 +35,7 @@ interface ImageSizeSettingProps {
 	scale: string;
 	width: string | undefined;
 	height: string | undefined;
+	aspectRatio: string | undefined;
 	setAttributes: ( attrs: BlockAttributes ) => void;
 }
 
@@ -57,6 +58,7 @@ export const ImageSizeSettings = ( {
 	scale,
 	width,
 	height,
+	aspectRatio,
 	setAttributes,
 }: ImageSizeSettingProps ) => {
 	return (
@@ -64,6 +66,22 @@ export const ImageSizeSettings = ( {
 			className="wc-block-product-image__tools-panel"
 			label={ __( 'Image size', 'woocommerce' ) }
 		>
+			<DimensionsTool
+				value={ { aspectRatio } }
+				onChange={ ( {
+					aspectRatio: newAspectRatio,
+				}: {
+					aspectRatio: string;
+				} ) => {
+					setAttributes( {
+						aspectRatio: newAspectRatio,
+						scale: 'cover',
+					} );
+				} }
+				defaultAspectRatio="auto"
+				tools={ [ 'aspectRatio' ] }
+			/>
+
 			<UnitControl
 				label={ __( 'Height', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
