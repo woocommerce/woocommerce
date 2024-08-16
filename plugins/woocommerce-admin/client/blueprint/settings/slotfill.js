@@ -139,6 +139,19 @@ const Blueprint = () => {
 					'woocommerce'
 				) }
 			</p>
+			<p>
+				<strong>
+					Please{ ' ' }
+					<a
+						href="https://automattic.survey.fm/woocommerce-blueprint-survey"
+						target="_blank"
+						rel="noreferrer"
+					>
+						complete the survey
+					</a>{ ' ' }
+					to help shape the direction of this feature!
+				</strong>
+			</p>
 			<h3>Import</h3>
 			<p>
 				You can import the schema on the{ ' ' }
