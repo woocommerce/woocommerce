@@ -17,7 +17,7 @@
 		"@types/wordpress__plugins": "3.0.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "^9.7.0",
+		"@wordpress/env": "^10.1.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "^8.55.0",
@@ -64,7 +64,7 @@
 		"build_step": "pnpm run build:zip"
 	},
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/' && pnpm build:project",
 		"build:project": "pnpm build:admin && pnpm uglify",
 		"build:admin": "wp-scripts build",
 		"build:dev": "pnpm lint:js && pnpm build",

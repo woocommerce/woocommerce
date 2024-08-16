@@ -839,7 +839,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
-						&& $sub['active']
+						&& ( $sub['active'] || empty( $sub['connections'] ) ) // Active on current site or not connected to any sites.
 						&& $sub['expiring']
 						&& ! $sub['autorenew'];
 			},
@@ -917,7 +917,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
-						&& $sub['active']
+						&& ( $sub['active'] || empty( $sub['connections'] ) ) // Active on current site or not connected to any sites.
 						&& $sub['expired']
 						&& ! $sub['lifetime'];
 			},

@@ -1,4 +1,5 @@
 const { encodeCredentials } = require( '../../../../utils/plugin-utils' );
+const { admin } = require( '../../../../test-data/data' );
 
 export class LogoPickerPage {
 	page;
@@ -58,8 +59,8 @@ export class LogoPickerPage {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
