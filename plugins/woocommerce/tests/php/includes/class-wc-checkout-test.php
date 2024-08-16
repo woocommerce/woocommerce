@@ -202,5 +202,20 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$errors->get_error_message( 'shipping' )
 		);
 	}
+
+	/**
+	 * @testdox If the WooCommerce class's customer object is null (like if WC has not been fully initialized yet),
+	 *          calling WC_Checkout::get_value should not throw an error.
+	 */
+	public function test_get_value_no_error_on_null_customer() {
+		$sut = WC_Checkout::instance();
+
+		$orig_customer = WC()->customer;
+		WC()->customer = null;
+
+		$this->assertNull( $sut->get_value( 'billing_country' ) );
+
+		WC()->customer = $orig_customer;
+	}
 }
 
