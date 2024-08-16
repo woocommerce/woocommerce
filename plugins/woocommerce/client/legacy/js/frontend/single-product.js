@@ -332,7 +332,8 @@ jQuery( function( $ ) {
 				}
 				captionEl.children[0].textContent = item.title;
 				return true;
-			}
+			},
+			timeToIdle: 0, // Ensure the gallery controls are always visible to avoid keyboard navigation issues.
 		}, wc_single_product_params.photoswipe_options );
 
 		// Initializes and opens PhotoSwipe.
