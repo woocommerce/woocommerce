@@ -135,6 +135,15 @@ abstract class DataSourcePoller {
 		$locale      = get_user_locale();
 		$specs_group = get_transient( $this->args['transient_name'] ) ?? array();
 		$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : null;
+
+		/**
+		 * Filter specs.
+		 *
+		 * @param array      $specs List of specs.
+		 * @param string     $this->id Spec identifier.
+		 *
+		 * @since 8.8.0
+		 */
 		$specs       = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
 
 		return false !== $specs ? $specs : array();
