@@ -339,15 +339,15 @@ jQuery( function( $ ) {
 		// Initializes and opens PhotoSwipe.
 		var photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );
 
-		photoswipe.listen('afterInit', function() {
+		photoswipe.listen( 'afterInit', function() {
 			self.trapFocusPhotoswipe();
 		});
 
-		photoswipe.listen('close', function() {
+		photoswipe.listen( 'close', function() {
 			self.trapFocusPhotoswipe( false );
 		});
 
-		photoswipe.listen('destroy', function() {
+		photoswipe.listen( 'destroy', function() {
 			var focusCurrentTargetId = setTimeout( function() {
 				currentTarget.focus();
 				clearTimeout( focusCurrentTargetId );
