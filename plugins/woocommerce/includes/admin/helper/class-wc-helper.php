@@ -1335,6 +1335,34 @@ class WC_Helper {
 	}
 
 	/**
+	 * Get the user's unconnected subscriptions.
+	 *
+	 * @return array
+	 */
+	public static function get_unconnected_subscriptions() {
+		static $unconnected_subscriptions = null;
+
+		// Cache unconnected_subscriptions in the current request.
+		if ( is_null( $unconnected_subscriptions ) ) {
+			$auth    = WC_Helper_Options::get( 'auth' );
+			$site_id = isset( $auth['site_id'] ) ? absint( $auth['site_id'] ) : 0;
+			if ( 0 === $site_id ) {
+				$unconnected_subscriptions = array();
+				return $unconnected_subscriptions;
+			}
+
+			$unconnected_subscriptions = array_filter(
+				self::get_subscriptions(),
+				function ( $subscription ) use ( $site_id ) {
+					return empty( $subscription['connections'] );
+				}
+			);
+		}
+
+		return $unconnected_subscriptions;
+	}
+
+	/**
 	 * Get subscription state of a given product ID.
 	 *
 	 * @since TBD

@@ -65,6 +65,7 @@ const Checkout = ( {
 		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
+		hasDarkControls,
 		showFormStepNumbers,
 	} = attributes;
 
@@ -98,6 +99,7 @@ const Checkout = ( {
 					requireApartmentField,
 					showPhoneField,
 					requirePhoneField,
+					hasDarkControls,
 					showFormStepNumbers,
 				} as Attributes
 			}
