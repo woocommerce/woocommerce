@@ -49,4 +49,7 @@
 			<file>./includes/wc-widget-functions.php</file>
 		</exclude>
 	</coverage>
+	<extensions>
+		<extension class="Automattic\WooCommerce\Tests\SlowTests" />
+	</extensions>
 </phpunit>
