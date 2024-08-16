@@ -127,6 +127,8 @@ jQuery( function( $ ) {
 		this.onResetSlidePosition = this.onResetSlidePosition.bind( this );
 		this.getGalleryItems      = this.getGalleryItems.bind( this );
 		this.openPhotoswipe       = this.openPhotoswipe.bind( this );
+		this.trapFocusPhotoswipe  = this.trapFocusPhotoswipe.bind( this );
+		this.handlePswpTrapFocus  = this.handlePswpTrapFocus.bind( this );
 
 		if ( this.flexslider_enabled ) {
 			this.initFlexslider( args.flexslider );
@@ -247,7 +249,9 @@ jQuery( function( $ ) {
 	 */
 	ProductGallery.prototype.initPhotoswipe = function() {
 		if ( this.zoom_enabled && this.$images.length > 0 ) {
-			this.$target.prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
+			this.$target.prepend( '<a href="#" class="woocommerce-product-gallery__trigger" aria-label="' + 
+				wc_single_product_params.i18n_open_product_gallery + '"></a>' 
+			);
 			this.$target.on( 'click', '.woocommerce-product-gallery__trigger', this.openPhotoswipe );
 			this.$target.on( 'click', '.woocommerce-product-gallery__image a', function( e ) {
 				e.preventDefault();
@@ -307,8 +311,10 @@ jQuery( function( $ ) {
 		e.preventDefault();
 
 		var pswpElement = $( '.pswp' )[0],
-			items       = this.getGalleryItems(),
-			eventTarget = $( e.target ),
+			items         = this.getGalleryItems(),
+			eventTarget   = $( e.target ),
+			currentTarget = e.currentTarget,
+			self				  = this,
 			clicked;
 
 		if ( 0 < eventTarget.closest( '.woocommerce-product-gallery__trigger' ).length ) {
@@ -331,7 +337,63 @@ jQuery( function( $ ) {
 
 		// Initializes and opens PhotoSwipe.
 		var photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );
+
+		photoswipe.listen('afterInit', function() {
+			self.trapFocusPhotoswipe();
+		});
+
+		photoswipe.listen('close', function() {
+			self.trapFocusPhotoswipe( false );
+		});
+
+		photoswipe.listen('destroy', function() {
+			var focusCurrentTargetId = setTimeout( function() {
+				currentTarget.focus();
+				clearTimeout( focusCurrentTargetId );
+			}, 500 );
+		});
+
 		photoswipe.init();
+	};
+
+	/**
+	 * Control focus in photoswipe modal.
+	 * 
+	 * @param {boolean} trapFocus - Whether to trap focus or not.
+	 */
+	ProductGallery.prototype.trapFocusPhotoswipe = function( trapFocus = true ) {
+		var pswp = document.querySelector( '.pswp' );
+
+		if ( ! pswp ) {
+			return;
+		}
+
+		if ( trapFocus ) {
+			pswp.addEventListener( 'keydown', this.handlePswpTrapFocus );
+		} else {
+			pswp.removeEventListener( 'keydown', this.handlePswpTrapFocus );
+		}
+	};
+	
+	/**
+	 * Handle keydown event in photoswipe modal.
+	 */
+	ProductGallery.prototype.handlePswpTrapFocus = function( e ) {
+		var allFocusablesEls = e.currentTarget.querySelectorAll( 'button:not([disabled])' ),
+		firstTabStop = allFocusablesEls[0];
+		lastTabStop  = allFocusablesEls[allFocusablesEls.length - 1];
+
+		if ( e.key === 'Tab' ) {
+			if ( e.shiftKey ) {
+				if ( document.activeElement === firstTabStop ) {
+					e.preventDefault();
+					lastTabStop.focus();
+				}
+			} else if ( document.activeElement === lastTabStop ) {
+				e.preventDefault();
+				firstTabStop.focus();
+			}
+		}
 	};
 
 	/**
