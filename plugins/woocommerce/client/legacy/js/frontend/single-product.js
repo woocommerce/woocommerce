@@ -312,7 +312,7 @@ jQuery( function( $ ) {
 			items         = this.getGalleryItems(),
 			eventTarget   = $( e.target ),
 			currentTarget = e.currentTarget,
-			self				  = this,
+			self          = this,
 			clicked;
 
 		if ( 0 < eventTarget.closest( '.woocommerce-product-gallery__trigger' ).length ) {
