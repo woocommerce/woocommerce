@@ -18,8 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Product usagee
  */
 class WC_Product_Usage {
-	private const RULE_GRACE_PERIOD_AFTER_EXPIRY    = 'grace_period_after_expiry';
-
 	/**
 	 * Load Product Usage class.
 	 *
