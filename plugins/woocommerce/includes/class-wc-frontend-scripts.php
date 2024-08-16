@@ -507,7 +507,6 @@ class WC_Frontend_Scripts {
 			case 'wc-single-product':
 				$params = array(
 					'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
-					'i18n_open_product_gallery' => esc_attr__( 'Open product gallery', 'woocommerce' ),
 					'review_rating_required'    => wc_review_ratings_required() ? 'yes' : 'no',
 					'flexslider'                => apply_filters(
 						'woocommerce_single_product_carousel_options',

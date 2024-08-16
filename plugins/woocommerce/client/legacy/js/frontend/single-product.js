@@ -249,9 +249,7 @@ jQuery( function( $ ) {
 	 */
 	ProductGallery.prototype.initPhotoswipe = function() {
 		if ( this.zoom_enabled && this.$images.length > 0 ) {
-			this.$target.prepend( '<a href="#" class="woocommerce-product-gallery__trigger" aria-label="' + 
-				wc_single_product_params.i18n_open_product_gallery + '"></a>' 
-			);
+			this.$target.prepend( '<a href="#" class="woocommerce-product-gallery__trigger">🔍</a>' );
 			this.$target.on( 'click', '.woocommerce-product-gallery__trigger', this.openPhotoswipe );
 			this.$target.on( 'click', '.woocommerce-product-gallery__image a', function( e ) {
 				e.preventDefault();
