@@ -62,11 +62,16 @@ class Init extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Gets the default suggestions.
+	 * Gets either cached or default suggestions.
 	 *
 	 * @return array
 	 */
-	public static function get_default_suggestions() {
+	public static function get_cached_or_default_suggestions() {
+		$specs = PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_cached_specs();
+
+		if ( ! is_array( $specs ) || 0 === count( $specs ) ) {
+			$specs = DefaultPaymentGateways::get_all();
+		}
 		/**
 		 * Allows filtering of payment gateway suggestion specs
 		 *
@@ -74,8 +79,8 @@ class Init extends RemoteSpecsEngine {
 		 *
 		 * @param array Gateway specs.
 		 */
-		$default_specs = apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', DefaultPaymentGateways::get_all() );
-		$results       = EvaluateSuggestion::evaluate_specs( $default_specs );
+		$specs   = apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', $specs );
+		$results = EvaluateSuggestion::evaluate_specs( $specs );
 		return $results['suggestions'];
 	}
 

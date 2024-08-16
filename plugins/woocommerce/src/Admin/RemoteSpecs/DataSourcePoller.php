@@ -129,6 +129,20 @@ abstract class DataSourcePoller {
 	/**
 	 * Reads the data sources for specs and persists those specs.
 	 *
+	 * @return array list of specs.
+	 */
+	public function get_cached_specs() {
+		$locale      = get_user_locale();
+		$specs_group = get_transient( $this->args['transient_name'] ) ?? array();
+		$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : null;
+		$specs       = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
+
+		return false !== $specs ? $specs : array();
+	}
+
+	/**
+	 * Reads the data sources for specs and persists those specs.
+	 *
 	 * @return bool Whether any specs were read.
 	 */
 	public function read_specs_from_data_sources() {
