@@ -16,6 +16,11 @@ const STATUSES = [
 	{ value: 'publish', label: __( 'Published' ) },
 	{ value: 'trash', label: __( 'Trash' ) },
 ];
+
+/**
+ * TODO: auto convert some of the product editor blocks ( from the blocks directory ) to this format.
+ * The edit function should work relatively well with the edit from the blocks, the only difference is that the blocks rely on getEntityProp to get the value
+ */
 const fields = [
 	{
 		id: 'title',
@@ -89,6 +94,7 @@ export function Layout() {
 		layout: {},
 	} );
 
+	// TODO: Use the Woo data store to get all the products, as this doesn't contain all the product data.
 	const records = useSelect( ( select ) => {
 		return select( 'core' ).getEntityRecords( 'postType', 'product' );
 	} );
@@ -101,6 +107,7 @@ export function Layout() {
 		return null;
 	}
 
+	// TODO: It would be nice to match the WordPress site editor navigation layout, but this is a nice to have at this point.
 	return (
 		<>
 			<VStack spacing={ 4 }>

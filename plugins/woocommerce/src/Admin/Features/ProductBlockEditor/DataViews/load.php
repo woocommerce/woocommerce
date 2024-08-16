@@ -34,6 +34,7 @@ function woocommerce_add_new_products_dashboard() {
 	if ( ! $gutenberg_experiments ) {
 		return;
 	}
+	// We may also want to limit this to GB being enabled and the latest GB version being installed.
     if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
         return;
     }
