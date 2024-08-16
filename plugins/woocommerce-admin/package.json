@@ -237,8 +237,8 @@
 	},
 	"peerDependencies": {
 		"@wordpress/data": "wp-6.0",
-		"react": "^18.3.0",
-		"react-dom": "^18.3.0"
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2"
 	},
 	"engines": {
 		"node": "^20.11.1",
