@@ -16,7 +16,6 @@ import {
 	BlockVariationStrategy,
 } from './block-registration-strategy';
 import { BLOCKS_WITH_RESTRICTION } from './blocks-with-restriction';
-
 /**
  * Manages the registration and unregistration of blocks based on template or page restrictions.
  *
@@ -63,16 +62,17 @@ export class BlockRegistrationManager
 			allowedTemplateParts,
 			availableInPostOrPageEditor,
 		} = BLOCKS_WITH_RESTRICTION[ blockWithRestrictionName ];
-		const shouldBeAvailableOnTemplate = Object.keys(
-			allowedTemplates
-		).some( ( allowedTemplate ) =>
-			currentTemplateId.startsWith( allowedTemplate )
-		);
-		const shouldBeAvailableOnTemplatePart = Object.keys(
-			allowedTemplateParts
-		).some( ( allowedTemplate ) =>
-			currentTemplateId.startsWith( allowedTemplate )
-		);
+
+		const shouldBeAvailableOnTemplate = allowedTemplates
+			? Object.keys( allowedTemplates ).some( ( allowedTemplate ) =>
+					currentTemplateId.startsWith( allowedTemplate )
+			  )
+			: true;
+		const shouldBeAvailableOnTemplatePart = allowedTemplateParts
+			? Object.keys( allowedTemplateParts ).some( ( allowedTemplate ) =>
+					currentTemplateId.startsWith( allowedTemplate )
+			  )
+			: true;
 		const shouldBeAvailableOnPostOrPageEditor =
 			isPostOrPage && availableInPostOrPageEditor;
 

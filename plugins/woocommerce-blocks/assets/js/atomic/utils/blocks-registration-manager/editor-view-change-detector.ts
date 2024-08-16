@@ -5,8 +5,10 @@ import { subscribe } from '@wordpress/data';
 import { getPath, getQueryArg } from '@wordpress/url';
 
 enum ContentType {
-	POST_OR_PAGE = 'post-or-page',
-	TEMPLATE = 'template',
+	WP_TEMPLATE = 'wp-template',
+	WP_TEMPLATE_PART = 'wp-template-part',
+	POST = 'post',
+	PAGE = 'page',
 	NONE = 'none',
 }
 
@@ -34,8 +36,6 @@ export interface EditorViewChangeDetectorObserver {
 export class EditorViewChangeDetector
 	implements EditorViewChangeDetectorSubject
 {
-	private previousTemplateId: string | undefined;
-	private currentTemplateId: string | undefined;
 	private previousContentType: ContentType | undefined;
 	private currentContentType: ContentType | undefined;
 	private previousPageLocation = '';
@@ -65,15 +65,15 @@ export class EditorViewChangeDetector
 		}
 
 		if ( path.includes( 'site-editor.php' ) ) {
-			return ContentType.TEMPLATE;
+			return ContentType.WP_TEMPLATE;
 		}
 
-		if (
-			path.includes( 'post.php' ) ||
-			path.includes( 'post-new.php' ) ||
-			path.includes( 'page-new.php' )
-		) {
-			return ContentType.POST_OR_PAGE;
+		if ( path.includes( 'post-new.php' ) || path.includes( 'post.php' ) ) {
+			return ContentType.POST;
+		}
+
+		if ( path.includes( 'page-new.php' ) ) {
+			return ContentType.PAGE;
 		}
 
 		return ContentType.NONE;
@@ -84,14 +84,17 @@ export class EditorViewChangeDetector
 			return true;
 		}
 
-		if ( this.currentContentType === ContentType.POST_OR_PAGE ) {
+		if (
+			this.currentContentType === ContentType.POST ||
+			this.currentContentType === ContentType.PAGE
+		) {
 			return (
 				this.getPostOrPageIdFromUrl( this.currentPageLocation ) !==
 				this.getPostOrPageIdFromUrl( this.previousPageLocation )
 			);
 		}
 
-		if ( this.currentContentType === ContentType.TEMPLATE ) {
+		if ( this.currentContentType === ContentType.WP_TEMPLATE ) {
 			return (
 				this.getCurrentTemplateIdFromUrl( this.currentPageLocation ) !==
 				this.getCurrentTemplateIdFromUrl( this.previousPageLocation )
@@ -115,11 +118,11 @@ export class EditorViewChangeDetector
 	}
 
 	public getPreviousTemplateId() {
-		return this.previousTemplateId;
+		return this.getCurrentTemplateIdFromUrl( this.previousPageLocation );
 	}
 
 	public getCurrentTemplateId() {
-		return this.currentTemplateId;
+		return this.getCurrentTemplateIdFromUrl( this.currentPageLocation );
 	}
 
 	private getCurrentTemplateIdFromUrl( url: string ): string | undefined {
@@ -130,7 +133,8 @@ export class EditorViewChangeDetector
 		let templateId;
 
 		if ( isTemplatePage ) {
-			templateId = getQueryArg( url, 'postId' );
+			const fullTemplateId = getQueryArg( url, 'postId' ) as string;
+			templateId = fullTemplateId.split( '//' )[ 1 ];
 		}
 
 		return templateId as string;
@@ -149,6 +153,9 @@ export class EditorViewChangeDetector
 	}
 
 	public getIsPostOrPage(): boolean {
-		return this.currentContentType === ContentType.POST_OR_PAGE;
+		return (
+			this.currentContentType === ContentType.POST ||
+			this.currentContentType === ContentType.PAGE
+		);
 	}
 }
