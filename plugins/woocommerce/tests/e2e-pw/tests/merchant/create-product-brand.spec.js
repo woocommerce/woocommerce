@@ -139,7 +139,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 				.getByRole( 'cell', { name, exact: true } )
 		).toHaveCount( 0 );
 	};
-	
+
 	await goToBrandsPage();
 	await createBrandIfNotExist(
 		'WooCommerce',
