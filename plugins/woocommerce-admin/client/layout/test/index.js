@@ -34,8 +34,6 @@ jest.mock( '@woocommerce/components', () => ( {
 
 jest.mock( '~/activity-panel', () => null );
 
-jest.mock( '../navigation', () => null );
-
 jest.mock( '~/utils/admin-settings', () => {
 	const adminSetting = jest.requireActual( '~/utils/admin-settings' );
 	return {
@@ -136,7 +134,6 @@ describe( 'EmbedLayout', () => {
 		window.history.pushState( {}, 'Page Title', '/url?search' );
 		render( <EmbedLayout /> );
 		expect( recordPageView ).toHaveBeenCalledWith( '/url?search', {
-			has_navigation: true,
 			is_embedded: true,
 		} );
 	} );
@@ -168,7 +165,6 @@ describe( 'PageLayout', () => {
 		mockPath( '/analytics/overview' );
 		render( <PageLayout /> );
 		expect( recordPageView ).toHaveBeenCalledWith( 'analytics_overview', {
-			has_navigation: true,
 			jetpack_active: false,
 			jetpack_connected: false,
 			jetpack_installed: false,

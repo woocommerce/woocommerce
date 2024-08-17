@@ -582,7 +582,6 @@ class WC_Form_Handler {
 			wp_safe_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
 			exit();
 		}
-
 	}
 
 	/**
@@ -607,7 +606,6 @@ class WC_Form_Handler {
 			wp_safe_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
 			exit();
 		}
-
 	}
 
 	/**
@@ -653,10 +651,10 @@ class WC_Form_Handler {
 				wc_add_notice( $removed_notice, apply_filters( 'woocommerce_cart_item_removed_notice_type', 'success' ) );
 			}
 
-			$referer = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
-			wp_safe_redirect( $referer );
-			exit;
-
+			if ( wp_get_referer() ) {
+				wp_safe_redirect( remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) );
+				exit;
+			}
 		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
 			// Undo Cart Item.
@@ -664,10 +662,10 @@ class WC_Form_Handler {
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
-			$referer = wp_get_referer() ? remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) : wc_get_cart_url();
-			wp_safe_redirect( $referer );
-			exit;
-
+			if ( wp_get_referer() ) {
+				wp_safe_redirect( remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) );
+				exit;
+			}
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form.
@@ -722,9 +720,11 @@ class WC_Form_Handler {
 				exit;
 			} elseif ( $cart_updated ) {
 				wc_add_notice( __( 'Cart updated.', 'woocommerce' ), apply_filters( 'woocommerce_cart_updated_notice_type', 'success' ) );
-				$referer = remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), ( wp_get_referer() ? wp_get_referer() : wc_get_cart_url() ) );
-				wp_safe_redirect( $referer );
-				exit;
+
+				if ( wp_get_referer() ) {
+					wp_safe_redirect( remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), wp_get_referer() ) );
+					exit;
+				}
 			}
 		}
 	}

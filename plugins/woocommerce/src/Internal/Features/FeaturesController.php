@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Admin\Analytics;
-use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -174,17 +173,6 @@ class FeaturesController {
 					'disable_ui'         => false,
 					'is_legacy'          => true,
 				),
-				'new_navigation'       => array(
-					'name'            => __( 'Navigation', 'woocommerce' ),
-					'description'     => __(
-						'Add the new WooCommerce navigation experience to the dashboard',
-						'woocommerce'
-					),
-					'option_key'      => Init::TOGGLE_OPTION_NAME,
-					'is_experimental' => false,
-					'disable_ui'      => false,
-					'is_legacy'       => true,
-				),
 				'product_block_editor' => array(
 					'name'            => __( 'New product editor', 'woocommerce' ),
 					'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
@@ -253,7 +241,7 @@ class FeaturesController {
 						'Enable this feature to log errors and related data to Automattic servers for debugging purposes and to improve WooCommerce',
 						'woocommerce'
 					),
-					'enabled_by_default' => false,
+					'enabled_by_default' => true,
 					'disable_ui'         => true,
 					'is_legacy'          => false,
 					'is_experimental'    => true,

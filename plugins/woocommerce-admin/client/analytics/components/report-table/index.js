@@ -7,7 +7,7 @@ import { Fragment, useRef, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { focus } from '@wordpress/dom';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { get, noop, partial, uniq } from 'lodash';
+import { get, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
@@ -50,17 +50,23 @@ const ReportTable = ( props ) => {
 		getRowsContent,
 		getSummary,
 		isRequesting,
-		primaryData,
-		tableData,
+		primaryData = {},
+		tableData = {
+			items: {
+				data: [],
+				totalResults: 0,
+			},
+			query: {},
+		},
 		endpoint,
 		// These props are not used in the render function, but are destructured
 		// so they are not included in the `tableProps` variable.
 		// eslint-disable-next-line no-unused-vars
 		itemIdField,
-		// eslint-disable-next-line no-unused-vars
-		tableQuery,
+		// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+		tableQuery = {},
 		compareBy,
-		compareParam,
+		compareParam = 'filter',
 		searchBy,
 		labels = {},
 		...tableProps
@@ -249,7 +255,7 @@ const ReportTable = ( props ) => {
 	};
 
 	const onSearchChange = ( values ) => {
-		const { baseSearchQuery, addCesSurveyForCustomerSearch } = props;
+		const { baseSearchQuery = {}, addCesSurveyForCustomerSearch } = props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
 		const searchTerms = values.map( ( v ) =>
@@ -551,22 +557,6 @@ ReportTable.propTypes = {
 	 * String to display as the title of the table.
 	 */
 	title: PropTypes.string.isRequired,
-};
-
-ReportTable.defaultProps = {
-	primaryData: {},
-	tableData: {
-		items: {
-			data: [],
-			totalResults: 0,
-		},
-		query: {},
-	},
-	tableQuery: {},
-	compareParam: 'filter',
-	downloadable: false,
-	onSearch: noop,
-	baseSearchQuery: {},
 };
 
 const EMPTY_ARRAY = [];
