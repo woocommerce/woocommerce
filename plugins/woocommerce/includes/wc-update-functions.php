@@ -416,7 +416,7 @@ function wc_update_209_brazillian_state() {
 
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
-	// Update brazillian state codes.
+	// Update brazilian state codes.
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
@@ -2598,7 +2598,7 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 /**
  * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
  *
- * @return bool Whether there are pending migration recrods.
+ * @return bool Whether there are pending migration records.
  */
 function wc_update_810_migrate_transactional_metadata_for_hpos() {
 	global $wpdb;
