@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Fix typos in woocommerce-blocks e2e tests.
