@@ -7,8 +7,6 @@ namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaysController;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**

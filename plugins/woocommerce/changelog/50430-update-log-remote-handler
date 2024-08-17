@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add remote logger as a log handler to wc logger
