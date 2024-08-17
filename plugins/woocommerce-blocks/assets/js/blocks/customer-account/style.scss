@@ -17,8 +17,13 @@
 
 .wp-block-woocommerce-customer-account {
 	display: flex;
+	align-items: center;
+	white-space: nowrap;
+	overflow: hidden;
 
 	a {
+		flex: 1;
+		overflow: hidden;
 		text-decoration: none !important;
 		align-items: center;
 		display: flex;
@@ -35,6 +40,8 @@
 
 		.wc-block-customer-account__account-icon {
 			box-sizing: content-box !important;
+			min-height: em(23px);
+			min-width: em(23px);
 			height: em(23px);
 			width: em(23px);
 			padding: em($gap-smaller);

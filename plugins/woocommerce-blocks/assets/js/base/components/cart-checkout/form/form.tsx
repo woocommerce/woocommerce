@@ -34,7 +34,11 @@ import prepareFormFields from './prepare-form-fields';
 import validateCountry from './validate-country';
 import customValidationHandler from './custom-validation-handler';
 import AddressLineFields from './address-line-fields';
-import { createFieldProps, getFieldData } from './utils';
+import {
+	createFieldProps,
+	createCheckboxFieldProps,
+	getFieldData,
+} from './utils';
 import { Select } from '../../select';
 import { validateState } from './validate-state';
 
@@ -161,6 +165,8 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				}
 
 				const fieldProps = createFieldProps( field, id, addressType );
+				const checkboxFieldProps =
+					createCheckboxFieldProps( fieldProps );
 
 				if ( field.key === 'email' ) {
 					fieldProps.id = 'email';
@@ -178,7 +184,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 									[ field.key ]: checked,
 								} );
 							} }
-							{ ...fieldProps }
+							{ ...checkboxFieldProps }
 						/>
 					);
 				}
@@ -292,6 +298,10 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 								} );
 							} }
 							options={ field.options }
+							required={ field.required }
+							errorMessage={
+								fieldProps.errorMessage || undefined
+							}
 						/>
 					);
 				}

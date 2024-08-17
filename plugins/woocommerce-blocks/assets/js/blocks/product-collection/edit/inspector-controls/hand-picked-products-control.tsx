@@ -29,7 +29,7 @@ import { DEFAULT_FILTERS } from '../../constants';
 function useProducts(
 	isLargeCatalog: boolean,
 	search: string,
-	selected: string[]
+	selected: string[] = []
 ) {
 	// Creating a map for fast lookup of products by id or name.
 	const [ productsMap, setProductsMap ] = useState<

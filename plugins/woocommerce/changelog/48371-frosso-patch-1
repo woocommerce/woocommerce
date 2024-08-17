@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+feat: add `aria-required` attributes to WC form fields
