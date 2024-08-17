@@ -472,7 +472,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 
 		if ( empty( $note_ids ) ) {
 			// Promo note doesn't exist, this could happen in cases where
-			// user might have disabled RemoteInboxNotications via disabling
+			// user might have disabled RemoteInboxNotifications via disabling
 			// marketing suggestions. Thus we'd have to manually add the note.
 			$note = new Note();
 			$note->set_name( $promo_note_name );
@@ -538,7 +538,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 *
 	 * @param string $url The URL needing a nonce.
 	 * @param string $action The nonce action.
-	 * @param string $name The nonce anme.
+	 * @param string $name The nonce name.
 	 * @return string A fully formed URL.
 	 */
 	private function maybe_add_nonce_to_url( string $url, string $action = '', string $name = '' ) : string {
@@ -547,7 +547,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		}
 
 		if ( empty( $name ) ) {
-			// Default paramater name.
+			// Default parameter name.
 			$name = '_wpnonce';
 		}
 
