@@ -37,7 +37,7 @@ test.describe( 'Product Filter: Stock Status Block', () => {
 			await page.goto( '/shop' );
 
 			const stockStatuses = page.locator(
-				'.wc-block-components-checkbox__label'
+				'.wc-block-interactivity-components-checkbox-list__label'
 			);
 
 			await expect( stockStatuses ).toHaveCount( 2 );

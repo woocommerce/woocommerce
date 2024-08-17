@@ -45,7 +45,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
 		$stock_param_keys = array_filter(
 			$url_param_keys,
-			function( $param ) {
+			function ( $param ) {
 				return self::STOCK_STATUS_QUERY_VAR === $param;
 			}
 		);
@@ -81,12 +81,12 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		$action_namespace = $this->get_full_block_name();
 
 		$active_stock_statuses = array_map(
-			function( $status ) use ( $stock_status_options, $action_namespace ) {
+			function ( $status ) use ( $stock_status_options, $action_namespace ) {
 				return array(
 					'title'      => $stock_status_options[ $status ],
 					'attributes' => array(
 						'data-wc-on--click' => "$action_namespace::actions.removeFilter",
-						'data-wc-context'   => "$action_namespace::" . wp_json_encode( array( 'value' => $status ) ),
+						'data-wc-context'   => "$action_namespace::" . wp_json_encode( array( 'value' => $status ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 					),
 				);
 			},
@@ -168,7 +168,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 
 		$list_items = array_values(
 			array_map(
-				function( $item ) use ( $stock_statuses, $show_counts, $selected_stock_statuses ) {
+				function ( $item ) use ( $stock_statuses, $show_counts, $selected_stock_statuses ) {
 					$label = $show_counts ? $stock_statuses[ $item['status'] ] . ' (' . $item['count'] . ')' : $stock_statuses[ $item['status'] ];
 					return array(
 						'label'   => $label,
@@ -183,13 +183,13 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		$selected_items = array_values(
 			array_filter(
 				$list_items,
-				function( $item ) use ( $selected_stock_statuses ) {
+				function ( $item ) use ( $selected_stock_statuses ) {
 						return in_array( $item['value'], $selected_stock_statuses, true );
 				}
 			)
 		);
 
-		$data_directive = wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) );
+		$data_directive = wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 		ob_start();
 		?>
@@ -255,7 +255,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 
 		return array_filter(
 			$data,
-			function( $stock_count ) {
+			function ( $stock_count ) {
 				return $stock_count['count'] > 0;
 			}
 		);
