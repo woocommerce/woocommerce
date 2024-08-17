@@ -1,12 +1,13 @@
 const { encodeCredentials } = require( './plugin-utils' );
+const { admin } = require( '../test-data/data' );
 
 const setFeatureFlag = async ( request, baseURL, flagName, enable ) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials(
-				'admin',
-				'password'
+				admin.username,
+				admin.password
 			) }`,
 			cookie: '',
 		},
@@ -23,8 +24,8 @@ const resetFeatureFlags = async ( request, baseURL ) => {
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials(
-				'admin',
-				'password'
+				admin.username,
+				admin.password
 			) }`,
 			cookie: '',
 		},

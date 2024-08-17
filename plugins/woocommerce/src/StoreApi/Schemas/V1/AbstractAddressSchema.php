@@ -164,7 +164,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address         = (array) $address;
 		$validation_util = new ValidationUtils();
 		$schema          = $this->get_properties();
-		// omit all keys from address that are not in the schema. This should account for email.
+
+		// Omit all keys from address that are not in the schema. This should account for email.
 		$address = array_intersect_key( $address, $schema );
 
 		// The flow is Validate -> Sanitize -> Re-Validate
@@ -179,6 +180,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			if ( empty( $schema[ $key ] ) || empty( $address[ $key ] ) ) {
 				continue;
 			}
+
 			if ( is_wp_error( rest_validate_value_from_schema( $value, $schema[ $key ], $key ) ) ) {
 				$errors->add(
 					'invalid_' . $key,

@@ -1,4 +1,5 @@
 const { encodeCredentials } = require( '../../../../utils/plugin-utils' );
+const { admin } = require( '../../../../test-data/data' );
 
 export class LogoPickerPage {
 	page;
@@ -43,7 +44,7 @@ export class LogoPickerPage {
 			.getByRole( 'tab', { name: 'Media Library' } )
 			.click();
 
-		await assemblerLocator.getByLabel( 'image-03' ).click();
+		await assemblerLocator.getByLabel( 'image-03' ).first().click();
 		await assemblerLocator
 			.getByRole( 'button', { name: 'Select', exact: true } )
 			.click();
@@ -58,8 +59,8 @@ export class LogoPickerPage {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
@@ -80,11 +81,11 @@ export class LogoPickerPage {
 		);
 		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
 		await assemblerLocator
-			.getByRole( 'button', { name: 'Save', exact: true } )
+			.getByRole( 'button', { name: 'Finish customizing', exact: true } )
 			.waitFor();
 		await Promise.all( [
 			waitForLogoResponse,
-			assemblerLocator.getByText( 'Save' ).click(),
+			assemblerLocator.getByText( 'Finish customizing' ).click(),
 		] );
 		await assemblerLocator.getByText( 'Your store looks great!' ).waitFor();
 	}
