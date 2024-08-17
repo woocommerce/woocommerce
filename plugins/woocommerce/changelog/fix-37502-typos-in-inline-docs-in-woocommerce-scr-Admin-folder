@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Fix typos in inline documentation in woocommerce/src/Admin directory.
