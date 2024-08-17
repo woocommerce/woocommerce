@@ -93,10 +93,10 @@ class DefaultFreeExtensions {
 		$plugins = array(
 			'google-listings-and-ads'       => array(
 				'min_php_version' => '7.4',
-				'name'            => __( 'Google Listings & Ads', 'woocommerce' ),
+				'name'            => __( 'Google for WooCommerce', 'woocommerce' ),
 				'description'     => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
-					__( 'Drive sales with %1$sGoogle Listings and Ads%2$s', 'woocommerce' ),
+					__( 'Drive sales with %1$sGoogle for WooCommerce%2$s', 'woocommerce' ),
 					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
@@ -116,7 +116,7 @@ class DefaultFreeExtensions {
 				),
 			),
 			'google-listings-and-ads:alt'   => array(
-				'name'           => __( 'Google Listings & Ads', 'woocommerce' ),
+				'name'           => __( 'Google for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
@@ -414,6 +414,24 @@ class DefaultFreeExtensions {
 						),
 					),
 					array(
+						'type'    => 'not',
+						'operand' => array(
+							array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-shipping' ),
+							),
+						),
+					),
+					array(
+						'type'    => 'not',
+						'operand' => array(
+							array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-tax' ),
+							),
+						),
+					),
+					array(
 						'type'     => 'or',
 						'operands' => array(
 							array(
@@ -468,63 +486,13 @@ class DefaultFreeExtensions {
 					'</a>'
 				),
 				'is_visible'     => array(
+					self::get_rules_for_wcservices_tax_countries(),
 					array(
-						'type'     => 'or',
-						'operands' => array(
+						'type'    => 'not',
+						'operand' => array(
 							array(
-								'type'      => 'base_location_country',
-								'value'     => 'US',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'FR',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'GB',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'DE',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'CA',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'AU',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'GR',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'BE',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'PT',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'DK',
-								'operation' => '=',
-							),
-							array(
-								'type'      => 'base_location_country',
-								'value'     => 'SE',
-								'operation' => '=',
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-services' ),
 							),
 						),
 					),
@@ -533,7 +501,16 @@ class DefaultFreeExtensions {
 						'operand' => array(
 							array(
 								'type'    => 'plugins_activated',
-								'plugins' => array( 'woocommerce-services' ),
+								'plugins' => array( 'woocommerce-shipping' ),
+							),
+						),
+					),
+					array(
+						'type'    => 'not',
+						'operand' => array(
+							array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-tax' ),
 							),
 						),
 					),
@@ -879,13 +856,13 @@ class DefaultFreeExtensions {
 			),
 			'tiktok-for-business'           => array(
 				'label'            => __( 'Create ad campaigns with TikTok', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-tiktok.svg', WC_PLUGIN_FILE ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-tiktok.png', WC_PLUGIN_FILE ),
 				'description'      => __( 'Create advertising campaigns and reach one billion global users.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/tiktok-for-woocommerce?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 1,
 			),
 			'google-listings-and-ads'       => array(
-				'label'            => __( 'Drive sales with Google Listings & Ads', 'woocommerce' ),
+				'label'            => __( 'Drive sales with Google for WooCommerce', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-google.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Reach millions of active shoppers across Google with free product listings and ads.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/google-listings-and-ads?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
@@ -900,12 +877,56 @@ class DefaultFreeExtensions {
 			),
 		);
 
-		// Copy shipping for the core-profiler and remove is_visible conditions, except for the country restriction.
+		/*
+		 * Overwrite the is_visible conditions to just the country restriction
+		 * and the requirement for WooCommerce Shipping and WooCommerce Tax
+		 * to not be active.
+		 */
 		$_plugins['woocommerce-services:shipping']['is_visible'] = array(
 			array(
 				'type'      => 'base_location_country',
 				'value'     => 'US',
 				'operation' => '=',
+			),
+			array(
+				'type'    => 'not',
+				'operand' => array(
+					array(
+						'type'    => 'plugins_activated',
+						'plugins' => array( 'woocommerce-shipping' ),
+					),
+				),
+			),
+			array(
+				'type'    => 'not',
+				'operand' => array(
+					array(
+						'type'    => 'plugins_activated',
+						'plugins' => array( 'woocommerce-tax' ),
+					),
+				),
+			),
+		);
+
+		$_plugins['woocommerce-services:tax']['is_visible'] = array(
+			self::get_rules_for_wcservices_tax_countries(),
+			array(
+				'type'    => 'not',
+				'operand' => array(
+					array(
+						'type'    => 'plugins_activated',
+						'plugins' => array( 'woocommerce-shipping' ),
+					),
+				),
+			),
+			array(
+				'type'    => 'not',
+				'operand' => array(
+					array(
+						'type'    => 'plugins_activated',
+						'plugins' => array( 'woocommerce-tax' ),
+					),
+				),
 			),
 		);
 
@@ -934,12 +955,106 @@ class DefaultFreeExtensions {
 		foreach ( $plugins as &$plugin ) {
 			if ( isset( $_plugins[ $plugin['key'] ] ) ) {
 				$plugin = array_merge( $plugin, $_plugins[ $plugin['key'] ] );
-				if ( isset( $plugin['is_visible'] ) && is_array( $plugin['is_visible'] ) ) {
+
+				/*
+				 * Removes the "not plugins_activated" rules from the "is_visible"
+				 * ruleset except for the WooCommerce Services plugin.
+				 *
+				 * WC Services is a plugin that provides shipping and tax features.
+				 * WC Services is sometimes labelled as "WooCommerce Shipping" or
+				 * "WooCommerce Tax", depending on which functionality of the plugin
+				 * is advertised.
+				 *
+				 * We have two new upcoming, standalone plugins: "WooCommerce Shipping" and
+				 * "WooCommerce Tax" (same names as sometimes used for WC Services).
+				 * The new plugins are incompatible with the old WC Services plugin.
+				 * In order to prevent merchants from running into this plugin conflict,
+				 * we want to keep the "not plugins_activated" rules for recommending
+				 * WC Services.
+				 *
+				 * If WC Services and the new plugins are installed together,
+				 * a notice is displayed and the plugin functionality is not registered
+				 * by either WC Services or WC Shipping and WC Tax.
+				 */
+				if (
+					isset( $plugin['is_visible'] ) &&
+					is_array( $plugin['is_visible'] ) &&
+					! in_array( $plugin['key'], array( 'woocommerce-services:shipping', 'woocommerce-services:tax' ), true )
+				) {
 					$plugin['is_visible'] = $remove_plugins_activated_rule( $plugin['is_visible'] );
 				}
 			}
 		}
 
 		return $plugins;
+	}
+
+	/**
+	 * Returns the country restrictions for use in the `is_visible` key for
+	 * recommending the tax functionality of WooCommerce Shipping & Tax.
+	 *
+	 * @return array
+	 */
+	private static function get_rules_for_wcservices_tax_countries() {
+		return array(
+			'type'     => 'or',
+			'operands' => array(
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'US',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'FR',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'GB',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'DE',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'CA',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'AU',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'GR',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'BE',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'PT',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'DK',
+					'operation' => '=',
+				),
+				array(
+					'type'      => 'base_location_country',
+					'value'     => 'SE',
+					'operation' => '=',
+				),
+			),
+		);
 	}
 }

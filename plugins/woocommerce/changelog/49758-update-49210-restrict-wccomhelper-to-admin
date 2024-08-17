@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Ensure `wccomHelper` data is only loaded on the Extensions page where it's needed.

@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 
 /**
  * WooCommercePayments Task
@@ -103,8 +104,7 @@ class WooCommercePayments extends Task {
 	public function can_view() {
 		$payments = $this->task_list->get_task( 'payments' );
 
-		return ! $payments->is_complete() && // Do not re-display the task if the "add payments" task has already been completed.
-			self::is_installed() &&
+		return ! $payments->is_complete() && // Do not re-display the task if the general "Payments" task has already been completed.
 			self::is_supported();
 	}
 
@@ -175,16 +175,16 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the store is in a supported country.
+	 * Check if the store is in a WooPayments supported country.
 	 *
 	 * @return bool
 	 */
 	public static function is_supported() {
-		$suggestions              = Suggestions::get_suggestions();
+		$suggestions              = Suggestions::get_suggestions( DefaultPaymentGateways::get_all() );
 		$suggestion_plugins       = array_merge(
 			...array_filter(
 				array_column( $suggestions, 'plugins' ),
-				function( $plugins ) {
+				function ( $plugins ) {
 					return is_array( $plugins );
 				}
 			)

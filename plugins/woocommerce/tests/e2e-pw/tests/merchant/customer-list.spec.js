@@ -77,7 +77,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.describe( 'Merchant > Customer List', () => {
+test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 	test.beforeEach( async ( { context } ) => {
 		// prevents the column picker from saving state between tests
 		await context.route( '**/users/**', ( route ) => route.abort() );
@@ -116,10 +116,16 @@ test.describe( 'Merchant > Customer List', () => {
 			let x = 1;
 			for ( const customer of customers ) {
 				await page
-					.locator( '#woocommerce-select-control-0__control-input' )
+					.getByRole( 'combobox', {
+						expanded: false,
+						disabled: false,
+					} )
 					.click();
 				await page
-					.locator( '#woocommerce-select-control-0__control-input' )
+					.getByRole( 'combobox', {
+						expanded: false,
+						disabled: false,
+					} )
 					.pressSequentially(
 						`${ customer.first_name } ${ customer.last_name }`
 					);
@@ -128,7 +134,13 @@ test.describe( 'Merchant > Customer List', () => {
 						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
 						exact: true,
 					} )
-					.waitFor( { state: 'visible' } );
+					.waitFor();
+				await page
+					.getByRole( 'option', {
+						name: `${ customer.first_name } ${ customer.last_name }`,
+						exact: true,
+					} )
+					.waitFor();
 				await page
 					.getByRole( 'option', {
 						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
@@ -276,7 +288,8 @@ test.describe( 'Merchant > Customer List', () => {
 				.getByRole( 'button' )
 				.click();
 			await page
-				.locator( '#woocommerce-select-control-1__control-input' )
+				.getByRole( 'group', { name: 'Email' } )
+				.getByRole( 'combobox', { expanded: false } )
 				.fill( customers[ 1 ].email );
 			await page
 				.getByRole( 'option', {
@@ -293,7 +306,8 @@ test.describe( 'Merchant > Customer List', () => {
 				.getByRole( 'button' )
 				.click();
 			await page
-				.locator( '#woocommerce-select-control-2__control-input' )
+				.getByRole( 'group', { name: 'Country / Region' } )
+				.getByRole( 'combobox', { expanded: false } )
 				.fill( 'US' );
 			await page
 				.getByRole( 'option', { name: 'United States (US)' } )

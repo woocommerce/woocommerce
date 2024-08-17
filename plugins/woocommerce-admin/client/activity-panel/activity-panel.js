@@ -15,7 +15,7 @@ import {
 	useUserPreferences,
 	getVisibleTasks,
 } from '@woocommerce/data';
-import { getHistory, addHistoryListener } from '@woocommerce/navigation';
+import { addHistoryListener } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSlot } from '@woocommerce/experimental';
 import {
@@ -376,8 +376,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			title:
 				( comingSoon === 'yes' &&
 					__( 'Preview store', 'woocommerce' ) ) ||
-				( comingSoon === 'no' && __( 'View store', 'woocommerce' ) ) ||
-				'',
+				__( 'View store', 'woocommerce' ),
 			visible: isHomescreen && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );
@@ -502,10 +501,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			</div>
 		</LayoutContextProvider>
 	);
-};
-
-ActivityPanel.defaultProps = {
-	getHistory,
 };
 
 export default ActivityPanel;

@@ -27,7 +27,6 @@ import ActivityHeader from '~/activity-panel/activity-header';
 import { ActivityPanel } from './activity-panel';
 import { Column } from './column';
 import InboxPanel from '../inbox-panel';
-import { IntroModal as NavigationIntroModal } from '../navigation/components/intro-modal';
 import StatsOverview from './stats-overview';
 import { StoreManagementLinks } from '../store-management-links';
 import {
@@ -50,6 +49,23 @@ const TaskLists = lazy( () =>
 	)
 );
 
+export const hasTwoColumnLayout = (
+	userPrefLayout,
+	defaultHomescreenLayout,
+	taskListComplete,
+	isTaskListHidden
+) => {
+	const hasTwoColumnContent =
+		taskListComplete ||
+		isTaskListHidden ||
+		window.wcAdminFeatures.analytics;
+
+	return (
+		( userPrefLayout || defaultHomescreenLayout ) === 'two_columns' &&
+		hasTwoColumnContent
+	);
+};
+
 export const Layout = ( {
 	defaultHomescreenLayout,
 	query,
@@ -62,14 +78,15 @@ export const Layout = ( {
 	const userPrefs = useUserPreferences();
 	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const shouldShowWCPayFeature = taskListComplete || isTaskListHidden;
-	const hasTwoColumnContent =
-		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
 	const isDashboardShown = Object.keys( query ).length > 0 && ! query.task; // ?&task=<x> query param is used to show tasks instead of the homescreen
 	const activeSetupTaskList = useActiveSetupTasklist();
 
-	const twoColumns =
-		( userPrefs.homepage_layout || defaultHomescreenLayout ) ===
-			'two_columns' && hasTwoColumnContent;
+	const twoColumns = hasTwoColumnLayout(
+		userPrefs.homepage_layout,
+		defaultHomescreenLayout,
+		taskListComplete,
+		isTaskListHidden
+	);
 
 	const isWideViewport = useRef( true );
 	const maybeToggleColumns = useCallback( () => {
@@ -144,9 +161,6 @@ export const Layout = ( {
 			>
 				{ isDashboardShown ? renderColumns() : renderTaskList() }
 				{ shouldShowMobileAppModal && <MobileAppModal /> }
-				{ window.wcAdminFeatures.navigation && (
-					<NavigationIntroModal />
-				) }
 			</div>
 		</>
 	);
@@ -173,10 +187,6 @@ Layout.propTypes = {
 	 * If the welcome from Calypso modal should display.
 	 */
 	shouldShowWelcomeFromCalypsoModal: PropTypes.bool,
-	/**
-	 * Dispatch an action to update an option
-	 */
-	updateOptions: PropTypes.func.isRequired,
 };
 
 export default compose(

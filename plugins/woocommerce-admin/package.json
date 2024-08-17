@@ -17,7 +17,7 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
-		"changelog": "composer install && composer exec -- changelogger",
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"example": "webpack --config docs/examples/extensions/examples.config.js",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
@@ -29,8 +29,7 @@
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
-		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../woocommerce/bin/generate-feature-config.php",
-		"postinstall": "node ./bin/xstate5-react-script.js"
+		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../woocommerce/bin/generate-feature-config.php"
 	},
 	"lint-staged": {
 		"*.scss": [
@@ -164,6 +163,7 @@
 		"@woocommerce/number": "workspace:*",
 		"@woocommerce/onboarding": "workspace:*",
 		"@woocommerce/product-editor": "workspace:*",
+		"@woocommerce/remote-logging": "workspace:*",
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/babel-preset-default": "^6.17.0",
 		"@wordpress/block-editor": "^9.8.0",
@@ -306,6 +306,9 @@
 				"node_modules/@woocommerce/tracks/build",
 				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
+				"node_modules/@woocommerce/remote-logging/build",
+				"node_modules/@woocommerce/remote-logging/build-module",
+				"node_modules/@woocommerce/remote-logging/build-types",
 				"node_modules/@woocommerce/product-editor/build",
 				"node_modules/@woocommerce/product-editor/build-module",
 				"node_modules/@woocommerce/product-editor/build-style",

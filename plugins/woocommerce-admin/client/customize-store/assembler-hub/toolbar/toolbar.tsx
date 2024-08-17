@@ -91,12 +91,6 @@ export const Toolbar = () => {
 		};
 	}, [] );
 
-	const firstBlock = useMemo( () => {
-		return allBlocks.find(
-			( block: BlockInstance ) => block.name !== 'core/template-part'
-		);
-	}, [ allBlocks ] );
-
 	const query = useQuery();
 
 	useEffect( () => {
@@ -107,8 +101,7 @@ export const Toolbar = () => {
 		setIsHomepageSidebarOpen( isHomepageUrl( path ) );
 	}, [ query ] );
 
-	const selectedBlockClientId =
-		currentBlock?.clientId ?? firstBlock?.clientId;
+	const selectedBlockClientId = currentBlock?.clientId ?? null;
 
 	const { isBlockMoverUpButtonDisabled, isBlockMoverDownButtonDisabled } =
 		useMemo( () => {
@@ -172,7 +165,7 @@ export const Toolbar = () => {
 
 				return new window.DOMRect(
 					rect?.left + 10,
-					Math.max( top + 100, 110 ),
+					Math.max( top + 70 + rect.top, 100 ),
 					width,
 					height
 				);
@@ -193,6 +186,7 @@ export const Toolbar = () => {
 	return (
 		<Popover
 			as="div"
+			animate={ false }
 			className="components-tooltip woocommerce-customize-store_block-toolbar-popover"
 			// @ts-expect-error missing type
 			variant="unstyled"
@@ -220,6 +214,7 @@ export const Toolbar = () => {
 						<Shuffle clientId={ selectedBlockClientId } />
 						<Delete
 							clientId={ selectedBlockClientId }
+							currentBlockName={ currentBlock?.name }
 							nextBlockClientId={ nextBlock?.clientId }
 						/>
 					</>

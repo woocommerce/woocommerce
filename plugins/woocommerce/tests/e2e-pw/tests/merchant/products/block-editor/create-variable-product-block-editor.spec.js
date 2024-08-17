@@ -8,6 +8,11 @@ const {
 } = require( '../../../../utils/product-block-editor' );
 
 const { variableProducts: utils } = require( '../../../../utils' );
+const attributes = require( './fixtures/attributes' );
+const tabs = require( './data/tabs' );
+const {
+	waitForGlobalAttributesLoaded,
+} = require( './helpers/wait-for-global-attributes-loaded' );
 
 const {
 	createVariableProduct,
@@ -26,35 +31,18 @@ const productData = {
 	summary: 'This is a product summary',
 };
 
-const attributesData = {
-	name: 'Size',
-	options: [ 'Small', 'Medium', 'Large' ],
-};
+const sizeAttribute = attributes.find(
+	( attribute ) => attribute.name === 'Size'
+);
 
-const tabs = [
-	{
-		name: 'General',
-		noteText:
-			"This product has options, such as size or color. You can manage each variation's images, downloads, and other details individually.",
-	},
-	{
-		name: 'Inventory',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's inventory and other details individually.",
-	},
-	{
-		name: 'Shipping',
-		noteText:
-			"This product has options, such as size or color. You can now manage each variation's shipping settings and other details individually.",
-	},
-];
+const termsLength = sizeAttribute.terms.length;
 
 let productId_editVariations,
 	productId_deleteVariations,
 	productId_singleVariation;
 
-test.describe( 'Variations tab', () => {
-	test.describe( 'Create variable product', () => {
+test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
+	test.describe( 'Create variable products', () => {
 		test.beforeAll( async ( { browser } ) => {
 			productId_editVariations = await createVariableProduct(
 				productAttributes
@@ -76,7 +64,7 @@ test.describe( 'Variations tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		test.skip( 'can create a variation option and publish the product', async ( {
+		test( 'can create a variation option and publish the product', async ( {
 			page,
 		} ) => {
 			await test.step( 'Load new product editor, disable tour', async () => {
@@ -111,34 +99,85 @@ test.describe( 'Variations tab', () => {
 					.click();
 			} );
 
-			await test.step( 'Add attribute options', async () => {
+			let newAttrData;
+			await test.step( 'Create global attribute', async () => {
 				await page
 					.getByRole( 'heading', { name: 'Add variation options' } )
 					.isVisible();
 
 				await page.waitForLoadState( 'domcontentloaded' );
 
-				await page
-					.locator(
-						'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
-					)
-					.fill( attributesData.name );
+				/*
+				 * Check the app loads the attributes,
+				 * based on the Spinner visibility.
+				 */
+				await waitForGlobalAttributesLoaded( page );
+
+				// Attribute combobox input
+				const attributeInputLocator = page
+					.getByRole( 'dialog' )
+					.getByRole( 'combobox' )
+					.first();
+
+				await attributeInputLocator.fill( sizeAttribute.name );
 
 				await page.locator( 'text=Create "Size"' ).click();
 
-				for ( const option of attributesData.options ) {
-					const container = page.locator(
-						'td.woocommerce-new-attribute-modal__table-attribute-value-column'
-					);
+				// Wait for the create-attribute async request to finish
+				const newAttrResponse = await page.waitForResponse(
+					( response ) =>
+						response
+							.url()
+							.includes(
+								`wp-json/wc/v3/products/attributes?name=${ sizeAttribute.name }&generate_slug=true`
+							) && response.status() === 201
+				);
 
-					const inputLocator = container.locator(
+				newAttrData = await newAttrResponse.json();
+			} );
+
+			await test.step( 'Add new terms to the attribute', async () => {
+				const FormTokenFieldLocator = page.locator(
+					'td.woocommerce-new-attribute-modal__table-attribute-value-column'
+				);
+
+				const FormTokenFieldInputLocator =
+					FormTokenFieldLocator.locator(
 						'input[id^="components-form-token-input-"]'
 					);
 
-					await inputLocator.fill( option );
-					await page.waitForTimeout( 500 ); // needs some time to be able to press Enter.
-					await inputLocator.press( 'Enter' );
-					await expect( container ).toContainText( option );
+				for ( const term of sizeAttribute.terms ) {
+					// Fill the input field with the option
+					await FormTokenFieldInputLocator.fill( term.name );
+					await FormTokenFieldInputLocator.press( 'Enter' );
+
+					/*
+					 * Check the new option is added to the list,
+					 * by checking the last aria-hidden
+					 */
+					const newAriaHiddenTokenLocator =
+						FormTokenFieldLocator.locator(
+							'span.components-form-token-field__token-text > span[aria-hidden="true"]'
+						).last();
+
+					await expect( newAriaHiddenTokenLocator ).toHaveText(
+						term.name
+					);
+
+					/*
+					 * Wait for the async POST request
+					 * that creates the new attribute term to finish.
+					 */
+					await page.waitForResponse( ( response ) => {
+						const urlToMatch = `/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`;
+
+						return (
+							response
+								.url()
+								.includes( encodeURI( urlToMatch ) ) &&
+							response.status() === 201
+						);
+					} );
 				}
 
 				await page
@@ -152,7 +191,7 @@ test.describe( 'Variations tab', () => {
 			await test.step( 'Add prices to variations', async () => {
 				await expect(
 					page.getByText(
-						'3 variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices'
+						`${ termsLength } variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices`
 					)
 				).toBeVisible();
 
@@ -162,16 +201,16 @@ test.describe( 'Variations tab', () => {
 					.getByRole( 'button', { name: 'Set prices' } )
 					.click();
 
-				await expect(
-					page.getByText( '$50.00' ).nth( 2 )
-				).toBeVisible();
+				await expect( page.getByText( '50' ).nth( 2 ) ).toBeVisible();
 
 				await expect(
 					page.getByLabel( 'Dismiss this notice' )
-				).toContainText( '3 variations updated.' );
+				).toContainText( `${ termsLength } variations updated.` );
 
 				await expect(
-					page.getByRole( 'button', { name: 'Select all (3)' } )
+					page.getByRole( 'button', {
+						name: `Select all (${ termsLength })`,
+					} )
 				).toBeVisible();
 			} );
 
@@ -183,17 +222,25 @@ test.describe( 'Variations tab', () => {
 					} )
 					.click();
 
-				const element = page.locator(
+				const snackbarLocator = page.locator(
 					'div.components-snackbar__content'
 				);
-				if ( Array.isArray( element ) ) {
-					await expect( await element[ 0 ].innerText() ).toMatch(
-						`${ attributesData.options.length } variations updated.`
-					);
-					await expect( await element[ 1 ].innerText() ).toMatch(
-						/Product published/
-					);
-				}
+
+				// Wait for the snackbar to appear
+				await snackbarLocator.waitFor( {
+					state: 'visible',
+					timeout: 20000,
+				} );
+
+				// Verify that the first message is the expected one
+				await expect( snackbarLocator.nth( 0 ) ).toHaveText(
+					`${ sizeAttribute.terms.length } variations updated.`
+				);
+
+				// Verify that the second message is the expected one
+				await expect( snackbarLocator.nth( 1 ) ).toHaveText(
+					/Product published/
+				);
 			} );
 		} );
 
@@ -223,6 +270,16 @@ test.describe( 'Variations tab', () => {
 
 			await getVariationsResponsePromise;
 
+			// Wait for response only to avoid flaky filling regular price below in Inventory tab
+			const waitResponse = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes(
+							'wp-json/wc-admin/options?options=woocommerce_dimension_unit'
+						) && response.status() === 200
+			);
+
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
 				.first()
@@ -234,15 +291,17 @@ test.describe( 'Variations tab', () => {
 				.getByRole( 'tab', { name: 'General' } )
 				.click();
 
-			await page.getByLabel( 'Regular price', { exact: true } ).click();
-
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
 				.waitFor( { state: 'visible' } );
 
+			await waitResponse;
+
+			await page.getByLabel( 'Regular price', { exact: true } ).click();
+
 			await page
 				.getByLabel( 'Regular price', { exact: true } )
-				.pressSequentially( '100' );
+				.fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
@@ -250,7 +309,7 @@ test.describe( 'Variations tab', () => {
 				.click();
 
 			await page
-				.locator( '#inspector-input-control-2' )
+				.locator( '[name="woocommerce-product-sku"]' )
 				.fill( `product-sku-${ new Date().getTime().toString() }` );
 
 			await page

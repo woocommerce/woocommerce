@@ -1,8 +1,7 @@
 {
+	"core": null,
 	"phpVersion": "7.4",
-	"plugins": [
-		"."
-	],
+	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
@@ -17,13 +16,16 @@
 		"test-data/images/": "./tests/e2e-pw/test-data/images/"
 	},
 	"lifecycleScripts": {
-		"afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",
-		"afterClean": "./tests/e2e-pw/bin/test-env-setup.sh"
+		"afterStart": "wp-env run tests-cli bash wp-content/plugins/woocommerce/tests/e2e-pw/bin/test-env-setup.sh",
+		"afterClean": "wp-env run tests-cli bash wp-content/plugins/woocommerce/tests/e2e-pw/bin/test-env-setup.sh"
 	},
 	"env": {
-		"development": {},
+		"development": {
+			"mysqlPort": 58888
+		},
 		"tests": {
 			"port": 8086,
+			"mysqlPort": 58086,
 			"plugins": [
 				".",
 				"https://downloads.wordpress.org/plugin/akismet.zip",

@@ -1,21 +1,14 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
+const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
 
-test.describe( 'Launch Your Store front end - logged out', () => {
-	test.afterAll( async ( { baseURL } ) => {
-		try {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_coming_soon',
-				'no'
-			);
-		} catch ( error ) {
-			console.log( error );
-		}
-	} );
+async function runComingSoonTests( themeContext = '' ) {
+	const testSuffix = themeContext ? ` (${ themeContext })` : '';
 
-	test( 'Entire site coming soon mode', async ( { page, baseURL } ) => {
+	test( `Entire site coming soon mode${ testSuffix }`, async ( {
+		page,
+		baseURL,
+	} ) => {
 		try {
 			await setOption(
 				request,
@@ -23,7 +16,6 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 				'woocommerce_coming_soon',
 				'yes'
 			);
-
 			await setOption(
 				request,
 				baseURL,
@@ -47,7 +39,10 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Store only coming soon mode', async ( { page, baseURL } ) => {
+	test( `Store only coming soon mode${ testSuffix }`, async ( {
+		page,
+		baseURL,
+	} ) => {
 		try {
 			await setOption(
 				request,
@@ -55,7 +50,6 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 				'woocommerce_coming_soon',
 				'yes'
 			);
-
 			await setOption(
 				request,
 				baseURL,
@@ -65,17 +59,64 @@ test.describe( 'Launch Your Store front end - logged out', () => {
 		} catch ( error ) {
 			console.log( error );
 		}
-
 		await page.goto( baseURL + '/shop/' );
 
 		await expect(
 			page.getByText( 'Great things are on the horizon' )
 		).toBeVisible();
-
 		await expect(
 			page.getByText(
 				'Something big is brewing! Our store is in the works and will be launching soon!'
 			)
 		).toBeVisible();
 	} );
-} );
+}
+
+test.describe(
+	'Launch Your Store front end - logged out',
+	{ tag: [ '@payments', '@services' ] },
+	() => {
+		test.afterAll( async ( { baseURL } ) => {
+			try {
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_coming_soon',
+					'no'
+				);
+			} catch ( error ) {
+				console.log( error );
+			}
+		} );
+
+		test.describe( 'Block Theme (Twenty Twenty Four)', () => {
+			test.beforeAll( async () => {
+				await activateTheme( 'twentytwentyfour' );
+			} );
+
+			test.afterAll( async () => {
+				// Reset theme to the default.
+				await activateTheme( DEFAULT_THEME );
+			} );
+
+			runComingSoonTests( test.step, test.use );
+		} );
+
+		test.describe( 'Classic Theme (Storefront)', () => {
+			test.beforeAll( async () => {
+				await activateTheme( 'storefront' );
+			} );
+
+			test.afterAll( async () => {
+				// Reset theme to the default.
+				await activateTheme( DEFAULT_THEME );
+			} );
+
+			runComingSoonTests(
+				test.step,
+				test.use,
+				'Classic Theme (Storefront)'
+			);
+		} );
+	}
+);

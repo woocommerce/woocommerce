@@ -2,13 +2,13 @@ const path = require( 'path' );
 
 const getPnpmPackage = ( sourceDir ) => {
 	const packageJson = require( path.join( sourceDir, 'package.json' ) );
-	let pnpm_package = 'pnpm';
+	let pnpmPackage = 'pnpm';
 
 	if ( packageJson.engines.pnpm ) {
-		pnpm_package = `pnpm@${ packageJson.engines.pnpm }`;
+		pnpmPackage = `pnpm@${ packageJson.engines.pnpm }`;
 	}
 
-	return pnpm_package;
+	return pnpmPackage;
 };
 
 const config = {
@@ -16,18 +16,18 @@ const config = {
 	pluginPath: '/plugins/woocommerce',
 	testsPath: '/plugins/woocommerce/tests/metrics/specs',
 	getSetupTestRunner: ( sourceDir ) => {
-		const pnpm_package = getPnpmPackage( sourceDir );
+		const pnpmPackage = getPnpmPackage( sourceDir );
 
-		return `npm install -g ${ pnpm_package } && pnpm install --filter="@woocommerce/plugin-woocommerce" &> /dev/null && cd plugins/woocommerce && pnpm exec playwright install chromium`;
+		return `npm install -g ${ pnpmPackage } && pnpm install --frozen-lockfile --filter="@woocommerce/plugin-woocommerce" &> /dev/null && cd plugins/woocommerce && pnpm exec playwright install chromium`;
 	},
 	getSetupCommand: ( sourceDir ) => {
-		const pnpm_package = getPnpmPackage( sourceDir );
+		const pnpmPackage = getPnpmPackage( sourceDir );
 
-		return `npm install -g ${ pnpm_package } && pnpm install &> /dev/null && pnpm build &> /dev/null`;
+		return `npm install -g ${ pnpmPackage } && pnpm install --frozen-lockfile &> /dev/null && pnpm build &> /dev/null`;
 	},
 	getTestCommand: ( sourceDir ) => {
-		const pnpm_package = getPnpmPackage( sourceDir );
-		return `npm install -g ${ pnpm_package } && cd plugins/woocommerce && pnpm test:metrics`;
+		const pnpmPackage = getPnpmPackage( sourceDir );
+		return `npm install -g ${ pnpmPackage } && cd plugins/woocommerce && pnpm test:metrics`;
 	},
 };
 

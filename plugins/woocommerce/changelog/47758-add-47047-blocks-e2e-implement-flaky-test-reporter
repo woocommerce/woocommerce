@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-WooCommerce Blocks: Added a GitHub Action to create issues for flaky E2E tests

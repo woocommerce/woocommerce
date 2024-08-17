@@ -148,6 +148,11 @@ export const TagField: React.FC< TagFieldProps > = ( {
 								)
 							);
 						onChange( [ ...value, ...newItems ] );
+					} else {
+						onChange( [
+							...value,
+							mapFromTreeItemToTag( selectedItems ),
+						] );
 					}
 				} }
 				onRemove={ ( removedItems ) => {

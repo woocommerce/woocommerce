@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Fixed log-out link behavior so that redirects work, and so that security nonces are automatically added to link in navigation menus.

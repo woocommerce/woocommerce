@@ -40,13 +40,27 @@ class Status extends AbstractOrderConfirmationBlock {
 			return '';
 		}
 
+		$account_notice = $this->render_account_notice( $order );
+
+		if ( $account_notice ) {
+			$block = sprintf(
+				'<div class="wc-block-order-confirmation-status-notices %1$s">%2$s</div>',
+				esc_attr( trim( $classname ) ),
+				$account_notice
+			) . $block;
+		}
+
 		$additional_content = $this->render_confirmation_notice( $order );
 
-		return $additional_content ? $block . sprintf(
-			'<div class="wc-block-order-confirmation-status-description %1$s">%2$s</div>',
-			esc_attr( trim( $classname ) ),
-			$additional_content
-		) : $block;
+		if ( $additional_content ) {
+			$block = $block . sprintf(
+				'<div class="wc-block-order-confirmation-status-description %1$s">%2$s</div>',
+				esc_attr( trim( $classname ) ),
+				$additional_content
+			);
+		}
+
+		return $block;
 	}
 
 	/**
@@ -140,6 +154,33 @@ class Status extends AbstractOrderConfirmationBlock {
 	protected function render_content_fallback() {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		return '<p>' . esc_html__( 'Please check your email for the order confirmation.', 'woocommerce' ) . '</p>';
+	}
+
+	/**
+	 * If the user associated with the order needs to set a password (new account) show a notice.
+	 *
+	 * @param \WC_Order|null $order Order object.
+	 * @return string
+	 */
+	protected function render_account_notice( $order = null ) {
+		if ( $order && $order->get_customer_id() && 'store-api' === $order->get_created_via() ) {
+			$nag      = get_user_option( 'default_password_nag', $order->get_customer_id() );
+			$generate = filter_var( get_option( 'woocommerce_registration_generate_password', false ), FILTER_VALIDATE_BOOLEAN );
+
+			if ( $nag && $generate ) {
+				return wc_print_notice(
+					sprintf(
+						// translators: %s: site name.
+						__( 'Your account with %s has been successfully created. We emailed you a link to set your account password.', 'woocommerce' ),
+						esc_html( wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) )
+					),
+					'notice',
+					array(),
+					true
+				);
+			}
+		}
+		return '';
 	}
 
 	/**

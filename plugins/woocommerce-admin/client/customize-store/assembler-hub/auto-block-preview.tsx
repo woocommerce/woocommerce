@@ -39,6 +39,8 @@ import { __ } from '@wordpress/i18n';
 import { useQuery } from '@woocommerce/navigation';
 import clsx from 'clsx';
 import { SelectedBlockContext } from './context/selected-block-ref-context';
+import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
+import { useInsertPatternByName } from './hooks/use-insert-pattern-by-name';
 
 // @ts-ignore No types for this exist yet.
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -169,6 +171,8 @@ function ScaledBlockPreview( {
 	const isResizing = useContext( IsResizingContext );
 	const query = useQuery();
 
+	const { insertPatternByName } = useInsertPatternByName();
+
 	useAddAutoBlockPreviewEventListenersAndObservers(
 		{
 			documentElement: iframeRef,
@@ -187,6 +191,7 @@ function ScaledBlockPreview( {
 			updatePopoverPosition,
 			setLogoBlockIds,
 			setContentHeight,
+			insertPatternByName,
 		}
 	);
 
@@ -241,7 +246,10 @@ function ScaledBlockPreview( {
 						// @ts-ignore disabled prop exists
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
-						readonly={ false }
+						canEnableZoomOutView={ true }
+						readonly={
+							! isFullComposabilityFeatureAndAPIAvailable()
+						}
 						style={
 							autoScale
 								? {
@@ -293,6 +301,23 @@ function ScaledBlockPreview( {
 							pointer-events: all !important;
 							cursor: pointer !important;
 						}
+
+						.components-resizable-box__handle {
+							display: none !important;
+						}
+
+						footer.is-selected::after,
+						header.is-selected::after {
+							outline-color: var(--wp-admin-theme-color) !important;
+						}
+
+						header.is-selected::after {
+						    border-top-left-radius: 20px;
+					    }
+
+						footer.is-selected::after {
+						    border-bottom-left-radius: 20px;
+					    }
 
 						${ additionalStyles }
 					` }

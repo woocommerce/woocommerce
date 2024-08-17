@@ -111,13 +111,6 @@ describe( 'Testing Mini-Cart', () => {
 		await waitFor( () =>
 			expect( screen.getByText( /your cart/i ) ).toBeInTheDocument()
 		);
-
-		// The opening of the drawer uses deprecated ReactDOM.render.
-		expect( console ).toHaveErroredWith(
-			`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot%s`,
-			// The stack trace
-			expect.any( String )
-		);
 	} );
 
 	it( 'closes the drawer when clicking on the close button', async () => {
@@ -132,9 +125,11 @@ describe( 'Testing Mini-Cart', () => {
 
 		// Close drawer.
 		let closeButton = null;
+
 		await waitFor( () => {
 			closeButton = screen.getByLabelText( /close/i );
 		} );
+
 		if ( closeButton ) {
 			await act( async () => {
 				await user.click( closeButton );
@@ -146,13 +141,6 @@ describe( 'Testing Mini-Cart', () => {
 				screen.queryByText( /your cart/i )
 			).not.toBeInTheDocument();
 		} );
-
-		// The opening of the drawer uses deprecated ReactDOM.render.
-		expect( console ).toHaveErroredWith(
-			`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot%s`,
-			// The stack trace
-			expect.any( String )
-		);
 	} );
 
 	it( 'renders empty cart if there are no items in the cart', async () => {
@@ -167,13 +155,6 @@ describe( 'Testing Mini-Cart', () => {
 		} );
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
-
-		// The opening of the drawer uses deprecated ReactDOM.render.
-		expect( console ).toHaveErroredWith(
-			`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot%s`,
-			// The stack trace
-			expect.any( String )
-		);
 	} );
 
 	it( 'updates contents when removed from cart event is triggered', async () => {

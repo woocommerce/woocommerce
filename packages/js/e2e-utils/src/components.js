@@ -556,7 +556,7 @@ const createCoupon = async (
  * Adds a shipping zone along with a shipping method.
  *
  * @param {string} zoneName     Shipping zone name.
- * @param {string} zoneLocation Shiping zone location. Defaults to country:US. For states use: state:US:CA
+ * @param {string} zoneLocation Shipping zone location. Defaults to country:US. For states use: state:US:CA
  * @param {string} zipCode      Shipping zone zip code. Defaults to empty one space.
  * @param {string} zoneMethod   Shipping method type. Defaults to flat_rate (use also: free_shipping or local_pickup)
  */

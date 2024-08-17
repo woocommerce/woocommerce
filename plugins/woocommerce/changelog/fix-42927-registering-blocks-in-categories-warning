@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Moved WooCommerce block categories registration on the server-side, fixing a bug that would show warnings to developers trying to hook new blocks in such categories.
