@@ -27,8 +27,15 @@ const redirectToIntroWithError = sendParent<
 	DesignWithoutAIStateMachineContext,
 	DesignWithoutAIStateMachineEvents,
 	DesignWithoutAIStateMachineEvents
->( {
-	type: 'NO_AI_FLOW_ERROR',
+>( ( context, event ) => {
+	const errorEvent = event as {
+		type: string;
+		data?: { data?: { status: number } };
+	};
+	return {
+		type: 'NO_AI_FLOW_ERROR',
+		errorStatus: errorEvent?.data?.data?.status,
+	};
 } );
 
 const redirectToAssemblerHubSection = (

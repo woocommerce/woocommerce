@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make the Metrics tests use utilities provided by the updated @wordpress/e2e-test-utils-playwright package.
