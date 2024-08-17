@@ -32,7 +32,6 @@ import { EmptyState } from '../../../components/empty-state';
 
 export function Edit( {
 	attributes,
-	clientId,
 	context: { isInSelectedTab },
 }: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDimissed = useRef( false );
@@ -80,19 +79,14 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice:
-					isInSelectedTab && productHasOptions
-						? getProductVariationsTotalCount< number >(
-								totalCountWithoutPriceRequestParams
-						  )
-						: 0,
+				totalCountWithoutPrice: productHasOptions
+					? getProductVariationsTotalCount< number >(
+							totalCountWithoutPriceRequestParams
+					  )
+					: 0,
 			};
 		},
-		[
-			isInSelectedTab,
-			productHasOptions,
-			totalCountWithoutPriceRequestParams,
-		]
+		[ productHasOptions, totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
@@ -131,7 +125,6 @@ export function Edit( {
 						'Set variation prices before adding this product.',
 						'woocommerce'
 					),
-					context: clientId,
 				};
 			}
 		},

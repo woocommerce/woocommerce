@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: add a flaky test reporter for Core e2e tests

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+allows the quantity selector on block cart page to render as readonly when editable is false

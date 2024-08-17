@@ -1,6 +1,6 @@
 # WooCommerce End to End Test Utilities
 
-This package contains utilities to simplify writing e2e tests specific to WooCommmerce.
+This package contains utilities to simplify writing e2e tests specific to WooCommerce.
 
 
 ## Installation
