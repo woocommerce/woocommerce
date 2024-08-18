@@ -41,11 +41,10 @@ use WP_REST_Response;
  * }
  * </code></pre>
  *
- * The above Controller will use {@see GenericQuery GenericQuery}
- * to get the data from a {@see DataStore data store} registered as `reports/my-thing`.
- * (To change the Query class or data store name, override `construct_query` method).
+ * The above Controller will get the data from a {@see DataStore data store} registered as `$rest_base` (`reports/my-thing`).
+ * (To change this behavior, override the `get_datastore_data()` method).
  *
- * To use it, please register your controller in the `woocommerce_admin_rest_controllers`
+ * To use the controller, please register your it in the `woocommerce_admin_rest_controllers`
  * filter and initialize the `Rest_API` class in your plugin.
  *
  * @extends WC_REST_Reports_Controller
@@ -99,16 +98,14 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Forwards a Query constructor,
-	 * to be able to customize Query class for a specific report.
+	 * Get data from `report-{$this->rest_base}` store, based on the given query vars.
 	 *
-	 * By default it creates `GenericQuery` with the rest base as name.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
 	 */
-	protected function construct_query( $query_args ) {
-		return new GenericQuery( $query_args, $this->rest_base );
+	protected function get_datastore_data( $query_args = array() ) {
+		$data_store = \WC_Data_Store::load( $this->rest_base );
+		return $data_store->get_data( $query_args );
 	}
 
 	/**
@@ -187,8 +184,7 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$query       = $this->construct_query( $query_args );
-		$report_data = $query->get_data();
+		$report_data = $this->get_datastore_data( $query_args );
 
 		if ( is_wp_error( $report_data ) ) {
 			return $report_data;

@@ -31,13 +31,16 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/coupons';
 
 	/**
-	 * Forwards a Coupons Query constructor.
+	 * Get data from `'coupons'` Query.
 	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
+	 * @override GenericController::get_datastore_data()
+	 *
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
 	 */
-	protected function construct_query( $query_args ) {
-		return new GenericQuery( $query_args, 'coupons' );
+	protected function get_datastore_data( $query_args = array() ) {
+		$query = new GenericQuery( $query_args, 'coupons' );
+		return $query->get_data();
 	}
 
 	/**
