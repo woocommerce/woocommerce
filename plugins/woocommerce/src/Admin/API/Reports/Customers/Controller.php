@@ -34,57 +34,13 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/customers';
 
 	/**
-	 * Forwards a Customers Query constructor.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new Query( $query_args );
-	}
-
-	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                        = array();
-		$args['registered_before']   = $request['registered_before'];
-		$args['registered_after']    = $request['registered_after'];
-		$args['order_before']        = $request['before'];
-		$args['order_after']         = $request['after'];
-		$args['page']                = $request['page'];
-		$args['per_page']            = $request['per_page'];
-		$args['order']               = $request['order'];
-		$args['orderby']             = $request['orderby'];
-		$args['match']               = $request['match'];
-		$args['search']              = $request['search'];
-		$args['searchby']            = $request['searchby'];
-		$args['name_includes']       = $request['name_includes'];
-		$args['name_excludes']       = $request['name_excludes'];
-		$args['username_includes']   = $request['username_includes'];
-		$args['username_excludes']   = $request['username_excludes'];
-		$args['email_includes']      = $request['email_includes'];
-		$args['email_excludes']      = $request['email_excludes'];
-		$args['country_includes']    = $request['country_includes'];
-		$args['country_excludes']    = $request['country_excludes'];
-		$args['last_active_before']  = $request['last_active_before'];
-		$args['last_active_after']   = $request['last_active_after'];
-		$args['orders_count_min']    = $request['orders_count_min'];
-		$args['orders_count_max']    = $request['orders_count_max'];
-		$args['total_spend_min']     = $request['total_spend_min'];
-		$args['total_spend_max']     = $request['total_spend_max'];
-		$args['avg_order_value_min'] = $request['avg_order_value_min'];
-		$args['avg_order_value_max'] = $request['avg_order_value_max'];
-		$args['last_order_before']   = $request['last_order_before'];
-		$args['last_order_after']    = $request['last_order_after'];
-		$args['customers']           = $request['customers'];
-		$args['users']               = $request['users'];
-		$args['force_cache_refresh'] = $request['force_cache_refresh'];
-		$args['filter_empty']        = $request['filter_empty'];
-
+		$args                      = parent::prepare_reports_query( $request );
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
 		$between_params_date       = array( 'last_active', 'registered' );
@@ -103,8 +59,7 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_item( $request ) {
 		$query_args              = $this->prepare_reports_query( $request );
 		$query_args['customers'] = array( $request->get_param( 'id' ) );
-		$customers_query         = new Query( $query_args );
-		$report_data             = $customers_query->get_data();
+		$report_data             = $this->get_datastore_data( $query_args );
 
 		$data = array();
 

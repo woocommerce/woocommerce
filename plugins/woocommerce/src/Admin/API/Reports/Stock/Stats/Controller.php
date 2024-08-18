@@ -38,8 +38,7 @@ class Controller extends \WC_REST_Reports_Controller {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$stock_query = new Query();
-		$report_data = $stock_query->get_data();
+		$report_data = $this->get_datastore_data();
 		$out_data    = array(
 			'totals' => $report_data,
 		);

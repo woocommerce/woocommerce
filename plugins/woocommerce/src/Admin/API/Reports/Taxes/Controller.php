@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -35,15 +34,6 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	protected $rest_base = 'reports/taxes';
 
-	/**
-	 * Forwards a Taxes Query constructor.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new GenericQuery( $query_args, 'taxes' );
-	}
 	/**
 	 * Maps query arguments from the REST request.
 	 *

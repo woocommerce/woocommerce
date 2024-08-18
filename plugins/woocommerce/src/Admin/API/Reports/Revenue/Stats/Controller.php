@@ -55,17 +55,30 @@ class Controller extends GenericStatsController implements ExportableInterface {
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 		$args['date_type']           = $request['date_type'];
 
-		return $args;
-	}
 
-	/**
-	 * Forwards a Query constructor.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new RevenueQuery( $query_args );
+		$defaults = array(
+			'per_page' => get_option( 'posts_per_page' ), // not sure if this should be the default.
+			'page'     => 1,
+			'order'    => 'DESC',
+			'orderby'  => 'date',
+			'before'   => '',
+			'after'    => '',
+			'interval' => 'week',
+			'fields'   => array(
+				'orders_count',
+				'num_items_sold',
+				'total_sales',
+				'coupons',
+				'coupons_count',
+				'refunds',
+				'taxes',
+				'shipping',
+				'net_revenue',
+				'gross_sales',
+			),
+		);
+
+		return array_merge( $defaults, $args );
 	}
 
 	/**

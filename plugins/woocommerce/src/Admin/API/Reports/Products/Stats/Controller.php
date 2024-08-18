@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -45,16 +44,6 @@ class Controller extends GenericStatsController {
 	 */
 	public function __construct() {
 		add_filter( 'woocommerce_analytics_products_stats_select_query', array( $this, 'set_default_report_data' ) );
-	}
-
-	/**
-	 * Forwards a Query constructor.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new GenericQuery( $query_args, 'products-stats' );
 	}
 
 	/**

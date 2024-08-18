@@ -23,19 +23,19 @@ use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 /**
  * API\Reports\Taxes\Stats\Query
  *
- * @deprecated x.x.x Taxes\Stats\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+ * @deprecated x.x.x Taxes\Stats\The Query class is deprecated. Please get data from the store directly in your Controller..
  */
 class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for Taxes report.
 	 *
-	 * @deprecated x.x.x Taxes\Stats\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+	 * @deprecated x.x.x Taxes\Stats\The Query class is deprecated. Please get data from the store directly in your Controller..
 	 *
 	 * @return array
 	 */
 	protected function get_default_query_vars() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'The Query class is deprecated. Please get data from the store directly in your Controller.' );
 
 		return array();
 	}
@@ -43,12 +43,12 @@ class Query extends ReportsQuery {
 	/**
 	 * Get tax stats data based on the current query vars.
 	 *
-	 * @deprecated x.x.x Taxes\Stats\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
+	 * @deprecated x.x.x Taxes\Stats\The Query class is deprecated. Please get data from the store directly in your Controller..
 	 *
 	 * @return array
 	 */
 	public function get_data() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'The Query class is deprecated. Please get data from the store directly in your Controller.' );
 
 		$args = apply_filters( 'woocommerce_analytics_taxes_stats_query_args', $this->get_query_vars() );
 

@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Downloads\Stats;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\GenericStatsController;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -57,16 +56,6 @@ class Controller extends GenericStatsController {
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
 		return $args;
-	}
-
-	/**
-	 * Forwards a Query constructor.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new GenericQuery( $query_args, 'downloads-stats' );
 	}
 
 	/**

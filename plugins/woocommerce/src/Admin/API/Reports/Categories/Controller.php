@@ -11,7 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
 
 /**
@@ -31,15 +30,6 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	protected $rest_base = 'reports/categories';
 
-	/**
-	 * Forwards a Categories Query constructor.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new GenericQuery( $query_args, 'categories' );
-	}
 	/**
 	 * Maps query arguments from the REST request.
 	 *

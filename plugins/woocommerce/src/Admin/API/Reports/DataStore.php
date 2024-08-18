@@ -48,7 +48,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * </code></pre>
  *
  * Please use the `woocommerce_data_stores` filter to add your custom data store to the list of available ones.
- * Then, your store could be accessed by Query classes ({@see GenericQuery::get_data() GenericQuery::get_data()})
+ * Then, your store could be accessed by Controller classes ({@see GenericController::get_datastore_data() GenericController::get_datastore_data()})
  * or using {@link \WC_Data_Store::load() \WC_Data_Store::load()}.
  *
  * Note that this class is NOT {@link https://developer.woocommerce.com/docs/how-to-manage-woocommerce-data-stores/ a CRUD data store}.

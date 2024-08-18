@@ -31,16 +31,6 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/orders';
 
 	/**
-	 * Forwards a Orders Query constructor.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new Query( $query_args );
-	}
-
-	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -74,7 +64,25 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['attribute_is_not']    = (array) $request['attribute_is_not'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
-		return $args;
+		// Defaults from the old Query class.
+		$defaults = array(
+			'name'           => '',
+			'parent'         => '',
+			'parent_exclude' => '',
+			'exclude'        => '',
+
+			'limit'          => get_option( 'posts_per_page' ),
+			'page'           => 1,
+			'offset'         => '',
+			'paginate'       => false,
+
+			'order'          => 'DESC',
+			'orderby'        => 'date',
+
+			'return'         => 'objects',
+		);
+
+		return array_merge( $defaults, $args );
 	}
 
 	/**

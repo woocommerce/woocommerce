@@ -31,19 +31,6 @@ class Controller extends GenericStatsController {
 	protected $rest_base = 'reports/orders/stats';
 
 	/**
-	 * Forwards a Query constructor,
-	 * to be able to customize Query class for a specific report.
-	 *
-	 * By default it creates `GenericQuery` with the rest base as name.
-	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
-	 */
-	protected function construct_query( $query_args ) {
-		return new Query( $query_args );
-	}
-
-	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -58,7 +45,16 @@ class Controller extends GenericStatsController {
 		$args['per_page']            = $request['per_page'];
 		$args['orderby']             = $request['orderby'];
 		$args['order']               = $request['order'];
-		$args['fields']              = $request['fields'];
+		$args['fields']              = isset( $request['fields'] ) ? $request['fields'] : array(
+			'net_revenue',
+			'avg_order_value',
+			'orders_count',
+			'avg_items_per_order',
+			'num_items_sold',
+			'coupons',
+			'coupons_count',
+			'total_customers',
+		);
 		$args['match']               = $request['match'];
 		$args['status_is']           = (array) $request['status_is'];
 		$args['status_is_not']       = (array) $request['status_is_not'];
