@@ -67,6 +67,22 @@ describe( 'AnalyticsSummary', () => {
 		expect( screen.queryByText( 'Previous year: 500.25' ) ).toBeNull();
 	} );
 
+	test( 'should call `recordEvent` callback when SummaryNumber gets clicked', async () => {
+		const recordEvent = jest.fn();
+		renderChart( 'number', 1000.5, 500.25, false, false, { recordEvent } );
+
+		const label = screen.getByText( 'Total sales' );
+
+		userEvent.click( label );
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'analytics_chart_tab_click',
+			{
+				report: 'revenue',
+				key: 'total_sales',
+			}
+		);
+	} );
+
 	test( 'should format currency numbers properly', async () => {
 		renderChart( 'currency', 1000.5, 500.25 );
 
