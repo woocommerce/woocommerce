@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Allow adding HTML to label prop in label component

@@ -46,12 +46,6 @@ function wc_template_redirect() {
 		exit;
 	}
 
-	// Redirect to edit account if trying to recover password whilst logged in.
-	if ( isset( $wp->query_vars['lost-password'] ) && is_user_logged_in() ) {
-		wp_safe_redirect( esc_url_raw( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) );
-		exit;
-	}
-
 	// Trigger 404 if trying to access an endpoint on wrong page.
 	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() && apply_filters( 'woocommerce_account_endpoint_page_not_found', true ) ) {
 		$wp_query->set_404();
@@ -2864,6 +2858,12 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		}
 
 		if ( $args['required'] ) {
+			// hidden inputs are the only kind of inputs that don't need an `aria-required` attribute.
+			// checkboxes apply the `custom_attributes` to the label - we need to apply the attribute on the input itself, instead.
+			if ( ! in_array( $args['type'], array( 'hidden', 'checkbox' ), true ) ) {
+				$args['custom_attributes']['aria-required'] = 'true';
+			}
+
 			$args['class'][] = 'validate-required';
 			$required        = '&nbsp;<abbr class="required" title="' . esc_attr__( 'required', 'woocommerce' ) . '">*</abbr>';
 		} else {
@@ -2988,12 +2988,13 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				}
 
 				$field .= sprintf(
-					'<input type="checkbox" name="%1$s" id="%2$s" value="%3$s" class="%4$s" %5$s /> %6$s',
+					'<input type="checkbox" name="%1$s" id="%2$s" value="%3$s" class="%4$s" %5$s%6$s /> %7$s',
 					esc_attr( $key ),
 					esc_attr( $args['id'] ),
 					esc_attr( $args['checked_value'] ),
 					esc_attr( 'input-checkbox ' . implode( ' ', $args['input_class'] ) ),
 					checked( $value, $args['checked_value'], false ),
+					$args['required'] ? ' aria-required="true"' : '',
 					wp_kses_post( $args['label'] )
 				);
 

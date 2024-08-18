@@ -5,7 +5,7 @@ import { test, expect } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'woocommerce/product-filters-overlay-navigation',
-	title: 'Navigation (Experimental)',
+	title: 'Overlay Navigation (Experimental)',
 	selectors: {
 		frontend: {},
 		editor: {
