@@ -7,10 +7,47 @@ use WP_REST_Request;
 use WP_REST_Response;
 
 /**
- * WC REST API Reports controller extended
- * to be shared as a generic base for all Analytics controllers.
+ * {@see WC_REST_Reports_Controller WC REST API Reports Controller} extended to be shared as a generic base for all Analytics reports controllers.
  *
- * @internal
+ * Handles pagination HTTP headers and links, basic, conventional params.
+ * Does all the REST API plumbing as `WC_REST_Controller`.
+ *
+ *
+ * Minimalistic example:
+ * <pre><code class="language-php">class MyController extends GenericController {
+ *     /** Route of your new REST endpoint. &ast;/
+ *     protected $rest_base = 'reports/my-thing';
+ *     /**
+ *      * Provide JSON schema for the response item.
+ *      * @override WC_REST_Reports_Controller::get_item_schema()
+ *      &ast;/
+ *     public function get_item_schema() {
+ *         $schema = array(
+ *             '$schema'    => 'http://json-schema.org/draft-04/schema#',
+ *             'title'      => 'report_my_thing',
+ *             'type'       => 'object',
+ *             'properties' => array(
+ *                 'product_id' => array(
+ *                     'type'        => 'integer',
+ *                     'readonly'    => true,
+ *                     'context'     => array( 'view', 'edit' ),
+ *                 'description' => __( 'Product ID.', 'my_extension' ),
+ *                 ),
+ *             ),
+ *         );
+ *         // Add additional fields from `get_additional_fields` method and apply `woocommerce_rest_' . $schema['title'] . '_schema` filter.
+ *         return $this->add_additional_fields_schema( $schema );
+ *     }
+ * }
+ * </code></pre>
+ *
+ * The above Controller will use {@see GenericQuery GenericQuery}
+ * to get the data from a {@see DataStore data store} registered as `reports/my-thing`.
+ * (To change the Query class or data store name, override `construct_query` method).
+ *
+ * To use it, please register your controller in the `woocommerce_admin_rest_controllers`
+ * filter and initialize the `Rest_API` class in your plugin.
+ *
  * @extends WC_REST_Reports_Controller
  */
 abstract class GenericController extends \WC_REST_Reports_Controller {
@@ -26,12 +63,12 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	/**
 	 * Add pagination headers and links.
 	 *
-	 * @param WP_REST_Request        $request   Request data.
-	 * @param WP_REST_Response|array $response  Response data.
-	 * @param int                    $total     Total results.
-	 * @param int                    $page      Current page.
-	 * @param int                    $max_pages Total amount of pages.
-	 * @return WP_REST_Response
+	 * @param \WP_REST_Request        $request   Request data.
+	 * @param \WP_REST_Response|array $response  Response data.
+	 * @param int                     $total     Total results.
+	 * @param int                     $page      Current page.
+	 * @param int                     $max_pages Total amount of pages.
+	 * @return \WP_REST_Response
 	 */
 	public function add_pagination_headers( $request, $response, int $total, int $page, int $max_pages ) {
 		$response = rest_ensure_response( $response );
@@ -75,7 +112,7 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Get the query params for collections.
+	 * Get the query params definition for collections.
 	 *
 	 * @return array
 	 */
@@ -139,10 +176,14 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 
 
 	/**
-	 * Get all reports.
+	 * Get the report data.
 	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * Prepares query params, fetches the report data from the Query object,
+	 * prepares it for the response, and packs it into the convention-conforming response object.
+	 *
+	 * @throws \WP_Error When the queried data is invalid.
+	 * @param \WP_REST_Request $request Request data.
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
@@ -175,6 +216,14 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 
 	/**
 	 * Prepare a report data item for serialization.
+	 *
+	 * This method is called by `get_items` to prepare a single report data item for serialization.
+	 * Calls `add_additional_fields_to_object` and `filter_response_by_context`,
+	 * then wpraps the data with `rest_ensure_response`.
+	 *
+	 * You can extend it to add or filter some fields.
+	 *
+	 * @override WP_REST_Posts_Controller::prepare_item_for_response()
 	 *
 	 * @param mixed           $report_item Report data item as returned from Data Store.
 	 * @param WP_REST_Request $request     Request object.

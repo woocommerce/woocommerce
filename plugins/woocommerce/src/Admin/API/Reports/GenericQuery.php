@@ -11,13 +11,18 @@ use WC_Data_Store;
  * A generic class for a report-specific query to be used in Analytics.
  *
  * Example usage:
- * $args = array(
+ * <pre><code class="language-php">$args = array(
  *          'before'    => '2018-07-19 00:00:00',
  *          'after'     => '2018-07-05 00:00:00',
  *          'page'      => 2,
  *         );
  * $report = new GenericQuery( $args, 'coupons' );
  * $mydata = $report->get_data();
+ * </code></pre>
+ *
+ * It uses the name provided in the class property or in the constructor call to load the `report-{name}` data store.
+ *
+ * It's used by the {@see GenericController GenericController}.
  *
  * @since x.x.x
  */
@@ -58,7 +63,7 @@ class GenericQuery extends \WC_Object_Query {
 	 * Filters query vars through `woocommerce_analytics_{snake_case(name)}_query_args` filter.
 	 * Filters results through `woocommerce_analytics_{snake_case(name)}_select_query` filter.
 	 *
-	 * @return array
+	 * @return mixed filtered results from the data store.
 	 */
 	public function get_data() {
 		$snake_name = str_replace( '-', '_', $this->name );
