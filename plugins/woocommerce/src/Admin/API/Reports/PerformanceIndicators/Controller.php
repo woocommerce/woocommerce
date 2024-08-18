@@ -478,7 +478,7 @@ class Controller extends GenericController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \Automattic\WooCommerce\Admin\API\Reports\Query $object Object data.
+	 * @param $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {

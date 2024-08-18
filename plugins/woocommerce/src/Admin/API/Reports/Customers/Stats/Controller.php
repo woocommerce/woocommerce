@@ -7,8 +7,6 @@
 
 namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
 
-use Automattic\WooCommerce\Admin\API\Reports\Customers\Query;
-
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;

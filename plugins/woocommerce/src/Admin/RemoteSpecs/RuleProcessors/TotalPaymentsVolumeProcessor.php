@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
@@ -76,18 +75,5 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Get the report query.
-	 *
-	 * @param array $args The query args.
-	 *
-	 * @return RevenueQuery The report query.
-	 */
-	protected function get_reports_query( $args ) {
-		return new RevenueQuery(
-			$args
-		);
 	}
 }

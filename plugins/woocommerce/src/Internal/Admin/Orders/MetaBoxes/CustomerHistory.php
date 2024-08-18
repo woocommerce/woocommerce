@@ -2,7 +2,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
-use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use WC_Order;
 
 /**
@@ -58,8 +57,20 @@ class CustomerHistory {
 			'order_before' => null,
 		);
 
-		$customers_query = new CustomersQuery( $args );
-		$customer_data   = $customers_query->get_data();
+
+		/**
+		 * Filter query args given for the report.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array $args Query args.
+		 */
+		$args = apply_filters( "woocommerce_analytics_customers_query_args", $args );
+
+		$data_store = \WC_Data_Store::load( 'customers' );
+		$results    = $data_store->get_data( $args );
+
+		$customer_data   = apply_filters( "woocommerce_analytics_customers_select_query", $results, $args );
 		return $customer_data->data[0] ?? null;
 	}
 
