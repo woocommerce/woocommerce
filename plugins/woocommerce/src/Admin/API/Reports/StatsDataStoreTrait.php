@@ -110,7 +110,7 @@ trait StatsDataStoreTrait {
 			// Fetch the actual data.
 			$data = $this->get_noncached_stats_data( $query_args, $params, $data, $expected_interval_count );
 
-			if (  ! is_wp_error( $data ) && is_array( $data->intervals ) ) {
+			if ( ! is_wp_error( $data ) && is_array( $data->intervals ) ) {
 				$this->create_interval_subtotals( $data->intervals );
 			}
 		}
