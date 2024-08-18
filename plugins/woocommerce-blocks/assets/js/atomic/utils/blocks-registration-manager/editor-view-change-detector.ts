@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { subscribe } from '@wordpress/data';
+import { subscribe, select } from '@wordpress/data';
 import { getPath, getQueryArg } from '@wordpress/url';
 
 enum ContentType {
-	WP_TEMPLATE = 'wp-template',
-	WP_TEMPLATE_PART = 'wp-template-part',
+	WP_TEMPLATE = 'wp_template',
+	WP_TEMPLATE_PART = 'wp_template_part',
 	POST = 'post',
 	PAGE = 'page',
 	NONE = 'none',
@@ -58,25 +58,13 @@ export class EditorViewChangeDetector
 	}
 
 	private detectContentType(): ContentType {
-		const path = getPath( window.location.href );
+		const editedContentType =
+			select( 'core/editor' ).getCurrentPostType< ContentType >() ||
+			select( 'core/edit-site' )?.getEditedPostType<
+				'wp_template' | 'wp_template_part'
+			>();
 
-		if ( ! path ) {
-			return ContentType.NONE;
-		}
-
-		if ( path.includes( 'site-editor.php' ) ) {
-			return ContentType.WP_TEMPLATE;
-		}
-
-		if ( path.includes( 'post-new.php' ) || path.includes( 'post.php' ) ) {
-			return ContentType.POST;
-		}
-
-		if ( path.includes( 'page-new.php' ) ) {
-			return ContentType.PAGE;
-		}
-
-		return ContentType.NONE;
+		return editedContentType || ContentType.NONE;
 	}
 
 	private checkIfPageLocationHasChanged(): boolean {
