@@ -6,7 +6,7 @@ import { Component, createElement } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
-import { getNewPath } from '@woocommerce/navigation';;
+import { getNewPath } from '@woocommerce/navigation';
 import { calculateDelta, formatValue } from '@woocommerce/number';
 import { getSummaryNumbers, SETTINGS_STORE_NAME } from '@woocommerce/data';
 import { getDateParamsFromQuery } from '@woocommerce/date';
@@ -15,12 +15,8 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import { AnalyticsError } from '../'
-import {
-	SummaryList,
-	SummaryListPlaceholder,
-	SummaryNumber,
-} from '../../'
+import { AnalyticsError } from '../';
+import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '../../';
 
 /**
  * Component to render summary numbers for WooCommerce Analytics reports.

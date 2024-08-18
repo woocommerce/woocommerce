@@ -120,7 +120,6 @@ export default {
 		recordEvent: ( ...args ) => {
 			console.log( `recordEvent called with `, ...args );
 		},
-
 	},
 	argTypes: {
 		isRequesting: {
