@@ -57,7 +57,6 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
  *         } else {
  *             $this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
  *         }
- *         $this->create_interval_subtotals( $data->intervals );
  *
  *         return $data;
  *    }
@@ -110,6 +109,10 @@ trait StatsDataStoreTrait {
 		if ( $query_args['page'] >= 1 && $query_args['page'] <= $total_pages ) {
 			// Fetch the actual data.
 			$data = $this->get_noncached_stats_data( $query_args, $params, $data, $expected_interval_count );
+
+			if (  ! is_wp_error( $data ) && is_array( $data->intervals ) ) {
+				$this->create_interval_subtotals( $data->intervals );
+			}
 		}
 
 		return $data;
