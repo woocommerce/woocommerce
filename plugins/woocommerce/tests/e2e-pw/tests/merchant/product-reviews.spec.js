@@ -48,7 +48,7 @@ const test = baseTest.extend( {
 } );
 
 test.describe(
-	'Product Reviews > Edit Product Review',
+	'Product Reviews',
 	{ tag: [ '@gutenberg', '@services' ] },
 	() => {
 		test( 'can view products reviews list', async ( { page, reviews } ) => {
