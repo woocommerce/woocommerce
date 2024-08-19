@@ -157,11 +157,28 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		$suggestions = PaymentGatewaySuggestions::get_cached_or_default_suggestions();
 
 		// Assert.
-		$default_specs       = DefaultPaymentGateways::get_all();
-		$default_suggestions = EvaluateSuggestion::evaluate_specs( $default_specs )['suggestions'];
+		$default_suggestions = EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
 
 		$this->assertEquals( $default_suggestions, $suggestions );
 	}
+
+
+	/**
+	 * Test that default gateways are provided when remote sources don't exist.
+	 */
+	public function test_cached_or_default_suggestions_when_marketplace_suggestions_off() {
+		// Arrange.
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+		PaymentGatewaySuggestionsDataSourcePoller::get_instance()->delete_specs_transient();
+
+		// Act.
+		$suggestions         = PaymentGatewaySuggestions::get_cached_or_default_suggestions();
+		$default_suggestions = EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
+
+		// Assert.
+		$this->assertEquals( $suggestions, $default_suggestions );
+	}
+
 
 	/**
 	 * Test that non-matched suggestions are not shown.
