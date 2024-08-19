@@ -67,7 +67,7 @@ class PageController {
 			wp_die( esc_html__( 'Order type mismatch.', 'woocommerce' ) );
 		}
 
-		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->edit_post, $this->order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->edit_post, $this->order->get_id() ) && ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
 		}
 
