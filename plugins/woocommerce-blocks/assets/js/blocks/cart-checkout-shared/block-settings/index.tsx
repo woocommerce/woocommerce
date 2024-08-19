@@ -105,7 +105,7 @@ export const ExpressPaymentControls = ( {
 } ) => {
 	return (
 		<InspectorControls>
-			<PanelBody title={ __( 'Button settings', 'woocommerce' ) }>
+			<PanelBody title={ __( 'Button Settings', 'woocommerce' ) }>
 				<ToggleControl
 					label={ __( 'Apply uniform styles', 'woocommerce' ) }
 					checked={ attributes.showButtonStyles }
