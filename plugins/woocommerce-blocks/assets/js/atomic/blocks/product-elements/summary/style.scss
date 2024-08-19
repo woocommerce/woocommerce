@@ -1,6 +1,7 @@
 .wc-block-components-product-summary {
 	margin-top: 0;
 	margin-bottom: $gap-small;
+	word-wrap: break-word;
 }
 .is-loading .wc-block-components-product-summary::before {
 	@include placeholder();
