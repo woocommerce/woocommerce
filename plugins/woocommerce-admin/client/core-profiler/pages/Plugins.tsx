@@ -7,6 +7,7 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { Extension, ExtensionList } from '@woocommerce/data';
 import { useState } from 'react';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -21,7 +22,6 @@ import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 import { PluginCard } from '../components/plugin-card/plugin-card';
 import { getAdminSetting } from '~/utils/admin-settings';
-import clsx from 'clsx';
 
 const locale = ( getAdminSetting( 'locale' )?.siteLocale || 'en_US' ).replace(
 	'_',
