@@ -45,8 +45,7 @@ use WP_REST_Response;
  * to get the data from a {@see DataStore data store} registered as `reports/my-thing`.
  * (To change the Query class or data store name, override `construct_query` method).
  *
- * To use it, please register your controller in the `woocommerce_admin_rest_controllers`
- * filter and initialize the `Rest_API` class in your plugin.
+ * To use it, please register your controller in the `woocommerce_admin_rest_controllers` filter.
  *
  * @extends WC_REST_Reports_Controller
  */

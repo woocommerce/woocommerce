@@ -18,7 +18,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * We use Report DataStores to separate DB data retrieval logic from the REST API controllers.
  *
  * Handles caching, data normalization, intervals-related methods, and other common functionality.
- * So, in your custom report DataStore class that extend this class
+ * So, in your custom report DataStore class that extends this class
  * you can focus on specifics by overriding the `get_noncached_data` method.
  *
  * Minimalistic example:
