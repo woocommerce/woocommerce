@@ -44,8 +44,7 @@ use WP_REST_Response;
  * The above Controller will get the data from a {@see DataStore data store} registered as `$rest_base` (`reports/my-thing`).
  * (To change this behavior, override the `get_datastore_data()` method).
  *
- * To use the controller, please register it with the filter `woocommerce_admin_rest_controllers`
- * filter and initialize the `Rest_API` class in your plugin.
+ * To use the controller, please register it with the filter `woocommerce_admin_rest_controllers` filter.
  *
  * @extends WC_REST_Reports_Controller
  */
