@@ -55,7 +55,7 @@ describe( 'ConfirmationModal', () => {
 		document.body.removeChild( formRef.current );
 	} );
 
-	it( 'should prompt the modal and submit the form when confirmed when live', () => {
+	it( 'should prompt the modal if current setting is live and submit the form', () => {
 		const currentSetting = { woocommerce_coming_soon: 'no' };
 
 		render(
@@ -82,6 +82,24 @@ describe( 'ConfirmationModal', () => {
 
 		// Ensure the form is submitted
 		expect( submitListener ).toHaveBeenCalled();
+	} );
+
+	it( 'should prompt the modal if current setting is not set', () => {
+		render(
+			<ConfirmationModal
+				formRef={ formRef }
+				saveButtonRef={ saveButtonRef }
+				currentSetting={ null }
+			/>
+		);
+
+		mockSelectComingSoon( 'yes' );
+		fireSubmitEvent();
+
+		// Confirm that the modal is not prompted
+		expect(
+			screen.queryByText( 'Confirm switch to ‘Coming soon’ mode' )
+		).toBeInTheDocument();
 	} );
 
 	it( 'should not prompt the modal if current setting is already "coming soon"', () => {
