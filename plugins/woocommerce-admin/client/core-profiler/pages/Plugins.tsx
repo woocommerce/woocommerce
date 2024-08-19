@@ -219,51 +219,53 @@ export const Plugins = ( {
 						);
 					} ) }
 				</div>
-				<div className="woocommerce-profiler-plugins-continue-button-container">
-					<Button
-						className="woocommerce-profiler-plugins-continue-button"
-						variant="primary"
-						onClick={
-							selectedPlugins.length
-								? submitInstallationRequest
-								: skipPluginsPage
-						}
-					>
-						{ __( 'Continue', 'woocommerce' ) }
-					</Button>
-				</div>
-				{ pluginsWithAgreement.length > 0 && (
-					<p className="woocommerce-profiler-plugins-jetpack-agreement">
-						{ interpolateComponents( {
-							mixedString: sprintf(
-								/* translators: %s: a list of plugins, e.g. Jetpack */
-								_n(
-									'By installing %s plugin for free you agree to our {{link}}Terms of Service{{/link}}.',
-									'By installing %s plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
-									pluginsWithAgreement.length,
-									'woocommerce'
-								),
-								joinWithAnd(
-									pluginsWithAgreement.map(
-										( plugin ) => plugin.name
+				<div className="woocommerce-profiler-plugins__footer">
+					<div className="woocommerce-profiler-plugins-continue-button-container">
+						<Button
+							className="woocommerce-profiler-plugins-continue-button"
+							variant="primary"
+							onClick={
+								selectedPlugins.length
+									? submitInstallationRequest
+									: skipPluginsPage
+							}
+						>
+							{ __( 'Continue', 'woocommerce' ) }
+						</Button>
+					</div>
+					{ pluginsWithAgreement.length > 0 && (
+						<p className="woocommerce-profiler-plugins-jetpack-agreement">
+							{ interpolateComponents( {
+								mixedString: sprintf(
+									/* translators: %s: a list of plugins, e.g. Jetpack */
+									_n(
+										'By installing %s plugin for free you agree to our {{link}}Terms of Service{{/link}}.',
+										'By installing %s plugins for free you agree to our {{link}}Terms of Service{{/link}}.',
+										pluginsWithAgreement.length,
+										'woocommerce'
+									),
+									joinWithAnd(
+										pluginsWithAgreement.map(
+											( plugin ) => plugin.name
+										)
 									)
-								)
-									.map( composeListFormatParts )
-									.join( '' )
-							),
-							components: {
-								span: <span />,
-								link: (
-									<Link
-										href="https://wordpress.com/tos/"
-										target="_blank"
-										type="external"
-									/>
+										.map( composeListFormatParts )
+										.join( '' )
 								),
-							},
-						} ) }
-					</p>
-				) }
+								components: {
+									span: <span />,
+									link: (
+										<Link
+											href="https://wordpress.com/tos/"
+											target="_blank"
+											type="external"
+										/>
+									),
+								},
+							} ) }
+						</p>
+					) }
+				</div>
 			</div>
 		</div>
 	);
