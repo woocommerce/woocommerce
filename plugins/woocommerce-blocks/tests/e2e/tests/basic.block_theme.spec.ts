@@ -19,6 +19,7 @@ test.describe( 'Basic role-based functionality tests', () => {
 
 			// Check that iframe with title "Editor canvas" is visible.
 			await expect( page.getByTitle( 'Editor canvas' ) ).toBeVisible();
+		} );
 	} );
 
 	test.describe( 'As customer', () => {
