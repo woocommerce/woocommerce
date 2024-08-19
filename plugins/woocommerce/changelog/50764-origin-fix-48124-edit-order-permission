@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixed edit order permission issue for custom user roles.
