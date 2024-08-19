@@ -272,3 +272,13 @@ export function* updateComingSoonMode( params ) {
 		} );
 	} );
 }
+
+export function* updateWccomRequestErrorsMode( params ) {
+	yield runCommand( 'Update wccom request errors mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/set-wccom-request-errors/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
