@@ -78,7 +78,6 @@ test.describe(
 				).toContainText( review.product_name );
 			}
 
-			// Check if the reviews are displayed
 			expect( reviews.length ).toBeGreaterThan( 0 );
 		} );
 
@@ -142,7 +141,6 @@ test.describe(
 				.getByRole( 'button', { name: 'Update Comment' } )
 				.click();
 
-			// Verify that the edited comment is there
 			await expect(
 				reviewRow.getByText( updatedQuickReview )
 			).toBeVisible();
@@ -151,20 +149,17 @@ test.describe(
 		test( 'can edit a product review', async ( { page, reviews } ) => {
 			const review = reviews[ 0 ];
 
-			// Go to the Edit page of the review
 			await page.goto(
 				`wp-admin/comment.php?action=editcomment&c=${ review.id }`
 			);
 			await expect( page.getByText( 'Edit Comment' ) ).toBeVisible();
 
-			// Create new comment and edit the review with it
 			const updatedReview = `(edited ${ Date.now() })`;
 			await page
 				.locator( '.wp-editor-area' )
 				.first()
 				.fill( updatedReview );
 
-			// Generate another random rating and edit the review with it
 			await page.click( '#rating' );
 			const updatedRating = ( Math.random() * ( 5 - 1 ) + 1 ).toFixed(
 				0
@@ -174,7 +169,6 @@ test.describe(
 			} );
 			await page.getByRole( 'button', { name: 'Update' } ).click();
 
-			// Verify that the edited comment is in the product reviews list
 			await page.goto(
 				`wp-admin/edit.php?post_type=product&page=product-reviews`
 			);
@@ -188,7 +182,6 @@ test.describe(
 				reviewRow.getByLabel( `${ updatedRating } out of 5` )
 			).toBeVisible();
 
-			// Verify that the edited comment is in the shop's product page
 			await reviewRow.locator( 'a.comments-view-item-link' ).click();
 			await page.click( '#tab-reviews' );
 			await expect(
@@ -202,26 +195,18 @@ test.describe(
 		test( 'can approve a product review', async ( { page, reviews } ) => {
 			const review = reviews[ 0 ]; // Select the first review for approval
 
-			// Go to the Product Reviews page
 			await page.goto(
 				`wp-admin/edit.php?post_type=product&page=product-reviews`
 			);
 
-			// Locate the review to be approved
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 
-			// Ensure the review is not already approved
 			const approveButton = reviewRow.getByRole( 'button', {
 				name: 'Approve',
 			} );
 
-			// Hover to reveal action buttons
 			await reviewRow.hover();
-
-			// Click the "Approve" button and wait for the state to become 'networkidle'
 			await approveButton.click();
-
-			// Verify the review is approved by checking the presence of "Unapprove" button
 			const unapproveButton = reviewRow.getByRole( 'button', {
 				name: 'Unapprove',
 			} );
@@ -232,73 +217,63 @@ test.describe(
 			page,
 			reviews,
 		} ) => {
-			const review = reviews[ 0 ]; // Select the first review to mark as spam
+			const review = reviews[ 0 ];
 
-			// Go to the Product Reviews page
 			await page.goto(
 				`wp-admin/edit.php?post_type=product&page=product-reviews`
 			);
 
-			// Locate the review to be marked as spam
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
 
-			// Select Spam action and verify the review is marked as spam
 			await reviewRow.getByRole( 'button', { name: 'Spam' } ).click();
 
-			// Navigate to the "Spam" tab to verify the review is marked as spam
+			await expect(
+				page.locator( `#comment-${ review.id }` )
+			).toBeHidden();
+
 			await page.click( 'a[href*="comment_status=spam"]' );
 
-			// Check if the spammed review is located on the "Spam" page
 			await expect(
 				page.locator( `#comment-${ review.id }` )
 			).toBeVisible();
 		} );
 
 		test( 'can reply to a product review', async ( { page, reviews } ) => {
-			const review = reviews[ 0 ]; // Select the first review to reply to
+			const review = reviews[ 0 ];
 
-			// Go to the Product Reviews page
 			await page.goto(
 				'wp-admin/edit.php?post_type=product&page=product-reviews'
 			);
 
-			// Locate the review to be replied to
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
-
-			// Click the Reply button within the review row
 			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
-
-			// Wait for the reply textarea to be visible
 			const replyTextArea = page.locator( 'textarea#replycontent' );
+
 			await expect( replyTextArea ).toBeVisible();
 
-			// Fill in the reply and submit it
 			const replyText = 'Thank you for your feedback!';
 			await replyTextArea.fill( replyText );
-
-			// Ensure the "Submit Reply" button within the reply area is visible and clickable
 			const submitReplyButton = page.locator(
 				'button.save.button.button-primary'
 			);
-			await expect( submitReplyButton ).toBeVisible();
-			await submitReplyButton.click();
 
-			// Verify that the reply is visible in the admin review list
+			await expect( submitReplyButton ).toBeVisible();
+
+			await submitReplyButton.click();
 			const replyLocator = page.locator(
 				`tr#comment-${ review.id } + tr.comment-reply .comment-text`
 			);
+
 			await expect( replyLocator ).toBeVisible();
 
-			// Get the product link from the review row
 			const productLink = await reviewRow
 				.locator( 'a.comments-view-item-link' )
 				.getAttribute( 'href' );
 			await page.goto( productLink );
 			await page.click( '#tab-reviews' );
 
-			// Verify that the reply is visible in the shop's reviews section
 			const replyReviews = page.locator(
 				`div.comment_container:has-text("${ replyText }")`
 			);
@@ -311,11 +286,9 @@ test.describe(
 			await page.goto(
 				`wp-admin/edit.php?post_type=product&page=product-reviews`
 			);
-
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
 
-			// Select Trash action, check confirmation prompt and undo
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
 			await expect(
 				page.getByText(
@@ -324,26 +297,24 @@ test.describe(
 			).toBeVisible();
 			await page.getByRole( 'button', { name: 'Undo' } ).click();
 
-			// Verify that the review has been restored
 			await expect(
 				reviewRow.getByRole( 'cell', { name: review.review } )
 			).toBeVisible();
 
-			// Select Trash action and delete it permanently
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
+
 			await expect(
 				page.getByText(
 					`Comment by ${ review.reviewer } moved to the Trash`
 				)
 			).toBeVisible();
 
-			// Verify that the review in the trash
 			await page.click( 'a[href*="comment_status=trash"]' );
+
 			await expect(
 				reviewRow.getByRole( 'cell', { name: review.review } )
 			).toBeVisible();
 
-			// Check that the review is in the trash via URL
 			await page.goto(
 				`wp-admin/comment.php?action=editcomment&c=${ review.id }`
 			);
