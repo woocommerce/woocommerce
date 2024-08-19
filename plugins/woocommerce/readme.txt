@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Allow new accounts to set new password even if logged in. [#50700](https://github.com/woocommerce/woocommerce/pull/50700)
 * Fix - Remove global_unique_id from interface and add warning in case it is not implemented [#50685](https://github.com/woocommerce/woocommerce/pull/50685)
 * Fix - CYS: avoid to enqueue Jetpack scripts [#50679](https://github.com/woocommerce/woocommerce/pull/50679)
 * Fix - Clear product unique ID (`global_unique_id`) when duplicating products. [#50629](https://github.com/woocommerce/woocommerce/pull/50629)
