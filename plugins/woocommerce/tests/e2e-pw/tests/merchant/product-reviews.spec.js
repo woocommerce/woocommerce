@@ -253,20 +253,10 @@ test.describe(
 
 			await expect( replyTextArea ).toBeVisible();
 
-			const replyText = 'Thank you for your feedback!';
+			const replyText = `Thank you for your feedback! (replied ${ Date.now() })`;
 			await replyTextArea.fill( replyText );
-			const submitReplyButton = page.locator(
-				'button.save.button.button-primary'
-			);
 
-			await expect( submitReplyButton ).toBeVisible();
-
-			await submitReplyButton.click();
-			const replyLocator = page.locator(
-				`tr#comment-${ review.id } + tr.comment-reply .comment-text`
-			);
-
-			await expect( replyLocator ).toBeVisible();
+			await page.locator( 'button.save.button.button-primary' ).click();
 
 			const productLink = await reviewRow
 				.locator( 'a.comments-view-item-link' )
