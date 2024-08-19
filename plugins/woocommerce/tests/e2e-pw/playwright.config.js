@@ -74,6 +74,7 @@ const config = {
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
+	forbidOnly: !! CI,
 	use: {
 		baseURL: BASE_URL,
 		screenshot: { mode: 'only-on-failure', fullPage: true },
