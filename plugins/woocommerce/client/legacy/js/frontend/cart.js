@@ -586,7 +586,8 @@ jQuery( function ( $ ) {
 				dataType: 'html',
 				success: function ( response ) {
 					$(
-						'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success, .coupon-error-notice'
+						'.woocommerce-error, .woocommerce-message, .woocommerce-info, ' +
+						'.is-error, .is-info, .is-success, .coupon-error-notice'
 					).remove();
 					
 					// We only want to show coupon notices if they are not errors.
