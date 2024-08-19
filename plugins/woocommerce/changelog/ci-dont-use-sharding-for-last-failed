@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: Use a single shard when re-running failed tests in CI
