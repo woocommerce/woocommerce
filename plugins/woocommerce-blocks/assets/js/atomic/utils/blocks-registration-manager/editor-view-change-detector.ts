@@ -74,21 +74,15 @@ export class EditorViewChangeDetector
 
 		if (
 			this.currentContentType === ContentType.POST ||
-			this.currentContentType === ContentType.PAGE
+			this.currentContentType === ContentType.PAGE ||
+			this.currentContentType === ContentType.WP_TEMPLATE ||
+			this.currentContentType === ContentType.WP_TEMPLATE_PART
 		) {
 			return (
-				this.getPostOrPageIdFromUrl( this.currentPageLocation ) !==
-				this.getPostOrPageIdFromUrl( this.previousPageLocation )
+				this.getContentIdFromUrl( this.currentPageLocation ) !==
+				this.getContentIdFromUrl( this.previousPageLocation )
 			);
 		}
-
-		if ( this.currentContentType === ContentType.WP_TEMPLATE ) {
-			return (
-				this.getCurrentTemplateIdFromUrl( this.currentPageLocation ) !==
-				this.getCurrentTemplateIdFromUrl( this.previousPageLocation )
-			);
-		}
-
 		return false;
 	}
 
@@ -106,44 +100,39 @@ export class EditorViewChangeDetector
 	}
 
 	public getPreviousTemplateId() {
-		return this.getCurrentTemplateIdFromUrl( this.previousPageLocation );
+		return this.getContentIdFromUrl( this.previousPageLocation );
 	}
 
 	public getCurrentTemplateId() {
-		return this.getCurrentTemplateIdFromUrl( this.currentPageLocation );
+		return this.getContentIdFromUrl( this.currentPageLocation );
 	}
 
-	private getCurrentTemplateIdFromUrl( url: string ): string | undefined {
-		const path = getPath( url );
-		const isTemplatePage = path
-			? path.includes( 'site-editor.php' )
-			: false;
-		let templateId;
+	private getContentIdFromUrl( url: string ): string | undefined {
+		let contentId;
 
-		if ( isTemplatePage ) {
+		if ( this.getIsPostOrPage() ) {
+			contentId = getQueryArg( url, 'post' );
+		}
+
+		if ( this.getIsTemplateOrTemplatePart() ) {
 			const fullTemplateId = getQueryArg( url, 'postId' ) as string;
-			templateId = fullTemplateId?.split( '//' )[ 1 ];
+			contentId = fullTemplateId?.split( '//' )[ 1 ];
 		}
 
-		return templateId as string;
-	}
-
-	private getPostOrPageIdFromUrl( url: string ): string | undefined {
-		const path = getPath( url );
-		const isPostOrPage = path ? path.includes( 'post.php' ) : false;
-		let postId;
-
-		if ( isPostOrPage ) {
-			postId = getQueryArg( url, 'post' );
-		}
-
-		return postId as string;
+		return contentId as string;
 	}
 
 	public getIsPostOrPage(): boolean {
 		return (
 			this.currentContentType === ContentType.POST ||
 			this.currentContentType === ContentType.PAGE
+		);
+	}
+
+	public getIsTemplateOrTemplatePart(): boolean {
+		return (
+			this.currentContentType === ContentType.WP_TEMPLATE ||
+			this.currentContentType === ContentType.WP_TEMPLATE_PART
 		);
 	}
 }
