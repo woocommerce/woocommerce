@@ -662,8 +662,13 @@ function wc_product_has_global_unique_id( $product_id, $global_unique_id ) {
 		return boolval( $has_global_unique_id );
 	}
 
-	$data_store             = WC_Data_Store::load( 'product' );
-	$global_unique_id_found = $data_store->is_existing_global_unique_id( $product_id, $global_unique_id );
+	$data_store = WC_Data_Store::load( 'product' );
+	if ( $data_store->has_callable( 'is_existing_global_unique_id' ) ) {
+		$global_unique_id_found = $data_store->is_existing_global_unique_id( $product_id, $global_unique_id );
+	} else {
+		$logger = wc_get_logger();
+		$logger->error( 'The method is_existing_global_unique_id is not implemented in the data store.', array( 'source' => 'wc_product_has_global_unique_id' ) );
+	}
 	/**
 	 * Gives plugins an opportunity to verify Unique ID uniqueness themselves.
 	 *
@@ -738,11 +743,17 @@ function wc_get_product_id_by_sku( $sku ) {
  *
  * @since  9.1.0
  * @param  string $global_unique_id Product Unique ID.
- * @return int
+ * @return int|null
  */
 function wc_get_product_id_by_global_unique_id( $global_unique_id ) {
 	$data_store = WC_Data_Store::load( 'product' );
-	return $data_store->get_product_id_by_global_unique_id( $global_unique_id );
+	if ( $data_store->has_callable( 'get_product_id_by_global_unique_id' ) ) {
+		return $data_store->get_product_id_by_global_unique_id( $global_unique_id );
+	} else {
+		$logger = wc_get_logger();
+		$logger->error( 'The method get_product_id_by_global_unique_id is not implemented in the data store.', array( 'source' => 'wc_get_product_id_by_global_unique_id' ) );
+	}
+	return null;
 }
 
 /**

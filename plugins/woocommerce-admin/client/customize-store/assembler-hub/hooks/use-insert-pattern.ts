@@ -39,7 +39,7 @@ export const useInsertPattern = () => {
 		currentTemplate?.id ?? ''
 	);
 
-	const blockToScroll = useRef< string | null >( null );
+	const insertedPatternRef = useRef< string | null >( null );
 
 	// @ts-expect-error No types for this exist yet.
 	const { insertBlocks } = useDispatch( blockEditorStore );
@@ -78,7 +78,7 @@ export const useInsertPattern = () => {
 					undefined,
 					false
 				);
-				blockToScroll.current = updatedBlocks[ 0 ].clientId;
+				insertedPatternRef.current = updatedBlocks[ 0 ].clientId;
 			} else {
 				const updatedBlocks =
 					findButtonBlockInsideCoverBlockWithBlackBackgroundPatternAndUpdate(
@@ -97,7 +97,7 @@ export const useInsertPattern = () => {
 					undefined,
 					false
 				);
-				blockToScroll.current = updatedBlocks[ 0 ].clientId;
+				insertedPatternRef.current = updatedBlocks[ 0 ].clientId;
 			}
 
 			trackEvent(
@@ -110,5 +110,6 @@ export const useInsertPattern = () => {
 
 	return {
 		insertPattern,
+		insertedPattern: insertedPatternRef,
 	};
 };

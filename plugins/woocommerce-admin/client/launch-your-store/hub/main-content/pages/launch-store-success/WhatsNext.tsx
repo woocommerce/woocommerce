@@ -78,7 +78,7 @@ const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 			'Give your shoppers more ways to pay by adding additional payment methods to your store.',
 			'woocommerce'
 		),
-		link: `${ ADMIN_URL }admin.php?page=wc-admin&task=payments`,
+		link: `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout`,
 		linkText: __( 'Add payment methods', 'woocommerce' ),
 		trackEvent: 'launch_you_store_congrats_payments_click',
 	};

@@ -15,19 +15,27 @@
 		{
 			"type": "path",
 			"url": "../../packages/php/monorepo-plugin"
+		},
+		{
+			"type": "path",
+			"url": "../../packages/php/blueprint",
+			"options": {
+				"symlink": false
+			}
 		}
 	],
 	"require": {
 		"php": ">=7.4",
-		"automattic/jetpack-a8c-mc-stats": "^1.4",
+		"automattic/jetpack-a8c-mc-stats": "^2.0.1",
 		"automattic/jetpack-autoloader": "2.11.18",
 		"automattic/jetpack-config": "1.15.2",
-		"automattic/jetpack-connection": "^1.57",
-		"automattic/jetpack-constants": "^1.6.22",
+		"automattic/jetpack-connection": "^2.10.1",
+		"automattic/jetpack-constants": "^2.0.3",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.8.1"
+		"woocommerce/action-scheduler": "3.8.1",
+		"woocommerce/blueprint": "*"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

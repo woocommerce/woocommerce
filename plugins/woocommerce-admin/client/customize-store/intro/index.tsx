@@ -277,6 +277,17 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		context.flowType === FlowType.noAI && context.intro.hasErrors
 	);
 
+	const errorMessage =
+		context.intro.errorStatus === 403
+			? __(
+					"Sorry, you don't have permission to update the theme.",
+					'woocommerce'
+			  )
+			: __(
+					'Oops! We encountered a problem while setting up the foundations. {{anchor}}Please try again{{/anchor}} or start with a theme.',
+					'woocommerce'
+			  );
+
 	const [ openDesignChangeWarningModal, setOpenDesignChangeWarningModal ] =
 		useState( false );
 
@@ -403,10 +414,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 							status="error"
 						>
 							{ interpolateComponents( {
-								mixedString: __(
-									'Oops! We encountered a problem while setting up the foundations. {{anchor}}Please try again{{/anchor}} or start with a theme.',
-									'woocommerce'
-								),
+								mixedString: errorMessage,
 								components: {
 									anchor: (
 										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, jsx-a11y/anchor-is-valid
