@@ -92,7 +92,7 @@ export const ConfirmationModal = ( {
 		>
 			<div className="site-visibility-settings-confirmation-modal__content">
 				{ __(
-					" Are you sure you want to switch from live to coming soon mode? Your site will not be visible, and customers won't be able to make purchases during this time.",
+					"Are you sure you want to switch from live to coming soon mode? Your site will not be visible, and customers won't be able to make purchases during this time.",
 					'woocommerce'
 				) }
 			</div>
