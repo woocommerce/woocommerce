@@ -62,7 +62,7 @@
 }
 
 @include breakpoint( "<600px" ) {
-	#wpadminbar {
+	div #wpadminbar {
 		position: fixed;
 	}
 
