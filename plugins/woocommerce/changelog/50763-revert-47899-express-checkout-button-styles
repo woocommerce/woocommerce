@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Reverting the new `buttonAttributes` API. This will be included in WC 9.4 instead.
+Reverting the new `buttonAttributes` API. This will be included in a later release
