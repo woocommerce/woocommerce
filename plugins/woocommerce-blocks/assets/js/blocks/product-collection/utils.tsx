@@ -18,13 +18,13 @@ import {
  * Internal dependencies
  */
 import {
-	ProductCollectionAttributes,
-	TProductCollectionOrder,
-	TProductCollectionOrderBy,
-	ProductCollectionQuery,
-	ProductCollectionDisplayLayout,
-	PreviewState,
-	SetPreviewState,
+	type ProductCollectionAttributes,
+	type TProductCollectionOrder,
+	type TProductCollectionOrderBy,
+	type ProductCollectionQuery,
+	type ProductCollectionDisplayLayout,
+	type PreviewState,
+	type SetPreviewState,
 } from './types';
 import {
 	coreQueryPaginationBlockName,

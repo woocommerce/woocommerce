@@ -78,7 +78,7 @@ export interface PriceSliderProps {
 	 */
 	step?: number;
 	/**
-	 * Wheter we're in the editor or not.
+	 * Whether we're in the editor or not.
 	 */
 	isEditor?: boolean;
 }

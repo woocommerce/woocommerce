@@ -1,0 +1,38 @@
+.blueprint-settings-slotfill {
+	label {
+		cursor: pointer;
+	}
+
+	button.is-primary {
+		margin-bottom: 7px;
+	}
+	button.is-link {
+		text-decoration: none;
+		&:active,
+		&:focus {
+			outline: none;
+			box-shadow: none;
+		}
+	}
+
+	#download-link-container {
+		margin-bottom: 10px;
+		a {
+			text-decoration: none;
+		}
+	}
+
+	.woo-blueprint-export-step-desc {
+		margin-top: 0.25em;
+		margin-bottom: 1em;
+		color: #828282;
+	}
+
+	h3 {
+		margin-top: 1.5em;
+	}
+
+	p {
+		max-width: 550px;
+	}
+}

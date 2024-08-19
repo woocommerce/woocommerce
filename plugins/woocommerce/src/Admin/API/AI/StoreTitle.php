@@ -86,8 +86,8 @@ class StoreTitle extends AIEndpoint {
 			);
 		}
 
-		$store_title                 = html_entity_decode( get_option( self::STORE_TITLE_OPTION_NAME ) );
-		$previous_ai_generated_title = html_entity_decode( get_option( self::AI_STORE_TITLE_OPTION_NAME ) );
+		$store_title                 = html_entity_decode( get_option( self::STORE_TITLE_OPTION_NAME, '' ) );
+		$previous_ai_generated_title = html_entity_decode( get_option( self::AI_STORE_TITLE_OPTION_NAME, '' ) );
 
 		if ( strtolower( trim( self::DEFAULT_TITLE ) ) === strtolower( trim( $store_title ) ) || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
 			return rest_ensure_response( array( 'ai_content_generated' => false ) );

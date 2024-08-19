@@ -82,7 +82,7 @@ describe( 'getProductStockStatus', () => {
 } );
 
 describe( 'getProductStockStatusClass', () => {
-	it( 'should return an emtpy string when the stock is not being managed and there is no stock status', () => {
+	it( 'should return an empty string when the stock is not being managed and there is no stock status', () => {
 		const status = getProductStockStatusClass( products[ 0 ] );
 		expect( status ).toBe( '' );
 	} );
