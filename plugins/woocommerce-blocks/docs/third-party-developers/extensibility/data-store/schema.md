@@ -40,7 +40,7 @@ This returns an action object used to update the store with the provided list of
 
 #### _Returns_ <!-- omit in toc -->
 
--   `object`: An action object used to update the store with the provided list of resource routes with teh following keys:
+-   `object`: An action object used to update the store with the provided list of resource routes with the following keys:
     -   _type_ `string`: The action type.
     -   _routes_ `object`: An object of routes keyed by the route name.
     -   _namespace_ `string`: The namespace the routes belong to, eg. `/wc/blocks`.
