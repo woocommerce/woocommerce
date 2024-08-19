@@ -197,7 +197,7 @@ jQuery( function ( $ ) {
 	/**
 	 * Shows coupon form errors.
 	 *
-	 * @param {string|object} html_element The HTML string response after applying an invalid coupon or a jQuey element.
+	 * @param {string|object} html_element The HTML string response after applying an invalid coupon or a jQuery element.
 	 * @param {Object} $target Coupon field wrapper jQuery element.
 	 * @param {boolean} is_live_region Whether role="alert" should be added or not.
 	 */
