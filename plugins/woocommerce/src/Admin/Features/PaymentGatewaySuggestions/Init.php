@@ -67,7 +67,9 @@ class Init extends RemoteSpecsEngine {
 	 * @return array
 	 */
 	public static function get_cached_or_default_suggestions() {
-		$specs = PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_cached_specs();
+		$specs = 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' )
+			? DefaultPaymentGateways::get_all()
+			: PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_cached_specs();
 
 		if ( ! is_array( $specs ) || 0 === count( $specs ) ) {
 			$specs = DefaultPaymentGateways::get_all();
