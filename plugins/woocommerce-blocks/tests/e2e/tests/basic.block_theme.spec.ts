@@ -13,6 +13,12 @@ test.describe( 'Basic role-based functionality tests', () => {
 				page.getByRole( 'heading', { name: 'Dashboard' } )
 			).toHaveText( 'Dashboard' );
 		} );
+
+		test( 'Load post editor in iframe mode', async ( { page } ) => {
+			await page.goto( '/wp-admin/post-new.php' );
+
+			// Check that iframe with title "Editor canvas" is visible.
+			await expect( page.getByTitle( 'Editor canvas' ) ).toBeVisible();
 	} );
 
 	test.describe( 'As customer', () => {
