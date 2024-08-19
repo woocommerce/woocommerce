@@ -12,6 +12,7 @@ import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 import metadata from './block.json';
 import { Edit } from './edit';
 import { Save } from './save';
+import { blockVariations } from './block-variations';
 import './style.scss';
 
 if ( isExperimentalBlocksEnabled() ) {
@@ -19,5 +20,6 @@ if ( isExperimentalBlocksEnabled() ) {
 		edit: Edit,
 		save: Save,
 		icon: <Icon icon={ closeSquareShadow } />,
+		variations: blockVariations,
 	} );
 }

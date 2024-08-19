@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Fix typo in getProductStockStatusClass test
