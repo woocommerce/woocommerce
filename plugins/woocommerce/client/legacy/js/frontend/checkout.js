@@ -681,7 +681,7 @@ jQuery( function( $ ) {
 					$form.removeClass( 'processing' ).unblock();
 
 					if ( response ) {
-						// We only want to show coupon notices if they are not errors.
+						// We only want to show coupon notices if they are no errors.
 						// Coupon errors are shown under the input.
 						if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
 							$form.slideUp( 400, function() {
