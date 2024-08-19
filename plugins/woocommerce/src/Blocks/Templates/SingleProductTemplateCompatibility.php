@@ -205,7 +205,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 				),
 			),
 			'woocommerce_single_product_summary'        => array(
-				'block_names' => array( 'core/post-excerpt' ),
+				'block_names' => array( 'core/post-excerpt', 'woocommerce/product-summary' ),
 				'position'    => 'before',
 				'hooked'      => array(
 					'woocommerce_template_single_title'   => 5,
