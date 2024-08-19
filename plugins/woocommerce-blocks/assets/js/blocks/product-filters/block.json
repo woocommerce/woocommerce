@@ -45,10 +45,10 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"usesContext": [
-		"postId"
-	],
-	"providesContext": {},
+	"usesContext": [ "postId" ],
+	"providesContext": {
+		"woocommerce/product-filters/overlay": "overlay"
+	},
 	"attributes": {
 		"overlay": {
 			"type": "string",
