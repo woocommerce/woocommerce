@@ -31,24 +31,25 @@
   - team: vortex
 
 "packages/js/components/**/*":
-  - team: mothra
+  - team: woo-fse
   - team: ghidorah
 
 "packages/js/csv-export/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/currency/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/customer-effort-score/**/*":
-  - team: mothra
+  - team: woo-fse
+  - team: ghidorah
 
 "packages/js/data/**/*":
-  - team: mothra
+  - team: woo-fse
   - team: ghidorah
 
 "packages/js/date/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
   - team: vortex
@@ -57,26 +58,27 @@
   - team: vortex
 
 "packages/js/experimental/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/explat/**/*":
-  - team: mothra
+  - team: woo-fse
   - team: ghidorah
 
 "packages/js/navigation/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/number/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/onboarding/**/*":
   - team: ghidorah
 
 "packages/js/product-editor/**/*":
-  - team: mothra
+  - team: woo-fse
 
 "packages/js/tracks/**/*":
-  - team: mothra
+  - team: woo-fse
+  - team: ghidorah
 
 "plugins/woocommerce/**/*":
   - team: proton
@@ -89,7 +91,7 @@
   - team: proton
 
 "plugins/woocommerce/src/Admin/**/*":
-  - team: mothra
+  - team: woo-fse
   - team: ghidorah
 
 "plugins/woocommerce/src/Blocks/**/*":
@@ -97,7 +99,7 @@
   - team: woo-fse
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
-  - team: mothra
+  - team: woo-fse
   - team: ghidorah
 
 "plugins/woocommerce/src/StoreApi/**/*":
@@ -105,7 +107,7 @@
   - team: woo-fse
 
 "plugins/woocommerce-admin/**/*":
-  - team: mothra
+  - team: woo-fse
   - team: ghidorah
 
 "plugins/woocommerce-blocks/**/*":
