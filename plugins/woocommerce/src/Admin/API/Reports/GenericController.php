@@ -98,7 +98,7 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Get data from `report-{$this->rest_base}` store, based on the given query vars.
+	 * Get data from `{$this->rest_base}` store, based on the given query vars.
 	 *
 	 * @throws Exception When the data store is not found {@see WC_Data_Store WC_Data_Store}.
 	 * @param array $query_args Query arguments.
