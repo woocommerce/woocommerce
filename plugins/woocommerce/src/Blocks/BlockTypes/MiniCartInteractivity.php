@@ -71,17 +71,6 @@ class MiniCartInteractivity extends AbstractBlock {
 	);
 
 	/**
-	 * Constructor.
-	 *
-	 * @param AssetApi            $asset_api Instance of the asset API.
-	 * @param AssetDataRegistry   $asset_data_registry Instance of the asset data registry.
-	 * @param IntegrationRegistry $integration_registry Instance of the integration registry.
-	 */
-	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry ) {
-		parent::__construct( $asset_api, $asset_data_registry, $integration_registry, $this->block_name );
-	}
-
-	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -90,7 +79,7 @@ class MiniCartInteractivity extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
-		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
+		// add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
 	}
 
@@ -105,26 +94,6 @@ class MiniCartInteractivity extends AbstractBlock {
 			'handle'       => 'wc-' . $this->block_name . '-block',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
 			'dependencies' => [ 'wc-blocks' ],
-		];
-		return $key ? $script[ $key ] : $script;
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @see $this->register_block_type()
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string
-	 */
-	protected function get_block_type_script( $key = null ) {
-		if ( is_cart() || is_checkout() ) {
-			return;
-		}
-
-		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
-			'dependencies' => [],
 		];
 		return $key ? $script[ $key ] : $script;
 	}
@@ -398,7 +367,7 @@ class MiniCartInteractivity extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $content . $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
+		return $this->get_markup( MiniCartUtils::migrate_attributes_to_color_panel( $attributes ) );
 	}
 
 	/**
@@ -441,13 +410,13 @@ class MiniCartInteractivity extends AbstractBlock {
 	 * @param bool $is_disabled - Whether the button is disabled or not.
 	 * @return string|false 
 	 */
-	protected function render_mini_cart_button( $attributes, $is_disabled ) {
+	protected function render_mini_cart_button( $attributes, $cart_item_count, $is_disabled ) {
 		$icon_color          = array_key_exists( 'iconColor', $attributes ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
 		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
 		$icon_name           = isset( $attributes['miniCartIcon'] ) ? esc_attr( $attributes['miniCartIcon'] ) : null;
 
 		?>
-		<button <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	
+		<button <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	
 			<?php
 				echo $this->get_cart_price_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. 
 			?>
@@ -455,7 +424,9 @@ class MiniCartInteractivity extends AbstractBlock {
 				<?php
 					echo $this->get_mini_cart_icon( $icon_color, $icon_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call.
 				?>
-				<span class="wc-block-mini-cart__badge" style="background: <?php echo esc_attr( $product_count_color ); ?>"></span>
+				<span class="wc-block-mini-cart__badge wc-block-mini-cart__badge__hidden" data-wc-style--display="state.displayQuantityBadgeStyle" data-wc-text="context.cartItemCount" style="background: <?php echo esc_attr( $product_count_color ); ?>">
+					<?php echo esc_html( $cart_item_count ); ?>
+				</span>
 			</span>
 		</button>
 		<?php
@@ -469,13 +440,26 @@ class MiniCartInteractivity extends AbstractBlock {
 	 *
 	 * @return string
 	 */
-	protected function get_mini_cart( $attributes, $wrapper_classes, $wrapper_styles, $template_part_contents ) {
+	protected function get_mini_cart( $attributes, $wrapper_classes, $wrapper_styles ) {
+		$template_part_contents = $this->get_template_part_contents();
+		$cart            = $this->get_cart_instance();
+		$cart_item_count = $cart->get_cart_contents_count();
+		$cart_context    = array(
+			'cartItemCount' => $cart_item_count,
+			'drawerOpen'    => false,
+		);
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+				'data-wc-context'     => wp_json_encode( $cart_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			)
+		);
 		ob_start();
 		?>
-		<div data-wc-interactive="<?php echo esc_attr( $this->get_interactivity_namespace_attribute() ); ?>">
-			<?php echo $this->render_mini_cart_button( $attributes, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
+		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - already escaped. ?> >
+			<?php echo $this->render_mini_cart_button( $attributes, $cart_item_count, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
 			<div class="<?php echo esc_attr( $wrapper_classes ); ?>" style="<?php echo esc_attr( $wrapper_styles ); ?>">
-				<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+				<div data-wc-class--wc-block-components-drawer__screen-overlay--is-hidden="!context.drawerOpen" class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 						<div class="wc-block-components-drawer__content">
 							<div class="wc-block-mini-cart__template-part">
@@ -573,7 +557,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		}
 
 		$classes_styles  = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array( 'text_color', 'background_color', 'font_size', 'font_weight', 'font_family' ) );
-		$wrapper_classes = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
+		$wrapper_classes = sprintf( 'wc-block-mini-cart-interactivity wp-block-woocommerce-mini-cart-interactivity %s', $classes_styles['classes'] );
 		if ( ! empty( $attributes['className'] ) ) {
 			$wrapper_classes .= ' ' . $attributes['className'];
 		}
@@ -583,9 +567,7 @@ class MiniCartInteractivity extends AbstractBlock {
 			return $this->render_hidden_mini_cart( $attributes, $wrapper_classes );
 		}
 
-		$template_part_contents = $this->get_template_part_contents();
-
-		return $this->get_mini_cart( $attributes, $wrapper_classes, $wrapper_styles, $template_part_contents );
+		return $this->get_mini_cart( $attributes, $wrapper_classes, $wrapper_styles );
 	}
 
 	/**

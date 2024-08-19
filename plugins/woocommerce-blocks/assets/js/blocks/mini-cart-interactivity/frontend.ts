@@ -15,19 +15,25 @@ interface Store {
 	};
 	callbacks: {
 		initialize: () => void;
+		toggleDrawerOpen: ( event: Event ) => void;
 	};
+}
+
+interface Context {
+	cartItemCount: number;
+	drawerOpen: boolean;
 }
 
 store< Store >( 'woocommerce/mini-cart-interactivity', {
 	state: {
 		get displayQuantityBadgeStyle() {
-			const context = getContext< { cartItemCount: number } >();
+			const context = getContext< Context >();
 			return context.cartItemCount > 0 ? 'flex' : 'none';
 		},
 	},
 	callbacks: {
 		initialize: () => {
-			const context = getContext< { cartItemCount: number } >();
+			const context = getContext< Context >();
 			subscribe( () => {
 				const cartData = select( CART_STORE_KEY ).getCartData();
 				const isResolutionFinished =
@@ -38,6 +44,11 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 					context.cartItemCount = cartData.itemsCount;
 				}
 			} );
+		},
+
+		toggleDrawerOpen: () => {
+			const context = getContext< Context >();
+			context.drawerOpen = ! context.drawerOpen;
 		},
 	},
 } );
