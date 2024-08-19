@@ -535,7 +535,8 @@ jQuery( function( $ ) {
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
 						try {
-							if ( 'success' === result.result && $form.triggerHandler( 'checkout_place_order_success', [ result, wc_checkout_form ] ) !== false ) {
+							if ( 'success' === result.result && 
+								$form.triggerHandler( 'checkout_place_order_success', [ result, wc_checkout_form ] ) !== false ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
 								} else {
