@@ -186,6 +186,7 @@ class Init {
 				'report-variations-stats' => 'Automattic\WooCommerce\Admin\API\Reports\Variations\Stats\DataStore',
 				'report-categories'       => 'Automattic\WooCommerce\Admin\API\Reports\Categories\DataStore',
 				'report-taxes'            => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore',
+				'reports/taxes'            => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore',
 				'report-taxes-stats'      => 'Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore',
 				'report-coupons'          => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore',
 				'report-coupons-stats'    => 'Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore',

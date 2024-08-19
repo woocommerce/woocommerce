@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
-use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -34,19 +33,6 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @var string
 	 */
 	protected $rest_base = 'reports/taxes';
-
-	/**
-	 * Get data from `'taxes'` Query.
-	 *
-	 * @override GenericController::get_datastore_data()
-	 *
-	 * @param array $query_args Query arguments.
-	 * @return mixed Results from the data store.
-	 */
-	protected function get_datastore_data( $query_args = array() ) {
-		$query = new GenericQuery( $query_args, 'taxes' );
-		return $query->get_data();
-	}
 
 	/**
 	 * Maps query arguments from the REST request.

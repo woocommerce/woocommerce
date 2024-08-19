@@ -163,6 +163,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		return $defaults;
 	}
 
+
+
+	/**
+	 * Get the data based on args.
+	 *
+	 * Filters query args, calls DataStore::get_data, and returns the filtered data.
+	 *
+	 * @override ReportsDataStore::get_data()
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error
+	 */
+	public function get_data( $query_args ) {
+		$args    = apply_filters( 'woocommerce_analytics_taxes_query_args', $query_args );
+		$results = parent::get_data( $args );
+		return apply_filters( 'woocommerce_analytics_taxes_select_query', $results, $args );
+	}
+
 	/**
 	 * Returns the report data based on normalized parameters.
 	 * Will be called by `get_data` if there is no data in cache.
