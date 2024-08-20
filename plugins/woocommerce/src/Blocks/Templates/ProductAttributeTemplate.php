@@ -62,11 +62,13 @@ class ProductAttributeTemplate extends AbstractTemplate {
 		}
 
 		if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
+			$compatibility_layer = new ArchiveProductTemplatesCompatibility();
+			$compatibility_layer->init();
+
 			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
 
-			if ( isset( $templates[0] ) && ! BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				$compatibility_layer = new ArchiveProductTemplatesCompatibility();
-				$compatibility_layer->init();
+			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
+				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );

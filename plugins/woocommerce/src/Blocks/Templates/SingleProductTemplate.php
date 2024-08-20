@@ -51,6 +51,9 @@ class SingleProductTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
+			$compatibility_layer = new SingleProductTemplateCompatibility();
+			$compatibility_layer->init();
+
 			$valid_slugs         = array( self::SLUG );
 			$single_product_slug = 'product' === $post->post_type && $post->post_name ? 'single-product-' . $post->post_name : '';
 			if ( $single_product_slug ) {
@@ -76,8 +79,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			}
 
 			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
-				$compatibility_layer = new SingleProductTemplateCompatibility();
-				$compatibility_layer->init();
+				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
