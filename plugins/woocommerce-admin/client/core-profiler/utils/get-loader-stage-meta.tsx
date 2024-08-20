@@ -28,7 +28,7 @@ const LightbulbStage = {
 	],
 };
 const LayoutStage = {
-	title: __( "Extending your store's capabilities", 'woocommerce' ),
+	title: __( 'Extending your store’s capabilities', 'woocommerce' ),
 	image: <img src={ LayoutImage } alt="loader-lightbulb" />,
 	paragraphs: [
 		{
@@ -42,7 +42,7 @@ const LayoutStage = {
 };
 
 const DevelopingStage = {
-	title: __( "Woo! Let's get your features ready", 'woocommerce' ),
+	title: __( 'Woo! Let’s get your features ready', 'woocommerce' ),
 	image: <img src={ DevelopingImage } alt="loader-developng" />,
 	paragraphs: [
 		{
