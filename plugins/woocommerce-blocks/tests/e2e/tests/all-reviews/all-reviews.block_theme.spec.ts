@@ -28,10 +28,11 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 
 	test( 'block can be inserted and it sorts reviews by most recent by default', async ( {
 		frontendUtils,
-		page,
 		editor,
 	} ) => {
-		await expect( page.getByText( allReviews[ 0 ].review ) ).toBeVisible();
+		await expect(
+			editor.canvas.getByText( allReviews[ 0 ].review )
+		).toBeVisible();
 
 		await editor.publishAndVisitPost();
 
