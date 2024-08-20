@@ -212,7 +212,7 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'link', {
+				page.getByRole( 'menuitem', {
 					name: 'Store coming soon',
 					exact: true,
 				} )
@@ -244,7 +244,7 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'link', {
+				page.getByRole( 'menuitem', {
 					name: 'Coming soon',
 					exact: true,
 				} )
@@ -273,7 +273,7 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'link', {
+				page.getByRole( 'menuitem', {
 					name: 'Live',
 					exact: true,
 				} )
