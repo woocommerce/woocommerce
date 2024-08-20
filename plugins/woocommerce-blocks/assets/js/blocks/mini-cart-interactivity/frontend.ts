@@ -52,6 +52,7 @@ interface Context {
 	cartItemCount: number;
 	drawerOpen: boolean;
 	scriptsLoaded: boolean;
+	drawerIsLoading: boolean;
 }
 
 updateTotals( getMiniCartTotalsFromLocalStorage() );
@@ -125,6 +126,7 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 						'getCartData'
 					);
 				if ( isResolutionFinished ) {
+					context.drawerIsLoading = false;
 					context.cartItemCount = cartData.itemsCount;
 				}
 			} );

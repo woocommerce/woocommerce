@@ -384,6 +384,7 @@ class MiniCartInteractivity extends AbstractBlock {
 
 	/**
 	 * Render the mini-cart hidden and disabled if it's the cart or checkout page.
+	 *
 	 * @param mixed $attributes - Attributes of the block.
 	 * @param mixed $wrapper_classes - Classes of the wrapper.
 	 *
@@ -406,9 +407,10 @@ class MiniCartInteractivity extends AbstractBlock {
 
 	/**
 	 * Render the mini-cart button.
+	 *
 	 * @param mixed $attributes - Attributes of the block.
-	 * @param bool $is_disabled - Whether the button is disabled or not.
-	 * @return string|false 
+	 * @param bool  $is_disabled - Whether the button is disabled or not.
+	 * @return string|false
 	 */
 	protected function render_mini_cart_button( $attributes, $cart_item_count, $is_disabled ) {
 		$icon_color          = array_key_exists( 'iconColor', $attributes ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
@@ -442,14 +444,15 @@ class MiniCartInteractivity extends AbstractBlock {
 	 */
 	protected function get_mini_cart( $attributes, $wrapper_classes, $wrapper_styles ) {
 		$template_part_contents = $this->get_template_part_contents();
-		$cart            = $this->get_cart_instance();
-		$cart_item_count = $cart->get_cart_contents_count();
-		$cart_context    = array(
-			'cartItemCount' => $cart_item_count,
-			'drawerOpen'    => false,
-			'scriptsLoaded' => false,
+		$cart                   = $this->get_cart_instance();
+		$cart_item_count        = $cart->get_cart_contents_count();
+		$cart_context           = array(
+			'cartItemCount'   => $cart_item_count,
+			'drawerOpen'      => false,
+			'scriptsLoaded'   => false,
+			'drawerIsLoading' => false,
 		);
-		$wrapper_attributes = get_block_wrapper_attributes(
+		$wrapper_attributes     = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 				'data-wc-context'     => wp_json_encode( $cart_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
@@ -461,7 +464,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - already escaped. ?> >
 			<?php echo $this->render_mini_cart_button( $attributes, $cart_item_count, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
 			<div style="<?php echo esc_attr( $wrapper_styles ); ?>">
-				<div data-wc-class--wc-block-components-drawer__screen-overlay--is-hidden="!context.drawerOpen" class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+				<div data-wc-class--is-loading="context.drawerIsLoading" data-wc-class--wc-block-components-drawer__screen-overlay--with-slide-in="context.drawerOpen" data-wc-class--wc-block-components-drawer__screen-overlay--is-hidden="!context.drawerOpen" class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 						<div class="wc-block-components-drawer__content">
 							<div class="wc-block-mini-cart__template-part">
@@ -514,8 +517,9 @@ class MiniCartInteractivity extends AbstractBlock {
 
 	/**
 	 * Get the template part contents.
+	 *
 	 * @return string - The template part contents.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	protected function get_template_part_contents() {
 		$template_part_contents = '';
