@@ -21,7 +21,7 @@ class ComingSoonAdminBarBadge {
 	}
 
 	/**
-	 * Invalidate the WordPress object cache and other known caches.
+	 * Add site visibility cache badge to WP admin bar.
 	 *
 	 * @internal
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
@@ -55,7 +55,7 @@ class ComingSoonAdminBarBadge {
 	}
 
 	/**
-	 * Invalidate the WordPress object cache and other known caches.
+	 * Output CSS for site visibility badge.
 	 *
 	 * @internal
 	 */
