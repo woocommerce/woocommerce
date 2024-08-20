@@ -62,7 +62,6 @@ class ProductAttributeTemplate extends AbstractTemplate {
 		}
 
 		if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
-
 			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
 
 			if ( isset( $templates[0] ) && ! BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
