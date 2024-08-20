@@ -587,10 +587,8 @@
 				{
 					"name": "woo-ci-runner-4-core",
 					"testType": "e2e",
-					"command": "test:e2e",
-					"shardingArguments": [
-						"--shard=1/6"
-					],
+					"command": "test:e2e **/product**",
+					"shardingArguments": [],
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"
@@ -607,10 +605,8 @@
 				{
 					"name": "woo-ci-runner-8-core",
 					"testType": "e2e",
-					"command": "test:e2e",
-					"shardingArguments": [
-						"--shard=1/6"
-					],
+					"command": "test:e2e **/product**",
+					"shardingArguments": [],
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"
@@ -627,10 +623,8 @@
 				{
 					"name": "ubuntu-20.04",
 					"testType": "e2e",
-					"command": "test:e2e",
-					"shardingArguments": [
-						"--shard=1/6"
-					],
+					"command": "test:e2e **/product**",
+					"shardingArguments": [],
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"

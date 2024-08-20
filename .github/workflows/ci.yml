@@ -113,7 +113,7 @@ jobs:
   
   project-test-jobs:
     name: "${{ matrix.name }}"
-    runs-on: ${{  startsWith(matrix.name, 'woo-ci-runner-4-core') && 'woo-ci-runner-4-core' || (startsWith(matrix.name, 'woo-ci-runner-8-core') && 'woo-ci-runner-8-core' || 'ubuntu-20.04') }}
+    runs-on: ${{  startsWith(matrix.name, 'woo-ci-runner-4-core') && 'woo-ci-runner-4-core-2' || (startsWith(matrix.name, 'woo-ci-runner-8-core') && 'woo-ci-runner-8-core' || 'ubuntu-20.04') }}
     needs: 'project-jobs'
     if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
