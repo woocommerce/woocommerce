@@ -172,7 +172,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.45.1"
+			"pinVersion": "^1.46.1"
 		},
 		{
 			"dependencies": [

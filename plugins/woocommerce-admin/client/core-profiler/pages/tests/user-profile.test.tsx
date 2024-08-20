@@ -50,7 +50,7 @@ describe( 'UserProfile', () => {
 		// @ts-ignore
 		render( <UserProfile { ...props } /> );
 		const radioInput = screen.getByLabelText< HTMLInputElement >(
-			"I'm already selling"
+			'I’m already selling'
 		); // Replace with the label of your radio button
 
 		// Perform the radio button selection
@@ -65,7 +65,7 @@ describe( 'UserProfile', () => {
 		expect( onlineSellingQuestion ).toBeInTheDocument();
 	} );
 
-	it( 'should show online selling question when choosing "Yes, I\'m selling online"', () => {
+	it( 'should show online selling question when choosing "Yes, I’m selling online"', () => {
 		render(
 			// @ts-ignore
 			<UserProfile
