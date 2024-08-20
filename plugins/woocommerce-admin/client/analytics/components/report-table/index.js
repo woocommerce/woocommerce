@@ -548,7 +548,7 @@ ReportTable.propTypes = {
 	 * Table data of that report. If it's not provided, it will be automatically
 	 * loaded via the provided `endpoint`.
 	 */
-	tableData: PropTypes.object.isRequired,
+	tableData: PropTypes.object,
 	/**
 	 * Properties to be added to the query sent to the report table endpoint.
 	 */
