@@ -59,7 +59,7 @@ const reducer: Reducer< CartState > = ( state = defaultCartState, action ) => {
 				...state,
 				metaData: {
 					...state.metaData,
-					isCustomerDataDirty: billingAddressChanged,
+					isCustomerDataDirty: state.metaData.isCustomerDataDirty || billingAddressChanged,
 				},
 				cartData: {
 					...state.cartData,
