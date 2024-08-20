@@ -1,13 +1,12 @@
-# Cart and Checkout Blocks Theming <!-- omit in toc -->
+---
+post_title: Cart and checkout blocks theming 
+menu_title: Cart and Checkout Blocks Theming 
+tags: reference
+---
 
 > [!IMPORTANT]
-> We strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be “private”, and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.
+> We strongly discourage writing CSS code based on existing block class names and prioritize using global styles when possible. We especially discourage writing CSS selectors that rely on a specific block being a descendant of another one, as users can move blocks around freely, so they are prone to breaking. Similar to WordPress itself, we consider the HTML structure within components, blocks, and block templates to be "private", and subject to further change in the future, so using CSS to target the internals of a block or a block template is _not recommended or supported_.
 
-## Table of Contents <!-- omit in toc -->
-
--   [Buttons](#buttons)
--   [Mobile submit container](#mobile-submit-container)
--   [Item quantity badge](#item-quantity-badge)
 
 ## Buttons
 
@@ -81,13 +80,5 @@ By default, it uses a combination of black and white borders and shadows so it h
 
 ![Order summary screenshot with custom styles for the item quantity badge](https://user-images.githubusercontent.com/3616980/83863109-2e421c80-a723-11ea-9bf7-2033a96cf5b2.png)
 
-<!-- FEEDBACK -->
 
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/designers/theming/cart-and-checkout.md)
-
-<!-- /FEEDBACK -->
 

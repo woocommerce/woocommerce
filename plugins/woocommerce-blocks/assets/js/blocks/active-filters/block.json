@@ -4,7 +4,9 @@
 	"title": "Active Filters Controls",
 	"description": "Display the currently active filters.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {
 		"html": false,
 		"multiple": false,
@@ -26,6 +28,6 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
