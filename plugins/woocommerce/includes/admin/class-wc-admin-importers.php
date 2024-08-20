@@ -34,7 +34,7 @@ class WC_Admin_Importers {
 		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_import', array( $this, 'do_ajax_product_import' ) );
-		add_action( 'in_admin_footer', array( __CLASS__, 'track_importer_exporter_view' ) );
+		add_action( 'in_admin_footer', array( $this, 'track_importer_exporter_view' ) );
 
 		// Register WooCommerce importers.
 		$this->importers['product_importer'] = array(
