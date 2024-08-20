@@ -338,6 +338,7 @@ class WC_Admin_Importers {
 		}
 
 		// Don't track if we're in a specific import screen.
+		// phpcs:ignore
 		if ( isset( $_GET['import'] ) ) {
 			return;
 		}
