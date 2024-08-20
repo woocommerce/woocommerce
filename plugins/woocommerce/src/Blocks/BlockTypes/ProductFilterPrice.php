@@ -171,7 +171,8 @@ final class ProductFilterPrice extends AbstractBlock {
 					type="text"
 					value="%s"
 					data-wc-bind--value="state.formattedMinPrice"
-					data-wc-on--change="actions.updateProducts"
+					data-wc-on--input="actions.updateProducts"
+					data-wc-on--focus="actions.selectInputContent"
 					pattern=""
 				/>',
 				wp_strip_all_tags( $formatted_min_price )
@@ -189,7 +190,8 @@ final class ProductFilterPrice extends AbstractBlock {
 					type="text"
 					value="%s"
 					data-wc-bind--value="state.formattedMaxPrice"
-					data-wc-on--change="actions.updateProducts"
+					data-wc-on--input="actions.updateProducts"
+					data-wc-on--focus="actions.selectInputContent"
 				/>',
 				wp_strip_all_tags( $formatted_max_price )
 			) : sprintf(

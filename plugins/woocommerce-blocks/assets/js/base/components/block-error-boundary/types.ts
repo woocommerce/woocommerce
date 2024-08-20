@@ -18,7 +18,7 @@ interface BlockErrorBase {
 	 */
 	text?: React.ReactNode | undefined;
 	/**
-	 * Text preceeding the error message.
+	 * Text preceding the error message.
 	 */
 	errorMessagePrefix?: string | undefined;
 	/**
@@ -26,7 +26,7 @@ interface BlockErrorBase {
 	 */
 	button?: React.ReactNode;
 	/**
-	 * Controls wether to show the error block or fail silently
+	 * Controls whether to show the error block or fail silently
 	 */
 	showErrorBlock?: boolean;
 }
