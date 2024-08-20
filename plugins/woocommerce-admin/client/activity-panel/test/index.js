@@ -9,7 +9,7 @@ import {
 	createEvent,
 } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { useUser, useUserPreferences } from '@woocommerce/data';
+import { useUser } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**

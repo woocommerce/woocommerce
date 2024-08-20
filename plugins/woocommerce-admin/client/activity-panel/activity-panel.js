@@ -12,7 +12,6 @@ import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	useUser,
-	useUserPreferences,
 	getVisibleTasks,
 } from '@woocommerce/data';
 import { addHistoryListener } from '@woocommerce/navigation';
