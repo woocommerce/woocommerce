@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Hardening against XSS by leveraging HTML API for adding block attribute data.
