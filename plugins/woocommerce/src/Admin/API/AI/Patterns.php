@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Blocks\AI\Connection;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 use WP_Error;
-use WP_HTTP_Response;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -62,7 +61,7 @@ class Patterns extends AIEndpoint {
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 *
-	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_patterns( WP_REST_Request $request ) {
 		$business_description = sanitize_text_field( wp_unslash( $request['business_description'] ) );
