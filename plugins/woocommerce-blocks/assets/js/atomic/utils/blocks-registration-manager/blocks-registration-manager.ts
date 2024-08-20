@@ -9,6 +9,7 @@ import { getBlockType } from '@wordpress/blocks';
 import {
 	EditorViewChangeDetector,
 	EditorViewChangeDetectorObserver,
+	EditorViewContentType,
 } from './editor-view-change-detector';
 import {
 	BlockRegistrationStrategy,
@@ -36,50 +37,56 @@ export class BlockRegistrationManager
 	}
 
 	/**
-	 * Determines whether a block should be registered based on the current template or page.
+	 * Determines whether a block should be registered based on the current post, page, template or template part.
 	 *
-	 * This method checks whether a block with restrictions should be registered based on the current template ID and
-	 * whether the editor is in post or page mode. It checks whether the current template ID starts with any of the
+	 * This method checks whether a block with restrictions should be registered based on the current content ID and
+	 * whether the editor is in post, page, template or template part mode. It checks whether the current template ID starts with any of the
 	 * allowed templates or template parts for the block, and whether the block is available in the post or page editor.
 	 *
 	 * @param {Object}  params                          - The parameters for the method.
 	 * @param {string}  params.blockWithRestrictionName - The name of the block with restrictions.
-	 * @param {string}  params.currentTemplateId        - The ID of the current template.
-	 * @param {boolean} params.isPostOrPage             - Whether the editor is in a post or page.
+	 * @param {string}  params.currentContentId         - The ID of the current template.
+	 * @param {boolean} params.currentContentType       - The type of the current content.
 	 * @return {boolean} True if the block should be registered, false otherwise.
 	 */
 	private shouldBlockBeRegistered( {
 		blockWithRestrictionName,
-		currentTemplateId,
-		isPostOrPage,
+		currentContentId,
+		currentContentType,
 	}: {
 		blockWithRestrictionName: string;
-		currentTemplateId: string;
-		isPostOrPage: boolean;
+		currentContentId: string;
+		currentContentType: EditorViewContentType;
 	} ) {
 		const {
 			allowedTemplates,
 			allowedTemplateParts,
-			availableInPostOrPageEditor,
+			availableInPostEditor,
+			availableInPageEditor,
 		} = BLOCKS_WITH_RESTRICTION[ blockWithRestrictionName ];
 
 		const shouldBeAvailableOnTemplate = allowedTemplates
 			? Object.keys( allowedTemplates ).some( ( allowedTemplate ) =>
-					currentTemplateId.startsWith( allowedTemplate )
+					currentContentId.startsWith( allowedTemplate )
 			  )
 			: true;
 		const shouldBeAvailableOnTemplatePart = allowedTemplateParts
 			? Object.keys( allowedTemplateParts ).some( ( allowedTemplate ) =>
-					currentTemplateId.startsWith( allowedTemplate )
+					currentContentId.startsWith( allowedTemplate )
 			  )
 			: true;
-		const shouldBeAvailableOnPostOrPageEditor =
-			isPostOrPage && availableInPostOrPageEditor;
+		const shouldBeAvailableOnPostEditor =
+			currentContentType === EditorViewContentType.POST &&
+			availableInPostEditor;
+		const shouldBeAvailableOnPageEditor =
+			currentContentType === EditorViewContentType.PAGE &&
+			availableInPageEditor;
 
 		return (
 			shouldBeAvailableOnTemplate ||
 			shouldBeAvailableOnTemplatePart ||
-			shouldBeAvailableOnPostOrPageEditor
+			shouldBeAvailableOnPostEditor ||
+			shouldBeAvailableOnPageEditor
 		);
 	}
 
@@ -87,19 +94,19 @@ export class BlockRegistrationManager
 	 * Unregisters blocks before entering a restricted area based on the current template or page/post.
 	 *
 	 * This method iterates over all blocks with restrictions and unregisters them if they should not be registered
-	 * based on the current template ID and whether the editor is in a post or page. It uses a block registration
+	 * based on the current content ID and whether the editor is in a post, page, template or template part. It uses a block registration
 	 * strategy to unregister the blocks, which depends on whether the block is a variation block or a regular block.
 	 *
-	 * @param {Object}  params                   - The parameters for the method.
-	 * @param {string}  params.currentTemplateId - The ID of the current template.
-	 * @param {boolean} params.isPostOrPage      - Whether the editor is in post or page mode.
+	 * @param {Object}  params                    - The parameters for the method.
+	 * @param {string}  params.currentContentId   - The ID of the current content.
+	 * @param {boolean} params.currentContentType - The type of the current content.
 	 */
 	unregisterBlocksBeforeEnteringRestrictedArea( {
-		currentTemplateId,
-		isPostOrPage,
+		currentContentId,
+		currentContentType,
 	}: {
-		currentTemplateId: string;
-		isPostOrPage: boolean;
+		currentContentId: string;
+		currentContentType: EditorViewContentType;
 	} ) {
 		for ( const blockWithRestrictionName of Object.keys(
 			BLOCKS_WITH_RESTRICTION
@@ -107,8 +114,8 @@ export class BlockRegistrationManager
 			if (
 				this.shouldBlockBeRegistered( {
 					blockWithRestrictionName,
-					currentTemplateId,
-					isPostOrPage,
+					currentContentId,
+					currentContentType,
 				} )
 			) {
 				continue;
@@ -170,9 +177,10 @@ export class BlockRegistrationManager
 	run( editorViewChangeDetector: EditorViewChangeDetector ) {
 		this.registerBlocksAfterLeavingRestrictedArea();
 		this.unregisterBlocksBeforeEnteringRestrictedArea( {
-			currentTemplateId:
-				editorViewChangeDetector.getCurrentTemplateId() || '',
-			isPostOrPage: editorViewChangeDetector.getIsPostOrPage(),
+			currentContentId:
+				editorViewChangeDetector.getCurrentContentId() || '',
+			currentContentType:
+				editorViewChangeDetector.getCurrentContentType(),
 		} );
 	}
 }

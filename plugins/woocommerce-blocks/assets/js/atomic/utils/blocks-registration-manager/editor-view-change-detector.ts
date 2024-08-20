@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { subscribe, select } from '@wordpress/data';
-import { getPath, getQueryArg } from '@wordpress/url';
+import { getQueryArg } from '@wordpress/url';
 
-enum ContentType {
+export enum EditorViewContentType {
 	WP_TEMPLATE = 'wp_template',
 	WP_TEMPLATE_PART = 'wp_template_part',
 	POST = 'post',
@@ -14,8 +14,7 @@ enum ContentType {
 
 interface EditorViewChangeDetectorSubject {
 	add( observer: EditorViewChangeDetectorObserver ): void;
-	getPreviousTemplateId(): string | undefined;
-	getCurrentTemplateId(): string | undefined;
+	getCurrentContentId(): string | undefined;
 	notify(): void;
 }
 
@@ -36,8 +35,8 @@ export interface EditorViewChangeDetectorObserver {
 export class EditorViewChangeDetector
 	implements EditorViewChangeDetectorSubject
 {
-	private previousContentType: ContentType | undefined;
-	private currentContentType: ContentType | undefined;
+	private previousContentType: EditorViewContentType | undefined;
+	private currentContentType: EditorViewContentType | undefined;
 	private previousPageLocation = '';
 	private currentPageLocation = '';
 
@@ -57,14 +56,16 @@ export class EditorViewChangeDetector
 		}, 'core/edit-site' );
 	}
 
-	private detectContentType(): ContentType {
+	private detectContentType(): EditorViewContentType {
 		const editedContentType =
-			select( 'core/editor' ).getCurrentPostType< ContentType >() ||
+			select(
+				'core/editor'
+			).getCurrentPostType< EditorViewContentType >() ||
 			select( 'core/edit-site' )?.getEditedPostType<
 				'wp_template' | 'wp_template_part'
 			>();
 
-		return editedContentType || ContentType.NONE;
+		return editedContentType || EditorViewContentType.NONE;
 	}
 
 	private checkIfPageLocationHasChanged(): boolean {
@@ -73,10 +74,10 @@ export class EditorViewChangeDetector
 		}
 
 		if (
-			this.currentContentType === ContentType.POST ||
-			this.currentContentType === ContentType.PAGE ||
-			this.currentContentType === ContentType.WP_TEMPLATE ||
-			this.currentContentType === ContentType.WP_TEMPLATE_PART
+			this.currentContentType === EditorViewContentType.POST ||
+			this.currentContentType === EditorViewContentType.PAGE ||
+			this.currentContentType === EditorViewContentType.WP_TEMPLATE ||
+			this.currentContentType === EditorViewContentType.WP_TEMPLATE_PART
 		) {
 			return (
 				this.getContentIdFromUrl( this.currentPageLocation ) !==
@@ -103,8 +104,12 @@ export class EditorViewChangeDetector
 		return this.getContentIdFromUrl( this.previousPageLocation );
 	}
 
-	public getCurrentTemplateId() {
+	public getCurrentContentId() {
 		return this.getContentIdFromUrl( this.currentPageLocation );
+	}
+
+	public getCurrentContentType() {
+		return this.currentContentType;
 	}
 
 	private getContentIdFromUrl( url: string ): string | undefined {
@@ -124,15 +129,15 @@ export class EditorViewChangeDetector
 
 	public getIsPostOrPage(): boolean {
 		return (
-			this.currentContentType === ContentType.POST ||
-			this.currentContentType === ContentType.PAGE
+			this.currentContentType === EditorViewContentType.POST ||
+			this.currentContentType === EditorViewContentType.PAGE
 		);
 	}
 
 	public getIsTemplateOrTemplatePart(): boolean {
 		return (
-			this.currentContentType === ContentType.WP_TEMPLATE ||
-			this.currentContentType === ContentType.WP_TEMPLATE_PART
+			this.currentContentType === EditorViewContentType.WP_TEMPLATE ||
+			this.currentContentType === EditorViewContentType.WP_TEMPLATE_PART
 		);
 	}
 }

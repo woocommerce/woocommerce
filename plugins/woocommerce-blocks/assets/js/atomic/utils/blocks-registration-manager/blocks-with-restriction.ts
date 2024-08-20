@@ -21,7 +21,8 @@ export interface BlocksWithRestriction {
 		allowedTemplateParts: {
 			[ key: string ]: boolean;
 		};
-		availableInPostOrPageEditor: boolean;
+		availableInPostEditor: boolean;
+		availableInPageEditor: boolean;
 		isVariationBlock: boolean;
 	};
 }
@@ -30,7 +31,8 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 	'woocommerce/add-to-cart-form': {
 		blockMetadata: addToCartFormBlockMetadata,
 		blockSettings: AddToCartFormBlockSettings,
-		availableInPostOrPageEditor: true,
+		availableInPostEditor: true,
+		availableInPageEditor: true,
 		isVariationBlock: false,
 	},
 	'woocommerce/product-gallery': {
@@ -42,7 +44,8 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 		allowedTemplateParts: {
 			'product-gallery': true,
 		},
-		availableInPostOrPageEditor: false,
+		availableInPostEditor: false,
+		availableInPageEditor: false,
 		isVariationBlock: false,
 	},
 };
