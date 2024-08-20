@@ -183,7 +183,7 @@ const SiteVisibility = () => {
 						label={
 							<>
 								{ __(
-									'Restrict to store pages only',
+									'Enable for store pages only',
 									'woocommerce'
 								) }
 								<p>
