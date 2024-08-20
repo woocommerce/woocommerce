@@ -66,11 +66,11 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		if ( $product_with_stock->is_type( 'variation' ) ) {
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
-			do_action( 'woocommerce_variation_set_stock', $product_with_stock, $new_stock );
+			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
 		} else {
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/** This action is documented in includes/data-stores/class-wc-product-data-store-cpt.php */
-			do_action( 'woocommerce_product_set_stock', $product_with_stock, $new_stock );
+			do_action( 'woocommerce_product_set_stock', $product_with_stock );
 		}
 
 		return $product_with_stock->get_stock_quantity();
@@ -280,13 +280,13 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
  * since stock quantity can also be updated in other ways.
  *
  * @param WC_Product $product        The product whose stock level has changed.
- * @param int|float  $stock_quantity The new quantity of stock.
  *
  * @return void
  */
-function wc_trigger_stock_change_actions( $product, $stock_quantity ) {
+function wc_trigger_stock_change_actions( $product ) {
 	$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
 	$low_stock_amount = absint( wc_get_low_stock_amount( $product ) );
+	$stock_quantity   = $product->get_stock_quantity();
 
 	if ( $stock_quantity <= $no_stock_amount ) {
 		/**
@@ -308,8 +308,8 @@ function wc_trigger_stock_change_actions( $product, $stock_quantity ) {
 		do_action( 'woocommerce_low_stock', $product );
 	}
 }
-add_action( 'woocommerce_variation_set_stock', 'wc_trigger_stock_change_actions', 10, 2 );
-add_action( 'woocommerce_product_set_stock', 'wc_trigger_stock_change_actions', 10, 2 );
+add_action( 'woocommerce_variation_set_stock', 'wc_trigger_stock_change_actions' );
+add_action( 'woocommerce_product_set_stock', 'wc_trigger_stock_change_actions' );
 
 /**
  * Increase stock levels for items within an order.

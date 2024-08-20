@@ -17,6 +17,7 @@ import {
 import { UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME } from '../commands/update-block-template-logging-threshold';
 import { UPDATE_COMING_SOON_MODE_ACTION_NAME } from '../commands/set-coming-soon-mode';
 import { TRIGGER_UPDATE_CALLBACKS_ACTION_NAME } from '../commands/trigger-update-callbacks';
+import { UPDATE_WCCOM_REQUEST_ERRORS_MODE } from '../commands/set-wccom-request-errors';
 
 export function* getCronJobs() {
 	const path = `${ API_NAMESPACE }/tools/get-cron-list/v1`;
@@ -111,6 +112,23 @@ export function* getComingSoonMode() {
 			method: 'GET',
 		} );
 		yield updateCommandParams( UPDATE_COMING_SOON_MODE_ACTION_NAME, {
+			mode: mode || 'disabled',
+		} );
+	} catch ( error ) {
+		throw new Error( error );
+	}
+}
+
+export function* getWccomRequestErrorsMode() {
+	const path = `${ API_NAMESPACE }/tools/get-wccom-request-errors/v1`;
+
+	try {
+		const mode = yield apiFetch( {
+			path,
+			method: 'GET',
+		} );
+
+		yield updateCommandParams( UPDATE_WCCOM_REQUEST_ERRORS_MODE, {
 			mode: mode || 'disabled',
 		} );
 	} catch ( error ) {
