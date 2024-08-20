@@ -416,6 +416,9 @@ class TaskLists {
 
 		$viewable_tasks  = $setup_list->get_viewable_tasks();
 		$completed_tasks = get_option( Task::COMPLETED_OPTION, array() );
+		if ( ! is_array( $completed_tasks ) ) {
+			$completed_tasks = array();
+		}
 
 		return count(
 			array_filter(
