@@ -85,7 +85,7 @@ return (pass);
 } 
 # Block access to php admin pages via website 
 if (req.url ~ "^/phpmyadmin/.*$" || req.url ~ "^/phppgadmin/.*$" || req.url ~ "^/server-status.*$") { 
-error 403 "For security reasons, this URL is only accesible using localhost (127.0.0.1) as the hostname"; 
+error 403 "For security reasons, this URL is only accessible using localhost (127.0.0.1) as the hostname"; 
 } 
 
 Add this to vcl_fetch:

@@ -20,7 +20,7 @@ add_action(
 	        $basic_details->add_block(
         		[
         			'id' 	     => 'example-tutorial-animal-age',
-                    // This orders the field, core fields are seperated by sums of 10.
+                    // This orders the field, core fields are separated by sums of 10.
 	            	'order'	     => 40,
 	            	'blockName'  => 'woocommerce/product-number-field',
 	            	'attributes' => [

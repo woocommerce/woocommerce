@@ -56,7 +56,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Shopper   | Product   | Variable Product info updates depending on variation | shopper/product-variable.spec.js         |
 | Shopper   | Product   | Add Variable Product to Cart                         | shopper/product-variable.spec.js         |
 | Shopper   | Product   | Display up-sell product                              | products/product-linked-products.spec.js |
-| Shopper   | Product   | Display releated products                            | products/product-linked-products.spec.js |
+| Shopper   | Product   | Display related products                             | products/product-linked-products.spec.js |
 | Shopper   | Product   | Display reviews                                      | merchant/product-reviews.spec.js         |
 | Shopper   | Product   | Add review                                           | merchant/product-reviews.spec.js         |
 | Shopper   | Product   | View product images                                  | shopper/product-simple.spec.js           |
@@ -74,7 +74,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Shopper   | Cart      | Display shipping options by address        | shopper/calculate-shipping.spec.js          |
 | Shopper   | Cart      | View empty cart                            | shopper/cart.spec.js                        |
 | Shopper   | Cart      | Display correct tax                        | shopper/cart-checkout-calculate-tax.spec.js |
-| Shopper   | Cart      | Respect coupon usage contraints            | shopper/cart-checkout-coupons.spec.js       |
+| Shopper   | Cart      | Respect coupon usage constraints           | shopper/cart-checkout-coupons.spec.js       |
 | Shopper   | Cart      | Display cross-sell products                | products/product-linked-products.spec.js    |
 | Shopper   | Cart      | Proceed to checkout                        | shopper/checkout.spec.js                    |
 
@@ -92,7 +92,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 | Shopper   | Checkout  | View checkout                            | shopper/checkout.spec.js                    |
 | Shopper   | Checkout  | Receive warnings when form is incomplete | shopper/checkout.spec.js                    |
 | Shopper   | Checkout  | Add billing address                      | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Respect coupon usage contraints          | shopper/cart-checkout-coupons.spec.js       |
+| Shopper   | Checkout  | Respect coupon usage constraints         | shopper/cart-checkout-coupons.spec.js       |
 | Shopper   | Checkout  | Display correct tax in checkout          | shopper/cart-checkout-calculate-tax.spec.js |
 | Shopper   | Checkout  | View order confirmation page             | shopper/checkout.spec.js                    |
 
