@@ -62,8 +62,8 @@ class ComingSoonAdminBarBadge {
 	public function output_css() {
 		if ( is_admin_bar_showing() ) {
 			echo '<style>
-				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge a.ab-item{
-					background-color: #f6f7f7;
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge a.ab-item {
+					background-color: #F6F7F7;
 					color: black;
 					margin-top:6px;
 					padding: 0 6px;
@@ -71,9 +71,18 @@ class ComingSoonAdminBarBadge {
 					line-height: 20px;
 					border-radius: 2px;
 				}
+
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge a.ab-item:hover {
+					background-color: #DCDCDE;
+				}
+
 				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge.woocommerce-site-status-badge-live a.ab-item {
-					background-color: #E8F1E9;
+					background-color: #E6F2E8;
 					color: #00450C;
+				}
+
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge.woocommerce-site-status-badge-live a.ab-item:hover {
+					background-color: #B8E6BF;
 				}
 			</style>';
 		}
