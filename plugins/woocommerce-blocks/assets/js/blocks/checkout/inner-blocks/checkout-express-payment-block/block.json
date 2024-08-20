@@ -13,18 +13,6 @@
 		"lock": false
 	},
 	"attributes": {
-		"showButtonStyles": {
-			"type": "boolean",
-			"default": true
-		},
-		"buttonHeight": {
-			"type": "string",
-			"default": "48"
-		},
-		"buttonBorderRadius": {
-			"type": "string",
-			"default": "4"
-		},
 		"className": {
 			"type": "string",
 			"default": ""
