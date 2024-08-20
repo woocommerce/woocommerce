@@ -16,7 +16,6 @@ class ComingSoonAdminBarBadge {
 	 */
 	final public function init() {
 		add_action( 'admin_bar_menu', array( $this, 'site_visibility_badge' ), 31 );
-		add_action( 'update_option_woocommerce_store_pages_only', array( $this, 'invalidate_caches' ) );
 		add_action( 'wp_head', array( $this, 'output_css' ) );
 		add_action( 'admin_head', array( $this, 'output_css' ) );
 	}
