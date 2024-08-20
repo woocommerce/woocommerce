@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Admin\API\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
@@ -16,28 +18,19 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class StoreInfo {
+class StoreInfo extends AIEndpoint {
 	/**
-	 * Endpoint namespace.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
+	protected $endpoint = 'store-info';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/store-info',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,

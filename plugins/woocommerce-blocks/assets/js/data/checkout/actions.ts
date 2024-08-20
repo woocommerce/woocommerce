@@ -63,7 +63,7 @@ export const __internalSetRedirectUrl = ( redirectUrl: string ) => ( {
 /**
  * Set whether the checkout has an error or not
  *
- * @param hasError Wether the checkout has an error or not
+ * @param hasError Whether the checkout has an error or not
  */
 export const __internalSetHasError = ( hasError = true ) => ( {
 	type: types.SET_HAS_ERROR,

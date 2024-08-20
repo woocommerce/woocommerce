@@ -1,7 +1,15 @@
+/**
+ * Internal dependencies
+ */
+import { BlockOverlayAttribute } from './constants';
+
+export type BlockOverlayAttributeOptions =
+	( typeof BlockOverlayAttribute )[ keyof typeof BlockOverlayAttribute ];
+
 export interface BlockAttributes {
 	productId?: string;
 	setAttributes: ( attributes: ProductFiltersBlockAttributes ) => void;
-	overlay: 'never' | 'mobile' | 'always';
+	overlay: BlockOverlayAttributeOptions;
 	overlayIcon:
 		| 'filter-icon-1'
 		| 'filter-icon-2'

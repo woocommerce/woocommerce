@@ -150,7 +150,7 @@ export const Configure = ( { markConfigured, paymentGateway } ) => {
 			{ helpText || (
 				<p>
 					{ __(
-						"You can manage this payment gateway's settings by clicking the button below",
+						'You can manage this payment gateway’s settings by clicking the button below',
 						'woocommerce'
 					) }
 				</p>

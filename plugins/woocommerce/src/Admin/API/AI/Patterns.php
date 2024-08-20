@@ -1,12 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Admin\API\AI;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 use WP_Error;
-use WP_HTTP_Response;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -17,28 +18,19 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class Patterns {
+class Patterns extends AIEndpoint {
 	/**
-	 * Endpoint namespace.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
+	protected $endpoint = 'patterns';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/patterns',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
@@ -69,7 +61,7 @@ class Patterns {
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 *
-	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_patterns( WP_REST_Request $request ) {
 		$business_description = sanitize_text_field( wp_unslash( $request['business_description'] ) );
