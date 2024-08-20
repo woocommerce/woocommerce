@@ -718,6 +718,7 @@ class WC_Download_Handler {
 	 * @param bool                     $defer           If tracking the download should be deferred.
 	 *
 	 * @return void
+	 * @throws Exception If the active version of Action Scheduler is less than 3.6.0.
 	 */
 	private static function track_download( $download, $user_id = null, $user_ip_address = null, bool $defer = false ): void {
 		try {

@@ -86,6 +86,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 				),
 			)
 		);
+
 		$email         = 'admin@example.org';
 		$product_id    = $product->get_id();
 		$downloads     = $product->get_downloads();
@@ -133,8 +134,12 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		self::restore_download_handlers();
 	}
 
+	/**
+	 * @testdox The remaining downloads count should iterate accurately.
+	 */
 	public function test_downloads_remaining_count(): void {
 		self::remove_download_handlers();
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Ok for unit tests.
 		file_put_contents( WP_CONTENT_DIR . '/uploads/woocommerce_uploads/supersheet-123.ods', str_pad( '', 100 ) );
 
 		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
