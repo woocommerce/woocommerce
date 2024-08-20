@@ -61,21 +61,23 @@ class ComingSoonAdminBarBadge {
 	 * @internal
 	 */
 	public function output_css() {
-		echo '<style>
-			#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge a.ab-item{
-				background-color: #f6f7f7;
-				color: black;
-				margin-top:6px;
-				padding: 0 6px;
-				height: 20px;
-				line-height: 20px;
-				border-radius: 2px;
-			}
-			#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge.woocommerce-site-status-badge-live a.ab-item {
-				background-color: #E8F1E9;
-				color: #00450C;
-			}
-		</style>';
+		if ( is_admin_bar_showing() ) {
+			echo '<style>
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge a.ab-item{
+					background-color: #f6f7f7;
+					color: black;
+					margin-top:6px;
+					padding: 0 6px;
+					height: 20px;
+					line-height: 20px;
+					border-radius: 2px;
+				}
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge.woocommerce-site-status-badge-live a.ab-item {
+					background-color: #E8F1E9;
+					color: #00450C;
+				}
+			</style>';
+		}
 	}
 
 }
