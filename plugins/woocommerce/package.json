@@ -583,7 +583,48 @@
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "woo-ci-runner",
+					"testType": "e2e",
+					"command": "test:e2e",
+					"shardingArguments": [
+						"--shard=1/6"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test"
+					},
+					"events": [
+						"runners-test"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "ubuntu-20.04",
+					"testType": "e2e",
+					"command": "test:e2e",
+					"shardingArguments": [
+						"--shard=1/6"
+					],
+					"changes": [],
+					"testEnv": {
+						"start": "env:test"
+					},
+					"events": [
+						"runners-test"
+					],
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				}
+				
 			]
 		}
 	},
