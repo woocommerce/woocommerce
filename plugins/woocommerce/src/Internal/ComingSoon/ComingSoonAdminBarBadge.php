@@ -72,8 +72,13 @@ class ComingSoonAdminBarBadge {
 					border-radius: 2px;
 				}
 
-				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge a.ab-item:hover {
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge a.ab-item:hover,
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge a.ab-item:focus {
 					background-color: #DCDCDE;
+				}
+
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge a.ab-item:focus {
+					outline: var(--wp-admin-border-width-focus) solid var(--wp-admin-theme-color-darker-20);
 				}
 
 				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge.woocommerce-site-status-badge-live a.ab-item {
@@ -81,7 +86,8 @@ class ComingSoonAdminBarBadge {
 					color: #00450C;
 				}
 
-				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge.woocommerce-site-status-badge-live a.ab-item:hover {
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge.woocommerce-site-status-badge-live a.ab-item:hover,
+				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge.woocommerce-site-status-badge-live a.ab-item:focus {
 					background-color: #B8E6BF;
 				}
 			</style>';
