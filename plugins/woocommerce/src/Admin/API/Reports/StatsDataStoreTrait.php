@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
  * Trait to contain *stats-specific methods for data stores.
  *
  * It does preliminary intervals & page calculations
- * and prepares intervals & totals data structure by implementing the  `get_noncached_data()` method.
+ * and prepares intervals & totals data structure by implementing the `get_noncached_data()` method.
  * So, this time, you'll need to prepare `get_noncached_stats_data()` which will be called only if
  * the requested page is within the date range.
  *
