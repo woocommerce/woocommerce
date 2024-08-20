@@ -29,7 +29,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: "I'm just starting my business" } )
+				.getByRole( 'radio', { name: 'I’m just starting my business' } )
 				.first()
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
@@ -175,12 +175,12 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: "I'm already selling" } )
+				.getByRole( 'radio', { name: 'I’m already selling' } )
 				.first()
 				.click();
 			await page.getByLabel( 'Select an option' ).click();
 			await page
-				.getByRole( 'option', { name: "No, I'm selling offline" } )
+				.getByRole( 'option', { name: 'No, I’m selling offline' } )
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
