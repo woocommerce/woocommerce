@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-custom-fields-toggle-field",
 	"title": "Product custom fields toggle control",
 	"category": "woocommerce",
 	"description": "The product custom fields toggle.",
-	"keywords": [ "products", "custom", "fields" ],
+	"keywords": [
+		"products",
+		"custom",
+		"fields"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"label": {

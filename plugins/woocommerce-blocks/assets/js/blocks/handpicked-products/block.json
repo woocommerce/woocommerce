@@ -2,10 +2,16 @@
 	"name": "woocommerce/handpicked-products",
 	"title": "Hand-picked Products",
 	"category": "woocommerce",
-	"keywords": [ "Handpicked Products", "WooCommerce" ],
+	"keywords": [
+		"Handpicked Products",
+		"WooCommerce"
+	],
 	"description": "Display a selection of hand-picked products in a grid.",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false
 	},
 	"attributes": {
@@ -75,6 +81,6 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
