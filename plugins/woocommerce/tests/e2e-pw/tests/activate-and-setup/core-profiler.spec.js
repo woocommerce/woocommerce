@@ -289,7 +289,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect
 				.soft(
 					page.getByRole( 'heading', {
-						name: "Extending your store's capabilities",
+						name: 'Extending your store’s capabilities',
 					} )
 				)
 				.toBeVisible( { timeout: 30000 } );
