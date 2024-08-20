@@ -644,4 +644,33 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( productGalleryBlock ).toBeVisible();
 	} );
+
+	test.describe( 'block registration', () => {
+		test( 'should be registered on the Single Product template', async ( {
+			page,
+			editor,
+		} ) => {
+			await editor.openGlobalBlockInserter();
+			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
+			const productGalleryBlockOption = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.title } );
+
+			await expect( productGalleryBlockOption ).toBeVisible();
+		} );
+
+		test( 'should be unregistered on the Post Editor', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			await admin.createNewPost();
+			await editor.openGlobalBlockInserter();
+			const productGalleryBlockOption = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.title } );
+
+			await expect( productGalleryBlockOption ).toBeHidden();
+		} );
+	} );
 } );
