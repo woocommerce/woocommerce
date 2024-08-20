@@ -132,8 +132,27 @@ class Bootstrap {
 				$is_store_api_request = wc()->is_store_api_request();
 
 				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
+
 					$this->container->get( BlockTemplatesRegistry::class )->init();
 					$this->container->get( BlockTemplatesController::class )->init();
+
+					if ( wc_current_theme_is_fse_theme() ) {
+						$this->container->register(
+							ArchiveProductTemplatesCompatibility::class,
+							function () {
+								return new ArchiveProductTemplatesCompatibility();
+							}
+						);
+						$this->container->register(
+							SingleProductTemplateCompatibility::class,
+							function () {
+								return new SingleProductTemplateCompatibility();
+							}
+						);
+
+						$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
+						$this->container->get( SingleProductTemplateCompatibility::class )->init();
+					}
 				}
 			},
 			999
@@ -169,8 +188,6 @@ class Bootstrap {
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
-			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
-			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 			$this->container->get( PTKPatternsStore::class );
 			$this->container->get( TemplateOptions::class )->init();
@@ -274,18 +291,6 @@ class Bootstrap {
 			function ( Container $container ) {
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
 				return new ClassicTemplatesCompatibility( $asset_data_registry );
-			}
-		);
-		$this->container->register(
-			ArchiveProductTemplatesCompatibility::class,
-			function () {
-				return new ArchiveProductTemplatesCompatibility();
-			}
-		);
-		$this->container->register(
-			SingleProductTemplateCompatibility::class,
-			function () {
-				return new SingleProductTemplateCompatibility();
 			}
 		);
 		$this->container->register(
