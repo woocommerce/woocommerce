@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal error if NULL is provided in array_search under Jetpack Stats

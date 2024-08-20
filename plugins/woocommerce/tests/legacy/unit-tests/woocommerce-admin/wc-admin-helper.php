@@ -44,7 +44,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
-		wp_delete_post( wc_privacy_policy_page_id(), true );
 		wp_delete_post( wc_terms_and_conditions_page_id(), true );
 	}
 

@@ -162,7 +162,7 @@ jobs:
           else
             MESSAGE="${{ github.event_name }}"
           fi
-          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_ENV"
         shell: bash
 
       - name: 'Resolve artifacts path'
@@ -213,7 +213,9 @@ jobs:
             if [ "$failedTests" -gt 0 ]; then
               if [ "$LAST_FAILED_RUN" == "1" ]; then
                 echo "Found failed tests, running only failed tests"
-                lastRunFlag="--last-failed"
+                # Add shard 1/1 to override the default shard value. No tests will run for shards > 1.
+                # The clean way would be to replace the shard flag from the command, but this also works.
+                lastRunFlag="--last-failed --shard=1/1"
               else
                 echo "Found failed tests, but LAST_FAILED_RUN is switched off. Running all tests."
               fi

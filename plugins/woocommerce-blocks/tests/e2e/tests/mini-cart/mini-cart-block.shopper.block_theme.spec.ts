@@ -44,7 +44,7 @@ test.describe( 'Shopper → Translations', () => {
 		).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'Mijn winkelmand bekijken' } )
+			page.getByRole( 'link', { name: 'Bekijk mijn winkelwagen' } )
 		).toBeVisible();
 
 		await expect(
