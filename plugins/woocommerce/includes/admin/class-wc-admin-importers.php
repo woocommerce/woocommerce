@@ -337,6 +337,11 @@ class WC_Admin_Importers {
 			return;
 		}
 
+		// Don't track if we're in a specific import screen.
+		if ( isset( $_GET['import'] ) ) {
+			return;
+		}
+
 		if ( 'import' === $screen->id || 'export' === $screen->id ) {
 			wc_admin_record_tracks_event( 'wordpress_' . $screen->id . '_view' );
 		}
