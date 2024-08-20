@@ -76,7 +76,8 @@ class SingleProductTemplate extends AbstractTemplate {
 			}
 
 			if ( isset( $template ) && BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+				$compatibility_layer = new SingleProductTemplateCompatibility();
+				$compatibility_layer->init();
 			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );

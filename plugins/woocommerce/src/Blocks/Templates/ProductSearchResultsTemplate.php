@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -50,8 +51,9 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_post_type_archive( 'product' ) && is_search() ) {
 			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
 
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+			if ( isset( $templates[0] ) && ! BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
+				$compatibility_layer = new ArchiveProductTemplatesCompatibility();
+				$compatibility_layer->init();
 			}
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
