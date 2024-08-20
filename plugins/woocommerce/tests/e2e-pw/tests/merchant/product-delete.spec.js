@@ -1,4 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { allure } = require( 'allure-playwright' );
 
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
@@ -36,12 +37,23 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Products > Delete Product',
-	{ tag: [ '@gutenberg', '@services' ] },
-	() => {
+	{
+		tag: [ '@gutenberg', '@services' ],
+		annotation: [
+			{
+				type: 'suite',
+				description: 'Products',
+			},
+		],
+	},
+	async () => {
 		test( 'can delete a product from edit view', async ( {
 			page,
 			product,
 		} ) => {
+			await allure.parentSuite( 'Products' );
+			await allure.suite( 'Product management' );
+			await allure.subSuite( 'Delete products' );
 			const editUrl = `wp-admin/post.php?post=${ product.id }&action=edit`;
 
 			await test.step( 'Navigate to product edit page', async () => {
@@ -82,6 +94,9 @@ test.describe(
 			page,
 			product,
 		} ) => {
+			await allure.parentSuite( 'Products' );
+			await allure.suite( 'Product management' );
+			await allure.subSuite( 'Delete products' );
 			await test.step( 'Navigate to products list page', async () => {
 				await page.goto(
 					`wp-admin/edit.php?post_type=product&s=${ product.name }`
@@ -129,7 +144,9 @@ test.describe(
 			product,
 			api,
 		} ) => {
-			// trash the product
+			await allure.parentSuite( 'Products' );
+			await allure.suite( 'Product management' );
+			await allure.subSuite( 'Delete products' );
 			await api.delete( `products/${ product.id }`, {
 				force: false,
 			} );

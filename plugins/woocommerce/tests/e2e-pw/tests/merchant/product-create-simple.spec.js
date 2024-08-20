@@ -1,4 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { allure } = require( 'allure-playwright' );
 
 const productData = {
 	virtual: {
@@ -66,8 +67,21 @@ const test = baseTest.extend( {
 for ( const productType of Object.keys( productData ) ) {
 	test(
 		`can create a simple ${ productType } product`,
-		{ tag: [ '@gutenberg', '@services' ] },
+		{
+			tag: [ '@gutenberg', '@services' ],
+			annotation: [
+				{
+					type: 'suite',
+					description: 'Products',
+				},
+				{ type: 'performance', description: 'very slow test!' },
+			],
+		},
 		async ( { page, category, product } ) => {
+			await allure.parentSuite( 'Products' );
+			await allure.suite( 'Product management' );
+			await allure.subSuite( 'Create products' );
+
 			await test.step( 'add new product', async () => {
 				await page.goto( 'wp-admin/post-new.php?post_type=product' );
 			} );
