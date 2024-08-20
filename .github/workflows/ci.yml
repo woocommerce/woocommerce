@@ -113,7 +113,7 @@ jobs:
   
   project-test-jobs:
     name: "${{ matrix.name }}"
-    runs-on: 'ubuntu-20.04'
+    runs-on: ${{ ( matrix.testType == 'e2e' && 'woo-ci-runner' ) || 'ubuntu-20.04' }}
     needs: 'project-jobs'
     if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
