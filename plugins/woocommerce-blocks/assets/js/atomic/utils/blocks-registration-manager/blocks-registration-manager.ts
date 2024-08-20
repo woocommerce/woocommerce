@@ -66,13 +66,17 @@ export class BlockRegistrationManager
 		} = BLOCKS_WITH_RESTRICTION[ blockWithRestrictionName ];
 
 		const shouldBeAvailableOnTemplate = allowedTemplates
-			? Object.keys( allowedTemplates ).some( ( allowedTemplate ) =>
-					currentContentId.startsWith( allowedTemplate )
+			? Object.keys( allowedTemplates ).some(
+					( allowedTemplate ) =>
+						currentContentId.startsWith( allowedTemplate ) &&
+						allowedTemplates[ allowedTemplate ]
 			  )
 			: true;
 		const shouldBeAvailableOnTemplatePart = allowedTemplateParts
-			? Object.keys( allowedTemplateParts ).some( ( allowedTemplate ) =>
-					currentContentId.startsWith( allowedTemplate )
+			? Object.keys( allowedTemplateParts ).some(
+					( allowedTemplate ) =>
+						currentContentId.startsWith( allowedTemplate ) &&
+						allowedTemplates[ allowedTemplate ]
 			  )
 			: true;
 		const shouldBeAvailableOnPostEditor =
