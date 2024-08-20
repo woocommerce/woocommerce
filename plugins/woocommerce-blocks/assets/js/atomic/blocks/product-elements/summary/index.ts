@@ -13,6 +13,7 @@ import edit from './edit';
 import { supports } from './supports';
 import { BLOCK_ICON as icon } from './constants';
 import metadata from './block.json';
+import './upgrade';
 
 const deprecated = [
 	{
