@@ -212,23 +212,10 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'button', {
+				page.getByRole( 'link', {
 					name: 'Store coming soon',
 					exact: true,
 				} )
-			).toBeVisible();
-
-			page.getByRole( 'button', {
-				name: 'Store coming soon',
-				exact: true,
-			} ).click();
-
-			await expect(
-				page.getByText( 'Manage site visibility' )
-			).toBeVisible();
-
-			await expect(
-				page.getByText( 'Customize "Coming soon" page' )
 			).toBeVisible();
 		} );
 
@@ -257,23 +244,10 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'button', {
-					name: 'Site coming soon',
+				page.getByRole( 'link', {
+					name: 'Coming soon',
 					exact: true,
 				} )
-			).toBeVisible();
-
-			page.getByRole( 'button', {
-				name: 'Site coming soon',
-				exact: true,
-			} ).click();
-
-			await expect(
-				page.getByText( 'Manage site visibility' )
-			).toBeVisible();
-
-			await expect(
-				page.getByText( 'Customize "Coming soon" page' )
 			).toBeVisible();
 		} );
 
@@ -299,24 +273,11 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'button', {
+				page.getByRole( 'link', {
 					name: 'Live',
 					exact: true,
 				} )
 			).toBeVisible();
-
-			page.getByRole( 'button', {
-				name: 'Live',
-				exact: true,
-			} ).click();
-
-			await expect(
-				page.getByText( 'Manage site visibility' )
-			).toBeVisible();
-
-			await expect(
-				page.getByText( 'Customize "Coming soon" page' )
-			).toBeHidden();
 		} );
 	}
 );
