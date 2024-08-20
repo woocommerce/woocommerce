@@ -173,6 +173,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Update - Enhanced sanitization in `@woocommerce/currency`. [#50802](https://github.com/woocommerce/woocommerce/pull/50802)
+* Fix - Hardening against XSS by leveraging HTML API for adding block attribute data. [#50801](https://github.com/woocommerce/woocommerce/pull/50801)
+* Fix - Prevent downloads of digitial products after partial refund. [#50804](https://github.com/woocommerce/woocommerce/pull/50804)
+* Add - Adds support for tracking downloads when a partial (ranged) request is made. [#50805](https://github.com/woocommerce/woocommerce/pull/50805)
 * Update - Turn AccessiblePrivateMethods::_accessible_private_methods into a static property. [#50806](https://github.com/woocommerce/woocommerce/pull/50806)
 * Fix - Correct label of shipping dimensions length field. [#50180](https://github.com/woocommerce/woocommerce/pull/50180)
 * Fix - Allow new accounts to set new password even if logged in. [#50700](https://github.com/woocommerce/woocommerce/pull/50700)
