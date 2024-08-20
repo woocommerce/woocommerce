@@ -4,17 +4,28 @@
 import { useBlockProps } from '@wordpress/block-editor';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import clsx from 'clsx';
+import { ExpressPaymentControls } from '@woocommerce/blocks/cart-checkout-shared';
+import type { BlockAttributes } from '@wordpress/blocks';
+import { useEffect } from '@wordpress/element';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import './editor.scss';
+import type {
+	ExpressPaymentSettings,
+	ExpressCartAttributes,
+} from '../../../cart-checkout-shared/types';
+import { ExpressPaymentContext } from '../../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
 
 export const Edit = ( {
 	attributes,
+	setAttributes,
 }: {
-	attributes: { className: string };
+	attributes: ExpressCartAttributes;
+	setAttributes: ( attrs: BlockAttributes ) => void;
 } ): JSX.Element | null => {
 	const { paymentMethods, isInitialized } = useExpressPaymentMethods();
 	const hasExpressPaymentMethods = Object.keys( paymentMethods ).length > 0;
@@ -24,7 +35,18 @@ export const Edit = ( {
 				hasExpressPaymentMethods,
 		} ),
 	} );
-	const { className } = attributes;
+
+	useEffect( () => {
+		const { showButtonStyles, buttonHeight, buttonBorderRadius } =
+			getSetting< ExpressPaymentSettings >( 'expressCheckout' );
+		setAttributes( {
+			showButtonStyles,
+			buttonHeight,
+			buttonBorderRadius,
+		} );
+	}, [ setAttributes ] );
+	const { className, showButtonStyles, buttonHeight, buttonBorderRadius } =
+		attributes;
 
 	if ( ! isInitialized || ! hasExpressPaymentMethods ) {
 		return null;
@@ -32,7 +54,15 @@ export const Edit = ( {
 
 	return (
 		<div { ...blockProps }>
-			<Block className={ className } />
+			<ExpressPaymentControls
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+			/>
+			<ExpressPaymentContext.Provider
+				value={ { showButtonStyles, buttonHeight, buttonBorderRadius } }
+			>
+				<Block className={ className } />
+			</ExpressPaymentContext.Provider>
 		</div>
 	);
 };

@@ -7,9 +7,9 @@ import { getValidBlockAttributes } from '@woocommerce/base-utils';
  * Internal dependencies
  */
 import Block from './block';
-import { ExpressCheckoutContext } from './context';
+import { ExpressPaymentContext } from '../../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
 import metadata from './block.json';
-import { ExpressCheckoutAttributes } from './types';
+import { ExpressCheckoutAttributes } from '../../../cart-checkout-shared/types';
 
 const FrontendBlock = ( attributes: ExpressCheckoutAttributes ) => {
 	const validAttributes = getValidBlockAttributes(
@@ -21,11 +21,11 @@ const FrontendBlock = ( attributes: ExpressCheckoutAttributes ) => {
 		validAttributes;
 
 	return (
-		<ExpressCheckoutContext.Provider
+		<ExpressPaymentContext.Provider
 			value={ { showButtonStyles, buttonHeight, buttonBorderRadius } }
 		>
 			<Block />
-		</ExpressCheckoutContext.Provider>
+		</ExpressPaymentContext.Provider>
 	);
 };
 

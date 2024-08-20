@@ -108,7 +108,7 @@ class CartCheckoutUtils {
 		}
 
 		$array_without_accents = array_map(
-			function( $value ) {
+			function ( $value ) {
 				return is_array( $value )
 					? self::deep_sort_with_accents( $value )
 					: remove_accents( wc_strtolower( html_entity_decode( $value ) ) );
@@ -129,7 +129,7 @@ class CartCheckoutUtils {
 		$shipping_zones             = \WC_Shipping_Zones::get_zones();
 		$formatted_shipping_zones   = array_reduce(
 			$shipping_zones,
-			function( $acc, $zone ) {
+			function ( $acc, $zone ) {
 				$acc[] = [
 					'id'          => $zone['id'],
 					'title'       => $zone['zone_name'],
@@ -145,5 +145,81 @@ class CartCheckoutUtils {
 			'description' => __( 'Locations outside all other zones', 'woocommerce' ),
 		];
 		return $formatted_shipping_zones;
+	}
+
+	/**
+	 * Syncronises the attributes of the express payment blocks between the Cart and Checkout blocks.
+	 *
+	 * @param int     $post_id The post ID.
+	 * @param WP_Post $post The post object.
+	 * @param string  $cart_or_checkout The block type to check.
+	 * @param array   $default_settings Default settings.
+	 *
+	 * @return array An array of formatted payment gateways.
+	 */
+	public static function update_express_payment_settings( $post_id, $post, $cart_or_checkout, $default_settings ) {
+
+		if ( ! in_array( $cart_or_checkout, array( 'cart', 'checkout' ), true ) ) {
+			return;
+		}
+
+		// This is not a proper save action, maybe an autosave, so don't continue.
+		if ( empty( $post->post_status ) || 'inherit' === $post->post_status ) {
+			return;
+		}
+
+		$block_name    = 'woocommerce/' . $cart_or_checkout;
+		$page_id       = 'woocommerce_' . $cart_or_checkout . '_page_id';
+		$template_name = 'page-' . $cart_or_checkout;
+
+		// Check if we are editing the checkout page and that it contains a Checkout block.
+		// Cast to string for Checkout page ID comparison because get_option can return it as a string, so better to compare both values as strings.
+		if ( ! empty( $post->post_type ) && 'wp_template' !== $post->post_type && ( false === has_block( $block_name, $post ) || (string) get_option( $page_id ) !== (string) $post_id ) ) {
+			return;
+		}
+
+		// Check if we are editing the Checkout template and that it contains a Checkout block.
+		if ( ( ! empty( $post->post_type ) && ! empty( $post->post_name ) && $template_name !== $post->post_name && 'wp_template' === $post->post_type ) || false === has_block( $block_name, $post ) ) {
+			return;
+		}
+
+		if ( empty( $post->post_content ) ) {
+			return;
+		}
+
+		$blocks = parse_blocks( $post->post_content );
+		$attrs  = self::find_express_checkout_attributes( $blocks, $cart_or_checkout );
+
+		$updated_attrs = $default_settings;
+		if ( is_array( $attrs ) ) {
+			$updated_attrs = array_merge( $default_settings, $attrs );
+		}
+		update_option(
+			'woocommerce_express_payment_settings',
+			$updated_attrs
+		);
+	}
+
+	/**
+	 * Recursively search the checkout block to find the express checkout block and
+	 * get the button style attributes
+	 *
+	 * @param array  $blocks Blocks to search.
+	 * @param string $cart_or_checkout The block type to check.
+	 */
+	private static function find_express_checkout_attributes( $blocks, $cart_or_checkout ) {
+		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
+		foreach ( $blocks as $block ) {
+			if ( ! empty( $block['blockName'] ) && $express_block_name === $block['blockName'] && ! empty( $block['attrs'] ) ) {
+				return $block['attrs'];
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$answer = self::find_express_checkout_attributes( $block['innerBlocks'], $cart_or_checkout );
+				if ( $answer ) {
+					return $answer;
+				}
+			}
+		}
 	}
 }

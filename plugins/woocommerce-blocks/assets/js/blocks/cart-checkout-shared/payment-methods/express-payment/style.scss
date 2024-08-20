@@ -96,12 +96,12 @@ $border-width: 1px;
 .wc-block-components-express-payment--cart {
 	.wc-block-components-express-payment__event-buttons {
 		> li {
-			padding-bottom: $gap;
+			margin-bottom: $gap;
 			text-align: center;
 			width: 100%;
 
 			&:last-child {
-				padding-bottom: 0;
+				margin-bottom: 0;
 			}
 		}
 	}
