@@ -314,7 +314,7 @@ export const updateStorePatterns = async (
 		await Promise.all( [
 			...productContents,
 			apiFetch( {
-				path: '/wc/private/ai/business-description',
+				path: '/wc-admin/ai/business-description',
 				method: 'POST',
 				data: {
 					business_description:
@@ -322,7 +322,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/store-title',
+				path: '/wc-admin/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:

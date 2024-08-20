@@ -66,5 +66,37 @@ jQuery(function( $ ) {
 		}
 	};
 
+	/**
+	 * Handles warning about coupons using password protection.
+	 */
+	const wc_coupon_password_warning = {
+		init: function() {
+			const $warning = $( '#wc-password-protected-coupon-warning' );
+			// Bail out early if necessary.
+			if ( 0 === $warning.length ) {
+				return;
+			}
+
+			const $visibility = $( 'input[name="visibility"]' ),
+				  $password_visibility = $( '#visibility-radio-password' ),
+				  $password_label = $( 'label[for="visibility-radio-password"]' );
+
+			// For coupons without password, prevent setting it.
+			if ( ! $password_visibility.is( ':checked' ) ) {
+				$password_visibility.prop( 'disabled', true );
+				$password_label.css( 'text-decoration', 'line-through' );
+				return;
+			}
+
+			$visibility.on(
+				'change',
+				function() {
+					$warning.toggleClass( 'hidden', ! $password_visibility.is( ':checked' ) );
+				}
+			);
+		}
+	};
+
 	wc_meta_boxes_coupon_actions.init();
+	wc_coupon_password_warning.init();
 });

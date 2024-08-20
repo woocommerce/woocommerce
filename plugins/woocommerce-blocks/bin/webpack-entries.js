@@ -16,7 +16,6 @@ const glob = require( 'glob' );
 // when you mark/unmark block experimental.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {},
 	'all-products': {
 		customDir: 'products/all-products',
 	},

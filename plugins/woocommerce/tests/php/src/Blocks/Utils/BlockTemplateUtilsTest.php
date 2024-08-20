@@ -44,7 +44,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Provides data for testing template_is_eligible_for_product_archive_fallback.
+	 * Provides data for testing template_is_eligible_for_fallback functions.
 	 */
 	public function provideFallbackData() {
 		return array(
@@ -56,39 +56,27 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test template_is_eligible_for_product_archive_fallback.
-	 *
-	 * @param string $input    The template slug.
-	 * @param bool   $expected The expected result.
-	 *
-	 * @dataProvider provideFallbackData
+	 * Test template_is_eligible_for_fallback_from_db when the template is not eligible.
 	 */
-	public function test_template_is_eligible_for_product_archive_fallback( $input, $expected ) {
-		$this->assertEquals( $expected, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $input ) );
+	public function test_template_is_eligible_for_fallback_from_db_no_eligible_template() {
+		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'single-product', array() ) );
 	}
 
 	/**
-	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is not eligible.
+	 * Test template_is_eligible_for_fallback_from_db when the template is eligible but not in the db.
 	 */
-	public function test_template_is_eligible_for_product_archive_fallback_from_db_no_eligible_template() {
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'single-product', array() ) );
+	public function test_template_is_eligible_for_fallback_from_db_eligible_template_empty_db() {
+		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'taxonomy-product_cat', array() ) );
 	}
 
 	/**
-	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is eligible but not in the db.
+	 * Test template_is_eligible_for_fallback_from_db when the template is eligible and in the db.
 	 */
-	public function test_template_is_eligible_for_product_archive_fallback_from_db_eligible_template_empty_db() {
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'taxonomy-product_cat', array() ) );
-	}
-
-	/**
-	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is eligible and in the db.
-	 */
-	public function test_template_is_eligible_for_product_archive_fallback_from_db_eligible_template_custom_in_the_db() {
+	public function test_template_is_eligible_for_fallback_from_db_eligible_template_custom_in_the_db() {
 		$db_templates = array(
 			(object) array( 'slug' => 'archive-product' ),
 		);
-		$this->assertEquals( true, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'taxonomy-product_cat', $db_templates ) );
+		$this->assertEquals( true, BlockTemplateUtils::template_is_eligible_for_fallback_from_db( 'taxonomy-product_cat', $db_templates ) );
 	}
 
 	/**
