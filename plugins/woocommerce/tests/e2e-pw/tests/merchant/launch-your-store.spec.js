@@ -132,7 +132,7 @@ test.describe(
 			// The store only checkbox should not be on the page.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Restrict to store pages only',
+					name: 'Apply to store pages only',
 				} )
 			).toHaveCount( 0 );
 
@@ -156,14 +156,14 @@ test.describe(
 			// The store only checkbox should be visible.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Restrict to store pages only',
+					name: 'Apply to store pages only',
 				} )
 			).toBeVisible();
 
 			// The store only checkbox should not be checked.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Restrict to store pages only',
+					name: 'Apply to store pages only',
 				} )
 			).not.toBeChecked();
 
