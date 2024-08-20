@@ -115,7 +115,7 @@ export default {
 		selectedChart: '',
 		summaryData: {},
 		isRequesting: false,
-		filters: {},
+		filters,
 		advancedFilters,
 		recordEvent: ( ...args ) => {
 			// eslint-disable-next-line no-console
