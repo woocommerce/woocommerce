@@ -333,7 +333,7 @@ class WC_Admin_Importers {
 	public function track_importer_exporter_view() {
 		$screen = get_current_screen();
 
-		if ( ! isset( $screen ) ) {
+		if ( ! isset( $screen->id ) ) {
 			return;
 		}
 
