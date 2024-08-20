@@ -71,14 +71,14 @@ export class BlockRegistrationManager
 						currentContentId.startsWith( allowedTemplate ) &&
 						allowedTemplates[ allowedTemplate ]
 			  )
-			: true;
+			: currentContentType === EditorViewContentType.WP_TEMPLATE;
 		const shouldBeAvailableOnTemplatePart = allowedTemplateParts
 			? Object.keys( allowedTemplateParts ).some(
 					( allowedTemplate ) =>
 						currentContentId.startsWith( allowedTemplate ) &&
 						allowedTemplates[ allowedTemplate ]
 			  )
-			: true;
+			: currentContentType === EditorViewContentType.WP_TEMPLATE_PART;
 		const shouldBeAvailableOnPostEditor =
 			currentContentType === EditorViewContentType.POST &&
 			availableInPostEditor;
