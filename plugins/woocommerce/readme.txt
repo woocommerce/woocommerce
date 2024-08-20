@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Update - Turn AccessiblePrivateMethods::_accessible_private_methods into a static property. [#50806](https://github.com/woocommerce/woocommerce/pull/50806)
 * Fix - Correct label of shipping dimensions length field. [#50180](https://github.com/woocommerce/woocommerce/pull/50180)
 * Fix - Allow new accounts to set new password even if logged in. [#50700](https://github.com/woocommerce/woocommerce/pull/50700)
 * Fix - Remove global_unique_id from interface and add warning in case it is not implemented [#50685](https://github.com/woocommerce/woocommerce/pull/50685)
