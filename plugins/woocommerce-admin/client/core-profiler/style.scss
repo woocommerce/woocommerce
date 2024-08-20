@@ -346,7 +346,7 @@
 		}
 	}
 
-	$sticky-footer-height: 140px;
+	$sticky-footer-height: 100px;
 
 	.woocommerce-profiler-plugins__list {
 		display: flex;
@@ -356,7 +356,7 @@
 		flex: 50%;
 
 		@mixin sticky-footer-scroll-padding {
-			padding-bottom: $sticky-footer-height;
+			padding-bottom: $sticky-footer-height + 32px;
 		}
 
 		@include breakpoint(">782px") {// sticky footer shouldn't apply to mobile layout
@@ -426,7 +426,7 @@
 
 		@mixin plugins-sticky-footer {
 			background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 44.69%);
-			height: 140px;
+			height: $sticky-footer-height;
 			position: fixed;
 			bottom: 0;
 		}
