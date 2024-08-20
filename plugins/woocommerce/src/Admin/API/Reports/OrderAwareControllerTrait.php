@@ -11,7 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Trait to contain shared methods for reports Controllers that use order and orders statuses.
  *
- * @see Automattic\WooCommerce\Admin\API\Reports\GenericController
+ * If your analytics controller needs to work with orders,
+ * you will most probably need to use at least {@see get_order_statuses() get_order_statuses()}
+ * to filter only "actionable" statuses to produce consistent results among other analytics.
+ *
+ * @see GenericController
  */
 trait OrderAwareControllerTrait {
 
@@ -84,7 +88,6 @@ trait OrderAwareControllerTrait {
 	 * Get order statuses without prefixes.
 	 * Includes unregistered statuses that have been marked "actionable".
 	 *
-	 * @internal
 	 * @return array
 	 */
 	public static function get_order_statuses() {

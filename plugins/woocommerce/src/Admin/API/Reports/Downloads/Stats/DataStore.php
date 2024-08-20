@@ -154,7 +154,6 @@ class DataStore extends DownloadsDataStore implements DataStoreInterface {
 		} else {
 			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 		}
-		$this->create_interval_subtotals( $data->intervals );
 
 		return $data;
 	}

@@ -1,8 +1,6 @@
 <?php
 /**
- * REST API Reports controller extended by WC Admin plugin.
- *
- * Handles requests to the reports endpoint.
+ * REST API Reports controller extended to handle requests to the reports endpoint.
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports;
@@ -13,7 +11,9 @@ use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
 
 /**
- * REST API Reports controller class.
+ * Reports controller class.
+ *
+ * Controller that handles the endpoint that returns all available analytics endpoints.
  *
  * @internal
  * @extends GenericController
@@ -182,6 +182,8 @@ class Controller extends GenericController {
 
 	/**
 	 * Get the Report's schema, conforming to JSON Schema.
+	 *
+	 * @override WP_REST_Controller::get_item_schema()
 	 *
 	 * @return array
 	 */
