@@ -79,5 +79,4 @@ class ComingSoonAdminBarBadge {
 			</style>';
 		}
 	}
-
 }
