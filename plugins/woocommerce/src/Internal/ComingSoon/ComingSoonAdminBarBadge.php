@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
 /**
@@ -24,11 +27,11 @@ class ComingSoonAdminBarBadge {
 	 * @internal
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
 	 */
-	function site_visibility_badge( $wp_admin_bar ) {
+	public function site_visibility_badge( $wp_admin_bar ) {
 		$labels = array(
-			'coming-soon'       => __( 'Coming soon' ),
-			'store-coming-soon' => __( 'Store coming soon' ),
-			'live'              => __( 'Live' ),
+			'coming-soon'       => __( 'Coming soon', 'woocommerce' ),
+			'store-coming-soon' => __( 'Store coming soon', 'woocommerce' ),
+			'live'              => __( 'Live', 'woocommerce' ),
 		);
 
 		if ( get_option( 'woocommerce_coming_soon' ) === 'yes' ) {
@@ -43,13 +46,13 @@ class ComingSoonAdminBarBadge {
 
 		$args = array(
 			'id'    => 'woocommerce-site-status-badge',
-			'title' => $labels[$key],
+			'title' => $labels[ $key ],
 			'href'  => admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ),
 			'meta'  => array(
 				'class' => 'woocommerce-site-status-badge-' . $key,
-			)
+			),
 		);
-		$wp_admin_bar->add_node($args);
+		$wp_admin_bar->add_node( $args );
 	}
 
 	/**
@@ -57,7 +60,7 @@ class ComingSoonAdminBarBadge {
 	 *
 	 * @internal
 	 */
-	function output_css() {
+	public function output_css() {
 		echo '<style>
 			#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-status-badge a.ab-item{
 				background-color: #f6f7f7;
@@ -76,10 +79,3 @@ class ComingSoonAdminBarBadge {
 	}
 
 }
-
-
-
-
-
-
-
