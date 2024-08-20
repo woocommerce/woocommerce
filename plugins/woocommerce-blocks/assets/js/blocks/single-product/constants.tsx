@@ -61,12 +61,8 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 						{ isDescendentOfSingleProductBlock: true },
 					],
 					[
-						'core/post-excerpt',
-						{
-							__woocommerceNamespace:
-								PRODUCT_SUMMARY_VARIATION_NAME,
-							excerptLength: 100,
-						},
+						'woocommerce/product-summary',
+						{ isDescendentOfSingleProductBlock: true },
 					],
 					[ 'woocommerce/add-to-cart-form' ],
 					[ 'woocommerce/product-meta' ],
