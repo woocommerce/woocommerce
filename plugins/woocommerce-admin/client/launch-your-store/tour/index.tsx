@@ -49,7 +49,8 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 				steps: [
 					{
 						referenceElements: {
-							desktop: '.woocommerce-lys-status-pill',
+							desktop:
+								'#wp-admin-bar-woocommerce-site-visibility-badge',
 						},
 						meta: {
 							name: 'set-your-store-visibility',
