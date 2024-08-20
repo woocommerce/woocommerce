@@ -12,6 +12,7 @@ import {
 	createInterpolateElement,
 	createElement,
 	useEffect,
+	useRef,
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
@@ -29,6 +30,7 @@ import {
 	COMING_SOON_PAGE_EDITOR_LINK,
 	SITE_VISIBILITY_DOC_LINK,
 } from '../constants';
+import { ConfirmationModal } from './components/confirmation-modal';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -45,6 +47,21 @@ const SiteVisibility = () => {
 	const [ privateLink, setPrivateLink ] = useState(
 		setting?.woocommerce_private_link || 'no'
 	);
+	const formRef = useRef( null );
+	const saveButtonRef = useRef( null );
+
+	useEffect( () => {
+		const saveButton = document.getElementsByClassName(
+			'woocommerce-save-button'
+		)[ 0 ];
+		if ( saveButton ) {
+			saveButtonRef.current = saveButton;
+		}
+		const form = document.querySelector( '#mainform' );
+		if ( form ) {
+			formRef.current = form;
+		}
+	}, [] );
 
 	useEffect( () => {
 		const initValues = {
@@ -266,6 +283,13 @@ const SiteVisibility = () => {
 					) }
 				</p>
 			</div>
+			{ formRef.current && saveButtonRef.current ? (
+				<ConfirmationModal
+					saveButtonRef={ saveButtonRef }
+					formRef={ formRef }
+					currentSetting={ setting }
+				/>
+			) : null }
 		</div>
 	);
 };
