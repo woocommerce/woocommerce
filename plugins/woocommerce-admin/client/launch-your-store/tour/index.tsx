@@ -54,13 +54,13 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 						meta: {
 							name: 'set-your-store-visibility',
 							heading: __(
-								"Set your store's visibility",
+								'Set your store’s visibility',
 								'woocommerce'
 							),
 							descriptions: {
 								desktop: createInterpolateElement(
 									__(
-										'Launch your store only when you\'re ready to by switching between "Coming soon" and "Live" modes. Build excitement by creating a custom page visitors will see before you\'re ready to go live. <link>Discover more</link>',
+										'Launch your store only when you’re ready to by switching between "Coming soon" and "Live" modes. Build excitement by creating a custom page visitors will see before you’re ready to go live. <link>Discover more</link>',
 										'woocommerce'
 									),
 									{
