@@ -1060,7 +1060,14 @@ if ( 0 < $mu_plugins_count ) :
 					</mark>
 					<a href="https://woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
 						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
+					</a> |
+					<mark class="info">
+						<span class="dashicons dashicons-info"></span>
+					</mark>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ); ?>">
+						<?php esc_html_e( 'Clear system status theme info cache', 'woocommerce' ); ?>
 					</a>
+				</td>
 				</td>
 			</tr>
 		<?php endif; ?>
