@@ -79,7 +79,7 @@ class MiniCartInteractivity extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_empty_cart_message_block_pattern' ) );
-		// add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
+		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 10, 4 );
 	}
 
@@ -416,7 +416,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		$icon_name           = isset( $attributes['miniCartIcon'] ) ? esc_attr( $attributes['miniCartIcon'] ) : null;
 
 		?>
-		<button <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	
+		<button <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	 
 			<?php
 				echo $this->get_cart_price_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. 
 			?>
@@ -447,18 +447,20 @@ class MiniCartInteractivity extends AbstractBlock {
 		$cart_context    = array(
 			'cartItemCount' => $cart_item_count,
 			'drawerOpen'    => false,
+			'scriptsLoaded' => false,
 		);
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 				'data-wc-context'     => wp_json_encode( $cart_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+				'class'               => $wrapper_classes,
 			)
 		);
 		ob_start();
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - already escaped. ?> >
 			<?php echo $this->render_mini_cart_button( $attributes, $cart_item_count, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
-			<div class="<?php echo esc_attr( $wrapper_classes ); ?>" style="<?php echo esc_attr( $wrapper_styles ); ?>">
+			<div style="<?php echo esc_attr( $wrapper_styles ); ?>">
 				<div data-wc-class--wc-block-components-drawer__screen-overlay--is-hidden="!context.drawerOpen" class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 						<div class="wc-block-components-drawer__content">
