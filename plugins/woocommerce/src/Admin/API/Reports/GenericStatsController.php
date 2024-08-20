@@ -218,9 +218,8 @@ abstract class GenericStatsController extends GenericController {
 	 */
 	public function get_items( $request ) {
 		$query_args = $this->prepare_reports_query( $request );
-		$query      = $this->construct_query( $query_args );
 		try {
-			$report_data = $query->get_data();
+			$report_data = $this->get_datastore_data( $query_args );
 		} catch ( ParameterException $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
