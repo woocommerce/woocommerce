@@ -72,7 +72,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const hasExtendedNotifications = Boolean( fills?.length );
-	const { updateUserPreferences, ...userData } = useUserPreferences();
+	const { updateUserPreferences } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
 	const { comingSoon } = useLaunchYourStore( {
 		enabled: isHomescreen,
@@ -167,7 +167,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const {
 		hasUnreadNotes,
 		hasAbbreviatedNotifications,
-		isCompletedTask,
 		thingsToDoNextCount,
 		requestingTaskListOptions,
 		setupTaskListComplete,
