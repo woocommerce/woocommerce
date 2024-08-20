@@ -105,7 +105,6 @@ export function Edit( {
 							'Please enter a valid date.',
 							'woocommerce'
 						),
-						context: clientId,
 					};
 				}
 
@@ -115,7 +114,6 @@ export function Edit( {
 							'The start date of the sale must be before the end date.',
 							'woocommerce'
 						),
-						context: clientId,
 					};
 				}
 			}
@@ -137,7 +135,6 @@ export function Edit( {
 							'Please enter a valid date.',
 							'woocommerce'
 						),
-						context: clientId,
 					};
 				}
 
@@ -147,7 +144,6 @@ export function Edit( {
 							'The end date of the sale must be after the start date.',
 							'woocommerce'
 						),
-						context: clientId,
 					};
 				}
 			}

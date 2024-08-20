@@ -23,7 +23,7 @@ import { CartDispatchFromMap, CartSelectFromMap } from './index';
  * @param {CartResponse} response
  */
 export const receiveCart =
-	( response: CartResponse ) =>
+	( response: Partial< CartResponse > ) =>
 	( {
 		dispatch,
 		select,
@@ -41,6 +41,23 @@ export const receiveCart =
 			cartItemsPendingDelete: select.getItemsPendingDelete(),
 		} );
 		dispatch.setCartData( newCart );
+		dispatch.setErrorData( null );
+	};
+
+/**
+ * Updates the store with the provided cart but omits the customer addresses.
+ *
+ * This is useful when currently editing address information to prevent it being overwritten from the server.
+ *
+ * @param {CartResponse} response
+ */
+export const receiveCartContents =
+	( response: Partial< CartResponse > ) =>
+	( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		const { shipping_address, billing_address, ...cartWithoutAddress } =
+			response;
+		dispatch.receiveCart( cartWithoutAddress );
 	};
 
 /**
@@ -49,13 +66,16 @@ export const receiveCart =
 export const receiveError =
 	( response: ApiErrorResponse | null = null ) =>
 	( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
-		if ( isApiErrorResponse( response ) ) {
-			dispatch.setErrorData( response );
-
-			if ( response.data?.cart ) {
-				dispatch.receiveCart( response?.data?.cart );
-			}
+		if ( ! isApiErrorResponse( response ) ) {
+			return;
 		}
+		if ( response.data?.cart ) {
+			dispatch.receiveCart( response?.data?.cart );
+		}
+		dispatch.setErrorData( response );
 	};
 
-export type Thunks = typeof receiveCart | typeof receiveError;
+export type Thunks =
+	| typeof receiveCart
+	| typeof receiveCartContents
+	| typeof receiveError;

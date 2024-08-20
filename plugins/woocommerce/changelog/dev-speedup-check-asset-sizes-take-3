@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: speedup assets size verification job execution time.
