@@ -259,8 +259,13 @@ class WC_Helper_Updater {
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
+		$installed_or_unconnected = array_merge(
+			WC_Helper::get_installed_subscriptions(),
+			WC_Helper::get_unconnected_subscriptions()
+		);
+
 		// Product subscriptions.
-		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+		$subscriptions = wp_list_filter( $installed_or_unconnected, array( 'product_id' => $product_id ) );
 		if ( empty( $subscriptions ) ) {
 			return;
 		}
