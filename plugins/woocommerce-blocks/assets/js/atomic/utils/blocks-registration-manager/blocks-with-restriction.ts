@@ -26,8 +26,6 @@ export interface BlocksWithRestriction {
 	};
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core
 export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 	'woocommerce/add-to-cart-form': {
 		blockMetadata: addToCartFormBlockMetadata,
