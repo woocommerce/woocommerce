@@ -229,7 +229,7 @@ export function* resetCustomizeYourStore() {
 		} );
 
 		yield apiFetch( {
-			path: '/wc/private/ai/patterns',
+			path: '/wc-admin/ai/patterns',
 			method: 'DELETE',
 		} );
 	} );
@@ -267,6 +267,16 @@ export function* updateComingSoonMode( params ) {
 	yield runCommand( 'Update coming soon mode', function* () {
 		yield apiFetch( {
 			path: API_NAMESPACE + '/tools/update-coming-soon-mode/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* updateWccomRequestErrorsMode( params ) {
+	yield runCommand( 'Update wccom request errors mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/set-wccom-request-errors/v1',
 			method: 'POST',
 			data: params,
 		} );
