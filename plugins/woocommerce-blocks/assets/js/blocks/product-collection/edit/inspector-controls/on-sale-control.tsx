@@ -3,7 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	ToggleControl,
+	// @ts-expect-error Using experimental features
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// @ts-expect-error Using experimental features
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
@@ -25,6 +30,13 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 		trackInteraction( CoreFilterNames.ON_SALE );
 	};
 
+	function handleOnSaleProductsChange( optionValue: string ) {
+		setQueryAttribute( {
+			woocommerceOnSale: optionValue === 'show-only',
+		} );
+		trackInteraction( CoreFilterNames.ON_SALE );
+	}
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'On Sale', 'woocommerce' ) }
@@ -33,16 +45,25 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 			onDeselect={ deselectCallback }
 			resetAllFilter={ deselectCallback }
 		>
-			<ToggleControl
-				label={ __( 'Show only products on sale', 'woocommerce' ) }
-				checked={ query.woocommerceOnSale || false }
-				onChange={ ( woocommerceOnSale ) => {
-					setQueryAttribute( {
-						woocommerceOnSale,
-					} );
-					trackInteraction( CoreFilterNames.ON_SALE );
-				} }
-			/>
+			<ToggleGroupControl
+				label={ __( 'On-sale products', 'woocommerce' ) }
+				help={ __(
+					'Only on sale products will be displayed in this collection.',
+					'woocommerce'
+				) }
+				isBlock
+				value={ query.woocommerceOnSale ? 'show-only' : 'dont-show' }
+				onChange={ handleOnSaleProductsChange }
+			>
+				<ToggleGroupControlOption
+					label={ __( 'Show Only', 'woocommerce' ) }
+					value="show-only"
+				/>
+				<ToggleGroupControlOption
+					label={ __( "Don't Show", 'woocommerce' ) }
+					value="dont-show"
+				/>
+			</ToggleGroupControl>
 		</ToolsPanelItem>
 	);
 };
