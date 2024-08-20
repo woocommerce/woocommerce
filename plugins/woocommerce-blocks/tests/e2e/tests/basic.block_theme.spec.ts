@@ -14,11 +14,9 @@ test.describe( 'Basic role-based functionality tests', () => {
 			).toHaveText( 'Dashboard' );
 		} );
 
-		test( 'Load post editor in iframe mode', async ( { page } ) => {
-			await page.goto( '/wp-admin/post-new.php' );
-
-			// Check that iframe with title "Editor canvas" is visible.
-			await expect( page.getByTitle( 'Editor canvas' ) ).toBeVisible();
+		test( 'Load iframed post editor', async ( { admin, editor } ) => {
+			await admin.createNewPost();
+			await expect( editor.canvas.owner() ).toBeVisible();
 		} );
 	} );
 
