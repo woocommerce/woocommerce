@@ -132,9 +132,18 @@ const SiteVisibility = () => {
 			/>
 			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
-				{ __(
-					'Manage how your site appears to visitors.',
-					'woocommerce'
+				{ createInterpolateElement(
+					__(
+						'Manage how your site appears to visitors. <a>Learn more</a>',
+						'woocommerce'
+					),
+					{
+						a: createElement( 'a', {
+							target: '_blank',
+							rel: 'noreferrer',
+							href: SITE_VISIBILITY_DOC_LINK,
+						} ),
+					}
 				) }
 			</p>
 			<div className="site-visibility-settings-slotfill-section">
@@ -162,6 +171,7 @@ const SiteVisibility = () => {
 								),
 								{
 									a: createElement( 'a', {
+										target: '_blank',
 										href: COMING_SOON_PAGE_EDITOR_LINK,
 									} ),
 								}
@@ -183,20 +193,13 @@ const SiteVisibility = () => {
 						label={
 							<>
 								{ __(
-									'Restrict to store pages only',
+									'Apply to store pages only',
 									'woocommerce'
 								) }
 								<p>
-									{ createInterpolateElement(
-										__(
-											'Display a "coming soon" message on your <a>store pages</a> — the rest of your site will remain visible.',
-											'woocommerce'
-										),
-										{
-											a: createElement( 'a', {
-												href: SITE_VISIBILITY_DOC_LINK,
-											} ),
-										}
+									{ __(
+										'Display a “coming soon” message on your store pages — the rest of your site will remain visible.',
+										'woocommerce'
 									) }
 								</p>
 							</>
