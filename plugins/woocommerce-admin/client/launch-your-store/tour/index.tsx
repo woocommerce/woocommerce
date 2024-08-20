@@ -50,7 +50,7 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 					{
 						referenceElements: {
 							desktop:
-								'#wp-admin-bar-woocommerce-site-status-badge',
+								'#wp-admin-bar-woocommerce-site-visibility-badge',
 						},
 						meta: {
 							name: 'set-your-store-visibility',

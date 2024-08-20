@@ -44,7 +44,7 @@ class ComingSoonAdminBarBadge {
 		}
 
 		$args = array(
-			'id'    => 'woocommerce-site-status-badge',
+			'id'    => 'woocommerce-site-visibility-badge',
 			'title' => $labels[ $key ],
 			'href'  => admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ),
 			'meta'  => array(
