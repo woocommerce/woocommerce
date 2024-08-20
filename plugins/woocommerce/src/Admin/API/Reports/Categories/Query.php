@@ -37,8 +37,6 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	protected function get_default_query_vars() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
-
 		return array();
 	}
 
@@ -50,8 +48,6 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	public function get_data() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
-
 		$args    = apply_filters( 'woocommerce_analytics_categories_query_args', $this->get_query_vars() );
 		$results = \WC_Data_Store::load( self::REPORT_NAME )->get_data( $args );
 		return apply_filters( 'woocommerce_analytics_categories_select_query', $results, $args );
