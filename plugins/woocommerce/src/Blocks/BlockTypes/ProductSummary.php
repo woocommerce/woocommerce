@@ -109,8 +109,7 @@ class ProductSummary extends AbstractBlock {
 	 * @return string
 	 */
 	private function trim_keeping_html_formatting( $input, $length ) {
-
-		return html_entity_decode( wp_trim_words( htmlentities( wpautop( $input, false ) ), $length ) );
+		return html_entity_decode( wp_trim_words( htmlentities( wpautop( $input, true ) ), $length ) );
 	}
 
 	/**
@@ -128,7 +127,7 @@ class ProductSummary extends AbstractBlock {
 			return $content;
 		}
 
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$post_id = $block->context['postId'] ?? '';
 		$product = wc_get_product( $post_id );
 
 		if ( ! $product ) {
@@ -145,7 +144,7 @@ class ProductSummary extends AbstractBlock {
 		$summary_length = isset( $attributes['summaryLength'] ) ? $attributes['summaryLength'] : false;
 		$link_text      = isset( $attributes['linkText'] ) ? $attributes['linkText'] : '';
 		$show_link      = isset( $attributes['showLink'] ) && $attributes['showLink'];
-		$summary        = $summary_length ? $this->trim_keeping_html_formatting( $source, $summary_length ) : $source;
+		$summary        = $summary_length ? $this->trim_keeping_html_formatting( $source, $summary_length ) : wpautop( $source );
 		$final_summary  = $show_link && $link_text ? $summary . $this->create_anchor( $product, $link_text ) : $summary;
 
 		$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
