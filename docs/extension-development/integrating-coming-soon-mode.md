@@ -57,7 +57,7 @@ function sync_coming_soon_to_other_plugins( $old_value, $new_value, $option ) {
 
 #### Trigger from other plugins
 
-You can use the following example to enable or disable WooCommerce coming soon mode from another plugin by directy updating `woocommerce_coming_soon` option:
+You can use the following example to enable or disable WooCommerce coming soon mode from another plugin by directly updating `woocommerce_coming_soon` option:
 
 ```php
 function sync_coming_soon_from_other_plugins( $is_enabled ) {
