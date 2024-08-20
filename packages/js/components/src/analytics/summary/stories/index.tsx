@@ -118,6 +118,7 @@ export default {
 		filters: {},
 		advancedFilters,
 		recordEvent: ( ...args ) => {
+			// eslint-disable-next-line no-console
 			console.log( `recordEvent called with `, ...args );
 		},
 	},
