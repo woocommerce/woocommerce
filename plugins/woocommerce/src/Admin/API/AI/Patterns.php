@@ -17,28 +17,19 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class Patterns {
+class Patterns extends AIEndpoint {
 	/**
-	 * Endpoint namespace.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
+	protected $endpoint = 'patterns';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/patterns',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
