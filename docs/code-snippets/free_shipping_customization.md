@@ -22,7 +22,7 @@ Add this code to your child theme’s `functions.php`, or via a plugin that allo
 
 ## Code Snippets
 
-### Enabling or Disabling Free Shipping via Hooks
+### Enabling or Disabling Free Shipping via Hooks 
 
 You can hook into the `is_available` function of the free shipping method.
 
