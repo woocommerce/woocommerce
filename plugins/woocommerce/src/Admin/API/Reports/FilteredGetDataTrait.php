@@ -55,5 +55,4 @@ trait FilteredGetDataTrait {
 		 */
 		return apply_filters( "woocommerce_analytics_{$this->context}_select_query", $results, $args );
 	}
-
 }
