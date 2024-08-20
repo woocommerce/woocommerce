@@ -268,7 +268,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 
 		// should return false if post_type is not product.
 		$this->assertFalse( WCAdminHelper::is_store_page( 'https://example.com/test?param1=value1&param2=value2' ) );
-
 	}
 
 	/** Test product archive link is store page even if shop page not set. */
