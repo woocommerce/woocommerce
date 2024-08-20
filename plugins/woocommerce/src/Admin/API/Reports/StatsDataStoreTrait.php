@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
  * Trait to contain *stats-specific methods for data stores.
  *
  * It does preliminary intervals & page calculations
- * and prepares intervals & totals data structure by implementing the  `get_noncached_data()` method.
+ * and prepares intervals & totals data structure by implementing the `get_noncached_data()` method.
  * So, this time, you'll need to prepare `get_noncached_stats_data()` which will be called only if
  * the requested page is within the date range.
  *
@@ -27,7 +27,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
  *     // Provide all the necessary properties and methods for a regular DataStore.
  *     // ...
  *     /**
- *      * Return your results with the help of the interval & total mathods and queries.
+ *      * Return your results with the help of the interval & total methods and queries.
  *      * @return stdClass|WP_Error $data filled with your results.
  *      &ast;/
  *     public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
@@ -57,7 +57,6 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
  *         } else {
  *             $this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
  *         }
- *         $this->create_interval_subtotals( $data->intervals );
  *
  *         return $data;
  *    }
@@ -110,6 +109,10 @@ trait StatsDataStoreTrait {
 		if ( $query_args['page'] >= 1 && $query_args['page'] <= $total_pages ) {
 			// Fetch the actual data.
 			$data = $this->get_noncached_stats_data( $query_args, $params, $data, $expected_interval_count );
+
+			if ( ! is_wp_error( $data ) && is_array( $data->intervals ) ) {
+				$this->create_interval_subtotals( $data->intervals );
+			}
 		}
 
 		return $data;

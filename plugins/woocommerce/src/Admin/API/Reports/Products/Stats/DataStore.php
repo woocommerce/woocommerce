@@ -235,7 +235,6 @@ class DataStore extends ProductsDataStore implements DataStoreInterface {
 			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 		}
 		$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
-		$this->create_interval_subtotals( $data->intervals );
 
 		return $data;
 	}
