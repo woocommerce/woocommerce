@@ -1,5 +1,0 @@
-Significance: patch
-Type: update
-
-Turn AccessiblePrivateMethods::_accessible_private_methods into a static property
-
