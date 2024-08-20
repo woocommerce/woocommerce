@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Adds support for tracking downloads when a partial (ranged) request is made.
