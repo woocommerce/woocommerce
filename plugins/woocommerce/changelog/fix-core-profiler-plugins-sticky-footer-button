@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed Core Profiler's sticky footer button problem

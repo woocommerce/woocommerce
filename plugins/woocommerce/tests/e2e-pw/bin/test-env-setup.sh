@@ -38,8 +38,5 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	wp option update woocommerce_allow_tracking 'yes'
 fi
 
-echo -e 'Disabling coming soon option\n'
-wp option update woocommerce_coming_soon 'no'
-
 echo -e 'Upload test images \n'
 wp media import './test-data/images/image-01.png' './test-data/images/image-02.png' './test-data/images/image-03.png'
