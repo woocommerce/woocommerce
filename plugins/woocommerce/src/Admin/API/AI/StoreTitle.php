@@ -46,13 +46,6 @@ class StoreTitle extends AIEndpoint {
 	protected $endpoint = 'store-title';
 
 	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
-
-	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
