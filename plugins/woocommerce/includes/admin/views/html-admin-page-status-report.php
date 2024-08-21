@@ -1068,7 +1068,6 @@ if ( 0 < $mu_plugins_count ) :
 						<?php esc_html_e( 'Clear system status theme info cache', 'woocommerce' ); ?>
 					</a>
 				</td>
-				</td>
 			</tr>
 		<?php endif; ?>
 	</tbody>
