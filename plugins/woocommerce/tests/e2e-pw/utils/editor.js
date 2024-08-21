@@ -104,7 +104,7 @@ const insertBlockByShortcut = async ( page, blockName ) => {
 	).toBeVisible();
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 	await expect(
-		page.getByLabel( `Block: ${ blockName }` ).first()
+		canvas.getByLabel( `Block: ${ blockName }` ).first()
 	).toBeVisible();
 };
 

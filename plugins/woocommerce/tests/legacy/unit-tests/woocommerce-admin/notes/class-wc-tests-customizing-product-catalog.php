@@ -55,7 +55,7 @@ class WC_Admin_Tests_Customizing_Product_Catalog extends WC_Unit_Test_Case {
 	 * When get_note() is called
 	 * Then it should return null
 	 */
-	public function test_it_does_not_add_note_if_prouduct_is_less_than_a_day_old() {
+	public function test_it_does_not_add_note_if_product_is_less_than_a_day_old() {
 		// Given.
 		wp_insert_post(
 			array(

@@ -9,9 +9,15 @@
 		"align": true,
 		"reusable": false
 	},
-	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId", "postType", "queryId" ],
+	"keywords": [
+		"WooCommerce"
+	],
+	"usesContext": [
+		"postId",
+		"postType",
+		"queryId"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
