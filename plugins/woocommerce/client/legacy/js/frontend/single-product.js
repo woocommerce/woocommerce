@@ -378,14 +378,17 @@ jQuery( function( $ ) {
 	 * Handle keydown event in photoswipe modal.
 	 */
 	ProductGallery.prototype.handlePswpTrapFocus = function( e ) {
-		var allFocusablesEls = e.currentTarget.querySelectorAll( 'button:not([disabled])' );
+		var allFocusablesEls      = e.currentTarget.querySelectorAll( 'button:not([disabled])' );
+		var filteredFocusablesEls = Array.from( allFocusablesEls ).filter( function( btn ) {
+			return btn.style.display !== 'none' && window.getComputedStyle( btn ).display !== 'none';
+		} );
 
-		if ( 1 >= allFocusablesEls.length ) {
+		if ( 1 >= filteredFocusablesEls.length ) {
 			return;
 		}
 
-		var firstTabStop = allFocusablesEls[0];
-		var lastTabStop  = allFocusablesEls[allFocusablesEls.length - 1];
+		var firstTabStop = filteredFocusablesEls[0];
+		var lastTabStop  = filteredFocusablesEls[filteredFocusablesEls.length - 1];
 
 		if ( e.key === 'Tab' ) {
 			if ( e.shiftKey ) {
