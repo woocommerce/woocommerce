@@ -39,12 +39,13 @@ const getCanvas = async ( page ) => {
 };
 
 const goToPageEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php?post_type=page' );
-	await disableWelcomeModal( { page } );
-	await page.waitForResponse(
+	const responsePromise = page.waitForResponse(
 		( response ) =>
 			response.url().includes( '//page' ) && response.status() === 200
 	);
+	await page.goto( 'wp-admin/post-new.php?post_type=page' );
+	await disableWelcomeModal( { page } );
+	await responsePromise;
 };
 
 const goToPostEditor = async ( { page } ) => {
