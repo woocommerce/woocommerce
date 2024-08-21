@@ -61,7 +61,7 @@ class Product extends AIEndpoint {
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 *
-	 * @return WP_Error|WP_REST_Response
+	 * @return WP_REST_Response
 	 */
 	public function update_product( WP_REST_Request $request ) {
 		$product_information = $request['products_information'] ?? array();
