@@ -15,6 +15,7 @@ import sharedAttributes, {
 
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woocommerce' ),
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
