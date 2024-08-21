@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 9.2.1 2024-08-21 =
+
+**WooCommerce**
+
+* Fix - Revert turning of AccessiblePrivateMethods::_accessible_private_methods into a static property because it caused fatal errors in some edge cases. [#50809](https://github.com/woocommerce/woocommerce/pull/50809)
+
+
 = 9.1.4 2024-07-26 =
 
 **WooCommerce**
