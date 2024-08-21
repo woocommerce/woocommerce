@@ -24,7 +24,7 @@ use WC_Data_Store;
  *
  * It's used by the {@see GenericController GenericController}.
  *
- * @since x.x.x
+ * @since 9.3.0
  */
 class GenericQuery extends \WC_Object_Query {
 
@@ -70,7 +70,7 @@ class GenericQuery extends \WC_Object_Query {
 		/**
 		 * Filter query args given for the report.
 		 *
-		 * @since x.x.x
+		 * @since 9.3.0
 		 *
 		 * @param array $query_args Query args.
 		 */
@@ -81,7 +81,7 @@ class GenericQuery extends \WC_Object_Query {
 		/**
 		 * Filter report query results.
 		 *
-		 * @since x.x.x
+		 * @since 9.3.0
 		 *
 		 * @param stdClass|WP_Error $results Results from the data store.
 		 * @param array             $args    Query args used to get the data (potentially filtered).

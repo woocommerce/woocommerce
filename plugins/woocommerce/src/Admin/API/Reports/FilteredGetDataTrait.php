@@ -41,7 +41,7 @@ trait FilteredGetDataTrait {
 		/**
 		 * Called before the data is fetched.
 		 *
-		 * @since x.x.x
+		 * @since 9.3.0
 		 * @param array $query_args Query parameters.
 		 */
 		$args    = apply_filters( "woocommerce_analytics_{$this->context}_query_args", $query_args );
@@ -50,7 +50,7 @@ trait FilteredGetDataTrait {
 		 * Called after the data is fetched.
 		 * The results can be modified here.
 		 *
-		 * @since x.x.x
+		 * @since 9.3.0
 		 * @param stdClass|WP_Error $results The results of the query.
 		 */
 		return apply_filters( "woocommerce_analytics_{$this->context}_select_query", $results, $args );
