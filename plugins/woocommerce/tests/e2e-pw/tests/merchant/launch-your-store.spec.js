@@ -132,7 +132,7 @@ test.describe(
 			// The store only checkbox should not be on the page.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Restrict to store pages only',
+					name: 'Apply to store pages only',
 				} )
 			).toHaveCount( 0 );
 
@@ -156,14 +156,14 @@ test.describe(
 			// The store only checkbox should be visible.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Restrict to store pages only',
+					name: 'Apply to store pages only',
 				} )
 			).toBeVisible();
 
 			// The store only checkbox should not be checked.
 			await expect(
 				page.getByRole( 'checkbox', {
-					name: 'Restrict to store pages only',
+					name: 'Apply to store pages only',
 				} )
 			).not.toBeChecked();
 
@@ -212,23 +212,10 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'button', {
+				page.getByRole( 'menuitem', {
 					name: 'Store coming soon',
 					exact: true,
 				} )
-			).toBeVisible();
-
-			page.getByRole( 'button', {
-				name: 'Store coming soon',
-				exact: true,
-			} ).click();
-
-			await expect(
-				page.getByText( 'Manage site visibility' )
-			).toBeVisible();
-
-			await expect(
-				page.getByText( 'Customize "Coming soon" page' )
 			).toBeVisible();
 		} );
 
@@ -257,23 +244,10 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'button', {
-					name: 'Site coming soon',
+				page.getByRole( 'menuitem', {
+					name: 'Coming soon',
 					exact: true,
 				} )
-			).toBeVisible();
-
-			page.getByRole( 'button', {
-				name: 'Site coming soon',
-				exact: true,
-			} ).click();
-
-			await expect(
-				page.getByText( 'Manage site visibility' )
-			).toBeVisible();
-
-			await expect(
-				page.getByText( 'Customize "Coming soon" page' )
 			).toBeVisible();
 		} );
 
@@ -299,24 +273,11 @@ test.describe(
 			await page.goto( '/wp-admin/admin.php?page=wc-admin' );
 
 			await expect(
-				page.getByRole( 'button', {
+				page.getByRole( 'menuitem', {
 					name: 'Live',
 					exact: true,
 				} )
 			).toBeVisible();
-
-			page.getByRole( 'button', {
-				name: 'Live',
-				exact: true,
-			} ).click();
-
-			await expect(
-				page.getByText( 'Manage site visibility' )
-			).toBeVisible();
-
-			await expect(
-				page.getByText( 'Customize "Coming soon" page' )
-			).toBeHidden();
 		} );
 	}
 );

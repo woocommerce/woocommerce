@@ -44,15 +44,17 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( "should allow changing the block's title", async ( { page } ) => {
+	test( "should allow changing the block's title", async ( { editor } ) => {
 		const textSelector =
 			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
 
 		const title = 'New Title';
 
-		await page.locator( textSelector ).fill( title );
+		await editor.canvas.locator( textSelector ).fill( title );
 
-		await expect( page.locator( textSelector ) ).toHaveText( title );
+		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+			title
+		);
 	} );
 
 	test( 'should allow changing the display style', async ( {
@@ -359,6 +361,12 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await maxPriceInput.dblclick();
 		await maxPriceInput.fill( '$5' );
+
+		const resetPriceFilterButton = page.getByRole( 'button', {
+			name: 'Reset price filter',
+		} );
+		await expect( resetPriceFilterButton ).toBeVisible();
+
 		await page
 			.getByRole( 'button', { name: 'Apply price filter' } )
 			.click();

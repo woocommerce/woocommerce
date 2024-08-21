@@ -142,7 +142,7 @@ const useLockedChildren = ( {
 
 			const clientId = targetNode.dataset.block;
 			const isLocked = isBlockLocked( clientId );
-			// Prevent the keyboard event from propogating if it supports locking.
+			// Prevent the keyboard event from propagating if it supports locking.
 			if ( isLocked ) {
 				event.preventDefault();
 				event.stopPropagation();
