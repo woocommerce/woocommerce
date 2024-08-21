@@ -199,12 +199,8 @@ test.describe( 'Product Collection', () => {
 
 			test( 'On Sale', async ( { pageObject } ) => {
 				await pageObject.createNewPostAndInsertBlock( 'onSale' );
-				const sidebarSettings = pageObject.locateSidebarSettings();
-				const input = sidebarSettings.getByLabel(
-					SELECTORS.onSaleControlLabel
-				);
 
-				await expect( input ).toBeHidden();
+				await expect( pageObject.getOnSaleControl() ).toBeHidden();
 			} );
 
 			test( 'Featured', async ( { pageObject } ) => {

@@ -471,15 +471,11 @@ test.describe( 'Product Collection', () => {
 				).toBeChecked();
 
 				// "On sale control" should be hidden when inherit query from template is enabled
-				await expect(
-					sidebarSettings.getByLabel( SELECTORS.onSaleControlLabel )
-				).toBeHidden();
+				await expect( pageObject.getOnSaleControl() ).toBeHidden();
 
 				// "On sale control" should be visible when inherit query from template is disabled
 				await pageObject.setInheritQueryFromTemplate( false );
-				await expect(
-					sidebarSettings.getByLabel( SELECTORS.onSaleControlLabel )
-				).toBeVisible();
+				await expect( pageObject.getOnSaleControl() ).toBeVisible();
 
 				// "On sale control" should retain its state when inherit query from template is enabled again
 				await pageObject.setShowOnlyProductsOnSale( {
@@ -487,18 +483,14 @@ test.describe( 'Product Collection', () => {
 					isLocatorsRefreshNeeded: false,
 				} );
 				await expect(
-					sidebarSettings.getByLabel( SELECTORS.onSaleControlLabel )
+					pageObject.getOnSaleControlShowOnlyOption()
 				).toBeChecked();
 				await pageObject.setInheritQueryFromTemplate( true );
-				await expect(
-					sidebarSettings.getByLabel( SELECTORS.onSaleControlLabel )
-				).toBeHidden();
+				await expect( pageObject.getOnSaleControl() ).toBeHidden();
 				await pageObject.setInheritQueryFromTemplate( false );
+				await expect( pageObject.getOnSaleControl() ).toBeVisible();
 				await expect(
-					sidebarSettings.getByLabel( SELECTORS.onSaleControlLabel )
-				).toBeVisible();
-				await expect(
-					sidebarSettings.getByLabel( SELECTORS.onSaleControlLabel )
+					pageObject.getOnSaleControlShowOnlyOption()
 				).toBeChecked();
 			} );
 
