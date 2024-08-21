@@ -97,6 +97,10 @@ export type PaymentMethodIcons = ( PaymentMethodIcon | string )[];
 export interface PaymentMethodConfiguration {
 	// A unique string to identify the payment method client side.
 	name: string;
+	// A human readable title for the payment method.
+	title: string;
+	// A human readable description for the payment method.
+	description?: string;
 	// A react node for your payment method UI.
 	content: ReactNode;
 	// A react node to display a preview of your payment method in the editor.
@@ -131,7 +135,14 @@ export type PaymentMethods =
 /**
  * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
  */
-export type PlainPaymentMethods = Record< string, { name: string } >;
+export type PlainPaymentMethods = Record<
+	string,
+	{
+		title?: string;
+		description?: string;
+		name: string;
+	}
+>;
 
 /**
  * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
@@ -144,6 +155,8 @@ export type ExpressPaymentMethods =
 
 export interface PaymentMethodConfigInstance {
 	name: string;
+	title?: string;
+	description?: string;
 	content: ReactNode;
 	edit: ReactNode;
 	paymentMethodId?: string;
@@ -159,6 +172,8 @@ export interface PaymentMethodConfigInstance {
 
 export interface ExpressPaymentMethodConfigInstance {
 	name: string;
+	title: string;
+	description: string | null;
 	content: ReactNode;
 	edit: ReactNode;
 	paymentMethodId?: string;

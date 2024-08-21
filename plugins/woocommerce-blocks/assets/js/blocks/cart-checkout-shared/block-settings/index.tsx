@@ -8,8 +8,12 @@ import {
 	RadioControl,
 	TextControl,
 } from '@wordpress/components';
+import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { __ } from '@wordpress/i18n';
 import type { BlockAttributes } from '@wordpress/blocks';
+import { select } from '@wordpress/data';
+import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
+import { ADMIN_URL } from '@woocommerce/settings';
 
 export const BlockSettings = ( {
 	attributes,
@@ -96,6 +100,29 @@ const ExpressPaymentToggle = ( {
 	return null;
 };
 
+export const ExpressPaymentMethods = () => {
+	const expressMethods =
+		select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods();
+
+	if ( Object.entries( expressMethods ).length < 1 ) {
+		return null;
+	}
+	return (
+		<>
+			{ Object.values( expressMethods ).map( ( values ) => {
+				return (
+					<ExternalLinkCard
+						key={ values.name }
+						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
+						title={ values?.title || values.name }
+						description={ values?.description || '' }
+					/>
+				);
+			} ) }
+		</>
+	);
+};
+
 export const ExpressPaymentControls = ( {
 	attributes,
 	setAttributes,
@@ -123,6 +150,15 @@ export const ExpressPaymentControls = ( {
 					attributes={ attributes }
 					setAttributes={ setAttributes }
 				/>
+			</PanelBody>
+			<PanelBody title={ __( 'Express Payment Methods', 'woocommerce' ) }>
+				<p className="wc-block-checkout__controls-text">
+					{ __(
+						'You currently have the following express payment integrations active.',
+						'woocommerce'
+					) }
+				</p>
+				<ExpressPaymentMethods />
 			</PanelBody>
 		</InspectorControls>
 	);
