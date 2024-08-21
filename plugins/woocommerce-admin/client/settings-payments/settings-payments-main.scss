@@ -9,17 +9,21 @@
 		width: 100%;
 	}
 
-	.other-payment-methods__button-text {
-		margin-right: 4px;
-	}
 
-	.other-payment-methods-row {
-		border-top: 1px solid #c3c4c7;
-		background-color: #fff;
-	}
+	table.wc_gateways {
+		.other-payment-methods__button-text {
+			margin-right: 4px;
+		}
 
-	.other-payment-methods__image {
-		vertical-align: middle;
-		margin-right: 8px;
+		td.other-payment-methods-row {
+			border-top: 1px solid #c3c4c7;
+			background-color: #fff;
+
+		}
+
+		.other-payment-methods__image {
+			vertical-align: middle;
+			margin-right: 8px;
+		}
 	}
 }
