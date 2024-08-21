@@ -138,6 +138,7 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 
 			if ( context.drawerOpen ) {
 				renderParentBlock( {
+					// @ts-expect-error - The type of renderParentBlock's Block argument is incorrect.
 					Block: MiniCartContentsBlock,
 					blockName,
 					getProps: ( el: Element ) => {
@@ -154,7 +155,6 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 					selector: '.wp-block-woocommerce-mini-cart-contents',
 					blockMap: getRegisteredBlockComponents( blockName ),
 				} );
-				// rootRef.current = renderedBlock;
 			}
 		},
 
@@ -198,16 +198,12 @@ window.addEventListener( 'load', () => {
 	const miniCartBlocks = document.querySelectorAll(
 		'.wc-block-mini-cart-interactivity'
 	);
-	console.log( 'loaded', miniCartBlocks );
-	let wasLoadScriptsCalled = false;
 
 	if ( miniCartBlocks.length === 0 ) {
 		return;
 	}
 
 	const dependencies = window.wcBlocksMiniCartFrontendDependencies;
-
-	console.log( 'dependencies', dependencies );
 
 	// Preload scripts
 	for ( const dependencyHandle in dependencies ) {

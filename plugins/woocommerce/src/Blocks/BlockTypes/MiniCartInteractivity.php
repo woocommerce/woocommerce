@@ -3,9 +3,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
@@ -395,11 +392,14 @@ class MiniCartInteractivity extends AbstractBlock {
 			return '';
 		}
 
+		$cart            = $this->get_cart_instance();
+		$cart_item_count = $cart->get_cart_contents_count();
+
 		ob_start();
 		// It is not necessary to load the Mini-Cart Block on Cart and Checkout page.
 		?>
 		<div class="<?php echo esc_attr( $wrapper_classes ); ?>" style="visibility:hidden" aria-hidden="true">
-			<?php echo $this->render_mini_cart_button( $attributes, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
+			<?php echo $this->render_mini_cart_button( $attributes, $cart_item_count, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
 		</div>
 		<?php
 		return ob_get_clean();
