@@ -2779,14 +2779,16 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 function wc_update_910_remove_obsolete_user_meta() {
 	global $wpdb;
 
-	$deletions = $wpdb->query( "
+	$deletions = $wpdb->query(
+		"
 		DELETE FROM $wpdb->usermeta
 		WHERE meta_key IN (
 			'_last_order',
 			'_order_count',
 			'_money_spent'
 		)
-	" );
+	"
+	);
 
 	$logger = wc_get_logger();
 
@@ -2814,4 +2816,39 @@ function wc_update_910_remove_obsolete_user_meta() {
 			)
 		);
 	}
+}
+
+/**
+ * Add woocommerce_coming_soon option when it is not currently present.
+ */
+function wc_update_930_add_woocommerce_coming_soon_option() {
+	add_option( 'woocommerce_coming_soon', 'no' );
+}
+
+/**
+ * Migrate Launch Your Store tour meta keys to the woocommerce_meta user data fields.
+ */
+function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
+	// Rename `woocommerce_launch_your_store_tour_hidden` meta key to `woocommerce_admin_launch_your_store_tour_hidden`.
+	global $wpdb;
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_launch_your_store_tour_hidden',
+			'woocommerce_launch_your_store_tour_hidden'
+		)
+	);
+
+	// Rename `woocommerce_coming_soon_banner_dismissed` meta key to `woocommerce_admin_coming_soon_banner_dismissed`.
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_coming_soon_banner_dismissed',
+			'woocommerce_coming_soon_banner_dismissed'
+		)
+	);
 }

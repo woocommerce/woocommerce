@@ -49,7 +49,7 @@ Insomnia is almost identical to Postman; fill in the same fields and again use b
 
 ![Insomnia](https://developer.woocommerce.com/wp-content/uploads/2023/12/insomnia.png)
 
-Thats it! The API is working.
+That's it! The API is working.
 
 If you have problems connecting, you may need to disable SSL verification - see the connection issues section below.
 

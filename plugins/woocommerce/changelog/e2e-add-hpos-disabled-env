@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: add hpos-disabled env and tagged tests with hpos tag

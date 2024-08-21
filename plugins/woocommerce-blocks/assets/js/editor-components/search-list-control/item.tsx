@@ -3,7 +3,7 @@
  */
 import clsx from 'clsx';
 import { CheckboxControl } from '@wordpress/components';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import { arrayDifferenceBy, arrayUnionBy } from '@woocommerce/utils';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -73,6 +73,12 @@ export const SearchListItem = < T extends object = object >( {
 			'is-radio-button': isSingle,
 		}
 	);
+
+	useEffect( () => {
+		if ( hasChildren && isSelected ) {
+			setExpandedPanelId( item.id as number );
+		}
+	}, [ item, hasChildren, isSelected ] );
 
 	const name = props.name || `search-list-item-${ controlId }`;
 	const id = `${ name }-${ item.id }`;

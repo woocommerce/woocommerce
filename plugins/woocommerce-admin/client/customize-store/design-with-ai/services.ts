@@ -206,7 +206,7 @@ const resetPatternsAndProducts = () => async () => {
 	const response = await apiFetch< {
 		is_ai_generated: boolean;
 	} >( {
-		path: '/wc/private/ai/store-info',
+		path: '/wc-admin/ai/store-info',
 		method: 'GET',
 	} );
 
@@ -216,7 +216,7 @@ const resetPatternsAndProducts = () => async () => {
 
 	return Promise.all( [
 		apiFetch( {
-			path: '/wc/private/ai/patterns',
+			path: '/wc-admin/ai/patterns',
 			method: 'DELETE',
 		} ),
 		apiFetch( {
@@ -239,7 +239,7 @@ export const updateStorePatterns = async (
 			ai_content_generated: boolean;
 			images: { images: Array< unknown >; search_term: string };
 		} >( {
-			path: '/wc/private/ai/images',
+			path: '/wc-admin/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
@@ -250,7 +250,7 @@ export const updateStorePatterns = async (
 		const { is_ai_generated } = await apiFetch< {
 			is_ai_generated: boolean;
 		} >( {
-			path: '/wc/private/ai/store-info',
+			path: '/wc-admin/ai/store-info',
 			method: 'GET',
 		} );
 
@@ -287,7 +287,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/patterns',
+				path: '/wc-admin/ai/patterns',
 				method: 'POST',
 				data: {
 					business_description:
@@ -314,7 +314,7 @@ export const updateStorePatterns = async (
 		await Promise.all( [
 			...productContents,
 			apiFetch( {
-				path: '/wc/private/ai/business-description',
+				path: '/wc-admin/ai/business-description',
 				method: 'POST',
 				data: {
 					business_description:
@@ -322,7 +322,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/store-title',
+				path: '/wc-admin/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:
