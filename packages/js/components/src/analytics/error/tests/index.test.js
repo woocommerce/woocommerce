@@ -10,25 +10,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import AnalyticsError from '..';
 
 describe( 'AnalyticsError', () => {
-	function onError( event ) {
-		// Note: this will swallow reports about unhandled errors!
-		// Use with extreme caution.
-		event.preventDefault();
-	}
-
 	// Mock window.location.reload by using a global variable
 	const originalLocation = window.location;
 
 	beforeAll( () => {
-		// Opt Out of the jsdom error messages
-		window.addEventListener( 'error', onError );
 		delete window.location;
 		window.location = { reload: jest.fn() };
 	} );
 
 	afterAll( () => {
 		window.location = originalLocation;
-		window.removeEventListener( 'error', onError );
 	} );
 
 	it( 'displays an error message', () => {
