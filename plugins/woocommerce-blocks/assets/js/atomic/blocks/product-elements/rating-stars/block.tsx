@@ -31,6 +31,7 @@ interface ProductRatingStarsProps {
 export const Block = ( props: ProductRatingStarsProps ): JSX.Element | null => {
 	const {
 		textAlign = '',
+		isDescendentOfSingleProductBlock,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
 	} = props;
 	const styleProps = useStyleProps( props );
@@ -43,6 +44,9 @@ export const Block = ( props: ProductRatingStarsProps ): JSX.Element | null => {
 	return (
 		<ProductRating
 			className={ className }
+			isDescendentOfSingleProductBlock={
+				isDescendentOfSingleProductBlock
+			}
 			shouldDisplayMockedReviewsWhenProductHasNoReviews={
 				shouldDisplayMockedReviewsWhenProductHasNoReviews
 			}
