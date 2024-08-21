@@ -108,7 +108,7 @@ const hasError = validationError?.message && ! validationError?.hidden;
 
 In the example above, the `message` is hidden and only the text color is changed to red, highlighting that this field has a validation error.
 
-In some cases, it's desired to show the validation error message to the user. For example, if the buyer tries to submit the checkout form without filling in the required fields. An example can seen when leaving the first name, last name and address fileds empty:
+In some cases, it's desired to show the validation error message to the user. For example, if the buyer tries to submit the checkout form without filling in the required fields. An example can seen when leaving the first name, last name and address fields empty:
 
 ![image](https://woocommerce.com/wp-content/uploads/2023/10/Screenshot-2023-10-25-at-18.28.30.png)
 

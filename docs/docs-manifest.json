@@ -14,6 +14,41 @@
   ],
   "categories": [
     {
+      "content": "",
+      "category_slug": "block-theme-development",
+      "category_title": "Block Theme Development",
+      "posts": [
+        {
+          "post_title": "Theming for Woo blocks",
+          "menu_title": "Theming for Woo Blocks",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/theming-woo-blocks.md",
+          "hash": "4e0614ad8cb28735cfc8a3e3331c28386d1ceeadb1d1ce8fe529f2846e06b631",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/theming-woo-blocks.md",
+          "id": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
+        },
+        {
+          "post_title": "CSS styling for themes",
+          "menu_title": "CSS Styling for Themes",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/css-styling.md",
+          "hash": "422b2e0008ad1809a50c61851abe5c43c6f6743f216bcd9ba7dc5251f65e749d",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/css-styling.md",
+          "id": "55b3452119141753ee1eaeee5f8d471ab362945b"
+        },
+        {
+          "post_title": "Cart and checkout blocks theming",
+          "menu_title": "Cart and Checkout Blocks Theming",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/cart-and-checkout.md",
+          "hash": "bb65130caa017d16d84226d0383d5441113ebb1c4a7e5f05c52a6ebf56514aa3",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/cart-and-checkout.md",
+          "id": "8ff3a904e51ef1a07a0a6b0c77b0134a2cb0a8e5"
+        }
+      ],
+      "categories": []
+    },
+    {
       "content": "\nDiscover tutorials and guides for creating custom WooCommerce stores. This section is your toolkit for building advanced, modern online shops that meet the needs of merchants and customers alike.\n",
       "category_slug": "building-a-woo-store",
       "category_title": "Building a Woo Store",
@@ -180,7 +215,7 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "dd8caf9a8f79bb0806887bb41f64f9e32da5542e1c4cabdf0057c7e17f4208b5",
+              "hash": "f60acaaea4a6ac4adf637bc7069c966e01db089f9dfaa937def91165a71a4255",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
@@ -1319,9 +1354,9 @@
       "categories": []
     },
     {
-      "content": "\nLearn to design and integrate custom themes in WooCommerce, focusing on responsive design and ecommerce optimization.\n\nThis document was created for use when developing classic themes. Check this other document for [block theme development](../../plugins/woocommerce-blocks/docs/designers/theming/README.md).\n",
+      "content": "\nLearn to design and integrate custom themes in WooCommerce, focusing on responsive design and ecommerce optimization.\n\nFor blocks themes, see our [block theme documentation](/docs/category/block-theme-development).\n",
       "category_slug": "theme-development",
-      "category_title": "Theme Development",
+      "category_title": "Classic Theme Development",
       "posts": [
         {
           "post_title": "Thumbnail image regeneration",
@@ -1345,10 +1380,7 @@
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
           "hash": "6099b3a45f91390d9dd239f496eaf531be2b638c666858d6a066051ce915176a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
-          "id": "34bfebec9fc45e680976814928a7b8a1778af14e",
-          "links": {
-            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c"
-          }
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
         },
         {
           "post_title": "How to set up and use a child theme",
@@ -1357,10 +1389,7 @@
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/set-up-a-child-theme.md",
           "hash": "b362d5ddd34d8b81f6a2ee2369dd2cd68e51700836a85f96d629e87d564b0844",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/set-up-a-child-theme.md",
-          "id": "00b6916595cbde7766f080260a9ea26f53f3271c",
-          "links": {
-            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c"
-          }
+          "id": "00b6916595cbde7766f080260a9ea26f53f3271c"
         },
         {
           "post_title": "Image sizing for theme developers",
@@ -1371,7 +1400,6 @@
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/image-sizes.md",
           "id": "3f5301ac3040d38bc449b440733da6a466209df3",
           "links": {
-            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c",
             "./thumbnail-image-regeneration.md": "733e1b16276d64f128ba0e337ca68ec3de0bf68f"
           }
         },
@@ -1399,10 +1427,7 @@
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/classic-theme-developer-handbook.md",
           "hash": "1194437fbc2ec82d60c8b73a9742ec650bd90fe734758c3a2b27ed852d4d14f7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/classic-theme-developer-handbook.md",
-          "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4",
-          "links": {
-            "../../plugins/woocommerce-blocks/docs/designers/theming/README.md": "64ff2179eb307d2bcd8d9736b3249ca56b77ba0c"
-          }
+          "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4"
         }
       ],
       "categories": []
