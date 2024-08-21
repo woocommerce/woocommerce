@@ -82,9 +82,6 @@ export const PrintfulAdvertProductPlacement = {
 	title: (
 		<span className="printful-sponsored__text">
 			{ __( 'Print-on-demand products', 'woocommerce' ) }
-			<div className="woocommerce-label">
-				{ __( 'Promoted', 'woocommerce' ) }
-			</div>
 		</span>
 	),
 	content: __(
@@ -99,7 +96,11 @@ export const PrintfulAdvertProductPlacement = {
 			src={ PrintfulIcon }
 		/>
 	),
-	after: <Icon icon={ chevronRight } />,
+	after: (
+		<div className="woocommerce-label">
+			{ __( 'Promoted', 'woocommerce' ) }
+		</div>
+	),
 	onClick: () => {
 		recordEvent( 'tasklist_product_printful_advert_click' );
 		window.open( 'https://woocommerce.com/products/printful', '_blank' );
@@ -116,7 +117,7 @@ export const ImportCSVItem = {
 	content: __( 'Import your products from a CSV file.', 'woocommerce' ),
 	className: 'woocommerce-products-list__item-advert',
 	before: <Upload />,
-	after: <Icon icon={ chevronRight } />,
+	after: null,
 	onClick: () => {
 		recordEvent( 'tasklist_add_product', {
 			method: 'import',

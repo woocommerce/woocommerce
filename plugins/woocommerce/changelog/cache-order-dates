@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache order dates in options for performance.

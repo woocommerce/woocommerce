@@ -8,12 +8,19 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Download handler class.
  */
 class WC_Download_Handler {
+	use AccessiblePrivateMethods;
+
+	/**
+	 * The hook used for deferred tracking of partial download attempts.
+	 */
+	public const TRACK_DOWNLOAD_CALLBACK = 'track_partial_download';
 
 	/**
 	 * Hook in methods.
@@ -25,6 +32,7 @@ class WC_Download_Handler {
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
 		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 2 );
 		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 2 );
+		self::add_action( self::TRACK_DOWNLOAD_CALLBACK, array( __CLASS__, 'track_download' ), 10, 3 );
 	}
 
 	/**
@@ -135,9 +143,13 @@ class WC_Download_Handler {
 		// Track the download in logs and change remaining/counts.
 		$current_user_id = get_current_user_id();
 		$ip_address      = WC_Geolocation::get_ip_address();
-		if ( ! $download_range['is_range_request'] ) {
-			$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
-		}
+
+		self::track_download(
+			$download,
+			$current_user_id > 0 ? $current_user_id : null,
+			! empty( $ip_address ) ? $ip_address : null,
+			$download_range['is_range_request']
+		);
 
 		self::download( $file_path, $download->get_product_id() );
 	}
@@ -694,6 +706,76 @@ class WC_Download_Handler {
 			$message .= ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-forward">' . esc_html__( 'Go to shop', 'woocommerce' ) . '</a>';
 		}
 		wp_die( $message, $title, array( 'response' => $status ) ); // WPCS: XSS ok.
+	}
+
+	/**
+	 * Takes care of tracking download requests, with support for deferring tracking in the case of
+	 * partial (ranged request) downloads.
+	 *
+	 * @param WC_Customer_Download|int $download        The download to be tracked.
+	 * @param int|null                 $user_id         The user ID, if known.
+	 * @param string|null              $user_ip_address The download IP address, if known.
+	 * @param bool                     $defer           If tracking the download should be deferred.
+	 *
+	 * @return void
+	 * @throws Exception If the active version of Action Scheduler is less than 3.6.0.
+	 */
+	private static function track_download( $download, $user_id = null, $user_ip_address = null, bool $defer = false ): void {
+		try {
+			// If we were supplied with an integer, convert it to a download object.
+			$download = new WC_Customer_Download( $download );
+
+			// In simple cases, we can track the download immediately.
+			if ( ! $defer ) {
+				$download->track_download( $user_id, $user_ip_address );
+				return;
+			}
+
+			// Counting of partial downloads may be disabled by the site operator.
+			if ( get_option( 'woocommerce_downloads_count_partial', 'yes' ) !== 'yes' ) {
+				return;
+			}
+
+			/**
+			 * Determines how long the window of time is for tracking unique download attempts, in relation to
+			 * partial (ranged) download requests.
+			 *
+			 * @since 9.2.0
+			 *
+			 * @param int $window_in_seconds      Non-negative number of seconds. Defaults to 1800 (30 minutes).
+			 * @param int $download_permission_id References the download permission being tracked.
+			 */
+			$window = absint( apply_filters( 'woocommerce_partial_download_tracking_window', 30 * MINUTE_IN_SECONDS, $download->get_id() ) );
+
+			// If we do not have Action Scheduler 3.6.0+ (this would be an unexpected scenario) then we cannot
+			// track partial downloads, because we require support for unique actions.
+			if ( version_compare( ActionScheduler_Versions::instance()->latest_version(), '3.6.0', '<' ) ) {
+				throw new Exception( 'Support for unique scheduled actions is not currently available.' );
+			}
+
+			as_schedule_single_action(
+				time() + $window,
+				self::TRACK_DOWNLOAD_CALLBACK,
+				array(
+					$download->get_id(),
+					$user_id,
+					$user_ip_address,
+				),
+				'woocommerce',
+				true
+			);
+		} catch ( Exception $e ) {
+			wc_get_logger()->error(
+				'There was a problem while tracking a product download.',
+				array(
+					'error'    => $e->getMessage(),
+					'id'       => $download->get_id(),
+					'user_id'  => $user_id,
+					'ip'       => $user_ip_address,
+					'deferred' => $defer ? 'yes' : 'no',
+				)
+			);
+		}
 	}
 }
 

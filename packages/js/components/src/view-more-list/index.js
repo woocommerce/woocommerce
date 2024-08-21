@@ -17,7 +17,7 @@ import Tag from '../tag';
  * @param {Array}  props.items
  * @return {Object} -
  */
-const ViewMoreList = ( { items } ) => {
+const ViewMoreList = ( { items = [] } ) => {
 	return (
 		<Tag
 			className="woocommerce-view-more-list"
@@ -47,10 +47,6 @@ ViewMoreList.propTypes = {
 	 * Items to list in the popover
 	 */
 	items: PropTypes.arrayOf( PropTypes.node ),
-};
-
-ViewMoreList.defaultProps = {
-	items: [],
 };
 
 export default ViewMoreList;
