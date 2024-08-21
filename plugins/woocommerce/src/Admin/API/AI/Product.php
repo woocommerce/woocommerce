@@ -17,6 +17,12 @@ defined( 'ABSPATH' ) || exit;
  * @internal
  */
 class Product {
+	/**
+	 * The store title option name.
+	 *
+	 * @var string
+	 */
+	const AI_CONTENT_GENERATED = 'ai_content_generated';
 
 	/**
 	 * Endpoint namespace.
@@ -73,7 +79,7 @@ class Product {
 		if ( empty( $product_information ) ) {
 			return rest_ensure_response(
 				array(
-					'ai_content_generated' => true,
+					self::AI_CONTENT_GENERATED => true,
 				)
 			);
 		}
@@ -88,7 +94,7 @@ class Product {
 
 		return rest_ensure_response(
 			array(
-				'ai_content_generated' => true,
+				self::AI_CONTENT_GENERATED => true,
 			)
 		);
 	}
