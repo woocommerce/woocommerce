@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Make screen readers announce notice messages once page loads.
