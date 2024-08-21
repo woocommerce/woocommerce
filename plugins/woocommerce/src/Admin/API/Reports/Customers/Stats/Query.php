@@ -35,8 +35,6 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	protected function get_default_query_vars() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use GenericQuery or \WC_Object_Query instead' );
-
 		return array(
 			'per_page' => get_option( 'posts_per_page' ), // not sure if this should be the default.
 			'page'     => 1,
@@ -54,8 +52,6 @@ class Query extends ReportsQuery {
 	 * @return array
 	 */
 	public function get_data() {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, 'x.x.x', 'Query class is deprecated, please use Reports\Customers\Query with a custom name, GenericQuery or \WC_Object_Query instead' );
-
 		$args = apply_filters( 'woocommerce_analytics_customers_stats_query_args', $this->get_query_vars() );
 
 		$data_store = \WC_Data_Store::load( 'report-customers-stats' );
