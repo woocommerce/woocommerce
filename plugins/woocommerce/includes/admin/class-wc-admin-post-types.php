@@ -897,6 +897,7 @@ class WC_Admin_Post_Types {
 		}
 
 		$old_price     = (float) $product->{"get_{$price_type}_price"}();
+		$old_price     = ! $old_price ? (float) $product->get_regular_price() : $old_price;
 		$price_changed = false;
 
 		$change_price  = absint( $request_data[ "change_{$price_type}_price" ] );
