@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { AnalyticsError } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -11,7 +12,6 @@ import PropTypes from 'prop-types';
 import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
-import ReportError from '../../components/report-error';
 import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from './table';
 import ReportFilters from '../../components/report-filters';
@@ -35,7 +35,7 @@ const VariationsReport = ( props ) => {
 	const { path, query, isError, isRequesting } = props;
 
 	if ( isError ) {
-		return <ReportError />;
+		return <AnalyticsError />;
 	}
 
 	const chartQuery = {
