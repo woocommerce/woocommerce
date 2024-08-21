@@ -2,6 +2,9 @@
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\BlockTemplatesController;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 
 /**
  * Handles the template_include hook to determine whether the current page needs
@@ -48,12 +51,20 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
+		$is_fse_theme         = wc_current_theme_is_fse_theme();
+		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
+
+		if ( ! $is_fse_theme && ! current_theme_supports( 'block-template-parts' ) ) {
+			// Initialize block templates for use in classic theme.
+			BlocksPackage::init();
+			$container = BlocksPackage::container();
+			$container->get( BlockTemplatesRegistry::class )->init();
+			$container->get( BlockTemplatesController::class )->init();
+		}
+
 		add_theme_support( 'block-templates' );
 
 		$coming_soon_template = get_query_template( 'coming-soon' );
-
-		$is_fse_theme         = wc_current_theme_is_fse_theme();
-		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
 
 		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_header();
@@ -66,7 +77,9 @@ class ComingSoonRequestHandler {
 			}
 		);
 
-		include $coming_soon_template;
+		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
+			include $coming_soon_template;
+		}
 
 		if ( ! $is_fse_theme && $is_store_coming_soon ) {
 			get_footer();
@@ -100,7 +113,7 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
-		// Do not show coming soon on 404 pages when restrict to store pages only.
+		// Do not show coming soon on 404 pages when applied to store pages only.
 		if ( $this->coming_soon_helper->is_store_coming_soon() && is_404() ) {
 			return false;
 		}

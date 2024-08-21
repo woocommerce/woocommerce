@@ -92,14 +92,8 @@
 				"command": "lint:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
-					"includes/**/*.php",
-					"patterns/**/*.php",
-					"src/**/*.php",
-					"templates/**/*.php",
-					"tests/php/**/*.php",
-					"tests/legacy/unit-tests/**/*.php",
-					"tests/unit-tests/**/*.php",
-					"tests/**/*.js"
+					"**/*.php",
+					"**/*.js"
 				]
 			},
 			"tests": [
@@ -115,14 +109,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -148,14 +137,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -181,14 +165,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -222,7 +201,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/e2e-pw/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -348,14 +329,8 @@
 				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
-					"command": "test:e2e",
-					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
-					],
+					"command": "test:e2e:with-env default-hpos-disabled --project=ui",
+					"shardingArguments": [],
 					"events": [
 						"daily-checks",
 						"release-checks"
@@ -368,7 +343,7 @@
 						}
 					},
 					"report": {
-						"resultsBlobName": "core-e2e-reports-non-hpos",
+						"resultsBlobName": "core-e2e-reports-hpos-disabled",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -442,7 +417,9 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -460,7 +437,7 @@
 				{
 					"name": "Core API tests - HPOS disabled",
 					"testType": "api",
-					"command": "test:api",
+					"command": "test:e2e:with-env default-hpos-disabled --project=api",
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
@@ -471,7 +448,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/e2e-pw/bin/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"events": [
 						"push"
@@ -502,7 +481,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/performance/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:perf"
@@ -529,8 +510,12 @@
 						".wp-env.json"
 					],
 					"events": [
-						"disabled"
-					]
+						"push"
+					],
+					"report": {
+						"resultsBlobName": "core-metrics-report",
+						"resultsPath": "../../tools/compare-perf/artifacts/"
+					}
 				},
 				{
 					"name": "Blocks e2e tests",
@@ -607,7 +592,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.45.1",
+		"@playwright/test": "^1.46.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
@@ -621,8 +606,8 @@
 		"@woocommerce/woocommerce-rest-api": "^1.0.1",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
-		"@wordpress/e2e-test-utils-playwright": "wp-6.4",
-		"@wordpress/env": "^9.7.0",
+		"@wordpress/e2e-test-utils-playwright": "wp-6.6",
+		"@wordpress/env": "^10.1.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.25.0",
 		"allure-playwright": "^2.9.2",

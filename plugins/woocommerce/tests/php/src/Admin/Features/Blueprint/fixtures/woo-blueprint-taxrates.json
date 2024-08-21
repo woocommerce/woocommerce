@@ -1,0 +1,41 @@
+{
+  "landingPage": "admin.php?page=wc-admin",
+  "steps": [
+	{
+	  "step": "setWCTaxRates",
+	  "values": {
+		"rates": [
+		  {
+			"tax_rate_id": "1",
+			"tax_rate_country": "US",
+			"tax_rate_state": "CA",
+			"tax_rate": "9.5000",
+			"tax_rate_name": "Tax",
+			"tax_rate_priority": "1",
+			"tax_rate_compound": "0",
+			"tax_rate_shipping": "1",
+			"tax_rate_order": "0",
+			"tax_rate_class": ""
+		  }
+		],
+		"locations": [
+		  {
+			"location_id": "1",
+			"location_code": "90020",
+			"tax_rate_id": "1",
+			"location_type": "postcode"
+		  },
+		  {
+			"location_id": "2",
+			"location_code": "LOS ANGELES",
+			"tax_rate_id": "1",
+			"location_type": "city"
+		  }
+		]
+	  },
+	  "meta": {
+		"plugin": "woocommerce"
+	  }
+	}
+  ]
+}

@@ -310,7 +310,7 @@ const registerClassicTemplateBlock = ( {
 			/>
 		),
 		category: 'woocommerce',
-		apiVersion: 2,
+		apiVersion: 3,
 		keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
 		description:
 			template && TEMPLATES[ template ]
