@@ -29,7 +29,7 @@ class Product extends AIEndpoint {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = 'patterns';
+	protected $endpoint = 'product';
 
 	/**
 	 * Register routes.
