@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -27,7 +27,7 @@ const {
 const container = document.createElement( 'div' );
 container.setAttribute( 'id', 'woo-product-usage-notice' );
 
-render(
+createRoot( document.body.appendChild( container ) ).render(
 	<ProductUsageNoticeModal
 		renewUrl={ renewUrl }
 		subscribeUrl={ subscribeUrl }
@@ -41,6 +41,5 @@ render(
 		colorScheme={ colorScheme }
 		subscriptionState={ subscriptionState }
 		screenId={ screenId }
-	/>,
-	document.body.appendChild( container )
+	/>
 );
