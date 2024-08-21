@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update WooCommercePayments task is_supported to use default suggestions

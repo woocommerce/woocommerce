@@ -166,6 +166,7 @@
 		align-items: center;
 		font-size: 14px;
 		font-weight: normal;
+		margin-bottom: 16px;
 
 		@include breakpoint("<782px") {
 			width: 100%;
@@ -179,7 +180,7 @@
 		justify-content: center;
 
 		@include breakpoint("<782px") {
-			margin: 16px auto 20px;
+			margin: 0 auto 20px;
 		}
 
 		.components-checkbox-control__input-container {
@@ -195,9 +196,6 @@
 			margin-left: 10px;
 		}
 
-		a {
-			color: $gray-700;
-		}
 	}
 }
 // Business location page
@@ -344,12 +342,44 @@
 			margin-top: 12px !important;
 		}
 	}
+
+	$sticky-footer-height: 120px;
+
 	.woocommerce-profiler-plugins__list {
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
 		gap: 16px;
 		flex: 50%;
+
+		@mixin sticky-footer-scroll-padding {
+			padding-bottom: $sticky-footer-height + 32px;
+		}
+
+		@include breakpoint(">782px") {// sticky footer shouldn't apply to mobile layout
+			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
+			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
+			&.rows-1 {
+				@media screen and ( max-height: 520px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-2 {
+				@media screen and ( max-height: 650px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-3 {
+				@media screen and ( max-height: 780px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-4 {
+				@media screen and ( max-height: 910px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+		}
 	}
 
 	.woocommerce-profiler-plugins-continue-button {
@@ -380,9 +410,46 @@
 	.woocommerce-profiler-plugins-jetpack-agreement {
 		color: $gray-700;
 		font-size: 12px;
-		a {
-			color: inherit;
+	}
+
+	.woocommerce-profiler-plugins__footer {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		@mixin plugins-sticky-footer {
+			background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 44.69%);
+			height: $sticky-footer-height;
+			position: fixed;
+			bottom: 0;
 		}
+
+		@include breakpoint(">782px") { // sticky footer shouldn't apply to mobile layout
+			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
+			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
+			&.rows-1 {
+				@media screen and ( max-height: 520px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-2 {
+				@media screen and ( max-height: 650px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-3 {
+				@media screen and ( max-height: 780px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-4 {
+				@media screen and ( max-height: 910px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+		}
+
 	}
 
 	.woocommerce-profiler-plugins-continue-button-container {
@@ -631,4 +698,16 @@
 	html.wp-toolbar {
 		padding-top: 32px !important;
 	}
+}
+
+.woocommerce-profiler-builder-intro {
+	display: flex;
+	flex-direction: column;
+	padding: 30px;
+	gap: 20px;
+	align-items: center;
+}
+
+.woocommerce-profiler-builder-intro-file-input {
+	margin-left: 100px;
 }
