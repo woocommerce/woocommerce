@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
-use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 
 /**
@@ -25,6 +24,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Dynamically sets the date column name based on configuration
+	 *
+	 * @override ReportsDataStore::__construct()
 	 */
 	public function __construct() {
 		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
@@ -34,6 +35,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_order_stats';
@@ -41,12 +44,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ReportsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'orders';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @override ReportsDataStore::$column_types
 	 *
 	 * @var array
 	 */
@@ -66,12 +73,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'orders';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
@@ -213,116 +224,117 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
 	 */
-	public function get_data( $query_args ) {
+	public function get_default_query_vars() {
+		$defaults = array_merge(
+			parent::get_default_query_vars(),
+			array(
+				'orderby'           => $this->date_column_name,
+				'product_includes'  => array(),
+				'product_excludes'  => array(),
+				'coupon_includes'   => array(),
+				'coupon_excludes'   => array(),
+				'tax_rate_includes' => array(),
+				'tax_rate_excludes' => array(),
+				'customer_type'     => null,
+				'status_is'         => array(),
+				'extended_info'     => false,
+				'refunds'           => null,
+				'order_includes'    => array(),
+				'order_excludes'    => array(),
+			)
+		);
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page'          => get_option( 'posts_per_page' ),
-			'page'              => 1,
-			'order'             => 'DESC',
-			'orderby'           => $this->date_column_name,
-			'before'            => TimeInterval::default_before(),
-			'after'             => TimeInterval::default_after(),
-			'fields'            => '*',
-			'product_includes'  => array(),
-			'product_excludes'  => array(),
-			'coupon_includes'   => array(),
-			'coupon_excludes'   => array(),
-			'tax_rate_includes' => array(),
-			'tax_rate_excludes' => array(),
-			'customer_type'     => null,
-			'status_is'         => array(),
-			'extended_info'     => false,
-			'refunds'           => null,
-			'order_includes'    => array(),
-			'order_excludes'    => array(),
+		$this->initialize_queries();
+
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$selections = $this->selected_columns( $query_args );
+		$params     = $this->get_limit_params( $query_args );
+		$this->add_sql_query_params( $query_args );
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+		$db_records_count = (int) $wpdb->get_var(
+			"SELECT COUNT( DISTINCT tt.order_id ) FROM (
+				{$this->subquery->get_query_statement()}
+			) AS tt"
+		);
+		/* phpcs:enable */
 
-		if ( false === $data ) {
-			$this->initialize_queries();
-
+		if ( 0 === $params['per_page'] ) {
+			$total_pages = 0;
+		} else {
+			$total_pages = (int) ceil( $db_records_count / $params['per_page'] );
+		}
+		if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 			$data = (object) array(
 				'data'    => array(),
-				'total'   => 0,
+				'total'   => $db_records_count,
 				'pages'   => 0,
 				'page_no' => 0,
 			);
-
-			$selections = $this->selected_columns( $query_args );
-			$params     = $this->get_limit_params( $query_args );
-			$this->add_sql_query_params( $query_args );
-			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT( DISTINCT tt.order_id ) FROM (
-					{$this->subquery->get_query_statement()}
-				) AS tt"
-			);
-			/* phpcs:enable */
-
-			if ( 0 === $params['per_page'] ) {
-				$total_pages = 0;
-			} else {
-				$total_pages = (int) ceil( $db_records_count / $params['per_page'] );
-			}
-			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				$data = (object) array(
-					'data'    => array(),
-					'total'   => $db_records_count,
-					'pages'   => 0,
-					'page_no' => 0,
-				);
-				return $data;
-			}
-
-			$this->subquery->clear_sql_clause( 'select' );
-			$this->subquery->add_sql_clause( 'select', $selections );
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-			/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
-			$orders_data = $wpdb->get_results(
-				$this->subquery->get_query_statement(),
-				ARRAY_A
-			);
-			/* phpcs:enable */
-
-			if ( null === $orders_data ) {
-				return $data;
-			}
-
-			if ( $query_args['extended_info'] ) {
-				$this->include_extended_info( $orders_data, $query_args );
-			}
-
-			$orders_data = array_map( array( $this, 'cast_numbers' ), $orders_data );
-			$data        = (object) array(
-				'data'    => $orders_data,
-				'total'   => $db_records_count,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
+			return $data;
 		}
+
+		$this->subquery->clear_sql_clause( 'select' );
+		$this->subquery->add_sql_clause( 'select', $selections );
+		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+		/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
+		$orders_data = $wpdb->get_results(
+			$this->subquery->get_query_statement(),
+			ARRAY_A
+		);
+		/* phpcs:enable */
+
+		if ( null === $orders_data ) {
+			return $data;
+		}
+
+		if ( $query_args['extended_info'] ) {
+			$this->include_extended_info( $orders_data, $query_args );
+		}
+
+		$orders_data = array_map( array( $this, 'cast_numbers' ), $orders_data );
+		$data        = (object) array(
+			'data'    => $orders_data,
+			'total'   => $db_records_count,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
 		return $data;
 	}
 
 	/**
 	 * Normalizes order_by clause to match to SQL query.
+	 *
+	 * @override ReportsDataStore::normalize_order_by()
 	 *
 	 * @param string $order_by Order by option requeste by user.
 	 * @return string

@@ -4,10 +4,15 @@
 	"title": "Order Status",
 	"description": "Display a \"thank you\" message, or a sentence regarding the current order status.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {
 		"multiple": false,
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false,
 		"typography": {
 			"fontSize": true,
@@ -51,6 +56,6 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
