@@ -1,11 +1,13 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-template",
 	"title": "Product Template",
 	"category": "woocommerce",
 	"description": "Contains the block elements used to render a product.",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"textdomain": "woocommerce",
 	"usesContext": [
 		"queryId",
@@ -22,7 +24,10 @@
 		"inserter": false,
 		"reusable": false,
 		"html": false,
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"anchor": true,
 		"color": {
 			"gradients": true,

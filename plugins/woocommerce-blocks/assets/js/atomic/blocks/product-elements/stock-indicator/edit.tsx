@@ -43,7 +43,7 @@ const Edit = ( {
 		<div
 			{ ...blockProps }
 			/**
-			 * If block is decendant of the All Products block, we don't want to
+			 * If block is descendant of the All Products block, we don't want to
 			 * apply style here because it will be applied inside Block using
 			 * useColors, useTypography, and useSpacing hooks.
 			 */

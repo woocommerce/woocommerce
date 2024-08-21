@@ -46,12 +46,6 @@ function wc_template_redirect() {
 		exit;
 	}
 
-	// Redirect to edit account if trying to recover password whilst logged in.
-	if ( isset( $wp->query_vars['lost-password'] ) && is_user_logged_in() ) {
-		wp_safe_redirect( esc_url_raw( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) );
-		exit;
-	}
-
 	// Trigger 404 if trying to access an endpoint on wrong page.
 	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() && apply_filters( 'woocommerce_account_endpoint_page_not_found', true ) ) {
 		$wp_query->set_404();
@@ -246,8 +240,8 @@ function wc_set_loop_prop( $prop, $value = '' ) {
  * Set the current visbility for a product in the woocommerce_loop global.
  *
  * @since 4.4.0
- * @param int  $product_id Product it to cache visbiility for.
- * @param bool $value The poduct visibility value to cache.
+ * @param int  $product_id Product it to cache visibility for.
+ * @param bool $value The product visibility value to cache.
  */
 function wc_set_loop_product_visibility( $product_id, $value ) {
 	wc_set_loop_prop( "product_visibility_$product_id", $value );

@@ -226,7 +226,7 @@ class ProductCollection extends AbstractBlock {
 				'data-wc-navigation-id',
 				'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 			);
-			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ), true ) ?? [];
+			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ) ?? '{}', true );
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(

@@ -1,3 +1,8 @@
+/**
+ * Internal dependencies
+ */
+import { BlockOverlayAttributeOptions as ProductFiltersBlockOverlayAttributeOptions } from '../product-filters/types';
+
 type BorderRadius = {
 	bottomLeft: string;
 	bottomRight: string;
@@ -9,10 +14,19 @@ type BorderSide = {
 	width: string;
 };
 
+export interface BlockContext {
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	'woocommerce/product-filters/overlay': ProductFiltersBlockOverlayAttributeOptions;
+}
+
+export type BlockVariationTriggerType = 'open-overlay' | 'close-overlay';
+
 export type BlockAttributes = {
 	navigationStyle: 'label-and-icon' | 'label-only' | 'icon-only';
 	buttonStyle: string;
 	iconSize?: number;
+	overlayMode: ProductFiltersBlockOverlayAttributeOptions;
+	triggerType: BlockVariationTriggerType;
 	style: {
 		border?: {
 			radius?: string | BorderRadius;

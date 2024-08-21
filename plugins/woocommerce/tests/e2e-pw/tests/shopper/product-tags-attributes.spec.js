@@ -1,7 +1,7 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const pageTitle = 'Product Showcase';
-const { goToPageEditor } = require( '../../utils/editor' );
+const { goToPageEditor, getCanvas } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const singleProductPrice1 = '5.00';
@@ -282,15 +282,17 @@ test.describe(
 			// create as a merchant a new page with Product Collection block
 			await goToPageEditor( { page } );
 
-			await page
+			const canvas = await getCanvas( page );
+
+			await canvas
 				.getByRole( 'textbox', { name: 'Add Title' } )
 				.fill( pageTitle );
 
-			await page
+			await canvas
 				.getByRole( 'button', { name: 'Add default block' } )
 				.click();
 
-			await page
+			await canvas
 				.getByRole( 'document', {
 					name: 'Empty block; start writing or type forward slash to choose a block',
 				} )
@@ -298,7 +300,7 @@ test.describe(
 			await page.keyboard.press( 'Enter' );
 
 			// Product Collection requires choosing some collection.
-			await page
+			await canvas
 				.locator(
 					'[data-type="woocommerce/product-collection"] .components-placeholder'
 				)
@@ -331,7 +333,7 @@ test.describe(
 			await expect(
 				page.getByRole( 'heading', { name: pageTitle } )
 			).toBeVisible();
-			await expect(
+			expect(
 				await page
 					.getByRole( 'button', { name: 'Add to cart' } )
 					.count()
