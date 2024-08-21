@@ -44,7 +44,9 @@ describe( 'AnalyticsError', () => {
 	it( 'shows reload button', () => {
 		render( <AnalyticsError /> );
 
-		expect( screen.getByText( 'Reload' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'button', { name: 'Reload' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'refreshes the page when Reload Page button is clicked', () => {
