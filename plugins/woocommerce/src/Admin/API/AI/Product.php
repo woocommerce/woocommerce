@@ -83,8 +83,12 @@ class Product {
 			);
 		}
 
-		$product_updater = new UpdateProducts();
-		$product_updater->update_product_content( $product_information );
+		try {
+			$product_updater = new UpdateProducts();
+			$product_updater->update_product_content( $product_information );
+		} catch ( \Exception $e ) {
+			return rest_ensure_response( array( 'ai_content_generated' => false ) );
+		}
 
 		$last_product_to_update = $request['last_product'] ?? false;
 
