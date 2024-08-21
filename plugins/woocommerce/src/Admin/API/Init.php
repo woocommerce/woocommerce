@@ -90,6 +90,7 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\AI\BusinessDescription',
 				'Automattic\WooCommerce\Admin\API\AI\StoreInfo',
 				'Automattic\WooCommerce\Admin\API\AI\Images',
+				'Automattic\WooCommerce\Admin\API\AI\Patterns',
 			);
 		}
 
