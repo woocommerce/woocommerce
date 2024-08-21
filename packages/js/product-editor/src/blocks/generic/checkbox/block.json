@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-checkbox-field",
 	"title": "Product checkbox control",
 	"category": "woocommerce",
 	"description": "A reusable checkbox for the product editor.",
-	"keywords": [ "products", "checkbox", "input" ],
+	"keywords": [
+		"products",
+		"checkbox",
+		"input"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"title": {
@@ -38,5 +42,7 @@
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }

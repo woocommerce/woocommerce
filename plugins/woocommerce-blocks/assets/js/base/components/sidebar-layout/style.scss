@@ -4,6 +4,10 @@
 	margin: 0 auto $gap;
 	position: relative;
 
+	&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+		flex-direction: row-reverse;
+	}
+
 	.wc-block-must-login-prompt {
 		display: block;
 	}

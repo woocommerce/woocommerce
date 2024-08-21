@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-variation-items-field",
 	"title": "Product variations items",
 	"category": "woocommerce",
 	"description": "The product variations items.",
-	"keywords": [ "products", "variations" ],
+	"keywords": [
+		"products",
+		"variations"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"description": {
@@ -22,6 +25,8 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "isInSelectedTab" ],
+	"usesContext": [
+		"isInSelectedTab"
+	],
 	"editorStyle": "file:./editor.css"
 }

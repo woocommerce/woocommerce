@@ -2,10 +2,15 @@
 	"name": "woocommerce/product-best-sellers",
 	"title": "Best Selling Products",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"description": "Display a grid of your all-time best selling products.",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false
 	},
 	"attributes": {
@@ -87,6 +92,6 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

@@ -22,6 +22,7 @@ const Blueprint = () => {
 	const [ exportEnabled, setExportEnabled ] = useState( true );
 	const [ exportAsZip, setExportAsZip ] = useState( false );
 	const [ error, setError ] = useState( null );
+
 	const steps = {
 		Settings: 'setWCSettings',
 		'Core Profiler Options': 'setWCCoreProfilerOptions',
@@ -33,6 +34,20 @@ const Blueprint = () => {
 		'Task Options': 'setWCTaskOptions',
 	};
 
+	const instructions = {
+		Settings:
+			'It includes all the settings in General, Accounts & Privacy, Emails, Integration, Site Visibility, Advanced.',
+		'Core Profiler Options': 'It in includes the setup wizard options.',
+		'Payment Gateways':
+			'It includes all the settings in WooCommerce | Settings | Payments.',
+		Shipping:
+			'It includes all the settings in WooCommerce | Settings | Shipping.',
+		'Tax rates':
+			'It includes all the settings in WooCommerce | Settings | Tax.',
+		Plugins: 'It includes the active plugins on the site.',
+		Themes: 'It includes the active theme on the site.',
+		'Task Options': 'It includes the state of the setup task list.',
+	};
 	// Initialize state to keep track of checkbox values
 	const [ checkedState, setCheckedState ] = useState(
 		Object.keys( steps ).reduce( ( acc, key ) => {
@@ -119,8 +134,61 @@ const Blueprint = () => {
 				</Notice>
 			) }
 			<p className="blueprint-settings-slotfill-description">
-				{ __( 'Import/Export your Blueprint schema.', 'woocommerce' ) }
+				{ __(
+					'Blueprints are setup files that contain all the installation instructions. including plugins, themes and settings. Ease the setup process, allow teams to apply each others’ changes and much more.',
+					'woocommerce'
+				) }
 			</p>
+			<p>
+				<strong>
+					Please{ ' ' }
+					<a
+						href="https://automattic.survey.fm/woocommerce-blueprint-survey"
+						target="_blank"
+						rel="noreferrer"
+					>
+						complete the survey
+					</a>{ ' ' }
+					to help shape the direction of this feature!
+				</strong>
+			</p>
+			<h3>Import</h3>
+			<p>
+				You can import the schema on the{ ' ' }
+				<a
+					href={ getAdminLink(
+						'admin.php?page=wc-admin&path=%2Fsetup-wizard&step=intro-builder'
+					) }
+				>
+					builder setup page
+				</a>
+				{ ', or use the import WP CLI command ' }
+				<br />
+				<code>wp wc blueprint import path-to-woo-blueprint.json</code>.
+			</p>
+			<p></p>
+			<h3>Export</h3>
+			<p>
+				Choose the items to include in your blueprint file, or use the
+				export WP CLI command <br />
+				<code>wp wc blueprint export save-to-path.json</code>{ ' ' }
+			</p>
+			{ Object.entries( steps ).map( ( [ key, value ] ) => (
+				<div key={ key } className="woo-blueprint-export-step">
+					<input
+						type="checkbox"
+						id={ key }
+						name={ key }
+						value={ value }
+						checked={ checkedState[ key ] }
+						onChange={ () => handleOnChange( key ) }
+					/>
+					<label htmlFor={ key }>{ key }</label>
+					<p className="woo-blueprint-export-step-desc">
+						{ instructions[ key ] }
+					</p>
+				</div>
+			) ) }
 			<Button
 				isLink
 				onClick={ () => {
@@ -135,26 +203,26 @@ const Blueprint = () => {
 					} );
 				} }
 			>
-				Toggle selections
+				<p>Toggle selections</p>
 			</Button>
-			<br />
-			<br />
-			{ Object.entries( steps ).map( ( [ key, value ] ) => (
-				<div key={ key }>
-					<input
-						type="checkbox"
-						id={ key }
-						name={ key }
-						value={ value }
-						checked={ checkedState[ key ] }
-						onChange={ () => handleOnChange( key ) }
-					/>
-					<label htmlFor={ key }>{ key }</label>
-				</div>
-			) ) }
-			<br />
-			<p>Export may take some time depending on your network speed.</p>
 			<div id="download-link-container"></div>
+			<h4>Options</h4>
+			<div>
+				<input
+					type="checkbox"
+					id="export-as-zip"
+					name={ 'export-as-zip' }
+					value={ 'yes' }
+					checked={ exportAsZip }
+					onChange={ () => {
+						setExportAsZip( ! exportAsZip );
+					} }
+				/>
+				<label htmlFor="export-as-zip">
+					Export as a zip (Experimental)
+				</label>
+			</div>
+			<br></br>
 			<Button
 				isPrimary
 				onClick={ () => {
@@ -173,37 +241,7 @@ const Blueprint = () => {
 			>
 				{ __( 'Export', 'woocommerce' ) }
 			</Button>
-			<div>
-				<input
-					type="checkbox"
-					id="export-as-zip"
-					name={ 'export-as-zip' }
-					value={ 'yes' }
-					checked={ exportAsZip }
-					onChange={ () => {
-						setExportAsZip( ! exportAsZip );
-					} }
-				/>
-				<label htmlFor="export-as-zip">
-					Export as a zip (Experimental)
-				</label>
-			</div>
-			<p>
-				You can import the schema on the{ ' ' }
-				<a
-					href={ getAdminLink(
-						'admin.php?page=wc-admin&path=%2Fsetup-wizard&step=intro-builder'
-					) }
-				>
-					builder setup page
-				</a>{ ' ' }
-				or use the import WP CLI command.
-			</p>
-			<h3>WP CLI Commands</h3>
-			<b>Import:</b>{ ' ' }
-			<code>wp wc blueprint import path-to-woo-blueprint.json</code>
-			<br /> <br />
-			<b>Export:</b> <code>wp wc blueprint export save-to-path.json</code>
+			<p>Export may take some time depending on your network speed.</p>
 		</div>
 	);
 };

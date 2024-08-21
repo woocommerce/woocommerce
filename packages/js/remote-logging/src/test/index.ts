@@ -32,6 +32,17 @@ jest.mock( 'tracekit', () => ( {
 	} ),
 } ) );
 
+jest.mock( '@woocommerce/settings', () => {
+	return {
+		getSetting: jest.fn().mockImplementation( ( key ) => {
+			if ( key === 'wcAssetUrl' ) {
+				return 'http://example.com/woocommerce/assets';
+			}
+			return null;
+		} ),
+	};
+} );
+
 describe( 'RemoteLogger', () => {
 	const originalConsoleWarn = console.warn;
 	let logger: RemoteLogger;
@@ -222,7 +233,7 @@ describe( 'RemoteLogger', () => {
 			const error = new Error( 'Test error' );
 			const stackFrames = [
 				{
-					url: 'http://example.com/wp-content/plugins/woocommerce/assets/js/admin/app.min.js',
+					url: 'http://example.com/woocommerce/assets/js/admin/app.min.js',
 					func: 'testFunction',
 					args: [],
 					line: 1,
@@ -241,6 +252,13 @@ describe( 'RemoteLogger', () => {
 			const stackFrames = [
 				{
 					url: 'http://example.com/other/script.js',
+					func: 'testFunction',
+					args: [],
+					line: 1,
+					column: 1,
+				},
+				{
+					url: 'http://example.com/other/plugin/woocommerce/assets/js/app.min.js',
 					func: 'testFunction',
 					args: [],
 					line: 1,

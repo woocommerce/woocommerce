@@ -45,7 +45,7 @@ export const IntroOptIn = ( {
 					title={ __( 'Welcome to Woo!', 'woocommerce' ) }
 					subTitle={ interpolateComponents( {
 						mixedString: __(
-							"It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.",
+							'It’s great to have you here with us! We’ll be guiding you through the setup process – first, answer a few questions to tailor your experience.',
 							'woocommerce'
 						),
 						components: {

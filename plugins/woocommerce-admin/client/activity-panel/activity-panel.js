@@ -12,7 +12,6 @@ import {
 	ONBOARDING_STORE_NAME,
 	OPTIONS_STORE_NAME,
 	useUser,
-	useUserPreferences,
 	getVisibleTasks,
 } from '@woocommerce/data';
 import { addHistoryListener } from '@woocommerce/navigation';
@@ -32,7 +31,6 @@ import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
-import { HighlightTooltip } from './highlight-tooltip';
 import { Panel } from './panel';
 import {
 	getLowStockCount as getLowStockProducts,
@@ -73,7 +71,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const hasExtendedNotifications = Boolean( fills?.length );
-	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
 	const { comingSoon } = useLaunchYourStore( {
 		enabled: isHomescreen,
@@ -168,7 +165,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const {
 		hasUnreadNotes,
 		hasAbbreviatedNotifications,
-		isCompletedTask,
 		thingsToDoNextCount,
 		requestingTaskListOptions,
 		setupTaskListComplete,
@@ -419,34 +415,8 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		}
 	};
 
-	const closedHelpPanelHighlight = () => {
-		recordEvent( 'help_tooltip_click' );
-		if ( userData && updateUserPreferences ) {
-			updateUserPreferences( {
-				help_panel_highlight_shown: 'yes',
-			} );
-		}
-	};
-
-	const shouldShowHelpTooltip = () => {
-		const { task } = query;
-		const startedTasks =
-			userData && userData.task_list_tracked_started_tasks;
-		const highlightShown = userData && userData.help_panel_highlight_shown;
-		if (
-			task &&
-			highlightShown !== 'yes' &&
-			( startedTasks || {} )[ task ] > 1 &&
-			! isCompletedTask
-		) {
-			return true;
-		}
-		return false;
-	};
-
 	const tabs = getTabs();
 	const headerId = uniqueId( 'activity-panel-header_' );
-	const showHelpHighlightTooltip = shouldShowHelpTooltip();
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>
@@ -483,21 +453,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						clearPanel={ () => clearPanel() }
 					/>
 				</Section>
-				{ showHelpHighlightTooltip ? (
-					<HighlightTooltip
-						delay={ 1000 }
-						useAnchor={ true }
-						title={ __( "We're here for help", 'woocommerce' ) }
-						content={ __(
-							'If you have any questions, feel free to explore the WooCommerce docs listed here.',
-							'woocommerce'
-						) }
-						closeButtonText={ __( 'Got it', 'woocommerce' ) }
-						id="activity-panel-tab-help"
-						onClose={ () => closedHelpPanelHighlight() }
-						onShow={ () => recordEvent( 'help_tooltip_view' ) }
-					/>
-				) : null }
 			</div>
 		</LayoutContextProvider>
 	);

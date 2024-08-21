@@ -329,14 +329,8 @@
 				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
-					"command": "test:e2e",
-					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
-					],
+					"command": "test:e2e:with-env default-hpos-disabled --project=ui",
+					"shardingArguments": [],
 					"events": [
 						"daily-checks",
 						"release-checks"
@@ -349,7 +343,7 @@
 						}
 					},
 					"report": {
-						"resultsBlobName": "core-e2e-reports-non-hpos",
+						"resultsBlobName": "core-e2e-reports-hpos-disabled",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -443,7 +437,7 @@
 				{
 					"name": "Core API tests - HPOS disabled",
 					"testType": "api",
-					"command": "test:api",
+					"command": "test:e2e:with-env default-hpos-disabled --project=api",
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
@@ -516,7 +510,7 @@
 						".wp-env.json"
 					],
 					"events": [
-						"disabled"
+						"push"
 					],
 					"report": {
 						"resultsBlobName": "core-metrics-report",
@@ -598,7 +592,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.45.1",
+		"@playwright/test": "^1.46.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
