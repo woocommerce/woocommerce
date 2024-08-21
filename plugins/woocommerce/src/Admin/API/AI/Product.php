@@ -73,7 +73,6 @@ class Product {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_product( WP_REST_Request $request ) {
-		$product_updater     = new UpdateProducts();
 		$product_information = $request['products_information'] ?? array();
 
 		if ( empty( $product_information ) ) {
@@ -84,6 +83,7 @@ class Product {
 			);
 		}
 
+		$product_updater = new UpdateProducts();
 		$product_updater->update_product_content( $product_information );
 
 		$last_product_to_update = $request['last_product'] ?? false;
