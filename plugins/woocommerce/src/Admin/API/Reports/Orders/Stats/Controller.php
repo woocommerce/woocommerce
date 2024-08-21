@@ -31,16 +31,16 @@ class Controller extends GenericStatsController {
 	protected $rest_base = 'reports/orders/stats';
 
 	/**
-	 * Forwards a Query constructor,
-	 * to be able to customize Query class for a specific report.
+	 * Get data from Query.
 	 *
-	 * By default it creates `GenericQuery` with the rest base as name.
+	 * @override GenericController::get_datastore_data()
 	 *
-	 * @param array $query_args Set of args to be forwarded to the constructor.
-	 * @return GenericQuery
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
 	 */
-	protected function construct_query( $query_args ) {
-		return new Query( $query_args );
+	protected function get_datastore_data( $query_args = array() ) {
+		$query = new Query( $query_args );
+		return $query->get_data();
 	}
 
 	/**

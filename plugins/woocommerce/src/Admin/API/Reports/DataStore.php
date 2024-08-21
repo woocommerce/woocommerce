@@ -18,7 +18,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * We use Report DataStores to separate DB data retrieval logic from the REST API controllers.
  *
  * Handles caching, data normalization, intervals-related methods, and other common functionality.
- * So, in your custom report DataStore class that extend this class
+ * So, in your custom report DataStore class that extends this class
  * you can focus on specifics by overriding the `get_noncached_data` method.
  *
  * Minimalistic example:
@@ -48,8 +48,15 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * </code></pre>
  *
  * Please use the `woocommerce_data_stores` filter to add your custom data store to the list of available ones.
- * Then, your store could be accessed by Query classes ({@see GenericQuery::get_data() GenericQuery::get_data()})
+ * Then, your store could be accessed by Controller classes ({@see GenericController::get_datastore_data() GenericController::get_datastore_data()})
  * or using {@link \WC_Data_Store::load() \WC_Data_Store::load()}.
+ *
+ * We recommend registering using the REST base name of your Controller as the key, e.g.:
+ * <pre><code class="language-php">add_filter( 'woocommerce_data_stores', function( $stores ) {
+ *     $stores['reports/my-thing'] = 'MyExtension\Admin\Analytics\Rest_API\MyDataStore';
+ * } );
+ * </code></pre>
+ * This way, `GenericController` will pick it up automatically.
  *
  * Note that this class is NOT {@link https://developer.woocommerce.com/docs/how-to-manage-woocommerce-data-stores/ a CRUD data store}.
  * It does not implement the {@see WC_Object_Data_Store_Interface WC_Object_Data_Store_Interface} nor extend WC_Data & WC_Data_Store_WP classes.
