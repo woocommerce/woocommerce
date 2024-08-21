@@ -457,6 +457,15 @@ function wc_clear_template_cache() {
 }
 
 /**
+ * Clear the system status theme info cache.
+ *
+ * @since 9.4.0
+ */
+function wc_clear_system_status_theme_info_cache() {
+	delete_transient( 'wc_system_status_theme_info' );
+}
+
+/**
  * Get Base Currency Code.
  *
  * @return string
@@ -1476,8 +1485,9 @@ function wc_transaction_query( $type = 'start', $force = false ) {
  */
 function wc_get_cart_url() {
 	if ( is_cart() && isset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] ) ) {
-		$protocol = is_ssl() ? 'https' : 'http';
-		$cart_url = esc_url_raw( $protocol . '://' . wp_unslash( $_SERVER['HTTP_HOST'] ) . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		$protocol    = is_ssl() ? 'https' : 'http';
+		$current_url = esc_url_raw( $protocol . '://' . wp_unslash( $_SERVER['HTTP_HOST'] ) . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		$cart_url    = remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), $current_url );
 	} else {
 		$cart_url = wc_get_page_permalink( 'cart' );
 	}

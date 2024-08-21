@@ -30,14 +30,16 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		page,
 		editor,
 	} ) => {
-		const categoryCheckbox = page.getByLabel( 'Clothing' );
+		const categoryCheckbox = editor.canvas.getByLabel( 'Clothing' ).first();
 		await categoryCheckbox.check();
 		await expect( categoryCheckbox ).toBeChecked();
-		const doneButton = page.getByRole( 'button', { name: 'Done' } );
+		const doneButton = editor.canvas.getByRole( 'button', {
+			name: 'Done',
+		} );
 		await doneButton.click();
 
 		await expect(
-			page.getByText( hoodieReviews[ 0 ].review )
+			editor.canvas.getByText( hoodieReviews[ 0 ].review )
 		).toBeVisible();
 
 		await editor.publishAndVisitPost();

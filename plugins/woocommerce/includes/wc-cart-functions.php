@@ -123,9 +123,9 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ) );
 	} else {
-		$message = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ) );
 	}
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
@@ -413,7 +413,12 @@ function wc_cart_round_discount( $value, $precision ) {
  */
 function wc_get_chosen_shipping_method_ids() {
 	$method_ids     = array();
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$chosen_methods = array();
+
+	if ( is_callable( array( WC()->session, 'get' ) ) ) {
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	}
+
 	foreach ( $chosen_methods as $chosen_method ) {
 		if ( ! is_string( $chosen_method ) ) {
 			continue;
@@ -421,6 +426,7 @@ function wc_get_chosen_shipping_method_ids() {
 		$chosen_method = explode( ':', $chosen_method );
 		$method_ids[]  = current( $chosen_method );
 	}
+
 	return $method_ids;
 }
 

@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-subsection",
 	"title": "Product subsection",
 	"category": "woocommerce",
 	"description": "The product subsection.",
-	"keywords": [ "products", "subsection", "group" ],
+	"keywords": [
+		"products",
+		"subsection",
+		"group"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"title": {
@@ -17,7 +21,11 @@
 		},
 		"blockGap": {
 			"type": "string",
-			"enum": [ "unit-20", "unit-30", "unit-40" ],
+			"enum": [
+				"unit-20",
+				"unit-30",
+				"unit-40"
+			],
 			"default": "unit-20"
 		}
 	},

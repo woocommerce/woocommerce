@@ -78,7 +78,7 @@ export interface PriceSliderProps {
 	 */
 	step?: number;
 	/**
-	 * Wheter we're in the editor or not.
+	 * Whether we're in the editor or not.
 	 */
 	isEditor?: boolean;
 }
@@ -170,6 +170,22 @@ const PriceSlider = ( {
 	] );
 
 	/**
+	 * Selects the price field when clicked.
+	 *
+	 * @param {Object} event event data.
+	 */
+	const handleSelectOnClick = (
+		event:
+			| React.FocusEvent< HTMLInputElement >
+			| React.MouseEvent< HTMLInputElement >
+	) => {
+		const target = event.currentTarget;
+		if ( target ) {
+			target.select();
+		}
+	};
+
+	/**
 	 * Works around an IE issue where only one range selector is visible by changing the display order
 	 * based on the mouse position.
 	 *
@@ -251,30 +267,19 @@ const PriceSlider = ( {
 	);
 
 	/**
-	 * Called when a price input loses focus - commit changes to slider.
+	 * Handles price change logic and calls onChange.
 	 */
-	const priceInputOnBlur = useCallback(
-		( event: React.FocusEvent< HTMLInputElement > ) => {
-			// Only refresh when finished editing the min and max fields.
-			if (
-				event.relatedTarget &&
-				( event.relatedTarget as Element ).classList &&
-				( event.relatedTarget as Element ).classList.contains(
-					'wc-block-price-filter__amount'
-				)
-			) {
-				return;
-			}
-
-			const isMin = event.target.classList.contains(
-				'wc-block-price-filter__amount--min'
-			);
-
+	const handlePriceChange = useDebouncedCallback(
+		(
+			minInsertedPrice: number,
+			maxInsertedPrice: number,
+			isMin: boolean
+		) => {
 			// When the user inserts in the max price input a value less or equal than the current minimum price,
 			// we set to 0 the minimum price.
-			if ( minPriceInput >= maxPriceInput ) {
+			if ( minInsertedPrice >= maxInsertedPrice ) {
 				const values = constrainRangeSliderValues(
-					[ 0, maxPriceInput ],
+					[ 0, maxInsertedPrice ],
 					null,
 					null,
 					stepValue,
@@ -287,7 +292,7 @@ const PriceSlider = ( {
 			}
 
 			const values = constrainRangeSliderValues(
-				[ minPriceInput, maxPriceInput ],
+				[ minInsertedPrice, maxInsertedPrice ],
 				null,
 				null,
 				stepValue,
@@ -295,7 +300,7 @@ const PriceSlider = ( {
 			);
 			onChange( values );
 		},
-		[ onChange, stepValue, minPriceInput, maxPriceInput ]
+		1000
 	);
 
 	const debouncedUpdateQuery = useDebouncedCallback( onSubmit, 600 );
@@ -406,7 +411,7 @@ const PriceSlider = ( {
 		displayType: 'input',
 		allowNegative: false,
 		disabled: isLoading || ! hasValidConstraints,
-		onBlur: priceInputOnBlur,
+		onClick: handleSelectOnClick,
 	};
 
 	return (
@@ -432,6 +437,11 @@ const PriceSlider = ( {
 									return;
 								}
 								setMinPriceInput( value );
+								handlePriceChange(
+									value,
+									maxPriceInput as number,
+									true
+								);
 							} }
 							value={ minPriceInput }
 						/>
@@ -456,6 +466,11 @@ const PriceSlider = ( {
 									return;
 								}
 								setMaxPriceInput( value );
+								handlePriceChange(
+									minPriceInput as number,
+									value,
+									false
+								);
 							} }
 							value={ maxPriceInput }
 						/>

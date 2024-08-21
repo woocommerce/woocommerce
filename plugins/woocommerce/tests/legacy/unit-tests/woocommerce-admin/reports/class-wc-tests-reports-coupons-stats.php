@@ -6,7 +6,7 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\DataStore as CouponsStatsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Coupons\Stats\Query as CouponsStatsQuery;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 
 /**
  * Class WC_Admin_Tests_Reports_Coupons_Stats
@@ -100,8 +100,8 @@ class WC_Admin_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new CouponsStatsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'coupons-stats' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -143,8 +143,8 @@ class WC_Admin_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 			'interval' => 'day',
 		);
 
-		// Test retrieving the stats through the query class.
-		$query          = new CouponsStatsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query          = new GenericQuery( $args, 'coupons-stats' );
 		$start_datetime = new DateTime( $start_time );
 		$end_datetime   = new DateTime( $end_time );
 		$expected_data  = (object) array(
