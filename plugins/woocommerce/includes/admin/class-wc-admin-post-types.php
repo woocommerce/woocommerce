@@ -906,7 +906,11 @@ class WC_Admin_Post_Types {
 
 		switch ( $change_price ) {
 			case 1:
-				$new_price = $price;
+				if ( empty( $price ) ) {
+					$new_price = $product->get_regular_price();
+				} else {
+					$new_price = $price;
+				}
 				break;
 			case 2:
 				if ( $is_percentage ) {
