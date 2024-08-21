@@ -214,6 +214,12 @@ class WC_Structured_Data {
 			$markup['sku'] = $product->get_id();
 		}
 
+		// Add GTIN only if it's a valid number.
+		$gtin = $product->get_global_unique_id();
+		if ( $gtin && is_numeric( $gtin ) ) {
+			$markup['gtin'] = $gtin;
+		}
+
 		if ( '' !== $product->get_price() ) {
 			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
 			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
