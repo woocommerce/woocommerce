@@ -25,5 +25,19 @@ class Brands {
 		if ( function_exists( 'wc_brands_init' ) ) {
 			remove_action( 'plugins_loaded', 'wc_brands_init', 1 );
 		}
+
+		include_once WC_ABSPATH . 'includes/class-wc-brands.php';
+		include_once WC_ABSPATH . 'includes/class-wc-brands-coupons.php';
+		include_once WC_ABSPATH . 'includes/class-wc-brands-brand-settings-manager.php';
+		include_once WC_ABSPATH . 'includes/wc-brands-functions.php';
+
+		if ( wc_current_theme_is_fse_theme() ) {
+			include_once WC_ABSPATH . 'includes/blocks/class-wc-brands-block-templates.php';
+			include_once WC_ABSPATH . 'includes/blocks/class-wc-brands-block-template-utils-duplicated.php';
+		}
+
+		if ( is_admin() ) {
+			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-brands.php';
+		}
 	}
 }

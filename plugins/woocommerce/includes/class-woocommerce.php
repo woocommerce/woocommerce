@@ -659,15 +659,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
 		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
-		include_once WC_ABSPATH . 'includes/class-wc-brands.php';
-		include_once WC_ABSPATH . 'includes/class-wc-brands-coupons.php';
-		include_once WC_ABSPATH . 'includes/class-wc-brands-brand-settings-manager.php';
-		include_once WC_ABSPATH . 'includes/wc-brands-functions.php';
-
-		if ( wc_current_theme_is_fse_theme() ) {
-			include_once WC_ABSPATH . 'includes/blocks/class-wc-brands-block-templates.php';
-			include_once WC_ABSPATH . 'includes/blocks/class-wc-brands-block-template-utils-duplicated.php';
-		}
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
