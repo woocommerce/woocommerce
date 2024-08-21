@@ -49,12 +49,13 @@ const goToPageEditor = async ( { page } ) => {
 };
 
 const goToPostEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php' );
-	await disableWelcomeModal( { page } );
-	await page.waitForResponse(
+	const responsePromise = page.waitForResponse(
 		( response ) =>
 			response.url().includes( '//single' ) && response.status() === 200
 	);
+	await page.goto( 'wp-admin/post-new.php' );
+	await disableWelcomeModal( { page } );
+	await responsePromise;
 };
 
 const fillPageTitle = async ( page, title ) => {
