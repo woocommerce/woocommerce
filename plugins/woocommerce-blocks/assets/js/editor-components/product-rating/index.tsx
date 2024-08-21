@@ -4,31 +4,54 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import type { CSSProperties } from 'react';
+import { isNumber, ProductResponseItem } from '@woocommerce/types';
 
 type RatingProps = {
+	className: string;
 	reviews: number;
 	rating: number;
 	parentClassName?: string;
+};
+
+export const getAverageRating = (
+	product: Omit< ProductResponseItem, 'average_rating' > & {
+		average_rating: string;
+	}
+) => {
+	const rating = parseFloat( product.average_rating );
+
+	return Number.isFinite( rating ) && rating > 0 ? rating : 0;
+};
+
+export const getRatingCount = ( product: ProductResponseItem ) => {
+	const count = isNumber( product.review_count )
+		? product.review_count
+		: parseInt( product.review_count, 10 );
+
+	return Number.isFinite( count ) && count > 0 ? count : 0;
 };
 
 const getStarStyle = ( rating: number ) => ( {
 	width: ( rating / 5 ) * 100 + '%',
 } );
 
-const NoRating = ( { parentClassName }: { parentClassName: string } ) => {
+const NoRating = ( {
+	className,
+	parentClassName,
+}: {
+	className: string;
+	parentClassName: string;
+} ) => {
 	const starStyle = getStarStyle( 0 );
 
 	return (
 		<div
 			className={ clsx(
-				'wc-block-components-product-rating__norating-container',
+				`${ className }__norating-container`,
 				`${ parentClassName }-product-rating__norating-container`
 			) }
 		>
-			<div
-				className={ 'wc-block-components-product-rating__norating' }
-				role="img"
-			>
+			<div className={ `${ className }__norating` } role="img">
 				<span style={ starStyle } />
 			</div>
 			<span>{ __( 'No Reviews', 'woocommerce' ) }</span>
@@ -37,7 +60,7 @@ const NoRating = ( { parentClassName }: { parentClassName: string } ) => {
 };
 
 const Rating = ( props: RatingProps ): JSX.Element => {
-	const { rating, reviews, parentClassName } = props;
+	const { className, rating, reviews, parentClassName } = props;
 
 	const starStyle = getStarStyle( rating );
 
@@ -63,7 +86,7 @@ const Rating = ( props: RatingProps ): JSX.Element => {
 	return (
 		<div
 			className={ clsx(
-				'wc-block-components-product-rating__stars',
+				`${ className }__stars`,
 				`${ parentClassName }__product-rating__stars`
 			) }
 			role="img"
@@ -74,8 +97,11 @@ const Rating = ( props: RatingProps ): JSX.Element => {
 	);
 };
 
-const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
-	const { reviews } = props;
+const ReviewsCount = ( props: {
+	className: string;
+	reviews: number;
+} ): JSX.Element => {
+	const { className, reviews } = props;
 
 	const reviewsCount = sprintf(
 		/* translators: %s is referring to the total of reviews for a product */
@@ -89,7 +115,7 @@ const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 	);
 
 	return (
-		<span className="wc-block-components-product-rating__reviews_count">
+		<span className={ `${ className }__reviews_count` }>
 			{ reviewsCount }
 		</span>
 	);
@@ -97,31 +123,44 @@ const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 
 type ProductRatingProps = {
 	className: string;
-	isDescendentOfSingleProductBlock: boolean;
+	isDescendentOfSingleProductBlock?: boolean;
 	shouldDisplayMockedReviewsWhenProductHasNoReviews?: boolean;
-	style: CSSProperties;
 	parentClassName?: string;
 	rating: number;
 	reviews: number;
+	styleProps: {
+		className: string;
+		style: CSSProperties;
+	};
+	textAlign?: string;
 };
 
-const ProductRating = ( props: ProductRatingProps ): JSX.Element | null => {
+export const ProductRating = (
+	props: ProductRatingProps
+): JSX.Element | null => {
 	const {
-		className,
+		className = 'wc-block-components-product-rating',
 		isDescendentOfSingleProductBlock,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
-		style,
 		parentClassName = '',
 		rating,
 		reviews,
+		styleProps,
+		textAlign,
 	} = props;
 
+	const wrapperClassName = clsx( styleProps.className, className, {
+		[ `${ parentClassName }__product-rating` ]: parentClassName,
+		[ `has-text-align-${ textAlign }` ]: textAlign,
+	} );
+
 	const mockedRatings = shouldDisplayMockedReviewsWhenProductHasNoReviews && (
-		<NoRating parentClassName={ parentClassName } />
+		<NoRating className={ className } parentClassName={ parentClassName } />
 	);
 
 	const content = reviews ? (
 		<Rating
+			className={ className }
 			rating={ rating }
 			reviews={ reviews }
 			parentClassName={ parentClassName }
@@ -133,13 +172,13 @@ const ProductRating = ( props: ProductRatingProps ): JSX.Element | null => {
 	const isReviewCountVisible = reviews && isDescendentOfSingleProductBlock;
 
 	return (
-		<div className={ className } style={ style }>
-			<div className="wc-block-components-product-rating__container">
+		<div className={ wrapperClassName } style={ styleProps.style }>
+			<div className={ `${ className }__container` }>
 				{ content }
-				{ isReviewCountVisible && <ReviewsCount reviews={ reviews } /> }
+				{ isReviewCountVisible && (
+					<ReviewsCount className={ className } reviews={ reviews } />
+				) }
 			</div>
 		</div>
 	);
 };
-
-export default ProductRating;
