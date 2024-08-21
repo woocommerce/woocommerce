@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getBlockType } from '@wordpress/blocks';
+import { BlockConfiguration, getBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -125,48 +125,97 @@ export class BlockRegistrationManager
 				continue;
 			}
 
-			if ( ! getBlockType( blockWithRestrictionName ) ) {
-				continue;
-			}
-
-			this.blockRegistrationStrategy = BLOCKS_WITH_RESTRICTION[
-				blockWithRestrictionName
-			].isVariationBlock
-				? new BlockVariationStrategy()
-				: new BlockTypeStrategy();
-
-			this.blockRegistrationStrategy.unregister(
-				blockWithRestrictionName
-			);
-			this.unregisteredBlocks.push( blockWithRestrictionName );
+			this.unregisterBlock( { blockWithRestrictionName } );
 		}
 	}
 
-	/**
-	 * Registers blocks after leaving a restricted area.
-	 *
-	 * This method iterates over all unregistered blocks and registers them if they are not restricted in the current context.
-	 * It uses a block registration strategy to register the blocks, which depends on whether the block is a variation block or a regular block.
-	 * If the block is successfully registered, it is removed from the list of unregistered blocks.
-	 */
-	registerBlocksAfterLeavingRestrictedArea() {
-		for ( const unregisteredBlockName of this.unregisteredBlocks ) {
-			const restrictedBlockData =
-				BLOCKS_WITH_RESTRICTION[ unregisteredBlockName ];
-			this.blockRegistrationStrategy = BLOCKS_WITH_RESTRICTION[
-				unregisteredBlockName
-			].isVariationBlock
-				? new BlockVariationStrategy()
-				: new BlockTypeStrategy();
-			const isBlockRegistered = this.blockRegistrationStrategy.register(
-				restrictedBlockData.blockMetadata,
-				restrictedBlockData.blockSettings
-			);
-			this.unregisteredBlocks = isBlockRegistered
-				? this.unregisteredBlocks.filter(
-						( blockName ) => blockName !== unregisteredBlockName
-				  )
-				: this.unregisteredBlocks;
+	private unregisterBlock( {
+		blockWithRestrictionName,
+	}: {
+		blockWithRestrictionName: string;
+	} ) {
+		if ( ! getBlockType( blockWithRestrictionName ) ) {
+			return;
+		}
+
+		this.blockRegistrationStrategy = BLOCKS_WITH_RESTRICTION[
+			blockWithRestrictionName
+		].isVariationBlock
+			? new BlockVariationStrategy()
+			: new BlockTypeStrategy();
+
+		this.blockRegistrationStrategy.unregister( blockWithRestrictionName );
+	}
+
+	private registerBlock( {
+		blockWithRestrictionName,
+		blockMetadata,
+		blockSettings,
+	}: {
+		blockWithRestrictionName: string;
+		blockMetadata: Partial< BlockConfiguration >;
+		blockSettings: Partial< BlockConfiguration >;
+	} ) {
+		this.blockRegistrationStrategy = BLOCKS_WITH_RESTRICTION[
+			blockWithRestrictionName
+		].isVariationBlock
+			? new BlockVariationStrategy()
+			: new BlockTypeStrategy();
+
+		console.log( {
+			registering: blockWithRestrictionName,
+			blockMetadata,
+			blockSettings,
+		} );
+
+		this.blockRegistrationStrategy.register( blockMetadata, blockSettings );
+	}
+
+	registerBlocksBeforeEnteringRestrictedArea( {
+		currentContentId,
+		currentContentType,
+	}: {
+		currentContentId: string;
+		currentContentType: EditorViewContentType;
+	} ) {
+		for ( const blockWithRestrictionName of Object.keys(
+			BLOCKS_WITH_RESTRICTION
+		) ) {
+			if (
+				! this.shouldBlockBeRegistered( {
+					blockWithRestrictionName,
+					currentContentId,
+					currentContentType,
+				} )
+			) {
+				continue;
+			}
+
+			const blockData =
+				BLOCKS_WITH_RESTRICTION[ blockWithRestrictionName ];
+			let blockMetadata = { ...blockData.blockMetadata };
+			let blockSettings = { ...blockData.blockSettings };
+
+			if ( blockData.onBeforeRegisterBlock ) {
+				const {
+					blockMetadata: blockUpdatedMetadata,
+					blockSettings: blockUpdatedSettings,
+				} = blockData.onBeforeRegisterBlock( {
+					blockSettings,
+					blockMetadata,
+					currentContentId,
+					currentContentType,
+				} );
+				blockMetadata = blockUpdatedMetadata;
+				blockSettings = blockUpdatedSettings;
+			}
+
+			this.unregisterBlock( { blockWithRestrictionName } );
+			this.registerBlock( {
+				blockWithRestrictionName,
+				blockMetadata,
+				blockSettings,
+			} );
 		}
 	}
 
@@ -179,7 +228,12 @@ export class BlockRegistrationManager
 	 * @param {EditorViewChangeDetector} EditorViewChangeDetector - The template change detector object.
 	 */
 	run( editorViewChangeDetector: EditorViewChangeDetector ) {
-		this.registerBlocksAfterLeavingRestrictedArea();
+		this.registerBlocksBeforeEnteringRestrictedArea( {
+			currentContentId:
+				editorViewChangeDetector.getCurrentContentId() || '',
+			currentContentType:
+				editorViewChangeDetector.getCurrentContentType(),
+		} );
 		this.unregisterBlocksBeforeEnteringRestrictedArea( {
 			currentContentId:
 				editorViewChangeDetector.getCurrentContentId() || '',
