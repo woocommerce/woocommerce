@@ -1838,6 +1838,7 @@ p.demo_store,
 	&::before {
 		font-family: "WooCommerce";
 		content: "\e028";
+		content: "\e028" / ""; // Add an empty alternative text so screen readers ignore it
 		display: inline-block;
 		position: absolute;
 		top: 1em;

@@ -30,7 +30,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		page,
 		editor,
 	} ) => {
-		const categoryCheckbox = editor.canvas.getByLabel( 'Clothing' );
+		const categoryCheckbox = editor.canvas.getByLabel( 'Clothing' ).first();
 		await categoryCheckbox.check();
 		await expect( categoryCheckbox ).toBeChecked();
 		const doneButton = editor.canvas.getByRole( 'button', {
