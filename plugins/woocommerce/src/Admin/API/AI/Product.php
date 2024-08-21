@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class Product {
+class Product extends AIEndpoint {
 	/**
 	 * The store title option name.
 	 *
@@ -25,26 +25,17 @@ class Product {
 	const AI_CONTENT_GENERATED = 'ai_content_generated';
 
 	/**
-	 * Endpoint namespace.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
-
-	/**
-	 * Route base.
-	 *
-	 * @var string
-	 */
-	protected $rest_base = 'ai';
+	protected $endpoint = 'patterns';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/product',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
