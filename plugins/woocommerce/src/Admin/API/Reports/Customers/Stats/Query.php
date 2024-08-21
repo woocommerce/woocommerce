@@ -23,14 +23,14 @@ use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 /**
  * API\Reports\Customers\Stats\Query
  *
- * @deprecated x.x.x Customers\Stats\Query class is deprecated, please use Reports\Customers\Query with a custom name, GenericQuery or \WC_Object_Query instead.
+ * @deprecated 9.3.0 Customers\Stats\Query class is deprecated, please use Reports\Customers\Query with a custom name, GenericQuery or \WC_Object_Query instead.
  */
 class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for Customers report.
 	 *
-	 * @deprecated x.x.x Customers\Stats\Query class is deprecated, please use Reports\Customers\Query with a custom name, GenericQuery or \WC_Object_Query instead.
+	 * @deprecated 9.3.0 Customers\Stats\Query class is deprecated, please use Reports\Customers\Query with a custom name, GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */
@@ -47,7 +47,7 @@ class Query extends ReportsQuery {
 	/**
 	 * Get product data based on the current query vars.
 	 *
-	 * @deprecated x.x.x Customers\Stats\Query class is deprecated, please use Reports\Customers\Query with a custom name, GenericQuery or \WC_Object_Query instead.
+	 * @deprecated 9.3.0 Customers\Stats\Query class is deprecated, please use Reports\Customers\Query with a custom name, GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */
