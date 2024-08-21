@@ -49,6 +49,7 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
+		"build:project:blocks-json-to-php": "wireit",
 		"build:check-assets": "rimraf build/* && cross-env ASSET_CHECK=true BABEL_ENV=default NODE_ENV=production webpack",
 		"prebuild:docs": "rimraf docs/extensibility/actions.md & rimraf docs/extensibility/filters.md",
 		"build:docs": "./vendor/bin/wp-hooks-generator --input=src --output=bin/hook-docs/data && node ./bin/hook-docs && pnpm build:docs:block-references",
@@ -394,6 +395,15 @@
 		"watch:build:project:bundle": {
 			"command": "webpack --watch",
 			"service": true
+		},
+		"build:project:blocks-json-to-php": {
+			"command": "node ./bin/blocks-json-to-php.js",
+			"files": [
+				"assets/js/blocks/**/block.json"
+			],
+			"output": [
+				"build/blocks-json.php"
+			]
 		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
