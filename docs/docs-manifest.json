@@ -761,7 +761,7 @@
           "menu_title": "Data storage",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/data-storage.md",
-          "hash": "ea827670b3a888f69cb50bc78dc10827c802abb135a5846f31cfa55e882f7faa",
+          "hash": "1ea2fabf927f9ced2fee89f930e9195c7df4d98ceb3d847436337376578802a3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/data-storage.md",
           "id": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102"
         },
@@ -1059,7 +1059,7 @@
       "categories": []
     },
     {
-      "content": "\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.",
+      "content": "\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.\n",
       "category_slug": "product-editor",
       "category_title": "Product Editor",
       "posts": [
@@ -1731,5 +1731,9 @@
       "categories": []
     }
   ],
+<<<<<<< HEAD
   "hash": "95e835afe855d5a898bfc31337d2a42b582794d5e1aaacb9b4a98cfc97748e05"
+=======
+  "hash": "9e327ca468bc1e7e062f2d9aca4ebef37ae66d4a4fadf1b51999a2581234d8fd"
+>>>>>>> 8e182f7ef1 (add manifest)
 }
