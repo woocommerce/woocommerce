@@ -1590,6 +1590,7 @@ class WC_Helper {
 			'product-usage-notice-rules',
 			array(
 				'authenticated' => false,
+				'timeout'       => 2,
 			)
 		);
 
