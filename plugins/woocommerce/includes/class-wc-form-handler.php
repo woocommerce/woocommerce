@@ -799,8 +799,13 @@ class WC_Form_Handler {
 			self::add_multiple_items_and_apply_coupon();
 			return;
 		}
+		
 	
 		// Legacy behavior
+		if ( ! is_numeric( wp_unslash( $_REQUEST['add-to-cart'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return;
+		}
+	
 		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( wp_unslash( $_REQUEST['add-to-cart'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$was_added_to_cart = false;
 		$adding_to_cart    = wc_get_product( $product_id );
@@ -836,42 +841,52 @@ class WC_Form_Handler {
 	}
 	
 	private static function add_multiple_items_and_apply_coupon() {
-		$product_ids = explode(',', wp_unslash($_REQUEST['add-to-cart']));
-		$quantities = isset($_REQUEST['quantity']) ? explode(',', wp_unslash($_REQUEST['quantity'])) : array_fill(0, count($product_ids), 1);
+		$product_ids = isset($_REQUEST['add-to-cart']) ? array_map('trim', explode(',', urldecode(wp_unslash($_REQUEST['add-to-cart'])))) : array();
+		$quantities = isset($_REQUEST['quantity']) ? array_map('trim', explode(',', urldecode(wp_unslash($_REQUEST['quantity'])))) : array();
 		$coupon_code = isset($_REQUEST['coupon-code']) ? wp_unslash($_REQUEST['coupon-code']) : '';
-	
+
 		$was_added_to_cart = false;
 		$url = false; // Ensure $url is defined
-	
+
+		// Ensure we have the same number of quantities as product IDs
+		$quantities = array_pad($quantities, count($product_ids), 1);
+
 		foreach ($product_ids as $index => $product_id) {
 			$product_id = apply_filters('woocommerce_add_to_cart_product_id', absint($product_id));
 			$quantity = isset($quantities[$index]) ? absint($quantities[$index]) : 1;
 			$adding_to_cart = wc_get_product($product_id);
-	
+
 			if (!$adding_to_cart) {
 				continue;
 			}
-	
+
 			$add_to_cart_handler = apply_filters('woocommerce_add_to_cart_handler', $adding_to_cart->get_type(), $adding_to_cart);
-	
+
 			if ('variable' === $add_to_cart_handler || 'variation' === $add_to_cart_handler) {
-				$was_added_to_cart = self::add_to_cart_handler_variable($product_id);
+				$was_added_to_cart = self::add_to_cart_handler_variable($product_id, $quantity);
 			} elseif ('grouped' === $add_to_cart_handler) {
-				$was_added_to_cart = self::add_to_cart_handler_grouped($product_id);
+				$was_added_to_cart = self::add_to_cart_handler_grouped($product_id, $quantity);
 			} elseif (has_action('woocommerce_add_to_cart_handler_' . $add_to_cart_handler)) {
 				do_action('woocommerce_add_to_cart_handler_' . $add_to_cart_handler, $url);
 			} else {
-				$was_added_to_cart = self::add_to_cart_handler_simple($product_id, $quantity);
+				$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+
+				if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) ) {
+					wc_add_to_cart_message( array( $product_id => $quantity ), true );
+					$was_added_to_cart = true;
+				} else {
+					$was_added_to_cart = false;
+				}
 			}
 		}
-	
+
 		if ($coupon_code && !WC()->cart->has_discount($coupon_code)) {
 			WC()->cart->add_discount(trim($coupon_code));
 		}
-	
+
 		if ($was_added_to_cart && 0 === wc_notice_count('error')) {
 			$url = apply_filters('woocommerce_add_to_cart_redirect', $url, $adding_to_cart);
-	
+
 			if ($url) {
 				wp_safe_redirect($url);
 				exit;
@@ -881,7 +896,7 @@ class WC_Form_Handler {
 			}
 		}
 	}
-	
+
 	/**
 	 * Handle adding simple products to the cart.
 	 *
