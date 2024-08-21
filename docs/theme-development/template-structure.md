@@ -3,10 +3,10 @@ post_title: Template structure & Overriding templates via a theme
 ---
 
 ---
-**NOTE**
 
-This document makes reference to classic themes which use PHP templates. If you are working on a block theme with HTML templates, [please check the Theming docs for block themes](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/designers/theming/README.md).
+**NOTE** This document makes reference to classic themes which use PHP templates. If you are working on a block theme with HTML templates, [please check the Theming docs for block themes](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/designers/theming/README.md).
 Overview
+
 ---
 
 
@@ -136,9 +136,9 @@ To override the admin order notification in our example, copy `wp-content/plugin
 The copied file will now override the WooCommerce default template file, so you can make any changes you wish to the copied file, and see it reflected in the resulting output.
 
 ---
-**Note**
 
-A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occassionally see notices in your System Status report that says, e.g. “version 3.5.0 is out of date. The core version is 3.7.0″. Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
+**Note** A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occassionally see notices in your System Status report that says, e.g. “version 3.5.0 is out of date. The core version is 3.7.0″. Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
+
 ---
 
 ## Declare Theme Support for Custom Templates
