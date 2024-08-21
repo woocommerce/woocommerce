@@ -4,7 +4,9 @@
 	"title": "Billing Address Section",
 	"description": "Display the order confirmation billing section.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"attributes": {
 		"heading": {
 			"type": "string"
@@ -12,7 +14,10 @@
 	},
 	"supports": {
 		"multiple": false,
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false,
 		"spacing": {
 			"padding": true,
@@ -24,6 +29,6 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

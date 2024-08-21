@@ -124,7 +124,7 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 	} );
 
-	test( 'should display ReportError when isError is true', () => {
+	test( 'should display AnalyticsError when isError is true', () => {
 		renderChart( 'number', null, null, true );
 
 		expect(

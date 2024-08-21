@@ -1,8 +1,6 @@
 <?php
 /**
- * REST API Reports controller extended by WC Admin plugin.
- *
- * Handles requests to the reports endpoint.
+ * REST API Reports controller extended to handle requests to the reports endpoint.
  */
 
 namespace Automattic\WooCommerce\Admin\API\Reports;
@@ -10,14 +8,19 @@ namespace Automattic\WooCommerce\Admin\API\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
 
 /**
- * REST API Reports controller class.
+ * Reports controller class.
+ *
+ * Controller that handles the endpoint that returns all available analytics endpoints.
  *
  * @internal
  * @extends GenericController
  */
 class Controller extends GenericController {
+
+	use OrderAwareControllerTrait;
 
 	/**
 	 * Get all reports.
@@ -136,71 +139,6 @@ class Controller extends GenericController {
 	}
 
 	/**
-	 * Get the order number for an order. If no filter is present for `woocommerce_order_number`, we can just return the ID.
-	 * Returns the parent order number if the order is actually a refund.
-	 *
-	 * @param  int $order_id Order ID.
-	 * @return string|null The Order Number or null if the order doesn't exist.
-	 */
-	protected function get_order_number( $order_id ) {
-		$order = wc_get_order( $order_id );
-
-		if ( ! $this->is_valid_order( $order ) ) {
-			return null;
-		}
-
-		if ( 'shop_order_refund' === $order->get_type() ) {
-			$order = wc_get_order( $order->get_parent_id() );
-
-			// If the parent order doesn't exist, return null.
-			if ( ! $this->is_valid_order( $order ) ) {
-				return null;
-			}
-		}
-
-		if ( ! has_filter( 'woocommerce_order_number' ) ) {
-			return $order->get_id();
-		}
-
-		return $order->get_order_number();
-	}
-
-	/**
-	 * Whether the order is valid.
-	 *
-	 * @param bool|WC_Order|WC_Order_Refund $order Order object.
-	 * @return bool True if the order is valid, false otherwise.
-	 */
-	protected function is_valid_order( $order ) {
-		return $order instanceof \WC_Order || $order instanceof \WC_Order_Refund;
-	}
-
-	/**
-	 * Get the order total with the related currency formatting.
-	 * Returns the parent order total if the order is actually a refund.
-	 *
-	 * @param  int $order_id Order ID.
-	 * @return string|null The Order Number or null if the order doesn't exist.
-	 */
-	protected function get_total_formatted( $order_id ) {
-		$order = wc_get_order( $order_id );
-
-		if ( ! $this->is_valid_order( $order ) ) {
-			return null;
-		}
-
-		if ( 'shop_order_refund' === $order->get_type() ) {
-			$order = wc_get_order( $order->get_parent_id() );
-
-			if ( ! $this->is_valid_order( $order ) ) {
-				return null;
-			}
-		}
-
-		return wp_strip_all_tags( html_entity_decode( $order->get_formatted_order_total() ), true );
-	}
-
-	/**
 	 * Prepare a report object for serialization.
 	 *
 	 * @param stdClass        $report  Report data.
@@ -214,12 +152,8 @@ class Controller extends GenericController {
 			'path'        => $report->path,
 		);
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
 		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $data, $request );
 		$response->add_links(
 			array(
 				'self'       => array(
@@ -248,6 +182,8 @@ class Controller extends GenericController {
 
 	/**
 	 * Get the Report's schema, conforming to JSON Schema.
+	 *
+	 * @override WP_REST_Controller::get_item_schema()
 	 *
 	 * @return array
 	 */
@@ -290,43 +226,5 @@ class Controller extends GenericController {
 		return array(
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
-	}
-
-	/**
-	 * Get order statuses without prefixes.
-	 * Includes unregistered statuses that have been marked "actionable".
-	 *
-	 * @internal
-	 * @return array
-	 */
-	public static function get_order_statuses() {
-		// Allow all statuses selected as "actionable" - this may include unregistered statuses.
-		// See: https://github.com/woocommerce/woocommerce-admin/issues/5592.
-		$actionable_statuses = get_option( 'woocommerce_actionable_order_statuses', array() );
-
-		// See WC_REST_Orders_V2_Controller::get_collection_params() re: any/trash statuses.
-		$registered_statuses = array_merge( array( 'any', 'trash' ), array_keys( self::get_order_status_labels() ) );
-
-		// Merge the status arrays (using flip to avoid array_unique()).
-		$allowed_statuses = array_keys( array_merge( array_flip( $registered_statuses ), array_flip( $actionable_statuses ) ) );
-
-		return $allowed_statuses;
-	}
-
-	/**
-	 * Get order statuses (and labels) without prefixes.
-	 *
-	 * @internal
-	 * @return array
-	 */
-	public static function get_order_status_labels() {
-		$order_statuses = array();
-
-		foreach ( wc_get_order_statuses() as $key => $label ) {
-			$new_key                    = str_replace( 'wc-', '', $key );
-			$order_statuses[ $new_key ] = $label;
-		}
-
-		return $order_statuses;
 	}
 }
