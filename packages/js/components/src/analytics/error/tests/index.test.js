@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -49,7 +50,7 @@ describe( 'AnalyticsError', () => {
 
 		render( <AnalyticsError /> );
 
-		fireEvent.click( screen.getByText( 'Reload' ) );
+		userEvent.click( screen.getByText( 'Reload' ) );
 
 		expect( reloadMock ).toHaveBeenCalled();
 	} );
