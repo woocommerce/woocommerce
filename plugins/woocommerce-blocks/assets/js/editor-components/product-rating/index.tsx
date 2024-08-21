@@ -96,43 +96,29 @@ const ReviewsCount = ( props: { reviews: number } ): JSX.Element => {
 };
 
 type ProductRatingProps = {
-	className?: string;
-	textAlign?: string;
+	className: string;
 	isDescendentOfSingleProductBlock: boolean;
-	shouldDisplayMockedReviewsWhenProductHasNoReviews: boolean;
-	styleProps: {
-		className: string;
-		style: CSSProperties;
-	};
+	shouldDisplayMockedReviewsWhenProductHasNoReviews?: boolean;
+	style: CSSProperties;
 	parentClassName?: string;
 	rating: number;
 	reviews: number;
 };
 
-const ProductRating = (
-	props: ProductRatingProps
-): JSX.Element | undefined => {
+const ProductRating = ( props: ProductRatingProps ): JSX.Element | null => {
 	const {
-		textAlign,
+		className,
 		isDescendentOfSingleProductBlock,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
-		styleProps,
+		style,
 		parentClassName = '',
-		rating = 0,
-		reviews = 0,
+		rating,
+		reviews,
 	} = props;
 
-	const className = clsx(
-		styleProps.className,
-		'wc-block-components-product-rating',
-		{
-			[ `${ parentClassName }__product-rating` ]: parentClassName,
-			[ `has-text-align-${ textAlign }` ]: textAlign,
-		}
-	);
-	const mockedRatings = shouldDisplayMockedReviewsWhenProductHasNoReviews ? (
+	const mockedRatings = shouldDisplayMockedReviewsWhenProductHasNoReviews && (
 		<NoRating parentClassName={ parentClassName } />
-	) : null;
+	);
 
 	const content = reviews ? (
 		<Rating
@@ -144,13 +130,13 @@ const ProductRating = (
 		mockedRatings
 	);
 
+	const isReviewCountVisible = reviews && isDescendentOfSingleProductBlock;
+
 	return (
-		<div className={ className } style={ styleProps.style }>
+		<div className={ className } style={ style }>
 			<div className="wc-block-components-product-rating__container">
 				{ content }
-				{ reviews && isDescendentOfSingleProductBlock ? (
-					<ReviewsCount reviews={ reviews } />
-				) : null }
+				{ isReviewCountVisible && <ReviewsCount reviews={ reviews } /> }
 			</div>
 		</div>
 	);

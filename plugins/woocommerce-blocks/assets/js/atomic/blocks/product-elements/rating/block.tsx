@@ -50,14 +50,14 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | undefined => {
 		isDescendentOfSingleProductBlock,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
 	} = props;
-	const styleProps = useStyleProps( props );
+	const { className, style } = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext();
 	const rating = getAverageRating( product );
 	const reviews = getRatingCount( product );
 
-	const className = clsx(
-		styleProps.className,
+	const ratingClassName = clsx(
+		className,
 		'wc-block-components-product-rating',
 		{
 			[ `${ parentClassName }__product-rating` ]: parentClassName,
@@ -68,15 +68,14 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | undefined => {
 	if ( reviews || shouldDisplayMockedReviewsWhenProductHasNoReviews ) {
 		return (
 			<ProductRating
-				className={ className }
-				textAlign={ textAlign }
+				className={ ratingClassName }
 				isDescendentOfSingleProductBlock={
 					isDescendentOfSingleProductBlock
 				}
 				shouldDisplayMockedReviewsWhenProductHasNoReviews={
 					shouldDisplayMockedReviewsWhenProductHasNoReviews
 				}
-				styleProps={ styleProps }
+				style={ style }
 				parentClassName={ parentClassName }
 				reviews={ reviews }
 				rating={ rating }
