@@ -56,11 +56,11 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const blockLocator = await editor.getBlockByName( blockData.slug );
 		await blockLocator.getByText( 'Test Category' ).click();
 		await blockLocator.getByText( 'Done' ).click();
-		await editor.page.getByLabel( 'Edit category image' ).click();
-		await editor.page.getByLabel( 'Rotate' ).click();
+		await editor.clickBlockToolbarButton( 'Edit category image' );
+		await editor.clickBlockToolbarButton( 'Rotate' );
 		await editor.page.getByRole( 'button', { name: 'Apply' } ).click();
 		await expect(
-			editor.page.locator( 'img[alt="Test Category"][src*="-edited"]' )
+			editor.canvas.locator( 'img[alt="Test Category"][src*="-edited"]' )
 		).toBeVisible();
 	} );
 } );

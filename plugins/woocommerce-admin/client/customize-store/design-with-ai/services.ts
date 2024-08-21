@@ -216,7 +216,7 @@ const resetPatternsAndProducts = () => async () => {
 
 	return Promise.all( [
 		apiFetch( {
-			path: '/wc/private/ai/patterns',
+			path: '/wc-admin/ai/patterns',
 			method: 'DELETE',
 		} ),
 		apiFetch( {
@@ -287,7 +287,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/patterns',
+				path: '/wc-admin/ai/patterns',
 				method: 'POST',
 				data: {
 					business_description:
