@@ -91,6 +91,8 @@ const loadScripts = async () => {
 
 	const dependencies = window.wcBlocksMiniCartFrontendDependencies;
 
+	console.log( dependencies );
+
 	// Lazy load scripts.
 	for ( const dependencyHandle in dependencies ) {
 		const dependency = dependencies[ dependencyHandle ];
@@ -137,6 +139,7 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 			context.drawerOpen = ! context.drawerOpen;
 
 			if ( context.drawerOpen ) {
+				// TODO - if we leave this here is non optimal because it means we immediately load the script deps we used to lazy load.
 				renderParentBlock( {
 					// @ts-expect-error - The type of renderParentBlock's Block argument is incorrect.
 					Block: MiniCartContentsBlock,

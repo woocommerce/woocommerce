@@ -8,9 +8,7 @@ import { miniCartAlt } from '@woocommerce/icons';
 /**
  * Internal dependencies
  */
-import { Edit, Save } from './edit';
-
-console.log( 'Registering mini cart interactivity block' );
+import edit from './edit';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore -- TypeScript expects some required properties which we already
@@ -24,6 +22,8 @@ registerBlockType( 'woocommerce/mini-cart-interactivity', {
 			/>
 		),
 	},
-	edit: Edit,
-	save: Save,
+	edit,
+	save() {
+		return null;
+	},
 } );
