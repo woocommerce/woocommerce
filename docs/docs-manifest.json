@@ -1145,7 +1145,7 @@
           "menu_title": "Reviews guidelines",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/reviews-guidelines.md",
-          "hash": "05ff159c07193e596de3d43e1d59c7c7f9a7e28d2176fd03d3f0bcfba5096d82",
+          "hash": "6926d6015ea2f4beb4edc5d33559ad9cda9929b30bc0ba313f53e09f64481926",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/reviews-guidelines.md",
           "id": "8d6addc12e06b0f15468b06db1211e4cdd57205f"
         },
@@ -1740,5 +1740,5 @@
       "categories": []
     }
   ],
-  "hash": "772596730969580f3bdae4f09dc54cc2bd6cd48b743137e210684cb1d966857f"
+  "hash": "35d11ad0c8f265ca0c1039b84e6e84cf1636bd1d77f205bff00fac09636efc31"
 }
