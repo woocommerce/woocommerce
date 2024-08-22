@@ -51,7 +51,7 @@ function wc_page_endpoint_document_title_parts( $title ) {
 
 	if ( ! is_null( $wp_query ) && ! is_admin() && is_main_query() && is_page() && is_wc_endpoint_url() ) {
 		$endpoint       = WC()->query->get_current_endpoint();
-		$action         = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+		$action         = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$endpoint_title = WC()->query->get_endpoint_title( $endpoint, $action );
 		$title['title'] = $endpoint_title ? $endpoint_title : $title['title'];
 
