@@ -325,8 +325,13 @@ test(
 				).toFixed( 2 );
 
 				await expect
-					.soft( await page.locator( 'bdi' ).first() )
-					.toContainText( expectedRegularPrice );
+					.soft(
+						await page
+							.locator( 'ins' )
+							.getByText( `$${ expectedSalePrice }` )
+							.count()
+					)
+					.toBeGreaterThan( 0 );
 			}
 		} );
 	}
