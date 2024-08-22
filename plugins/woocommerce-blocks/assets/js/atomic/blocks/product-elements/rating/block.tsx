@@ -46,10 +46,8 @@ export const Block = ( props: ProductRatingProps ): JSX.Element | undefined => {
 		return (
 			<ProductRating
 				className={ className }
-				isDescendentOfSingleProductBlock={
-					isDescendentOfSingleProductBlock
-				}
-				shouldDisplayMockedReviewsWhenProductHasNoReviews={
+				showReviewCount={ isDescendentOfSingleProductBlock }
+				showMockedReviews={
 					shouldDisplayMockedReviewsWhenProductHasNoReviews
 				}
 				styleProps={ styleProps }

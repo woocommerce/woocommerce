@@ -123,8 +123,8 @@ const ReviewsCount = ( props: {
 
 type ProductRatingProps = {
 	className: string;
-	isDescendentOfSingleProductBlock?: boolean;
-	shouldDisplayMockedReviewsWhenProductHasNoReviews?: boolean;
+	showReviewCount?: boolean;
+	showMockedReviews?: boolean;
 	parentClassName?: string;
 	rating: number;
 	reviews: number;
@@ -140,8 +140,8 @@ export const ProductRating = (
 ): JSX.Element | null => {
 	const {
 		className = 'wc-block-components-product-rating',
-		isDescendentOfSingleProductBlock,
-		shouldDisplayMockedReviewsWhenProductHasNoReviews,
+		showReviewCount,
+		showMockedReviews,
 		parentClassName = '',
 		rating,
 		reviews,
@@ -154,7 +154,7 @@ export const ProductRating = (
 		[ `has-text-align-${ textAlign }` ]: textAlign,
 	} );
 
-	const mockedRatings = shouldDisplayMockedReviewsWhenProductHasNoReviews && (
+	const mockedRatings = showMockedReviews && (
 		<NoRating className={ className } parentClassName={ parentClassName } />
 	);
 
@@ -169,7 +169,7 @@ export const ProductRating = (
 		mockedRatings
 	);
 
-	const isReviewCountVisible = reviews && isDescendentOfSingleProductBlock;
+	const isReviewCountVisible = reviews && showReviewCount;
 
 	return (
 		<div className={ wrapperClassName } style={ styleProps.style }>
