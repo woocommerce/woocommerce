@@ -1119,7 +1119,7 @@
       ]
     },
     {
-      "content": "\nEnsuring the quality of your WooCommerce projects is essential. This section will delve into quality exoectations, best practices, coding standards, and other methodologies to ensure your projects stand out in terms of reliability, efficiency, user experience, and more. \n",
+      "content": "\nEnsuring the quality of your WooCommerce projects is essential. This section will delve into quality expectations, best practices, coding standards, and other methodologies to ensure your projects stand out in terms of reliability, efficiency, user experience, and more. \n",
       "category_slug": "quality-and-best-practices",
       "category_title": "Quality And Best Practices",
       "posts": [
@@ -1139,6 +1139,15 @@
           "hash": "48ec15e8c50c2fceea0bce267a52dcd7c740a9f1614773b10b6bab4a2e605a8c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/support-and-documentation.md",
           "id": "c7ab700f5ab812a79b646a865caf429864becdb8"
+        },
+        {
+          "post_title": "Reviews Guidelines for WooCommerce Extensions",
+          "menu_title": "Reviews Guidelines",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/reviews-guidelines.md",
+          "hash": "7ccce1de0f47b721a067db6586c5829dca94aa6454553adc67b2dbf22e975cd5",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/reviews-guidelines.md",
+          "id": "8d6addc12e06b0f15468b06db1211e4cdd57205f"
         },
         {
           "post_title": "Understanding the risks of removing URL bases in WooCommerce",
@@ -1731,5 +1740,5 @@
       "categories": []
     }
   ],
-  "hash": "b6fab4eae1266824ee3e876c8fa5fd0342f59b4a0e5978f1460afc67d82e6d94"
+  "hash": "5dd7a5759bb405a09318ec86a188b2d3062613a4628e3607a6d394cc4a0c81e3"
 }
