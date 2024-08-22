@@ -43,7 +43,9 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 	return (
 		<ToolsPanelItem
 			label={ __( 'On Sale', 'woocommerce' ) }
-			hasValue={ () => query.woocommerceOnSale === true }
+			hasValue={ () =>
+				query.woocommerceOnSale !== DEFAULT_FILTERS.woocommerceOnSale
+			}
 			onSelect={ handleToolsPanelItemSelect }
 			onDeselect={ handleToolsPanelItemDeselect }
 			resetAllFilter={ handleToolsPanelItemDeselect }
