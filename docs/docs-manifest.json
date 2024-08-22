@@ -1286,7 +1286,7 @@
               "post_title": "Notifying users about bug fixes and feature requests",
               "menu_title": "Notifying users about bug fixes and feature requests",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
-              "hash": "155f346fd1aec42163d0b790722195f14aecee3967bb10f2d942d844e40a9b46",
+              "hash": "30b6241ebb32204910980a5dea2399a8fa2e02fa37ea22449edc549f3f14034b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
               "id": "9ccc4bf579cc624002478fe8706241f4640d92b8"
             },
@@ -1796,5 +1796,5 @@
       "categories": []
     }
   ],
-  "hash": "8ffd20e86befba43b6ad97cfa7af80b941fc4b06e658fb357ae2750896a9c9be"
+  "hash": "7e929e4f5594921717bb3407ea502c4a01d4dabee6b8b1d441cd14fda4b22248"
 }

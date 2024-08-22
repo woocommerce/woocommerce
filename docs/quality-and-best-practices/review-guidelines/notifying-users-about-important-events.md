@@ -9,7 +9,7 @@ Bugs are usually reported via support or GitHub, or you can discover them yourse
 
 When a critical bug is found, resolve it within a couple of days (most critical bugs should be resolved within 24 hours) and release a new plugin version promptly. Part of your release process should be to notify all stakeholders (the support team and the merchant affected) about the upcoming release.
 
-Even though a critical bug is a great source of stress for merchants, a quick resolution makes merchants feel heard and supported — having a reliable business partner, who is keen to help in the most difficult situation, helps build a stronger relationship. Therefore, we usually ask merchants for a 5* review when we deliver a fast solution.
+Even though a critical bug is a great source of stress for merchants, a quick resolution makes merchants feel heard and supported - having a reliable business partner, who is keen to help in the most difficult situation, helps build a stronger relationship. Therefore, we usually ask merchants for a 5* review when we deliver a fast solution.
 
 When you implement a new feature request and ship a new plugin version, you can follow a similar approach to bugs:
 
