@@ -29,6 +29,14 @@ export const PaymentMethod = ( {
 		e.preventDefault();
 		setIsLoading( true );
 
+		if ( ! window.woocommerce_admin.nonces?.gateway_toggle ) {
+			// eslint-disable-next-line no-console
+			console.warn( 'Unexpected error: Nonce not found' );
+			// Redirect to payment setting page if nonce is not found. Users should still be able to toggle the payment method from that page.
+			window.location.href = settings_url;
+			return;
+		}
+
 		try {
 			const response = await fetch( window.woocommerce_admin.ajax_url, {
 				method: 'POST',
@@ -37,8 +45,7 @@ export const PaymentMethod = ( {
 				},
 				body: new URLSearchParams( {
 					action: 'woocommerce_toggle_gateway_enabled',
-					security:
-						window.woocommerce_admin.nonces?.gateway_toggle || '',
+					security: window.woocommerce_admin.nonces?.gateway_toggle,
 					gateway_id: id,
 				} ),
 			} );
