@@ -36,7 +36,7 @@ class RoutesController {
 	public function __construct( SchemaController $schema_controller ) {
 		$this->schema_controller = $schema_controller;
 		$this->routes            = [
-			'v1'      => [
+			'v1' => [
 				Routes\V1\Batch::IDENTIFIER              => Routes\V1\Batch::class,
 				Routes\V1\Cart::IDENTIFIER               => Routes\V1\Cart::class,
 				Routes\V1\CartAddItem::IDENTIFIER        => Routes\V1\CartAddItem::class,
