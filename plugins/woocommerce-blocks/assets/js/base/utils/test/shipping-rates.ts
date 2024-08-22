@@ -32,12 +32,12 @@ jest.mock( '@woocommerce/settings', () => {
 		} ),
 	};
 } );
-const LOCAL_PICKUP_ENABLED = jest.fn().mockReturnValue( true );
 jest.mock( '@woocommerce/block-settings', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@woocommerce/block-settings' ),
-	LOCAL_PICKUP_ENABLED,
+	LOCAL_PICKUP_ENABLED: true,
 } ) );
+const blockSettingsMock = jest.requireMock( '@woocommerce/block-settings' );
 
 // Returns a rate object with the given values
 const generateRate = (
@@ -133,7 +133,7 @@ describe( 'isPackageRateCollectable', () => {
 			expect( hasCollectableRate( ratesToTest2 ) ).toBe( false );
 		} );
 		it( 'returns false for all rates if local pickup is disabled', () => {
-			LOCAL_PICKUP_ENABLED.mockReturnValue( false );
+			blockSettingsMock.LOCAL_PICKUP_ENABLED = false;
 			const ratesToTest = [ 'flat_rate', 'local_pickup' ];
 			expect( hasCollectableRate( ratesToTest ) ).toBe( false );
 		} );
