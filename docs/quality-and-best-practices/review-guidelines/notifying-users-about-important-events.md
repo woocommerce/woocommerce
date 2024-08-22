@@ -1,5 +1,5 @@
 ---
-post_title: Notifying users about bug fixes and features requests
+post_title: Notifying users about bug fixes and feature requests
 menu_title: Notifying users about bug fixes and feature requests
 ---
 
