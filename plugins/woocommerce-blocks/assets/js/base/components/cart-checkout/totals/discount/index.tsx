@@ -57,7 +57,7 @@ const TotalsDiscount = ( {
 		defaultValue: cartCoupons,
 	} );
 
-	if ( ! discountValue && cartCoupons.length === 0 ) {
+	if ( ! discountValue && filteredCartCoupons.length === 0 ) {
 		return null;
 	}
 
