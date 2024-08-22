@@ -202,6 +202,61 @@ abstract class AbstractBlock {
 		$chunks = preg_filter( '/.js/', '', $blocks );
 		return $chunks;
 	}
+	
+	/**
+	 * Get block settings from a metadata path.  Caches the resulting value in a transient.
+	 *
+	 * @param string $metadata_path Metadata path to block.json file.
+	 * @return array Block settings.
+	 */
+	public function get_block_settings_from_metadata_path( $metadata_path ) {
+		$transient_name = 'woocommerce_block_settings_' . $metadata_path;
+		$transient      = get_transient( $transient_name );
+		if ( $transient ) {
+			return $transient;
+		}
+
+		if ( empty( $metadata_path ) || ! file_exists( $metadata_path ) ) {
+			set_transient( $transient_name, [] );
+			return [];
+		}
+		
+		$json = json_decode( file_get_contents( $metadata_path ), true );
+
+		$property_mappings = array(
+			'apiVersion'      => 'api_version',
+			'name'            => 'name',
+			'title'           => 'title',
+			'category'        => 'category',
+			'parent'          => 'parent',
+			'ancestor'        => 'ancestor',
+			'icon'            => 'icon',
+			'description'     => 'description',
+			'keywords'        => 'keywords',
+			'attributes'      => 'attributes',
+			'providesContext' => 'provides_context',
+			'usesContext'     => 'uses_context',
+			'selectors'       => 'selectors',
+			'supports'        => 'supports',
+			'styles'          => 'styles',
+			'variations'      => 'variations',
+			'example'         => 'example',
+			'allowedBlocks'   => 'allowed_blocks',
+		);
+
+		foreach ( $property_mappings as $key => $mapped_key ) {
+			if ( isset( $json[ $key ] ) ) {
+				$json[ $mapped_key ] = $json[ $key ];
+				if ( $mapped_key !== $key ) {
+					unset( $json[ $key ] );
+				}
+			}
+		}
+
+		set_transient( $transient_name, $json );
+		return $json;
+	}
+
 	/**
 	 * Registers the block type with WordPress.
 	 *
@@ -219,7 +274,8 @@ abstract class AbstractBlock {
 			$block_settings['api_version'] = 2;
 		}
 
-		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
+		$metadata_path  = $this->asset_api->get_block_metadata_path( $this->block_name );
+		$block_settings = array_merge( $block_settings, $this->get_block_settings_from_metadata_path( $metadata_path ) );
 
 		/**
 		 * We always want to load block styles separately, for every theme.
@@ -249,15 +305,6 @@ abstract class AbstractBlock {
 				10,
 				2
 			);
-		}
-
-		// Prefer to register with metadata if the path is set in the block's class.
-		if ( ! empty( $metadata_path ) ) {
-			register_block_type_from_metadata(
-				$metadata_path,
-				$block_settings
-			);
-			return;
 		}
 
 		/*
