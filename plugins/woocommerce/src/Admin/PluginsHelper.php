@@ -14,6 +14,7 @@ use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Utilities\PluginUtil;
 use Plugin_Upgrader;
 use WC_Helper;
 use WC_Helper_Updater;
@@ -42,6 +43,11 @@ class PluginsHelper {
 	 * The URL for the WooCommerce subscription page.
 	 */
 	const WOO_SUBSCRIPTION_PAGE_URL = 'https://woocommerce.com/my-account/my-subscriptions/';
+
+	/**
+	 * The URL for the WooCommerce.com add payment method page.
+	 */
+	const WOO_ADD_PAYMENT_METHOD_URL = 'https://woocommerce.com/my-account/add-payment-method/';
 
 	/**
 	 * Meta key for dismissing expired subscription notices.
@@ -75,7 +81,7 @@ class PluginsHelper {
 	 *
 	 * @param string $slug Plugin slug to get path for.
 	 *
-	 * @return string|false
+	 * @return string|false The plugin path or false if the plugin is not installed.
 	 */
 	public static function get_plugin_path_from_slug( $slug ) {
 		$plugins = get_plugins();
@@ -132,16 +138,25 @@ class PluginsHelper {
 	/**
 	 * Get an array of active plugin slugs.
 	 *
-	 * @return array
+	 * The list will include both network active and site active plugins.
+	 *
+	 * @return array The list of active plugin slugs.
 	 */
 	public static function get_active_plugin_slugs() {
-		return array_map(
-			function ( $plugin_path ) {
-				$path_parts = explode( '/', $plugin_path );
+		return array_unique(
+			array_map(
+				function ( $absolute_path ) {
+					// Make the path relative to the plugins directory.
+					$plugin_path = str_replace( WP_PLUGIN_DIR . '/', '', $absolute_path );
 
-				return $path_parts[0];
-			},
-			get_option( 'active_plugins', array() )
+					// Split the path to get the plugin slug (aka the directory name).
+					$path_parts = explode( '/', $plugin_path );
+
+					return $path_parts[0];
+				},
+				// Use this method as it is the most bulletproof way to get the active plugins.
+				wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins()
+			)
 		);
 	}
 
@@ -168,7 +183,7 @@ class PluginsHelper {
 	public static function is_plugin_active( $plugin ) {
 		$plugin_path = self::get_plugin_path_from_slug( $plugin );
 
-		return $plugin_path ? in_array( $plugin_path, get_option( 'active_plugins', array() ), true ) : false;
+		return $plugin_path && \is_plugin_active( $plugin_path );
 	}
 
 	/**
@@ -588,9 +603,11 @@ class PluginsHelper {
 
 		$connect_page_url = add_query_arg(
 			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => rawurlencode( '/extensions' ),
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_setting_screen_connect',
 			),
 			admin_url( 'admin.php' )
 		);
@@ -706,7 +723,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Construct the subscritpion notice data based on user subscriptions data.
+	 * Construct the subscription notice data based on user subscriptions data.
 	 *
 	 * @param array  $all_subs all subscription data.
 	 * @param array  $subs_to_show filtered subscriptions as condition.
@@ -717,10 +734,19 @@ class PluginsHelper {
 	 */
 	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
 		if ( 1 < $total ) {
+			$hyperlink_url = add_query_arg(
+				array(
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
+
+				),
+				self::WOO_SUBSCRIPTION_PAGE_URL
+			);
+
 			$parsed_message = sprintf(
 				$messages['different_subscriptions'],
 				esc_attr( $total ),
-				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
+				esc_url( $hyperlink_url ),
 				esc_attr( $total ),
 			);
 
@@ -752,8 +778,11 @@ class PluginsHelper {
 		$expiry_date   = date_i18n( 'F jS', $subscription['expires'] );
 		$hyperlink_url = add_query_arg(
 			array(
-				'product_id' => $product_id,
-				'type'       => $type,
+				'product_id'   => $product_id,
+				'type'         => $type,
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
+
 			),
 			self::WOO_SUBSCRIPTION_PAGE_URL
 		);
@@ -810,6 +839,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& ( $sub['active'] || empty( $sub['connections'] ) ) // Active on current site or not connected to any sites.
 						&& $sub['expiring']
 						&& ! $sub['autorenew'];
 			},
@@ -824,29 +854,7 @@ class PluginsHelper {
 		// When payment method is missing on WooCommerce.com.
 		$helper_notices = WC_Helper::get_notices();
 		if ( ! empty( $helper_notices['missing_payment_method_notice'] ) ) {
-			$description = $allowed_link
-				? sprintf(
-					/* translators: %s: WooCommerce.com URL to add payment method */
-					_n(
-						'Your WooCommerce extension subscription is missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
-						'Your WooCommerce extension subscriptions are missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
-						$total_expiring_subscriptions,
-						'woocommerce'
-					),
-					'https://woocommerce.com/my-account/add-payment-method/'
-				)
-				: _n(
-					'Your WooCommerce extension subscription is missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
-					'Your WooCommerce extension subscriptions are missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
-					$total_expiring_subscriptions,
-					'woocommerce'
-				);
-
-			return array(
-				'description' => $description,
-				'button_text' => __( 'Add payment method', 'woocommerce' ),
-				'button_link' => 'https://woocommerce.com/my-account/add-payment-method/',
-			);
+			return self::get_missing_payment_method_notice( $allowed_link, $total_expiring_subscriptions );
 		}
 
 		// Payment method is available but there are expiring subscriptions.
@@ -865,14 +873,20 @@ class PluginsHelper {
 			'expiring',
 		);
 
-		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		$button_link = add_query_arg(
+			array(
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_in_apps_screen_enable_autorenew',
+			),
+			self::WOO_SUBSCRIPTION_PAGE_URL
+		);
 		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
 					'product_id' => $notice_data['product_id'],
 					'type'       => 'expiring',
 				),
-				self::WOO_SUBSCRIPTION_PAGE_URL
+				$button_link
 			);
 		}
 
@@ -903,6 +917,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
+						&& ( $sub['active'] || empty( $sub['connections'] ) ) // Active on current site or not connected to any sites.
 						&& $sub['expired']
 						&& ! $sub['lifetime'];
 			},
@@ -923,21 +938,28 @@ class PluginsHelper {
 				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
 				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
-				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s.</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 			),
 			'expired',
 		);
 
-		$button_link = self::WOO_SUBSCRIPTION_PAGE_URL;
+		$button_link = add_query_arg(
+			array(
+				'utm_source'   => 'pu',
+				'utm_campaign' => $allowed_link ? 'pu_settings_screen_renew' : 'pu_in_apps_screen_renew',
+			),
+			self::WOO_SUBSCRIPTION_PAGE_URL
+		);
+
 		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
 					'product_id' => $notice_data['product_id'],
 					'type'       => 'expiring',
 				),
-				self::WOO_SUBSCRIPTION_PAGE_URL
+				$button_link
 			);
 		}
 
@@ -972,5 +994,46 @@ class PluginsHelper {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get the notice data for missing payment method.
+	 *
+	 * @param bool $allowed_link whether should show link on the notice or not.
+	 * @param int  $total_expiring_subscriptions total expiring subscriptions.
+	 *
+	 * @return array the notices data.
+	 */
+	public static function get_missing_payment_method_notice( $allowed_link = true, $total_expiring_subscriptions = 1 ) {
+		$add_payment_method_link = add_query_arg(
+			array(
+				'utm_source'   => 'pu',
+				'utm_campaign' => $allowed_link ? 'pu_settings_screen_add_payment_method' : 'pu_in_apps_screen_add_payment_method',
+			),
+			self::WOO_ADD_PAYMENT_METHOD_URL
+		);
+		$description             = $allowed_link
+			? sprintf(
+			/* translators: %s: WooCommerce.com URL to add payment method */
+				_n(
+					'Your WooCommerce extension subscription is missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
+					'Your WooCommerce extension subscriptions are missing a payment method for renewal. <a href="%s">Add a payment method</a> to ensure you continue receiving updates and streamlined support.',
+					$total_expiring_subscriptions,
+					'woocommerce'
+				),
+				$add_payment_method_link
+			)
+			: _n(
+				'Your WooCommerce extension subscription is missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
+				'Your WooCommerce extension subscriptions are missing a payment method for renewal. Add a payment method to ensure you continue receiving updates and streamlined support.',
+				$total_expiring_subscriptions,
+				'woocommerce'
+			);
+
+		return array(
+			'description' => $description,
+			'button_text' => __( 'Add payment method', 'woocommerce' ),
+			'button_link' => $add_payment_method_link,
+		);
 	}
 }

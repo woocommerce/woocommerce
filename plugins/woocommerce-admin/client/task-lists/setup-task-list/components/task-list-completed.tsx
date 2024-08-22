@@ -33,7 +33,7 @@ export const TaskListCompleted = ( {
 							<img src={ HeaderImage } alt="Completed" />
 							<h2>
 								{ __(
-									"You've completed store setup",
+									'You’ve completed store setup',
 									'woocommerce'
 								) }
 							</h2>

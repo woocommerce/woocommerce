@@ -1,17 +1,19 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { BlockVariation } from '@wordpress/blocks';
+import {
+	productFilterActive,
+	productFilterAttribute,
+	productFilterPrice,
+	productFilterRating,
+	productFilterStockStatus,
+} from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
+import { AttributeSetting, objectHasProp } from '@woocommerce/types';
 
-/**
- * Internal dependencies
- */
-import { activeFiltersIcon } from './inner-blocks/active-filters/icon';
-import { attributeFilterIcon } from './inner-blocks/attribute-filter/icon';
-import { priceFilterIcon } from './inner-blocks/price-filter/icon';
-import { ratingFilterIcon } from './inner-blocks/rating-filter/icon';
-import { stockStatusFilterIcon } from './inner-blocks/stock-filter/icon';
+const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const variations: BlockVariation[] = [
 	{
@@ -25,9 +27,7 @@ const variations: BlockVariation[] = [
 			heading: __( 'Active filters', 'woocommerce' ),
 			filterType: 'active-filters',
 		},
-		icon: {
-			src: activeFiltersIcon,
-		},
+		icon: productFilterActive,
 		isDefault: true,
 	},
 	{
@@ -41,9 +41,7 @@ const variations: BlockVariation[] = [
 			filterType: 'price-filter',
 			heading: __( 'Price', 'woocommerce' ),
 		},
-		icon: {
-			src: priceFilterIcon,
-		},
+		icon: productFilterPrice,
 	},
 	{
 		name: 'product-filter-stock-status',
@@ -56,25 +54,7 @@ const variations: BlockVariation[] = [
 			filterType: 'stock-filter',
 			heading: __( 'Status', 'woocommerce' ),
 		},
-		icon: {
-			src: stockStatusFilterIcon,
-		},
-	},
-	{
-		name: 'product-filter-attribute',
-		title: __( 'Attribute (Experimental)', 'woocommerce' ),
-		description: __(
-			'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
-			'woocommerce'
-		),
-		attributes: {
-			filterType: 'attribute-filter',
-			heading: __( 'Attribute', 'woocommerce' ),
-			attributeId: 0,
-		},
-		icon: {
-			src: attributeFilterIcon,
-		},
+		icon: productFilterStockStatus,
 	},
 	{
 		name: 'product-filter-rating',
@@ -87,11 +67,52 @@ const variations: BlockVariation[] = [
 			filterType: 'rating-filter',
 			heading: __( 'Rating', 'woocommerce' ),
 		},
-		icon: {
-			src: ratingFilterIcon,
-		},
+		icon: productFilterRating,
 	},
 ];
+
+ATTRIBUTES.forEach( ( attribute ) => {
+	variations.push( {
+		name: `product-filter-attribute-${ attribute.attribute_name }`,
+		title: `${ attribute.attribute_label } (Experimental)`,
+		description: sprintf(
+			// translators: %s is the attribute label.
+			__(
+				`Enable customers to filter the product collection by selecting one or more %s attributes.`,
+				'woocommerce'
+			),
+			attribute.attribute_label
+		),
+		attributes: {
+			filterType: 'attribute-filter',
+			heading: attribute.attribute_label,
+			attributeId: parseInt( attribute.attribute_id, 10 ),
+		},
+		icon: productFilterAttribute,
+		// Can be `isActive: [ 'filterType', 'attributeId' ]`, but the API is available from 6.6.
+		isActive: ( blockAttributes, variationAttributes ) => {
+			return (
+				blockAttributes.filterType === variationAttributes.filterType &&
+				blockAttributes.attributeId === variationAttributes.attributeId
+			);
+		},
+	} );
+} );
+
+variations.push( {
+	name: 'product-filter-attribute',
+	title: __( 'Attribute (Experimental)', 'woocommerce' ),
+	description: __(
+		'Enable customers to filter the product collection by selecting one or more attributes, such as color.',
+		'woocommerce'
+	),
+	attributes: {
+		filterType: 'attribute-filter',
+		heading: __( 'Attribute', 'woocommerce' ),
+		attributeId: 0,
+	},
+	icon: productFilterAttribute,
+} );
 
 /**
  * Add `isActive` function to all Product Filter block variations.
@@ -99,8 +120,10 @@ const variations: BlockVariation[] = [
  *  Block by providing its attributes.
  */
 variations.forEach( ( variation ) => {
-	// @ts-expect-error: `isActive` is currently typed wrong in `@wordpress/blocks`.
-	variation.isActive = [ 'filterType' ];
+	if ( ! objectHasProp( variation, 'isActive' ) ) {
+		// @ts-expect-error: `isActive` is currently typed wrong in `@wordpress/blocks`.
+		variation.isActive = [ 'filterType' ];
+	}
 } );
 
 export const blockVariations = variations;

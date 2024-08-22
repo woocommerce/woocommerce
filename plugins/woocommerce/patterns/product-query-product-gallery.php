@@ -19,6 +19,10 @@ $products_title = $content['titles'][0]['default'] ?? '';
 	<h3 class="wp-block-heading alignwide"><?php echo esc_html( $products_title ); ?></h3>
 	<!-- /wp:heading -->
 
+	<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
+	<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+
 	<!-- wp:woocommerce/product-collection {"queryId":2,"query":{"perPage":6,"pages":0,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":[],"isProductCollectionBlock":true,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[]},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"queryContextIncludes":["collection"],"align":"wide","layout":{"type":"default"}} -->
 	<div class="wp-block-woocommerce-product-collection alignwide">
 		<!-- wp:woocommerce/product-template -->

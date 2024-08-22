@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-toggle-field",
 	"title": "Product toggle control",
 	"category": "woocommerce",
 	"description": "The product toggle.",
-	"keywords": [ "products", "radio", "input" ],
+	"keywords": [
+		"products",
+		"radio",
+		"input"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"label": {
@@ -48,5 +52,7 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }

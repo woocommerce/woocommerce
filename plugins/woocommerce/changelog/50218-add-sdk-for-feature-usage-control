@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add methods required by extensions to control product feature usage based on subscription status.

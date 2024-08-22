@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add e2e tests to confirm that the store is in coming soon mode after completing the core profiler

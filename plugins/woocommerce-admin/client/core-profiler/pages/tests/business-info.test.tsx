@@ -94,7 +94,7 @@ describe( 'BusinessInfo', () => {
 			'im_setting_up_a_store_for_a_client';
 		render( <BusinessInfo { ...props } /> );
 		expect(
-			screen.getByText( /Which industry is your client's business in?/i )
+			screen.getByText( /Which industry is your client’s business in?/i )
 		).toBeInTheDocument();
 	} );
 

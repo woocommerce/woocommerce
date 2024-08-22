@@ -49,6 +49,7 @@ import {
 	MAX_LOGO_WIDTH,
 	ALLOWED_MEDIA_TYPES,
 } from './constants';
+import { trackEvent } from '~/customize-store/tracking';
 
 const useLogoEdit = ( {
 	shouldSyncIcon,
@@ -541,10 +542,15 @@ export const SidebarNavigationScreenLogo = ( {
 								components: {
 									link: (
 										<Link
-											href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
+											href="https://go.fiverr.com/visit/?bta=917527&brand=logomaker&landingPage=https%253A%252F%252Fwww.fiverr.com%252Flogo-maker%252Fwoo"
 											target="_blank"
 											type="external"
 											rel="noreferrer"
+											onClick={ () => {
+												trackEvent(
+													'customize_your_store_fiverr_logo_maker_cta_click'
+												);
+											} }
 										/>
 									),
 								},

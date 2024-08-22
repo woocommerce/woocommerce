@@ -132,18 +132,6 @@ class Bootstrap {
 				$is_store_api_request = wc()->is_store_api_request();
 
 				if ( ! $is_store_api_request && ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) ) {
-					$this->container->register(
-						BlockTemplatesRegistry::class,
-						function () {
-							return new BlockTemplatesRegistry();
-						}
-					);
-					$this->container->register(
-						BlockTemplatesController::class,
-						function () {
-							return new BlockTemplatesController();
-						}
-					);
 					$this->container->get( BlockTemplatesRegistry::class )->init();
 					$this->container->get( BlockTemplatesController::class )->init();
 				}
@@ -446,6 +434,18 @@ class Bootstrap {
 			QueryFilters::class,
 			function () {
 				return new QueryFilters();
+			}
+		);
+		$this->container->register(
+			BlockTemplatesRegistry::class,
+			function () {
+				return new BlockTemplatesRegistry();
+			}
+		);
+		$this->container->register(
+			BlockTemplatesController::class,
+			function () {
+				return new BlockTemplatesController();
 			}
 		);
 	}

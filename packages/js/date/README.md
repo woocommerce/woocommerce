@@ -212,7 +212,7 @@ Calculates the date difference between two dates. Used in calculating a matching
 | Param | Type | Description |
 | --- | --- | --- |
 | date | <code>string</code> | Date to compare |
-| date2 | <code>string</code> | Seconary date to compare |
+| date2 | <code>string</code> | Secondary date to compare |
 
 <a name="getPreviousDate"></a>
 
@@ -279,7 +279,7 @@ Get a DateValue object for a period prior to the current period.
 <a name="getCurrentPeriod"></a>
 
 ### getCurrentPeriod(period, compare) ⇒ [<code>DateValue</code>](#DateValue)
-Get a DateValue object for a curent period. The period begins on the first day of the period,
+Get a DateValue object for a current period. The period begins on the first day of the period,
 and ends on the current day.
 
 **Kind**: global function

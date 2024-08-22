@@ -135,7 +135,7 @@ export const LaunchYourStoreSuccess = ( {
 									{
 										link: (
 											<a
-												href="https://woocommerce.com/document/server-caches/"
+												href="https://woocommerce.com/document/configuring-woocommerce-settings/coming-soon-mode/#server-caches"
 												target="_blank"
 												rel="noreferrer"
 											>
@@ -148,7 +148,7 @@ export const LaunchYourStoreSuccess = ( {
 									}
 							  )
 							: __(
-									"You've successfully launched your store and are ready to start selling! We can't wait to see your business grow.",
+									'You’ve successfully launched your store and are ready to start selling! We can’t wait to see your business grow.',
 									'woocommerce'
 							  ) }
 					</h2>
@@ -193,7 +193,7 @@ export const LaunchYourStoreSuccess = ( {
 						/>
 					</div>
 					<h2 className="woocommerce-launch-store__congrats-main-actions-title">
-						{ __( "What's next?", 'woocommerce' ) }
+						{ __( 'What’s next?', 'woocommerce' ) }
 					</h2>
 					<WhatsNext
 						activePlugins={ activePlugins }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix optional param in PHPdoc for `WC_Admin_Marketplace_Promotions` to generate code-reference w/o warnings

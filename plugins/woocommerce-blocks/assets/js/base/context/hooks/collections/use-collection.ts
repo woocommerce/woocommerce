@@ -13,7 +13,7 @@ import { isError } from '@woocommerce/types';
  * kept up to date with the collection matching that query in the store state.
  *
  * @throws {Object} Throws an exception object if there was a problem with the
- * 					API request, to be picked up by BlockErrorBoundry.
+ * 					API request, to be picked up by BlockErrorBoundary.
  *
  * @param {Object}  options                  An object declaring the various
  *                                           collection arguments.
