@@ -22,7 +22,7 @@ The `SqlQuery` class is a SQL Query statement object. Its properties consist of
 
 ## Reports Data Stores
 
-The base DataStore `Automattic\WooCommerce\Admin\API\Reports\DataStore` extends the `SqlQuery` class. The implementation data store classes use the following `SqlQuery` instances:
+The base DataStore `Automattic\WooCommerce\Admin\API\Reports\DataStore` extends the `SqlQuery` class. There is `StatsDataStoreTrait` that adds Interval & Total Queries. The implementation data store classes use the following `SqlQuery` instances:
 
 | Data Store | Context | Class Query | Sub Query | Interval Query | Total Query |
 | ---------- | ------- | ----------- | --------- | -------------- | ----------- |
@@ -40,6 +40,7 @@ The base DataStore `Automattic\WooCommerce\Admin\API\Reports\DataStore` extends 
 | Taxes | taxes | Yes | Yes | - | - |
 | Tax Stats | tax_stats | Yes | - | Yes | Yes |
 | Variations | variations | Yes | Yes | - | - |
+| StatsDataStoreTrait | n/a | n/a | - | Yes | Yes |
 
 Query contexts are named as follows:
 

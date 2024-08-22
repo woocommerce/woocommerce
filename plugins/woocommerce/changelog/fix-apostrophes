@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Changed instances of prime marks inappropriately used when apostrophes are supposed to be used for some parts of WC Admin JS/TS/TSX files

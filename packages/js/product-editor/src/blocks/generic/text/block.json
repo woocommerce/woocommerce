@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-text-field",
 	"title": "Product text field",
 	"category": "woocommerce",
 	"description": "A text field for use in the product editor.",
-	"keywords": [ "products", "text" ],
+	"keywords": [
+		"products",
+		"text"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"label": {
@@ -59,5 +62,7 @@
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }

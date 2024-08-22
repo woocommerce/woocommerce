@@ -854,7 +854,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $global_unique_id Unique ID.
 	 */
 	public function set_global_unique_id( $global_unique_id ) {
-		$global_unique_id = (string) $global_unique_id;
+		$global_unique_id = preg_replace( '/[^0-9\-]/', '', (string) $global_unique_id );
 		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! wc_product_has_global_unique_id( $this->get_id(), $global_unique_id ) ) {
 			$global_unique_id_found = wc_get_product_id_by_global_unique_id( $global_unique_id );
 

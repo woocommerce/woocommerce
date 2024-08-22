@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Admin\API\AI;
 
 use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
@@ -14,29 +16,26 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  */
-class Product {
-
+class Product extends AIEndpoint {
 	/**
-	 * Endpoint namespace.
+	 * The endpoint response option name.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin';
+	const AI_CONTENT_GENERATED = 'ai_content_generated';
 
 	/**
-	 * Route base.
+	 * Endpoint.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'ai';
+	protected $endpoint = 'product';
 
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/product',
+		$this->register(
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
@@ -58,11 +57,11 @@ class Product {
 	}
 
 	/**
-	 * Update product with the content and image powered by AI.
+	 * Update product with the content and images powered by AI.
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 *
-	 * @return WP_Error|WP_REST_Response
+	 * @return WP_REST_Response
 	 */
 	public function update_product( WP_REST_Request $request ) {
 		$product_updater     = new UpdateProducts();
@@ -71,12 +70,17 @@ class Product {
 		if ( empty( $product_information ) ) {
 			return rest_ensure_response(
 				array(
-					'ai_content_generated' => true,
+					self::AI_CONTENT_GENERATED => true,
 				)
 			);
 		}
 
-		$product_updater->update_product_content( $product_information );
+		try {
+			$product_updater = new UpdateProducts();
+			$product_updater->update_product_content( $product_information );
+		} catch ( \Exception $e ) {
+			return rest_ensure_response( array( 'ai_content_generated' => false ) );
+		}
 
 		$last_product_to_update = $request['last_product'] ?? false;
 
@@ -86,7 +90,7 @@ class Product {
 
 		return rest_ensure_response(
 			array(
-				'ai_content_generated' => true,
+				self::AI_CONTENT_GENERATED => true,
 			)
 		);
 	}

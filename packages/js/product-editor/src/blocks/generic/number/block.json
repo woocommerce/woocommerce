@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-number-field",
 	"title": "Product number control",
 	"category": "woocommerce",
 	"description": "A reusable number field for the product editor.",
-	"keywords": [ "products", "number", "input" ],
+	"keywords": [
+		"products",
+		"number",
+		"input"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"label": {

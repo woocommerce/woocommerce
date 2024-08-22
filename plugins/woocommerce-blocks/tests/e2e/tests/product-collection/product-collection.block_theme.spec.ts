@@ -44,6 +44,44 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
+	test( 'Can be migrated to from Products (Beta) block', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		await admin.createNewPost();
+
+		await editor.insertBlock( {
+			name: 'core/query',
+			attributes: {
+				namespace: 'woocommerce/product-query',
+			},
+		} );
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Products (Beta)' )
+		).toBeVisible();
+
+		await editor.canvas
+			.getByRole( 'button', { name: 'Start blank' } )
+			.click();
+		await editor.canvas.getByLabel( 'Title & Date' ).click();
+
+		await page
+			.getByRole( 'button', { name: 'Upgrade to Product Collection' } )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Products (Beta)' )
+		).toBeHidden();
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Collection' ).first()
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Choose collection' } )
+		).toBeVisible();
+	} );
+
 	test.describe( 'Renders correctly with all Product Elements', () => {
 		const expectedProductContent = [
 			'Beanie', // core/post-title
@@ -57,11 +95,11 @@ test.describe( 'Product Collection', () => {
 			'Add to cart', // woocommerce/product-button
 		];
 
-		test( 'In a post', async ( { page, pageObject } ) => {
+		test( 'In a post', async ( { page, editor, pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect(
-				page.locator( '[data-testid="product-image"]:visible' )
+				editor.canvas.locator( '[data-testid="product-image"]:visible' )
 			).toHaveCount( 9 );
 
 			await pageObject.insertProductElements();
@@ -180,25 +218,30 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock();
 
-			const allProducts = pageObject.products;
-			const salePoducts = pageObject.products.filter( {
+			let allProducts = pageObject.products;
+			let saleProducts = pageObject.products.filter( {
 				hasText: 'Product on sale',
 			} );
 
 			await expect( allProducts ).toHaveCount( 9 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
 				onSale: true,
 			} );
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.publishAndGoToFrontend();
+			await pageObject.refreshLocators( 'frontend' );
+			allProducts = pageObject.products;
+			saleProducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
 
 			await expect( allProducts ).toHaveCount( 6 );
-			await expect( salePoducts ).toHaveCount( 6 );
+			await expect( saleProducts ).toHaveCount( 6 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
@@ -722,6 +765,7 @@ test.describe( 'Product Collection', () => {
 
 				const postId = await editor.publishPost();
 				await page.goto( `/?p=${ postId }` );
+				await pageObject.refreshLocators( 'frontend' );
 
 				await expect( pageObject.products ).toHaveCount( 2 );
 
@@ -1071,7 +1115,6 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		test( 'With multiple Pagination blocks', async ( {
-			page,
 			admin,
 			editor,
 			pageObject,
@@ -1079,7 +1122,9 @@ test.describe( 'Product Collection', () => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'productCatalog' );
-			const paginations = page.getByLabel( BLOCK_LABELS.pagination );
+			const paginations = editor.canvas.getByLabel(
+				BLOCK_LABELS.pagination
+			);
 
 			await expect( paginations ).toHaveCount( 1 );
 
@@ -1373,15 +1418,12 @@ test.describe( 'Product Collection', () => {
 			editor,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock();
-			const productTemplate = page.getByLabel(
-				BLOCK_LABELS.productTemplate
-			);
-			await expect( productTemplate ).toBeVisible();
+			await expect( pageObject.productTemplate ).toBeVisible();
 
 			// Refresh the post and verify the block is still visible
 			await editor.publishPost();
 			await page.reload();
-			await expect( productTemplate ).toBeVisible();
+			await expect( pageObject.productTemplate ).toBeVisible();
 		} );
 
 		test( 'On Sale collection should be visible after Refresh', async ( {
@@ -1413,15 +1455,12 @@ test.describe( 'Product Collection', () => {
 			editor,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'onSale' );
-			const productTemplate = page.getByLabel(
-				BLOCK_LABELS.productTemplate
-			);
-			await expect( productTemplate ).toBeVisible();
+			await expect( pageObject.productTemplate ).toBeVisible();
 
 			// Refresh the post and verify "On Sale" collection is still visible
 			await editor.saveDraft();
 			await page.reload();
-			await expect( productTemplate ).toBeVisible();
+			await expect( pageObject.productTemplate ).toBeVisible();
 		} );
 	} );
 
@@ -1591,6 +1630,72 @@ test.describe( 'Product Collection', () => {
 			await expect( products ).toHaveText( expectedProducts );
 		} );
 	} );
+
+	test.describe( 'Extensibility - JS events', () => {
+		test( 'emits wc-blocks_product_list_rendered event on init and on page change', async ( {
+			pageObject,
+			page,
+		} ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					( e ) => {
+						const { collection } = e.detail;
+						window.eventPayload = collection;
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect
+				.poll(
+					async () => await page.evaluate( 'window.eventPayload' )
+				)
+				.toBe( undefined );
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 1 );
+
+			await page.getByRole( 'link', { name: 'Next Page' } ).click();
+
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 2 );
+		} );
+
+		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
+			pageObject,
+			page,
+		} ) => {
+			// Adding three blocks in total
+			await pageObject.createNewPostAndInsertBlock();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost();
+
+			await page.addInitScript( () => {
+				let eventFired = 0;
+				window.document.addEventListener(
+					'wc-blocks_product_list_rendered',
+					() => {
+						window.eventFired = ++eventFired;
+					}
+				);
+			} );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect
+				.poll( async () => await page.evaluate( 'window.eventFired' ) )
+				.toBe( 3 );
+		} );
+	} );
 } );
 
 /**
@@ -1624,18 +1729,17 @@ test.describe( 'Testing registerProductCollection', () => {
 		pageObject,
 		editor,
 		admin,
-		page,
 	} ) => {
 		await admin.createNewPost();
 		await editor.insertBlockUsingGlobalInserter( pageObject.BLOCK_NAME );
-		await page
+		await editor.canvas
 			.getByRole( 'button', {
 				name: 'Choose collection',
 			} )
 			.click();
 
 		// Get text of all buttons in the collection chooser
-		const collectionChooserButtonsTexts = await editor.page
+		const collectionChooserButtonsTexts = await editor.canvas
 			.locator( '.wc-blocks-product-collection__collection-button-title' )
 			.allTextContents();
 
@@ -1744,7 +1848,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollectionWithPreview'
 			);
-			const previewButtonLocator = editor.page.getByTestId(
+			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
 
@@ -1804,7 +1908,7 @@ test.describe( 'Testing registerProductCollection', () => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollectionWithAdvancedPreview'
 			);
-			const previewButtonLocator = editor.page.getByTestId(
+			const previewButtonLocator = editor.canvas.getByTestId(
 				SELECTORS.previewButtonTestID
 			);
 
