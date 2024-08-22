@@ -52,7 +52,7 @@ export const WCPayInstallButton = () => {
 			onClick={ installWooCommercePayments }
 			variant="secondary"
 			isBusy={ installing }
-			disabled={ installing }
+			aria-disabled={ installing }
 		>
 			{ __( 'Install', 'woocommerce' ) }
 		</Button>
