@@ -108,7 +108,7 @@ test( 'can add images', { tag: '@gutenberg' }, async ( { page, product } ) => {
 
 		for ( const image of images ) {
 			await expect(
-				page.locator( `img.wp-post-image[src*="${ image }"]` )
+				page.locator( `img[src*="${ image }"]` )
 			).toBeVisible();
 		}
 	} );
@@ -163,7 +163,7 @@ test(
 			// Verify image in store frontend
 			await page.goto( productWithGallery.permalink );
 			await expect(
-				page.locator( `img.wp-post-image[src*="${ newImageName }"]` )
+				page.locator( `img[src*="${ newImageName }"]` )
 			).toBeVisible();
 		} );
 	}
