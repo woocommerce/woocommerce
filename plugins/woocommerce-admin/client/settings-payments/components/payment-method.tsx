@@ -54,7 +54,7 @@ export const PaymentMethod = ( {
 					window.location.href = settings_url;
 				}
 			} else {
-				throw new Error( 'Failed to toggle gateway' );
+				window.location.href = settings_url;
 			}
 		} catch ( error ) {
 			// eslint-disable-next-line no-console
