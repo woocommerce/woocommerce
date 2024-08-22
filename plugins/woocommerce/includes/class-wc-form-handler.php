@@ -795,7 +795,7 @@ class WC_Form_Handler {
 		wc_nocache_headers();
 	
 		// Check for the new format parameter
-		if ( isset( $_REQUEST['format'] ) && 'meta' === $_REQUEST['format'] ) {
+		if ( isset( $_REQUEST['format'] ) && 'multi' === $_REQUEST['format'] ) {
 			self::add_multiple_items_and_apply_coupon();
 			return;
 		}
