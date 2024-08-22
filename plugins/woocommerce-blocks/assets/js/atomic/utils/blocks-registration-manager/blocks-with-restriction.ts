@@ -11,7 +11,6 @@ import { AddToCartFormBlockSettings } from '../../../atomic/blocks/product-eleme
 import productGalleryBlockMetadata from '../../../blocks/product-gallery/block.json';
 import addToCartFormBlockMetadata from '../../../atomic/blocks/product-elements/add-to-cart-form/block.json';
 import { EditorViewContentType } from './editor-view-change-detector';
-import { isEmpty } from '@woocommerce/types';
 
 export interface BlocksWithRestriction {
 	[ key: string ]: {
@@ -64,11 +63,6 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 			} else {
 				blockSettings.ancestor = undefined;
 			}
-
-			console.log(
-				'changing block settings for Add to Cart Form',
-				blockSettings
-			);
 
 			return { blockMetadata, blockSettings };
 		},

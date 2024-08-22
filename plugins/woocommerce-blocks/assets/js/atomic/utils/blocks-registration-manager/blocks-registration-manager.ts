@@ -112,6 +112,10 @@ export class BlockRegistrationManager
 		currentContentId: string;
 		currentContentType: EditorViewContentType;
 	} ) {
+		if ( currentContentType === EditorViewContentType.NONE ) {
+			return;
+		}
+
 		for ( const blockWithRestrictionName of Object.keys(
 			BLOCKS_WITH_RESTRICTION
 		) ) {
