@@ -1,6 +1,6 @@
 ---
 post_title: Reviews Guidelines for WooCommerce Extensions
-menu_title: Reviews Guidelines
+menu_title: Reviews guidelines
 tags: reference
 ---
 

@@ -1142,10 +1142,10 @@
         },
         {
           "post_title": "Reviews Guidelines for WooCommerce Extensions",
-          "menu_title": "Reviews Guidelines",
+          "menu_title": "Reviews guidelines",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/reviews-guidelines.md",
-          "hash": "7ccce1de0f47b721a067db6586c5829dca94aa6454553adc67b2dbf22e975cd5",
+          "hash": "05ff159c07193e596de3d43e1d59c7c7f9a7e28d2176fd03d3f0bcfba5096d82",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/reviews-guidelines.md",
           "id": "8d6addc12e06b0f15468b06db1211e4cdd57205f"
         },
@@ -1740,5 +1740,5 @@
       "categories": []
     }
   ],
-  "hash": "5dd7a5759bb405a09318ec86a188b2d3062613a4628e3607a6d394cc4a0c81e3"
+  "hash": "772596730969580f3bdae4f09dc54cc2bd6cd48b743137e210684cb1d966857f"
 }
