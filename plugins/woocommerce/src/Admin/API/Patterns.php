@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
-use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use WP_Error;
 use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
@@ -48,8 +48,7 @@ class Patterns {
 	/**
 	 * Fetch a single pattern from the PTK to ensure the API is available.
 	 *
-	 * @return WP_REST_Response
-	 * @throws RouteException If the patterns cannot be fetched.
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_pattern() {
 		$ptk_client = Package::container()->get( PTKClient::class );
@@ -61,10 +60,7 @@ class Patterns {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			throw new RouteException(
-				wp_kses( $response->get_error_message(), array() ),
-				wp_kses( $response->get_error_code(), array() )
-			);
+			return $response;
 		}
 
 		return rest_ensure_response(
