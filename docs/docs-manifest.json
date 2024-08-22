@@ -1302,7 +1302,7 @@
               "post_title": "How to request WooCommerce extension reviews",
               "menu_title": "Requesting reviews",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
-              "hash": "2132717828167e6e9a784e183dd95126a56d922c2b33cd7e5c5a3a59d10d7796",
+              "hash": "5a77783c32c1bb0fefc6888f7a3217fe6e5c7242692593a17828b2f1ffec618b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
               "id": "3d0c8bf7339a71198737d19eec7e6d71697b3727"
             }
@@ -1796,5 +1796,5 @@
       "categories": []
     }
   ],
-  "hash": "b940c09941137f154f41d2cb86bc0e199bd70f12752c6e4d75f2a36e95330490"
+  "hash": "aed8797ef51eef8ebc3d29337a5c1e2eb321e45ee45cd20b297246ee2ec72c44"
 }
