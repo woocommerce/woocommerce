@@ -407,15 +407,13 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByLabel( 'Delete Pinterest for' )
 			).toBeHidden();
 		} );
-	} );
 
-	test( 'Confirm that the store is in coming soon mode after completing the core profiler', async ( {
-		page,
-	} ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await expect(
-			page.getByRole( 'menuitem', { name: 'Store coming soon' } )
-		).toBeVisible();
+		await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Store coming soon' } )
+			).toBeVisible();
+		} );
 	} );
 } );
 
@@ -462,15 +460,13 @@ test.describe( 'Store owner can skip the core profiler', () => {
 				name: 'Welcome to WooCommerce Core E2E Test Suite',
 			} )
 		).toBeVisible();
-	} );
 
-	test( 'Confirm that the store is in coming soon mode after skipping the core profiler', async ( {
-		page,
-	} ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await expect(
-			page.getByRole( 'menuitem', { name: 'Store coming soon' } )
-		).toBeVisible();
+		await test.step( 'Confirm that the store is in coming soon mode after skipping the core profiler', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Store coming soon' } )
+			).toBeVisible();
+		} );
 	} );
 
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
