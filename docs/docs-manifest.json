@@ -1246,15 +1246,15 @@
       ],
       "categories": [
         {
-          "content": "\nReviews are an integral part of the online shopping experience, and people installing software pay attention to them. Prospective users of your extensions will likely consider average ratings when making software choices.\n\nMany of today's most popular online review platforms — from Yelp business reviews, to Amazon product reviews — have a range of opinion that can be polarized, with many extremely positive and/or negative reviews, and fewer moderate opinions. This creates a \"J-shaped\" distribution of reviews that isn't as accurate or as helpful as could be.\n\nWooCommerce.com and WordPress.org both feature reviews heavily, and competing extensions having a higher rating likely have the edge in user choice. \n\n## Primary considerations around reviews\n\nRequesting more reviews for a extension with major issues will not generate good reviews, and analyzing existing reviews will help surface areas to address before soliciting reviews.\n\nIt is extremely rare for users of WordPress plugins to leave reviews organically (.2% of users for WordPress.org leave reviews), which means that there's an untapped market of 99.8% of users of the average plugin.\n\nThese plugins are competing with other plugins on the same search terms in the WordPress.org plugin directory, and ratings are a large factor in the ranking algorithm. This is not usually a factor to the same extent on the WooCommerce Marketplace. For instance, WooCommerce's PayPal extension directly competes on all possible keywords with other PayPal extensions on the WordPress.org repository, while it does not compete with other PayPal payments extensions on the Marketplace.\n",
+          "content": "\nReviews are an integral part of the online shopping experience, and people installing software pay attention to them. Prospective users of your extensions will likely consider average ratings when making software choices.\n\nMany of today's most popular online review platforms - from Yelp business reviews, to Amazon product reviews - have a range of opinion that can be polarized, with many extremely positive and/or negative reviews, and fewer moderate opinions. This creates a \"J-shaped\" distribution of reviews that isn't as accurate or as helpful as could be.\n\nWooCommerce.com and WordPress.org both feature reviews heavily, and competing extensions having a higher rating likely have the edge in user choice. \n\n## Primary considerations around reviews\n\nRequesting more reviews for a extension with major issues will not generate good reviews, and analyzing existing reviews will help surface areas to address before soliciting reviews.\n\nIt is extremely rare for users of WordPress plugins to leave reviews organically (.2% of users for WordPress.org leave reviews), which means that there's an untapped market of 99.8% of users of the average plugin.\n\nThese plugins are competing with other plugins on the same search terms in the WordPress.org plugin directory, and ratings are a large factor in the ranking algorithm. This is not usually a factor to the same extent on the WooCommerce Marketplace. For instance, WooCommerce's PayPal extension directly competes on all possible keywords with other PayPal extensions on the WordPress.org repository, while it does not compete with other PayPal payments extensions on the Marketplace.\n",
           "category_slug": "review-guidelines",
           "category_title": "Review Guidelines",
           "posts": [
             {
               "post_title": "When to request WooCommerce extension reviews",
-              "menu_title": "When to review reviews",
+              "menu_title": "When to request reviews",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/when-to-request-reviews.md",
-              "hash": "b104db2cd0a8ff6ebac8ae93e5908f518f83c927e867f94b3745290e32af980b",
+              "hash": "7a14ceb03ac0a98d84c0d380e44534129198f8ee682e84824cbb6c793da71be8",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/when-to-request-reviews.md",
               "id": "d40eb30ff49c89545a5918f5b8c08b82e6f8f45a"
             },
@@ -1283,10 +1283,10 @@
               "id": "7cb825a3830e392aeae853b441a91237f48c3ae5"
             },
             {
-              "post_title": "Notifying users about bug fixes and features requests",
+              "post_title": "Notifying users about bug fixes and feature requests",
               "menu_title": "Notifying users about bug fixes and feature requests",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
-              "hash": "4e1508499ff11586680af208f3b90afba4c482d75aca25bc4ed18bfd1590f7e7",
+              "hash": "155f346fd1aec42163d0b790722195f14aecee3967bb10f2d942d844e40a9b46",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
               "id": "9ccc4bf579cc624002478fe8706241f4640d92b8"
             },
@@ -1796,5 +1796,5 @@
       "categories": []
     }
   ],
-  "hash": "aed8797ef51eef8ebc3d29337a5c1e2eb321e45ee45cd20b297246ee2ec72c44"
+  "hash": "8ffd20e86befba43b6ad97cfa7af80b941fc4b06e658fb357ae2750896a9c9be"
 }
