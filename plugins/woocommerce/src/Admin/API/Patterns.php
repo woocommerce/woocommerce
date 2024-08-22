@@ -9,33 +9,22 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Exception;
-use WP_Error;
-use WP_HTTP_Response;
 use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Product controller
+ * Patterns controller
  *
  * @internal
  */
 class Patterns {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-admin';
-
 	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace,
+			'wc-admin',
 			'/patterns',
 			array(
 				array(
@@ -59,7 +48,7 @@ class Patterns {
 	/**
 	 * Fetch a single pattern from the PTK to ensure the API is available.
 	 *
-	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response
+	 * @return WP_REST_Response
 	 * @throws RouteException If the patterns cannot be fetched.
 	 */
 	public function get_pattern() {
@@ -88,17 +77,16 @@ class Patterns {
 	/**
 	 * Fetch the patterns from the PTK and update the transient.
 	 *
-	 * @return WP_Error|WP_HTTP_Response|WP_REST_Response
-	 * @throws Exception If the patterns cannot be fetched.
+	 * @return WP_REST_Response
 	 */
 	public function update_patterns() {
 		$ptk_patterns_store = Package::container()->get( PTKPatternsStore::class );
 
-		$patterns = $ptk_patterns_store->fetch_patterns();
+		$ptk_patterns_store->fetch_patterns();
 
 		$block_patterns = Package::container()->get( BlockPatterns::class );
 
-		$block_patterns->register_ptk_patterns( $patterns );
+		$block_patterns->register_ptk_patterns();
 
 		return rest_ensure_response(
 			array(
