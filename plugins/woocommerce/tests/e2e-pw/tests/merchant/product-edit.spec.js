@@ -292,3 +292,57 @@ test(
 		});
 	}
 );
+
+test(
+	'can decrease the sale price if the product was not previously in sale when bulk editing products',
+	{ tag: [ '@gutenberg', '@services' ] },
+	async ( { page, products } ) => {
+		await page.goto( `wp-admin/edit.php?post_type=product` );
+
+		const salePriceDecrease = 10;
+
+		await test.step( 'Update products with the "Sale > Decrease existing sale price" option', async () => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
+
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await page
+				.locator( 'select[name="change_sale_price"]' )
+				.selectOption(
+					'Decrease existing sale price by (fixed amount or %):'
+				);
+			await page
+				.getByPlaceholder( 'Enter sale price ($)' )
+				.fill( `${ salePriceDecrease }%` );
+
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+		});
+
+		await test.step( 'Verify products have a sale price', async () => {
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				const expectedSalePrice = (
+					product.regular_price *
+					( 1 - salePriceDecrease / 100 )
+				).toFixed( 2 );
+
+				await expect
+					.soft(
+						await page
+							.locator( 'ins' )
+							.getByText( `$${ expectedSalePrice }` )
+							.count()
+					)
+					.toBeGreaterThan( 0 );
+			}
+		});
+	}
+);
