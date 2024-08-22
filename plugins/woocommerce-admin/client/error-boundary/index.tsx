@@ -76,7 +76,7 @@ export class ErrorBoundary extends Component<
 					</h1>
 					<p className="woocommerce-global-error-boundary__subheading">
 						{ __(
-							"We're sorry for the inconvenience. Please try reloading the page, or you can get support from the community forums.",
+							'We’re sorry for the inconvenience. Please try reloading the page, or you can get support from the community forums.',
 							'woocommerce'
 						) }
 					</p>

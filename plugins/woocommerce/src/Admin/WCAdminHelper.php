@@ -150,6 +150,18 @@ class WCAdminHelper {
 		}
 		$normalized_path = self::get_normalized_url_path( $url );
 
+		$params = array(
+			'post_type' => 'product',
+		);
+
+		parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $url_params );
+
+		foreach ( $params as $key => $param ) {
+			if ( isset( $url_params[ $key ] ) && $url_params[ $key ] === $param ) {
+				return true;
+			}
+		}
+
 		// WC store pages.
 		$store_pages = array(
 			'shop'        => wc_get_page_id( 'shop' ),
@@ -185,6 +197,7 @@ class WCAdminHelper {
 			}
 
 			$permalink = get_permalink( $page_id );
+
 			if ( ! $permalink ) {
 				continue;
 			}

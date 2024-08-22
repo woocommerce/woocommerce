@@ -4,7 +4,10 @@
 	"title": "Customer account",
 	"description": "A block that allows your customers to log in and out of their accounts in your store.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce", "My Account" ],
+	"keywords": [
+		"WooCommerce",
+		"My Account"
+	],
 	"supports": {
 		"align": true,
 		"color": {
@@ -34,6 +37,6 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

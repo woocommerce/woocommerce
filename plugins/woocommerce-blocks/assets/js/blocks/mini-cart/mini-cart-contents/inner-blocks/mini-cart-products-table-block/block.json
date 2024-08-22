@@ -21,8 +21,10 @@
 			}
 		}
 	},
-	"parent": [ "woocommerce/mini-cart-items-block" ],
+	"parent": [
+		"woocommerce/mini-cart-items-block"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

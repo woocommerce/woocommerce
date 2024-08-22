@@ -37,15 +37,17 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( "should allow changing the block's title", async ( { page } ) => {
+	test( "should allow changing the block's title", async ( { editor } ) => {
 		const textSelector =
 			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
 
 		const title = 'New Title';
 
-		await page.locator( textSelector ).fill( title );
+		await editor.canvas.locator( textSelector ).fill( title );
 
-		await expect( page.locator( textSelector ) ).toHaveText( title );
+		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+			title
+		);
 	} );
 
 	test( 'should allow changing the display style', async ( {
@@ -81,7 +83,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			} )
 		).toBeHidden();
 
-		await expect( page.getByRole( 'combobox' ) ).toBeVisible();
+		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
 	} );
 
 	test( 'should allow toggling the visibility of the filter button', async ( {

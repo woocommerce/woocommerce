@@ -51,7 +51,7 @@ export const useSiteVisibilityTour = () => {
 		onClose,
 		shouldTourBeShown:
 			shouldStoreShowLYSTour &&
-			! ( hasUserDismissedTourMeta || lysTourHidden ),
+			! ( hasUserDismissedTourMeta || lysTourHidden === 'yes' ),
 		showTour,
 		setShowTour,
 	};
