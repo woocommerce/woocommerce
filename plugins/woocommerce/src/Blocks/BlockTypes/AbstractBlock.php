@@ -56,6 +56,13 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
+	 * Stores the compiled metadata for all inner blocks.
+	 *
+	 * @var array|null
+	 */
+	protected static $compiled_block_metadata = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -78,6 +85,22 @@ abstract class AbstractBlock {
 	 */
 	protected function get_full_block_name() {
 		return $this->namespace . '/' . $this->block_name;
+	}
+
+	/**
+	 * Loads the compiled block metadata from a file.
+	 *
+	 * This method ensures the metadata is loaded only once and stored in a static variable.
+	 */
+	protected function load_compiled_block_metadata() {
+		if ( null === self::$compiled_block_metadata ) {
+			$meta_file_path = WC_ABSPATH . '/assets/client/blocks/blocks-json.php';
+			if ( file_exists( $meta_file_path ) ) {
+				self::$compiled_block_metadata = require $meta_file_path;
+			} else {
+				self::$compiled_block_metadata = [];
+			}
+		}
 	}
 
 	/**
@@ -202,12 +225,102 @@ abstract class AbstractBlock {
 		$chunks = preg_filter( '/.js/', '', $blocks );
 		return $chunks;
 	}
+
 	/**
 	 * Registers the block type with WordPress.
 	 *
-	 * @return string[] Chunks paths.
+	 * This method determines whether to use compiled metadata or file-based metadata
+	 * for block registration.
 	 */
 	protected function register_block_type() {
+		$this->load_compiled_block_metadata();
+
+		$compiled_loading_enabled = false; // Core bug prevents registering a block using styles without a block.json file, see https://core.trac.wordpress.org/ticket/61910
+		if ( $compiled_loading_enabled && isset( self::$compiled_block_metadata[ $this->namespace . '/' . $this->block_name ] ) ) {
+			$this->register_block_type_from_compiled_metadata();
+		} else {
+			$this->register_block_type_from_file_metadata();
+		}
+	}
+
+	/**
+	 * Registers the block type using compiled metadata.
+	 *
+	 * This method is used when pre-compiled metadata is available for the block.
+	 */
+	protected function register_block_type_from_compiled_metadata() {
+		$block_meta = self::$compiled_block_metadata[ $this->namespace . '/' . $this->block_name ];
+		$transformed_meta = $this->transform_block_metadata( $block_meta );
+
+		$block_settings = $this->get_block_settings();
+		$merged_settings = array_merge( $transformed_meta, $block_settings );
+		$merged_settings = $this->maybe_load_styles_separately( $merged_settings );
+		register_block_type_from_metadata( '', $merged_settings );
+	}
+
+	/**
+	 * Transform block metadata to the expected format.
+	 *
+	 * @param array $block_meta The original block metadata.
+	 * @return array Transformed block metadata.
+	 */
+	protected function transform_block_metadata( $block_meta ) {
+		$property_mappings = array(
+			'apiVersion'      => 'api_version',
+			'name'            => 'name',
+			'title'           => 'title',
+			'category'        => 'category',
+			'parent'          => 'parent',
+			'ancestor'        => 'ancestor',
+			'icon'            => 'icon',
+			'description'     => 'description',
+			'keywords'        => 'keywords',
+			'attributes'      => 'attributes',
+			'providesContext' => 'provides_context',
+			'usesContext'     => 'uses_context',
+			'selectors'       => 'selectors',
+			'supports'        => 'supports',
+			'styles'          => 'styles',
+			'variations'      => 'variations',
+			'example'         => 'example',
+			'allowedBlocks'   => 'allowed_blocks',
+		);
+
+		$transformed_meta = [];
+		foreach ( $property_mappings as $compiled_key => $expected_key ) {
+			if ( isset( $block_meta[ $compiled_key ] ) ) {
+				$transformed_meta[ $expected_key ] = $block_meta[ $compiled_key ];
+			}
+		}
+		return $transformed_meta;
+	}
+
+	/**
+	 * Registers the block type using metadata from a file.
+	 *
+	 * This method is used when pre-compiled metadata is not available and we need to read from block.json.
+	 */
+	protected function register_block_type_from_file_metadata() {
+		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
+		$block_settings = $this->get_block_settings();
+		$block_settings = $this->maybe_load_styles_separately( $block_settings );
+
+		if ( ! empty( $metadata_path ) ) {
+			register_block_type_from_metadata( $metadata_path, $block_settings );
+		} else {
+			$block_settings['attributes'] = $this->get_block_type_attributes();
+			$block_settings['supports'] = $this->get_block_type_supports();
+			$block_settings['uses_context'] = $this->get_block_type_uses_context();
+			register_block_type( $this->get_block_type(), $block_settings );
+		}
+	}
+
+	/**
+	 * Get common block settings.
+	 *
+	 * @return array
+	 */
+	protected function get_block_settings() {
 		$block_settings = [
 			'render_callback' => $this->get_block_type_render_callback(),
 			'editor_script'   => $this->get_block_type_editor_script( 'handle' ),
@@ -219,8 +332,10 @@ abstract class AbstractBlock {
 			$block_settings['api_version'] = 2;
 		}
 
-		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
+		return $block_settings;
+	}
 
+	protected function maybe_load_styles_separately( $block_settings ) {
 		/**
 		 * We always want to load block styles separately, for every theme.
 		 * When the core assets are loaded separately, other blocks' styles get
@@ -250,29 +365,7 @@ abstract class AbstractBlock {
 				2
 			);
 		}
-
-		// Prefer to register with metadata if the path is set in the block's class.
-		if ( ! empty( $metadata_path ) ) {
-			register_block_type_from_metadata(
-				$metadata_path,
-				$block_settings
-			);
-			return;
-		}
-
-		/*
-		 * Insert attributes and supports if we're not registering the block using metadata.
-		 * These are left unset until now and only added here because if they were set when registering with metadata,
-		 * the attributes and supports from $block_settings would override the values from metadata.
-		 */
-		$block_settings['attributes']   = $this->get_block_type_attributes();
-		$block_settings['supports']     = $this->get_block_type_supports();
-		$block_settings['uses_context'] = $this->get_block_type_uses_context();
-
-		register_block_type(
-			$this->get_block_type(),
-			$block_settings
-		);
+		return $block_settings;
 	}
 
 	/**

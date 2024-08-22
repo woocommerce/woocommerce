@@ -14,12 +14,54 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 	protected $is_lazy_loaded = true;
 
 	/**
-	 * Registers the block type with WordPress using the metadata file.
+	 * Registers the block type with WordPress.
 	 *
-	 * The registration using metadata is now recommended. And it's required for "Inner Blocks" to
-	 * fix the issue of missing translations in the inspector (in the Editor mode)
+	 * This method determines whether to use compiled metadata or file-based metadata
+	 * for block registration.
 	 */
-	protected function register_block_type() {
+    protected function register_block_type() {
+		$this->load_compiled_block_metadata();
+
+		if ( isset( parent::$compiled_block_metadata[ $this->namespace . '/' . $this->block_name ] ) ) {
+			$this->register_block_type_from_compiled_metadata();
+		} else {
+			$this->register_block_type_from_file_metadata();
+		}
+	}
+
+	/**
+	 * Registers the block type using compiled metadata.
+	 *
+	 * This method is used when pre-compiled metadata is available for the block.
+	 */
+	protected function register_block_type_from_compiled_metadata() {
+		$block_meta = self::$compiled_block_metadata[ $this->namespace . '/' . $this->block_name ];
+		$transformed_meta = $this->transform_block_metadata( $block_meta );
+
+		$block_settings = $this->get_block_settings();
+		$merged_settings = array_merge( $transformed_meta, $block_settings );
+
+		register_block_type_from_metadata( '', $merged_settings );
+	}
+
+	/**
+	 * Registers the block type using metadata from a file.
+	 *
+	 * This method is used when pre-compiled metadata is not available and we need to read from block.json.
+	 */
+	protected function register_block_type_from_file_metadata() {
+		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name, 'inner-blocks/' );
+		$block_settings = $this->get_block_settings();
+
+		register_block_type_from_metadata( $metadata_path, $block_settings );
+	}
+
+	/**
+	 * Get common block settings.
+	 *
+	 * @return array
+	 */
+	protected function get_block_settings() {
 		$block_settings = [
 			'render_callback' => $this->get_block_type_render_callback(),
 			'editor_style'    => $this->get_block_type_editor_style(),
@@ -30,12 +72,7 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 			$block_settings['api_version'] = 2;
 		}
 
-		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name, 'inner-blocks/' );
-		// Prefer to register with metadata if the path is set in the block's class.
-		register_block_type_from_metadata(
-			$metadata_path,
-			$block_settings
-		);
+		return $block_settings;
 	}
 
 	/**
