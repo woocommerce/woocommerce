@@ -23,26 +23,30 @@ import { DEFAULT_FILTERS } from '../../constants';
 const OnSaleControl = ( props: QueryControlProps ) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
 
-	const deselectCallback = () => {
-		setQueryAttribute( {
-			woocommerceOnSale: DEFAULT_FILTERS.woocommerceOnSale,
-		} );
+	function changeOnSaleQueryAttribute( woocommerceOnSale?: boolean ) {
+		setQueryAttribute( { woocommerceOnSale } );
 		trackInteraction( CoreFilterNames.ON_SALE );
-	};
+	}
+
+	function handleToolsPanelItemSelect() {
+		changeOnSaleQueryAttribute( true );
+	}
+
+	function handleToolsPanelItemDeselect() {
+		changeOnSaleQueryAttribute( DEFAULT_FILTERS.woocommerceOnSale );
+	}
 
 	function handleOnSaleProductsChange( optionValue: string ) {
-		setQueryAttribute( {
-			woocommerceOnSale: optionValue === 'show-only',
-		} );
-		trackInteraction( CoreFilterNames.ON_SALE );
+		changeOnSaleQueryAttribute( optionValue === 'show-only' );
 	}
 
 	return (
 		<ToolsPanelItem
 			label={ __( 'On Sale', 'woocommerce' ) }
 			hasValue={ () => query.woocommerceOnSale === true }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			onSelect={ handleToolsPanelItemSelect }
+			onDeselect={ handleToolsPanelItemDeselect }
+			resetAllFilter={ handleToolsPanelItemDeselect }
 		>
 			<ToggleGroupControl
 				label={ __( 'On-sale products', 'woocommerce' ) }
