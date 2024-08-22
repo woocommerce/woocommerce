@@ -85,7 +85,12 @@ export interface ProductCollectionQuery {
 	 */
 	featured: boolean;
 	timeFrame: TimeFrame | undefined;
-	woocommerceOnSale: boolean;
+	/**
+	 * If true: it shows only on sale products.
+	 * If false: it hides/excludes on sale products.
+	 * If undefined: the filter is inactive.
+	 */
+	woocommerceOnSale: boolean | undefined;
 	/**
 	 * Filter products by their stock status.
 	 *
