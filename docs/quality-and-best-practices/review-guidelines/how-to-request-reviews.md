@@ -4,11 +4,12 @@ menu_title: Requesting reviews
 ---
 
 ## Methods of requesitng reviews
+
 ### Admin notices
 
 Admin notices are an industry standard method of requesting reviews, but bombarding the admin dashboard with admin notices is not effective. We recommend using restraint in the design of a notice, as well as limiting to a single notice at a time. It's very easy to overwhelm merchants with too many notices, or too intrusive notices.
 
-#### Recommendations:
+#### Recommendations
 
 * A good place for an admin notice to review an extension would be to show on the `Plugins` page and extension's settings pages.
 * Include a snooze option (or multiple) on your notices with a clear expectation of when the notice will reappear.
