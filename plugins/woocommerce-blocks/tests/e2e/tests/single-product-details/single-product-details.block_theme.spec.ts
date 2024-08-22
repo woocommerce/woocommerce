@@ -88,7 +88,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
-		await page.getByText( "Show tab title in content" ).click();
+		await page.getByText( 'Show tab title in content' ).click();
 
 		// Verify the "Description" h2 heading has been hidden from the canvas.
 		await expect(
@@ -99,9 +99,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		// Visit the product page in the frontend.
 		await frontendUtils.goToShop();
-		await page.getByText( "V-Neck T-Shirt" ).click();
+		await page.getByText( 'V-Neck T-Shirt' ).click();
 
 		// Verify the "Description" h2 heading is not in the page.
 		await expect(

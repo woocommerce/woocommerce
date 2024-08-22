@@ -1,16 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	InspectorControls,
-	BlockControls,
-	useBlockProps,
-} from '@wordpress/block-editor';
-import { Disabled } from '@wordpress/components';
-import {
-	PanelBody,
-	ToggleControl,
-} from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
@@ -21,7 +13,10 @@ import Block from './block';
 import { Attributes } from './types';
 import './editor.scss';
 
-const Edit = ( { attributes, setAttributes }: BlockEditProps< Attributes > ) => {
+const Edit = ( {
+	attributes,
+	setAttributes,
+}: BlockEditProps< Attributes > ) => {
 	const { className, hideTabTitle } = attributes;
 	const blockProps = useBlockProps( {
 		className,
@@ -33,7 +28,10 @@ const Edit = ( { attributes, setAttributes }: BlockEditProps< Attributes > ) => 
 				<InspectorControls key="inspector">
 					<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 						<ToggleControl
-							label={ __( 'Show tab title in content', 'woocommerce' ) }
+							label={ __(
+								'Show tab title in content',
+								'woocommerce'
+							) }
 							checked={ ! hideTabTitle }
 							onChange={ () =>
 								setAttributes( {

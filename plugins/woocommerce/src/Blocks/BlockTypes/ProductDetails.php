@@ -70,7 +70,6 @@ class ProductDetails extends AbstractBlock {
 			$tabs_html = new WP_HTML_Tag_Processor( $tabs );
 			while ( $tabs_html->next_tag( array( 'class_name' => 'wc-tab' ) ) ) {
 				if ( $tabs_html->next_tag( 'h2' ) ) {
-					var_dump( $tabs_html->get_tag( array( 'tag_name' => 'h2' ) ) );
 					$tabs_html->set_attribute( 'hidden', 'true' );
 				}
 			}
