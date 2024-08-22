@@ -260,12 +260,10 @@ test(
 
 			await page
 				.locator( 'select[name="change_sale_price"]' )
-				.selectOption(
-					'Change to:'
-				);
+				.selectOption( 'Change to:' );
 
 			await page.getByRole( 'button', { name: 'Update' } ).click();
-		});
+		} );
 
 		await test.step( 'Verify products have their regular price again', async () => {
 			for ( const product of products ) {
@@ -274,21 +272,13 @@ test(
 				const expectedRegularPrice = product.regular_price;
 
 				await expect
-					.soft(
-						await page
-							.locator( 'ins' )
-							.count()
-					)
+					.soft( await page.locator( 'ins' ).count() )
 					.toBe( 0 );
 
 				await expect
-					.soft(
-						await page
-							.locator( 'bdi' )
-							.first()
-					)
+					.soft( await page.locator( 'bdi' ).first() )
 					.toContainText( expectedRegularPrice );
 			}
-		});
+		} );
 	}
 );
