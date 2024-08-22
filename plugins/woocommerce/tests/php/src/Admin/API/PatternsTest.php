@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
