@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
@@ -20,6 +19,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_order_product_lookup';
@@ -27,12 +28,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ReportsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'variations';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @override ReportsDataStore::$column_types
 	 *
 	 * @var array
 	 */
@@ -70,12 +75,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'variations';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
@@ -208,6 +217,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
+	 * @override ReportsDataStore::normalize_order_by()
 	 *
 	 * @param string $order_by Sorting criterion.
 	 *
@@ -372,145 +383,138 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
-	 * @param array $query_args Query parameters.
+	 * @override ReportsDataStore::get_default_query_vars()
 	 *
-	 * @return stdClass|WP_Error Data.
+	 * @return array Query parameters.
 	 */
-	public function get_data( $query_args ) {
+	public function get_default_query_vars() {
+		$defaults                       = parent::get_default_query_vars();
+		$defaults['product_includes']   = array();
+		$defaults['variation_includes'] = array();
+		$defaults['extended_info']      = false;
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
 
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page'           => get_option( 'posts_per_page' ),
-			'page'               => 1,
-			'order'              => 'DESC',
-			'orderby'            => 'date',
-			'before'             => TimeInterval::default_before(),
-			'after'              => TimeInterval::default_after(),
-			'fields'             => '*',
-			'product_includes'   => array(),
-			'variation_includes' => array(),
-			'extended_info'      => false,
+		$this->initialize_queries();
+
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$selections          = $this->selected_columns( $query_args );
+		$included_variations =
+			( isset( $query_args['variation_includes'] ) && is_array( $query_args['variation_includes'] ) )
+				? $query_args['variation_includes']
+				: array();
+		$params              = $this->get_limit_params( $query_args );
+		$this->add_sql_query_params( $query_args );
 
-		if ( false === $data ) {
-			$this->initialize_queries();
+		if ( count( $included_variations ) > 0 ) {
+			$total_results = count( $included_variations );
+			$total_pages   = (int) ceil( $total_results / $params['per_page'] );
 
-			$data = (object) array(
-				'data'    => array(),
-				'total'   => 0,
-				'pages'   => 0,
-				'page_no' => 0,
-			);
+			$this->subquery->clear_sql_clause( 'select' );
+			$this->subquery->add_sql_clause( 'select', $selections );
 
-			$selections          = $this->selected_columns( $query_args );
-			$included_variations =
-				( isset( $query_args['variation_includes'] ) && is_array( $query_args['variation_includes'] ) )
-					? $query_args['variation_includes']
-					: array();
-			$params              = $this->get_limit_params( $query_args );
-			$this->add_sql_query_params( $query_args );
-
-			if ( count( $included_variations ) > 0 ) {
-				$total_results = count( $included_variations );
-				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $selections );
-
-				if ( 'date' === $query_args['orderby'] ) {
-					$this->subquery->add_sql_clause( 'select', ", {$table_name}.date_created" );
-				}
-
-				$fields          = $this->get_fields( $query_args );
-				$join_selections = $this->format_join_selections( $fields, array( 'variation_id' ) );
-				$ids_table       = $this->get_ids_table( $included_variations, 'variation_id' );
-
-				$this->add_sql_clause( 'select', $join_selections );
-				$this->add_sql_clause( 'from', '(' );
-				$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
-				$this->add_sql_clause( 'from', ") AS {$table_name}" );
-				$this->add_sql_clause(
-					'right_join',
-					"RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.variation_id = {$table_name}.variation_id"
-				);
-
-				$variations_query = $this->get_query_statement();
-			} else {
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $selections );
-
-				/**
-				 * Experimental: Filter the Variations SQL query allowing extensions to add additional SQL clauses.
-				 *
-				 * @since 7.4.0
-				 * @param array $query_args Query parameters.
-				 * @param SqlQuery $subquery Variations query class.
-				 */
-				apply_filters( 'experimental_woocommerce_analytics_variations_additional_clauses', $query_args, $this->subquery );
-
-				/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-				$db_records_count = (int) $wpdb->get_var(
-					"SELECT COUNT(*) FROM (
-						{$this->subquery->get_query_statement()}
-					) AS tt"
-				);
-				/* phpcs:enable */
-
-				$total_results = $db_records_count;
-				$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
-
-				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-					return $data;
-				}
-
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-				$variations_query = $this->subquery->get_query_statement();
+			if ( 'date' === $query_args['orderby'] ) {
+				$this->subquery->add_sql_clause( 'select', ", {$table_name}.date_created" );
 			}
 
-			/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
-			$product_data = $wpdb->get_results(
-				$variations_query,
-				ARRAY_A
+			$fields          = $this->get_fields( $query_args );
+			$join_selections = $this->format_join_selections( $fields, array( 'variation_id' ) );
+			$ids_table       = $this->get_ids_table( $included_variations, 'variation_id' );
+
+			$this->add_sql_clause( 'select', $join_selections );
+			$this->add_sql_clause( 'from', '(' );
+			$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
+			$this->add_sql_clause( 'from', ") AS {$table_name}" );
+			$this->add_sql_clause(
+				'right_join',
+				"RIGHT JOIN ( {$ids_table} ) AS default_results
+				ON default_results.variation_id = {$table_name}.variation_id"
+			);
+
+			$variations_query = $this->get_query_statement();
+		} else {
+
+			$this->subquery->clear_sql_clause( 'select' );
+			$this->subquery->add_sql_clause( 'select', $selections );
+
+			/**
+			 * Experimental: Filter the Variations SQL query allowing extensions to add additional SQL clauses.
+			 *
+			 * @since 7.4.0
+			 * @param array $query_args Query parameters.
+			 * @param SqlQuery $subquery Variations query class.
+			 */
+			apply_filters( 'experimental_woocommerce_analytics_variations_additional_clauses', $query_args, $this->subquery );
+
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			$db_records_count = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM (
+					{$this->subquery->get_query_statement()}
+				) AS tt"
 			);
 			/* phpcs:enable */
 
-			if ( null === $product_data ) {
+			$total_results = $db_records_count;
+			$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
+
+			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return $data;
 			}
 
-			$this->include_extended_info( $product_data, $query_args );
-
-			if ( $query_args['extended_info'] ) {
-				$this->fill_deleted_product_name( $product_data );
-			}
-
-			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
-			$data         = (object) array(
-				'data'    => $product_data,
-				'total'   => $total_results,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
+			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+			$variations_query = $this->subquery->get_query_statement();
 		}
+
+		/* phpcs:disable WordPress.DB.PreparedSQL.NotPrepared */
+		$product_data = $wpdb->get_results(
+			$variations_query,
+			ARRAY_A
+		);
+		/* phpcs:enable */
+
+		if ( null === $product_data ) {
+			return $data;
+		}
+
+		$this->include_extended_info( $product_data, $query_args );
+
+		if ( $query_args['extended_info'] ) {
+			$this->fill_deleted_product_name( $product_data );
+		}
+
+		$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
+		$data         = (object) array(
+			'data'    => $product_data,
+			'total'   => $total_results,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
 
 		return $data;
 	}

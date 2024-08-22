@@ -22,7 +22,6 @@ const config: PlaywrightTestConfig = {
 	forbidOnly: !! CI,
 	reporter: process.env.CI
 		? [
-				[ 'github' ],
 				[ 'list' ],
 				[ './flaky-tests-reporter.ts' ],
 				[
@@ -31,6 +30,7 @@ const config: PlaywrightTestConfig = {
 						outputFolder: `${ __dirname }/artifacts/test-results/allure-results`,
 					},
 				],
+				[ 'buildkite-test-collector/playwright/reporter' ],
 		  ]
 		: 'list',
 	use: {

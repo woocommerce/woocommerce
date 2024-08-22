@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an additional field for the email settings that sets the footer text color

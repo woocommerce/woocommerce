@@ -3,9 +3,10 @@
 	"title": "WooCommerce Monorepo",
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
+	"packageManager": "pnpm@9.1.3",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"pnpm": "9.1.3"
 	},
 	"private": true,
 	"repository": {

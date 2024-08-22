@@ -15,7 +15,6 @@ const {
 	CI,
 	DEFAULT_TIMEOUT_OVERRIDE,
 	E2E_MAX_FAILURES,
-	PLAYWRIGHT_HTML_REPORT,
 	REPEAT_EACH,
 } = process.env;
 
@@ -41,19 +40,20 @@ const reporter = [
 		`${ testsRootPath }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ testsRootPath }/test-results/allure-results` },
 	],
+	[
+		`${ testsRootPath }/reporters/flaky-tests-reporter.js`,
+		{ outputFolder: `${ testsRootPath }/test-results/flaky-tests` },
+	],
 ];
 
 if ( process.env.CI ) {
-	reporter.push( [ 'github' ] );
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ testsRootPath }/reporters/skipped-tests.js` ] );
 } else {
 	reporter.push( [
 		'html',
 		{
-			outputFolder:
-				PLAYWRIGHT_HTML_REPORT ??
-				`${ testsResultsPath }/playwright-report`,
+			outputFolder: `${ testsRootPath }/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
@@ -64,7 +64,7 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: `${ testsResultsPath }/results-data`,
+	outputDir: testsResultsPath,
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: `${ testsRootPath }/tests`,
@@ -74,6 +74,7 @@ const config = {
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
+	forbidOnly: !! CI,
 	use: {
 		baseURL: BASE_URL,
 		screenshot: { mode: 'only-on-failure', fullPage: true },

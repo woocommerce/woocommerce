@@ -42,12 +42,12 @@ const wcAdminPackages = [
 	'onboarding',
 	'block-templates',
 	'product-editor',
+	'remote-logging',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
 const wpAdminScripts = [
 	'marketing-coupons',
-	'navigation-opt-out',
 	'onboarding-homepage-notice',
 	'onboarding-product-notice',
 	'onboarding-product-import-notice',

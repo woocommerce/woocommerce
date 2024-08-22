@@ -54,7 +54,7 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( "It's time to get paid", 'woocommerce' ) }</h1>
+				<h1>{ __( 'It’s time to get paid', 'woocommerce' ) }</h1>
 				{ incentive?.task_header_content ? (
 					<p
 						dangerouslySetInnerHTML={ sanitizeHTML(
