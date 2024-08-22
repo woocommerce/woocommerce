@@ -41,7 +41,6 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 		<ToolsPanelItem
 			label={ __( 'On Sale', 'woocommerce' ) }
 			hasValue={ () => query.woocommerceOnSale === true }
-			isShownByDefault
 			onDeselect={ deselectCallback }
 			resetAllFilter={ deselectCallback }
 		>
