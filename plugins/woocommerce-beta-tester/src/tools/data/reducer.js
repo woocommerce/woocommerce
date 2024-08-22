@@ -14,6 +14,7 @@ const DEFAULT_STATE = {
 		updateBlockTemplateLoggingThreshold: {},
 		runSelectedUpdateCallbacks: {},
 		updateWccomRequestErrorsMode: {},
+		fakeWooPayments: {},
 	},
 	status: '',
 	dbUpdateVersions: [],
