@@ -459,7 +459,7 @@ function wc_clear_template_cache() {
 /**
  * Clear the system status theme info cache.
  *
- * @since 9.4.0
+ * @since 9.3.0
  */
 function wc_clear_system_status_theme_info_cache() {
 	delete_transient( 'wc_system_status_theme_info' );
