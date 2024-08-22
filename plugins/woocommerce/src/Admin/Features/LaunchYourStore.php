@@ -5,12 +5,13 @@ namespace Automattic\WooCommerce\Admin\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Internal\Admin\WCAdminUser;
 
 /**
  * Takes care of Launch Your Store related actions.
  */
 class LaunchYourStore {
-	const BANNER_DISMISS_USER_META_KEY = 'woocommerce_coming_soon_banner_dismissed';
+	const BANNER_DISMISS_USER_META_KEY = 'coming_soon_banner_dismissed';
 	/**
 	 * Constructor.
 	 */
@@ -21,6 +22,7 @@ class LaunchYourStore {
 		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
 		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'append_coming_soon_global_tracks' ), 10, 2 );
 		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ), 10, 2 );
+		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 	}
 
 	/**
@@ -160,7 +162,10 @@ class LaunchYourStore {
 			return false;
 		}
 
-		if ( get_user_meta( $current_user_id, self::BANNER_DISMISS_USER_META_KEY, true ) === 'yes' ) {
+		$has_dismissed_banner = WCAdminUser::get_user_data_field( $current_user_id, self::BANNER_DISMISS_USER_META_KEY )
+				// Remove this check in WC 9.4.
+				|| get_user_meta( $current_user_id, 'woocommerce_' . self::BANNER_DISMISS_USER_META_KEY, true ) === 'yes';
+		if ( $has_dismissed_banner ) {
 			return false;
 		}
 
@@ -198,6 +203,8 @@ class LaunchYourStore {
 
 	/**
 	 * Register user meta fields for Launch Your Store.
+	 *
+	 * This should be removed in WC 9.4.
 	 */
 	public function register_launch_your_store_user_meta_fields() {
 		if ( ! $this->is_manager_or_admin() ) {
@@ -217,12 +224,28 @@ class LaunchYourStore {
 
 		register_meta(
 			'user',
-			self::BANNER_DISMISS_USER_META_KEY,
+			'woocommerce_coming_soon_banner_dismissed',
 			array(
 				'type'         => 'string',
 				'description'  => 'Indicate whether the user has dismissed the coming soon notice or not.',
 				'single'       => true,
 				'show_in_rest' => true,
+			)
+		);
+	}
+
+	/**
+	 * Register user meta fields for Launch Your Store.
+	 *
+	 * @param array $user_data_fields user data fields.
+	 * @return array
+	 */
+	public function add_user_data_fields( $user_data_fields ) {
+		return array_merge(
+			$user_data_fields,
+			array(
+				'launch_your_store_tour_hidden',
+				self::BANNER_DISMISS_USER_META_KEY,
 			)
 		);
 	}
@@ -236,9 +259,9 @@ class LaunchYourStore {
 	 * @param object $user user object.
 	 */
 	public function reset_woocommerce_coming_soon_banner_dismissed( $user_login, $user ) {
-		$existing_meta = get_user_meta( $user->ID, self::BANNER_DISMISS_USER_META_KEY, true );
+		$existing_meta = WCAdminUser::get_user_data_field( $user->ID, self::BANNER_DISMISS_USER_META_KEY );
 		if ( 'yes' === $existing_meta ) {
-			update_user_meta( $user->ID, self::BANNER_DISMISS_USER_META_KEY, 'no' );
+			WCAdminUser::update_user_data_field( $user->ID, self::BANNER_DISMISS_USER_META_KEY, 'no' );
 		}
 	}
 }

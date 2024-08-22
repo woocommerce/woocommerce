@@ -30,7 +30,8 @@ import {
  * Internal dependencies
  */
 import './editor.scss';
-import type { BlockAttributes } from './types';
+import { type BlockAttributes } from './types';
+import { BlockOverlayAttribute } from './constants';
 
 const defaultAttribute = getSetting< AttributeSetting >(
 	'defaultProductFilterAttribute'
@@ -131,15 +132,15 @@ export const Edit = ( {
 						} }
 					>
 						<ToggleGroupControlOption
-							value={ 'never' }
+							value={ BlockOverlayAttribute.NEVER }
 							label={ __( 'Never', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
-							value={ 'mobile' }
+							value={ BlockOverlayAttribute.MOBILE }
 							label={ __( 'Mobile', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
-							value={ 'always' }
+							value={ BlockOverlayAttribute.ALWAYS }
 							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>

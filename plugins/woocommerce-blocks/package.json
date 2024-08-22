@@ -113,7 +113,7 @@
 		"@babel/preset-react": "7.23.3",
 		"@babel/preset-typescript": "7.23.2",
 		"@bartekbp/typescript-checkstyle": "5.0.0",
-		"@playwright/test": "^1.45.1",
+		"@playwright/test": "^1.46.1",
 		"@storybook/addon-a11y": "7.5.2",
 		"@storybook/addon-actions": "^7.6.4",
 		"@storybook/addon-docs": "^7.6.4",
@@ -190,6 +190,7 @@
 		"babel-plugin-explicit-exports-references": "^1.0.2",
 		"babel-plugin-react-docgen": "4.2.1",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
+		"buildkite-test-collector": "^1.7.1",
 		"chalk": "4.1.2",
 		"circular-dependency-plugin": "5.2.2",
 		"copy-webpack-plugin": "11.0.0",
@@ -252,7 +253,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"pnpm": "9.1.3"
 	},
 	"dependencies": {
 		"@ariakit/react": "^0.4.4",

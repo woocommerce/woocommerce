@@ -103,6 +103,11 @@ export class RemoteLogger {
 				message: error.message,
 				severity: 'error',
 				...extraData,
+				properties: {
+					...extraData?.properties,
+					request_uri:
+						window.location.pathname + window.location.search,
+				},
 			} ),
 			trace: this.getFormattedStackFrame(
 				TraceKit.computeStackTrace( error )
@@ -206,6 +211,10 @@ export class RemoteLogger {
 				message: error.message,
 				severity: 'critical',
 				tags: [ 'js-unhandled-error' ],
+				properties: {
+					request_uri:
+						window.location.pathname + window.location.search,
+				},
 			} ),
 			trace: this.getFormattedStackFrame( trace ),
 		};
@@ -334,7 +343,7 @@ export class RemoteLogger {
 	) {
 		const containsWooCommerceFrame = stackFrames.some(
 			( frame ) =>
-				frame.url && frame.url.includes( '/woocommerce/assets/' )
+				frame.url && frame.url.startsWith( getSetting( 'wcAssetUrl' ) )
 		);
 
 		/**

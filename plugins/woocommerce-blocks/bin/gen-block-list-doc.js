@@ -103,12 +103,12 @@ function processObjWithInnerKeys( obj ) {
  * not disabled. So adding { color: 'link' } support also brings along
  * background and text.
  *
- * @param {Object} supports - keys supported by blokc
+ * @param {Object} supports - keys supported by block
  * @return {Object} supports augmented with defaults
  */
 function augmentSupports( supports ) {
 	if ( supports && 'color' in supports ) {
-		// If backgroud or text is not specified (true or false)
+		// If background or text is not specified (true or false)
 		// then add it as true.a
 		if (
 			typeof supports.color === 'object' &&

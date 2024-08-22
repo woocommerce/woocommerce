@@ -4,7 +4,9 @@
 	"title": "Filter by Attribute Controls",
 	"description": "Enable customers to filter the product grid by selecting one or more attributes, such as color.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {
 		"html": false,
 		"color": {
@@ -53,6 +55,6 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

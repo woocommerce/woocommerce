@@ -1,4 +1,4 @@
-<?php
+<?php //phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * Init WooCommerce data importers.
  *
@@ -34,6 +34,7 @@ class WC_Admin_Importers {
 		add_action( 'admin_head', array( $this, 'hide_from_menus' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_import', array( $this, 'do_ajax_product_import' ) );
+		add_action( 'in_admin_footer', array( $this, 'track_importer_exporter_view' ) );
 
 		// Register WooCommerce importers.
 		$this->importers['product_importer'] = array(
@@ -96,8 +97,13 @@ class WC_Admin_Importers {
 	 */
 	public function product_importer() {
 		if ( Constants::is_defined( 'WP_LOAD_IMPORTERS' ) ) {
-			wp_safe_redirect( admin_url( 'edit.php?post_type=product&page=product_importer' ) );
+			wp_safe_redirect( admin_url( 'edit.php?post_type=product&page=product_importer&source=wordpress-importer' ) );
 			exit;
+		}
+
+		// phpcs:ignore
+		if ( isset( $_GET['source'] ) && 'wordpress-importer' === sanitize_text_field( wp_unslash( $_GET['source'] ) ) ) {
+			wc_admin_record_tracks_event( 'product_importer_view_from_wp_importer' );
 		}
 
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -132,7 +138,9 @@ class WC_Admin_Importers {
 			}
 		}
 
-		require dirname( __FILE__ ) . '/importers/class-wc-tax-rate-importer.php';
+		wc_admin_record_tracks_event( 'tax_rates_importer_view_from_wp_importer' );
+
+		require __DIR__ . '/importers/class-wc-tax-rate-importer.php';
 
 		$importer = new WC_Tax_Rate_Importer();
 		$importer->dispatch();
@@ -182,7 +190,9 @@ class WC_Admin_Importers {
 								// Register the taxonomy now so that the import works!
 								register_taxonomy(
 									$term['domain'],
+									// phpcs:ignore
 									apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
+									// phpcs:ignore
 									apply_filters(
 										'woocommerce_taxonomy_args_' . $term['domain'],
 										array(
@@ -229,7 +239,7 @@ class WC_Admin_Importers {
 			 *
 			 * @param int $size Batch size.
 			 *
-			 * @since
+			 * @since 3.1.0
 			 */
 			'lines'              => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
 			'parse'              => true,
@@ -312,6 +322,29 @@ class WC_Admin_Importers {
 					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
 				)
 			);
+		}
+	}
+
+	/**
+	 * Track importer/exporter view.
+	 *
+	 * @return void
+	 */
+	public function track_importer_exporter_view() {
+		$screen = get_current_screen();
+
+		if ( ! isset( $screen->id ) ) {
+			return;
+		}
+
+		// Don't track if we're in a specific import screen.
+		// phpcs:ignore
+		if ( isset( $_GET['import'] ) ) {
+			return;
+		}
+
+		if ( 'import' === $screen->id || 'export' === $screen->id ) {
+			wc_admin_record_tracks_event( 'wordpress_' . $screen->id . '_view' );
 		}
 	}
 }
