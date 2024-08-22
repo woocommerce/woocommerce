@@ -220,7 +220,7 @@ const resetPatternsAndProducts = () => async () => {
 			method: 'DELETE',
 		} ),
 		apiFetch( {
-			path: '/wc/private/ai/products',
+			path: '/wc-admin/ai/products',
 			method: 'DELETE',
 		} ),
 	] );
@@ -278,7 +278,7 @@ export const updateStorePatterns = async (
 			additional_errors?: unknown[];
 		} >( [
 			apiFetch( {
-				path: '/wc/private/ai/products',
+				path: '/wc-admin/ai/products',
 				method: 'POST',
 				data: {
 					business_description:
