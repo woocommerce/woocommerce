@@ -3,9 +3,7 @@
  */
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
-import { PAYMENT_GATEWAYS_STORE_NAME, PaymentGateway } from '@woocommerce/data';
-import { Spinner } from '@woocommerce/components';
+import { PaymentGateway } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -16,43 +14,41 @@ import { OtherPaymentMethods } from './components/other-payment-methods';
 import { PaymentsBannerWrapper } from '~/payments/payment-settings-banner';
 
 export const SettingsPaymentsMain: React.FC = () => {
-	const paymentGateways = useSelect( ( select ) =>
-		select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateways()
-	);
-
-	const isLoading = useSelect(
-		( select ) =>
-			! select( PAYMENT_GATEWAYS_STORE_NAME ).hasFinishedResolution(
-				'getPaymentGateways'
-			)
-	);
-
-	const availablePaymentGateways = useMemo( () => {
-		const isWcPayInstalled = paymentGateways.some(
-			( gateway: PaymentGateway ) => {
-				return gateway.id === 'woocommerce_payments';
-			}
+	const [ paymentGateways, error ] = useMemo( () => {
+		const script = document.getElementById(
+			'experimental_wc_settings_payments_gateways'
 		);
 
-		if ( isWcPayInstalled ) {
-			return paymentGateways.filter( ( gateway: PaymentGateway ) => {
-				// Filter out woocommerce payment sub-methods. e.g woocommerce_payments_bancontact and pre_install_woocommerce_payments_promotion
-				return (
-					! gateway.id.startsWith( 'woocommerce_payments_' ) &&
-					gateway.id !== 'pre_install_woocommerce_payments_promotion'
-				);
-			} );
+		try {
+			if ( script && script.textContent ) {
+				return [
+					JSON.parse( script.textContent ) as PaymentGateway[],
+					null,
+				];
+			}
+			throw new Error( 'Could not find payment gateways data' );
+		} catch ( e ) {
+			return [ [], e as Error ];
 		}
+	}, [] );
 
-		return paymentGateways;
-	}, [ paymentGateways ] );
+	if ( error ) {
+		// This is a temporary error message to be replaced by error boundary.
+		return (
+			<div>
+				<h1>
+					{ __( 'Error loading payment gateways', 'woocommerce' ) }
+				</h1>
+				<p>{ error.message }</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="settings-payments-main__container">
 			<div id="wc_payments_settings_slotfill">
 				<PaymentsBannerWrapper />
 			</div>
-
 			<table className="form-table">
 				<tbody>
 					<tr>
@@ -83,32 +79,25 @@ export const SettingsPaymentsMain: React.FC = () => {
 										<th className="action"></th>
 									</tr>
 								</thead>
+								<tbody className="ui-sortable">
+									{ paymentGateways.map(
+										( gateway: PaymentGateway ) => (
+											<PaymentMethod
+												key={ gateway.id }
+												{ ...gateway }
+											/>
+										)
+									) }
 
-								{ isLoading ? (
-									<div className="settings-payments-main__spinner">
-										<Spinner />
-									</div>
-								) : (
-									<tbody className="ui-sortable">
-										{ availablePaymentGateways.map(
-											( gateway: PaymentGateway ) => (
-												<PaymentMethod
-													key={ gateway.id }
-													{ ...gateway }
-												/>
-											)
-										) }
-
-										<tr>
-											<td
-												className="other-payment-methods-row"
-												colSpan={ 5 }
-											>
-												<OtherPaymentMethods />
-											</td>
-										</tr>
-									</tbody>
-								) }
+									<tr>
+										<td
+											className="other-payment-methods-row"
+											colSpan={ 5 }
+										>
+											<OtherPaymentMethods />
+										</td>
+									</tr>
+								</tbody>
 							</table>
 						</td>
 					</tr>
