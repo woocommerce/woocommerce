@@ -276,7 +276,12 @@ class Api {
 
 		wp_register_script( $handle, $script_data['src'], $script_dependencies, $script_data['version'], true );
 
-		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
+		if ( $has_i18n === false ) {
+			// deprecate this param.
+			wc_deprecated_argument( __FUNCTION__, '9.4.0', 'Passing false for $has_i18n parameter is deprecated and will be removed in future versions. All scripts will attempt to load translation for.' );
+		}
+		
+		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woocommerce', $this->package->get_path( 'languages' ) );
 		}
 	}
