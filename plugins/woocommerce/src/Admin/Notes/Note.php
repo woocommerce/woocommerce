@@ -676,7 +676,7 @@ class Note extends \WC_Data {
 	 *
 	 * @param string $note_action_name Name of action to add a nonce to.
 	 * @param string $nonce_action The nonce action.
-	 * @param string $nonce_name The nonce Name. This is used as the paramater name in the resulting URL for the action.
+	 * @param string $nonce_name The nonce Name. This is used as the parameter name in the resulting URL for the action.
 	 * @return void
 	 * @throws \Exception If note name cannot be found.
 	 */

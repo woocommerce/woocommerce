@@ -26,6 +26,7 @@ import { getValidityMessageForInput } from '../../checkout/utils';
 import { ValidatedTextInputProps } from './types';
 
 export type ValidatedTextInputHandle = {
+	focus?: () => void;
 	revalidate: () => void;
 };
 
@@ -147,6 +148,9 @@ const ValidatedTextInput = forwardRef<
 			forwardedRef,
 			function () {
 				return {
+					focus() {
+						inputRef.current?.focus();
+					},
 					revalidate() {
 						validateInput( ! value );
 					},
