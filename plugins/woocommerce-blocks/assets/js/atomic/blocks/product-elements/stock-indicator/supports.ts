@@ -7,13 +7,8 @@ import {
 	__experimentalGetSpacingClassesAndStyles,
 } from '@wordpress/block-editor';
 
-/**
- * Internal dependencies
- */
-import sharedConfig from '../shared/config';
-
 export const supports = {
-	...sharedConfig.supports,
+	html: false,
 	color: {
 		text: true,
 		background: true,
