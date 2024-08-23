@@ -10,10 +10,12 @@ import { ProductGalleryBlockSettings } from '@woocommerce/blocks/product-gallery
 import { AddToCartFormBlockSettings } from '../../../atomic/blocks/product-elements/add-to-cart-form/settings';
 import productGalleryBlockMetadata from '../../../blocks/product-gallery/block.json';
 import addToCartFormBlockMetadata from '../../../atomic/blocks/product-elements/add-to-cart-form/block.json';
+import productMetaBlockMetadata from '../../../atomic/blocks/product-elements/product-meta/block.json';
 import productImageGalleryBlockMetadata from '../../../atomic/blocks/product-elements/product-image-gallery/block.json';
 import { EditorViewContentType } from './editor-view-change-detector';
 import { ProductPriceBlockSettings } from '../../blocks/product-elements/price/settings';
 import { ProductImageGalleryBlockSettings } from '../../blocks/product-elements/product-image-gallery/settings';
+import { ProductMetaBlockSettings } from '../../blocks/product-elements/product-meta/settings';
 
 interface BlockWithRestriction {
 	blockMetadata?: Partial< BlockConfiguration > | string;
@@ -108,6 +110,27 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 			) {
 				blockSettings.ancestor = [ 'woocommerce/single-product' ];
 			} else {
+				blockSettings.ancestor = undefined;
+			}
+
+			return { blockMetadata, blockSettings };
+		},
+	} ),
+	'woocommerce/product-meta': createBlockWithRestriction( {
+		blockMetadata: productMetaBlockMetadata,
+		blockSettings: ProductMetaBlockSettings,
+		onBeforeRegisterBlock( blockConfig ) {
+			const {
+				blockMetadata,
+				blockSettings,
+				currentContentId,
+				currentContentType,
+			} = blockConfig;
+
+			if (
+				currentContentType === EditorViewContentType.WP_TEMPLATE &&
+				currentContentId?.includes( 'single-product' )
+			) {
 				blockSettings.ancestor = undefined;
 			}
 
