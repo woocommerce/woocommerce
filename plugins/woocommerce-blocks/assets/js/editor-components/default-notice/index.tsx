@@ -42,7 +42,7 @@ export function DefaultNotice( { block }: { block: string } ) {
 			postPublished: isCurrentPostPublished(),
 			currentPostId: getCurrentPostId(),
 		};
-	} );
+	}, [] );
 	const [ settingStatus, setStatus ] = useState( 'pristine' );
 	const updatePage = useCallback( () => {
 		setStatus( 'updating' );
