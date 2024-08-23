@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { registerBlockType } from '@wordpress/blocks';
+
+/**
  * Internal dependencies
  */
 import metadata from './block.json';
