@@ -76,55 +76,168 @@ const debounceUpdate = debounce( ( context, element, event ) => {
 	);
 }, 1000 );
 
-store< PriceFilterStore >( 'woocommerce/product-filter-price', {
-	state: {
-		rangeStyle: () => {
-			const { minPrice, maxPrice, minRange, maxRange } =
-				getContext< PriceFilterContext >();
+const constrainRangeSliderValues = (
+	/**
+	 * Tuple containing min and max values.
+	 */
+	values: [ number, number ],
+	/**
+	 * Min allowed value for the sliders.
+	 */
+	min?: number | null,
+	/**
+	 * Max allowed value for the sliders.
+	 */
+	max?: number | null,
+	/**
+	 * Step value for the sliders.
+	 */
+	step = 1,
+	/**
+	 * Whether we're currently interacting with the min range slider or not, so we update the correct values.
+	 */
+	isMin = false
+): { minPrice: number; maxPrice: number } => {
+	let [ minValue, maxValue ] = values;
 
-			return [
-				`--low: ${
-					( 100 * ( minPrice - minRange ) ) / ( maxRange - minRange )
-				}%`,
-				`--high: ${
-					( 100 * ( maxPrice - minRange ) ) / ( maxRange - minRange )
-				}%`,
-			].join( ';' );
-		},
-		formattedMinPrice: () => {
-			const { minPrice } = getContext< PriceFilterContext >();
-			return formatPrice( minPrice, getCurrency( { minorUnit: 0 } ) );
-		},
-		formattedMaxPrice: () => {
-			const { maxPrice } = getContext< PriceFilterContext >();
-			return formatPrice( maxPrice, getCurrency( { minorUnit: 0 } ) );
-		},
-	},
-	actions: {
-		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-			const context = getContext< PriceFilterContext >();
+	const isFinite = ( n: number | null | undefined ): n is number =>
+		Number.isFinite( n );
 
-			// In some occasions the input element is updated with the incorrect value.
-			// By using the element that triggered the event, we can ensure the correct value is used for the input.
-			const element = getElement();
+	if ( ! isFinite( minValue ) ) {
+		minValue = min || 0;
+	}
 
-			debounceUpdate( context, element, event );
+	if ( ! isFinite( maxValue ) ) {
+		maxValue = max || step;
+	}
+
+	if ( isFinite( min ) && min > minValue ) {
+		minValue = min;
+	}
+
+	if ( isFinite( max ) && max <= minValue ) {
+		minValue = max - step;
+	}
+
+	if ( isFinite( min ) && min >= maxValue ) {
+		maxValue = min + step;
+	}
+
+	if ( isFinite( max ) && max < maxValue ) {
+		maxValue = max;
+	}
+
+	if ( ! isMin && minValue >= maxValue ) {
+		minValue = maxValue - step;
+	}
+
+	if ( isMin && maxValue <= minValue ) {
+		maxValue = minValue + step;
+	}
+
+	return { minPrice: minValue, maxPrice: maxValue };
+};
+
+const getRangeStyle = (
+	minPrice: number,
+	maxPrice: number,
+	minRange: number,
+	maxRange: number
+) => {
+	return `--low: ${
+		( 100 * ( minPrice - minRange ) ) / ( maxRange - minRange )
+	}%; --high: ${
+		( 100 * ( maxPrice - minRange ) ) / ( maxRange - minRange )
+	}%;`;
+};
+
+const { state } = store< PriceFilterStore >(
+	'woocommerce/product-filter-price',
+	{
+		state: {
+			rangeStyle: () => {
+				const { minPrice, maxPrice, minRange, maxRange } =
+					getContext< PriceFilterContext >();
+
+				return getRangeStyle( minPrice, maxPrice, minRange, maxRange );
+			},
+			formattedMinPrice: () => {
+				const { minPrice } = getContext< PriceFilterContext >();
+				return formatPrice( minPrice, getCurrency( { minorUnit: 0 } ) );
+			},
+			formattedMaxPrice: () => {
+				const { maxPrice } = getContext< PriceFilterContext >();
+				return formatPrice( maxPrice, getCurrency( { minorUnit: 0 } ) );
+			},
 		},
-		selectInputContent: () => {
-			const element = getElement();
-			if ( element && element.ref ) {
-				element.ref.select();
-			}
+		actions: {
+			updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+				const context = getContext< PriceFilterContext >();
+
+				// In some occasions the input element is updated with the incorrect value.
+				// By using the element that triggered the event, we can ensure the correct value is used for the input.
+				const element = getElement();
+
+				debounceUpdate( context, element, event );
+			},
+			selectInputContent: () => {
+				const element = getElement();
+				if ( element && element.ref ) {
+					element.ref.select();
+				}
+			},
+			reset: () => {
+				navigate(
+					getUrl( {
+						minRange: 0,
+						maxRange: 0,
+						minPrice: 0,
+						maxPrice: 0,
+					} )
+				);
+			},
+			updateRange: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+				const context = getContext< PriceFilterContext >();
+				const { minPrice, maxPrice, minRange, maxRange } = context;
+				const isMin = event.target.classList.contains( 'min' );
+				const targetValue = +event.target.value;
+				const stepValue = 1;
+				const currentValues: [ number, number ] = isMin
+					? [
+							Math.round( targetValue / stepValue ) * stepValue,
+							maxPrice,
+					  ]
+					: [
+							minPrice,
+							Math.round( targetValue / stepValue ) * stepValue,
+					  ];
+				const values = constrainRangeSliderValues(
+					currentValues,
+					minRange,
+					maxRange,
+					stepValue,
+					isMin
+				);
+
+				if ( targetValue >= maxPrice ) {
+					context.maxPrice = minPrice + 1;
+				} else if ( targetValue <= minPrice ) {
+					context.minPrice = maxPrice - 1;
+				}
+
+				state.rangeStyle = getRangeStyle(
+					values.minPrice,
+					values.maxPrice,
+					minRange,
+					maxRange
+				);
+
+				if ( isMin ) {
+					context.minPrice = values.minPrice;
+				} else {
+					context.maxPrice = values.maxPrice;
+				}
+			},
 		},
-		reset: () => {
-			navigate(
-				getUrl( {
-					minRange: 0,
-					maxRange: 0,
-					minPrice: 0,
-					maxPrice: 0,
-				} )
-			);
-		},
-	},
-} );
+	}
+);

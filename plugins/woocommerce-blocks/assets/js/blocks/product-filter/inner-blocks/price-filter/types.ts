@@ -34,5 +34,8 @@ export type PriceFilterStore = {
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => void;
 		selectInputContent: () => void;
 		reset: () => void;
+		updateRange: (
+			event: HTMLElementEvent< HTMLInputElement >
+		) => void;
 	};
 };
