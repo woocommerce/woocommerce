@@ -1,4 +1,9 @@
 <?php
+/**
+ * Class WC_Tests_Admin_Post_Types file.
+ *
+ * @package WooCommerce\Tests\Admin
+ */
 
 declare( strict_types=1 );
 
