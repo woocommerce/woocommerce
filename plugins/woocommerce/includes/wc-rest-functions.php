@@ -410,8 +410,6 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		'wc/private',
 	);
 
-	// We can consider allowing filtering this list in the future.
-
 	$known_namespace_request = false;
 	foreach ( $known_namespaces as $known_namespace ) {
 		if ( str_starts_with( $rest_route, $known_namespace ) ) {
@@ -424,5 +422,5 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		return true;
 	}
 
-	return str_starts_with( $rest_route, $ns );
+	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
 }
