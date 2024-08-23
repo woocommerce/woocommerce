@@ -115,6 +115,7 @@ export const useCollection = < T >(
 			currentResourceValues,
 			currentQuery,
 			shouldSelect,
+			throwError,
 		]
 	);
 	// if selector was not bailed, then update current results. Otherwise return
