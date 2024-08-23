@@ -76,7 +76,7 @@ export const Edit = (): JSX.Element => {
 				templateLock="insert"
 			/>
 			<Disabled>
-				<Form />
+				<Form isEditor={ true } />
 			</Disabled>
 		</div>
 	);

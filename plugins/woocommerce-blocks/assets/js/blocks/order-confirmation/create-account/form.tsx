@@ -30,7 +30,7 @@ const Form = ( {
 	attributes: blockAttributes,
 	isEditor,
 }: {
-	attributes: { customerEmail: string };
+	attributes?: { customerEmail?: string; nonceToken?: string };
 	isEditor: boolean;
 } ) => {
 	const [ isLoading, setIsLoading ] = useState( false );
@@ -40,8 +40,9 @@ const Form = ( {
 		select( VALIDATION_STORE_KEY ).getValidationError( 'account-password' )
 	);
 	const customerEmail =
-		blockAttributes.customerEmail ||
+		blockAttributes?.customerEmail ||
 		( isEditor ? 'customer@email.com' : '' );
+	const nonceToken = blockAttributes?.nonceToken || '';
 
 	return (
 		<form
@@ -122,6 +123,7 @@ const Form = ( {
 			<input type="hidden" name="email" value={ customerEmail } />
 			<input type="hidden" name="password" value={ password } />
 			<input type="hidden" name="create-account" value="1" />
+			<input type="hidden" name="_wpnonce" value={ nonceToken } />
 			<p className={ 'wc-block-order-confirmation-create-account-terms' }>
 				{ createInterpolateElement(
 					/* translators: %1$s terms page link, %2$s privacy page link. */

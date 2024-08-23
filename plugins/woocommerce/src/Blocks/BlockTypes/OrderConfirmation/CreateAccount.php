@@ -37,8 +37,12 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 * @return \WP_Error|int
 	 */
 	protected function process_form_post( $order ) {
-		if ( ! isset( $_POST['create-account'], $_POST['email'], $_POST['password'] ) ) {
+		if ( ! isset( $_POST['create-account'], $_POST['email'], $_POST['password'], $_POST['_wpnonce'] ) ) {
 			return 0;
+		}
+
+		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'wc_create_account' ) ) {
+			return new \WP_Error( 'invalid_nonce', __( 'Unable to create account. Please try again.', 'woocommerce' ) );
 		}
 
 		$user_email = sanitize_email( wp_unslash( $_POST['email'] ) );
@@ -130,6 +134,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		}
 
 		$processor->set_attribute( 'data-customer-email', $order->get_billing_email() );
+		$processor->set_attribute( 'data-nonce-token', wp_create_nonce( 'wc_create_account' ) );
 
 		return $processor->get_updated_html();
 	}
@@ -141,10 +146,10 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 */
 	protected function render_confirmation() {
 		$content  = '<div class="woocommerce-order-confirmation-create-account-success">';
-		$content .= '<h3>' . __( 'Your account has been successfully created', 'woocommerce' ) . '</h3>';
+		$content .= '<h3>' . esc_html__( 'Your account has been successfully created', 'woocommerce' ) . '</h3>';
 		$content .= '<p>' . sprintf(
 			/* translators: 1: link to my account page, 2: link to shipping and billing addresses, 3: link to account details, 4: closing tag */
-			__( 'You can now %1$sview your recent orders%4$s, manage your %2$sshipping and billing addresses%4$s, and edit your %3$spassword and account details%4$s.', 'woocommerce' ),
+			esc_html__( 'You can now %1$sview your recent orders%4$s, manage your %2$sshipping and billing addresses%4$s, and edit your %3$spassword and account details%4$s.', 'woocommerce' ),
 			'<a href="' . esc_url( wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
 			'<a href="' . esc_url( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
 			'<a href="' . esc_url( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',

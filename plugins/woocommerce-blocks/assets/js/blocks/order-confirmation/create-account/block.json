@@ -1,0 +1,47 @@
+{
+	"name": "woocommerce/order-confirmation-create-account",
+	"version": "1.0.0",
+	"title": "Account Creation",
+	"description": "Display the order confirmation create account section.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"attributes": {
+		"customerEmail": {
+			"type": "string",
+			"default": ""
+		},
+		"nonceToken": {
+			"type": "string",
+			"default": ""
+		},
+		"align": {
+			"type": "string",
+			"default": "wide"
+		},
+		"className": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"multiple": false,
+		"align": [
+			"wide",
+			"full"
+		],
+		"html": false,
+		"spacing": {
+			"padding": true,
+			"margin": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false
+			}
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
