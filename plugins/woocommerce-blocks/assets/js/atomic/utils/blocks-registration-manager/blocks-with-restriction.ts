@@ -13,6 +13,7 @@ import addToCartFormBlockMetadata from '../../../atomic/blocks/product-elements/
 import productMetaBlockMetadata from '../../../atomic/blocks/product-elements/product-meta/block.json';
 import productImageGalleryBlockMetadata from '../../../atomic/blocks/product-elements/product-image-gallery/block.json';
 import productRatingBlockMetadata from '../../../atomic/blocks/product-elements/rating/block.json';
+import productDetailsBlockMetadata from '../../../atomic/blocks/product-elements/product-details/block.json';
 import relatedProductsBlockMetadata from '../../../atomic/blocks/product-elements/related-products/block.json';
 import { EditorViewContentType } from './editor-view-change-detector';
 import { ProductPriceBlockSettings } from '../../blocks/product-elements/price/settings';
@@ -20,6 +21,7 @@ import { ProductImageGalleryBlockSettings } from '../../blocks/product-elements/
 import { ProductMetaBlockSettings } from '../../blocks/product-elements/product-meta/settings';
 import { ProductRatingBlockSettings } from '../../blocks/product-elements/rating/settings';
 import { RelatedProductsBlockSettings } from '../../blocks/product-elements/related-products/settings';
+import { ProductDetailsBlockSettings } from '../../blocks/product-elements/product-details/settings';
 
 interface BlockWithRestriction {
 	blockMetadata?: Partial< BlockConfiguration > | string;
@@ -120,6 +122,15 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 			return { blockMetadata, blockSettings };
 		},
 	} ),
+	'woocommerce/product-details': createBlockWithRestriction( {
+		blockMetadata: productDetailsBlockMetadata,
+		blockSettings: ProductDetailsBlockSettings,
+		allowedTemplates: {
+			'single-product': true,
+		},
+		availableInPageEditor: false,
+		availableInPostEditor: false,
+	} ),
 	'woocommerce/product-meta': createBlockWithRestriction( {
 		blockMetadata: productMetaBlockMetadata,
 		blockSettings: ProductMetaBlockSettings,
@@ -211,22 +222,5 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 		},
 		availableInPageEditor: false,
 		availableInPostEditor: false,
-		onBeforeRegisterBlock( blockConfig ) {
-			const {
-				blockMetadata,
-				blockSettings,
-				currentContentId,
-				currentContentType,
-			} = blockConfig;
-
-			if (
-				currentContentType === EditorViewContentType.WP_TEMPLATE &&
-				currentContentId?.includes( 'single-product' )
-			) {
-				blockSettings.ancestor = undefined;
-			}
-
-			return { blockMetadata, blockSettings };
-		},
 	} ),
 };
