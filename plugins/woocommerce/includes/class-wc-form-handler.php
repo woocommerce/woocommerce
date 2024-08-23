@@ -986,7 +986,7 @@ class WC_Form_Handler {
 					}
 				}
 
-				// Peform the login.
+				// Perform the login.
 				$user = wp_signon( apply_filters( 'woocommerce_login_credentials', $creds ), is_ssl() );
 
 				if ( is_wp_error( $user ) ) {

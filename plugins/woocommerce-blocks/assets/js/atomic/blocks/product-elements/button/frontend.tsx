@@ -104,22 +104,20 @@ const { state } = store< Store >( 'woocommerce/product-button', {
 		},
 		get addToCartText(): string {
 			const context = getContext();
+			const inTheCartText = state.inTheCartText || '';
 			// We use the temporary number of items when there's no animation, or the
 			// second part of the animation hasn't started.
-			if (
+			const showTemporaryNumber =
 				context.animationStatus === AnimationStatus.IDLE ||
-				context.animationStatus === AnimationStatus.SLIDE_OUT
-			) {
-				return getButtonText(
-					context.addToCartText,
-					state.inTheCartText!,
-					context.temporaryNumberOfItems
-				);
-			}
+				context.animationStatus === AnimationStatus.SLIDE_OUT;
+			const numberOfItems = showTemporaryNumber
+				? context.temporaryNumberOfItems
+				: state.numberOfItemsInTheCart;
+
 			return getButtonText(
 				context.addToCartText,
-				state.inTheCartText!,
-				state.numberOfItemsInTheCart
+				inTheCartText,
+				numberOfItems
 			);
 		},
 		get displayViewCart(): boolean {

@@ -59,7 +59,7 @@ class ProductFormsController {
 	}
 
 	/**
-	 * Create ot update a product_form post for each product form template.
+	 * Create or update a product_form post for each product form template.
 	 * If the post already exists, it will be updated.
 	 * If the post does not exist, it will be created even if the action is `update`.
 	 *

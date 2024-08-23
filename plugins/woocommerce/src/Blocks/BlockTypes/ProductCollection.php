@@ -324,7 +324,7 @@ class ProductCollection extends AbstractBlock {
 		$is_enhanced_pagination_enabled = ! ( $this->parsed_block['attrs']['forcePageReload'] ?? false );
 
 		// Only proceed if the block is a product collection block,
-		// enhaced pagination is enabled and query IDs match.
+		// enhanced pagination is enabled and query IDs match.
 		if ( $is_product_collection_block && $is_enhanced_pagination_enabled && $query_id === $parsed_query_id ) {
 			$block_content = $this->process_pagination_links( $block_content );
 		}
@@ -414,8 +414,8 @@ class ProductCollection extends AbstractBlock {
 
 	/**
 	 * Check inner blocks of Product Collection block if there's one
-	 * incompatible with Interactivity API and if so, disable client-side
-	 * naviagtion.
+	 * incompatible with the Interactivity API and if so, disable client-side
+	 * navigation.
 	 *
 	 * @param array $parsed_block The block being rendered.
 	 * @return string Returns the parsed block, unmodified.
@@ -867,7 +867,7 @@ class ProductCollection extends AbstractBlock {
 	 * - For array items with numeric keys, we merge them as normal.
 	 * - For array items with string keys:
 	 *
-	 *   - If the value isn't array, we'll use the value comming from the merge array.
+	 *   - If the value isn't array, we'll use the value coming from the merge array.
 	 *     $base = ['orderby' => 'date']
 	 *     $new  = ['orderby' => 'meta_value_num']
 	 *     Result: ['orderby' => 'meta_value_num']
