@@ -15,9 +15,6 @@ import metadata from './block.json';
 registerBlockType( metadata, {
 	...sharedConfig,
 	icon,
-	attributes: {
-		...metadata.attributes,
-	},
 	supports,
 	edit,
 } );
