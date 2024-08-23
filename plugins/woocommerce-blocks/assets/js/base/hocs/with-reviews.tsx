@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import type { Review } from '@woocommerce/base-components/reviews/types';
+import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 
 /**
  * Internal dependencies
@@ -11,51 +12,59 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import { getReviews } from '../../blocks/reviews/utils';
 import { formatError } from '../utils/errors';
 
+interface WithReviewsProps {
+	order: 'asc' | 'desc';
+	orderby: string;
+	reviewsToDisplay: number;
+	categoryIds?: string | string[];
+	delayFunction?: ( f: () => void ) => DelayedFunction;
+	onReviewsAppended?: () => void;
+	onReviewsLoadError?: ( error: ErrorObject ) => void;
+	onReviewsReplaced?: () => void;
+	productId?: string | number;
+	attributes: {
+		previewReviews?: Review[];
+	};
+}
+
+interface WithReviewsState {
+	error: string | ErrorObject | null;
+	loading: boolean;
+	reviews: Review[];
+	totalReviews: number;
+}
+
+type DelayedFunction = ( () => void ) & { cancel?: () => void };
+
 /**
  * HOC that queries reviews for a component.
- *
- * @param {Function} OriginalComponent Component being wrapped.
  */
-const withReviews = ( OriginalComponent ) => {
-	class WrappedComponent extends Component {
-		static propTypes = {
-			order: PropTypes.oneOf( [ 'asc', 'desc' ] ).isRequired,
-			orderby: PropTypes.string.isRequired,
-			reviewsToDisplay: PropTypes.number.isRequired,
-			categoryIds: PropTypes.oneOfType( [
-				PropTypes.string,
-				PropTypes.array,
-			] ),
-			delayFunction: PropTypes.func,
-			onReviewsAppended: PropTypes.func,
-			onReviewsLoadError: PropTypes.func,
-			onReviewsReplaced: PropTypes.func,
-			productId: PropTypes.oneOfType( [
-				PropTypes.string,
-				PropTypes.number,
-			] ),
-		};
-
-		static defaultProps = {
-			delayFunction: ( f ) => f,
-			onReviewsAppended: () => {},
-			onReviewsLoadError: () => {},
-			onReviewsReplaced: () => {},
-		};
-
+const withReviews = (
+	OriginalComponent: React.FunctionComponent< Record< string, unknown > >
+) => {
+	class WrappedComponent extends Component<
+		WithReviewsProps,
+		WithReviewsState
+	> {
 		isPreview = !! this.props.attributes.previewReviews;
 
-		delayedAppendReviews = this.props.delayFunction( this.appendReviews );
+		delayedAppendReviews = (
+			this.props.delayFunction ?? ( ( f: () => void ) => f )
+		)( this.appendReviews.bind( this ) );
 
 		isMounted = false;
 
-		state = {
+		state: WithReviewsState = {
 			error: null,
 			loading: true,
-			reviews: this.isPreview ? this.props.attributes.previewReviews : [],
-			totalReviews: this.isPreview
-				? this.props.attributes.previewReviews.length
-				: 0,
+			reviews:
+				this.isPreview && this.props.attributes?.previewReviews
+					? this.props.attributes.previewReviews
+					: [],
+			totalReviews:
+				this.isPreview && this.props.attributes?.previewReviews
+					? this.props.attributes.previewReviews.length
+					: 0,
 		};
 
 		componentDidMount() {
@@ -63,7 +72,7 @@ const withReviews = ( OriginalComponent ) => {
 			this.replaceReviews();
 		}
 
-		componentDidUpdate( prevProps ) {
+		componentDidUpdate( prevProps: WithReviewsProps ) {
 			if ( prevProps.reviewsToDisplay < this.props.reviewsToDisplay ) {
 				// Since this attribute might be controlled via something with
 				// short intervals between value changes, this allows for optionally
@@ -74,27 +83,35 @@ const withReviews = ( OriginalComponent ) => {
 			}
 		}
 
-		shouldReplaceReviews( prevProps, nextProps ) {
+		shouldReplaceReviews(
+			prevProps: WithReviewsProps,
+			nextProps: WithReviewsProps
+		) {
 			return (
 				prevProps.orderby !== nextProps.orderby ||
 				prevProps.order !== nextProps.order ||
 				prevProps.productId !== nextProps.productId ||
-				! isShallowEqual( prevProps.categoryIds, nextProps.categoryIds )
+				! isShallowEqual(
+					prevProps.categoryIds as string[],
+					nextProps.categoryIds as string[]
+				)
 			);
 		}
 
 		componentWillUnmount() {
 			this.isMounted = false;
-
-			if ( this.delayedAppendReviews.cancel ) {
+			if (
+				'cancel' in this.delayedAppendReviews &&
+				typeof this.delayedAppendReviews.cancel === 'function'
+			) {
 				this.delayedAppendReviews.cancel();
 			}
 		}
 
-		getArgs( reviewsToSkip ) {
+		getArgs( reviewsToSkip: number ) {
 			const { categoryIds, order, orderby, productId, reviewsToDisplay } =
 				this.props;
-			const args = {
+			const args: Record< string, string | number > = {
 				order,
 				orderby,
 				per_page: reviewsToDisplay - reviewsToSkip,
@@ -123,7 +140,8 @@ const withReviews = ( OriginalComponent ) => {
 				return;
 			}
 
-			const { onReviewsReplaced } = this.props;
+			const onReviewsReplaced =
+				this.props.onReviewsReplaced ?? ( () => undefined );
 			this.updateListOfReviews().then( onReviewsReplaced );
 		}
 
@@ -132,7 +150,9 @@ const withReviews = ( OriginalComponent ) => {
 				return;
 			}
 
-			const { onReviewsAppended, reviewsToDisplay } = this.props;
+			const onReviewsAppended =
+				this.props.onReviewsAppended ?? ( () => undefined );
+			const { reviewsToDisplay } = this.props;
 			const { reviews } = this.state;
 
 			// Given that this function is delayed, props might have been updated since
@@ -144,7 +164,7 @@ const withReviews = ( OriginalComponent ) => {
 			this.updateListOfReviews( reviews ).then( onReviewsAppended );
 		}
 
-		updateListOfReviews( oldReviews = [] ) {
+		updateListOfReviews( oldReviews: Review[] = [] ) {
 			const { reviewsToDisplay } = this.props;
 			const { totalReviews } = this.state;
 			const reviewsToLoad =
@@ -174,18 +194,19 @@ const withReviews = ( OriginalComponent ) => {
 								error: null,
 							} );
 						}
-
 						return { newReviews };
 					}
 				)
 				.catch( this.setError );
 		}
 
-		setError = async ( e ) => {
+		setError = async ( e: Error ) => {
 			if ( ! this.isMounted ) {
 				return;
 			}
-			const { onReviewsLoadError } = this.props;
+
+			const onReviewsLoadError =
+				this.props.onReviewsLoadError ?? ( () => undefined );
 			const error = await formatError( e );
 
 			this.setState( { reviews: [], loading: false, error } );
@@ -211,8 +232,9 @@ const withReviews = ( OriginalComponent ) => {
 
 	const { displayName = OriginalComponent.name || 'Component' } =
 		OriginalComponent;
-	WrappedComponent.displayName = `WithReviews( ${ displayName } )`;
-
+	(
+		WrappedComponent as React.ComponentType< WithReviewsProps >
+	 ).displayName = `WithReviews(${ displayName })`;
 	return WrappedComponent;
 };
 
