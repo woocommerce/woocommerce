@@ -81,8 +81,8 @@ class Patterns extends AIEndpoint {
 		try {
 			( new UpdatePatterns() )->generate_content( $ai_connection, $token, $images, $business_description );
 			return rest_ensure_response( array( 'ai_content_generated' => true ) );
-		} catch ( WP_Error $e ) {
-			return $e;
+		} catch ( \Exception $e ) {
+			return rest_ensure_response( array( 'ai_content_generated' => false ) );
 		}
 	}
 

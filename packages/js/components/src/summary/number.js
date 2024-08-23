@@ -192,8 +192,7 @@ SummaryNumber.propTypes = {
 	/**
 	 * The type of the link
 	 */
-	hrefType: PropTypes.oneOf( [ 'wp-admin', 'wc-admin', 'external' ] )
-		.isRequired,
+	hrefType: PropTypes.oneOf( [ 'wp-admin', 'wc-admin', 'external' ] ),
 	/**
 	 * Boolean describing whether the menu list is open. Only applies in mobile view,
 	 * and only applies to the toggle-able item (first in the list).
