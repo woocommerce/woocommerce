@@ -196,8 +196,6 @@ window.addEventListener( 'load', () => {
 	const dependencies =
 		window.wcBlocksMiniCartInteractivityFrontendDependencies;
 
-	console.log( 'preloaded: ', dependencies );
-
 	// Preload scripts
 	for ( const dependencyHandle in dependencies ) {
 		const dependency = dependencies[ dependencyHandle ];

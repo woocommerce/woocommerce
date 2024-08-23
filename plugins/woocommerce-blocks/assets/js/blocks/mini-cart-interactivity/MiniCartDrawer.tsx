@@ -109,6 +109,7 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 				return;
 			}
 			if ( isOpen ) {
+				console.log( 'mini iapi', MiniCartContentsBlock );
 				const renderedBlock = renderParentBlock( {
 					Block: MiniCartContentsBlock,
 					blockName,

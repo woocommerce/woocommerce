@@ -30,7 +30,7 @@ class MiniCartInteractivity extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $chunks_folder = 'mini-cart-contents-block';
+	protected $chunks_folder = 'mini-cart-interactivity-contents-block';
 
 	/**
 	 * Array of scripts that will be lazy loaded when interacting with the block.
@@ -422,7 +422,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		$icon_name           = isset( $attributes['miniCartIcon'] ) ? esc_attr( $attributes['miniCartIcon'] ) : null;
 
 		?>
-		<button <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	 
+		<button data-wc-bind--data-is-initially-open="context.drawerOpen" <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	 
 			<?php
 				echo $this->get_cart_price_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. 
 			?>
@@ -474,11 +474,11 @@ class MiniCartInteractivity extends AbstractBlock {
 				</div>
 				<?php // Keep the drawer separate so that we don't mutate DOM within the interactivity API powered mini cart icon. ?>
 				<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+					<div class="wc-block-mini-cart-interactivity__template-part" style="display:none">
+						<?php echo wp_kses_post( $template_part_contents ); ?>
+					</div>
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 						<div class="wc-block-components-drawer__content">
-							<div class="wc-block-mini-cart__template-part">
-								<?php echo wp_kses_post( $template_part_contents ); ?>
-							</div>
 						</div>
 					</div>
 				</div>

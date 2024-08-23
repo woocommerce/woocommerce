@@ -9,6 +9,8 @@ import { renderFrontend } from '@woocommerce/base-utils';
 import { MiniCartDrawer } from './MiniCartDrawer';
 import './style.scss';
 
+const MINI_CART_BUTTON_SELECTOR = '.wc-block-mini-cart__button';
+
 const renderMiniCartFrontend = () => {
 	// Check if button is focused. In that case, we want to refocus it after we
 	// replace it with the React equivalent.
@@ -29,14 +31,20 @@ const renderMiniCartFrontend = () => {
 		selector: '.wc-block-mini-cart__drawer',
 		Block: MiniCartDrawer,
 		getProps: ( el ) => {
-			let colorClassNames = '';
-			const button = el.querySelector( '.wc-block-mini-cart__button' );
+			const button = document.querySelector( MINI_CART_BUTTON_SELECTOR );
+			const dataset =
+				button instanceof HTMLButtonElement
+					? button.dataset
+					: { isInitiallyOpen: 'false' };
+			const colorClassNames =
+				button instanceof HTMLButtonElement
+					? button.classList
+							.toString()
+							.replace( 'wc-block-mini-cart__button', '' )
+					: '';
 
-			if ( button instanceof HTMLButtonElement ) {
-				colorClassNames = button.classList
-					.toString()
-					.replace( 'wc-block-mini-cart__button', '' );
-			}
+			const isInitiallyOpen = dataset.isInitiallyOpen === 'true';
+
 			return {
 				initialCartTotals: el.dataset.cartTotals
 					? JSON.parse( el.dataset.cartTotals )
@@ -44,24 +52,15 @@ const renderMiniCartFrontend = () => {
 				initialCartItemsCount: el.dataset.cartItemsCount
 					? parseInt( el.dataset.cartItemsCount, 10 )
 					: 0,
-				isInitiallyOpen: el.dataset.isInitiallyOpen === 'true',
+				isInitiallyOpen,
 				colorClassNames,
 				style: el.dataset.style ? JSON.parse( el.dataset.style ) : {},
-				miniCartIcon: el.dataset.miniCartIcon,
 				addToCartBehaviour: el.dataset.addToCartBehaviour || 'none',
 				hasHiddenPrice: el.dataset.hasHiddenPrice !== 'false',
-				priceColor: el.dataset.priceColor
-					? JSON.parse( el.dataset.priceColor )
-					: {},
-				iconColor: el.dataset.iconColor
-					? JSON.parse( el.dataset.iconColor )
-					: {},
-				productCountColor: el.dataset.productCountColor
-					? JSON.parse( el.dataset.productCountColor )
-					: {},
 				contents:
-					el.querySelector( '.wc-block-mini-cart__template-part' )
-						?.innerHTML ?? '',
+					document.querySelector(
+						'.wc-block-mini-cart-interactivity__template-part'
+					)?.innerHTML ?? '',
 				productCountVisibility: el.dataset.productCountVisibility,
 			};
 		},
@@ -82,3 +81,21 @@ const renderMiniCartFrontend = () => {
 };
 
 renderMiniCartFrontend();
+
+// Create a mutation observer to watch for changes to the dataset isInitiallyOpen
+const observer = new MutationObserver( ( mutations ) => {
+	mutations.forEach( ( mutation ) => {
+		if ( mutation.type === 'attributes' ) {
+			renderMiniCartFrontend();
+		}
+	} );
+} );
+
+const miniCartButton = document.querySelector( MINI_CART_BUTTON_SELECTOR );
+
+if ( miniCartButton ) {
+	observer.observe( miniCartButton, {
+		attributes: true,
+		attributeFilter: [ 'data-is-initially-open' ],
+	} );
+}

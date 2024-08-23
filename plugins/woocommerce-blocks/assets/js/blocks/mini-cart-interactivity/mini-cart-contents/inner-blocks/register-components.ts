@@ -23,6 +23,8 @@ import miniCartCheckoutButtonMetadata from './mini-cart-checkout-button-block/bl
 // eslint-disable-next-line no-undef,camelcase
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
+console.log( 'registered components' );
+
 registerCheckoutBlock( {
 	metadata: filledMiniCartMetadata,
 	component: lazy(

@@ -166,8 +166,12 @@ const blocks = {
 const cartAndCheckoutBlocks = {
 	cart: {},
 	checkout: {},
-	'mini-cart': {},
 	'mini-cart-interactivity': {},
+	'mini-cart-interactivity-contents': {
+		customDir: 'mini-cart-interactivity/mini-cart-contents',
+	},
+
+	'mini-cart': {},
 	'mini-cart-contents': {
 		customDir: 'mini-cart/mini-cart-contents',
 	},

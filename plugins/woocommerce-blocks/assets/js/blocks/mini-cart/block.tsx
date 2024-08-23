@@ -131,6 +131,11 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 				return;
 			}
 			if ( isOpen ) {
+				console.log(
+					'og mini cart',
+					getRegisteredBlockComponents( blockName ),
+					MiniCartContentsBlock
+				);
 				const renderedBlock = renderParentBlock( {
 					Block: MiniCartContentsBlock,
 					blockName,

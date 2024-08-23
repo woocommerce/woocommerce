@@ -19,6 +19,8 @@ export const MiniCartContentsBlock = (
 ): JSX.Element => {
 	const { children } = props;
 
+	console.log( 'reeender' );
+
 	return (
 		<>
 			<CartEventsProvider>

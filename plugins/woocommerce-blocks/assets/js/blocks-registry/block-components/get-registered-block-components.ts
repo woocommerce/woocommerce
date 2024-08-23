@@ -25,6 +25,7 @@ import { registeredBlockComponents } from './registered-block-components-init';
 export function getRegisteredBlockComponents(
 	context: string
 ): Record< string, RegisteredBlockComponent > {
+	console.log( 'getRegisteredBlockComponents', registeredBlockComponents );
 	const parentInnerBlocks =
 		typeof registeredBlockComponents[ context ] === 'object' &&
 		Object.keys( registeredBlockComponents[ context ] ).length > 0
