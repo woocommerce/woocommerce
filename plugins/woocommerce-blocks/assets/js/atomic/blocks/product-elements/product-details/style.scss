@@ -33,7 +33,7 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 			font-weight: bold;
 			opacity: 0.65;
 
-			> a {
+			a {
 				padding: 0.5em 1em;
 				color: inherit;
 				border: none;
@@ -59,7 +59,7 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 
 			/* Remove default focus styles in favor of the ones we defined above. */
 			&:focus:not(:focus-visible),
-			> a:focus:not(:focus-visible) {
+			a:focus:not(:focus-visible) {
 				outline: none;
 			}
 
