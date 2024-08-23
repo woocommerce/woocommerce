@@ -6,11 +6,11 @@ import { select, subscribe } from '@wordpress/data';
 import preloadScript from '@woocommerce/base-utils/preload-script';
 import lazyLoadScript from '@woocommerce/base-utils/lazy-load-script';
 import {
-	getValidBlockAttributes,
+	// getValidBlockAttributes,
 	translateJQueryEventToNative,
 } from '@woocommerce/base-utils';
-import { renderParentBlock } from '@woocommerce/atomic-utils';
-import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
+// import { renderParentBlock } from '@woocommerce/atomic-utils';
+// import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -22,11 +22,11 @@ import {
 	updateTotals,
 } from '../mini-cart/utils/data';
 import setStyles from '../mini-cart/utils/set-styles';
-import { MiniCartContentsBlock } from '../mini-cart/mini-cart-contents/block';
-import {
-	blockName,
-	attributes as miniCartContentsAttributes,
-} from '../mini-cart/mini-cart-contents/attributes';
+// import { MiniCartContentsBlock } from '../mini-cart/mini-cart-contents/block';
+// import {
+// 	blockName,
+// 	attributes as miniCartContentsAttributes,
+// } from '../mini-cart/mini-cart-contents/attributes';
 
 interface dependencyData {
 	src: string;
@@ -61,47 +61,50 @@ setStyles();
 
 declare global {
 	interface Window {
-		wcBlocksMiniCartFrontendDependencies: Record< string, dependencyData >;
+		wcBlocksMiniCartInteractivityFrontendDependencies: Record<
+			string,
+			dependencyData
+		>;
 	}
 }
 
 // Make it so we can read jQuery events triggered by WC Core elements.
-const removeJQueryAddingToCartEvent = translateJQueryEventToNative(
-	'adding_to_cart',
-	'wc-blocks_adding_to_cart'
-);
+// const removeJQueryAddingToCartEvent = translateJQueryEventToNative(
+// 	'adding_to_cart',
+// 	'wc-blocks_adding_to_cart'
+// );
 
-const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
-	'added_to_cart',
-	'wc-blocks_added_to_cart'
-);
+// const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
+// 	'added_to_cart',
+// 	'wc-blocks_added_to_cart'
+// );
 
-const removeJQueryRemovedFromCartEvent = translateJQueryEventToNative(
-	'removed_from_cart',
-	'wc-blocks_removed_from_cart'
-);
+// const removeJQueryRemovedFromCartEvent = translateJQueryEventToNative(
+// 	'removed_from_cart',
+// 	'wc-blocks_removed_from_cart'
+// );
 
-const loadScripts = async () => {
-	removeJQueryAddingToCartEvent();
+// const loadScripts = async () => {
+// 	removeJQueryAddingToCartEvent();
 
-	document.body.removeEventListener(
-		'wc-blocks_adding_to_cart',
-		loadScripts
-	);
+// 	document.body.removeEventListener(
+// 		'wc-blocks_adding_to_cart',
+// 		loadScripts
+// 	);
 
-	const dependencies = window.wcBlocksMiniCartFrontendDependencies;
+// 	const dependencies = window.wcBlocksMiniCartFrontendDependencies;
 
-	console.log( dependencies );
+// 	console.log( dependencies );
 
-	// Lazy load scripts.
-	for ( const dependencyHandle in dependencies ) {
-		const dependency = dependencies[ dependencyHandle ];
-		await lazyLoadScript( {
-			handle: dependencyHandle,
-			...dependency,
-		} );
-	}
-};
+// 	// Lazy load scripts.
+// 	for ( const dependencyHandle in dependencies ) {
+// 		const dependency = dependencies[ dependencyHandle ];
+// 		await lazyLoadScript( {
+// 			handle: dependencyHandle,
+// 			...dependency,
+// 		} );
+// 	}
+// };
 
 store< Store >( 'woocommerce/mini-cart-interactivity', {
 	state: {
@@ -118,6 +121,7 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 				: 'wc-block-components-drawer__screen-overlay--with-slide-in';
 		},
 	},
+
 	callbacks: {
 		initialize: () => {
 			const context = getContext< Context >();
@@ -140,60 +144,60 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 
 			if ( context.drawerOpen ) {
 				// TODO - if we leave this here is non optimal because it means we immediately load the script deps we used to lazy load.
-				renderParentBlock( {
-					// @ts-expect-error - The type of renderParentBlock's Block argument is incorrect.
-					Block: MiniCartContentsBlock,
-					blockName,
-					getProps: ( el: Element ) => {
-						return {
-							attributes: getValidBlockAttributes(
-								miniCartContentsAttributes,
-								/* eslint-disable @typescript-eslint/no-explicit-any */
-								( el instanceof HTMLElement
-									? el.dataset
-									: {} ) as any
-							),
-						};
-					},
-					selector: '.wp-block-woocommerce-mini-cart-contents',
-					blockMap: getRegisteredBlockComponents( blockName ),
-				} );
+				// renderParentBlock( {
+				// 	// @ts-expect-error - The type of renderParentBlock's Block argument is incorrect.
+				// 	Block: MiniCartContentsBlock,
+				// 	blockName,
+				// 	getProps: ( el: Element ) => {
+				// 		return {
+				// 			attributes: getValidBlockAttributes(
+				// 				miniCartContentsAttributes,
+				// 				/* eslint-disable @typescript-eslint/no-explicit-any */
+				// 				( el instanceof HTMLElement
+				// 					? el.dataset
+				// 					: {} ) as any
+				// 			),
+				// 		};
+				// 	},
+				// 	selector: '.wp-block-woocommerce-mini-cart-contents',
+				// 	blockMap: getRegisteredBlockComponents( blockName ),
+				// } );
 			}
 		},
 
-		loadScripts: async () => {
-			const context = getContext< Context >();
-			// Ensure we only call loadScripts once.
-			if ( context.scriptsLoaded ) {
-				return;
-			}
+		// loadScripts: async () => {
+		// 	const context = getContext< Context >();
+		// 	// Ensure we only call loadScripts once.
+		// 	if ( context.scriptsLoaded ) {
+		// 		return;
+		// 	}
 
-			context.scriptsLoaded = true;
+		// 	context.scriptsLoaded = true;
 
-			await loadScripts();
+		// 	await loadScripts();
 
-			// Remove adding to cart event handler.
-		},
+		// 	// Remove adding to cart event handler.
+		// },
 
-		loadContents: async () => {
-			const context = getContext< Context >();
-			if ( ! context.scriptsLoaded ) {
-				loadScripts();
-			}
+		// loadContents: async () => {
+		// 	const context = getContext< Context >();
+		// 	if ( ! context.scriptsLoaded ) {
+		// 		loadScripts();
+		// 	}
 
-			// document.body.removeEventListener(
-			// 	'wc-blocks_added_to_cart',
-			// 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-			// 	funcOnAddToCart
-			// );
-			// document.body.removeEventListener(
-			// 	'wc-blocks_removed_from_cart',
-			// 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-			// 	loadContentsWithRefresh
-			// );
-			removeJQueryAddedToCartEvent();
-			removeJQueryRemovedFromCartEvent();
-		},
+		// 	// document.body.removeEventListener(
+		// 	// 	'wc-blocks_added_to_cart',
+		// 	// 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+		// 	// 	funcOnAddToCart
+		// 	// );
+		// 	// document.body.removeEventListener(
+		// 	// 	'wc-blocks_removed_from_cart',
+		// 	// 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+		// 	// 	loadContentsWithRefresh
+		// 	// );
+		// 	removeJQueryAddedToCartEvent();
+		// 	removeJQueryRemovedFromCartEvent();
+		// },
 	},
 } );
 
@@ -206,7 +210,10 @@ window.addEventListener( 'load', () => {
 		return;
 	}
 
-	const dependencies = window.wcBlocksMiniCartFrontendDependencies;
+	const dependencies =
+		window.wcBlocksMiniCartInteractivityFrontendDependencies;
+
+	console.log( 'preloaded: ', dependencies );
 
 	// Preload scripts
 	for ( const dependencyHandle in dependencies ) {

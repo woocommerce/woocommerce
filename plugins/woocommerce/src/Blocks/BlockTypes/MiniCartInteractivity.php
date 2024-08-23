@@ -187,7 +187,7 @@ class MiniCartInteractivity extends AbstractBlock {
 	 * Prints the variable containing information about the scripts to lazy load.
 	 */
 	public function print_lazy_load_scripts() {
-		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-component-frontend.js' );
+		$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-interactivity-component-frontend.js' );
 
 		$num_dependencies = is_countable( $script_data['dependencies'] ) ? count( $script_data['dependencies'] ) : 0;
 		$wp_scripts       = wp_scripts();
@@ -214,7 +214,7 @@ class MiniCartInteractivity extends AbstractBlock {
 			}
 		}
 
-		$this->scripts_to_lazy_load['wc-block-mini-cart-component-frontend'] = array(
+		$this->scripts_to_lazy_load['wc-block-mini-cart-interactivity-component-frontend'] = array(
 			'src'          => $script_data['src'],
 			'version'      => $script_data['version'],
 			'translations' => $this->get_inner_blocks_translations(),
@@ -250,10 +250,10 @@ class MiniCartInteractivity extends AbstractBlock {
 		}
 
 		$data                          = rawurlencode( wp_json_encode( $this->scripts_to_lazy_load ) );
-		$mini_cart_dependencies_script = "var wcBlocksMiniCartFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
+		$mini_cart_dependencies_script = "var wcBlocksMiniCartInteractivityFrontendDependencies = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 
 		wp_add_inline_script(
-			'wc-mini-cart-block-frontend',
+			'wc-mini-cart-interactivity-block-frontend',
 			$mini_cart_dependencies_script,
 			'before'
 		);
@@ -442,7 +442,8 @@ class MiniCartInteractivity extends AbstractBlock {
 	 * Get the markup for the Mini-Cart block.
 	 *
 	 * @param array  $attributes Block attributes.
-	 * @param string $template_part_contents Template part contents.`
+	 * @param string $wrapper_classes Wrapper classes.
+	 * @param string $wrapper_styles Wrapper styles.
 	 *
 	 * @return string
 	 */
@@ -459,17 +460,20 @@ class MiniCartInteractivity extends AbstractBlock {
 		);
 		$wrapper_attributes     = get_block_wrapper_attributes(
 			array(
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-				'data-wc-context'     => wp_json_encode( $cart_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-				'class'               => $wrapper_classes,
+				'class' => $wrapper_classes,
 			)
 		);
+
+		$interactivity_namespace = wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+
 		ob_start();
 		?>
-		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - already escaped. ?> >
-			<?php echo $this->render_mini_cart_button( $attributes, $cart_item_count, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
-			<div style="<?php echo esc_attr( $wrapper_styles ); ?>">
-				<div data-wc-class--is-loading="context.drawerIsLoading" data-wc-class--wc-block-components-drawer__screen-overlay--with-slide-in="context.drawerOpen" data-wc-class--wc-block-components-drawer__screen-overlay--is-hidden="!context.drawerOpen" class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
+		<div style="<?php echo esc_attr( $wrapper_styles ); ?>" <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - already escaped. ?> >
+				<div data-wc-interactive='<?php echo esc_attr( $interactivity_namespace ); ?>' data-wc-context='<?php echo esc_attr( wp_json_encode( $cart_context ) ); ?>'>
+					<?php echo $this->render_mini_cart_button( $attributes, $cart_item_count, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. ?>
+				</div>
+				<?php // Keep the drawer separate so that we don't mutate DOM within the interactivity API powered mini cart icon. ?>
+				<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 					<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
 						<div class="wc-block-components-drawer__content">
 							<div class="wc-block-mini-cart__template-part">
@@ -478,7 +482,6 @@ class MiniCartInteractivity extends AbstractBlock {
 						</div>
 					</div>
 				</div>
-			</div>
 		</div> 
 		<?php
 		return ob_get_clean();

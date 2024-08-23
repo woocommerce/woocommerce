@@ -285,6 +285,8 @@ const entries = {
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 		'mini-cart-interactivity':
 			'./assets/js/blocks/mini-cart-interactivity/frontend.ts',
+		'mini-cart-interactivity-component':
+			'./assets/js/blocks/mini-cart-interactivity/component-frontend.tsx',
 	},
 };
 
