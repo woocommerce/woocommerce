@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 /**
  * Class WC_Structured_Data_Test.
@@ -19,17 +20,22 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		parent::setUp();
 	}
 
+	/**
+	 * Test is_valid_gtin function
+	 *
+	 * @return void
+	 */
 	public function test_is_valid_gtin(): void {
 
-		$valid_gtins = [
+		$valid_gtins = array(
 			'12345678',
 			'123456789012',
 			'1234567890123',
-			'12345678901234'
-		];
+			'12345678901234',
+		);
 
-		$invalid_gtins = [
-			"",
+		$invalid_gtins = array(
+			'',
 			'abcdefgh',
 			'-9999999',
 			'12-45-66',
@@ -39,7 +45,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			'1234567890',
 			'12 34 56 78',
 			'12 34 56',
-		];
+		);
 
 		foreach ( $valid_gtins as $valid_gtin ) {
 			$this->assertTrue( $this->structured_data->is_valid_gtin( $valid_gtin ) );
@@ -48,15 +54,19 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		foreach ( $invalid_gtins as $invalid_gtin ) {
 			$this->assertFalse( $this->structured_data->is_valid_gtin( $invalid_gtin ) );
 		}
-
 	}
 
+	/**
+	 * Test prepare_gtin function
+	 *
+	 * @return void
+	 */
 	public function test_prepare_gtin(): void {
-		$this->assertEquals( $this->structured_data->prepare_gtin( "123-456-78" ), "12345678" );
-		$this->assertEquals( $this->structured_data->prepare_gtin( "-123-456-78" ), "12345678" );
-		$this->assertEquals( $this->structured_data->prepare_gtin( "GTIN: 123-456-78" ), "12345678" );
-		$this->assertEquals( $this->structured_data->prepare_gtin( "123 456 78" ), "12345678" );
-		$this->assertEquals( $this->structured_data->prepare_gtin( null ), "" );
-		$this->assertEquals( $this->structured_data->prepare_gtin( "GTIN" ), "" );
+		$this->assertEquals( $this->structured_data->prepare_gtin( '123-456-78' ), '12345678' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( '-123-456-78' ), '12345678' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( 'GTIN: 123-456-78' ), '12345678' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( '123 456 78' ), '12345678' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( null ), '' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( 'GTIN' ), '' );
 	}
 }

@@ -590,7 +590,7 @@ class WC_Structured_Data {
 	public function is_valid_gtin( $gtin ) {
 		if ( $gtin && is_numeric( $gtin ) && $gtin > 0 ) {
 			$gtin_length = strlen( $gtin );
-			return $gtin_length === 8 || $gtin_length === 12 || $gtin_length === 13 || $gtin_length === 14;
+			return ( 8 === $gtin_length || 12 === $gtin_length || 13 === $gtin_length || 14 === $gtin_length;
 		}
 
 		return false;
@@ -604,9 +604,9 @@ class WC_Structured_Data {
 	 */
 	public function prepare_gtin( $gtin ) {
 		if ( ! $gtin ) {
-			return "";
+			return '';
 		}
 
-		return preg_replace("/[^0-9]/", "", $gtin );
+		return preg_replace( '/[^0-9]/', '', $gtin );
 	}
 }
