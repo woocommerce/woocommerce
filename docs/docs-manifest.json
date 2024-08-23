@@ -71,6 +71,14 @@
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
         {
+          "post_title": "Blocks reference",
+          "menu_title": "Blocks Reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
+          "hash": "b6cd78cba78be8846621f27b9d4a408c713e1915bdbb7fc27b6247b3ff8610f1",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
+          "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
+        },
+        {
           "post_title": "How to add a custom field to simple and variable products",
           "menu_title": "Add Custom Fields to Products",
           "tags": "how-to",
@@ -1796,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "aed8797ef51eef8ebc3d29337a5c1e2eb321e45ee45cd20b297246ee2ec72c44"
+  "hash": "bc033743c2d7d1b6e5eaabe527fe994d5ea3e79aefa4f9b594bd68d59632e0f7"
 }

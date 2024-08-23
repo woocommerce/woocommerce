@@ -1,3 +1,8 @@
+---
+post_title: Blocks reference
+menu_title: Blocks Reference
+---
+
 # Woo Blocks Reference
 
 This page lists the Woo blocks included in the package. (Incomplete as there are still blocks that are not using block.json definition).
