@@ -672,5 +672,22 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( productGalleryBlockOption ).toBeHidden();
 		} );
+
+		test( 'should be unregistered on the Page Editor', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			await admin.createNewPost( {
+				postType: 'page',
+				title: 'New Page',
+			} );
+			await editor.openGlobalBlockInserter();
+			const productGalleryBlockOption = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.title } );
+
+			await expect( productGalleryBlockOption ).toBeHidden();
+		} );
 	} );
 } );
