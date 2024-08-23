@@ -1132,7 +1132,11 @@ class WC_Checkout {
 			);
 
 			if ( is_wp_error( $customer_id ) ) {
-				throw new Exception( $customer_id->get_error_message() );
+				// Filter the notice shown when a customer tries to register with an existing email address.
+				if ( 'registration-error-email-exists' === $customer_id->get_error_code() ) {
+					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			wc_set_customer_auth_cookie( $customer_id );
