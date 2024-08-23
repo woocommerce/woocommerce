@@ -76,14 +76,14 @@ const removeJQueryAddingToCartEvent = translateJQueryEventToNative(
 	'adding_to_cart',
 	'wc-blocks_adding_to_cart'
 );
-const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
-	'added_to_cart',
-	'wc-blocks_added_to_cart'
-);
-const removeJQueryRemovedFromCartEvent = translateJQueryEventToNative(
-	'removed_from_cart',
-	'wc-blocks_removed_from_cart'
-);
+// const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
+// 	'added_to_cart',
+// 	'wc-blocks_added_to_cart'
+// );
+// const removeJQueryRemovedFromCartEvent = translateJQueryEventToNative(
+// 	'removed_from_cart',
+// 	'wc-blocks_removed_from_cart'
+// );
 
 const loadScripts = async () => {
 	const dependencies =
@@ -165,9 +165,12 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 		},
 
 		loadScripts: async () => {
-			console.log( 'loadScripts' );
+			const context = getContext< Context >();
 
-			await loadScripts();
+			if ( ! context.scriptsLoaded ) {
+				context.scriptsLoaded = true;
+				await loadScripts();
+			}
 
 			// Remove adding to cart event handler.
 			document.body.removeEventListener(
@@ -175,9 +178,8 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 				loadScripts
 			);
 
-			removeJQueryAddingToCartEvent();
-
 			// Remove adding to cart event handler.
+			removeJQueryAddingToCartEvent();
 		},
 	},
 } );
