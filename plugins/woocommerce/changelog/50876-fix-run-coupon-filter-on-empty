@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make Checkout block `coupons` filter consistent by always running.
