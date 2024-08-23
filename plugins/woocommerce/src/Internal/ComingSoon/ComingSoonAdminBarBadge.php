@@ -65,10 +65,10 @@ class ComingSoonAdminBarBadge {
 				#wpadminbar .quicklinks #wp-admin-bar-woocommerce-site-visibility-badge a.ab-item {
 					background-color: #F6F7F7;
 					color: black;
-					margin-top:6px;
+					margin-top:7px;
 					padding: 0 6px;
-					height: 20px;
-					line-height: 20px;
+					height: 18px;
+					line-height: 17px;
 					border-radius: 2px;
 				}
 
