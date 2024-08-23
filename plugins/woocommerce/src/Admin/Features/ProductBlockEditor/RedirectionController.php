@@ -96,7 +96,7 @@ class RedirectionController {
 	/**
 	 * Check if a product is supported by the new experience.
 	 *
-	 * @param array $product_templates The registered product teamplates.
+	 * @param array $product_templates The registered product templates.
 	 */
 	public function set_product_templates( array $product_templates ): void {
 		$this->product_templates = $product_templates;

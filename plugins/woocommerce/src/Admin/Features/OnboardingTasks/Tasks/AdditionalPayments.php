@@ -188,7 +188,7 @@ class AdditionalPayments extends Payments {
 	 */
 	private static function get_suggestion_gateways( $filter_by = 'category_additional' ) {
 		$country            = wc_get_base_location()['country'];
-		$plugin_suggestions = Init::get_suggestions();
+		$plugin_suggestions = Init::get_cached_or_default_suggestions();
 		$plugin_suggestions = array_filter(
 			$plugin_suggestions,
 			function( $plugin ) use ( $country, $filter_by ) {

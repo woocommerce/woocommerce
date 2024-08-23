@@ -110,7 +110,9 @@ test.describe(
 
 				// Verify image in store frontend
 				await page.goto( product.permalink );
-				await expect( page.getByTitle( `image-01` ) ).toBeVisible();
+				await expect(
+					page.locator( `img.wp-post-image[src*="image-01"]` )
+				).toBeVisible();
 			} );
 		} );
 
@@ -150,7 +152,9 @@ test.describe(
 
 				// Verify image in store frontend
 				await page.goto( productWithImage.permalink );
-				await expect( page.getByTitle( `image-02` ) ).toBeVisible();
+				await expect(
+					page.locator( `img.wp-post-image[src*="image-02"]` )
+				).toBeVisible();
 			} );
 		} );
 

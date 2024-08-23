@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Rename woocommerce_is_store_page to woocommerce_is_extension_store_page

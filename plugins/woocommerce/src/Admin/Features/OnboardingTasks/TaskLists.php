@@ -297,7 +297,6 @@ class TaskLists {
 				$task_list->add_task( $task );
 			}
 		}
-
 	}
 
 	/**
@@ -318,8 +317,8 @@ class TaskLists {
 	public static function get_lists_by_ids( $ids ) {
 		return array_filter(
 			self::$lists,
-			function( $list ) use ( $ids ) {
-				return in_array( $list->get_list_id(), $ids, true );
+			function ( $task_list ) use ( $ids ) {
+				return in_array( $task_list->get_list_id(), $ids, true );
 			}
 		);
 	}
@@ -404,25 +403,31 @@ class TaskLists {
 	/**
 	 * Return number of setup tasks remaining
 	 *
-	 * @return number
+	 * This is not updated immediately when a task is completed, but rather when task is marked as complete in the database to reduce performance impact.
+	 *
+	 * @return int|null
 	 */
 	public static function setup_tasks_remaining() {
 		$setup_list = self::get_list( 'setup' );
 
-		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->has_previously_completed() || $setup_list->is_complete() ) {
+		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->has_previously_completed() ) {
 			return;
 		}
 
-		$remaining_tasks = array_values(
+		$viewable_tasks  = $setup_list->get_viewable_tasks();
+		$completed_tasks = get_option( Task::COMPLETED_OPTION, array() );
+		if ( ! is_array( $completed_tasks ) ) {
+			$completed_tasks = array();
+		}
+
+		return count(
 			array_filter(
-				$setup_list->get_viewable_tasks(),
-				function( $task ) {
-					return ! $task->is_complete();
+				$viewable_tasks,
+				function ( $task ) use ( $completed_tasks ) {
+					return ! in_array( $task->get_id(), $completed_tasks, true );
 				}
 			)
 		);
-
-		return count( $remaining_tasks );
 	}
 
 	/**
@@ -443,7 +448,6 @@ class TaskLists {
 				break;
 			}
 		}
-
 	}
 
 	/**

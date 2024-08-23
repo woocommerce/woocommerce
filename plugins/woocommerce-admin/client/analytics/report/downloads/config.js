@@ -167,10 +167,10 @@ export const advancedFilters = applyFilters(
 					placeholder: __( 'Search order number', 'woocommerce' ),
 					remove: __( 'Remove order number filter', 'woocommerce' ),
 					rule: __(
-						'Select a order number filter match',
+						'Select an order number filter match',
 						'woocommerce'
 					),
-					/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
+					/* translators: A sentence describing an order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
 						'<title>Order #</title> <rule/> <filter/>',
 						'woocommerce'
@@ -210,7 +210,7 @@ export const advancedFilters = applyFilters(
 						'Select an IP address filter match',
 						'woocommerce'
 					),
-					/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
+					/* translators: A sentence describing an order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
 					title: __(
 						'<title>IP Address</title> <rule/> <filter/>',
 						'woocommerce'
