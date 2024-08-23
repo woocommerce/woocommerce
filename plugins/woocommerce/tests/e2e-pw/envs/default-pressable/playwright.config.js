@@ -7,7 +7,11 @@ config = {
 		{
 			name: 'default pressable',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: '**basic.spec.js',
+			testMatch: [
+				'**/basic.spec.js', // Match the specific file
+				'**/activate-and-setup/**/*.spec.js', // Match all .spec.js files in the activate-and-setup folder
+			],
+			grepInvert: /@local/,
 		},
 	],
 };
