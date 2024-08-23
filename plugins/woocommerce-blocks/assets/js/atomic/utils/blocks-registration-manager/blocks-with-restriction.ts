@@ -10,8 +10,10 @@ import { ProductGalleryBlockSettings } from '@woocommerce/blocks/product-gallery
 import { AddToCartFormBlockSettings } from '../../../atomic/blocks/product-elements/add-to-cart-form/settings';
 import productGalleryBlockMetadata from '../../../blocks/product-gallery/block.json';
 import addToCartFormBlockMetadata from '../../../atomic/blocks/product-elements/add-to-cart-form/block.json';
+import productImageGalleryBlockMetadata from '../../../atomic/blocks/product-elements/product-image-gallery/block.json';
 import { EditorViewContentType } from './editor-view-change-detector';
 import { ProductPriceBlockSettings } from '../../blocks/product-elements/price/settings';
+import { ProductImageGalleryBlockSettings } from '../../blocks/product-elements/product-image-gallery/settings';
 
 interface BlockWithRestriction {
 	blockMetadata?: Partial< BlockConfiguration > | string;
@@ -67,6 +69,13 @@ const createBlockWithRestriction = (
 		defaultBlockWithRestriction.availableInPostEditor =
 			context.availableInPostEditor;
 	}
+	if ( context.allowedTemplates !== undefined ) {
+		defaultBlockWithRestriction.allowedTemplates = context.allowedTemplates;
+	}
+	if ( context.allowedTemplateParts !== undefined ) {
+		defaultBlockWithRestriction.allowedTemplateParts =
+			context.allowedTemplateParts;
+	}
 	if ( context.isVariationBlock !== undefined ) {
 		defaultBlockWithRestriction.isVariationBlock = context.isVariationBlock;
 	}
@@ -104,6 +113,15 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 
 			return { blockMetadata, blockSettings };
 		},
+	} ),
+	'woocommerce/product-image-gallery': createBlockWithRestriction( {
+		blockMetadata: productImageGalleryBlockMetadata,
+		blockSettings: ProductImageGalleryBlockSettings,
+		allowedTemplates: {
+			'single-product': true,
+		},
+		availableInPostEditor: false,
+		availableInPageEditor: false,
 	} ),
 	'woocommerce/product-gallery': createBlockWithRestriction( {
 		blockMetadata: productGalleryBlockMetadata,
