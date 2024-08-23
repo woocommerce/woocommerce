@@ -122,7 +122,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		createNotice(
 			'success',
 			__(
-				"You're awesome! One less item on your to-do list ✅",
+				'You’re awesome! One less item on your to-do list ✅',
 				'woocommerce'
 			)
 		);

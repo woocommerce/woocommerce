@@ -34,7 +34,7 @@ const LaunchYourStoreHeader = ( {
 				</h1>
 				<p>
 					{ __(
-						"It's time to celebrate – you're ready to launch your store! Woo! Hit the button to preview your store and make it public.",
+						'It’s time to celebrate – you’re ready to launch your store! Woo! Hit the button to preview your store and make it public.',
 						'woocommerce'
 					) }
 				</p>

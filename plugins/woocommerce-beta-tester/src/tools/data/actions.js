@@ -229,7 +229,7 @@ export function* resetCustomizeYourStore() {
 		} );
 
 		yield apiFetch( {
-			path: '/wc/private/ai/patterns',
+			path: '/wc-admin/ai/patterns',
 			method: 'DELETE',
 		} );
 	} );
@@ -270,5 +270,40 @@ export function* updateComingSoonMode( params ) {
 			method: 'POST',
 			data: params,
 		} );
+	} );
+}
+
+export function* updateWccomRequestErrorsMode( params ) {
+	yield runCommand( 'Update wccom request errors mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/set-wccom-request-errors/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* fakeWooPayments( params ) {
+	yield runCommand( 'Toggle Fake WooPayments Completion', function* () {
+		const newStatus = params.enabled === 'yes' ? 'no' : 'yes';
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/fake-wcpay-completion/v1',
+			method: 'POST',
+			data: {
+				enabled: newStatus,
+			},
+		} );
+
+		yield updateCommandParams( 'fakeWooPayments', {
+			enabled: newStatus,
+		} );
+
+		yield updateMessage(
+			'Toggle Fake WooPayments Completion',
+			`Fake WooPayments completion ${
+				newStatus === 'yes' ? 'disabled' : 'enabled'
+			}`
+		);
 	} );
 }

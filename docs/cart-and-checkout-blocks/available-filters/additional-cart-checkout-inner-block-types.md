@@ -24,7 +24,7 @@ This filter is called once for each inner block area, so it is possible to be ve
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following key:
     -   _block_ `string` - The block name of the inner block area, e.g. `woocommerce/checkout-shipping-address-block`.
--   _validation_ `boolean` or `Error` - Checks if the returned value is an arry of strings. If an error occurs, it will be thrown.
+-   _validation_ `boolean` or `Error` - Checks if the returned value is an array of strings. If an error occurs, it will be thrown.
 
 ### Returns <!-- omit in toc -->
 

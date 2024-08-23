@@ -21,6 +21,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_order_product_lookup';
@@ -28,12 +30,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ReportsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'products';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @override ReportsDataStore::$column_types
 	 *
 	 * @var array
 	 */
@@ -79,12 +85,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'products';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
@@ -175,6 +185,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
+	 * @override ReportsDataStore::normalize_order_by()
+	 *
 	 * @param string $order_by Sorting criterion.
 	 * @return string
 	 */
@@ -256,122 +268,137 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
+	 * @override ReportsDataStore::get_data()
+	 *
 	 * @param array $query_args  Query parameters.
 	 * @return stdClass|WP_Error Data.
 	 */
 	public function get_data( $query_args ) {
+		$data = parent::get_data( $query_args );
+
+		/*
+		 * Do not cache extended info -- this is required to get the latest stock data.
+		 * `include_extended_info` checks only `extended_info` key,
+		 * so we don't need to bother about normalizing timestamps.
+		 */
+		$defaults   = $this->get_default_query_vars();
+		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->include_extended_info( $data->data, $query_args );
+
+		return $data;
+	}
+
+	/**
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
+	 *
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
+	 */
+	public function get_default_query_vars() {
+		$defaults                      = parent::get_default_query_vars();
+		$defaults['category_includes'] = array();
+		$defaults['product_includes']  = array();
+		$defaults['extended_info']     = false;
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
 
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page'          => get_option( 'posts_per_page' ),
-			'page'              => 1,
-			'order'             => 'DESC',
-			'orderby'           => 'date',
-			'before'            => TimeInterval::default_before(),
-			'after'             => TimeInterval::default_after(),
-			'fields'            => '*',
-			'category_includes' => array(),
-			'product_includes'  => array(),
-			'extended_info'     => false,
+		$this->initialize_queries();
+
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$selections        = $this->selected_columns( $query_args );
+		$included_products = $this->get_included_products_array( $query_args );
+		$params            = $this->get_limit_params( $query_args );
+		$this->add_sql_query_params( $query_args );
 
-		if ( false === $data ) {
-			$this->initialize_queries();
+		if ( count( $included_products ) > 0 ) {
+			$filtered_products = array_diff( $included_products, array( '-1' ) );
+			$total_results     = count( $filtered_products );
+			$total_pages       = (int) ceil( $total_results / $params['per_page'] );
 
-			$data = (object) array(
-				'data'    => array(),
-				'total'   => 0,
-				'pages'   => 0,
-				'page_no' => 0,
-			);
-
-			$selections        = $this->selected_columns( $query_args );
-			$included_products = $this->get_included_products_array( $query_args );
-			$params            = $this->get_limit_params( $query_args );
-			$this->add_sql_query_params( $query_args );
-
-			if ( count( $included_products ) > 0 ) {
-				$filtered_products = array_diff( $included_products, array( '-1' ) );
-				$total_results     = count( $filtered_products );
-				$total_pages       = (int) ceil( $total_results / $params['per_page'] );
-
-				if ( 'date' === $query_args['orderby'] ) {
-					$selections .= ", {$table_name}.date_created";
-				}
-
-				$fields          = $this->get_fields( $query_args );
-				$join_selections = $this->format_join_selections( $fields, array( 'product_id' ) );
-				$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $selections );
-				$this->add_sql_clause( 'select', $join_selections );
-				$this->add_sql_clause( 'from', '(' );
-				$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
-				$this->add_sql_clause( 'from', ") AS {$table_name}" );
-				$this->add_sql_clause(
-					'right_join',
-					"RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.product_id = {$table_name}.product_id"
-				);
-				$this->add_sql_clause( 'where', 'AND default_results.product_id != -1' );
-
-				$products_query = $this->get_query_statement();
-			} else {
-				$count_query      = "SELECT COUNT(*) FROM (
-						{$this->subquery->get_query_statement()}
-					) AS tt";
-				$db_records_count = (int) $wpdb->get_var(
-					$count_query // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				);
-
-				$total_results = $db_records_count;
-				$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
-
-				if ( ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) ) {
-					return $data;
-				}
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $selections );
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-				$products_query = $this->subquery->get_query_statement();
+			if ( 'date' === $query_args['orderby'] ) {
+				$selections .= ", {$table_name}.date_created";
 			}
 
-			$product_data = $wpdb->get_results(
-				$products_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				ARRAY_A
+			$fields          = $this->get_fields( $query_args );
+			$join_selections = $this->format_join_selections( $fields, array( 'product_id' ) );
+			$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
+
+			$this->subquery->clear_sql_clause( 'select' );
+			$this->subquery->add_sql_clause( 'select', $selections );
+			$this->add_sql_clause( 'select', $join_selections );
+			$this->add_sql_clause( 'from', '(' );
+			$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
+			$this->add_sql_clause( 'from', ") AS {$table_name}" );
+			$this->add_sql_clause(
+				'right_join',
+				"RIGHT JOIN ( {$ids_table} ) AS default_results
+				ON default_results.product_id = {$table_name}.product_id"
+			);
+			$this->add_sql_clause( 'where', 'AND default_results.product_id != -1' );
+
+			$products_query = $this->get_query_statement();
+		} else {
+			$count_query      = "SELECT COUNT(*) FROM (
+					{$this->subquery->get_query_statement()}
+				) AS tt";
+			$db_records_count = (int) $wpdb->get_var(
+				$count_query // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			);
 
-			if ( null === $product_data ) {
+			$total_results = $db_records_count;
+			$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
+
+			if ( ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) ) {
 				return $data;
 			}
 
-			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
-			$data         = (object) array(
-				'data'    => $product_data,
-				'total'   => $total_results,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
+			$this->subquery->clear_sql_clause( 'select' );
+			$this->subquery->add_sql_clause( 'select', $selections );
+			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+			$products_query = $this->subquery->get_query_statement();
 		}
 
-		$this->include_extended_info( $data->data, $query_args );
+		$product_data = $wpdb->get_results(
+			$products_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			ARRAY_A
+		);
+
+		if ( null === $product_data ) {
+			return $data;
+		}
+
+		$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
+		$data         = (object) array(
+			'data'    => $product_data,
+			'total'   => $total_results,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
 
 		return $data;
 	}
