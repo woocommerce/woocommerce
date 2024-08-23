@@ -14,6 +14,7 @@ import productMetaBlockMetadata from '../../../atomic/blocks/product-elements/pr
 import productImageGalleryBlockMetadata from '../../../atomic/blocks/product-elements/product-image-gallery/block.json';
 import productRatingBlockMetadata from '../../../atomic/blocks/product-elements/rating/block.json';
 import productDetailsBlockMetadata from '../../../atomic/blocks/product-elements/product-details/block.json';
+import productReviewsBlockMetadata from '../../../atomic/blocks/product-elements/product-reviews/block.json';
 import relatedProductsBlockMetadata from '../../../atomic/blocks/product-elements/related-products/block.json';
 import { EditorViewContentType } from './editor-view-change-detector';
 import { ProductPriceBlockSettings } from '../../blocks/product-elements/price/settings';
@@ -22,6 +23,7 @@ import { ProductMetaBlockSettings } from '../../blocks/product-elements/product-
 import { ProductRatingBlockSettings } from '../../blocks/product-elements/rating/settings';
 import { RelatedProductsBlockSettings } from '../../blocks/product-elements/related-products/settings';
 import { ProductDetailsBlockSettings } from '../../blocks/product-elements/product-details/settings';
+import { ProductReviewsBlockSettings } from '../../blocks/product-elements/product-reviews/settings';
 
 interface BlockWithRestriction {
 	blockMetadata?: Partial< BlockConfiguration > | string;
@@ -213,6 +215,15 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 
 			return { blockMetadata, blockSettings };
 		},
+	} ),
+	'woocommerce/product-reviews': createBlockWithRestriction( {
+		blockMetadata: productReviewsBlockMetadata,
+		blockSettings: ProductReviewsBlockSettings,
+		allowedTemplates: {
+			'single-product': true,
+		},
+		availableInPageEditor: false,
+		availableInPostEditor: false,
 	} ),
 	'woocommerce/related-products': createBlockWithRestriction( {
 		blockMetadata: relatedProductsBlockMetadata,
