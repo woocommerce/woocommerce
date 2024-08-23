@@ -137,4 +137,63 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.getBlockByName( blockData.slug )
 		).toBeVisible();
 	} );
+
+	test.describe( 'block registration', () => {
+		test( 'should be registered on the Single Product template', async ( {
+			page,
+			editor,
+			requestUtils,
+			admin,
+		} ) => {
+			const template = await requestUtils.createTemplate( 'wp_template', {
+				slug: 'single-product',
+				title: 'Custom Single Product',
+				content: 'placeholder',
+			} );
+
+			await admin.visitSiteEditor( {
+				postId: template.id,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
+			await editor.openGlobalBlockInserter();
+			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
+			const addToCartWithOptions = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.name } );
+
+			await expect( addToCartWithOptions ).toBeVisible();
+		} );
+
+		test( 'should be hidden in the block inserter on the Post Editor', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			await admin.createNewPost();
+			await editor.openGlobalBlockInserter();
+			const addToCartWithOptions = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.slug } );
+
+			await expect( addToCartWithOptions ).toBeHidden();
+		} );
+
+		test( 'should be hidden in the block inserter on the Page Editor', async ( {
+			admin,
+			page,
+			editor,
+		} ) => {
+			await admin.createNewPost( {
+				postType: 'page',
+				title: 'New Page',
+			} );
+			await editor.openGlobalBlockInserter();
+			const addToCartWithOptions = page
+				.getByRole( 'listbox', { name: 'WooCommerce' } )
+				.getByRole( 'option', { name: blockData.slug } );
+
+			await expect( addToCartWithOptions ).toBeHidden();
+		} );
+	} );
 } );
