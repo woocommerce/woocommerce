@@ -17,7 +17,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchro
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
-use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 
 defined( 'ABSPATH' ) || exit;
@@ -1283,8 +1283,7 @@ class WC_Install {
 				return;
 			}
 
-			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
-			if ( in_array( $legacy_api_plugin, $active_valid_plugins, true ) ) {
+			if ( in_array( $legacy_api_plugin, wp_get_active_and_valid_plugins(), true ) ) {
 				return;
 			}
 
