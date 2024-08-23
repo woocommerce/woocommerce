@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove title attribute from image since it makes the image get announced twice using screen readers

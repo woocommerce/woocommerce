@@ -1622,7 +1622,6 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		apply_filters(
 			'woocommerce_gallery_image_html_attachment_image_params',
 			array(
-				'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
 				'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
 				'data-src'                => esc_url( $full_src[0] ),
 				'data-large_image'        => esc_url( $full_src[0] ),
