@@ -34,7 +34,7 @@ declare global {
  * This function checks whether an element matching that selector exists.
  * Useful to know if a script has already been appended to the page.
  */
-const isScriptTagInDOM = ( scriptId: string, src = '' ): boolean => {
+export const isScriptTagInDOM = ( scriptId: string, src = '' ): boolean => {
 	// If the store is using a plugin to concatenate scripts, we might have some
 	// cases where we don't detect whether a script has already been loaded.
 	// Because of that, we add an extra protection to the wc-blocks-registry-js
