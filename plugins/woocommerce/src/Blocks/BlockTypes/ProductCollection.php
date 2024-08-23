@@ -605,7 +605,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$orderby             = $request->get_param( 'orderBy' );
-		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$on_sale             = is_null( $request->get_param( 'woocommerceOnSale' ) ) ? null : $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
 		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
@@ -715,7 +715,7 @@ class ProductCollection extends AbstractBlock {
 			's'              => $query['search'],
 		);
 
-		$is_on_sale          = $query['woocommerceOnSale'] ?? false;
+		$is_on_sale          = $query['woocommerceOnSale'] ?? null;
 		$product_attributes  = $query['woocommerceAttributes'] ?? array();
 		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? array() );
 		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? array();
@@ -884,9 +884,15 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @return array
 	 */
-	private function get_on_sale_products_query( $is_on_sale ) {
-		if ( ! $is_on_sale ) {
+	private function get_on_sale_products_query( $is_on_sale ) {		
+		if ( is_null( $is_on_sale ) ) {
 			return array();
+		}
+
+		if ( ! $is_on_sale ) {
+			return array(
+				'post__not_in' => wc_get_product_ids_on_sale(),
+			);
 		}
 
 		return array(
