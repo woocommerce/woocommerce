@@ -657,7 +657,7 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 				} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
 					// Shop managers can only edit customer info.
 					$userdata                    = get_userdata( $args[0] );
-					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
 					}
@@ -677,7 +677,7 @@ add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
  */
 function wc_get_customer_download_permissions( $customer_id ) {
 	$data_store = WC_Data_Store::load( 'customer-download' );
-	return apply_filters( 'woocommerce_permission_list', $data_store->get_downloads_for_customer( $customer_id ), $customer_id );
+	return apply_filters( 'woocommerce_permission_list', $data_store->get_downloads_for_customer( $customer_id ), $customer_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 }
 
 /**
@@ -736,6 +736,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			}
 
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
 				$download_file['name'],
@@ -773,6 +774,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 		}
 	}
 
+	// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	return apply_filters( 'woocommerce_customer_available_downloads', $downloads, $customer_id );
 }
 
@@ -898,7 +900,7 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  * @param mixed  $_meta_value Value of the meta that was changed.
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
-	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
+	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 	$update_time = in_array( $meta_key, $keys_to_track, true ) ? true : false;
 	$update_time = 'billing_' === substr( $meta_key, 0, 8 ) ? true : $update_time;
@@ -929,7 +931,7 @@ function wc_set_user_last_update_time( $user_id ) {
  * @return array
  */
 function wc_get_customer_saved_methods_list( $customer_id ) {
-	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id );
+	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 }
 
 /**
