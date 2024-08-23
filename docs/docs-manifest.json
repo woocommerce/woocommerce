@@ -1119,7 +1119,7 @@
       ]
     },
     {
-      "content": "\nEnsuring the quality of your WooCommerce projects is essential. This section will delve into quality exoectations, best practices, coding standards, and other methodologies to ensure your projects stand out in terms of reliability, efficiency, user experience, and more. \n",
+      "content": "\nEnsuring the quality of your WooCommerce projects is essential. This section will delve into quality expectations, best practices, coding standards, and other methodologies to ensure your projects stand out in terms of reliability, efficiency, user experience, and more. \n",
       "category_slug": "quality-and-best-practices",
       "category_title": "Quality And Best Practices",
       "posts": [
@@ -1244,7 +1244,72 @@
           "id": "b09a572b8a452b6cd795e0985daa85f06e5889fb"
         }
       ],
-      "categories": []
+      "categories": [
+        {
+          "content": "\nReviews are an integral part of the online shopping experience, and people installing software pay attention to them. Prospective users of your extensions will likely consider average ratings when making software choices.\n\nMany of today's most popular online review platforms — from Yelp business reviews, to Amazon product reviews — have a range of opinion that can be polarized, with many extremely positive and/or negative reviews, and fewer moderate opinions. This creates a \"J-shaped\" distribution of reviews that isn't as accurate or as helpful as could be.\n\nWooCommerce.com and WordPress.org both feature reviews heavily, and competing extensions having a higher rating likely have the edge in user choice. \n\n## Primary considerations around reviews\n\nRequesting more reviews for a extension with major issues will not generate good reviews, and analyzing existing reviews will help surface areas to address before soliciting reviews.\n\nIt is extremely rare for users of WordPress plugins to leave reviews organically (.2% of users for WordPress.org leave reviews), which means that there's an untapped market of 99.8% of users of the average plugin.\n\nThese plugins are competing with other plugins on the same search terms in the WordPress.org plugin directory, and ratings are a large factor in the ranking algorithm. This is not usually a factor to the same extent on the WooCommerce Marketplace. For instance, WooCommerce's PayPal extension directly competes on all possible keywords with other PayPal extensions on the WordPress.org repository, while it does not compete with other PayPal payments extensions on the Marketplace.\n",
+          "category_slug": "review-guidelines",
+          "category_title": "Review Guidelines",
+          "posts": [
+            {
+              "post_title": "When to request WooCommerce extension reviews",
+              "menu_title": "When to review reviews",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/when-to-request-reviews.md",
+              "hash": "b104db2cd0a8ff6ebac8ae93e5908f518f83c927e867f94b3745290e32af980b",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/when-to-request-reviews.md",
+              "id": "d40eb30ff49c89545a5918f5b8c08b82e6f8f45a"
+            },
+            {
+              "post_title": "Utilizing your support team to respond to feedback",
+              "menu_title": "Utilizing your support team",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/utilizing-your-support-team.md",
+              "hash": "3cadfdd506c2c279c16d411b4037f6ea6cd2fa2dcfad6ffe895e89e61b0e54c0",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/utilizing-your-support-team.md",
+              "id": "f7029c8549d5ed86dd8f9cc27d7a62da539b9ba7"
+            },
+            {
+              "post_title": "Utilizing WooCommerce extension feature requests",
+              "menu_title": "Utilizing feature requests",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/utilizing-feature-requests.md",
+              "hash": "28af9f05e0c843a932ba1320d16097c029e71bdeae0dbe02ff95a96eb9d8c1c0",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/utilizing-feature-requests.md",
+              "id": "4efca02b0f14b13a1471f5beec4ef15365f98b17"
+            },
+            {
+              "post_title": "How to respond to negative WooCommerce extension reviews",
+              "menu_title": "Responding to negative reviews",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/responding-to-negative-reviews.md",
+              "hash": "306df15c394c6867657e7c68282f16dab5d08e821bbb7e27514abca764262b24",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/responding-to-negative-reviews.md",
+              "id": "7cb825a3830e392aeae853b441a91237f48c3ae5"
+            },
+            {
+              "post_title": "Notifying users about bug fixes and features requests",
+              "menu_title": "Notifying users about bug fixes and feature requests",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
+              "hash": "4e1508499ff11586680af208f3b90afba4c482d75aca25bc4ed18bfd1590f7e7",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
+              "id": "9ccc4bf579cc624002478fe8706241f4640d92b8"
+            },
+            {
+              "post_title": "Miscellaneous guidelines and advice",
+              "menu_title": "Miscellaneous guidelines",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/misc-guidelines.md",
+              "hash": "c5515db05195cebbe1ed0595dbf2a09623c3b85e1b5b6e1c3628a79b957f8884",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/misc-guidelines.md",
+              "id": "003ece0250c6a0c248019a095f75f3cfedbc290e"
+            },
+            {
+              "post_title": "How to request WooCommerce extension reviews",
+              "menu_title": "Requesting reviews",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
+              "hash": "5a77783c32c1bb0fefc6888f7a3217fe6e5c7242692593a17828b2f1ffec618b",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
+              "id": "3d0c8bf7339a71198737d19eec7e6d71697b3727"
+            }
+          ],
+          "categories": []
+        }
+      ]
     },
     {
       "content": "\nUnderstand Woo's reporting capabilities. Learn to generate, understand, and optimize reports to make informed decisions about your WooCommerce projects.\n",
@@ -1731,5 +1796,5 @@
       "categories": []
     }
   ],
-  "hash": "b6fab4eae1266824ee3e876c8fa5fd0342f59b4a0e5978f1460afc67d82e6d94"
+  "hash": "aed8797ef51eef8ebc3d29337a5c1e2eb321e45ee45cd20b297246ee2ec72c44"
 }
