@@ -3,7 +3,7 @@
 	"MD003": { "style": "atx" },
 	"MD007": { "indent": 4 },
 	"MD013": { "line_length": 9999 },
-	"MD024": { "allow_different_nesting": true },
+	"MD024": { "siblings_only": true },
 	"MD033": { "allowed_elements": ["video"] },
 	"MD035": false,
 	"MD041": false,
