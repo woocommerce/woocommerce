@@ -51,8 +51,8 @@ class SingleProductTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
-			$valid_slugs = array( self::SLUG );
-			$single_product_slug = 'product' === $post->post_type && $post->post_name  ? 'single-product-' . $post->post_name : '';
+			$valid_slugs         = array( self::SLUG );
+			$single_product_slug = 'product' === $post->post_type && $post->post_name ? 'single-product-' . $post->post_name : '';
 			if ( $single_product_slug ) {
 				$valid_slugs[] = 'single-product-' . $post->post_name;
 			}

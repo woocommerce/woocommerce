@@ -37,7 +37,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			$default_single_product_template_content,
+			$default_product_catalog_template_content,
 			$result[0]->content
 		);
 	}
