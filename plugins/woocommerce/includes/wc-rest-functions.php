@@ -422,5 +422,15 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		return true;
 	}
 
+	/**
+	 * Filters whether a namespace should be loaded.
+	 *
+	 * @param bool   $should_load True if the namespace should be loaded, false otherwise.
+	 * @param string $ns          The namespace to check.
+	 * @param string $rest_route  The REST route being checked.
+	 * @param array  $known_namespaces Known namespaces that we know are safe to not load if the request is not for them.
+	 *
+	 * @since 9.2.3
+	 */
 	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
 }
