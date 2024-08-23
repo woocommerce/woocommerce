@@ -1623,7 +1623,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	 *
 	 * @param array $image_attributes Attributes for the image markup.
 	*/
-	$image_params      = apply_filters(
+	$image_params = apply_filters(
 		'woocommerce_gallery_image_html_attachment_image_params',
 		array(
 			'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
