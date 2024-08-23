@@ -52,7 +52,8 @@ class SingleProductTemplate extends AbstractTemplate {
 			global $post;
 
 			$valid_slugs = array( self::SLUG );
-			if ( 'product' === $post->post_type && $post->post_name ) {
+			$single_product_slug = 'product' === $post->post_type && $post->post_name  ? 'single-product-' . $post->post_name : '';
+			if ( $single_product_slug ) {
 				$valid_slugs[] = 'single-product-' . $post->post_name;
 			}
 			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
@@ -67,7 +68,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			// Check if there is a template matching the slug `single-product-{post_name}`.
 			if ( count( $valid_slugs ) > 1 && count( $templates ) > 1 ) {
 				foreach ( $templates as $t ) {
-					if ( $valid_slugs[1] === $t->slug ) {
+					if ( $single_product_slug === $t->slug ) {
 						$template = $t;
 						break;
 					}
