@@ -46,7 +46,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$id = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$this->assertInstanceOf( 'WP_Error', $id );
 
-		// Empty username.
+		// Empty email.
 		$id = wc_create_new_customer( '', 'testuser', 'testpassword' );
 		$this->assertInstanceOf( 'WP_Error', $id );
 
@@ -57,20 +57,6 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		// Existing username.
 		$id = wc_create_new_customer( 'test2@example.com', 'testuser', 'testpassword' );
 		$this->assertInstanceOf( 'WP_Error', $id );
-
-		// Username with auto-generation.
-		update_option( 'woocommerce_registration_generate_username', 'yes' );
-		$id       = wc_create_new_customer( 'fred@example.com', '', 'testpassword' );
-		$userdata = get_userdata( $id );
-		$this->assertEquals( 'fred', $userdata->user_login );
-		$id       = wc_create_new_customer( 'fred@mail.com', '', 'testpassword' );
-		$userdata = get_userdata( $id );
-		$this->assertNotEquals( 'fred', $userdata->user_login );
-		$this->assertStringContainsString( 'fred', $userdata->user_login );
-		$id       = wc_create_new_customer( 'fred@test.com', '', 'testpassword' );
-		$userdata = get_userdata( $id );
-		$this->assertNotEquals( 'fred', $userdata->user_login );
-		$this->assertStringContainsString( 'fred', $userdata->user_login );
 
 		// Test extra arguments to generate display_name.
 		$id       = wc_create_new_customer(
@@ -85,13 +71,20 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$userdata = get_userdata( $id );
 		$this->assertEquals( 'John Doe', $userdata->display_name );
 
-		// No password.
-		update_option( 'woocommerce_registration_generate_password', 'no' );
-		$id = wc_create_new_customer( 'joe@example.com', 'joecustomer', '' );
-		$this->assertInstanceOf( 'WP_Error', $id );
+		// Username with auto-generation.
+		$id       = wc_create_new_customer( 'fred@example.com', '', 'testpassword' );
+		$userdata = get_userdata( $id );
+		$this->assertEquals( 'fred', $userdata->user_login );
+		$id       = wc_create_new_customer( 'fred@mail.com', '', 'testpassword' );
+		$userdata = get_userdata( $id );
+		$this->assertNotEquals( 'fred', $userdata->user_login );
+		$this->assertStringContainsString( 'fred', $userdata->user_login );
+		$id       = wc_create_new_customer( 'fred@test.com', '', 'testpassword' );
+		$userdata = get_userdata( $id );
+		$this->assertNotEquals( 'fred', $userdata->user_login );
+		$this->assertStringContainsString( 'fred', $userdata->user_login );
 
 		// Auto-generated password.
-		update_option( 'woocommerce_registration_generate_password', 'yes' );
 		$id = wc_create_new_customer( 'joe@example.com', 'joecustomer', '' );
 		$this->assertTrue( is_numeric( $id ) && $id > 0 );
 	}
