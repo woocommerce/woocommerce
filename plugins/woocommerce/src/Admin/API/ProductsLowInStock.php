@@ -263,7 +263,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 
 	/**
 	 * Return a query string for low in stock products.
-	 * The query string incldues the following replacement strings:
+	 * The query string includes the following replacement strings:
 	 * - :selects
 	 * - :postmeta_join
 	 * - :postmeta_wheres
