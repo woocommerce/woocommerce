@@ -195,6 +195,22 @@ class FixtureData {
 	}
 
 	/**
+	 * Create a product category and return the result.
+	 *
+	 * @param array $props Category props.
+	 * @return array
+	 */
+	public function get_product_category( $props ) {
+		$category_name = $props['name'] ?? 'Test Category';
+
+		return wp_insert_term(
+			$category_name,
+			'product_cat',
+			$props
+		);
+	}
+
+	/**
 	 * Create a coupon and return the result.
 	 *
 	 * @param array $props Product props.

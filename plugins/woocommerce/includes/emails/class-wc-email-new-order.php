@@ -109,10 +109,11 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
-				$order->update_meta_data( '_new_order_email_sent', 'true' );
-				$order->save();
+				$email_sent_successfully = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+				if ( $email_sent_successfully ) {
+					$order->update_meta_data( '_new_order_email_sent', 'true' );
+					$order->save();
+				}
 			}
 
 			$this->restore_locale();

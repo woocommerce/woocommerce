@@ -28,7 +28,6 @@ describe( 'paymentMethodDataReducer', () => {
 		shouldSavePaymentMethod: false,
 		errorMessage: '',
 		activePaymentMethod: '',
-		activeSavedToken: '',
 		incompatiblePaymentMethods: {},
 	} );
 
@@ -55,7 +54,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 	} );
@@ -79,7 +77,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 		const nextState = reducer( stateWithRegisteredMethod, {
@@ -104,7 +101,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 	} );
@@ -134,7 +130,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 	} );
@@ -162,7 +157,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 		const nextState = reducer( stateWithRegisteredMethod, {
@@ -187,7 +181,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 	} );
@@ -217,7 +210,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 		const nextState = reducer( stateWithRegisteredMethod, {
@@ -250,7 +242,6 @@ describe( 'paymentMethodDataReducer', () => {
 			shouldSavePaymentMethod: false,
 			errorMessage: '',
 			activePaymentMethod: '',
-			activeSavedToken: '',
 			incompatiblePaymentMethods: {},
 		} );
 	} );

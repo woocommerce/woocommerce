@@ -3,16 +3,21 @@
  */
 import { __ } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
-import { EmptyContent } from '@woocommerce/components';
+import { createElement } from '@wordpress/element';
 
 /**
- * Component to render when there is an error in a report component due to data
+ * Internal dependencies
+ */
+import EmptyContent from '../../empty-content';
+
+/**
+ * Component to render when there is an error in an analytics component due to data
  * not being loaded or being invalid.
  *
  * @param {Object} props             React props.
  * @param {string} [props.className] Additional class name to style the component.
  */
-function ReportError( { className } ) {
+function AnalyticsError( { className } ) {
 	const title = __(
 		'There was an error getting your stats. Please try again.',
 		'woocommerce'
@@ -32,11 +37,11 @@ function ReportError( { className } ) {
 	);
 }
 
-ReportError.propTypes = {
+AnalyticsError.propTypes = {
 	/**
 	 * Additional class name to style the component.
 	 */
 	className: PropTypes.string,
 };
 
-export default ReportError;
+export default AnalyticsError;
