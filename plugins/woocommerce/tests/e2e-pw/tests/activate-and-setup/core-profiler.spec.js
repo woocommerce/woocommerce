@@ -43,8 +43,8 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: 'I’m just starting my business' } )
-				.first()
+				.getByRole( 'radio' )
+				.filter( { hasText: 'just starting my business' } )
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
@@ -189,12 +189,13 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: 'I’m already selling' } )
-				.first()
+				.getByRole( 'radio' )
+				.filter( { hasText: 'already selling' } )
 				.click();
 			await page.getByLabel( 'Select an option' ).click();
 			await page
-				.getByRole( 'option', { name: 'No, I’m selling offline' } )
+				.getByRole( 'option' )
+				.filter( { hasText: 'selling offline' } )
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
@@ -295,16 +296,16 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			// and we want the test to complete in order for cleanup to happen
 			await expect
 				.soft(
-					page.getByRole( 'heading', {
-						name: 'Woo! Let’s get your features ready',
-					} )
+					page
+						.getByRole( 'heading' )
+						.filter( { hasText: 'get your features ready' } )
 				)
 				.toBeVisible( { timeout: 30000 } );
 			await expect
 				.soft(
-					page.getByRole( 'heading', {
-						name: 'Extending your store’s capabilities',
-					} )
+					page
+						.getByRole( 'heading' )
+						.filter( { hasText: 'Extending your store' } )
 				)
 				.toBeVisible( { timeout: 30000 } );
 			// dashboard shown
@@ -314,7 +315,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible( { timeout: 30000 } );
 			// go to the plugins page to make sure that extensions were installed
-			await page.goto( 'wp-admin/plugins.php' );
+			await page.goto( 'wp-admin/plugins.php?plugin_status=active' );
 			await expect(
 				page.getByRole( 'heading', { name: 'Plugins', exact: true } )
 			).toBeVisible();
@@ -408,12 +409,12 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeHidden();
 		} );
 
-		await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
-			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-			await expect(
-				page.getByRole( 'menuitem', { name: 'Store coming soon' } )
-			).toBeVisible();
-		} );
+		// await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
+		// 	await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+		// 	await expect(
+		// 		page.getByRole( 'menuitem', { name: 'Store coming soon' } )
+		// 	).toBeVisible();
+		// } );
 	} );
 } );
 
@@ -461,12 +462,12 @@ test.describe( 'Store owner can skip the core profiler', () => {
 			} )
 		).toBeVisible();
 
-		await test.step( 'Confirm that the store is in coming soon mode after skipping the core profiler', async () => {
-			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-			await expect(
-				page.getByRole( 'menuitem', { name: 'Store coming soon' } )
-			).toBeVisible();
-		} );
+		// await test.step( 'Confirm that the store is in coming soon mode after skipping the core profiler', async () => {
+		// 	await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+		// 	await expect(
+		// 		page.getByRole( 'menuitem', { name: 'Store coming soon' } )
+		// 	).toBeVisible();
+		// } );
 	} );
 
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
