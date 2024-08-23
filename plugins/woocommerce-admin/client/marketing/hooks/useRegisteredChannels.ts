@@ -24,7 +24,7 @@ type UseRegisteredChannels = {
 };
 
 /**
- * A object that maps the product listings status in
+ * An object that maps the product listings status in
  * plugins/woocommerce/src/Admin/Marketing/MarketingChannelInterface.php backend
  * to SyncStatusType frontend.
  */
