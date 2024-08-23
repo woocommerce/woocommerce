@@ -43,6 +43,33 @@ const scaleHelp: Record< string, string > = {
 	),
 };
 
+const sizeUnits: { value: string; label: string }[] = [
+	{
+		value: 'px',
+		label: 'px',
+	},
+	{
+		value: 'em',
+		label: 'em',
+	},
+	{
+		value: 'rem',
+		label: 'rem',
+	},
+	{
+		value: '%',
+		label: '%',
+	},
+	{
+		value: 'vw',
+		label: 'vw',
+	},
+	{
+		value: 'vh',
+		label: 'vh',
+	},
+];
+
 export const ImageSizeSettings = ( {
 	scale,
 	width,
@@ -60,12 +87,7 @@ export const ImageSizeSettings = ( {
 					setAttributes( { height: value } );
 				} }
 				value={ height }
-				units={ [
-					{
-						value: 'px',
-						label: 'px',
-					},
-				] }
+				units={ sizeUnits }
 			/>
 			<UnitControl
 				label={ __( 'Width', 'woocommerce' ) }
@@ -73,12 +95,7 @@ export const ImageSizeSettings = ( {
 					setAttributes( { width: value } );
 				} }
 				value={ width }
-				units={ [
-					{
-						value: 'px',
-						label: 'px',
-					},
-				] }
+				units={ sizeUnits }
 			/>
 			{ height && (
 				<ToolsPanelItem
