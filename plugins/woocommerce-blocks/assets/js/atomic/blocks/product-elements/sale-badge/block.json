@@ -1,0 +1,20 @@
+{
+	"name": "woocommerce/product-sale-badge",
+	"version": "1.0.0",
+	"title": "On-Sale Badge",
+	"description": "Displays an on-sale badge if the product is on-sale.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"productId": { "type": "number", "default": 0 },
+		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
+		"isDescendentOfSingleProductTemplate": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"usesContext": [ "query", "queryId", "postId" ],
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
