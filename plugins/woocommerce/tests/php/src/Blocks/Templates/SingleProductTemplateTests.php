@@ -12,6 +12,37 @@ use \WP_UnitTestCase;
 class SingleProductTemplateTests extends WP_UnitTestCase {
 
 	/**
+	 * Test that the Product Catalog template content isn't updated mistakenly.
+	 * In other words, make sure the Single Product template logic doesn't leak
+	 * into other templates.
+	 *
+	 */
+	public function test_dont_update_single_product_content_for_other_templates() {
+		$single_product_template                  = new SingleProductTemplate();
+		$default_product_catalog_template_content = '
+			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
+			<!-- wp:woocommerce/product-image-gallery /-->
+			<!-- wp:template-part {"slug":"footer","theme":"twentytwentythree","tagName":"footer"} /-->';
+
+		$template          = new \WP_Block_Template();
+		$template->slug    = 'archive-product';
+		$template->title   = 'Product Catalog';
+		$template->content = $default_product_catalog_template_content;
+		$template->type    = 'wp_template';
+
+		$result = $single_product_template->update_single_product_content(
+			array(
+				$template,
+			),
+		);
+
+		$this->assertEquals(
+			$default_single_product_template_content,
+			$result[0]->content
+		);
+	}
+
+	/**
 	 * Test that the Single Product template content isn't updated if it
 	 * contains the Legacy Template block.
 	 *
