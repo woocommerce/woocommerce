@@ -33,7 +33,7 @@ interface Context {
 	queryId: number;
 }
 
-interface Props {
+export interface Props {
 	attributes: Attributes;
 	setAttributes: (
 		attributes: Partial< BlockAttributes > & Record< string, unknown >

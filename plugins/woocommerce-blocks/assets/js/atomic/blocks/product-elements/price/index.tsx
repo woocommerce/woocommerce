@@ -1,34 +1,12 @@
 /**
  * External dependencies
  */
-import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import sharedConfig from '../shared/config';
-import edit from './edit';
-import attributes from './attributes';
-import { supports } from './supports';
-import {
-	BLOCK_TITLE as title,
-	BLOCK_ICON as icon,
-	BLOCK_DESCRIPTION as description,
-} from './constants';
+import { ProductPriceBlockSettings } from './settings';
 
-const blockConfig = {
-	...sharedConfig,
-	title,
-	description,
-	usesContext: [ 'query', 'queryId', 'postId' ],
-	icon: { src: icon },
-	attributes,
-	supports,
-	edit,
-};
-
-registerBlockSingleProductTemplate( {
-	blockName: 'woocommerce/product-price',
-	blockSettings: blockConfig,
-	isAvailableOnPostEditor: true,
-} );
+// @ts-expect-error: `metadata` currently does not have a type definition in WordPress core.
+registerBlockType( 'woocommerce/product-price', ProductPriceBlockSettings );

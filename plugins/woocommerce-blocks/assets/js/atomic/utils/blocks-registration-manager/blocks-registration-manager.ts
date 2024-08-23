@@ -172,7 +172,10 @@ export class BlockRegistrationManager
 			blockSettings,
 		} );
 
-		this.blockRegistrationStrategy.register( blockMetadata, blockSettings );
+		this.blockRegistrationStrategy.register(
+			blockMetadata || blockWithRestrictionName,
+			blockSettings
+		);
 	}
 
 	registerBlocksBeforeEnteringRestrictedArea( {
@@ -197,7 +200,9 @@ export class BlockRegistrationManager
 
 			const blockData =
 				BLOCKS_WITH_RESTRICTION[ blockWithRestrictionName ];
-			let blockMetadata = { ...blockData.blockMetadata };
+			let blockMetadata = blockData.blockMetadata
+				? { ...blockData.blockMetadata }
+				: blockWithRestrictionName;
 			let blockSettings = { ...blockData.blockSettings };
 
 			if ( blockData.onBeforeRegisterBlock ) {

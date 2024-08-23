@@ -11,9 +11,10 @@ import { AddToCartFormBlockSettings } from '../../../atomic/blocks/product-eleme
 import productGalleryBlockMetadata from '../../../blocks/product-gallery/block.json';
 import addToCartFormBlockMetadata from '../../../atomic/blocks/product-elements/add-to-cart-form/block.json';
 import { EditorViewContentType } from './editor-view-change-detector';
+import { ProductPriceBlockSettings } from '../../blocks/product-elements/price/settings';
 
 interface BlockWithRestriction {
-	blockMetadata: Partial< BlockConfiguration >;
+	blockMetadata?: Partial< BlockConfiguration > | string;
 	blockSettings: Partial< BlockConfiguration >;
 	allowedTemplates:
 		| {
@@ -115,5 +116,25 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 		},
 		availableInPostEditor: false,
 		availableInPageEditor: false,
+	} ),
+	'woocommerce/product-price': createBlockWithRestriction( {
+		blockSettings: ProductPriceBlockSettings,
+		onBeforeRegisterBlock( blockConfig ) {
+			const {
+				blockMetadata,
+				blockSettings,
+				currentContentId,
+				currentContentType,
+			} = blockConfig;
+
+			if (
+				currentContentType === EditorViewContentType.WP_TEMPLATE &&
+				currentContentId?.includes( 'single-product' )
+			) {
+				blockSettings.ancestor = undefined;
+			}
+
+			return { blockMetadata, blockSettings };
+		},
 	} ),
 };
