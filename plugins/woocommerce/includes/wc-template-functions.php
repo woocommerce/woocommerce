@@ -1615,6 +1615,14 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+
+	/**
+	 * Filters the attributes for the image markup.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param array $image_attributes Attributes for the image markup.
+	*/
 	$image_params      = apply_filters(
 		'woocommerce_gallery_image_html_attachment_image_params',
 		array(
