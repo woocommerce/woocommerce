@@ -18,6 +18,7 @@ import { changeUrl, getUrlParameter } from '@woocommerce/utils';
 import {
 	CurrencyResponse,
 	isBoolean,
+	isNumber,
 	isString,
 	objectHasProp,
 } from '@woocommerce/types';
@@ -71,13 +72,6 @@ function formatPrice( value: unknown, minorUnit: number ) {
 	return Number( value ) * 10 ** minorUnit;
 }
 
-// TODO There *has* to be a better way of getting this... Currently depending on `body` to get the `term-XYZ` CSS class...
-const getCategoryId = () => {
-	const categoryIdString =
-		document.body.className.match( /term-(\d+)/ )?.[ 1 ];
-	return categoryIdString ? parseInt( categoryIdString ) : categoryIdString;
-};
-
 interface PriceFilterBlockProps {
 	/**
 	 * The attributes for this block.
@@ -119,9 +113,14 @@ const PriceFilterBlock = ( {
 	const minPriceParam = getUrlParameter( 'min_price' );
 	const maxPriceParam = getUrlParameter( 'max_price' );
 	const [ queryState ] = useQueryStateByContext();
+	const queryCategory = getSettingWithCoercion(
+		'categoryId',
+		undefined,
+		isNumber
+	);
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
-		queryCategory: getCategoryId(),
+		...( queryCategory && { queryCategory } ),
 		queryState,
 		isEditor,
 	} );
