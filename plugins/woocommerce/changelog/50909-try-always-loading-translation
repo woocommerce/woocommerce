@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+Comment: Always load up translation for scripts, this doesn't need a note because it's preventative measure.
+
