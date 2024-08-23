@@ -49,8 +49,6 @@ const TotalsDiscount = ( {
 	} = values;
 	const discountValue = parseInt( totalDiscount, 10 );
 
-	// We need to run the filter even if we don't have coupons.
-	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const filteredCartCoupons = applyCheckoutFilter( {
 		arg: filteredCartCouponsFilterArg,
 		filterName: 'coupons',
