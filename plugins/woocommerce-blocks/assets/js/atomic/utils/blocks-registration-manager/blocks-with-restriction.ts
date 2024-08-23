@@ -13,11 +13,13 @@ import addToCartFormBlockMetadata from '../../../atomic/blocks/product-elements/
 import productMetaBlockMetadata from '../../../atomic/blocks/product-elements/product-meta/block.json';
 import productImageGalleryBlockMetadata from '../../../atomic/blocks/product-elements/product-image-gallery/block.json';
 import productRatingBlockMetadata from '../../../atomic/blocks/product-elements/rating/block.json';
+import relatedProductsBlockMetadata from '../../../atomic/blocks/product-elements/related-products/block.json';
 import { EditorViewContentType } from './editor-view-change-detector';
 import { ProductPriceBlockSettings } from '../../blocks/product-elements/price/settings';
 import { ProductImageGalleryBlockSettings } from '../../blocks/product-elements/product-image-gallery/settings';
 import { ProductMetaBlockSettings } from '../../blocks/product-elements/product-meta/settings';
 import { ProductRatingBlockSettings } from '../../blocks/product-elements/rating/settings';
+import { RelatedProductsBlockSettings } from '../../blocks/product-elements/related-products/settings';
 
 interface BlockWithRestriction {
 	blockMetadata?: Partial< BlockConfiguration > | string;
@@ -183,6 +185,32 @@ export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
 	'woocommerce/product-rating': createBlockWithRestriction( {
 		blockMetadata: productRatingBlockMetadata,
 		blockSettings: ProductRatingBlockSettings,
+		onBeforeRegisterBlock( blockConfig ) {
+			const {
+				blockMetadata,
+				blockSettings,
+				currentContentId,
+				currentContentType,
+			} = blockConfig;
+
+			if (
+				currentContentType === EditorViewContentType.WP_TEMPLATE &&
+				currentContentId?.includes( 'single-product' )
+			) {
+				blockSettings.ancestor = undefined;
+			}
+
+			return { blockMetadata, blockSettings };
+		},
+	} ),
+	'woocommerce/related-products': createBlockWithRestriction( {
+		blockMetadata: relatedProductsBlockMetadata,
+		blockSettings: RelatedProductsBlockSettings,
+		allowedTemplates: {
+			'single-product': true,
+		},
+		availableInPageEditor: false,
+		availableInPostEditor: false,
 		onBeforeRegisterBlock( blockConfig ) {
 			const {
 				blockMetadata,
