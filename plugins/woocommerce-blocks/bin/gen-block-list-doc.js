@@ -17,14 +17,21 @@ const fs = require( 'fs' );
  *
  * @type {string}
  */
-const ROOT_DIR = path.resolve( __dirname, '../' );
+const ROOT_DIR = path.resolve( __dirname, '../../../' );
+
+/**
+ * Path to root Blocks project directory.
+ *
+ * @type {string}
+ */
+const BLOCK_LIBRARY_ROOT_DIR = path.resolve( __dirname, '../' );
 
 /**
  * Path to blocks directory.
  *
  * @type {string}
  */
-const BLOCK_LIBRARY_DIR = path.resolve( ROOT_DIR, 'assets/js' );
+const BLOCK_LIBRARY_DIR = path.resolve( BLOCK_LIBRARY_ROOT_DIR, 'assets/js' );
 
 /**
  * Path to docs file.
@@ -33,7 +40,7 @@ const BLOCK_LIBRARY_DIR = path.resolve( ROOT_DIR, 'assets/js' );
  */
 const BLOCK_LIBRARY_DOCS_FILE = path.resolve(
 	ROOT_DIR,
-	'docs/block-references/block-references.md'
+	'docs/building-a-woo-store/block-references.md'
 );
 
 /**
