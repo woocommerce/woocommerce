@@ -6,7 +6,7 @@ post_title: Review Guidelines
 
 Reviews are an integral part of the online shopping experience, and people installing software pay attention to them. Prospective users of your extensions will likely consider average ratings when making software choices.
 
-Many of today's most popular online review platforms — from Yelp business reviews, to Amazon product reviews — have a range of opinion that can be polarized, with many extremely positive and/or negative reviews, and fewer moderate opinions. This creates a "J-shaped" distribution of reviews that isn't as accurate or as helpful as could be.
+Many of today's most popular online review platforms - from Yelp business reviews, to Amazon product reviews - have a range of opinion that can be polarized, with many extremely positive and/or negative reviews, and fewer moderate opinions. This creates a "J-shaped" distribution of reviews that isn't as accurate or as helpful as could be.
 
 WooCommerce.com and WordPress.org both feature reviews heavily, and competing extensions having a higher rating likely have the edge in user choice. 
 
