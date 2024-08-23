@@ -7,6 +7,7 @@
 		"./packages/interactivity-components/**/*",
 		"./assets/js/blocks/**/block.json",
 		"./assets/js/atomic/blocks/**/block.json",
+		"./assets/js/blocks/mini-cart-interactivity/mini-cart-contents/inner-blocks/**/block.json",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
 		"./storybook/**/*",
 		"./tests/js/setup-after-env.ts"

@@ -23,6 +23,8 @@
 		"./assets/js/blocks/cart/inner-blocks/**/index.tsx",
 		"./assets/js/blocks/cart/inner-blocks/register-components.ts",
 		"./assets/js/base/components/**/*.{tsx,ts}",
+		"./assets/js/blocks/mini-cart-interactivity/mini-cart-contents/inner-blocks/**/index.tsx",
+		"./assets/js/blocks/mini-cart-interactivity/mini-cart-contents/inner-blocks/register-components.ts",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/index.tsx",
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/register-components.ts",
 		"./assets/js/blocks/cart-checkout-shared/sidebar-notices/index.tsx",

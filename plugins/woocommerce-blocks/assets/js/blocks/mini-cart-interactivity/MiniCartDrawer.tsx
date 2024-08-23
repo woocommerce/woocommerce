@@ -18,12 +18,12 @@ import type { ReactRootWithContainer } from '@woocommerce/base-utils';
  * Internal dependencies
  */
 import type { BlockAttributes } from './types';
-import { MiniCartContentsBlock } from './mini-cart-contents/block';
+import { MiniCartContentsBlock } from '../mini-cart/mini-cart-contents/block';
 import './style.scss';
 import {
 	blockName,
 	attributes as miniCartContentsAttributes,
-} from './mini-cart-contents/attributes';
+} from '../mini-cart/mini-cart-contents/attributes';
 
 type Props = BlockAttributes;
 
@@ -109,7 +109,6 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 				return;
 			}
 			if ( isOpen ) {
-				console.log( 'mini iapi', MiniCartContentsBlock );
 				const renderedBlock = renderParentBlock( {
 					Block: MiniCartContentsBlock,
 					blockName,
