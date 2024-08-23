@@ -169,13 +169,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.2.2 2024-08-22 =
+= 9.2.3 2024-08-XX =
 
 **WooCommerce**
 
 * Fix - Ensure translation is fully loaded for certain parts of Checkout block. [#50892](https://github.com/woocommerce/woocommerce/pull/50892)
-* Fix - Revert PR#48731 to address possible issues with plugins using WC's bundled select2 package. [#50854](https://github.com/woocommerce/woocommerce/pull/50854)
-* Fix - Partially revert PR#48709 as it could cause issues for some users of the REST API system_status endpoint. [#50881](https://github.com/woocommerce/woocommerce/pull/50881)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
