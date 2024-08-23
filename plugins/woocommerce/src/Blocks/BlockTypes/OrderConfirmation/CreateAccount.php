@@ -2,8 +2,6 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * CreateAccount class.
  */
@@ -33,6 +31,59 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	}
 
 	/**
+	 * Process posted account form.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return \WP_Error|int
+	 */
+	protected function process_form_post( $order ) {
+		if ( ! isset( $_POST['create-account'], $_POST['email'], $_POST['password'] ) ) {
+			return 0;
+		}
+
+		$user_email = sanitize_email( wp_unslash( $_POST['email'] ) );
+		$password   = wp_unslash( $_POST['password'] );
+
+		// Does order already have user?
+		if ( $order->get_customer_id() ) {
+			return new \WP_Error( 'order_already_has_user', __( 'This order is already linked to a user account.', 'woocommerce' ) );
+		}
+
+		// Check given details match the current viewed order.
+		if ( $order->get_billing_email() !== $user_email ) {
+			return new \WP_Error( 'email_mismatch', __( 'The email address provided does not match the email address on this order.', 'woocommerce' ) );
+		}
+
+		if ( empty( $password ) || strlen( $password ) < 8 ) {
+			return new \WP_Error( 'password_too_short', __( 'Password must be at least 8 characters.', 'woocommerce' ) );
+		}
+
+		$customer_id = wc_create_new_customer(
+			$user_email,
+			'',
+			$password,
+			[
+				'first_name' => $order->get_billing_first_name(),
+				'last_name'  => $order->get_billing_last_name(),
+				'source'     => 'delayed-account-creation',
+			]
+		);
+
+		if ( is_wp_error( $customer_id ) ) {
+			return $customer_id;
+		}
+
+		// Associate customer with the order.
+		$order->set_customer_id( $customer_id );
+		$order->save();
+
+		// Set the customer auth cookie.
+		wc_set_customer_auth_cookie( $customer_id );
+
+		return $customer_id;
+	}
+
+	/**
 	 * This renders the content of the block within the wrapper.
 	 *
 	 * @param \WC_Order    $order Order object.
@@ -46,7 +97,26 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 			return '';
 		}
 
-		$processor = new \WP_HTML_Tag_Processor( $content );
+		// Check registration is possible for this order/customer, and if not, return early.
+		if ( email_exists( $order->get_billing_email() ) ) {
+			return '';
+		}
+
+		$result = $this->process_form_post( $order );
+
+		if ( is_wp_error( $result ) ) {
+			$notice = wc_print_notice( $result->get_error_message(), 'error', [], true );
+		} elseif ( $result ) {
+			return $this->render_confirmation();
+		}
+
+		$processor = new \WP_HTML_Tag_Processor(
+			$content .
+			'<div class="woocommerce-order-confirmation-create-account-form-wrapper">' .
+				$notice .
+				'<div class="woocommerce-order-confirmation-create-account-form"></div>' .
+			'</div>'
+		);
 
 		if ( ! $processor->next_tag( array( 'class_name' => 'wp-block-woocommerce-order-confirmation-create-account' ) ) ) {
 			return $content;
@@ -55,6 +125,33 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		$processor->set_attribute( 'class', '' );
 		$processor->add_class( 'woocommerce-order-confirmation-create-account-content' );
 
-		return $processor->get_updated_html() . '<div class="woocommerce-order-confirmation-create-account-form"></div>';
+		if ( ! $processor->next_tag( array( 'class_name' => 'woocommerce-order-confirmation-create-account-form' ) ) ) {
+			return $content;
+		}
+
+		$processor->set_attribute( 'data-customer-email', $order->get_billing_email() );
+
+		return $processor->get_updated_html();
+	}
+
+	/**
+	 * Render the block when an account has been registered.
+	 *
+	 * @return string
+	 */
+	protected function render_confirmation() {
+		$content  = '<div class="woocommerce-order-confirmation-create-account-success">';
+		$content .= '<h3>' . __( 'Your account has been successfully created', 'woocommerce' ) . '</h3>';
+		$content .= '<p>' . sprintf(
+			/* translators: 1: link to my account page, 2: link to shipping and billing addresses, 3: link to account details, 4: closing tag */
+			__( 'You can now %1$sview your recent orders%4$s, manage your %2$sshipping and billing addresses%4$s, and edit your %3$spassword and account details%4$s.', 'woocommerce' ),
+			'<a href="' . esc_url( wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
+			'<a href="' . esc_url( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
+			'<a href="' . esc_url( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) . '">',
+			'</a>'
+		) . '</p>';
+		$content .= '</div>';
+
+		return $content;
 	}
 }
