@@ -13,6 +13,16 @@ const blockData: BlockData = {
 	},
 };
 
+const relatedProductsControlsBlockData: BlockData = {
+	name: 'Related Products Controls',
+	slug: 'woocommerce/related-products',
+	mainClass: '.wc-block-related-products',
+	selectors: {
+		frontend: {},
+		editor: {},
+	},
+};
+
 test.describe( `${ blockData.name } Block`, () => {
 	test( "can't be added in the Post Editor", async ( { admin, editor } ) => {
 		await admin.createNewPost();
@@ -61,6 +71,10 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await expect(
 			await editor.getBlockByName( blockData.slug )
+		).toBeVisible();
+
+		await expect(
+			await editor.getBlockByName( relatedProductsControlsBlockData.slug )
 		).toBeVisible();
 	} );
 

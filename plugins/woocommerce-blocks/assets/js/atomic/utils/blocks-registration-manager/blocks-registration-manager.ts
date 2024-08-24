@@ -147,8 +147,14 @@ export class BlockRegistrationManager
 		].isVariationBlock
 			? new BlockVariationStrategy()
 			: new BlockTypeStrategy();
+		const blockVariationName =
+			BLOCKS_WITH_RESTRICTION[ blockWithRestrictionName ]
+				.blockVariationName;
 
-		this.blockRegistrationStrategy.unregister( blockWithRestrictionName );
+		this.blockRegistrationStrategy.unregister(
+			blockWithRestrictionName,
+			blockVariationName
+		);
 	}
 
 	private registerBlock( {

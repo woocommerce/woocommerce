@@ -3,6 +3,11 @@
  */
 import { BlockConfiguration } from '@wordpress/blocks';
 import { ProductGalleryBlockSettings } from '@woocommerce/blocks/product-gallery/settings';
+import { QUERY_LOOP_ID } from '@woocommerce/blocks/product-query/constants';
+import {
+	RELATED_PRODUCTS_VARIATION_NAME,
+	RelatedProductsControlsBlockVariationSettings,
+} from '@woocommerce/blocks/product-query/variations';
 
 /**
  * Internal dependencies
@@ -43,6 +48,7 @@ interface BlockWithRestriction {
 	availableInPostEditor: boolean;
 	availableInPageEditor: boolean;
 	isVariationBlock: boolean;
+	blockVariationName?: string;
 	onBeforeRegisterBlock?: ( context: {
 		blockMetadata: Partial< BlockConfiguration >;
 		blockSettings: Partial< BlockConfiguration >;
@@ -98,6 +104,17 @@ const createBlockWithRestriction = (
 };
 
 export const BLOCKS_WITH_RESTRICTION: BlocksWithRestriction = {
+	[ QUERY_LOOP_ID ]: createBlockWithRestriction( {
+		blockSettings: RelatedProductsControlsBlockVariationSettings,
+		allowedTemplates: {
+			'single-product': true,
+		},
+		allowedTemplateParts: undefined,
+		availableInPageEditor: false,
+		availableInPostEditor: false,
+		isVariationBlock: true,
+		blockVariationName: RELATED_PRODUCTS_VARIATION_NAME,
+	} ),
 	'woocommerce/add-to-cart-form': createBlockWithRestriction( {
 		blockMetadata: addToCartFormBlockMetadata,
 		blockSettings: AddToCartFormBlockSettings,
