@@ -122,7 +122,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeVisible();
 
 			// go to the plugins page to make sure that extensions weren't installed
-			await page.goto( 'wp-admin/plugins.php' );
+			await page.goto( 'wp-admin/plugins.php?plugin_status=active' );
 			await expect(
 				page.getByRole( 'heading', { name: 'Plugins', exact: true } )
 			).toBeVisible();
