@@ -4,6 +4,8 @@
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
+import { AnalyticsSummary } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -11,7 +13,6 @@ import { __ } from '@wordpress/i18n';
 import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
-import ReportSummary from '../../components/report-summary';
 import TaxesReportTable from './table';
 import ReportFilters from '../../components/report-filters';
 
@@ -49,7 +50,7 @@ class TaxesReport extends Component {
 					advancedFilters={ advancedFilters }
 					report="taxes"
 				/>
-				<ReportSummary
+				<AnalyticsSummary
 					charts={ charts }
 					endpoint="taxes"
 					isRequesting={ isRequesting }
@@ -57,6 +58,7 @@ class TaxesReport extends Component {
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
 					advancedFilters={ advancedFilters }
+					recordEvent={ recordEvent }
 				/>
 				<ReportChart
 					charts={ charts }

@@ -4,7 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { AnalyticsError } from '@woocommerce/components';
+import { AnalyticsError, AnalyticsSummary } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import { AnalyticsError } from '@woocommerce/components';
 import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
-import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from './table';
 import ReportFilters from '../../components/report-filters';
 
@@ -55,7 +55,7 @@ const VariationsReport = ( props ) => {
 				advancedFilters={ advancedFilters }
 				report="variations"
 			/>
-			<ReportSummary
+			<AnalyticsSummary
 				mode={ mode }
 				charts={ charts }
 				endpoint="variations"
@@ -64,6 +64,7 @@ const VariationsReport = ( props ) => {
 				selectedChart={ getSelectedChart( query.chart, charts ) }
 				filters={ filters }
 				advancedFilters={ advancedFilters }
+				recordEvent={ recordEvent }
 			/>
 			<ReportChart
 				charts={ charts }

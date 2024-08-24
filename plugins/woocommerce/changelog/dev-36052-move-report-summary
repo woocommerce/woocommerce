@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move `ReportSummary` to `@woocommerce/components` as `AnalyticsSummary`
