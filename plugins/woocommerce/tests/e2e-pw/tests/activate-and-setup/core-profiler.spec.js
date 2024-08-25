@@ -189,13 +189,12 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio' )
-				.filter( { hasText: 'already selling' } )
+				.getByRole( 'radio', { name: 'I’m already selling' } )
+				.first()
 				.click();
 			await page.getByLabel( 'Select an option' ).click();
 			await page
-				.getByRole( 'option' )
-				.filter( { hasText: 'selling offline' } )
+				.getByRole( 'option', { name: 'No, I’m selling offline' } )
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
@@ -296,16 +295,16 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			// and we want the test to complete in order for cleanup to happen
 			await expect
 				.soft(
-					page
-						.getByRole( 'heading' )
-						.filter( { hasText: 'get your features ready' } )
+					page.getByRole( 'heading', {
+						name: 'Woo! Let’s get your features ready',
+					} )
 				)
 				.toBeVisible( { timeout: 30000 } );
 			await expect
 				.soft(
-					page
-						.getByRole( 'heading' )
-						.filter( { hasText: 'Extending your store' } )
+					page.getByRole( 'heading', {
+						name: 'Extending your store’s capabilities',
+					} )
 				)
 				.toBeVisible( { timeout: 30000 } );
 			// dashboard shown
