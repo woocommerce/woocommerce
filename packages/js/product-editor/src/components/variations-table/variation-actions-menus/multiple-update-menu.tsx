@@ -35,7 +35,7 @@ export function MultipleUpdateMenu( {
 					icon={ isOpen ? chevronUp : chevronDown }
 					variant="secondary"
 					onClick={ onToggle }
-					className="variations-actions-menu__toogle"
+					className="variations-actions-menu__toggle"
 				>
 					<span>{ __( 'Quick update', 'woocommerce' ) }</span>
 				</Button>

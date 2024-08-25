@@ -170,7 +170,7 @@ class Edit {
 		 *
 		 * @since 7.4.0
 		 *
-		 * @oaram WC_Order $order The order being edited.
+		 * @param WC_Order $order The order being edited.
 		 */
 		do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
 

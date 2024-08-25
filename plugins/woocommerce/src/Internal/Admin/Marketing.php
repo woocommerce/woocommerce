@@ -158,7 +158,7 @@ class Marketing {
 	}
 
 	/**
-	 * Order marketing menu items alphabeticaly.
+	 * Order marketing menu items alphabetically.
 	 * Overview should be first, and Coupons should be second, followed by other marketing menu items.
 	 *
 	 * @return  void
@@ -178,7 +178,7 @@ class Marketing {
 
 		if ( false === $overview_key ) {
 			/*
-			 * If Overview is not found we may be on a site witha different language.
+			 * If Overview is not found, we may be on a site with a different language.
 			 * We can use a fallback and try to find the overview page by its path.
 			 */
 			$overview_key = array_search( 'admin.php?page=wc-admin&path=/marketing', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ), true );
@@ -194,7 +194,7 @@ class Marketing {
 
 		if ( false === $coupons_key ) {
 			/*
-			 * If Coupons is not found we may be on a site witha different language.
+			 * If Coupons is not found, we may be on a site with a different language.
 			 * We can use a fallback and try to find the coupons page by its path.
 			 */
 			$coupons_key = array_search( 'edit.php?post_type=shop_coupon', array_column( $marketing_submenu, self::SUBMENU_LOCATION_KEY ), true );
