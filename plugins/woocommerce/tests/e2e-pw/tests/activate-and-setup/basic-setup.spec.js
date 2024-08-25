@@ -42,7 +42,7 @@ test.describe(
 			await page
 				.locator( '#woocommerce_permalink_structure' )
 				.fill( '/product/' );
-			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+			await page.locator( '#submit' ).click();
 			// Verify that settings have been saved
 			// await expect(
 			// 	page.locator( '#setting-error-settings_updated' )
