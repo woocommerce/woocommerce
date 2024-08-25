@@ -43,8 +43,8 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: 'I’m just starting my business' } )
-				.first()
+				.getByRole( 'radio' )
+				.filter( { hasText: 'just starting my business' } )
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
