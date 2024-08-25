@@ -44,9 +44,9 @@ test.describe(
 				.fill( '/product/' );
 			await page.locator( '#submit' ).click();
 			// Verify that settings have been saved
-			// await expect(
-			// 	page.locator( '#setting-error-settings_updated' )
-			// ).toContainText( 'Permalink structure updated.' );
+			await expect(
+				page.locator( '#setting-error-settings_updated' )
+			).toContainText( 'Permalink structure updated.' );
 			await expect( page.locator( '#permalink_structure' ) ).toHaveValue(
 				'/%postname%/'
 			);
