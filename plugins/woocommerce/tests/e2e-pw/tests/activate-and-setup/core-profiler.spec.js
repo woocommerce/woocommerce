@@ -409,12 +409,14 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			).toBeHidden();
 		} );
 
-		// await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
-		// 	await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		// 	await expect(
-		// 		page.getByRole( 'menuitem', { name: 'Store coming soon' } )
-		// 	).toBeVisible();
-		// } );
+		await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await expect(
+				page
+					.getByRole( 'menuitem' )
+					.filter( { hasText: 'coming soon' } )
+			).toBeVisible();
+		} );
 	} );
 } );
 
@@ -462,12 +464,14 @@ test.describe( 'Store owner can skip the core profiler', () => {
 			} )
 		).toBeVisible();
 
-		// await test.step( 'Confirm that the store is in coming soon mode after skipping the core profiler', async () => {
-		// 	await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		// 	await expect(
-		// 		page.getByRole( 'menuitem', { name: 'Store coming soon' } )
-		// 	).toBeVisible();
-		// } );
+		await test.step( 'Confirm that the store is in coming soon mode after skipping the core profiler', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await expect(
+				page
+					.getByRole( 'menuitem' )
+					.filter( { hasText: 'coming soon' } )
+			).toBeVisible();
+		} );
 	} );
 
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
