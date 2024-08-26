@@ -169,7 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.2.3 2024-08-XX =
+= 9.2.3 2024-08-26 = Fix - Ensure translation is fully loaded for certain parts of Checkout block.
 
 **WooCommerce**
 
