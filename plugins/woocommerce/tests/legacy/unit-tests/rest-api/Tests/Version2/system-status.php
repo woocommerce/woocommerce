@@ -154,9 +154,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_system_status_info_active_plugins() {
-		$this->skip_on_php_8_1();
-
 		wp_set_current_user( self::$administrator_user );
+		delete_transient( 'wc_system_status_active_plugins' );
 
 		$actual_plugins = array( 'hello.php' );
 		update_option( 'active_plugins', $actual_plugins );
@@ -165,9 +164,20 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$data    = $response->get_data();
 		$plugins = (array) $data['active_plugins'];
-
 		$this->assertEquals( 1, count( $plugins ) );
-		$this->assertEquals( 'Hello Dolly', $plugins[0]['name'] );
+
+		$plugin = reset( $plugins );
+		$this->assertArrayHasKey( 'plugin', $plugin );
+		$this->assertEquals( 'hello.php', $plugin['plugin'] );
+		$this->assertArrayHasKey( 'name', $plugin );
+		$this->assertEquals( 'Hello Dolly', $plugin['name'] );
+		$this->assertArrayHasKey( 'version', $plugin );
+		$this->assertArrayHasKey( 'version_latest', $plugin );
+		$this->assertArrayHasKey( 'url', $plugin );
+		$this->assertArrayHasKey( 'author_name', $plugin );
+		$this->assertArrayHasKey( 'author_url', $plugin );
+		$this->assertArrayHasKey( 'network_activated', $plugin );
+		$this->assertEquals( false, $plugin['network_activated'] );
 	}
 
 	/**
