@@ -153,12 +153,7 @@ class ShippingLabelBannerDisplayRules {
 	 * @return bool
 	 */
 	private function order_has_shippable_products() {
-		$post = get_post();
-		if ( ! $post ) {
-			return false;
-		}
-
-		$order = wc_get_order( get_post()->ID );
+		$order = wc_get_order();
 
 		if ( ! $order ) {
 			return false;
