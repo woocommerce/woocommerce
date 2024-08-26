@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Replace `Automattic\WooCommerce\Admin\API\Reports\*\Query` classes with a single `GenericQuery` class.
