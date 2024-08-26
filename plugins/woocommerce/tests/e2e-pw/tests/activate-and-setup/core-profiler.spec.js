@@ -474,41 +474,45 @@ test.describe( 'Store owner can skip the core profiler', () => {
 		} );
 	} );
 
-	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
-		// await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
-		// 	await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		// 	await page
-		// 		.getByRole( 'menuitem', { name: 'Total sales' } )
-		// 		.waitFor( { state: 'visible' } );
-		// } );
+	test(
+		'Can connect to WooCommerce.com',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { page } ) => {
+			await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
+				await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+				await page
+					.getByRole( 'menuitem', { name: 'Total sales' } )
+					.waitFor( { state: 'visible' } );
+			} );
 
-		await test.step( 'Go to the extensions tab and connect store', async () => {
-			await page.goto(
-				'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
-			);
-			await expect(
-				page.getByText(
-					'Hundreds of vetted products and services. Unlimited potential.'
-				)
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'button', { name: 'My Subscriptions' } )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'link', { name: 'Connect your store' } )
-			).toBeVisible();
-			await page
-				.getByRole( 'link', { name: 'Connect your store' } )
-				.click();
-		} );
+			await test.step( 'Go to the extensions tab and connect store', async () => {
+				await page.goto(
+					'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
+				);
+				await expect(
+					page.getByText(
+						'Hundreds of vetted products and services. Unlimited potential.'
+					)
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'button', { name: 'My Subscriptions' } )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'link', { name: 'Connect your store' } )
+				).toBeVisible();
+				await page
+					.getByRole( 'link', { name: 'Connect your store' } )
+					.click();
+			} );
 
-		await test.step( 'Check that we are sent to wp.com', async () => {
-			await expect( page.url() ).toContain( 'wordpress.com/log-in' );
-			await expect(
-				page.getByRole( 'heading', {
-					name: 'Log in to your account',
-				} )
-			).toBeVisible( { timeout: 30000 } );
-		} );
-	} );
+			await test.step( 'Check that we are sent to wp.com', async () => {
+				await expect( page.url() ).toContain( 'wordpress.com/log-in' );
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Log in to your account',
+					} )
+				).toBeVisible( { timeout: 30000 } );
+			} );
+		}
+	);
 } );
