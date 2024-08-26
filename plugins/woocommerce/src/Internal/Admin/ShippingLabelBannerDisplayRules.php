@@ -11,14 +11,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 class ShippingLabelBannerDisplayRules {
 
 	/**
-	 * Holds the installed Jetpack version.
-	 *
-	 * @var string
-	 */
-	private $jetpack_version;
-
-
-	/**
 	 * Whether or not the installed Jetpack is connected.
 	 *
 	 * @var bool
@@ -45,13 +37,6 @@ class ShippingLabelBannerDisplayRules {
 	 * @var bool
 	 */
 	private $wcs_tos_accepted;
-
-	/**
-	 * Minimum supported Jetpack version.
-	 *
-	 * @var string
-	 */
-	private $min_jetpack_version = '4.4';
 
 	/**
 	 * Minimum supported WooCommerce Shipping & Tax version.
@@ -97,8 +82,6 @@ class ShippingLabelBannerDisplayRules {
 	 */
 	public function should_display_banner() {
 		return $this->banner_not_dismissed() &&
-			$this->jetpack_installed_and_active() &&
-			$this->jetpack_up_to_date() &&
 			$this->jetpack_connected &&
 			$this->no_incompatible_plugins_installed &&
 			$this->order_has_shippable_products() &&
@@ -127,24 +110,6 @@ class ShippingLabelBannerDisplayRules {
 		$dismissed_24h      = time() < $expired_timestamp;
 
 		return ! $dismissed_for_good && ! $dismissed_24h;
-	}
-
-	/**
-	 * Checks if jetpack is installed and active.
-	 *
-	 * @return bool
-	 */
-	private function jetpack_installed_and_active() {
-		return ! ! $this->jetpack_version;
-	}
-
-	/**
-	 * Checks if Jetpack version is supported.
-	 *
-	 * @return bool
-	 */
-	private function jetpack_up_to_date() {
-		return version_compare( $this->jetpack_version, $this->min_jetpack_version, '>=' );
 	}
 
 	/**
