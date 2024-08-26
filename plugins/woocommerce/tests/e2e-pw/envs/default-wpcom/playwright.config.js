@@ -9,9 +9,7 @@ config = {
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: [
 				'**/basic.spec.js',
-				'**/activate-and-setup/**/*.spec.js',
 			],
-			grepInvert: /@local/,
 		},
 	],
 };
