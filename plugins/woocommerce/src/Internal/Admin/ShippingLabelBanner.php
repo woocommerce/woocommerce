@@ -37,17 +37,12 @@ class ShippingLabelBanner {
 	 */
 	private function should_show_meta_box() {
 		if ( ! $this->shipping_label_banner_display_rules ) {
-			$jetpack_version   = null;
-			$jetpack_connected = null;
+			$dotcom_connected = null;
 			$wcs_version       = null;
 			$wcs_tos_accepted  = null;
 
-			if ( defined( 'JETPACK__VERSION' ) ) {
-				$jetpack_version = JETPACK__VERSION;
-			}
-
 			if ( class_exists( Jetpack_Connection_Manager::class ) ) {
-				$jetpack_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
+				$dotcom_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
 			}
 
 			if ( class_exists( '\WC_Connect_Loader' ) ) {
@@ -67,8 +62,7 @@ class ShippingLabelBanner {
 
 			$this->shipping_label_banner_display_rules =
 				new ShippingLabelBannerDisplayRules(
-					$jetpack_version,
-					$jetpack_connected,
+					$dotcom_connected,
 					$wcs_version,
 					$wcs_tos_accepted,
 					$incompatible_plugins

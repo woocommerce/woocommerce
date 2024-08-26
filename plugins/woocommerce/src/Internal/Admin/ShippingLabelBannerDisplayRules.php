@@ -11,11 +11,11 @@ namespace Automattic\WooCommerce\Internal\Admin;
 class ShippingLabelBannerDisplayRules {
 
 	/**
-	 * Whether or not the installed Jetpack is connected.
+	 * Whether the site is connected to wordpress.com.
 	 *
 	 * @var bool
 	 */
-	private $jetpack_connected;
+	private $dotcom_connected;
 
 	/**
 	 * Holds the installed WooCommerce Shipping & Tax version.
@@ -63,15 +63,13 @@ class ShippingLabelBannerDisplayRules {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $jetpack_version Installed Jetpack version to check.
-	 * @param bool   $jetpack_connected Is Jetpack connected?.
+	 * @param bool   $dotcom_connected Is site connected to wordpress.com?.
 	 * @param string $wcs_version Installed WooCommerce Shipping & Tax version to check.
 	 * @param bool   $wcs_tos_accepted WooCommerce Shipping & Tax Terms of Service accepted?.
 	 * @param bool   $incompatible_plugins_installed Are there any incompatible plugins installed?.
 	 */
-	public function __construct( $jetpack_version, $jetpack_connected, $wcs_version, $wcs_tos_accepted, $incompatible_plugins_installed ) {
-		$this->jetpack_version                   = $jetpack_version;
-		$this->jetpack_connected                 = $jetpack_connected;
+	public function __construct( $dotcom_connected, $wcs_version, $wcs_tos_accepted, $incompatible_plugins_installed ) {
+		$this->dotcom_connected                 = $dotcom_connected;
 		$this->wcs_version                       = $wcs_version;
 		$this->wcs_tos_accepted                  = $wcs_tos_accepted;
 		$this->no_incompatible_plugins_installed = ! $incompatible_plugins_installed;
@@ -82,7 +80,7 @@ class ShippingLabelBannerDisplayRules {
 	 */
 	public function should_display_banner() {
 		return $this->banner_not_dismissed() &&
-			$this->jetpack_connected &&
+			$this->dotcom_connected &&
 			$this->no_incompatible_plugins_installed &&
 			$this->order_has_shippable_products() &&
 			$this->store_in_us_and_usd() &&
