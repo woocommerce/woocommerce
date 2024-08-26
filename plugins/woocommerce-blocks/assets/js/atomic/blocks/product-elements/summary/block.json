@@ -44,21 +44,6 @@
 	},
 	"usesContext": [ "query", "queryId", "postId" ],
 	"keywords": [ "WooCommerce" ],
-	"supports": {
-		"color": {
-			"text": true,
-			"background": true,
-			"link": true
-		},
-		"spacing": {
-			"margin": true,
-			"padding": true
-		},
-		"typography": {
-			"fontSize": true
-		},
-		"__experimentalSelector": ".wc-block-components-product-summary"
-	},
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
