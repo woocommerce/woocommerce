@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix flaky remote logging PHP unit test
