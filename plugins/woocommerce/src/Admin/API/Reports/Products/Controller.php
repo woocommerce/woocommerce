@@ -42,7 +42,7 @@ class Controller extends GenericController implements ExportableInterface {
 	);
 
 	/**
-	 * Get data from `'products'` Query.
+	 * Get data from `'products'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *

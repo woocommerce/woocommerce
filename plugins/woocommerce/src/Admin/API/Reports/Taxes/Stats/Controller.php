@@ -84,7 +84,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'taxes-stats'` Query.
+	 * Get data from `'taxes-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
