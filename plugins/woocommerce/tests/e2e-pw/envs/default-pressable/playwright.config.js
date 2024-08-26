@@ -11,7 +11,6 @@ config = {
 				'**/basic.spec.js',
 				'**/merchant/products/add-variable-product/**/*.spec.js',
 			],
-			grepInvert: /@local/,
 		},
 	],
 };
