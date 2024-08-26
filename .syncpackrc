@@ -53,7 +53,7 @@
 				"@wordpress/core-data",
 				"@wordpress/data",
 				"@wordpress/data-controls",
-				"@wordpress/data-views",
+				"@wordpress/dataviews",
 				"@wordpress/date",
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/deprecated",
