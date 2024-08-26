@@ -131,7 +131,7 @@ const LinkToDescription = ( {
 		<p>
 			<RichText
 				identifier="linkToDescrption"
-				className="wp-block-post-excerpt__more-link"
+				className="wc-block-components-product-summary__more-link"
 				tagName="a"
 				aria-label={ __( '“Read more” link text', 'woocommerce' ) }
 				placeholder={ __( 'Add "read more" link text', 'woocommerce' ) }
