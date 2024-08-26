@@ -6,7 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 /**
- * Determines whether or not the Shipping Label Banner should be displayed
+ * Determines whether the Shipping Label Banner should be displayed
  */
 class ShippingLabelBannerDisplayRules {
 
@@ -25,14 +25,14 @@ class ShippingLabelBannerDisplayRules {
 	private $wcs_version;
 
 	/**
-	 * Whether or not there're plugins installed incompatible with the banner.
+	 * Whether installed plugins are incompatible with the banner.
 	 *
 	 * @var bool
 	 */
 	private $no_incompatible_plugins_installed;
 
 	/**
-	 * Whether or not the WooCommerce Shipping & Tax ToS has been accepted.
+	 * Whether the WooCommerce Shipping & Tax ToS has been accepted.
 	 *
 	 * @var bool
 	 */
