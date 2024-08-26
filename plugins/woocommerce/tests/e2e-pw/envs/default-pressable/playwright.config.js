@@ -7,7 +7,10 @@ config = {
 		{
 			name: 'default pressable',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: '**basic.spec.js',
+			testMatch: [
+				'**/basic.spec.js',
+				'**/merchant/products/block-editor/**/*.spec.js',
+			],
 		},
 	],
 };
