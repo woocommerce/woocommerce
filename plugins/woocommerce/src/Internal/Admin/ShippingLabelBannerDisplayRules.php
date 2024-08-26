@@ -18,13 +18,6 @@ class ShippingLabelBannerDisplayRules {
 	private $dotcom_connected;
 
 	/**
-	 * Holds the installed WooCommerce Shipping & Tax version.
-	 *
-	 * @var string
-	 */
-	private $wcs_version;
-
-	/**
 	 * Whether installed plugins are incompatible with the banner.
 	 *
 	 * @var bool
@@ -32,18 +25,18 @@ class ShippingLabelBannerDisplayRules {
 	private $no_incompatible_plugins_installed;
 
 	/**
+	 * Holds the installed WooCommerce Shipping & Tax version.
+	 *
+	 * @var string
+	 */
+	private $wcs_version;
+
+	/**
 	 * Whether the WooCommerce Shipping & Tax ToS has been accepted.
 	 *
 	 * @var bool
 	 */
 	private $wcs_tos_accepted;
-
-	/**
-	 * Minimum supported WooCommerce Shipping & Tax version.
-	 *
-	 * @var string
-	 */
-	private $min_wcs_version = '1.22.5';
 
 	/**
 	 * Supported countries by USPS, see: https://webpmt.usps.gov/pmt010.cfm
@@ -63,13 +56,12 @@ class ShippingLabelBannerDisplayRules {
 	/**
 	 * Constructor.
 	 *
-	 * @param bool   $dotcom_connected Is site connected to wordpress.com?.
-	 * @param string $wcs_version Installed WooCommerce Shipping & Tax version to check.
-	 * @param bool   $wcs_tos_accepted WooCommerce Shipping & Tax Terms of Service accepted?.
-	 * @param bool   $incompatible_plugins_installed Are there any incompatible plugins installed?.
+	 * @param bool $dotcom_connected Is site connected to wordpress.com?.
+	 * @param bool $wcs_tos_accepted WooCommerce Shipping & Tax Terms of Service accepted?.
+	 * @param bool $incompatible_plugins_installed Are there any incompatible plugins installed?.
 	 */
 	public function __construct( $dotcom_connected, $wcs_version, $wcs_tos_accepted, $incompatible_plugins_installed ) {
-		$this->dotcom_connected                 = $dotcom_connected;
+		$this->dotcom_connected                  = $dotcom_connected;
 		$this->wcs_version                       = $wcs_version;
 		$this->wcs_tos_accepted                  = $wcs_tos_accepted;
 		$this->no_incompatible_plugins_installed = ! $incompatible_plugins_installed;
@@ -84,9 +76,7 @@ class ShippingLabelBannerDisplayRules {
 			$this->no_incompatible_plugins_installed &&
 			$this->order_has_shippable_products() &&
 			$this->store_in_us_and_usd() &&
-			( $this->wcs_not_installed() || (
-				$this->wcs_up_to_date() && ! $this->wcs_tos_accepted
-			) );
+			$this->wcs_not_installed();
 	}
 
 	/**
@@ -154,12 +144,5 @@ class ShippingLabelBannerDisplayRules {
 	 */
 	private function wcs_not_installed() {
 		return ! $this->wcs_version;
-	}
-
-	/**
-	 * Checks if WooCommerce Shipping & Tax is up to date.
-	 */
-	private function wcs_up_to_date() {
-		return $this->wcs_version && version_compare( $this->wcs_version, $this->min_wcs_version, '>=' );
 	}
 }

@@ -38,15 +38,15 @@ class ShippingLabelBanner {
 	private function should_show_meta_box() {
 		if ( ! $this->shipping_label_banner_display_rules ) {
 			$dotcom_connected = null;
-			$wcs_version       = null;
-			$wcs_tos_accepted  = null;
+			$wcs_version      = null;
+			$wcs_tos_accepted = null;
 
 			if ( class_exists( Jetpack_Connection_Manager::class ) ) {
 				$dotcom_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
 			}
 
-			if ( class_exists( '\WC_Connect_Loader' ) ) {
-				$wcs_version = \WC_Connect_Loader::get_wcs_version();
+			if ( class_exists( '\Automattic\WCShipping\Utils' ) ) {
+				$wcs_version = \Automattic\WCShipping\Utils::get_wcshipping_version();
 			}
 
 			if ( class_exists( '\WC_Connect_Options' ) ) {
@@ -79,9 +79,9 @@ class ShippingLabelBanner {
 	 * @param \WP_Post $post Current post object.
 	 */
 	public function add_meta_boxes( $post_type, $post ) {
-    if ( !OrderUtil::is_order_edit_screen() ) {
-      return;
-    }
+		if ( ! OrderUtil::is_order_edit_screen() ) {
+			return;
+		}
 		$order = wc_get_order( $post );
 		if ( $this->should_show_meta_box() ) {
 			add_meta_box(
