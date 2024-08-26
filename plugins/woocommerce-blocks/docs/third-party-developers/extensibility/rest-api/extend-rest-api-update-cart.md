@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD024 -->
 # Updating the cart with the Store API <!-- omit in toc -->
 
 ## Table of Contents <!-- omit in toc -->
