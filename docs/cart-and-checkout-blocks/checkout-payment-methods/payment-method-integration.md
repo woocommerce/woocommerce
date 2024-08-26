@@ -43,6 +43,9 @@ The options you feed the configuration instance should be an object in this shap
 ```js
 const options = {
 	name: 'my_payment_method',
+	title: 'My Mayment Method',
+	description: 'A setence or two about your payment method',
+	gatewayId: 'gateway-id',
 	content: <div>A React node</div>,
 	edit: <div>A React node</div>,
 	canMakePayment: () => true,
@@ -58,6 +61,18 @@ Here's some more details on the configuration options:
 #### `name` (required)
 
 This should be a unique string (wise to try to pick something unique for your gateway that wouldn't be used by another implementation) that is used as the identifier for the gateway client side. If `paymentMethodId` is not provided, `name` is used for `paymentMethodId` as well.
+
+#### `title` (required)
+
+This should be a human readable string with the name of your payment method. It should be sentence capitalised. It is displayed to the merchant in the editor when viewing the Checkout block to indicate which express payment methods are active
+
+#### `description` (required)
+
+This is one or two sentences maximum describing your payment gateway. It should be sentence capitalised. It is displayed to the merchant in the editor when viewing the Checkout block to indicate which express payment methods are active
+
+#### `gatewayId` (required)
+
+This is the ID of the Payment Gateway that your plugin registers server side, and which registers the express payment method. It is used to link your express payment method on the clinet, to a payment gateway defined on the server. It is used to direct the user to the right settings page within the editor.
 
 #### `content` (required)
 
