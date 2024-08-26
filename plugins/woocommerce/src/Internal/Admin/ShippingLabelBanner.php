@@ -56,9 +56,7 @@ class ShippingLabelBanner {
 			$incompatible_plugins = class_exists( '\WC_Shipping_Fedex_Init' ) ||
 				class_exists( '\WC_Shipping_UPS_Init' ) ||
 				class_exists( '\WC_Integration_ShippingEasy' ) ||
-				class_exists( '\WC_ShipStation_Integration' ) ||
-				class_exists( '\Automattic\WCShipping\Loader' ) ||
-				class_exists( '\Automattic\WCTax\Loader' );
+				class_exists( '\WC_ShipStation_Integration' );
 
 			$this->shipping_label_banner_display_rules =
 				new ShippingLabelBannerDisplayRules(
