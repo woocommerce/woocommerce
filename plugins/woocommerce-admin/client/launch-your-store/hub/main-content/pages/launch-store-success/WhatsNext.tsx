@@ -78,7 +78,7 @@ const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 			'Give your shoppers more ways to pay by adding additional payment methods to your store.',
 			'woocommerce'
 		),
-		link: `${ ADMIN_URL }admin.php?page=wc-admin&task=payments`,
+		link: `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout`,
 		linkText: __( 'Add payment methods', 'woocommerce' ),
 		trackEvent: 'launch_you_store_congrats_payments_click',
 	};
@@ -86,7 +86,7 @@ const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 	const mailchimp = {
 		title: __( 'Build customer relationships', 'woocommerce' ),
 		description: __(
-			"Keep your shoppers up to date with what's new in your store and set up clever post-purchase automations.",
+			'Keep your shoppers up to date with what’s new in your store and set up clever post-purchase automations.',
 			'woocommerce'
 		),
 		link: isMailChimpActivated
@@ -123,7 +123,7 @@ const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 	const externalDocumentation = {
 		title: __( 'Help is on hand', 'woocommerce' ),
 		description: __(
-			"Detailed guides and our support team are always available if you're feeling stuck or need some guidance.",
+			'Detailed guides and our support team are always available if you’re feeling stuck or need some guidance.',
 			'woocommerce'
 		),
 		link: `https://woo.com/documentation/woocommerce/?utm_source=launch_your_store&utm_medium=product`,

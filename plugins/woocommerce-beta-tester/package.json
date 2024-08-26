@@ -8,7 +8,7 @@
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"
 	},
 	"title": "WooCommerce Beta Tester",
-	"version": "2.3.2",
+	"version": "2.4.0",
 	"homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
 	"devDependencies": {
 		"@types/react": "^17.0.71",
@@ -17,7 +17,7 @@
 		"@types/wordpress__plugins": "3.0.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "^9.7.0",
+		"@wordpress/env": "^10.1.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "^8.55.0",
@@ -35,6 +35,7 @@
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/expression-evaluation": "workspace:*",
 		"@woocommerce/product-editor": "workspace:*",
+		"@woocommerce/remote-logging": "workspace:*",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/components": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
@@ -63,7 +64,8 @@
 		"build_step": "pnpm run build:zip"
 	},
 	"scripts": {
-		"build": "pnpm build:admin && pnpm uglify",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/' && pnpm build:project",
+		"build:project": "pnpm build:admin && pnpm uglify",
 		"build:admin": "wp-scripts build",
 		"build:dev": "pnpm lint:js && pnpm build",
 		"build:zip": "./bin/build-zip.sh",
@@ -89,7 +91,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"pnpm": "9.1.3"
 	},
 	"lint-staged": {
 		"*.php": [

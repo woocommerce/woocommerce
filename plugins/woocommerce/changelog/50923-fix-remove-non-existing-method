@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS - Remove usage of `prepare_item_for_response` function in `Images` endpoint.

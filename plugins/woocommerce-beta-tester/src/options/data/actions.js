@@ -43,24 +43,26 @@ export function setNotice( notice ) {
 }
 
 export function* deleteOption( optionName ) {
-	try {
-		yield apiFetch( {
-			method: 'DELETE',
-			path: `${ API_NAMESPACE }/options/${ optionName }`,
-		} );
-		yield {
-			type: TYPES.DELETE_OPTION,
-			optionName,
-		};
-	} catch {
-		throw new Error();
-	}
+	yield apiFetch( {
+		method: 'DELETE',
+		path: `${ API_NAMESPACE }/options/${ optionName }`,
+	} );
+	yield {
+		type: TYPES.DELETE_OPTION,
+		optionName,
+	};
 }
 
 export function* saveOption( optionName, newOptionValue ) {
 	try {
 		const payload = {};
-		payload[ optionName ] = JSON.parse( newOptionValue );
+		try {
+			// If the option value is a JSON string, parse it.
+			payload[ optionName ] = JSON.parse( newOptionValue );
+		} catch ( error ) {
+			// If it's not a JSON string, just use the value as is.
+			payload[ optionName ] = newOptionValue;
+		}
 		yield apiFetch( {
 			method: 'POST',
 			path: '/wc-admin/options',
@@ -71,11 +73,11 @@ export function* saveOption( optionName, newOptionValue ) {
 			status: 'success',
 			message: optionName + ' has been saved.',
 		} );
-	} catch {
+	} catch ( error ) {
 		yield setNotice( {
 			status: 'error',
 			message: 'Unable to save ' + optionName,
 		} );
-		throw new Error();
+		throw error;
 	}
 }

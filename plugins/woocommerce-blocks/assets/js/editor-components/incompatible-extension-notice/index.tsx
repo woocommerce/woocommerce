@@ -53,7 +53,7 @@ export function IncompatibleExtensionsNotice( {
 						),
 						{
 							a: (
-								<ExternalLink href="https://woocommerce.com/document/cart-checkout-blocks-status/" />
+								<ExternalLink href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions/" />
 							),
 						}
 				  )
@@ -69,7 +69,7 @@ export function IncompatibleExtensionsNotice( {
 						{
 							strong: <strong />,
 							a: (
-								<ExternalLink href="https://woocommerce.com/document/cart-checkout-blocks-status/" />
+								<ExternalLink href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions/" />
 							),
 						}
 				  ) }
@@ -114,7 +114,7 @@ export function IncompatibleExtensionsNotice( {
 										// translators: %s is the number of incompatible extensions.
 										_n(
 											'%s more incompatibility',
-											'%s more incompatibilites',
+											'%s more incompatibilities',
 											remainingEntries,
 											'woocommerce'
 										),

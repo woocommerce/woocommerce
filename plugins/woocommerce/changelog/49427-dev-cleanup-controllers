@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Reduce duplicated code in Analytics controllers, unify their behavior and API.

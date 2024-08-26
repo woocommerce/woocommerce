@@ -5573,14 +5573,22 @@ img.help_tip {
 		}
 
 		label:first-child {
-			margin-right: 1em;
+			margin-right: 1.4em;
 			border-right: 1px solid #dfdfdf;
 		}
 
 		input,
 		select {
-			margin-top: -3px 0 0;
+			margin-top: -2px;
 			vertical-align: middle;
+		}
+
+		label.has-checkbox {
+			margin-right: 15px;
+		}
+
+		label.has-checkbox > input[type="checkbox"] {
+			margin-right: 3px;
 		}
 
 		select {
@@ -8078,7 +8086,7 @@ table.bar_chart {
 	#woocommerce-product-data {
 		.hndle {
 			display: block;
-			line-height: 24px;
+			line-height: 28px;
 
 			.type_box {
 				display: inline;
