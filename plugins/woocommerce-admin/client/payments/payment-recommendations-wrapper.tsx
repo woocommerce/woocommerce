@@ -27,7 +27,14 @@ export const PaymentRecommendations: React.FC< EmbeddedBodyProps > = ( {
 				'reactify-classic-payments-settings'
 			] === true
 		) {
-			return null;
+			const paymentsMainRoot = document.getElementById(
+				'experimental_wc_settings_payments_main'
+			);
+
+			// Only show payment recommendations in the main settings page.
+			if ( ! paymentsMainRoot ) {
+				return null;
+			}
 		}
 
 		return (
