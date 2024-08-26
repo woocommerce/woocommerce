@@ -79,8 +79,31 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 		null
 	);
 
+	// Hack to force re-render when elements are not rendered in expected order.
+	const [ observerState, setObserverState ] = useState< boolean >( false );
+
 	const contentsRef = useCallback( ( node ) => {
 		setContentsNode( node );
+
+		const mutationObserver = new MutationObserver( ( mutationsList ) => {
+			for ( const mutation of mutationsList ) {
+				if ( mutation.type === 'childList' ) {
+					// Check if a child matching the selector exists
+					const childElement = node.querySelector(
+						'.wc-block-components-drawer__close-wrapper'
+					);
+					if ( childElement ) {
+						// Hack to force re-render when elements are not rendered in expected order.
+						setObserverState( ! observerState );
+					}
+				}
+			}
+		} );
+
+		mutationObserver.observe( node, {
+			childList: true,
+			subtree: true,
+		} );
 	}, [] );
 
 	const rootRef = useRef< ReactRootWithContainer[] | null >( null );
@@ -193,7 +216,7 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 				slideIn={ ! skipSlideIn }
 			>
 				<div
-					className="wc-block-mini-cart__template-part"
+					className="wc-block-mini-cart-interactivity__template-part"
 					ref={ contentsRef }
 					dangerouslySetInnerHTML={ { __html: contents } }
 				></div>

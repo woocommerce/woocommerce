@@ -14,6 +14,8 @@ import {
 	useEffect,
 	useRef,
 	forwardRef,
+	useState,
+	useCallback,
 } from '@wordpress/element';
 import { close, Icon } from '@wordpress/icons';
 import {
@@ -51,19 +53,21 @@ const CloseButtonPortal = ( {
 		'.wc-block-components-drawer__close-wrapper'
 	);
 
-	return closeButtonWrapper
-		? createPortal(
-				<Button
-					className="wc-block-components-drawer__close"
-					onClick={ onClick }
-					removeTextWrap
-					aria-label={ __( 'Close', 'woocommerce' ) }
-				>
-					<Icon icon={ close } />
-				</Button>,
-				closeButtonWrapper
-		  )
-		: null;
+	if ( closeButtonWrapper ) {
+		return createPortal(
+			<Button
+				className="wc-block-components-drawer__close"
+				onClick={ onClick }
+				removeTextWrap
+				aria-label={ __( 'Close', 'woocommerce' ) }
+			>
+				<Icon icon={ close } />
+			</Button>,
+			closeButtonWrapper
+		);
+	}
+
+	return null;
 };
 
 const UnforwardedDrawer = (
@@ -87,11 +91,11 @@ const UnforwardedDrawer = (
 		onClose();
 	};
 
+	const contentRef = useRef< HTMLDivElement >( null );
 	const ref = useRef< HTMLDivElement >();
 	const focusOnMountRef = useFocusOnMount();
 	const constrainedTabbingRef = useConstrainedTabbing();
 	const focusReturnRef = useFocusReturn();
-	const contentRef = useRef< HTMLDivElement >( null );
 
 	useEffect( () => {
 		if ( isOpen ) {

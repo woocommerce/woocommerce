@@ -25,11 +25,6 @@ import {
 	updateTotals,
 } from '../mini-cart/utils/data';
 import setStyles from '../mini-cart/utils/set-styles';
-// import { MiniCartContentsBlock } from '../mini-cart/mini-cart-contents/block';
-// import {
-// 	blockName,
-// 	attributes as miniCartContentsAttributes,
-// } from '../mini-cart/mini-cart-contents/attributes';
 
 interface dependencyData {
 	src: string;
@@ -165,6 +160,7 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 		},
 
 		loadScripts: async () => {
+			console.log( 'loadScripts' );
 			const context = getContext< Context >();
 
 			if ( ! context.scriptsLoaded ) {
