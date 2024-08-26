@@ -133,7 +133,6 @@ export const PaymentMethod = ( {
 										method_title
 								  )
 						}
-						aria-label-params={ [ method_title ] }
 					>
 						{ isEnabled
 							? __( 'Yes', 'woocommerce' )
