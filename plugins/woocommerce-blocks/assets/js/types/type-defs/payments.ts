@@ -97,10 +97,6 @@ export type PaymentMethodIcons = ( PaymentMethodIcon | string )[];
 export interface PaymentMethodConfiguration {
 	// A unique string to identify the payment method client side.
 	name: string;
-	// A human readable title for the payment method.
-	title: string;
-	// A human readable description for the payment method.
-	description?: string;
 	// A react node for your payment method UI.
 	content: ReactNode;
 	// A react node to display a preview of your payment method in the editor.
@@ -123,10 +119,28 @@ export interface PaymentMethodConfiguration {
 	savedTokenComponent?: ReactNode | null;
 }
 
-export type ExpressPaymentMethodConfiguration = Omit<
-	PaymentMethodConfiguration,
-	'icons' | 'label' | 'ariaLabel' | 'placeOrderButtonLabel'
->;
+export interface ExpressPaymentMethodConfiguration {
+	// A unique string to identify the payment method client side.
+	name: string;
+	// A human readable title for the payment method.
+	title: string;
+	// A human readable description for the payment method.
+	description: string;
+	// The gateway ID for the payment method.
+	gatewayId: string;
+	// A react node for your payment method UI.
+	content: ReactNode;
+	// A react node to display a preview of your payment method in the editor.
+	edit: ReactNode;
+	// A callback to determine whether the payment method should be shown in the checkout.
+	canMakePayment: CanMakePaymentCallback;
+	// A unique string to represent the payment method server side. If not provided, defaults to name.
+	paymentMethodId?: string;
+	// Object that describes various features provided by the payment method.
+	supports: SupportsConfiguration;
+	// A React node that contains logic handling any processing your payment method has to do with saved payment methods if your payment method supports them
+	savedTokenComponent?: ReactNode | null;
+}
 
 export type PaymentMethods =
 	| Record< string, PaymentMethodConfigInstance >
@@ -155,8 +169,6 @@ export type ExpressPaymentMethods =
 
 export interface PaymentMethodConfigInstance {
 	name: string;
-	title?: string;
-	description?: string;
 	content: ReactNode;
 	edit: ReactNode;
 	paymentMethodId?: string;
@@ -174,6 +186,7 @@ export interface ExpressPaymentMethodConfigInstance {
 	name: string;
 	title: string;
 	description: string | null;
+	gatewayId: string | null;
 	content: ReactNode;
 	edit: ReactNode;
 	paymentMethodId?: string;

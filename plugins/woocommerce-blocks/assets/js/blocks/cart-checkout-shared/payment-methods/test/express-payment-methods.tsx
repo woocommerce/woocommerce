@@ -33,6 +33,9 @@ const registerMockExpressPaymentMethods = () => {
 	mockExpressPaymentMethodNames.forEach( ( name ) => {
 		registerExpressPaymentMethod( {
 			name,
+			title: `${ name } payment method`,
+			description: `A test ${ name } payment method`,
+			gatewayId: 'test-express-payment-method',
 			paymentMethodId: name,
 			content: <MockExpressButton name={ name } />,
 			edit: <MockEditorExpressButton name={ name } />,
