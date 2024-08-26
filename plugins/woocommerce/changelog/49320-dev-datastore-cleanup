@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Reduce the amount of duplicated code in Analytics `DataStore`s.

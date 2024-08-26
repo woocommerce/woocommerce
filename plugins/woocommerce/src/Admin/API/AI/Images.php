@@ -65,13 +65,10 @@ class Images extends AIEndpoint {
 
 		if ( $last_business_description === $business_description ) {
 			return rest_ensure_response(
-				$this->prepare_item_for_response(
-					array(
-						'ai_content_generated' => true,
-						'images'               => array(),
-					),
-					$request
-				)
+				array(
+					'ai_content_generated' => true,
+					'images'               => array(),
+				),
 			);
 		}
 

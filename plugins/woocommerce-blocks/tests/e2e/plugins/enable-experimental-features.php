@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Blocks Test Enable Experimental Features
- * Description: Enable exerimental features for WooCommerce Blocks that are behind feature flags.
+ * Description: Enable experimental features for WooCommerce Blocks that are behind feature flags.
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  *

@@ -2,7 +2,7 @@
 /**
  * REST API Plugins Controller
  *
- * Handles requests to install and activate depedent plugins.
+ * Handles requests to install and activate dependent plugins.
  */
 
 namespace Automattic\WooCommerce\Admin\API;

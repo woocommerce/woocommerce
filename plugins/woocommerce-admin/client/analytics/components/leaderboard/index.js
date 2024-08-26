@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Card, CardBody, CardHeader } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { EmptyTable, TableCard } from '@woocommerce/components';
+import { EmptyTable, AnalyticsError, TableCard } from '@woocommerce/components';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { getPersistedQuery } from '@woocommerce/navigation';
@@ -21,7 +21,6 @@ import { Text } from '@woocommerce/experimental';
 /**
  * Internal dependencies
  */
-import ReportError from '../report-error';
 import sanitizeHTML from '../../../lib/sanitize-html';
 import './style.scss';
 
@@ -88,7 +87,7 @@ export class Leaderboard extends Component {
 		const classes = 'woocommerce-leaderboard';
 
 		if ( isError ) {
-			return <ReportError className={ classes } />;
+			return <AnalyticsError className={ classes } />;
 		}
 
 		const rows = this.getFormattedRows();

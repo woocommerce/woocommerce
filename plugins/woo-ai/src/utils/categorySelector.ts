@@ -1,5 +1,5 @@
 /**
- * Helper function to select a checkbox if it exists within a element
+ * Helper function to select a checkbox if it exists within an element
  *
  * @param element - The DOM element to check for a checkbox
  */
