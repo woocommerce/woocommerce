@@ -75,7 +75,7 @@
           "menu_title": "Add Custom Fields to Products",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "59ef97ed2053dedfa5e7c658d5c7fa470d8110afc9b84584cb32b58389bf5687",
+          "hash": "8c244abf6351a30372ddd021dc172927b662deca7ef32a33bfb6ba6783690a0f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -1302,7 +1302,7 @@
               "post_title": "How to request WooCommerce extension reviews",
               "menu_title": "Requesting reviews",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
-              "hash": "5a77783c32c1bb0fefc6888f7a3217fe6e5c7242692593a17828b2f1ffec618b",
+              "hash": "dfdf5add075777636eb628d25484e93268251437dec0253766c12d80ac82573b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
               "id": "3d0c8bf7339a71198737d19eec7e6d71697b3727"
             }
@@ -1796,5 +1796,5 @@
       "categories": []
     }
   ],
-  "hash": "7e929e4f5594921717bb3407ea502c4a01d4dabee6b8b1d441cd14fda4b22248"
+  "hash": "c7afedf912ac423f6be3878bc545f2190960971bd0d5f08fc96ea457e398f107"
 }

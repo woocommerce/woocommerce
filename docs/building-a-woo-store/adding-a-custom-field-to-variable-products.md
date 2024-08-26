@@ -59,7 +59,7 @@ For our Woo extension, we'll be appending our field right at the end with `wooco
 Let's get started with creating a new class which will hold the code for the field. Add a new file with the name `class-product-fields.php` to the `/includes/admin/` folder. Within the class, we add our namespace, an abort if anyone tries to call the file directly and a \_\_construct method which calls the `hooks()` method:
 
 ```php
-<?php
+&lt;?php
 
 namespace WooProductField\Admin;
 
@@ -103,9 +103,9 @@ public function add_field() {
 				'desc_tip'	=> true,
 				'value' => $product_object->get_meta( '_new_stock_information' )
 			)
-		); ?>
-	</div>
-	<?php
+		); ?&gt;
+	&lt;/div&gt;
+	&lt;?php
 }
 ```
 
@@ -190,9 +190,9 @@ In our function we output the stock information with the [appropriate escape fun
 ```php
 public function add_stock_info() {
 	global $product;
-	?>
-	<p><?php echo esc_html( $product->get_meta( '_new_stock_information' ) ); ?> </p>
-	<?php
+	?&gt;
+	&lt;p&gt;&lt;?php echo esc_html( $product->get_meta( '_new_stock_information' ) ); ?&gt; &lt;/p&gt;
+	&lt;?php
 
     }
 ```
