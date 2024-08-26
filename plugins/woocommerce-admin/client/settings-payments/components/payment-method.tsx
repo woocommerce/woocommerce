@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { PaymentGateway } from '@woocommerce/data';
 import { WooPaymentMethodsLogos } from '@woocommerce/onboarding';
 
@@ -113,9 +113,27 @@ export const PaymentMethod = ( {
 						} ${
 							isLoading ? 'woocommerce-input-toggle--loading' : ''
 						}` }
-						aria-label={ `The "${ method_title }" payment method is currently ${
-							isEnabled ? 'enabled' : 'disabled'
-						}` }
+						/* translators: %s: payment method title */
+						aria-label={
+							isEnabled
+								? sprintf(
+										/* translators: %s: payment method title */
+										__(
+											'The "%s" payment method is currently enabled',
+											'woocommerce'
+										),
+										method_title
+								  )
+								: sprintf(
+										/* translators: %s: payment method title */
+										__(
+											'The "%s" payment method is currently disabled',
+											'woocommerce'
+										),
+										method_title
+								  )
+						}
+						aria-label-params={ [ method_title ] }
 					>
 						{ isEnabled
 							? __( 'Yes', 'woocommerce' )
@@ -136,8 +154,22 @@ export const PaymentMethod = ( {
 						className="button alignright"
 						aria-label={
 							enabled
-								? `Manage the "${ method_title }" payment method`
-								: `Set up the "${ method_title }" payment method`
+								? sprintf(
+										/* translators: %s: payment method title */
+										__(
+											'Manage the "%s" payment method',
+											'woocommerce'
+										),
+										method_title
+								  )
+								: sprintf(
+										/* translators: %s: payment method title */
+										__(
+											'Set up the "%s" payment method',
+											'woocommerce'
+										),
+										method_title
+								  )
 						}
 						href={ settings_url }
 					>
