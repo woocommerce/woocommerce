@@ -24,8 +24,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut    = wc_get_container()->get( RemoteLogger::class );
-		WC()->version = '9.2.0';
+		$this->sut = wc_get_container()->get( RemoteLogger::class );
 	}
 
 	/**
@@ -37,6 +36,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		$this->cleanup_filters();
 		delete_option( 'woocommerce_feature_remote_logging_enabled' );
 		delete_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT );
+		delete_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY );
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
 		WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
@@ -90,21 +90,34 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 */
 	public function remote_logging_disallowed_provider() {
 		return array(
-			'feature flag disabled'   => array(
+			'feature flag disabled' => array(
 				'condition' => 'feature flag disabled',
 				'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 			),
-			'tracking opted out'      => array(
+			'tracking opted out'    => array(
 				'condition' => 'tracking opted out',
 				'setup'     => fn() => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
 			),
-			'outdated version'        => array(
-				'condition' => 'outdated version',
-				'setup'     => fn() => WC()->version = '9.0.0',
-			),
-			'high variant assignment' => array(
-				'condition' => 'high variant assignment',
-				'setup'     => fn() => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
+			'outdated version'      => array(
+				'condition'               => 'outdated version',
+				'setup'                   => function () {
+					$version = WC()->version;
+					$next_version = implode(
+						'.',
+						array_map(
+							function ( $n, $i ) {
+								return 0 === $i ? $n + 1 : 0;
+							},
+							explode( '.', $version ),
+							array_keys( explode( '.', $version ) )
+						)
+					);
+					set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, $next_version );
+				},
+				'high variant assignment' => array(
+					'condition' => 'high variant assignment',
+					'setup'     => fn() => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
+				),
 			),
 		);
 	}
@@ -412,7 +425,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			'plugins_api',
 			function ( $result, $action, $args ) {
 				if ( 'plugin_information' === $action && 'woocommerce' === $args->slug ) {
-					return (object) array( 'version' => '9.2.0' );
+					return (object) array( 'version' => $enabled ? WC()->version : '9.0.0' );
 				}
 				return $result;
 			},
