@@ -22,7 +22,7 @@ import SetupNotice, { setupErrorTypes } from '../setup-notice';
 import { getWcsAssets, acceptWcsTos } from '../wcs-api';
 
 const wcAssetUrl = getSetting( 'wcAssetUrl', '' );
-const wcsPluginSlug = 'woocommerce-services';
+const wcsPluginSlug = 'woocommerce-shipping';
 
 export class ShippingBanner extends Component {
 	constructor( props ) {
