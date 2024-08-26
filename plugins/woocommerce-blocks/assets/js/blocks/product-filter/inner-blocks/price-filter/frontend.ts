@@ -198,7 +198,7 @@ store< PriceFilterStore >( 'woocommerce/product-filter-price', {
 			const context = getContext< PriceFilterContext >();
 			const { minPrice, maxPrice, minRange, maxRange } = context;
 			const isMin = event.target.classList.contains( 'min' );
-			const targetValue = Number(event.target.value);
+			const targetValue = Number( event.target.value );
 			const stepValue = 1;
 			const currentValues: [ number, number ] = isMin
 				? [
