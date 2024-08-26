@@ -6,3 +6,4 @@ export const FLAT_RATE_SHIPPING_NAME = 'Flat rate shipping';
 export const FLAT_RATE_SHIPPING_PRICE = '$10.00';
 export const DISCOUNTED_PRODUCT_NAME = 'Cap';
 export const REGULAR_PRICED_PRODUCT_NAME = 'Polo';
+export const INVALID_COUPON = 'invalidcoupon';

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure translation is fully loaded for certain parts of Checkout block.

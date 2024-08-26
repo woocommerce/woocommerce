@@ -86,7 +86,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
-		// Avoid ambigious columns in SQL query.
+		// Avoid ambiguous columns in SQL query.
 		$this->report_columns = array(
 			'order_id'         => "DISTINCT {$table_name}.order_id",
 			'parent_id'        => "{$table_name}.parent_id",

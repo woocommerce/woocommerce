@@ -300,3 +300,22 @@
 		color: #999;
 	}
 }
+
+@mixin coupon-error-notice-cart() {
+	clear: left;
+	color: var(--wc-red);
+	flex-basis: 100%;
+	float: none;
+	font-size: 0.75em;
+	margin-bottom: 0;
+	margin-top: 8px;
+	text-align: left;
+	width: auto;
+}
+
+@mixin coupon-error-notice-checkout() {
+	color: var(--wc-red);
+	display: block;
+	font-size: 0.75em;
+	margin-top: 8px;
+}
