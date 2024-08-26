@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ProductDataViews;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
@@ -18,7 +19,18 @@ class Init {
 	public function __construct() {
 		if ( $this->has_data_views_support() ) {
 			add_action( 'admin_menu', array( $this, 'woocommerce_add_new_products_dashboard' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		}
+	}
+
+	/**
+	 * Returns true if we are on a JS powered admin page.
+	 */
+	private static function is_product_data_view_page() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		return isset( $_GET['page'] ) && $_GET['page'] === 'woocommerce-products-dashboard';
+		// phpcs:enable WordPress.Security.NonceVerification
 	}
 
 	/**
@@ -50,6 +62,33 @@ class Init {
 	}
 
 	/**
+	 * Enqueue styles needed for the rich text editor.
+	 */
+	public function enqueue_styles() {
+		if ( ! $this->is_product_data_view_page() ) {
+			return;
+		}
+		wp_enqueue_style( 'wc-product-editor' );
+	}
+
+	/**
+	 * Enqueue scripts needed for the product form block editor.
+	 */
+	public function enqueue_scripts() {
+		if ( ! $this->is_product_data_view_page() ) {
+			return;
+		}
+
+		$script_handle = 'wc-admin-edit-product';
+		wp_register_script( $script_handle, '', array( 'wp-blocks' ), '0.1.0', true );
+		wp_enqueue_script( $script_handle );
+		wp_enqueue_media();
+		wp_register_style( 'wc-global-presets', false ); // phpcs:ignore
+		wp_add_inline_style( 'wc-global-presets', wp_get_global_stylesheet( array( 'presets' ) ) );
+		wp_enqueue_style( 'wc-global-presets' );
+	}
+
+	/**
 	 * Replaces the default posts menu item with the new posts dashboard.
 	 */
 	public function woocommerce_add_new_products_dashboard() {
@@ -73,6 +112,8 @@ class Init {
 	 * Renders the new posts dashboard page.
 	 */
 	public function woocommerce_products_dashboard() {
+		$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version      = Constants::get_constant( 'WC_VERSION' );
 		wp_register_style(
 			'wp-gutenberg-posts-dashboard',
 			gutenberg_url( 'build/edit-site/posts.css', __FILE__ ),
