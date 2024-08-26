@@ -431,7 +431,7 @@
           "post_title": "Add a message above the login / register form",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/before-login--register-form.md",
-          "hash": "49f0d942364ea6815e799972894406cb0963164adfb6c373222dcf7fb0ee6fb9",
+          "hash": "dd3d61cd1f99d459956167041718e6a25693901a810d4bde47613d5ea2595ca3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/before-login--register-form.md",
           "id": "26ea2036f16952c8c965f2ab38ab214e421aa615"
         },
@@ -719,7 +719,7 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "a34e2c637ac47adb1dd2e7b2510fb3eb7ff517b8f31e9cfa6fe4d3920f2567e7",
+          "hash": "c73e3c5015e6cda3be9ebd2d5fbda590ac9fa599e5fb02163c971c01060970ad",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93"
         },
@@ -1796,5 +1796,5 @@
       "categories": []
     }
   ],
-  "hash": "c7afedf912ac423f6be3878bc545f2190960971bd0d5f08fc96ea457e398f107"
+  "hash": "1e9fd142270fe46589cb65aa034469cd96fcb7594266ccbd9eaab5a25ca4ddfb"
 }
