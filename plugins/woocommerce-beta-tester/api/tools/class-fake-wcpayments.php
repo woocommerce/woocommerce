@@ -59,4 +59,15 @@ class Fake_WCPayments extends WC_Payment_Gateway_WCPay {
 	public function is_available() {
 		return true;
 	}
+
+	/**
+	 * Checks if the account has not completed onboarding due to users abandoning the process half way.
+	 * Also used by WC Core to complete the task "Set up WooPayments".
+	 * Called directly by WooCommerce Core.
+	 *
+	 * @return bool
+	 */
+	public function is_account_partially_onboarded(): bool {
+		return false;
+	}
 }
