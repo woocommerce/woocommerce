@@ -67,6 +67,8 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_remote_logging_allowed() {
 		$this->setup_remote_logging_conditions( true );
+
+		$this->sut->log_is_remote_logging_allowed();
 		$this->assertTrue( $this->sut->is_remote_logging_allowed() );
 	}
 

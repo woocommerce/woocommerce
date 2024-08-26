@@ -139,25 +139,47 @@ class RemoteLogger extends \WC_Log_Handler {
 	 */
 	public function is_remote_logging_allowed() {
 		if ( ! FeaturesUtil::feature_is_enabled( 'remote_logging' ) ) {
-			echo 'Feature flag is not enabled.';
 			return false;
 		}
 
 		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
-			echo 'Tracking is not enabled.';
 			return false;
 		}
 
 		if ( ! $this->is_variant_assignment_allowed() ) {
-			echo 'Variant assignment is not allowed.';
 			return false;
 		}
 
 		if ( ! $this->is_latest_woocommerce_version() ) {
-			echo 'WooCommerce is not the latest version.';
 			return false;
 		}
 
+		return true;
+	}
+
+	/**
+	 * Log the conditions that prevent remote logging.
+	 *
+	 * @return bool
+	 */
+	public function log_is_remote_logging_allowed() {
+		if ( ! FeaturesUtil::feature_is_enabled( 'remote_logging' ) ) {
+			echo 'Feature flag for remote error logging is disabled.';
+		}
+
+		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+			echo 'User has not opted into tracking/logging.';
+		}
+
+		if ( ! $this->is_variant_assignment_allowed() ) {
+			echo 'Store is not allowed to log based on the variant assignment percentage.';
+		}
+
+		if ( ! $this->is_latest_woocommerce_version() ) {
+			echo 'Current WooCommerce version is not the latest.';
+		}
+
+		echo 'Remote logging is allowed.';
 		return true;
 	}
 
