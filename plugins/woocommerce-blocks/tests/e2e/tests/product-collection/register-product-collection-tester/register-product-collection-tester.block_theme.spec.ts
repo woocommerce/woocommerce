@@ -217,10 +217,9 @@ test.describe( 'Testing registerProductCollection', () => {
 			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
-		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview for 1 second', async ( {
+		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview and then replace it by the actual content', async ( {
 			pageObject,
 			editor,
-			page,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollectionWithAdvancedPreview'
@@ -231,10 +230,6 @@ test.describe( 'Testing registerProductCollection', () => {
 
 			// The preview button should be visible
 			await expect( previewButtonLocator ).toBeVisible();
-
-			// Disabling eslint rule because we need to wait for the preview to disappear
-			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 1000 );
 
 			// The preview button should be hidden
 			await expect( previewButtonLocator ).toBeHidden();
