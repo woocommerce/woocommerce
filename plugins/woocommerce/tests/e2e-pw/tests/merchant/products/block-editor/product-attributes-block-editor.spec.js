@@ -373,6 +373,11 @@ test(
 			await expect(
 				async () => {
 					await page.reload();
+					await expect(
+						page.locator(
+							`[aria-label="Block: Product attributes"]`
+						)
+					).toBeVisible();
 					await page.getByRole( 'button', { name: 'Edit' } ).click();
 					await expect(
 						page.locator(
