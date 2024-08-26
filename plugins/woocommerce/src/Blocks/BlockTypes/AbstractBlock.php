@@ -56,6 +56,13 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
+	 * Stores the compiled metadata for all inner blocks.
+	 *
+	 * @var array|null
+	 */
+	protected static $compiled_block_metadata = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -78,6 +85,22 @@ abstract class AbstractBlock {
 	 */
 	protected function get_full_block_name() {
 		return $this->namespace . '/' . $this->block_name;
+	}
+
+	/**
+	 * Loads the compiled block metadata from a file.
+	 *
+	 * This method ensures the metadata is loaded only once and stored in a static variable.
+	 */
+	protected function load_compiled_block_metadata() {
+		if ( null === self::$compiled_block_metadata ) {
+			$meta_file_path = WC_ABSPATH . '/assets/client/blocks/blocks-json.php';
+			if ( file_exists( $meta_file_path ) ) {
+				self::$compiled_block_metadata = require $meta_file_path;
+			} else {
+				self::$compiled_block_metadata = [];
+			}
+		}
 	}
 
 	/**
@@ -273,6 +296,43 @@ abstract class AbstractBlock {
 			$this->get_block_type(),
 			$block_settings
 		);
+	}
+
+	/**
+	 * Transform block metadata to the expected format.
+	 *
+	 * @param array $block_meta The original block metadata.
+	 * @return array Transformed block metadata.
+	 */
+	protected function transform_block_metadata( $block_meta ) {
+		$property_mappings = array(
+			'apiVersion'      => 'api_version',
+			'name'            => 'name',
+			'title'           => 'title',
+			'category'        => 'category',
+			'parent'          => 'parent',
+			'ancestor'        => 'ancestor',
+			'icon'            => 'icon',
+			'description'     => 'description',
+			'keywords'        => 'keywords',
+			'attributes'      => 'attributes',
+			'providesContext' => 'provides_context',
+			'usesContext'     => 'uses_context',
+			'selectors'       => 'selectors',
+			'supports'        => 'supports',
+			'styles'          => 'styles',
+			'variations'      => 'variations',
+			'example'         => 'example',
+			'allowedBlocks'   => 'allowed_blocks',
+		);
+
+		$transformed_meta = [];
+		foreach ( $property_mappings as $compiled_key => $expected_key ) {
+			if ( isset( $block_meta[ $compiled_key ] ) ) {
+				$transformed_meta[ $expected_key ] = $block_meta[ $compiled_key ];
+			}
+		}
+		return $transformed_meta;
 	}
 
 	/**
