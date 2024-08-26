@@ -238,7 +238,6 @@ test.describe( 'Testing registerProductCollection', () => {
 		test( 'Should display properly in Product Catalog template', async ( {
 			pageObject,
 			editor,
-			page,
 		} ) => {
 			await pageObject.goToProductCatalogAndInsertCollection(
 				'myCustomCollectionWithAdvancedPreview'
@@ -260,10 +259,6 @@ test.describe( 'Testing registerProductCollection', () => {
 				.getByLabel( BLOCK_LABELS.productImage )
 				.locator( 'visible=true' );
 			await expect( products ).toHaveCount( 9 );
-
-			// Disabling eslint rule because we need to wait for the preview to disappear
-			// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-			await page.waitForTimeout( 1000 );
 
 			// The preview button should be hidden after 1 second
 			await expect( previewButtonLocator ).toBeHidden();
