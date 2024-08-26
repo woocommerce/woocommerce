@@ -63,28 +63,20 @@ test.describe( 'Testing registerProductCollection', () => {
 			} )
 			.click();
 
-		// Get text of all buttons in the collection chooser
-		const collectionChooserButtonsTexts = await editor.canvas
-			.locator( '.wc-blocks-product-collection__collection-button-title' )
-			.allTextContents();
+		const productCollectionBlock = editor.canvas.getByLabel(
+			'Block: Product Collection'
+		);
 
-		// Check if all registered collections are available in the collection chooser
-		expect(
-			collectionChooserButtonsTexts.includes(
-				MY_REGISTERED_COLLECTIONS.myCustomCollection.name
-			)
-		).toBeTruthy();
-		expect(
-			collectionChooserButtonsTexts.includes(
-				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithPreview.name
-			)
-		).toBeTruthy();
-		expect(
-			collectionChooserButtonsTexts.includes(
-				MY_REGISTERED_COLLECTIONS.myCustomCollectionWithAdvancedPreview
-					.name
-			)
-		).toBeTruthy();
+		for ( const myCollection of Object.values(
+			MY_REGISTERED_COLLECTIONS
+		) ) {
+			await expect(
+				productCollectionBlock.getByRole( 'button', {
+					name: myCollection.name,
+					exact: true,
+				} )
+			).toBeVisible();
+		}
 	} );
 
 	test.describe( 'My Custom Collection', () => {
