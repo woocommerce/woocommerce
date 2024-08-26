@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove the usage of `ReportSummary`s `isRequesting` property as it has no effect.

@@ -203,7 +203,7 @@ describe( 'inbox_note_view event', () => {
 			notesHaveResolved: true,
 			isBatchUpdating: false,
 		} ) );
-		// The original InboxNotecard has a VisibilityDetector so I prefered to mock it and always call onNoteVisible
+		// The original InboxNotecard has a VisibilityDetector so I preferred to mock it and always call onNoteVisible
 		InboxNoteCard.mockImplementation( ( { onNoteVisible, note } ) => {
 			useEffect( () => onNoteVisible( note ), [] );
 			return <div>{ note.id }</div>;
