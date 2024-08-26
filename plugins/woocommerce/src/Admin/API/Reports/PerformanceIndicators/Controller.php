@@ -478,7 +478,7 @@ class Controller extends GenericController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object $object data
+	 * @param object $object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {
