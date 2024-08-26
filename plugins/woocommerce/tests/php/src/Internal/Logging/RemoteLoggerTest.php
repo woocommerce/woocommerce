@@ -423,7 +423,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 5 );
 		add_filter(
 			'plugins_api',
-			function ( $result, $action, $args ) {
+			function ( $result, $action, $args ) use ( $enabled ) {
 				if ( 'plugin_information' === $action && 'woocommerce' === $args->slug ) {
 					return (object) array( 'version' => $enabled ? WC()->version : '9.0.0' );
 				}
