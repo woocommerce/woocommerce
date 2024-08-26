@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix: ensure the global product object is always ready for compatibility layer by disabling default render routine of Product Templates inner  blocks.

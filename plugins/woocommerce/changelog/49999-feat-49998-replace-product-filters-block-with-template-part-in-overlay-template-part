@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Replace the Product Filters block within the Product Filters Overlay template part with the Product Filters template part. This functionality is experimental and not yet available.
-

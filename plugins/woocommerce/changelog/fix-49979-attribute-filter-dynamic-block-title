@@ -1,5 +1,0 @@
-Significance: patch
-Type: enhancement
-Comment: Enhancement: Register variation for each product attribute. Remove the need of manipulating metadata/blockName. Improve editor performance by only updating wrapper and heading on product attribute change.
-
-

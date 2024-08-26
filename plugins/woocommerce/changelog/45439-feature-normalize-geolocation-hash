@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Make `geolocation_ajax_get_location_hash` case-insensitive, to reduce the number of cache misses.
