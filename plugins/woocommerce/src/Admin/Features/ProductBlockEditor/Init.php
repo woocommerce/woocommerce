@@ -56,7 +56,6 @@ class Init {
 		$this->redirection_controller = new RedirectionController();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			require __DIR__ . '/DataViews/load.php';
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
 			add_action( 'get_edit_post_link', array( $this, 'update_edit_product_link' ), 10, 2 );

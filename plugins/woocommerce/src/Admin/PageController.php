@@ -564,7 +564,7 @@ class PageController {
 	 */
 	public static function is_admin_page() {
 		// phpcs:disable WordPress.Security.NonceVerification
-		return isset( $_GET['page'] ) &&  ( 'wc-admin' === $_GET['page'] || $_GET['page'] === 'woocommerce-products-dashboard' );
+		return isset( $_GET['page'] ) && ( 'wc-admin' === $_GET['page'] || $_GET['page'] === 'woocommerce-products-dashboard' );
 		// phpcs:enable WordPress.Security.NonceVerification
 	}
 
