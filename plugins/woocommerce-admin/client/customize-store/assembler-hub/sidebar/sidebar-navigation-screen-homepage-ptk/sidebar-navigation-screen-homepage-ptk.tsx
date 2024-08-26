@@ -163,7 +163,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 	const [ optInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
 
-	const [ isFetchingPatterns, setIsFetchingPatterns ] = useState( false );
+	const [ isSettingTracking, setIsSettingTracking ] = useState( false );
 
 	const optIn = () => {
 		trackEvent(
@@ -264,7 +264,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 											<Button
 												onClick={ async () => {
 													await apiFetch( {
-														path: `/wc/private/patterns`,
+														path: `/wc-admin/patterns`,
 														method: 'POST',
 													} );
 
@@ -324,25 +324,18 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												onClick={ async () => {
 													optIn();
 													await enableTracking();
-													setIsFetchingPatterns(
+													setIsSettingTracking(
 														true
 													);
-													await apiFetch< {
-														success: boolean;
-													} >( {
-														path: `/wc/private/patterns`,
-														method: 'POST',
-													} );
-													invalidateCache();
 													closeModal();
-													setIsFetchingPatterns(
+													setIsSettingTracking(
 														false
 													);
 												} }
 												variant="primary"
 												disabled={ ! optInDataSharing }
 											>
-												{ isFetchingPatterns ? (
+												{ isSettingTracking ? (
 													<Spinner />
 												) : (
 													__(

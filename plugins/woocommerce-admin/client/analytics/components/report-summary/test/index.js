@@ -124,7 +124,7 @@ describe( 'ReportSummary', () => {
 		expect( delta ).toBeInTheDocument();
 	} );
 
-	test( 'should display ReportError when isError is true', () => {
+	test( 'should display AnalyticsError when isError is true', () => {
 		renderChart( 'number', null, null, true );
 
 		expect(
@@ -134,7 +134,7 @@ describe( 'ReportSummary', () => {
 		).toBeInTheDocument();
 	} );
 
-	test( 'should display SummaryListPlaceholder when isRequesting is true', () => {
+	test( 'should display SummaryListPlaceholder when summaryData.isRequesting is true', () => {
 		const { container } = renderChart( 'number', null, null, false, true );
 
 		expect(
