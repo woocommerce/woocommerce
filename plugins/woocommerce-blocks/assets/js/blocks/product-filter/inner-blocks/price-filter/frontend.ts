@@ -151,93 +151,83 @@ const getRangeStyle = (
 	}%;`;
 };
 
-const { state } = store< PriceFilterStore >(
-	'woocommerce/product-filter-price',
-	{
-		state: {
-			rangeStyle: () => {
-				const { minPrice, maxPrice, minRange, maxRange } =
-					getContext< PriceFilterContext >();
+store< PriceFilterStore >( 'woocommerce/product-filter-price', {
+	state: {
+		rangeStyle: () => {
+			const { minPrice, maxPrice, minRange, maxRange } =
+				getContext< PriceFilterContext >();
 
-				return getRangeStyle( minPrice, maxPrice, minRange, maxRange );
-			},
-			formattedMinPrice: () => {
-				const { minPrice } = getContext< PriceFilterContext >();
-				return formatPrice( minPrice, getCurrency( { minorUnit: 0 } ) );
-			},
-			formattedMaxPrice: () => {
-				const { maxPrice } = getContext< PriceFilterContext >();
-				return formatPrice( maxPrice, getCurrency( { minorUnit: 0 } ) );
-			},
+			return getRangeStyle( minPrice, maxPrice, minRange, maxRange );
 		},
-		actions: {
-			updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-				const context = getContext< PriceFilterContext >();
-
-				// In some occasions the input element is updated with the incorrect value.
-				// By using the element that triggered the event, we can ensure the correct value is used for the input.
-				const element = getElement();
-
-				debounceUpdate( context, element, event );
-			},
-			selectInputContent: () => {
-				const element = getElement();
-				if ( element && element.ref ) {
-					element.ref.select();
-				}
-			},
-			reset: () => {
-				navigate(
-					getUrl( {
-						minRange: 0,
-						maxRange: 0,
-						minPrice: 0,
-						maxPrice: 0,
-					} )
-				);
-			},
-			updateRange: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-				const context = getContext< PriceFilterContext >();
-				const { minPrice, maxPrice, minRange, maxRange } = context;
-				const isMin = event.target.classList.contains( 'min' );
-				const targetValue = +event.target.value;
-				const stepValue = 1;
-				const currentValues: [ number, number ] = isMin
-					? [
-							Math.round( targetValue / stepValue ) * stepValue,
-							maxPrice,
-					  ]
-					: [
-							minPrice,
-							Math.round( targetValue / stepValue ) * stepValue,
-					  ];
-				const values = constrainRangeSliderValues(
-					currentValues,
-					minRange,
-					maxRange,
-					stepValue,
-					isMin
-				);
-
-				if ( targetValue >= maxPrice ) {
-					context.maxPrice = minPrice + 1;
-				} else if ( targetValue <= minPrice ) {
-					context.minPrice = maxPrice - 1;
-				}
-
-				state.rangeStyle = getRangeStyle(
-					values.minPrice,
-					values.maxPrice,
-					minRange,
-					maxRange
-				);
-
-				if ( isMin ) {
-					context.minPrice = values.minPrice;
-				} else {
-					context.maxPrice = values.maxPrice;
-				}
-			},
+		formattedMinPrice: () => {
+			const { minPrice } = getContext< PriceFilterContext >();
+			return formatPrice( minPrice, getCurrency( { minorUnit: 0 } ) );
 		},
-	}
-);
+		formattedMaxPrice: () => {
+			const { maxPrice } = getContext< PriceFilterContext >();
+			return formatPrice( maxPrice, getCurrency( { minorUnit: 0 } ) );
+		},
+	},
+	actions: {
+		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+			const context = getContext< PriceFilterContext >();
+
+			// In some occasions the input element is updated with the incorrect value.
+			// By using the element that triggered the event, we can ensure the correct value is used for the input.
+			const element = getElement();
+
+			debounceUpdate( context, element, event );
+		},
+		selectInputContent: () => {
+			const element = getElement();
+			if ( element && element.ref ) {
+				element.ref.select();
+			}
+		},
+		reset: () => {
+			navigate(
+				getUrl( {
+					minRange: 0,
+					maxRange: 0,
+					minPrice: 0,
+					maxPrice: 0,
+				} )
+			);
+		},
+		updateRange: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+			const context = getContext< PriceFilterContext >();
+			const { minPrice, maxPrice, minRange, maxRange } = context;
+			const isMin = event.target.classList.contains( 'min' );
+			const targetValue = +event.target.value;
+			const stepValue = 1;
+			const currentValues: [ number, number ] = isMin
+				? [
+						Math.round( targetValue / stepValue ) * stepValue,
+						maxPrice,
+				  ]
+				: [
+						minPrice,
+						Math.round( targetValue / stepValue ) * stepValue,
+				  ];
+			const values = constrainRangeSliderValues(
+				currentValues,
+				minRange,
+				maxRange,
+				stepValue,
+				isMin
+			);
+
+			if ( targetValue >= maxPrice ) {
+				context.maxPrice = minPrice + 1;
+			} else if ( targetValue <= minPrice ) {
+				context.minPrice = maxPrice - 1;
+			}
+
+			if ( isMin ) {
+				context.minPrice = values.minPrice;
+			} else {
+				context.maxPrice = values.maxPrice;
+			}
+		},
+	},
+} );
