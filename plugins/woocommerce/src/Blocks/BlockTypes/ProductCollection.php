@@ -50,6 +50,8 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * The render state of the product collection block.
 	 *
+	 * These props are runtime-based and reinitialize for every block on a page.
+	 *
 	 * @var array
 	 */
 	private $render_state = array(
