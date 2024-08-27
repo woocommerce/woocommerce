@@ -134,6 +134,7 @@ export function BlockEditor( {
 			if ( window.productBlockEditorSettings !== undefined ) {
 				setSettingsGlobal( window.productBlockEditorSettings );
 			} else {
+				// @ts-expect-error No types for this exist yet.
 				timeoutId = setTimeout( checkSettingsGlobal, 100 );
 			}
 		};

@@ -11,7 +11,7 @@ module.exports = {
 		'../../../packages/js/experimental/src/**/stories/*.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/onboarding components
 		'../../../packages/js/onboarding/src/**/stories/*.@(js|tsx)',
-		'../../../packages/js/product-editor/src/**/stories/*.@(js|tsx)',
+		'../../../packages/js/product-editor/src/**/*.stories.@(js|tsx)',
 		'../../../plugins/woocommerce-admin/client/**/stories/*.@(js|tsx)',
 	],
 	addons: [

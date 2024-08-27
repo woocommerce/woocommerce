@@ -46,6 +46,8 @@ module.exports = ( storybookConfig ) => {
 	// We need to use react 18 for the storybook since some dependencies are not compatible with react 17
 	// Once we upgrade react to 18 in repo, we can remove this alias
 	storybookConfig.resolve.alias.react = require.resolve( 'react18' );
+	storybookConfig.resolve.alias[ 'react-dom' ] =
+		require.resolve( 'react18-dom' );
 
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),

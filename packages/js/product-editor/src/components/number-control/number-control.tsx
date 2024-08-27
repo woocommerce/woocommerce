@@ -116,6 +116,7 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 
 		useEffect( () => {
 			if ( increment !== 0 ) {
+				// @ts-expect-error `timeoutRef` is not null.
 				timeoutRef.current = setTimeout(
 					incrementValue,
 					isInitialClick.current ? MEDIUM_DELAY : SHORT_DELAY
