@@ -49,6 +49,8 @@ module.exports = ( storybookConfig ) => {
 	storybookConfig.resolve.alias[ 'react-dom' ] =
 		require.resolve( 'react18-dom' );
 
+	storybookConfig.externals = [ 'react-dom/client' ];
+
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
 		path.join( __dirname, '../../packages/js/product-editor/src' ),

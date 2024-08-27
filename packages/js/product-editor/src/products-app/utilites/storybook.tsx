@@ -25,24 +25,21 @@ export const DataView = () => {
 	// Declare data, fields, etc.
 
 	return (
-		<div>
-			<h1>Data Views</h1>
-			{ /* <DataViews
-				data={ data }
-				fields={ fields }
-				paginationInfo={ {
-					totalItems: 1,
-					totalPages: 1,
-				} }
-				view={ {
-					type: 'list',
-				} }
-				onChangeView={ () => {} }
-				defaultLayouts={ {
-					list: {},
-				} }
-				getItemId={ ( item ) => item.title }
-			/> */ }
-		</div>
+		<DataViews
+			data={ data }
+			fields={ fields }
+			paginationInfo={ {
+				totalItems: 1,
+				totalPages: 1,
+			} }
+			view={ {
+				type: 'grid',
+			} }
+			onChangeView={ () => {} }
+			defaultLayouts={ {
+				list: {},
+			} }
+			getItemId={ ( item ) => item.title }
+		/>
 	);
 };

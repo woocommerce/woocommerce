@@ -4,6 +4,7 @@
  */
 import type { StoryFn } from '@storybook/react';
 import { createElement } from 'react';
+import { DataView } from '../../utilites/storybook';
 
 /**
  * Internal dependencies
@@ -11,10 +12,10 @@ import { createElement } from 'react';
 
 export default {
 	title: 'Data Field Controls/Slug',
-	component: <h1>ciaone</h1>,
+	component: DataView,
 };
 
-const Template: StoryFn< {} > = () => <h1>ciaone</h1>;
+const Template: StoryFn< {} > = () => <DataView />;
 
 export const Default: StoryFn< {} > = Template.bind( {} );
 Default.args = {};
