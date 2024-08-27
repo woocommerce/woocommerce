@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Component, ReactNode, ErrorInfo } from 'react';
+import { ReactNode, ErrorInfo, useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { captureException } from '@woocommerce/remote-logging';
@@ -21,98 +21,112 @@ type ErrorBoundaryState = {
 	errorInfo: ErrorInfo | null;
 };
 
-export class ErrorBoundary extends Component<
-	ErrorBoundaryProps,
-	ErrorBoundaryState
-> {
-	constructor( props: ErrorBoundaryProps ) {
-		super( props );
-		this.state = { hasError: false, error: null, errorInfo: null };
-	}
+export const ErrorBoundary: React.FC< ErrorBoundaryProps > = ( {
+	children,
+} ) => {
+	const [ state, setState ] = useState< ErrorBoundaryState >( {
+		hasError: false,
+		error: null,
+		errorInfo: null,
+	} );
 
-	static getDerivedStateFromError(
-		error: Error
-	): Partial< ErrorBoundaryState > {
-		return { hasError: true, error };
-	}
+	useEffect( () => {
+		const errorHandler = ( error: Error, errorInfo: ErrorInfo ) => {
+			setState( ( prevState ) => ( {
+				...prevState,
+				hasError: true,
+				error,
+				errorInfo,
+			} ) );
 
-	componentDidCatch( error: Error, errorInfo: ErrorInfo ) {
-		this.setState( { errorInfo } );
+			bumpStat( 'error', 'unhandled-js-error-during-render' );
 
-		bumpStat( 'error', 'unhandled-js-error-during-render' );
+			// Limit the component stack to 10 calls so we don't send too much data.
+			const componentStack = errorInfo.componentStack
+				.trim()
+				.split( '\n' )
+				.slice( 0, 10 )
+				.map( ( line ) => line.trim() );
 
-		// Limit the component stack to 10 calls so we don't send too much data.
-		const componentStack = errorInfo.componentStack
-			.trim()
-			.split( '\n' )
-			.slice( 0, 10 )
-			.map( ( line ) => line.trim() );
+			captureException( error, {
+				severity: 'critical',
+				extra: {
+					componentStack,
+				},
+			} );
+		};
 
-		captureException( error, {
-			severity: 'critical',
-			extra: {
-				componentStack,
-			},
-		} );
-	}
+		const unhandledRejectionHandler = ( event: PromiseRejectionEvent ) => {
+			errorHandler( event.reason, { componentStack: '' } );
+		};
 
-	handleRefresh = () => {
+		const errorEventHandler = ( event: ErrorEvent ) => {
+			errorHandler( event.error, { componentStack: '' } );
+		};
+
+		window.addEventListener( 'error', errorEventHandler );
+		window.addEventListener(
+			'unhandledrejection',
+			unhandledRejectionHandler
+		);
+
+		return () => {
+			window.removeEventListener( 'error', errorEventHandler );
+			window.removeEventListener(
+				'unhandledrejection',
+				unhandledRejectionHandler
+			);
+		};
+	}, [] );
+
+	const handleRefresh = () => {
 		window.location.reload();
 	};
 
-	handleOpenSupport = () => {
+	const handleOpenSupport = () => {
 		window.open(
 			'https://wordpress.org/support/plugin/woocommerce/',
 			'_blank'
 		);
 	};
 
-	render() {
-		if ( this.state.hasError ) {
-			return (
-				<div className="woocommerce-global-error-boundary">
-					<h1 className="woocommerce-global-error-boundary__heading">
-						{ __( 'Oops, something went wrong', 'woocommerce' ) }
-					</h1>
-					<p className="woocommerce-global-error-boundary__subheading">
-						{ __(
-							'We’re sorry for the inconvenience. Please try reloading the page, or you can get support from the community forums.',
-							'woocommerce'
-						) }
-					</p>
-					<div className="woocommerce-global-error-boundary__actions">
-						<Button
-							variant="secondary"
-							onClick={ this.handleOpenSupport }
-						>
-							{ __( 'Get Support', 'woocommerce' ) }
-						</Button>
-						<Button
-							variant="primary"
-							onClick={ this.handleRefresh }
-						>
-							{ __( 'Reload Page', 'woocommerce' ) }
-						</Button>
-					</div>
-					<details className="woocommerce-global-error-boundary__details">
-						<summary>
-							{ __( 'Click for error details', 'woocommerce' ) }
-						</summary>
-						<div className="woocommerce-global-error-boundary__details-content">
-							<strong className="woocommerce-global-error-boundary__error">
-								{ this.state.error &&
-									this.state.error.toString() }
-							</strong>
-							<p>
-								{ this.state.errorInfo &&
-									this.state.errorInfo.componentStack }
-							</p>
-						</div>
-					</details>
+	if ( state.hasError ) {
+		return (
+			<div className="woocommerce-global-error-boundary">
+				<h1 className="woocommerce-global-error-boundary__heading">
+					{ __( 'Oops, something went wrong', 'woocommerce' ) }
+				</h1>
+				<p className="woocommerce-global-error-boundary__subheading">
+					{ __(
+						"We're sorry for the inconvenience. Please try reloading the page, or you can get support from the community forums.",
+						'woocommerce'
+					) }
+				</p>
+				<div className="woocommerce-global-error-boundary__actions">
+					<Button variant="secondary" onClick={ handleOpenSupport }>
+						{ __( 'Get Support', 'woocommerce' ) }
+					</Button>
+					<Button variant="primary" onClick={ handleRefresh }>
+						{ __( 'Reload Page', 'woocommerce' ) }
+					</Button>
 				</div>
-			);
-		}
-
-		return this.props.children;
+				<details className="woocommerce-global-error-boundary__details">
+					<summary>
+						{ __( 'Click for error details', 'woocommerce' ) }
+					</summary>
+					<div className="woocommerce-global-error-boundary__details-content">
+						<strong className="woocommerce-global-error-boundary__error">
+							{ state.error && state.error.toString() }
+						</strong>
+						<p>
+							{ state.errorInfo &&
+								state.errorInfo.componentStack }
+						</p>
+					</div>
+				</details>
+			</div>
+		);
 	}
-}
+
+	return <>{ children }</>;
+};
