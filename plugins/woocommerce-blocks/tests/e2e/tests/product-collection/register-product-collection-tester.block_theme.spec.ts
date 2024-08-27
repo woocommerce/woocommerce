@@ -10,7 +10,7 @@ import ProductCollectionPage, {
 	BLOCK_LABELS,
 	Collections,
 	SELECTORS,
-} from '../product-collection.page';
+} from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
