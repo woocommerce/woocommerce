@@ -3,19 +3,11 @@
 /**
  * External dependencies
  */
-import { DataViews, DataForm } from '@wordpress/dataviews';
 import { createElement, useState, Fragment } from '@wordpress/element';
+import { useViewportMatch, useResizeObserver } from '@wordpress/compose';
 import {
-	useReducedMotion,
-	useViewportMatch,
-	useResizeObserver,
-	usePrevious,
-} from '@wordpress/compose';
-import {
-	__experimentalVStack as VStack,
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
-	__unstableUseNavigateRegions as useNavigateRegions,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
@@ -36,15 +28,6 @@ import SidebarContent from './sidebar';
 
 const { NavigableRegion } = unlock( editorPrivateApis );
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
-
-const STATUSES = [
-	{ value: 'draft', label: __( 'Draft' ) },
-	{ value: 'future', label: __( 'Scheduled' ) },
-	{ value: 'pending', label: __( 'Pending Review' ) },
-	{ value: 'private', label: __( 'Private' ) },
-	{ value: 'publish', label: __( 'Published' ) },
-	{ value: 'trash', label: __( 'Trash' ) },
-];
 
 export function Layout( { route } ) {
 	const [ fullResizer ] = useResizeObserver();

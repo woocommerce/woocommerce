@@ -35,12 +35,13 @@ const STATUSES = [
  */
 const fields = [
 	{
-		id: 'title',
-		label: 'Title',
+		id: 'name',
+		label: 'Name',
+		type: 'text',
 		enableHiding: false,
 		render: ( { item } ) => {
-            if ( item && item.title ) {
-			    return item.title.rendered;
+            if ( item && item.name ) {
+			    return item.name;
             }
 		},
 	},
@@ -50,21 +51,6 @@ const fields = [
 		render: ( { item } ) => {
 			return <time>{ item.date }</time>;
 		},
-	},
-	{
-		id: 'author',
-		label: __( 'Author' ),
-		render: ( { item } ) => {
-			return <a href="...">{ item.author }</a>;
-		},
-		elements: [
-			{ value: 1, label: 'Admin' },
-			{ value: 2, label: 'User' },
-		],
-		filterBy: {
-			operators: [ 'is', 'isNot' ],
-		},
-		enableSorting: false,
 	},
 	{
 		label: __( 'Status' ),
@@ -82,7 +68,7 @@ const fields = [
 
 const form = {
 	type: 'panel',
-	fields: [ 'title', 'status', 'author' ],
+	fields: [ 'name', 'status' ],
 };
 
 export default function ProductEdit( { 
@@ -100,9 +86,7 @@ export default function ProductEdit( {
 			return {
 				initialEdits:
 					ids.length === 1
-						? select( 'core' ).getEntityRecord(
-								'postType',
-								postType,
+						? select( 'wc/admin/products' ).getProduct(
 								ids[ 0 ]
 						  )
 						: null,

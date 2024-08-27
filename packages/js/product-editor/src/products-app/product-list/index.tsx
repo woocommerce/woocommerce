@@ -45,34 +45,27 @@ const STATUSES = [
  */
 const fields = [
 	{
-		id: 'title',
-		label: 'Title',
+		id: 'name',
+		label: 'Name',
 		enableHiding: false,
 		render: ( { item } ) => {
-			return item.title.rendered;
+			return item.name;
+		},
+	},
+	{
+		id: 'sku',
+		label: 'SKU',
+		enableHiding: false,
+		render: ( { item } ) => {
+			return item.sku;
 		},
 	},
 	{
 		id: 'date',
 		label: 'Date',
 		render: ( { item } ) => {
-			return <time>{ item.date }</time>;
+			return <time>{ item.date_created }</time>;
 		},
-	},
-	{
-		id: 'author',
-		label: __( 'Author' ),
-		render: ( { item } ) => {
-			return <a href="...">{ item.author }</a>;
-		},
-		elements: [
-			{ value: 1, label: 'Admin' },
-			{ value: 2, label: 'User' },
-		],
-		filterBy: {
-			operators: [ 'is', 'isNot' ],
-		},
-		enableSorting: false,
 	},
 	{
 		label: __( 'Status' ),
@@ -145,9 +138,13 @@ export default function ProductList( {
 		},
 		search: '',
 		filters: [],
-		fields: [ 'title', 'date', 'author', 'status' ],
+		fields: [ 'name', 'sku', 'date', 'status' ],
 		layout: {},
 	} );
+
+	const queryParams = useMemo( () => {
+		return {};
+	}, [] );
 
 	const onChangeSelection = useCallback(
 		( items ) => {
@@ -161,9 +158,12 @@ export default function ProductList( {
 	);
 
 	// TODO: Use the Woo data store to get all the products, as this doesn't contain all the product data.
-	const records = useSelect( ( select ) => {
-		return select( 'core' ).getEntityRecords( 'postType', 'product' );
-	} );
+	const records = useSelect(
+		( select ) => {
+			return select( 'wc/admin/products' ).getProducts( queryParams );
+		},
+		[ queryParams ]
+	);
 
 	const postTypeActions = usePostActions( {
 		postType: 'product',

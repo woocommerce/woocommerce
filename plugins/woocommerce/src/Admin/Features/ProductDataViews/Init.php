@@ -21,6 +21,15 @@ class Init {
 			add_action( 'admin_menu', array( $this, 'woocommerce_add_new_products_dashboard' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+			if ( $this->is_product_data_view_page() ) {
+				add_filter(
+					'admin_body_class',
+					static function ( $classes ) {
+						return "$classes is-fullscreen-mode";
+					}
+				);
+			}
 		}
 	}
 
