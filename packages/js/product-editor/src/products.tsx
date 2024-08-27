@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import {
 	StrictMode,
 	Suspense,
@@ -38,7 +39,12 @@ export function initializeProductsDashboard( id: string ) {
 					<ProductsApp />
 				</Suspense>
 			) : (
-				<div>Please enabled Gutenberg for this feature</div>
+				<div>
+					{ __(
+						'Please enabled Gutenberg for this feature',
+						'woocommerce'
+					) }
+				</div>
 			) }
 		</StrictMode>
 	);
