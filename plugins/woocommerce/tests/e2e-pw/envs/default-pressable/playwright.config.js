@@ -9,9 +9,9 @@ config = {
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: [
 				'**/basic.spec.js',
-        '**/merchant/products/add-variable-product/**/*.spec.js',
-        '**/activate-and-setup/**/*.spec.js',
-        '**/merchant/products/block-editor/**/*.spec.js',
+				'**/merchant/products/add-variable-product/**/*.spec.js',
+				'**/activate-and-setup/**/*.spec.js',
+				'**/merchant/products/block-editor/**/*.spec.js',
 			],
 			grepInvert: /@skip-on-default-pressable/,
 		},
