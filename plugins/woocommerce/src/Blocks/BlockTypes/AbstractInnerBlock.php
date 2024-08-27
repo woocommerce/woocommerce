@@ -36,10 +36,9 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 	 */
 	protected function register_block_type_from_compiled_metadata() {
 		$block_meta = self::$compiled_block_metadata[ $this->namespace . '/' . $this->block_name ];
-		$transformed_meta = $this->transform_block_metadata( $block_meta );
 
 		$block_settings = $this->get_block_settings();
-		$merged_settings = array_merge( $transformed_meta, $block_settings );
+		$merged_settings = array_merge( $block_meta, $block_settings );
 
 		register_block_type_from_metadata( '', $merged_settings );
 	}

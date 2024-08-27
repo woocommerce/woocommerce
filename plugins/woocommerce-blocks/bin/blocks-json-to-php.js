@@ -1,25 +1,56 @@
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-const json2php = require('json2php');
+const fs = require( 'fs' );
+const path = require( 'path' );
+const glob = require( 'glob' );
+const json2php = require( 'json2php' );
 
-const blocksDir = path.join(__dirname, '../assets/js/blocks');
-const outputFile = path.join(__dirname, '../build/blocks-json.php');
+const blocksDir = path.join( __dirname, '../assets/js/blocks' );
+const outputFile = path.join( __dirname, '../build/blocks-json.php' );
 
 const blocks = {};
 
-glob.sync(`${blocksDir}/**/block.json`).forEach(file => {
-  if (file.includes('inner-blocks')) {
-    const blockJson = JSON.parse(fs.readFileSync(file, 'utf8'));
-    blocks[blockJson.name] = blockJson;
-  }
-});
+// Define the property mappings
+const propertyMappings = {
+	apiVersion: 'api_version',
+	name: 'name',
+	title: 'title',
+	category: 'category',
+	parent: 'parent',
+	ancestor: 'ancestor',
+	icon: 'icon',
+	description: 'description',
+	keywords: 'keywords',
+	attributes: 'attributes',
+	providesContext: 'provides_context',
+	usesContext: 'uses_context',
+	selectors: 'selectors',
+	supports: 'supports',
+	styles: 'styles',
+	variations: 'variations',
+	example: 'example',
+	allowedBlocks: 'allowed_blocks',
+};
+
+glob.sync( `${ blocksDir }/**/block.json` ).forEach( ( file ) => {
+	if ( file.includes( 'inner-blocks' ) ) {
+		const blockJson = JSON.parse( fs.readFileSync( file, 'utf8' ) );
+		const transformedBlock = {};
+
+		// Transform properties
+		Object.entries( propertyMappings ).forEach( ( [ compiledKey, expectedKey ] ) => {
+			if ( blockJson.hasOwnProperty( compiledKey ) ) {
+				transformedBlock[ expectedKey ] = blockJson[ compiledKey ];
+			}
+		} );
+
+		blocks[ blockJson.name ] = transformedBlock;
+	}
+} );
 
 const phpContent = `<?php
 // This file is generated. Do not modify it manually.
-return ${json2php(blocks)};
+return ${ json2php( blocks ) };
 `;
 
-fs.writeFileSync(outputFile, phpContent);
+fs.writeFileSync( outputFile, phpContent );
 
-console.log('blocks-json.php has been generated.');
+console.log( 'blocks-json.php has been generated with transformed properties.' );

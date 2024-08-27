@@ -299,43 +299,6 @@ abstract class AbstractBlock {
 	}
 
 	/**
-	 * Transform block metadata to the expected format.
-	 *
-	 * @param array $block_meta The original block metadata.
-	 * @return array Transformed block metadata.
-	 */
-	protected function transform_block_metadata( $block_meta ) {
-		$property_mappings = array(
-			'apiVersion'      => 'api_version',
-			'name'            => 'name',
-			'title'           => 'title',
-			'category'        => 'category',
-			'parent'          => 'parent',
-			'ancestor'        => 'ancestor',
-			'icon'            => 'icon',
-			'description'     => 'description',
-			'keywords'        => 'keywords',
-			'attributes'      => 'attributes',
-			'providesContext' => 'provides_context',
-			'usesContext'     => 'uses_context',
-			'selectors'       => 'selectors',
-			'supports'        => 'supports',
-			'styles'          => 'styles',
-			'variations'      => 'variations',
-			'example'         => 'example',
-			'allowedBlocks'   => 'allowed_blocks',
-		);
-
-		$transformed_meta = [];
-		foreach ( $property_mappings as $compiled_key => $expected_key ) {
-			if ( isset( $block_meta[ $compiled_key ] ) ) {
-				$transformed_meta[ $expected_key ] = $block_meta[ $compiled_key ];
-			}
-		}
-		return $transformed_meta;
-	}
-
-	/**
 	 * Get the block type.
 	 *
 	 * @return string
