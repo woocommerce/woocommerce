@@ -750,7 +750,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 * Action to signal that the value of 'stock_quantity' for a variation has changed.
 				 *
 				 * @since 3.0
-				 * @since 9.2 Added $stock parameter.
 				 *
 				 * @param WC_Product $product The variation whose stock has changed.
 				 */
@@ -760,7 +759,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 * Action to signal that the value of 'stock_quantity' for a product has changed.
 				 *
 				 * @since 3.0
-				 * @since 9.2 Added $stock parameter.
 				 *
 				 * @param WC_Product $product The variation whose stock has changed.
 				 */
