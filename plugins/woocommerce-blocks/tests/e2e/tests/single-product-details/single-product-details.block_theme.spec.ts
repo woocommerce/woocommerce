@@ -80,7 +80,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		} );
 
 		const block = await editor.getBlockByName( blockData.slug );
-		await block.click();
+		await editor.selectBlocks( block );
 
 		// Verify the "Description" h2 heading is visible by default.
 		await expect(
