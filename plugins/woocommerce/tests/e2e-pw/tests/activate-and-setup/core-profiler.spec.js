@@ -475,12 +475,12 @@ test.describe( 'Store owner can skip the core profiler', () => {
 	} );
 
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {
-		// await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
-		// 	await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		// 	await page
-		// 		.getByRole( 'menuitem', { name: 'Total sales' } )
-		// 		.waitFor( { state: 'visible' } );
-		// } );
+		await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await page
+				.getByRole( 'menuitem', { name: 'Total sales' } )
+				.waitFor( { state: 'visible' } );
+		} );
 
 		await test.step( 'Go to the extensions tab and connect store', async () => {
 			await page.goto(
