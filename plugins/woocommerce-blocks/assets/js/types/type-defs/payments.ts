@@ -152,9 +152,10 @@ export type PaymentMethods =
 export type PlainPaymentMethods = Record<
 	string,
 	{
-		title?: string;
-		description?: string;
 		name: string;
+		title: string;
+		description: string;
+		gatewayId: string;
 	}
 >;
 
@@ -185,8 +186,8 @@ export interface PaymentMethodConfigInstance {
 export interface ExpressPaymentMethodConfigInstance {
 	name: string;
 	title: string;
-	description: string | null;
-	gatewayId: string | null;
+	description: string;
+	gatewayId: string;
 	content: ReactNode;
 	edit: ReactNode;
 	paymentMethodId?: string;

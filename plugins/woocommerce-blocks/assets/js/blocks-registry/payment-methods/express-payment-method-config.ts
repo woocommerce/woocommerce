@@ -20,8 +20,8 @@ export default class ExpressPaymentMethodConfig
 {
 	public name: string;
 	public title: string;
-	public description: string | null;
-	public gatewayId: string | null;
+	public description: string;
+	public gatewayId: string;
 	public content: ReactNode;
 	public edit: ReactNode;
 	public paymentMethodId?: string;
@@ -33,8 +33,8 @@ export default class ExpressPaymentMethodConfig
 		ExpressPaymentMethodConfig.assertValidConfig( config );
 		this.name = config.name;
 		this.title = config.title || this.name;
-		this.description = config.description || null;
-		this.gatewayId = config.gatewayId || null;
+		this.description = config.description || '';
+		this.gatewayId = config.gatewayId || '';
 		this.content = config.content;
 		this.edit = config.edit;
 		this.paymentMethodId = config.paymentMethodId || this.name;

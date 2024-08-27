@@ -113,9 +113,11 @@ export const ExpressPaymentMethods = () => {
 				return (
 					<ExternalLinkCard
 						key={ values.name }
-						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout` }
-						title={ values?.title || values.name }
-						description={ values?.description || '' }
+						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout&section=${ encodeURIComponent(
+							values.gatewayId
+						) }` }
+						title={ values.title }
+						description={ values.description }
 					/>
 				);
 			} ) }

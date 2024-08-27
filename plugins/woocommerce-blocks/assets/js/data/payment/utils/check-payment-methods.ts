@@ -163,18 +163,28 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			| PaymentMethodConfigInstance
 			| ExpressPaymentMethodConfigInstance
 	) => {
-		const { name, title, description } = paymentMethod;
+		if ( express ) {
+			const { name, title, description, gatewayId } =
+				paymentMethod as ExpressPaymentMethodConfigInstance;
+			availablePaymentMethods = {
+				...availablePaymentMethods,
+				[ paymentMethod.name ]: {
+					name,
+					title,
+					description,
+					gatewayId,
+				},
+			};
+		} else {
+			const { name } = paymentMethod as PaymentMethodConfigInstance;
 
-		// Not all payment methods will have title and description as they were added
-		// after the initial implementation.
-		availablePaymentMethods = {
-			...availablePaymentMethods,
-			[ paymentMethod.name ]: {
-				name,
-				...( title && { title } ),
-				...( description && { description } ),
-			},
-		};
+			availablePaymentMethods = {
+				...availablePaymentMethods,
+				[ paymentMethod.name ]: {
+					name,
+				},
+			};
+		}
 	};
 
 	// Order payment methods.
