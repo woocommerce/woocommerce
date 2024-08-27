@@ -8,7 +8,6 @@ const outputFile = path.join( __dirname, '../build/blocks-json.php' );
 
 const blocks = {};
 
-// Define the property mappings
 const propertyMappings = {
 	apiVersion: 'api_version',
 	name: 'name',
@@ -35,7 +34,6 @@ glob.sync( `${ blocksDir }/**/block.json` ).forEach( ( file ) => {
 		const blockJson = JSON.parse( fs.readFileSync( file, 'utf8' ) );
 		const transformedBlock = {};
 
-		// Transform properties
 		Object.entries( propertyMappings ).forEach( ( [ compiledKey, expectedKey ] ) => {
 			if ( blockJson.hasOwnProperty( compiledKey ) ) {
 				transformedBlock[ expectedKey ] = blockJson[ compiledKey ];
