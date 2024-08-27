@@ -105,10 +105,22 @@ export const ExpressPaymentMethods = () => {
 		select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods();
 
 	if ( Object.entries( expressMethods ).length < 1 ) {
-		return null;
+		<p className="wc-block-checkout__controls-text">
+			{ __(
+				'You currently have no express payment integrations active.',
+				'woocommerce'
+			) }
+		</p>;
 	}
+
 	return (
 		<>
+			<p className="wc-block-checkout__controls-text">
+				{ __(
+					'You currently have the following express payment integrations active.',
+					'woocommerce'
+				) }
+			</p>
 			{ Object.values( expressMethods ).map( ( values ) => {
 				return (
 					<ExternalLinkCard
@@ -154,12 +166,6 @@ export const ExpressPaymentControls = ( {
 				/>
 			</PanelBody>
 			<PanelBody title={ __( 'Express Payment Methods', 'woocommerce' ) }>
-				<p className="wc-block-checkout__controls-text">
-					{ __(
-						'You currently have the following express payment integrations active.',
-						'woocommerce'
-					) }
-				</p>
 				<ExpressPaymentMethods />
 			</PanelBody>
 		</InspectorControls>
