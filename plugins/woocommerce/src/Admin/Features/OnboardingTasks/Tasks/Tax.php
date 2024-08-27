@@ -167,12 +167,12 @@ class Tax extends Task {
 
 	/**
 	 * Get an array of countries that support Stripe tax.
-	 * 
+	 *
 	 * @return array
 	 */
 	public static function get_stripe_tax_support_countries() {
-		// https://docs.stripe.com/tax/supported-countries#supported-countries accurate as of 2024-08-26
-		// countries with remote sales not included
+		// https://docs.stripe.com/tax/supported-countries#supported-countries accurate as of 2024-08-26.
+		// countries with remote sales not included.
 		return array(
 			'AU',
 			'AT',
@@ -211,7 +211,7 @@ class Tax extends Task {
 			'CH',
 			'AE',
 			'GB',
-			'US'
+			'US',
 		);
 	}
 }
