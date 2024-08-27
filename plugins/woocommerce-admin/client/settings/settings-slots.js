@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
+<<<<<<< HEAD
 import { render, createRoot, useContext } from '@wordpress/element';
+=======
+import { createRoot } from '@wordpress/element';
+>>>>>>> trunk
 import { createSlotFill, SlotFillProvider } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
 
@@ -35,6 +39,10 @@ export const possiblyRenderSettingsSlots = (
 		{
 			id: 'wc_settings_site_visibility_slotfill',
 			scope: 'woocommerce-site-visibility-settings',
+		},
+		{
+			id: 'wc_settings_blueprint_slotfill',
+			scope: 'woocommerce-blueprint-settings',
 		},
 	];
 

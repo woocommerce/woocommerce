@@ -73,6 +73,7 @@ body.woocommerce-assembler {
 	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
 		align-items: center;
 		display: flex;
+		color: $gray-900;
 	}
 
 	.edit-site-site-hub__site-title {
@@ -172,6 +173,10 @@ body.woocommerce-assembler {
 			align-self: stretch;
 			width: 100%;
 			border: 1.5px solid transparent;
+
+			svg {
+				color: $gray-800;
+			}
 
 			&:hover,
 			&:active,
@@ -569,6 +574,10 @@ body.woocommerce-assembler {
 }
 
 .woocommerce-customize-store__step-intro {
+	.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
+		background-color: #fff;
+	}
+
 	.edit-site-site-hub__view-mode-toggle-container {
 		height: 32px;
 	}

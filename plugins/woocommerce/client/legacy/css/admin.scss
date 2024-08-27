@@ -3165,7 +3165,7 @@ ul.wc_coupon_list_block {
 .order-status {
 	display: inline-flex;
 	line-height: 2.5em;
-	color: #777;
+	color: #454545;
 	background: #e5e5e5;
 	border-radius: 4px;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -3176,27 +3176,27 @@ ul.wc_coupon_list_block {
 
 	&.status-completed {
 		background: #c8d7e1;
-		color: #2e4453;
+		color: #003d66;
 	}
 
 	&.status-on-hold {
 		background: #f8dda7;
-		color: #94660c;
+		color: #573B00;
 	}
 
 	&.status-failed {
 		background: #eba3a3;
-		color: #761919;
+		color: #570000;
 	}
 
 	&.status-processing {
 		background: #c6e1c6;
-		color: #5b841b;
+		color: #2c4700;
 	}
 
 	&.status-trash {
 		background: #eba3a3;
-		color: #761919;
+		color: #550202;
 	}
 
 	> span {
@@ -5573,14 +5573,22 @@ img.help_tip {
 		}
 
 		label:first-child {
-			margin-right: 1em;
+			margin-right: 1.4em;
 			border-right: 1px solid #dfdfdf;
 		}
 
 		input,
 		select {
-			margin-top: -3px 0 0;
+			margin-top: -2px;
 			vertical-align: middle;
+		}
+
+		label.has-checkbox {
+			margin-right: 15px;
+		}
+
+		label.has-checkbox > input[type="checkbox"] {
+			margin-right: 3px;
 		}
 
 		select {
@@ -8078,7 +8086,7 @@ table.bar_chart {
 	#woocommerce-product-data {
 		.hndle {
 			display: block;
-			line-height: 24px;
+			line-height: 28px;
 
 			.type_box {
 				display: inline;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9afb60a267493fc0d864410ef878ea41",
+    "content-hash": "51e3f59e8a93e41ed5edb619543009e0",
     "packages": [],
     "packages-dev": [
         {
@@ -456,6 +456,59 @@
             "time": "2024-05-20T13:34:27+00:00"
         },
         {
+            "name": "phpstan/phpdoc-parser",
+            "version": "0.4.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/phpdoc-parser.git",
+                "reference": "d8d9d4645379e677466d407034436bb155b11c65"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/d8d9d4645379e677466d407034436bb155b11c65",
+                "reference": "d8d9d4645379e677466d407034436bb155b11c65",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~7.1"
+            },
+            "require-dev": {
+                "consistence/coding-standard": "^3.5",
+                "ergebnis/composer-normalize": "^2.0.2",
+                "jakub-onderka/php-parallel-lint": "^0.9.2",
+                "phing/phing": "^2.16.0",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12.19",
+                "phpstan/phpstan-strict-rules": "^0.12",
+                "phpunit/phpunit": "^6.3",
+                "slevomat/coding-standard": "^4.7.2",
+                "symfony/process": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PHPStan\\PhpDocParser\\": [
+                        "src/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPDoc parser with support for nullable, intersection and generic types",
+            "support": {
+                "issues": "https://github.com/phpstan/phpdoc-parser/issues",
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/master"
+            },
+            "time": "2020-04-13T16:28:46+00:00"
+        },
+        {
             "name": "sirbrillig/phpcs-changed",
             "version": "v2.11.5",
             "source": {
@@ -510,17 +563,78 @@
             "time": "2024-05-23T20:01:41+00:00"
         },
         {
-            "name": "squizlabs/php_codesniffer",
-            "version": "3.10.1",
+            "name": "slevomat/coding-standard",
+            "version": "6.3.10",
             "source": {
                 "type": "git",
-                "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "8f90f7a53ce271935282967f53d0894f8f1ff877"
+                "url": "https://github.com/slevomat/coding-standard.git",
+                "reference": "58fa5ea2c048357ae55185eb5e93ca2826fffde0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/8f90f7a53ce271935282967f53d0894f8f1ff877",
-                "reference": "8f90f7a53ce271935282967f53d0894f8f1ff877",
+                "url": "https://api.github.com/repos/slevomat/coding-standard/zipball/58fa5ea2c048357ae55185eb5e93ca2826fffde0",
+                "reference": "58fa5ea2c048357ae55185eb5e93ca2826fffde0",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1",
+                "phpstan/phpdoc-parser": "0.4.0 - 0.4.4",
+                "squizlabs/php_codesniffer": "^3.5.5"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "0.6.2",
+                "phing/phing": "2.16.3",
+                "php-parallel-lint/php-parallel-lint": "1.2.0",
+                "phpstan/phpstan": "0.12.19",
+                "phpstan/phpstan-deprecation-rules": "0.12.2",
+                "phpstan/phpstan-phpunit": "0.12.8",
+                "phpstan/phpstan-strict-rules": "0.12.2",
+                "phpunit/phpunit": "7.5.20|8.5.2|9.1.2"
+            },
+            "type": "phpcodesniffer-standard",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "6.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SlevomatCodingStandard\\": "SlevomatCodingStandard"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Slevomat Coding Standard for PHP_CodeSniffer complements Consistence Coding Standard by providing sniffs with additional checks.",
+            "support": {
+                "issues": "https://github.com/slevomat/coding-standard/issues",
+                "source": "https://github.com/slevomat/coding-standard/tree/6.3.10"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/kukulich",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/slevomat/coding-standard",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-06-22T11:33:09+00:00"
+        },
+        {
+            "name": "squizlabs/php_codesniffer",
+            "version": "3.10.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
+                "reference": "86e5f5dd9a840c46810ebe5ff1885581c42a3017"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/86e5f5dd9a840c46810ebe5ff1885581c42a3017",
+                "reference": "86e5f5dd9a840c46810ebe5ff1885581c42a3017",
                 "shasum": ""
             },
             "require": {
@@ -587,7 +701,62 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-05-22T21:24:41+00:00"
+            "time": "2024-07-21T23:26:44+00:00"
+        },
+        {
+            "name": "suin/phpcs-psr4-sniff",
+            "version": "v3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/suin/phpcs-psr4-sniff.git",
+                "reference": "b000ca1e3d04c9876b39c2e56859760b93dfc84d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/suin/phpcs-psr4-sniff/zipball/b000ca1e3d04c9876b39c2e56859760b93dfc84d",
+                "reference": "b000ca1e3d04c9876b39c2e56859760b93dfc84d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.1",
+                "slevomat/coding-standard": ">=4.7 <8.0.0",
+                "squizlabs/php_codesniffer": ">=3.3 <4.0.0"
+            },
+            "type": "phpcodesniffer-standard",
+            "autoload": {
+                "psr-0": {
+                    "Suin\\Sniffs\\Classes\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "suin",
+                    "email": "suinyeze@gmail.com",
+                    "homepage": "https://github.com/suin",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP_CodeSniffer sniff that checks class name matches PSR-4 project structure.",
+            "homepage": "https://github.com/suin/php",
+            "keywords": [
+                "PSR-4",
+                "coding-standards",
+                "coding-style",
+                "namespace",
+                "php-codesniffer",
+                "phpcs",
+                "static-analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/suin/php/issues",
+                "source": "https://github.com/suin/phpcs-psr4-sniff/tree/v3.0.0"
+            },
+            "time": "2021-06-02T06:16:24+00:00"
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
@@ -705,5 +874,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }

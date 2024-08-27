@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -29,6 +30,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
+use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 
 /**
  * Main WooCommerce Class.
@@ -44,7 +46,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.3.0';
+	public $version = '9.4.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -310,6 +312,7 @@ final class WooCommerce {
 
 		self::add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
+		self::add_filter( 'woocommerce_register_log_handlers', array( $this, 'register_remote_log_handler' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -327,6 +330,7 @@ final class WooCommerce {
 		$container->get( WebhookUtil::class );
 		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
+		$container->get( ComingSoonAdminBarBadge::class );
 		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
 
@@ -422,8 +426,6 @@ final class WooCommerce {
 	 * Define WC Constants.
 	 */
 	private function define_constants() {
-		$upload_dir = wp_upload_dir( null, false );
-
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
 		$this->define( 'WC_PLUGIN_BASENAME', plugin_basename( WC_PLUGIN_FILE ) );
 		$this->define( 'WC_VERSION', $this->version );
@@ -442,8 +444,9 @@ final class WooCommerce {
 		 */
 		if ( defined( 'WC_LOG_DIR' ) ) {
 			$this->define( 'WC_LOG_DIR_CUSTOM', true );
+		} else {
+			$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory( false ) );
 		}
-		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
@@ -708,6 +711,11 @@ final class WooCommerce {
 		 * WCCOM Site.
 		 */
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
+
+		/**
+		 * Product Usage
+		 */
+		include_once WC_ABSPATH . 'includes/product-usage/class-wc-product-usage.php';
 
 		/**
 		 * Libraries and packages.
@@ -1310,5 +1318,17 @@ final class WooCommerce {
 			$slug = dirname( WC_PLUGIN_BASENAME );
 		}
 		return $slug;
+	}
+
+	/**
+	 * Register the remote log handler.
+	 *
+	 * @param \WC_Log_Handler[] $handlers The handlers to register.
+	 *
+	 * @return \WC_Log_Handler[]
+	 */
+	private function register_remote_log_handler( $handlers ) {
+		$handlers[] = wc_get_container()->get( RemoteLogger::class );
+		return $handlers;
 	}
 }
