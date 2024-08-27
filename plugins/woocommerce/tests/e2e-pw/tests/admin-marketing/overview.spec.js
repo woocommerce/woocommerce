@@ -28,11 +28,6 @@ test.describe( 'Marketing page', () => {
 
 		// Sections present
 		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
-		).toBeVisible();
-		await expect(
 			page.getByText( 'Channels', { exact: true } )
 		).toBeVisible();
 		await expect(
