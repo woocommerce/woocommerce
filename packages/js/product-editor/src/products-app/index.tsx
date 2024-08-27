@@ -21,7 +21,7 @@ function ProductsLayout() {
 	return <div>Initial Products Layout</div>;
 }
 
-export default function ProductsApp() {
+export function ProductsApp() {
 	return (
 		<GlobalStylesProvider>
 			<UnsavedChangesWarning />

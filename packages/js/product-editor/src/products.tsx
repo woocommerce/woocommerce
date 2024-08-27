@@ -3,15 +3,18 @@
  */
 import {
 	StrictMode,
+	Suspense,
 	createElement,
 	// @ts-expect-error createRoot is available.
 	createRoot,
+	lazy,
 } from '@wordpress/element';
 
-/**
- * Internal dependencies
- */
-import ProductsApp from './products-app';
+const ProductsApp = lazy( () =>
+	import( './products-app' ).then( ( module ) => ( {
+		default: module.ProductsApp,
+	} ) )
+);
 
 /**
  * Initializes the "Products Dashboard".
@@ -24,7 +27,9 @@ export function initializeProductsDashboard( id: string ) {
 
 	root.render(
 		<StrictMode>
-			<ProductsApp />
+			<Suspense fallback={ null }>
+				<ProductsApp />
+			</Suspense>
 		</StrictMode>
 	);
 
