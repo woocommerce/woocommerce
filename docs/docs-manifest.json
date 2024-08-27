@@ -267,7 +267,7 @@
               "menu_title": "Legacy Hooks",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "hash": "025731fc8884e13e09ecc857bee7d669a091f11640e023e40c08ffc521f38964",
+              "hash": "be4cf6862932c6696568b210e5f6ae4bd5313dacfb66724e23fab830baeb94e1",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
               "id": "5264fa45d393327b2c9cffb038c4d3670879d911"
             }
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "e054beda95d791f118b8aba90fd63fe1c28ce9f008d89fd863397aac7bf9e827"
+  "hash": "df3de404fdaf0f5edbc84ef82a7e492c5bf95c862aecadf9643229b7d10cc2eb"
 }

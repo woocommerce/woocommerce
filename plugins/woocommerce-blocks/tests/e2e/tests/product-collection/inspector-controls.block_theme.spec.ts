@@ -6,7 +6,7 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import ProductCollectionPage, { SELECTORS } from '../product-collection.page';
+import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {

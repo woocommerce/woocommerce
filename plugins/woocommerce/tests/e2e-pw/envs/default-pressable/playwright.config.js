@@ -10,6 +10,7 @@ config = {
 			testMatch: [
 				'**/basic.spec.js',
 				'**/activate-and-setup/**/*.spec.js',
+				'**/merchant/products/block-editor/**/*.spec.js',
 				'**/admin-analytics/**/*.spec.js',
 				'**/admin-marketing/**/*.spec.js',
 				'**/admin-tasks/**/*.spec.js',
