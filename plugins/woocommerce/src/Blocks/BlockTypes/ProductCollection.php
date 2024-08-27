@@ -140,7 +140,7 @@ class ProductCollection extends AbstractBlock {
 		// Reset the render state for the next render.
 		$this->reset_render_state();
 
-		return $block_content;
+		return $this->enhance_product_collection_with_interactivity( $block_content, $block );
 	}
 
 	/**
