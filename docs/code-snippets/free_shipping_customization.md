@@ -18,7 +18,7 @@ The functionality to hide all other methods, and only show Free Shipping, requir
 
 Before adding snippets, clear your WooCommerce cache. Go to WooCommerce > System Status > Tools > WooCommerce Transients > Clear transients.
 
-Add this code to your child theme’s `functions.php`, or via a plugin that allows custom functions to be added. Please don’t add custom code directly to a parent theme’s `functions.php` as changes are entirely erased when a parent theme updates.
+Add this code to your child theme's `functions.php`, or via a plugin that allows custom functions to be added. Please don't add custom code directly to a parent theme's `functions.php` as changes are entirely erased when a parent theme updates.
 
 ## Code Snippets
 
@@ -34,7 +34,7 @@ This means you can use `add_filter()` on `woocommerce_shipping_free_shipping_is_
 
 ### How do I only show Free Shipping?
 
-The following snippet hides everything but `free_shipping`, if it’s available and the customer's cart qualifies. 
+The following snippet hides everything but `free_shipping`, if it's available and the customer's cart qualifies. 
 
 ```php
 /**
@@ -59,7 +59,7 @@ add_filter( 'woocommerce_package_rates', 'my_hide_shipping_when_free_is_availabl
 
 ### How do I only show Local Pickup and Free Shipping?
 
-The snippet below hides everything but `free_shipping` and `local_pickup`, if it’s available and the customer's cart qualifies. 
+The snippet below hides everything but `free_shipping` and `local_pickup`, if it's available and the customer's cart qualifies. 
 
 ```php
 

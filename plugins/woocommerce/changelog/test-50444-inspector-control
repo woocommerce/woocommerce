@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Move the inspector controls e2e tests from product collection file to its own file

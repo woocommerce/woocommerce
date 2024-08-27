@@ -320,7 +320,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is within the product-query namespace
+	 * Check whether block is within the product-query namespace.
 	 *
 	 * @param array $block Parsed block data.
 	 */
@@ -331,7 +331,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block has isInherited attribute asigned
+	 * Check whether block has isInherited attribute assigned.
 	 *
 	 * @param array $block Parsed block data.
 	 */
@@ -357,7 +357,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is a Post template
+	 * Check whether block is a Post template.
 	 *
 	 * @param string $block_name Block name.
 	 */
@@ -366,7 +366,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is a Product Template
+	 * Check whether block is a Product Template.
 	 *
 	 * @param string $block_name Block name.
 	 */
@@ -375,7 +375,7 @@ class ArchiveProductTemplatesCompatibility extends AbstractTemplateCompatibility
 	}
 
 	/**
-	 * Check if block is eaither a Post template or Product Template
+	 * Check if block is either a Post template or a Product Template
 	 *
 	 * @param string $block_name Block name.
 	 */

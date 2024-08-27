@@ -10,6 +10,7 @@ import { CheckoutExpressPayment } from '../../../cart-checkout-shared/payment-me
 
 const Block = ( { className }: { className?: string } ): JSX.Element | null => {
 	const { cartNeedsPayment } = useStoreCart();
+
 	if ( ! cartNeedsPayment ) {
 		return null;
 	}

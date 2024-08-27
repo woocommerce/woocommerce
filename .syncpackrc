@@ -12,7 +12,7 @@
 			"dependencies": [
 				"pnpm"
 			],
-			"pinVersion": "^9.1.0",
+			"pinVersion": "9.1.3",
 			"packages": [
 				"**"
 			]
@@ -172,7 +172,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.45.1"
+			"pinVersion": "^1.46.1"
 		},
 		{
 			"dependencies": [

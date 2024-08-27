@@ -20,6 +20,7 @@ import './inner-blocks';
  */
 const settings = {
 	title: __( 'Cart', 'woocommerce' ),
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon

@@ -205,6 +205,10 @@ const PaymentRecommendations: React.FC = () => {
 			};
 		} );
 
+	if ( pluginsList.length === 0 ) {
+		return null;
+	}
+
 	return (
 		<Card size="medium" className="woocommerce-recommended-payments-card">
 			<CardHeader>
