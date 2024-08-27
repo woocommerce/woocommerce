@@ -29,9 +29,6 @@ export default class PaymentMethodConfig
 	implements PaymentMethodConfigInstance
 {
 	public name: string;
-	public title: string;
-	public description: string;
-	public gatewayId: string;
 	public content: ReactNode;
 	public edit: ReactNode;
 	public paymentMethodId?: string;
@@ -47,9 +44,6 @@ export default class PaymentMethodConfig
 		// validate config
 		PaymentMethodConfig.assertValidConfig( config );
 		this.name = config.name;
-		this.title = config.title || config.name;
-		this.description = config.description;
-		this.gatewayId = config.gatewayId;
 		this.label = config.label;
 		this.placeOrderButtonLabel = config.placeOrderButtonLabel;
 		this.ariaLabel = config.ariaLabel;

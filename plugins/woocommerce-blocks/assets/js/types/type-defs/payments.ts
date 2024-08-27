@@ -123,11 +123,11 @@ export interface ExpressPaymentMethodConfiguration {
 	// A unique string to identify the payment method client side.
 	name: string;
 	// A human readable title for the payment method.
-	title: string;
+	title?: string;
 	// A human readable description for the payment method.
-	description: string;
+	description?: string;
 	// The gateway ID for the payment method.
-	gatewayId: string;
+	gatewayId?: string;
 	// A react node for your payment method UI.
 	content: ReactNode;
 	// A react node to display a preview of your payment method in the editor.
