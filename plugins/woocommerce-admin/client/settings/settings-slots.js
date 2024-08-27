@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-<<<<<<< HEAD
-import { render, createRoot, useContext } from '@wordpress/element';
-=======
 import { createRoot } from '@wordpress/element';
->>>>>>> trunk
 import { createSlotFill, SlotFillProvider } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
 
