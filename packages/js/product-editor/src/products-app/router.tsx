@@ -12,18 +12,27 @@ import SidebarNavigationScreen from '@wordpress/edit-site/build-module/component
 // import DataViewsSidebarContent from '@wordpress/edit-site/build-module/components/sidebar-dataviews';
 // import PostList from '@wordpress/edit-site/build-module/components/post-list';
 
+/**
+ * Internal dependencies
+ */
+import ProductList from './product-list/index';
+import ProductEdit from './product-edit/index';
+
 function DataViewsSidebarContent() {
 	return <div>Sidebar dataviews</div>;
-}
-function PostList() {
-	return <div>Post List</div>;
 }
 
 const { useLocation } = unlock( routerPrivateApis );
 
 export default function useLayoutAreas() {
 	const { params = {} } = useLocation();
-	const { postType, layout, canvas } = params;
+	const {
+		postType = 'product',
+		layout = 'table',
+		canvas,
+		quickEdit,
+		postId,
+	} = params;
 	const labels = useSelect(
 		( select ) => {
 			return select( coreStore ).getPostType( postType )?.labels;
@@ -34,19 +43,23 @@ export default function useLayoutAreas() {
 	// Products list.
 	if ( [ 'product' ].includes( postType ) ) {
 		const isListLayout = layout === 'list' || ! layout;
+		const showQuickEdit = quickEdit && ! isListLayout;
 		return {
 			key: 'products-list',
 			areas: {
 				sidebar: (
 					<SidebarNavigationScreen
-						title={ labels?.name }
+						title={ 'Products' }
 						isRoot
 						content={ <DataViewsSidebarContent /> }
 					/>
 				),
-				content: <PostList postType={ postType } />,
+				content: <ProductList />,
 				preview: false,
-				mobile: <PostList postType={ postType } />,
+				mobile: <ProductList postType={ postType } />,
+				edit: showQuickEdit && (
+					<ProductEdit postType={ postType } postId={ postId } />
+				),
 			},
 			widths: {
 				content: isListLayout ? 380 : undefined,

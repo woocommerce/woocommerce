@@ -114,11 +114,13 @@ class Init {
 	public function woocommerce_products_dashboard() {
 		$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version      = Constants::get_constant( 'WC_VERSION' );
+		if ( function_exists( 'gutenberg_url' ) ) {
 		wp_register_style(
 			'wp-gutenberg-posts-dashboard',
 			gutenberg_url( 'build/edit-site/posts.css', __FILE__ ),
 			array()
 		);
+	}
 		WCAdminAssets::get_instance();
 		wp_enqueue_style( 'wp-gutenberg-posts-dashboard' );
 		wp_enqueue_script( 'wc-admin-product-editor', WC()->plugin_url() . '/assets/js/admin/product-editor' . $suffix . '.js', array( 'wc-product-editor' ), $version, false );
