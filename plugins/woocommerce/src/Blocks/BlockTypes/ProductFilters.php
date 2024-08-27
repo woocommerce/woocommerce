@@ -58,7 +58,7 @@ class ProductFilters extends AbstractBlock {
 		$html = str_replace( $target_div, $product_filters_content_html . $target_div, $html );
 
 		$html = strtr(
-			'<dialog hidden role="dialog" aria-modal="true">
+			'<dialog hidden role="dialog" aria-modal="true" data-wc-bind--hidden="!state.isDialogOpen">
 				{{html}}
 			</dialog>',
 			array(

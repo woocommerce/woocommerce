@@ -11,15 +11,21 @@ const getContext = ( ns?: string ) =>
 	getContextFn< ProductFiltersContext >( ns );
 
 const productFilters = {
-	state: {},
+	state: {
+		isDialogOpen: () => {
+			const context = getContext();
+			return context.isDialogOpen;
+		},
+	},
 	actions: {
 		closeDialog: () => {
 			// const context = getContext();
 			// context.isDialogOpen = false;
 		},
 		openDialog: () => {
-			// const context = getContext();
-			// context.isDialogOpen = true;
+			const context = getContext();
+			context.isDialogOpen = true;
+			console.log( 'openDialog' );
 		},
 	},
 	callbacks: {},
