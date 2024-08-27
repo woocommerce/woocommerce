@@ -293,7 +293,41 @@ export class ShippingBanner extends Component {
 		);
 	};
 
-	openWcsModal() {}
+	openWcsModal = () => {
+		// Since the button is dynamically added, we need to wait for it to become selectable and then click it.
+
+		const buttonSelector =
+			'#woocommerce-shipping-shipping-label-shipping_label button';
+		if ( MutationObserver ) {
+			const observer = new MutationObserver(
+				( mutationsList, observer ) => {
+					const button = document.querySelector( buttonSelector );
+					if ( button ) {
+						button.click();
+						observer.disconnect();
+					}
+				}
+			);
+
+			observer.observe(
+				document.getElementById(
+					'woocommerce-shipping-shipping-label-shipping_label'
+				),
+				{
+					childList: true,
+					subtree: true,
+				}
+			);
+		} else {
+			const interval = setInterval( () => {
+				const targetElement = document.querySelector( buttonSelector );
+				if ( targetElement ) {
+					targetElement.click();
+					clearInterval( interval );
+				}
+			}, 300 );
+		}
+	};
 
 	render() {
 		const {
