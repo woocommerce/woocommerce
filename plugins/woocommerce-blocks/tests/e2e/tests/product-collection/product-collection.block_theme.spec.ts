@@ -87,7 +87,7 @@ test.describe( 'Product Collection', () => {
 			await admin.createNewPost();
 		} );
 
-		test( 'does not render', async ( { page, pageObject } ) => {
+		test( 'does not render', async ( { page, editor, pageObject } ) => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'featured' );
 			await pageObject.addFilter( 'Price Range' );
@@ -95,7 +95,7 @@ test.describe( 'Product Collection', () => {
 				max: '1',
 			} );
 
-			const featuredBlock = page.getByLabel( 'Block: Featured' );
+			const featuredBlock = editor.canvas.getByLabel( 'Block: Featured' );
 
 			await expect(
 				featuredBlock.getByText( 'Featured products' )
@@ -143,6 +143,7 @@ test.describe( 'Product Collection', () => {
 
 		test( 'renders if No Results block is present', async ( {
 			page,
+			editor,
 			pageObject,
 		} ) => {
 			await pageObject.insertProductCollection();
@@ -152,13 +153,13 @@ test.describe( 'Product Collection', () => {
 				max: '1',
 			} );
 
-			const noResultsFoundText = page.getByText( 'No results found' );
-
-			await expect( noResultsFoundText ).toBeVisible();
+			await expect(
+				editor.canvas.getByText( 'No results found' )
+			).toBeVisible();
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( noResultsFoundText ).toBeVisible();
+			await expect( page.getByText( 'No results found' ) ).toBeVisible();
 		} );
 	} );
 
