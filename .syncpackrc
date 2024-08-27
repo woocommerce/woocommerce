@@ -200,7 +200,9 @@
 				"@wordpress/interface",
 				"@wordpress/router",
 				"@wordpress/edit-site",
-				"@wordpress/private-apis"
+				"@wordpress/private-apis",
+				"@wordpress/dataviews",
+				"@wordpress/dom"
 			],
 			"packages": [
 				"@woocommerce/block-templates",
