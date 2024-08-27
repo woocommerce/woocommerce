@@ -10,6 +10,11 @@ import {
 	lazy,
 } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import { getGutenbergVersion } from './utils/get-gutenberg-version';
+
 const ProductsApp = lazy( () =>
 	import( './products-app' ).then( ( module ) => ( {
 		default: module.ProductsApp,
@@ -24,12 +29,17 @@ const ProductsApp = lazy( () =>
 export function initializeProductsDashboard( id: string ) {
 	const target = document.getElementById( id );
 	const root = createRoot( target );
+	const isGutenbergEnabled = getGutenbergVersion() > 0;
 
 	root.render(
 		<StrictMode>
-			<Suspense fallback={ null }>
-				<ProductsApp />
-			</Suspense>
+			{ isGutenbergEnabled ? (
+				<Suspense fallback={ null }>
+					<ProductsApp />
+				</Suspense>
+			) : (
+				<div>Please enabled Gutenberg for this feature</div>
+			) }
 		</StrictMode>
 	);
 
