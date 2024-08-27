@@ -321,7 +321,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			return (
 				<EmptyContent
 					title={ __(
-						"You currently don't have any actionable statuses. " +
+						'You currently don’t have any actionable statuses. ' +
 							'To display orders here, select orders that require further review in settings.',
 						'woocommerce'
 					) }
@@ -360,17 +360,8 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 }
 
 OrdersPanel.propTypes = {
-	isError: PropTypes.bool,
-	isRequesting: PropTypes.bool,
 	unreadOrdersCount: PropTypes.number,
-	orders: PropTypes.array.isRequired,
 	orderStatuses: PropTypes.array,
-};
-
-OrdersPanel.defaultProps = {
-	orders: [],
-	isError: false,
-	isRequesting: false,
 };
 
 export default OrdersPanel;

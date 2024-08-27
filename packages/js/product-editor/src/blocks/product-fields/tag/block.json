@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-tag-field",
 	"title": "Product Tag",
 	"category": "widgets",
 	"description": "A field to select product tags.",
-	"keywords": [ "products", "tag" ],
+	"keywords": [
+		"products",
+		"tag"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
@@ -19,7 +22,10 @@
 			"type": "string"
 		}
 	},
-	"usesContext": [ "postType", "isInSelectedTab" ],
+	"usesContext": [
+		"postType",
+		"isInSelectedTab"
+	],
 	"supports": {
 		"align": false,
 		"html": false,

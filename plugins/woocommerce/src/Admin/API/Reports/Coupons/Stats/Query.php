@@ -21,11 +21,15 @@ use Automattic\WooCommerce\Admin\API\Reports\Query as ReportsQuery;
 
 /**
  * API\Reports\Coupons\Stats\Query
+ *
+ * @deprecated 9.3.0 Coupons\Stats\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
  */
 class Query extends ReportsQuery {
 
 	/**
 	 * Valid fields for Products report.
+	 *
+	 * @deprecated 9.3.0 Coupons\Stats\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */
@@ -35,6 +39,8 @@ class Query extends ReportsQuery {
 
 	/**
 	 * Get product data based on the current query vars.
+	 *
+	 * @deprecated 9.3.0 Coupons\Stats\Query class is deprecated, please use GenericQuery or \WC_Object_Query instead.
 	 *
 	 * @return array
 	 */

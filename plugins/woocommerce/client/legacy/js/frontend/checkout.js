@@ -656,7 +656,8 @@ jQuery( function( $ ) {
 		init: function() {
 			$( document.body ).on( 'click', 'a.showcoupon', this.show_coupon_form );
 			$( document.body ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
-			$( 'form.checkout_coupon' ).hide().on( 'submit', this.submit );
+			$( document.body ).on( 'blur change input', '#coupon_code', this.remove_coupon_error );
+			$( 'form.checkout_coupon' ).hide().on( 'submit', this.submit.bind( this ) );
 		},
 		show_coupon_form: function() {
 			$( '.checkout_coupon' ).slideToggle( 400, function() {
@@ -664,8 +665,36 @@ jQuery( function( $ ) {
 			});
 			return false;
 		},
-		submit: function() {
-			var $form = $( this );
+		show_coupon_error: function( html_element, $target ) {
+			if ( $target.length === 0 ) {
+				return;
+			}
+	
+			var msg = $( $.parseHTML( html_element ) ).text().trim();
+
+			if ( msg === '' ) {
+				return;
+			}
+				
+			$target.find( '#coupon_code' )
+				.focus()
+				.addClass( 'has-error' )
+				.attr( 'aria-invalid', 'true' )
+				.attr( 'aria-describedby', 'coupon-error-notice' );
+			$target.append( '<span class="coupon-error-notice" id="coupon-error-notice" role="alert">' + msg + '</span>' );
+		},
+		remove_coupon_error: function( evt ) {
+			$( evt.currentTarget )
+				.removeClass( 'has-error' )
+				.removeAttr( 'aria-invalid' )
+				.removeAttr( 'aria-describedby' )
+				.next( '.coupon-error-notice' )
+				.remove();
+		},
+		submit: function( evt ) {
+			var $form = $( evt.currentTarget );
+			var $coupon_field = $form.find( '#coupon_code' );
+			var self = this;
 
 			if ( $form.is( '.processing' ) ) {
 				return false;
@@ -689,13 +718,20 @@ jQuery( function( $ ) {
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' ),
 				data:		data,
-				success:	function( code ) {
+				success:	function( response ) {
 					$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message' ).remove();
 					$form.removeClass( 'processing' ).unblock();
 
-					if ( code ) {
-						$form.before( code );
-						$form.slideUp();
+					if ( response ) {
+						// We only want to show coupon notices if they are no errors.
+						// Coupon errors are shown under the input.
+						if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
+							$form.slideUp( 400, function() {
+								$form.before( response );
+							} );
+						} else {
+							self.show_coupon_error( response, $coupon_field.parent() );
+						}
 
 						$( document.body ).trigger( 'applied_coupon_in_checkout', [ data.coupon_code ] );
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
@@ -741,6 +777,7 @@ jQuery( function( $ ) {
 
 						// Remove coupon code from coupon field
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
+						$( 'form.checkout_coupon' ).slideUp();
 					}
 				},
 				error: function ( jqXHR ) {

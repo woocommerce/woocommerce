@@ -57,6 +57,16 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		//phpcs:disable WordPress.Security.NonceVerification.Recommended
 		global $current_section;
 
+		// We don't want to output anything from the action for now. So we buffer it and discard it.
+		ob_start();
+		/**
+		 * Fires before the payment gateways settings fields are rendered.
+		 *
+		 * @since 1.5.7
+		 */
+		do_action( 'woocommerce_admin_field_payment_gateways' );
+		ob_end_clean();
+
 		// Load gateways so we can show any global options they may have.
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 
@@ -91,6 +101,11 @@ class WC_Settings_Payment_Gateways_React extends WC_Settings_Page {
 		global $hide_save_button;
 		$hide_save_button = true;
 		echo '<div id="experimental_wc_settings_payments_' . esc_attr( $section ) . '"></div>';
+
+		// Output the gateways data to the page so the React app can use it.
+		$controller = new WC_REST_Payment_Gateways_Controller();
+		$response   = $controller->get_items( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) );
+		echo '<script type="application/json" id="experimental_wc_settings_payments_gateways">' . wp_json_encode( $response->data ) . '</script>';
 	}
 
 	/**

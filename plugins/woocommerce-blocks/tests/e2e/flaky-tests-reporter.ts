@@ -57,8 +57,8 @@ class FlakyTestsReporter implements Reporter {
 					this.failingTestCaseResults.set( testTitle, [] );
 				}
 				this.failingTestCaseResults
-					.get( testTitle )!
-					.push( formatTestResult( testCaseResult ) );
+					.get( testTitle )
+					?.push( formatTestResult( testCaseResult ) );
 				break;
 			}
 			case 'flaky': {

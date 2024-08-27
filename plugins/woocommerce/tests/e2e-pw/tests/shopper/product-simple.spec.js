@@ -1,5 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { admin } = require( '../../test-data/data' );
 
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
@@ -100,8 +101,8 @@ test.describe(
 			page,
 		} ) => {
 			await page.goto( 'my-account' );
-			await page.locator( '#username' ).fill( 'admin' );
-			await page.locator( '#password' ).fill( 'password' );
+			await page.locator( '#username' ).fill( admin.username );
+			await page.locator( '#password' ).fill( admin.password );
 			await page.locator( 'text=Log in' ).click();
 
 			await page.goto( `product/${ simpleProductSlug }` );
