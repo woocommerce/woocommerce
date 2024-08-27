@@ -133,7 +133,10 @@ test.describe( 'Add product attributes', { tag: '@gutenberg' }, () => {
 						'options=woocommerce_task_list_reminder_bar_hidden'
 					)
 			);
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await page
+				.locator( '#publishing-action' )
+				.getByRole( 'button', { name: 'Update' } )
+				.click();
 
 			const response = await finalRequestResolution;
 			expect( response.ok() ).toBeTruthy();
