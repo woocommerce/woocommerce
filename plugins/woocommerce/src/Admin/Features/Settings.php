@@ -3,19 +3,14 @@
  * WooCommerce Settings.
  */
 
-namespace Automattic\WooCommerce\Internal\Admin;
+namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
  * Contains backend logic for the Settings feature.
  */
-class SettingsNavigationFeature {
-	/**
-	 * Option name used to toggle this feature.
-	 */
-	const TOGGLE_OPTION_NAME = 'woocommerce_settings_enabled';
-
+class Settings {
 	/**
 	 * Class instance.
 	 *
@@ -42,11 +37,6 @@ class SettingsNavigationFeature {
 		}
 
 		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
-
-		if ( 'yes' !== get_option( 'woocommerce_settings_enabled', 'no' ) ) {
-			return;
-		}
-
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		// Run this after the original WooCommerce settings have been added.
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 60 );
