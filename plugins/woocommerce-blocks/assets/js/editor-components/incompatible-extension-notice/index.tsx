@@ -114,7 +114,7 @@ export function IncompatibleExtensionsNotice( {
 										// translators: %s is the number of incompatible extensions.
 										_n(
 											'%s more incompatibility',
-											'%s more incompatibilites',
+											'%s more incompatibilities',
 											remainingEntries,
 											'woocommerce'
 										),
