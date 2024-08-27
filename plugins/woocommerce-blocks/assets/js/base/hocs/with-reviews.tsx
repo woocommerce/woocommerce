@@ -50,7 +50,7 @@ const withReviews = (
 
 		delayedAppendReviews = (
 			this.props.delayFunction ?? ( ( f: () => void ) => f )
-		)( this.appendReviews.bind( this ) );
+		)( this.appendReviews );
 
 		isMounted = false;
 
