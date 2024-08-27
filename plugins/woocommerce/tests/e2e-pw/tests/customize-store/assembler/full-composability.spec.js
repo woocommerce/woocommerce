@@ -343,32 +343,35 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( defaultPattern ).toBeVisible();
 	} );
 
-	test( 'Clicking opt-in new patterns should be available', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-		const assembler = await pageObject.getAssembler();
+	test(
+		'Clicking opt-in new patterns should be available',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { pageObject, baseURL } ) => {
+			await prepareAssembler( pageObject, baseURL );
+			const assembler = await pageObject.getAssembler();
 
-		await assembler.getByText( 'Usage tracking' ).click();
-		await expect(
-			assembler.getByText( 'Access more patterns' )
-		).toBeVisible();
+			await assembler.getByText( 'Usage tracking' ).click();
+			await expect(
+				assembler.getByText( 'Access more patterns' )
+			).toBeVisible();
 
-		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
+			await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
 
-		await assembler
-			.getByText( 'Access more patterns' )
-			.waitFor( { state: 'hidden' } );
+			await assembler
+				.getByText( 'Access more patterns' )
+				.waitFor( { state: 'hidden' } );
 
-		const sidebarPattern = assembler.locator(
-			'.block-editor-block-patterns-list'
-		);
+			const sidebarPattern = assembler.locator(
+				'.block-editor-block-patterns-list'
+			);
 
-		await sidebarPattern.waitFor( { state: 'visible' } );
+			await sidebarPattern.waitFor( { state: 'visible' } );
 
-		await expect(
-			assembler.locator( '.block-editor-block-patterns-list__list-item' )
-		).toHaveCount( 10 );
-	} );
+			await expect(
+				assembler.locator(
+					'.block-editor-block-patterns-list__list-item'
+				)
+			).toHaveCount( 10 );
+		}
+	);
 } );
