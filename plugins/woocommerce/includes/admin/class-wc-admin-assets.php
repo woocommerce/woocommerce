@@ -41,7 +41,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$screen    = get_current_screen();
 			$screen_id = $screen ? $screen->id : '';
 
-			if ( strpos( $_GET['path'], '/settings' ) !== false ) {
+			if ( isset( $_GET['path'] ) && strpos( $_GET['path'], '/settings' ) !== false ) {
 				$screen_id = 'woocommerce_page_wc-settings';
 			}
 
