@@ -17,7 +17,13 @@ import {
  */
 import type { EditProps } from '../types';
 
-export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
+export const Inspector = ( {
+	attributes,
+	setAttributes,
+}: {
+	attributes: EditProps[ 'attributes' ];
+	setAttributes: EditProps[ 'setAttributes' ];
+} ) => {
 	const { showInputFields, inlineInput } = attributes;
 
 	return (

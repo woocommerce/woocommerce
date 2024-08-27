@@ -16,7 +16,10 @@ const Edit = ( props: EditProps ) => {
 
 	return (
 		<div { ...blockProps }>
-			<Inspector { ...props } />
+			<Inspector
+				attributes={ props.attributes }
+				setAttributes={ props.setAttributes }
+			/>
 			<Disabled>
 				<PriceSlider { ...props } />
 			</Disabled>
