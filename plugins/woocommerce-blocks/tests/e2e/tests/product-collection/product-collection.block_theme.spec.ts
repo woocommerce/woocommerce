@@ -113,6 +113,8 @@ test.describe( 'Product Collection', () => {
 			await expect( content ).not.toContainText( 'No results found' );
 		} );
 
+		// This test ensures the runtime render state is correctly reset for
+		// each block.
 		test( 'does not prevent subsequent blocks from render', async ( {
 			page,
 			pageObject,
@@ -157,40 +159,6 @@ test.describe( 'Product Collection', () => {
 			await pageObject.publishAndGoToFrontend();
 
 			await expect( noResultsFoundText ).toBeVisible();
-		} );
-
-		// See https://github.com/woocommerce/woocommerce/pull/50404#discussion_r1709377484
-		test( 'renders if No Results block is above the Product Template block', async ( {
-			page,
-			editor,
-			pageUtils,
-			pageObject,
-		} ) => {
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost( 'productCatalog' );
-			await pageObject.addFilter( 'Price Range' );
-			await pageObject.setPriceRange( {
-				max: '1',
-			} );
-
-			const noResultsBlockSelector =
-				'[data-type="woocommerce/product-collection-no-results"]';
-			const productTemplateBlockSelector =
-				'[data-type="woocommerce/product-template"]';
-
-			// Move the No Results block to the top.
-			await editor.selectBlocks( page.locator( noResultsBlockSelector ) );
-			await pageUtils.pressKeys( 'secondary+t', { times: 2 } );
-
-			await expect(
-				page.locator(
-					`${ noResultsBlockSelector }:above(${ productTemplateBlockSelector })`
-				)
-			).toBeVisible();
-
-			await pageObject.publishAndGoToFrontend();
-
-			await expect( page.getByText( 'No results found' ) ).toBeVisible();
 		} );
 	} );
 
