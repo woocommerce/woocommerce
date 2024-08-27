@@ -1413,7 +1413,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private function get_temporary_coupon( WC_Order_Item_Coupon $coupon_item ): WC_Coupon {
 		$coupon_object = new WC_Coupon();
 
-		// Since WooCommerce 8.7 a succint 'coupon_info' line item meta entry is created
+		// Since WooCommerce 8.7 a succinct 'coupon_info' line item meta entry is created
 		// whenever a coupon is applied to an order. Previously a more verbose 'coupon_data' was created.
 
 		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
