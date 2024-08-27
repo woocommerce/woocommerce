@@ -234,6 +234,7 @@ final class ProductFilterPrice extends AbstractBlock {
 							data-wc-bind--max="context.maxRange"
 							data-wc-bind--value="context.minPrice"
 							data-wc-on--change="actions.updateProducts"
+							data-wc-on--input="actions.updateRange"
 						>
 						<input
 							type="range"
@@ -246,6 +247,7 @@ final class ProductFilterPrice extends AbstractBlock {
 							data-wc-bind--max="context.maxRange"
 							data-wc-bind--value="context.maxPrice"
 							data-wc-on--change="actions.updateProducts"
+							data-wc-on--input="actions.updateRange"
 						>
 					</div>
 					<div class="wp-block-woocommerce-product-filter-price-content-right-input text">
