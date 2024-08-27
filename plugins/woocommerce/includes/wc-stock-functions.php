@@ -284,6 +284,10 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
  * @return void
  */
 function wc_trigger_stock_change_actions( $product ) {
+	if ( true !== $product->get_manage_stock() ) {
+		return;
+	}
+
 	$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
 	$low_stock_amount = absint( wc_get_low_stock_amount( $product ) );
 	$stock_quantity   = $product->get_stock_quantity();

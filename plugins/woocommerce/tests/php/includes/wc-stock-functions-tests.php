@@ -432,4 +432,28 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_no_stock', $callback );
 	}
+
+	/**
+	 * @testdox The wc_trigger_stock_change_actions function should only trigger actions if the product is set
+	 *          to manage stock.
+	 */
+	public function test_wc_trigger_stock_change_actions_bails_early_for_unmanaged_stock() {
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+		add_action( 'woocommerce_no_stock', $callback );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertFalse( $action_fired );
+
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0 );
+		$product->save();
+
+		$this->assertTrue( $action_fired );
+
+		remove_action( 'woocommerce_no_stock', $callback );
+	}
 }
