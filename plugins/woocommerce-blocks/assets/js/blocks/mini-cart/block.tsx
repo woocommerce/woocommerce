@@ -154,6 +154,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 
 		return () => {
 			if ( contentsNode instanceof Element && isOpen ) {
+				console.log( 'unmounting contentsNode', contentsNode );
 				const unmountingContainer = contentsNode.querySelector(
 					'.wp-block-woocommerce-mini-cart-contents'
 				);

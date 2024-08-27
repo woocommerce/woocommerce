@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { renderParentBlock } from '@woocommerce/atomic-utils';
-import Drawer from '@woocommerce/base-components/drawer';
+import Drawer, { DrawerCloseButton } from '@woocommerce/base-components/drawer';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import {
 	getValidBlockAttributes,
@@ -36,6 +36,7 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 		isInitiallyOpen = false,
 		contents = '',
 		addToCartBehaviour = 'none',
+		onClose,
 	} = attributes;
 
 	const {
@@ -82,29 +83,36 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 	// Hack to force re-render when elements are not rendered in expected order.
 	const [ observerState, setObserverState ] = useState< boolean >( false );
 
-	const contentsRef = useCallback( ( node ) => {
-		setContentsNode( node );
+	const contentsRef = useCallback(
+		( node ) => {
+			setContentsNode( node );
 
-		const mutationObserver = new MutationObserver( ( mutationsList ) => {
-			for ( const mutation of mutationsList ) {
-				if ( mutation.type === 'childList' ) {
-					// Check if a child matching the selector exists
-					const childElement = node.querySelector(
-						'.wc-block-components-drawer__close-wrapper'
-					);
-					if ( childElement ) {
-						// Hack to force re-render when elements are not rendered in expected order.
-						setObserverState( ! observerState );
+			if ( node ) {
+				const mutationObserver = new MutationObserver(
+					( mutationsList ) => {
+						for ( const mutation of mutationsList ) {
+							if ( mutation.type === 'childList' ) {
+								// Check if a child matching the selector exists
+								const childElement = node.querySelector(
+									'.wc-block-components-drawer__close-wrapper'
+								);
+								if ( childElement ) {
+									// Hack to force re-render when elements are not rendered in expected order.
+									setObserverState( ! observerState );
+								}
+							}
+						}
 					}
-				}
-			}
-		} );
+				);
 
-		mutationObserver.observe( node, {
-			childList: true,
-			subtree: true,
-		} );
-	}, [] );
+				mutationObserver.observe( node, {
+					childList: true,
+					subtree: true,
+				} );
+			}
+		},
+		[ observerState ]
+	);
 
 	const rootRef = useRef< ReactRootWithContainer[] | null >( null );
 
@@ -155,7 +163,7 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 
 		return () => {
 			if ( contentsNode instanceof Element && isOpen ) {
-				const unmountingContainer = contentsNode.querySelector(
+				const unmountingContainer = contentsNode?.querySelector(
 					'.wp-block-woocommerce-mini-cart-contents'
 				);
 
@@ -211,15 +219,19 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 				} ) }
 				isOpen={ isOpen }
 				onClose={ () => {
+					onClose();
 					setIsOpen( false );
 				} }
 				slideIn={ ! skipSlideIn }
 			>
-				<div
-					className="wc-block-mini-cart-interactivity__template-part"
-					ref={ contentsRef }
-					dangerouslySetInnerHTML={ { __html: contents } }
-				></div>
+				<>
+					<DrawerCloseButton />
+					<div
+						className="wc-block-mini-cart-interactivity__template-part"
+						ref={ contentsRef }
+						dangerouslySetInnerHTML={ { __html: contents } }
+					></div>
+				</>
 			</Drawer>
 		</>
 	);

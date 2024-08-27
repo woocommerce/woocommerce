@@ -12,6 +12,12 @@ import './style.scss';
 const MINI_CART_BUTTON_SELECTOR = '.wc-block-mini-cart__button';
 
 const renderMiniCartFrontend = () => {
+	const onClose = () => {
+		document.body.dispatchEvent(
+			new Event( 'wc-mini-cart-interactivity-close-drawer' )
+		);
+	};
+
 	// Check if button is focused. In that case, we want to refocus it after we
 	// replace it with the React equivalent.
 	let focusedMiniCartBlock: HTMLElement | null = null;
@@ -54,6 +60,7 @@ const renderMiniCartFrontend = () => {
 					: 0,
 				isInitiallyOpen,
 				colorClassNames,
+				onClose,
 				style: el.dataset.style ? JSON.parse( el.dataset.style ) : {},
 				addToCartBehaviour: el.dataset.addToCartBehaviour || 'none',
 				hasHiddenPrice: el.dataset.hasHiddenPrice !== 'false',
@@ -81,6 +88,13 @@ const renderMiniCartFrontend = () => {
 };
 
 renderMiniCartFrontend();
+
+document.body.addEventListener(
+	'wc-mini-cart-interactivity-open-drawer',
+	() => {
+		renderMiniCartFrontend();
+	}
+);
 
 // Create a mutation observer to watch for changes to the dataset isInitiallyOpen
 const observer = new MutationObserver( ( mutations ) => {

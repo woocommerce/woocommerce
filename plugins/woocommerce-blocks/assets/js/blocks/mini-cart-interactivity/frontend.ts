@@ -9,11 +9,8 @@ import lazyLoadScript, {
 } from '@woocommerce/base-utils/lazy-load-script';
 import {
 	getNavigationType,
-	// getValidBlockAttributes,
 	translateJQueryEventToNative,
 } from '@woocommerce/base-utils';
-// import { renderParentBlock } from '@woocommerce/atomic-utils';
-// import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -137,30 +134,13 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 			context.drawerOpen = ! context.drawerOpen;
 
 			if ( context.drawerOpen ) {
-				// TODO - if we leave this here is non optimal because it means we immediately load the script deps we used to lazy load.
-				// renderParentBlock( {
-				// 	// @ts-expect-error - The type of renderParentBlock's Block argument is incorrect.
-				// 	Block: MiniCartContentsBlock,
-				// 	blockName,
-				// 	getProps: ( el: Element ) => {
-				// 		return {
-				// 			attributes: getValidBlockAttributes(
-				// 				miniCartContentsAttributes,
-				// 				/* eslint-disable @typescript-eslint/no-explicit-any */
-				// 				( el instanceof HTMLElement
-				// 					? el.dataset
-				// 					: {} ) as any
-				// 			),
-				// 		};
-				// 	},
-				// 	selector: '.wp-block-woocommerce-mini-cart-contents',
-				// 	blockMap: getRegisteredBlockComponents( blockName ),
-				// } );
+				document.body.dispatchEvent(
+					new Event( 'wc-mini-cart-interactivity-open-drawer' )
+				);
 			}
 		},
 
 		loadScripts: async () => {
-			console.log( 'loadScripts' );
 			const context = getContext< Context >();
 
 			if ( ! context.scriptsLoaded ) {
@@ -172,6 +152,13 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 			document.body.removeEventListener(
 				'wc-blocks_adding_to_cart',
 				loadScripts
+			);
+
+			document.body.addEventListener(
+				'wc-mini-cart-interactivity-close-drawer',
+				() => {
+					context.drawerOpen = false;
+				}
 			);
 
 			// Remove adding to cart event handler.
