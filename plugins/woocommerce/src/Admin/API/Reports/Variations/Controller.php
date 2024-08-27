@@ -50,7 +50,7 @@ class Controller extends GenericController implements ExportableInterface {
 	);
 
 	/**
-	 * Get data from `'variations'` Query.
+	 * Get data from `'variations'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
