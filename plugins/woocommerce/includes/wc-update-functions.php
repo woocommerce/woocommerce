@@ -416,7 +416,7 @@ function wc_update_209_brazillian_state() {
 
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
-	// Update brazilian state codes.
+	// Update Brazilian state codes.
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
