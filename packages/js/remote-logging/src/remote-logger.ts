@@ -292,7 +292,7 @@ export class RemoteLogger {
 			.map( this.getFormattedFrame )
 			.join( '\n\n' );
 
-		// Set hard limit of 8192 characters for the stack trace so it does not use too much user bandwith and also our computation.
+		// Set hard limit of 8192 characters for the stack trace so it does not use too much user bandwidth and also our computation.
 		return trace.length > 8192 ? trace.substring( 0, 8192 ) : trace;
 	}
 

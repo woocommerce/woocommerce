@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update admin-* folders, so e2e tests are passing against Pressable env.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: This PR only updates an in-product link to the docs. The doc content is the same and has only been moved. No changelog entry needed IMO
-
