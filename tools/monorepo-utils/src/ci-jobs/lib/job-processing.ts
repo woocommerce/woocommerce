@@ -359,7 +359,7 @@ async function createJobsForProject(
 
 		// Jobs will check to see whether or not they should trigger based on the files
 		// that have been changed in the project. When "true" is given, however, it
-		// means that we should consider ALL ci-jobsfiles to have been changed and
+		// means that we should consider ALL files to have been changed and
 		// trigger any jobs for the project.
 		let projectChanges;
 		if ( changes === true ) {
