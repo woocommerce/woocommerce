@@ -134,7 +134,7 @@ test.describe( 'Add product attributes', { tag: '@gutenberg' }, () => {
 					)
 			);
 			await page
-				.getByText( 'Copy to a new draft Move to' )
+				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
 				.click();
 
