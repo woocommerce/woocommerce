@@ -7,7 +7,11 @@ config = {
 		{
 			name: 'default pressable',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: '**basic.spec.js',
+			testMatch: [
+				'**/basic.spec.js',
+				'**/activate-and-setup/**/*.spec.js',
+			],
+			grepInvert: /@skip-on-default-pressable/,
 		},
 	],
 };
