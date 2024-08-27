@@ -13,7 +13,7 @@ import deprecated from '@wordpress/deprecated';
 /**
  * @typedef {Object} CurrencyProps
  * @property {string} code           Currency ISO code.
- * @property {string} symbol         Symbol, can be multi-character.
+ * @property {string} symbol         Symbol, can be multi-character. Should be in plain text, w/o HTML markup.
  * @property {string} symbolPosition Where the symbol should be relative to the amount. One of `'left' | 'right' | 'left_space | 'right_space'`.
  * @typedef {NumberConfig & CurrencyProps} CurrencyConfig
  */

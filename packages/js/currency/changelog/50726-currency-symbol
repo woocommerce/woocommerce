@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add an explicit note to `CurrencyProps.currency` JSDoc that HTML markup is not supported.
