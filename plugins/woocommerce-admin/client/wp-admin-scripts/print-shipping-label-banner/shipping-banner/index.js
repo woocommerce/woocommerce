@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { Button, ExternalLink } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
@@ -23,6 +23,7 @@ import { getWcsAssets, acceptWcsTos } from '../wcs-api';
 
 const wcAssetUrl = getSetting( 'wcAssetUrl', '' );
 const wcsPluginSlug = 'woocommerce-shipping';
+const wcstPluginSlug = 'woocommerce-services';
 
 export class ShippingBanner extends Component {
 	constructor( props ) {
@@ -259,7 +260,7 @@ export class ShippingBanner extends Component {
 	}
 
 	getInstallText = () => {
-		const { activePlugins } = this.props;
+		const { activePlugins, actionButtonLabel } = this.props;
 		if ( activePlugins.includes( wcsPluginSlug ) ) {
 			// If WCS is active, then the only remaining step is to agree to the ToS.
 			return __(
@@ -267,9 +268,12 @@ export class ShippingBanner extends Component {
 				'woocommerce'
 			);
 		}
-		return __(
-			'By clicking "Create shipping label", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
-			'woocommerce'
+		return sprintf(
+			__(
+				'By clicking "%s", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
+				'woocommerce'
+			),
+			actionButtonLabel
 		);
 	};
 
@@ -394,6 +398,7 @@ export class ShippingBanner extends Component {
 			return null;
 		}
 
+		const { actionButtonLabel } = this.props;
 		return (
 			<div>
 				<div className="wc-admin-shipping-banner-container">
@@ -445,7 +450,7 @@ export class ShippingBanner extends Component {
 						isBusy={ isShippingLabelButtonBusy }
 						onClick={ this.createShippingLabelClicked }
 					>
-						{ __( 'Create shipping label', 'woocommerce' ) }
+						{ actionButtonLabel }
 					</Button>
 
 					<button
@@ -487,11 +492,16 @@ export default compose(
 		const isRequesting =
 			isPluginsRequesting( 'activatePlugins' ) ||
 			isPluginsRequesting( 'installPlugins' );
+		const activePlugins = getActivePlugins();
+		const actionButtonLabel = activePlugins.includes( wcstPluginSlug )
+			? __( 'Install WooCommerce Shipping', 'woocommerce' )
+			: __( 'Create shipping label', 'woocommerce' );
 
 		return {
 			isRequesting,
 			isJetpackConnected: isJetpackConnected(),
-			activePlugins: getActivePlugins(),
+			activePlugins,
+			actionButtonLabel,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
