@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes a bug where some express payment buttons weren't being rendered correctly
