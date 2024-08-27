@@ -29,7 +29,7 @@ See <https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-pl
 | ----------------------------- | ------------------------------------------------------- |
 | [Actions](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/hooks/actions.md) | Documentation covering action hooks on the server side. |
 | [Filters](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/hooks/filters.md) | Documentation covering filter hooks on the server side. |
-| [Migrated Hooks](/docs/cart-and-checkout-legacy-hooks/) | Documentation covering the migrated WooCommerce core hooks. |
+| [Migrated Hooks](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/docs/third-party-developers/extensibility/hooks/migrated-hooks.md) | Documentation covering the migrated WooCommerce core hooks. |
 
 ## REST API
 
@@ -44,9 +44,9 @@ See <https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-pl
 
 | Document                                                                               | Description                                                                                                 |
 | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| [Checkout Flow and Events](/docs/cart-and-checkout-checkout-flow-and-events/)     | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to. |
-| [Payment Method Integration](/docs/cart-and-checkout-payment-method-integration-for-the-checkout-block/) | Information about implementing payment methods.                                                             |
-| [Filtering Payment Methods](/docs/cart-and-checkout-filtering-payment-methods-in-the-checkout-block/)   | Information about filtering the payment methods available in the Checkout Block.                            |
+| [Checkout Flow and Events](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/checkout-flow-and-events.md)     | All about the checkout flow in the checkout block and the various emitted events that can be subscribed to. |
+| [Payment Method Integration](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md) | Information about implementing payment methods.                                                             |
+| [Filtering Payment Methods](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/filtering-payment-methods.md)   | Information about filtering the payment methods available in the Checkout Block.                            |
 
 ## Checkout Block
 
@@ -54,11 +54,11 @@ In addition to the reference material below, [please see the `block-checkout` pa
 
 | Document                                                                                         | Description                                                                                                       |
 |--------------------------------------------------------------------------------------------------| ----------------------------------------------------------------------------------------------------------------- |
-| [How the Checkout Block processes an order](/docs/cart-and-checkout-how-the-checkout-block-processes-an-order/) | The detailed inner workings of the Checkout Flow.                                                                 |
-| [IntegrationInterface](/docs/cart-and-checkout-handling-scripts-styles-and-data/)                                | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks. |
-| [Available Filters](/docs/category/cart-and-checkout-blocks/available-filters/)                                       | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.                |
-| [Slots and Fills](/docs/cart-and-checkout-slot-and-fill/)                                                | Explains Slot Fills and how to use them to render your own components in Cart and Checkout.                       |
-| [Available Slot Fills](/docs/cart-and-checkout-available-slots/)                                 | Available Slots that you can use and their positions in Cart and Checkout.                                        |
-| [DOM Events](/docs/cart-and-checkout-dom-events/)                                                     | A list of DOM Events used by some blocks to communicate between them and with other parts of WooCommerce.         |
+| [How the Checkout Block processes an order](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/how-checkout-processes-an-order.md) | The detailed inner workings of the Checkout Flow.                                                                 |
+| [IntegrationInterface](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/integration-interface.md)                                | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks. |
+| [Available Filters](https://github.com/woocommerce/woocommerce/tree/trunk/docs/cart-and-checkout-blocks/available-filters)                                       | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.                |
+| [Slots and Fills](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/slot-fills.md)                                                | Explains Slot Fills and how to use them to render your own components in Cart and Checkout.                       |
+| [Available Slot Fills](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/available-slot-fills.md)                                 | Available Slots that you can use and their positions in Cart and Checkout.                                        |
+| [DOM Events](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/dom-events.md)                                                     | A list of DOM Events used by some blocks to communicate between them and with other parts of WooCommerce.         |
 | [Filter Registry](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-blocks/packages/checkout/filter-registry/README.md)                          | The filter registry allows callbacks to be registered to manipulate certain values.                               |
-| [Additional Checkout Fields](/docs/cart-and-checkout-additional-checkout-fields/)                     | The filter registry allows callbacks to be registered to manipulate certain values.                               |
+| [Additional Checkout Fields](https://github.com/woocommerce/woocommerce/blob/trunk/docs/cart-and-checkout-blocks/additional-checkout-fields.md)                     | The filter registry allows callbacks to be registered to manipulate certain values.                               |
