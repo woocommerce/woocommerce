@@ -11,7 +11,6 @@ config = {
 				'**/basic.spec.js',
 				'**/activate-and-setup/**/*.spec.js',
 			],
-			grepInvert: /@skip-on-default-pressable/,
 		},
 	],
 };
