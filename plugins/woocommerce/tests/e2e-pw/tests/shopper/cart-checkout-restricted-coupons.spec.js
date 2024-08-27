@@ -8,6 +8,13 @@ const excludedProductName = 'Excluded test product';
 const includedCategoryName = 'Included Category';
 const excludedCategoryName = 'Excluded Category';
 
+// This waits for the cart page to refresh after applying the coupon to prevent flakyness.
+const awaitCartPageResponse = ( page ) =>
+	page.waitForResponse(
+		( response ) =>
+			response.url().includes( '/cart/' ) && response.status() === 200
+	);
+
 test.describe(
 	'Cart & Checkout Restricted Coupons',
 	{ tag: [ '@payments', '@services', '@hpos' ] },
@@ -198,6 +205,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				await expect(
 					page.getByText( 'This coupon has expired.' )
 				).toBeVisible();
@@ -240,6 +248,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				// failed because we need to have at least $50 in cart (single product is only $20)
 				await expect(
 					page.getByText(
@@ -258,6 +267,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				await expect(
 					page.getByText( 'Coupon code applied successfully.' )
 				).toBeVisible();
@@ -270,6 +280,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				await expect(
 					page.getByText(
 						'Sorry, coupon "min-max-spend-individual" has already been applied and cannot be used in conjunction with other coupons.'
@@ -356,6 +367,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				// failed because this product is on sale
 				await expect(
 					page.getByText(
@@ -440,6 +452,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				// failed because this coupon code has been used too much
 				await expect(
 					page.getByText(
@@ -492,6 +505,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				// failed because this product is not included for coupon
 				await expect(
 					page.getByText(
@@ -540,6 +554,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				// succeeded
 				await expect(
 					page.getByText( 'Coupon code applied successfully.' )
@@ -584,6 +599,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				// failed because this product is excluded from coupon
 				await expect(
 					page.getByText(
@@ -632,6 +648,7 @@ test.describe(
 				await page
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
+				await awaitCartPageResponse( page );
 				// succeeded
 				await expect(
 					page.getByText( 'Coupon code applied successfully.' )
@@ -672,7 +689,7 @@ test.describe(
 				.getByPlaceholder( 'Coupon code' )
 				.fill( 'email-restricted' );
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-
+			await awaitCartPageResponse( page );
 			await expect(
 				page.getByText(
 					'Please enter a valid email at checkout to use coupon code "email-restricted".'
