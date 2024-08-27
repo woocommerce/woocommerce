@@ -3,6 +3,8 @@
  * WooCommerce Product Data Views
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Admin\Features\ProductDataViews;
 
 use Automattic\Jetpack\Constants;
@@ -38,7 +40,7 @@ class Init {
 	 */
 	private static function is_product_data_view_page() {
 		// phpcs:disable WordPress.Security.NonceVerification
-		return isset( $_GET['page'] ) && $_GET['page'] === 'woocommerce-products-dashboard';
+		return isset( $_GET['page'] ) && 'woocommerce-products-dashboard' === $_GET['page'];
 		// phpcs:enable WordPress.Security.NonceVerification
 	}
 
@@ -121,8 +123,8 @@ class Init {
 	 * Renders the new posts dashboard page.
 	 */
 	public function woocommerce_products_dashboard() {
-		$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
-		$version      = Constants::get_constant( 'WC_VERSION' );
+		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		$version = Constants::get_constant( 'WC_VERSION' );
 		if ( function_exists( 'gutenberg_url' ) ) {
 			wp_register_style(
 				'wp-gutenberg-posts-dashboard',
