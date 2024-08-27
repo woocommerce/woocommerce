@@ -17,14 +17,10 @@ export function* getOptions( search ) {
 
 	yield setLoadingState( true );
 
-	try {
-		const response = yield apiFetch( {
-			path,
-		} );
-		yield setOptions( response );
-	} catch ( error ) {
-		throw new Error();
-	}
+	const response = yield apiFetch( {
+		path,
+	} );
+	yield setOptions( response );
 }
 
 export function* getOptionForEditing( optionName ) {
@@ -41,21 +37,17 @@ export function* getOptionForEditing( optionName ) {
 
 	const path = '/wc-admin/options?options=' + optionName;
 
-	try {
-		const response = yield apiFetch( {
-			path,
-		} );
+	const response = yield apiFetch( {
+		path,
+	} );
 
-		let content = response[ optionName ];
-		if ( typeof content === 'object' ) {
-			content = JSON.stringify( response[ optionName ], null, 2 );
-		}
-
-		yield setOptionForEditing( {
-			name: optionName,
-			content,
-		} );
-	} catch ( error ) {
-		throw new Error( error );
+	let content = response[ optionName ];
+	if ( typeof content === 'object' ) {
+		content = JSON.stringify( response[ optionName ], null, 2 );
 	}
+
+	yield setOptionForEditing( {
+		name: optionName,
+		content,
+	} );
 }

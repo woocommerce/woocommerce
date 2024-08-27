@@ -52,7 +52,7 @@ const ReminderText: React.FC< ReminderTextProps > = ( {
 			  )
 			: /* translators: 1: remaining tasks count */
 			  __(
-					"🚀 You're doing great! {{strongText}}%1$d steps left{{/strongText}} to get your store up and running. {{setupLink}}Continue setup{{/setupLink}}",
+					'🚀 You’re doing great! {{strongText}}%1$d steps left{{/strongText}} to get your store up and running. {{setupLink}}Continue setup{{/setupLink}}',
 					'woocommerce'
 			  );
 

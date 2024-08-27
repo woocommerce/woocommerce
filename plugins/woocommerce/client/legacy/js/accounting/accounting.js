@@ -230,7 +230,7 @@
 	 * 2nd parameter `precision` can be an object matching `settings.number`
 	 */
 	var formatNumber = lib.formatNumber = lib.format = function(number, precision, thousand, decimal) {
-		// Resursively format arrays:
+		// Recursively format arrays:
 		if (isArray(number)) {
 			return map(number, function(val) {
 				return formatNumber(val, precision, thousand, decimal);
@@ -275,7 +275,7 @@
 	 * To do: tidy up the parameters
 	 */
 	var formatMoney = lib.formatMoney = function(number, symbol, precision, thousand, decimal, format) {
-		// Resursively format arrays:
+		// Recursively format arrays:
 		if (isArray(number)) {
 			return map(number, function(val){
 				return formatMoney(val, symbol, precision, thousand, decimal, format);
@@ -315,7 +315,7 @@
 	 * List should be an array of numbers
 	 * Second parameter can be an object containing keys that match the params
 	 *
-	 * Returns array of accouting-formatted number strings of same length
+	 * Returns array of accounting-formatted number strings of the same length
 	 *
 	 * NB: `white-space:pre` CSS rule is required on the list container to prevent
 	 * browsers from collapsing the whitespace in the output strings.

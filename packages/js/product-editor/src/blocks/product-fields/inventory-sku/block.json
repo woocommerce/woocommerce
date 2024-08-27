@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-sku-field",
 	"title": "Product text control",
 	"category": "woocommerce",
 	"description": "The product sku.",
-	"keywords": [ "products", "sku" ],
+	"keywords": [
+		"products",
+		"sku"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
@@ -27,5 +30,7 @@
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }

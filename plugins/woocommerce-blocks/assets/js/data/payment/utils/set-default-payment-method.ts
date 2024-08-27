@@ -25,11 +25,13 @@ export const setDefaultPaymentMethod = async (
 
 	const savedPaymentMethods =
 		select( PAYMENT_STORE_KEY ).getSavedPaymentMethods();
-
+	const flatSavedPaymentMethods = Object.keys( savedPaymentMethods ).flatMap(
+		( type ) => savedPaymentMethods[ type ]
+	);
 	const savedPaymentMethod =
-		Object.keys( savedPaymentMethods ).flatMap(
-			( type ) => savedPaymentMethods[ type ]
-		)[ 0 ] || undefined;
+		flatSavedPaymentMethods.find( ( method ) => method.is_default ) ||
+		flatSavedPaymentMethods[ 0 ] ||
+		undefined;
 
 	if ( savedPaymentMethod ) {
 		const token = savedPaymentMethod.tokenId.toString();
@@ -61,7 +63,6 @@ export const setDefaultPaymentMethod = async (
 	}
 
 	dispatch( PAYMENT_STORE_KEY ).__internalSetPaymentIdle();
-
 	dispatch( PAYMENT_STORE_KEY ).__internalSetActivePaymentMethod(
 		paymentMethodKeys[ 0 ]
 	);

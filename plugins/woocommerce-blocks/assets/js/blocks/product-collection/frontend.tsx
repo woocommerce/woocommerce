@@ -199,9 +199,7 @@ const productCollectionStore = {
 			const { collection } =
 				getContext< ProductCollectionStoreContext >();
 
-			triggerProductListRenderedEvent( {
-				collection: collection || CoreCollectionNames.PRODUCT_CATALOG,
-			} );
+			triggerProductListRenderedEvent( { collection } );
 		},
 	},
 };

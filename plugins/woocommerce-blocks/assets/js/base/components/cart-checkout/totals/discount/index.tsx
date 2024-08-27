@@ -49,7 +49,13 @@ const TotalsDiscount = ( {
 	} = values;
 	const discountValue = parseInt( totalDiscount, 10 );
 
-	if ( ! discountValue && cartCoupons.length === 0 ) {
+	const filteredCartCoupons = applyCheckoutFilter( {
+		arg: filteredCartCouponsFilterArg,
+		filterName: 'coupons',
+		defaultValue: cartCoupons,
+	} );
+
+	if ( ! discountValue && filteredCartCoupons.length === 0 ) {
 		return null;
 	}
 
@@ -60,12 +66,6 @@ const TotalsDiscount = ( {
 	)
 		? discountValue + discountTaxValue
 		: discountValue;
-
-	const filteredCartCoupons = applyCheckoutFilter( {
-		arg: filteredCartCouponsFilterArg,
-		filterName: 'coupons',
-		defaultValue: cartCoupons,
-	} );
 
 	return (
 		<TotalsItem

@@ -19,28 +19,15 @@ import { WCUser, UserPreferences } from './types';
 const getWooCommerceMeta = ( user: WCUser ) => {
 	const wooMeta = user.woocommerce_meta || {};
 
-	const userData = mapValues( wooMeta, ( data, key ) => {
+	const userData = mapValues( wooMeta, ( data ) => {
 		if ( ! data || data.length === 0 ) {
 			return '';
 		}
 		try {
 			return JSON.parse( data );
 		} catch ( e ) {
-			if ( e instanceof Error ) {
-				/* eslint-disable no-console */
-				console.error(
-					`Error parsing value '${ data }' for ${ key }`,
-					e.message
-				);
-				/* eslint-enable no-console */
-			} else {
-				/* eslint-disable no-console */
-				console.error(
-					`Unexpected Error parsing value '${ data }' for ${ key } ${ e }`
-				);
-				/* eslint-enable no-console */
-			}
-			return '';
+			// If we can't parse the value, return the raw data. The meta value could be a string like 'yes' or 'no'.
+			return data;
 		}
 	} );
 
@@ -53,7 +40,7 @@ async function updateUserPrefs(
 	user: WCUser,
 	saveUser: ( userToSave: {
 		id: number;
-		woocommerce_meta: { [ key: string ]: boolean };
+		woocommerce_meta: WCUser[ 'woocommerce_meta' ];
 	} ) => WCUser,
 	getLastEntitySaveError: (
 		kind: string,
@@ -64,7 +51,14 @@ async function updateUserPrefs(
 ) {
 	// @todo Handle unresolved getCurrentUser() here.
 	// Prep fields for update.
-	const metaData = mapValues( userPrefs, JSON.stringify );
+	const metaData = mapValues( userPrefs, ( value ) => {
+		if ( typeof value === 'string' ) {
+			// If the value is a string, we don't need to serialize it.
+			return value;
+		}
+
+		return JSON.stringify( value );
+	} );
 
 	if ( Object.keys( metaData ).length === 0 ) {
 		return {
@@ -81,7 +75,6 @@ async function updateUserPrefs(
 			...metaData,
 		},
 	} );
-
 	// Use saveUser() to update WooCommerce meta values.
 	const updatedUser = await saveUser( {
 		id: user.id,
