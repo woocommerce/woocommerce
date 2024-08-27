@@ -20,6 +20,8 @@ class ShippingLabelBanner {
 	 */
 	private $shipping_label_banner_display_rules;
 
+	private const MIN_COMPATIBLE_WCST_VERSION = '2.7.0';
+
 	/**
 	 * Constructor
 	 */
@@ -125,14 +127,18 @@ class ShippingLabelBanner {
 	public function add_print_shipping_label_script( $hook ) {
 		WCAdminAssets::register_style( 'print-shipping-label-banner', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'print-shipping-label-banner', true );
+		$wcst_version = null;
+		$order        = wc_get_order();
+		if ( class_exists( '\WC_Connect_Loader' ) ) {
+			$wcst_version = \WC_Connect_Loader::get_wcs_version();
+		}
 
 		$payload = array(
-			'nonce'                 => wp_create_nonce( 'wp_rest' ),
-			'baseURL'               => get_rest_url(),
-			'wcs_server_connection' => true,
+			'is_wcst_compatible' => $wcst_version ? (int) version_compare( $wcst_version, self::MIN_COMPATIBLE_WCST_VERSION, '>=' ) : 0,
+			'order_id'           => $order ? $order->get_id() : null,
 		);
 
-		wp_localize_script( 'print-shipping-label-banner', 'wcConnectData', $payload );
+		wp_localize_script( 'wc-admin-print-shipping-label-banner', 'wcShippingCoreData', $payload );
 	}
 
 	/**

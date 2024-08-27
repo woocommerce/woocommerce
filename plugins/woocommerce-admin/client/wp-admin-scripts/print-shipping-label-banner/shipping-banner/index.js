@@ -19,7 +19,11 @@ import { getSetting } from '@woocommerce/settings';
 import '../style.scss';
 import DismissModal from '../dismiss-modal';
 import SetupNotice, { setupErrorTypes } from '../setup-notice';
-import { getWcsAssets, acceptWcsTos } from '../wcs-api';
+import {
+	getWcsAssets,
+	acceptWcsTos,
+	getWcsLabelPurchaseConfigs,
+} from '../wcs-api';
 
 const wcAssetUrl = getSetting( 'wcAssetUrl', '' );
 const wcsPluginSlug = 'woocommerce-shipping';
@@ -29,15 +33,11 @@ export class ShippingBanner extends Component {
 	constructor( props ) {
 		super( props );
 
-		const orderId = new URL( window.location.href ).searchParams.get(
-			'post'
-		);
-
 		this.state = {
 			showShippingBanner: true,
 			isDismissModalOpen: false,
 			setupErrorReason: setupErrorTypes.SETUP,
-			orderId: parseInt( orderId, 10 ),
+			orderId: parseInt( wcShippingCoreData.order_id, 10 ),
 			wcsAssetsLoaded: false,
 			wcsAssetsLoading: false,
 			wcsSetupError: false,
@@ -136,12 +136,19 @@ export class ShippingBanner extends Component {
 		} );
 	};
 
-	acceptTosAndGetWCSAssets() {
+	acceptTosAndGetWCSAssets = () => {
 		return acceptWcsTos()
+			.then( () => getWcsLabelPurchaseConfigs( this.state.orderId ) )
+			.then( ( configs ) => {
+				window.WCShipping_Config = configs.config;
+				return configs;
+			} )
 			.then( () => getWcsAssets() )
 			.then( ( wcsAssets ) => this.loadWcsAssets( wcsAssets ) )
-			.catch( () => this.setState( { wcsSetupError: true } ) );
-	}
+			.catch( ( err ) => {
+				this.setState( { wcsSetupError: true } );
+			} );
+	};
 
 	generateMetaBoxHtml( nodeId, title, args ) {
 		const argsJsonString = JSON.stringify( args ).replace( /"/g, '&quot;' ); // JS has no native html_entities so we just replace.
@@ -160,8 +167,7 @@ export class ShippingBanner extends Component {
 		</div>
 	</div>
 	<div class="inside">
-		<div class="wcc-root woocommerce wc-connect-create-shipping-label" data-args="${ argsJsonString }">
-		</div>
+		<div class="wcc-root woocommerce woocommerce-shipping-shipping-label" id="woocommerce-shipping-shipping-label-${ args.context }"></div>
 	</div>
 </div>
 `;
@@ -175,8 +181,8 @@ export class ShippingBanner extends Component {
 
 		this.setState( { wcsAssetsLoading: true } );
 
-		const jsPath = assets.wc_connect_admin_script;
-		const stylePath = assets.wc_connect_admin_style;
+		const jsPath = assets.wcshipping_create_label_script;
+		const stylePath = assets.wcshipping_create_label_style;
 
 		if ( undefined === window.wcsPluginData ) {
 			const assetPath = jsPath.substring(
@@ -236,7 +242,6 @@ export class ShippingBanner extends Component {
 			} ),
 			new Promise( ( resolve, reject ) => {
 				if ( stylePath !== '' ) {
-					const head = document.getElementsByTagName( 'head' )[ 0 ];
 					const link = document.createElement( 'link' );
 					link.rel = 'stylesheet';
 					link.type = 'text/css';
@@ -244,7 +249,8 @@ export class ShippingBanner extends Component {
 					link.media = 'all';
 					link.onload = resolve;
 					link.onerror = reject;
-					head.appendChild( link );
+					link.id = 'wcshipping-injected-styles';
+					document.head.appendChild( link );
 				} else {
 					resolve();
 				}
@@ -255,6 +261,16 @@ export class ShippingBanner extends Component {
 				wcsAssetsLoading: false,
 				isShippingLabelButtonBusy: false,
 			} );
+
+			// Reshow the shipping label metabox.
+			if ( window.jQuery ) {
+				window.jQuery( '#woocommerce-order-label' ).show();
+			}
+
+			document.getElementById(
+				'woocommerce-admin-print-label'
+			).style.display = 'none';
+
 			this.openWcsModal();
 		} );
 	}
@@ -277,116 +293,7 @@ export class ShippingBanner extends Component {
 		);
 	};
 
-	openWcsModal() {
-		if ( window.wcsGetAppStoreAsync ) {
-			window
-				.wcsGetAppStoreAsync( 'wc-connect-create-shipping-label' )
-				.then( ( wcsStore ) => {
-					const state = wcsStore.getState();
-					const { orderId } = this.state;
-					const siteId = state.ui.selectedSiteId;
-
-					const wcsStoreUnsubscribe = wcsStore.subscribe( () => {
-						const latestState = wcsStore.getState();
-
-						const shippingLabelState = get(
-							latestState,
-							[
-								'extensions',
-								'woocommerce',
-								'woocommerceServices',
-								siteId,
-								'shippingLabel',
-								orderId,
-							],
-							null
-						);
-
-						const labelSettingsState = get(
-							latestState,
-							[
-								'extensions',
-								'woocommerce',
-								'woocommerceServices',
-								siteId,
-								'labelSettings',
-							],
-							null
-						);
-
-						const packageState = get(
-							latestState,
-							[
-								'extensions',
-								'woocommerce',
-								'woocommerceServices',
-								siteId,
-								'packages',
-							],
-							null
-						);
-
-						const locationsState = get( latestState, [
-							'extensions',
-							'woocommerce',
-							'sites',
-							siteId,
-							'data',
-							'locations',
-						] );
-
-						if (
-							shippingLabelState &&
-							labelSettingsState &&
-							labelSettingsState.meta &&
-							packageState &&
-							locationsState
-						) {
-							if (
-								shippingLabelState.loaded &&
-								labelSettingsState.meta.isLoaded &&
-								packageState.isLoaded &&
-								isArray( locationsState ) &&
-								! this.state.isWcsModalOpen
-							) {
-								if ( window.jQuery ) {
-									this.setState( { isWcsModalOpen: true } );
-									window
-										.jQuery(
-											'.shipping-label__new-label-button'
-										)
-										.click();
-								}
-								wcsStore.dispatch( {
-									type: 'NOTICE_CREATE',
-									notice: {
-										duration: 10000,
-										status: 'is-success',
-										text: __(
-											'Plugin installed and activated',
-											'woocommerce'
-										),
-									},
-								} );
-							} else if (
-								shippingLabelState.showPurchaseDialog
-							) {
-								wcsStoreUnsubscribe();
-								if ( window.jQuery ) {
-									window
-										.jQuery( '#woocommerce-order-label' )
-										.show();
-								}
-							}
-						}
-					} );
-
-					document.getElementById(
-						'woocommerce-admin-print-label'
-					).style.display = 'none';
-				} );
-		}
-	}
+	openWcsModal() {}
 
 	render() {
 		const {
