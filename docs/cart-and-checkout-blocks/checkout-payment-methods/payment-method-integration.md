@@ -62,17 +62,17 @@ Here's some more details on the configuration options:
 
 This should be a unique string (wise to try to pick something unique for your gateway that wouldn't be used by another implementation) that is used as the identifier for the gateway client side. If `paymentMethodId` is not provided, `name` is used for `paymentMethodId` as well.
 
-#### `title` (required)
+#### `title` (optional)
 
-This should be a human readable string with the name of your payment method. It should be sentence capitalised. It is displayed to the merchant in the editor when viewing the Checkout block to indicate which express payment methods are active
+This should be a human readable string with the name of your payment method. It should be sentence capitalised. It is displayed to the merchant in the editor when viewing the Checkout block to indicate which express payment methods are active. If it is not provided, the `name` will be used as the title.
 
-#### `description` (required)
+#### `description` (optional)
 
-This is one or two sentences maximum describing your payment gateway. It should be sentence capitalised. It is displayed to the merchant in the editor when viewing the Checkout block to indicate which express payment methods are active
+This is one or two sentences maximum describing your payment gateway. It should be sentence capitalised. It is displayed to the merchant in the editor when viewing the Checkout block to indicate which express payment methods are active.
 
-#### `gatewayId` (required)
+#### `gatewayId` (optional)
 
-This is the ID of the Payment Gateway that your plugin registers server side, and which registers the express payment method. It is used to link your express payment method on the clinet, to a payment gateway defined on the server. It is used to direct the user to the right settings page within the editor.
+This is the ID of the Payment Gateway that your plugin registers server side, and which registers the express payment method. It is used to link your express payment method on the clinet, to a payment gateway defined on the server. It is used to direct the merchant to the right settings page within the editor. If this is not provided, the merchant will be redirected to the general Woo payment settings page.
 
 #### `content` (required)
 
