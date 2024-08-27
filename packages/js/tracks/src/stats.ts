@@ -22,7 +22,7 @@ const GROUP_PREFIX = 'x_woocommerce-';
  * @param {Record<string, string> | string} group  - The group of stats or a single stat name.
  * @param {string}                          [name] - The name of the stat if group is a string.
  *
- * @return {URLSearchParams} The constructed querys.
+ * @return {URLSearchParams} The constructed query.
  */
 function buildQueryParams(
 	group: Record< string, string > | string,
