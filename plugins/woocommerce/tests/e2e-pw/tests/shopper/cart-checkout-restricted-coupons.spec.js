@@ -368,7 +368,7 @@ test.describe(
 					.getByRole( 'button', { name: 'Apply coupon' } )
 					.click();
 				await awaitCartPageResponse( page );
-				// failed because this product is on sale
+				// failed because this product is on sale.
 				await expect(
 					page.getByText(
 						'Sorry, this coupon is not valid for sale items.'
