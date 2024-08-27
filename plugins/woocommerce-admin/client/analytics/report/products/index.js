@@ -82,7 +82,6 @@ class ProductsReport extends Component {
 					mode={ mode }
 					charts={ charts }
 					endpoint="products"
-					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
