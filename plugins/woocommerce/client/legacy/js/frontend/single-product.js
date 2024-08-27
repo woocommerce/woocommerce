@@ -343,13 +343,7 @@ jQuery( function( $ ) {
 
 		photoswipe.listen( 'close', function() {
 			self.trapFocusPhotoswipe( false );
-		});
-
-		photoswipe.listen( 'destroy', function() {
-			var focusCurrentTargetId = setTimeout( function() {
-				currentTarget.focus();
-				clearTimeout( focusCurrentTargetId );
-			}, 500 );
+			currentTarget.focus();
 		});
 
 		photoswipe.init();
