@@ -446,7 +446,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 				if ( is_wp_error( $upload ) ) {
 					/**
-					 * Filter to check if it should supress the image upload error, false by default.
+					 * Filter to check if it should suppress the image upload error, false by default.
 					 *
 					 * @since 4.5.0
 					 * @param bool false   If it should suppress.

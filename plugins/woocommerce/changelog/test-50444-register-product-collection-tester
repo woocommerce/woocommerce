@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Move register product collection tester e2e tests from product collection file to its own file
