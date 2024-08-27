@@ -115,7 +115,7 @@ class ProductCollection extends AbstractBlock {
 		);
 
 		// Interactivity API: Add navigation directives to the product collection block.
-		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_product_collection_rendering' ), 10, 2 );
+		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_rendering' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
@@ -132,7 +132,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @return string
 	 */
-	public function handle_product_collection_rendering( $block_content, $block ) {
+	public function handle_rendering( $block_content, $block ) {
 		if ( $this->should_prevent_render() ) {
 			return ''; // Prevent rendering.
 		}
