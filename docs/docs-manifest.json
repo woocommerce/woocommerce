@@ -1059,7 +1059,7 @@
           "menu_title": "DOM Events",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/dom-events.md",
-          "hash": "4d7f53b7aeff2ddfd9db62f0bef03c400ef2cbf25de1b7d9da7048cb3c001c60",
+          "hash": "3694ce05722ffbd252e938ff61c5d657934e8825ba0f5951ef2f1c2b14d09d2c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/dom-events.md",
           "id": "c8d247b91472740075871e6b57a9583d893ac650"
         }
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "f7bc131f5a7c8f5b271a797c894034c4092c0977c4f7fba5cab41a6485d08635"
+  "hash": "f63fe1490da6fe9e5d083e25dd20f69e0648db9fec72503a9b07767005238508"
 }
