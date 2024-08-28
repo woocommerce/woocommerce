@@ -15,7 +15,12 @@ import { createElement } from '@wordpress/element';
  * @param {string} props.visibleFormat
  * @return {Object} -
  */
-const Date = ( { date, machineFormat, screenReaderFormat, visibleFormat } ) => {
+const Date = ( {
+	date,
+	machineFormat = 'Y-m-d H:i:s',
+	screenReaderFormat = 'F j, Y',
+	visibleFormat = 'Y-m-d',
+} ) => {
 	return (
 		<time dateTime={ formatDate( machineFormat, date ) }>
 			<span aria-hidden="true">
@@ -46,12 +51,6 @@ Date.propTypes = {
 	 * Date format displayed in the page.
 	 */
 	visibleFormat: PropTypes.string,
-};
-
-Date.defaultProps = {
-	machineFormat: 'Y-m-d H:i:s',
-	screenReaderFormat: 'F j, Y',
-	visibleFormat: 'Y-m-d',
 };
 
 export default Date;

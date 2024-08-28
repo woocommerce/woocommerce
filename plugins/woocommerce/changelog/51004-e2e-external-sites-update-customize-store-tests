@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update /customize-store tests, so they are passing against Pressable env.

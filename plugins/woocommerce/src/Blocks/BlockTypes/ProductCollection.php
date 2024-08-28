@@ -156,21 +156,54 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Attach the init directive to Product Collection block.
+	 * Check if next tag is a PC block.
+	 *
+	 * @param WP_HTML_Tag_processor $p Initial tag processor.
+	 *
+	 * @return bool Answer if PC block is available.
+	 */
+	private function is_next_tag_product_collection( $p ) {
+		return $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) );
+	}
+
+	/**
+	 * Set PC block namespace for Interactivity API.
+	 *
+	 * @param WP_HTML_Tag_processor $p Initial tag processor.
+	 */
+	private function set_product_collection_namespace( $p ) {
+		$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+	}
+
+	/**
+	 * Attach the init directive to Product Collection block to call
+	 * the onRender callback.
 	 *
 	 * @param string $block_content The HTML content of the block.
+	 * @param string $collection Collection type.
 	 *
 	 * @return string Updated HTML content.
 	 */
-	private function add_init_directive( $block_content ) {
+	private function add_rendering_callback( $block_content, $collection ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-init to the product collection block so we trigger JS event on render.
-		if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
+		if ( $this->is_next_tag_product_collection( $p ) ) {
 			$p->set_attribute(
 				'data-wc-init',
 				'callbacks.onRender'
 			);
+			if ( $collection ) {
+				$p->set_attribute(
+					'data-wc-context',
+					wp_json_encode(
+						array(
+							'collection' => $collection,
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					)
+				);
+			}
 		}
 
 		return $p->get_updated_html();
@@ -184,20 +217,21 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @return string Updated HTML content.
 	 */
-	private function enable_client_side_naviagation( $block_content ) {
+	private function enable_client_side_navigation( $block_content ) {
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 
 		// Add `data-wc-navigation-id to the product collection block.
-		if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
+		if ( $this->is_next_tag_product_collection( $p ) ) {
 			$p->set_attribute(
 				'data-wc-navigation-id',
 				'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 			);
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$current_context = json_decode( $p->get_attribute( 'data-wc-context' ) ?? '{}', true );
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
 					array(
+						...$current_context,
 						// The message to be announced by the screen reader when the page is loading or loaded.
 						'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
 						'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
@@ -254,14 +288,20 @@ class ProductCollection extends AbstractBlock {
 		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
 
 		if ( $is_product_collection_block ) {
-			// Enqueue the Interactivity API runtime.
+			// Enqueue the Interactivity API runtime and set the namespace.
 			wp_enqueue_script( 'wc-interactivity' );
+			$p = new \WP_HTML_Tag_Processor( $block_content );
+			if ( $this->is_next_tag_product_collection( $p ) ) {
+				$this->set_product_collection_namespace( $p );
+			}
+			$block_content = $p->get_updated_html();
 
-			$block_content = $this->add_init_directive( $block_content );
+			$collection    = $block['attrs']['collection'] ?? '';
+			$block_content = $this->add_rendering_callback( $block_content, $collection );
 
 			$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 			if ( $is_enhanced_pagination_enabled ) {
-				$block_content = $this->enable_client_side_naviagation( $block_content );
+				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
 
@@ -284,7 +324,7 @@ class ProductCollection extends AbstractBlock {
 		$is_enhanced_pagination_enabled = ! ( $this->parsed_block['attrs']['forcePageReload'] ?? false );
 
 		// Only proceed if the block is a product collection block,
-		// enhaced pagination is enabled and query IDs match.
+		// enhanced pagination is enabled and query IDs match.
 		if ( $is_product_collection_block && $is_enhanced_pagination_enabled && $query_id === $parsed_query_id ) {
 			$block_content = $this->process_pagination_links( $block_content );
 		}
@@ -333,7 +373,7 @@ class ProductCollection extends AbstractBlock {
 				'class_name' => $class_name,
 			)
 		) ) {
-			$processor->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$this->set_product_collection_namespace( $processor );
 			$processor->set_attribute( 'data-wc-on--click', 'actions.navigate' );
 			$processor->set_attribute( 'data-wc-key', $key_prefix . '--' . esc_attr( wp_rand() ) );
 
@@ -374,8 +414,8 @@ class ProductCollection extends AbstractBlock {
 
 	/**
 	 * Check inner blocks of Product Collection block if there's one
-	 * incompatible with Interactivity API and if so, disable client-side
-	 * naviagtion.
+	 * incompatible with the Interactivity API and if so, disable client-side
+	 * navigation.
 	 *
 	 * @param array $parsed_block The block being rendered.
 	 * @return string Returns the parsed block, unmodified.
@@ -827,7 +867,7 @@ class ProductCollection extends AbstractBlock {
 	 * - For array items with numeric keys, we merge them as normal.
 	 * - For array items with string keys:
 	 *
-	 *   - If the value isn't array, we'll use the value comming from the merge array.
+	 *   - If the value isn't array, we'll use the value coming from the merge array.
 	 *     $base = ['orderby' => 'date']
 	 *     $new  = ['orderby' => 'meta_value_num']
 	 *     Result: ['orderby' => 'meta_value_num']

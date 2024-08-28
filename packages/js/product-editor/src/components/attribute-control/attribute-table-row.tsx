@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	createElement,
 	useEffect,
@@ -12,7 +13,12 @@ import {
 	Button,
 	FormTokenField as CoreFormTokenField,
 } from '@wordpress/components';
-import { useSelect, useDispatch, select as sel } from '@wordpress/data';
+import {
+	useSelect,
+	useDispatch,
+	select as sel,
+	dispatch,
+} from '@wordpress/data';
 import { cleanForSlug } from '@wordpress/url';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
@@ -281,22 +287,39 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 		// Create the new terms.
 		const promises = newTokens.map( async ( token ) => {
-			const newTerm = ( await createProductAttributeTerm(
-				{
-					name: token.value,
-					slug: token.slug,
-					attribute_id: attributeId,
-				},
-				{
-					optimisticQueryUpdate: selectItemsQuery,
-					optimisticUrlParameters: [ attributeId ],
-				}
-			) ) as ProductAttributeTerm;
+			try {
+				const newTerm = ( await createProductAttributeTerm(
+					{
+						name: token.value,
+						slug: token.slug,
+						attribute_id: attributeId,
+					},
+					{
+						optimisticQueryUpdate: selectItemsQuery,
+						optimisticUrlParameters: [ attributeId ],
+					}
+				) ) satisfies ProductAttributeTerm;
 
-			return newTerm;
+				return newTerm;
+			} catch ( error ) {
+				dispatch( 'core/notices' ).createErrorNotice(
+					sprintf(
+						/* translators: %s: the attribute term */
+						__(
+							'There was an error trying to create the attribute term "%s".',
+							'woocommerce'
+						),
+						token.value
+					)
+				);
+				return undefined;
+			}
 		} );
 
 		const newTerms = await Promise.all( promises );
+		const storedTerms = newTerms.filter(
+			( term ) => term !== undefined
+		) as ProductAttributeTerm[];
 
 		// Remove the recently created terms from the temporary state,
 		setTemporaryTerms( ( prevTerms ) =>
@@ -324,7 +347,11 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		);
 
 		// Call the callback to update the Form terms.
-		onTermsSelect( [ ...newSelectedTerms, ...newTerms ], index, attribute );
+		onTermsSelect(
+			[ ...newSelectedTerms, ...storedTerms ],
+			index,
+			attribute
+		);
 	}
 
 	/*

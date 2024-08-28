@@ -32,9 +32,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$selected_value = 'yes' === ( isset( $option['default'] ) ? $option['default'] : 'no' );
 			}
 			?>
-			<label for="<?php echo esc_attr( $option['id'] ); ?>" class="<?php echo esc_attr( $option['wrapper_class'] ); ?> tips" data-tip="<?php echo esc_attr( $option['description'] ); ?>">
-				<?php echo esc_html( $option['label'] ); ?>:
+			<label for="<?php echo esc_attr( $option['id'] ); ?>" class="<?php echo esc_attr( $option['wrapper_class'] ); ?> tips has-checkbox" data-tip="<?php echo esc_attr( $option['description'] ); ?>">
 				<input type="checkbox" name="<?php echo esc_attr( $option['id'] ); ?>" id="<?php echo esc_attr( $option['id'] ); ?>" data-product-type-option-id="<?php echo esc_attr( $option['id'] ); ?>" <?php echo checked( $selected_value, true, false ); ?> />
+				<?php echo esc_html( $option['label'] ); ?>
 			</label>
 		<?php endforeach; ?>
 	</span>

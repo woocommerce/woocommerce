@@ -3,6 +3,7 @@
  */
 import { dispatch } from '@wordpress/data';
 import { CartResponse, ExtensionCartUpdateArgs } from '@woocommerce/types';
+import { processErrorResponse } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -19,5 +20,10 @@ export const extensionCartUpdate = (
 	args: ExtensionCartUpdateArgs
 ): Promise< CartResponse > => {
 	const { applyExtensionCartUpdate } = dispatch( STORE_KEY );
-	return applyExtensionCartUpdate( args );
+	return applyExtensionCartUpdate( args ).catch( ( error ) => {
+		if ( error?.code === 'woocommerce_rest_cart_extensions_error' ) {
+			processErrorResponse( error );
+		}
+		return Promise.reject( error );
+	} );
 };

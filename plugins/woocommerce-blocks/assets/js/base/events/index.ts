@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { AddToCartEventDetail } from '@woocommerce/types';
+import type { CoreCollectionNames } from '@woocommerce/blocks/product-collection/types';
 
 /**
  * Internal dependencies
@@ -66,10 +67,13 @@ export const triggerAddedToCartEvent = ( {
 	} );
 };
 
-export const triggerProductListRenderedEvent = (): void => {
-	dispatchEvent( EVENT.WC_BLOCKS_PRODUCT_LIST_RENDERED, {
+export const triggerProductListRenderedEvent = ( payload: {
+	collection?: CoreCollectionNames | string;
+} ) => {
+	dispatchEvent( 'wc-blocks_product_list_rendered', {
 		bubbles: true,
 		cancelable: true,
+		detail: payload,
 	} );
 };
 

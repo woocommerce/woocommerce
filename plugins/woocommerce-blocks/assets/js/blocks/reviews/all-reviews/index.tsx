@@ -20,7 +20,7 @@ import type { AllReviewsEditorProps } from './types';
  * This block lists all product reviews.
  */
 registerBlockType( 'woocommerce/all-reviews', {
-	apiVersion: 2,
+	apiVersion: 3,
 	title: __( 'All Reviews', 'woocommerce' ),
 	icon: {
 		src: (

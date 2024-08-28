@@ -60,8 +60,9 @@ trait DraftOrderTrait {
 			return true;
 		}
 
-		// Pending and failed orders can be retried if the cart hasn't changed.
-		if ( $order_object->needs_payment() && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
+		// Failed orders and those needing payment can be retried if the cart hasn't changed.
+		// Pending orders are excluded from this check since they may be awaiting an update from the payment processor.
+		if ( $order_object->needs_payment() && ! $order_object->has_status( 'pending' ) && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
 			return true;
 		}
 

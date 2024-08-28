@@ -51,11 +51,9 @@ export function PublishButtonMenu( {
 
 				showSuccessNotice( scheduledProduct );
 			} )
-			.catch( ( error ) => {
-				const { message, errorProps } = getProductErrorMessageAndProps(
-					error,
-					visibleTab
-				);
+			.catch( async ( error ) => {
+				const { message, errorProps } =
+					await getProductErrorMessageAndProps( error, visibleTab );
 				createErrorNotice( message, errorProps );
 			} )
 			.finally( () => {
@@ -138,9 +136,9 @@ export function PublishButtonMenu( {
 										);
 										navigateTo( { url } );
 									} )
-									.catch( ( error ) => {
+									.catch( async ( error ) => {
 										const { message, errorProps } =
-											getProductErrorMessageAndProps(
+											await getProductErrorMessageAndProps(
 												error,
 												visibleTab
 											);
@@ -176,9 +174,9 @@ export function PublishButtonMenu( {
 											url: productListUrl,
 										} );
 									} )
-									.catch( ( error ) => {
+									.catch( async ( error ) => {
 										const { message, errorProps } =
-											getProductErrorMessageAndProps(
+											await getProductErrorMessageAndProps(
 												error,
 												visibleTab
 											);

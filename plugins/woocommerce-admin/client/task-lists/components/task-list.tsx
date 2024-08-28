@@ -125,7 +125,7 @@ export const TaskList: React.FC< TaskListProps > = ( {
 					className="woocommerce-task-card woocommerce-homescreen-card"
 				>
 					<CardHeader size="medium">
-						<div className="wooocommerce-task-card__header">
+						<div className="woocommerce-task-card__header">
 							<Text
 								size="20"
 								lineHeight="28px"

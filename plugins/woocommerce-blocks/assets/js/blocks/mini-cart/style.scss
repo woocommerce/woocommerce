@@ -33,7 +33,6 @@
 	padding: em($gap-small) em($gap-smaller);
 
 	&:hover:not([disabled]) {
-		opacity: 0.6;
 		cursor: pointer;
 	}
 }

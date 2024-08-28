@@ -11,6 +11,7 @@ import {
 	Modal,
 	// @ts-ignore No types for this exist yet.
 	__experimentalNavigatorButton as NavigatorButton,
+	Spinner,
 	// @ts-ignore No types for this exist yet.
 } from '@wordpress/components';
 import {
@@ -31,7 +32,6 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
 /**
  * Internal dependencies
  */
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
 import { trackEvent } from '~/customize-store/tracking';
 import { CustomizeStoreContext } from '../..';
@@ -41,13 +41,14 @@ import { capitalize } from 'lodash';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
-import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { isTrackingAllowed } from '../../utils/is-tracking-allowed';
 import clsx from 'clsx';
 import './style.scss';
 import { usePatterns } from '~/customize-store/assembler-hub/hooks/use-patterns';
 import { THEME_SLUG } from '~/customize-store/data/constants';
+import apiFetch from '@wordpress/api-fetch';
+import { enableTracking } from '~/customize-store/design-without-ai/services';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
 	if ( path?.includes( category ) ) {
@@ -60,7 +61,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 }: {
 	onNavigateBackClick: () => void;
 } ) => {
-	const { context, sendEvent } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 
 	const isNetworkOffline = useNetworkStatus();
 	const isPTKPatternsAPIAvailable = context.isPTKPatternsAPIAvailable;
@@ -107,7 +108,12 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		}, initialAccumulator );
 	}, [ blocks ] );
 
-	const { blockPatterns, isLoading: isLoadingPatterns } = usePatterns();
+	const {
+		blockPatterns,
+		isLoading: isLoadingPatterns,
+		invalidateCache,
+	} = usePatterns();
+
 	const patternsFromPTK = blockPatterns.filter(
 		( pattern ) =>
 			! pattern.name.includes( THEME_SLUG ) &&
@@ -118,28 +124,36 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 			pattern.source !== 'pattern-directory/core'
 	);
 
-	let notice;
-	if ( isNetworkOffline ) {
-		notice = __(
-			"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
-			'woocommerce'
-		);
-	} else if ( ! isPTKPatternsAPIAvailable ) {
-		notice = __(
-			"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
-			'woocommerce'
-		);
-	} else if ( ! isTrackingAllowed() ) {
-		notice = __(
-			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
-			'woocommerce'
-		);
-	} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
-		notice = __(
-			'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
-			'woocommerce'
-		);
-	}
+	const notice = useMemo( () => {
+		let noticeText;
+		if ( isNetworkOffline ) {
+			noticeText = __(
+				"Looks like we can't detect your network. Please double-check your internet connection and refresh the page.",
+				'woocommerce'
+			);
+		} else if ( ! isPTKPatternsAPIAvailable ) {
+			noticeText = __(
+				"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns.",
+				'woocommerce'
+			);
+		} else if ( ! isTrackingAllowed() ) {
+			noticeText = __(
+				'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more patterns.',
+				'woocommerce'
+			);
+		} else if ( ! isLoadingPatterns && patternsFromPTK.length === 0 ) {
+			noticeText = __(
+				'Unfortunately, a technical issue is preventing more patterns from being displayed. Please <FetchPatterns>try again</FetchPatterns> later.',
+				'woocommerce'
+			);
+		}
+		return noticeText;
+	}, [
+		isNetworkOffline,
+		isPTKPatternsAPIAvailable,
+		isLoadingPatterns,
+		patternsFromPTK.length,
+	] );
 
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
@@ -148,6 +162,8 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 
 	const [ optInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
+
+	const [ isSettingTracking, setIsSettingTracking ] = useState( false );
 
 	const optIn = () => {
 		trackEvent(
@@ -164,7 +180,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 	const title = __( 'Design your homepage', 'woocommerce' );
 
 	const sidebarMessage = __(
-		'Create an engaging homepage by adding and combining different patterns and layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
+		'Create an engaging homepage by adding and combining different patterns and layouts. You can continue customizing this page, including the content, later via the Editor.',
 		'woocommerce'
 	);
 
@@ -174,26 +190,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 		<SidebarNavigationScreen
 			title={ title }
 			onNavigateBackClick={ onNavigateBackClick }
-			description={ createInterpolateElement( sidebarMessage, {
-				EditorLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_editor_link_click',
-								{
-									source: 'homepage',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
-				),
-			} ) }
+			description={ sidebarMessage }
 			content={
 				<div className="woocommerce-customize-store__sidebar-homepage-content">
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage">
@@ -265,16 +262,13 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 										),
 										FetchPatterns: (
 											<Button
-												onClick={ () => {
-													if ( isIframe( window ) ) {
-														sendMessageToParent( {
-															type: 'INSTALL_PATTERNS',
-														} );
-													} else {
-														sendEvent(
-															'INSTALL_PATTERNS'
-														);
-													}
+												onClick={ async () => {
+													await apiFetch( {
+														path: `/wc-admin/patterns`,
+														method: 'POST',
+													} );
+
+													invalidateCache();
 												} }
 												variant="link"
 											/>
@@ -327,24 +321,27 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 												) }
 											</Button>
 											<Button
-												onClick={ () => {
+												onClick={ async () => {
 													optIn();
-													if ( isIframe( window ) ) {
-														sendMessageToParent( {
-															type: 'INSTALL_PATTERNS',
-														} );
-													} else {
-														sendEvent(
-															'INSTALL_PATTERNS'
-														);
-													}
+													await enableTracking();
+													setIsSettingTracking(
+														true
+													);
+													closeModal();
+													setIsSettingTracking(
+														false
+													);
 												} }
 												variant="primary"
 												disabled={ ! optInDataSharing }
 											>
-												{ __(
-													'Opt in',
-													'woocommerce'
+												{ isSettingTracking ? (
+													<Spinner />
+												) : (
+													__(
+														'Opt in',
+														'woocommerce'
+													)
 												) }
 											</Button>
 										</div>

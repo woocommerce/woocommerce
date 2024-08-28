@@ -71,6 +71,7 @@
 		"@wordpress/media-utils": "wp-6.0",
 		"@wordpress/plugins": "wp-6.0",
 		"@wordpress/preferences": "wp-6.0",
+		"@wordpress/private-apis": "^1.6.0",
 		"@wordpress/url": "wp-6.0",
 		"classnames": "^2.3.2",
 		"dompurify": "^2.4.7",

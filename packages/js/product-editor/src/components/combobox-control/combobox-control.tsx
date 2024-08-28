@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { ForwardedRef } from 'react';
-import { ComboboxControl as Combobox } from '@wordpress/components';
+import { ComboboxControl as CoreCombobox } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import {
 	createElement,
@@ -17,6 +17,12 @@ import classNames from 'classnames';
  * Internal dependencies
  */
 import type { ComboboxControlProps } from './types';
+
+/*
+ * Create an alias for the ComboboxControl core component,
+ * but with the custom ComboboxControlProps interface.
+ */
+const Combobox = CoreCombobox as React.ComponentType< ComboboxControlProps >;
 
 /**
  * This is a wrapper + a work around the Combobox to
@@ -39,6 +45,7 @@ export const ComboboxControl = forwardRef( function ForwardedComboboxControl(
 		onFilterValueChange,
 		onChange,
 		onBlur,
+		__experimentalRenderItem,
 	}: ComboboxControlProps,
 	ref: ForwardedRef< HTMLInputElement >
 ) {
@@ -122,6 +129,7 @@ export const ComboboxControl = forwardRef( function ForwardedComboboxControl(
 				currentId,
 				className
 			) }
+			__experimentalRenderItem={ __experimentalRenderItem }
 		/>
 	);
 } );

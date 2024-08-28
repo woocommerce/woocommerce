@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-summary-field",
 	"title": "Product summary",
 	"category": "widgets",
 	"description": "The product summary.",
-	"keywords": [ "products", "summary", "excerpt" ],
+	"keywords": [
+		"products",
+		"summary",
+		"excerpt"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"property": {
@@ -31,7 +35,10 @@
 		},
 		"direction": {
 			"type": "string",
-			"enum": [ "ltr", "rtl" ]
+			"enum": [
+				"ltr",
+				"rtl"
+			]
 		},
 		"label": {
 			"type": "string"
@@ -53,5 +60,7 @@
 		"lock": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }

@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
+import type { DragEventHandler } from 'react';
 import {
+	Children,
 	createElement,
 	cloneElement,
 	useState,
-	useEffect,
+	useMemo,
 } from '@wordpress/element';
-import { DragEventHandler } from 'react';
 import classnames from 'classnames';
 import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 
@@ -15,10 +16,9 @@ import { MediaItem, MediaUpload } from '@wordpress/media-utils';
  * Internal dependencies
  */
 import { moveIndex } from '../sortable';
-import { ImageGalleryToolbar } from './index';
-import { ImageGalleryChild, MediaUploadComponentType } from './types';
-import { removeItem, replaceItem } from './utils';
 import { ImageGalleryWrapper } from './image-gallery-wrapper';
+import { ImageGalleryToolbar } from './index';
+import type { ImageGalleryChild, MediaUploadComponentType } from './types';
 
 export type ImageGalleryProps = {
 	children: ImageGalleryChild | ImageGalleryChild[];
@@ -57,26 +57,86 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		null
 	);
 	const [ isDragging, setIsDragging ] = useState< boolean >( false );
-	const [ orderedChildren, setOrderedChildren ] = useState<
-		ImageGalleryChild[]
-	>( [] );
+	const childElements = useMemo(
+		() => Children.toArray( children ) as JSX.Element[],
+		[ children ]
+	);
 
-	useEffect( () => {
-		if ( ! children ) {
-			return;
-		}
-		setOrderedChildren(
-			( Array.isArray( children ) ? children : [ children ] ).map(
-				( child, index ) =>
-					cloneElement( child, { key: child.key || String( index ) } )
+	function cloneChild( child: JSX.Element, childIndex: number ) {
+		const key = child.key || String( childIndex );
+		const isToolbarVisible = key === activeToolbarKey;
+
+		return cloneElement(
+			child,
+			{
+				key,
+				isDraggable: allowDragging && ! child.props.isCover,
+				className: classnames( {
+					'is-toolbar-visible': isToolbarVisible,
+				} ),
+				onClick() {
+					setActiveToolbarKey( isToolbarVisible ? null : key );
+				},
+				onBlur( event: React.FocusEvent< HTMLDivElement > ) {
+					if (
+						isDragging ||
+						event.currentTarget.contains( event.relatedTarget ) ||
+						( event.relatedTarget &&
+							( event.relatedTarget as Element ).closest(
+								'.media-modal, .components-modal__frame'
+							) ) ||
+						( event.relatedTarget &&
+							// Check if not a button within the toolbar is clicked, to prevent hiding the toolbar.
+							( event.relatedTarget as Element ).closest(
+								'.woocommerce-image-gallery__toolbar'
+							) ) ||
+						( event.relatedTarget &&
+							// Prevent toolbar from hiding if the dropdown is clicked within the toolbar.
+							( event.relatedTarget as Element ).closest(
+								'.woocommerce-image-gallery__toolbar-dropdown-popover'
+							) )
+					) {
+						return;
+					}
+					setActiveToolbarKey( null );
+				},
+			},
+			isToolbarVisible && (
+				<ImageGalleryToolbar
+					value={ child.props.id }
+					allowDragging={ allowDragging }
+					childIndex={ childIndex }
+					lastChild={ childIndex === childElements.length - 1 }
+					moveItem={ ( fromIndex: number, toIndex: number ) => {
+						onOrderChange(
+							moveIndex< ImageGalleryChild >(
+								fromIndex,
+								toIndex,
+								childElements
+							)
+						);
+					} }
+					removeItem={ ( removeIndex: number ) => {
+						onRemove( {
+							removeIndex,
+							removedItem: childElements[ removeIndex ],
+						} );
+					} }
+					replaceItem={ (
+						replaceIndex: number,
+						media: { id: number } & MediaItem
+					) => {
+						onReplace( { replaceIndex, media } );
+					} }
+					setToolBarItem={ ( toolBarItem ) => {
+						onSelectAsCover( activeToolbarKey );
+						setActiveToolbarKey( toolBarItem );
+					} }
+					MediaUploadComponent={ MediaUploadComponent }
+				/>
 			)
 		);
-	}, [ children ] );
-
-	const updateOrderedChildren = ( items: ImageGalleryChild[] ) => {
-		setOrderedChildren( items );
-		onOrderChange( items );
-	};
+	}
 
 	return (
 		<div
@@ -87,7 +147,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 		>
 			<ImageGalleryWrapper
 				allowDragging={ allowDragging }
-				updateOrderedChildren={ updateOrderedChildren }
+				updateOrderedChildren={ onOrderChange }
 				onDragStart={ ( event ) => {
 					setIsDragging( true );
 					onDragStart( event );
@@ -98,114 +158,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 				} }
 				onDragOver={ onDragOver }
 			>
-				{ orderedChildren.map( ( child, childIndex ) => {
-					const isToolbarVisible = child.key === activeToolbarKey;
-
-					return cloneElement(
-						child,
-						{
-							isDraggable: allowDragging && ! child.props.isCover,
-							className: classnames( {
-								'is-toolbar-visible': isToolbarVisible,
-							} ),
-							onClick: () => {
-								setActiveToolbarKey(
-									isToolbarVisible
-										? null
-										: ( child.key as string )
-								);
-							},
-							onBlur: (
-								event: React.FocusEvent< HTMLDivElement >
-							) => {
-								if (
-									isDragging ||
-									event.currentTarget.contains(
-										event.relatedTarget
-									) ||
-									( event.relatedTarget &&
-										(
-											event.relatedTarget as Element
-										 ).closest(
-											'.media-modal, .components-modal__frame'
-										) ) ||
-									( event.relatedTarget &&
-										// Check if not a button within the toolbar is clicked, to prevent hiding the toolbar.
-										(
-											event.relatedTarget as Element
-										 ).closest(
-											'.woocommerce-image-gallery__toolbar'
-										) ) ||
-									( event.relatedTarget &&
-										// Prevent toolbar from hiding if the dropdown is clicked within the toolbar.
-										(
-											event.relatedTarget as Element
-										 ).closest(
-											'.woocommerce-image-gallery__toolbar-dropdown-popover'
-										) )
-								) {
-									return;
-								}
-								setActiveToolbarKey( null );
-							},
-						},
-						isToolbarVisible ? (
-							<ImageGalleryToolbar
-								value={ child.props.id }
-								allowDragging={ allowDragging }
-								childIndex={ childIndex }
-								lastChild={
-									childIndex === orderedChildren.length - 1
-								}
-								moveItem={ (
-									fromIndex: number,
-									toIndex: number
-								) => {
-									updateOrderedChildren(
-										moveIndex< ImageGalleryChild >(
-											fromIndex,
-											toIndex,
-											orderedChildren
-										)
-									);
-								} }
-								removeItem={ ( removeIndex: number ) => {
-									onRemove( {
-										removeIndex,
-										removedItem:
-											orderedChildren[ removeIndex ],
-									} );
-									updateOrderedChildren(
-										removeItem(
-											orderedChildren,
-											removeIndex
-										)
-									);
-								} }
-								replaceItem={ (
-									replaceIndex: number,
-									media: { id: number } & MediaItem
-								) => {
-									onReplace( { replaceIndex, media } );
-									setOrderedChildren(
-										replaceItem< {
-											src: string;
-											alt: string;
-										} >( orderedChildren, replaceIndex, {
-											src: media.url as string,
-											alt: media.alt as string,
-										} )
-									);
-								} }
-								setToolBarItem={ ( toolBarItem ) => {
-									onSelectAsCover( activeToolbarKey );
-									setActiveToolbarKey( toolBarItem );
-								} }
-								MediaUploadComponent={ MediaUploadComponent }
-							/>
-						) : null
-					);
-				} ) }
+				{ childElements.map( cloneChild ) }
 			</ImageGalleryWrapper>
 		</div>
 	);
