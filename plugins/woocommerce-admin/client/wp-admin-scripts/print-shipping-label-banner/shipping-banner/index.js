@@ -36,7 +36,6 @@ export class ShippingBanner extends Component {
 			showShippingBanner: true,
 			isDismissModalOpen: false,
 			setupErrorReason: setupErrorTypes.SETUP,
-			orderId: parseInt( window.wcShippingCoreData.order_id, 10 ),
 			wcsAssetsLoaded: false,
 			wcsAssetsLoading: false,
 			wcsSetupError: false,
@@ -85,8 +84,13 @@ export class ShippingBanner extends Component {
 
 	async installAndActivatePlugins( pluginSlug ) {
 		// Avoid double activating.
-		const { installPlugins, activatePlugins, isRequesting, activePlugins } =
-			this.props;
+		const {
+			installPlugins,
+			activatePlugins,
+			isRequesting,
+			activePlugins,
+			isWcstCompatible,
+		} = this.props;
 		if ( isRequesting ) {
 			return false;
 		}
@@ -108,10 +112,7 @@ export class ShippingBanner extends Component {
 			return;
 		}
 
-		if (
-			! activePlugins.includes( wcsPluginSlug ) &&
-			[ 1, '1' ].includes( window.wcShippingCoreData.is_wcst_compatible )
-		) {
+		if ( ! activePlugins.includes( wcsPluginSlug ) && isWcstCompatible ) {
 			this.acceptTosAndGetWCSAssets();
 		} else {
 			this.setState( {
@@ -147,7 +148,7 @@ export class ShippingBanner extends Component {
 
 	acceptTosAndGetWCSAssets = () => {
 		return acceptWcsTos()
-			.then( () => getWcsLabelPurchaseConfigs( this.state.orderId ) )
+			.then( () => getWcsLabelPurchaseConfigs( this.props.orderId ) )
 			.then( ( configs ) => {
 				window.WCShipping_Config = configs.config;
 				return configs;
@@ -204,8 +205,7 @@ export class ShippingBanner extends Component {
 			window.wcsPluginData = { assetPath };
 		}
 
-		const { orderId } = this.state;
-		const { itemsCount } = this.props;
+		const { itemsCount, orderId } = this.props;
 
 		const shippingLabelContainerHtml = this.generateMetaBoxHtml(
 			'woocommerce-order-label',
@@ -371,10 +371,8 @@ export class ShippingBanner extends Component {
 			showShippingBanner,
 			isShippingLabelButtonBusy,
 		} = this.state;
-		if (
-			! showShippingBanner &&
-			[ 0, '0' ].includes( window.wcShippingCoreData.is_wcst_compatible )
-		) {
+		const { isWcstCompatible } = this.props;
+		if ( ! showShippingBanner && ! isWcstCompatible ) {
 			document
 				.getElementById( 'woocommerce-admin-print-label' )
 				.classList.add( 'error' );
@@ -474,6 +472,8 @@ ShippingBanner.propTypes = {
 	activatePlugins: PropTypes.func.isRequired,
 	installPlugins: PropTypes.func.isRequired,
 	isRequesting: PropTypes.bool.isRequired,
+	orderId: PropTypes.number.isRequired,
+	isWcstCompatible: PropTypes.bool.isRequired,
 };
 
 export default compose(
@@ -503,6 +503,10 @@ export default compose(
 			activePlugins,
 			actionButtonLabel,
 			headline,
+			orderId: parseInt( window.wcShippingCoreData.order_id, 10 ),
+			isWcstCompatible: [ 1, '1' ].includes(
+				window.wcShippingCoreData.is_wcst_compatible
+			),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
