@@ -23,6 +23,14 @@ test.describe(
 		} ) => {
 			await goToPageEditor( { page } );
 
+			// Dismiss "Choose a pattern" if present (Pressable)
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if (
+				await page.getByLabel( 'Close', { exact: true } ).isVisible()
+			) {
+				await page.getByLabel( 'Close', { exact: true } ).click();
+			}
+
 			await fillPageTitle( page, testPage.title );
 			const wordPressVersion = await getInstalledWordPressVersion();
 			await insertBlock( page, 'Classic Cart', wordPressVersion );
