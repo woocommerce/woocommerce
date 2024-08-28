@@ -78,7 +78,7 @@ export const SearchListItem = < T extends object = object >( {
 		if ( hasChildren && isSelected ) {
 			setExpandedPanelId( item.id as number );
 		}
-	}, [ item, hasChildren, isSelected ] );
+	}, [ item, hasChildren, isSelected, setExpandedPanelId ] );
 
 	const name = props.name || `search-list-item-${ controlId }`;
 	const id = `${ name }-${ item.id }`;

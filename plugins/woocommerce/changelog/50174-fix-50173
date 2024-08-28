@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Add filter `woocommerce_is_store_page` to modify whether Coming Soon mode considers a URL a store page or not.
