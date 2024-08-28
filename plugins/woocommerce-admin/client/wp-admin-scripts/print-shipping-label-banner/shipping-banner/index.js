@@ -199,14 +199,6 @@ export class ShippingBanner extends Component {
 		const shipmentTrackingStylePath =
 			assets.wcshipping_shipment_tracking_style;
 
-		if ( undefined === window.wcsPluginData ) {
-			const assetPath = jsPath.substring(
-				0,
-				jsPath.lastIndexOf( '/' ) + 1
-			);
-			window.wcsPluginData = { assetPath };
-		}
-
 		const { itemsCount, orderId } = this.props;
 
 		document.getElementById( labelPurchaseMetaboxId )?.remove();
