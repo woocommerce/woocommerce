@@ -239,6 +239,13 @@ export class ShippingBanner extends Component {
 			window.jQuery( '#woocommerce-order-label' ).hide();
 		}
 
+		document
+			.querySelectorAll( 'script[src*="/woocommerce-services/"]' )
+			.forEach( ( node ) => node.remove?.() );
+		document
+			.querySelectorAll( 'link[href*="/woocommerce-services/"]' )
+			.forEach( ( node ) => node.remove?.() );
+
 		Promise.all( [
 			new Promise( ( resolve, reject ) => {
 				const script = document.createElement( 'script' );
