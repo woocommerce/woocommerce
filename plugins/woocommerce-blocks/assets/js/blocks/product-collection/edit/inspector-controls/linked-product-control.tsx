@@ -7,6 +7,7 @@ import { SelectedOption } from '@woocommerce/block-hocs';
 import { useState, useMemo } from '@wordpress/element';
 import { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
 import { ProductResponseItem } from '@woocommerce/types';
+import { decodeEntities } from '@wordpress/html-entities';
 import {
 	PanelBody,
 	PanelRow,
@@ -53,12 +54,24 @@ const ProductButton: React.FC< {
 						alt={ product?.name }
 					/>
 				</FlexItem>
-				<Flex direction="column" align="flex-start" gap={ 0 }>
+
+				<Flex
+					direction="column"
+					align="flex-start"
+					gap={ 1 }
+					className="wc-block-product-collection-linked-product-control__content"
+				>
 					<FlexItem>
-						<Text color="inherit">{ product?.name }</Text>
+						<Text color="inherit" lineHeight={ 1 }>
+							{ product?.name
+								? decodeEntities( product.name )
+								: '' }
+						</Text>
 					</FlexItem>
 					<FlexItem>
-						<Text color="inherit">{ product?.sku }</Text>
+						<Text color="inherit" lineHeight={ 1 }>
+							{ product?.sku }
+						</Text>
 					</FlexItem>
 				</Flex>
 			</Flex>
