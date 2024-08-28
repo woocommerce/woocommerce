@@ -88,6 +88,12 @@ declare global {
 		getUserSetting?: ( name: string ) => string | undefined;
 		setUserSetting?: ( name: string, value: string ) => void;
 		deleteUserSetting?: ( name: string ) => void;
+		woocommerce_admin: {
+			ajax_url: string;
+			nonces: {
+				gateway_toggle?: string;
+			}
+		}
 	}
 }
 

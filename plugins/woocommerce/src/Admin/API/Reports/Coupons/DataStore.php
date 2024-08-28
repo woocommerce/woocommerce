@@ -21,6 +21,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_order_coupon_lookup';
@@ -28,12 +30,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ReportsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'coupons';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @override ReportsDataStore::$column_types
 	 *
 	 * @var array
 	 */
@@ -46,12 +52,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'coupons';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
@@ -148,6 +158,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
+	 * @override ReportsDataStore::normalize_order_by()
+	 *
 	 * @param string $order_by Sorting criterion.
 	 * @return string
 	 */
@@ -224,119 +236,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
-	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
-	 */
-	public function get_data( $query_args ) {
-		global $wpdb;
-
-		$table_name = self::get_db_table_name();
-
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page'      => get_option( 'posts_per_page' ),
-			'page'          => 1,
-			'order'         => 'DESC',
-			'orderby'       => 'coupon_id',
-			'before'        => TimeInterval::default_before(),
-			'after'         => TimeInterval::default_after(),
-			'fields'        => '*',
-			'coupons'       => array(),
-			'extended_info' => false,
-		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
-
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
-
-		if ( false === $data ) {
-			$this->initialize_queries();
-
-			$data = (object) array(
-				'data'    => array(),
-				'total'   => 0,
-				'pages'   => 0,
-				'page_no' => 0,
-			);
-
-			$selections       = $this->selected_columns( $query_args );
-			$included_coupons = $this->get_included_coupons_array( $query_args );
-			$limit_params     = $this->get_limit_params( $query_args );
-			$this->subquery->add_sql_clause( 'select', $selections );
-			$this->add_sql_query_params( $query_args );
-
-			if ( count( $included_coupons ) > 0 ) {
-				$total_results = count( $included_coupons );
-				$total_pages   = (int) ceil( $total_results / $limit_params['per_page'] );
-
-				$fields    = $this->get_fields( $query_args );
-				$ids_table = $this->get_ids_table( $included_coupons, 'coupon_id' );
-
-				$this->add_sql_clause( 'select', $this->format_join_selections( $fields, array( 'coupon_id' ) ) );
-				$this->add_sql_clause( 'from', '(' );
-				$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
-				$this->add_sql_clause( 'from', ") AS {$table_name}" );
-				$this->add_sql_clause(
-					'right_join',
-					"RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.coupon_id = {$table_name}.coupon_id"
-				);
-
-				$coupons_query = $this->get_query_statement();
-			} else {
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-				$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-				$coupons_query = $this->subquery->get_query_statement();
-
-				$this->subquery->clear_sql_clause( array( 'select', 'order_by', 'limit' ) );
-				$this->subquery->add_sql_clause( 'select', 'coupon_id' );
-				$coupon_subquery = "SELECT COUNT(*) FROM (
-					{$this->subquery->get_query_statement()}
-				) AS tt";
-
-				$db_records_count = (int) $wpdb->get_var(
-					$coupon_subquery // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				);
-
-				$total_results = $db_records_count;
-				$total_pages   = (int) ceil( $db_records_count / $limit_params['per_page'] );
-				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-					return $data;
-				}
-			}
-
-			$coupon_data = $wpdb->get_results(
-				$coupons_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				ARRAY_A
-			);
-			if ( null === $coupon_data ) {
-				return $data;
-			}
-
-			$this->include_extended_info( $coupon_data, $query_args );
-
-			$coupon_data = array_map( array( $this, 'cast_numbers' ), $coupon_data );
-			$data        = (object) array(
-				'data'    => $coupon_data,
-				'total'   => $total_results,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
-		}
-
-		return $data;
-	}
-
-	/**
 	 * Get coupon ID for an order.
 	 *
 	 * Tries to get the ID from order item meta, then falls back to a query of published coupons.
@@ -361,6 +260,115 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// Try to get the coupon ID using the code.
 		return wc_get_coupon_id_by_code( $coupon_item->get_code() );
+	}
+
+	/**
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
+	 *
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
+	 */
+	public function get_default_query_vars() {
+		$defaults                  = parent::get_default_query_vars();
+		$defaults['orderby']       = 'coupon_id';
+		$defaults['coupons']       = array();
+		$defaults['extended_info'] = false;
+
+		return $defaults;
+	}
+
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
+		global $wpdb;
+
+		$table_name = self::get_db_table_name();
+
+		$this->initialize_queries();
+
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
+		);
+
+		$selections       = $this->selected_columns( $query_args );
+		$included_coupons = $this->get_included_coupons_array( $query_args );
+		$limit_params     = $this->get_limit_params( $query_args );
+		$this->subquery->add_sql_clause( 'select', $selections );
+		$this->add_sql_query_params( $query_args );
+
+		if ( count( $included_coupons ) > 0 ) {
+			$total_results = count( $included_coupons );
+			$total_pages   = (int) ceil( $total_results / $limit_params['per_page'] );
+
+			$fields    = $this->get_fields( $query_args );
+			$ids_table = $this->get_ids_table( $included_coupons, 'coupon_id' );
+
+			$this->add_sql_clause( 'select', $this->format_join_selections( $fields, array( 'coupon_id' ) ) );
+			$this->add_sql_clause( 'from', '(' );
+			$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
+			$this->add_sql_clause( 'from', ") AS {$table_name}" );
+			$this->add_sql_clause(
+				'right_join',
+				"RIGHT JOIN ( {$ids_table} ) AS default_results
+				ON default_results.coupon_id = {$table_name}.coupon_id"
+			);
+
+			$coupons_query = $this->get_query_statement();
+		} else {
+			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+			$coupons_query = $this->subquery->get_query_statement();
+
+			$this->subquery->clear_sql_clause( array( 'select', 'order_by', 'limit' ) );
+			$this->subquery->add_sql_clause( 'select', 'coupon_id' );
+			$coupon_subquery = "SELECT COUNT(*) FROM (
+				{$this->subquery->get_query_statement()}
+			) AS tt";
+
+			$db_records_count = (int) $wpdb->get_var(
+				$coupon_subquery // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			);
+
+			$total_results = $db_records_count;
+			$total_pages   = (int) ceil( $db_records_count / $limit_params['per_page'] );
+			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
+				return $data;
+			}
+		}
+
+		$coupon_data = $wpdb->get_results(
+			$coupons_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			ARRAY_A
+		);
+		if ( null === $coupon_data ) {
+			return $data;
+		}
+
+		$this->include_extended_info( $coupon_data, $query_args );
+
+		$coupon_data = array_map( array( $this, 'cast_numbers' ), $coupon_data );
+		$data        = (object) array(
+			'data'    => $coupon_data,
+			'total'   => $total_results,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
+
+		return $data;
 	}
 
 	/**
