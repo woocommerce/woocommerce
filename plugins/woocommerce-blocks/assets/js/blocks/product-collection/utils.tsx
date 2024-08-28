@@ -405,7 +405,6 @@ export const useGetProduct = ( productId: number | undefined ) => {
 		null
 	);
 	const [ isLoading, setIsLoading ] = useState< boolean >( false );
-	const [ hasError, setHasError ] = useState< boolean >( false );
 
 	useEffect( () => {
 		const fetchProduct = async () => {
@@ -416,16 +415,13 @@ export const useGetProduct = ( productId: number | undefined ) => {
 						productId
 					) ) as ProductResponseItem;
 					setProduct( fetchedProduct );
-					setHasError( ! fetchedProduct );
 				} catch ( error ) {
-					setHasError( true );
 					setProduct( null );
 				} finally {
 					setIsLoading( false );
 				}
 			} else {
 				setProduct( null );
-				setHasError( false );
 				setIsLoading( false );
 			}
 		};
@@ -433,5 +429,5 @@ export const useGetProduct = ( productId: number | undefined ) => {
 		fetchProduct();
 	}, [ productId ] );
 
-	return { product, isLoading, hasError };
+	return { product, isLoading };
 };
