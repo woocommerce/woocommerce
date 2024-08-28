@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-import { DataViews } from '@wordpress/dataviews';
-import type { View, SupportedLayouts } from '@wordpress/dataviews';
+import { DataViews, View } from '@wordpress/dataviews';
 import {
 	createElement,
 	useState,
 	useMemo,
 	useCallback,
+	useEffect,
 } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
-import { chevronRight } from '@wordpress/icons';
+import { drawerRight } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
@@ -35,6 +35,11 @@ import { privateApis as editorPrivateApis } from '@wordpress/editor';
  * Internal dependencies
  */
 import { unlock } from '../../lock-unlock';
+import {
+	useDefaultViews,
+	defaultLayouts,
+} from '../sidebar-dataviews/default-views';
+import { LAYOUT_LIST } from '../constants';
 
 const { NavigableRegion } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -91,14 +96,6 @@ const fields = [
 	},
 ];
 
-const defaultLayouts: SupportedLayouts = {
-	table: {
-		layout: {
-			primaryField: 'name',
-		},
-	},
-};
-
 export type ProductListProps = {
 	subTitle?: string;
 	className?: string;
@@ -107,6 +104,89 @@ export type ProductListProps = {
 };
 
 const PAGE_SIZE = 25;
+const EMPTY_ARRAY: Product[] = [];
+
+const getDefaultView = (
+	defaultViews: Array< { slug: string; view: View } >,
+	activeView: string
+) => {
+	return defaultViews.find( ( { slug } ) => slug === activeView )?.view;
+};
+
+/**
+ * This function abstracts working with default & custom views by
+ * providing a [ state, setState ] tuple based on the URL parameters.
+ *
+ * Consumers use the provided tuple to work with state
+ * and don't have to deal with the specifics of default & custom views.
+ *
+ * @param {string} postType Post type to retrieve default views for.
+ * @return {Array} The [ state, setState ] tuple.
+ */
+function useView(
+	postType: string
+): [ View, ( view: View ) => void, ( view: View ) => void ] {
+	const {
+		params: { activeView = 'all', isCustom = 'false', layout },
+	} = useLocation();
+	const history = useHistory();
+
+	const defaultViews = useDefaultViews( { postType } );
+	const [ view, setView ] = useState< View >( () => {
+		const initialView = getDefaultView( defaultViews, activeView ) ?? {
+			type: layout ?? LAYOUT_LIST,
+		};
+
+		const type = layout ?? initialView.type;
+		return {
+			...initialView,
+			type,
+		};
+	} );
+
+	const setViewWithUrlUpdate = useCallback(
+		( newView: View ) => {
+			const { params } = history.getLocationWithParams();
+
+			if ( newView.type === LAYOUT_LIST && ! params?.layout ) {
+				// Skip updating the layout URL param if
+				// it is not present and the newView.type is LAYOUT_LIST.
+			} else if ( newView.type !== params?.layout ) {
+				history.push( {
+					...params,
+					layout: newView.type,
+				} );
+			}
+
+			setView( newView );
+		},
+		[ history, isCustom ]
+	);
+
+	// When layout URL param changes, update the view type
+	// without affecting any other config.
+	useEffect( () => {
+		setView( ( prevView ) => ( {
+			...prevView,
+			type: layout ?? LAYOUT_LIST,
+		} ) );
+	}, [ layout ] );
+
+	// When activeView or isCustom URL parameters change, reset the view.
+	useEffect( () => {
+		const newView = getDefaultView( defaultViews, activeView );
+
+		if ( newView ) {
+			const type = layout ?? newView.type;
+			setView( {
+				...newView,
+				type,
+			} );
+		}
+	}, [ activeView, isCustom, layout, defaultViews ] );
+
+	return [ view, setViewWithUrlUpdate, setViewWithUrlUpdate ];
+}
 
 export default function ProductList( {
 	subTitle,
@@ -115,28 +195,24 @@ export default function ProductList( {
 }: ProductListProps ) {
 	const history = useHistory();
 	const location = useLocation();
-	const { postId, quickEdit = false } = location.params;
+	const { postId, quickEdit = false, postType = 'product' } = location.params;
 	const [ selection, setSelection ] = useState( [ postId ] );
-	const [ view, setView ] = useState< View >( {
-		type: 'table',
-		perPage: 5,
-		page: 1,
-		sort: {
-			field: 'date',
-			direction: 'desc',
-		},
-		search: '',
-		filters: [],
-		fields: [ 'name', 'sku', 'date', 'status' ],
-		layout: {},
-	} );
+	const [ view, setView ] = useView( postType );
 
 	const queryParams = useMemo( () => {
+		const additionalParams = view?.filters?.reduce( ( params, filter ) => {
+			params[ filter.field ] = filter.value;
+			return params;
+		}, {} as Record< string, string > );
 		return {
 			page: 1,
 			per_page: PAGE_SIZE,
+			order: view.sort?.direction,
+			orderby: view.sort?.field,
+			search: view.search,
+			...additionalParams,
 		};
-	}, [] );
+	}, [ location.params, view ] );
 
 	const onChangeSelection = useCallback(
 		( items ) => {
@@ -150,23 +226,18 @@ export default function ProductList( {
 	);
 
 	// TODO: Use the Woo data store to get all the products, as this doesn't contain all the product data.
-	const { records, totalCount } = useSelect(
+	const { records, totalCount, isLoading } = useSelect(
 		( select ) => {
+			const { getProducts, getProductsTotalCount, isResolving } =
+				select( 'wc/admin/products' );
 			return {
-				records: select( 'wc/admin/products' ).getProducts(
-					queryParams
-				) as Product[],
-				totalCount: select( 'wc/admin/products' ).getProductsTotalCount(
-					queryParams
-				) as number,
+				records: getProducts( queryParams ) as Product[],
+				totalCount: getProductsTotalCount( queryParams ) as number,
+				isLoading: isResolving( 'getProducts', [ queryParams ] ),
 			};
 		},
 		[ queryParams ]
 	);
-
-	if ( ! records ) {
-		return null;
-	}
 
 	const classes = classNames( 'edit-site-page', className );
 
@@ -208,10 +279,11 @@ export default function ProductList( {
 					</VStack>
 				) }
 				<DataViews
-					data={ records }
+					data={ records || EMPTY_ARRAY }
 					view={ view }
 					onChangeView={ setView }
 					onChangeSelection={ onChangeSelection }
+					isLoading={ isLoading }
 					selection={ selection }
 					// @ts-expect-error types seem rather strict for this still.
 					fields={ fields }
@@ -225,7 +297,7 @@ export default function ProductList( {
 							// @ts-expect-error outdated type.
 							size="compact"
 							isPressed={ quickEdit }
-							icon={ chevronRight }
+							icon={ drawerRight }
 							label={ __(
 								'Toggle details panel',
 								'woocommerce'
