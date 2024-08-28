@@ -16,6 +16,7 @@ config = {
 				'**/admin-marketing/**/*.spec.js',
 				'**/admin-tasks/**/*.spec.js',
 				'**/customize-store/**/*.spec.js',
+				'**/merchant/command-palette.spec.js',
 				'**/merchant/create-cart-block.spec.js',
 				'**/merchant/create-checkout-block.spec.js',
 				'**/merchant/create-coupon.spec.js',
