@@ -58,7 +58,7 @@ export const ErrorBoundary: React.FC< ErrorBoundaryProps > = ( {
 			} );
 
 			// Reintroducing the bumpStat call
-			bumpStat( 'error_boundary', 'error' );
+			bumpStat( 'error', 'unhandled-js-error-during-render' );
 		};
 
 		window.addEventListener( 'error', errorHandler as EventListener );
