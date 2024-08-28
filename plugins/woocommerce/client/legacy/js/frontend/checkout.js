@@ -568,6 +568,9 @@ jQuery( function( $ ) {
 							// Add new errors
 							if ( result.messages ) {
 								var $msgs = $( result.messages )
+									// The error notice template (plugins/woocommerce/templates/notices/error.php)
+									// adds the role="alert" to a list HTML element. This becomes a problem in this context
+									// because screen readers won't read the list content correctly if its role is not "list".
 									.removeAttr( 'role' )
 									.attr( 'tabindex', '-1' );
 								var $msgsWithLink = wc_checkout_form.wrapMessagesInsideLink( $msgs );
