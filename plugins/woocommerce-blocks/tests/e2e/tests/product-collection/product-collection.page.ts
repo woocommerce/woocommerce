@@ -135,7 +135,7 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const placeholderSelector = this.admin.page.locator(
+		const placeholderSelector = this.editor.canvas.locator(
 			SELECTORS.collectionPlaceholder
 		);
 
@@ -429,7 +429,7 @@ class ProductCollectionPage {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
-		await this.page.locator( SELECTORS.product ).first().waitFor();
+		await this.editor.canvas.locator( SELECTORS.product ).first().waitFor();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -788,11 +788,13 @@ class ProductCollectionPage {
 	}
 
 	private async initializeLocatorsForEditor() {
-		this.productTemplate = this.page.locator( SELECTORS.productTemplate );
-		this.products = this.page
+		this.productTemplate = this.editor.canvas.locator(
+			SELECTORS.productTemplate
+		);
+		this.products = this.editor.canvas
 			.locator( SELECTORS.product )
 			.locator( 'visible=true' );
-		this.productImages = this.page
+		this.productImages = this.editor.canvas
 			.locator( SELECTORS.productImage.inEditor )
 			.locator( 'visible=true' );
 		this.productTitles = this.productTemplate
@@ -801,10 +803,10 @@ class ProductCollectionPage {
 		this.productPrices = this.productTemplate
 			.locator( SELECTORS.productPrice.inEditor )
 			.locator( 'visible=true' );
-		this.addToCartButtons = this.page
+		this.addToCartButtons = this.editor.canvas
 			.locator( SELECTORS.addToCartButton.inEditor )
 			.locator( 'visible=true' );
-		this.pagination = this.page.getByRole( 'document', {
+		this.pagination = this.editor.canvas.getByRole( 'document', {
 			name: 'Block: Pagination',
 		} );
 	}

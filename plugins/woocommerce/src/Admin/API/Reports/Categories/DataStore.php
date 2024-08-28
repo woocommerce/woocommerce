@@ -9,7 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 
 /**
@@ -20,12 +19,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_order_product_lookup';
 
 	/**
 	 * Cache identifier.
+	 *
+	 * @override ReportsDataStore::$cache_key
 	 *
 	 * @var string
 	 */
@@ -48,6 +51,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Mapping columns to data type to return correct response types.
 	 *
+	 * @override ReportsDataStore::$column_types
+	 *
 	 * @var array
 	 */
 	protected $column_types = array(
@@ -61,12 +66,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'categories';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
@@ -145,6 +154,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
+	 * @override ReportsDataStore::normalize_order_by()
+	 *
 	 * @param string $order_by Sorting criterion.
 	 * @return string
 	 */
@@ -201,104 +212,99 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
 	 */
-	public function get_data( $query_args ) {
+	public function get_default_query_vars() {
+		$defaults                      = parent::get_default_query_vars();
+		$defaults['category_includes'] = array();
+		$defaults['extended_info']     = false;
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @see get_data
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
+		$this->initialize_queries();
 
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page'          => get_option( 'posts_per_page' ),
-			'page'              => 1,
-			'order'             => 'DESC',
-			'orderby'           => 'date',
-			'before'            => TimeInterval::default_before(),
-			'after'             => TimeInterval::default_after(),
-			'fields'            => '*',
-			'category_includes' => array(),
-			'extended_info'     => false,
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
+		$included_categories = $this->get_included_categories_array( $query_args );
+		$this->add_sql_query_params( $query_args );
 
-		if ( false === $data ) {
-			$this->initialize_queries();
+		if ( count( $included_categories ) > 0 ) {
+			$fields    = $this->get_fields( $query_args );
+			$ids_table = $this->get_ids_table( $included_categories, 'category_id' );
 
-			$data = (object) array(
-				'data'    => array(),
-				'total'   => 0,
-				'pages'   => 0,
-				'page_no' => 0,
+			$this->add_sql_clause( 'select', $this->format_join_selections( array_merge( array( 'category_id' ), $fields ), array( 'category_id' ) ) );
+			$this->add_sql_clause( 'from', '(' );
+			$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
+			$this->add_sql_clause( 'from', ") AS {$table_name}" );
+			$this->add_sql_clause(
+				'right_join',
+				"RIGHT JOIN ( {$ids_table} ) AS default_results
+				ON default_results.category_id = {$table_name}.category_id"
 			);
 
-			$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
-			$included_categories = $this->get_included_categories_array( $query_args );
-			$this->add_sql_query_params( $query_args );
-
-			if ( count( $included_categories ) > 0 ) {
-				$fields    = $this->get_fields( $query_args );
-				$ids_table = $this->get_ids_table( $included_categories, 'category_id' );
-
-				$this->add_sql_clause( 'select', $this->format_join_selections( array_merge( array( 'category_id' ), $fields ), array( 'category_id' ) ) );
-				$this->add_sql_clause( 'from', '(' );
-				$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
-				$this->add_sql_clause( 'from', ") AS {$table_name}" );
-				$this->add_sql_clause(
-					'right_join',
-					"RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.category_id = {$table_name}.category_id"
-				);
-
-				$categories_query = $this->get_query_statement();
-			} else {
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-				$categories_query = $this->subquery->get_query_statement();
-			}
-			$categories_data = $wpdb->get_results(
-				$categories_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				ARRAY_A
-			);
-
-			if ( null === $categories_data ) {
-				return new \WP_Error( 'woocommerce_analytics_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ), array( 'status' => 500 ) );
-			}
-
-			$record_count = count( $categories_data );
-			$total_pages  = (int) ceil( $record_count / $query_args['per_page'] );
-			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return $data;
-			}
-
-			$categories_data = $this->page_records( $categories_data, $query_args['page'], $query_args['per_page'] );
-			$this->include_extended_info( $categories_data, $query_args );
-			$categories_data = array_map( array( $this, 'cast_numbers' ), $categories_data );
-			$data            = (object) array(
-				'data'    => $categories_data,
-				'total'   => $record_count,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
+			$categories_query = $this->get_query_statement();
+		} else {
+			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$categories_query = $this->subquery->get_query_statement();
 		}
+		$categories_data = $wpdb->get_results(
+			$categories_query, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			ARRAY_A
+		);
+
+		if ( null === $categories_data ) {
+			return new \WP_Error( 'woocommerce_analytics_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$record_count = count( $categories_data );
+		$total_pages  = (int) ceil( $record_count / $query_args['per_page'] );
+		if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
+			return $data;
+		}
+
+		$categories_data = $this->page_records( $categories_data, $query_args['page'], $query_args['per_page'] );
+		$this->include_extended_info( $categories_data, $query_args );
+		$categories_data = array_map( array( $this, 'cast_numbers' ), $categories_data );
+		$data            = (object) array(
+			'data'    => $categories_data,
+			'total'   => $record_count,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
 
 		return $data;
 	}
 
 	/**
 	 * Initialize query objects.
+	 *
+	 * @override ReportsDataStore::initialize_queries()
 	 */
 	protected function initialize_queries() {
 		global $wpdb;

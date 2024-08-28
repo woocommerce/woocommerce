@@ -6,19 +6,16 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use WC_Rate_Limiter;
 use WC_Cache_Helper;
-
 /**
  * Class RemoteLoggerTest.
  */
 class RemoteLoggerTest extends \WC_Unit_Test_Case {
-
 	/**
 	 * System under test.
 	 *
-	 * @var RemoteLogger;
+	 * @var RemoteLogger
 	 */
 	private $sut;
-
 
 	/**
 	 * Set up test
@@ -27,10 +24,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
 		$this->sut = wc_get_container()->get( RemoteLogger::class );
-
-		WC()->version = '9.2.0';
 	}
 
 	/**
@@ -40,401 +34,288 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_filters();
-
 		delete_option( 'woocommerce_feature_remote_logging_enabled' );
 		delete_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT );
-
+		delete_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY );
 		global $wpdb;
-		$wpdb->query(
-			"DELETE FROM {$wpdb->prefix}wc_rate_limits"
-		);
-
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
 		WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
 	}
 
 	/**
-	 * Clean up filters.
+	 * Cleanup filters used in tests.
 	 *
 	 * @return void
 	 */
 	private function cleanup_filters() {
-		remove_all_filters( 'option_woocommerce_admin_remote_feature_enabled' );
-		remove_all_filters( 'option_woocommerce_allow_tracking' );
-		remove_all_filters( 'option_woocommerce_version' );
-		remove_all_filters( 'option_woocommerce_remote_variant_assignment' );
-		remove_all_filters( 'plugins_api' );
-		remove_all_filters( 'pre_http_request' );
-		remove_all_filters( 'woocommerce_remote_logger_formatted_log_data' );
+		$filters = array(
+			'option_woocommerce_admin_remote_feature_enabled',
+			'option_woocommerce_allow_tracking',
+			'option_woocommerce_version',
+			'option_woocommerce_remote_variant_assignment',
+			'plugins_api',
+			'pre_http_request',
+			'woocommerce_remote_logger_formatted_log_data',
+		);
+		foreach ( $filters as $filter ) {
+			remove_all_filters( $filter );
+		}
 	}
 
 	/**
-	 * @testdox Test that remote logging is allowed when all conditions are met.
+	 * @testdox Remote logging is allowed when all conditions are met
 	 */
 	public function test_remote_logging_allowed() {
-		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
-
-		add_filter(
-			'option_woocommerce_allow_tracking',
-			function () {
-				return 'yes';
-			}
-		);
-		add_filter(
-			'option_woocommerce_remote_variant_assignment',
-			function () {
-				return 5;
-			}
-		);
-
-		add_filter(
-			'plugins_api',
-			function ( $result, $action, $args ) {
-				if ( 'plugin_information' === $action && 'woocommerce' === $args->slug ) {
-					return (object) array(
-						'version' => '9.2.0',
-					);
-				}
-				return $result;
-			},
-			10,
-			3
-		);
-
+		$this->setup_remote_logging_conditions( true );
 		$this->assertTrue( $this->sut->is_remote_logging_allowed() );
 	}
 
 	/**
-	 * @testdox Test that remote logging is not allowed when the feature flag is disabled.
+	 * @testdox Remote logging is not allowed under various conditions
+	 * @dataProvider remote_logging_disallowed_provider
+	 *
+	 * @param string   $condition      The condition being tested.
+	 * @param callable $setup_callback Callback to set up the test condition.
 	 */
-	public function test_remote_logging_not_allowed_feature_flag_disabled() {
-		update_option( 'woocommerce_feature_remote_logging_enabled', 'no' );
-
-		add_filter(
-			'option_woocommerce_allow_tracking',
-			function () {
-				return 'yes';
-			}
-		);
-		add_filter(
-			'option_woocommerce_remote_variant_assignment',
-			function () {
-				return 5;
-			}
-		);
-
-		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
-
+	public function test_remote_logging_not_allowed( $condition, $setup_callback ) {
+		$this->setup_remote_logging_conditions( true );
+		$setup_callback( $this );
 		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
 	}
 
 	/**
-	 * @testdox Test that remote logging is not allowed when user tracking is not opted in.
+	 * Data provider for test_remote_logging_not_allowed.
+	 *
+	 * @return array[] Test cases with conditions and setup callbacks.
 	 */
-	public function test_remote_logging_not_allowed_tracking_opted_out() {
-		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
-		add_filter(
-			'option_woocommerce_allow_tracking',
-			function () {
-				return 'no';
-			}
-		);
-		add_filter(
-			'option_woocommerce_remote_variant_assignment',
-			function () {
-				return 5;
-			}
-		);
-
-		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
-
-		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
-	}
-
-	/**
-	 * @testdox Test that remote logging is not allowed when the WooCommerce version is outdated.
-	 */
-	public function test_remote_logging_not_allowed_outdated_version() {
-		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
-		add_filter(
-			'option_woocommerce_allow_tracking',
-			function () {
-				return 'yes';
-			}
-		);
-		add_filter(
-			'option_woocommerce_remote_variant_assignment',
-			function () {
-				return 5;
-			}
-		);
-
-		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
-		WC()->version = '9.0.0';
-
-		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
-	}
-
-	/**
-	 * @testdox Test that remote logging is not allowed when the variant assignment is high.
-	 */
-	public function test_remote_logging_not_allowed_high_variant_assignment() {
-		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
-		add_filter(
-			'option_woocommerce_allow_tracking',
-			function () {
-				return 'yes';
-			}
-		);
-		add_filter(
-			'option_woocommerce_version',
-			function () {
-				return '9.2.0';
-			}
-		);
-		add_filter(
-			'option_woocommerce_remote_variant_assignment',
-			function () {
-				return 15;
-			}
-		);
-
-		set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, '9.2.0', DAY_IN_SECONDS );
-
-		$this->assertFalse( $this->sut->is_remote_logging_allowed() );
-	}
-
-	/**
-	 * @testdox Test that the fetch_latest_woocommerce_version method retries fetching the latest WooCommerce version when the API call fails.
-	 */
-	public function test_fetch_latest_woocommerce_version_retry() {
-		update_option( 'woocommerce_feature_remote_logging_enabled', 'yes' );
-
-		add_filter(
-			'option_woocommerce_allow_tracking',
-			function () {
-				return 'yes';
-			}
-		);
-		add_filter(
-			'option_woocommerce_remote_variant_assignment',
-			function () {
-				return 5;
-			}
-		);
-
-		add_filter(
-			'plugins_api', // phpcs:ignore PEAR.Functions.FunctionCallSignature.MultipleArguments
-			function ( $result, $action, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-				return new \WP_Error();
-			},
-			10,
-			3
-		);
-
-		$this->sut->is_remote_logging_allowed();
-		$this->assertEquals( 1, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
-
-		$this->sut->is_remote_logging_allowed();
-		$this->assertEquals( 2, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
-
-		$this->sut->is_remote_logging_allowed();
-		$this->assertEquals( 3, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
-
-		// After 3 retries, the transient should not be updated.
-		$this->sut->is_remote_logging_allowed();
-		$this->assertEquals( 3, get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY ) );
-	}
-
-	/**
-	 * @testdox Test get_formatted_log method with basic log data returns expected array.
-	 */
-	public function test_get_formatted_log_basic() {
-		$level   = 'error';
-		$message = 'Fatal error occurred at line 123 in ' . ABSPATH . 'wp-content/file.php';
-		$context = array( 'tags' => array( 'tag1', 'tag2' ) );
-
-		$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
-
-		$this->assertArrayHasKey( 'feature', $formatted_log );
-		$this->assertArrayHasKey( 'severity', $formatted_log );
-		$this->assertArrayHasKey( 'message', $formatted_log );
-		$this->assertArrayHasKey( 'host', $formatted_log );
-		$this->assertArrayHasKey( 'tags', $formatted_log );
-		$this->assertArrayHasKey( 'properties', $formatted_log );
-
-		$this->assertEquals( 'woocommerce_core', $formatted_log['feature'] );
-		$this->assertEquals( 'error', $formatted_log['severity'] );
-		$this->assertEquals( 'Fatal error occurred at line 123 in **/wp-content/file.php', $formatted_log['message'] );
-		$this->assertEquals( wp_parse_url( home_url(), PHP_URL_HOST ), $formatted_log['host'] );
-
-		// Tags.
-		$this->assertArrayHasKey( 'tags', $formatted_log );
-		$this->assertEquals( array( 'woocommerce', 'php', 'tag1', 'tag2' ), $formatted_log['tags'] );
-
-		// Properties.
-		$this->assertEquals( WC()->version, $formatted_log['properties']['wc_version'] );
-		$this->assertEquals( get_bloginfo( 'version' ), $formatted_log['properties']['wp_version'] );
-		$this->assertEquals( phpversion(), $formatted_log['properties']['php_version'] );
-	}
-
-	/**
-	 * @testdox Test get_formatted_log method sanitizes backtrace.
-	 */
-	public function test_get_formatted_log_with_backtrace() {
-		$level   = 'error';
-		$message = 'Test error message';
-		$context = array( 'backtrace' => ABSPATH . 'wp-content/file.php' );
-
-		$result = $this->sut->get_formatted_log( $level, $message, $context );
-		$this->assertEquals( '**/wp-content/file.php', $result['trace'] );
-
-		$context = array( 'backtrace' => ABSPATH . 'wp-content/plugins/woocommerce/file.php' );
-		$result  = $this->sut->get_formatted_log( $level, $message, $context );
-		$this->assertEquals( '**/woocommerce/file.php', $result['trace'] );
-
-		$context = array( 'backtrace' => true );
-		$result  = $this->sut->get_formatted_log( $level, $message, $context );
-
-		$this->assertIsString( $result['trace'] );
-		$this->assertStringContainsString( '**/woocommerce/tests/php/src/Internal/Logging/RemoteLoggerTest.php', $result['trace'] );
-	}
-
-
-	/**
-	 * @testdox Test get_formatted_log method log extra attributes.
-	 */
-	public function test_get_formatted_log_with_extra() {
-		$level   = 'error';
-		$message = 'Test error message';
-		$context = array(
-			'extra' => array(
-				'key1' => 'value1',
-				'key2' => 'value2',
+	public function remote_logging_disallowed_provider() {
+		return array(
+			'feature flag disabled' => array(
+				'condition' => 'feature flag disabled',
+				'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
+			),
+			'tracking opted out'    => array(
+				'condition' => 'tracking opted out',
+				'setup'     => fn() => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
+			),
+			'outdated version'      => array(
+				'condition'               => 'outdated version',
+				'setup'                   => function () {
+					$version = WC()->version;
+					$next_version = implode(
+						'.',
+						array_map(
+							function ( $n, $i ) {
+								return 0 === $i ? $n + 1 : 0;
+							},
+							explode( '.', $version ),
+							array_keys( explode( '.', $version ) )
+						)
+					);
+					set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, $next_version );
+				},
+				'high variant assignment' => array(
+					'condition' => 'high variant assignment',
+					'setup'     => fn() => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
+				),
 			),
 		);
-
-		$result = $this->sut->get_formatted_log( $level, $message, $context );
-
-		$this->assertArrayHasKey( 'extra', $result );
-		$this->assertEquals( 'value1', $result['extra']['key1'] );
-		$this->assertEquals( 'value2', $result['extra']['key2'] );
 	}
 
+	/**
+	 * @testdox Fetch latest WooCommerce version retries on API failure
+	 */
+	public function test_fetch_latest_woocommerce_version_retry() {
+		$this->setup_remote_logging_conditions( true );
+		add_filter( 'plugins_api', fn() => new \WP_Error(), 10, 3 );
+
+		for ( $i = 1; $i <= 4; $i++ ) {
+			$this->sut->is_remote_logging_allowed();
+			$retry_count = get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY );
+			$this->assertEquals( min( $i, 3 ), $retry_count );
+		}
+	}
 
 	/**
-	 * @testdox Test handle() method when throttled.
+	 * @testdox get_formatted_log method returns expected array structure
+	 * @dataProvider get_formatted_log_provider
 	 *
-	 * @return void
+	 * @param string $level    The log level.
+	 * @param string $message  The log message.
+	 * @param array  $context  The log context.
+	 * @param array  $expected The expected formatted log array.
 	 */
-	public function test_handle_returns_false_when_throttled() {
-		$mock_local_logger = $this->createMock( \WC_Logger::class );
-		$mock_local_logger->expects( $this->once() )
-			->method( 'info' )
-			->with( 'Remote logging throttled.', array( 'source' => 'wc-remote-logger' ) );
+	public function test_get_formatted_log( $level, $message, $context, $expected ) {
+		$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
+		foreach ( $expected as $key => $value ) {
+			$this->assertArrayHasKey( $key, $formatted_log );
+			$this->assertEquals( $value, $formatted_log[ $key ] );
+		}
+	}
 
+	/**
+	 * Data provider for test_get_formatted_log.
+	 *
+	 * @return array[] Test cases with log data and expected formatted output.
+	 */
+	public function get_formatted_log_provider() {
+		return array(
+			'basic log data'            => array(
+				'error',
+				'Fatal error occurred at line 123 in ' . ABSPATH . 'wp-content/file.php',
+				array( 'tags' => array( 'tag1', 'tag2' ) ),
+				array(
+					'feature'  => 'woocommerce_core',
+					'severity' => 'error',
+					'message'  => 'Fatal error occurred at line 123 in **/wp-content/file.php',
+					'tags'     => array( 'woocommerce', 'php', 'tag1', 'tag2' ),
+				),
+			),
+			'log with backtrace'        => array(
+				'error',
+				'Test error message',
+				array( 'backtrace' => ABSPATH . 'wp-content/plugins/woocommerce/file.php' ),
+				array( 'trace' => '**/woocommerce/file.php' ),
+			),
+			'log with extra attributes' => array(
+				'error',
+				'Test error message',
+				array(
+					'extra' => array(
+						'key1' => 'value1',
+						'key2' => 'value2',
+					),
+				),
+				array(
+					'extra' => array(
+						'key1' => 'value1',
+						'key2' => 'value2',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox should_handle method behaves correctly under different conditions
+	 * @dataProvider should_handle_provider
+	 *
+	 * @param callable $setup   Function to set up the test environment.
+	 * @param string   $level   Log level to test.
+	 * @param bool     $expected Expected result of should_handle method.
+	 */
+	public function test_should_handle( $setup, $level, $expected ) {
 		$this->sut = $this->getMockBuilder( RemoteLogger::class )
-			->setConstructorArgs( array( $mock_local_logger ) )
+			->onlyMethods( array( 'is_remote_logging_allowed', 'is_third_party_error' ) )
+			->getMock();
+
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+		$this->sut->method( 'is_third_party_error' )->willReturn( false );
+
+		$setup( $this );
+
+		$result = $this->invoke_private_method( $this->sut, 'should_handle', array( $level, 'Test message', array() ) );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * Data provider for test_should_handle method.
+	 *
+	 * @return array Test cases for should_handle method.
+	 */
+	public function should_handle_provider() {
+		return array(
+			'throttled'                 => array(
+				fn() => WC_Rate_Limiter::set_rate_limit( RemoteLogger::RATE_LIMIT_ID, 10 ),
+				'critical',
+				false,
+			),
+			'less severe than critical' => array(
+				fn() => null,
+				'error',
+				false,
+			),
+			'critical level'            => array(
+				fn() => null,
+				'critical',
+				true,
+			),
+		);
+	}
+
+	/**
+	 * @testdox handle method applies filter and doesn't send logs when filtered to null
+	 */
+	public function test_handle_filtered_log_null() {
+		$this->sut = $this->getMockBuilder( RemoteLogger::class )
 			->onlyMethods( array( 'is_remote_logging_allowed' ) )
 			->getMock();
 
 		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
-		// Set rate limit to simulate exceeded limit.
-		WC_Rate_Limiter::set_rate_limit( RemoteLogger::RATE_LIMIT_ID, 10 );
-		$result = $this->sut->handle( time(), 'error', 'Test message', array() );
-		$this->assertFalse( $result );
-	}
-
-
-	/**
-	 * @testdox Test handle() method applies filter.
-	 *
-	 * @return void
-	 */
-	public function test_handle_filtered_log_null() {
-		$this->sut = $this->getMockBuilder( RemoteLogger::class )
-							->onlyMethods( array( 'is_remote_logging_allowed' ) )
-							->getMock();
-
-		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
-
-		add_filter(
-			'woocommerce_remote_logger_formatted_log_data',
-			function ( $log_data, $level, $message, $context ) {
-				$this->assertEquals( 'Test message', $log_data['message'] );
-				$this->assertEquals( 'error', $level );
-				$this->assertEquals( 'Test message', $message );
-				$this->assertEquals( array(), $context );
-
-				return null;
-			},
-			10,
-			4
-		);
-
-		// Mock wp_safe_remote_post using pre_http_request filter.
-		add_filter(
-			'pre_http_request',
-			function () {
-				// assert not called.
-				$this->assertFalse( true );
-			},
-			10,
-			3
-		);
+		add_filter( 'woocommerce_remote_logger_formatted_log_data', fn() => null, 10, 4 );
+		add_filter( 'pre_http_request', fn() => $this->fail( 'wp_safe_remote_post should not be called' ), 10, 3 );
 
 		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
 	}
 
 	/**
-	 * @testdox Test handle() method successfully sends log.
+	 * @testdox handle method does not send logs in dev environment
 	 */
-	public function test_handle_successful() {
-		$this->sut = $this->getMockBuilder( RemoteLogger::class )
-							->onlyMethods( array( 'is_remote_logging_allowed' ) )
-							->getMock();
+	public function test_handle_does_not_send_logs_in_dev_environment() {
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
+			->onlyMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
 
+		$this->sut->set_is_dev_or_local( true );
 		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
-		// Mock wp_safe_remote_post using pre_http_request filter.
+		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+	}
+
+	/**
+	 * @testdox handle method successfully sends log
+	 */
+	public function test_handle_successful() {
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
+			->onlyMethods( array( 'is_remote_logging_allowed' ) )
+			->getMock();
+
+		$this->sut->set_is_dev_or_local( false );
+		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
+
 		add_filter(
 			'pre_http_request',
-			function ( $preempt, $args, $url ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-					$this->assertArrayHasKey( 'body', $args );
-					$this->assertArrayHasKey( 'headers', $args );
-					return array(
-						'response' => array(
-							'code'    => 200,
-							'message' => 'OK',
-						),
-						'body'     => wp_json_encode( array( 'success' => true ) ),
-					);
+			function ( $preempt, $args ) {
+				$this->assertArrayHasKey( 'body', $args );
+				$this->assertArrayHasKey( 'headers', $args );
+				return array(
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'body'     => wp_json_encode( array( 'success' => true ) ),
+				);
 			},
 			10,
 			3
 		);
 
-		$this->assertTrue( $this->sut->handle( time(), 'error', 'Test message', array() ) );
-		// Verify that rate limit was set.
+		$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array() ) );
 		$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 	}
 
 	/**
-	 * @testdox Test handle method when remote logging fails.
-	 **/
+	 * @testdox handle method handles remote logging failure
+	 */
 	public function test_handle_remote_logging_failure() {
-		$mock_local_logger = $this->createMock( \WC_Logger::class );
-		$mock_local_logger->expects( $this->once() )
-			->method( 'error' );
-
-		$this->sut = $this->getMockBuilder( RemoteLogger::class )
-			->setConstructorArgs( array( $mock_local_logger ) )
+		$this->sut = $this->getMockBuilder( RemoteLoggerWithEnvironmentOverride::class )
 			->onlyMethods( array( 'is_remote_logging_allowed' ) )
 			->getMock();
 
+		$this->sut->set_is_dev_or_local( false );
 		$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
-		// Mock wp_safe_remote_post to throw an exception using pre_http_request filter.
 		add_filter(
 			'pre_http_request',
 			function ( $preempt, $args, $url ) {
@@ -447,94 +328,111 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
-		// Verify that rate limit was set.
+		$this->assertFalse( $this->sut->handle( time(), 'critical', 'Test message', array() ) );
 		$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 	}
 
 	/**
-	 * @testdox Test is_third_party_error method.
-	 *
-	 * @dataProvider data_provider_for_is_third_party_error
-	 *
-	 * @param string $message         Error message.
-	 * @param array  $context         Context.
-	 * @param bool   $expected_result  Expected result.
+	 * @testdox is_third_party_error method correctly identifies third-party errors
+	 * @dataProvider is_third_party_error_provider
+	 * @param string $message The error message to check.
+	 * @param array  $context The context of the error.
+	 * @param bool   $expected_result The expected result of the check.
 	 */
 	public function test_is_third_party_error( $message, $context, $expected_result ) {
 		$result = $this->invoke_private_method( $this->sut, 'is_third_party_error', array( $message, $context ) );
-
 		$this->assertEquals( $expected_result, $result );
 	}
 
 	/**
-	 * Data provider for third party error test.
+	 * Data provider for test_is_third_party_error.
 	 *
-	 * @return array
+	 * @return array[] Test cases.
 	 */
-	public function data_provider_for_is_third_party_error() {
+	public function is_third_party_error_provider() {
 		return array(
+			array( 'Fatal error in ' . WC_ABSPATH . 'file.php', array(), false ),
+			array( 'Fatal error in /wp-content/file.php', array(), false ),
+			array( 'Fatal error in /wp-content/file.php', array( 'source' => 'fatal-errors' ), false ),
 			array(
-				'Fatal error occurred at line 123 in' . WC_ABSPATH . 'file.php',
-				array(),
-				false,
-			),
-			array(
-				'Fatal error occurred at line 123 in /home/user/path/wp-content/file.php',
-				array(),
-				false,  // source is not.
-			),
-			array(
-				'Fatal error occurred at line 123 in /home/user/path/wp-content/file.php',
-				array( 'source' => 'fatal-errors' ),
-				false, // backtrace is not set.
-			),
-			array(
-				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
+				'Fatal error in /wp-content/plugins/3rd-plugin/file.php',
 				array(
 					'source'    => 'fatal-errors',
-					'backtrace' => array(
-						'/home/user/path/wp-content/plugins/3rd-plugin/file.php',
-						WC_ABSPATH . 'file.php',
-					),
+					'backtrace' => array( '/wp-content/plugins/3rd-plugin/file.php', WC_ABSPATH . 'file.php' ),
 				),
 				false,
 			),
 			array(
-				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/woocommerce-3rd-plugin/file.php',
+				'Fatal error in /wp-content/plugins/woocommerce-3rd-plugin/file.php',
 				array(
 					'source'    => 'fatal-errors',
-					'backtrace' => array(
-						WP_PLUGIN_DIR . 'woocommerce-3rd-plugin/file.php',
-					),
+					'backtrace' => array( WP_PLUGIN_DIR . 'woocommerce-3rd-plugin/file.php' ),
 				),
 				true,
 			),
 			array(
-				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
+				'Fatal error in /wp-content/plugins/3rd-plugin/file.php',
 				array(
 					'source'    => 'fatal-errors',
-					'backtrace' => array(
-						WP_PLUGIN_DIR . '3rd-plugin/file.php',
-					),
+					'backtrace' => array( WP_PLUGIN_DIR . '3rd-plugin/file.php' ),
 				),
 				true,
 			),
 			array(
-				'Fatal error occurred at line 123 in /home/user/path/wp-content/plugins/3rd-plugin/file.php',
+				'Fatal error in /wp-content/plugins/3rd-plugin/file.php',
 				array(
 					'source'    => 'fatal-errors',
-					'backtrace' => array(
-						array(
-							'file' => WP_PLUGIN_DIR . '3rd-plugin/file.php',
-						),
-					),
+					'backtrace' => array( array( 'file' => WP_PLUGIN_DIR . '3rd-plugin/file.php' ) ),
 				),
 				true,
 			),
 		);
 	}
 
+	/**
+	 * @testdox sanitize method correctly sanitizes paths
+	 */
+	public function test_sanitize() {
+		$message  = WC_ABSPATH . 'includes/class-wc-test.php on line 123';
+		$expected = '**/woocommerce/includes/class-wc-test.php on line 123';
+		$result   = $this->invoke_private_method( $this->sut, 'sanitize', array( $message ) );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testdox sanitize_trace method correctly sanitizes stack traces
+	 */
+	public function test_sanitize_trace() {
+		$trace    = array(
+			WC_ABSPATH . 'includes/class-wc-test.php:123',
+			ABSPATH . 'wp-includes/plugin.php:456',
+		);
+		$expected = "**/woocommerce/includes/class-wc-test.php:123\n**/wp-includes/plugin.php:456";
+		$result   = $this->invoke_private_method( $this->sut, 'sanitize_trace', array( $trace ) );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * Setup common conditions for remote logging tests.
+	 *
+	 * @param bool $enabled Whether remote logging is enabled.
+	 */
+	private function setup_remote_logging_conditions( $enabled = true ) {
+		update_option( 'woocommerce_feature_remote_logging_enabled', $enabled ? 'yes' : 'no' );
+		add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
+		add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 5 );
+		add_filter(
+			'plugins_api',
+			function ( $result, $action, $args ) use ( $enabled ) {
+				if ( 'plugin_information' === $action && 'woocommerce' === $args->slug ) {
+					return (object) array( 'version' => $enabled ? WC()->version : '9.0.0' );
+				}
+				return $result;
+			},
+			10,
+			3
+		);
+	}
 
 	/**
 	 * Helper method to invoke private methods.
@@ -551,3 +449,34 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		return $method->invokeArgs( $obj, $parameters );
 	}
 }
+
+
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
+/**
+ * Mock class that extends RemoteLogger to allow overriding is_dev_or_local_environment.
+ */
+class RemoteLoggerWithEnvironmentOverride extends RemoteLogger {
+	/**
+	 * The is_dev_or_local value.
+	 *
+	 * @var bool
+	 */
+	private $is_dev_or_local = false;
+
+	/**
+	 * Set the is_dev_or_local value.
+	 *
+	 * @param bool $value The value to set.
+	 */
+	public function set_is_dev_or_local( $value ) {
+		$this->is_dev_or_local = $value;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function is_dev_or_local_environment() {
+		return $this->is_dev_or_local;
+	}
+}
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName

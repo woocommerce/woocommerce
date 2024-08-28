@@ -16,6 +16,7 @@ import metadata from './block.json';
 import deprecated from './deprecated';
 
 registerBlockType( metadata, {
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon

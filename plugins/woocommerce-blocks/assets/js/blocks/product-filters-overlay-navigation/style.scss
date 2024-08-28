@@ -3,8 +3,16 @@
 }
 
 .wc-block-product-filters-overlay-navigation {
+	display: flex;
+	flex-direction: row;
+	cursor: pointer;
+
 	&.alignright {
 		margin-left: auto;
+	}
+
+	&.alignleft {
+		margin-left: unset;
 	}
 
 	&.aligncenter {

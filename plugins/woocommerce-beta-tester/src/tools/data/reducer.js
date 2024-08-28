@@ -13,6 +13,8 @@ const DEFAULT_STATE = {
 		updateComingSoonMode: {},
 		updateBlockTemplateLoggingThreshold: {},
 		runSelectedUpdateCallbacks: {},
+		updateWccomRequestErrorsMode: {},
+		fakeWooPayments: {},
 	},
 	status: '',
 	dbUpdateVersions: [],

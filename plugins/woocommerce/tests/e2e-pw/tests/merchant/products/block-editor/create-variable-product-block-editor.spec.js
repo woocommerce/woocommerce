@@ -114,9 +114,10 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 				await waitForGlobalAttributesLoaded( page );
 
 				// Attribute combobox input
-				const attributeInputLocator = page.locator(
-					'input[aria-describedby^="components-form-token-suggestions-howto-combobox-control"]'
-				);
+				const attributeInputLocator = page
+					.getByRole( 'dialog' )
+					.getByRole( 'combobox' )
+					.first();
 
 				await attributeInputLocator.fill( sizeAttribute.name );
 
@@ -366,10 +367,16 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 
 			await page.getByLabel( 'Delete variation' ).click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			await expect( await element.innerText() ).toMatch(
-				'1 variation deleted.'
-			);
+			await expect(
+				page
+					.getByLabel( 'Dismiss this notice' )
+					.getByText( '1 variation deleted.' )
+			).toBeVisible();
+
+			await page.waitForSelector(
+				'div.woocommerce-product-variations-pagination__info',
+				{ timeout: 20000 }
+			); // test was timing out before page loaded
 
 			await expect(
 				await page

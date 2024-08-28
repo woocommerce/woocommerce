@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update remote logger to check dev env and whether logging is enabled

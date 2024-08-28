@@ -92,9 +92,10 @@ test.describe(
 			await publishPage( page, testPage.title );
 
 			// add additional payment option after page creation
-			await api.put( 'payment_gateways/bacs', {
+			const r = await api.put( 'payment_gateways/bacs', {
 				enabled: true,
 			} );
+			expect( r.data.enabled ).toBe( true );
 			await page.reload();
 
 			// Mandatory to wait for the editor content, to ensure the iframe is loaded (if Gutenberg is active)

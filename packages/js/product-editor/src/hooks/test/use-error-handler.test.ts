@@ -11,6 +11,7 @@ import { useBlocksHelper } from '../use-blocks-helper';
 
 const mockNavigateTo = jest.fn();
 const mockFocusByValidatorId = jest.fn();
+const mockGetFieldByValidatorId = jest.fn();
 
 jest.mock( '@woocommerce/navigation', () => ( {
 	getNewPath: jest.fn().mockReturnValue( '/new-path' ),
@@ -26,6 +27,9 @@ jest.mock( '../../contexts/validation-context', () => ( {
 		focusByValidatorId: jest.fn( ( args ) =>
 			mockFocusByValidatorId( args )
 		),
+		getFieldByValidatorId: jest.fn( ( args ) =>
+			mockGetFieldByValidatorId( args )
+		),
 	} ),
 } ) );
 
@@ -39,6 +43,7 @@ jest.mock( '../use-blocks-helper', () => ( {
 	useBlocksHelper: jest.fn().mockReturnValue( {
 		getParentTabId: jest.fn( () => 'inventory' ),
 		getParentTabIdByBlockName: jest.fn( () => 'inventory' ),
+		getClientIdByField: jest.fn( ( arg ) => arg ),
 	} ),
 } ) );
 
@@ -47,7 +52,7 @@ describe( 'useErrorHandler', () => {
 		jest.clearAllMocks();
 	} );
 
-	it( 'should return the correct error message and props when exists and the field is visible', () => {
+	it( 'should return the correct error message and props when exists and the field is visible', async () => {
 		const error = {
 			code: 'product_invalid_sku',
 			message: 'Invalid or duplicated SKU.',
@@ -57,7 +62,7 @@ describe( 'useErrorHandler', () => {
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
-		const { message, errorProps } = getProductErrorMessageAndProps(
+		const { message, errorProps } = await getProductErrorMessageAndProps(
 			error,
 			visibleTab
 		);
@@ -66,7 +71,7 @@ describe( 'useErrorHandler', () => {
 		expect( errorProps ).toEqual( {} );
 	} );
 
-	it( 'should return the correct error message and props when exists and the field is not visible', () => {
+	it( 'should return the correct error message and props when exists and the field is not visible', async () => {
 		const error = {
 			code: 'product_invalid_sku',
 		} as WPError;
@@ -75,7 +80,7 @@ describe( 'useErrorHandler', () => {
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
-		const { message, errorProps } = getProductErrorMessageAndProps(
+		const { message, errorProps } = await getProductErrorMessageAndProps(
 			error,
 			visibleTab
 		);
@@ -84,7 +89,7 @@ describe( 'useErrorHandler', () => {
 		expect( errorProps.explicitDismiss ).toBeTruthy();
 	} );
 
-	it( 'should call focusByValidatorId for form field errors when errorProps action is triggered', () => {
+	it( 'should call focusByValidatorId for form field errors when errorProps action is triggered', async () => {
 		const error = {
 			code: 'product_form_field_error',
 			validatorId: 'test-validator',
@@ -94,7 +99,7 @@ describe( 'useErrorHandler', () => {
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
-		const { errorProps } = getProductErrorMessageAndProps(
+		const { errorProps } = await getProductErrorMessageAndProps(
 			error,
 			visibleTab
 		);
@@ -111,8 +116,11 @@ describe( 'useErrorHandler', () => {
 		expect( mockFocusByValidatorId ).toHaveBeenCalledWith(
 			'test-validator'
 		);
+		expect( mockGetFieldByValidatorId ).toHaveBeenCalledWith(
+			'test-validator'
+		);
 	} );
-	it( 'should call getParentTabIdByBlockName and focusByValidatorId for invalid sku errors when errorProps action is triggered', () => {
+	it( 'should call getParentTabIdByBlockName and focusByValidatorId for invalid sku errors when errorProps action is triggered', async () => {
 		const error = {
 			code: 'product_invalid_sku',
 		} as WPError;
@@ -121,10 +129,8 @@ describe( 'useErrorHandler', () => {
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
-		const { errorProps: fieldsErrorProps } = getProductErrorMessageAndProps(
-			error,
-			visibleTab
-		);
+		const { errorProps: fieldsErrorProps } =
+			await getProductErrorMessageAndProps( error, visibleTab );
 
 		expect( fieldsErrorProps ).toBeDefined();
 		expect( fieldsErrorProps.actions ).toBeDefined();
@@ -137,7 +143,7 @@ describe( 'useErrorHandler', () => {
 
 		expect( mockFocusByValidatorId ).toHaveBeenCalledWith( 'sku' );
 	} );
-	it( 'should not call getErrorPropsWithActions for invalid sku errors when getParentTabIdByBlockName returns null', () => {
+	it( 'should not call getErrorPropsWithActions for invalid sku errors when getParentTabIdByBlockName returns null', async () => {
 		const error = {
 			code: 'product_invalid_sku',
 		} as WPError;
@@ -146,12 +152,13 @@ describe( 'useErrorHandler', () => {
 		( useBlocksHelper as jest.Mock ).mockReturnValue( {
 			getParentTabId: jest.fn( () => null ), // Mock returns null
 			getParentTabIdByBlockName: jest.fn( () => null ), // Mock returns null
+			getClientIdByField: jest.fn( () => null ), // Mock returns null
 		} );
 
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
-		const { message, errorProps } = getProductErrorMessageAndProps(
+		const { message, errorProps } = await getProductErrorMessageAndProps(
 			error,
 			visibleTab
 		);
@@ -161,7 +168,7 @@ describe( 'useErrorHandler', () => {
 		expect( mockFocusByValidatorId ).not.toHaveBeenCalled();
 		expect( message ).toBe( 'Invalid or duplicated SKU.' );
 	} );
-	it( 'should not call getErrorPropsWithActions for form field errors when getParentTabId returns null', () => {
+	it( 'should not call getErrorPropsWithActions for form field errors when getParentTabId returns null', async () => {
 		const error = {
 			code: 'product_form_field_error',
 			validatorId: 'test-validator',
@@ -172,12 +179,13 @@ describe( 'useErrorHandler', () => {
 		( useBlocksHelper as jest.Mock ).mockReturnValue( {
 			getParentTabId: jest.fn( () => null ), // Mock returns null
 			getParentTabIdByBlockName: jest.fn( () => null ), // Mock returns null
+			getClientIdByField: jest.fn( () => null ), // Mock returns null
 		} );
 
 		const { result } = renderHook( () => useErrorHandler() );
 		const { getProductErrorMessageAndProps } = result.current;
 
-		const { message, errorProps } = getProductErrorMessageAndProps(
+		const { message, errorProps } = await getProductErrorMessageAndProps(
 			error,
 			visibleTab
 		);
@@ -185,6 +193,9 @@ describe( 'useErrorHandler', () => {
 		expect( errorProps ).toBeDefined();
 		expect( errorProps.actions ).not.toBeDefined();
 		expect( mockFocusByValidatorId ).not.toHaveBeenCalled();
+		expect( mockGetFieldByValidatorId ).toHaveBeenCalledWith(
+			'test-validator'
+		);
 		expect( message ).toBe( 'Test error message' );
 	} );
 } );

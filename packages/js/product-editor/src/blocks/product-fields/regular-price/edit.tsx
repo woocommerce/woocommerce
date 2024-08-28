@@ -72,7 +72,6 @@ export function Edit( {
 							'Regular price must be greater than or equals to zero.',
 							'woocommerce'
 						),
-						context: clientId,
 					};
 				}
 				if (
@@ -84,7 +83,6 @@ export function Edit( {
 							'Regular price must be greater than the sale price.',
 							'woocommerce'
 						),
-						context: clientId,
 					};
 				}
 			} else if ( isRequired ) {
@@ -94,7 +92,6 @@ export function Edit( {
 						__( '%s is required.', 'woocommerce' ),
 						label
 					),
-					context: clientId,
 				};
 			}
 		},

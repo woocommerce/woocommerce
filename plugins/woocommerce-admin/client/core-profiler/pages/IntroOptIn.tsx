@@ -45,7 +45,7 @@ export const IntroOptIn = ( {
 					title={ __( 'Welcome to Woo!', 'woocommerce' ) }
 					subTitle={ interpolateComponents( {
 						mixedString: __(
-							"It's great to have you here with us! We'll be guiding you through the setup process – first, answer a few questions to tailor your experience.",
+							'It’s great to have you here with us! We’ll be guiding you through the setup process – first, answer a few questions to tailor your experience.',
 							'woocommerce'
 						),
 						components: {
@@ -65,7 +65,20 @@ export const IntroOptIn = ( {
 				>
 					{ __( 'Set up my store', 'woocommerce' ) }
 				</Button>
-
+				{ window.wcAdminFeatures?.blueprint && (
+					<Button
+						className="woocommerce-profiler-setup-store__button"
+						variant="tertiary"
+						onClick={ () =>
+							sendEvent( {
+								type: 'INTRO_BUILDER',
+								payload: { optInDataSharing: false },
+							} )
+						}
+					>
+						{ __( 'Builder setup', 'woocommerce' ) }
+					</Button>
+				) }
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
 						className="core-profiler__checkbox"

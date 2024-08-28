@@ -219,8 +219,8 @@ class WC_Admin_Marketplace_Promotions {
 	/**
 	 * From the array of promotions, select those of a given format.
 	 *
-	 * @param ? array  $promotions  Array of data about promotions of all formats.
-	 * @param ? string $format      Format we want to filter for.
+	 * @param ?array  $promotions  Array of data about promotions of all formats.
+	 * @param ?string $format      Format we want to filter for.
 	 *
 	 * @return array
 	 */

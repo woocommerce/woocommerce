@@ -54,13 +54,15 @@ class Settings {
 	 * The `wp_upload_dir` function takes into account the possibility of multisite, and handles changing
 	 * the directory if the context is switched to a different site in the network mid-request.
 	 *
+	 * @param bool $create_dir Optional. True to attempt to create the log directory if it doesn't exist. Default true.
+	 *
 	 * @return string The full directory path, with trailing slash.
 	 */
-	public static function get_log_directory(): string {
+	public static function get_log_directory( bool $create_dir = true ): string {
 		if ( true === Constants::get_constant( 'WC_LOG_DIR_CUSTOM' ) ) {
 			$dir = Constants::get_constant( 'WC_LOG_DIR' );
 		} else {
-			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir' );
+			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir', null, $create_dir );
 
 			/**
 			 * Filter to change the directory for storing WooCommerce's log files.
@@ -74,18 +76,20 @@ class Settings {
 
 		$dir = trailingslashit( $dir );
 
-		$realpath = realpath( $dir );
-		if ( false === $realpath ) {
-			$result = wp_mkdir_p( $dir );
+		if ( true === $create_dir ) {
+			$realpath = realpath( $dir );
+			if ( false === $realpath ) {
+				$result = wp_mkdir_p( $dir );
 
-			if ( true === $result ) {
-				// Create infrastructure to prevent listing contents of the logs directory.
-				try {
-					$filesystem = FilesystemUtil::get_wp_filesystem();
-					$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
-					$filesystem->put_contents( $dir . 'index.html', '' );
-				} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-					// Creation failed.
+				if ( true === $result ) {
+					// Create infrastructure to prevent listing contents of the logs directory.
+					try {
+						$filesystem = FilesystemUtil::get_wp_filesystem();
+						$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
+						$filesystem->put_contents( $dir . 'index.html', '' );
+					} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+						// Creation failed.
+					}
 				}
 			}
 		}

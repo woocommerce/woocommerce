@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { removeAllNotices, debounce, pick } from '@woocommerce/base-utils';
+import { debounce, pick } from '@woocommerce/base-utils';
 import {
 	CartBillingAddress,
 	CartShippingAddress,
@@ -157,7 +157,6 @@ const updateCustomerData = (): void => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
 			localState.doingPush = false;
-			removeAllNotices();
 		} )
 		.catch( ( response ) => {
 			localState.doingPush = false;
