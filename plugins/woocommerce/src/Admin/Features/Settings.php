@@ -42,8 +42,6 @@ class Settings {
 		// Run this after the original WooCommerce settings have been added.
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 60 );
 		add_action( 'init', array( $this, 'redirect_core_settings_pages' ) );
-
-		wp_enqueue_script( 'wc-jquery-in-react' );
 	}
 
 	/**
@@ -76,6 +74,17 @@ class Settings {
 		$settings['settingsPages'] = $pages;
 		$settings['settingsNonce'] = wp_create_nonce( 'woocommerce-settings' );
 
+		global $wp_scripts;
+		$settings['scripts'] = array();
+
+		foreach ( $wp_scripts->queue as $script ) {
+			$registered_script = $wp_scripts->registered[ $script ];
+			if ( isset( $registered_script ) ) {
+				$settings['settingsScripts'][ $script ] = array(
+					'src' => $registered_script->src,
+				);
+			}
+		}
 		return $settings;
 	}
 

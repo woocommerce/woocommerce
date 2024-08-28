@@ -158,10 +158,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), $version );
 			wp_register_script( 'js-cookie', WC()->plugin_url() . '/assets/js/js-cookie/js.cookie' . $suffix . '.js', array(), '2.1.4', true );
 
-			if ( Features::is_enabled( 'settings' ) ) {
-				wp_register_script( 'wc-jquery-in-react', WC()->plugin_url() . '/assets/js/admin/jquery-in-react' . $suffix . '.js', array( 'jquery' ), '1.0.0', true );
-			}
-
 			wp_localize_script(
 				'wc-enhanced-select',
 				'wc_enhanced_select_params',
