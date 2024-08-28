@@ -9,6 +9,7 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
  */
 import { unlock } from '../lock-unlock';
 import ProductList from './product-list';
+import ProductEdit from './product-edit';
 import DataViewsSidebarContent from './sidebar-dataviews';
 import SidebarNavigationScreen from './sidebar-navigation-screen';
 
@@ -32,10 +33,17 @@ export type Route = {
 
 export default function useLayoutAreas() {
 	const { params = {} } = useLocation();
-	const { postType = 'product', layout = 'table', canvas } = params;
+	const {
+		postType = 'product',
+		layout = 'table',
+		canvas,
+		quickEdit,
+		postId,
+	} = params;
 	// Products list.
 	if ( [ 'product' ].includes( postType ) ) {
 		const isListLayout = layout === 'list' || ! layout;
+		const showQuickEdit = quickEdit && ! isListLayout;
 		return {
 			key: 'products-list',
 			areas: {
@@ -49,9 +57,13 @@ export default function useLayoutAreas() {
 				content: <ProductList />,
 				preview: false,
 				mobile: <ProductList postType={ postType } />,
+				edit: showQuickEdit && (
+					<ProductEdit postType={ postType } postId={ postId } />
+				),
 			},
 			widths: {
 				content: isListLayout ? 380 : undefined,
+				edit: showQuickEdit ? 380 : undefined,
 			},
 		};
 	}
