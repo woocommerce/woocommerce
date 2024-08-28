@@ -10,10 +10,7 @@ import SidebarNavigationScreen from '@wordpress/edit-site/build-module/component
  */
 import { unlock } from '../lock-unlock';
 import ProductList from './product-list';
-
-function DataViewsSidebarContent() {
-	return <div>Sidebar dataviews</div>;
-}
+import DataViewsSidebarContent from './sidebar-dataviews';
 
 const { useLocation } = unlock( routerPrivateApis );
 

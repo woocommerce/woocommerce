@@ -3,8 +3,12 @@
 /**
  * External dependencies
  */
-import { createElement, useState, Fragment } from '@wordpress/element';
-import { useViewportMatch, useResizeObserver } from '@wordpress/compose';
+import { createElement, useState, Fragment, useRef } from '@wordpress/element';
+import {
+	useViewportMatch,
+	useResizeObserver,
+	useReducedMotion,
+} from '@wordpress/compose';
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
@@ -19,6 +23,7 @@ import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import ResizableFrame from '@wordpress/edit-site/build-module/components/resizable-frame';
 import ErrorBoundary from '@wordpress/edit-site/build-module/components/error-boundary';
+import { default as SiteHub } from '@wordpress/edit-site/build-module/components/site-hub';
 import classNames from 'classnames';
 
 /**
@@ -29,8 +34,11 @@ import SidebarContent from './sidebar';
 const { NavigableRegion } = unlock( editorPrivateApis );
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
+const ANIMATION_DURATION = 0.3;
+
 export function Layout( { route } ) {
 	const [ fullResizer ] = useResizeObserver();
+	const toggleRef = useRef();
 	const [ canvasResizer, canvasSize ] = useResizeObserver();
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const [ isResizableFrameOversized, setIsResizableFrameOversized ] =
@@ -41,6 +49,7 @@ export function Layout( { route } ) {
 			canvasMode: getCanvasMode(),
 		};
 	}, [] );
+	const disableMotion = useReducedMotion();
 	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
 	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
 
@@ -65,31 +74,33 @@ export function Layout( { route } ) {
 							className="edit-site-layout__sidebar-region"
 						>
 							<AnimatePresence>
-								{ canvasMode === 'view' && (
-									<motion.div
-										initial={ { opacity: 0 } }
-										animate={ { opacity: 1 } }
-										exit={ { opacity: 0 } }
-										transition={ {
-											type: 'tween',
-											duration:
-												// Disable transition in mobile to emulate a full page transition.
-												disableMotion ||
-												isMobileViewport
-													? 0
-													: ANIMATION_DURATION,
-											ease: 'easeOut',
-										} }
-										className="edit-site-layout__sidebar"
-									>
-										<div>SiteHub</div>
-										<SidebarContent routeKey={ routeKey }>
-											{ areas.sidebar }
-										</SidebarContent>
-										<div>SaveHub </div>
-										<div>SavePanel</div>
-									</motion.div>
-								) }
+								<motion.div
+									initial={ { opacity: 0 } }
+									animate={ { opacity: 1 } }
+									exit={ { opacity: 0 } }
+									transition={ {
+										type: 'tween',
+										duration:
+											// Disable transition in mobile to emulate a full page transition.
+											disableMotion || isMobileViewport
+												? 0
+												: ANIMATION_DURATION,
+										ease: 'easeOut',
+									} }
+									className="edit-site-layout__sidebar"
+								>
+									<SiteHub
+										ref={ toggleRef }
+										isTransparent={
+											isResizableFrameOversized
+										}
+									/>
+									<SidebarContent routeKey={ routeKey }>
+										{ areas.sidebar }
+									</SidebarContent>
+									{ /* <div>SaveHub </div> */ }
+									{ /* <div>SavePanel</div> */ }
+								</motion.div>
 							</AnimatePresence>
 						</NavigableRegion>
 					) }

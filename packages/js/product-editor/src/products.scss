@@ -4,11 +4,12 @@
 .woocommerce_page_woocommerce-products-dashboard #adminmenumain {
 	display: none;
 }
+
 .woocommerce_page_woocommerce-products-dashboard #wpcontent {
 	margin-left: 0;
 }
-body.woocommerce_page_woocommerce-products-dashboard
-	#woocommerce-products-dashboard {
+
+body.woocommerce_page_woocommerce-products-dashboard #woocommerce-products-dashboard {
 	@include wp-admin-reset("#woocommerce-products-dashboard");
 	@include reset;
 	display: block !important;
@@ -18,6 +19,13 @@ body.woocommerce_page_woocommerce-products-dashboard
 	bottom: 0;
 	left: 0;
 	min-height: 100vh;
+}
+
+#woocommerce-products-dashboard {
+	.edit-site-layout__view-mode-toggle {
+		transform: scale(0.5);
+		border-radius: 4px;
+	}
 }
 
 body.js.is-fullscreen-mode {
