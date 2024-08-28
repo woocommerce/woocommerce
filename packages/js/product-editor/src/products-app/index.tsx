@@ -3,7 +3,6 @@
  */
 import { createElement } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import useInitEditedEntityFromURL from '@wordpress/edit-site/build-module/components/sync-state-with-url/use-init-edited-entity-from-url';
 import {
 	UnsavedChangesWarning,
 	// @ts-expect-error No types for this exist yet.
@@ -22,7 +21,6 @@ const { GlobalStylesProvider } = unlock( editorPrivateApis );
 
 function ProductsLayout() {
 	// This ensures the edited entity id and type are initialized properly.
-	useInitEditedEntityFromURL();
 	const route = useLayoutAreas();
 	return <Layout route={ route } />;
 }
