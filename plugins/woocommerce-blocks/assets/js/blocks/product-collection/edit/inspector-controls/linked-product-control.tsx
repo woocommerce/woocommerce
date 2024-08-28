@@ -66,6 +66,31 @@ const ProductButton: React.FC< {
 	);
 };
 
+const LinkedProductPopoverContent: React.FC< {
+	query: ProductCollectionQuery;
+	setAttributes: ProductCollectionSetAttributes;
+	setIsDropdownOpen: React.Dispatch< React.SetStateAction< boolean > >;
+} > = ( { query, setAttributes, setIsDropdownOpen } ) => (
+	<ProductControl
+		selected={ query?.productReference as SelectedOption }
+		onChange={ ( value: SelectedOption[] = [] ) => {
+			const productId = value[ 0 ]?.id ?? null;
+			if ( productId !== null ) {
+				setAttributes( {
+					query: {
+						...query,
+						productReference: productId,
+					},
+				} );
+				setIsDropdownOpen( false );
+			}
+		} }
+		messages={ {
+			search: __( 'Select a product', 'woocommerce' ),
+		} }
+	/>
+);
+
 const LinkedProductControl = ( {
 	query,
 	setAttributes,
@@ -93,27 +118,6 @@ const LinkedProductControl = ( {
 		);
 	}, [ location.type, query?.productReference, usesReference ] );
 
-	const jsxPopoverContent = (
-		<ProductControl
-			selected={ query?.productReference as SelectedOption }
-			onChange={ ( value = [] ) => {
-				const isValidId = ( value[ 0 ]?.id ?? null ) !== null;
-				if ( isValidId ) {
-					setAttributes( {
-						query: {
-							...query,
-							productReference: value[ 0 ].id,
-						},
-					} );
-					setIsDropdownOpen( false );
-				}
-			} }
-			messages={ {
-				search: __( 'Select a product', 'woocommerce' ),
-			} }
-		/>
-	);
-
 	if ( ! showLinkedProductControl ) return null;
 
 	return (
@@ -131,7 +135,13 @@ const LinkedProductControl = ( {
 							isLoading={ isLoading }
 						/>
 					) }
-					renderContent={ () => jsxPopoverContent }
+					renderContent={ () => (
+						<LinkedProductPopoverContent
+							query={ query }
+							setAttributes={ setAttributes }
+							setIsDropdownOpen={ setIsDropdownOpen }
+						/>
+					) }
 					open={ isDropdownOpen }
 					onToggle={ () => setIsDropdownOpen( ! isDropdownOpen ) }
 				/>
