@@ -452,10 +452,10 @@ class Controller extends GenericController {
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param array           $stat_data    Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param array           $stat_data Report data item as returned from Data Store.
+	 * @param WP_REST_Request $request   Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $stat_data, $request ) {
@@ -478,7 +478,7 @@ class Controller extends GenericController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \Automattic\WooCommerce\Admin\API\Reports\Query $object Object data.
+	 * @param object $object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {

@@ -113,7 +113,7 @@ class ComingSoonRequestHandler {
 			return false;
 		}
 
-		// Do not show coming soon on 404 pages when restrict to store pages only.
+		// Do not show coming soon on 404 pages when applied to store pages only.
 		if ( $this->coming_soon_helper->is_store_coming_soon() && is_404() ) {
 			return false;
 		}

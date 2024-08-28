@@ -14,11 +14,10 @@ $border-width: 1px;
 		> li {
 			margin: 0;
 			width: 100%;
-			overflow: hidden;
 
 			> img {
 				width: 100%;
-				height: auto;
+				height: 48px;
 			}
 		}
 	}
@@ -32,7 +31,7 @@ $border-width: 1px;
 		list-style: none;
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		grid-gap: 10px;
+		grid-gap: 12px;
 
 		@include breakpoint("<782px") {
 			grid-template-columns: 1fr;
@@ -59,7 +58,7 @@ $border-width: 1px;
 			height: $universal-border-radius - $border-width;
 			margin-right: $gap-small;
 			pointer-events: none;
-			width: #{$gap-large - $gap-small - $border-width * 2};
+			flex-grow: 1;
 		}
 
 		&::after {

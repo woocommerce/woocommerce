@@ -508,6 +508,7 @@ class CheckoutFields {
 				'hidden'         => false,
 				'autocomplete'   => 'email',
 				'autocapitalize' => 'none',
+				'type'           => 'email',
 				'index'          => 0,
 			],
 			'country'    => [
