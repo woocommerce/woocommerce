@@ -50,13 +50,6 @@ export default function DataViewsSidebarContent() {
 					);
 				} ) }
 			</ItemGroup>
-			{ /* { window?.__experimentalCustomViews && (
-				<CustomDataViewsList
-					activeView={ activeView }
-					type={ postType }
-					isCustom
-				/>
-			) } */ }
 		</>
 	);
 }
