@@ -134,7 +134,7 @@ class ShippingLabelBanner {
 		}
 
 		$payload = array(
-			// If WCS&T is not installed, it's considered compatible
+			// If WCS&T is not installed, it's considered compatible.
 			'is_wcst_compatible' => $wcst_version ? (int) version_compare( $wcst_version, self::MIN_COMPATIBLE_WCST_VERSION, '>=' ) : 1,
 			'order_id'           => $order ? $order->get_id() : null,
 		);
