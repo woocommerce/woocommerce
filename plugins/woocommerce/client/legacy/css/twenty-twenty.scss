@@ -2336,16 +2336,8 @@ a.reset_variations {
 	overflow: hidden;
 	width: 100%;
 
-	a {
-		color: #fff;
-
-		&:hover {
-			color: #fff;
-		}
-
-		&.button {
-			background: #000000;
-		}
+	a.button {
+		background: #000000;
 	}
 }
 
@@ -2429,5 +2421,14 @@ form.checkout_coupon {
 
 	.input-text.has-error:focus {
 		border-color: var(--wc-red);
+	}
+}
+
+/**
+ * Checkout error message
+ */
+ .checkout {
+	.checkout-inline-error-message {
+		@include checkout-inline-error-message();
 	}
 }
