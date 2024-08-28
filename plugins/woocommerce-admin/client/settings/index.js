@@ -45,8 +45,17 @@ const Settings = ( { params } ) => {
 			sidebarVisisble
 		);
 
-		const event = new Event( 'reactRendered' );
-		window.dispatchEvent( event );
+		// Append a new script tag
+		const script = document.createElement( 'script' );
+		script.src =
+			'http://localhost:8888/wp-content/plugins/woocommerce/assets/js/admin/wc-shipping-classes.js';
+		script.async = true;
+		document.body.appendChild( script );
+
+		// Cleanup function to remove the script when the component unmounts
+		return () => {
+			document.body.removeChild( script );
+		};
 	}, [ params.page, section, sidebarVisisble ] );
 
 	// Register the slot fills for the settings page just once.
