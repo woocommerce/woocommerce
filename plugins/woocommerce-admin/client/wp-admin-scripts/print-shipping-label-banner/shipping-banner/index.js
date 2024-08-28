@@ -367,7 +367,7 @@ export class ShippingBanner extends Component {
 			return null;
 		}
 
-		const { actionButtonLabel } = this.props;
+		const { actionButtonLabel, headline } = this.props;
 		return (
 			<div>
 				<div className="wc-admin-shipping-banner-container">
@@ -377,12 +377,7 @@ export class ShippingBanner extends Component {
 						alt={ __( 'Shipping ', 'woocommerce' ) }
 					/>
 					<div className="wc-admin-shipping-banner-blob">
-						<h3>
-							{ __(
-								'Print discounted shipping labels with a click.',
-								'woocommerce'
-							) }
-						</h3>
+						<h3>{ headline }</h3>
 						<p>
 							{ interpolateComponents( {
 								mixedString: this.state.installText,
@@ -465,12 +460,21 @@ export default compose(
 		const actionButtonLabel = activePlugins.includes( wcstPluginSlug )
 			? __( 'Install WooCommerce Shipping', 'woocommerce' )
 			: __( 'Create shipping label', 'woocommerce' );
-
+		const headline = activePlugins.includes( wcstPluginSlug )
+			? __(
+					'Print discounted shipping labels with a click, now with the dedicated plugin!',
+					'woocommerce'
+			  )
+			: __(
+					'Print discounted shipping labels with a click.',
+					'woocommerce'
+			  );
 		return {
 			isRequesting,
 			isJetpackConnected: isJetpackConnected(),
 			activePlugins,
 			actionButtonLabel,
+			headline,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
