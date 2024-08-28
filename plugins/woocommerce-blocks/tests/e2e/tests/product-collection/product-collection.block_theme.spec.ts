@@ -977,7 +977,7 @@ test.describe( 'Testing "usesReference" argument in "registerProductCollection"'
 				await expect( editorProductPicker )[ expectedVisibility ]();
 
 				if ( collection.shouldShowProductPicker ) {
-					await pageObject.chooseProductInEditorProductPicker(
+					await pageObject.chooseProductInEditorProductPickerIfAvailable(
 						admin.page
 					);
 				}
@@ -1054,7 +1054,7 @@ test.describe( 'Editor product picker', () => {
 				await expect( editorProductPicker ).toBeVisible();
 
 				// Once a product is selected, the product picker should be hidden
-				await pageObject.chooseProductInEditorProductPicker(
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
 					admin.page
 				);
 				await expect( editorProductPicker ).toBeHidden();
@@ -1115,7 +1115,9 @@ test.describe( 'Editor product picker', () => {
 		await expect( editorProductPicker ).toBeVisible();
 
 		// Once a product is selected, the product picker should be hidden
-		await pageObject.chooseProductInEditorProductPicker( admin.page );
+		await pageObject.chooseProductInEditorProductPickerIfAvailable(
+			admin.page
+		);
 		await expect( editorProductPicker ).toBeHidden();
 
 		// Change collection using Toolbar
@@ -1125,7 +1127,9 @@ test.describe( 'Editor product picker', () => {
 		await expect( editorProductPicker ).toBeVisible();
 
 		// Once a product is selected, the product picker should be hidden
-		await pageObject.chooseProductInEditorProductPicker( admin.page );
+		await pageObject.chooseProductInEditorProductPickerIfAvailable(
+			admin.page
+		);
 		await expect( editorProductPicker ).toBeHidden();
 
 		// Product picker should be hidden for collections that don't need product

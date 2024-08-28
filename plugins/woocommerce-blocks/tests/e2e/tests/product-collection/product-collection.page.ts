@@ -201,20 +201,27 @@ class ProductCollectionPage {
 		}
 	}
 
-	async chooseProductInEditorProductPicker(
+	async chooseProductInEditorProductPickerIfAvailable(
 		pageReference: Page | FrameLocator
 	) {
 		const editorProductPicker = pageReference.locator(
 			SELECTORS.productPicker
 		);
-		if ( await editorProductPicker.count() ) {
-			await editorProductPicker
-				.locator( 'label' )
-				.filter( {
-					hasText: 'Album',
-				} )
-				.click();
-		}
+
+		await editorProductPicker
+			.locator( 'label' )
+			.filter( {
+				hasText: 'Album',
+			} )
+			.click();
+
+		await editorProductPicker
+			.locator( 'label' )
+			.filter( {
+				hasText: 'Album',
+			} )
+			.click( { timeout: 3000 } )
+			.catch( () => null );
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
@@ -222,7 +229,9 @@ class ProductCollectionPage {
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		// If product picker is available, choose a product.
-		await this.chooseProductInEditorProductPicker( this.admin.page );
+		await this.chooseProductInEditorProductPickerIfAvailable(
+			this.admin.page
+		);
 		await this.refreshLocators( 'editor' );
 		await this.editor.openDocumentSettingsSidebar();
 	}
@@ -365,7 +374,9 @@ class ProductCollectionPage {
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		// If product picker is available, choose a product.
-		await this.chooseProductInEditorProductPicker( this.editor.canvas );
+		await this.chooseProductInEditorProductPickerIfAvailable(
+			this.editor.canvas
+		);
 		await this.refreshLocators( 'editor' );
 	}
 
