@@ -189,6 +189,8 @@ export class ShippingBanner extends Component {
 
 		this.setState( { wcsAssetsLoading: true } );
 
+		const labelPurchaseMetaboxId = 'woocommerce-order-label';
+		const shipmentTrackingMetaboxId = 'woocommerce-order-shipment-tracking';
 		const jsPath = assets.wcshipping_create_label_script;
 		const stylePath = assets.wcshipping_create_label_style;
 
@@ -207,8 +209,9 @@ export class ShippingBanner extends Component {
 
 		const { itemsCount, orderId } = this.props;
 
+		document.getElementById( labelPurchaseMetaboxId )?.remove();
 		const shippingLabelContainerHtml = this.generateMetaBoxHtml(
-			'woocommerce-order-label',
+			labelPurchaseMetaboxId,
 			__( 'Shipping Label', 'woocommerce' ),
 			{
 				order: { id: orderId },
@@ -221,8 +224,9 @@ export class ShippingBanner extends Component {
 			.getElementById( 'woocommerce-order-data' )
 			.insertAdjacentHTML( 'beforebegin', shippingLabelContainerHtml );
 
+		document.getElementById( shipmentTrackingMetaboxId )?.remove();
 		const shipmentTrackingHtml = this.generateMetaBoxHtml(
-			'woocommerce-order-shipment-tracking',
+			shipmentTrackingMetaboxId,
 			__( 'Shipment Tracking', 'woocommerce' ),
 			{
 				order: { id: orderId },
