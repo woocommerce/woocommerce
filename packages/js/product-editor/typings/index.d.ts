@@ -25,9 +25,21 @@ declare module '@wordpress/core-data' {
 		name: string,
 		id: number | string,
 		options?: { enabled: boolean }
-	): { record: T, editedRecord: T, isResolving: boolean, hasResolved: boolean };
+	): {
+		record: T;
+		editedRecord: T;
+		isResolving: boolean;
+		hasResolved: boolean;
+	};
 }
 declare module '@wordpress/keyboard-shortcuts' {
-	function useShortcut(name: string, callback: (event: KeyboardEvent) => void): void;
+	function useShortcut(
+		name: string,
+		callback: ( event: KeyboardEvent ) => void
+	): void;
 	const store;
+}
+
+declare module '@wordpress/router' {
+	const privateApis;
 }

@@ -1,6 +1,0 @@
-Significance: patch
-Type: fix
-
-Reduce error noise in the user profile screen, by removing the requirement for custom fields to have a class attribute.
-
-
