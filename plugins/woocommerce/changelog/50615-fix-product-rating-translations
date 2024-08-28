@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix translation - Avoid registering blocks in the wrong context.

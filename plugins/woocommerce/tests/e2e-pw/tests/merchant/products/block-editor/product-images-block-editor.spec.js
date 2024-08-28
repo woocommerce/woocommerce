@@ -107,7 +107,11 @@ test( 'can add images', { tag: '@gutenberg' }, async ( { page, product } ) => {
 		await page.goto( product.permalink );
 
 		for ( const image of images ) {
-			await expect( page.getByTitle( image ) ).toBeVisible();
+			await expect(
+				// By scopping the locator to the link, we exclude the zoom image and
+				// ensure the correct image is displayed.
+				page.locator( `a > img[src*="${ image }"]` )
+			).toBeVisible();
 		}
 	} );
 } );
@@ -160,7 +164,11 @@ test(
 
 			// Verify image in store frontend
 			await page.goto( productWithGallery.permalink );
-			await expect( page.getByTitle( newImageName ) ).toBeVisible();
+			await expect(
+				// By scopping the locator to the link, we exclude the zoom image and
+				// ensure the correct image is displayed.
+				page.locator( `a > img[src*="${ newImageName }"]` )
+			).toBeVisible();
 		} );
 	}
 );

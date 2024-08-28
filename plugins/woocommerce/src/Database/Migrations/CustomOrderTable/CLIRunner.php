@@ -330,7 +330,7 @@ class CLIRunner {
 	 * ---
 	 *
 	 * [--order-types]
-	 * : Comma seperated list of order types that needs to be verified. For example, --order-types=shop_order,shop_order_refund
+	 * : Comma-separated list of order types that needs to be verified. For example, --order-types=shop_order,shop_order_refund
 	 * ---
 	 * default: Output of function `wc_get_order_types( 'cot-migration' )`
 	 *
@@ -385,7 +385,7 @@ class CLIRunner {
 		if ( 0 === count( $order_types ) ) {
 			return WP_CLI::error(
 				sprintf(
-				/* Translators: %s is the comma seperated list of order types. */
+				/* Translators: %s is the comma-separated list of order types. */
 					__( 'Passed order type does not match any registered order types. Following order types are registered: %s', 'woocommerce' ),
 					implode( ',', wc_get_order_types( 'cot-migration' ) )
 				)
@@ -927,7 +927,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *    # Cleanup post data for order 314.
 	 *    $ wp wc hpos cleanup 314
 	 *
-	 *    # Cleanup postmeta for orders with IDs betweeen 10 and 100 and order 314.
+	 *    # Cleanup postmeta for orders with IDs between 10 and 100 and order 314.
 	 *    $ wp wc hpos cleanup 10-100 314
 	 *
 	 *    # Cleanup postmeta for all orders.
@@ -1161,10 +1161,10 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * ---
 	 *
 	 * [--meta_keys=<meta_keys>]
-	 * : Comma separated list of meta keys to backfill.
+	 * : Comma-separated list of meta keys to backfill.
 	 *
 	 * [--props=<props>]
-	 * : Comma separated list of order properties to backfill.
+	 * : Comma-separated list of order properties to backfill.
 	 *
 	 * @since 8.6.0
 	 *
