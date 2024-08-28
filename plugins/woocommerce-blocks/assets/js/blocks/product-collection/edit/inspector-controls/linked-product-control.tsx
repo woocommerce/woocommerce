@@ -42,7 +42,7 @@ const LinkedProductControl = ( {
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
 	const { product, isLoading } = useGetProduct( query.productReference );
 
-	const isShowLinkedProductControl = useMemo( () => {
+	const showLinkedProductControl = useMemo( () => {
 		const isInRequiredLocation = usesReference?.includes( location.type );
 		const isProductContextRequired = usesReference?.includes( 'product' );
 		const isProductContextSelected =
@@ -114,7 +114,7 @@ const LinkedProductControl = ( {
 		/>
 	);
 
-	if ( ! isShowLinkedProductControl ) return null;
+	if ( ! showLinkedProductControl ) return null;
 
 	return (
 		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
