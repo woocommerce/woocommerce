@@ -53,7 +53,7 @@ class WC_REST_Product_Shipping_Classes_Controller extends WC_REST_Product_Shippi
 	}
 
 	/**
-	 * Callback fuction for the slug-suggestion endpoint.
+	 * Callback function for the slug-suggestion endpoint.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return string          The suggested slug.

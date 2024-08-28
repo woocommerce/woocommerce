@@ -148,7 +148,7 @@ export const LaunchYourStoreSuccess = ( {
 									}
 							  )
 							: __(
-									"You've successfully launched your store and are ready to start selling! We can't wait to see your business grow.",
+									'You’ve successfully launched your store and are ready to start selling! We can’t wait to see your business grow.',
 									'woocommerce'
 							  ) }
 					</h2>
@@ -193,7 +193,7 @@ export const LaunchYourStoreSuccess = ( {
 						/>
 					</div>
 					<h2 className="woocommerce-launch-store__congrats-main-actions-title">
-						{ __( "What's next?", 'woocommerce' ) }
+						{ __( 'What’s next?', 'woocommerce' ) }
 					</h2>
 					<WhatsNext
 						activePlugins={ activePlugins }

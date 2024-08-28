@@ -69,7 +69,7 @@ TimelineItem.propTypes = {
 		 * The PHP clock format string used to format times, see php.net/date.
 		 */
 		clockFormat: PropTypes.string,
-	} ).isRequired,
+	} ),
 };
 
 export default TimelineItem;

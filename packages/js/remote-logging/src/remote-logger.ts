@@ -292,7 +292,7 @@ export class RemoteLogger {
 			.map( this.getFormattedFrame )
 			.join( '\n\n' );
 
-		// Set hard limit of 8192 characters for the stack trace so it does not use too much user bandwith and also our computation.
+		// Set hard limit of 8192 characters for the stack trace so it does not use too much user bandwidth and also our computation.
 		return trace.length > 8192 ? trace.substring( 0, 8192 ) : trace;
 	}
 
@@ -343,7 +343,7 @@ export class RemoteLogger {
 	) {
 		const containsWooCommerceFrame = stackFrames.some(
 			( frame ) =>
-				frame.url && frame.url.includes( '/woocommerce/assets/' )
+				frame.url && frame.url.startsWith( getSetting( 'wcAssetUrl' ) )
 		);
 
 		/**

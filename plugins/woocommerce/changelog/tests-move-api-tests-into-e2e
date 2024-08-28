@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Tests: moved api core tests as a suite in e2e-pw

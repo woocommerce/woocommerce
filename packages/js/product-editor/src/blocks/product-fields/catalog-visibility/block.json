@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-catalog-visibility-field",
 	"description": "A checkbox to manage the catalog visibility of the product.",
 	"title": "Product catalog visibility",
 	"category": "widgets",
-	"keywords": [ "products", "catalog" ],
+	"keywords": [
+		"products",
+		"catalog"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"label": {
@@ -14,7 +17,12 @@
 		},
 		"visibility": {
 			"type": "string",
-			"enum": [ "visible", "catalog", "search", "hidden" ],
+			"enum": [
+				"visible",
+				"catalog",
+				"search",
+				"hidden"
+			],
 			"default": "visible"
 		}
 	},

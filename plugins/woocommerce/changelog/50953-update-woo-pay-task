@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Refactor WooCommercePayments task to use woo payment gateway from `WC()->payment_gateways->payment_gateways()`
