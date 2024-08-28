@@ -1306,6 +1306,16 @@ p.demo_store,
 		border-radius: 5px;
 	}
 
+	form.checkout_coupon {
+		.coupon-error-notice {
+			@include coupon-error-notice-checkout();
+		}
+
+		.input-text.has-error:focus {
+			border-color: var(--wc-red);
+		}
+	}
+
 	ul#shipping_method {
 		list-style: none outside;
 		margin: 0;
@@ -1838,6 +1848,7 @@ p.demo_store,
 	&::before {
 		font-family: "WooCommerce";
 		content: "\e028";
+		content: "\e028" / ""; // Add an empty alternative text so screen readers ignore it
 		display: inline-block;
 		position: absolute;
 		top: 1em;
@@ -1970,6 +1981,14 @@ p.demo_store,
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
+
+			&.has-error:focus {
+				border-color: var(--wc-red);
+			}
+		}
+
+		td.actions .coupon .coupon-error-notice {
+			@include coupon-error-notice-cart();
 		}
 
 		input {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: enable new linting rules for PHP (PSR-4 naming, Strict types declaration).

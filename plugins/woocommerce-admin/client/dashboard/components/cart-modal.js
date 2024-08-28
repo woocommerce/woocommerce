@@ -137,7 +137,7 @@ class CartModal extends Component {
 
 				<p className="woocommerce-cart-modal__help-text">
 					{ __(
-						"You won't have access to this functionality until the extensions have been purchased and installed.",
+						'You won’t have access to this functionality until the extensions have been purchased and installed.',
 						'woocommerce'
 					) }
 				</p>
@@ -148,7 +148,7 @@ class CartModal extends Component {
 						isBusy={ purchaseLaterButtonBusy }
 						onClick={ () => this.onClickPurchaseLater() }
 					>
-						{ __( "I'll do it later", 'woocommerce' ) }
+						{ __( 'I’ll do it later', 'woocommerce' ) }
 					</Button>
 
 					<Button

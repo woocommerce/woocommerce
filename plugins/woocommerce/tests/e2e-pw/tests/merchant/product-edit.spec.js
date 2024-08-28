@@ -185,3 +185,100 @@ test(
 		} );
 	}
 );
+
+test(
+	'can restore regular price when bulk editing products',
+	{ tag: [ '@gutenberg', '@services' ] },
+	async ( { page, products } ) => {
+		await page.goto( `wp-admin/edit.php?post_type=product` );
+
+		const salePriceDecrease = 10;
+
+		await test.step( 'select and bulk edit the products', async () => {
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await expect(
+				await page.locator( '#bulk-titles-list li' ).count()
+			).toEqual( products.length );
+		} );
+
+		await test.step( 'update the sale price', async () => {
+			await page
+				.locator( 'select[name="change_sale_price"]' )
+				.selectOption(
+					'Set to regular price decreased by (fixed amount or %):'
+				);
+			await page
+				.getByPlaceholder( 'Enter sale price ($)' )
+				.fill( `${ salePriceDecrease }%` );
+		} );
+
+		await test.step( 'save the updates', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+		} );
+
+		await test.step( 'verify the changes', async () => {
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				const expectedRegularPrice = product.regular_price;
+
+				const expectedSalePrice = (
+					expectedRegularPrice *
+					( 1 - salePriceDecrease / 100 )
+				).toFixed( 2 );
+
+				await expect
+					.soft(
+						await page
+							.locator( 'ins' )
+							.getByText( `$${ expectedSalePrice }` )
+							.count()
+					)
+					.toBeGreaterThan( 0 );
+			}
+		} );
+
+		await test.step( 'Update products leaving the "Sale > Change to" empty', async () => {
+			await page.goto( `wp-admin/edit.php?post_type=product` );
+
+			for ( const product of products ) {
+				await page.getByLabel( `Select ${ product.name }` ).click();
+			}
+
+			await page
+				.locator( '#bulk-action-selector-top' )
+				.selectOption( 'Edit' );
+			await page.locator( '#doaction' ).click();
+
+			await page
+				.locator( 'select[name="change_sale_price"]' )
+				.selectOption( 'Change to:' );
+
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+		} );
+
+		await test.step( 'Verify products have their regular price again', async () => {
+			for ( const product of products ) {
+				await page.goto( `product/${ product.slug }` );
+
+				const expectedRegularPrice = product.regular_price;
+
+				await expect
+					.soft( await page.locator( 'ins' ).count() )
+					.toBe( 0 );
+
+				await expect
+					.soft( await page.locator( 'bdi' ).first() )
+					.toContainText( expectedRegularPrice );
+			}
+		} );
+	}
+);

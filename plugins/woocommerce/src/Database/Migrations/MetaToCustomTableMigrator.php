@@ -134,7 +134,7 @@ abstract class MetaToCustomTableMigrator extends TableMigrator {
 	 * @return string Generated queries for batch update. Would be of the form:
 	 * INSERT INTO $table ( $columns ) VALUES
 	 *  ($value for row 1)
-	 *  ($valye for row 2)
+	 *  ($value for row 2)
 	 * ...
 	 * ON DUPLICATE KEY UPDATE
 	 * $column1 = VALUES($column1)

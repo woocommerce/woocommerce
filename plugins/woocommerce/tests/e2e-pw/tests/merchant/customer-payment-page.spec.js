@@ -114,7 +114,7 @@ test.describe(
 				page.getByText( 'Your order has been received' )
 			).toBeVisible();
 			await expect(
-				page.getByText( `Order number: ${ orderId }` )
+				page.getByText( `Order #: ${ orderId }` )
 			).toBeVisible();
 			await expect(
 				await page.getByText( `Total: $${ productPrice }` ).count()

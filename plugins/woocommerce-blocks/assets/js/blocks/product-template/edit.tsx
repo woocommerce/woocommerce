@@ -1,3 +1,4 @@
+/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /* eslint-disable @typescript-eslint/naming-convention */
 /**
  * External dependencies

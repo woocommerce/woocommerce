@@ -232,7 +232,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		if ( wc_product_sku_enabled() ) {
-			// Do a partial match for a sku. Supercedes sku parameter that does exact matching.
+			// Do a partial match for a sku. Supersedes sku parameter that does exact matching.
 			if ( ! empty( $request['search_sku'] ) ) {
 				// Store this for use in the query clause filters.
 				$this->search_sku_in_product_lookup_table = $request['search_sku'];

@@ -52,7 +52,6 @@ class TaxesReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="taxes"
-					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }

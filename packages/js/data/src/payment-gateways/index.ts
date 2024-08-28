@@ -13,7 +13,7 @@ import * as resolvers from './resolvers';
 import * as selectors from './selectors';
 import reducer from './reducer';
 import { STORE_KEY } from './constants';
-import { WPDataActions } from '../types';
+import { WPDataSelectors } from '../types';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 
 export const PAYMENT_GATEWAYS_STORE_NAME = STORE_KEY;
@@ -33,7 +33,7 @@ declare module '@wordpress/data' {
 	): DispatchFromMap< typeof actions >;
 	function select(
 		key: typeof STORE_KEY
-	): SelectFromMap< typeof selectors > & WPDataActions;
+	): SelectFromMap< typeof selectors > & WPDataSelectors;
 	function resolveSelect(
 		key: typeof STORE_KEY
 	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
