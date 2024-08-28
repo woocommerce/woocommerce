@@ -11,6 +11,7 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 		padding: 0;
 		border-bottom-width: 0;
 		border-bottom-color: inherit; /* Backward compatibility for TT3, TT2. */
+		overflow: visible;
 
 		&::after,
 		&::before {
@@ -26,14 +27,14 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 			border-bottom-width: 2px;
 			border-radius: 0;
 			margin: 0;
-			padding: 0 1em;
+			padding: 0;
 			display: inline-block;
 			float: none; /* Backward compatibility for TT3, TT2. */
 			font-weight: bold;
 			opacity: 0.65;
 
 			a {
-				padding: 0.5em 0;
+				padding: 0.5em 1em;
 				color: inherit;
 				border: none;
 				text-shadow: none;
@@ -42,6 +43,7 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 			}
 
 			&:hover,
+			&:focus-within,
 			&.active {
 				color: inherit;
 				background: inherit;
@@ -53,6 +55,12 @@ html body .wp-block-woocommerce-product-details.is-style-minimal {
 					border: none;
 					text-decoration: none;
 				}
+			}
+
+			/* Remove default focus styles in favor of the ones we defined above. */
+			&:focus:not(:focus-visible),
+			a:focus:not(:focus-visible) {
+				outline: none;
 			}
 
 			@media only screen and ( max-width: 768px ) {

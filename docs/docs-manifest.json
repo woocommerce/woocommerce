@@ -71,6 +71,14 @@
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
         {
+          "post_title": "Blocks reference",
+          "menu_title": "Blocks Reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
+          "hash": "b6cd78cba78be8846621f27b9d4a408c713e1915bdbb7fc27b6247b3ff8610f1",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
+          "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
+        },
+        {
           "post_title": "How to add a custom field to simple and variable products",
           "menu_title": "Add Custom Fields to Products",
           "tags": "how-to",
@@ -259,7 +267,7 @@
               "menu_title": "Legacy Hooks",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "hash": "025731fc8884e13e09ecc857bee7d669a091f11640e023e40c08ffc521f38964",
+              "hash": "be4cf6862932c6696568b210e5f6ae4bd5313dacfb66724e23fab830baeb94e1",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
               "id": "5264fa45d393327b2c9cffb038c4d3670879d911"
             }
@@ -1302,7 +1310,7 @@
               "post_title": "How to request WooCommerce extension reviews",
               "menu_title": "Requesting reviews",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
-              "hash": "5a77783c32c1bb0fefc6888f7a3217fe6e5c7242692593a17828b2f1ffec618b",
+              "hash": "dfdf5add075777636eb628d25484e93268251437dec0253766c12d80ac82573b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
               "id": "3d0c8bf7339a71198737d19eec7e6d71697b3727"
             }
@@ -1796,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "7e929e4f5594921717bb3407ea502c4a01d4dabee6b8b1d441cd14fda4b22248"
+  "hash": "df3de404fdaf0f5edbc84ef82a7e492c5bf95c862aecadf9643229b7d10cc2eb"
 }

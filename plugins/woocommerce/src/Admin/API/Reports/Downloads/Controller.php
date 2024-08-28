@@ -32,7 +32,7 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/downloads';
 
 	/**
-	 * Get data from `'downloads'` Query.
+	 * Get data from `'downloads'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *

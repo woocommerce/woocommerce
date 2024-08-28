@@ -147,11 +147,9 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_connected() {
-		if ( class_exists( '\WC_Payments' ) ) {
-			$wc_payments_gateway = \WC_Payments::get_gateway();
-			return method_exists( $wc_payments_gateway, 'is_connected' )
-				? $wc_payments_gateway->is_connected()
-				: false;
+		$wc_payments_gateway = self::get_woo_payments_gateway();
+		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_connected' ) ) {
+			return $wc_payments_gateway->is_connected();
 		}
 
 		return false;
@@ -164,11 +162,9 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_account_partially_onboarded() {
-		if ( class_exists( '\WC_Payments' ) ) {
-			$wc_payments_gateway = \WC_Payments::get_gateway();
-			return method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' )
-				? $wc_payments_gateway->is_account_partially_onboarded()
-				: false;
+		$wc_payments_gateway = self::get_woo_payments_gateway();
+		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' ) ) {
+			return $wc_payments_gateway->is_account_partially_onboarded();
 		}
 
 		return false;
@@ -194,5 +190,18 @@ class WooCommercePayments extends Task {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Get the WooPayments gateway.
+	 *
+	 * @return \WC_Payments|null
+	 */
+	private static function get_woo_payments_gateway() {
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		if ( isset( $payment_gateways['woocommerce_payments'] ) ) {
+			return $payment_gateways['woocommerce_payments'];
+		}
+		return null;
 	}
 }

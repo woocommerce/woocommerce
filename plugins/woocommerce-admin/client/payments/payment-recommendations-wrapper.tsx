@@ -21,15 +21,11 @@ export const PaymentRecommendations: React.FC< EmbeddedBodyProps > = ( {
 	tab,
 	section,
 } ) => {
-	if ( page === 'wc-settings' && tab === 'checkout' && ! section ) {
-		if (
-			window?.wcAdminFeatures?.[
-				'reactify-classic-payments-settings'
-			] === true
-		) {
-			return null;
-		}
-
+	if (
+		page === 'wc-settings' &&
+		tab === 'checkout' &&
+		( ! section || section === 'main' )
+	) {
 		return (
 			<RecommendationsEligibilityWrapper>
 				<Suspense fallback={ null }>

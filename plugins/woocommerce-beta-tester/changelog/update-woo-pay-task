@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update Fake_WCPayments is_account_partially_onboarded to return false
