@@ -422,13 +422,11 @@ class MiniCartInteractivity extends AbstractBlock {
 		$icon_name           = isset( $attributes['miniCartIcon'] ) ? esc_attr( $attributes['miniCartIcon'] ) : null;
 
 		$is_initially_open        = isset( $attributes['isInitiallyOpen'] ) && $attributes['isInitiallyOpen'] ? 'true' : 'false';
-		$has_hidden_price         = isset( $attributes['hasHiddenPrice'] ) && $attributes['hasHiddenPrice'] ? 'true' : 'false';
 		$add_to_cart_behaviour    = isset( $attributes['addToCartBehaviour'] ) ? $attributes['addToCartBehaviour'] : 'none';
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'always';
 
 		$data = array(
 			'is-initially-open'        => $is_initially_open,
-			'has-hidden-price'         => $has_hidden_price,
 			'add-to-cart-behaviour'    => $add_to_cart_behaviour,
 			'product-count-visibility' => $product_count_visibility,
 		);
@@ -442,7 +440,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		$data_attributes_string = implode( ' ', $data_attributes );
 
 		?>
-		<button data-wc-bind--data-cart-item-totals="context.cartItemTotals" data-wc-bind--data-cart-item-count="context.cartItemCount" <?php echo $data_attributes_string; ?> <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	  
+		<button data-wc-bind--data-has-hidden-price="context.hasHiddenPrice" data-wc-bind--data-cart-item-totals="context.cartItemTotals" data-wc-bind--data-cart-item-count="context.cartItemCount" <?php echo $data_attributes_string; ?> <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	  
 			<?php
 				echo $this->get_cart_price_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. 
 			?>
@@ -479,6 +477,8 @@ class MiniCartInteractivity extends AbstractBlock {
 			'drawerIsLoading'    => false,
 			'isInitiallyOpen'    => isset( $attributes['isInitiallyOpen'] ) ? $attributes['isInitiallyOpen'] : false,
 			'addToCartBehaviour' => isset( $attributes['addToCartBehaviour'] ) ? $attributes['addToCartBehaviour'] : 'none',
+			'hasHiddenPrice'     => isset( $attributes['hasHiddenPrice'] ) ? $attributes['hasHiddenPrice'] : false,
+			'amount'             => 0,
 		);
 		$wrapper_attributes     = get_block_wrapper_attributes(
 			array(

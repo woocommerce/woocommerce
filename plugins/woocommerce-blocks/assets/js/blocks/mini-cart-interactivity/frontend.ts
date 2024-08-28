@@ -11,12 +11,14 @@ import {
 	getNavigationType,
 	translateJQueryEventToNative,
 } from '@woocommerce/base-utils';
+import { _n, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { CART_STORE_KEY } from '../../data';
 import {
+	getAmount,
 	getMiniCartTotalsFromLocalStorage,
 	getMiniCartTotalsFromServer,
 } from './utils/data';
@@ -33,6 +35,7 @@ interface dependencyData {
 interface Store {
 	state: {
 		displayQuantityBadgeStyle: string;
+		priceAriaLabel: string;
 	};
 	callbacks: {
 		initialize: () => void;
@@ -48,10 +51,10 @@ interface Context {
 	drawerIsLoading: boolean;
 	// JSON stringified cart totals.
 	cartItemTotals: string;
+	amount: string;
+	hasHiddenPrice: boolean;
 }
 
-// updateTotals( getMiniCartTotalsFromLocalStorage() );
-// getMiniCartTotalsFromServer().then( updateTotals );
 setStyles();
 
 declare global {
@@ -103,6 +106,35 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 			const context = getContext< Context >();
 			return context.cartItemCount > 0 ? 'flex' : 'none';
 		},
+
+		get priceAriaLabel() {
+			const context = getContext< Context >();
+
+			const { cartItemCount, hasHiddenPrice, amount } = context;
+
+			return hasHiddenPrice
+				? sprintf(
+						/* translators: %s number of products in cart. */
+						_n(
+							'%1$d item in cart',
+							'%1$d items in cart',
+							cartItemCount,
+							'woocommerce'
+						),
+						cartItemCount
+				  )
+				: sprintf(
+						/* translators: %1$d is the number of products in the cart. %2$s is the cart total */
+						_n(
+							'%1$d item in cart, total price of %2$s',
+							'%1$d items in cart, total price of %2$s',
+							cartItemCount,
+							'woocommerce'
+						),
+						cartItemCount,
+						amount
+				  );
+		},
 	},
 
 	callbacks: {
@@ -113,16 +145,23 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 			const localStorageTotals = getMiniCartTotalsFromLocalStorage();
 
 			if ( localStorageTotals ) {
-				const [ totals ] = localStorageTotals;
+				const [ totals, quantity ] = localStorageTotals;
+				const amount = getAmount( totals );
 				context.cartItemTotals = JSON.stringify( totals );
+				context.cartItemCount = quantity;
+				context.amount = amount;
 			}
 
 			const serverTotals = await getMiniCartTotalsFromServer();
 
 			if ( serverTotals ) {
-				const [ serverUpdatedTotals ] = serverTotals;
+				const [ serverUpdatedTotals, serverUpdatedQuantity ] =
+					serverTotals;
+				const amount = getAmount( serverUpdatedTotals );
 				// If we have the totals from the server, update them on the dataset.
 				context.cartItemTotals = JSON.stringify( serverUpdatedTotals );
+				context.cartItemCount = serverUpdatedQuantity;
+				context.amount = amount;
 			}
 
 			subscribe( () => {
