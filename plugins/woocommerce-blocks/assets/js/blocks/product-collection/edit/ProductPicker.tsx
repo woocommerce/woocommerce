@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Icon, info } from '@wordpress/icons';
 import ProductControl from '@woocommerce/editor-components/product-control';
@@ -38,8 +38,14 @@ const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 						className="wc-blocks-product-collection__info-icon"
 					/>
 					<Text>
-						<strong>{ collection.title }</strong> requires a product
-						to be selected in order to display associated items.
+						{ sprintf(
+							/* translators: %s: collection title */
+							__(
+								'<strong>%s</strong> requires a product to be selected in order to display associated items.',
+								'woocommerce'
+							),
+							collection.title
+						) }
 					</Text>
 				</HStack>
 				<ProductControl
