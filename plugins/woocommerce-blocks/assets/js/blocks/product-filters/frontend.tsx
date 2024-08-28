@@ -25,7 +25,6 @@ const productFilters = {
 		openDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = true;
-			console.log( 'openDialog' );
 		},
 	},
 	callbacks: {},

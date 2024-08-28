@@ -58,13 +58,21 @@ class ProductFilters extends AbstractBlock {
 		$html = str_replace( $target_div, $product_filters_content_html . $target_div, $html );
 
 		$html = strtr(
-			'<dialog hidden role="dialog" aria-modal="true" data-wc-bind--hidden="!state.isDialogOpen">
+			'<dialog hidden role="dialog" aria-modal="true">
 				{{html}}
 			</dialog>',
 			array(
 				'{{html}}' => $html,
 			)
 		);
+
+		$p    = new \WP_HTML_Tag_Processor( $html );
+		if ( $p->next_tag() ) {
+			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$p->set_attribute( 'data-wc-bind--hidden', '!state.isDialogOpen' );
+			$p->set_attribute( 'data-wc-class--wc-block-product-filters--dialog-open', 'state.isDialogOpen' );
+			$html = $p->get_updated_html();
+		}
 
 		return $html;
 	}
