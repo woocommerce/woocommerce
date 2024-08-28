@@ -69,7 +69,6 @@ class CategoriesReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="products"
-					isRequesting={ isRequesting }
 					limitProperties={
 						isSingleCategoryView
 							? [ 'products', 'categories' ]
