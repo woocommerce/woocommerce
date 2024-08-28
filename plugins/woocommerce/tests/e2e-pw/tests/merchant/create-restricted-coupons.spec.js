@@ -224,7 +224,9 @@ test.describe( 'Restricted coupon management', { tag: '@services' }, () => {
 						.first()
 						.pressSequentially( product.name );
 					await page
-						.getByRole( 'option', { name: product.name } )
+						.getByRole( 'option' )
+						.first()
+						.filter( { hasText: product.name } )
 						.click();
 				} );
 			}
@@ -241,7 +243,9 @@ test.describe( 'Restricted coupon management', { tag: '@services' }, () => {
 						.last()
 						.pressSequentially( product.name );
 					await page
-						.getByRole( 'option', { name: product.name } )
+						.getByRole( 'option' )
+						.first()
+						.filter( { hasText: product.name } )
 						.click();
 				} );
 			}
