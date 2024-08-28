@@ -9,7 +9,7 @@ Custom code should be copied into your child theme's **functions.php** file.
 
 ## Note
 
-Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](https://developer.woocommerce.com/docs/customizing-checkout-fields-using-actions-and-filters/).
+Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](https://developer.woocommerce.com/docs/cart-and-checkout-additional-checkout-fields/).
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 
