@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Reverting the new `buttonAttributes` API. This will be included in a later release

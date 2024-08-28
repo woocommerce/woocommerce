@@ -175,7 +175,7 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	/**
 	 * Get the report data.
 	 *
-	 * Prepares query params, fetches the report data from the Query object,
+	 * Prepares query params, fetches the report data from the data store,
 	 * prepares it for the response, and packs it into the convention-conforming response object.
 	 *
 	 * @throws \WP_Error When the queried data is invalid.
@@ -237,7 +237,7 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Maps query arguments from the REST request, to be fed to Query.
+	 * Maps query arguments from the REST request, to be used to query the datastore.
 	 *
 	 * `WP_REST_Request` does not expose a method to return all params covering defaults,
 	 * as it does for `$request['param']` accessor.

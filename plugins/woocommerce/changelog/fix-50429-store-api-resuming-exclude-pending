@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store API: Do not resume pending orders--create a new order instead

@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Transform labels in shipping zone region selector to decode html entities

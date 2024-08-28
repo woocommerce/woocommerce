@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add the `woocommerce_should_clear_cart_after_payment` filter to influence whether the cart should be cleared after payment.
-
