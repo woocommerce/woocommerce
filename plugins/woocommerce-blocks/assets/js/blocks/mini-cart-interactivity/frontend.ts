@@ -34,7 +34,6 @@ interface dependencyData {
 interface Store {
 	state: {
 		displayQuantityBadgeStyle: string;
-		drawerClasses: string;
 	};
 	callbacks: {
 		initialize: () => void;
@@ -102,14 +101,6 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 		get displayQuantityBadgeStyle() {
 			const context = getContext< Context >();
 			return context.cartItemCount > 0 ? 'flex' : 'none';
-		},
-
-		get drawerClasses() {
-			const context = getContext< Context >();
-
-			return ! context.drawerOpen
-				? 'wc-block-components-drawer__screen-overlay--is-hidden'
-				: 'wc-block-components-drawer__screen-overlay--with-slide-in';
 		},
 	},
 
