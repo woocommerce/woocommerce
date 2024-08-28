@@ -3,7 +3,6 @@
  */
 import { createElement } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import SidebarNavigationScreen from '@wordpress/edit-site/build-module/components/sidebar-navigation-screen';
 
 /**
  * Internal dependencies
@@ -11,6 +10,7 @@ import SidebarNavigationScreen from '@wordpress/edit-site/build-module/component
 import { unlock } from '../lock-unlock';
 import ProductList from './product-list';
 import DataViewsSidebarContent from './sidebar-dataviews';
+import SidebarNavigationScreen from './sidebar-navigation-screen';
 
 const { useLocation } = unlock( routerPrivateApis );
 

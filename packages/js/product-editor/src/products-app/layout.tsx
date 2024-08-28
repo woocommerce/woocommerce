@@ -10,7 +10,6 @@ import {
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { default as SiteHub } from '@wordpress/edit-site/build-module/components/site-hub';
 import {
 	// @ts-expect-error missing type.
 	EditorSnackbars,
@@ -29,6 +28,7 @@ import {
  * Internal dependencies
  */
 import SidebarContent from './sidebar';
+import SiteHub from './site-hub';
 import { Route } from './router';
 import { unlock } from '../lock-unlock';
 
@@ -42,7 +42,7 @@ type LayoutProps = {
 
 export function Layout( { route }: LayoutProps ) {
 	const [ fullResizer ] = useResizeObserver();
-	const toggleRef = useRef();
+	const toggleRef = useRef< HTMLAnchorElement >( null );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const { canvasMode } = useSelect( ( select ) => {
 		const { getCanvasMode } = unlock( select( 'core/edit-site' ) );
