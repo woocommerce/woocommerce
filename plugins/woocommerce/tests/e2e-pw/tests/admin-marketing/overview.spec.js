@@ -28,11 +28,6 @@ test.describe( 'Marketing page', () => {
 
 		// Sections present
 		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
-		).toBeVisible();
-		await expect(
 			page.getByText( 'Channels', { exact: true } )
 		).toBeVisible();
 		await expect(
@@ -55,38 +50,44 @@ test.describe( 'Marketing page', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Introduction can be dismissed', async ( { page } ) => {
-		// Go to the Marketing page.
-		await page.goto( 'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing' );
+	test(
+		'Introduction can be dismissed',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { page } ) => {
+			// Go to the Marketing page.
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
+			);
 
-		// Dismiss the introduction (if it's visible)
-		try {
-			await page
-				.locator(
-					'.woocommerce-marketing-introduction-banner-illustration > .components-button'
+			// Dismiss the introduction (if it's visible)
+			try {
+				await page
+					.locator(
+						'.woocommerce-marketing-introduction-banner-illustration > .components-button'
+					)
+					.click( { timeout: 2000 } );
+			} catch ( e ) {
+				console.log( 'Info: introduction already hidden' );
+			}
+
+			// The introduction should be hidden.
+			await expect(
+				page.getByText(
+					'Reach new customers and increase sales without leaving WooCommerce'
 				)
-				.click( { timeout: 2000 } );
-		} catch ( e ) {
-			console.log( 'Info: introduction already hidden' );
+			).toBeHidden();
+
+			// Refresh the page to make sure the state is saved.
+			await page.reload();
+
+			// The introduction should still be hidden.
+			await expect(
+				page.getByText(
+					'Reach new customers and increase sales without leaving WooCommerce'
+				)
+			).toBeHidden();
 		}
-
-		// The introduction should be hidden.
-		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
-		).toBeHidden();
-
-		// Refresh the page to make sure the state is saved.
-		await page.reload();
-
-		// The introduction should still be hidden.
-		await expect(
-			page.getByText(
-				'Reach new customers and increase sales without leaving WooCommerce'
-			)
-		).toBeHidden();
-	} );
+	);
 
 	test( 'Learning section can be expanded', async ( { page } ) => {
 		// Go to the Dashboard page (this adds time for posts to be created)

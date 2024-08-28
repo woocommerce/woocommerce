@@ -48,7 +48,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'products-stats'` Query.
+	 * Get data from `'products-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -61,7 +61,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Maps query arguments from the REST request, to be fed to Query.
+	 * Maps query arguments from the REST request to be used to query the datastore.
 	 *
 	 * @param \WP_REST_Request $request Full request object.
 	 * @return array Simplified array of params.

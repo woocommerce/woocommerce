@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update `activate-and-setup` e2e tests, so they are passing against Pressable env.

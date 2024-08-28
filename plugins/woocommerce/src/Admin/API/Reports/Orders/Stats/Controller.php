@@ -31,7 +31,7 @@ class Controller extends GenericStatsController {
 	protected $rest_base = 'reports/orders/stats';
 
 	/**
-	 * Get data from Query.
+	 * Get data from Orders\Stats\Query.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
