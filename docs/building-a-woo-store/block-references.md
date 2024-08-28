@@ -141,6 +141,17 @@ Display related products.
 -	**Supports:** align, ~~reusable~~
 -	**Attributes:** 
 
+## On-Sale Badge - woocommerce/product-sale-badge
+
+Displays an on-sale badge if the product is on-sale.
+
+-	**Name:** woocommerce/product-sale-badge
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** 
+-	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductTemplate, productId
+
 ## Active Filters Controls - woocommerce/active-filters
 
 Display the currently active filters.
