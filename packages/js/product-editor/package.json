@@ -61,7 +61,7 @@
 		"@wordpress/deprecated": "wp-6.0",
 		"@wordpress/dom": "^4.6.0",
 		"@wordpress/edit-post": "wp-6.0",
-		"@wordpress/edit-site": "5.15.0",
+		"@wordpress/edit-site": "6.6.1",
 		"@wordpress/editor": "wp-6.0",
 		"@wordpress/element": "wp-6.0",
 		"@wordpress/hooks": "wp-6.0",
