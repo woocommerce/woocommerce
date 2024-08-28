@@ -170,7 +170,7 @@ class Tax extends Task {
 	 *
 	 * @return array
 	 */
-	public static function get_stripe_tax_support_countries() {
+	private static function get_stripe_tax_support_countries() {
 		// https://docs.stripe.com/tax/supported-countries#supported-countries accurate as of 2024-08-26.
 		// countries with remote sales not included.
 		return array(

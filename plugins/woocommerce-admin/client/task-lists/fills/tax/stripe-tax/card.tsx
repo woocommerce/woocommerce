@@ -44,9 +44,11 @@ export const Card: React.FC< TaxChildProps > = ( {
 				__( 'Multi-economic nexus compliance', 'woocommerce' ),
 				__( 'Detailed tax transaction reports', 'woocommerce' ),
 				__( 'Coverage in over 55 countries', 'woocommerce' ),
-				__( 'Free to install, then pay as you go.', 'woocommerce' ),
 			] }
-			terms={ '' }
+			terms={ __(
+				'Free to install, then pay as you go.',
+				'woocommerce'
+			) }
 			onClick={ () => {} }
 		>
 			{ stripeTaxActivated ? (
