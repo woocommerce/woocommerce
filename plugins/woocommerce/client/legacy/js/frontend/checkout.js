@@ -612,7 +612,9 @@ jQuery( function( $ ) {
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
 			wc_checkout_form.scroll_to_notices();
-			wc_checkout_form.$checkout_form.find( '.woocommerce-error[tabindex="-1"]' ).focus();
+			wc_checkout_form.$checkout_form.find(
+				'.woocommerce-error[tabindex="-1"], .wc-block-components-notice-banner.is-error[tabindex="-1"]' )
+			.focus();
 			$( document.body ).trigger( 'checkout_error' , [ error_message ] );
 		},
 		wrapMessagesInsideLink: function( $msgs ) {
