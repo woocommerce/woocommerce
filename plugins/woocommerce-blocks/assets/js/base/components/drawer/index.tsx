@@ -138,6 +138,7 @@ const UnforwardedDrawer = (
 		<div
 			ref={ overlayRef }
 			className={ clsx( 'wc-block-components-drawer__screen-overlay', {
+				shapoopy: true,
 				'wc-block-components-drawer__screen-overlay--is-hidden':
 					! isOpen,
 				'wc-block-components-drawer__screen-overlay--with-slide-in':

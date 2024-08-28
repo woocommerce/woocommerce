@@ -422,7 +422,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		$icon_name           = isset( $attributes['miniCartIcon'] ) ? esc_attr( $attributes['miniCartIcon'] ) : null;
 
 		?>
-		<button data-wc-bind--data-is-initially-open="context.drawerOpen" <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	 
+		<button data-wc-bind--data-add-to-cart-behaviour="context.addToCartBehaviour" data-wc-bind--data-is-initially-open="context.isInitiallyOpen" <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	 
 			<?php
 				echo $this->get_cart_price_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. 
 			?>
@@ -452,11 +452,13 @@ class MiniCartInteractivity extends AbstractBlock {
 		$cart                   = $this->get_cart_instance();
 		$cart_item_count        = $cart->get_cart_contents_count();
 		$cart_context           = array(
-			'cartItemCount'   => $cart_item_count,
-			'cartIsEmpty'     => 0 === $cart_item_count,
-			'drawerOpen'      => false,
-			'scriptsLoaded'   => false,
-			'drawerIsLoading' => false,
+			'cartItemCount'      => $cart_item_count,
+			'cartIsEmpty'        => 0 === $cart_item_count,
+			'drawerOpen'         => false,
+			'scriptsLoaded'      => false,
+			'drawerIsLoading'    => false,
+			'isInitiallyOpen'    => isset( $attributes['isInitiallyOpen'] ) ? $attributes['isInitiallyOpen'] : false,
+			'addToCartBehaviour' => isset( $attributes['addToCartBehaviour'] ) ? $attributes['addToCartBehaviour'] : 'none',
 		);
 		$wrapper_attributes     = get_block_wrapper_attributes(
 			array(

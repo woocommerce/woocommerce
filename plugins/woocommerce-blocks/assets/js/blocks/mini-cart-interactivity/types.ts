@@ -30,4 +30,5 @@ export interface BlockAttributes {
 	iconColor: ColorItem;
 	productCountColor: ColorItem;
 	productCountVisibility?: productCountVisibilityType;
+	onClose: () => void;
 }

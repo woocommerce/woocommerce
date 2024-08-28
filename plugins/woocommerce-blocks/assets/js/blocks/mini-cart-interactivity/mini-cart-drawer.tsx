@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { renderParentBlock } from '@woocommerce/atomic-utils';
-import Drawer, { DrawerCloseButton } from '@woocommerce/base-components/drawer';
+import Drawer from '@woocommerce/base-components/drawer';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import {
 	getValidBlockAttributes,
@@ -182,12 +182,21 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 	}, [ isOpen, contentsNode ] );
 
 	useEffect( () => {
+		const openDrawer = () => {
+			setSkipSlideIn( false );
+			setIsOpen( true );
+		};
+
 		const openMiniCart = () => {
 			if ( addToCartBehaviour === 'open_drawer' ) {
-				setSkipSlideIn( false );
-				setIsOpen( true );
+				openDrawer();
 			}
 		};
+
+		document.body.addEventListener(
+			'wc-mini-cart-interactivity-open-drawer',
+			openDrawer
+		);
 
 		// Make it so we can read jQuery events triggered by WC Core elements.
 		const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
@@ -224,14 +233,11 @@ export const MiniCartDrawer = ( attributes: Props ): JSX.Element => {
 				} }
 				slideIn={ ! skipSlideIn }
 			>
-				<>
-					<DrawerCloseButton />
-					<div
-						className="wc-block-mini-cart-interactivity__template-part"
-						ref={ contentsRef }
-						dangerouslySetInnerHTML={ { __html: contents } }
-					></div>
-				</>
+				<div
+					className="wc-block-mini-cart-interactivity__template-part"
+					ref={ contentsRef }
+					dangerouslySetInnerHTML={ { __html: contents } }
+				></div>
 			</Drawer>
 		</>
 	);

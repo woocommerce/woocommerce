@@ -6,7 +6,7 @@ import { renderFrontend } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import { MiniCartDrawer } from './MiniCartDrawer';
+import { MiniCartDrawer } from './mini-cart-drawer';
 import './style.scss';
 
 const MINI_CART_BUTTON_SELECTOR = '.wc-block-mini-cart__button';
@@ -34,7 +34,7 @@ const renderMiniCartFrontend = () => {
 	/* eslint-enable @wordpress/no-global-active-element */
 
 	renderFrontend( {
-		selector: '.wc-block-mini-cart__drawer',
+		selector: '.wc-block-components-drawer__screen-overlay',
 		Block: MiniCartDrawer,
 		getProps: ( el ) => {
 			const button = document.querySelector( MINI_CART_BUTTON_SELECTOR );
@@ -48,6 +48,14 @@ const renderMiniCartFrontend = () => {
 							.toString()
 							.replace( 'wc-block-mini-cart__button', '' )
 					: '';
+
+			// dataset we must provide:
+			// - isInitiallyOpen: true/false
+			// - cartTotals: JSON.stringify( { totals, subtotals } )
+			// - cartItemsCount: number
+			// - hasHiddenPrice: true/false
+			// - addToCartBehaviour: none/open_drawer
+			// - productCountVisibility: always/never/greater_than_zero
 
 			const isInitiallyOpen = dataset.isInitiallyOpen === 'true';
 
@@ -88,28 +96,3 @@ const renderMiniCartFrontend = () => {
 };
 
 renderMiniCartFrontend();
-
-document.body.addEventListener(
-	'wc-mini-cart-interactivity-open-drawer',
-	() => {
-		renderMiniCartFrontend();
-	}
-);
-
-// Create a mutation observer to watch for changes to the dataset isInitiallyOpen
-const observer = new MutationObserver( ( mutations ) => {
-	mutations.forEach( ( mutation ) => {
-		if ( mutation.type === 'attributes' ) {
-			renderMiniCartFrontend();
-		}
-	} );
-} );
-
-const miniCartButton = document.querySelector( MINI_CART_BUTTON_SELECTOR );
-
-if ( miniCartButton ) {
-	observer.observe( miniCartButton, {
-		attributes: true,
-		attributeFilter: [ 'data-is-initially-open' ],
-	} );
-}
