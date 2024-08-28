@@ -16,7 +16,7 @@ interface Context {
 
 store< Store >( 'woocommerce/product-image', {
 	actions: {
-		*triggerEvent() {
+		triggerViewEvent() {
 			const context = getContext< Context >();
 			const { productId } = context;
 

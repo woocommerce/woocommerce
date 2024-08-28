@@ -143,7 +143,7 @@ class ProductImage extends AbstractBlock {
 			$directives = '
 				data-wc-interactive=\'' . wp_json_encode( array( 'namespace' => 'woocommerce/product-image' ), JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
 				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
-				data-wc-on--click=actions.triggerEvent
+				data-wc-on--click=actions.triggerViewEvent
 			';
 		}
 
