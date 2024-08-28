@@ -184,6 +184,11 @@ export class ShippingBanner extends Component {
 		const jsPath = assets.wcshipping_create_label_script;
 		const stylePath = assets.wcshipping_create_label_style;
 
+		const shipmentTrackingJsPath =
+			assets.wcshipping_shipment_tracking_script;
+		const shipmentTrackingStylePath =
+			assets.wcshipping_shipment_tracking_style;
+
 		if ( undefined === window.wcsPluginData ) {
 			const assetPath = jsPath.substring(
 				0,
@@ -241,11 +246,34 @@ export class ShippingBanner extends Component {
 				document.body.appendChild( script );
 			} ),
 			new Promise( ( resolve, reject ) => {
+				const script = document.createElement( 'script' );
+				script.src = shipmentTrackingJsPath;
+				script.async = true;
+				script.onload = resolve;
+				script.onerror = reject;
+				document.body.appendChild( script );
+			} ),
+			new Promise( ( resolve, reject ) => {
 				if ( stylePath !== '' ) {
 					const link = document.createElement( 'link' );
 					link.rel = 'stylesheet';
 					link.type = 'text/css';
 					link.href = stylePath;
+					link.media = 'all';
+					link.onload = resolve;
+					link.onerror = reject;
+					link.id = 'wcshipping-injected-styles';
+					document.head.appendChild( link );
+				} else {
+					resolve();
+				}
+			} ),
+			new Promise( ( resolve, reject ) => {
+				if ( shipmentTrackingStylePath !== '' ) {
+					const link = document.createElement( 'link' );
+					link.rel = 'stylesheet';
+					link.type = 'text/css';
+					link.href = shipmentTrackingStylePath;
 					link.media = 'all';
 					link.onload = resolve;
 					link.onerror = reject;
