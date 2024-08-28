@@ -147,7 +147,7 @@ $max-button-width: calc(100% / #{$max-button-columns});
 }
 
 // Preview mode
-.wp-block-woocommerce-product-collection .wc-block-product-collection__preview-button {
+.wc-block-product-collection__preview-button {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -162,8 +162,8 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		box-shadow: none;
 	}
 
-	&:hover.is-primary,
-	&:active.is-primary {
+	&:hover.is-primary:not(:disabled),
+	&:active.is-primary:not(:disabled) {
 		background: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
 		color: var(--wp-components-color-accent-inverted, #fff);
 	}
