@@ -35,7 +35,17 @@ const test = baseTest.extend( {
 	coupon: async ( { api }, use ) => {
 		const coupon = {};
 		await use( coupon );
-		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+		await api
+			.delete( `coupons/${ coupon.id }`, { force: true } )
+			.then( ( response ) => {
+				console.log( 'Delete successful:', response.data );
+			} )
+			.catch( ( error ) => {
+				if ( error.response ) {
+					console.log( 'Error response data:', error.response.data );
+					console.log( 'Error status:', error.response.status );
+				}
+			} );
 	},
 } );
 
