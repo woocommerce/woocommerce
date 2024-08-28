@@ -85,7 +85,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Error message.
 	 *
 	 * This property should not be considered public API, and should not be accessed directly.
-	 * It is being added to supress PHP > 8.0 warnings against dynamic property creation, and all access
+	 * It is being added to suppress PHP > 8.0 warnings against dynamic property creation, and all access
 	 * should be through the getter and setter methods, namely `get_error_message()` and `set_error_message()`.
 	 * In the future, the access modifier may be changed back to protected.
 	 *

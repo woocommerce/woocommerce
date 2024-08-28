@@ -413,7 +413,12 @@ function wc_cart_round_discount( $value, $precision ) {
  */
 function wc_get_chosen_shipping_method_ids() {
 	$method_ids     = array();
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$chosen_methods = array();
+
+	if ( is_callable( array( WC()->session, 'get' ) ) ) {
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	}
+
 	foreach ( $chosen_methods as $chosen_method ) {
 		if ( ! is_string( $chosen_method ) ) {
 			continue;
@@ -421,6 +426,7 @@ function wc_get_chosen_shipping_method_ids() {
 		$chosen_method = explode( ':', $chosen_method );
 		$method_ids[]  = current( $chosen_method );
 	}
+
 	return $method_ids;
 }
 

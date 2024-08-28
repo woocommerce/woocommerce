@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the logic that conditionally activates the compatibility layer in WooCommerce block templates so it detects blocks inside patterns

@@ -60,9 +60,9 @@ const Edit = ( {
 			<div
 				{ ...blockProps }
 				/**
-				 * If block is descendant of the All Products block, we don't want to
-				 * apply style here because it will be applied inside Block using
-				 * useColors, useTypography, and useSpacing hooks.
+				 * If block is a descendant of the All Products block, we don't
+				 * want to apply style here because it will be applied inside
+				 * Block using useColors, useTypography, and useSpacing hooks.
 				 */
 				style={
 					attributes.isDescendantOfAllProducts ? undefined : style

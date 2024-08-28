@@ -55,6 +55,7 @@ require 'tools/trigger-update-callbacks.php';
 require 'tools/reset-cys.php';
 require 'tools/set-block-template-logging-threshold.php';
 require 'tools/set-coming-soon-mode.php';
+require 'tools/fake-woo-payments-gateway.php';
 require 'tracks/class-tracks-debug-log.php';
 require 'features/features.php';
 require 'rest-api-filters/class-wca-test-helper-rest-api-filters.php';
