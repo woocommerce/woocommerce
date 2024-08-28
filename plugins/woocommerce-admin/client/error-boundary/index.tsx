@@ -31,15 +31,17 @@ export const ErrorBoundary: React.FC< ErrorBoundaryProps > = ( {
 	} );
 
 	useEffect( () => {
-		const errorHandler = ( error: Error, errorInfo: ErrorInfo ) => {
+		const errorHandler = ( event: ErrorEvent | PromiseRejectionEvent ) => {
+			const error =
+				event instanceof ErrorEvent ? event.error : event.reason;
+			const errorInfo = { componentStack: '' };
+
 			setState( ( prevState ) => ( {
 				...prevState,
 				hasError: true,
 				error,
 				errorInfo,
 			} ) );
-
-			bumpStat( 'error', 'unhandled-js-error-during-render' );
 
 			// Limit the component stack to 10 calls so we don't send too much data.
 			const componentStack = errorInfo.componentStack
@@ -54,27 +56,25 @@ export const ErrorBoundary: React.FC< ErrorBoundaryProps > = ( {
 					componentStack,
 				},
 			} );
+
+			// Reintroducing the bumpStat call
+			bumpStat( 'error_boundary', 'error' );
 		};
 
-		const unhandledRejectionHandler = ( event: PromiseRejectionEvent ) => {
-			errorHandler( event.reason, { componentStack: '' } );
-		};
-
-		const errorEventHandler = ( event: ErrorEvent ) => {
-			errorHandler( event.error, { componentStack: '' } );
-		};
-
-		window.addEventListener( 'error', errorEventHandler );
+		window.addEventListener( 'error', errorHandler as EventListener );
 		window.addEventListener(
 			'unhandledrejection',
-			unhandledRejectionHandler
+			errorHandler as EventListener
 		);
 
 		return () => {
-			window.removeEventListener( 'error', errorEventHandler );
+			window.removeEventListener(
+				'error',
+				errorHandler as EventListener
+			);
 			window.removeEventListener(
 				'unhandledrejection',
-				unhandledRejectionHandler
+				errorHandler as EventListener
 			);
 		};
 	}, [] );
