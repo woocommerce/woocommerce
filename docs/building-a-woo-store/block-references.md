@@ -51,7 +51,7 @@ Display a product's description, attributes, and reviews.
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** align, spacing (margin)
--	**Attributes:** 
+-	**Attributes:** hideTabTitle
 
 ## Product Image Gallery - woocommerce/product-image-gallery
 
