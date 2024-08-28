@@ -878,5 +878,56 @@ test.describe( 'Product Collection', () => {
 				.poll( async () => await page.evaluate( 'window.eventFired' ) )
 				.toBe( 3 );
 		} );
+
+		test.describe( 'wc-blocks_viewed_product is emitted', () => {
+			let promise: Promise< number | undefined >;
+
+			test.beforeEach( async ( { page, pageObject } ) => {
+				await pageObject.createNewPostAndInsertBlock();
+
+				promise = new Promise( ( resolve ) => {
+					void page.exposeFunction( 'resolveProductId', resolve );
+					void page.addInitScript( () => {
+						window.document.addEventListener(
+							'wc-blocks_viewed_product',
+							( e ) => {
+								window.resolveProductId( e.detail.productId );
+							}
+						);
+					} );
+				} );
+
+				await pageObject.publishAndGoToFrontend();
+			} );
+
+			test( 'when Product Image is clicked', async ( { page } ) => {
+				// Click the element that triggers the event
+				await page
+					.locator( '[data-block-name="woocommerce/product-image"]' )
+					.nth( 0 )
+					.click();
+
+				// Wait for the productId to be resolved from the exposed function
+				const productId = await promise;
+				expect( productId ).toEqual( expect.any( Number ) );
+			} );
+
+			test( 'when Product Title is clicked', async ( { page } ) => {
+				// Click the element that triggers the event
+				await page.locator( '.wp-block-post-title' ).nth( 0 ).click();
+
+				// Wait for the productId to be resolved from the exposed function
+				const productId = await promise;
+				expect( productId ).toEqual( expect.any( Number ) );
+			} );
+
+			test( 'when Add to Cart Anchor is clicked', async ( { page } ) => {
+				await page.getByLabel( 'Select options for “Hoodie”' ).click();
+
+				// Wait for the productId to be resolved from the exposed function
+				const productId = await promise;
+				expect( productId ).toEqual( expect.any( Number ) );
+			} );
+		} );
 	} );
 } );
