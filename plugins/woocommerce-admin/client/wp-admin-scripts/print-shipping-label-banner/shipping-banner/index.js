@@ -7,7 +7,6 @@ import { Button, ExternalLink } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from '@automattic/interpolate-components';
 import PropTypes from 'prop-types';
-import { get, isArray } from 'lodash';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -37,7 +36,7 @@ export class ShippingBanner extends Component {
 			showShippingBanner: true,
 			isDismissModalOpen: false,
 			setupErrorReason: setupErrorTypes.SETUP,
-			orderId: parseInt( wcShippingCoreData.order_id, 10 ),
+			orderId: parseInt( window.wcShippingCoreData.order_id, 10 ),
 			wcsAssetsLoaded: false,
 			wcsAssetsLoading: false,
 			wcsSetupError: false,
@@ -111,7 +110,7 @@ export class ShippingBanner extends Component {
 
 		if (
 			! activePlugins.includes( wcsPluginSlug ) &&
-			[ 1, '1' ].includes( wcShippingCoreData.is_wcst_compatible )
+			[ 1, '1' ].includes( window.wcShippingCoreData.is_wcst_compatible )
 		) {
 			this.acceptTosAndGetWCSAssets();
 		} else {
@@ -155,14 +154,12 @@ export class ShippingBanner extends Component {
 			} )
 			.then( () => getWcsAssets() )
 			.then( ( wcsAssets ) => this.loadWcsAssets( wcsAssets ) )
-			.catch( ( err ) => {
+			.catch( () => {
 				this.setState( { wcsSetupError: true } );
 			} );
 	};
 
 	generateMetaBoxHtml( nodeId, title, args ) {
-		const argsJsonString = JSON.stringify( args ).replace( /"/g, '&quot;' ); // JS has no native html_entities so we just replace.
-
 		const togglePanelText = __( 'Toggle panel:', 'woocommerce' );
 
 		return `
@@ -323,6 +320,7 @@ export class ShippingBanner extends Component {
 			);
 		}
 		return sprintf(
+			// translators: %s is the action button label.
 			__(
 				'By clicking "%s", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
 				'woocommerce'
@@ -336,13 +334,13 @@ export class ShippingBanner extends Component {
 
 		const buttonSelector =
 			'#woocommerce-shipping-shipping-label-shipping_label button';
-		if ( MutationObserver ) {
-			const observer = new MutationObserver(
-				( mutationsList, observer ) => {
+		if ( window.MutationObserver ) {
+			const observer = new window.MutationObserver(
+				( mutationsList, observing ) => {
 					const button = document.querySelector( buttonSelector );
 					if ( button ) {
 						button.click();
-						observer.disconnect();
+						observing.disconnect();
 					}
 				}
 			);
@@ -375,7 +373,7 @@ export class ShippingBanner extends Component {
 		} = this.state;
 		if (
 			! showShippingBanner &&
-			[ 0, '0' ].includes( wcShippingCoreData.is_wcst_compatible )
+			[ 0, '0' ].includes( window.wcShippingCoreData.is_wcst_compatible )
 		) {
 			document
 				.getElementById( 'woocommerce-admin-print-label' )
