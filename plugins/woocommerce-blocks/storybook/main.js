@@ -35,7 +35,7 @@ module.exports = {
 	},
 	// webpackFinal field was added in following PR: https://github.com/woocommerce/woocommerce-blocks/pull/7514
 	// This fixes "storybook build issue" related to framer-motion library.
-	// Solution is from this commment: https://github.com/storybookjs/storybook/issues/16690#issuecomment-971579785
+	// Solution is from this comment: https://github.com/storybookjs/storybook/issues/16690#issuecomment-971579785
 	webpackFinal: async ( config ) => {
 		config.module.rules.push( {
 			test: /\.mjs$/,

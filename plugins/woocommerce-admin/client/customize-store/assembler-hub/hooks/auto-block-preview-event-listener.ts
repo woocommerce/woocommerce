@@ -175,9 +175,10 @@ const addInertToAssemblerPatterns = (
 const addInertToAllInnerBlocks = ( documentElement: HTMLElement ) => {
 	const body = documentElement.ownerDocument.body;
 	const observerChildList = new window.MutationObserver( () => {
-		const parentBlocks = body.getElementsByClassName(
-			'block-editor-block-list__layout'
-		)[ 0 ].children;
+		const parentBlocks =
+			body.getElementsByClassName(
+				'block-editor-block-list__layout'
+			)[ 0 ]?.children ?? [];
 
 		for ( const parentBlock of parentBlocks ) {
 			parentBlock.setAttribute( 'data-is-parent-block', 'true' );
@@ -440,7 +441,7 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 			unsubscribeCallbacks.push( removeEventListenerHidePopover );
 		}
 
-		// Add event listner to the button which will insert a default pattern
+		// Add event listener to the button which will insert a default pattern
 		// when there are no patterns inserted in the block preview.
 		const removePatternButtonClickListener = addPatternButtonClickListener(
 			documentElement,

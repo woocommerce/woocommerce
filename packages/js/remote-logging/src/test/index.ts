@@ -6,7 +6,7 @@ import { addFilter, removeFilter } from '@wordpress/hooks';
 /**
  * Internal dependencies
  */
-import { init, log } from '../';
+import { init, log, captureException } from '../';
 import {
 	RemoteLogger,
 	REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
@@ -31,6 +31,17 @@ jest.mock( 'tracekit', () => ( {
 		],
 	} ),
 } ) );
+
+jest.mock( '@woocommerce/settings', () => {
+	return {
+		getSetting: jest.fn().mockImplementation( ( key ) => {
+			if ( key === 'wcAssetUrl' ) {
+				return 'http://example.com/woocommerce/assets';
+			}
+			return null;
+		} ),
+	};
+} );
 
 describe( 'RemoteLogger', () => {
 	const originalConsoleWarn = console.warn;
@@ -90,6 +101,59 @@ describe( 'RemoteLogger', () => {
 			);
 
 			removeFilter( REMOTE_LOGGING_LOG_ENDPOINT_FILTER, 'test' );
+		} );
+	} );
+
+	describe( 'error', () => {
+		it( 'should send an error to the API with default data', async () => {
+			const error = new Error( 'Test error' );
+			await logger.error( error );
+
+			expect( fetchMock ).toHaveBeenCalledWith(
+				'https://public-api.wordpress.com/rest/v1.1/js-error',
+				expect.objectContaining( {
+					method: 'POST',
+					body: expect.any( FormData ),
+				} )
+			);
+
+			const formData = fetchMock.mock.calls[ 0 ][ 1 ].body;
+			const payload = JSON.parse( formData.get( 'error' ) );
+			expect( payload[ 'message' ] ).toBe( 'Test error' );
+			expect( payload[ 'severity' ] ).toBe( 'error' );
+			expect( payload[ 'trace' ] ).toContain(
+				'#1 at testFunction (http://example.com/woocommerce/assets/js/admin/app.min.js:1:1)'
+			);
+		} );
+
+		it( 'should send an error to the API with extra data', async () => {
+			const error = new Error( 'Test error' );
+			const extraData = {
+				severity: 'warning' as const,
+				tags: [ 'custom-tag' ],
+			};
+			await logger.error( error, extraData );
+
+			expect( fetchMock ).toHaveBeenCalledWith(
+				'https://public-api.wordpress.com/rest/v1.1/js-error',
+				expect.objectContaining( {
+					method: 'POST',
+					body: expect.any( FormData ),
+				} )
+			);
+
+			const formData = fetchMock.mock.calls[ 0 ][ 1 ].body;
+			const payload = JSON.parse( formData.get( 'error' ) );
+			expect( payload[ 'message' ] ).toBe( 'Test error' );
+			expect( payload[ 'severity' ] ).toBe( 'warning' );
+			expect( payload[ 'tags' ] ).toEqual( [
+				'woocommerce',
+				'js',
+				'custom-tag',
+			] );
+			expect( payload[ 'trace' ] ).toContain(
+				'#1 at testFunction (http://example.com/woocommerce/assets/js/admin/app.min.js:1:1)'
+			);
 		} );
 	} );
 
@@ -164,19 +228,19 @@ describe( 'RemoteLogger', () => {
 		} );
 	} );
 
-	describe( 'shouldSendError', () => {
+	describe( 'shouldHandleError', () => {
 		it( 'should return true for WooCommerce errors', () => {
 			const error = new Error( 'Test error' );
 			const stackFrames = [
 				{
-					url: 'http://example.com/wp-content/plugins/woocommerce/assets/js/admin/app.min.js',
+					url: 'http://example.com/woocommerce/assets/js/admin/app.min.js',
 					func: 'testFunction',
 					args: [],
 					line: 1,
 					column: 1,
 				},
 			];
-			const result = ( logger as any ).shouldSendError(
+			const result = ( logger as any ).shouldHandleError(
 				error,
 				stackFrames
 			);
@@ -193,8 +257,15 @@ describe( 'RemoteLogger', () => {
 					line: 1,
 					column: 1,
 				},
+				{
+					url: 'http://example.com/other/plugin/woocommerce/assets/js/app.min.js',
+					func: 'testFunction',
+					args: [],
+					line: 1,
+					column: 1,
+				},
 			];
-			const result = ( logger as any ).shouldSendError(
+			const result = ( logger as any ).shouldHandleError(
 				error,
 				stackFrames
 			);
@@ -203,7 +274,7 @@ describe( 'RemoteLogger', () => {
 
 		it( 'should return false for WooCommerce errors with no stack frames', () => {
 			const error = new Error( 'Test error' );
-			const result = ( logger as any ).shouldSendError( error, [] );
+			const result = ( logger as any ).shouldHandleError( error, [] );
 			expect( result ).toBe( false );
 		} );
 
@@ -214,7 +285,7 @@ describe( 'RemoteLogger', () => {
 				() => true
 			);
 			const error = new Error( 'Test error' );
-			const result = ( logger as any ).shouldSendError( error, [] );
+			const result = ( logger as any ).shouldHandleError( error, [] );
 			expect( result ).toBe( true );
 		} );
 	} );
@@ -252,21 +323,32 @@ describe( 'RemoteLogger', () => {
 	} );
 } );
 
+global.window.wcSettings = {
+	isRemoteLoggingEnabled: true,
+};
+
 describe( 'init', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		window.wcTracks = { isEnabled: true };
+
+		global.window.wcSettings = {
+			isRemoteLoggingEnabled: true,
+		};
 	} );
 
-	it( 'should not initialize the logger if Tracks is not enabled', () => {
-		window.wcTracks = { isEnabled: false };
+	it( 'should not initialize or log when remote logging is disabled', () => {
+		global.window.wcSettings = {
+			isRemoteLoggingEnabled: false,
+		};
 		init( { errorRateLimitMs: 1000 } );
-		expect( () => log( 'info', 'Test message' ) ).not.toThrow();
+		log( 'info', 'Test message' );
+		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should initialize the logger if Tracks is enabled', () => {
+	it( 'should initialize and log without throwing when remote logging is enabled', () => {
 		init( { errorRateLimitMs: 1000 } );
 		expect( () => log( 'info', 'Test message' ) ).not.toThrow();
+		expect( fetchMock ).toHaveBeenCalled();
 	} );
 
 	it( 'should not initialize the logger twice', () => {
@@ -280,9 +362,21 @@ describe( 'init', () => {
 } );
 
 describe( 'log', () => {
-	it( 'should not log if Tracks is not enabled', () => {
-		window.wcTracks = { isEnabled: false };
+	it( 'should not log if remote logging is disabled', () => {
+		global.window.wcSettings = {
+			isRemoteLoggingEnabled: false,
+		};
 		log( 'info', 'Test message' );
+		expect( fetchMock ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'captureException', () => {
+	it( 'should not log error if remote logging is disabled', () => {
+		global.window.wcSettings = {
+			isRemoteLoggingEnabled: false,
+		};
+		captureException( new Error( 'Test error' ) );
 		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 } );

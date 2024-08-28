@@ -7,7 +7,7 @@ const productPrice = '15.99';
 
 test.describe(
 	'WooCommerce Merchant Flow: Orders > Customer Payment Page',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@hpos' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -114,7 +114,7 @@ test.describe(
 				page.getByText( 'Your order has been received' )
 			).toBeVisible();
 			await expect(
-				page.getByText( `Order number: ${ orderId }` )
+				page.getByText( `Order #: ${ orderId }` )
 			).toBeVisible();
 			await expect(
 				await page.getByText( `Total: $${ productPrice }` ).count()

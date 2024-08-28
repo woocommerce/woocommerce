@@ -4,6 +4,7 @@
 import { getSetting } from '@woocommerce/settings';
 import { AttributeSetting } from '@woocommerce/types';
 import { InspectorControls } from '@wordpress/block-editor';
+import { dispatch, useSelect } from '@wordpress/data';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -24,10 +25,15 @@ import {
  */
 import { sortOrderOptions } from '../constants';
 import { BlockAttributes, EditProps } from '../types';
+import { getAttributeFromId } from '../utils';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
-export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
+export const Inspector = ( {
+	clientId,
+	attributes,
+	setAttributes,
+}: EditProps ) => {
 	const {
 		attributeId,
 		sortOrder,
@@ -37,6 +43,47 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 		hideEmpty,
 		clearButton,
 	} = attributes;
+	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+	const { productFilterWrapperBlockId, productFilterWrapperHeadingBlockId } =
+		useSelect(
+			( select ) => {
+				if ( ! clientId )
+					return {
+						productFilterWrapperBlockId: undefined,
+						productFilterWrapperHeadingBlockId: undefined,
+					};
+
+				const { getBlockParentsByBlockName, getBlock } =
+					select( 'core/block-editor' );
+
+				const parentBlocksByBlockName = getBlockParentsByBlockName(
+					clientId,
+					'woocommerce/product-filter'
+				);
+
+				if ( parentBlocksByBlockName.length === 0 )
+					return {
+						productFilterWrapperBlockId: undefined,
+						productFilterWrapperHeadingBlockId: undefined,
+					};
+
+				const parentBlockId = parentBlocksByBlockName[ 0 ];
+
+				const parentBlock = getBlock( parentBlockId );
+				const headerGroupBlock = parentBlock?.innerBlocks.find(
+					( block ) => block.name === 'core/group'
+				);
+				const headingBlock = headerGroupBlock?.innerBlocks.find(
+					( block ) => block.name === 'core/heading'
+				);
+
+				return {
+					productFilterWrapperBlockId: parentBlockId,
+					productFilterWrapperHeadingBlockId: headingBlock?.clientId,
+				};
+			},
+			[ clientId ]
+		);
 
 	return (
 		<>
@@ -48,11 +95,32 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 							label: item.attribute_label,
 						} ) ) }
 						value={ attributeId + '' }
-						onChange={ ( value ) =>
+						onChange={ ( value ) => {
+							const numericId = parseInt( value || '', 10 );
 							setAttributes( {
-								attributeId: parseInt( value || '', 10 ),
-							} )
-						}
+								attributeId: numericId,
+							} );
+							const attributeObject =
+								getAttributeFromId( numericId );
+							if ( productFilterWrapperBlockId ) {
+								updateBlockAttributes(
+									productFilterWrapperBlockId,
+									{
+										attributeId: numericId,
+									}
+								);
+							}
+							if ( productFilterWrapperHeadingBlockId ) {
+								updateBlockAttributes(
+									productFilterWrapperHeadingBlockId,
+									{
+										content:
+											attributeObject?.label ??
+											__( 'Attribute', 'woocommerce' ),
+									}
+								);
+							}
+						} }
 						help={ __(
 							'Choose the attribute to show in this filter.',
 							'woocommerce'

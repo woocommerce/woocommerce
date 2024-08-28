@@ -42,7 +42,7 @@ import type {
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
 import * as wooIcons from '../../../icons';
 import isProductFormTemplateSystemEnabled from '../../../utils/is-product-form-template-system-enabled';
-import { errorHandler } from '../../../hooks/use-product-manager';
+import { formatProductError } from '../../../utils/format-product-error';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -187,10 +187,14 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					template: productTemplate.id,
 				} );
 			} catch ( error ) {
-				const { message, errorProps } = getProductErrorMessageAndProps(
-					errorHandler( error as WPError, productStatus ) as WPError,
-					selectedTab
-				);
+				const { message, errorProps } =
+					await getProductErrorMessageAndProps(
+						formatProductError(
+							error as WPError,
+							productStatus
+						) as WPError,
+						selectedTab
+					);
 				createErrorNotice( message, errorProps );
 			}
 
@@ -305,10 +309,14 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			// by the product editor.
 			window.location.href = getNewPath( {}, `/product/${ productId }` );
 		} catch ( error ) {
-			const { message, errorProps } = getProductErrorMessageAndProps(
-				errorHandler( error as WPError, productStatus ) as WPError,
-				selectedTab
-			);
+			const { message, errorProps } =
+				await getProductErrorMessageAndProps(
+					formatProductError(
+						error as WPError,
+						productStatus
+					) as WPError,
+					selectedTab
+				);
 			createErrorNotice( message, errorProps );
 		}
 	}

@@ -7,8 +7,6 @@ namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaysController;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**
@@ -61,6 +59,31 @@ class Init extends RemoteSpecsEngine {
 		}
 
 		return $specs_to_return;
+	}
+
+	/**
+	 * Gets either cached or default suggestions.
+	 *
+	 * @return array
+	 */
+	public static function get_cached_or_default_suggestions() {
+		$specs = 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' )
+			? DefaultPaymentGateways::get_all()
+			: PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_cached_specs();
+
+		if ( ! is_array( $specs ) || 0 === count( $specs ) ) {
+			$specs = DefaultPaymentGateways::get_all();
+		}
+		/**
+		 * Allows filtering of payment gateway suggestion specs
+		 *
+		 * @since 6.4.0
+		 *
+		 * @param array Gateway specs.
+		 */
+		$specs   = apply_filters( 'woocommerce_admin_payment_gateway_suggestion_specs', $specs );
+		$results = EvaluateSuggestion::evaluate_specs( $specs );
+		return $results['suggestions'];
 	}
 
 	/**

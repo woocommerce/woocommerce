@@ -62,5 +62,6 @@ export function useValidations< T = unknown >() {
 			} );
 		},
 		focusByValidatorId,
+		getFieldByValidatorId: context.getFieldByValidatorId,
 	};
 }

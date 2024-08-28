@@ -22,11 +22,11 @@ const tableHeadersDefault = [
 	},
 	{
 		key: 'expiry',
-		label: __( 'Expiry/Renewal date', 'woocommerce' ),
+		label: __( 'Expires/Renews on', 'woocommerce' ),
 	},
 	{
-		key: 'autoRenew',
-		label: __( 'Auto-renew', 'woocommerce' ),
+		key: 'subscription',
+		label: __( 'Subscription', 'woocommerce' ),
 	},
 	{
 		key: 'version',

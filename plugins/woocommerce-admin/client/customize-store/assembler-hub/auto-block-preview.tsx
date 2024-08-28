@@ -246,6 +246,7 @@ function ScaledBlockPreview( {
 						// @ts-ignore disabled prop exists
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
+						canEnableZoomOutView={ true }
 						readonly={
 							! isFullComposabilityFeatureAndAPIAvailable()
 						}

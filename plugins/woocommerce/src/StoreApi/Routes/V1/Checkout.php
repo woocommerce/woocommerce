@@ -1,12 +1,14 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\AdditionalFields;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
@@ -62,7 +64,7 @@ class Checkout extends AbstractCartRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		return true;
+		return ! $this->has_cart_token( $request );
 	}
 
 	/**
@@ -175,6 +177,54 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Validate required additional fields on request.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @throws RouteException When a required additional field is missing.
+	 */
+	public function validate_required_additional_fields( \WP_REST_Request $request ) {
+		$contact_fields           = $this->additional_fields_controller->get_fields_for_location( 'contact' );
+		$order_fields             = $this->additional_fields_controller->get_fields_for_location( 'order' );
+		$order_and_contact_fields = array_merge( $contact_fields, $order_fields );
+
+		if ( ! empty( $order_and_contact_fields ) ) {
+			foreach ( $order_and_contact_fields as $field_key => $order_and_contact_field ) {
+				if ( $order_and_contact_field['required'] && ! isset( $request['additional_fields'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided additional fields: %s is required', 'woocommerce' ), $order_and_contact_field['label'] ) ),
+						400
+					);
+				}
+			}
+		}
+
+		$address_fields = $this->additional_fields_controller->get_fields_for_location( 'address' );
+		if ( ! empty( $address_fields ) ) {
+			foreach ( $address_fields as $field_key => $address_field ) {
+				if ( $address_field['required'] && ! isset( $request['billing_address'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided billing address: %s is required', 'woocommerce' ), $address_field['label'] ) ),
+						400
+					);
+				}
+				if ( $address_field['required'] && ! isset( $request['shipping_address'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided shipping address: %s is required', 'woocommerce' ), $address_field['label'] ) ),
+						400
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Process an order.
 	 *
 	 * 1. Obtain Draft Order
@@ -200,6 +250,11 @@ class Checkout extends AbstractCartRoute {
 		 * Validate items and fix violations before the order is processed.
 		 */
 		$this->cart_controller->validate_cart();
+
+		/**
+		 * Validate additional fields on request.
+		 */
+		$this->validate_required_additional_fields( $request );
 
 		/**
 		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart

@@ -1,17 +1,11 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	useState,
-	useEffect,
-	useLayoutEffect,
-} from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { parse } from 'qs';
 import { pick } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
-import { Slot, Fill } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 
 /**
@@ -343,19 +337,3 @@ export const navigateTo = ( { url } ) => {
 
 	window.location.href = String( parsedUrl );
 };
-
-/**
- * A Fill for extensions to add client facing custom Navigation Items.
- *
- * @slotFill WooNavigationItem
- * @scope woocommerce-navigation
- * @param {Object} props          React props.
- * @param {Array}  props.children Node children.
- * @param {string} props.item     Navigation item slug.
- */
-export const WooNavigationItem = ( { children, item } ) => {
-	return <Fill name={ 'woocommerce_navigation_' + item }>{ children }</Fill>;
-};
-WooNavigationItem.Slot = ( { name } ) => (
-	<Slot name={ 'woocommerce_navigation_' + name } />
-);

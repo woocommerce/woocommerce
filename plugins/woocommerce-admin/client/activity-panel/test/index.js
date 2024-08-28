@@ -9,7 +9,7 @@ import {
 	createEvent,
 } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
-import { useUser, useUserPreferences } from '@woocommerce/data';
+import { useUser } from '@woocommerce/data';
 import { useState } from '@wordpress/element';
 
 /**
@@ -245,82 +245,6 @@ describe( 'Activity Panel', () => {
 		);
 
 		expect( queryByText( 'Finish setup' ) ).toBeDefined();
-	} );
-
-	describe( 'help panel tooltip', () => {
-		it( 'should render highlight tooltip when task count is at-least 2, task is not completed, and tooltip not shown yet', () => {
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: { payment: 2 },
-			} );
-			const { getByText } = render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( getByText( '[HighlightTooltip]' ) ).toBeInTheDocument();
-		} );
-
-		it( 'should not render highlight tooltip when task is not visited more then once', () => {
-			useSelect.mockImplementation( () => ( {
-				requestingTaskListOptions: false,
-				setupTaskListComplete: false,
-				setupTaskListHidden: false,
-				trackedCompletedTasks: [],
-			} ) );
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: { payment: 1 },
-			} );
-			render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( screen.queryByText( '[HighlightTooltip]' ) ).toBeNull();
-
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: {},
-			} );
-
-			render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( screen.queryByText( '[HighlightTooltip]' ) ).toBeNull();
-		} );
-
-		it( 'should not render highlight tooltip when task is visited twice, but completed already', () => {
-			useSelect.mockImplementation( () => ( {
-				requestingTaskListOptions: false,
-				setupTaskListComplete: false,
-				setupTaskListHidden: false,
-				isCompletedTask: true,
-			} ) );
-
-			useUserPreferences.mockReturnValue( {
-				updateUserPreferences: () => {},
-				task_list_tracked_started_tasks: { payment: 2 },
-			} );
-
-			const { queryByText } = render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
-		} );
-
-		it( 'should not render highlight tooltip when task is visited twice, not completed, but already shown', () => {
-			useUserPreferences.mockReturnValue( {
-				task_list_tracked_started_tasks: { payment: 2 },
-				help_panel_highlight_shown: 'yes',
-			} );
-
-			const { queryByText } = render(
-				<ActivityPanel isEmbedded query={ { task: 'payment' } } />
-			);
-
-			expect( queryByText( '[HighlightTooltip]' ) ).toBeNull();
-		} );
 	} );
 
 	describe( 'panel', () => {

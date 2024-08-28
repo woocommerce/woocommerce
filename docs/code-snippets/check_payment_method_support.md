@@ -5,8 +5,6 @@ tags: payment-methods
 current wccom url: https://woocommerce.com/document/check-if-payment-gateway-supports-refunds-subscriptions-preorders/
 ---
 
-# Check if a Payment Method Support Refunds, Subscriptions or Pre-orders
-
 If a payment method's documentation doesn’t clearly outline the supported features, you can often find what features are supported by looking at payment methods code.
 
 Payment methods can add support for certain features from WooCommerce and its extensions. For example, a payment method can support refunds, subscriptions or pre-orders functionality.
@@ -41,4 +39,4 @@ class WC_Gateway_Simplify_Commerce extends WC_Payment_Gateway {
         );    
 ```
 
-If you don’t find `$this->supports` in the plugin files, that may mean that the payment method isn’t correctly declaring support for refunds, subscripts or pre-orders.
+If you don't find `$this->supports` in the plugin files, that may mean that the payment method isn't correctly declaring support for refunds, subscripts or pre-orders.

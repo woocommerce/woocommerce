@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Icon, info } from '@wordpress/icons';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
+import { createInterpolateElement } from '@wordpress/element';
 import {
 	Placeholder,
 	// @ts-expect-error Using experimental features
@@ -38,8 +39,19 @@ const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 						className="wc-blocks-product-collection__info-icon"
 					/>
 					<Text>
-						<strong>{ collection.title }</strong> requires a product
-						to be selected in order to display associated items.
+						{ createInterpolateElement(
+							sprintf(
+								/* translators: %s: collection title */
+								__(
+									'<strong>%s</strong> requires a product to be selected in order to display associated items.',
+									'woocommerce'
+								),
+								collection.title
+							),
+							{
+								strong: <strong />,
+							}
+						) }
 					</Text>
 				</HStack>
 				<ProductControl

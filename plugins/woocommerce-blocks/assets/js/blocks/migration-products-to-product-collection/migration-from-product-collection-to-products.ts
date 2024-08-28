@@ -7,7 +7,6 @@ import { select, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { disableAutoUpdate } from './migration-from-products-to-product-collection';
 import {
 	getProductCollectionBlockClientIds,
 	checkIfBlockCanBeInserted,
@@ -216,7 +215,6 @@ export const replaceProductCollectionWithProducts = () => {
 };
 
 export const revertMigration = () => {
-	disableAutoUpdate();
 	setUpgradeStatus( {
 		status: 'reverted',
 		time: Date.now(),

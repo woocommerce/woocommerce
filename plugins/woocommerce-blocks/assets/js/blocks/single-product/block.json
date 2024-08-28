@@ -5,26 +5,31 @@
 	"title": "Single Product",
 	"description": "Display a single product.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {
-		"align": [ "wide", "full" ]
+		"align": [
+			"wide",
+			"full"
+		]
 	},
 	"attributes": {
 		"isPreview": {
-		   "type": "boolean",
-		   "default": false
+			"type": "boolean",
+			"default": false
 		},
 		"productId": {
-		   "type": "number"
+			"type": "number"
 		}
-	 },
-	 "example": {
+	},
+	"example": {
 		"attributes": {
-		  "isPreview": true
+  			"isPreview": true
 		}
-	  },
+	},
 	"usesContext": [ "postId", "postType", "queryId" ],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

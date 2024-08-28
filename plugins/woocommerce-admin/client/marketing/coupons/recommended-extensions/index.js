@@ -19,8 +19,11 @@ import Card from '../card';
 const RecommendedExtensions = ( {
 	extensions,
 	isLoading,
-	title,
-	description,
+	title = __( 'Recommended extensions', 'woocommerce' ),
+	description = __(
+		'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.',
+		'woocommerce'
+	),
 	category,
 } ) => {
 	if ( extensions.length === 0 && ! isLoading ) {
@@ -93,14 +96,6 @@ RecommendedExtensions.propTypes = {
 	 * Category of extensions to display.
 	 */
 	category: PropTypes.string,
-};
-
-RecommendedExtensions.defaultProps = {
-	title: __( 'Recommended extensions', 'woocommerce' ),
-	description: __(
-		'Great marketing requires the right tools. Take your marketing to the next level with our recommended marketing extensions.',
-		'woocommerce'
-	),
 };
 
 export { RecommendedExtensions };

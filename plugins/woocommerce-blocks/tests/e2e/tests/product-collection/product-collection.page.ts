@@ -140,7 +140,7 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const placeholderSelector = this.admin.page.locator(
+		const placeholderSelector = this.editor.canvas.locator(
 			SELECTORS.collectionPlaceholder
 		);
 
@@ -206,20 +206,27 @@ class ProductCollectionPage {
 		}
 	}
 
-	async chooseProductInEditorProductPicker(
+	async chooseProductInEditorProductPickerIfAvailable(
 		pageReference: Page | FrameLocator
 	) {
 		const editorProductPicker = pageReference.locator(
 			SELECTORS.productPicker
 		);
-		if ( await editorProductPicker.count() ) {
-			await editorProductPicker
-				.locator( 'label' )
-				.filter( {
-					hasText: 'Album',
-				} )
-				.click();
-		}
+
+		await editorProductPicker
+			.locator( 'label' )
+			.filter( {
+				hasText: 'Album',
+			} )
+			.click();
+
+		await editorProductPicker
+			.locator( 'label' )
+			.filter( {
+				hasText: 'Album',
+			} )
+			.click( { timeout: 3000 } )
+			.catch( () => null );
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
@@ -227,7 +234,9 @@ class ProductCollectionPage {
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		// If product picker is available, choose a product.
-		await this.chooseProductInEditorProductPicker( this.admin.page );
+		await this.chooseProductInEditorProductPickerIfAvailable(
+			this.admin.page
+		);
 		await this.refreshLocators( 'editor' );
 		await this.editor.openDocumentSettingsSidebar();
 	}
@@ -370,7 +379,9 @@ class ProductCollectionPage {
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		// If product picker is available, choose a product.
-		await this.chooseProductInEditorProductPicker( this.editor.canvas );
+		await this.chooseProductInEditorProductPickerIfAvailable(
+			this.editor.canvas
+		);
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -434,7 +445,7 @@ class ProductCollectionPage {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
-		await this.page.locator( SELECTORS.product ).first().waitFor();
+		await this.editor.canvas.locator( SELECTORS.product ).first().waitFor();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -793,11 +804,13 @@ class ProductCollectionPage {
 	}
 
 	private async initializeLocatorsForEditor() {
-		this.productTemplate = this.page.locator( SELECTORS.productTemplate );
-		this.products = this.page
+		this.productTemplate = this.editor.canvas.locator(
+			SELECTORS.productTemplate
+		);
+		this.products = this.editor.canvas
 			.locator( SELECTORS.product )
 			.locator( 'visible=true' );
-		this.productImages = this.page
+		this.productImages = this.editor.canvas
 			.locator( SELECTORS.productImage.inEditor )
 			.locator( 'visible=true' );
 		this.productTitles = this.productTemplate
@@ -806,10 +819,10 @@ class ProductCollectionPage {
 		this.productPrices = this.productTemplate
 			.locator( SELECTORS.productPrice.inEditor )
 			.locator( 'visible=true' );
-		this.addToCartButtons = this.page
+		this.addToCartButtons = this.editor.canvas
 			.locator( SELECTORS.addToCartButton.inEditor )
 			.locator( 'visible=true' );
-		this.pagination = this.page.getByRole( 'document', {
+		this.pagination = this.editor.canvas.getByRole( 'document', {
 			name: 'Block: Pagination',
 		} );
 	}
