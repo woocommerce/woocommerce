@@ -2,6 +2,12 @@
 
 A remote logging package for Automattic based projects. This package provides error tracking and logging capabilities, with support for rate limiting, stack trace formatting, and customizable error filtering.
 
+## Installation
+
+```bash
+npm install @woocommerce/remote-logging --save
+```
+
 ## Description
 
 The WooCommerce Remote Logging package offers the following features:
@@ -46,14 +52,22 @@ The WooCommerce Remote Logging package offers the following features:
 
 ## Customization
 
-You can customize the behavior of the remote logger using WordPress filters:
 
-- `woocommerce_remote_logging_should_send_error`: Control whether an error should be sent to the remote API.
-- `woocommerce_remote_logging_error_data`: Modify the error data before sending it to the remote API.
-- `woocommerce_remote_logging_log_endpoint`: Customize the endpoint URL for sending log messages.
-- `woocommerce_remote_logging_js_error_endpoint`: Customize the endpoint URL for sending JavaScript errors.
+You can customize the behavior of the remote logger using WordPress filters. Here are the available filters:
 
-### Example
+### `woocommerce_remote_logging_should_send_error`
+
+Control whether an error should be sent to the remote API.
+
+**Parameters:**
+
+- `shouldSend` (boolean): The default decision on whether to send the error.
+- `error` (Error): The error object.
+- `stackFrames` (Array): An array of stack frames from the error.
+
+**Return value:** (boolean) Whether the error should be sent.
+
+**Usage example:**
 
 ```js
 import { addFilter } from '@wordpress/hooks';
@@ -62,13 +76,82 @@ addFilter(
   'woocommerce_remote_logging_should_send_error',
   'my-plugin',
   (shouldSend, error, stackFrames) => {
-		const containsPluginFrame = stackFrames.some(
-			( frame ) =>
-				frame.url && frame.url.includes( '/my-plugin/' );
-		);
-    // Custom logic to determine if the error should be sent
-    return shouldSend && containsPluginFrame;
+  const containsPluginFrame = stackFrames.some(
+    (frame) => frame.url && frame.url.includes( /YOUR_PLUGIN_ASSET_PATH/ )
+  );
+  // Only send errors that originate from our plugin
+  return shouldSend && containsPluginFrame;
   }
+);
+```
+
+### `woocommerce_remote_logging_error_data`
+
+Modify the error data before sending it to the remote API.
+
+**Parameters:**
+
+- `errorData` (ErrorData): The error data object to be sent.
+
+**Return value:** (ErrorData) The modified error data object.
+
+**Usage example:**
+
+```js
+import { addFilter } from '@wordpress/hooks';
+
+addFilter(
+  'woocommerce_remote_logging_error_data',
+  'my-plugin',
+  (errorData) => {
+    // Custom logic to modify error data
+    errorData.tags = [ ...errorData.tags, 'my-plugin' ];
+    return errorData;
+  }
+);
+```
+
+### `woocommerce_remote_logging_log_endpoint`
+
+Modify the URL of the remote logging API endpoint.
+
+**Parameters:**
+
+- `endpoint` (string): The default endpoint URL.
+
+**Return value:** (string) The modified endpoint URL.
+
+**Usage example:**
+
+```js
+import { addFilter } from '@wordpress/hooks';
+
+addFilter(
+  'woocommerce_remote_logging_log_endpoint',
+  'my-plugin',
+  (endpoint) => 'https://my-custom-endpoint.com/log'
+);
+```
+
+### `woocommerce_remote_logging_js_error_endpoint`
+
+Modify the URL of the remote logging API endpoint for JavaScript errors.
+
+**Parameters:**
+
+- `endpoint` (string): The default endpoint URL for JavaScript errors.
+
+**Return value:** (string) The modified endpoint URL for JavaScript errors.
+
+**Usage example:**
+
+```js
+import { addFilter } from '@wordpress/hooks';
+
+addFilter(
+  'woocommerce_remote_logging_js_error_endpoint',
+  'my-plugin',
+  (endpoint) => 'https://my-custom-endpoint.com/js-error-log'
 );
 ```
 
