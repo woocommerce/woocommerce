@@ -57,3 +57,11 @@ declare module '@wordpress/edit-site/build-module/components/sidebar-navigation-
 	} >;
 	export default SidebarNavigationScreen;
 }
+
+declare module '@wordpress/edit-site/build-module/components/site-hub' {
+	const SiteHub: React.FunctionComponent< {
+		ref: React.Ref;
+		isTransparent: boolean;
+	} >;
+	export default SiteHub;
+}

@@ -1,48 +1,49 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 /**
  * External dependencies
  */
-import { createElement, useState, Fragment, useRef } from '@wordpress/element';
+import classNames from 'classnames';
+import { createElement, Fragment, useRef } from '@wordpress/element';
 import {
 	useViewportMatch,
 	useResizeObserver,
 	useReducedMotion,
 } from '@wordpress/compose';
-import {
-	__unstableMotion as motion,
-	__unstableAnimatePresence as AnimatePresence,
-} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
+import { default as SiteHub } from '@wordpress/edit-site/build-module/components/site-hub';
 import {
+	// @ts-expect-error missing type.
 	EditorSnackbars,
+	// @ts-expect-error missing type.
 	privateApis as editorPrivateApis,
 } from '@wordpress/editor';
-import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-import ResizableFrame from '@wordpress/edit-site/build-module/components/resizable-frame';
-import ErrorBoundary from '@wordpress/edit-site/build-module/components/error-boundary';
-import { default as SiteHub } from '@wordpress/edit-site/build-module/components/site-hub';
-import classNames from 'classnames';
+// eslint-disable-next-line @woocommerce/dependency-group
+import {
+	// @ts-expect-error missing type.
+	__unstableMotion as motion,
+	// @ts-expect-error missing type.
+	__unstableAnimatePresence as AnimatePresence,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import SidebarContent from './sidebar';
+import { Route } from './router';
+import { unlock } from '../lock-unlock';
 
 const { NavigableRegion } = unlock( editorPrivateApis );
-const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
 const ANIMATION_DURATION = 0.3;
 
-export function Layout( { route } ) {
+type LayoutProps = {
+	route: Route;
+};
+
+export function Layout( { route }: LayoutProps ) {
 	const [ fullResizer ] = useResizeObserver();
 	const toggleRef = useRef();
-	const [ canvasResizer, canvasSize ] = useResizeObserver();
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
-	const [ isResizableFrameOversized, setIsResizableFrameOversized ] =
-		useState( false );
 	const { canvasMode } = useSelect( ( select ) => {
 		const { getCanvasMode } = unlock( select( 'core/edit-site' ) );
 		return {
@@ -50,8 +51,6 @@ export function Layout( { route } ) {
 		};
 	}, [] );
 	const disableMotion = useReducedMotion();
-	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
-	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
 
 	const { key: routeKey, areas, widths } = route;
 
@@ -91,15 +90,11 @@ export function Layout( { route } ) {
 								>
 									<SiteHub
 										ref={ toggleRef }
-										isTransparent={
-											isResizableFrameOversized
-										}
+										isTransparent={ false }
 									/>
 									<SidebarContent routeKey={ routeKey }>
 										{ areas.sidebar }
 									</SidebarContent>
-									{ /* <div>SaveHub </div> */ }
-									{ /* <div>SavePanel</div> */ }
 								</motion.div>
 							</AnimatePresence>
 						</NavigableRegion>
@@ -128,51 +123,6 @@ export function Layout( { route } ) {
 							} }
 						>
 							{ areas.edit }
-						</div>
-					) }
-
-					{ ! isMobileViewport && areas.preview && (
-						<div className="edit-site-layout__canvas-container">
-							{ canvasResizer }
-							{ !! canvasSize.width && (
-								<div
-									className={ classNames(
-										'edit-site-layout__canvas',
-										{
-											'is-right-aligned':
-												isResizableFrameOversized,
-										}
-									) }
-								>
-									<ErrorBoundary>
-										<ResizableFrame
-											isReady={ true }
-											isFullWidth={
-												canvasMode === 'edit'
-											}
-											defaultSize={ {
-												width:
-													canvasSize.width -
-													24 /* $canvas-padding */,
-												height: canvasSize.height,
-											} }
-											isOversized={
-												isResizableFrameOversized
-											}
-											setIsOversized={
-												setIsResizableFrameOversized
-											}
-											innerContentStyle={ {
-												background:
-													gradientValue ??
-													backgroundColor,
-											} }
-										>
-											{ areas.preview }
-										</ResizableFrame>
-									</ErrorBoundary>
-								</div>
-							) }
 						</div>
 					) }
 				</div>
