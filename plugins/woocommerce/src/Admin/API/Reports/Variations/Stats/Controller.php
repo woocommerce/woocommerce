@@ -46,7 +46,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'variations-stats'` Query.
+	 * Get data from `'variations-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *

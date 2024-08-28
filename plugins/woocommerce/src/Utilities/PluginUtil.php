@@ -78,7 +78,7 @@ class PluginUtil {
 	 * Note that the doc block for `wp_get_active_and_valid_plugins` says it returns "Array of paths to plugin files
 	 * relative to the plugins directory", but it actually returns absolute paths.
 	 *
-	 * @return string[] Array of absolute paths to plugin files.
+	 * @return string[] Array of plugin basenames (paths relative to the plugin directory).
 	 */
 	public function get_all_active_valid_plugins() {
 		$local = wp_get_active_and_valid_plugins();
@@ -91,8 +91,11 @@ class PluginUtil {
 		}
 
 		$all = array_merge( $local, $network );
+		$all = array_unique( $all );
+		$all = array_map( 'plugin_basename', $all );
+		sort( $all );
 
-		return array_unique( $all );
+		return $all;
 	}
 
 	/**
