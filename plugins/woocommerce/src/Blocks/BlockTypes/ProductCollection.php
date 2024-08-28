@@ -547,7 +547,7 @@ class ProductCollection extends AbstractBlock {
 		 * @since 9.5.0
 		 *
 		 * @param array $args The query args.
-		 * @param array $request The request object.
+		 * @param WP_Request $request The request object.
 		 *
 		 * @return array
 		 */
