@@ -59,8 +59,8 @@ jobs:
                 <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>
                 *Labels:* ${{ join(github.event.pull_request.labels.*.name, ', ') }}
                 *Monthly Release Milestone:* <${{ github.event.pull_request.milestone.html_url }}|${{ github.event.pull_request.milestone.title }}> (Release Date: ${{ env.MILESTONE_DATE }})
-                *WooAF (weekly) Timeline: this PR can be tested from:* ${{ env.TEST_DATE_MESSAGE }}
-                Please visit the <#${{ secrets.WOO_CORE_RELEASES_SLACK_CHANNEL }}> to obtain the latest WooAF build for testing.
+                Please check the Milestone above and test using the latest <https://github.com/woocommerce/woocommerce/releases|pre-release build>.
+                If a pre-release build for the stated Milestone does not exist, please use the Nightly build.
             slack-optional-unfurl_links: false
             slack-optional-unfurl_media: false
 
