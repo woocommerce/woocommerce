@@ -51,7 +51,7 @@ Display a product's description, attributes, and reviews.
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** align, spacing (margin)
--	**Attributes:** 
+-	**Attributes:** hideTabTitle
 
 ## Product Image Gallery - woocommerce/product-image-gallery
 
@@ -129,6 +129,17 @@ Display related products.
 -   **Parent:** 
 -	**Supports:** align, ~~reusable~~
 -	**Attributes:** 
+
+## On-Sale Badge - woocommerce/product-sale-badge
+
+Displays an on-sale badge if the product is on-sale.
+
+-	**Name:** woocommerce/product-sale-badge
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** 
+-	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductTemplate, productId
 
 ## Active Filters Controls - woocommerce/active-filters
 
