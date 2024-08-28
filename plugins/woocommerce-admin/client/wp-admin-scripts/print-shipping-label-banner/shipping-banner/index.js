@@ -86,7 +86,8 @@ export class ShippingBanner extends Component {
 
 	async installAndActivatePlugins( pluginSlug ) {
 		// Avoid double activating.
-		const { installPlugins, activatePlugins, isRequesting } = this.props;
+		const { installPlugins, activatePlugins, isRequesting, activePlugins } =
+			this.props;
 		if ( isRequesting ) {
 			return false;
 		}
@@ -108,7 +109,16 @@ export class ShippingBanner extends Component {
 			return;
 		}
 
-		this.acceptTosAndGetWCSAssets();
+		if (
+			! activePlugins.includes( wcsPluginSlug ) &&
+			[ 1, '1' ].includes( wcShippingCoreData.is_wcst_compatible )
+		) {
+			this.acceptTosAndGetWCSAssets();
+		} else {
+			this.setState( {
+				showShippingBanner: false,
+			} );
+		}
 	}
 
 	woocommerceServiceLinkClicked = () => {
@@ -363,6 +373,26 @@ export class ShippingBanner extends Component {
 			showShippingBanner,
 			isShippingLabelButtonBusy,
 		} = this.state;
+		if (
+			! showShippingBanner &&
+			[ 0, '0' ].includes( wcShippingCoreData.is_wcst_compatible )
+		) {
+			document
+				.getElementById( 'woocommerce-admin-print-label' )
+				.classList.add( 'error' );
+
+			return (
+				<p>
+					<strong>
+						{ __(
+							'Please update the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.',
+							'woocommerce'
+						) }
+					</strong>
+				</p>
+			);
+		}
+
 		if ( ! showShippingBanner ) {
 			return null;
 		}
