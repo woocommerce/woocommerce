@@ -2116,7 +2116,7 @@ p.demo_store,
 		}
 
 		.checkout-inline-error-message {
-			color: $red;
+			color: var(--wc-red);
 			font-size: 0.75em;
 			margin-bottom: 0;
 		}
