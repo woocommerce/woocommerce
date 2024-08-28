@@ -7,6 +7,7 @@ const {
 	transformIntoBlocks,
 	publishPage,
 	openEditorSettings,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
@@ -75,12 +76,7 @@ test.describe(
 			await goToPageEditor( { page } );
 
 			// Dismiss "Choose a pattern" if present (Pressable)
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if (
-				await page.getByLabel( 'Close', { exact: true } ).isVisible()
-			) {
-				await page.getByLabel( 'Close', { exact: true } ).click();
-			}
+			await closeChoosePatternModal( { page } );
 
 			await fillPageTitle( page, testPage.title );
 			const wordPressVersion = await getInstalledWordPressVersion();
