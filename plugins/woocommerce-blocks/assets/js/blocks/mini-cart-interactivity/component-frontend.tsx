@@ -49,14 +49,6 @@ const renderMiniCartFrontend = () => {
 							.replace( 'wc-block-mini-cart__button', '' )
 					: '';
 
-			// dataset we must provide:
-			// - isInitiallyOpen: true/false
-			// - cartTotals: JSON.stringify( { totals, subtotals } )
-			// - cartItemsCount: number
-			// - hasHiddenPrice: true/false
-			// - addToCartBehaviour: none/open_drawer
-			// - productCountVisibility: always/never/greater_than_zero
-
 			const isInitiallyOpen = dataset.isInitiallyOpen === 'true';
 
 			return {

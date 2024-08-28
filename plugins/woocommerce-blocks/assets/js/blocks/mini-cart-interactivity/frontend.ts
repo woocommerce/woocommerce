@@ -19,8 +19,7 @@ import { CART_STORE_KEY } from '../../data';
 import {
 	getMiniCartTotalsFromLocalStorage,
 	getMiniCartTotalsFromServer,
-	updateTotals,
-} from '../mini-cart/utils/data';
+} from './utils/data';
 import setStyles from '../mini-cart/utils/set-styles';
 
 interface dependencyData {
@@ -47,10 +46,12 @@ interface Context {
 	drawerOpen: boolean;
 	scriptsLoaded: boolean;
 	drawerIsLoading: boolean;
+	// JSON stringified cart totals.
+	cartItemTotals: string;
 }
 
-updateTotals( getMiniCartTotalsFromLocalStorage() );
-getMiniCartTotalsFromServer().then( updateTotals );
+// updateTotals( getMiniCartTotalsFromLocalStorage() );
+// getMiniCartTotalsFromServer().then( updateTotals );
 setStyles();
 
 declare global {
@@ -105,10 +106,28 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 	},
 
 	callbacks: {
-		initialize: () => {
+		initialize: async () => {
 			const context = getContext< Context >();
+
+			// First populate the cartItemTotals with the totals from the local storage.
+			const localStorageTotals = getMiniCartTotalsFromLocalStorage();
+
+			if ( localStorageTotals ) {
+				const [ totals ] = localStorageTotals;
+				context.cartItemTotals = JSON.stringify( totals );
+			}
+
+			const serverTotals = await getMiniCartTotalsFromServer();
+
+			if ( serverTotals ) {
+				const [ serverUpdatedTotals ] = serverTotals;
+				// If we have the totals from the server, update them on the dataset.
+				context.cartItemTotals = JSON.stringify( serverUpdatedTotals );
+			}
+
 			subscribe( () => {
 				const cartData = select( CART_STORE_KEY ).getCartData();
+
 				const isResolutionFinished =
 					select( CART_STORE_KEY ).hasFinishedResolution(
 						'getCartData'

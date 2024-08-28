@@ -421,8 +421,28 @@ class MiniCartInteractivity extends AbstractBlock {
 		$product_count_color = array_key_exists( 'productCountColor', $attributes ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
 		$icon_name           = isset( $attributes['miniCartIcon'] ) ? esc_attr( $attributes['miniCartIcon'] ) : null;
 
+		$is_initially_open        = isset( $attributes['isInitiallyOpen'] ) && $attributes['isInitiallyOpen'] ? 'true' : 'false';
+		$has_hidden_price         = isset( $attributes['hasHiddenPrice'] ) && $attributes['hasHiddenPrice'] ? 'true' : 'false';
+		$add_to_cart_behaviour    = isset( $attributes['addToCartBehaviour'] ) ? $attributes['addToCartBehaviour'] : 'none';
+		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'always';
+
+		$data = array(
+			'is-initially-open'        => $is_initially_open,
+			'has-hidden-price'         => $has_hidden_price,
+			'add-to-cart-behaviour'    => $add_to_cart_behaviour,
+			'product-count-visibility' => $product_count_visibility,
+		);
+
+		$data_attributes = array();
+
+		foreach ( $data as $key => $value ) {
+			$data_attributes[] = sprintf( 'data-%s="%s"', $key, esc_attr( $value ) );
+		}
+
+		$data_attributes_string = implode( ' ', $data_attributes );
+
 		?>
-		<button data-wc-bind--data-add-to-cart-behaviour="context.addToCartBehaviour" data-wc-bind--data-is-initially-open="context.isInitiallyOpen" <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	 
+		<button data-wc-bind--data-cart-item-totals="context.cartItemTotals" data-wc-bind--data-cart-item-count="context.cartItemCount" <?php echo $data_attributes_string; ?> <?php echo $is_disabled ? 'disabled' : ''; ?> class="wc-block-mini-cart__button" data-wc-init="callbacks.initialize" data-wc-on--mouseover="callbacks.loadScripts" data-wc-on--click="callbacks.toggleDrawerOpen" aria-label="<?php echo esc_attr( __( 'Cart', 'woocommerce' ) ); ?>">	  
 			<?php
 				echo $this->get_cart_price_markup( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped - Escaped already in the function call. 
 			?>
