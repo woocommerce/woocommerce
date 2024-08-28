@@ -53,21 +53,19 @@ const CloseButtonPortal = ( {
 		'.wc-block-components-drawer__close-wrapper'
 	);
 
-	if ( closeButtonWrapper ) {
-		return createPortal(
-			<Button
-				className="wc-block-components-drawer__close"
-				onClick={ onClick }
-				removeTextWrap
-				aria-label={ __( 'Close', 'woocommerce' ) }
-			>
-				<Icon icon={ close } />
-			</Button>,
-			closeButtonWrapper
-		);
-	}
-
-	return null;
+	return closeButtonWrapper
+		? createPortal(
+				<Button
+					className="wc-block-components-drawer__close"
+					onClick={ onClick }
+					removeTextWrap
+					aria-label={ __( 'Close', 'woocommerce' ) }
+				>
+					<Icon icon={ close } />
+				</Button>,
+				closeButtonWrapper
+		  )
+		: null;
 };
 
 const UnforwardedDrawer = (
@@ -91,11 +89,11 @@ const UnforwardedDrawer = (
 		onClose();
 	};
 
-	const contentRef = useRef< HTMLDivElement >( null );
 	const ref = useRef< HTMLDivElement >();
 	const focusOnMountRef = useFocusOnMount();
 	const constrainedTabbingRef = useConstrainedTabbing();
 	const focusReturnRef = useFocusReturn();
+	const contentRef = useRef< HTMLDivElement >( null );
 
 	useEffect( () => {
 		if ( isOpen ) {
@@ -138,7 +136,6 @@ const UnforwardedDrawer = (
 		<div
 			ref={ overlayRef }
 			className={ clsx( 'wc-block-components-drawer__screen-overlay', {
-				shapoopy: true,
 				'wc-block-components-drawer__screen-overlay--is-hidden':
 					! isOpen,
 				'wc-block-components-drawer__screen-overlay--with-slide-in':
