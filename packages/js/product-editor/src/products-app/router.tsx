@@ -14,6 +14,22 @@ import DataViewsSidebarContent from './sidebar-dataviews';
 
 const { useLocation } = unlock( routerPrivateApis );
 
+export type Route = {
+	key: string;
+	areas: {
+		sidebar: React.JSX.Element | React.FunctionComponent;
+		content?: React.JSX.Element | React.FunctionComponent;
+		edit?: React.JSX.Element | React.FunctionComponent;
+		mobile?: React.JSX.Element | React.FunctionComponent | boolean;
+		preview?: boolean;
+	};
+	widths?: {
+		content?: number;
+		edit?: number;
+		sidebar?: number;
+	};
+};
+
 export default function useLayoutAreas() {
 	const { params = {} } = useLocation();
 	const { postType = 'product', layout = 'table', canvas } = params;
@@ -45,7 +61,7 @@ export default function useLayoutAreas() {
 		key: 'default',
 		areas: {
 			sidebar: () => null,
-			preview: () => null,
+			preview: false,
 			mobile: canvas === 'edit',
 		},
 	};
