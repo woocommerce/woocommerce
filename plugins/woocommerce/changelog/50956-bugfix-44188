@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Use a MutationObserver to fix race conditions described in #44188
