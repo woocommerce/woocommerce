@@ -7,6 +7,7 @@ import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { Cart } from '@woocommerce/type-defs/cart';
 import { createRoot } from '@wordpress/element';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
+import { triggerViewedProductEvent } from '@woocommerce/base-utils';
 
 interface Context {
 	isLoading: boolean;
@@ -38,6 +39,7 @@ interface Store {
 	actions: {
 		addToCart: () => void;
 		handleAnimationEnd: ( event: AnimationEvent ) => void;
+		triggerViewEvent: () => void;
 	};
 	callbacks: {
 		startAnimation: () => void;
@@ -170,6 +172,12 @@ const { state } = store< Store >( 'woocommerce/product-button', {
 				context.displayViewCart = true;
 				context.isLoading = false;
 			}
+		},
+		triggerViewEvent() {
+			const context = getContext();
+			const { productId } = context;
+
+			triggerViewedProductEvent( { productId } );
 		},
 		handleAnimationEnd: ( event: AnimationEvent ) => {
 			const context = getContext();
