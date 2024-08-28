@@ -70,7 +70,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			await page.getByRole( 'button', { name: 'Update' } ).click();
 		} );
 
-		await test.step( `Insert the block in a post an visit it`, async () => {
+		await test.step( `Insert the block in a post and visit it`, async () => {
 			await blockUtils.insertBlockAndVisit(
 				blockData.slug,
 				blockData.productSlug
@@ -99,7 +99,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 		} );
 
-		await test.step( 'Insert the block in a post an visit it', async () => {
+		await test.step( 'Insert the block in a post and visit it', async () => {
 			await blockUtils.insertBlockAndVisit(
 				blockData.slug,
 				blockData.productSlug
