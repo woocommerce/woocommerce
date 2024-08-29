@@ -88,7 +88,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_enqueue_style( 'woocommerce_admin_menu_styles' );
 
 			// Admin styles for WC pages only.
-			if ( in_array( $screen_id, wc_get_screen_ids() ) ) {
+			if ( in_array( $screen_id, wc_get_screen_ids() ) || $is_new_settings ) {
 				wp_enqueue_style( 'woocommerce_admin_styles' );
 				wp_enqueue_style( 'jquery-ui-style' );
 				wp_enqueue_style( 'wp-color-picker' );
@@ -201,8 +201,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				)
 			);
 
+			$is_new_settings = isset( $_GET['path'] ) && strpos( $_GET['path'], '/settings' ) !== false;
+
 			// WooCommerce admin pages.
-			if ( in_array( $screen_id, wc_get_screen_ids() ) ) {
+			if ( in_array( $screen_id, wc_get_screen_ids() ) || $is_new_settings ) {
 				wp_enqueue_script( 'iris' );
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
