@@ -42,17 +42,9 @@ test.describe(
 					name: 'Your cart is currently empty!',
 				} )
 			).toBeVisible();
-			try {
-				await expect(
-					page.getByRole( 'link', { name: 'Browse store' } )
-				).toBeVisible();
-			} catch ( e ) {
-				// Cover the case when we run tests on Pressable
-				// eslint-disable-next-line jest/no-try-expect
-				await expect(
-					page.getByRole( 'heading', { name: 'New in store' } )
-				).toBeVisible();
-			}
+			await expect(
+				page.getByRole( 'link', { name: 'Browse store' } )
+			).toBeVisible();
 		} );
 	}
 );
