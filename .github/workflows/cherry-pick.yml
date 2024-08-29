@@ -49,7 +49,7 @@ jobs:
                   const pullRequestUrl = issue.pull_request.url;
                   const prDetails = await github.request(pullRequestUrl);
                   core.setOutput('base_ref', prDetails.data.base.ref);
-                  core.setOutput('prLabels', prDetails.data.labels.map(label => label.name).join(","));
+                  core.setOutput('pr_labels', prDetails.data.labels.map(label => label.name).join(","));
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -59,7 +59,7 @@ jobs:
               with:
                   script: |
                       const baseRef = process.env.BASE_REF;
-                      const prLabels = process.env.LABELS.split(",");
+                      const prLabels = process.env.PR_LABELS.split(",");
                       console.log("baseRef:", baseRef);
                       console.log("prLabels:", prLabels);
 
@@ -82,7 +82,7 @@ jobs:
                       }
               env:
                 BASE_REF: ${{ steps.fetch_pr_details.outputs.base_ref }}
-                PR_LABELS: ${{ steps.fetch_pr_details.outputs.prLabels }}
+                PR_LABELS: ${{ steps.fetch_pr_details.outputs.pr_labels }}
 
     prep:
         name: Prep inputs
