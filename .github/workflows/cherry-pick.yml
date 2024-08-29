@@ -3,7 +3,7 @@ on:
     issues:
         types: [milestoned, labeled]
     pull_request:
-        types: [closed, opened]
+        types: [closed, labeled]
     workflow_dispatch:
         inputs:
             release_branch:
