@@ -199,7 +199,7 @@ export class ShippingBanner extends Component {
 		const shipmentTrackingStylePath =
 			assets.wcshipping_shipment_tracking_style;
 
-		const { itemsCount, orderId } = this.props;
+		const { itemsCount, orderId, activePlugins } = this.props;
 
 		document.getElementById( labelPurchaseMetaboxId )?.remove();
 		const shippingLabelContainerHtml = this.generateMetaBoxHtml(
@@ -309,7 +309,13 @@ export class ShippingBanner extends Component {
 				'woocommerce-admin-print-label'
 			).style.display = 'none';
 
-			this.openWcsModal();
+			/**
+			 * We'll only get to this point if either WCS&T is not active or is active but compatible with WooCommerce Shipping
+			 * so once we check if the WCS&T is not active, we can open the label purchase modal immediately.
+			 */
+			if ( ! activePlugins.includes( wcstPluginSlug ) ) {
+				this.openWcsModal();
+			}
 		} );
 	}
 
