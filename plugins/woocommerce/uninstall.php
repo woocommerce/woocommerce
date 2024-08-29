@@ -32,6 +32,7 @@ wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
  * Only remove ALL product and page data if WC_REMOVE_ALL_DATA constant is set to true in user's
  * wp-config.php. This is to prevent data loss when deleting the plugin from the backend
  * and to ensure only the site owner can perform this action.
+ * Testingggg
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Load WooCommerce so we can access the container, install routines, etc, during uninstall.
