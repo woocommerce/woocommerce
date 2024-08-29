@@ -17,7 +17,7 @@ import type { ReactRootWithContainer } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import type { BlockAttributes } from './types';
+import type { BlockAttributes } from '../mini-cart/types';
 import { MiniCartContentsBlock } from '../mini-cart/mini-cart-contents/block';
 import './style.scss';
 import {
@@ -25,7 +25,7 @@ import {
 	attributes as miniCartContentsAttributes,
 } from '../mini-cart/mini-cart-contents/attributes';
 
-type Props = BlockAttributes;
+type Props = BlockAttributes & { onClose: () => void };
 
 function getScrollbarWidth() {
 	return window.innerWidth - document.documentElement.clientWidth;

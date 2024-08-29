@@ -8,7 +8,11 @@ import { Icon } from '@wordpress/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { IconType, ColorItem, productCountVisibilityType } from '.././types';
+import {
+	IconType,
+	ColorItem,
+	productCountVisibilityType,
+} from '../../mini-cart/types';
 
 interface Props {
 	count: number;
