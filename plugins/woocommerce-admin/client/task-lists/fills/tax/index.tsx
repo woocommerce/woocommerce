@@ -203,7 +203,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		recordEvent( 'tasklist_tax_view_options', {
 			options: partners.map( ( partner ) => partner.id ),
 		} );
-	}, [ partners, query ] );
+	}, [ partners, query.partner ] );
 
 	const currentPartner = useMemo( () => {
 		if ( ! query.partner ) {
