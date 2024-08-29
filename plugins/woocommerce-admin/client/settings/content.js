@@ -150,7 +150,12 @@ export const Content = ( { data } ) => {
 							</div>
 						);
 					case 'script':
-						return <SettingsScript content={ setting.content } />;
+						return (
+							<SettingsScript
+								key={ key }
+								content={ setting.content }
+							/>
+						);
 					default:
 						return null;
 				}
