@@ -337,7 +337,9 @@ export class ShippingBanner extends Component {
 			observer.observe(
 				document.getElementById(
 					'woocommerce-shipping-shipping-label-shipping_label'
-				),
+				) ??
+					document.getElementById( 'wpbody-content' ) ??
+					document.body,
 				{
 					childList: true,
 					subtree: true,
