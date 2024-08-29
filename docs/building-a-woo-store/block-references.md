@@ -42,6 +42,17 @@ Display a call to action button which either adds the product to the cart, or li
 -	**Supports:** align (full, wide), color (link, text, ~~background~~), interactivity, typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, textAlign, width
 
+## Product Image - woocommerce/product-image
+
+Display the main product image.
+
+-	**Name:** woocommerce/product-image
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** 
+-	**Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
+
 ## Product Details - woocommerce/product-details
 
 Display a product's description, attributes, and reviews.

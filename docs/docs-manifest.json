@@ -23,7 +23,7 @@
           "menu_title": "Theming for Woo Blocks",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/theming-woo-blocks.md",
-          "hash": "1ce763e8afcc7dfdd8c5eca4da799add21dfac48279c08fc7b614071edb67a7d",
+          "hash": "cec80a34a38b7286be676a35624e2e441f5ccbb1aa318def6afe56a5a2bb6558",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/theming-woo-blocks.md",
           "id": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
         },
@@ -74,7 +74,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "5e36472952cdb8639fc4cb63d44a43276d14bb59624ac3dd19d846c5b6358315",
+          "hash": "a33fe5766283aaa70154077692a180319110e133ad430bf8dda3032455bad45c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "771d75cfb29dbd077e0af2234e1bbe0e99360ec6974519f02e8c70c656ac1763"
+  "hash": "0b0ae9b9ed454ab234a5f053f6efb37bafb3e90f1c98f6488263c019f552697b"
 }
