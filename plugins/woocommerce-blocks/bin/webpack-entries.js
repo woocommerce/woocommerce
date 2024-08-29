@@ -94,9 +94,11 @@ const blocks = {
 	},
 	'product-filters-overlay': {
 		isExperimental: true,
+		customDir: 'product-filters/inner-blocks/overlay',
 	},
 	'product-filters-overlay-navigation': {
 		isExperimental: true,
+		customDir: 'product-filters/inner-blocks/overlay-navigation',
 	},
 	'product-filter-stock-status': {
 		isExperimental: true,
