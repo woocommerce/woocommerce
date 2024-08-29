@@ -75,7 +75,6 @@ test.describe(
 		} ) => {
 			await goToPageEditor( { page } );
 
-			// Dismiss "Choose a pattern" if present (Pressable)
 			await closeChoosePatternModal( { page } );
 
 			await fillPageTitle( page, testPage.title );

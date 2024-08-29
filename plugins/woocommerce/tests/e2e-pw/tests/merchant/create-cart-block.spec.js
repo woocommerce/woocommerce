@@ -24,8 +24,6 @@ test.describe(
 		} ) => {
 			await goToPageEditor( { page } );
 
-			// Dismiss "Choose a pattern" if present (Pressable)
-			// eslint-disable-next-line playwright/no-conditional-in-test
 			await closeChoosePatternModal( { page } );
 
 			await fillPageTitle( page, testPage.title );
