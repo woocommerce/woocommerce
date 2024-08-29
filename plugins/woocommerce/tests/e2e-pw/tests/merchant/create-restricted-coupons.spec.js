@@ -80,10 +80,8 @@ const test = baseTest.extend( {
 				console.log( 'Delete successful:', response.data );
 			} )
 			.catch( ( error ) => {
-				if ( error.response ) {
-					console.log( 'Error response data:', error.response.data );
-					console.log( 'Error status:', error.response.status );
-				}
+				console.log( 'Error response data:', error.response.data );
+				throw new Error( error.response.data );
 			} );
 	},
 
