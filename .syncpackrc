@@ -105,6 +105,15 @@
 			"dependencies": [
 				"@types/react"
 			],
+			"pinVersion": "^18.3.4",
+			"packages": [
+				"@woocommerce/admin-library"
+			]
+		},
+		{
+			"dependencies": [
+				"@types/react"
+			],
 			"pinVersion": "^17.0.71",
 			"packages": [
 				"**"
@@ -117,6 +126,15 @@
 			"pinVersion": "^17.0.25",
 			"packages": [
 				"**"
+			]
+		},
+		{
+			"dependencies": [
+				"@types/react-dom"
+			],
+			"pinVersion": "^18.3.0",
+			"packages": [
+				"@woocommerce/admin-library"
 			]
 		},
 		{
@@ -137,6 +155,16 @@
 				"**"
 			],
 			"pinVersion": "^17.0.2"
+		},
+		{
+			"dependencies": [
+				"react",
+				"react-dom"
+			],
+			"packages": [
+				"@woocommerce/admin-library"
+			],
+			"pinVersion": "^18.3.0"
 		},
 		{
 			"dependencies": [
