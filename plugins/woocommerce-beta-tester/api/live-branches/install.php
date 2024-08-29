@@ -1,9 +1,11 @@
-<?php // @codingStandardsIgnoreLine I don't know why it thinks the doc comment is missing.
+<?php
 /**
  * REST API endpoints for live branches installation.
  *
  * @package WC_Beta_Tester
  */
+
+defined( 'ABSPATH' ) || exit;
 
 require_once __DIR__ . '/../../includes/class-wc-beta-tester-live-branches-installer.php';
 
@@ -37,7 +39,7 @@ register_woocommerce_admin_test_helper_rest_route(
 			} else {
 				return new \WP_Error(
 					'woocommerce_rest_cannot_edit',
-					__( 'Sorry, you cannot perform this action', 'woocommerce' )
+					__( 'Sorry, you cannot perform this action', 'woocommerce-beta-tester' )
 				);
 			}
 		},

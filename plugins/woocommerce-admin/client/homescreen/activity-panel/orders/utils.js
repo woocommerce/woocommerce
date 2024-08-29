@@ -57,11 +57,7 @@ export function getOrderStatuses( select ) {
 }
 
 export const getLowStockCountQuery = {
-	page: 1,
-	per_page: 1,
-	low_in_stock: true,
 	status: 'publish',
-	_fields: [ 'id' ],
 };
 
 export function getLowStockCount( select ) {
@@ -74,16 +70,16 @@ export function getLowStockCount( select ) {
 	// depend on `getItemsTotalCount` to have been called.
 	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
 	const totalLowStockProducts = getItemsTotalCount(
-		'products/low-in-stock',
+		'products/count-low-in-stock',
 		getLowStockCountQuery,
 		defaultValue
 	);
 
 	const isError = Boolean(
-		getItemsError( 'products/low-in-stock', getLowStockCountQuery )
+		getItemsError( 'products/count-low-in-stock', getLowStockCountQuery )
 	);
 	const isRequesting = isResolving( 'getItemsTotalCount', [
-		'products/low-in-stock',
+		'products/count-low-in-stock',
 		getLowStockCountQuery,
 		defaultValue,
 	] );

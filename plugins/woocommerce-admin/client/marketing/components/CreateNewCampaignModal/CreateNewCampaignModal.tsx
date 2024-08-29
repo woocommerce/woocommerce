@@ -12,7 +12,7 @@ import {
 	FlexItem,
 } from '@wordpress/components';
 import { chevronUp, chevronDown, external } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -47,6 +47,9 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	const { loadInstalledPluginsAfterActivation } =
 		useInstalledPluginsWithoutChannels();
 
+	const hasCampaignTypes = !! campaignTypes?.length;
+	const hasRecommendedChannels = !! recommendedChannels?.length;
+
 	const onInstalledAndActivated = ( pluginSlug: string ) => {
 		refetchCampaignTypes();
 		refetchRegisteredChannels();
@@ -56,7 +59,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 	return (
 		<Modal
 			{ ...restProps }
-			className={ classnames(
+			className={ clsx(
 				className,
 				'woocommerce-marketing-create-campaign-modal'
 			) }
@@ -64,7 +67,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 		>
 			<div className="woocommerce-marketing-new-campaigns">
 				<div className="woocommerce-marketing-new-campaigns__question-label">
-					{ !! campaignTypes?.length
+					{ hasCampaignTypes
 						? __(
 								'Where would you like to promote your products?',
 								'woocommerce'
@@ -109,7 +112,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 									<FlexItem>
 										{ __( 'Create', 'woocommerce' ) }
 									</FlexItem>
-									{ !! isExternalURL( el.createUrl ) && (
+									{ isExternalURL( el.createUrl ) && (
 										<FlexItem>
 											<Icon
 												icon={ external }
@@ -123,7 +126,7 @@ export const CreateNewCampaignModal = ( props: CreateCampaignModalProps ) => {
 					</Flex>
 				) ) }
 			</div>
-			{ !! recommendedChannels?.length && (
+			{ hasRecommendedChannels && (
 				<div className="woocommerce-marketing-add-channels">
 					<Flex direction="column">
 						<FlexItem>

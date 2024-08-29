@@ -88,7 +88,7 @@ class ReportsSync {
 		 * Fires when report data regeneration begins.
 		 *
 		 * @param int|bool $days Number of days to import.
-		 * @param bool     $skip_existing Skip exisiting records.
+		 * @param bool     $skip_existing Skip existing records.
 		 */
 		do_action( 'woocommerce_analytics_regenerate_init', $days, $skip_existing );
 
@@ -99,7 +99,7 @@ class ReportsSync {
 	 * Update the import stat totals and counts.
 	 *
 	 * @param int|bool $days Number of days to import.
-	 * @param bool     $skip_existing Skip exisiting records.
+	 * @param bool     $skip_existing Skip existing records.
 	 */
 	public static function reset_import_stats( $days, $skip_existing ) {
 		$import_stats = get_option( ImportScheduler::IMPORT_STATS_OPTION, array() );
@@ -137,7 +137,7 @@ class ReportsSync {
 	 * Get the import totals for all syncs.
 	 *
 	 * @param int|bool $days Number of days to import.
-	 * @param bool     $skip_existing Skip exisiting records.
+	 * @param bool     $skip_existing Skip existing records.
 	 * @return array
 	 */
 	public static function get_import_totals( $days, $skip_existing ) {

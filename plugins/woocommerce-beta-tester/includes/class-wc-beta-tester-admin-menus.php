@@ -125,7 +125,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 
 				$version_string = '';
 				$network_string = '';
-				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woo.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
 						/* translators: %s: plugin latest version */
 						$version_string = sprintf( esc_html__( '%s is available', 'woocommerce-beta-tester' ), $plugin['version_latest'] );

@@ -10,21 +10,18 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Products;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * REST API Reports products controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends GenericController
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
+class Controller extends GenericController implements ExportableInterface {
 
 	/**
 	 * Route base.
@@ -45,13 +42,55 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	);
 
 	/**
-	 * Get items.
+	 * Get data from `'products'` GenericQuery.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @override GenericController::get_datastore_data()
 	 *
-	 * @return array|WP_Error
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
 	 */
-	public function get_items( $request ) {
+	protected function get_datastore_data( $query_args = array() ) {
+		$query = new GenericQuery( $query_args, 'products' );
+		return $query->get_data();
+	}
+
+	/**
+	 * Prepare a report data item for serialization.
+	 *
+	 * @param Array           $report  Report data item as returned from Data Store.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function prepare_item_for_response( $report, $request ) {
+		$response = parent::prepare_item_for_response( $report, $request );
+		$response->add_links( $this->prepare_links( $report ) );
+
+		/**
+		 * Filter a report returned from the API.
+		 *
+		 * Allows modification of the report data right before it is returned.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param object           $report   The original report object.
+		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 *
+		 * @since 6.5.0
+		 */
+		$filtered_response = apply_filters( 'woocommerce_rest_prepare_report_products', $response, $report, $request );
+		if ( isset( $filtered_response->data['extended_info']['name'] ) ) {
+			$filtered_response->data['extended_info']['name'] = wp_strip_all_tags( $filtered_response->data['extended_info']['name'] );
+		}
+		return $filtered_response;
+	}
+
+
+	/**
+	 * Maps query arguments from the REST request.
+	 *
+	 * @param array $request Request array.
+	 * @return array
+	 */
+	protected function prepare_reports_query( $request ) {
 		$args       = array();
 		$registered = array_keys( $this->get_collection_params() );
 		foreach ( $registered as $param_name ) {
@@ -63,72 +102,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				}
 			}
 		}
-
-		$reports       = new Query( $args );
-		$products_data = $reports->get_data();
-
-		$data = array();
-
-		foreach ( $products_data->data as $product_data ) {
-			$item = $this->prepare_item_for_response( $product_data, $request );
-			if ( isset( $item->data['extended_info']['name'] ) ) {
-				$item->data['extended_info']['name'] = wp_strip_all_tags( $item->data['extended_info']['name'] );
-			}
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		$response = rest_ensure_response( $data );
-		$response->header( 'X-WP-Total', (int) $products_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $products_data->pages );
-
-		$page      = $products_data->page_no;
-		$max_pages = $products_data->pages;
-		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
-	}
-
-	/**
-	 * Prepare a report object for serialization.
-	 *
-	 * @param Array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
-	 */
-	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $report ) );
-
-		/**
-		 * Filter a report returned from the API.
-		 *
-		 * Allows modification of the report data right before it is returned.
-		 *
-		 * @param WP_REST_Response $response The response object.
-		 * @param object           $report   The original report object.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_products', $response, $report, $request );
+		return $args;
 	}
 
 	/**
@@ -256,60 +230,17 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params               = array();
-		$params['context']    = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']       = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
+		$params                    = parent::get_collection_params();
+		$params['orderby']['enum'] = array(
+			'date',
+			'net_revenue',
+			'orders_count',
+			'items_sold',
+			'product_name',
+			'variations',
+			'sku',
 		);
-		$params['per_page']   = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 10,
-			'minimum'           => 1,
-			'maximum'           => 100,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['after']      = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['before']     = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['order']      = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'desc',
-			'enum'              => array( 'asc', 'desc' ),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['orderby']    = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'date',
-			'enum'              => array(
-				'date',
-				'net_revenue',
-				'orders_count',
-				'items_sold',
-				'product_name',
-				'variations',
-				'sku',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['categories'] = array(
+		$params['categories']      = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -318,7 +249,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'type' => 'integer',
 			),
 		);
-		$params['match']      = array(
+		$params['match']           = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'all',
@@ -328,7 +259,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['products']   = array(
+		$params['products']        = array(
 			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -343,12 +274,6 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['force_cache_refresh'] = array(
-			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
-			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

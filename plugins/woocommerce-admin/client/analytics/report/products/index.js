@@ -6,6 +6,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { AnalyticsError } from '@woocommerce/components';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -15,7 +16,6 @@ import { advancedFilters, charts, filters } from './config';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ProductsReportTable from './table';
 import ReportChart from '../../components/report-chart';
-import ReportError from '../../components/report-error';
 import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from '../variations/table';
 import ReportFilters from '../../components/report-filters';
@@ -39,8 +39,10 @@ class ProductsReport extends Component {
 				: 'products';
 		const label =
 			isSingleProductView && isSingleProductVariable
-				? __( '%d variations', 'woocommerce' )
-				: __( '%d products', 'woocommerce' );
+				? /* translators: %d: number of variations */
+				  __( '%d variations', 'woocommerce' )
+				: /* translators: %d: number of products */
+				  __( '%d products', 'woocommerce' );
 
 		return {
 			compareObject,
@@ -55,7 +57,7 @@ class ProductsReport extends Component {
 			this.props;
 
 		if ( isError ) {
-			return <ReportError />;
+			return <AnalyticsError />;
 		}
 
 		const chartQuery = {
@@ -80,7 +82,6 @@ class ProductsReport extends Component {
 					mode={ mode }
 					charts={ charts }
 					endpoint="products"
-					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }

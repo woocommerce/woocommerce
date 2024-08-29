@@ -90,11 +90,11 @@
 		} );
 
 		// Edit prompt
-		$( function () {
+		function editPrompt () {
 			var changed = false;
 			let $check_column = $( '.wp-list-table .check-column' );
 
-			$( 'input, textarea, select, checkbox' ).on( 'change', function (
+			$( 'input, textarea, select, checkbox' ).on( 'change input', function (
 				event
 			) {
 				// Toggling WP List Table checkboxes should not trigger navigation warnings.
@@ -110,6 +110,14 @@
 						return params.i18n_nav_warning;
 					};
 					changed = true;
+					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+				}
+			} );
+
+			$( '.iris-picker' ).on( 'click', function () {
+				if ( ! changed ) {
+					changed = true;
+					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
 				}
 			} );
 
@@ -119,7 +127,34 @@
 					window.onbeforeunload = '';
 				}
 			);
+		}
+
+		$( editPrompt );
+
+		const nodeListContainsFormElements = ( nodes ) => {
+			if ( ! nodes.length	) {
+				return false;
+			}
+			return Array.from( nodes ).some( ( element ) => {
+				return $( element ).find( 'input, textarea, select, checkbox' ).length;
+			} );
+		}
+
+		const form = document.querySelector( '#mainform' );
+		const observer = new MutationObserver( ( mutationsList ) => {
+			for ( const mutation of mutationsList ) {
+				if ( mutation.type === 'childList' ) {
+					if ( nodeListContainsFormElements( mutation.addedNodes ) ) {
+						editPrompt();
+						$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+					} else if ( nodeListContainsFormElements( mutation.removedNodes ) ) {
+						$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+					}
+				}
+			}
 		} );
+
+		observer.observe( form, { childList: true, subtree: true } );
 
 		// Sorting
 		$( 'table.wc_gateways tbody, table.wc_shipping tbody' ).sortable( {
@@ -140,7 +175,7 @@
 			},
 			stop: function ( event, ui ) {
 				ui.item.removeAttr( 'style' );
-				ui.item.trigger( 'updateMoveButtons' );
+				ui.item.trigger( 'updateMoveButtons', { isInitialLoad: false } );
 			},
 		} );
 
@@ -192,12 +227,12 @@
 				}
 
 				moveBtn.trigger( 'focus' ); // Re-focus after the container was moved.
-				moveBtn.closest( 'table' ).trigger( 'updateMoveButtons' );
+				moveBtn.closest( 'table' ).trigger( 'updateMoveButtons', { isInitialLoad: false } );
 			} );
 
 		$( '.wc-item-reorder-nav' )
 			.closest( 'table' )
-			.on( 'updateMoveButtons', function () {
+			.on( 'updateMoveButtons', function ( event, data ) {
 				var table = $( this ),
 					lastRow = $( this ).find( 'tbody tr:last' ),
 					firstRow = $( this ).find( 'tbody tr:first' );
@@ -214,11 +249,14 @@
 					.find( '.wc-item-reorder-nav .wc-move-down' )
 					.addClass( 'wc-move-disabled' )
 					.attr( { tabindex: '-1', 'aria-hidden': 'true' } );
+				if ( ! data.isInitialLoad ) {
+					$( '.woocommerce-save-button' ).removeAttr( 'disabled' );
+				}	
 			} );
 
 		$( '.wc-item-reorder-nav' )
 			.closest( 'table' )
-			.trigger( 'updateMoveButtons' );
+			.trigger( 'updateMoveButtons', { isInitialLoad: true } );
 
 		$( '.submit button' ).on( 'click', function () {
 			if (
@@ -260,6 +298,41 @@
 			recordEvent( 'settings_payments_recommendations_other_options', {
 				available_payment_methods: payment_methods,
 			} );
+		} );
+
+		$( '.woocommerce-save-button.components-button' ).on( 'click', function ( e ) {
+			if ( ! $( this ).attr( 'disabled' ) ) {
+				$( this ).addClass( 'is-busy' );
+			}
+		} );
+
+		/**
+		 * Support conditionally displaying a settings field description when another element
+		 * is set to a specific value.
+		 *
+		 * This logic is subject to change, and is not intended for use by other plugins.
+		 * Note that we can't avoid jQuery here, because of our current dependence on Select2
+		 * for various controls.
+		 */
+		document.querySelectorAll( 'body.woocommerce_page_wc-settings #mainform .conditional.description' ).forEach( description => {
+			const $underObservation = $( description.dataset.dependsOn );
+			const showIfEquals      = description.dataset.showIfEquals;
+
+			if ( undefined === showIfEquals || $underObservation.length === 0 ) {
+				return;
+			}
+
+			/**
+			 * Set visibility of the description element according to whether its value
+			 * matches that of showIfEquals.
+			 */
+			const changeAgent = () => {
+				description.style.visibility = $underObservation.val() === showIfEquals ? 'visible' : 'hidden';
+			};
+
+			// Monitor future changes, and take action based on the current state.
+			$underObservation.on( 'change', changeAgent );
+			changeAgent();
 		} );
 	} );
 } )( jQuery, woocommerce_settings_params, wp );

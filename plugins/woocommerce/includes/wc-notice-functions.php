@@ -29,14 +29,16 @@ function wc_notice_count( $notice_type = '' ) {
 	$notice_count = 0;
 	$all_notices  = WC()->session->get( 'wc_notices', array() );
 
-	if ( isset( $all_notices[ $notice_type ] ) ) {
+	if ( isset( $all_notices[ $notice_type ] ) && is_array( $all_notices[ $notice_type ] ) ) {
 
 		$notice_count = count( $all_notices[ $notice_type ] );
 
 	} elseif ( empty( $notice_type ) ) {
 
 		foreach ( $all_notices as $notices ) {
-			$notice_count += count( $notices );
+			if ( is_countable( $notices ) ) {
+				$notice_count += count( $notices );
+			}
 		}
 	}
 
@@ -129,7 +131,7 @@ function wc_clear_notices() {
  *
  * @since 2.1
  * @param bool $return true to return rather than echo. @since 3.5.0.
- * @return string|null
+ * @return string|void
  */
 function wc_print_notices( $return = false ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
@@ -137,7 +139,14 @@ function wc_print_notices( $return = false ) {
 		return;
 	}
 
-	$all_notices  = WC()->session->get( 'wc_notices', array() );
+	$session = WC()->session;
+
+	// If the session handler has not initialized, there will be no notices for us to read.
+	if ( null === $session ) {
+		return;
+	}
+
+	$all_notices  = $session->get( 'wc_notices', array() );
 	$notice_types = apply_filters( 'woocommerce_notice_types', array( 'error', 'success', 'notice' ) );
 
 	// Buffer output.
@@ -180,13 +189,17 @@ function wc_print_notices( $return = false ) {
  * @param string $message The text to display in the notice.
  * @param string $notice_type Optional. The singular name of the notice type - either error, success or notice.
  * @param array  $data        Optional notice data. @since 3.9.0.
+ * @param bool   $return      true to return rather than echo. @since 7.7.0.
  */
-function wc_print_notice( $message, $notice_type = 'success', $data = array() ) {
+function wc_print_notice( $message, $notice_type = 'success', $data = array(), $return = false ) {
 	if ( 'success' === $notice_type ) {
 		$message = apply_filters( 'woocommerce_add_message', $message );
 	}
 
 	$message = apply_filters( 'woocommerce_add_' . $notice_type, $message );
+
+	// Buffer output.
+	ob_start();
 
 	wc_get_template(
 		"notices/{$notice_type}.php",
@@ -200,6 +213,14 @@ function wc_print_notice( $message, $notice_type = 'success', $data = array() ) 
 			),
 		)
 	);
+
+	$notice = wc_kses_notice( ob_get_clean() );
+
+	if ( $return ) {
+		return $notice;
+	}
+
+	echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import fetch from 'node-fetch';
-import { Logger } from 'cli-core/src/logger';
+import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 
 // Typing just the things we need from the WP.com Post object.
 // (which is not the same as WP Post object or API Post object).

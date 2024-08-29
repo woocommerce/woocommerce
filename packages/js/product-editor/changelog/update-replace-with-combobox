@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Product Block Editor: replace custom select with the combobox control core component in the product attributes

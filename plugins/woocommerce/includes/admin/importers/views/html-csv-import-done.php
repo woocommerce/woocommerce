@@ -30,6 +30,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			);
 		}
 
+		if ( 0 < $imported_variations ) {
+			$results[] = sprintf(
+				/* translators: %d: products count */
+				_n( '%s variations imported', '%s variations imported', $imported_variations, 'woocommerce' ),
+				'<strong>' . number_format_i18n( $imported_variations ) . '</strong>'
+			);
+		}
+
 		if ( 0 < $skipped ) {
 			$results[] = sprintf(
 				/* translators: %d: products count */
@@ -72,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</thead>
 			<tbody>
 				<?php
-				if ( count( $errors ) ) {
+				if ( is_array( $errors ) && count( $errors ) ) {
 					foreach ( $errors as $error ) {
 						if ( ! is_wp_error( $error ) ) {
 							continue;

@@ -6,10 +6,16 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { addExitPageListener, initProductScreenTracks } from './shared';
+import {
+	addExitPageListener,
+	getProductData,
+	initProductScreenTracks,
+} from './shared';
 
 const initTracks = () => {
-	recordEvent( 'product_edit_view' );
+	const productData = getProductData();
+
+	recordEvent( 'product_edit_view', { product_id: productData?.product_id } );
 	initProductScreenTracks();
 };
 

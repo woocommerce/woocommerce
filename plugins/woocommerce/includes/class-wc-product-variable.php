@@ -52,6 +52,22 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
+	 * Get the aria-describedby description for the add to cart button.
+	 * Note that this is to provide the description, not the describedby attribute
+	 * itself.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_aria_describedby() {
+		/**
+		 * This filter is documented in includes/abstracts/abstract-wc-product.php.
+		 *
+		 * @since 7.8.0
+		 */
+		return apply_filters( 'woocommerce_product_add_to_cart_aria_describedby', $this->is_purchasable() ? __( 'This product has multiple variants. The options may be chosen on the product page', 'woocommerce' ) : '', $this );
+	}
+
+	/**
 	 * Get the add to cart button text.
 	 *
 	 * @return string
@@ -585,7 +601,7 @@ class WC_Product_Variable extends WC_Product {
 	*/
 
 	/**
-	 * Sync a variable product with it's children. These sync functions sync
+	 * Sync a variable product with its children. These sync functions sync
 	 * upwards (from child to parent) when the variation is saved.
 	 *
 	 * @param WC_Product|int $product Product object or ID for which you wish to sync.

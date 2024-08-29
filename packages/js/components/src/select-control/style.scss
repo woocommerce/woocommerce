@@ -4,6 +4,7 @@
 	.components-base-control {
 		height: 56px;
 		display: flex;
+		box-sizing: border-box;
 		align-items: center;
 		border: 1px solid $studio-gray-20;
 		border-radius: 3px;
@@ -125,7 +126,7 @@
 		top: 57px;
 		z-index: 10;
 		overflow-y: auto;
-		max-height: 350px;
+		max-height: 362px;
 
 		&.is-static {
 			position: static;

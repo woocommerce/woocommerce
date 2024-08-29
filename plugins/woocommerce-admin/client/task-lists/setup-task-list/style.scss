@@ -1,0 +1,348 @@
+.woocommerce-homescreen .woocommerce-task-dashboard__container:empty {
+	margin-bottom: 0;
+}
+
+.woocommerce-task-dashboard__container {
+	.woocommerce-homescreen-card {
+		max-width: none;
+		width: 100%;
+	}
+
+	.woocommerce-task-card__header-container {
+		display: flex;
+		position: relative;
+		border-bottom: 1px solid $studio-gray-5;
+	}
+
+	.woocommerce-task-card__header {
+		width: 100%;
+		flex: 1;
+	}
+
+	.woocommerce-ellipsis-menu {
+		position: absolute;
+		top: $gap;
+		right: $gap-large;
+	}
+
+	.woocommerce-task-card.is-loading {
+		.woocommerce-card__body {
+			border-top: 1px solid $studio-gray-5;
+		}
+
+		.components-card__header {
+			background: #fff;
+			height: 130px;
+			display: block;
+			.is-placeholder {
+				margin: 20px;
+				width: 100%;
+				height: 90px;
+			}
+		}
+
+		.woocommerce-task-card__header {
+			align-self: inherit;
+		}
+
+		.is-placeholder {
+			@include placeholder();
+			display: inline-block;
+			height: 16px;
+		}
+
+		.woocommerce-card__title {
+			.is-placeholder {
+				width: 70%;
+				height: 28px;
+			}
+		}
+
+		.woocommerce-task-list__item-before {
+			.is-placeholder {
+				height: 36px;
+				width: 36px;
+				border-radius: 50%;
+			}
+		}
+
+		.woocommerce-task-list__item-text {
+			.is-placeholder {
+				width: 80%;
+			}
+		}
+	}
+}
+
+.woocommerce-task-dashboard__container .woocommerce-task-card.completed {
+	display: block;
+	.components-card__header {
+		display: block;
+	}
+
+	h2 {
+		margin-top: $gap-large;
+		margin-bottom: $gap-small;
+	}
+
+	.woocommerce-task-card__header {
+		display: block;
+		text-align: center;
+	}
+
+	button.is-secondary {
+		margin-right: $gap-small;
+	}
+}
+
+.woocommerce-task-dashboard__container.setup-task-list {
+	max-width: 1032px;
+	display: flex;
+	flex-direction: row;
+	margin: 0 auto;
+	justify-content: space-between;
+
+	ul li.complete .woocommerce-task-list__item-title {
+		font-weight: 600;
+		color: $gray-600;
+	}
+
+	// Single column mode
+	@mixin single-column {
+		ul {
+			display: block;
+			li {
+				display: grid;
+				grid-template-columns: 48px auto 48px;
+				border-right: none;
+				border-bottom: 1px solid #e0e0e0;
+			}
+			li.is-active {
+				box-shadow: inset 5px 0 0 0 var(--wp-admin-theme-color);
+				transition: box-shadow 0.1s linear;
+			}
+		}
+		.woocommerce-task-list__item-text {
+			display: block;
+			padding: 0;
+			margin-top: 0;
+		}
+
+		.woocommerce-task-header__contents {
+			@include breakpoint( "<782px") {
+				max-width: 380px;
+			}
+			@include breakpoint("<600px") {
+				max-width: 100%;
+			}
+
+			max-width: 65%;
+		}
+
+		.svg-background {
+			right: 6%;
+		}
+	}
+
+
+	ul {
+		li {
+			display: block;
+			width: 100%;
+			border-right: 1px solid #e0e0e0;
+			border-top: none;
+			padding: $gap $gap-large;
+		}
+		li:last-child {
+			border-right: none;
+		}
+		li.is-active {
+			box-shadow: inset 0 -4px 0 0 var(--wp-admin-theme-color);
+			transition: box-shadow 0.1s linear;
+
+			.woocommerce-task-list__item-badge {
+				background-color: $white;
+				position: relative;
+				z-index: 1;
+			}
+		}
+
+		li.is-active::after {
+			background-color: var(--wp-admin-theme-color);
+			opacity: 0.1;
+			content: "";
+			top: 0;
+			left: 0;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			pointer-events: none;
+		}
+	}
+	.woocommerce-task-list__item:not(.complete) .woocommerce-task__icon {
+		border: 1px solid var(--wp-admin-theme-color);
+		background: transparent;
+	}
+	.woocommerce-task-list__item.complete:not(.complete) .woocommerce-task__icon {
+		border: none;
+	}
+
+	.woocommerce-task-list__item-before {
+		display: block;
+		padding: 0;
+	}
+
+	.woocommerce-task-list__item-text {
+		display: block;
+		padding: 0;
+		margin-top: 10px;
+	}
+
+	.numbered-circle {
+		justify-content: center;
+		display: flex;
+		align-items: center;
+		height: 100%;
+		width: 100%;
+	}
+
+	@include single-column;
+
+
+	@for $i from 1 through 10 {
+		.woocommerce-task-list__item:not(.complete).index-#{$i} .woocommerce-task__icon::after {
+			content: "#{$i}";
+			@extend .numbered-circle;
+			color: var(--wp-admin-theme-color);
+			font-weight: bold;
+		}
+	}
+
+	@include breakpoint( "<782px" ) {
+		@include single-column;
+	}
+
+	@at-root .woocommerce-setup-panel & .woocommerce-task-header__contents-container {
+		padding: 16px;
+	}
+
+	.woocommerce-task-header__contents-container {
+		padding: 24px 40px 24px 24px;
+		position: relative;
+		flex: 1;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	.svg-background {
+		@include breakpoint("<600px") {
+			display: none;
+		}
+
+		@include breakpoint( "<782px") {
+			right: 0.5%;
+			width: 40%;
+		}
+
+		position: absolute;
+		z-index: 0;
+		right: 24px;
+		max-width: 25%;
+		max-height: 150px;
+		width: auto;
+		height: auto;
+
+		.admin-theme-color {
+			fill: var(--wp-admin-theme-color);
+		}
+
+		.admin-theme-color-darker-10 {
+			fill: var(--wp-admin-theme-color-darker-10);
+		}
+
+		.admin-theme-color-darker-20 {
+			fill: var(--wp-admin-theme-color-darker-20);
+		}
+	}
+
+	.woocommerce-task-header__contents {
+		@include breakpoint( "<782px") {
+			max-width: 380px;
+		}
+
+		max-width: 70%;
+
+		h1 {
+			color: $gray-900;
+			font-size: 1.25rem;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 28px; /* 140% */
+			padding: 0;
+		}
+
+		p,
+		span {
+			color: $gray-700;
+			font-size: 0.8125rem;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 16px; /* 123.077% */
+		}
+
+		p:first-of-type {
+			margin-top: $gap-smaller;
+		}
+
+		// This is required in order to have svg image as background.
+		position: relative;
+		z-index: 1;
+	}
+
+	.woocommerce-task-header__timer {
+		display: flex;
+		align-items: center;
+		line-height: 22px;
+		margin-bottom: 0;
+		img {
+			margin-right: 6px;
+		}
+	}
+}
+
+.woocommerce-task-dismiss-modal {
+	width: 565px;
+	max-width: 100%;
+
+	.components-modal__header {
+		border-bottom: 1px solid #ddd;
+	}
+
+	.woocommerce-usage-modal__message {
+		box-sizing: border-box;
+		border-bottom: 1px solid #ddd;
+		padding: 0 32px;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		background: #fff;
+		align-items: center;
+		height: 60px;
+		z-index: 10;
+		position: relative;
+		position: sticky;
+		top: 0;
+		margin: 0 -32px 24px;
+		font-size: 1.2em;
+	}
+
+	.woocommerce-usage-modal__actions {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: $gap;
+
+		button {
+			margin-left: $gap;
+		}
+	}
+}

@@ -5,10 +5,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 
 <h2 class="wc-shipping-zones-heading">
-	<?php _e( 'Shipping zones', 'woocommerce' ); ?>
-	<a href="<?php echo admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ); ?>" class="page-title-action"><?php esc_html_e( 'Add shipping zone', 'woocommerce' ); ?></a>
+	<span><?php esc_html_e( 'Shipping zones', 'woocommerce' ); ?></span>
+	<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>" class="page-title-action"><?php esc_html_e( 'Add zone', 'woocommerce' ); ?></a>
 </h2>
-<p><?php echo __( 'A shipping zone is a geographic region where a certain set of shipping methods are offered.', 'woocommerce' ) . ' ' . __( 'WooCommerce will match a customer to a single zone using their shipping address and present the shipping methods within that zone to them.', 'woocommerce' ); ?></p>
+<p class="wc-shipping-zone-heading-help-text">
+	<?php
+	echo wp_kses_post(
+		sprintf(
+			/* translators: %s: URL to local pickup settings */
+			__(
+				"A shipping zone consists of the region(s) you'd like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we'll use their shipping address to show them the methods available in their area. To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
+				'woocommerce'
+			),
+			esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+		)
+	);
+	?>
+</p>
 <table class="wc-shipping-zones widefat">
 	<thead>
 		<tr>
@@ -16,53 +29,53 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<th class="wc-shipping-zone-name"><?php esc_html_e( 'Zone name', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-region"><?php esc_html_e( 'Region(s)', 'woocommerce' ); ?></th>
 			<th class="wc-shipping-zone-methods"><?php esc_html_e( 'Shipping method(s)', 'woocommerce' ); ?></th>
+			<th></th>
 		</tr>
 	</thead>
-	<tbody class="wc-shipping-zone-rows"></tbody>
-	<tbody>
-		<tr data-id="0" class="wc-shipping-zone-worldwide">
-			<td width="1%" class="wc-shipping-zone-worldwide"></td>
-			<td class="wc-shipping-zone-name">
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=0' ) ); ?>"><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></a>
-				<div class="row-actions">
-					<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php _e( 'Manage shipping methods', 'woocommerce' ); ?></a>
-				</div>
-			</td>
-			<td class="wc-shipping-zone-region"><?php _e( 'This zone is <b>optionally</b> used for regions that are not included in any other shipping zone.', 'woocommerce' ); ?></td>
-			<td class="wc-shipping-zone-methods">
-				<ul>
-					<?php
-					$worldwide = new WC_Shipping_Zone( 0 );
-					$methods   = $worldwide->get_shipping_methods();
-					uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+	<tbody class="wc-shipping-zone-rows wc-shipping-tables-tbody"></tbody>
 
-					if ( ! empty( $methods ) ) {
-						foreach ( $methods as $method ) {
-							$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
-							echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
-						}
-					} else {
-						echo '<li class="wc-shipping-zone-method">' . __( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+	<tfoot data-id="0" class="wc-shipping-zone-worldwide wc-shipping-zone-rows-tfoot">
+		<td width="1%" class="wc-shipping-zone-worldwide"></td>
+		<td class="wc-shipping-zone-name">
+			<?php esc_html_e( 'Rest of the world', 'woocommerce' ); ?>
+		</td>
+		<td class="wc-shipping-zone-region"><?php esc_html_e( 'An optional zone you can use to set the shipping method(s) available to any regions that have not been listed above.', 'woocommerce' ); ?></td>
+		<td class="wc-shipping-zone-methods">
+			<ul>
+				<?php
+				$worldwide = new WC_Shipping_Zone( 0 );
+				$methods   = $worldwide->get_shipping_methods();
+				uasort( $methods, 'wc_shipping_zone_method_order_uasort_comparison' );
+
+				if ( ! empty( $methods ) ) {
+					foreach ( $methods as $method ) {
+						$class_name = 'yes' === $method->enabled ? 'method_enabled' : 'method_disabled';
+						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '">' . esc_html( $method->get_title() ) . '</li>';
 					}
-					?>
-				</ul>
-			</td>
-		</tr>
-	</tbody>
+				} else {
+					echo '<li>' . esc_html_e( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+				}
+				?>
+			</ul>
+		</td>
+		<td class="wc-shipping-zone-actions">
+			<a class="wc-shipping-zone-action-edit" href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id=0"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+		</td>
+	</tfoot>
+
 </table>
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row-blank">
 	<?php if ( 0 === $method_count ) : ?>
 		<tr>
-			<td class="wc-shipping-zones-blank-state" colspan="4">
-				<p class="main"><?php _e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
-				<p><?php _e( 'For example:', 'woocommerce' ); ?></p>
+			<td class="wc-shipping-zones-blank-state" colspan="5">
+				<p class="main"><?php esc_html_e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
+				<p><?php esc_html_e( 'For example:', 'woocommerce' ); ?></p>
 				<ul>
-					<li><?php _e( 'Local zone = California ZIP 90210 = Local pickup', 'woocommerce' ); ?>
-					<li><?php _e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
-					<li><?php _e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php esc_html_e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php esc_html_e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
 				</ul>
-				<p><?php _e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
+				<p><?php esc_html_e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
 				<a class="button button-primary wc-shipping-zone-add" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>
 			</td>
 		</tr>
@@ -73,16 +86,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tr data-id="{{ data.zone_id }}">
 		<td width="1%" class="wc-shipping-zone-sort"></td>
 		<td class="wc-shipping-zone-name">
-			<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}">{{ data.zone_name }}</a>
-			<div class="row-actions">
-				<a href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php _e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete"><?php _e( 'Delete', 'woocommerce' ); ?></a>
-			</div>
+			{{ data.zone_name }}
 		</td>
 		<td class="wc-shipping-zone-region">
 			{{ data.formatted_zone_location }}
 		</td>
 		<td class="wc-shipping-zone-methods">
 			<div><ul></ul></div>
+		</td>
+		<td class="wc-shipping-zone-actions">
+			<div>
+				<a class="wc-shipping-zone-action-edit" href="admin.php?page=wc-settings&amp;tab=shipping&amp;zone_id={{ data.zone_id }}"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a> | <a href="#" class="wc-shipping-zone-delete wc-shipping-zone-actions"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
+			</div>
 		</td>
 	</tr>
 </script>
@@ -92,9 +107,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
-					<h1><?php _e( 'Add shipping method', 'woocommerce' ); ?></h1>
+					<h1><?php esc_html_e( 'Add shipping method', 'woocommerce' ); ?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
-						<span class="screen-reader-text"><?php _e( 'Close modal panel', 'woocommerce' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
 				<article>

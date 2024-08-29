@@ -1,0 +1,20 @@
+{
+	"name": "woocommerce/product-average-rating",
+	"title": "Product Average Rating (Beta)",
+	"description": "Display the average rating of a product",
+	"apiVersion": 3,
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"textAlign": {
+			"type": "string"
+		}
+	},
+	"keywords": [
+		"WooCommerce"
+	],
+	"ancestor": [
+		"woocommerce/single-product"
+	],
+	"textdomain": "woocommerce",
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

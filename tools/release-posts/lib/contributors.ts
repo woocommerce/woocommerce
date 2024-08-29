@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { checkoutRef, sparseCheckoutRepo } from 'cli-core/src/git';
+import {
+	checkoutRef,
+	sparseCheckoutRepo,
+} from '@woocommerce/monorepo-utils/src/core/git';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import semver from 'semver';

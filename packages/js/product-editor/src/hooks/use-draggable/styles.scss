@@ -1,0 +1,41 @@
+.woocommerce-draggable {
+	&__container {
+		[data-draggable="target"] {
+			&.is-dragging {
+				opacity: 0.5;
+				background-color: $white;
+				border-radius: $grid-unit-05;
+			}
+
+			&.is-dragging-before,
+			&.is-dragging-after {
+				position: relative;
+			}
+
+			&.is-dragging-before:before,
+			&.is-dragging-after:after {
+				content: "";
+				display: block;
+				position: absolute;
+				width: 100%;
+				height: $grid-unit-05 + 1px;
+				left: 0;
+				background-color: var(--wp-admin-theme-color);
+				border-radius: $grid-unit-30;
+			}
+
+			&.is-dragging-before:before {
+				bottom: 100%;
+			}
+
+			&.is-dragging-after:after {
+				top: 100%;
+			}
+		}
+
+		[data-draggable="handler"] {
+			cursor: grab;
+			user-select: none;
+		}
+	}
+}

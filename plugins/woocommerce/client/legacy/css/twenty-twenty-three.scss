@@ -1,29 +1,7 @@
 /**
 * Fonts
 */
-@font-face {
-	font-family: star;
-	src: url(../fonts/star.eot);
-	src:
-		url(../fonts/star.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/star.woff) format("woff"),
-		url(../fonts/star.ttf) format("truetype"),
-		url(../fonts/star.svg#star) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: WooCommerce;
-	src: url(../fonts/WooCommerce.eot);
-	src:
-		url(../fonts/WooCommerce.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/WooCommerce.woff) format("woff"),
-		url(../fonts/WooCommerce.ttf) format("truetype"),
-		url(../fonts/WooCommerce.svg#WooCommerce) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
+@import "fonts";
 
 @import "mixins";
 @import "animation";
@@ -285,7 +263,8 @@
 				}
 			}
 
-			figure.woocommerce-product-gallery__wrapper {
+			figure.woocommerce-product-gallery__wrapper,
+			div.woocommerce-product-gallery__wrapper {
 				margin: 0;
 			}
 
@@ -299,7 +278,8 @@
 				margin: 0;
 			}
 
-			figure.woocommerce-product-gallery__wrapper {
+			figure.woocommerce-product-gallery__wrapper,
+			div.woocommerce-product-gallery__wrapper {
 				margin: 0;
 			}
 
@@ -330,6 +310,11 @@
 
 		.single_variation_wrap {
 			margin-top: var(--wp--style--block-gap);
+
+			// Prevent height flickering when selecting a variation.
+			.single_variation .woocommerce-variation-description > :first-child {
+				margin-top: 0;
+			}
 		}
 
 		ol.flex-control-thumbs {
@@ -361,8 +346,12 @@
 
 		.related.products {
 			margin-top: 7rem;
+			clear: both;
 		}
 
+		.upsells.products {
+			clear: both;
+		}
 	}
 
 	// Reviews tab.
@@ -429,7 +418,7 @@
 		height: 1em;
 		line-height: 1;
 		width: 5.4rem;
-		font-family: star;
+		font-family: WooCommerce;
 		font-style: normal;
 		color: var(--wp--preset--color--contrast);
 		margin: 1rem auto 0.7rem auto;
@@ -527,13 +516,6 @@
 			}
 		}
 	}
-
-	// Highlights for specific info, e.g. on the My Account > Orders > Order X: Order ___ was placed on ____
-	mark {
-		font-weight: bold;
-		background-color: transparent;
-	}
-
 }
 
 // Description/Additional info/Reviews tabs.
@@ -584,12 +566,28 @@ ul.wc-tabs {
 	font-size: var(--wp--preset--font-size--small);
 	margin-left: 1em;
 
-	h2 {
+	// Hide repeated heading.
+	h2:first-of-type {
 		display: none;
 	}
 
+	// Attributes table styles.
 	table.woocommerce-product-attributes {
-		text-align: left;
+		tbody {
+
+			td, th {
+				padding: 0.2rem 0.2rem 0.2rem 0;
+
+				p {
+					margin: 0;
+				}
+			}
+
+			th {
+				text-align: left;
+				padding-right: 1rem;
+			}
+		}
 	}
 }
 
@@ -632,7 +630,6 @@ ul.wc-tabs {
 
 					#coupon_code {
 						float: left;
-						margin-bottom: 1rem;
 					}
 				}
 			}
@@ -951,20 +948,6 @@ ul.wc-tabs {
 		margin-bottom: var(--wp--style--block-gap);
 	}
 
-	// Improves the presentation of order overview (order #, date, email, etc, not the line items) on the Thank you page.
-	ul.woocommerce-order-overview {
-
-		li {
-			display: inline;
-			text-transform: uppercase;
-
-			strong {
-				text-transform: none;
-				display: block;
-			}
-		}
-	}
-
 	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.
 	.woocommerce-customer-details {
 		address {
@@ -1007,6 +990,15 @@ ul.wc-tabs {
 
 		thead th {
 			text-transform: uppercase;
+		}
+
+		.wc-item-meta {
+			list-style-type: none;
+			padding-inline-start: 2rem;
+
+			li > p {
+				margin-block-start: 0.3rem;
+			}
 		}
 	}
 }
@@ -1158,4 +1150,24 @@ Notice messages (like 'Added to cart', 'Billing address needs to be filled in', 
   &[role='alert']::before {
     content: '\2713';
   }
+}
+
+/**
+ * Coupon error notice
+ */
+ .woocommerce-cart {
+	td.actions .coupon .coupon-error-notice {
+		@include coupon-error-notice-cart();
+		margin-top: 0;
+ 	}
+}
+
+form.checkout_coupon {
+	.coupon-error-notice {
+		@include coupon-error-notice-checkout();
+	}
+
+	.input-text.has-error:focus {
+		border-color: var(--wc-red);
+	}
 }

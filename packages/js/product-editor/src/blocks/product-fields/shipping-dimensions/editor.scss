@@ -1,0 +1,23 @@
+.wp-block-woocommerce-product-shipping-dimensions-fields {
+	.components-base-control {
+		margin-bottom: $gap;
+
+		&__field {
+			.components-base-control__label > span {
+				color: $gray-700;
+			}
+
+			.components-input-control__suffix {
+				flex-shrink: 0;
+				color: $gray-700;
+			}
+		}
+	}
+
+	&__dimensions-image {
+		width: 100%;
+		height: 100%;
+		padding: $gap;
+		overflow: visible;
+	}
+}

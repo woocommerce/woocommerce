@@ -39,7 +39,7 @@ const runCheckoutApplyCouponsTest = () => {
 					text: 'Coupon code applied successfully.',
 				} );
 
-				// Wait for page to expand total calculations to avoid flakyness
+				// Wait for page to expand total calculations to avoid flakiness
 				await page.waitForSelector( '.order-total' );
 
 				// Verify discount applied and order total

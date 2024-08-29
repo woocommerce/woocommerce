@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 /**
  * Specs data source poller class for payment gateway suggestions.
@@ -18,7 +18,7 @@ class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 	 * Default data sources array.
 	 */
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json',
+		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json',
 	);
 
 	/**
@@ -33,7 +33,20 @@ class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 	 */
 	public static function get_instance() {
 		if ( ! self::$instance ) {
-			self::$instance = new self( self::ID, self::DATA_SOURCES );
+			// Add country query param to data sources.
+			$base_location = wc_get_base_location();
+			$data_sources  = array_map(
+				function( $url ) use ( $base_location ) {
+					return add_query_arg(
+						'country',
+						$base_location['country'],
+						$url
+					);
+				},
+				self::DATA_SOURCES
+			);
+
+			self::$instance = new self( self::ID, $data_sources );
 		}
 		return self::$instance;
 	}

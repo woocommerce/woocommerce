@@ -105,7 +105,7 @@ class {{slugPascalCase}}_Blocks_Integration implements IntegrationInterface {
 
         $style_url  = plugins_url( $style_path, __FILE__ );
         wp_enqueue_style(
-            '{{slug}}-blocks-integration',
+            '{{slug}}-checkout-newsletter-subscription-block',
             $style_url,
             [],
             $this->get_file_version( $style_path )

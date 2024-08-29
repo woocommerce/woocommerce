@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only run effect when product is resolved

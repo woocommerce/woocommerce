@@ -11,6 +11,13 @@ defined( 'ABSPATH' ) || exit;
 <div id="key-fields" class="settings-panel">
 	<h2><?php esc_html_e( 'Key details', 'woocommerce' ); ?></h2>
 
+	<div class="inline notice">
+		<ul class="advice">
+			<li><?php esc_html_e( 'API keys open up access to potentially sensitive information. Only share them with organizations you trust.', 'woocommerce' ); ?></li>
+			<li><?php esc_html_e( 'Stick to one key per client: this makes it easier to revoke access in the future for a single client, without causing disruption for others.', 'woocommerce' ); ?></li>
+		</ul>
+	</div>
+
 	<input type="hidden" id="key_id" value="<?php echo esc_attr( $key_id ); ?>" />
 
 	<table id="api-keys-options" class="form-table">
@@ -24,6 +31,9 @@ defined( 'ABSPATH' ) || exit;
 				</th>
 				<td class="forminp">
 					<input maxlength="200" id="key_description" type="text" class="input-text regular-input" value="<?php echo esc_attr( $key_data['description'] ); ?>" />
+					<p class="description">
+						<?php esc_html_e( 'Add a meaningful description, including a note of the person, company or app you are sharing the key with.', 'woocommerce' ); ?>
+					</p>
 				</td>
 			</tr>
 			<tr valign="top">
@@ -72,6 +82,9 @@ defined( 'ABSPATH' ) || exit;
 							<option value="<?php echo esc_attr( $permission_id ); ?>" <?php selected( $key_data['permissions'], $permission_id, true ); ?>><?php echo esc_html( $permission_name ); ?></option>
 						<?php endforeach; ?>
 					</select>
+					<p class="conditional description" data-depends-on="#key_permissions" data-show-if-equals="write">
+						<?php esc_html_e( 'Write-only keys do not prevent clients from seeing information about the entities they are updating.', 'woocommerce' ); ?>
+					</p>
 				</td>
 			</tr>
 

@@ -1,0 +1,71 @@
+<?php
+/**
+ * Plugin Name:          {{title}}
+{{#pluginURI}}
+ * Plugin URI:           {{{pluginURI}}}
+{{/pluginURI}}
+{{#description}}
+ * Description:          {{description}}
+{{/description}}
+ * Version:              {{version}}
+ * Requires at least:    6.2
+ * WC requires at least: 7.8
+ * Requires PHP:         7.4
+{{#author}}
+ * Author:               {{author}}
+{{/author}}
+{{#license}}
+ * License:              {{license}}
+{{/license}}
+{{#licenseURI}}
+ * License URI:          {{{licenseURI}}}
+{{/licenseURI}}
+ * Text Domain:          {{textdomain}}
+{{#domainPath}}
+ * Domain Path:          {{{domainPath}}}
+{{/domainPath}}
+{{#updateURI}}
+ * Update URI:           {{{updateURI}}}
+{{/updateURI}}
+ *
+ * @package              {{namespace}}
+ */
+
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry;
+
+
+/**
+ * Registers the block using the metadata loaded from the `block.json` file.
+ * Behind the scenes, it registers also all assets so they can be enqueued
+ * through the block editor in the corresponding context.
+ *
+ * @see https://developer.wordpress.org/reference/functions/register_block_type/
+ */
+function {{namespaceSnakeCase}}_{{slugSnakeCase}}_block_init() {
+	if ( isset( $_GET['page'] ) && $_GET['page'] === 'wc-admin' ) {
+		BlockRegistry::get_instance()->register_block_type_from_metadata( __DIR__ . '/build' );
+	}
+}
+add_action( 'init', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_block_init' );
+
+function {{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor( BlockTemplateInterface $template ) {
+	if ( $template instanceof ProductFormTemplateInterface && 'simple-product' === $template->get_id() ) {
+		$basic_details = $template->get_section_by_id( 'basic-details' );
+
+		if ( $basic_details ) {
+			$basic_details->add_block(
+				[
+					'id' 	     => '{{namespace}}-{{slug}}',
+					'order'	     => 40,
+					'blockName'  => '{{namespace}}/{{slug}}',
+					'attributes' => [
+						'message' => '{{title}}',
+					]
+				]
+			);
+		}
+	}
+}
+add_filter( 'woocommerce_block_template_register', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor', 100 );

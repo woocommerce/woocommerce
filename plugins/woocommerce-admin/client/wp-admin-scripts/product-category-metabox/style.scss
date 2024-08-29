@@ -1,0 +1,64 @@
+.product-add-category {
+	&__tree-control {
+		margin-top: $gap-smaller;
+
+		.woocommerce-tree-select-control {
+			.components-base-control,
+			.woocommerce-tree-select-control__tree {
+				padding: 0 5px;
+			}
+
+			.components-checkbox-control__label {
+				min-height: $gap-larger;
+			}
+
+			&__tags {
+				display: none;
+			}
+			.components-base-control .woocommerce-tree-select-control__control-input,
+			.woocommerce-tree-select-control__option {
+				font-size: 12px;
+			}
+			.components-checkbox-control__input {
+				height: $gap;
+				width: $gap;
+			}
+			.components-checkbox-control__checked {
+				height: $gap + $gap-smallest;
+				width: $gap + $gap-smallest;
+			}
+		}
+	}
+}
+
+.categorydiv.category-async-metabox {
+	#product_cat-all {
+		overflow: visible;
+
+		.categorychecklist {
+			max-height: 140px;
+			margin-left: 0;
+			> li {
+				display: flex;
+				align-items: center;
+				margin-right: $gap-small;
+			}
+			.ntdelbutton {
+				position: relative;
+				margin: 0;
+			}
+		}
+	}
+	.woocommerce-experimental-select-control__combo-box-wrapper {
+		min-height: 30px;
+		border-radius: $gap-smallest;
+	}
+	.woocommerce-experimental-select-control__menu-item {
+		padding: 5px $gap-small;
+	}
+	.category-add {
+		&__error {
+			color: $error-red;
+		}
+	}
+}

@@ -210,3 +210,100 @@ export function* runDisableEmail() {
 		yield setIsEmailDisabled( response );
 	} );
 }
+
+export function* resetCustomizeYourStore() {
+	yield runCommand( 'Reset Customize Your Store', function* () {
+		const optionsToDelete = [
+			'woocommerce_customize_store_onboarding_tour_hidden',
+			'woocommerce_admin_customize_store_completed',
+			'woocommerce_admin_customize_store_completed_theme_id',
+		];
+		yield apiFetch( {
+			method: 'DELETE',
+			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
+		} );
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/reset-cys',
+			method: 'POST',
+		} );
+
+		yield apiFetch( {
+			path: '/wc-admin/ai/patterns',
+			method: 'DELETE',
+		} );
+	} );
+}
+
+export function setLoggingLevels( loggingLevels ) {
+	return {
+		type: TYPES.SET_LOGGING_LEVELS,
+		loggingLevels,
+	};
+}
+
+export function setBlockTemplateLoggingThreshold(
+	blockTemplateLoggingThreshold
+) {
+	return {
+		type: TYPES.SET_BLOCK_TEMPLATE_LOGGING_THRESHOLD,
+		blockTemplateLoggingThreshold,
+	};
+}
+
+export function* updateBlockTemplateLoggingThreshold( params ) {
+	yield runCommand( 'Update block template logging threshold', function* () {
+		yield apiFetch( {
+			path:
+				API_NAMESPACE +
+				'/tools/update-block-template-logging-threshold/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* updateComingSoonMode( params ) {
+	yield runCommand( 'Update coming soon mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/update-coming-soon-mode/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* updateWccomRequestErrorsMode( params ) {
+	yield runCommand( 'Update wccom request errors mode', function* () {
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/set-wccom-request-errors/v1',
+			method: 'POST',
+			data: params,
+		} );
+	} );
+}
+
+export function* fakeWooPayments( params ) {
+	yield runCommand( 'Toggle Fake WooPayments Completion', function* () {
+		const newStatus = params.enabled === 'yes' ? 'no' : 'yes';
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/fake-wcpay-completion/v1',
+			method: 'POST',
+			data: {
+				enabled: newStatus,
+			},
+		} );
+
+		yield updateCommandParams( 'fakeWooPayments', {
+			enabled: newStatus,
+		} );
+
+		yield updateMessage(
+			'Toggle Fake WooPayments Completion',
+			`Fake WooPayments completion ${
+				newStatus === 'yes' ? 'disabled' : 'enabled'
+			}`
+		);
+	} );
+}

@@ -1,0 +1,67 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	&__menu-item span {
+		white-space: normal;
+	}
+
+	&__menu-avatar-image {
+		border-radius: 50%;
+		height: $grid-unit-30;
+		width: $grid-unit-30;
+	}
+
+	&__menu-icon {
+		flex-shrink: 0;
+		margin-right: $grid-unit-10;
+	}
+
+	&__menu-text {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__sub-text {
+		color: $gray-700;
+		font-size: 12px;
+	}
+
+	&__header-account-modal {
+
+		&__header-account-modal-text {
+			margin-bottom: $grid-unit-10;
+		}
+	}
+
+	&__header-account-modal-overlay {
+		// This is to ensure the modal is above the user menu popover.
+		z-index: 1000000;
+	}
+
+	&__header-account-modal-button-group {
+		display: inline-flex;
+		gap: $grid-unit-10;
+		justify-content: flex-end;
+		margin-top: $grid-unit-30;
+		width: 100%;
+
+		.woocommerce-marketplace__header-account-modal-button,
+		.woocommerce-marketplace__header-account-modal-button.is-primary {
+			border-radius: 2px;
+			box-shadow: none;
+		}
+	}
+}
+
+@media screen and (min-width: $break-small) {
+	.woocommerce-marketplace {
+		&__header-account-modal {
+			max-width: $modal-min-width;
+
+			&.has-size-medium {
+				max-width: $modal-width-medium;
+				width: 100%;
+			}
+		}
+	}
+}

@@ -51,7 +51,7 @@ class WC_Regenerate_Images {
 			add_action( 'admin_init', array( __CLASS__, 'regenerating_notice' ) );
 			add_action( 'woocommerce_hide_regenerating_thumbnails_notice', array( __CLASS__, 'dismiss_regenerating_notice' ) );
 
-			// Regenerate thumbnails in the background after settings changes. Not ran on multisite to avoid multiple simultanious jobs.
+			// Regenerate thumbnails in the background after settings changes. Not ran on multisite to avoid multiple simultaneous jobs.
 			if ( ! is_multisite() ) {
 				add_action( 'customize_save_after', array( __CLASS__, 'maybe_regenerate_images' ) );
 				add_action( 'after_switch_theme', array( __CLASS__, 'maybe_regenerate_images' ) );
@@ -263,13 +263,19 @@ class WC_Regenerate_Images {
 	private static function get_full_size_image_dimensions( $attachment_id ) {
 		$imagedata = wp_get_attachment_metadata( $attachment_id );
 
-		if ( ! $imagedata ) {
+		if ( ! is_array( $imagedata ) ) {
 			return array();
 		}
 
 		if ( ! isset( $imagedata['file'] ) && isset( $imagedata['sizes']['full'] ) ) {
 			$imagedata['height'] = $imagedata['sizes']['full']['height'];
 			$imagedata['width']  = $imagedata['sizes']['full']['width'];
+		}
+
+		// The result of the earlier wp_get_attachment_metadata call is filterable, so we may not have height or
+		// width data at this point.
+		if ( ! isset( $imagedata['height'] ) || ! isset( $imagedata['width'] ) ) {
+			return array();
 		}
 
 		return array(

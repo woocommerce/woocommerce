@@ -10,10 +10,14 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see     https://docs.woocommerce.com/document/template-structure/
+ * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 4.6.0
+ * @version 9.0.0
+ *
+ * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
+
+ // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,11 +27,12 @@ if ( ! $order ) {
 	return;
 }
 
-$order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
-$show_purchase_note    = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
-$show_customer_details = is_user_logged_in() && $order->get_user_id() === get_current_user_id();
-$downloads             = $order->get_downloadable_items();
-$show_downloads        = $order->has_downloadable_item() && $order->is_download_permitted();
+$order_items        = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
+$show_purchase_note = $order->has_status( apply_filters( 'woocommerce_purchase_note_order_statuses', array( 'completed', 'processing' ) ) );
+$downloads          = $order->get_downloadable_items();
+
+// We make sure the order belongs to the user. This will also be true if the user is a guest, and the order belongs to a guest (userID === 0).
+$show_customer_details = $order->get_user_id() === get_current_user_id();
 
 if ( $show_downloads ) {
 	wc_get_template(
@@ -83,7 +88,7 @@ if ( $show_downloads ) {
 				?>
 					<tr>
 						<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
-						<td><?php echo ( 'payment_method' === $key ) ? esc_html( $total['value'] ) : wp_kses_post( $total['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+						<td><?php echo wp_kses_post( $total['value'] ); ?></td>
 					</tr>
 					<?php
 			}
@@ -91,7 +96,7 @@ if ( $show_downloads ) {
 			<?php if ( $order->get_customer_note() ) : ?>
 				<tr>
 					<th><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
-					<td><?php echo wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ); ?></td>
+					<td><?php echo wp_kses( nl2br( wptexturize( $order->get_customer_note() ) ), array() ); ?></td>
 				</tr>
 			<?php endif; ?>
 		</tfoot>

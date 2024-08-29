@@ -37,6 +37,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			'layout'       => $note->get_layout(),
 			'image'        => $note->get_image(),
 			'is_deleted'   => (int) $note->get_is_deleted(),
+			'is_read'      => (int) $note->get_is_read(),
 		);
 
 		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data() );
@@ -109,7 +110,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_source( $note_row->source );
 			$note->set_date_created( $note_row->date_created );
 			$note->set_date_reminder( $note_row->date_reminder );
-			$note->set_is_snoozable( $note_row->is_snoozable );
+			$note->set_is_snoozable( (bool) $note_row->is_snoozable );
 			$note->set_is_deleted( (bool) $note_row->is_deleted );
 			isset( $note_row->is_read ) && $note->set_is_read( (bool) $note_row->is_read );
 			$note->set_layout( $note_row->layout );
@@ -162,11 +163,11 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 					'source'        => $note->get_source(),
 					'date_created'  => $date_created_to_db,
 					'date_reminder' => $date_reminder_to_db,
-					'is_snoozable'  => $note->get_is_snoozable(),
+					'is_snoozable'  => (int) $note->get_is_snoozable(),
 					'layout'        => $note->get_layout(),
 					'image'         => $note->get_image(),
-					'is_deleted'    => $note->get_is_deleted(),
-					'is_read'       => $note->get_is_read(),
+					'is_deleted'    => (int) $note->get_is_deleted(),
+					'is_read'       => (int) $note->get_is_read(),
 				),
 				array( 'note_id' => $note->get_id() )
 			);
@@ -391,7 +392,7 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 	 * @param string $type Comma separated list of note types.
 	 * @param string $status Comma separated list of statuses.
 	 * @param string $context Optional argument that the woocommerce_note_where_clauses filter can use to determine whether to apply extra conditions. Extensions should define their own contexts and use them to avoid adding to notes where clauses when not needed.
-	 * @return array An array of objects containing a note id.
+	 * @return string Count of objects with given type, status and context.
 	 */
 	public function get_notes_count( $type = array(), $status = array(), $context = self::WC_ADMIN_NOTE_OPER_GLOBAL ) {
 		global $wpdb;

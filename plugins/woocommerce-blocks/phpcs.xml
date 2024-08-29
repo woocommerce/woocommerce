@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards">
+	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
+
+	<!-- Exclude paths -->
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>languages/woo-gutenberg-products-block.php</exclude-pattern>
+
+	<!-- Configs -->
+	<!--
+		It should match the minimum WP version supported by WooCommerce Core
+		(see https://github.com/woocommerce/woocommerce-blocks/blob/trunk/.github/release-initial-checklist.md#initial-preparation)
+	-->
+	<config name="minimum_supported_wp_version" value="6.3" />
+	<config name="testVersion" value="7.4-" />
+
+	<!-- Rules -->
+	<rule ref="WooCommerce-Core" />
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="woo-gutenberg-products-block" />
+		</properties>
+	</rule>
+
+	<rule ref="PHPCompatibility">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>src/*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.PHP.DisallowShortTernary.Found">
+		<exclude-pattern>src/*</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>src/*</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.FileComment.MissingPackageTag">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/php</exclude-pattern>
+		<exclude-pattern>patterns</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/php</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.FileComment.SpacingAfterComment">
+		<exclude-pattern>patterns</exclude-pattern>
+	</rule>
+
+	<rule ref="Generic.Commenting">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<rule ref="Generic.Commenting.Todo">
+		<exclude name="Generic.Commenting.Todo.TaskFound"/>
+		<exclude name="Generic.Commenting.Todo.CommentFound"/>
+	</rule>
+
+	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
+		<exclude-pattern>src/*</exclude-pattern>
+	</rule>
+
+	<!-- Exclude Interactivity API-->
+	<exclude-pattern>./src/Interactivity/*</exclude-pattern>
+</ruleset>

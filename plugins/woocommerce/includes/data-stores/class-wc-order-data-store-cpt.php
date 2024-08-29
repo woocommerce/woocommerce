@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -100,6 +102,12 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order->set_order_key( wc_generate_order_key() );
 		}
 		parent::create( $order );
+
+		// Do not fire 'woocommerce_new_order' for draft statuses.
+		if ( in_array( $order->get_status( 'edit' ), array( 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
+			return;
+		}
+
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 	}
 
@@ -183,22 +191,37 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		// Also grab the current status so we can compare.
 		$previous_status = get_post_status( $order->get_id() );
+		// If the order doesn't exist in the DB, we will consider it as new.
+		if ( ! $previous_status && $order->get_id() === 0 ) {
+			$previous_status = 'new';
+		}
 
 		// Update the order.
 		parent::update( $order );
 
-		// Fire a hook depending on the status - this should be considered a creation if it was previously draft status.
-		$new_status = $order->get_status( 'edit' );
+		$current_status = $order->get_status( 'edit' );
 
-		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft' ), true ) ) {
-			do_action( 'woocommerce_new_order', $order->get_id(), $order );
-		} else {
-			do_action( 'woocommerce_update_order', $order->get_id(), $order );
+		// We need to remove the wc- prefix from the status for comparison and proper evaluation of new vs updated orders.
+		$previous_status = OrderUtil::remove_status_prefix( $previous_status );
+		$current_status  = OrderUtil::remove_status_prefix( $current_status );
+
+		$draft_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft' );
+
+		// This hook should be fired only if the new status is not one of draft statuses and the previous status was one of the draft statuses.
+		if (
+			$current_status !== $previous_status
+			&& ! in_array( $current_status, $draft_statuses, true )
+			&& in_array( $previous_status, $draft_statuses, true )
+		) {
+			do_action( 'woocommerce_new_order', $order->get_id(), $order );  // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			return;
 		}
+
+		do_action( 'woocommerce_update_order', $order->get_id(), $order );  // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	/**
-	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
+	 * Helper method that updates all the post meta for an order based on its settings in the WC_Order class.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @since 3.0.0
@@ -538,7 +561,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$unpaid_orders = $wpdb->get_col(
 			$wpdb->prepare(
-				// @codingStandardsIgnoreStart
+			// @codingStandardsIgnoreStart
 				"SELECT posts.ID
 				FROM {$wpdb->posts} AS posts
 				WHERE   posts.post_type   IN ('" . implode( "','", wc_get_order_types() ) . "')
@@ -577,6 +600,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'_shipping_address_index',
 					'_billing_last_name',
 					'_billing_email',
+					'_billing_phone',
 				)
 			)
 		);
@@ -602,6 +626,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 							FROM {$wpdb->prefix}woocommerce_order_items as order_items
 							WHERE order_item_name LIKE %s",
 							'%' . $wpdb->esc_like( wc_clean( $term ) ) . '%'
+						)
+					),
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT DISTINCT os.order_id FROM {$wpdb->prefix}wc_order_stats os
+							INNER JOIN {$wpdb->prefix}wc_customer_lookup cl ON os.customer_id = cl.customer_id
+							INNER JOIN {$wpdb->usermeta} um ON cl.user_id = um.user_id
+							WHERE (um.meta_key = 'billing_phone' OR um.meta_key = 'shipping_phone')
+							AND um.meta_value = %s",
+							wc_clean( $term )
 						)
 					)
 				)
@@ -986,6 +1020,40 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array|object
 	 */
 	public function query( $query_vars ) {
+		/**
+		 * Allows 3rd parties to filter query args that will trigger an unsupported notice.
+		 *
+		 * @since 9.2.0
+		 *
+		 * @param array $unsupported_args Array of query arg names.
+		 */
+		$unsupported_args = (array) apply_filters(
+			'woocommerce_order_data_store_cpt_query_unsupported_args',
+			array( 'meta_query', 'field_query' )
+		);
+
+		// Trigger doing_it_wrong() for query vars only supported in HPOS.
+		$unsupported_args_in_query = array_keys( array_filter( array_intersect_key( $query_vars, array_flip( $unsupported_args ) ) ) );
+
+		if ( $unsupported_args_in_query && __CLASS__ === get_class( $this ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				esc_html(
+					sprintf(
+						// translators: %s is a comma separated list of query arguments.
+						_n(
+							'Order query argument (%s) is not supported on the current order datastore.',
+							'Order query arguments (%s) are not supported on the current order datastore.',
+							count( $unsupported_args_in_query ),
+							'woocommerce'
+						),
+						implode( ', ', $unsupported_args_in_query )
+					)
+				),
+				'9.2.0'
+			);
+		}
+
 		$args = $this->get_wp_query_args( $query_vars );
 
 		if ( ! empty( $args['errors'] ) ) {
@@ -1169,5 +1237,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			array()
 		);
 		WC_Order::prime_raw_meta_data_cache( $raw_meta_data_collection, 'orders' );
+	}
+
+	/**
+	 * Attempts to restore the specified order back to its original status (after having been trashed).
+	 *
+	 * @param WC_Order $order The order to be untrashed.
+	 *
+	 * @return bool If the operation was successful.
+	 */
+	public function untrash_order( WC_Order $order ): bool {
+		if ( ! wp_untrash_post( $order->get_id() ) ) {
+			return false;
+		}
+
+		$order->set_status( get_post_field( 'post_status', $order->get_id() ) );
+		return (bool) $order->save();
 	}
 }

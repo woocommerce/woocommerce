@@ -49,6 +49,7 @@ class OnboardingSetupWizard {
 		add_action( 'admin_init', array( $this, 'do_admin_redirects' ) );
 		add_action( 'current_screen', array( $this, 'redirect_to_profiler' ) );
 		add_filter( 'woocommerce_show_admin_notice', array( $this, 'remove_old_install_notice' ), 10, 2 );
+		add_filter( 'admin_viewport_meta', array( $this, 'set_viewport_meta_tag' ) );
 	}
 
 	/**
@@ -231,6 +232,12 @@ class OnboardingSetupWizard {
 		$settings['onboarding']['localeInfo']      = include WC()->plugin_path() . '/i18n/locale-info.php';
 		$settings['onboarding']['profile']         = $profile;
 
+		if ( $this->is_setup_wizard() ) {
+			$settings['onboarding']['pageCount']    = (int) ( wp_count_posts( 'page' ) )->publish;
+			$settings['onboarding']['postCount']    = (int) ( wp_count_posts( 'post' ) )->publish;
+			$settings['onboarding']['isBlockTheme'] = wc_current_theme_is_fse_theme();
+		}
+
 		return apply_filters( 'woocommerce_admin_onboarding_preloaded_data', $settings );
 	}
 
@@ -275,5 +282,21 @@ class OnboardingSetupWizard {
 		}
 
 		return $show;
+	}
+
+	/**
+	 * Set the viewport meta tag for the setup wizard.
+	 *
+	 * @param string $viewport_meta Viewport meta content value.
+	 * @return string Viewport meta content value.
+	 *
+	 * @since 9.0.0
+	 */
+	public function set_viewport_meta_tag( $viewport_meta ) {
+		if ( ! $this->is_setup_wizard() ) {
+			return $viewport_meta;
+		}
+
+		return 'width=device-width, initial-scale=1.0, maximum-scale=1.0';
 	}
 }

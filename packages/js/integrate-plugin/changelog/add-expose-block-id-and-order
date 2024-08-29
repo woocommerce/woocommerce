@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Initial version of @woocommerce/block-templates package. Adds registerWooBlockType and useWooBlockProps.

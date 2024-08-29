@@ -16,7 +16,7 @@ describe( 'preventLeavingProductForm', () => {
 		const fromUrl = {
 			search: 'admin.php?page=wc-admin&path=/product/123&tab=general',
 		} as Location;
-		const shouldPrevent = preventLeavingProductForm( toUrl, fromUrl );
+		const shouldPrevent = preventLeavingProductForm()( toUrl, fromUrl );
 		expect( shouldPrevent ).toBe( true );
 	} );
 
@@ -27,7 +27,7 @@ describe( 'preventLeavingProductForm', () => {
 		const fromUrl = {
 			search: 'admin.php?page=wc-admin&path=/product/123&tab=general',
 		} as Location;
-		const shouldPrevent = preventLeavingProductForm( toUrl, fromUrl );
+		const shouldPrevent = preventLeavingProductForm()( toUrl, fromUrl );
 		expect( shouldPrevent ).toBe( true );
 	} );
 
@@ -38,7 +38,35 @@ describe( 'preventLeavingProductForm', () => {
 		const fromUrl = {
 			search: 'admin.php?page=wc-admin&path=/product/123&tab=shipping',
 		} as Location;
-		const shouldPrevent = preventLeavingProductForm( toUrl, fromUrl );
+		const shouldPrevent = preventLeavingProductForm()( toUrl, fromUrl );
+		expect( shouldPrevent ).toBe( true );
+	} );
+
+	it( 'should allow leaving when moving from the add-product to the edit page with same product id', () => {
+		const toUrl = new URL(
+			'http://mysite.com/admin.php?page=wc-admin&path=/product/123&tab=general'
+		);
+		const fromUrl = {
+			search: 'admin.php?page=wc-admin&path=/add-product',
+		} as Location;
+		const shouldPrevent = preventLeavingProductForm( 123 )(
+			toUrl,
+			fromUrl
+		);
+		expect( shouldPrevent ).toBe( false );
+	} );
+
+	it( 'should not allow leaving when moving from the add-product to the edit page with different product id', () => {
+		const toUrl = new URL(
+			'http://mysite.com/admin.php?page=wc-admin&path=/product/123&tab=general'
+		);
+		const fromUrl = {
+			search: 'admin.php?page=wc-admin&path=/add-product',
+		} as Location;
+		const shouldPrevent = preventLeavingProductForm( 333 )(
+			toUrl,
+			fromUrl
+		);
 		expect( shouldPrevent ).toBe( true );
 	} );
 
@@ -49,7 +77,7 @@ describe( 'preventLeavingProductForm', () => {
 		const fromUrl = {
 			search: 'admin.php?page=wc-admin&path=/product/123&tab=shipping&other_param=b',
 		} as Location;
-		const shouldPrevent = preventLeavingProductForm( toUrl, fromUrl );
+		const shouldPrevent = preventLeavingProductForm()( toUrl, fromUrl );
 		expect( shouldPrevent ).toBe( true );
 	} );
 } );

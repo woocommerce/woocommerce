@@ -29,6 +29,36 @@ class WC_Settings_Tracking {
 	protected $updated_options = array();
 
 	/**
+	 * List of option names that are dropdown menus.
+	 *
+	 * @var array
+	 */
+	protected $dropdown_menu_options = array();
+
+
+	/**
+	 * List of options that have been modified.
+	 *
+	 * @var array
+	 */
+	protected $modified_options = array();
+
+	/**
+	 * List of options that have been deleted.
+	 *
+	 * @var array
+	 */
+	protected $deleted_options = array();
+
+	/**
+	 * List of options that have been added.
+	 *
+	 * @var array
+	 */
+	protected $added_options = array();
+
+
+	/**
 	 * Toggled options.
 	 *
 	 * @var array
@@ -44,8 +74,40 @@ class WC_Settings_Tracking {
 	public function init() {
 		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
 		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_list' ) );
+		add_action( 'woocommerce_update_non_option_setting', array( $this, 'add_option_to_list_and_track_setting_change' ) );
 		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_settings_tracking_scripts' ) );
+	}
+
+	/**
+	 * Adds the option to the allowed and updated options directly.
+	 * Currently used for settings that don't use update_option.
+	 *
+	 * @param array $option WooCommerce option that should be updated.
+	 */
+	public function add_option_to_list_and_track_setting_change( $option ) {
+		if ( ! in_array( $option['id'], $this->allowed_options, true ) ) {
+			$this->allowed_options[] = $option['id'];
+		}
+		if ( isset( $option['action'] ) ) {
+			if ( 'add' === $option['action'] ) {
+				$this->added_options[] = $option['id'];
+			} elseif ( 'delete' === $option['action'] ) {
+				$this->deleted_options[] = $option['id'];
+			} elseif ( ! in_array( $option['id'], $this->updated_options, true ) ) {
+				$this->updated_options[] = $option['id'];
+			}
+		} elseif ( isset( $option['value'] ) ) {
+			if ( 'select' === $option['type'] ) {
+				$this->modified_options[ $option['id'] ] = $option['value'];
+
+			} elseif ( 'checkbox' === $option['type'] ) {
+				$option_state                             = 'yes' === $option['value'] ? 'enabled' : 'disabled';
+				$this->toggled_options[ $option_state ][] = $option['id'];
+			}
+			$this->updated_options[] = $option['id'];
+		}
+
 	}
 
 	/**
@@ -60,6 +122,10 @@ class WC_Settings_Tracking {
 	 */
 	public function add_option_to_list( $option ) {
 		$this->allowed_options[] = $option['id'];
+
+		if ( isset( $option['options'] ) ) {
+			$this->dropdown_menu_options[] = $option['id'];
+		}
 
 		// Delay attaching this action since it could get fired a lot.
 		if ( false === has_action( 'update_option', array( $this, 'track_setting_change' ) ) ) {
@@ -91,8 +157,10 @@ class WC_Settings_Tracking {
 			return;
 		}
 
-		// Check and save toggled options.
-		if ( in_array( $new_value, array( 'yes', 'no' ), true ) && in_array( $old_value, array( 'yes', 'no' ), true ) ) {
+		if ( in_array( $option_name, $this->dropdown_menu_options, true ) ) {
+			$this->modified_options[ $option_name ] = $new_value;
+		} elseif ( in_array( $new_value, array( 'yes', 'no' ), true ) && in_array( $old_value, array( 'yes', 'no' ), true ) ) {
+			// Save toggled options.
 			$option_state                             = 'yes' === $new_value ? 'enabled' : 'disabled';
 			$this->toggled_options[ $option_state ][] = $option_name;
 		}
@@ -106,17 +174,33 @@ class WC_Settings_Tracking {
 	public function send_settings_change_event() {
 		global $current_tab, $current_section;
 
-		if ( empty( $this->updated_options ) ) {
+		if ( empty( $this->updated_options ) && empty( $this->deleted_options ) && empty( $this->added_options ) ) {
 			return;
 		}
 
-		$properties = array(
-			'settings' => implode( ',', $this->updated_options ),
-		);
+		$properties = array();
+
+		if ( ! empty( $this->updated_options ) ) {
+			$properties['settings'] = implode( ',', $this->updated_options );
+		}
+
+		if ( ! empty( $this->deleted_options ) ) {
+			$properties['deleted'] = implode( ',', $this->deleted_options );
+		}
+
+		if ( ! empty( $this->added_options ) ) {
+			$properties['added'] = implode( ',', $this->added_options );
+		}
 
 		foreach ( $this->toggled_options as $state => $options ) {
 			if ( ! empty( $options ) ) {
 				$properties[ $state ] = implode( ',', $options );
+			}
+		}
+
+		if ( ! empty( $this->modified_options ) ) {
+			foreach ( $this->modified_options as $option_name => $selected_option ) {
+				$properties[ $option_name ] = $selected_option ?? '';
 			}
 		}
 

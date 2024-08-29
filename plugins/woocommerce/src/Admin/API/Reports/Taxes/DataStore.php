@@ -21,6 +21,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Table used to get the data.
 	 *
+	 * @override ReportsDataStore::$table_name
+	 *
 	 * @var string
 	 */
 	protected static $table_name = 'wc_order_tax_lookup';
@@ -28,12 +30,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Cache identifier.
 	 *
+	 * @override ReportsDataStore::$cache_key
+	 *
 	 * @var string
 	 */
 	protected $cache_key = 'taxes';
 
 	/**
 	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @override ReportsDataStore::$column_types
 	 *
 	 * @var array
 	 */
@@ -53,26 +59,40 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override ReportsDataStore::$context
+	 *
 	 * @var string
 	 */
 	protected $context = 'taxes';
 
 	/**
 	 * Assign report columns once full table name has been assigned.
+	 *
+	 * @override ReportsDataStore::assign_report_columns()
 	 */
 	protected function assign_report_columns() {
-		$table_name           = self::get_db_table_name();
+		global $wpdb;
+		$table_name = self::get_db_table_name();
+
+		// Using wp_woocommerce_tax_rates table limits the result to only the existing tax rates and
+		// omits the historical records which differs from the purpose of wp_wc_order_tax_lookup table.
+		// So in order to get the same data present in wp_woocommerce_tax_rates without breaking the
+		// API contract the values are now retrieved from wp_woocommerce_order_items and wp_woocommerce_order_itemmeta.
+		// And given that country, state and priority are not separate columns within the woocommerce_order_items,
+		// a split to order_item_name column value is required to separate those values. This is not ideal,
+		// but given this query is paginated and cached, then it is not a big deal. There is always room for
+		// improvements here.
 		$this->report_columns = array(
 			'tax_rate_id'  => "{$table_name}.tax_rate_id",
-			'name'         => 'tax_rate_name as name',
-			'tax_rate'     => 'tax_rate',
-			'country'      => 'tax_rate_country as country',
-			'state'        => 'tax_rate_state as state',
-			'priority'     => 'tax_rate_priority as priority',
+			'name'         => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
+			'tax_rate'     => "CAST({$wpdb->prefix}woocommerce_order_itemmeta.meta_value AS DECIMAL(7,4)) as tax_rate",
+			'country'      => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
+			'state'        => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
+			'priority'     => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
 			'total_tax'    => 'SUM(total_tax) as total_tax',
 			'order_tax'    => 'SUM(order_tax) as order_tax',
 			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
-			'orders_count' => "COUNT( DISTINCT ( CASE WHEN total_tax >= 0 THEN {$table_name}.order_id END ) ) as orders_count",
+			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
 		);
 	}
 
@@ -97,11 +117,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 		}
 
-		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-			$this->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_tax_rates ON default_results.tax_rate_id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id" );
-		} else {
-			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_tax_rates ON {$table_name}.tax_rate_id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id" );
-		}
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND {$wpdb->prefix}woocommerce_order_itemmeta.meta_key = 'rate_percent'" );
 	}
 
 	/**
@@ -131,120 +148,96 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Returns the report data based on parameters supplied by the user.
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
 	 *
-	 * @param array $query_args  Query parameters.
-	 * @return stdClass|WP_Error Data.
+	 * @override ReportsDataStore::get_default_query_vars()
+	 *
+	 * @return array Query parameters.
 	 */
-	public function get_data( $query_args ) {
+	public function get_default_query_vars() {
+		$defaults            = parent::get_default_query_vars();
+		$defaults['orderby'] = 'tax_rate_id';
+		$defaults['taxes']   = array();
+
+		return $defaults;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @override ReportsDataStore::get_noncached_data()
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = self::get_db_table_name();
+		$this->initialize_queries();
 
-		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults   = array(
-			'per_page' => get_option( 'posts_per_page' ),
-			'page'     => 1,
-			'order'    => 'DESC',
-			'orderby'  => 'tax_rate_id',
-			'before'   => TimeInterval::default_before(),
-			'after'    => TimeInterval::default_after(),
-			'fields'   => '*',
-			'taxes'    => array(),
+		$data = (object) array(
+			'data'    => array(),
+			'total'   => 0,
+			'pages'   => 0,
+			'page_no' => 0,
 		);
-		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args, $defaults );
 
-		/*
-		 * We need to get the cache key here because
-		 * parent::update_intervals_sql_params() modifies $query_args.
-		 */
-		$cache_key = $this->get_cache_key( $query_args );
-		$data      = $this->get_cached_data( $cache_key );
+		$this->add_sql_query_params( $query_args );
+		$params = $this->get_limit_params( $query_args );
 
-		if ( false === $data ) {
-			$this->initialize_queries();
-
-			$data = (object) array(
-				'data'    => array(),
-				'total'   => 0,
-				'pages'   => 0,
-				'page_no' => 0,
+		if ( isset( $query_args['taxes'] ) && is_array( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
+			$total_results = count( $query_args['taxes'] );
+			$total_pages   = (int) ceil( $total_results / $params['per_page'] );
+		} else {
+			$db_records_count = (int) $wpdb->get_var(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- cache ok, DB call ok, unprepared SQL ok.
+				"SELECT COUNT(*) FROM ( {$this->subquery->get_query_statement()} ) AS tt"
 			);
 
-			$this->add_sql_query_params( $query_args );
-			$params = $this->get_limit_params( $query_args );
+			$total_results = $db_records_count;
+			$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
 
-			if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-				$total_results = count( $query_args['taxes'] );
-				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
-
-				$inner_selections = array( 'tax_rate_id', 'total_tax', 'order_tax', 'shipping_tax', 'orders_count' );
-				$outer_selections = array( 'name', 'tax_rate', 'country', 'state', 'priority' );
-
-				$selections      = $this->selected_columns( array( 'fields' => $inner_selections ) );
-				$fields          = $this->get_fields( $query_args );
-				$join_selections = $this->format_join_selections( $fields, array( 'tax_rate_id' ), $outer_selections );
-				$ids_table       = $this->get_ids_table( $query_args['taxes'], 'tax_rate_id' );
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $this->selected_columns( array( 'fields' => $inner_selections ) ) );
-				$this->add_sql_clause( 'select', $join_selections );
-				$this->add_sql_clause( 'from', '(' );
-				$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
-				$this->add_sql_clause( 'from', ") AS {$table_name}" );
-				$this->add_sql_clause(
-					'right_join',
-					"RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.tax_rate_id = {$table_name}.tax_rate_id"
-				);
-
-				$taxes_query = $this->get_query_statement();
-			} else {
-				$db_records_count = (int) $wpdb->get_var(
-					"SELECT COUNT(*) FROM (
-						{$this->subquery->get_query_statement()}
-					) AS tt"
-				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-
-				$total_results = $db_records_count;
-				$total_pages   = (int) ceil( $db_records_count / $params['per_page'] );
-
-				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-					return $data;
-				}
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-				$taxes_query = $this->subquery->get_query_statement();
-			}
-
-			$tax_data = $wpdb->get_results(
-				$taxes_query,
-				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-
-			if ( null === $tax_data ) {
+			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return $data;
 			}
-
-			$tax_data = array_map( array( $this, 'cast_numbers' ), $tax_data );
-			$data     = (object) array(
-				'data'    => $tax_data,
-				'total'   => $total_results,
-				'pages'   => $total_pages,
-				'page_no' => (int) $query_args['page'],
-			);
-
-			$this->set_cached_data( $cache_key, $data );
 		}
+
+		$this->subquery->clear_sql_clause( 'select' );
+		$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
+		$this->subquery->add_sql_clause( 'group_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name, {$wpdb->prefix}woocommerce_order_itemmeta.meta_value" );
+		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
+
+		$taxes_query = $this->subquery->get_query_statement();
+
+		$tax_data = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- cache ok, DB call ok, unprepared SQL ok.
+			$taxes_query,
+			ARRAY_A
+		);
+
+		if ( null === $tax_data ) {
+			return $data;
+		}
+
+		$tax_data = array_map( array( $this, 'cast_numbers' ), $tax_data );
+		$data     = (object) array(
+			'data'    => $tax_data,
+			'total'   => $total_results,
+			'pages'   => $total_pages,
+			'page_no' => (int) $query_args['page'],
+		);
 
 		return $data;
 	}
 
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
+	 * @override ReportsDataStore::normalize_order_by()
 	 *
 	 * @param string $order_by Sorting criterion.
 	 * @return string
@@ -253,9 +246,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		global $wpdb;
 
 		if ( 'tax_code' === $order_by ) {
-			return 'CONCAT_WS( "-", NULLIF(tax_rate_country, ""), NULLIF(tax_rate_state, ""), NULLIF(tax_rate_name, ""), NULLIF(tax_rate_priority, "") )';
+			return "{$wpdb->prefix}woocommerce_order_items.order_item_name";
 		} elseif ( 'rate' === $order_by ) {
-			return "CAST({$wpdb->prefix}woocommerce_tax_rates.tax_rate as DECIMAL(7,4))";
+			return 'tax_rate';
 		}
 
 		return $order_by;

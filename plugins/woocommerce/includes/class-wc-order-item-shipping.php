@@ -7,6 +7,8 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -144,9 +146,9 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 		$this->set_prop( 'taxes', $tax_data );
 
 		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-			$this->set_total_tax( array_sum( $tax_data['total'] ) );
+			$this->set_total_tax( NumberUtil::array_sum( $tax_data['total'] ) );
 		} else {
-			$this->set_total_tax( array_sum( array_map( 'wc_round_tax_total', $tax_data['total'] ) ) );
+			$this->set_total_tax( NumberUtil::array_sum( array_map( 'wc_round_tax_total', $tax_data['total'] ) ) );
 		}
 	}
 

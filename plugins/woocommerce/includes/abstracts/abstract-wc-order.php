@@ -134,7 +134,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * This method overwrites the base class's clone method to make it a no-op. In base class WC_Data, we are unsetting the meta_id to clone.
 	 * It seems like this was done to avoid conflicting the metadata when duplicating products. However, doing that does not seems necessary for orders.
-	 * In-fact, when we do that for orders, we lose the capability to clone orders with custom meta data by caching plugins. This is because, when we clone an order object for caching, it will clone the metadata without the ID. Unfortunately, when this cached object with nulled meta ID is retreived, WC_Data will consider it as a new meta and will insert it as a new meta-data causing duplicates.
+	 * In-fact, when we do that for orders, we lose the capability to clone orders with custom meta data by caching plugins. This is because, when we clone an order object for caching, it will clone the metadata without the ID. Unfortunately, when this cached object with nulled meta ID is retrieved, WC_Data will consider it as a new meta and will insert it as a new meta-data causing duplicates.
 	 *
 	 * Eventually, we should move away from overwriting the __clone method in base class itself, since it's easily possible to still duplicate the product without having to hook into the __clone method.
 	 *
@@ -218,7 +218,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
 				$order_cache = wc_get_container()->get( OrderCache::class );
-				$order_cache->update_if_cached( $this );
+				$order_cache->remove( $this->get_id() );
 			}
 
 			/**
@@ -489,9 +489,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_total_discount( $ex_tax = true ) {
 		if ( $ex_tax ) {
-			$total_discount = $this->get_discount_total();
+			$total_discount = (float) $this->get_discount_total();
 		} else {
-			$total_discount = $this->get_discount_total() + $this->get_discount_tax();
+			$total_discount = (float) $this->get_discount_total() + (float) $this->get_discount_tax();
 		}
 		return apply_filters( 'woocommerce_order_get_total_discount', NumberUtil::round( $total_discount, WC_ROUNDING_PRECISION ), $this );
 	}
@@ -626,7 +626,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function set_status( $new_status ) {
 		$old_status = $this->get_status();
-		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
+		$new_status = OrderUtil::remove_status_prefix( $new_status );
 
 		$status_exceptions = array( 'auto-draft', 'trash' );
 
@@ -638,7 +638,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses(), true ) && ! in_array( $old_status, $status_exceptions, true ) ) {
+			if ( $old_status && ( 'auto-draft' === $old_status || ( ! in_array( 'wc-' . $old_status, $this->get_valid_statuses(), true ) && ! in_array( $old_status, $status_exceptions, true ) ) ) ) {
 				$old_status = 'pending';
 			}
 		}
@@ -810,6 +810,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param string $type Order item type. Default null.
 	 */
 	public function remove_order_items( $type = null ) {
+
+		/**
+		 * Trigger action before removing all order line items. Allows you to track order items.
+		 *
+		 * @param  WC_Order  $this  The current order object.
+		 * @param  string $type Order item type. Default null.
+		 *
+		 * @since 7.8.0
+		 */
+		do_action( 'woocommerce_remove_order_items', $this, $type );
 		if ( ! empty( $type ) ) {
 			$this->data_store->delete_items( $this, $type );
 
@@ -822,6 +832,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data_store->delete_items( $this );
 			$this->items = array();
 		}
+		/**
+		 * Trigger action after removing all order line items.
+		 *
+		 * @param  WC_Order  $this  The current order object.
+		 * @param  string $type Order item type. Default null.
+		 *
+		 * @since 7.8.0
+		 */
+		do_action( 'woocommerce_removed_order_items', $this, $type );
 	}
 
 	/**
@@ -1346,8 +1365,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			} else {
 
 				// If we do not have a coupon ID (was it virtual? has it been deleted?) we must create a temporary coupon using what data we have stored during checkout.
-				$coupon_object = new WC_Coupon();
-				$coupon_object->set_props( (array) $coupon_item->get_meta( 'coupon_data', true ) );
+				$coupon_object = $this->get_temporary_coupon( $coupon_item );
 				$coupon_object->set_code( $coupon_code );
 				$coupon_object->set_virtual( true );
 
@@ -1356,7 +1374,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 					// If the order originally had prices including tax, remove the discount + discount tax.
 					if ( $this->get_prices_include_tax() ) {
-						$coupon_object->set_amount( $coupon_item->get_discount() + $coupon_item->get_discount_tax() );
+						$coupon_object->set_amount( (float) $coupon_item->get_discount() + (float) $coupon_item->get_discount_tax() );
 					} else {
 						$coupon_object->set_amount( $coupon_item->get_discount() );
 					}
@@ -1381,6 +1399,35 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Recalculate totals and taxes.
 		$this->calculate_totals( true );
+	}
+
+	/**
+	 * Get a coupon object populated from order line item metadata, to be used when reapplying coupons
+	 * if the original coupon no longer exists.
+	 *
+	 * @since 8.7.0
+	 *
+	 * @param WC_Order_Item_Coupon $coupon_item The order item corresponding to the coupon to reapply.
+	 * @returns WC_Coupon Coupon object populated from order line item metadata, or empty if no such metadata exists (should never happen).
+	 */
+	private function get_temporary_coupon( WC_Order_Item_Coupon $coupon_item ): WC_Coupon {
+		$coupon_object = new WC_Coupon();
+
+		// Since WooCommerce 8.7 a succinct 'coupon_info' line item meta entry is created
+		// whenever a coupon is applied to an order. Previously a more verbose 'coupon_data' was created.
+
+		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
+		if ( $coupon_info ) {
+			$coupon_object->set_short_info( $coupon_info );
+			return $coupon_object;
+		}
+
+		$coupon_data = $coupon_item->get_meta( 'coupon_data', true );
+		if ( $coupon_data ) {
+			$coupon_object->set_props( (array) $coupon_data );
+		}
+
+		return $coupon_object;
 	}
 
 	/**
@@ -1442,11 +1489,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$coupon_id = wc_get_coupon_id_by_code( $coupon_code );
 					$coupon    = new WC_Coupon( $coupon_id );
 
-					// Avoid storing used_by - it's not needed and can get large.
-					$coupon_data = $coupon->get_data();
-					unset( $coupon_data['used_by'] );
-
-					$coupon_item->add_meta_data( 'coupon_data', $coupon_data );
+					$coupon_info = $coupon->get_short_info();
+					$coupon_item->add_meta_data( 'coupon_info', $coupon_info );
 				} else {
 					$coupon_item = $this->get_item( $item_id, false );
 				}
@@ -1601,7 +1645,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$shipping_total = 0;
 
 		foreach ( $this->get_shipping_methods() as $shipping ) {
-			$shipping_total += $shipping->get_total();
+			$shipping_total += (float) $shipping->get_total();
 		}
 
 		$this->set_shipping_total( $shipping_total );
@@ -1764,8 +1808,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		return array_reduce(
 			$this->get_fees(),
 			function( $carry, $item ) {
-				return $carry + $item->get_total();
-			}
+				return $carry + (float) $item->get_total();
+			},
+			0.0
 		);
 	}
 
@@ -1796,7 +1841,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$tax_amount = wc_round_tax_total( $tax_amount );
 				}
 
-				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
+				$shipping_taxes[ $tax_rate_id ] = isset( $shipping_taxes[ $tax_rate_id ] ) ? (float) $shipping_taxes[ $tax_rate_id ] + $tax_amount : $tax_amount;
 			}
 		}
 
@@ -1874,7 +1919,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_total_tax    = 0;
 
 		$cart_subtotal = $this->get_cart_subtotal_for_order();
-		$cart_total    = $this->get_cart_total_for_order();
+		$cart_total    = (float) $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
@@ -1885,7 +1930,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Sum fee costs.
 		foreach ( $this->get_fees() as $item ) {
-			$fee_total = $item->get_total();
+			$fee_total = (float) $item->get_total();
 
 			if ( 0 > $fee_total ) {
 				$max_discount = NumberUtil::round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
@@ -1894,7 +1939,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$item->set_total( $max_discount );
 				}
 			}
-			$fees_total += $item->get_total();
+			$fees_total += (float) $item->get_total();
 		}
 
 		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
@@ -1917,7 +1962,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, wc_get_price_decimals() ) );
 		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
-		$this->set_total( NumberUtil::round( $cart_total + $fees_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
+		$this->set_total( NumberUtil::round( $cart_total + $fees_total + (float) $this->get_shipping_total() + (float) $this->get_cart_tax() + (float) $this->get_shipping_tax(), wc_get_price_decimals() ) );
 
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
@@ -1939,12 +1984,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_subtotal' ) ) && $item->get_quantity() ) {
 			if ( $inc_tax ) {
-				$subtotal = ( $item->get_subtotal() + $item->get_subtotal_tax() ) / $item->get_quantity();
+				$subtotal = ( (float) $item->get_subtotal() + (float) $item->get_subtotal_tax() ) / $item->get_quantity();
 			} else {
-				$subtotal = floatval( $item->get_subtotal() ) / $item->get_quantity();
+				$subtotal = ( (float) $item->get_subtotal() ) / $item->get_quantity();
 			}
 
-			$subtotal = $round ? number_format( (float) $subtotal, wc_get_price_decimals(), '.', '' ) : $subtotal;
+			$subtotal = $round ? NumberUtil::round( $subtotal, wc_get_price_decimals() ) : $subtotal;
 		}
 
 		return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
@@ -1963,9 +2008,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_subtotal' ) ) ) {
 			if ( $inc_tax ) {
-				$subtotal = $item->get_subtotal() + $item->get_subtotal_tax();
+				$subtotal = (float) $item->get_subtotal() + (float) $item->get_subtotal_tax();
 			} else {
-				$subtotal = $item->get_subtotal();
+				$subtotal = (float) $item->get_subtotal();
 			}
 
 			$subtotal = $round ? NumberUtil::round( $subtotal, wc_get_price_decimals() ) : $subtotal;
@@ -1987,9 +2032,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_total' ) ) && $item->get_quantity() ) {
 			if ( $inc_tax ) {
-				$total = ( $item->get_total() + $item->get_total_tax() ) / $item->get_quantity();
+				$total = ( (float) $item->get_total() + (float) $item->get_total_tax() ) / $item->get_quantity();
 			} else {
-				$total = floatval( $item->get_total() ) / $item->get_quantity();
+				$total = ( (float) $item->get_total() ) / $item->get_quantity();
 			}
 
 			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
@@ -2011,7 +2056,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( is_callable( array( $item, 'get_total' ) ) ) {
 			// Check if we need to add line tax to the line total.
-			$total = $inc_tax ? $item->get_total() + $item->get_total_tax() : $item->get_total();
+			$total = $inc_tax ? (float) $item->get_total() + (float) $item->get_total_tax() : (float) $item->get_total();
 
 			// Check if we need to round.
 			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
@@ -2094,14 +2139,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_subtotal_to_display( $compound = false, $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		$subtotal    = $this->get_cart_subtotal_for_order();
+		$subtotal    = (float) $this->get_cart_subtotal_for_order();
 
 		if ( ! $compound ) {
 
 			if ( 'incl' === $tax_display ) {
 				$subtotal_taxes = 0;
 				foreach ( $this->get_items() as $item ) {
-					$subtotal_taxes += self::round_line_tax( $item->get_subtotal_tax(), false );
+					$subtotal_taxes += self::round_line_tax( (float) $item->get_subtotal_tax(), false );
 				}
 				$subtotal += wc_round_tax_total( $subtotal_taxes );
 			}
@@ -2117,18 +2162,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			// Add Shipping Costs.
-			$subtotal += $this->get_shipping_total();
+			$subtotal += (float) $this->get_shipping_total();
 
 			// Remove non-compound taxes.
 			foreach ( $this->get_taxes() as $tax ) {
 				if ( $tax->is_compound() ) {
 					continue;
 				}
-				$subtotal = $subtotal + $tax->get_tax_total() + $tax->get_shipping_tax_total();
+				$subtotal = $subtotal + (float) $tax->get_tax_total() + (float) $tax->get_shipping_tax_total();
 			}
 
 			// Remove discounts.
-			$subtotal = $subtotal - $this->get_total_discount();
+			$subtotal = $subtotal - (float) $this->get_total_discount();
 			$subtotal = wc_price( $subtotal, array( 'currency' => $this->get_currency() ) );
 		}
 
@@ -2157,7 +2202,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			} else {
 
 				// Show shipping including tax.
-				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array( 'currency' => $this->get_currency() ) );
+				$shipping = wc_price( (float) $this->get_shipping_total() + (float) $this->get_shipping_tax(), array( 'currency' => $this->get_currency() ) );
 
 				if ( (float) $this->get_shipping_tax() > 0 && ! $this->get_prices_include_tax() ) {
 					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
@@ -2185,7 +2230,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_discount_to_display( $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
-		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display && 'excl' === get_option( 'woocommerce_tax_display_cart' ) ), array( 'currency' => $this->get_currency() ) ), $this );
+
+		/**
+		 * Filter the discount amount to display.
+		 *
+		 * @since 2.7.0.
+		 */
+		return apply_filters( 'woocommerce_order_discount_to_display', wc_price( $this->get_total_discount( 'excl' === $tax_display ), array( 'currency' => $this->get_currency() ) ), $this );
 	}
 
 	/**
@@ -2251,7 +2302,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 				$total_rows[ 'fee_' . $fee->get_id() ] = array(
 					'label' => $fee->get_name() . ':',
-					'value' => wc_price( 'excl' === $tax_display ? $fee->get_total() : $fee->get_total() + $fee->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
+					'value' => wc_price( 'excl' === $tax_display ? (float) $fee->get_total() : (float) $fee->get_total() + (float) $fee->get_total_tax(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}

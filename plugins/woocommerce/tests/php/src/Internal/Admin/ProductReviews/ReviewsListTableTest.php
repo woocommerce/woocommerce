@@ -54,9 +54,9 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_single_row() : void {
 		$post_id = $this->factory()->post->create();
-		$review = $this->factory()->comment->create_and_get(
+		$review  = $this->factory()->comment->create_and_get(
 			[
-				'comment_post_ID'  => $post_id,
+				'comment_post_ID' => $post_id,
 			]
 		);
 
@@ -89,7 +89,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $review_status  The review status.
 	 * @param string $column_name    The current column name being output.
-	 * @param string $primary_column The primary colum name.
+	 * @param string $primary_column The primary column name.
 	 * @param bool   $user_can_edit  Whether the current user can edit reviews.
 	 *
 	 * @return void
@@ -102,7 +102,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		$list_table = $this->get_reviews_list_table();
 		$reflection = new ReflectionClass( $list_table );
-		$method = $reflection->getMethod( 'handle_row_actions' );
+		$method     = $reflection->getMethod( 'handle_row_actions' );
 		$method->setAccessible( true );
 		$property = $reflection->getProperty( 'current_user_can_edit_review' );
 		$property->setAccessible( true );
@@ -217,7 +217,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_primary_column_name() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_primary_column_name' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_primary_column_name' );
 		$method->setAccessible( true );
 
 		$this->assertSame( 'comment', $method->invoke( $list_table ) );
@@ -237,7 +237,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_column_cb( bool $current_user_can_edit, string $expected_output ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_cb' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_cb' );
 		$method->setAccessible( true );
 
 		$property = ( new ReflectionClass( $list_table ) )->getProperty( 'current_user_can_edit_review' );
@@ -258,7 +258,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_column_cb() */
 	public function data_provider_test_column_cb() : array {
 		return [
-			'user has the capability' => [
+			'user has the capability'           => [
 				true,
 				'<label class="screen-reader-text" for="cb-select-123">Select review</label>
 			<input
@@ -286,7 +286,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_column_type( string $comment_type, string $expected_output ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_type' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_type' );
 		$method->setAccessible( true );
 
 		$review = $this->factory()->comment->create_and_get(
@@ -305,8 +305,8 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_column_type() */
 	public function data_provider_test_column_type() : array {
 		return [
-			'review' => [ 'review', '&#9734;&nbsp;Review' ],
-			'reply' => [ 'comment', 'Reply' ],
+			'review'           => [ 'review', '&#9734;&nbsp;Review' ],
+			'reply'            => [ 'comment', 'Reply' ],
 			'default to reply' => [ 'anything', 'Reply' ],
 		];
 	}
@@ -326,7 +326,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	public function test_column_rating( string $meta_value, string $expected_output ) : void {
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_rating' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_rating' );
 		$method->setAccessible( true );
 
 		$review = $this->factory()->comment->create_and_get();
@@ -345,12 +345,12 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_column_rating() */
 	public function data_provider_test_column_rating() : array {
 		return [
-			'no rating' => [ '', '' ],
-			'1 star' => [ '1', '<span aria-label="1 out of 5">&#9733;&#9734;&#9734;&#9734;&#9734;</span>' ],
-			'2 stars' => [ '2', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ],
-			'3 stars' => [ '3', '<span aria-label="3 out of 5">&#9733;&#9733;&#9733;&#9734;&#9734;</span>' ],
-			'4 stars' => [ '4', '<span aria-label="4 out of 5">&#9733;&#9733;&#9733;&#9733;&#9734;</span>' ],
-			'5 stars' => [ '5', '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ],
+			'no rating'               => [ '', '' ],
+			'1 star'                  => [ '1', '<span aria-label="1 out of 5">&#9733;&#9734;&#9734;&#9734;&#9734;</span>' ],
+			'2 stars'                 => [ '2', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ],
+			'3 stars'                 => [ '3', '<span aria-label="3 out of 5">&#9733;&#9733;&#9733;&#9734;&#9734;</span>' ],
+			'4 stars'                 => [ '4', '<span aria-label="4 out of 5">&#9733;&#9733;&#9733;&#9733;&#9734;</span>' ],
+			'5 stars'                 => [ '5', '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ],
 			'2.5 stars (rounds down)' => [ '2.5', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ],
 		];
 	}
@@ -379,7 +379,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$comment = $review; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_author' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_author' );
 		$method->setAccessible( true );
 
 		update_option( 'show_avatars', $show_avatars );
@@ -427,7 +427,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		global $comment;
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url' );
 		$method->setAccessible( true );
 
 		$the_comment = $this->factory()->comment->create_and_get(
@@ -444,10 +444,10 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_get_item_author_url() */
 	public function data_provider_test_get_item_author_url() : array {
 		return [
-			'No URL' => [ '', '' ],
-			'Empty URL (http)' => [ 'http://', '' ],
+			'No URL'            => [ '', '' ],
+			'Empty URL (http)'  => [ 'http://', '' ],
 			'Empty URL (https)' => [ 'https://', '' ],
-			'Valid URL' => [ 'https://example.com', 'https://example.com' ],
+			'Valid URL'         => [ 'https://example.com', 'https://example.com' ],
 		];
 	}
 
@@ -465,7 +465,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_item_author_url_for_display( string $author_url, string $author_url_for_display ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url_for_display' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_item_author_url_for_display' );
 		$method->setAccessible( true );
 
 		$this->assertSame( $author_url_for_display, $method->invokeArgs( $list_table, [ $author_url ] ) );
@@ -476,11 +476,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$very_long_url = 'https://www.example.com/this-is-a-very-long-url-that-is-longer-than-the-maximum-allowed-length-of-the-url-for-display-purposes/';
 
 		return [
-			'Empty URL' => [ '', '' ],
-			'Empty URL (http)' => [ 'http://', '' ],
+			'Empty URL'         => [ '', '' ],
+			'Empty URL (http)'  => [ 'http://', '' ],
 			'Empty URL (https)' => [ 'https://', '' ],
-			'Regular URL' => [ 'https://www.example.com', 'example.com' ],
-			'Very long URL' => [ $very_long_url, substr( str_replace( 'https://www.', '', $very_long_url ), 0, 49 ) . '&hellip;' ],
+			'Regular URL'       => [ 'https://www.example.com', 'example.com' ],
+			'Very long URL'     => [ $very_long_url, substr( str_replace( 'https://www.', '', $very_long_url ), 0, 49 ) . '&hellip;' ],
 		];
 	}
 
@@ -498,11 +498,11 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_column_date( bool $has_product, int $approved_flag ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_date' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_date' );
 		$method->setAccessible( true );
 
 		$post_id = $has_product ? $this->factory()->post->create() : 0;
-		$review = $this->factory()->comment->create_and_get(
+		$review  = $this->factory()->comment->create_and_get(
 			[
 				'comment_post_ID'  => $post_id,
 				'comment_approved' => (string) $approved_flag,
@@ -560,7 +560,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$post = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_response' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_response' );
 		$method->setAccessible( true );
 
 		ob_start();
@@ -590,7 +590,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		);
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_comment' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_comment' );
 		$method->setAccessible( true );
 
 		ob_start();
@@ -629,7 +629,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_in_reply_to_review_text() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_in_reply_to_review_text' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_in_reply_to_review_text' );
 		$method->setAccessible( true );
 
 		$review = $this->factory()->comment->create_and_get(
@@ -667,7 +667,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_bulk_actions( string $current_comment_status, array $expected_actions ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_bulk_actions' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_bulk_actions' );
 		$method->setAccessible( true );
 
 		global $comment_status;
@@ -683,7 +683,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	public function data_provider_get_bulk_actions() : Generator {
 		yield 'all statuses' => [
 			'current_comment_status' => 'all',
-			'expected_actions' => [
+			'expected_actions'       => [
 				'unapprove',
 				'approve',
 				'spam',
@@ -693,7 +693,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		yield 'approved status' => [
 			'current_comment_status' => 'approved',
-			'expected_actions' => [
+			'expected_actions'       => [
 				'unapprove',
 				'spam',
 				'trash',
@@ -702,7 +702,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		yield 'moderated status' => [
 			'current_comment_status' => 'moderated',
-			'expected_actions' => [
+			'expected_actions'       => [
 				'approve',
 				'spam',
 				'trash',
@@ -711,7 +711,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		yield 'trash status' => [
 			'current_comment_status' => 'trash',
-			'expected_actions' => [
+			'expected_actions'       => [
 				'spam',
 				'untrash',
 				'delete',
@@ -720,7 +720,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 
 		yield 'spam status' => [
 			'current_comment_status' => 'spam',
-			'expected_actions' => [
+			'expected_actions'       => [
 				'unspam',
 				'delete',
 			],
@@ -738,7 +738,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	public function test_set_review_product() : void {
 		$list_table = $this->get_reviews_list_table();
 		$reflection = new ReflectionClass( $list_table );
-		$method = $reflection->getMethod( 'set_review_product' );
+		$method     = $reflection->getMethod( 'set_review_product' );
 		$method->setAccessible( true );
 		$property = $reflection->getProperty( 'current_product_for_reviews' );
 		$property->setAccessible( true );
@@ -775,7 +775,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_set_review_status( ?string $request_status, string $expected_comment_status ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_status' );
 		$method->setAccessible( true );
 
 		$_REQUEST['comment_status'] = $request_status;
@@ -812,7 +812,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_set_review_type( ?string $review_type, ?string $expected_review_type ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_type' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'set_review_type' );
 		$method->setAccessible( true );
 
 		if ( null !== $review_type ) {
@@ -847,7 +847,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_sortable_columns() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sortable_columns' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sortable_columns' );
 		$method->setAccessible( true );
 
 		$this->assertSame(
@@ -877,7 +877,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_sort_arguments( ?string $orderby, ?string $order, array $expected_args ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sort_arguments' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_sort_arguments' );
 		$method->setAccessible( true );
 
 		if ( null !== $orderby ) {
@@ -976,7 +976,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_filter_type_arguments( ?string $review_type, ?string $comment_type ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_filter_type_arguments' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_filter_type_arguments' );
 		$method->setAccessible( true );
 
 		if ( null !== ( $review_type ) ) {
@@ -1010,7 +1010,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	public function test_get_filter_rating_arguments() : void {
 		$list_table = $this->get_reviews_list_table();
 		$reflection = new ReflectionClass( $list_table );
-		$method = $reflection->getMethod( 'get_filter_rating_arguments' );
+		$method     = $reflection->getMethod( 'get_filter_rating_arguments' );
 		$method->setAccessible( true );
 		$property = $reflection->getProperty( 'current_reviews_rating' );
 		$property->setAccessible( true );
@@ -1051,7 +1051,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	public function test_get_filter_product_arguments() : void {
 		$list_table = $this->get_reviews_list_table();
 		$reflection = new ReflectionClass( $list_table );
-		$method = $reflection->getMethod( 'get_filter_product_arguments' );
+		$method     = $reflection->getMethod( 'get_filter_product_arguments' );
 		$method->setAccessible( true );
 		$property = $reflection->getProperty( 'current_product_for_reviews' );
 		$property->setAccessible( true );
@@ -1084,7 +1084,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_arguments' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_arguments' );
 		$method->setAccessible( true );
 
 		$this->assertSame( $expected_args, $method->invoke( $list_table ) );
@@ -1116,7 +1116,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$_REQUEST['s'] = $search_value;
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_search_arguments' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_search_arguments' );
 		$method->setAccessible( true );
 
 		$this->assertSame( $expected_args, $method->invoke( $list_table ) );
@@ -1180,10 +1180,10 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$comment_status = $status; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'extra_tablenav' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'extra_tablenav' );
 		$method->setAccessible( true );
 
-		$review = $this->factory()->comment->create_and_get();
+		$review   = $this->factory()->comment->create_and_get();
 		$property = ( new ReflectionClass( $list_table ) )->getProperty( 'items' );
 		$property->setAccessible( true );
 		$property->setValue( $list_table, $has_items ? [ $review ] : [] );
@@ -1214,14 +1214,14 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	/** @see test_extra_tablenav() */
 	public function data_provider_test_extra_tablenav() : Generator {
 		yield 'no items top' => [
-			'position' => 'top',
-			'has_items' => false,
+			'position'                  => 'top',
+			'has_items'                 => false,
 			'current_user_can_moderate' => true,
-			'status' => '',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'status'                    => '',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [],
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
@@ -1229,14 +1229,14 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 
 		yield 'no items bottom' => [
-			'position' => 'bottom',
-			'has_items' => false,
+			'position'                  => 'bottom',
+			'has_items'                 => false,
 			'current_user_can_moderate' => true,
-			'status' => '',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'status'                    => '',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [],
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
@@ -1244,16 +1244,16 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 
 		yield 'unfiltered with items top' => [
-			'position' => 'top',
-			'has_items' => true,
+			'position'                  => 'top',
+			'has_items'                 => true,
 			'current_user_can_moderate' => true,
-			'status' => '',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [
+			'status'                    => '',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 			],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
@@ -1261,14 +1261,14 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 
 		yield 'unfiltered with items bottom' => [
-			'position' => 'bottom',
-			'has_items' => true,
+			'position'                  => 'bottom',
+			'has_items'                 => true,
 			'current_user_can_moderate' => true,
-			'status' => '',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'status'                    => '',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [],
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
@@ -1277,82 +1277,82 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 
 		yield 'spam with items top' => [
-			'position' => 'top',
-			'has_items' => true,
+			'position'                  => 'top',
+			'has_items'                 => true,
 			'current_user_can_moderate' => true,
-			'status' => 'spam',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [
+			'status'                    => 'spam',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Spam"',
 			],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [],
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [],
 		];
 
 		yield 'spam with items bottom' => [
-			'position' => 'bottom',
-			'has_items' => true,
+			'position'                  => 'bottom',
+			'has_items'                 => true,
 			'current_user_can_moderate' => true,
-			'status' => 'spam',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [
+			'status'                    => 'spam',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Spam"',
 			],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 			],
 		];
 
 		yield 'trash with items top' => [
-			'position' => 'top',
-			'has_items' => true,
+			'position'                  => 'top',
+			'has_items'                 => true,
 			'current_user_can_moderate' => true,
-			'status' => 'trash',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [
+			'status'                    => 'trash',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Trash"',
 			],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [],
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [],
 		];
 
 		yield 'trash with items bottom' => [
-			'position' => 'bottom',
-			'has_items' => true,
+			'position'                  => 'bottom',
+			'has_items'                 => true,
 			'current_user_can_moderate' => true,
-			'status' => 'trash',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [
+			'status'                    => 'trash',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply" value="Empty Trash"',
 			],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 			],
 		];
 
 		yield 'trash with items top and user cannot moderate' => [
-			'position' => 'top',
-			'has_items' => true,
+			'position'                  => 'top',
+			'has_items'                 => true,
 			'current_user_can_moderate' => false,
-			'status' => 'trash',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [
+			'status'                    => 'trash',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 			],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
 				'<input type="submit" name="delete_all" id="delete_all" class="button apply"',
@@ -1360,14 +1360,14 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		];
 
 		yield 'trash with items bottom and user cannot moderate' => [
-			'position' => 'bottom',
-			'has_items' => true,
+			'position'                  => 'bottom',
+			'has_items'                 => true,
 			'current_user_can_moderate' => false,
-			'status' => 'trash',
-			'expected_start' => '<div class="alignleft actions">',
-			'expected_elements' => [],
-			'expected_end' => '</div>',
-			'not_expected_elements' => [
+			'status'                    => 'trash',
+			'expected_start'            => '<div class="alignleft actions">',
+			'expected_elements'         => [],
+			'expected_end'              => '</div>',
+			'not_expected_elements'     => [
 				'<input type="submit" name="filter_action" id="post-query-submit" class="button" value="Filter"',
 				'<input type="hidden" id="_destroy_nonce" name="_destroy_nonce"',
 				'<input type="hidden" name="_wp_http_referer"',
@@ -1388,7 +1388,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_review_type_dropdown( string $chosen_type ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_type_dropdown' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'review_type_dropdown' );
 		$method->setAccessible( true );
 
 		ob_start();
@@ -1428,7 +1428,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_review_rating_dropdown( int $chosen_rating ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'review_rating_dropdown' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'review_rating_dropdown' );
 		$method->setAccessible( true );
 
 		ob_start();
@@ -1462,10 +1462,10 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_column_default() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'column_default' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_default' );
 		$method->setAccessible( true );
 
-		$review = $this->factory()->comment->create_and_get();
+		$review   = $this->factory()->comment->create_and_get();
 		$callback = function( $review ) {
 			echo 'Custom content for "custom_column" for ID ' . esc_html( $review->comment_ID );
 		};
@@ -1491,10 +1491,10 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_filter_column_output() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'filter_column_output' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'filter_column_output' );
 		$method->setAccessible( true );
 
-		$review = $this->factory()->comment->create_and_get();
+		$review   = $this->factory()->comment->create_and_get();
 		$callback = function( $content, $review ) {
 			return 'Additional content to "' . $content . '" for test column belonging to review with ID: ' . esc_html( $review->comment_ID );
 		};
@@ -1518,7 +1518,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_product_search() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'product_search' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'product_search' );
 		$method->setAccessible( true );
 
 		$product = WC_Helper_Product::create_simple_product( false );
@@ -1543,7 +1543,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_status_filters() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_filters' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_status_filters' );
 		$method->setAccessible( true );
 
 		$this->assertSame(
@@ -1613,7 +1613,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_view_url( string $comment_type, int $post_id, string $expected ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_view_url' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_view_url' );
 		$method->setAccessible( true );
 
 		$this->assertSame(
@@ -1627,25 +1627,25 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		yield 'empty type, empty post ID' => [
 			'comment_type' => '',
 			'post_id'      => 0,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews',
 		];
 
 		yield 'review type, empty post ID' => [
 			'comment_type' => 'review',
 			'post_id'      => 0,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=review',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=review',
 		];
 
 		yield 'reply type, with post ID' => [
 			'comment_type' => 'reply',
 			'post_id'      => 123,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=reply&p=123',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews&comment_type=reply&p=123',
 		];
 
 		yield 'all type, with post ID' => [
 			'comment_type' => 'all',
 			'post_id'      => 123,
-			'expected'     => 'http://example.org/wp-admin/edit.php?post_type=product&page=product-reviews&p=123',
+			'expected'     => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews&p=123',
 		];
 	}
 
@@ -1663,7 +1663,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_convert_status_string_to_comment_approved( string $status, string $expected_conversion ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'convert_status_to_query_value' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'convert_status_to_query_value' );
 		$method->setAccessible( true );
 
 		$this->assertSame( $expected_conversion, $method->invoke( $list_table, $status ) );
@@ -1697,7 +1697,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$this->factory()->comment->create_many(
 			3,
 			[
-				'comment_post_ID'  => $post_id,
+				'comment_post_ID' => $post_id,
 			]
 		);
 
@@ -1738,7 +1738,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		);
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_review_count' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_review_count' );
 		$method->setAccessible( true );
 
 		// Should have 3 moderated.
@@ -1770,16 +1770,16 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$comment_status = 'all'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_views' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_views' );
 		$method->setAccessible( true );
 
 		$this->assertSame(
 			[
-				'all'       => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
-				'moderated' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
-				'approved'  => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
-				'spam'      => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
-				'trash'     => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
+				'all'       => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=all" class="current" aria-current="page">All <span class="count">(<span class="all-count">0</span>)</span></a>',
+				'moderated' => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=moderated">Pending <span class="count">(<span class="pending-count">0</span>)</span></a>',
+				'approved'  => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=approved">Approved <span class="count">(<span class="approved-count">0</span>)</span></a>',
+				'spam'      => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=spam">Spam <span class="count">(<span class="spam-count">0</span>)</span></a>',
+				'trash'     => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;comment_type=other&#038;comment_status=trash">Trash <span class="count">(<span class="trash-count">0</span>)</span></a>',
 			],
 			$method->invoke( $list_table )
 		);
@@ -1799,7 +1799,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_offset_arguments( $request_start_value, ?int $current_page_number, array $expected_args ) : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_offset_arguments' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_offset_arguments' );
 		$method->setAccessible( true );
 
 		if ( ! is_null( $request_start_value ) ) {
@@ -1831,7 +1831,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_total_comments_arguments() : void {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_total_comments_arguments' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_total_comments_arguments' );
 		$method->setAccessible( true );
 
 		$default_query_args = [
@@ -1863,7 +1863,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_per_page() {
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'get_per_page' );
 		$method->setAccessible( true );
 
 		$this->assertSame( 20, $method->invoke( $list_table ) );
@@ -1907,7 +1907,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 		$post = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$list_table = $this->get_reviews_list_table();
-		$method = ( new ReflectionClass( $list_table ) )->getMethod( 'comments_bubble' );
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'comments_bubble' );
 		$method->setAccessible( true );
 
 		ob_start();
@@ -1921,37 +1921,37 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	public function provider_comments_bubble(): Generator {
 		yield 'no reviews' => [
 			'approved_review_count' => 0,
-			'pending_review_count' => 0,
-			'product_is_trashed' => false,
-			'expected_html' => '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">No reviews</span><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No reviews</span></span>',
+			'pending_review_count'  => 0,
+			'product_is_trashed'    => false,
+			'expected_html'         => '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">No reviews</span><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No reviews</span></span>',
 		];
 
 		yield 'approved reviews only' => [
 			'approved_review_count' => 2,
-			'pending_review_count' => 0,
-			'product_is_trashed' => false,
-			'expected_html' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 reviews</span></a><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No pending reviews</span></span>',
+			'pending_review_count'  => 0,
+			'product_is_trashed'    => false,
+			'expected_html'         => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 reviews</span></a><span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">0</span><span class="screen-reader-text">No pending reviews</span></span>',
 		];
 
 		yield 'approved and pending reviews' => [
 			'approved_review_count' => 1,
-			'pending_review_count' => 1,
-			'product_is_trashed' => false,
-			'expected_html' => '<a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">1</span><span class="screen-reader-text">1 approved review</span></a><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
+			'pending_review_count'  => 1,
+			'product_is_trashed'    => false,
+			'expected_html'         => '<a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=approved" class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">1</span><span class="screen-reader-text">1 approved review</span></a><a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
 		];
 
 		yield 'pending reviews only' => [
 			'approved_review_count' => 0,
-			'pending_review_count' => 2,
-			'product_is_trashed' => false,
-			'expected_html' => '<span class="post-com-count post-com-count-no-comments"><span class="comment-count comment-count-no-comments" aria-hidden="true">0</span><span class="screen-reader-text">No approved reviews</span></span><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">2</span><span class="screen-reader-text">2 pending reviews</span></a>',
+			'pending_review_count'  => 2,
+			'product_is_trashed'    => false,
+			'expected_html'         => '<span class="post-com-count post-com-count-no-comments"><span class="comment-count comment-count-no-comments" aria-hidden="true">0</span><span class="screen-reader-text">No approved reviews</span></span><a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">2</span><span class="screen-reader-text">2 pending reviews</span></a>',
 		];
 
 		yield 'approved and pending reviews, but product is trashed' => [
 			'approved_review_count' => 2,
-			'pending_review_count' => 1,
-			'product_is_trashed' => true,
-			'expected_html' => '<span class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 approved reviews</span></span><a href="http://example.org/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
+			'pending_review_count'  => 1,
+			'product_is_trashed'    => true,
+			'expected_html'         => '<span class="post-com-count post-com-count-approved"><span class="comment-count-approved" aria-hidden="true">2</span><span class="screen-reader-text">2 approved reviews</span></span><a href="http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&#038;page=product-reviews&#038;product_id=PRODUCT_ID&#038;comment_status=moderated" class="post-com-count post-com-count-pending"><span class="comment-count-pending" aria-hidden="true">1</span><span class="screen-reader-text">1 pending review</span></a>',
 		];
 	}
 

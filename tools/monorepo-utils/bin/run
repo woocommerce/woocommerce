@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+const fs = require( 'node:fs' );
+const path = require( 'node:path' );
+
+// We need to make sure that the tool has been built before we can use it.
+const runFile = path.join( __dirname, '..', 'dist', 'index.js' );
+if ( ! fs.existsSync( runFile ) ) {
+    console.error( 'The "monorepo-utils" tool has not been built.' );
+    process.exit( 1 );
+}
+
+// Execute the tool now that we've confirmed it exists.
+require( '../dist/index.js' );

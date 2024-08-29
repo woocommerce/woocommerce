@@ -98,7 +98,7 @@ export const advancedFilters = applyFilters(
 	{
 		filters: {},
 		title: _x(
-			'Revenue Matches {{select /}} Filters',
+			'Revenue Matches <select/> Filters',
 			'A sentence describing filters for Revenue. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
 			'woocommerce'
 		),

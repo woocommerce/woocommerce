@@ -1,0 +1,14 @@
+.woocommerce-remove-confirmation-modal {
+	max-width: 650px;
+
+	&__content {
+		padding-bottom: $grid-unit-40;
+	}
+
+	&__buttons {
+		display: flex;
+		flex-direction: row;
+		gap: $grid-unit;
+		justify-content: flex-end;
+	}
+}

@@ -7,10 +7,17 @@ import { Schema } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ProductCategory } from '../product-categories/types';
+import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
 
-export type ProductType = 'simple' | 'grouped' | 'external' | 'variable';
+export type ProductType =
+	| 'simple'
+	| 'grouped'
+	| 'external'
+	| 'variable'
+	| 'variation';
 export type ProductStatus =
+	| 'auto-draft'
 	| 'deleted'
 	| 'draft'
 	| 'pending'
@@ -26,13 +33,32 @@ export type ProductDownload = {
 	file: string;
 };
 
-export type ProductAttribute = {
+export type ProductProductAttribute = {
 	id: number;
 	name: string;
+	slug: string;
 	position: number;
 	visible: boolean;
 	variation: boolean;
 	options: string[];
+};
+
+/**
+ * Product - Default attributes properties
+ */
+export type ProductDefaultAttribute = {
+	/**
+	 * Attribute ID.
+	 */
+	id: number;
+	/**
+	 * Attribute name.
+	 */
+	name: string;
+	/**
+	 * Selected attribute term name.
+	 */
+	option: string;
 };
 
 export type ProductDimensions = {
@@ -41,23 +67,31 @@ export type ProductDimensions = {
 	length: string;
 };
 
+export type ProductCatalogVisibility =
+	| 'visible'
+	| 'catalog'
+	| 'search'
+	| 'hidden';
+
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Schema.Post,
 	'status' | 'categories'
 > & {
-	attributes: ProductAttribute[];
+	attributes: ProductProductAttribute[];
 	average_rating: string;
 	backordered: boolean;
 	backorders: 'no' | 'notify' | 'yes';
 	backorders_allowed: boolean;
 	button_text: string;
 	categories: Pick< ProductCategory, 'id' | 'name' | 'slug' >[];
+	catalog_visibility: ProductCatalogVisibility;
 	date_created: string;
 	date_created_gmt: string;
 	date_modified: string;
 	date_modified_gmt: string;
 	date_on_sale_from_gmt: string | null;
 	date_on_sale_to_gmt: string | null;
+	default_attributes: ProductDefaultAttribute[];
 	description: string;
 	dimensions: ProductDimensions;
 	download_expiry: number;
@@ -69,6 +103,11 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	generated_slug: string;
 	id: number;
 	low_stock_amount: number;
+	meta_data: {
+		id?: number;
+		key: string;
+		value?: string;
+	}[];
 	manage_stock: boolean;
 	menu_order: number;
 	name: string;
@@ -93,6 +132,7 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	status: Status;
 	stock_quantity: number;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+	tags: Pick< ProductTag, 'id' | 'name' >[];
 	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
 	tax_status: 'taxable' | 'shipping' | 'none';
 	total_sales: number;
@@ -127,7 +167,7 @@ export const productReadOnlyProperties = [
 	'variations',
 ] as const;
 
-export type ReadOnlyProperties = typeof productReadOnlyProperties[ number ];
+export type ReadOnlyProperties = ( typeof productReadOnlyProperties )[ number ];
 
 export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
@@ -135,7 +175,7 @@ export type ProductQuery<
 	Status = ProductStatus,
 	Type = ProductType
 > = BaseQueryParams< keyof Product > & {
-	orderby:
+	orderby?:
 		| 'date'
 		| 'id'
 		| 'include'
@@ -144,19 +184,31 @@ export type ProductQuery<
 		| 'price'
 		| 'popularity'
 		| 'rating';
-	slug: string;
-	status: Status;
-	type: Type;
-	sku: string;
-	featured: boolean;
-	category: string;
-	tag: string;
-	shipping_class: string;
-	attribute: string;
-	attribute_term: string;
-	tax_class: 'standard' | 'reduced-rate' | 'zero-rate';
-	on_sale: boolean;
-	min_price: string;
-	max_price: string;
-	stock_status: 'instock' | 'outofstock' | 'onbackorder';
+	slug?: string;
+	status?: Status;
+	type?: Type;
+	sku?: string;
+	featured?: boolean;
+	category?: string;
+	tag?: string;
+	shipping_class?: string;
+	attribute?: string;
+	attribute_term?: string;
+	tax_class?: 'standard' | 'reduced-rate' | 'zero-rate';
+	on_sale?: boolean;
+	min_price?: string;
+	max_price?: string;
+	stock_status?: 'instock' | 'outofstock' | 'onbackorder';
+};
+
+export type SuggestedProductOptionsKey = string;
+
+/*
+ * Selector types
+ */
+export type GetSuggestedProductsOptions = {
+	categories?: number[];
+	tags?: number[];
+	attributes?: number[];
+	limit?: number;
 };

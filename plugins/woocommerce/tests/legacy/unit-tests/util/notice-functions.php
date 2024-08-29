@@ -135,7 +135,11 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
 		wc_add_notice( 'One True Notice', 'notice' );
 
-		$this->assertEquals( $expected_return, wc_print_notices( true ) );
+		$actual_return = wc_print_notices( true );
+		$normalized_actual_return = preg_replace('/\s+/', '', $actual_return);
+		$normalized_expected_return = preg_replace('/\s+/', '', $expected_return);
+
+		$this->assertEquals($normalized_expected_return, $normalized_actual_return);
 	}
 
 	/**

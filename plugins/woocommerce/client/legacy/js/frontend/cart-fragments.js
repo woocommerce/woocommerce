@@ -38,9 +38,9 @@ jQuery( function( $ ) {
 	var $fragment_refresh = {
 		url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_refreshed_fragments' ),
 		type: 'POST',
-		data: new URLSearchParams( {
+		data: {
 			time: new Date().getTime()
-		} ).toString(),
+		},
 		timeout: wc_cart_fragments_params.request_timeout,
 		success: function( data ) {
 			if ( data && data.fragments ) {
@@ -68,25 +68,7 @@ jQuery( function( $ ) {
 
 	/* Named callback for refreshing cart fragment */
 	function refresh_cart_fragment() {
-		const controller = new AbortController();
-		const timeoutId = setTimeout( () => controller.abort(), $fragment_refresh.timeout );
-
-		window.fetch( $fragment_refresh.url, {
-			method: $fragment_refresh.type,
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: $fragment_refresh.data,
-			signal: controller.signal
-		} )
-			.then( response => {
-				clearTimeout( timeoutId );
-
-				if ( !response.ok ) {
-					throw new Error( response.statusText );
-				}
-				return response.json();
-			} )
-			.then( $fragment_refresh.success )
-			.catch( error => $fragment_refresh.error() );
+		$.ajax( $fragment_refresh );
 	}
 
 	/* Cart Handling */

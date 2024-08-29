@@ -29,18 +29,18 @@ class WC_Product_Factory {
 			return false;
 		}
 
-		$product_type = $this->get_product_type( $product_id );
+		$product_type = self::get_product_type( $product_id );
 
 		// Backwards compatibility.
 		if ( ! empty( $deprecated ) ) {
 			wc_deprecated_argument( 'args', '3.0', 'Passing args to the product factory is deprecated. If you need to force a type, construct the product class directly.' );
 
 			if ( isset( $deprecated['product_type'] ) ) {
-				$product_type = $this->get_classname_from_product_type( $deprecated['product_type'] );
+				$product_type = self::get_classname_from_product_type( $deprecated['product_type'] );
 			}
 		}
 
-		$classname = $this->get_product_classname( $product_id, $product_type );
+		$classname = self::get_product_classname( $product_id, $product_type );
 
 		try {
 			return new $classname( $product_id, $deprecated );

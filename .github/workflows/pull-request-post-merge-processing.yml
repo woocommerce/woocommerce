@@ -38,10 +38,31 @@ jobs:
               with:
                   php-version: '7.4'
             - name: 'Run the script to assign a milestone'
-              if: |
-                  !github.event.pull_request.milestone &&
-                  github.event.pull_request.base.ref == 'trunk'
+              if: github.event.pull_request.base.ref == 'trunk'
               run: php assign-milestone-to-merged-pr.php
               env:
                   PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: 'Add the label for PR analysis'
+              if: |
+                github.event.pull_request.base.ref == 'trunk' &&
+                ! contains(github.event.pull_request.labels.*.name, 'status: analysis complete')
+              uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                labels: 'needs: analysis'
+            - uses: actions/checkout@v3
+              with:
+                sparse-checkout: |
+                  .github/actions/pr-scrub-notify-slack
+                ref: trunk
+            - name: 'Trigger PR scrub'
+              if: |
+                github.event.pull_request.base.ref == 'trunk' &&
+                ! contains(github.event.pull_request.labels.*.name, 'needs: analysis') &&
+                ! contains(github.event.pull_request.labels.*.name, 'status: analysis complete')
+              uses: ./.github/actions/pr-scrub-notify-slack
+              with:
+                TEST_ASSISTANCE_BOT_TOKEN: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
+                WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL: ${{ secrets.WOO_PR_TESTING_ANALYSIS_SLACK_CHANNEL }}
+                WOO_PR_TESTING_ANALYSIS_TEAM_ID: ${{ secrets.WOO_PR_TESTING_ANALYSIS_TEAM_ID }}

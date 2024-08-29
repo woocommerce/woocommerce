@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { chevronDown, chevronUp } from '@wordpress/icons';
 import classNames from 'classnames';
 import { createElement, forwardRef } from 'react';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -23,14 +24,27 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 		treeItemProps,
 		headingProps,
 		treeProps,
-		expander: { isExpanded, onToggleExpand },
 		selection,
-		highlighter: { isHighlighted },
 		getLabel,
 	} = useTreeItem( {
 		...props,
 		ref,
 	} );
+
+	function handleKeyDown( event: React.KeyboardEvent< HTMLElement > ) {
+		if ( event.key === 'Escape' && props.onEscape ) {
+			event.preventDefault();
+			props.onEscape();
+		} else if ( event.key === 'ArrowLeft' ) {
+			if ( item.index !== undefined ) {
+				props.onExpand?.( item.index, false );
+			}
+		} else if ( event.key === 'ArrowRight' ) {
+			if ( item.index !== undefined ) {
+				props.onExpand?.( item.index, true );
+			}
+		}
+	}
 
 	return (
 		<li
@@ -40,7 +54,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				'experimental-woocommerce-tree-item',
 				{
 					'experimental-woocommerce-tree-item--highlighted':
-						isHighlighted,
+						props.isHighlighted,
 				}
 			) }
 		>
@@ -48,7 +62,7 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				{ ...headingProps }
 				className="experimental-woocommerce-tree-item__heading"
 			>
-				{ /* eslint-disable-next-line jsx-a11y/label-has-for */ }
+				{ /* eslint-disable-next-line jsx-a11y/label-has-for, jsx-a11y/label-has-associated-control */ }
 				<label className="experimental-woocommerce-tree-item__label">
 					{ selection.multiple ? (
 						<CheckboxControl
@@ -57,35 +71,48 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 							}
 							checked={ selection.checkedStatus === 'checked' }
 							onChange={ selection.onSelectChild }
+							onKeyDown={ handleKeyDown }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore __nextHasNoMarginBottom is a valid prop
+							__nextHasNoMarginBottom={ true }
 						/>
 					) : (
 						<input
-							type="radio"
+							type="checkbox"
+							className="experimental-woocommerce-tree-item__checkbox"
 							checked={ selection.checkedStatus === 'checked' }
-							className="components-radio-control__input"
 							onChange={ ( event ) =>
-								selection.onSelectChild(
-									event.currentTarget.checked
-								)
+								selection.onSelectChild( event.target.checked )
 							}
+							onKeyDown={ handleKeyDown }
 						/>
 					) }
 
 					{ typeof getLabel === 'function' ? (
 						getLabel( item )
 					) : (
-						<span>{ item.data.label }</span>
+						<span>{ decodeEntities( item.data.label ) }</span>
 					) }
 				</label>
 
 				{ Boolean( item.children?.length ) && (
 					<div className="experimental-woocommerce-tree-item__expander">
 						<Button
-							icon={ isExpanded ? chevronUp : chevronDown }
-							onClick={ onToggleExpand }
+							icon={
+								item.data.isExpanded ? chevronUp : chevronDown
+							}
+							onClick={ () => {
+								if ( item.index !== undefined ) {
+									props.onExpand?.(
+										item.index,
+										! item.data.isExpanded
+									);
+								}
+							} }
+							onKeyDown={ handleKeyDown }
 							className="experimental-woocommerce-tree-item__expander"
 							aria-label={
-								isExpanded
+								item.data.isExpanded
 									? __( 'Collapse', 'woocommerce' )
 									: __( 'Expand', 'woocommerce' )
 							}
@@ -94,8 +121,13 @@ export const TreeItem = forwardRef( function ForwardedTreeItem(
 				) }
 			</div>
 
-			{ Boolean( item.children.length ) && isExpanded && (
-				<Tree { ...treeProps } />
+			{ Boolean( item.children.length ) && item.data.isExpanded && (
+				<Tree
+					{ ...treeProps }
+					highlightedIndex={ props.highlightedIndex }
+					onExpand={ props.onExpand }
+					onEscape={ props.onEscape }
+				/>
 			) }
 		</li>
 	);

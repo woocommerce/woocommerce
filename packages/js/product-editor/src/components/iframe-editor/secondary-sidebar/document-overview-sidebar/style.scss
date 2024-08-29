@@ -1,0 +1,44 @@
+.woocommerce-iframe-editor__document-overview-sidebar {
+	position: relative;
+	width: 350px;
+	height: 100%;
+	border-right: 1px solid $gray-400;
+	background: $studio-white;
+	@media only screen and (max-width: $break-medium) {
+		width: 100%;
+		position: absolute;
+		z-index: 100;
+	}
+
+	&-close-button {
+		position: absolute;
+		right: calc($grid-unit - 2px);
+		top: calc($grid-unit - 2px);
+	}
+
+	&-tab-panel {
+		height: 100%;
+
+		.components-tab-panel__tabs {
+			padding-right: $grid-unit-60;
+			border-bottom: 1px solid $gray-400;
+		}
+
+		.components-tab-panel__tab-content {
+			display: flex;
+			flex-direction: column;
+			height: calc(100% - $grid-unit-60);
+			.block-editor-list-view-tree {
+				margin: 0;
+				width: 100%;
+			}
+		}
+	}
+
+	&-tab-content {
+		height: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+		padding: $grid-unit calc($grid-unit - 2px);
+	}
+}

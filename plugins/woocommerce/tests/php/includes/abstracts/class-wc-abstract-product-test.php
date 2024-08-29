@@ -2,6 +2,7 @@
 
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
  * Tests relating to the WC_Abstract_Product class.
  */
@@ -113,8 +114,8 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_addition_of_invalid_product_downloads_by_shop_manager() {
 		wp_set_current_user( $this->shop_manager_user );
-		$downloads        = $this->product->get_downloads();
-		$downloads[]      = array(
+		$downloads   = $this->product->get_downloads();
+		$downloads[] = array(
 			'id'   => '',
 			'file' => 'https://also.not.yet.added/file.pdf',
 			'name' => 'Another file',
@@ -162,5 +163,62 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 			$this->product->get_downloads(),
 			'If a shop manager attempts to change an existing downloadable file to a valid path (that is covered by an approved directory rule) that is okay.'
 		);
+	}
+
+	/**
+	 * @testDox By default, product is not on sale.
+	 */
+	public function test_on_sale() {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertFalse( $product->is_on_sale() );
+		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is on sale when sale price is set and less than regular price, even without a sale schedule.
+	 */
+	public function test_on_sale_sale_price_is_set() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$this->assertTrue( $product->is_on_sale() );
+		$this->assertEquals( 5, $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is on sale when schedule is set and current date is within schedule.
+	 */
+	public function test_on_sale_scheduled() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ) );
+		$product->save();
+
+		$this->assertTrue( $product->is_on_sale() );
+		$this->assertEquals( 5, $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is not on sale when past schedule is set.
+	 */
+	public function test_on_sale_past_schedule() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS * 2 ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ) );
+		$product->save();
+
+		$this->assertFalse( $product->is_on_sale() );
+		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
+	}
+
+	/**
+	 * @testDox Product is not on sale when future schedule is set.
+	 */
+	public function test_on_sale_future_schedule() {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS * 2 ) );
+		$product->save();
+
+		$this->assertFalse( $product->is_on_sale() );
+		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
 	}
 }

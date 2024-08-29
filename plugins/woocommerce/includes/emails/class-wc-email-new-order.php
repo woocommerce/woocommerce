@@ -89,6 +89,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 				$order = wc_get_order( $order_id );
 			}
 
+			$email_already_sent = false;
 			if ( is_a( $order, 'WC_Order' ) ) {
 				$this->object                         = $order;
 				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
@@ -108,10 +109,11 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
-				$order->update_meta_data( '_new_order_email_sent', 'true' );
-				$order->save();
+				$email_sent_successfully = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+				if ( $email_sent_successfully ) {
+					$order->update_meta_data( '_new_order_email_sent', 'true' );
+					$order->save();
+				}
 			}
 
 			$this->restore_locale();

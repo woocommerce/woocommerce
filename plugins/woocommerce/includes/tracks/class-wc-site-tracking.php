@@ -64,9 +64,10 @@ class WC_Site_Tracking {
 	 * Adds the tracking function to the admin footer.
 	 */
 	public static function add_tracking_function() {
-		$user           = wp_get_current_user();
-		$server_details = WC_Tracks::get_server_details();
-		$blog_details   = WC_Tracks::get_blog_details( $user->ID );
+		$user            = wp_get_current_user();
+		$server_details  = WC_Tracks::get_server_details();
+		$blog_details    = WC_Tracks::get_blog_details( $user->ID );
+		$tracks_identity = WC_Tracks_Client::get_identity( $user->ID );
 
 		$client_tracking_properties = array_merge( $server_details, $blog_details );
 		/**
@@ -81,6 +82,11 @@ class WC_Site_Tracking {
 		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.isEnabled = <?php echo self::is_tracking_enabled() ? 'true' : 'false'; ?>;
+			window._tkq = window._tkq || [];
+
+			<?php if ( 'anon' !== $tracks_identity['_ut'] ) { ?>
+			window._tkq.push( [ 'identifyUser', '<?php echo esc_js( $tracks_identity['_ui'] ); ?>' ] );
+			<?php } ?>
 			window.wcTracks.validateEvent = function( eventName, props = {} ) {
 				let isValid = true;
 				if ( ! <?php echo esc_js( WC_Tracks_Event::EVENT_NAME_REGEX ); ?>.test( eventName ) ) {
@@ -124,7 +130,6 @@ class WC_Site_Tracking {
 				if ( ! window.wcTracks.validateEvent( eventName, eventProperties ) ) {
 					return;
 				}
-				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
 		</script>
@@ -204,6 +209,7 @@ class WC_Site_Tracking {
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-order-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-coupon-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-theme-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-product-collection-block-tracking.php';
 
 		$tracking_classes = array(
 			'WC_Extensions_Tracking',
@@ -216,6 +222,7 @@ class WC_Site_Tracking {
 			'WC_Order_Tracking',
 			'WC_Coupon_Tracking',
 			'WC_Theme_Tracking',
+			'WC_Product_Collection_Block_Tracking',
 		);
 
 		foreach ( $tracking_classes as $tracking_class ) {
@@ -228,5 +235,26 @@ class WC_Site_Tracking {
 		}
 	}
 
+	/**
+	 * Sets a cookie for tracking purposes, but only if tracking is enabled/allowed.
+	 *
+	 * @internal
+	 * @since 9.2.0
+	 *
+	 * @param string $cookie_key   The key of the cookie.
+	 * @param string $cookie_value The value of the cookie.
+	 * @param int    $expire       Expiry of the cookie.
+	 * @param bool   $secure       Whether the cookie should be served only over https.
+	 * @param bool   $http_only    Whether the cookie is only accessible over HTTP.
+	 *
+	 * @return bool If setting the cookie was attempted (will be false if tracking is not allowed).
+	 */
+	public static function set_tracking_cookie( string $cookie_key, string $cookie_value, int $expire = 0, bool $secure = false, bool $http_only = false ): bool {
+		if ( self::is_tracking_enabled() ) {
+			wc_setcookie( $cookie_key, $cookie_value, $expire, $secure, $http_only );
+			return true;
+		}
 
+		return false;
+	}
 }

@@ -60,7 +60,9 @@ class ShippingLabelBanner {
 			$incompatible_plugins = class_exists( '\WC_Shipping_Fedex_Init' ) ||
 				class_exists( '\WC_Shipping_UPS_Init' ) ||
 				class_exists( '\WC_Integration_ShippingEasy' ) ||
-				class_exists( '\WC_ShipStation_Integration' );
+				class_exists( '\WC_ShipStation_Integration' ) ||
+				class_exists( '\Automattic\WCShipping\Loader' ) ||
+				class_exists( '\Automattic\WCTax\Loader' );
 
 			$this->shipping_label_banner_display_rules =
 				new ShippingLabelBannerDisplayRules(
@@ -128,14 +130,7 @@ class ShippingLabelBanner {
 	 * @param string $hook current page hook.
 	 */
 	public function add_print_shipping_label_script( $hook ) {
-		$rtl = is_rtl() ? '.rtl' : '';
-		wp_enqueue_style(
-			'print-shipping-label-banner-style',
-			WCAdminAssets::get_url( "print-shipping-label-banner/style{$rtl}", 'css' ),
-			array( 'wp-components' ),
-			WCAdminAssets::get_file_version( 'css' )
-		);
-
+		WCAdminAssets::register_style( 'print-shipping-label-banner', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'print-shipping-label-banner', true );
 
 		$payload = array(

@@ -6,6 +6,9 @@
  * @since   3.7.0
  */
 
+use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
+use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -38,7 +41,6 @@ class WC_WCCOM_Site {
 	protected static function includes() {
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer-requirements-check.php';
 	}
 
 	/**
@@ -63,11 +65,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-					return new WP_Error(
-						WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_CODE,
-						WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_MESSAGE,
-						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::NO_ACCESS_TOKEN_HTTP_CODE )
-					);
+					return new Installer_Error( Installer_Error_Codes::NO_ACCESS_TOKEN );
 				}
 			);
 			return false;
@@ -81,11 +79,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-					return new WP_Error(
-						WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_CODE,
-						WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_MESSAGE,
-						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::NO_SIGNATURE_HTTP_CODE )
-					);
+					return new Installer_Error( Installer_Error_Codes::NO_SIGNATURE );
 				}
 			);
 			return false;
@@ -98,11 +92,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-					return new WP_Error(
-						WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_CODE,
-						WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_MESSAGE,
-						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::SITE_NOT_CONNECTED_HTTP_CODE )
-					);
+					return new Installer_Error( Installer_Error_Codes::SITE_NOT_CONNECTED );
 				}
 			);
 			return false;
@@ -112,11 +102,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-					return new WP_Error(
-						WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_CODE,
-						WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_MESSAGE,
-						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::INVALID_TOKEN_HTTP_CODE )
-					);
+					return new Installer_Error( Installer_Error_Codes::INVALID_TOKEN );
 				}
 			);
 			return false;
@@ -128,11 +114,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-					return new WP_Error(
-						WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_CODE,
-						WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_MESSAGE,
-						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::REQUEST_VERIFICATION_FAILED_HTTP_CODE )
-					);
+					return new Installer_Error( Installer_Error_Codes::REQUEST_VERIFICATION_FAILED );
 				}
 			);
 			return false;
@@ -143,11 +125,7 @@ class WC_WCCOM_Site {
 			add_filter(
 				self::AUTH_ERROR_FILTER_NAME,
 				function() {
-					return new WP_Error(
-						WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_CODE,
-						WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_MESSAGE,
-						array( 'status' => WC_REST_WCCOM_Site_Installer_Errors::USER_NOT_FOUND_HTTP_CODE )
-					);
+					return new Installer_Error( Installer_Error_Codes::USER_NOT_FOUND );
 				}
 			);
 			return false;
@@ -239,11 +217,29 @@ class WC_WCCOM_Site {
 	 * @return array Registered namespaces.
 	 */
 	public static function register_rest_namespace( $namespaces ) {
-		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-errors.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
 
-		$namespaces['wccom-site/v1'] = array(
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error-codes.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/abstract-wc-rest-wccom-site-controller.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-ssr-controller.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-status-controller.php';
+
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state-storage.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-manager.php';
+
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/interface-installaton-step.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-get-product-info.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-download-product.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-unpack-product.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-activate-product.php';
+
+		$namespaces['wccom-site/v2'] = array(
 			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller',
+			'ssr'       => 'WC_REST_WCCOM_Site_SSR_Controller',
+			'status'    => 'WC_REST_WCCOM_Site_Status_Controller',
 		);
 
 		return $namespaces;

@@ -70,8 +70,32 @@ class WC_Product_Simple extends WC_Product {
 	 */
 	public function add_to_cart_description() {
 		/* translators: %s: Product title */
-		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add &ldquo;%s&rdquo; to your cart', 'woocommerce' ) : __( 'Read more about &ldquo;%s&rdquo;', 'woocommerce' );
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart: &ldquo;%s&rdquo;', 'woocommerce' ) : __( 'Read more about &ldquo;%s&rdquo;', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( $text, $this->get_name() ), $this );
+	}
+
+	/**
+	 * Get the add to cart button success message - used to update the mini cart live region.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_success_message() {
+		$text = '';
+
+		if ( $this->is_purchasable() && $this->is_in_stock() ) {
+			/* translators: %s: Product title */
+			$text = __( '&ldquo;%s&rdquo; has been added to your cart', 'woocommerce' );
+			$text = sprintf( $text, $this->get_name() );
+		}
+
+		/**
+		 * Filter product add to cart success message.
+		 *
+		 * @since 9.2.0
+		 * @param string $text The success message when a product is added to the cart.
+		 * @param WC_Product_Simple $this Reference to the current WC_Product_Simple instance.
+		 */
+		return apply_filters( 'woocommerce_product_add_to_cart_success_message', $text, $this );
 	}
 }

@@ -4,7 +4,10 @@
  * www.drewwilson.com
  * code.drewwilson.com/entry/tiptip-jquery-plugin
  *
- * Version 1.3   -   Updated: Mar. 23, 2010
+ * Version 1.3.1   -   Updated: Mar. 30, 2023
+ *
+ * This is a custom version of TipTip. This file has been locally modified for specific requirements.
+ * Since the original version is no longer maintained, the changes were not submitted back to the original author.
  *
  * This Plug-In will create a custom tooltip to replace the default
  * browser tooltip. It is extremely lightweight and very smart in
@@ -31,7 +34,7 @@
 			fadeIn: 200,
 			fadeOut: 200,
 			attribute: "title",
-			content: false, // HTML or String to fill TipTIp with
+			content: false, // HTML or String or callback to fill TipTIp with
 		  	enter: function(){},
 		  	exit: function(){}
 	  	};
@@ -98,8 +101,12 @@
 				}
 
 				function active_tiptip(){
+					var content = typeof opts.content === 'function' ? opts.content() : org_title;
+					if (!content) {
+						return;
+					}
 					opts.enter.call(this);
-					tiptip_content.html(org_title);
+					tiptip_content.html(content);
 					tiptip_holder.hide().css("margin","0");
 					tiptip_holder.removeAttr('class');
 					tiptip_arrow.removeAttr("style");

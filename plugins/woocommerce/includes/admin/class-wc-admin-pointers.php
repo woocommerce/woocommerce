@@ -38,6 +38,7 @@ class WC_Admin_Pointers {
 		switch ( $screen->id ) {
 			case 'product':
 				$this->create_product_tutorial();
+				$this->create_variable_product_tutorial();
 				break;
 			case 'woocommerce_page_wc-addons':
 				$this->create_wc_addons_tutorial();
@@ -62,6 +63,17 @@ class WC_Admin_Pointers {
 		$labels          = $wp_post_types['product']->labels;
 		$labels->add_new = __( 'Enable guided mode', 'woocommerce' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-tour', true );
+	}
+
+	/**
+	 * Pointers for creating a variable product.
+	 */
+	public function create_variable_product_tutorial() {
+		if ( ! current_user_can( 'manage_options' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'variable-product-tour', true );
 	}
 
 	/**

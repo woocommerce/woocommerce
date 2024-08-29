@@ -13,8 +13,10 @@ jQuery( function ( $ ) {
 				)
 				.on( 'click', 'a.debug-report', this.generateReport )
 				.on( 'click', '#copy-for-support', this.copyReport )
-				.on( 'aftercopy', '#copy-for-support', this.copySuccess )
-				.on( 'aftercopyfailure', '#copy-for-support', this.copyFail );
+				.on( 'click', '#copy-for-github', this.copyGithubReport )
+				.on( 'aftercopy', '#copy-for-support, #copy-for-github', this.copySuccess )
+				.on( 'aftercopyfailure', '#copy-for-support, #copy-for-github', this.copyFail )
+				.on( 'click', '#download-for-support', this.downloadReport );
 		},
 
 		/**
@@ -92,12 +94,51 @@ jQuery( function ( $ ) {
 			wcSetClipboard( $( '#debug-report' ).find( 'textarea' ).val(), $( this ) );
 			evt.preventDefault();
 		},
+		/**
+		 * Apply redactions
+		 */
+		applyRedactions( report ) {
+			var redactions = [
+				{
+					regex: /(WordPress address \(URL\):)[^\n]*/,
+					replacement: "$1 [Redacted]"
+				},
+				{
+					regex: /(Site address \(URL\):)[^\n]*/,
+					replacement: "$1 [Redacted]"
+				},
+				{
+					regex: /(### Database ###\n)([\s\S]*?)(\n### Post Type Counts ###)/,
+					replacement: "$1\n[REDACTED]\n$3"
+				}
+			];
+
+			redactions.forEach( function( redaction ) {
+				report = report.replace( redaction.regex, redaction.replacement );
+			});
+			return report;
+		},
+		/**
+		 * Copy for GitHub report.
+		 *
+		 * @param {Object} event Copy event.
+		 */
+		copyGithubReport: function( event ) {
+			wcClearClipboard();
+			var reportValue = $( '#debug-report' ).find( 'textarea' ).val();
+			var redactedReport = wcSystemStatus.applyRedactions( reportValue );
+
+			var reportForGithub = '<details><summary>System Status Report</summary>\n\n``' + redactedReport + '``\n</details>';
+
+			wcSetClipboard( reportForGithub, $( this ) );
+			event.preventDefault();
+		},
 
 		/**
 		 * Display a "Copied!" tip when success copying
 		 */
-		copySuccess: function() {
-			$( '#copy-for-support' ).tipTip({
+		copySuccess: function( event ) {
+			$( event.target ).tipTip({
 				'attribute':  'data-tip',
 				'activation': 'focus',
 				'fadeIn':     50,
@@ -112,6 +153,21 @@ jQuery( function ( $ ) {
 		copyFail: function() {
 			$( '.copy-error' ).removeClass( 'hidden' );
 			$( '#debug-report' ).find( 'textarea' ).trigger( 'focus' ).trigger( 'select' );
+		},
+
+		downloadReport: function() {
+			var ssr_text = new Blob( [ $( '#debug-report' ).find( 'textarea' ).val() ], { type: 'text/plain' } );
+
+			var domain = window.location.hostname;
+			var datetime = new Date().toISOString().slice( 0, 19 ).replace( /:/g, '-' );
+
+			var a = document.createElement( 'a' );
+			a.download = 'SystemStatusReport_' + domain + '_' + datetime + '.txt';
+			a.href = window.URL.createObjectURL( ssr_text );
+			a.textContent = 'Download ready';
+			a.style='display:none';
+			a.click();
+			a.remove();
 		}
 	};
 

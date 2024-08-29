@@ -105,7 +105,7 @@ describe( 'ProductTypes', () => {
 
 		expect(
 			screen.queryByText(
-				'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.'
+				'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.'
 			)
 		).toBeInTheDocument();
 	} );
@@ -133,7 +133,7 @@ describe( 'ProductTypes', () => {
 
 		expect(
 			screen.queryByText(
-				'The following extensions will be added to your site for free: WooCommerce Payments. An account is required to use this feature.'
+				'The following extensions will be added to your site for free: WooPayments. An account is required to use this feature.'
 			)
 		).not.toBeInTheDocument();
 	} );

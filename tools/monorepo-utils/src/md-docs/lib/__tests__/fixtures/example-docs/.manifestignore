@@ -1,0 +1,4 @@
+# Exclude developer-tools.md
+developer-tools
+# Exclude excluded-folder & test wildcard
+excluded-fold*

@@ -35,15 +35,6 @@ class Notes extends \WC_REST_CRUD_Controller {
 	protected $rest_base = 'admin/notes';
 
 	/**
-	 * Allowed promo notes for experimental-activate-promo.
-	 *
-	 * @var array
-	 */
-	protected $allowed_promo_notes = array(
-		'wcpay-promo-2022-us-incentive-20-off',
-	);
-
-	/**
 	 * Register the routes for admin notes.
 	 */
 	public function register_routes() {
@@ -394,7 +385,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Prepare an array with the the requested updates.
+	 * Prepare an array with the requested updates.
 	 *
 	 * @param WP_REST_Request $request  Request object.
 	 * @return array A list of the requested updates values.
@@ -458,9 +449,17 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 * @return WP_REST_Request|WP_Error
 	 */
 	public function activate_promo_note( $request ) {
+		/**
+		 * Filter allowed promo notes for experimental-activate-promo.
+		 *
+		 * @param array     $promo_notes    Array of allowed promo notes.
+		 * @since 7.8.0
+		 */
+		$allowed_promo_notes = apply_filters( 'woocommerce_admin_allowed_promo_notes', [] );
+
 		$promo_note_name = $request->get_param( 'promo_note_name' );
 
-		if ( ! in_array( $promo_note_name, $this->allowed_promo_notes, true ) ) {
+		if ( ! in_array( $promo_note_name, $allowed_promo_notes, true ) ) {
 			return new \WP_Error(
 				'woocommerce_note_invalid_promo_note_name',
 				__( 'Please provide a valid promo note name.', 'woocommerce' ),
@@ -539,7 +538,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	 *
 	 * @param string $url The URL needing a nonce.
 	 * @param string $action The nonce action.
-	 * @param string $name The nonce anme.
+	 * @param string $name The nonce name.
 	 * @return string A fully formed URL.
 	 */
 	private function maybe_add_nonce_to_url( string $url, string $action = '', string $name = '' ) : string {
@@ -548,7 +547,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 		}
 
 		if ( empty( $name ) ) {
-			// Default paramater name.
+			// Default parameter name.
 			$name = '_wpnonce';
 		}
 

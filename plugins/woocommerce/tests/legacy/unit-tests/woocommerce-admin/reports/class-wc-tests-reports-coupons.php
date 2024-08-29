@@ -5,9 +5,9 @@
  * @package WooCommerce\Admin\Tests\Coupons
  */
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Coupons\Query as CouponsQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
@@ -96,8 +96,8 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new CouponsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'coupons' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 
 		// Test order by orders_count DESC.
@@ -367,9 +367,8 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 				continue;
 			}
 
-			$coupon_2_data = $coupon_2->get_data();
-			unset( $coupon_2_data['used_by'] );
-			$coupon_item->add_meta_data( 'coupon_data', $coupon_2_data );
+			$coupon_2_short_info = $coupon_2->get_short_info();
+			$coupon_item->add_meta_data( 'coupon_info', $coupon_2_short_info );
 			$coupon_item->save();
 		}
 

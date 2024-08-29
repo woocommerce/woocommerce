@@ -9,9 +9,12 @@
 	verbose="true"
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
 	<testsuites>
-		<testsuite name="WooCommerce Test Suite">
+		<testsuite name="wc-phpunit-legacy">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+		</testsuite>
+		<testsuite name="wc-phpunit-main">
 			<directory suffix=".php">./tests/php</directory>
+			<exclude>./tests/php/helpers</exclude>
 		</testsuite>
 	</testsuites>
 	<coverage includeUncoveredFiles="true">

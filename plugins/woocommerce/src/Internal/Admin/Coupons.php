@@ -73,7 +73,7 @@ class Coupons {
 			__( 'Coupons', 'woocommerce' ),
 			'manage_options',
 			'coupons-moved',
-			[ $this, 'coupon_menu_moved' ]
+			array( $this, 'coupon_menu_moved' )
 		);
 	}
 
@@ -117,15 +117,7 @@ class Coupons {
 			return;
 		}
 
-		$rtl = is_rtl() ? '-rtl' : '';
-
-		wp_enqueue_style(
-			'wc-admin-marketing-coupons',
-			WCAdminAssets::get_url( "marketing-coupons/style{$rtl}", 'css' ),
-			array(),
-			WCAdminAssets::get_file_version( 'css' )
-		);
-
+		WCAdminAssets::register_style( 'marketing-coupons', 'style' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'marketing-coupons', true );
 	}
 }

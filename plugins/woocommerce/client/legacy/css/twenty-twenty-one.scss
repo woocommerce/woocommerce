@@ -13,29 +13,7 @@ $highlights-color: #88a171;
 /**
  * Fonts
  */
-@font-face {
-	font-family: star;
-	src: url(../fonts/star.eot);
-	src:
-		url(../fonts/star.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/star.woff) format("woff"),
-		url(../fonts/star.ttf) format("truetype"),
-		url(../fonts/star.svg#star) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: WooCommerce;
-	src: url(../fonts/WooCommerce.eot);
-	src:
-		url(../fonts/WooCommerce.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/WooCommerce.woff) format("woff"),
-		url(../fonts/WooCommerce.ttf) format("truetype"),
-		url(../fonts/WooCommerce.svg#WooCommerce) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
+@import "fonts";
 
 /**
  * Global elements
@@ -398,7 +376,7 @@ ul.products {
 	line-height: 1;
 	font-size: 1em;
 	width: 5.4em;
-	font-family: star;
+	font-family: WooCommerce;
 	margin-bottom: 0.7rem;
 
 	&::before {
@@ -2345,6 +2323,10 @@ a.reset_variations {
 
 				&:first-child {
 					border-top: 1px solid;
+
+					td.product-remove:first-child {
+						border-top: inherit;
+					}
 				}
 
 				&:last-child {
@@ -2384,6 +2366,8 @@ a.reset_variations {
 
 				.product-remove {
 					float: right;
+					position: relative;
+					z-index: 1;
 				}
 
 				.product-thumbnail {
@@ -3050,6 +3034,20 @@ a.reset_variations {
 	}
 }
 
+@media only screen and (max-width: 768px) {
+	.woocommerce-message,
+	.woocommerce-error li,
+	.woocommerce-info {
+		padding: 1rem 1.5rem;
+
+		a.button {
+			margin-left: 10px;
+			min-width: 100px;
+			padding: calc(0.70 * var(--button--padding-vertical)) calc(0.50 * var(--button--padding-horizontal));
+		}
+	}
+}
+
 .woocommerce-info {
 	border-top-color: var( --wc-blue );
 }
@@ -3085,5 +3083,24 @@ a.reset_variations {
 	&:hover {
 		text-decoration: none;
 		color: #000;
+	}
+}
+
+/**
+ * Coupon error notice
+ */
+ .woocommerce-cart {
+	td.actions .coupon .coupon-error-notice {
+		@include coupon-error-notice-cart();
+ 	}
+}
+
+form.checkout_coupon {
+	.coupon-error-notice {
+		@include coupon-error-notice-checkout();
+	}
+
+	.input-text.has-error:focus {
+		border-color: var(--wc-red);
 	}
 }

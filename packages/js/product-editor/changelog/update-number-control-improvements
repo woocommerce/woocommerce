@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update number control to not allow invalid values through arrow keys or buttons

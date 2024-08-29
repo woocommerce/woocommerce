@@ -1,0 +1,72 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-filters",
+	"version": "1.0.0",
+	"title": "Product Filters (Experimental)",
+	"description": "Let shoppers filter products displayed on the page.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"supports": {
+		"align": true,
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
+		},
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"multiple": false,
+		"inserter": false,
+		"interactivity": true,
+		"typography": {
+			"fontSize": true,
+			"textAlign": true
+		},
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical",
+				"justifyContent": "stretch",
+				"verticalAlignment": "top"
+			},
+			"allowVerticalAlignment": true,
+			"allowJustification": true,
+			"allowOrientation": true,
+			"allowInheriting": false
+		},
+		"spacing": {
+			"blockGap": true
+		}
+	},
+	"textdomain": "woocommerce",
+	"usesContext": [ "postId" ],
+	"providesContext": {
+		"woocommerce/product-filters/overlay": "overlay"
+	},
+	"attributes": {
+		"overlay": {
+			"type": "string",
+			"default": "never"
+		},
+		"overlayIcon": {
+			"type": "string",
+			"default": "filter-icon-1"
+		},
+		"overlayButtonStyle": {
+			"type": "string",
+			"default": "label-icon"
+		},
+		"overlayIconSize": {
+			"type": "number",
+			"default": "12"
+		}
+	},
+	"viewScript": "wc-product-filters-frontend",
+	"example": {}
+}

@@ -44,8 +44,25 @@ export function searchProduct() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title matches: Search Results for {product_search_term} – WooCommerce Core E2E Test Suite':
+				( response ) => {
+					const title_actual = response
+						.html()
+						.find( 'head title' )
+						.text();
+					const title_expected = new RegExp(
+						`Search Results for .${ product_search_term }. – WooCommerce Core E2E Test Suite`
+					);
+					return title_actual.match( title_expected );
+				},
 			"body contains: 'Search results' title": ( response ) =>
 				response.body.includes( 'Search results:' ),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 	} );
 

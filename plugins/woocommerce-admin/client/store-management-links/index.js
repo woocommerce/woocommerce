@@ -25,6 +25,28 @@ import { QuickLinkCategory } from './quick-link-category';
 import { QuickLink } from './quick-link';
 import { getAdminSetting } from '~/utils/admin-settings';
 
+export function getLinkTypeAndHref( { path, tab = null, type, href = null } ) {
+	return (
+		{
+			'wc-admin': {
+				href: `admin.php?page=wc-admin&path=%2F${ path }`,
+				linkType: 'wc-admin',
+			},
+			'wp-admin': {
+				href: path,
+				linkType: 'wp-admin',
+			},
+			'wc-settings': {
+				href: `admin.php?page=wc-settings&tab=${ tab }`,
+				linkType: 'wp-admin',
+			},
+		}[ type ] || {
+			href,
+			linkType: 'external',
+		}
+	);
+}
+
 export function getItemsByCategory( shopUrl ) {
 	return [
 		{
@@ -110,28 +132,6 @@ export function getItemsByCategory( shopUrl ) {
 			],
 		},
 	];
-}
-
-export function getLinkTypeAndHref( { path, tab = null, type, href = null } ) {
-	return (
-		{
-			'wc-admin': {
-				href: `admin.php?page=wc-admin&path=%2F${ path }`,
-				linkType: 'wc-admin',
-			},
-			'wp-admin': {
-				href: path,
-				linkType: 'wp-admin',
-			},
-			'wc-settings': {
-				href: `admin.php?page=wc-settings&tab=${ tab }`,
-				linkType: 'wp-admin',
-			},
-		}[ type ] || {
-			href,
-			linkType: 'external',
-		}
-	);
 }
 
 export const generateExtensionLinks = ( links ) => {

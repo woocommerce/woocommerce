@@ -65,8 +65,8 @@ The `config` prop has the following structure:
 
 - `label`: String - A label above the filter selector.
 - `staticParams`: Array - Url parameters to persist when selecting a new filter.
-- `param`: String - The url paramter this filter will modify.
-- `defaultValue`: String - The default paramter value to use instead of 'all'.
+- `param`: String - The url parameter this filter will modify.
+- `defaultValue`: String - The default parameter value to use instead of 'all'.
 - `showFilters`: Function - Determine if the filter should be shown. Supply a function with the query object as an argument returning a boolean.
 - `filters`: Array - Array of filter objects.
 

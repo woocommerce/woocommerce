@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Make eslint emit JSON report for annotating PRs.

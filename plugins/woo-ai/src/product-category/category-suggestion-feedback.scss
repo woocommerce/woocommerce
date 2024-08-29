@@ -1,0 +1,19 @@
+.category-suggestions-feedback {
+	.notice {
+		position: relative;
+
+		span {
+			vertical-align: middle;
+		}
+
+		.button-group {
+			.button {
+				background: initial;
+				border: none;
+			}
+			.button:hover {
+				text-decoration: underline;
+			}
+		}
+	}
+}

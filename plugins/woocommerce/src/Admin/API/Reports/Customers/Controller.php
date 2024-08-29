@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Customers;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableTraits;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
@@ -17,20 +18,13 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * REST API Reports customers controller class.
  *
  * @internal
- * @extends WC_REST_Reports_Controller
+ * @extends GenericController
  */
-class Controller extends \WC_REST_Reports_Controller implements ExportableInterface {
+class Controller extends GenericController implements ExportableInterface {
 	/**
 	 * Exportable traits.
 	 */
 	use ExportableTraits;
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc-analytics';
 
 	/**
 	 * Route base.
@@ -38,6 +32,19 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @var string
 	 */
 	protected $rest_base = 'reports/customers';
+
+	/**
+	 * Get data from Customers\Query.
+	 *
+	 * @override GenericController::get_datastore_data()
+	 *
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
+	 */
+	protected function get_datastore_data( $query_args = array() ) {
+		$query = new Query( $query_args );
+		return $query->get_data();
+	}
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -79,6 +86,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 		$args['customers']           = $request['customers'];
 		$args['users']               = $request['users'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
+		$args['filter_empty']        = $request['filter_empty'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
@@ -88,49 +96,6 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 
 		return $args;
 	}
-
-	/**
-	 * Get all reports.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new Query( $query_args );
-		$report_data     = $customers_query->get_data();
-
-		$data = array();
-
-		foreach ( $report_data->data as $customer_data ) {
-			$item   = $this->prepare_item_for_response( $customer_data, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		$response = rest_ensure_response( $data );
-		$response->header( 'X-WP-Total', (int) $report_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
-
-		$page      = $report_data->page_no;
-		$max_pages = $report_data->pages;
-		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
-	}
-
 
 	/**
 	 * Get one report.
@@ -159,11 +124,11 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param array            $report  Report data item as returned from Data Store.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -325,8 +290,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                            = array();
-		$params['context']                 = $this->get_context_param( array( 'default' => 'view' ) );
+		$params                            = parent::get_collection_params();
 		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
@@ -339,60 +303,19 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']                   = array(
-			'description'       => __( 'Limit response to resources with orders published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['before']                  = array(
-			'description'       => __( 'Limit response to resources with orders published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['page']                    = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
-		);
-		$params['per_page']                = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 10,
-			'minimum'           => 1,
-			'maximum'           => 100,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['order']                   = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'desc',
-			'enum'              => array( 'asc', 'desc' ),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['orderby']                 = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'date_registered',
-			'enum'              => array(
-				'username',
-				'name',
-				'country',
-				'city',
-				'state',
-				'postcode',
-				'date_registered',
-				'date_last_active',
-				'orders_count',
-				'total_spend',
-				'avg_order_value',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
+		$params['orderby']['default']      = 'date_registered';
+		$params['orderby']['enum']         = array(
+			'username',
+			'name',
+			'country',
+			'city',
+			'state',
+			'postcode',
+			'date_registered',
+			'date_last_active',
+			'orders_count',
+			'total_spend',
+			'avg_order_value',
 		);
 		$params['match']                   = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
@@ -417,6 +340,7 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'name',
 				'username',
 				'email',
+				'all',
 			),
 		);
 		$params['name_includes']           = array(
@@ -585,11 +509,21 @@ class Controller extends \WC_REST_Reports_Controller implements ExportableInterf
 				'type' => 'integer',
 			),
 		);
-		$params['force_cache_refresh'] = array(
-			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
-			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
+		$params['filter_empty']            = array(
+			'description'       => __( 'Filter out results where any of the passed fields are empty', 'woocommerce' ),
+			'type'              => 'array',
 			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
+				'enum' => array(
+					'email',
+					'name',
+					'country',
+					'city',
+					'state',
+					'postcode',
+				),
+			),
 		);
 
 		return $params;

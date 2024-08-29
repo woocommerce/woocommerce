@@ -10,9 +10,9 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see https://docs.woocommerce.com/document/template-structure/
+ * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.0.1
+ * @version 9.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,7 +27,7 @@ do_action( 'woocommerce_before_edit_account_address_form' ); ?>
 
 	<form method="post">
 
-		<h3><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title, $load_address ); ?></h3><?php // @codingStandardsIgnoreLine ?>
+		<h2><?php echo apply_filters( 'woocommerce_my_account_edit_address_title', $page_title, $load_address ); ?></h2><?php // @codingStandardsIgnoreLine ?>
 
 		<div class="woocommerce-address-fields">
 			<?php do_action( "woocommerce_before_edit_address_form_{$load_address}" ); ?>

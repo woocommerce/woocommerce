@@ -1,0 +1,25 @@
+import { Meta, Title, IconGallery, IconItem } from '@storybook/blocks';
+import * as icons from '../index';
+
+<Meta title="Icons/Icon Library" />
+
+# Icon Library
+
+<IconGallery>
+	{ Object.entries( icons ).map( ( [ name, icon ] ) => {
+		return (
+			<IconItem key={ name } name={ name }>
+				{ typeof icon === 'function' ? icon( {} ) : icon }
+			</IconItem>
+		);
+	} ) }
+</IconGallery>
+
+## Usage
+
+```jsx
+import { bagAlt } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
+
+const IconExample = () => <Icon icon={ bagAlt } />;
+```

@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		const currentStep = widget.data( 'current-step' );
 		const totalSteps = widget.data( 'total-steps' );
 
-		$( document ).on( 'ready', function() {
+		$( function() {
 			window.wcTracks.recordEvent( 'wcadmin_setup_widget_view', {
 				completed_tasks: currentStep,
 				total_tasks: totalSteps,

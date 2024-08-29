@@ -7,6 +7,11 @@ import { useSelect } from '@wordpress/data';
 import { getVisibleTasks, ONBOARDING_STORE_NAME } from '@woocommerce/data';
 import { getSetting } from '@woocommerce/settings';
 
+/**
+ * Internal dependencies
+ */
+import sanitizeHTML from '../../lib/sanitize-html';
+
 export type DefaultProgressTitleProps = {
 	taskListId: string;
 };
@@ -50,13 +55,13 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 				  )
 				: __( 'Welcome to your store', 'woocommerce' );
 		}
-		if ( completedCount > 0 && completedCount < 4 ) {
-			return __( "Let's get you started", 'woocommerce' ) + '   🚀';
+		if ( completedCount <= 3 ) {
+			return __( 'Let’s get you started', 'woocommerce' ) + '   🚀';
 		}
 		if ( completedCount > 3 && completedCount < 6 ) {
-			return __( 'You are on the right track', 'woocommerce' );
+			return __( 'You’re on the right track', 'woocommerce' );
 		}
-		return __( 'You are almost there', 'woocommerce' );
+		return __( 'You’re almost there', 'woocommerce' );
 	}, [ completedCount, hasVisitedTasks, tasksCount ] );
 
 	if ( loading ) {
@@ -64,6 +69,9 @@ export const DefaultProgressTitle: React.FC< DefaultProgressTitleProps > = ( {
 	}
 
 	return (
-		<h1 className="woocommerce-task-progress-header__title">{ title }</h1>
+		<h1
+			className="woocommerce-task-progress-header__title"
+			dangerouslySetInnerHTML={ sanitizeHTML( title ) }
+		/>
 	);
 };

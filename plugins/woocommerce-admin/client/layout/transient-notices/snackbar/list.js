@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { omit, noop } from 'lodash';
 import { useTransition, animated } from '@react-spring/web';
 import { useReducedMotion } from '@wordpress/compose';
@@ -47,7 +47,7 @@ function SnackbarList( {
 		immediate: isReducedMotion,
 	} );
 
-	className = classnames( 'components-snackbar-list', className );
+	className = clsx( 'components-snackbar-list', className );
 	const removeNotice = ( notice ) => () => {
 		onRemove( notice.id );
 		// To be removed when we're no longer using core/notices2.

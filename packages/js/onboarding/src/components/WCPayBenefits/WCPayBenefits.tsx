@@ -13,22 +13,29 @@ import {
 	PaymentCardIcon,
 	InternationalMarketIcon,
 	EarnManageIcon,
+	WooPayIcon,
 } from './icons';
 
-export const WCPayBenefits: React.VFC = () => {
+export const WCPayBenefits: React.VFC< {
+	isWooPayEligible: boolean;
+} > = ( { isWooPayEligible = false } ) => {
 	return (
 		<Flex className="woocommerce-wcpay-benefits" align="top">
 			<Flex className="woocommerce-wcpay-benefits-benefit">
-				<PaymentCardIcon />
+				<Flex className="woocommerce-wcpay-benefits-benefit-icon-container">
+					<PaymentCardIcon />
+				</Flex>
 				<Text as="p">
 					{ __(
-						'Offer your customers their preferred way to pay including debit and credit card payments, Apple Pay, Sofort, SEPA, iDeal and many more.',
+						'Offer your customers card payments, iDeal, and the ability to sell in-person with Woo mobile app.',
 						'woocommerce'
 					) }
 				</Text>
 			</Flex>
 			<Flex className="woocommerce-wcpay-benefits-benefit">
-				<InternationalMarketIcon />
+				<Flex className="woocommerce-wcpay-benefits-benefit-icon-container">
+					<InternationalMarketIcon />
+				</Flex>
 				<Text as="p">
 					{ __(
 						'Sell to international markets and accept more than 135 currencies with local payment methods.',
@@ -37,7 +44,9 @@ export const WCPayBenefits: React.VFC = () => {
 				</Text>
 			</Flex>
 			<Flex className="woocommerce-wcpay-benefits-benefit">
-				<EarnManageIcon />
+				<Flex className="woocommerce-wcpay-benefits-benefit-icon-container">
+					<EarnManageIcon />
+				</Flex>
 				<Text as="p">
 					{ __(
 						'Earn and manage recurring revenue and get automatic deposits into your nominated bank account.',
@@ -45,6 +54,19 @@ export const WCPayBenefits: React.VFC = () => {
 					) }
 				</Text>
 			</Flex>
+			{ isWooPayEligible && (
+				<Flex className="woocommerce-wcpay-benefits-benefit">
+					<Flex className="woocommerce-wcpay-benefits-benefit-icon-container">
+						<WooPayIcon />
+					</Flex>
+					<Text as="p">
+						{ __(
+							'Boost conversions with WooPay, a new express checkout feature included in WooPayments.',
+							'woocommerce'
+						) }
+					</Text>
+				</Flex>
+			) }
 		</Flex>
 	);
 };

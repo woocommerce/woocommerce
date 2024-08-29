@@ -250,11 +250,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			if ( 'external' === $object->get_type() ) {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
 			}
-
+			$is_variation = false;
 			if ( 'variation' === $object->get_type() ) {
 				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
 					$data['status'] = 0; // Variations cannot be drafts - set to private.
 				}
+				$is_variation = true;
 			}
 
 			if ( 'importing' === $object->get_status() ) {
@@ -283,8 +284,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			do_action( 'woocommerce_product_import_inserted_product_object', $object, $data );
 
 			return array(
-				'id'      => $object->get_id(),
-				'updated' => $updating,
+				'id'           => $object->get_id(),
+				'updated'      => $updating,
+				'is_variation' => $is_variation,
 			);
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -300,7 +302,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	protected function set_image_data( &$product, $data ) {
 		// Image URLs need converting to IDs before inserting.
 		if ( isset( $data['raw_image_id'] ) ) {
-			$product->set_image_id( $this->get_attachment_id_from_url( $data['raw_image_id'], $product->get_id() ) );
+			$attachment_id = $this->get_attachment_id_from_url( $data['raw_image_id'], $product->get_id() );
+			$product->set_image_id( $attachment_id );
+			wc_product_attach_featured_image( $attachment_id, $product );
 		}
 
 		// Gallery image URLs need converting to IDs before inserting.
@@ -743,7 +747,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			// Unlimited, set to 32GB.
 			$memory_limit = '32000M';
 		}
-		return intval( $memory_limit ) * 1024 * 1024;
+		return wp_convert_hr_to_bytes( $memory_limit );
 	}
 
 	/**

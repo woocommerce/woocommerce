@@ -27,21 +27,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 const onboarding = getAdminSetting( 'onboarding', {} );
 
-const Loader = ( props ) => {
-	if ( props.isLoading ) {
-		return (
-			<div
-				className="woocommerce-admin__industry__spinner"
-				style={ { textAlign: 'center' } }
-			>
-				<Spinner />
-			</div>
-		);
-	}
-
-	return <Industry { ...props } />;
-};
-
 class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
@@ -94,6 +79,14 @@ class Industry extends Component {
 
 	getSelectedSlugs() {
 		return this.state.selected.map( ( industry ) => industry.slug );
+	}
+
+	componentDidMount() {
+		recordEvent( 'onboarding_site_heuristics', {
+			page_count: onboarding.pageCount,
+			post_count: onboarding.postCount,
+			is_block_theme: onboarding.isBlockTheme,
+		} );
 	}
 
 	componentDidUpdate() {
@@ -304,6 +297,21 @@ class Industry extends Component {
 		);
 	}
 }
+
+const Loader = ( props ) => {
+	if ( props.isLoading ) {
+		return (
+			<div
+				className="woocommerce-admin__industry__spinner"
+				style={ { textAlign: 'center' } }
+			>
+				<Spinner />
+			</div>
+		);
+	}
+
+	return <Industry { ...props } />;
+};
 
 export default compose(
 	withSelect( ( select ) => {

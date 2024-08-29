@@ -33,15 +33,16 @@ class WC_Beta_Tester_Version_Picker {
 	 * @throws Exception On update error.
 	 */
 	public function handle_version_switch() {
-		if ( ! isset( $_GET['wcbt_switch_to_version'], $_GET['_wpnonce'] ) ) { // WPCS: Input var ok.
+		if ( ! isset( $_GET['wcbt_switch_to_version'], $_GET['_wpnonce'] ) ) {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'wcbt_switch_version_nonce' ) ) { // WPCS: Input var ok, sanitization ok.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'wcbt_switch_version_nonce' ) ) {
 			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce-beta-tester' ) );
 		}
 
-		$version = isset( $_GET['wcbt_switch_to_version'] ) ? sanitize_text_field( wp_unslash( $_GET['wcbt_switch_to_version'] ) ) : ''; // WPCS: Input var ok, sanitization ok.
+		$version = isset( $_GET['wcbt_switch_to_version'] ) ? sanitize_text_field( wp_unslash( $_GET['wcbt_switch_to_version'] ) ) : '';
 
 		if ( empty( $version ) ) {
 			return;
@@ -58,7 +59,7 @@ class WC_Beta_Tester_Version_Picker {
 				'title'   => 'Version switch result',
 				'plugin'  => $plugin_name,
 				'version' => $version,
-				'nonce'   => wp_unslash( $_GET['_wpnonce'] ), // WPCS: Input var ok, sanitization ok.
+				'nonce'   => wp_unslash( $_GET['_wpnonce'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			);
 
 			$skin     = new Automatic_Upgrader_Skin( $skin_args );
@@ -128,9 +129,11 @@ class WC_Beta_Tester_Version_Picker {
 		$tags          = array_reverse( $tags );
 		$versions_html = '';
 
-		if ( ! empty( $_GET['switched'] ) ) { // WPCS: input var ok, CSRF ok.
+		// The nonce is validated upstream.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['switched'] ) ) {
 			/* translators: %s: WooCoomerce version  */
-			$versions_html .= '<div class="notice notice-success"><p>' . sprintf( esc_html__( 'Successfully switched version to %s.', 'woocommerce-beta-tester' ), esc_html( sanitize_text_field( wp_unslash( $_GET['switched'] ) ) ) ) . '</p></div>'; // WPCS: input var ok, CSRF ok.
+			$versions_html .= '<div class="notice notice-success"><p>' . sprintf( esc_html__( 'Successfully switched version to %s.', 'woocommerce-beta-tester' ), esc_html( sanitize_text_field( wp_unslash( $_GET['switched'] ) ) ) ) . '</p></div>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		$versions_html        .= '<ul class="wcbt-version-list">';
@@ -141,10 +144,10 @@ class WC_Beta_Tester_Version_Picker {
 		foreach ( $tags as $tag_version ) {
 
 			$versions_html .= '<li class="wcbt-version-li">';
-			$versions_html .= '<label><input type="radio" ' . checked( strtolower($tag_version), strtolower($this->current_version), false ) . ' value="' . esc_attr( $tag_version ) . '" name="wcbt_switch_to_version">' . $tag_version;
+			$versions_html .= '<label><input type="radio" ' . checked( strtolower( $tag_version ), strtolower( $this->current_version ), false ) . ' value="' . esc_attr( $tag_version ) . '" name="wcbt_switch_to_version">' . $tag_version;
 
 			// Is this the current version?
-			if ( strcasecmp($tag_version, $this->current_version) === 0 ) {
+			if ( strcasecmp( $tag_version, $this->current_version ) === 0 ) {
 				$versions_html .= '<span class="wcbt-current-version"><strong>' . esc_html__( '&nbsp;Installed Version', 'woocommerce-beta-tester' ) . '</strong></span>';
 			}
 
@@ -174,7 +177,7 @@ class WC_Beta_Tester_Version_Picker {
 				<h1><?php esc_html_e( 'Available WooCommerce Releases', 'woocommerce-beta-tester' ); ?></h1>
 				<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/tools.php' ) ); ?>">
 					<div class="wcbt-versions-wrap">
-						<?php echo $this->get_versions_html( $channel ); // WPCS: XSS ok. ?>
+						<?php echo $this->get_versions_html( $channel ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					</div>
 					<div class="wcbt-submit-wrap">
 						<a href="#wcbt-modal-version-switch-confirm" class="button-primary" id="wcbt-modal-version-switch-confirm"><?php esc_html_e( 'Switch version', 'woocommerce-beta-tester' ); ?></a>

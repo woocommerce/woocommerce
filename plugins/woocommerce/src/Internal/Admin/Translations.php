@@ -81,6 +81,10 @@ class Translations {
 				continue;
 			}
 
+			if ( ! isset( $chunk_data['comment']['reference'] ) ) {
+				continue;
+			}
+
 			$reference_file = $chunk_data['comment']['reference'];
 
 			// Only combine "app" files (not scripts registered with WP).

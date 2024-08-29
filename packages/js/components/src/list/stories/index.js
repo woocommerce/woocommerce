@@ -146,7 +146,7 @@ export const CustomStyleAndTags = () => {
 			title: 'WooCommerce.com',
 			href: 'https://woocommerce.com',
 			onClick: logItemClick,
-			listItemTag: 'woocommerce.com-link',
+			listItemTag: 'woo.com-link',
 		},
 		{
 			before: <Gridicon icon="my-sites" />,

@@ -6,8 +6,6 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Orders\Query as OrdersQuery;
-use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders
@@ -96,7 +94,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 					'date_created_gmt' => $data->data[0]['date_created_gmt'], // Not under test.
 					'date'             => $data->data[0]['date'], // Not under test.
 					'extended_info'    => array(
-						'products' => array(
+						'products'    => array(
 							array(
 								'id'       => $variation->get_id(),
 								'name'     => $variation->get_name(),
@@ -108,8 +106,11 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 								'quantity' => 1,
 							),
 						),
-						'coupons'  => array(),
-						'customer' => $data->data[0]['extended_info']['customer'], // Not under test.
+						'coupons'     => array(),
+						'customer'    => $data->data[0]['extended_info']['customer'], // Not under test.
+						'attribution' => array(
+							'origin' => 'Unknown',
+						),
 					),
 				),
 			),

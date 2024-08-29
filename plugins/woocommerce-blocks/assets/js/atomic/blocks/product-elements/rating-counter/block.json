@@ -1,0 +1,46 @@
+{
+	"name": "woocommerce/product-rating-counter",
+	"version": "1.0.0",
+	"title": "Product Rating Counter",
+	"description": "Display the review count of a product",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"productId": {
+			"type": "number",
+			"default": 0
+		},
+		"isDescendentOfQueryLoop": {
+			"type": "boolean",
+			"default": false
+		},
+		"textAlign": {
+			"type": "string",
+			"default": ""
+		},
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductTemplate": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"usesContext": [
+		"query",
+		"queryId",
+		"postId"
+	],
+	"keywords": [
+		"WooCommerce"
+	],
+	"supports": {
+		"align": true
+	},
+	"ancestor": [
+		"woocommerce/single-product"
+	],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

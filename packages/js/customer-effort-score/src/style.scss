@@ -1,5 +1,4 @@
 @import 'components/customer-feedback-simple/customer-feedback-simple.scss';
-@import 'components/product-mvp-feedback-modal/product-mvp-feedback-modal.scss';
 @import 'components/feedback-modal/feedback-modal.scss';
 
 .woocommerce-customer-effort-score__selection {
@@ -31,7 +30,7 @@
 		}
 
 		input {
-			// Hide the radio input but keep it accessibile.
+			// Hide the radio input but keep it accessible.
 			position: absolute;
 			opacity: 0;
 		}
@@ -108,8 +107,20 @@
 	}
 }
 
+.woocommerce-customer-effort-score {
+	.components-modal__content {
+		padding-bottom: 100px;
+	}
+}
+
 .woocommerce-customer-effort-score__buttons {
 	text-align: right;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #fff;
+	padding: calc( 2 * $gap );
 
 	.components-button {
 		margin-left: 1em;

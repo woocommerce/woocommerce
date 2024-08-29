@@ -103,7 +103,7 @@ class WC_Meta_Box_Order_Actions {
 			$trash_order_url = add_query_arg(
 				array(
 					'action'           => 'trash',
-					'order'            => array( $order_id ),
+					'id'            => array( $order_id ),
 					'_wp_http_referer' => $order_list_url,
 				),
 				$order_list_url
@@ -199,7 +199,7 @@ class WC_Meta_Box_Order_Actions {
 	 */
 	private static function get_available_order_actions_for_order( $order ) {
 		$actions = array(
-			'send_order_details'              => __( 'Email invoice / order details to customer', 'woocommerce' ),
+			'send_order_details'              => __( 'Send order details to customer', 'woocommerce' ),
 			'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),
 			'regenerate_download_permissions' => __( 'Regenerate download permissions', 'woocommerce' ),
 		);

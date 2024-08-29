@@ -8,10 +8,9 @@
 import { TreeProps } from '../types';
 
 export function useTree( {
-	ref,
 	items,
 	level = 1,
-	role = 'tree',
+	role = 'listbox',
 	multiple,
 	selected,
 	getItemLabel,
@@ -19,6 +18,15 @@ export function useTree( {
 	shouldItemBeHighlighted,
 	onSelect,
 	onRemove,
+	shouldNotRecursivelySelect,
+	createValue,
+	onTreeBlur,
+	onCreateNew,
+	shouldShowCreateButton,
+	onFirstItemLoop,
+	onEscape,
+	highlightedIndex,
+	onExpand,
 	...props
 }: TreeProps ) {
 	return {
@@ -35,6 +43,7 @@ export function useTree( {
 			getLabel: getItemLabel,
 			shouldItemBeExpanded,
 			shouldItemBeHighlighted,
+			shouldNotRecursivelySelect,
 			onSelect,
 			onRemove,
 		},

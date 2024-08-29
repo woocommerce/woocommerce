@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import PaymentRecommendations from '../payment-recommendations';
-import { isWCPaySupported } from '../../tasks/fills/PaymentGatewaySuggestions/components/WCPay';
+import { isWCPaySupported } from '../../task-lists/fills/PaymentGatewaySuggestions/components/WCPay';
 import { createNoticesFromResponse } from '~/lib/notices';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
@@ -44,7 +44,7 @@ jest.mock( '@woocommerce/components', () => ( {
 	),
 } ) );
 jest.mock(
-	'../../tasks/fills/PaymentGatewaySuggestions/components/WCPay',
+	'../../task-lists/fills/PaymentGatewaySuggestions/components/WCPay',
 	() => ( {
 		isWCPaySupported: jest.fn(),
 	} )
@@ -197,7 +197,9 @@ describe( 'Payment recommendations', () => {
 		} );
 
 		afterEach( () => {
-			Object.defineProperty( global.window, 'location', oldLocation );
+			if ( oldLocation !== undefined ) {
+				Object.defineProperty( global.window, 'location', oldLocation );
+			}
 		} );
 
 		it( 'should install plugin and trigger event and redirect when finished, when clicking the action button', async () => {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes a React 18 concurrency-related issue with tab switching.

@@ -1619,7 +1619,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	public function test_get_checkout_payment_url() {
 		$object = new WC_Order();
 		$id     = $object->save();
-		$this->assertEquals( 'http://example.org?order-pay=' . $id . '&pay_for_order=true&key=' . $object->get_order_key(), $object->get_checkout_payment_url() );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?order-pay=' . $id . '&pay_for_order=true&key=' . $object->get_order_key(), $object->get_checkout_payment_url() );
 	}
 
 	/**
@@ -1629,7 +1629,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_order_key( 'xxx' );
 		$id = $object->save();
-		$this->assertEquals( 'http://example.org?order-received=' . $id . '&key=' . $object->get_order_key(), $object->get_checkout_order_received_url() );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?order-received=' . $id . '&key=' . $object->get_order_key(), $object->get_checkout_order_received_url() );
 	}
 
 	/**
@@ -1653,7 +1653,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_get_cancel_endpoint() {
 		$object = new WC_Order();
-		$this->assertEquals( 'http://example.org/', $object->get_cancel_endpoint() );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '/', $object->get_cancel_endpoint() );
 	}
 
 	/**
@@ -1662,7 +1662,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	public function test_get_view_order_url() {
 		$object = new WC_Order();
 		$id     = $object->save();
-		$this->assertEquals( 'http://example.org?view-order=' . $id, $object->get_view_order_url() );
+		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?view-order=' . $id, $object->get_view_order_url() );
 	}
 
 	/**

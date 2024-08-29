@@ -182,7 +182,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$variable_products = array();
 
 		foreach ( $products->products as $product ) {
-			// Check if the category is set, this means we need to fetch variations seperately as they are not tied to a category.
+			// Check if the category is set, this means we need to fetch variations separately as they are not tied to a category.
 			if ( ! empty( $args['category'] ) && $product->is_type( 'variable' ) ) {
 				$variable_products[] = $product->get_id();
 			}
@@ -262,7 +262,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		 * @since 3.1.0
 		 *
 		 * @param array                   $row         An associative array with the data of a single row in the CSV file.
-		 * @param WC_Product              $product     The product object correspnding to the current row.
+		 * @param WC_Product              $product     The product object corresponding to the current row.
 		 * @param WC_Product_CSV_Exporter $exporter    The instance of the CSV exporter.
 		 */
 		return apply_filters( 'woocommerce_product_export_row_data', $row, $product, $this );

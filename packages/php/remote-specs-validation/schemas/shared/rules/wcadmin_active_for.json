@@ -1,0 +1,16 @@
+{
+	"type": "object",
+	"required": ["type", "operation", "days"],
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["wcadmin_active_for"]
+		},
+		"operation": {
+			"$ref": "#/definitions/operations"
+		},
+		"days": {
+			"type": "integer"
+		}
+	}
+}

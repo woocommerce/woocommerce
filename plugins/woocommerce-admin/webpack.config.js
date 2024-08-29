@@ -40,13 +40,14 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'onboarding',
+	'block-templates',
 	'product-editor',
+	'remote-logging',
 ];
 // wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
 // See ./client/wp-admin-scripts/README.md for more details
 const wpAdminScripts = [
 	'marketing-coupons',
-	'navigation-opt-out',
 	'onboarding-homepage-notice',
 	'onboarding-product-notice',
 	'onboarding-product-import-notice',
@@ -65,6 +66,17 @@ const wpAdminScripts = [
 	'settings-tracking',
 	'order-tracking',
 	'product-import-tracking',
+	'variable-product-tour',
+	'product-category-metabox',
+	'shipping-settings-region-picker',
+	'command-palette',
+	'command-palette-analytics',
+	'woo-connect-notice',
+	'woo-plugin-update-connect-notice',
+	'woo-enable-autorenew',
+	'woo-renew-subscription',
+	'woo-subscriptions-notice',
+	'woo-product-usage-notice',
 ];
 const getEntryPoints = () => {
 	const entryPoints = {
@@ -82,6 +94,13 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
+// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
+// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
+require( 'fs-extra' ).ensureSymlinkSync(
+	path.join( __dirname, './node_modules/xstate5' ),
+	path.join( __dirname, './node_modules/@xstate5/react/node_modules/xstate' )
+);
+
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: getEntryPoints(),
@@ -93,8 +112,8 @@ const webpackConfig = {
 				? `wp-admin-scripts/[name]${ outputSuffix }.js`
 				: `[name]/index${ outputSuffix }.js`;
 		},
-		chunkFilename: `chunks/[name]${ outputSuffix }.js`,
-		path: path.join( __dirname, '/../woocommerce/assets/client/admin' ),
+		chunkFilename: `chunks/[name]${ outputSuffix }.js?ver=[contenthash]`,
+		path: path.join( __dirname, '/build' ),
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
 			name: [ 'wc', '[modulename]' ],
@@ -104,6 +123,7 @@ const webpackConfig = {
 		uniqueName: '__wcAdmin_webpackJsonp',
 	},
 	module: {
+		parser: styleConfig.parser,
 		rules: [
 			{
 				test: /\.(t|j)sx?$/,
@@ -113,8 +133,8 @@ const webpackConfig = {
 					amd: false,
 				},
 				exclude: [
-					// Exclude node_modules/.pnpm
-					/node_modules(\/|\\)\.pnpm(\/|\\)/,
+					/[\/\\]node_modules[\/\\]\.pnpm[\/\\]/,
+					/[\/\\](changelog|bin|build|docs|test)[\/\\]/,
 				],
 				use: {
 					loader: 'babel-loader',
@@ -138,6 +158,11 @@ const webpackConfig = {
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 						].filter( Boolean ),
+						cacheDirectory: path.resolve(
+							__dirname,
+							'../../node_modules/.cache/babel-loader'
+						),
+						cacheCompression: false,
 					},
 				},
 			},
@@ -183,7 +208,8 @@ const webpackConfig = {
 		// The package build process doesn't handle extracting CSS from JS files, so we copy them separately.
 		new CopyWebpackPlugin( {
 			patterns: wcAdminPackages.map( ( packageName ) => ( {
-				from: `../../packages/js/${ packageName }/build-style/*.css`,
+				// Copy css and style.asset.php files.
+				from: `../../packages/js/${ packageName }/build-style/*.{css,php}`,
 				to: `./${ packageName }/[name][ext]`,
 				noErrorOnMissing: true,
 				// Overwrites files already in compilation.assets to ensure we use the assets from the build-style.
@@ -191,6 +217,17 @@ const webpackConfig = {
 				force: true,
 			} ) ),
 		} ),
+
+		// Get all product editor blocks so they can be loaded via JSON.
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: '../../packages/js/product-editor/build/blocks',
+					to: './product-editor/blocks',
+				},
+			],
+		} ),
+
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 
@@ -200,6 +237,12 @@ const webpackConfig = {
 				requestToExternal( request ) {
 					if ( request === '@wordpress/components/build/ui' ) {
 						// The external wp.components does not include ui components, so we need to skip requesting to external here.
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/edit-site' ) ) {
+						// The external wp.editSite does not include edit-site components, so we need to skip requesting to external here. We can remove this once the edit-site components are exported in the external wp.editSite.
+						// We use the edit-site components in the customize store.
 						return null;
 					}
 				},

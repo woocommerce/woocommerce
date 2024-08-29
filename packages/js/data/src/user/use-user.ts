@@ -16,8 +16,8 @@ import { WCUser } from './types';
  */
 export const useUser = () => {
 	const userData = useSelect( ( select ) => {
-		// TODO: Update @types/wordpress__core-data to include the 'hasStartedResolution', 'hasFinishedResolution' method.
-		// @ts-expect-errors Property 'hasStartedResolution', 'hasFinishedResolution' does not exist on type @types/wordpress__core-data
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
 			select( STORE_NAME );
 

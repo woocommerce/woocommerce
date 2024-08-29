@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Remove timeouts in e2e tests for variable products and analytics.

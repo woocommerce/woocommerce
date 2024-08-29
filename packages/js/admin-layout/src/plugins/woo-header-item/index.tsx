@@ -14,7 +14,7 @@ export const WC_HEADER_SLOT_NAME = 'woocommerce_header_item';
 /**
  * Get the slot fill name for the generic header slot or a specific header if provided.
  *
- * @param  name Name of the specific header.
+ * @param name Name of the specific header.
  * @return string
  */
 const getSlotFillName = ( name?: string ) => {

@@ -1,0 +1,88 @@
+$progress-complete-color: var(--wp-admin-theme-color);
+
+.woocommerce-task-progress-header {
+	position: relative;
+	min-height: 28px;
+
+	h1 {
+		font-size: 24px;
+	}
+
+	p {
+		color: $gray-700;
+		font-size: 16px;
+		line-height: 24px;
+		margin-top: $gap-smaller;
+	}
+
+	.woocommerce-task-progress-header__progress-bar {
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
+		border: 1px solid #ddd;
+		border-radius: 16px;
+		height: 12px;
+		width: 100%;
+		margin-bottom: 0;
+
+		// Firefox
+		& {
+			background-color: #fff;
+		}
+
+		&::-moz-progress-bar {
+			background-color: $progress-complete-color;
+			border-radius: 16px;
+		}
+
+		// Chrome
+		&::-webkit-progress-bar {
+			background-color: #fff;
+			border-radius: 16px;
+		}
+
+		&::-webkit-progress-value {
+			background-color: $progress-complete-color;
+			border-bottom-left-radius: 16px;
+			border-top-left-radius: 16px;
+		}
+	}
+
+	.woocommerce-card__menu {
+		position: absolute;
+		right: 0;
+		top: -7px;
+	}
+
+	// Styles for the activity/setup panel.
+	@at-root .woocommerce-setup-panel & {
+		padding: $gap;
+
+		h1 {
+			font-size: 16px;
+			font-weight: 600;
+		}
+
+		p {
+			font-size: 16px;
+		}
+
+		.woocommerce-card__menu {
+			top: 17px;
+		}
+	}
+
+	@include breakpoint( "<782px" ) {
+		padding-left: var(--large-gap);
+		padding-right: var(--large-gap);
+	}
+}
+
+h1.woocommerce-task-progress-header__title {
+	padding-top: 4px;
+
+	@include breakpoint( "<782px" ) {
+		padding-left: var(--large-gap);
+		padding-right: var(--large-gap);
+	}
+}

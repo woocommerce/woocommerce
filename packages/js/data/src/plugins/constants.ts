@@ -33,8 +33,8 @@ export const pluginNames = {
 		'woocommerce'
 	),
 	'woocommerce-gateway-stripe': __( 'WooCommerce Stripe', 'woocommerce' ),
-	'woocommerce-payfast-gateway': __( 'WooCommerce PayFast', 'woocommerce' ),
-	'woocommerce-payments': __( 'WooCommerce Payments', 'woocommerce' ),
+	'woocommerce-payfast-gateway': __( 'WooCommerce Payfast', 'woocommerce' ),
+	'woocommerce-payments': __( 'WooPayments', 'woocommerce' ),
 	'woocommerce-services': __( 'WooCommerce Shipping & Tax', 'woocommerce' ),
 	'woocommerce-services:shipping': __(
 		'WooCommerce Shipping & Tax',
@@ -52,7 +52,7 @@ export const pluginNames = {
 		'Mercado Pago payments for WooCommerce',
 		'woocommerce'
 	),
-	'google-listings-and-ads': __( 'Google Listings and Ads', 'woocommerce' ),
+	'google-listings-and-ads': __( 'Google for WooCommerce', 'woocommerce' ),
 	'woo-razorpay': __( 'Razorpay', 'woocommerce' ),
 	mailpoet: __( 'MailPoet', 'woocommerce' ),
 	'pinterest-for-woocommerce': __(

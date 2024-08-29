@@ -5,6 +5,8 @@
  * @package WC_Beta_Tester
  */
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class Tracks_Debug_Log.
  */
@@ -42,7 +44,7 @@ class Tracks_Debug_Log {
 	 */
 	public function __construct() {
 		// WooCommerce might not be installed/activated between installs of WC versions.
-		if ( class_exists( 'WooCommerce' ) ) {
+		if ( defined( 'WC_ABSPATH' ) ) {
 			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
 			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
 
@@ -68,6 +70,10 @@ class Tracks_Debug_Log {
 		}
 
 		foreach ( $properties as $key => $property ) {
+			if ( is_array( $property ) ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+				$property = print_r( $property, true );
+			}
 			if ( $logger ) {
 				$logger->debug(
 					"  - {$key}: {$property}",

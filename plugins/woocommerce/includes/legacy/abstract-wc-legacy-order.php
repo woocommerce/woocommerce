@@ -329,7 +329,7 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	/**
 	 * Set the customer address.
 	 * @param array $address Address data.
-	 * @param string $type billing or shipping.
+	 * @param string $type Type of address; 'billing' or 'shipping'.
 	 */
 	public function set_address( $address, $type = 'billing' ) {
 		foreach ( $address as $key => $value ) {

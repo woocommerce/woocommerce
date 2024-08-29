@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -22,6 +23,13 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
+	/**
+	 * Controls whether the WooCommerce admin bar should be disabled.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param bool $enabled
+	 */
 	if ( apply_filters( 'woocommerce_disable_admin_bar', true ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
 		$show_admin_bar = false;
 	}
@@ -273,9 +281,9 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 
 	if ( $complete ) {
 		update_user_meta( $customer_id, 'paying_customer', 1 );
-		update_user_meta( $customer_id, '_order_count', '' );
-		update_user_meta( $customer_id, '_money_spent', '' );
-		delete_user_meta( $customer_id, '_last_order' );
+		Users::update_site_user_meta( $customer_id, 'wc_order_count', '' );
+		Users::update_site_user_meta( $customer_id, 'wc_money_spent', '' );
+		Users::delete_site_user_meta( $customer_id, 'wc_last_order' );
 	}
 
 	return $linked;
@@ -355,21 +363,24 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 				$statuses
 			);
 			$order_table = OrdersTableDataStore::get_orders_table_name();
+			$user_id_clause = '';
+			if ( $user_id ) {
+				$user_id_clause = 'OR o.customer_id = ' . absint( $user_id );
+			}
 			$sql = "
-SELECT im.meta_value FROM $order_table AS o
+SELECT DISTINCT im.meta_value FROM $order_table AS o
 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON o.id = i.order_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
 WHERE o.status IN ('" . implode( "','", $statuses ) . "')
 AND im.meta_key IN ('_product_id', '_variation_id' )
 AND im.meta_value != 0
-AND ( o.customer_id IN ('" . implode( "','", $customer_data ) . "') OR o.billing_email IN ('" . implode( "','", $customer_data ) . "') )
-
+AND ( o.billing_email IN ('" . implode( "','", $customer_data ) . "') $user_id_clause )
 ";
 			$result = $wpdb->get_col( $sql );
 		} else {
 			$result = $wpdb->get_col(
 				"
-SELECT im.meta_value FROM {$wpdb->posts} AS p
+SELECT DISTINCT im.meta_value FROM {$wpdb->posts} AS p
 INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id

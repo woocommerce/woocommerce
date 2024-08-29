@@ -39,6 +39,7 @@ class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 		OrderHelper::create_order_custom_table_if_not_exist();
 		$this->data_store = wc_get_container()->get( OrdersTableDataStore::class );
 		$this->sut        = wc_get_container()->get( PostsToOrdersMigrationController::class );
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
@@ -47,6 +48,7 @@ class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 	}
 
 	/**
@@ -133,27 +135,6 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			)
 		);
 		// phpcs:enable
-	}
-
-	/**
-	 * Test that when an order is partially migrated, it can still be resumed as expected.
-	 */
-	public function test_interrupted_migration() {
-		$this->markTestSkipped();
-	}
-
-	/**
-	 * Test that invalid order data is not migrated but logged.
-	 */
-	public function test_migrating_invalid_order_data() {
-		$this->markTestSkipped();
-	}
-
-	/**
-	 * Test when one order is invalid but other one is valid in a migration batch.
-	 */
-	public function test_migrating_invalid_valid_order_combo() {
-		$this->markTestSkipped();
 	}
 
 	/**
@@ -379,6 +360,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	public function test_database_errors_during_migrations_are_logged() {
 		global $wpdb;
 
+		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'no' );
+
 		$fake_logger = $this->use_fake_logger();
 
 		$wpdb_mock = new DynamicDecorator( $wpdb );
@@ -390,19 +373,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 				$wpdb_mock = $args[0];
 				$query     = $args[1];
 
-				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
-					$wpdb_mock->state = 'Something failed!';
-				}
-			}
-		);
-
-		$wpdb_mock->register_property_get_replacement(
-			'last_error',
-			function( $replacement_object ) {
-				if ( $replacement_object->state ) {
-					return $replacement_object->state;
-				} else {
-					return $replacement_object->original_object->last_error;
+				if ( StringUtil::contains( $query, 'posts' ) ) {
+					$wpdb_mock->decorated_object->last_error = 'Something failed!';
 				}
 			}
 		);
@@ -417,7 +389,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			}
 		);
 
-		$this->assertEquals( 'PostMetaToOrderMetaMigrator: when processing ids 1-3: Something failed!', $actual_errors[0]['message'] );
+		$this->assertTrue( str_contains( $actual_errors[0]['message'], 'when processing ids 1-3: Something failed!' ) );
 		$this->assertEquals( array( 1, 2, 3 ), $actual_errors[0]['data']['ids'] );
 		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
 	}
@@ -440,7 +412,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			function( ...$args ) use ( $exception ) {
 				$query = $args[1];
 
-				if ( StringUtil::contains( $query, 'wc_orders' ) ) {
+				if ( StringUtil::contains( $query, 'posts' ) ) {
 					throw $exception;
 				}
 			}
@@ -456,7 +428,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 			}
 		);
 
-		$this->assertTrue( StringUtil::starts_with( $actual_errors[0]['message'], 'PostMetaToOrderMetaMigrator: when processing ids 1-3: (Exception) Something failed!' ) );
+		$this->assertTrue( StringUtil::contains( $actual_errors[0]['message'], 'when processing ids 1-3: (Exception) Something failed!' ) );
 		$this->assertEquals( $exception, $actual_errors[0]['data']['exception'] );
 		$this->assertEquals( PostsToOrdersMigrationController::LOGS_SOURCE_NAME, $actual_errors[0]['data']['source'] );
 	}
@@ -514,8 +486,8 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$wpdb_mock->register_method_replacement(
 			'get_results',
 			function( ...$args ) {
-				$wpdb_decorator                              = $args[0];
-				$wpdb_decorator->original_object->last_error = 'Something failed!';
+				$wpdb_decorator                               = $args[0];
+				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
 				return false;
 			}
 		);
@@ -585,22 +557,28 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	 */
 	public function test_db_transaction_is_rolled_back_on_db_error() {
 		update_option( CustomOrdersTableController::USE_DB_TRANSACTIONS_OPTION, 'yes' );
-		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'SERIALIZABLE' );
+		update_option( CustomOrdersTableController::DB_TRANSACTIONS_ISOLATION_LEVEL_OPTION, 'READ UNCOMMITTED' );
 
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
-			'get_results',
-			function( ...$args ) {
-				$wpdb_decorator                              = $args[0];
-				$wpdb_decorator->original_object->last_error = 'Something failed!';
-				return false;
+			'query',
+			function( $wpdb_decorator, $query ) {
+				$result = $this->fake_query_transaction_logger( $wpdb_decorator, $query, false );
+				if ( str_contains( $query, 'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() ) ) {
+					$wpdb_decorator->decorated_object->last_error = 'Something failed!';
+				}
+				if ( str_contains( $query, 'SET TRANSACTION ISOLATION LEVEL' ) ) {
+					$wpdb_decorator->decorated_object->last_error = '';
+					return true;
+				}
+				return $result;
 			}
 		);
 
 		$this->create_and_migrate_order();
 
 		$expected = array(
-			'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE',
+			'SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED',
 			'START TRANSACTION',
 			'ROLLBACK',
 		);
@@ -617,9 +595,12 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 
 		$wpdb_mock = $this->use_wpdb_mock();
 		$wpdb_mock->register_method_replacement(
-			'get_results',
-			function( ...$args ) {
-				throw new \Exception( 'Something failed!' );
+			'query',
+			function( $wpdb_decorator, $query ) {
+				if ( str_contains( $query, 'INSERT INTO ' . OrdersTableDataStore::get_orders_table_name() ) ) {
+					throw new \Exception( 'Something failed!' );
+				}
+				return $this->fake_query_transaction_logger( $wpdb_decorator, $query, false );
 			}
 		);
 
@@ -705,28 +686,41 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 				$wpdb_decorator = $args[0];
 				$query          = $args[1];
 
-				$is_transaction_related_query =
-					StringUtil::contains( $query, 'TRANSACTION' ) ||
-					StringUtil::contains( $query, 'COMMIT' ) ||
-					StringUtil::contains( $query, 'ROLLBACK' );
-
-				if ( $is_transaction_related_query ) {
-					if ( $transaction_fails instanceof \Exception ) {
-						throw $transaction_fails;
-					} elseif ( $transaction_fails ) {
-						$wpdb_decorator->decorated_object->last_error = 'Something failed!';
-						return false;
-					} else {
-						$this->executed_transaction_statements[] = $query;
-						return true;
-					}
-				} else {
-					return $wpdb_decorator->call_original_method( 'query', $args );
-				}
+				return $this->fake_query_transaction_logger( $wpdb_decorator, $query, $transaction_fails );
 			}
 		);
 
 		return $wpdb_mock;
+	}
+
+	/**
+	 * Helper method to log and optionally error any transaction related query.
+	 *
+	 * @param DynamicDecorator $wpdb_decorator The $wpdb decorator.
+	 * @param string           $query The query.
+	 * @param bool             $transaction_fails False if the transaction related queries won't fail, 'error' if they produce a db error, or an Exception object that they will throw.
+	 *
+	 * @return bool
+	 */
+	private function fake_query_transaction_logger( DynamicDecorator $wpdb_decorator, $query, $transaction_fails ) {
+		$is_transaction_related_query =
+			StringUtil::contains( $query, 'TRANSACTION' ) ||
+			StringUtil::contains( $query, 'COMMIT' ) ||
+			StringUtil::contains( $query, 'ROLLBACK' );
+
+		if ( $is_transaction_related_query ) {
+			if ( $transaction_fails instanceof \Exception ) {
+				throw $transaction_fails;
+			} elseif ( $transaction_fails ) {
+				$wpdb_decorator->decorated_object->last_error = 'Something failed!';
+				return false;
+			} else {
+				$this->executed_transaction_statements[] = $query;
+				return true;
+			}
+		} else {
+			return $wpdb_decorator->decorated_object->query( $query );
+		}
 	}
 
 	/**
@@ -745,5 +739,108 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
 
 		$this->assertEmpty( $errors );
+	}
+
+	/**
+	 * @testDox When there are mutli meta values for a supposed unique meta key, the first one is picked.
+	 */
+	public function test_first_value_is_picked_when_multi_value() {
+		global $wpdb;
+		$order              = wc_get_order( OrderHelper::create_complex_wp_post_order() );
+		$original_order_key = $order->get_order_key();
+
+		$this->assertNotEmpty( $original_order_key );
+
+		// Add a second order key.
+		add_post_meta( $order->get_id(), '_order_key', 'second_order_key_should_be_ignored' );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$migrated_order_key = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT order_key FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertEquals( $original_order_key, $migrated_order_key );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		$this->assertEmpty( $errors );
+	}
+
+	/**
+	 * @testDox Test migration for multiple null order_key meta value.
+	 */
+	public function test_order_key_null_multiple() {
+		$order1 = OrderHelper::create_order();
+		$order2 = OrderHelper::create_order();
+		delete_post_meta( $order1->get_id(), '_order_key' );
+		delete_post_meta( $order2->get_id(), '_order_key' );
+
+		$this->sut->migrate_order( $order1->get_id() );
+		$this->sut->migrate_order( $order2->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order1->get_id(), $order2->get_id() ) );
+		$this->assertEmpty( $errors );
+	}
+
+	/**
+	 * @testDox Test migration when SQL mode does not allow 0 dates.
+	 */
+	public function test_migration_with_null_date_and_strict_sql_mode() {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		delete_post_meta( $order->get_id(), '_date_paid' );
+
+		$sql_mode = $wpdb->get_var( 'SELECT @@sql_mode' );
+
+		// Set SQL mode to strict to disallow 0 dates.
+		$wpdb->query( "SET sql_mode = 'TRADITIONAL'" );
+
+		// Assert that strict mode was indeed enabled, by trying to insert 0 date.
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$wpdb->suppress_errors();
+
+		// phpcs:ignore -- Ignoring this error because we are testing for it.
+		$result = $wpdb->query( "INSERT INTO $orders_table (date_created_gmt) VALUES ('0000-00-00 00:00:00')" );
+		$this->assertFalse( $result );
+		$wpdb->suppress_errors( false );
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		$this->assertEmpty( $errors ); // _customer_user_agent
+
+		// phpcs:ignore -- Hardcoded value.
+		$wpdb->query( "SET sql_mode = '$sql_mode' " );
+	}
+
+	/**
+	 * @testDox Test that values in exponential notation are migrated properly.
+	 */
+	public function test_migration_with_numbers_in_exponential_notation() {
+		global $wpdb;
+
+		$order = OrderHelper::create_order();
+		update_post_meta( $order->get_id(), '_order_tax', '7.1054273576E-15' ); // 0
+		update_post_meta( $order->get_id(), '_order_total', '12E-2' ); // 0.12
+		update_post_meta( $order->get_id(), '_cart_discount_tax', '1237E-2' ); // 12.37
+
+		$this->sut->migrate_order( $order->get_id() );
+
+		$errors = $this->sut->verify_migrated_orders( array( $order->get_id() ) );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r -- Intentional for informative debug message.
+		$this->assertEmpty( $errors, 'Errors found in migrated data: ' . print_r( $errors, true ) );
+
+		$order_tax = $wpdb->get_var( $wpdb->prepare( "SELECT tax_amount FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) );
+		$this->assertEquals( 0, $order_tax );
+
+		$order_total = $wpdb->get_var( $wpdb->prepare( "SELECT total_amount FROM {$wpdb->prefix}wc_orders WHERE id = %d", $order->get_id() ) );
+		$this->assertEquals( 0.12, $order_total );
+
+		$cart_discount_tax = $wpdb->get_var( $wpdb->prepare( "SELECT discount_tax_amount FROM {$wpdb->prefix}wc_order_operational_data WHERE order_id = %d", $order->get_id() ) );
+		$this->assertEquals( 12.37, $cart_discount_tax );
 	}
 }

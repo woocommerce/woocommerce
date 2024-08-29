@@ -161,7 +161,7 @@ class FilterPicker extends Component {
 			update[ param ] = query[ param ];
 		} );
 
-		// Remove all of this filter's params not associated witth the update while
+		// Remove all of this filter's params not associated with the update while
 		// leaving any other params from any other filter an extension may have added.
 		this.getAllFilterParams().forEach( ( param ) => {
 			if ( ! update[ param ] ) {
@@ -294,7 +294,9 @@ class FilterPicker extends Component {
 				) }
 				<Dropdown
 					contentClassName="woocommerce-filters-filter__content"
-					position="bottom"
+					popoverProps={ {
+						placement: 'bottom',
+					} }
 					expandOnMobile
 					headerTitle={ __(
 						'filter report to show:',
@@ -374,11 +376,11 @@ FilterPicker.propTypes = {
 		 */
 		staticParams: PropTypes.array.isRequired,
 		/**
-		 * The url paramter this filter will modify.
+		 * The url parameter this filter will modify.
 		 */
 		param: PropTypes.string.isRequired,
 		/**
-		 * The default paramter value to use instead of 'all'.
+		 * The default parameter value to use instead of 'all'.
 		 */
 		defaultValue: PropTypes.string,
 		/**

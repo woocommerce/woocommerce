@@ -1,39 +1,37 @@
 /**
  * External dependencies
  */
-import {
-	BlockConfiguration,
-	BlockEditProps,
-	registerBlockType,
-} from '@wordpress/blocks';
-import { ComponentType } from 'react';
+import { Block, BlockConfiguration } from '@wordpress/blocks';
+import deprecated from '@wordpress/deprecated';
 
-type BlockRepresentation = {
-	name: string;
-	metadata: BlockConfiguration;
-	settings: Partial< Omit< BlockConfiguration, 'edit' > > & {
-		readonly edit?:
-			| ComponentType<
-					BlockEditProps< object > & {
-						context?: Record< string, unknown >;
-					}
-			  >
-			| undefined;
-	};
-};
+/**
+ * Internal dependencies
+ */
+import { registerProductEditorBlockType } from './register-product-editor-block-type';
+
+interface BlockRepresentation< T extends Record< string, object > > {
+	name?: string;
+	metadata: BlockConfiguration< T >;
+	settings: Partial< BlockConfiguration< T > >;
+}
 
 /**
  * Function to register an individual block.
  *
- * @param {Object} block The block to be registered.
- *
- * @return {?WPBlockType} The block, if it has been successfully registered;
- *                        otherwise `undefined`.
+ * @param block The block to be registered.
+ * @return The block, if it has been successfully registered; otherwise `undefined`.
  */
-export default function initBlock( block: BlockRepresentation ) {
+export function initBlock<
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	T extends Record< string, any > = Record< string, any >
+>( block: BlockRepresentation< T > ): Block< T > | undefined {
+	deprecated( 'initBlock()', {
+		alternative: 'registerProductEditorBlockType()',
+	} );
+
 	if ( ! block ) {
 		return;
 	}
-	const { metadata, settings, name } = block;
-	return registerBlockType( { name, ...metadata }, settings );
+
+	return registerProductEditorBlockType( block );
 }

@@ -35,7 +35,7 @@ const getIntHeaderValues = (
 		const value = response.headers.get( key );
 		if ( value === undefined ) {
 			throw new Error(
-				`Malformed response from server. '${ key }' header is missing when retriving ./report/${ endpoint }.`
+				`Malformed response from server. '${ key }' header is missing when retrieving ./report/${ endpoint }.`
 			);
 		}
 		return parseInt( value, 10 );
@@ -50,6 +50,15 @@ export function* getReportItems(
 		parse: false,
 		path: addQueryArgs( `${ NAMESPACE }/reports/${ endpoint }`, query ),
 	};
+
+	if ( endpoint === 'performance-indicators' && ! query.stats ) {
+		yield setReportItems( endpoint, query, {
+			data: [],
+			totalResults: 0,
+			totalPages: 0,
+		} );
+		return;
+	}
 
 	try {
 		const response: {

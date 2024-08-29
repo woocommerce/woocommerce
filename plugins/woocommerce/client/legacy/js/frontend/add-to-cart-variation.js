@@ -22,10 +22,11 @@
 		self.$form.off( '.wc-variation-form' );
 
 		// Methods.
-		self.getChosenAttributes    = self.getChosenAttributes.bind( self );
-		self.findMatchingVariations = self.findMatchingVariations.bind( self );
-		self.isMatch                = self.isMatch.bind( self );
-		self.toggleResetLink        = self.toggleResetLink.bind( self );
+		self.getChosenAttributes         = self.getChosenAttributes.bind( self );
+		self.findMatchingVariations      = self.findMatchingVariations.bind( self );
+		self.isMatch                     = self.isMatch.bind( self );
+		self.toggleResetLink             = self.toggleResetLink.bind( self );
+		self.showNoMatchingVariationsMsg = self.showNoMatchingVariationsMsg.bind( self );
 
 		// Events.
 		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: self }, self.onReset );
@@ -167,16 +168,16 @@
 
 		if ( attributes.count && attributes.count === attributes.chosenCount ) {
 			if ( form.useAjax ) {
-				if ( form.controller ) {
-					form.controller.abort();
+				if ( form.xhr ) {
+					form.xhr.abort();
 				}
 				form.$form.block( { message: null, overlayCSS: { background: '#fff', opacity: 0.6 } } );
 				currentAttributes.product_id  = parseInt( form.$form.data( 'product_id' ), 10 );
 				currentAttributes.custom_data = form.$form.data( 'custom_data' );
-				const options                 = {
+				form.xhr                      = $.ajax( {
 					url: wc_add_to_cart_variation_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_variation' ),
 					type: 'POST',
-					data: $.param( currentAttributes ),
+					data: currentAttributes,
 					success: function( variation ) {
 						if ( variation ) {
 							form.$form.trigger( 'found_variation', [ variation ] );
@@ -185,39 +186,14 @@
 							attributes.chosenCount = 0;
 
 							if ( ! form.loading ) {
-								form.$form
-									.find( '.single_variation' )
-									.after(
-										'<p class="wc-no-matching-variations woocommerce-info">' +
-										wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
-										'</p>'
-									);
-								form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+								form.showNoMatchingVariationsMsg();
 							}
 						}
 					},
 					complete: function() {
 						form.$form.unblock();
 					}
-				};
-
-				const controller = new AbortController();
-				form.controller = controller;
-
-				window.fetch( options.url, {
-					method: options.type,
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-					body: options.data,
-					signal: controller.signal
-				} )
-					.then( response => {
-						if ( !response.ok ) {
-							throw new Error( response.statusText );
-						}
-						return response.json();
-					})
-					.then( options.success )
-					.finally( () => options.complete() );
+				} );
 			} else {
 				form.$form.trigger( 'update_variation_values' );
 
@@ -231,14 +207,7 @@
 					attributes.chosenCount = 0;
 
 					if ( ! form.loading ) {
-						form.$form
-							.find( '.single_variation' )
-							.after(
-								'<p class="wc-no-matching-variations woocommerce-info">' +
-								wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
-								'</p>'
-							);
-						form.$form.find( '.wc-no-matching-variations' ).slideDown( 200 );
+						form.showNoMatchingVariationsMsg();
 					}
 				}
 			}
@@ -346,7 +315,7 @@
 		var form = event.data.variationForm;
 
 		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).trigger( 'change' );
-		form.$form.find( '.wc-no-matching-variations' ).remove();
+		form.$form.find( '.wc-no-matching-variations' ).parent().remove();
 
 		if ( form.useAjax ) {
 			form.$form.trigger( 'check_variations' );
@@ -588,6 +557,24 @@
 	};
 
 	/**
+	 * Show no matching variation message.
+	 */
+	VariationForm.prototype.showNoMatchingVariationsMsg = function() {
+		this.$form
+			.find( '.single_variation' )
+			.after(
+				'<div role="alert">' +
+					'<p class="wc-no-matching-variations woocommerce-info">' +
+						wc_add_to_cart_variation_params.i18n_no_matching_variations_text +
+					'</p>' +
+				'</div>'
+			)
+			.next( 'div' )
+			.find( '.wc-no-matching-variations' )
+			.slideDown( 200 );
+	};
+
+	/**
 	 * Function to call wc_variation_form on jquery selector.
 	 */
 	$.fn.wc_variation_form = function() {
@@ -686,7 +673,7 @@
 			var slideToImage = $gallery_nav.find( 'li img[src="' + variation.image.gallery_thumbnail_src + '"]' );
 
 			if ( slideToImage.length > 0 ) {
-				slideToImage.trigger( 'click' );
+				slideToImage.trigger( 'flexslider-click' );
 				$form.attr( 'current-image', variation.image_id );
 				window.setTimeout( function() {
 					$( window ).trigger( 'resize' );

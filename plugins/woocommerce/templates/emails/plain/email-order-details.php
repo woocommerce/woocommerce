@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see https://docs.woocommerce.com/document/template-structure/
+ * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
  * @version 3.7.0
  */
@@ -43,7 +43,7 @@ if ( $item_totals ) {
 }
 
 if ( $order->get_customer_note() ) {
-	echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses_post( wptexturize( $order->get_customer_note() ) ) . "\n";
+	echo esc_html__( 'Note:', 'woocommerce' ) . "\t " . wp_kses( wptexturize( $order->get_customer_note() ), array() ) . "\n";
 }
 
 if ( $sent_to_admin ) {

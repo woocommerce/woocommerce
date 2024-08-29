@@ -82,7 +82,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 				),
 				'needs_setup'            => false,
 				'post_install_scripts'   => array(),
-				'settings_url'           => 'http://example.org/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+				'settings_url'           => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
 				'connection_url'         => '',
 				'setup_help_text'        => '',
 				'required_settings_keys' => array(),
@@ -148,7 +148,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 				),
 				'needs_setup'            => false,
 				'post_install_scripts'   => array(),
-				'settings_url'           => 'http://example.org/wp-admin/admin.php?page=wc-settings&tab=checkout&section=paypal',
+				'settings_url'           => 'http://' . WP_TESTS_DOMAIN . '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=paypal',
 				'connection_url'         => null,
 				'setup_help_text'        => null,
 				'required_settings_keys' => array(),
@@ -247,7 +247,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woo@woo.local', $paypal['settings']['email']['value'] );
 		$this->assertEquals( 'yes', $paypal['settings']['testmode']['value'] );
 
-		// Test bogus paramter.
+		// Test bogus parameter.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/paypal' );
 		$request->set_body_params(
 			array(

@@ -1997,18 +1997,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test is_coupon_emails_allowed function on the cart, specifically test wildcard emails.
-	 *
-	 * @return void
-	 */
-	public function test_is_coupon_emails_allowed() {
-		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.local' ) ) );
-		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( '*.test' ) ) );
-		$this->assertEquals( true, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer@wc.local' ) ) );
-		$this->assertEquals( false, WC()->cart->is_coupon_emails_allowed( array( 'customer@wc.local' ), array( 'customer2@wc.local' ) ) );
-	}
-
-	/**
 	 * Check subtotals align when using filters. Ref: 23340
 	 */
 	public function test_changing_tax_class_via_filter_issue_23340() {
@@ -2199,7 +2187,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that adding a variation via URL parameter succeeds when some attributes belong to the
-	 * variation and others are specificed via URL parameter.
+	 * variation and others are specified via URL parameter.
 	 */
 	public function test_add_variation_by_url_with_valid_attribute() {
 		add_filter( 'woocommerce_add_to_cart_redirect', '__return_false' );

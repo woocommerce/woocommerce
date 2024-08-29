@@ -43,7 +43,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			CodeHacker::disable();
 			self::$code_hacker_temporary_disables_requested = 1;
 		} elseif ( self::$code_hacker_temporary_disables_requested > 0 ) {
-			self::$code_hacker_temporary_disables_requested++;
+			++self::$code_hacker_temporary_disables_requested;
 		}
 	}
 
@@ -53,7 +53,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	protected static function reenable_code_hacker() {
 		if ( self::$code_hacker_temporary_disables_requested > 0 ) {
-			self::$code_hacker_temporary_disables_requested--;
+			--self::$code_hacker_temporary_disables_requested;
 			if ( 0 === self::$code_hacker_temporary_disables_requested ) {
 				CodeHacker::enable();
 			}
@@ -218,6 +218,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Reset all the class registration replacements in the dependency injection container,
+	 * so any further "get" will return an instance of the class originally registered.
+	 * For this to work with shared definitions 'reset_container_resolutions' is required too.
+	 */
+	public function reset_container_replacements() {
+		wc_get_container()->reset_all_replacements();
+	}
+
+	/**
 	 * Reset the mock legacy proxy class so that all the registered mocks are unregistered.
 	 */
 	public function reset_legacy_proxy_mocks() {
@@ -264,6 +273,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function register_legacy_proxy_global_mocks( array $mocks ) {
 		wc_get_container()->get( LegacyProxy::class )->register_global_mocks( $mocks );
+	}
+
+	/**
+	 * Register a callback to be executed when the "exit" method is invoked.
+	 *
+	 * @param callable|null $mock The callback to be registered, or null to unregister it.
+	 */
+	public function register_exit_mock( ?callable $mock ) {
+		wc_get_container()->get( LegacyProxy::class )->register_exit_mock( $mock );
 	}
 
 	/**
@@ -370,6 +388,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		return $matches;
+	}
+
+	/**
+	 * Clear recorded tracks event.
+	 */
+	public function clear_tracks_events() {
+		$events = WC_Tracks_Footer_Pixel::clear_events();
 	}
 
 	/**

@@ -135,7 +135,7 @@ function get_latest_version_with_release() {
 }
 
 /**
- * Function to retreive the sha1 reference for a given branch name.
+ * Function to retrieve the sha1 reference for a given branch name.
  *
  * @param string $branch The name of the branch.
  * @return string Returns the name of the branch, or a falsey value on error.

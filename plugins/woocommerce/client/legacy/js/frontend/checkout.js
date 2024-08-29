@@ -8,38 +8,6 @@ jQuery( function( $ ) {
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
-	const ajax = options => {
-		const controller = new AbortController();
-
-		window.fetch( options.url, {
-			method: options.type,
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-			body: options.data,
-			signal: controller.signal
-		} )
-			.then( response => {
-				response.text().then( text => {
-					if ( !response.ok ) {
-						const error = new Error( response.statusText );
-						error.responseText = text; // Needed for when wc_checkout_params.debug_mode is enabled
-						throw error;
-					}
-
-					if ( options.dataType === 'html' ) {
-						options.success( text );
-						return;
-					}
-
-					const json = JSON.parse( ajax.dataFilter( text, 'json' ) );
-					options.success( json );
-				} );
-			} )
-			.catch( error => options.error && options.error( error.responseText, 'error', error.message ) );
-
-		return controller;
-	};
-	ajax.dataFilter = ( raw_response, dataType ) => raw_response;
-
 	var wc_checkout_form = {
 		updateTimer: false,
 		dirtyInput: false,
@@ -189,10 +157,10 @@ jQuery( function( $ ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.maybe_update_checkout, '1000' );
 		},
-		trigger_update_checkout: function() {
+		trigger_update_checkout: function( event ) {
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.dirtyInput = false;
-			$( document.body ).trigger( 'update_checkout' );
+			$( document.body ).trigger( 'update_checkout', { current_target: event ? event.currentTarget : null } );
 		},
 		maybe_update_checkout: function() {
 			var update_totals = true;
@@ -288,12 +256,11 @@ jQuery( function( $ ) {
 			wc_checkout_form.updateTimer = setTimeout( wc_checkout_form.update_checkout_action, '5', args );
 		},
 		update_checkout_action: function( args ) {
-			if ( wc_checkout_form.controller ) {
-				wc_checkout_form.controller.abort();
+			if ( wc_checkout_form.xhr ) {
+				wc_checkout_form.xhr.abort();
 			}
 
-			var $form = $( 'form.checkout' );
-			if ( $form.length === 0 ) {
+			if ( $( 'form.checkout' ).length === 0 ) {
 				return;
 			}
 
@@ -349,7 +316,7 @@ jQuery( function( $ ) {
 				s_address       : s_address,
 				s_address_2     : s_address_2,
 				has_full_address: has_full_address,
-				post_data       : new URLSearchParams( new FormData( $form[0] ) ).toString()
+				post_data       : $( 'form.checkout' ).serialize()
 			};
 
 			if ( false !== args.update_shipping_method ) {
@@ -360,10 +327,7 @@ jQuery( function( $ ) {
 					shipping_methods[ $( this ).data( 'index' ) ] = $( this ).val();
 				} );
 
-				// Flatten shipping_methods for use in URLSearchParams()
-				for ( var k in shipping_methods ) {
-					data[ 'shipping_method[' + k + ']' ] = shipping_methods[ k ];
-				}
+				data.shipping_method = shipping_methods;
 			}
 
 			$( '.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table' ).block({
@@ -374,10 +338,10 @@ jQuery( function( $ ) {
 				}
 			});
 
-			wc_checkout_form.controller = ajax({
+			wc_checkout_form.xhr = $.ajax({
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'update_order_review' ),
-				data:		new URLSearchParams( data ).toString(),
+				data:		data,
 				success:	function( data ) {
 
 					// Reload the page if requested
@@ -440,8 +404,10 @@ jQuery( function( $ ) {
 					// Check for error
 					if ( data && 'failure' === data.result ) {
 
+						var $form = $( 'form.checkout' );
+
 						// Remove notices from all sources
-						$( '.woocommerce-error, .woocommerce-message' ).remove();
+						$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 
 						// Add new errors returned by this event
 						if ( data.messages ) {
@@ -458,6 +424,16 @@ jQuery( function( $ ) {
 
 					// Re-init methods
 					wc_checkout_form.init_payment_methods();
+
+					// If there is no errors and the checkout update was triggered by changing the shipping method, focus its radio input.
+					if (
+						data &&
+						'success' === data.result &&
+						args.current_target &&
+						args.current_target.id.indexOf( 'shipping_method' ) !== -1
+					) {
+						document.getElementById( args.current_target.id ).focus();
+					}
 
 					// Fire updated_checkout event.
 					$( document.body ).trigger( 'updated_checkout', [ data ] );
@@ -511,7 +487,7 @@ jQuery( function( $ ) {
 
 			// Trigger a handler to let gateways manipulate the checkout if needed
 			// eslint-disable-next-line max-len
-			if ( $form.triggerHandler( 'checkout_place_order' ) !== false && $form.triggerHandler( 'checkout_place_order_' + wc_checkout_form.get_payment_method() ) !== false ) {
+			if ( $form.triggerHandler( 'checkout_place_order', [ wc_checkout_form ] ) !== false && $form.triggerHandler( 'checkout_place_order_' + wc_checkout_form.get_payment_method(), [ wc_checkout_form ] ) !== false ) {
 
 				$form.addClass( 'processing' );
 
@@ -520,44 +496,47 @@ jQuery( function( $ ) {
 				// Attach event to block reloading the page when the form has been submitted
 				wc_checkout_form.attachUnloadEventsOnSubmit();
 
-				// ajax.dataFilter affects all ajax() calls, but we use it to ensure JSON is valid once returned.
-				ajax.dataFilter = function( raw_response, dataType ) {
-					// We only want to work with JSON
-					if ( 'json' !== dataType ) {
-						return raw_response;
-					}
-
-					if ( wc_checkout_form.is_valid_json( raw_response ) ) {
-						return raw_response;
-					} else {
-						// Attempt to fix the malformed JSON
-						var maybe_valid_json = raw_response.match( /{"result.*}/ );
-
-						if ( null === maybe_valid_json ) {
-							console.log( 'Unable to fix malformed JSON' );
-						} else if ( wc_checkout_form.is_valid_json( maybe_valid_json[0] ) ) {
-							console.log( 'Fixed malformed JSON. Original:' );
-							console.log( raw_response );
-							raw_response = maybe_valid_json[0];
-						} else {
-							console.log( 'Unable to fix malformed JSON' );
+				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
+				$.ajaxSetup( {
+					dataFilter: function( raw_response, dataType ) {
+						// We only want to work with JSON
+						if ( 'json' !== dataType ) {
+							return raw_response;
 						}
+
+						if ( wc_checkout_form.is_valid_json( raw_response ) ) {
+							return raw_response;
+						} else {
+							// Attempt to fix the malformed JSON
+							var maybe_valid_json = raw_response.match( /{"result.*}/ );
+
+							if ( null === maybe_valid_json ) {
+								console.log( 'Unable to fix malformed JSON #1' );
+							} else if ( wc_checkout_form.is_valid_json( maybe_valid_json[0] ) ) {
+								console.log( 'Fixed malformed JSON. Original:' );
+								console.log( raw_response );
+								raw_response = maybe_valid_json[0];
+							} else {
+								console.log( 'Unable to fix malformed JSON #2' );
+							}
+						}
+
+						return raw_response;
 					}
+				} );
 
-					return raw_response;
-				};
-
-				ajax({
+				$.ajax({
 					type:		'POST',
 					url:		wc_checkout_params.checkout_url,
-					data:		new URLSearchParams( new FormData( $form[0] ) ).toString(),
+					data:		$form.serialize(),
 					dataType:   'json',
 					success:	function( result ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
 						try {
-							if ( 'success' === result.result && $form.triggerHandler( 'checkout_place_order_success', result ) !== false ) {
+							if ( 'success' === result.result && 
+								$form.triggerHandler( 'checkout_place_order_success', [ result, wc_checkout_form ] ) !== false ) {
 								if ( -1 === result.redirect.indexOf( 'https://' ) || -1 === result.redirect.indexOf( 'http://' ) ) {
 									window.location = result.redirect;
 								} else {
@@ -588,14 +567,25 @@ jQuery( function( $ ) {
 							}
 						}
 					},
-					error:	function( responseText, textStatus, errorThrown ) {
+					error:	function( jqXHR, textStatus, errorThrown ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
+						// This is just a technical error fallback. i18_checkout_error is expected to be always defined and localized.
+						var errorMessage = errorThrown;
+
+						if (
+							typeof wc_checkout_params === 'object' &&
+							wc_checkout_params !== null &&
+							wc_checkout_params.hasOwnProperty( 'i18n_checkout_error' ) &&
+							typeof wc_checkout_params.i18n_checkout_error === 'string' &&
+							wc_checkout_params.i18n_checkout_error.trim() !== ''
+						) {
+							errorMessage = wc_checkout_params.i18n_checkout_error;
+						}
+
 						wc_checkout_form.submit_error(
-							'<div class="woocommerce-error">' +
-							( errorThrown || wc_checkout_params.i18n_checkout_error ) +
-							'</div>'
+							'<div class="woocommerce-error">' + errorMessage + '</div>'
 						);
 					}
 				});
@@ -604,7 +594,7 @@ jQuery( function( $ ) {
 			return false;
 		},
 		submit_error: function( error_message ) {
-			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
+			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' ); // eslint-disable-line max-len
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
@@ -625,7 +615,8 @@ jQuery( function( $ ) {
 		init: function() {
 			$( document.body ).on( 'click', 'a.showcoupon', this.show_coupon_form );
 			$( document.body ).on( 'click', '.woocommerce-remove-coupon', this.remove_coupon );
-			$( 'form.checkout_coupon' ).hide().on( 'submit', this.submit );
+			$( document.body ).on( 'blur change input', '#coupon_code', this.remove_coupon_error );
+			$( 'form.checkout_coupon' ).hide().on( 'submit', this.submit.bind( this ) );
 		},
 		show_coupon_form: function() {
 			$( '.checkout_coupon' ).slideToggle( 400, function() {
@@ -633,8 +624,36 @@ jQuery( function( $ ) {
 			});
 			return false;
 		},
-		submit: function() {
-			var $form = $( this );
+		show_coupon_error: function( html_element, $target ) {
+			if ( $target.length === 0 ) {
+				return;
+			}
+	
+			var msg = $( $.parseHTML( html_element ) ).text().trim();
+
+			if ( msg === '' ) {
+				return;
+			}
+				
+			$target.find( '#coupon_code' )
+				.focus()
+				.addClass( 'has-error' )
+				.attr( 'aria-invalid', 'true' )
+				.attr( 'aria-describedby', 'coupon-error-notice' );
+			$target.append( '<span class="coupon-error-notice" id="coupon-error-notice" role="alert">' + msg + '</span>' );
+		},
+		remove_coupon_error: function( evt ) {
+			$( evt.currentTarget )
+				.removeClass( 'has-error' )
+				.removeAttr( 'aria-invalid' )
+				.removeAttr( 'aria-describedby' )
+				.next( '.coupon-error-notice' )
+				.remove();
+		},
+		submit: function( evt ) {
+			var $form = $( evt.currentTarget );
+			var $coupon_field = $form.find( '#coupon_code' );
+			var self = this;
 
 			if ( $form.is( '.processing' ) ) {
 				return false;
@@ -649,21 +668,29 @@ jQuery( function( $ ) {
 			});
 
 			var data = {
-				security:		wc_checkout_params.apply_coupon_nonce,
-				coupon_code:	$form.find( 'input[name="coupon_code"]' ).val()
+				security: wc_checkout_params.apply_coupon_nonce,
+				coupon_code: $form.find('input[name="coupon_code"]').val(),
+				billing_email: wc_checkout_form.$checkout_form.find('input[name="billing_email"]').val()
 			};
 
-			ajax({
+			$.ajax({
 				type:		'POST',
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' ),
-				data:		new URLSearchParams( data ).toString(),
-				success:	function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+				data:		data,
+				success:	function( response ) {
+					$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 					$form.removeClass( 'processing' ).unblock();
 
-					if ( code ) {
-						$form.before( code );
-						$form.slideUp();
+					if ( response ) {
+						// We only want to show coupon notices if they are no errors.
+						// Coupon errors are shown under the input.
+						if ( response.indexOf( 'woocommerce-error' ) === -1 && response.indexOf( 'is-error' ) === -1 ) {
+							$form.slideUp( 400, function() {
+								$form.before( response );
+							} );
+						} else {
+							self.show_coupon_error( response, $coupon_field.parent() );
+						}
 
 						$( document.body ).trigger( 'applied_coupon_in_checkout', [ data.coupon_code ] );
 						$( document.body ).trigger( 'update_checkout', { update_shipping_method: false } );
@@ -693,12 +720,12 @@ jQuery( function( $ ) {
 				coupon:   coupon
 			};
 
-			ajax({
+			$.ajax({
 				type:    'POST',
 				url:     wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' ),
-				data:    new URLSearchParams( data ).toString(),
+				data:    data,
 				success: function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+					$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 					container.removeClass( 'processing' ).unblock();
 
 					if ( code ) {
@@ -709,12 +736,13 @@ jQuery( function( $ ) {
 
 						// Remove coupon code from coupon field
 						$( 'form.checkout_coupon' ).find( 'input[name="coupon_code"]' ).val( '' );
+						$( 'form.checkout_coupon' ).slideUp();
 					}
 				},
-				error: function ( responseText ) {
+				error: function ( jqXHR ) {
 					if ( wc_checkout_params.debug_mode ) {
 						/* jshint devel: true */
-						console.log( responseText );
+						console.log( jqXHR.responseText );
 					}
 				},
 				dataType: 'html'

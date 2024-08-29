@@ -13,6 +13,19 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	const VERSION_OPTION = 'woocommerce_admin_version';
 
 	/**
+	 * @var null|string Initial installed version number.
+	 */
+	protected static $initial_installed_version_number = null;
+
+	/**
+	 * Setup
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+		self::$initial_installed_version_number = WC()->version;
+	}
+
+	/**
 	 * Integration test for database table creation.
 	 *
 	 * @group database
@@ -132,13 +145,19 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 * Test the following options are created.
 	 *
 	 * - woocommerce_admin_install_timestamp
+	 * - WC_Install::NEWLY_INSTALLED_OPTION
 	 *
 	 * @return void
 	 */
 	public function test_options_are_set() {
 		delete_transient( 'wc_installing' );
 		WC_Install::install();
-		$options = array( 'woocommerce_admin_install_timestamp' );
+
+		$options = array(
+			'woocommerce_admin_install_timestamp',
+			WC_Install::NEWLY_INSTALLED_OPTION,
+		);
+
 		foreach ( $options as $option ) {
 			$this->assertNotFalse( get_option( $option ) );
 		}
@@ -168,13 +187,20 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test woocommerce_newly_installed action gets fired.
+	 * Test woocommerce_newly_installed action gets fired and the option is set to 'no'.
+	 *
 	 * @return void
 	 */
 	public function test_woocommerce_newly_installed_action() {
-		delete_option( 'woocommerce_version' );
-		WC_Install::check_version();
-		$this->assertTrue( did_action( 'woocommerce_newly_installed' ) > 0 );
+		update_option( WC_Install::NEWLY_INSTALLED_OPTION, 'yes' );
+
+		// Call twice to ensure `woocommerce_newly_installed` is only triggered once.
+		WC_Install::newly_installed();
+		WC_Install::newly_installed();
+
+		$this->assertTrue( 1 === did_action( 'woocommerce_newly_installed' ) );
+		$this->assertEquals( get_option( WC_Install::NEWLY_INSTALLED_OPTION ), 'no' );
+		$this->assertEquals( get_option( WC_Install::INITIAL_INSTALLED_VERSION ), self::$initial_installed_version_number );
 	}
 
 	/**

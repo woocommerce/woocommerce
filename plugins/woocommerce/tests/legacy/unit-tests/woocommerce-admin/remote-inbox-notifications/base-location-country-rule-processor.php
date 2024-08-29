@@ -5,11 +5,11 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\BaseLocationCountryRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\BaseLocationCountryRuleProcessor;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
- * class WC_Admin_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor
  */
 class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor extends WC_Unit_Test_Case {
 	/**
@@ -108,6 +108,22 @@ class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor e
 	public function test_spec_succeeds_if_base_location_is_not_default() {
 		update_option( 'woocommerce_default_country', 'US:FL' );
 		update_option( OnboardingProfile::DATA_OPTION, array() );
+
+		$processor = new BaseLocationCountryRuleProcessor();
+
+		$result = $processor->process( $this->get_rule(), new stdClass() );
+
+		$this->assertEquals( true, $result );
+	}
+
+	/**
+	 * Tests that the processor returns true if profiler option's `is_store_country_set` is true.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_succeeds_if_base_location_is_default_and_is_store_country_set_is_true() {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( OnboardingProfile::DATA_OPTION, array( 'is_store_country_set' => true ) );
 
 		$processor = new BaseLocationCountryRuleProcessor();
 

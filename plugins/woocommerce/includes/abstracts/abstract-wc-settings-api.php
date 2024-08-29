@@ -212,6 +212,21 @@ abstract class WC_Settings_API {
 			if ( 'title' !== $this->get_field_type( $field ) ) {
 				try {
 					$this->settings[ $key ] = $this->get_field_value( $key, $field, $post_data );
+					if ( 'select' === $field['type'] || 'checkbox' === $field['type'] ) {
+						/**
+						 * Notify that a non-option setting has been updated.
+						 *
+						 * @since 7.8.0
+						 */
+						do_action(
+							'woocommerce_update_non_option_setting',
+							array(
+								'id'    => $key,
+								'type'  => $field['type'],
+								'value' => $this->settings[ $key ],
+							)
+						);
+					}
 				} catch ( Exception $e ) {
 					$this->add_error( $e->getMessage() );
 				}
@@ -219,8 +234,8 @@ abstract class WC_Settings_API {
 		}
 
 		$option_key = $this->get_option_key();
-        do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
-        return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' );
+		do_action( 'woocommerce_update_option', array( 'id' => $option_key ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		return update_option( $option_key, apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ), 'yes' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	}
 
 	/**
@@ -729,7 +744,7 @@ abstract class WC_Settings_API {
 			'options'           => array(),
 		);
 
-		$data = wp_parse_args( $data, $defaults );
+		$data  = wp_parse_args( $data, $defaults );
 		$value = $this->get_option( $key );
 
 		ob_start();
@@ -929,26 +944,14 @@ abstract class WC_Settings_API {
 	/**
 	 * Validate Textarea Field.
 	 *
+	 * @since 9.0.0 No longer allows storing IFRAME, which was allowed for "ShareThis" integration no longer found in core.
 	 * @param  string $key Field key.
 	 * @param  string $value Posted Value.
 	 * @return string
 	 */
 	public function validate_textarea_field( $key, $value ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses(
-			trim( stripslashes( $value ) ),
-			array_merge(
-				array(
-					'iframe' => array(
-						'src'   => true,
-						'style' => true,
-						'id'    => true,
-						'class' => true,
-					),
-				),
-				wp_kses_allowed_html( 'post' )
-			)
-		);
+		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
 
 	/**

@@ -1,0 +1,102 @@
+[
+	{
+		"status": "completed",
+		"conclusion": "success",
+		"name": "Successful required job"
+	},
+	{
+		"status": "completed",
+		"conclusion": "success",
+		"name": "Successful job (optional)"
+	},
+	{
+		"status": "completed",
+		"conclusion": "failure",
+		"name": "Failed required job"
+	},
+	{
+		"status": "completed",
+		"conclusion": "failure",
+		"name": "Failed job (optional)"
+	},
+	{
+		"status": "completed",
+		"conclusion": "cancelled",
+		"name": "Cancelled required job"
+	},
+	{
+		"status": "completed",
+		"conclusion": "cancelled",
+		"name": "Cancelled job (optional)"
+	},
+	{
+		"status": "completed",
+		"conclusion": "skipped",
+		"name": "Skipped required job"
+	},
+	{
+		"status": "completed",
+		"conclusion": "skipped",
+		"name": "Skipped job (optional)"
+	},
+	{
+		"status": "queued",
+		"conclusion": "",
+		"name": "Queued required job"
+	},
+	{
+		"status": "queued",
+		"conclusion": "",
+		"name": "Queued job (optional)"
+	},
+	{
+		"status": "in_progress",
+		"conclusion": "",
+		"name": "In progress required job"
+	},
+	{
+		"status": "in_progress",
+		"conclusion": "",
+		"name": "In progress job (optional)"
+	},
+	{
+		"status": "unknown_status",
+		"conclusion": "",
+		"name": "Required job with unknown status"
+	},
+	{
+		"status": "unknown_status",
+		"conclusion": "",
+		"name": "Job with unknown status (optional)"
+	},
+	{
+		"status": "completed",
+		"conclusion": "unknown_conclusion",
+		"name": "Required job with unknown conclusion"
+	},
+	{
+		"status": "completed",
+		"conclusion": "unknown_conclusion",
+		"name": "Job with unknown conclusion (optional)"
+	},
+	{
+		"status": "in_progress",
+		"conclusion": "",
+		"name": "Publish reports in_progress"
+	},
+	{
+		"status": "completed",
+		"conclusion": "",
+		"name": "Publish reports - failed"
+	},
+	{
+		"status": "completed",
+		"conclusion": "",
+		"name": "Another Publish reports that failed"
+	},
+	{
+		"status": "queued",
+		"conclusion": "",
+		"name": "Publish reports job queued"
+	}
+]
