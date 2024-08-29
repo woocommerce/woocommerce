@@ -70,6 +70,7 @@ const fields = [
 		id: 'sku',
 		label: __( 'SKU', 'woocommerce' ),
 		enableHiding: false,
+		enableSorting: false,
 		render: ( { item }: { item: Product } ) => {
 			return item.sku;
 		},
@@ -218,12 +219,14 @@ export default function ProductList( {
 					: filter.value;
 			}
 		} );
+		const orderby =
+			view.sort?.field === 'name' ? 'title' : view.sort?.field;
 
 		return {
-			page: 1,
-			per_page: PAGE_SIZE,
+			per_page: view.perPage,
+			page: view.page,
 			order: view.sort?.direction,
-			orderby: view.sort?.field,
+			orderby,
 			search: view.search,
 			...filters,
 		};
@@ -257,9 +260,9 @@ export default function ProductList( {
 	const paginationInfo = useMemo(
 		() => ( {
 			totalItems: totalCount,
-			totalPages: Math.ceil( totalCount / PAGE_SIZE ),
+			totalPages: Math.ceil( totalCount / ( view.perPage || PAGE_SIZE ) ),
 		} ),
-		[ totalCount ]
+		[ totalCount, view.perPage ]
 	);
 
 	const classes = classNames( 'edit-site-page', className );
