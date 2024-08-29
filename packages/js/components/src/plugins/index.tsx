@@ -19,6 +19,7 @@ type PluginsProps = {
 		response: InstallPluginsResponse
 	) => void;
 	onError: ( errors: unknown, response: InstallPluginsResponse ) => void;
+	onClick?: () => void;
 	onSkip?: () => void;
 	skipText?: string;
 	autoInstall?: boolean;
@@ -37,6 +38,7 @@ export const Plugins = ( {
 	onAbort,
 	onComplete,
 	onError = () => null,
+	onClick = () => null,
 	pluginSlugs = [ 'woocommerce-services' ],
 	onSkip,
 	installText = __( 'Install & enable', 'woocommerce' ),
@@ -159,6 +161,7 @@ export const Plugins = ( {
 				}
 				disabled={ isRequesting && hasBeenClicked }
 				onClick={ () => {
+					onClick();
 					setHasBeenClicked( true );
 					installAndActivate();
 				} }
