@@ -39,7 +39,6 @@ const appendSettingsScripts = () => {
 	return Object.entries( settingsScripts ).reduce(
 		( scripts, [ key, script ] ) => {
 			if ( ! ignoredSettingsScripts.includes( key ) ) {
-				console.log( 'script', key );
 				const scriptElement = document.createElement( 'script' );
 				scriptElement.src = script.src;
 

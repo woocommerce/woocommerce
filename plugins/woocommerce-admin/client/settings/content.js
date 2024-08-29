@@ -11,6 +11,20 @@ import { useDispatch } from '@wordpress/data';
  */
 import { SettingsCheckbox, SettingsInput } from './components';
 
+const SettingsScript = ( { content } ) => {
+	useEffect( () => {
+		const scriptElement = document.createElement( 'script' );
+		scriptElement.type = 'text/javascript';
+		scriptElement.innerHTML = content;
+		document.body.appendChild( scriptElement );
+
+		return () => {
+			document.body.removeChild( scriptElement );
+		};
+	}, [] );
+	return null;
+};
+
 export const Content = ( { data } ) => {
 	const { settings } = data;
 	console.log( settings );
@@ -135,6 +149,8 @@ export const Content = ( { data } ) => {
 								/>
 							</div>
 						);
+					case 'script':
+						return <SettingsScript content={ setting.content } />;
 					default:
 						return null;
 				}

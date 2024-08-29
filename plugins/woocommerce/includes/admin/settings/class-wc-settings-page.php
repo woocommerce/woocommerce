@@ -170,6 +170,18 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					}
 				// Otherwise, render the page's output method.
 				} else {
+					if ( 'classes' === $section_id ) {
+						$tags = new WP_HTML_Tag_Processor( $html );
+						while( $tags->next_tag( array( 'tag_name' => 'script' ) ) ) {
+							$script_type = $tags->get_attribute( 'type' );
+								$script_contents = $tags->get_modifiable_text();
+								$section_settings_data[] = array(
+									'type' => 'script',
+									'content' => $script_contents,
+								);
+						}
+					}
+					
 					$section_settings_data[] = array(
 						'type' => 'custom',
 						'content' => trim( $html ),
