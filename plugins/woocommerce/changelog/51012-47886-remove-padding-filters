@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Remove extra bottom padding in filters in the editor.
