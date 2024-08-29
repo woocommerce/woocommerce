@@ -328,6 +328,7 @@ final class BlockTypesController {
 			'CatalogSorting',
 			'ClassicTemplate',
 			'ClassicShortcode',
+			'ComingSoon',
 			'CustomerAccount',
 			'FeaturedCategory',
 			'FeaturedProduct',
