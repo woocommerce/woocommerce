@@ -51,7 +51,7 @@ const run = async (
 
 	const gql = graphqlWithAuth();
 
-	let prData = await gql(
+	let prData: any = await gql(
 		`
 query($pr_number: Int!) { 
 	repository(owner: "${ options.owner }", name: "${ options.name }") {
@@ -96,7 +96,7 @@ Author: ${ prData.author.login }
 
 	// Step 3: Check if the changelog file already exists
 
-	const changelogFileData = await gql( `
+	const changelogFileData: any = await gql( `
 query {
 	repository(owner: "${ options.owner }", name: "${ options.name }") {
 		object(expression: "${ prData.headRef.name }:plugins/woocommerce/changelog/pr-${ prNumber }") {
@@ -179,7 +179,7 @@ mutation ($input: CreateCommitOnBranchInput!) {
 		exit( 0 );
 	}
 
-	const mutationResult = await gql( mutationCommand, mutationData );
+	const mutationResult: any = await gql( mutationCommand, mutationData );
 
 	Logger.notice( 'Success!' );
 	log(
