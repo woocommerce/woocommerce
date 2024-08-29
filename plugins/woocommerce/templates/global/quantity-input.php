@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 7.8.0
+ * @version 9.4.0
  *
  * @var bool   $readonly If the input should be set to readonly mode.
  * @var string $type     The input type attribute.
@@ -42,7 +42,9 @@ $label = ! empty( $args['product_name'] ) ? sprintf( esc_html__( '%s quantity', 
 		name="<?php echo esc_attr( $input_name ); ?>"
 		value="<?php echo esc_attr( $input_value ); ?>"
 		aria-label="<?php esc_attr_e( 'Product quantity', 'woocommerce' ); ?>"
-		size="4"
+		<?php if ( in_array( $type, array( 'text', 'search', 'tel', 'url', 'email', 'password' ), true ) ) : ?>
+			size="4"
+		<?php endif; ?>
 		min="<?php echo esc_attr( $min_value ); ?>"
 		max="<?php echo esc_attr( 0 < $max_value ? $max_value : '' ); ?>"
 		<?php if ( ! $readonly ) : ?>
