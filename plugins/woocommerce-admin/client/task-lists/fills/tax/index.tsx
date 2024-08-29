@@ -213,7 +213,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		return (
 			partners.find( ( partner ) => partner.id === query.partner ) || null
 		);
-	}, [ partners, query ] );
+	}, [ partners, query.partner ] );
 
 	const childProps = {
 		isPending,
