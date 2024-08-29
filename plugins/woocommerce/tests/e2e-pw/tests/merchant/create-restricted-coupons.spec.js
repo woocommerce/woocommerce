@@ -87,10 +87,11 @@ const test = baseTest.extend( {
 
 	product: async ( { api }, use ) => {
 		let product = {};
+		const productName = `Product ${ Date.now() }`;
 
 		await api
 			.post( 'products', {
-				name: 'Product',
+				name: productName,
 				regular_price: '100',
 			} )
 			.then( ( response ) => {
@@ -222,9 +223,7 @@ test.describe( 'Restricted coupon management', { tag: '@services' }, () => {
 						.first()
 						.pressSequentially( product.name );
 					await page
-						.getByRole( 'option' )
-						.first()
-						.filter( { hasText: product.name } )
+						.getByRole( 'option', { name: product.name } )
 						.click();
 				} );
 			}
@@ -241,9 +240,7 @@ test.describe( 'Restricted coupon management', { tag: '@services' }, () => {
 						.last()
 						.pressSequentially( product.name );
 					await page
-						.getByRole( 'option' )
-						.first()
-						.filter( { hasText: product.name } )
+						.getByRole( 'option', { name: product.name } )
 						.click();
 				} );
 			}
