@@ -318,7 +318,7 @@ export class ShippingBanner extends Component {
 		} );
 	}
 
-	openWcsModal = () => {
+	openWcsModal() {
 		// Since the button is dynamically added, we need to wait for it to become selectable and then click it.
 
 		const buttonSelector =
@@ -354,7 +354,7 @@ export class ShippingBanner extends Component {
 				}
 			}, 300 );
 		}
-	};
+	}
 
 	render() {
 		const {
