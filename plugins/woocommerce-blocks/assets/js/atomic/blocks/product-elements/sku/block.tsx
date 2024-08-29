@@ -44,14 +44,16 @@ const Preview = ( {
 		style={ style }
 	>
 		<RichText
-			value={ prefix }
+			tagName="span"
 			placeholder="Prefix"
+			value={ prefix }
 			onChange={ ( value ) => setAttributes( { prefix: value } ) }
 		/>
 		<strong>{ sku }</strong>
 		<RichText
-			value={ suffix }
+			tagName="span"
 			placeholder="Suffix"
+			value={ suffix }
 			onChange={ ( value ) => setAttributes( { suffix: value } ) }
 		/>
 	</div>
