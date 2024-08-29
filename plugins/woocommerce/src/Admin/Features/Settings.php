@@ -36,7 +36,6 @@ class Settings {
 			return;
 		}
 
-		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_component_settings' ) );
 		// Run this after the original WooCommerce settings have been added.
 		add_action( 'admin_menu', array( $this, 'register_pages' ), 60 );
@@ -63,26 +62,6 @@ class Settings {
 		$settings['settingsPages'] = $pages;
 
 		return $settings;
-	}
-
-	/**
-	 * Add the feature toggle to the features settings.
-	 *
-	 * @param array $features Feature sections.
-	 * @return array
-	 */
-	public static function add_feature_toggle( $features ) {
-		$features[] = array(
-			'title' => __( 'Settings', 'woocommerce' ),
-			'desc'  => __(
-				'Adds the new WooCommerce settings UI.',
-				'woocommerce'
-			),
-			'id'    => 'woocommerce_settings_enabled',
-			'type'  => 'checkbox',
-		);
-
-		return $features;
 	}
 
 	/**
