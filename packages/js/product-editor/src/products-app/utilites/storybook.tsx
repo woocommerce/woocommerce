@@ -1493,7 +1493,6 @@ export const ProductForm = ( {
 	productData,
 }: ProductFormProps ) => {
 	const [ product, setProduct ] = useState( productData );
-
 	return (
 		<DataForm
 			data={ product }
