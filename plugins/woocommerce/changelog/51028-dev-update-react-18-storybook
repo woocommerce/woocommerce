@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Update `@woocommerce/admin-library` to React 18 and fix `@woocommerce/components` Storybook.
