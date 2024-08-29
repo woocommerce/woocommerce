@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -368,6 +368,11 @@ describe( 'Create shipping label button', () => {
 			</Fragment>
 		);
 
+		const openWcsModalSpy = jest.spyOn(
+			ShippingBanner.prototype,
+			'openWcsModal'
+		);
+
 		// Initiate the loading of WCS assets on first click.
 		userEvent.click(
 			getByRole( 'button', {
@@ -380,6 +385,8 @@ describe( 'Create shipping label button', () => {
 				document.getElementById( 'woocommerce-admin-print-label' )
 			).not.toBeVisible();
 		} );
+
+		expect( openWcsModalSpy ).toHaveBeenCalledTimes( 1 );
 	} );
 } );
 
@@ -560,5 +567,62 @@ describe( 'The message in the banner', () => {
 			container.querySelector( '.wc-admin-shipping-banner-blob p' )
 				.textContent
 		).toBe( notActivatedMessage );
+	} );
+} );
+
+describe( 'If incompatible WCS&T is active', () => {
+	const installPlugins = jest.fn().mockReturnValue( {
+		success: true,
+	} );
+	const activatePlugins = jest.fn().mockReturnValue( {
+		success: true,
+	} );
+
+	beforeEach( () => {
+		acceptWcsTos.mockClear();
+	} );
+
+	it( 'should show if there is activation error', async () => {
+		const actionButtonLabel = 'Install WooCommerce Shipping';
+
+		const { getByRole, getByText } = render(
+			<Fragment>
+				<div id="woocommerce-order-data" />
+				<div id="woocommerce-order-actions" />
+				<div id="woocommerce-admin-print-label" />
+				<ShippingBanner
+					isJetpackConnected={ true }
+					activatePlugins={ activatePlugins }
+					activePlugins={ [ wcstPluginSlug, 'jetpack' ] }
+					installPlugins={ installPlugins }
+					itemsCount={ 1 }
+					isRequesting={ false }
+					orderId={ 1 }
+					isWcstCompatible={ false }
+					actionButtonLabel={ actionButtonLabel }
+				/>
+			</Fragment>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		await waitFor( () => {
+			expect( installPlugins ).toHaveBeenCalledWith( [ wcsPluginSlug ] );
+		} );
+		await waitFor( () => {
+			expect( activatePlugins ).toHaveBeenCalledWith( [ wcsPluginSlug ] );
+		} );
+
+		await waitFor( () => {
+			expect( acceptWcsTos ).not.toHaveBeenCalled();
+		} );
+
+		await waitFor( () =>
+			expect(
+				getByText(
+					'Please update the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.'
+				)
+			).toBeInTheDocument()
+		);
 	} );
 } );
