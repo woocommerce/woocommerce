@@ -108,7 +108,7 @@ jQuery( function( $ ) {
 						return;
 					}
 
-					if ( response.error && response.product_url ) {						
+					if ( response.error && response.product_url ) {
 						window.location = response.product_url;
 						return;
 					}
