@@ -244,7 +244,7 @@ export const addChangelogFileCommand = new Command( 'add-changelog-file' )
 	.addArgument(
 		new Argument(
 			'<significance>',
-			'Significance, first letter is enough ("j" for "major")s'
+			'Significance, first letter is enough ("j" for "major").'
 		)
 			.choices( significanceValues )
 			.argParser( ( x ) =>
@@ -254,7 +254,7 @@ export const addChangelogFileCommand = new Command( 'add-changelog-file' )
 			)
 	)
 	.addArgument(
-		new Argument( '<type>', 'Type, first letter is enoughs' )
+		new Argument( '<type>', 'Type, first letter is enough.' )
 			.choices( types )
 			.argParser( ( x ) =>
 				types.includes( x )
