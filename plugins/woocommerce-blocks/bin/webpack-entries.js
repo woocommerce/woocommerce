@@ -90,6 +90,7 @@ const blocks = {
 	},
 	'product-filter': {
 		isExperimental: true,
+		customDir: 'product-filters/inner-blocks/product-filter',
 	},
 	'product-filters-overlay': {
 		isExperimental: true,
