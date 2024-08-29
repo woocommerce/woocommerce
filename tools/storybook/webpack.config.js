@@ -20,6 +20,7 @@ const wcAdminPackages = [
 	'data',
 	'tracks',
 	'experimental',
+	'product-editor',
 ];
 
 module.exports = ( storybookConfig ) => {
@@ -40,19 +41,21 @@ module.exports = ( storybookConfig ) => {
 		'./setting.mock.js'
 	);
 
-	storybookConfig.resolve.alias[ 'react/jsx-runtime' ] =
-		require.resolve( 'react/jsx-runtime' );
+	storybookConfig.resolve.alias.react = path.resolve(
+		__dirname,
+		'./node_modules/react'
+	);
+	storybookConfig.resolve.alias[ 'react-dom' ] = path.resolve(
+		__dirname,
+		'./node_modules/react-dom'
+	);
 
-	storybookConfig.externals = [ 'react-dom/client' ];
-	// We need to use react 18 for the storybook since some dependencies are not compatible with react 17
-	// Once we upgrade react to 18 in repo, we can remove this alias
-	storybookConfig.resolve.alias.react = require.resolve( 'react18' );
-	storybookConfig.resolve.alias[ 'react-dom' ] =
-		require.resolve( 'react18-dom' );
+	// storybookConfig.resolve.alias[ 'react/jsx-runtime' ] =
+	// 	require.resolve( 'react/jsx-runtime' );
 
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
-		path.join( __dirname, '../../packages/js/product-editor/src' ),
+		// path.join( __dirname, '../../packages/js/product-editor/src' ),
 		'node_modules',
 	];
 
