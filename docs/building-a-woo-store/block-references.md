@@ -53,6 +53,17 @@ Display the main product image.
 -	**Supports:** 
 -	**Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
 
+## Product Price - woocommerce/product-price
+
+Display the price of a product.
+
+-	**Name:** woocommerce/product-price
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Parent:** 
+-	**Supports:** ~~html~~
+-	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
+
 ## Product Details - woocommerce/product-details
 
 Display a product's description, attributes, and reviews.
