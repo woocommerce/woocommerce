@@ -9,7 +9,7 @@ import { CheckboxListContext } from '@woocommerce/interactivity-components/check
 /**
  * Internal dependencies
  */
-import { navigate } from '../../frontend';
+import { navigate } from '../product-filter/frontend';
 
 const getUrl = ( activeFilters: string ) => {
 	const url = new URL( window.location.href );
