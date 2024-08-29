@@ -77,9 +77,9 @@ class ProductSKU extends AbstractBlock {
 			</div>',
 			esc_attr( $styles_and_classes['classes'] ),
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
-			esc_attr( $attributes['prefix'] ),
+			isset( $attributes['prefix'] ) ? esc_attr( $attributes['prefix'] ) : __( 'SKU: ', 'woocommerce' ),
 			$product_sku,
-			esc_attr( $attributes['suffix'] ),
+			isset( $attributes['suffix'] ) ? esc_attr( $attributes['suffix'] ) : ''
 		);
 	}
 }
