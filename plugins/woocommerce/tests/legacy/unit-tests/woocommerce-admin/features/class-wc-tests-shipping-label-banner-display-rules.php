@@ -13,13 +13,6 @@ use Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules;
 class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Case {
 
 	/**
-	 * Jetpack version to test the display manager.
-	 *
-	 * @var string
-	 */
-	private $valid_jetpack_version = '4.4';
-
-	/**
 	 * Stores the default WordPress options stored in the database.
 	 *
 	 * @var array
@@ -178,19 +171,6 @@ class WC_Admin_Tests_Shipping_Label_Banner_Display_Rules extends WC_Unit_Test_Ca
 		$this->with_order(
 			function ( $that ) {
 				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false, true );
-
-				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
-			}
-		);
-	}
-
-	/**
-	 * Test if the banner is hidden when Jetpack version is not at least 4.4.
-	 */
-	public function test_if_banner_hidden_when_jetpack_version_is_old() {
-		$this->with_order(
-			function ( $that ) {
-				$shipping_label_banner_display_rules = new ShippingLabelBannerDisplayRules( true, '1.22.5', false );
 
 				$that->assertEquals( $shipping_label_banner_display_rules->should_display_banner(), false );
 			}
