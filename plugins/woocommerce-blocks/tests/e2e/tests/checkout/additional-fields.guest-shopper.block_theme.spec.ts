@@ -96,37 +96,19 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						shipping: {
 							'Government ID': '12345',
 							'Confirm government ID': '12345',
+							'How wide is your road? (optional)': 'wide',
 						},
 						billing: {
 							'Government ID': '54321',
 							'Confirm government ID': '54321',
+							'How wide is your road? (optional)': 'narrow',
 						},
 					},
 					order: {
-						'How did you hear about us?': 'Other',
+						'How did you hear about us? (optional)': 'other',
 						'What is your favourite colour?': 'Blue',
 					},
 				}
-			);
-
-			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
-			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
-			// by label alone is not reliable unless we know the value.
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Shipping address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.selectOption( 'wide' );
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'How wide is your road?' )
-				.selectOption( 'narrow' );
-
-			await checkoutPageObject.page.evaluate(
-				'document.activeElement.blur()'
 			);
 
 			await checkoutPageObject.page
@@ -246,7 +228,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Shipping address',
 					} )
-					.getByLabel( 'How wide is your road?' )
+					.getByLabel( 'How wide is your road? (optional)' )
 			).toHaveValue( 'wide' );
 			await expect(
 				checkoutPageObject.page
@@ -274,7 +256,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByRole( 'group', {
 						name: 'Billing address',
 					} )
-					.getByLabel( 'How wide is your road?' )
+					.getByLabel( 'How wide is your road? (optional)' )
 			).toHaveValue( 'narrow' );
 		} );
 	} );

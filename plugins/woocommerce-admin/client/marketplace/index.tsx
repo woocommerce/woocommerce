@@ -14,7 +14,6 @@ import {
 import Header from './components/header/header';
 import Content from './components/content/content';
 import Footer from './components/footer/footer';
-import FeedbackModal from './components/feedback-modal/feedback-modal';
 
 function MarketplaceComponents() {
 	const { selectedTab } = useContext( MarketplaceContext );
@@ -27,7 +26,6 @@ function MarketplaceComponents() {
 		<div className={ classNames }>
 			<Header />
 			<Content />
-			<FeedbackModal />
 			<Footer />
 		</div>
 	);

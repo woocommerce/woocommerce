@@ -59,7 +59,8 @@ class ProductGalleryUtils {
 						wp_json_encode(
 							array(
 								'imageId' => $product_gallery_image_id,
-							)
+							),
+							JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 						)
 					);
 

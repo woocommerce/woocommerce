@@ -15,7 +15,7 @@ import {
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { compose } from 'redux';
-import { recordEvent } from '@woocommerce/tracks';
+import { recordEvent as fallbackRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -359,15 +359,18 @@ function getListItems( props ) {
 	} ) );
 }
 
-export const HelpPanel = ( props ) => {
-	const { taskName } = props;
+export const HelpPanel = ( {
+	taskName,
+	recordEvent = fallbackRecordEvent,
+	...props
+} ) => {
 	useEffect( () => {
-		props.recordEvent( 'help_panel_open', {
+		recordEvent( 'help_panel_open', {
 			task_name: taskName || 'homescreen',
 		} );
-	}, [ taskName ] );
+	}, [ taskName, recordEvent ] );
 
-	const listItems = getListItems( props );
+	const listItems = getListItems( { taskName, recordEvent, ...props } );
 
 	return (
 		<Fragment>
@@ -380,10 +383,6 @@ export const HelpPanel = ( props ) => {
 			</Section>
 		</Fragment>
 	);
-};
-
-HelpPanel.defaultProps = {
-	recordEvent,
 };
 
 export default compose(

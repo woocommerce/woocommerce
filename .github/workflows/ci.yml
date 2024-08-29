@@ -16,7 +16,8 @@ on:
         type: string
 
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
+  # Cancel concurrent jobs but not for push event. For push use the run_id to have a unique group.
+  group: ci-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}-${{ inputs.trigger }}
   cancel-in-progress: true
 
 env:
@@ -38,16 +39,20 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          fetch-depth: 0
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        with:
-          php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
+          # If 'base_ref' is available, the 'Build Matrix' step requires non-shallow git-history to identify changed files.
+          fetch-depth: ${{ ( ( github.base_ref && '0' ) || '1' ) }}
+      - name: 'Setup PNPM'
+        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
       - uses: actions/github-script@v7
         name: 'Build Matrix'
         id: 'project-jobs'
         with:
           script: |
+            // Intended behaviour of the jobs generation:
+            // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
+            // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
+            
+            // github.base_ref is only available for pull_request events
             let baseRef = ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
@@ -71,6 +76,12 @@ jobs:
               githubEvent = trigger;
             }
             
+            // `pre-release` should trigger `release-checks`, but without a 'tag' ref. 
+            // This will run all release-checks against the branch the workflow targeted, instead of a release artifact.
+            if ( trigger === 'pre-release' ) {
+              githubEvent = 'release-checks';
+            }
+            
             const child_process = require( 'node:child_process' );
             child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
   
@@ -87,7 +98,8 @@ jobs:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
         with:
-          fetch-depth: 0
+          # the WooCommerce plugin package uses phpcs-changed for linting, which requires non-shallow git-history.
+          fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
@@ -119,7 +131,7 @@ jobs:
         with:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
-          build-type: ${{ ( ( matrix.testType == 'unit:php' || matrix.testType == 'api' ) && 'backend' ) || 'full' }}
+          build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || 'full' }}
           pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
           pull-package-deps: '${{ matrix.projectName }}'
 
@@ -138,29 +150,20 @@ jobs:
         env: ${{ matrix.testEnv.envVars }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
-      - name: 'Get commit message'
-        id: 'get_commit_message'
+      - name: 'Determine BuildKite Analytics Message'
         env:
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            COMMIT_MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+            MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
           elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            COMMIT_MESSAGE="$PR_TITLE"
+            MESSAGE="$PR_TITLE"
           else
-            COMMIT_MESSAGE="${{ github.event_name }}"
+            MESSAGE="${{ github.event_name }}"
           fi
-          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_ENV"
         shell: bash
-
-      - name: 'Run tests (${{ matrix.testType }})'
-        env:
-          E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
-          BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
-          BUILDKITE_ANALYTICS_MESSAGE: ${{ steps.get_commit_message.outputs.COMMIT_MESSAGE }}
-          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
       - name: 'Resolve artifacts path'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -168,7 +171,71 @@ jobs:
         # https://github.com/actions/upload-artifact/issues/176
         env:
           ARTIFACTS_PATH: '${{ matrix.projectPath }}/${{ matrix.report.resultsPath }}'
-        run: echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+        run: |
+          # first runs will probably not have the directory, so we need to create it so that realpath doesn't fail
+          mkdir -p $ARTIFACTS_PATH
+          echo "ARTIFACTS_PATH=$(realpath $ARTIFACTS_PATH)" >> $GITHUB_ENV
+
+      - name: 'Download Playwright last run info'
+        id: 'download-last-run-info'
+        if: ${{ always() && matrix.report.resultsPath != '' && matrix.testType == 'e2e' }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 'last-run__${{ strategy.job-index }}'
+
+      - name: 'Run tests (${{ matrix.testType }})'
+        env:
+          E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
+          BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
+          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
+          LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
+        run: |
+          lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
+          lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
+          
+          if [ -f "$lastRunFile" ]; then
+              echo "Found last run info file: \"$lastRunFile\""
+              echo "Moving to destination: \"$lastRunFileDest\""
+              mkdir -p "$ARTIFACTS_PATH"
+              mv "$lastRunFile" "$lastRunFileDest"
+          else
+              echo "No last run info file found. Searched for: \"$lastRunFile\""
+          fi
+          
+          lastRunFlag=""
+          if [ -f "$lastRunFileDest" ]; then
+            # Playwright last run info is available, parse the file and check if there are failed tests
+            cat "$lastRunFileDest"
+            failedTests=$(jq '.failedTests | length' "$lastRunFileDest")
+            
+            # Only if there are failed tests, we want to use the --last-failed flag. 
+            # The run will fail if we're using the flag and there are no failed tests.
+            if [ "$failedTests" -gt 0 ]; then
+              if [ "$LAST_FAILED_RUN" == "1" ]; then
+                echo "Found failed tests, running only failed tests"
+                # Add shard 1/1 to override the default shard value. No tests will run for shards > 1.
+                # The clean way would be to replace the shard flag from the command, but this also works.
+                lastRunFlag="--last-failed --shard=1/1"
+              else
+                echo "Found failed tests, but LAST_FAILED_RUN is switched off. Running all tests."
+              fi
+            else
+                echo "No failed tests found, running all tests"
+            fi
+          fi
+          
+          # Finally, run the tests
+          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
+          
+      - name: 'Upload Playwright last run info'
+        # always upload the last run info, even if the test run passed
+        if: ${{ always() && matrix.report.resultsPath != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'last-run__${{ strategy.job-index }}'
+          path: '${{ env.ARTIFACTS_PATH }}/.last-run.json'
+          if-no-files-found: ignore
+          overwrite: true
 
       - name: 'Upload artifacts'
         if: ${{ always() && matrix.report.resultsPath != '' }}
@@ -183,15 +250,6 @@ jobs:
           name: flaky-tests-${{ strategy.job-index }}
           path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
           if-no-files-found: ignore
-
-      - name: 'Archive metrics results'
-        if: ${{ success() && startsWith(matrix.name, 'Metrics') }} # this seems too fragile, we should update the reporting path and use the generic upload step above
-        uses: actions/upload-artifact@v4
-        env:
-          WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
-        with:
-          name: metrics-results
-          path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
   
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
@@ -207,7 +265,7 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ always() && github.event_name == 'pull_request' }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -236,15 +294,13 @@ jobs:
         'project-lint-jobs',
         'project-test-jobs',
       ]
-    if: ${{ !cancelled() && github.event_name != 'pull_request' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce'  }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        with:
-          php-version: false
+      - name: 'Setup PNPM'
+        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
 
       - name: 'Send messages for failed jobs'
         env:
@@ -273,7 +329,7 @@ jobs:
         'project-jobs',
         'project-test-jobs',
       ]
-    if: ${{ !cancelled() && needs.project-jobs.outputs.report-jobs != '[]' && ! github.event.pull_request.head.repo.fork  }}
+    if: ${{ !cancelled() && needs.project-jobs.outputs.report-jobs != '[]' && github.repository == 'woocommerce/woocommerce' }}
     strategy:
       fail-fast: false
       matrix:
@@ -330,8 +386,12 @@ jobs:
   
   report-flaky-tests:
     name: 'Create issues for flaky tests'
-    if: ${{ !cancelled() && ! github.event.pull_request.head.repo.fork }}
-    needs: [ 'project-test-jobs' ]
+    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs:
+      [
+        'project-jobs',
+        'project-test-jobs',
+      ]
     runs-on: ubuntu-latest
     permissions:
       contents: read

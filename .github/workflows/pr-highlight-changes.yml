@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'plugins/woocommerce/**'
+      - '!plugins/woocommerce/templates/templates/**'
 jobs:
   analyze:
     name: 'Analyze Branch Changes'
@@ -26,7 +27,7 @@ jobs:
           GIT_CLONE_PROTECTION_ACTIVE: false
         run: |
           HEAD_REF=$(git rev-parse HEAD)
-          exclude="plugins/woocommerce/tests plugins/woocommerce-admin/tests plugins/woocommerce-blocks/tests"
+          exclude="plugins/woocommerce/tests plugins/woocommerce/templates/templates plugins/woocommerce-admin/tests plugins/woocommerce-blocks/tests"
           version=$(pnpm analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
           pnpm analyzer "$HEAD_REF" $version -o "github" -e $exclude
       - uses: 'actions/github-script@v6'

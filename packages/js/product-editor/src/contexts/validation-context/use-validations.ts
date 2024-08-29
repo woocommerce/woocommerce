@@ -19,6 +19,10 @@ export function useValidations< T = unknown >() {
 
 	async function focusByValidatorId( validatorId: string ) {
 		const field = await context.getFieldByValidatorId( validatorId );
+
+		if ( ! field ) {
+			return;
+		}
 		const tab = field.closest(
 			'.wp-block-woocommerce-product-tab__content'
 		);
@@ -58,5 +62,6 @@ export function useValidations< T = unknown >() {
 			} );
 		},
 		focusByValidatorId,
+		getFieldByValidatorId: context.getFieldByValidatorId,
 	};
 }

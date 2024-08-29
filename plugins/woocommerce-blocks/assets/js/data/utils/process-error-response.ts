@@ -209,6 +209,9 @@ export const processErrorResponse = (
 
 	createNotice( 'error', errorMessage, {
 		id: response.code,
-		context: context || getErrorContextFromCode( response.code ),
+		context:
+			context ||
+			response?.data?.context ||
+			getErrorContextFromCode( response.code ),
 	} );
 };

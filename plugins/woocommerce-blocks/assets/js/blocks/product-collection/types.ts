@@ -100,10 +100,11 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
-		preview: {
+		preview?: {
 			initialPreviewState?: PreviewState;
 			setPreviewState?: SetPreviewState;
 		};
+		usesReference?: string[];
 		context: {
 			templateSlug: string;
 		};
@@ -134,7 +135,6 @@ export type QueryControlProps = {
 
 export enum CoreCollectionNames {
 	PRODUCT_CATALOG = 'woocommerce/product-collection/product-catalog',
-	CUSTOM = 'woocommerce/product-collection/custom',
 	BEST_SELLERS = 'woocommerce/product-collection/best-sellers',
 	FEATURED = 'woocommerce/product-collection/featured',
 	NEW_ARRIVALS = 'woocommerce/product-collection/new-arrivals',

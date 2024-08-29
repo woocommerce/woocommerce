@@ -53,7 +53,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-products.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-tax.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-shipping.php';
-				$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
+				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways-react.php';
+				} else {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-payment-gateways.php';
+				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';

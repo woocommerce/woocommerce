@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,9 +13,7 @@ const postForm = document.getElementById( 'posts-filter' );
 if ( postForm ) {
 	const couponRoot = document.createElement( 'div' );
 	couponRoot.setAttribute( 'id', 'coupon-root' );
-
-	render(
-		<CouponsOverview />,
-		postForm.parentNode.appendChild( couponRoot )
+	createRoot( postForm.parentNode.appendChild( couponRoot ) ).render(
+		<CouponsOverview />
 	);
 }

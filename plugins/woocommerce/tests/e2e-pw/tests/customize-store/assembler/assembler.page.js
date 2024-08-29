@@ -17,7 +17,7 @@ export class AssemblerPage {
 		);
 
 		await frame
-			.getByRole( 'button', { name: 'Save' } )
+			.getByRole( 'button', { name: 'Finish customizing' } )
 			.waitFor( { timeout: 25000 } );
 	}
 

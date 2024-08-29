@@ -366,3 +366,32 @@ export const useProductCollectionQueryContext = ( {
 		return queryContext;
 	}, [ queryContextIncludes, productCollectionBlockAttributes ] );
 };
+
+export const parseTemplateSlug = ( rawTemplateSlug = '' ) => {
+	const categoryPrefix = 'category-';
+	const productCategoryPrefix = 'taxonomy-product_cat-';
+	const productTagPrefix = 'taxonomy-product_tag-';
+
+	if ( rawTemplateSlug.startsWith( categoryPrefix ) ) {
+		return {
+			taxonomy: 'category',
+			slug: rawTemplateSlug.replace( categoryPrefix, '' ),
+		};
+	}
+
+	if ( rawTemplateSlug.startsWith( productCategoryPrefix ) ) {
+		return {
+			taxonomy: 'product_cat',
+			slug: rawTemplateSlug.replace( productCategoryPrefix, '' ),
+		};
+	}
+
+	if ( rawTemplateSlug.startsWith( productTagPrefix ) ) {
+		return {
+			taxonomy: 'product_tag',
+			slug: rawTemplateSlug.replace( productTagPrefix, '' ),
+		};
+	}
+
+	return { taxonomy: '', slug: '' };
+};

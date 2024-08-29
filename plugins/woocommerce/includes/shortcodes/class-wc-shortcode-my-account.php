@@ -39,6 +39,33 @@ class WC_Shortcode_My_Account {
 			return;
 		}
 
+		self::my_account_add_notices();
+
+		// Show the lost password page. This can still be accessed directly by logged in accounts which is important for the initial create password links sent via email.
+		if ( isset( $wp->query_vars['lost-password'] ) ) {
+			self::lost_password();
+			return;
+		}
+
+		// Show login form if not logged in.
+		if ( ! is_user_logged_in() ) {
+			wc_get_template( 'myaccount/form-login.php' );
+			return;
+		}
+
+		// Output the my account page.
+		self::my_account( $atts );
+	}
+
+	/**
+	 * Add notices to the my account page.
+	 *
+	 * Historically a filter has existed to render a message above the my account page content while the user is
+	 * logged out. See `woocommerce_my_account_message`.
+	 */
+	private static function my_account_add_notices() {
+		global $wp;
+
 		if ( ! is_user_logged_in() ) {
 			/**
 			 * Filters the message shown on the 'my account' page when the user is not logged in.
@@ -50,27 +77,18 @@ class WC_Shortcode_My_Account {
 			if ( ! empty( $message ) ) {
 				wc_add_notice( $message );
 			}
-
-			// After password reset, add confirmation message.
-			if ( ! empty( $_GET['password-reset'] ) ) { // WPCS: input var ok, CSRF ok.
-				wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
-			}
-
-			if ( isset( $wp->query_vars['lost-password'] ) ) {
-				self::lost_password();
-			} else {
-				wc_get_template( 'myaccount/form-login.php' );
-			}
-			return;
 		}
 
-		if ( isset( $wp->query_vars['customer-logout'] ) ) {
+		// After password reset, add confirmation message.
+		if ( ! empty( $_GET['password-reset'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wc_add_notice( __( 'Your password has been reset successfully.', 'woocommerce' ) );
+		}
+
+		// After logging out without a nonce, add confirmation message.
+		if ( isset( $wp->query_vars['customer-logout'] ) && is_user_logged_in() ) {
 			/* translators: %s: logout url */
 			wc_add_notice( sprintf( __( 'Are you sure you want to log out? <a href="%s">Confirm and log out</a>', 'woocommerce' ), wc_logout_url() ) );
 		}
-
-		// Output the my account page.
-		self::my_account( $atts );
 	}
 
 	/**

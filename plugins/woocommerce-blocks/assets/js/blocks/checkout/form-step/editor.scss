@@ -9,11 +9,13 @@
 		display: block;
 	}
 }
-.wc-block-components-checkout-step__title {
+.wc-block-components-checkout-step__title,
+.wc-block-components-checkout-step__description {
 	display: flex;
 	width: 100%;
 
 	.block-editor-plain-text {
 		height: auto !important;
+		resize: none !important;
 	}
 }

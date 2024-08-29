@@ -31,6 +31,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
 		add_action( 'deleted_transient', array( $this, 'delete_default_attribute_id_transient' ) );
+		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 	}
 
 	/**
@@ -44,7 +45,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_attribute() );
+			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_product_attribute() );
 		}
 	}
 
@@ -134,7 +135,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 									'value'         => $term,
 									'attributeSlug' => $product_attribute,
 									'queryType'     => get_query_var( "query_type_{$product_attribute}" ),
-								)
+								),
+								JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 							),
 						),
 					);
@@ -160,6 +162,11 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if ( empty( $attributes['attributeId'] ) ) {
+			$default_product_attribute = $this->get_default_product_attribute();
+			$attributes['attributeId'] = $default_product_attribute->attribute_id;
+		}
+
 		// don't render if its admin, or ajax in progress.
 		if ( is_admin() || wp_doing_ajax() || empty( $attributes['attributeId'] ) ) {
 			return '';
@@ -173,7 +180,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				'<div %s></div>',
 				get_block_wrapper_attributes(
 					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 						'data-has-filter'     => 'no',
 					)
 				),
@@ -225,8 +232,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'<div %1$s>%2$s%3$s</div>',
 			get_block_wrapper_attributes(
 				array(
-					'data-wc-context'     => wp_json_encode( $context ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 					'data-has-filter'     => 'yes',
 				)
 			),
@@ -360,9 +367,17 @@ final class ProductFilterAttribute extends AbstractBlock {
 	/**
 	 * Get the attribute if with most term but closest to 30 terms.
 	 *
-	 * @return int
+	 * @return object
 	 */
-	private function get_default_attribute() {
+	private function get_default_product_attribute() {
+		// Cache this variable in memory to prevent repeated database queries to check
+		// for transient in the same request.
+		static $cached = null;
+
+		if ( $cached ) {
+			return $cached;
+		}
+
 		$cached = get_transient( 'wc_block_product_filter_attribute_default_attribute' );
 
 		if ( $cached ) {
@@ -402,9 +417,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 		}
 
-		$default_attribute = array(
-			'id'    => 0,
-			'label' => __( 'Attribute', 'woocommerce' ),
+		$default_attribute = (object) array(
+			'attribute_id'      => '0',
+			'attribute_name'    => 'attribute',
+			'attribute_label'   => __( 'Attribute', 'woocommerce' ),
+			'attribute_type'    => 'select',
+			'attribute_orderby' => 'menu_order',
+			'attribute_public'  => 0,
 		);
 
 		if ( $attribute_id ) {
@@ -414,5 +433,53 @@ final class ProductFilterAttribute extends AbstractBlock {
 		set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute );
 
 		return $default_attribute;
+	}
+
+	/**
+	 * Register pattern for default product attribute.
+	 */
+	public function register_block_patterns() {
+		$default_attribute = $this->get_default_product_attribute();
+		register_block_pattern(
+			'woocommerce/default-attribute-filter',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  => strtr(
+					'
+<!-- wp:woocommerce/product-filter {"filterType":"attribute-filter","attributeId":{{attribute_id}}} -->
+<!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group">
+	<!-- wp:heading {"level":3} -->
+	<h3 class="wp-block-heading">{{attribute_label}}</h3>
+	<!-- /wp:heading -->
+
+	<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true,"move":false}} -->
+	<!-- wp:buttons {"layout":{"type":"flex"}} -->
+	<div class="wp-block-buttons">
+		<!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
+		<div
+			class="wp-block-button wc-block-product-filter-clear-button is-style-outline"
+			style="text-decoration: underline"
+		>
+			<a class="wp-block-button__link wp-element-button" style="border-style: none; border-width: 0px">Clear</a>
+		</div>
+		<!-- /wp:button -->
+	</div>
+	<!-- /wp:buttons -->
+	<!-- /wp:woocommerce/product-filter-clear-button -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:woocommerce/product-filter-attribute {"attributeId":{{attribute_id}},"lock":{"remove":true}} /-->
+<!-- /wp:woocommerce/product-filter -->
+					',
+					array(
+						'{{attribute_id}}'    => intval( $default_attribute->attribute_id ),
+						'{{attribute_label}}' => esc_html( $default_attribute->attribute_label ),
+					)
+				),
+			)
+		);
 	}
 }

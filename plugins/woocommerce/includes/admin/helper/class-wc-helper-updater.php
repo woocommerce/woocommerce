@@ -188,9 +188,11 @@ class WC_Helper_Updater {
 	public static function add_connect_woocom_plugin_message() {
 		$connect_page_url = add_query_arg(
 			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => rawurlencode( '/extensions' ),
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_plugin_screen_connect',
 			),
 			admin_url( 'admin.php' )
 		);
@@ -257,8 +259,13 @@ class WC_Helper_Updater {
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
+		$installed_or_unconnected = array_merge(
+			WC_Helper::get_installed_subscriptions(),
+			WC_Helper::get_unconnected_subscriptions()
+		);
+
 		// Product subscriptions.
-		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+		$subscriptions = wp_list_filter( $installed_or_unconnected, array( 'product_id' => $product_id ) );
 		if ( empty( $subscriptions ) ) {
 			return;
 		}

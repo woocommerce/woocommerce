@@ -43,7 +43,7 @@ const getSharedPlugins = ( {
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					cwd: process.cwd(),
 					failOnError: 'warn',
 			  } )
@@ -94,7 +94,9 @@ const getCoreConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(t|j)sx?$/,
-					exclude: /node_modules/,
+					exclude: [
+						/[\/\\](node_modules|build|docs|bin|storybook|tests|test)[\/\\]/,
+					],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -208,7 +210,7 @@ const getMainConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -349,7 +351,7 @@ const getFrontConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -471,7 +473,7 @@ const getPaymentsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -582,7 +584,7 @@ const getExtensionsConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -693,7 +695,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -856,6 +858,7 @@ const getStylingConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {
@@ -976,7 +979,7 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: [
 						{
 							loader: require.resolve( 'babel-loader' ),
@@ -1062,7 +1065,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			rules: [
 				{
 					test: /\.(j|t)sx?$/,
-					exclude: /node_modules/,
+					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
 					use: {
 						loader: 'babel-loader',
 						options: {

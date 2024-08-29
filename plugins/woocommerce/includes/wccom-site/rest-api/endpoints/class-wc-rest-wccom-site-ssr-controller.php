@@ -55,7 +55,7 @@ class WC_REST_WCCOM_Site_SSR_Controller extends WC_REST_WCCOM_Site_Controller {
 	}
 
 	/**
-	 * Generate SSR data and submit it to WooCommmerce.com.
+	 * Generate SSR data and submit it to WooCommerce.com.
 	 *
 	 * @since  7.8.0
 	 * @param  WP_REST_Request $request Full details about the request.

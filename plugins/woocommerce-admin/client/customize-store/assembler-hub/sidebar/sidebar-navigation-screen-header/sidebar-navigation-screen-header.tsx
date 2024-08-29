@@ -6,12 +6,10 @@
 import { __ } from '@wordpress/i18n';
 import {
 	useCallback,
-	createInterpolateElement,
 	useContext,
 	useEffect,
 	useMemo,
 } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 // @ts-expect-error No types for this exist yet.
@@ -21,7 +19,6 @@ import { store as coreStore } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { usePatternsByCategory } from '../../hooks/use-patterns';
 import { useSelectedPattern } from '../../hooks/use-selected-pattern';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
@@ -35,7 +32,6 @@ import {
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
-import { trackEvent } from '~/customize-store/tracking';
 
 import './style.scss';
 
@@ -140,31 +136,9 @@ export const SidebarNavigationScreenHeader = ( {
 				resetHighlightedBlockClientId();
 				onNavigateBackClick();
 			} }
-			description={ createInterpolateElement(
-				__(
-					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
-					'woocommerce'
-				),
-				{
-					EditorLink: (
-						<Link
-							onClick={ () => {
-								trackEvent(
-									'customize_your_store_assembler_hub_editor_link_click',
-									{
-										source: 'header',
-									}
-								);
-								window.open(
-									`${ ADMIN_URL }site-editor.php`,
-									'_blank'
-								);
-								return false;
-							} }
-							href=""
-						/>
-					),
-				}
+			description={ __(
+				"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the Editor.",
+				'woocommerce'
 			) }
 			content={
 				<>

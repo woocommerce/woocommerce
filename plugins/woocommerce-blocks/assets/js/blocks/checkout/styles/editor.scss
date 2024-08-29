@@ -8,6 +8,10 @@
 		align-items: flex-start;
 		padding-left: 5px;
 
+		&:has(> :first-child.wp-block-woocommerce-checkout-totals-block) {
+			flex-direction: row-reverse;
+		}
+
 		.wc-block-checkout__additional_fields {
 			padding: 0;
 		}

@@ -12,37 +12,7 @@ import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
 import { useValidations } from '../../contexts/validation-context';
 import type { WPError } from '../../hooks/use-error-handler';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
-
-export function errorHandler( error: WPError, productStatus: ProductStatus ) {
-	if ( error.code ) {
-		return error;
-	}
-
-	const errorObj = Object.values( error ).find(
-		( value ) => value !== undefined
-	) as WPError | undefined;
-
-	if ( 'variations' in error && error.variations ) {
-		return {
-			...errorObj,
-			code: 'variable_product_no_variation_prices',
-		};
-	}
-
-	if ( errorObj !== undefined ) {
-		return {
-			...errorObj,
-			code: 'product_form_field_error',
-		};
-	}
-
-	return {
-		code:
-			productStatus === 'publish' || productStatus === 'future'
-				? 'product_publish_error'
-				: 'product_create_error',
-	};
-}
+import { formatProductError } from '../../utils/format-product-error';
 
 export function useProductManager< T = Product >( postType: string ) {
 	const [ id ] = useEntityProp< number >( 'postType', postType, 'id' );
@@ -107,7 +77,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return savedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw formatProductError( error as WPError, status );
 		} finally {
 			setIsSaving( false );
 		}
@@ -128,7 +98,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return duplicatedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw formatProductError( error as WPError, status );
 		} finally {
 			setIsSaving( false );
 		}
@@ -174,7 +144,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return deletedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw formatProductError( error as WPError, status );
 		} finally {
 			setTrashing( false );
 		}
