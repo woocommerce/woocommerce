@@ -302,6 +302,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update core profiler continue button container on extension screen [#50582](https://github.com/woocommerce/woocommerce/pull/50582)
 * Update - Update Store Alert actions to have unique keys. [#50424](https://github.com/woocommerce/woocommerce/pull/50424)
 * Update - Update WooCommercePayments task is_supported to use default suggestions [#50585](https://github.com/woocommerce/woocommerce/pull/50585)
+* Dev - Execute test env setup on host instead of wp-env container [#51021](https://github.com/woocommerce/woocommerce/pull/51021)
 * Dev - Added code docs with examples to the Analytics classes [#49425](https://github.com/woocommerce/woocommerce/pull/49425)
 * Dev - Add lost password e2e tests [#50611](https://github.com/woocommerce/woocommerce/pull/50611)
 * Dev - Add unit tests for the product_add_publish track. [#49916](https://github.com/woocommerce/woocommerce/pull/49916)
