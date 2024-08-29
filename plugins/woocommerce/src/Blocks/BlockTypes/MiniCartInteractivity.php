@@ -336,7 +336,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		}
 		$price_color = array_key_exists( 'priceColor', $attributes ) ? $attributes['priceColor']['color'] : '';
 
-		return '<span class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . ' "></span>' . $this->get_include_tax_label_markup( $attributes );
+		return '<span data-wc-text="context.amount" data-wc-bind--aria-label="state.priceAriaLabel" class="wc-block-mini-cart__amount" style="color:' . esc_attr( $price_color ) . ' "></span>' . $this->get_include_tax_label_markup( $attributes );
 	}
 
 	/**
