@@ -122,7 +122,7 @@
 
 ### Taxes
 
-1. Setup two differnt tax rates, one for your store base address for 10%, one for a differnt address for 20%.
+1. Setup two different tax rates, one for your store base address for 10%, one for a different address for 20%.
 2. Create a pickup location with an address that matches the 20% tax address.
 3. Create a pickup location without an address.
 4. On Checkout, select regular shipping, use an address that doesn't match the ones above, you should **not** see a tax line item.

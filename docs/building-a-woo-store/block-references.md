@@ -42,16 +42,16 @@ Display a call to action button which either adds the product to the cart, or li
 -	**Supports:** align (full, wide), color (link, text, ~~background~~), interactivity, typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, textAlign, width
 
-## Product Price - woocommerce/product-price
+## Product Image - woocommerce/product-image
 
-Display the price of a product.
+Display the main product image.
 
--	**Name:** woocommerce/product-price
+-	**Name:** woocommerce/product-image
 -	**Category:** woocommerce-product-elements
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** 
--	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
+-	**Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
 
 ## Product Details - woocommerce/product-details
 
@@ -140,6 +140,17 @@ Display related products.
 -   **Parent:** 
 -	**Supports:** align, ~~reusable~~
 -	**Attributes:** 
+
+## On-Sale Badge - woocommerce/product-sale-badge
+
+Displays an on-sale badge if the product is on-sale.
+
+-	**Name:** woocommerce/product-sale-badge
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** 
+-	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductTemplate, productId
 
 ## Active Filters Controls - woocommerce/active-filters
 
