@@ -8,7 +8,7 @@ const excludedProductName = 'Excluded test product';
 const includedCategoryName = 'Included Category';
 const excludedCategoryName = 'Excluded Category';
 
-// This waits for the cart page to refresh after applying the coupon to prevent flakyness.
+// This applies a coupon and waits for the result to prevent flakyness.
 const applyCoupon = async ( page ) => {
 	const responsePromise = page.waitForResponse(
 		( response ) =>
