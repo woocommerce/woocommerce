@@ -72,7 +72,7 @@ export const Card: React.FC< TaxChildProps > = ( {
 						} );
 					} }
 					onComplete={ () => {
-						recordEvent( 'tasklist_tax_installed_plugin', {
+						recordEvent( 'tasklist_tax_install_plugin_success', {
 							selected_option: STRIPE_TAX_PLUGIN_SLUG,
 						} );
 						const { updateAndPersistSettingsForGroup } =
