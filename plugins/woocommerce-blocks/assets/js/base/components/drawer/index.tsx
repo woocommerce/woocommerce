@@ -14,8 +14,6 @@ import {
 	useEffect,
 	useRef,
 	forwardRef,
-	useState,
-	useCallback,
 } from '@wordpress/element';
 import { close, Icon } from '@wordpress/icons';
 import {
