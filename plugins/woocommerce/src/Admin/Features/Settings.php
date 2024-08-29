@@ -1,4 +1,4 @@
-<?php
+<?php //phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * WooCommerce Settings.
  */
