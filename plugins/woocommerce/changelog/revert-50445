@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Execute test env setup on host instead of wp-env container
