@@ -49,6 +49,7 @@ jobs:
                   const pullRequestUrl = issue.pull_request.url;
                   const prDetails = await github.request(pullRequestUrl);
                   core.setOutput('base_ref', prDetails.data.base.ref);
+                  core.setOutput('prLabels', prDetails.data.labels.map(label => label.name).join(","));
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -58,7 +59,9 @@ jobs:
               with:
                   script: |
                       const baseRef = process.env.BASE_REF;
+                      const prLabels = process.env.LABELS.split(",");
                       console.log("baseRef:", baseRef);
+                      console.log("prLabels:", prLabels);
 
                       let run = false;
 
@@ -70,6 +73,8 @@ jobs:
 
                       const isBot = context.payload.pull_request && ( context.payload.pull_request.user.login == 'github-actions[bot]' || context.payload.pull_request.user.type == 'Bot' );
 
+                      const isCFEReady = prLabels.includes("CFE ready");
+
                       if ( !isBot && ( isManualTrigger || isMergedMilestonedIssue || isMergedMilestonedPR ) ) {
                         core.setOutput( 'run', 'true' );
                       } else {
@@ -77,6 +82,7 @@ jobs:
                       }
               env:
                 BASE_REF: ${{ steps.fetch_pr_details.outputs.base_ref }}
+                PR_LABELS: ${{ steps.fetch_pr_details.outputs.prLabels }}
 
     prep:
         name: Prep inputs
@@ -94,8 +100,17 @@ jobs:
               with:
                   script: |
                       const event = ${{ toJSON( github.event ) }}
+                      const isCFEReady = process.env.PR_LABELS.split(",").includes("CFE ready");
 
                       // Means this workflow was triggered manually.
+                      if ( isCFEReady ) {                        
+                        core.setOutput( 'new_cfe_flow', true )
+
+                        const baseBranchOfPR = ${{ steps.fetch_pr_details.outputs.base_ref }}
+                        const releaseBranchVersion = baseBranchOfPR.replace( 'release/', '' )
+                        core.setOutput( 'version', releaseBranchVersion )
+                        core.setOutput( 'release', baseBranchOfPR )
+                      } else
                       if ( event.inputs && event.inputs.release_branch ) {
                         const releaseBranch = '${{ inputs.release_branch }}'
                         const version = releaseBranch.replace( 'release/', '' )
@@ -166,6 +181,7 @@ jobs:
 
             - name: Get commit sha from PR
               id: commit-sha
+              if: needs.prep.outputs.new_cfe_flow != true
               uses: actions/github-script@v6
               with:
                   script: |
@@ -178,6 +194,7 @@ jobs:
                       core.setOutput( 'sha', pr.data.merge_commit_sha )
 
             - name: Cherry pick
+              if: needs.prep.outputs.new_cfe_flow != true
               run: |
                   git cherry-pick ${{ steps.commit-sha.outputs.sha }} -m1
 
