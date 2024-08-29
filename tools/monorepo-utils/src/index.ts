@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 /**
  * Internal dependencies
  */
+import PullRequest from './pull-requests/commands';
 import CodeFreeze from './code-freeze/commands';
 import Slack from './slack/commands/slack';
 import Manifest from './md-docs/commands';
@@ -38,7 +39,8 @@ const program = new Command()
 	.addCommand( CIJobs )
 	.addCommand( WorkflowProfiler )
 	.addCommand( Manifest )
-	.addCommand( SlackTestReport );
+	.addCommand( SlackTestReport )
+	.addCommand( PullRequest );
 
 program.exitOverride();
 
