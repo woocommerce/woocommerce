@@ -6,7 +6,11 @@ import { Command } from '@commander-js/extra-typings';
 /**
  * Internal dependencies
  */
-import { getIssuesByLabel, updateIssue } from '../../../core/github/repo';
+import {
+	getIssuesByLabel,
+	updateIssue,
+	getRepositoryLabel,
+} from '../../../core/github/repo';
 import { Logger } from '../../../core/logger';
 
 export const replaceLabelsCommand = new Command( 'replace-labels' )
@@ -31,8 +35,8 @@ export const replaceLabelsCommand = new Command( 'replace-labels' )
 		'Only remove the label if it already contains a label that starts with.'
 	)
 	.action( async ( options ) => {
-		const { label, owner, name, replacementLabel, removeIfStartsWith } =
-			options;
+		const { owner, name, replacementLabel, removeIfStartsWith } = options;
+		const label = options.label?.toLowerCase();
 
 		if ( ! label ) {
 			Logger.warn(
@@ -50,11 +54,28 @@ export const replaceLabelsCommand = new Command( 'replace-labels' )
 			process.exit( 0 );
 		}
 
+		try {
+			Logger.startTask(
+				`Checking if "${ replacementLabel }" exists in ${ name } repository.`
+			);
+			await getRepositoryLabel(
+				{ owner, name },
+				replacementLabel.toLowerCase()
+			);
+			Logger.endTask();
+		} catch ( e ) {
+			Logger.endTask();
+			Logger.warn(
+				`"${ replacementLabel }" does not exist in ${ name } repository. Please create the label first.`
+			);
+			process.exit( 0 );
+		}
+
 		for ( const issue of results ) {
 			// Get labels by name only and filter out the existing label.
 			const labels = issue.labels
 				.map( ( l ) => ( typeof l === 'string' ? l : l.name ) )
-				.filter( ( l ) => l !== label );
+				.filter( ( l ) => l.toLowerCase() !== label );
 
 			/**
 			 * Check if label with prefix already exists, in that case we only remove the label.

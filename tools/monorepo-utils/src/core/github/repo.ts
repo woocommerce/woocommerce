@@ -40,6 +40,31 @@ export const getLatestGithubReleaseVersion = async ( options: {
 	).tagName;
 };
 
+export const getRepositoryLabel = async (
+	options: {
+		owner?: string;
+		name?: string;
+	},
+	label: string
+): Promise<
+	Endpoints[ 'GET /repos/{owner}/{repo}/labels/{name}' ][ 'response' ][ 'data' ]
+> => {
+	const { owner, name } = options;
+	try {
+		const { data } = await octokitWithAuth().request(
+			'GET /repos/{owner}/{repo}/labels/{label}',
+			{
+				owner,
+				repo: name,
+				label,
+			}
+		);
+		return data;
+	} catch ( e ) {
+		throw new Error( e );
+	}
+};
+
 export const getIssuesByLabel = async (
 	options: {
 		owner?: string;
