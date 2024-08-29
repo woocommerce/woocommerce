@@ -47,6 +47,7 @@
 		"@storybook/theming": "6.5.17-alpha.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"react": "^18.3.0",
+		"react18": "npm:react@^18.3.0",
 		"react-dom": "^18.3.0",
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",
