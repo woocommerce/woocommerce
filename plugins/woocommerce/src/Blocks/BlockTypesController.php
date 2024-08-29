@@ -328,7 +328,6 @@ final class BlockTypesController {
 			'CatalogSorting',
 			'ClassicTemplate',
 			'ClassicShortcode',
-			'ComingSoon',
 			'CustomerAccount',
 			'FeaturedCategory',
 			'FeaturedProduct',
@@ -426,6 +425,7 @@ final class BlockTypesController {
 					'AllProducts',
 					'Cart',
 					'Checkout',
+					'ComingSoon',
 					'ProductGallery',
 				)
 			);
