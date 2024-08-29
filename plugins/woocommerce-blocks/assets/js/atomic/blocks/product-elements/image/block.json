@@ -24,5 +24,6 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
+	"viewScript": "wc-product-image-interactivity-frontend",
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
