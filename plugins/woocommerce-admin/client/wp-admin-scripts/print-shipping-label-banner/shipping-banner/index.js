@@ -40,7 +40,6 @@ export class ShippingBanner extends Component {
 			wcsAssetsLoading: false,
 			wcsSetupError: false,
 			isShippingLabelButtonBusy: false,
-			installText: this.getInstallText(),
 			isWcsModalOpen: false,
 		};
 	}
@@ -319,25 +318,6 @@ export class ShippingBanner extends Component {
 		} );
 	}
 
-	getInstallText = () => {
-		const { activePlugins, actionButtonLabel } = this.props;
-		if ( activePlugins.includes( wcsPluginSlug ) ) {
-			// If WCS is active, then the only remaining step is to agree to the ToS.
-			return __(
-				'You\'ve already installed WooCommerce Shipping. By clicking "Create shipping label", you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
-				'woocommerce'
-			);
-		}
-		return sprintf(
-			// translators: %s is the action button label.
-			__(
-				'By clicking "%s", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
-				'woocommerce'
-			),
-			actionButtonLabel
-		);
-	};
-
 	openWcsModal = () => {
 		// Since the button is dynamically added, we need to wait for it to become selectable and then click it.
 
@@ -415,7 +395,14 @@ export class ShippingBanner extends Component {
 						<h3>{ headline }</h3>
 						<p>
 							{ interpolateComponents( {
-								mixedString: this.state.installText,
+								mixedString: sprintf(
+									// translators: %s is the action button label.
+									__(
+										'By clicking "%s", {{wcsLink}}WooCommerce Shipping{{/wcsLink}} will be installed and you agree to its {{tosLink}}Terms of Service{{/tosLink}}.',
+										'woocommerce'
+									),
+									actionButtonLabel
+								),
 								components: {
 									tosLink: (
 										<ExternalLink

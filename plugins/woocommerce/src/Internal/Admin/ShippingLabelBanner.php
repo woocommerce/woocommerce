@@ -41,7 +41,6 @@ class ShippingLabelBanner {
 		if ( ! $this->shipping_label_banner_display_rules ) {
 			$dotcom_connected = null;
 			$wcs_version      = null;
-			$wcs_tos_accepted = null;
 
 			if ( class_exists( Jetpack_Connection_Manager::class ) ) {
 				$dotcom_connected = ( new Jetpack_Connection_Manager() )->has_connected_owner();
@@ -49,10 +48,6 @@ class ShippingLabelBanner {
 
 			if ( class_exists( '\Automattic\WCShipping\Utils' ) ) {
 				$wcs_version = \Automattic\WCShipping\Utils::get_wcshipping_version();
-			}
-
-			if ( class_exists( '\WC_Connect_Options' ) ) {
-				$wcs_tos_accepted = \WC_Connect_Options::get_option( 'tos_accepted' );
 			}
 
 			$incompatible_plugins = class_exists( '\WC_Shipping_Fedex_Init' ) ||
@@ -64,7 +59,6 @@ class ShippingLabelBanner {
 				new ShippingLabelBannerDisplayRules(
 					$dotcom_connected,
 					$wcs_version,
-					$wcs_tos_accepted,
 					$incompatible_plugins
 				);
 		}

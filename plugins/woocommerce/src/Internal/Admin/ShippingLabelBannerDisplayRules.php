@@ -32,13 +32,6 @@ class ShippingLabelBannerDisplayRules {
 	private $wcs_version;
 
 	/**
-	 * Whether the WooCommerce Shipping & Tax ToS has been accepted.
-	 *
-	 * @var bool
-	 */
-	private $wcs_tos_accepted;
-
-	/**
 	 * Supported countries by USPS, see: https://webpmt.usps.gov/pmt010.cfm
 	 *
 	 * @var array
@@ -58,13 +51,11 @@ class ShippingLabelBannerDisplayRules {
 	 *
 	 * @param bool        $dotcom_connected Is site connected to wordpress.com?.
 	 * @param string|null $wcs_version Installed WooCommerce Shipping version to check, null if not installed.
-	 * @param bool        $wcs_tos_accepted WooCommerce Shipping & Tax Terms of Service accepted?.
 	 * @param bool        $incompatible_plugins_installed Are there any incompatible plugins installed?.
 	 */
-	public function __construct( $dotcom_connected, $wcs_version, $wcs_tos_accepted, $incompatible_plugins_installed ) {
+	public function __construct( $dotcom_connected, $wcs_version, $incompatible_plugins_installed ) {
 		$this->dotcom_connected                  = $dotcom_connected;
 		$this->wcs_version                       = $wcs_version;
-		$this->wcs_tos_accepted                  = $wcs_tos_accepted;
 		$this->no_incompatible_plugins_installed = ! $incompatible_plugins_installed;
 	}
 

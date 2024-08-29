@@ -525,8 +525,6 @@ describe( 'The message in the banner', () => {
 
 	const notActivatedMessage =
 		'By clicking "Create shipping label", WooCommerce Shipping(opens in a new tab) will be installed and you agree to its Terms of Service(opens in a new tab).';
-	const activatedMessage =
-		'You\'ve already installed WooCommerce Shipping. By clicking "Create shipping label", you agree to its Terms of Service(opens in a new tab).';
 
 	it( 'should show install text "By clicking "Create shipping label"..." when first loaded.', () => {
 		const { container } = createShippingBannerWrapper( {
@@ -554,6 +552,7 @@ describe( 'The message in the banner', () => {
 				itemsCount={ 1 }
 				orderId={ 1 }
 				isWcstCompatible={ true }
+				actionButtonLabel="Create shipping label"
 			/>
 		);
 
@@ -561,16 +560,5 @@ describe( 'The message in the banner', () => {
 			container.querySelector( '.wc-admin-shipping-banner-blob p' )
 				.textContent
 		).toBe( notActivatedMessage );
-	} );
-
-	it( 'should show install text "By clicking "You\'ve already installed WooCommerce Shipping."..." when WooCommerce Service is already installed.', () => {
-		const { container } = createShippingBannerWrapper( {
-			activePlugins: [ wcsPluginSlug ],
-		} );
-
-		expect(
-			container.querySelector( '.wc-admin-shipping-banner-blob p' )
-				.textContent
-		).toBe( activatedMessage );
 	} );
 } );
