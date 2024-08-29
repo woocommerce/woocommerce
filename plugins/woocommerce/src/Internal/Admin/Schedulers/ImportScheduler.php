@@ -60,7 +60,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * Get batch sizes.
 	 *
 	 * @internal
-	 * @retun array
+	 * @return array
 	 */
 	public static function get_batch_sizes() {
 		return array_merge(
@@ -96,7 +96,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 *
 	 * @internal
 	 * @param integer|boolean $days Number of days to import.
-	 * @param boolean         $skip_existing Skip exisiting records.
+	 * @param boolean         $skip_existing Skip existing records.
 	 */
 	public static function import_batch_init( $days, $skip_existing ) {
 		$batch_size = static::get_batch_size( 'import' );
@@ -117,7 +117,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @internal
 	 * @param int      $batch_number Batch number to import (essentially a query page number).
 	 * @param int|bool $days Number of days to import.
-	 * @param bool     $skip_existing Skip exisiting records.
+	 * @param bool     $skip_existing Skip existing records.
 	 * @return void
 	 */
 	public static function import_batch( $batch_number, $days, $skip_existing ) {

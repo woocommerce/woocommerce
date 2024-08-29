@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fixes a warning that only shows up when validating page content
+
+
