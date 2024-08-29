@@ -12,6 +12,8 @@
 }
 
 .wc-block-stock-filter {
+	display: grid;
+
 	&.is-loading {
 		@include placeholder();
 		margin-top: $gap;
