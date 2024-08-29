@@ -21,5 +21,14 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
+	"supports": {
+		"html": false
+	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
