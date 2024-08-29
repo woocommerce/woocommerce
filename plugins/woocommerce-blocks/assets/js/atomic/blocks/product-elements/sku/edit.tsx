@@ -68,7 +68,7 @@ const Edit = ( {
 					attributes.isDescendantOfAllProducts ? undefined : style
 				}
 			>
-				<Block { ...blockAttrs } setAttributes={setAttributes} />
+				<Block { ...blockAttrs } setAttributes={ setAttributes } />
 			</div>
 		</>
 	);

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import {
 	useInnerBlockLayoutContext,
@@ -47,17 +46,13 @@ const Preview = ( {
 		<RichText
 			value={ prefix }
 			placeholder="Prefix"
-			onChange={ ( value ) =>
-				setAttributes( { prefix: value } )
-			}
+			onChange={ ( value ) => setAttributes( { prefix: value } ) }
 		/>
 		<strong>{ sku }</strong>
 		<RichText
 			value={ suffix }
 			placeholder="Suffix"
-			onChange={ ( value ) =>
-				setAttributes( { suffix: value } )
-			}
+			onChange={ ( value ) => setAttributes( { suffix: value } ) }
 		/>
 	</div>
 );
