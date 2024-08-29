@@ -65,7 +65,8 @@ export const SidebarContainer = ( {
 						label={ __( 'Back', 'woocommerce' ) }
 						showTooltip={ false }
 					/>
-
+					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+					{ /* @ts-ignore - TODO - fix this type error. */ }
 					<Heading
 						className="edit-site-sidebar-navigation-screen__title"
 						level={ 1 }

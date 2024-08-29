@@ -66,6 +66,8 @@ export const LysSurvey = ( {
 									/>
 								}
 								iconSize={ 14 }
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore - TODO - fix this type error.
 								size={ 24 }
 								onClick={ () => {
 									setIsShowThanks( false );

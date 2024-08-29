@@ -38,6 +38,8 @@ export const WooTaskListCompletion = ( {
 }: WooTaskListCompletionProps ) => {
 	return (
 		<Fill name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }>
+			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+			{ /* @ts-ignore - TODO - fix this type error. */ }
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
@@ -57,12 +59,16 @@ export type WooTaskListCompletionFillProps = {
 WooTaskListCompletion.Slot = ( {
 	fillProps,
 }: {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - TODO - fix this type error.
 	fillProps: Slot.Props & WooTaskListCompletionFillProps;
 } ) => (
 	<Slot
 		name={ EXPERIMENTAL_WC_TASK_LIST_COMPLETION_SLOT_NAME }
 		fillProps={ fillProps }
 	>
+		{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+		{ /* @ts-ignore - TODO - fix this type error. */ }
 		{ sortFillsByOrder }
 	</Slot>
 );

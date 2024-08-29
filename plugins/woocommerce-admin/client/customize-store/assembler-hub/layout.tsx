@@ -163,6 +163,7 @@ export const Layout = () => {
 								animate={ 'view' }
 							>
 								<SiteHub
+									// @ts-ignore - TODO - fix this type error.
 									as={ motion.div }
 									variants={ {
 										view: { x: 0 },

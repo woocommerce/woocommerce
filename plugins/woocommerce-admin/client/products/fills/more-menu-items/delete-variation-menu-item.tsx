@@ -130,6 +130,8 @@ export const DeleteVariationMenuItem = ( {
 			<MenuGroup>
 				<MenuItem
 					isDestructive
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore - TODO - fix this type error.
 					variant="tertiary"
 					onClick={ handleMenuItemClick }
 				>

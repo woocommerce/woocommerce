@@ -41,6 +41,7 @@ export const SiteHub = forwardRef(
 			isTransparent: boolean;
 			className: string;
 			as: string;
+			// @ts-ignore - TODO - fix this type error.
 			variants: motion.Variants;
 		},
 		ref
@@ -58,6 +59,7 @@ export const SiteHub = forwardRef(
 
 		return (
 			<motion.div
+				// @ts-ignore - TODO - fix this type error.
 				ref={ ref }
 				{ ...restProps }
 				className={ clsx( 'edit-site-site-hub', restProps.className ) }

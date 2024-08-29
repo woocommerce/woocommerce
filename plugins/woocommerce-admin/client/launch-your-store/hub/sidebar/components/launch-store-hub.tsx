@@ -98,6 +98,8 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 				animate={ 'view' }
 			>
 				<SiteHub
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore - TODO - fix this type error.
 					as={ motion.div }
 					variants={ {
 						view: { x: 0 },

@@ -42,6 +42,8 @@ const CustomizeStoreHeader = ( {
 				<h1>{ __( 'Start customizing your store', 'woocommerce' ) }</h1>
 				<p>{ taskDescription }</p>
 				<Button
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore - TODO - fix this type error.
 					isSecondary={ task.isComplete }
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }

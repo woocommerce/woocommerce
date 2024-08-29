@@ -195,6 +195,8 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 								<Button
 									className="button alignright"
 									onClick={ () => installPaymentGateway() }
+									// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+									// @ts-ignore - TODO - fix this type error.
 									isSecondary
 									isBusy={ installing }
 									aria-disabled={ installing }

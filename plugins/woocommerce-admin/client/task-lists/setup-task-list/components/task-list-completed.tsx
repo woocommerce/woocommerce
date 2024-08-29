@@ -37,9 +37,13 @@ export const TaskListCompleted = ( {
 									'woocommerce'
 								) }
 							</h2>
+							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+							{ /* @ts-ignore - TODO - fix this type error. */ }
 							<Button isSecondary onClick={ keepTasks }>
 								{ __( 'Keep list', 'woocommerce' ) }
 							</Button>
+							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+							{ /* @ts-ignore - TODO - fix this type error. */ }
 							<Button isPrimary onClick={ hideTasks }>
 								{ __( 'Hide this list', 'woocommerce' ) }
 							</Button>

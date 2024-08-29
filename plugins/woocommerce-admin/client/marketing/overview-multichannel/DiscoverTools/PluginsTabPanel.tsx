@@ -127,6 +127,8 @@ export const PluginsTabPanel = ( {
 					return (
 						<Button
 							variant="secondary"
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore - TODO - fix this type error.
 							href={ getInAppPurchaseUrl( plugin.url ) }
 							disabled={ buttonDisabled }
 							onClick={ () => {

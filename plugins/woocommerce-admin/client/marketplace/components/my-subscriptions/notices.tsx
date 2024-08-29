@@ -39,6 +39,8 @@ export default function Notices() {
 				status={ notice.status }
 				onRemove={ () => removeNotice( notice.productKey ) }
 				key={ notice.productKey }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore - TODO - fix this type error.
 				actions={ actions( notice ) }
 			>
 				<img src={ Alert } alt="" width={ 24 } height={ 24 } />

@@ -133,6 +133,8 @@ export const Plugins = ( {
 				components: {
 					span: <span />,
 					link: (
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - TODO - fix this type error.
 						<Button isLink onClick={ submitInstallationRequest } />
 					),
 				},

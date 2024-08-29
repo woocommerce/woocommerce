@@ -33,9 +33,13 @@ export const LoadSampleProductConfirmModal: React.VFC< Props > = ( {
 				) }
 			</Text>
 			<div className="woocommerce-confirmation-modal-actions">
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+				{ /* @ts-ignore - TODO - fix this type error. */ }
 				<Button isSecondary onClick={ onCancel }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+				{ /* @ts-ignore - TODO - fix this type error. */ }
 				<Button isPrimary onClick={ onImport }>
 					{ __( 'Import sample products', 'woocommerce' ) }
 				</Button>

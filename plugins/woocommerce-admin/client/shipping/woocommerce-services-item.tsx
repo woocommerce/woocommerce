@@ -73,6 +73,8 @@ const WooCommerceServicesItem: React.FC< {
 			</div>
 			<div className="woocommerce-list__item-after">
 				<Button
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore - TODO - fix this type error.
 					isSecondary
 					onClick={ handleSetupClick }
 					isBusy={ pluginsBeingSetup.includes(

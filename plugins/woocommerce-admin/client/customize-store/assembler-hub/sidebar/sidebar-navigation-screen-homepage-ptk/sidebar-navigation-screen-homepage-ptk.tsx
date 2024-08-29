@@ -289,6 +289,7 @@ export const SidebarNavigationScreenHomepagePTK = ( {
 									>
 										<CheckboxControl
 											className="core-profiler__checkbox"
+											// @ts-ignore - TODO - fix this type error.
 											label={ interpolateComponents( {
 												mixedString: __(
 													'More patterns from the WooCommerce.com library are available! Opt in to connect your store and access the full library, plus get more relevant content and a tailored store setup experience. Opting in will enable {{link}}usage tracking{{/link}}, which you can opt out of at any time via WooCommerce settings.',

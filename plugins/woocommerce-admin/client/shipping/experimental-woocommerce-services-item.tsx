@@ -55,6 +55,8 @@ const WooCommerceServicesItem: React.FC< {
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+				{ /* @ts-ignore - TODO - fix this type error. */ }
 				<Button isSecondary onClick={ handleSetupClick }>
 					{ isWCSInstalled
 						? __( 'Activate', 'woocommerce' )

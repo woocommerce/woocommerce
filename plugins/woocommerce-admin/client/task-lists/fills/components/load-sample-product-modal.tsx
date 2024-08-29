@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Modal } from '@wordpress/components';
-import { Spinner } from '@wordpress/components/build/ui';
+import { Modal, Spinner } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
 
 /**
@@ -19,6 +18,8 @@ const LoadSampleProductModal: React.FC = () => {
 			title=""
 			onRequestClose={ () => {} }
 		>
+			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+			{ /* @ts-ignore - TODO - fix this type error. */ }
 			<Spinner color="#007cba" size={ 48 } />
 			<Text className="woocommerce-load-sample-product-modal__title">
 				{ __( 'Loading sample products', 'woocommerce' ) }

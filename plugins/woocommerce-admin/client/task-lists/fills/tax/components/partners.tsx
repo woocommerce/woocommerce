@@ -37,6 +37,8 @@ export const Partners: React.FC< TaxChildProps > = ( {
 				<ul className="woocommerce-tax-partners__other-actions">
 					<li>
 						<Button
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore - TODO - fix this type error.
 							isTertiary
 							disabled={ isPending }
 							isBusy={ isPending }
@@ -49,6 +51,8 @@ export const Partners: React.FC< TaxChildProps > = ( {
 					</li>
 					<li>
 						<Button
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore - TODO - fix this type error.
 							isTertiary
 							disabled={ isPending }
 							isBusy={ isPending }

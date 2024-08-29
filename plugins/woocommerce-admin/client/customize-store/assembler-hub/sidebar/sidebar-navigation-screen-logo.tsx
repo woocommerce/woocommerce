@@ -460,7 +460,6 @@ export const SidebarNavigationScreenLogo = ( {
 								popoverProps={ {
 									className:
 										'woocommerce-customize-store__logo-dropdown-popover',
-									// @ts-expect-error outdated TS.
 									placement: 'bottom-end',
 								} }
 							>

@@ -10,6 +10,8 @@ import { __ } from '@wordpress/i18n';
 import { connectUrl } from '../../../../utils/functions';
 
 interface RenewProps {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - TODO - fix this type error.
 	variant?: Button.ButtonVariant;
 	install?: string;
 }

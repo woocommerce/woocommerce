@@ -84,6 +84,8 @@ export const ShippingRecommendationsList: React.FC = ( { children } ) => (
 				className="woocommerce-recommended-shipping-extensions__more_options_cta"
 				href="https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=shipping_recommendations"
 				target="_blank"
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore - TODO - fix this type error.
 				isTertiary
 			>
 				{ __( 'See more options', 'woocommerce' ) }

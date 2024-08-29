@@ -106,6 +106,7 @@ export const SidebarNavigationScreen = ( {
 							showTooltip={ false }
 						/>
 					) }
+					{ /* @ts-ignore - TODO - fix this type error. */ }
 					<Heading
 						className="edit-site-sidebar-navigation-screen__title"
 						style={

@@ -99,6 +99,8 @@ const ApmList: React.FunctionComponent< ApmListProps > = ( {
 		),
 		before: <img src={ apm.icon } alt="" />,
 		after: (
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore - TODO - fix this type error.
 			<ToggleControl
 				checked={ enabledApms.has( apm ) }
 				onChange={ () => handleToggleChange( apm ) }

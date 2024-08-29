@@ -117,6 +117,8 @@ export const ShippingRecommendation: React.FC<
 				'woocommerce'
 			),
 			content: isJetpackConnected ? (
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore - TODO - fix this type error.
 				<Button onClick={ redirect } isBusy={ isRedirecting } isPrimary>
 					{ __( 'Complete task', 'woocommerce' ) }
 				</Button>

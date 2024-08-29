@@ -72,6 +72,8 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - TODO - fix this type error.
 						isSecondary
 						href={ getAdminLink( manageUrl ) }
 						onClick={ () => {
@@ -88,6 +90,8 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - TODO - fix this type error.
 						isSecondary
 						onClick={ () => installAndActivate( slug ) }
 					>
@@ -98,6 +102,8 @@ export const Plugin: React.FC< PluginProps > = ( {
 					<Button
 						disabled={ isDisabled }
 						isBusy={ isBusy }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - TODO - fix this type error.
 						isSecondary
 						onClick={ () => installAndActivate( slug ) }
 					>

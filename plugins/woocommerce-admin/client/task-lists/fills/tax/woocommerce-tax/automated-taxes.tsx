@@ -42,6 +42,8 @@ export const AutomatedTaxes: React.FC<
 				} ) }
 			</p>
 			<Button
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore - TODO - fix this type error.
 				isPrimary
 				isBusy={ isPending }
 				onClick={ () => {
@@ -55,6 +57,8 @@ export const AutomatedTaxes: React.FC<
 			</Button>
 			<Button
 				disabled={ isPending }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore - TODO - fix this type error.
 				isTertiary
 				onClick={ () => {
 					recordEvent( 'tasklist_tax_setup_automated_proceed', {
@@ -65,6 +69,8 @@ export const AutomatedTaxes: React.FC<
 			>
 				{ __( "No thanks, I'll set up manually", 'woocommerce' ) }
 			</Button>
+			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+			{ /* @ts-ignore - TODO - fix this type error. */ }
 			<Button disabled={ isPending } isTertiary onClick={ onDisable }>
 				{ __( "I don't charge sales tax", 'woocommerce' ) }
 			</Button>

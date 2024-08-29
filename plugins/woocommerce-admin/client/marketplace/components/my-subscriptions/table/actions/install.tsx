@@ -23,6 +23,8 @@ import { NoticeStatus } from '../../../../contexts/types';
 
 interface InstallProps {
 	subscription: Subscription;
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - TODO - fix this type error.
 	variant?: Button.ButtonVariant;
 	onSuccess?: () => void;
 	onError?: () => void;

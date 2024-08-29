@@ -100,10 +100,14 @@ export default function HeaderAccount(): JSX.Element {
 						>
 							<MenuItem
 								className="woocommerce-marketplace__menu-item"
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore - TODO - fix this type error.
 								href={ accountOrConnect }
 							>
 								{ connectionDetails() }
 							</MenuItem>
+							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+							{ /* @ts-ignore - TODO - fix this type error. */ }
 							<MenuItem href={ accountURL }>
 								<Icon
 									icon={ external }

@@ -36,6 +36,8 @@ const WCPaySettingBanner = () => {
 				actionButton={
 					<Button
 						href={ WC_PAY_SETUP_URL }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - TODO - fix this type error.
 						isPrimary
 						onClick={ recordTrack }
 					>

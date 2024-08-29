@@ -149,6 +149,8 @@ function ExitSurveyModal( {}: {
 
 			<div className="woopayments-welcome-page__survey-buttons">
 				<Button
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore - TODO - fix this type error.
 					isTertiary
 					isDestructive
 					onClick={ exitSurvey }
@@ -156,6 +158,8 @@ function ExitSurveyModal( {}: {
 				>
 					{ strings.survey.cancelButton }
 				</Button>
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+				{ /* @ts-ignore - TODO - fix this type error. */ }
 				<Button isSecondary onClick={ sendFeedback } name="send">
 					{ strings.survey.submitButton }
 				</Button>

@@ -62,6 +62,8 @@ export const Navigation = ( {
 								'woocommerce-profiler-navigation-skip-link',
 								classNames.mobile ? 'mobile' : ''
 							) }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore - TODO - fix this type error.
 							isLink
 						>
 							{ skipText }

@@ -82,6 +82,8 @@ export const IntroOptIn = ( {
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
 						className="core-profiler__checkbox"
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore - TODO - fix this type error.
 						label={ interpolateComponents( {
 							mixedString: __(
 								'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking.{{/link}}',

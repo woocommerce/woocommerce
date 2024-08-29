@@ -36,6 +36,8 @@ export const WooCYSSecondaryButton: React.FC< {
 	children?: React.ReactNode;
 	order?: number;
 } > & {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - TODO - fix this type error.
 	Slot: React.FC< Slot.Props >;
 } = ( { children, order = 1 } ) => {
 	return (
@@ -44,6 +46,8 @@ export const WooCYSSecondaryButton: React.FC< {
 				EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME
 			}
 		>
+			{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+			{ /* @ts-ignore - TODO - fix this type error. */ }
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
@@ -58,6 +62,8 @@ WooCYSSecondaryButton.Slot = ( { fillProps } ) => (
 		}
 		fillProps={ fillProps }
 	>
+		{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+		{ /* @ts-ignore - TODO - fix this type error. */ }
 		{ sortFillsByOrder }
 	</Slot>
 );

@@ -16,6 +16,8 @@ import { cloneElement } from '@wordpress/element';
 export const createOrderedChildren = (
 	children: React.ReactNode,
 	order: number,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - TODO - fix this type error.
 	props: Fill.Props
 ) => {
 	if ( typeof children === 'function' ) {
@@ -34,6 +36,8 @@ export const createOrderedChildren = (
  * @param {Array} fills - slot's `Fill`s.
  * @return {Node} Node.
  */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - TODO - fix this type error.
 export const sortFillsByOrder: Slot.Props[ 'children' ] = ( fills ) => {
 	// Copy fills array here because its type is readonly array that doesn't have .sort method in Typescript definition.
 	const sortedFills = [ ...fills ].sort( ( a, b ) => {

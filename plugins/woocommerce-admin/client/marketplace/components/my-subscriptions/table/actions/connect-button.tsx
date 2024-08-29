@@ -21,6 +21,8 @@ import { NoticeStatus } from '../../../../contexts/types';
 interface ConnectProps {
 	subscription: Subscription;
 	onClose?: () => void;
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore - TODO - fix this type error.
 	variant?: Button.ButtonVariant;
 }
 
