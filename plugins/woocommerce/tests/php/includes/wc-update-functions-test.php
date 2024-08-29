@@ -89,5 +89,76 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( strpos( $table_definition, "fk_{$wpdb->prefix}wc_download_log_permission_id" ) );
 	}
 
+	/**
+	 * Test woocommerce_hooked_blocks_version option gets set to "no" when block hooks are disabled for unapproved block themes.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_920_add_wc_hooked_blocks_version_option_block_hooks_version_is_set_to_no() {
+		add_filter( 'woocommerce_hooked_blocks_theme_include_list', '__return_empty_array', 999, 1 );
 
+		switch_theme( 'twentytwentytwo' );
+
+		delete_option( 'woocommerce_hooked_blocks_version' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_920_add_wc_hooked_blocks_version_option();
+
+		$this->assertEquals( 'no', get_option( 'woocommerce_hooked_blocks_version' ) );
+
+		remove_filter( 'woocommerce_hooked_blocks_theme_include_list', '__return_empty_array', 999, 1 );
+	}
+
+	/**
+	 * Test woocommerce_hooked_blocks_version option gets set to "8.4.0" for approved block themes.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_920_add_wc_hooked_blocks_version_option_block_hooks_version_is_set_to_840() {
+		switch_theme( 'twentytwentytwo' );
+
+		delete_option( 'woocommerce_hooked_blocks_version' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_920_add_wc_hooked_blocks_version_option();
+
+		$this->assertEquals( '8.4.0', get_option( 'woocommerce_hooked_blocks_version' ) );
+	}
+
+	/**
+	 * Test woocommerce_hooked_blocks_version option is not overwritten
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_920_add_wc_hooked_blocks_version_option_block_hooks_version_is_not_overwritten() {
+		switch_theme( 'twentytwentytwo' );
+
+		delete_option( 'woocommerce_hooked_blocks_version' );
+		add_option( 'woocommerce_hooked_blocks_version', '1.0.0' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_920_add_wc_hooked_blocks_version_option();
+
+		$this->assertEquals( '1.0.0', get_option( 'woocommerce_hooked_blocks_version' ) );
+	}
+
+	/**
+	 * Test woocommerce_hooked_blocks_version option is not overwritten
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_920_add_wc_hooked_blocks_version_option_block_hooks_version_not_present_for_classic_themes() {
+		switch_theme( 'storefront' );
+
+		delete_option( 'woocommerce_hooked_blocks_version' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_920_add_wc_hooked_blocks_version_option();
+
+		$this->assertEquals( null, get_option( 'woocommerce_hooked_blocks_version', null ) );
+	}
 }

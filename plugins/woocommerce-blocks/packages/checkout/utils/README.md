@@ -2,23 +2,23 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [`extensionCartUpdate`](#extensioncartupdate)
-    -   [Usage](#usage)
-    -   [Options](#options)
-        -   [`args (object, required)`](#args-object-required)
--   [`mustContain`](#mustcontain)
-    -   [Usage](#usage-1)
-    -   [Options](#options-1)
-        -   [`value (string, required)`](#value-string-required)
-        -   [`requiredValue (string, required)`](#requiredvalue-string-required)
+- [`extensionCartUpdate`](#extensioncartupdate)
+   	- [`extensionCartUpdate` Usage](#extensioncartupdate-usage)
+   	- [`extensionCartUpdate` Options](#extensioncartupdate-options)
+      		- [`args (object, required)`](#args-object-required)
+- [`mustContain`](#mustcontain)
+   	- [`mustContain` Usage](#mustcontain-usage)
+   	- [`mustContain` Options](#mustcontain-options)
+      		- [`value (string, required)`](#value-string-required)
+      		- [`requiredValue (string, required)`](#requiredvalue-string-required)
 
 Miscellaneous utility functions for dealing with checkout functionality.
 
 ## `extensionCartUpdate`
 
-When executed, this will call the cart/extensions REST API endpoint. The new cart is then received into the client-side store.
+When executed, this will call the cart/extensions REST API endpoint. The new cart is then received into the client-side store. `extensionCartUpdate` returns a promise that resolves when the cart is updated which should also be used for error handling.
 
-### Usage
+### `extensionCartUpdate` Usage
 
 ```ts
 // Aliased import
@@ -32,10 +32,14 @@ extensionCartUpdate( {
 	data: {
 		key: 'value',
 	},
+} ).then( () => {
+	// Cart has been updated.
+} ).catch( ( error ) => {
+	// Handle error.
 } );
 ```
 
-### Options
+### `extensionCartUpdate` Options
 
 The following options are available:
 
@@ -47,7 +51,7 @@ Args to pass to the Rest API endpoint. This can contain data and a namespace to 
 
 Ensures that a given value contains a string, or throws an error.
 
-### Usage
+### `mustContain` Usage
 
 ```js
 // Aliased import
@@ -60,7 +64,7 @@ mustContain( 'This is a string containing a <price />', '<price />' ); // This w
 mustContain( 'This is a string', '<price />' ); // This will throw an error
 ```
 
-### Options
+### `mustContain` Options
 
 The following options are available:
 

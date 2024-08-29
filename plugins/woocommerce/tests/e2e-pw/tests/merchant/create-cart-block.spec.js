@@ -6,6 +6,7 @@ const {
 	transformIntoBlocks,
 	publishPage,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
@@ -23,7 +24,8 @@ test.describe(
 			await goToPageEditor( { page } );
 
 			await fillPageTitle( page, testPage.title );
-			await insertBlock( page, 'Classic Cart' );
+			const wordPressVersion = await getInstalledWordPressVersion();
+			await insertBlock( page, 'Classic Cart', wordPressVersion );
 			await transformIntoBlocks( page );
 			await publishPage( page, testPage.title );
 

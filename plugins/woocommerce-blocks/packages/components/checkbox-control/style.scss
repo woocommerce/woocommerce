@@ -2,6 +2,7 @@
 	@include reset-color();
 	@include reset-typography();
 	margin-top: em($gap);
+	line-height: 1;
 
 	label {
 		align-items: flex-start;

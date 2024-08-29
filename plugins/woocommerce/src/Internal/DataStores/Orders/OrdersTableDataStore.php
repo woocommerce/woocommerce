@@ -98,7 +98,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Meta keys that are considered ephemereal and do not trigger a full save (updating modified date) when changed.
+	 * Meta keys that are considered ephemeral and do not trigger a full save (updating modified date) when changed.
 	 *
 	 * @var string[]
 	 */
@@ -2586,7 +2586,7 @@ FROM $order_meta_table
 	 * @param \WC_Order $order Order object.
 	 */
 	public function update( &$order ) {
-		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status' );
+		$previous_status = ArrayUtil::get_value_or_default( $order->get_data(), 'status', 'new' );
 
 		// Before updating, ensure date paid is set if missing.
 		if (
@@ -2621,8 +2621,15 @@ FROM $order_meta_table
 		$order->apply_changes();
 		$this->clear_caches( $order );
 
-		// For backwards compatibility, moving a draft order to a valid status triggers the 'woocommerce_new_order' hook.
-		if ( ! empty( $changes['status'] ) && in_array( $previous_status, array( 'new', 'auto-draft', 'draft', 'checkout-draft' ), true ) ) {
+		$draft_statuses = array( 'new', 'auto-draft', 'draft', 'checkout-draft' );
+
+		// For backwards compatibility, this hook should be fired only if the new status is not one of the draft statuses and the previous status was one of the draft statuses.
+		if (
+			! empty( $changes['status'] )
+			&& $changes['status'] !== $previous_status
+			&& ! in_array( $changes['status'], $draft_statuses, true )
+			&& in_array( $previous_status, $draft_statuses, true )
+		) {
 			do_action( 'woocommerce_new_order', $order->get_id(), $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			return;
 		}
@@ -2637,7 +2644,7 @@ FROM $order_meta_table
 	}
 
 	/**
-	 * Proxy to udpating order meta. Here for backward compatibility reasons.
+	 * Proxy to updating order meta. Here for backward compatibility reasons.
 	 *
 	 * @param \WC_Order $order Order object.
 	 *

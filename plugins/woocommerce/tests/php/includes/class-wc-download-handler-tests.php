@@ -74,7 +74,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		$approved_directories->add_approved_directory( 'https://always.trusted' );
 		$approved_directory_rule_id = $approved_directories->add_approved_directory( 'https://new.supplier' );
 
-		$product = WC_Helper_Product::create_downloadable_product(
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
 			array(
 				array(
 					'name' => 'Book 1',
@@ -87,12 +87,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$customer = WC_Helper_Customer::create_customer();
-		$email    = 'admin@example.org';
-		$order    = WC_Helper_Order::create_order( $customer->get_id(), $product );
-		$order->set_status( 'completed' );
-		$order->save();
-
+		$email         = 'admin@example.org';
 		$product_id    = $product->get_id();
 		$downloads     = $product->get_downloads();
 		$download_keys = array_keys( $downloads );
@@ -137,6 +132,111 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 		// Cleanup.
 		add_action( 'woocommerce_download_file_force', $download_counter );
 		self::restore_download_handlers();
+	}
+
+	/**
+	 * @testdox The remaining downloads count should iterate accurately.
+	 */
+	public function test_downloads_remaining_count(): void {
+		self::remove_download_handlers();
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Ok for unit tests.
+		file_put_contents( WP_CONTENT_DIR . '/uploads/woocommerce_uploads/supersheet-123.ods', str_pad( '', 100 ) );
+
+		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
+			array(
+				array(
+					'name' => 'Supersheet 123',
+					'file' => content_url( 'uploads/woocommerce_uploads/supersheet-123.ods' ),
+				),
+			)
+		);
+
+		$product_id    = $product->get_id();
+		$downloads     = $product->get_downloads();
+		$download_keys = array_keys( $downloads );
+		$email         = 'admin@example.org';
+		$download      = current( WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'product_id' => $product_id ) ) );
+
+		$download->set_downloads_remaining( 10 );
+		$download->save();
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		$_GET = array(
+			'download_file' => $product_id,
+			'order'         => $order->get_order_key(),
+			'email'         => $email,
+			'uid'           => hash( 'sha256', $email ),
+			'key'           => $download_keys[0],
+		);
+
+		WC_Download_Handler::download_product();
+		$download = new WC_Customer_Download( $download->get_id() );
+		$this->assertEquals(
+			9,
+			$download->get_downloads_remaining(),
+			'In relation to "normal" download requests, we should see a reduction in the downloads remaining count.'
+		);
+
+		// Let's simulate a ranged request (partial download).
+		$_SERVER['HTTP_RANGE'] = 'bytes=10-50';
+		WC_Download_Handler::download_product();
+		$download = new WC_Customer_Download( $download->get_id() );
+		$this->assertEquals(
+			9,
+			$download->get_downloads_remaining(),
+			'In relation to "ranged" (partial) download requests, we should not see an immediate reduction in the downloads remaining count.'
+		);
+
+		// Repeat (HTTP_RANGE is still set).
+		WC_Download_Handler::download_product();
+		$download = new WC_Customer_Download( $download->get_id() );
+		$this->assertEquals(
+			9,
+			$download->get_downloads_remaining(),
+			'In relation to "ranged" (partial) download requests, we should not see an immediate reduction in the downloads remaining count.'
+		);
+
+		// Find the deferred download tracking action.
+		$deferred_download_tracker = current(
+			WC_Queue::instance()->search(
+				array( 'hook' => WC_Download_Handler::TRACK_DOWNLOAD_CALLBACK )
+			)
+		);
+
+		// Let it do it's thing, and confirm that a further decrement happened (of just 1 unit).
+		do_action_ref_array( $deferred_download_tracker->get_hook(), $deferred_download_tracker->get_args() );
+		$download = new WC_Customer_Download( $download->get_id() );
+		$this->assertEquals(
+			8,
+			$download->get_downloads_remaining(),
+			'In relation to "ranged" (partial) download requests, the deferred update to the downloads remaining count functioned as expected.'
+		);
+
+		self::restore_download_handlers();
+	}
+
+	/**
+	 * Creates a downloadable product, and then places (and completes) an order for that
+	 * object.
+	 *
+	 * @param array[] $downloadable_files Array of arrays, with each inner array specifying the 'name' and 'file'.
+	 *
+	 * @return array {
+	 *     WC_Product,
+	 *     WC_Order
+	 * }
+	 */
+	private function build_downloadable_product_and_order_one( array $downloadable_files ): array {
+		$product  = WC_Helper_Product::create_downloadable_product( $downloadable_files );
+		$customer = WC_Helper_Customer::create_customer();
+		$order    = WC_Helper_Order::create_order( $customer->get_id(), $product );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		return array(
+			$product,
+			$order,
+		);
 	}
 
 	/**

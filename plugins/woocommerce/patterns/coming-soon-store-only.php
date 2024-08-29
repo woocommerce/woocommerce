@@ -20,8 +20,8 @@ if ( 'twentytwentyfour' === $current_theme ) {
 
 ?>
 
-<!-- wp:woocommerce/coming-soon {"storeOnly":true} -->
-<div class="wp-block-woocommerce-coming-soon">
+<!-- wp:woocommerce/coming-soon {"storeOnly":true, "className":"woocommerce-coming-soon-store-only"} -->
+<div class="wp-block-woocommerce-coming-soon woocommerce-coming-soon-store-only">
 
 <?php
 if ( wc_current_theme_is_fse_theme() ) {
@@ -56,6 +56,5 @@ if ( wc_current_theme_is_fse_theme() ) {
 	echo '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->';
 }
 ?>
-
-<style>.woocommerce-breadcrumb {display: none;}</style></div>
+</div>
 <!-- /wp:woocommerce/coming-soon -->

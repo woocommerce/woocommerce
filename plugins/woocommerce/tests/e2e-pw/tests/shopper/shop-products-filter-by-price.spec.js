@@ -6,6 +6,7 @@ const {
 	insertBlockByShortcut,
 	publishPage,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 const singleProductPrice1 = '10';
 const singleProductPrice2 = '50';
@@ -71,7 +72,8 @@ test.describe(
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );
 			await insertBlockByShortcut( page, 'Filter by Price' );
-			await insertBlock( page, 'All Products' );
+			const wordPressVersion = await getInstalledWordPressVersion();
+			await insertBlock( page, 'All Products', wordPressVersion );
 			await publishPage( page, testPage.title );
 
 			// go to the page to test filtering products by price

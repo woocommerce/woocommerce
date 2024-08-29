@@ -1,6 +1,15 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect, request } = require( '@playwright/test' );
 const { logIn } = require( '../utils/login' );
 const { admin, customer } = require( '../test-data/data' );
+const { setOption } = require( '../utils/options' );
+
+test.beforeAll( async ( { baseURL } ) => {
+	try {
+		await setOption( request, baseURL, 'woocommerce_coming_soon', 'no' );
+	} catch ( error ) {
+		console.log( error );
+	}
+} );
 
 test( 'Load the home page', async ( { page } ) => {
 	await page.goto( '/' );
@@ -9,9 +18,7 @@ test( 'Load the home page', async ( { page } ) => {
 			.getByRole( 'link', { name: 'WooCommerce Core E2E Test' } )
 			.count()
 	).toBeGreaterThan( 0 );
-	await expect(
-		page.getByText( 'Proudly powered by WordPress' )
-	).toBeVisible();
+	await expect( page.getByText( /powered by WordPress/i ) ).toBeVisible();
 	expect( await page.title() ).toBe( 'WooCommerce Core E2E Test Suite' );
 	await expect(
 		page.getByRole( 'link', { name: 'WordPress' } )

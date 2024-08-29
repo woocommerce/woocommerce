@@ -9,7 +9,6 @@ import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
 import { ProductCollectionFeedbackPrompt } from '@woocommerce/editor-components/feedback-prompt';
 import {
-	enableAutoUpdate,
 	revertMigration,
 	getUpgradeStatus,
 	HOURS_TO_DISPLAY_UPGRADE_NOTICE,
@@ -36,7 +35,10 @@ import {
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
-import InheritQueryControl from './inherit-query-control';
+import {
+	InheritQueryControl,
+	FilterableControl,
+} from './use-page-context-control';
 import OrderByControl from './order-by-control';
 import OnSaleControl from './on-sale-control';
 import StockStatusControl from './stock-status-control';
@@ -79,10 +81,27 @@ const ProductCollectionInspectorControls = (
 	const showQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
+	const showFilterableControl =
+		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
 	const showOrderControl =
 		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
-	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
 	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
+	const showStockStatusControl = shouldShowFilter(
+		CoreFilterNames.STOCK_STATUS
+	);
+	const showHandPickedProductsControl = shouldShowFilter(
+		CoreFilterNames.HAND_PICKED
+	);
+	const showKeywordControl = shouldShowFilter( CoreFilterNames.KEYWORD );
+	const showAttributesControl = shouldShowFilter(
+		CoreFilterNames.ATTRIBUTES
+	);
+	const showTaxonomyControls = shouldShowFilter( CoreFilterNames.TAXONOMY );
+	const showFeaturedControl = shouldShowFilter( CoreFilterNames.FEATURED );
+	const showCreatedControl = shouldShowFilter( CoreFilterNames.CREATED );
+	const showPriceRangeControl = shouldShowFilter(
+		CoreFilterNames.PRICE_RANGE
+	);
 
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
@@ -114,6 +133,9 @@ const ProductCollectionInspectorControls = (
 				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
+				{ showFilterableControl && (
+					<FilterableControl { ...queryControlProps } />
+				) }
 				<LayoutOptionsControl { ...displayControlProps } />
 				<ColumnsControl { ...displayControlProps } />
 				{ showOrderControl && (
@@ -134,16 +156,30 @@ const ProductCollectionInspectorControls = (
 					{ showOnSaleControl && (
 						<OnSaleControl { ...queryControlProps } />
 					) }
-					<StockStatusControl { ...queryControlProps } />
-					<HandPickedProductsControl { ...queryControlProps } />
-					<KeywordControl { ...queryControlProps } />
-					<AttributesControl { ...queryControlProps } />
-					<TaxonomyControls { ...queryControlProps } />
+					{ showStockStatusControl && (
+						<StockStatusControl { ...queryControlProps } />
+					) }
+					{ showHandPickedProductsControl && (
+						<HandPickedProductsControl { ...queryControlProps } />
+					) }
+					{ showKeywordControl && (
+						<KeywordControl { ...queryControlProps } />
+					) }
+					{ showAttributesControl && (
+						<AttributesControl { ...queryControlProps } />
+					) }
+					{ showTaxonomyControls && (
+						<TaxonomyControls { ...queryControlProps } />
+					) }
 					{ showFeaturedControl && (
 						<FeaturedProductsControl { ...queryControlProps } />
 					) }
-					<CreatedControl { ...queryControlProps } />
-					<PriceRangeControl { ...queryControlProps } />
+					{ showCreatedControl && (
+						<CreatedControl { ...queryControlProps } />
+					) }
+					{ showPriceRangeControl && (
+						<PriceRangeControl { ...queryControlProps } />
+					) }
 				</ToolsPanel>
 			) : null }
 			<ProductCollectionFeedbackPrompt />
@@ -152,13 +188,6 @@ const ProductCollectionInspectorControls = (
 };
 
 export default ProductCollectionInspectorControls;
-
-// Trigger Auto Upgrade of Products only once when module is loaded.
-// This triggers subscription but only if:
-// - auto update is enabled
-// - user haven't reverted the migration
-// - no other subscription is in place
-enableAutoUpdate();
 
 const isProductCollection = ( blockName: string ) =>
 	blockName === metadata.name;

@@ -2,16 +2,15 @@
  * External dependencies
  */
 import { useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import Combobox from '../combobox';
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
+import { Select, SelectOption } from '../select';
 
 export const CountryInput = ( {
 	className,
@@ -22,36 +21,27 @@ export const CountryInput = ( {
 	value = '',
 	autoComplete = 'off',
 	required = false,
-	errorId,
-	errorMessage = __( 'Please select a country', 'woocommerce' ),
 }: CountryInputWithCountriesProps ): JSX.Element => {
-	const options = useMemo(
-		() =>
-			Object.entries( countries ).map(
-				( [ countryCode, countryName ] ) => ( {
-					value: countryCode,
-					label: decodeEntities( countryName ),
-				} )
-			),
-		[ countries ]
-	);
+	const options = useMemo< SelectOption[] >( () => {
+		return Object.entries( countries ).map(
+			( [ countryCode, countryName ] ) => ( {
+				value: countryCode,
+				label: decodeEntities( countryName ),
+			} )
+		);
+	}, [ countries ] );
 
 	return (
-		<div
+		<Select
 			className={ clsx( className, 'wc-block-components-country-input' ) }
-		>
-			<Combobox
-				id={ id }
-				label={ label }
-				onChange={ onChange }
-				options={ options }
-				value={ value }
-				errorId={ errorId }
-				errorMessage={ errorMessage }
-				required={ required }
-				autoComplete={ autoComplete }
-			/>
-		</div>
+			id={ id }
+			label={ label || '' }
+			onChange={ onChange }
+			options={ options }
+			value={ value }
+			required={ required }
+			autoComplete={ autoComplete }
+		/>
 	);
 };
 

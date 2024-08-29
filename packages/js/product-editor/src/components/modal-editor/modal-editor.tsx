@@ -23,6 +23,7 @@ type ModalEditorProps = {
 	onClose?: () => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
 	title: string;
+	name: string;
 };
 
 export function ModalEditor( {
@@ -30,6 +31,7 @@ export function ModalEditor( {
 	onChange,
 	onClose,
 	title,
+	name,
 }: ModalEditorProps ) {
 	const { closeModalEditor } = useDispatch( productEditorUiStore );
 
@@ -58,6 +60,7 @@ export function ModalEditor( {
 				onInput={ debouncedOnChange }
 				onChange={ debouncedOnChange }
 				onClose={ handleClose }
+				name={ name }
 			/>
 		</Modal>
 	);

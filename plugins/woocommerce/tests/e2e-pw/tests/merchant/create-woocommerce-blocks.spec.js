@@ -5,7 +5,9 @@ const {
 	insertBlock,
 	getCanvas,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
+const { getInstalledWordPressVersion } = require( '../../utils/wordpress' );
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
@@ -146,11 +148,15 @@ test.describe(
 		} ) => {
 			await goToPageEditor( { page } );
 
+			await closeChoosePatternModal( { page } );
+
 			await fillPageTitle( page, testPage.title );
+
+			const wordPressVersion = await getInstalledWordPressVersion();
 
 			for ( let i = 0; i < blocks.length; i++ ) {
 				await test.step( `Insert ${ blocks[ i ] } block`, async () => {
-					await insertBlock( page, blocks[ i ] );
+					await insertBlock( page, blocks[ i ], wordPressVersion );
 
 					const canvas = await getCanvas( page );
 

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
+import { registerBlockSingleProductTemplate } from '@woocommerce/atomic-utils';
 
 /**
  * Internal dependencies
@@ -18,7 +18,6 @@ import {
 
 const blockConfig = {
 	...sharedConfig,
-	apiVersion: 2,
 	title,
 	description,
 	usesContext: [ 'query', 'queryId', 'postId' ],
@@ -28,4 +27,8 @@ const blockConfig = {
 	edit,
 };
 
-registerBlockType( 'woocommerce/product-price', blockConfig );
+registerBlockSingleProductTemplate( {
+	blockName: 'woocommerce/product-price',
+	blockSettings: blockConfig,
+	isAvailableOnPostEditor: true,
+} );

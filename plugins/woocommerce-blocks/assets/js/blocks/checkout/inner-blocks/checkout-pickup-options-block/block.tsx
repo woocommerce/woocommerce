@@ -6,6 +6,7 @@ import {
 	useState,
 	useEffect,
 	useCallback,
+	useMemo,
 	createInterpolateElement,
 } from '@wordpress/element';
 import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
@@ -138,10 +139,12 @@ const renderPickupLocation = (
 const Block = (): JSX.Element | null => {
 	const { shippingRates, selectShippingRate } = useShippingData();
 
-	// Get pickup locations from the first shipping package.
-	const pickupLocations = ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
-		isPackageRateCollectable
-	);
+	// Memoize pickup locations to prevent re-rendering when the shipping rates change.
+	const pickupLocations = useMemo( () => {
+		return ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
+			isPackageRateCollectable
+		);
+	}, [ shippingRates ] );
 
 	const [ selectedOption, setSelectedOption ] = useState< string >(
 		() => pickupLocations.find( ( rate ) => rate.selected )?.rate_id || ''
@@ -168,13 +171,19 @@ const Block = (): JSX.Element | null => {
 		renderPickupLocation,
 	};
 
-	// Update the selected option if there is no rate selected on mount.
 	useEffect( () => {
-		if ( ! selectedOption && pickupLocations[ 0 ] ) {
+		if (
+			! selectedOption &&
+			pickupLocations[ 0 ] &&
+			selectedOption !== pickupLocations[ 0 ].rate_id
+		) {
 			setSelectedOption( pickupLocations[ 0 ].rate_id );
 			onSelectRate( pickupLocations[ 0 ].rate_id );
 		}
-	}, [ onSelectRate, pickupLocations, selectedOption ] );
+		// Removing onSelectRate as it lead to an infinite loop when only one pickup location is available.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ pickupLocations, selectedOption ] );
+
 	const packageCount = getShippingRatesPackageCount( shippingRates );
 	return (
 		<>

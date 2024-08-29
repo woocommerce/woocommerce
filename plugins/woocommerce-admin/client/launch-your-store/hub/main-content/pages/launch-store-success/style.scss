@@ -18,7 +18,8 @@
 	display: flex;
 	flex-direction: column;
 	width: 100vw;
-	height: 100vh;
+	min-height: 100vh;
+	max-width: 100vw;
 
 	.woocommerce-launch-store__congrats-header-container {
 		min-height: 64px;

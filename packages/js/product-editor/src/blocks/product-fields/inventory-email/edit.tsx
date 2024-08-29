@@ -52,10 +52,12 @@ export function Edit( {
 		`low_stock_amount-${ clientId }`,
 		async function stockQuantityValidator() {
 			if ( lowStockAmount && lowStockAmount < 0 ) {
-				return __(
-					'This field must be a positive number.',
-					'woocommerce'
-				);
+				return {
+					message: __(
+						'This field must be a positive number.',
+						'woocommerce'
+					),
+				};
 			}
 		},
 		[ lowStockAmount ]

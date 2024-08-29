@@ -23,7 +23,8 @@ import type {
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
-	getDefaultValueOfInheritQueryFromTemplate,
+	getDefaultValueOfInherit,
+	getDefaultValueOfFilterable,
 	useSetPreviewState,
 } from '../utils';
 import InspectorControls from './inspector-controls';
@@ -67,6 +68,7 @@ const useQueryId = (
 
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
+	usesReference,
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const isInitialAttributesSet = useRef( false );
@@ -78,6 +80,7 @@ const ProductCollectionContent = ( {
 		setAttributes,
 		location,
 		attributes,
+		usesReference,
 	} );
 
 	const blockProps = useBlockProps();
@@ -95,7 +98,8 @@ const ProductCollectionContent = ( {
 		...DEFAULT_ATTRIBUTES,
 		query: {
 			...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
-			inherit: getDefaultValueOfInheritQueryFromTemplate(),
+			inherit: getDefaultValueOfInherit(),
+			filterable: getDefaultValueOfFilterable(),
 		},
 		...( attributes as Partial< ProductCollectionAttributes > ),
 		queryId,

@@ -91,11 +91,13 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		if ( as_has_scheduled_action( $action ) ) {
+		$last_request = get_transient( 'last_fetch_patterns_request' );
+		if ( as_has_scheduled_action( $action ) || false !== $last_request ) {
 			return;
 		}
 
 		as_schedule_single_action( time(), $action );
+		set_transient( 'last_fetch_patterns_request', time(), HOUR_IN_SECONDS );
 	}
 
 	/**
@@ -185,6 +187,7 @@ class PTKPatternsStore {
 
 		$patterns = $this->ptk_client->fetch_patterns(
 			array(
+				// This is the site where the patterns are stored. Despite the 'wpcomstaging.com' domain suggesting a staging environment, this URL points to the production environment where stable versions of the patterns are maintained.
 				'site'       => 'wooblockpatterns.wpcomstaging.com',
 				'categories' => array(
 					'_woo_intro',

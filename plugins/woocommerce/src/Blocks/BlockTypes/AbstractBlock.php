@@ -450,14 +450,16 @@ abstract class AbstractBlock {
 				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
 			];
 			if ( is_admin() && ! WC()->is_rest_api_request() ) {
-				$wc_blocks_config = array_merge(
+				$product_counts     = wp_count_posts( 'product' );
+				$published_products = isset( $product_counts->publish ) ? $product_counts->publish : 0;
+				$wc_blocks_config   = array_merge(
 					$wc_blocks_config,
 					[
 						// Note that while we don't have a consolidated way of doing feature-flagging
 						// we are borrowing from the WC Admin Features implementation. Also note we cannot
 						// use the wcAdminFeatures global because it's not always enqueued in the context of blocks.
 						'experimentalBlocksEnabled' => Features::is_enabled( 'experimental-blocks' ),
-						'productCount'              => array_sum( (array) wp_count_posts( 'product' ) ),
+						'productCount'              => $published_products,
 					]
 				);
 			}

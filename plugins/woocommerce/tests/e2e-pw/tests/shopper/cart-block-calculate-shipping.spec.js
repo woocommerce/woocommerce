@@ -142,7 +142,10 @@ test.describe(
 
 			// Set shipping country to Netherlands
 			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page.getByRole( 'combobox' ).first().fill( 'Netherlands' );
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Netherlands' );
 			await page.getByLabel( 'Postal code' ).fill( '1011AA' );
 			await page.getByLabel( 'City' ).fill( 'Amsterdam' );
 			await page.getByRole( 'button', { name: 'Update' } ).click();
@@ -171,7 +174,10 @@ test.describe(
 
 			// Set shipping country to Portugal
 			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Portugal' );
 			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 			await page.getByLabel( 'City' ).fill( 'Lisbon' );
 			await page.getByRole( 'button', { name: 'Update' } ).click();
@@ -207,7 +213,10 @@ test.describe(
 
 			// Set shipping country to Portugal
 			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Portugal' );
 			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 			await page.getByLabel( 'City' ).fill( 'Lisbon' );
 			await page.getByRole( 'button', { name: 'Update' } ).click();
@@ -238,7 +247,10 @@ test.describe(
 
 			// Set shipping country to Portugal
 			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Portugal' );
 			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 			await page.getByLabel( 'City' ).fill( 'Lisbon' );
 			await page.getByRole( 'button', { name: 'Update' } ).click();

@@ -119,26 +119,32 @@ function wc_get_endpoint_url( $endpoint, $value = '', $permalink = '' ) {
 }
 
 /**
- * Hide menu items conditionally.
+ * Hide or adjust menu items conditionally.
  *
  * @param array $items Navigation items.
  * @return array
  */
 function wc_nav_menu_items( $items ) {
-	if ( ! is_user_logged_in() ) {
-		$customer_logout = get_option( 'woocommerce_logout_endpoint', 'customer-logout' );
+	$logout_endpoint = get_option( 'woocommerce_logout_endpoint', 'customer-logout' );
 
-		if ( ! empty( $customer_logout ) && ! empty( $items ) && is_array( $items ) ) {
-			foreach ( $items as $key => $item ) {
-				if ( empty( $item->url ) ) {
-					continue;
-				}
-				$path  = wp_parse_url( $item->url, PHP_URL_PATH ) ?? '';
-				$query = wp_parse_url( $item->url, PHP_URL_QUERY ) ?? '';
+	if ( ! empty( $logout_endpoint ) && ! empty( $items ) && is_array( $items ) ) {
+		foreach ( $items as $key => $item ) {
+			if ( empty( $item->url ) ) {
+				continue;
+			}
 
-				if ( strstr( $path, $customer_logout ) || strstr( $query, $customer_logout ) ) {
-					unset( $items[ $key ] );
-				}
+			$path           = wp_parse_url( $item->url, PHP_URL_PATH ) ?? '';
+			$query          = wp_parse_url( $item->url, PHP_URL_QUERY ) ?? '';
+			$is_logout_link = strstr( $path, $logout_endpoint ) || strstr( $query, $logout_endpoint );
+
+			if ( ! $is_logout_link ) {
+				continue;
+			}
+
+			if ( is_user_logged_in() ) {
+				$items[ $key ]->url = wp_nonce_url( $item->url, 'customer-logout' );
+			} else {
+				unset( $items[ $key ] );
 			}
 		}
 	}
@@ -147,6 +153,40 @@ function wc_nav_menu_items( $items ) {
 }
 add_filter( 'wp_nav_menu_objects', 'wc_nav_menu_items', 10 );
 
+/**
+ * Hide menu items in navigation blocks conditionally.
+ *
+ * Does the same thing as wc_nav_menu_items but for block themes.
+ *
+ * @since 9.3.0
+ * @param \WP_Block_list $inner_blocks Inner blocks.
+ * @return \WP_Block_list
+ */
+function wc_nav_menu_inner_blocks( $inner_blocks ) {
+	$logout_endpoint = get_option( 'woocommerce_logout_endpoint', 'customer-logout' );
+
+	if ( ! empty( $logout_endpoint ) && $inner_blocks ) {
+		foreach ( $inner_blocks as $inner_block_key => $inner_block ) {
+			$url            = $inner_block->parsed_block['attrs']['url'] ?? '';
+			$path           = wp_parse_url( $url, PHP_URL_PATH ) ?? '';
+			$query          = wp_parse_url( $url, PHP_URL_QUERY ) ?? '';
+			$is_logout_link = strstr( $path, $logout_endpoint ) || strstr( $query, $logout_endpoint );
+
+			if ( ! $is_logout_link ) {
+				continue;
+			}
+
+			if ( is_user_logged_in() ) {
+				$inner_block->parsed_block['attrs']['url'] = wp_nonce_url( $inner_block->parsed_block['attrs']['url'], 'customer-logout' );
+			} else {
+				unset( $inner_blocks[ $inner_block_key ] );
+			}
+		}
+	}
+
+	return $inner_blocks;
+}
+add_filter( 'block_core_navigation_render_inner_blocks', 'wc_nav_menu_inner_blocks' );
 
 /**
  * Fix active class in nav for shop page.
@@ -168,7 +208,7 @@ function wc_nav_menu_item_classes( $menu_items ) {
 			$menu_id = (int) $menu_item->object_id;
 
 			// Unset active class for blog page.
-			if ( $page_for_posts === $menu_id ) {
+			if ( $page_for_posts === $menu_id && isset( $menu_item->object ) && 'page' === $menu_item->object ) {
 				$menu_items[ $key ]->current = false;
 
 				if ( in_array( 'current_page_parent', $classes, true ) ) {

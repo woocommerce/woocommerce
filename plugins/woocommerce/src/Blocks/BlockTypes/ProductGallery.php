@@ -59,7 +59,7 @@ class ProductGallery extends AbstractBlock {
 
 		$html = array_reduce(
 			$parsed_template,
-			function( $carry, $item ) {
+			function ( $carry, $item ) {
 				return $carry . render_block( $item );
 			},
 			''
@@ -134,7 +134,7 @@ class ProductGallery extends AbstractBlock {
 		$p    = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) ) );
+			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
@@ -147,7 +147,8 @@ class ProductGallery extends AbstractBlock {
 						'mouseIsOverPreviousOrNextButton' => false,
 						'productId'                       => $product_id,
 						'elementThatTriggeredDialogOpening' => null,
-					)
+					),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			);
 

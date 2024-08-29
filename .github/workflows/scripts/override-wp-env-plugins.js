@@ -20,24 +20,50 @@ if ( ! WP_ENV_CONFIG_PATH ) {
 
 const artifactUrl = `https://github.com/woocommerce/woocommerce/releases/download/${ RELEASE_TAG }/${ ARTIFACT_NAME }`;
 
-const testEnvPlugins = {
-	env: {
-		tests: {
-			plugins: [],
-		},
-	},
-};
-const data = fs.readFileSync( `${ WP_ENV_CONFIG_PATH }/.wp-env.json`, 'utf8' );
+const configPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.json`;
+console.log( `Reading ${ configPath }` );
+const data = fs.readFileSync( configPath, 'utf8' );
 const wpEnvConfig = JSON.parse( data );
-testEnvPlugins.env.tests.plugins = wpEnvConfig.env.tests.plugins;
 
-const currentDirEntry = testEnvPlugins.env.tests.plugins.indexOf( '.' );
+const overrideConfig = {};
 
-if ( currentDirEntry !== -1 ) {
-	testEnvPlugins.env.tests.plugins[ currentDirEntry ] = artifactUrl;
+if ( wpEnvConfig.plugins ) {
+	overrideConfig.plugins = wpEnvConfig.plugins;
 }
 
+if ( wpEnvConfig.env?.tests?.plugins ) {
+	overrideConfig.env = {
+		tests: {
+			plugins: wpEnvConfig.env.tests.plugins,
+		},
+	};
+}
+
+const entriesToReplace = [ '.', '../woocommerce' ];
+
+for ( const entry of entriesToReplace ) {
+	// Search and replace in root plugins
+	let found = overrideConfig.plugins.indexOf( entry );
+	if ( found >= 0 ) {
+		console.log(
+			`Replacing ${ entry } with ${ artifactUrl } in root plugins`
+		);
+		overrideConfig.plugins[ found ] = artifactUrl;
+	}
+
+	// Search and replace in test env plugins
+	found = overrideConfig.env?.tests?.plugins?.indexOf( entry );
+	if ( found >= 0 ) {
+		console.log(
+			`Replacing ${ entry } with ${ artifactUrl } in env.tests.plugins`
+		);
+		overrideConfig.env.tests.plugins[ found ] = artifactUrl;
+	}
+}
+
+const overrideConfigPath = `${ WP_ENV_CONFIG_PATH }/.wp-env.override.json`;
+console.log( `Saving ${ overrideConfigPath }` );
 fs.writeFileSync(
-	`${ WP_ENV_CONFIG_PATH }/.wp-env.override.json`,
-	JSON.stringify( testEnvPlugins, null, 2 )
+	overrideConfigPath,
+	JSON.stringify( overrideConfig, null, 2 )
 );

@@ -1,5 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const { customer } = require( '../../test-data/data' );
+const { admin, customer } = require( '../../test-data/data' );
 
 const emailContent = '#wp-mail-logging-modal-content-body-content';
 const emailContentHtml = '#wp-mail-logging-modal-format-html';
@@ -226,6 +226,9 @@ test.describe(
 		test( 'should receive an email when initiating a password reset', async ( {
 			page,
 		} ) => {
+			// Effect a log out/simulate a new browsing session by dropping all cookies.
+			await page.context().clearCookies();
+			await page.reload();
 			await page.goto( 'my-account/lost-password/' );
 
 			await test.step( 'initiate password reset from my account', async () => {
@@ -247,10 +250,10 @@ test.describe(
 				await page.goto( 'wp-login.php' );
 				await page
 					.getByLabel( 'Username or Email Address' )
-					.fill( 'admin' );
+					.fill( admin.username );
 				await page
 					.getByLabel( 'Password', { exact: true } )
-					.fill( 'password' );
+					.fill( admin.password );
 				await page.getByRole( 'button', { name: 'Log In' } ).click();
 				await page.goto(
 					`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(

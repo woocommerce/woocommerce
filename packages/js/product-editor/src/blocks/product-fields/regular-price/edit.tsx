@@ -67,23 +67,32 @@ export function Edit( {
 			const listPrice = Number.parseFloat( regularPrice );
 			if ( listPrice ) {
 				if ( listPrice < 0 ) {
-					return __(
-						'Regular price must be greater than or equals to zero.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'Regular price must be greater than or equals to zero.',
+							'woocommerce'
+						),
+					};
 				}
 				if (
 					salePrice &&
 					listPrice <= Number.parseFloat( salePrice )
 				) {
-					return __(
-						'Regular price must be greater than the sale price.',
-						'woocommerce'
-					);
+					return {
+						message: __(
+							'Regular price must be greater than the sale price.',
+							'woocommerce'
+						),
+					};
 				}
 			} else if ( isRequired ) {
-				/* translators: label of required field. */
-				return sprintf( __( '%s is required.', 'woocommerce' ), label );
+				return {
+					message: sprintf(
+						/* translators: label of required field. */
+						__( '%s is required.', 'woocommerce' ),
+						label
+					),
+				};
 			}
 		},
 		[ regularPrice, salePrice ]

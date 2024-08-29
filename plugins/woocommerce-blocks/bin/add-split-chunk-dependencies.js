@@ -14,8 +14,7 @@ class AddSplitChunkDependencies {
 	apply( compiler ) {
 		compiler.hooks.thisCompilation.tap(
 			'AddStableChunksToAssets',
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars -- not used.
-			( compilation, callback ) => {
+			( compilation ) => {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'AddStableChunksToAssets',

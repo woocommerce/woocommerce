@@ -65,6 +65,7 @@ class MiniCart extends AbstractBlock {
 			'position' => 'after',
 			'anchor'   => 'core/navigation',
 			'area'     => 'header',
+			'version'  => '8.4.0',
 		),
 	);
 

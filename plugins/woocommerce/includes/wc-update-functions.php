@@ -416,7 +416,7 @@ function wc_update_209_brazillian_state() {
 
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
-	// Update brazillian state codes.
+	// Update Brazilian state codes.
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
@@ -2598,7 +2598,7 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 /**
  * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
  *
- * @return bool Whether there are pending migration recrods.
+ * @return bool Whether there are pending migration records.
  */
 function wc_update_810_migrate_transactional_metadata_for_hpos() {
 	global $wpdb;
@@ -2731,6 +2731,45 @@ function wc_update_910_add_launch_your_store_tour_option() {
 }
 
 /**
+ * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
+ */
+function wc_update_920_add_wc_hooked_blocks_version_option() {
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name );
+
+	// If the option already exists, we don't need to do anything.
+	if ( false !== $option_value ) {
+		return;
+	}
+
+	/**
+	 * A list of theme slugs to execute this with.
+	 * We are applying this filter to allow for the list to be extended by third-parties who were already using it.
+	 *
+	 * @since 8.4.0
+	 */
+	$theme_include_list               = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+	$active_theme_name                = wp_get_theme()->get( 'Name' );
+	$should_set_hooked_blocks_version = in_array( $active_theme_name, $theme_include_list, true );
+
+	if ( $should_set_hooked_blocks_version ) {
+		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
+		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
+		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
+		add_option( $option_name, '8.4.0' );
+	} else {
+		// For block themes that aren't approved themes set this option to "no" to completely disable hooked blocks.
+		// This means we can assume the absence of the option is when a site is switching from a classic theme to a block theme for the first time.
+		// Note: We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
+		add_option( $option_name, 'no' );
+	}
+}
+
+/**
  * Remove user meta associated with the keys '_last_order', '_order_count' and '_money_spent'.
  *
  * New keys are now used for these, to improve compatibility with multisite networks.
@@ -2740,14 +2779,16 @@ function wc_update_910_add_launch_your_store_tour_option() {
 function wc_update_910_remove_obsolete_user_meta() {
 	global $wpdb;
 
-	$deletions = $wpdb->query( "
+	$deletions = $wpdb->query(
+		"
 		DELETE FROM $wpdb->usermeta
 		WHERE meta_key IN (
 			'_last_order',
 			'_order_count',
 			'_money_spent'
 		)
-	" );
+	"
+	);
 
 	$logger = wc_get_logger();
 
@@ -2775,4 +2816,39 @@ function wc_update_910_remove_obsolete_user_meta() {
 			)
 		);
 	}
+}
+
+/**
+ * Add woocommerce_coming_soon option when it is not currently present.
+ */
+function wc_update_930_add_woocommerce_coming_soon_option() {
+	add_option( 'woocommerce_coming_soon', 'no' );
+}
+
+/**
+ * Migrate Launch Your Store tour meta keys to the woocommerce_meta user data fields.
+ */
+function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
+	// Rename `woocommerce_launch_your_store_tour_hidden` meta key to `woocommerce_admin_launch_your_store_tour_hidden`.
+	global $wpdb;
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_launch_your_store_tour_hidden',
+			'woocommerce_launch_your_store_tour_hidden'
+		)
+	);
+
+	// Rename `woocommerce_coming_soon_banner_dismissed` meta key to `woocommerce_admin_coming_soon_banner_dismissed`.
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_coming_soon_banner_dismissed',
+			'woocommerce_coming_soon_banner_dismissed'
+		)
+	);
 }

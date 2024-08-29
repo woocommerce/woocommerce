@@ -38,9 +38,7 @@ jobs:
                   docs/docs-manifest.json
 
             - name: Setup PNPM
-              uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2
-              with:
-                  version: '8.6.7'
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
 
             - name: Setup Node
               uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c

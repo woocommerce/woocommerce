@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-require_once dirname( __FILE__ ) . '/legacy/class-wc-legacy-coupon.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-coupon.php';
 
 /**
  * Coupon class.
@@ -85,7 +85,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Error message.
 	 *
 	 * This property should not be considered public API, and should not be accessed directly.
-	 * It is being added to supress PHP > 8.0 warnings against dynamic property creation, and all access
+	 * It is being added to suppress PHP > 8.0 warnings against dynamic property creation, and all access
 	 * should be through the getter and setter methods, namely `get_error_message()` and `set_error_message()`.
 	 * In the future, the access modifier may be changed back to protected.
 	 *
@@ -1066,7 +1066,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$err = __( 'Sorry, this coupon is not applicable to your cart contents.', 'woocommerce' );
 				break;
 			case self::E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK:
-				if ( is_user_logged_in() && wc_get_page_id( 'myaccount' ) > 0 ) {
+				if ( is_user_logged_in() && wc_get_page_id( 'myaccount' ) > 0 && ! WC()->is_store_api_request() ) {
 					/* translators: %s: myaccount page link. */
 					$err = sprintf( __( 'Coupon usage limit has been reached. If you were using this coupon just now but your order was not complete, you can retry or cancel the order by going to the <a href="%s">my account page</a>.', 'woocommerce' ), wc_get_endpoint_url( 'orders', '', wc_get_page_permalink( 'myaccount' ) ) );
 				} else {

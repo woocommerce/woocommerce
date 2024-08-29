@@ -68,7 +68,8 @@
 
 	&__notice {
 		border-left: 0px;
-		margin: 0 0 $gap-large 0;
+		margin: 0 0 $gap-small 0;
+		padding: $gap-small $gap;
 		&.is-error {
 			background-color: #fcf0f1;
 		}
@@ -161,7 +162,7 @@
 		gap: $gap-smaller;
 		margin-right: $gap-smallest;
 
-		.variations-actions-menu__toogle:disabled {
+		.variations-actions-menu__toggle:disabled {
 			cursor: not-allowed;
 		}
 
