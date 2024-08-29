@@ -30,7 +30,7 @@ class MiniCartInteractivity extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $chunks_folder = 'mini-cart-interactivity-contents-block';
+	protected $chunks_folder = 'mini-cart-contents';
 
 	/**
 	 * Array of scripts that will be lazy loaded when interacting with the block.
