@@ -88,7 +88,8 @@
 				"webpack*"
 			],
 			"packages": [
-				"@woocommerce/block-library"
+				"@woocommerce/block-library",
+				"@woocommerce/storybook"
 			],
 			"isIgnored": true
 		},
@@ -283,6 +284,15 @@
 				"**"
 			],
 			"pinVersion": "wp-6.6"
+		},
+		{
+			"dependencies": [
+				"@wordpress/components"
+			],
+			"packages": [
+				"@woocommerce/admin-library"
+			],
+			"pinVersion": "wp-6.5"
 		},
 		{
 			"dependencies": [

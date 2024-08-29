@@ -53,7 +53,7 @@
 		"@wordpress/base-styles": "wp-6.0",
 		"@wordpress/blob": "wp-6.0",
 		"@wordpress/blocks": "^11.21.0",
-		"@wordpress/components": "wp-6.0",
+		"@wordpress/components": "wp-6.5",
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/core-data": "wp-6.0",
 		"@wordpress/data-controls": "wp-6.0",
