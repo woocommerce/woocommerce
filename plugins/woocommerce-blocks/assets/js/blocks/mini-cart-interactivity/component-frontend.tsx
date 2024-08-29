@@ -9,8 +9,6 @@ import { renderFrontend } from '@woocommerce/base-utils';
 import { MiniCartDrawer } from './mini-cart-drawer';
 import './style.scss';
 
-const MINI_CART_BUTTON_SELECTOR = '.wc-block-mini-cart__button';
-
 const renderMiniCartFrontend = () => {
 	const onClose = () => {
 		document.body.dispatchEvent(
@@ -37,7 +35,9 @@ const renderMiniCartFrontend = () => {
 		selector: '.wc-block-components-drawer__screen-overlay',
 		Block: MiniCartDrawer,
 		getProps: ( el ) => {
-			const button = document.querySelector( MINI_CART_BUTTON_SELECTOR );
+			const button = document.querySelector(
+				'.wc-block-mini-cart__button'
+			);
 			const dataset =
 				button instanceof HTMLButtonElement
 					? button.dataset
