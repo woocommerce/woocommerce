@@ -84,11 +84,11 @@ addFilter(
   'woocommerce_remote_logging_should_send_error',
   'my-plugin',
   (shouldSend, error, stackFrames) => {
-  const containsPluginFrame = stackFrames.some(
-    (frame) => frame.url && frame.url.includes( /YOUR_PLUGIN_ASSET_PATH/ )
-  );
-  // Only send errors that originate from our plugin
-  return shouldSend && containsPluginFrame;
+    const containsPluginFrame = stackFrames.some(
+      (frame) => frame.url && frame.url.includes( /YOUR_PLUGIN_ASSET_PATH/ )
+    );
+    // Only send errors that originate from our plugin
+    return shouldSend && containsPluginFrame;
   }
 );
 ```
