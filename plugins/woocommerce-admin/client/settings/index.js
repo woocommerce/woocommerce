@@ -21,6 +21,43 @@ import { registerExampleSettingsView } from './settings-view-example';
 import { useFullScreen } from '~/utils';
 import './style.scss';
 
+const ignoredSettingsScripts = [
+	'wc-admin-app',
+	'WCPAY_DASH_APP',
+	'woo-tracks',
+	'woocommerce-admin-test-helper',
+	'woocommerce-beta-tester-live-branches',
+	'wp-auth-check',
+];
+
+const appendSettingsScripts = () => {
+	const settingsScripts = window.wcSettings?.admin?.settingsScripts;
+	if ( ! settingsScripts ) {
+		return [];
+	}
+
+	return Object.entries( settingsScripts ).reduce(
+		( scripts, [ key, script ] ) => {
+			if ( ! ignoredSettingsScripts.includes( key ) ) {
+				console.log( 'script', key );
+				const scriptElement = document.createElement( 'script' );
+				scriptElement.src = script.src;
+
+				document.body.appendChild( scriptElement );
+				scripts.push( scriptElement );
+			}
+			return scripts;
+		},
+		[]
+	);
+};
+
+const removeSettingsScripts = ( scripts ) => {
+	scripts.forEach( ( script ) => {
+		document.body.removeChild( script );
+	} );
+};
+
 const Settings = ( { params } ) => {
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const settingsData = window.wcSettings?.admin?.settingsPages;
@@ -45,16 +82,11 @@ const Settings = ( { params } ) => {
 			sidebarVisisble
 		);
 
-		// Append a new script tag
-		const script = document.createElement( 'script' );
-		script.src =
-			'http://localhost:8888/wp-content/plugins/woocommerce/assets/js/admin/wc-shipping-classes.js';
-		script.async = true;
-		document.body.appendChild( script );
+		const scripts = appendSettingsScripts();
 
 		// Cleanup function to remove the script when the component unmounts
 		return () => {
-			document.body.removeChild( script );
+			removeSettingsScripts( scripts );
 		};
 	}, [ params.page, section, sidebarVisisble ] );
 
