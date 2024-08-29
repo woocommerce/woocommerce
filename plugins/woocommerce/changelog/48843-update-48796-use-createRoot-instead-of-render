@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Switch `render()` to `createRoot().render()` to use React 18 features.
