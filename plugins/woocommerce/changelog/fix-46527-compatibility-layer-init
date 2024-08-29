@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Conditionally initialize block template compatibility classes

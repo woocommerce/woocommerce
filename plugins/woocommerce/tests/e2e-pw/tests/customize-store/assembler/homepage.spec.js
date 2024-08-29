@@ -314,22 +314,23 @@ test.describe( 'Homepage tracking banner', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Should not show the "Want more patterns?" banner when tracking is allowed', async ( {
-		baseURL,
-		pageObject,
-	} ) => {
-		await setOption(
-			request,
-			baseURL,
-			'woocommerce_allow_tracking',
-			'yes'
-		);
+	test(
+		'Should not show the "Want more patterns?" banner when tracking is allowed',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { baseURL, pageObject } ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'yes'
+			);
 
-		await prepareAssembler( pageObject, baseURL );
+			await prepareAssembler( pageObject, baseURL );
 
-		const assembler = await pageObject.getAssembler();
-		await expect(
-			assembler.getByText( 'Want more patterns?' )
-		).toBeHidden();
-	} );
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeHidden();
+		}
+	);
 } );
