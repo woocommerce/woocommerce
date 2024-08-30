@@ -198,16 +198,14 @@ export class ShippingBanner extends Component {
 		const shipmentTrackingStylePath =
 			assets.wcshipping_shipment_tracking_style;
 
-		const { itemsCount, orderId, activePlugins } = this.props;
+		const { activePlugins } = this.props;
 
 		document.getElementById( labelPurchaseMetaboxId )?.remove();
 		const shippingLabelContainerHtml = this.generateMetaBoxHtml(
 			labelPurchaseMetaboxId,
 			__( 'Shipping Label', 'woocommerce' ),
 			{
-				order: { id: orderId },
 				context: 'shipping_label',
-				items: itemsCount,
 			}
 		);
 		// Insert shipping label metabox just above main order details box.
@@ -220,9 +218,7 @@ export class ShippingBanner extends Component {
 			shipmentTrackingMetaboxId,
 			__( 'Shipment Tracking', 'woocommerce' ),
 			{
-				order: { id: orderId },
 				context: 'shipment_tracking',
-				items: itemsCount,
 			}
 		);
 		// Insert tracking metabox in the side after the order actions.
@@ -464,7 +460,6 @@ export class ShippingBanner extends Component {
 }
 
 ShippingBanner.propTypes = {
-	itemsCount: PropTypes.number.isRequired,
 	isJetpackConnected: PropTypes.bool.isRequired,
 	activePlugins: PropTypes.array.isRequired,
 	activatePlugins: PropTypes.func.isRequired,

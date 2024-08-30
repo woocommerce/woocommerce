@@ -76,7 +76,7 @@ class ShippingLabelBanner {
 		if ( ! OrderUtil::is_order_edit_screen() ) {
 			return;
 		}
-		$order = wc_get_order( $post_or_order );
+
 		if ( $this->should_show_meta_box() ) {
 			add_meta_box(
 				'woocommerce-admin-print-label',
@@ -87,8 +87,6 @@ class ShippingLabelBanner {
 				'high',
 				array(
 					'context' => 'shipping_label',
-					'order'   => $order->get_id(),
-					'items'   => $this->count_shippable_items( $order ),
 				)
 			);
 			add_action( 'admin_enqueue_scripts', array( $this, 'add_print_shipping_label_script' ) );
