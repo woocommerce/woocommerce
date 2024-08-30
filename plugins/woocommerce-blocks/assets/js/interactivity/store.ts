@@ -10,6 +10,9 @@ import { proxifyState, proxifyStore } from './proxies';
 import { getNamespace } from './namespaces';
 import { deepMerge, isPlainObject } from './utils';
 
+const isObject = ( item: unknown ): boolean =>
+	!! item && typeof item === 'object' && ! Array.isArray( item );
+
 export const stores = new Map();
 const rawStores = new Map();
 const storeLocks = new Map();
@@ -198,6 +201,25 @@ export const populateServerData = ( data?: {
 	}
 };
 
+const parseInitialState = () => {
+	const storeTag = document.querySelector(
+		`script[type="application/json"]#wc-interactivity-initial-state`
+	);
+	if ( ! storeTag?.textContent ) return {};
+	try {
+		const initialState = JSON.parse( storeTag.textContent );
+		if ( isObject( initialState ) ) return initialState;
+		throw Error( 'Parsed state is not an object' );
+	} catch ( e ) {
+		// eslint-disable-next-line no-console
+		console.log( e );
+	}
+	return {};
+};
+
 // Parse and populate the initial state and config.
+Object.entries( parseInitialState() ).forEach( ( [ namespace, state ] ) => {
+	store( namespace, { state } );
+} );
 const data = parseServerData();
 populateServerData( data );
