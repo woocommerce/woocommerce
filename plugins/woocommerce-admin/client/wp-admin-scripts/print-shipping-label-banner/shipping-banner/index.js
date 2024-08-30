@@ -90,6 +90,7 @@ export class ShippingBanner extends Component {
 			isRequesting,
 			activePlugins,
 			isWcstCompatible,
+			isIncompatibleWCShippingInstalled,
 		} = this.props;
 		if ( isRequesting ) {
 			return false;
@@ -109,6 +110,15 @@ export class ShippingBanner extends Component {
 				setupErrorReason: setupErrorTypes.ACTIVATE,
 				wcsSetupError: true,
 			} );
+			return;
+		}
+
+		/**
+		 * If a incompatible version of the WooCommerce Shipping plugin is installed, the necessary endpoints
+		 * are not available, so we need to reload the page to ensure to make the plugin usable.
+		 */
+		if ( isIncompatibleWCShippingInstalled ) {
+			window.location.reload( true );
 			return;
 		}
 
@@ -514,6 +524,9 @@ export default compose(
 			orderId: parseInt( window.wcShippingCoreData.order_id, 10 ),
 			isWcstCompatible: [ 1, '1' ].includes(
 				window.wcShippingCoreData.is_wcst_compatible
+			),
+			isIncompatibleWCShippingInstalled: [ 1, '1' ].includes(
+				window.wcShippingCoreData.is_incompatible_wcshipping_installed
 			),
 		};
 	} ),

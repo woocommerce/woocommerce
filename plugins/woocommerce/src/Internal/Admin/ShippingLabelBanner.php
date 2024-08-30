@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use function WP_CLI\Utils\get_plugin_name;
 
 /**
  * Shows print shipping label banner on edit order page.
@@ -20,7 +21,8 @@ class ShippingLabelBanner {
 	 */
 	private $shipping_label_banner_display_rules;
 
-	private const MIN_COMPATIBLE_WCST_VERSION = '2.7.0';
+	private const MIN_COMPATIBLE_WCST_VERSION       = '2.7.0';
+	private const MIN_COMPATIBLE_WCSHIPPING_VERSION = '1.1.0';
 
 	/**
 	 * Constructor
@@ -116,16 +118,27 @@ class ShippingLabelBanner {
 	public function add_print_shipping_label_script( $hook ) {
 		WCAdminAssets::register_style( 'print-shipping-label-banner', 'style', array( 'wp-components' ) );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'print-shipping-label-banner', true );
-		$wcst_version = null;
-		$order        = wc_get_order();
+		$wcst_version                 = null;
+		$wcshipping_installed_version = null;
+		$order                        = wc_get_order();
 		if ( class_exists( '\WC_Connect_Loader' ) ) {
 			$wcst_version = \WC_Connect_Loader::get_wcs_version();
 		}
 
+		$wc_shipping_plugin_file = WP_PLUGIN_DIR . '/woocommerce-shipping/woocommerce-shipping.php';
+		if ( file_exists( $wc_shipping_plugin_file ) ) {
+			$plugin_data                  = get_plugin_data( $wc_shipping_plugin_file );
+			$wcshipping_installed_version = $plugin_data['Version'];
+		}
+
 		$payload = array(
 			// If WCS&T is not installed, it's considered compatible.
-			'is_wcst_compatible' => $wcst_version ? (int) version_compare( $wcst_version, self::MIN_COMPATIBLE_WCST_VERSION, '>=' ) : 1,
-			'order_id'           => $order ? $order->get_id() : null,
+			'is_wcst_compatible'                   => $wcst_version ? (int) version_compare( $wcst_version, self::MIN_COMPATIBLE_WCST_VERSION, '>=' ) : 1,
+			'order_id'                             => $order ? $order->get_id() : null,
+			// The banner is shown if the plugin is installed but not active, so we need to check if the installed version is compatible.
+			'is_incompatible_wcshipping_installed' => $wcshipping_installed_version ?
+			(int) version_compare( $wcshipping_installed_version, self::MIN_COMPATIBLE_WCSHIPPING_VERSION, '<' )
+			: 0,
 		);
 
 		wp_localize_script( 'wc-admin-print-shipping-label-banner', 'wcShippingCoreData', $payload );
