@@ -12,10 +12,11 @@ import { Product } from '@woocommerce/data';
  */
 import { unlock } from '../../lock-unlock';
 
-const { useHistory } = unlock( routerPrivateApis );
+const { useHistory, useLocation } = unlock( routerPrivateApis );
 
-export const useEditProductAction = () => {
+export const useEditProductAction = ( { postType }: { postType: string } ) => {
 	const history = useHistory();
+	const location = useLocation();
 	return useMemo(
 		() => ( {
 			id: 'edit-product',
@@ -32,13 +33,13 @@ export const useEditProductAction = () => {
 			callback( items: Product[] ) {
 				const product = items[ 0 ];
 				history.push( {
-					page: 'woocommerce-products-dashboard',
+					...location.params,
 					postId: product.id,
-					postType: product.type,
+					postType,
 					quickEdit: true,
 				} );
 			},
 		} ),
-		[ history ]
+		[ history, location.params ]
 	);
 };
