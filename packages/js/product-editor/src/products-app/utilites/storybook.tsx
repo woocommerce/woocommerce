@@ -1475,6 +1475,121 @@ export const PRODUCTS_DATA = [
 	},
 ];
 
+export const PRODUCT_FIELDS = [
+	{
+		label: 'Name',
+		id: 'name',
+		type: 'text',
+	},
+	{
+		label: 'Slug',
+		id: 'slug',
+		type: 'text',
+	},
+	{
+		label: 'Permalink',
+		id: 'permalink',
+		type: 'url',
+	},
+	{
+		label: 'Date Created',
+		id: 'date_created',
+		type: 'datetime',
+	},
+	{
+		label: 'Date Modified',
+		id: 'date_modified',
+		type: 'datetime',
+	},
+	{
+		label: 'Type',
+		id: 'type',
+		type: 'text',
+	},
+	{
+		label: 'Status',
+		id: 'status',
+		type: 'text',
+	},
+	{
+		label: 'Featured',
+		id: 'featured',
+		type: 'checkbox',
+	},
+	{
+		label: 'Catalog Visibility',
+		id: 'catalog_visibility',
+		type: 'text',
+	},
+	{
+		label: 'Description',
+		id: 'description',
+		type: 'textarea',
+	},
+	{
+		label: 'Short Description',
+		id: 'short_description',
+		type: 'textarea',
+	},
+	{
+		label: 'SKU',
+		id: 'sku',
+		type: 'text',
+	},
+	{
+		label: 'Price',
+		id: 'price',
+		type: 'text',
+	},
+	{
+		label: 'Regular Price',
+		id: 'regular_price',
+		type: 'text',
+	},
+	{
+		label: 'On Sale',
+		id: 'on_sale',
+		type: 'checkbox',
+	},
+	{
+		label: 'Purchasable',
+		id: 'purchasable',
+		type: 'checkbox',
+	},
+	{
+		label: 'Downloads',
+		id: 'downloads',
+		type: 'text',
+	},
+	{
+		label: 'Stock Status',
+		id: 'stock_status',
+		type: 'text',
+	},
+	{
+		label: 'Categories',
+		id: 'categories',
+		type: 'text',
+	},
+	{
+		label: 'Images',
+		id: 'images',
+		type: 'text',
+	},
+	{
+		label: 'Average Rating',
+		id: 'average_rating',
+		type: 'text',
+	},
+	{
+		label: 'Rating Count',
+		id: 'rating_count',
+		type: 'text',
+	},
+];
+
+export const PRODUCT_FIELDS_KEYS = PRODUCT_FIELDS.map( ( field ) => field.id );
+
 type ProductFormProps = {
 	productData: ( typeof PRODUCTS_DATA )[ 0 ];
 	fields: {
