@@ -24,7 +24,7 @@ const newAccountEmail = `marge-${ new Date()
 const newAccountEmailWithCustomPassword = `homer-${ new Date()
 	.getTime()
 	.toString() }@woocommercecoree2etestsuite.com`;
-const newAccountCustomPassword = 'supersecurepassword123';
+const newAccountCustomPassword = 'sup3rS3cur3P4ssw0rd!#123';
 
 const simpleProductName = 'Very Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor.';
