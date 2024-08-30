@@ -1172,7 +1172,7 @@ test.describe( 'Product picker', () => {
 				await expect( editorProductPicker ).toBeVisible();
 
 				// Once a product is selected, the product picker should be hidden
-				await pageObject.chooseProductInEditorProductPicker(
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
 					admin.page
 				);
 				await expect( editorProductPicker ).toBeHidden();

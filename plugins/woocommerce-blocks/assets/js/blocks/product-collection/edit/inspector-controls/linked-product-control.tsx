@@ -5,8 +5,8 @@ import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
 import { useState, useMemo } from '@wordpress/element';
-import { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
-import { ProductResponseItem } from '@woocommerce/types';
+import type { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
+import type { ProductResponseItem } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	PanelBody,
@@ -25,7 +25,7 @@ import {
  * Internal dependencies
  */
 import { useGetProduct } from '../../utils';
-import {
+import type {
 	ProductCollectionQuery,
 	ProductCollectionSetAttributes,
 } from '../../types';

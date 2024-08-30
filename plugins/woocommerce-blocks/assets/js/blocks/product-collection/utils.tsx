@@ -8,7 +8,7 @@ import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { useEffect, useLayoutEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { ProductResponseItem } from '@woocommerce/types';
+import type { ProductResponseItem } from '@woocommerce/types';
 import { getProduct } from '@woocommerce/editor-components/utils';
 import {
 	createBlock,
