@@ -11,7 +11,6 @@ import {
 	drafts,
 	published,
 	scheduled,
-	pending,
 	notAllowed,
 } from '@wordpress/icons';
 import type { ColumnStyle, ViewTable } from '@wordpress/dataviews';
@@ -23,7 +22,7 @@ import {
 	LAYOUT_LIST,
 	LAYOUT_TABLE,
 	LAYOUT_GRID,
-	OPERATOR_IS_ANY,
+	OPERATOR_IS,
 } from '../constants';
 
 export const defaultLayouts: Record<
@@ -38,12 +37,9 @@ export const defaultLayouts: Record<
 > = {
 	[ LAYOUT_TABLE ]: {
 		layout: {
-			primaryField: 'title',
+			primaryField: 'name',
 			styles: {
-				'featured-image': {
-					width: '1%',
-				},
-				title: {
+				name: {
 					maxWidth: 300,
 				},
 			},
@@ -52,12 +48,12 @@ export const defaultLayouts: Record<
 	[ LAYOUT_GRID ]: {
 		layout: {
 			mediaField: 'featured-image',
-			primaryField: 'title',
+			primaryField: 'name',
 		},
 	},
 	[ LAYOUT_LIST ]: {
 		layout: {
-			primaryField: 'title',
+			primaryField: 'name',
 			mediaField: 'featured-image',
 		},
 	},
@@ -99,7 +95,7 @@ export function useDefaultViews( { postType }: { postType: string } ): Array< {
 				title: labels?.all_items || __( 'All items', 'woocommerce' ),
 				slug: 'all',
 				icon: pages,
-				view: DEFAULT_POST_BASE,
+				view: { ...DEFAULT_POST_BASE },
 			},
 			{
 				title: __( 'Published', 'woocommerce' ),
@@ -110,7 +106,7 @@ export function useDefaultViews( { postType }: { postType: string } ): Array< {
 					filters: [
 						{
 							field: 'status',
-							operator: OPERATOR_IS_ANY,
+							operator: OPERATOR_IS,
 							value: 'publish',
 						},
 					],
@@ -125,7 +121,7 @@ export function useDefaultViews( { postType }: { postType: string } ): Array< {
 					filters: [
 						{
 							field: 'status',
-							operator: OPERATOR_IS_ANY,
+							operator: OPERATOR_IS,
 							value: 'future',
 						},
 					],
@@ -140,23 +136,8 @@ export function useDefaultViews( { postType }: { postType: string } ): Array< {
 					filters: [
 						{
 							field: 'status',
-							operator: OPERATOR_IS_ANY,
+							operator: OPERATOR_IS,
 							value: 'draft',
-						},
-					],
-				},
-			},
-			{
-				title: __( 'Pending', 'woocommerce' ),
-				slug: 'pending',
-				icon: pending,
-				view: {
-					...DEFAULT_POST_BASE,
-					filters: [
-						{
-							field: 'status',
-							operator: OPERATOR_IS_ANY,
-							value: 'pending',
 						},
 					],
 				},
@@ -170,7 +151,7 @@ export function useDefaultViews( { postType }: { postType: string } ): Array< {
 					filters: [
 						{
 							field: 'status',
-							operator: OPERATOR_IS_ANY,
+							operator: OPERATOR_IS,
 							value: 'private',
 						},
 					],
@@ -187,7 +168,7 @@ export function useDefaultViews( { postType }: { postType: string } ): Array< {
 					filters: [
 						{
 							field: 'status',
-							operator: OPERATOR_IS_ANY,
+							operator: OPERATOR_IS,
 							value: 'trash',
 						},
 					],

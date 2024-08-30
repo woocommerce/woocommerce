@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { DataViews, View } from '@wordpress/dataviews';
+import { Action, DataViews, View } from '@wordpress/dataviews';
 import {
 	createElement,
 	useState,
@@ -9,7 +9,7 @@ import {
 	useCallback,
 	useEffect,
 } from '@wordpress/element';
-import { Product } from '@woocommerce/data';
+import { Product, ProductQuery } from '@woocommerce/data';
 import { drawerRight } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { __ } from '@wordpress/i18n';
@@ -39,7 +39,7 @@ import {
 	useDefaultViews,
 	defaultLayouts,
 } from '../sidebar-dataviews/default-views';
-import { LAYOUT_LIST } from '../constants';
+import { LAYOUT_LIST, OPERATOR_IS } from '../constants';
 
 const { NavigableRegion } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -47,7 +47,6 @@ const { useHistory, useLocation } = unlock( routerPrivateApis );
 const STATUSES = [
 	{ value: 'draft', label: __( 'Draft', 'woocommerce' ) },
 	{ value: 'future', label: __( 'Scheduled', 'woocommerce' ) },
-	{ value: 'pending', label: __( 'Pending Review', 'woocommerce' ) },
 	{ value: 'private', label: __( 'Private', 'woocommerce' ) },
 	{ value: 'publish', label: __( 'Published', 'woocommerce' ) },
 	{ value: 'trash', label: __( 'Trash', 'woocommerce' ) },
@@ -71,6 +70,7 @@ const fields = [
 		id: 'sku',
 		label: __( 'SKU', 'woocommerce' ),
 		enableHiding: false,
+		enableSorting: false,
 		render: ( { item }: { item: Product } ) => {
 			return item.sku;
 		},
@@ -90,7 +90,7 @@ const fields = [
 			item.status,
 		elements: STATUSES,
 		filterBy: {
-			operators: [ 'isAny' ],
+			operators: [ OPERATOR_IS ],
 		},
 		enableSorting: false,
 	},
@@ -105,6 +105,7 @@ export type ProductListProps = {
 
 const PAGE_SIZE = 25;
 const EMPTY_ARRAY: Product[] = [];
+const EMPTY_ACTIONS_ARRAY: Action< Product >[] = [];
 
 const getDefaultView = (
 	defaultViews: Array< { slug: string; view: View } >,
@@ -188,6 +189,10 @@ function useView(
 	return [ view, setViewWithUrlUpdate, setViewWithUrlUpdate ];
 }
 
+function getItemId( item: Product ) {
+	return item.id.toString();
+}
+
 export default function ProductList( {
 	subTitle,
 	className,
@@ -195,22 +200,35 @@ export default function ProductList( {
 }: ProductListProps ) {
 	const history = useHistory();
 	const location = useLocation();
-	const { postId, quickEdit = false, postType = 'product' } = location.params;
+	const {
+		postId,
+		quickEdit = false,
+		postType = 'product',
+		isCustom,
+		activeView = 'all',
+	} = location.params;
 	const [ selection, setSelection ] = useState( [ postId ] );
 	const [ view, setView ] = useView( postType );
 
 	const queryParams = useMemo( () => {
-		const additionalParams = view?.filters?.reduce( ( params, filter ) => {
-			params[ filter.field ] = filter.value;
-			return params;
-		}, {} as Record< string, string > );
+		const filters: Partial< ProductQuery > = {};
+		view.filters?.forEach( ( filter ) => {
+			if ( filter.field === 'status' ) {
+				filters.status = Array.isArray( filter.value )
+					? filter.value.join( ',' )
+					: filter.value;
+			}
+		} );
+		const orderby =
+			view.sort?.field === 'name' ? 'title' : view.sort?.field;
+
 		return {
-			page: 1,
-			per_page: PAGE_SIZE,
+			per_page: view.perPage,
+			page: view.page,
 			order: view.sort?.direction,
-			orderby: view.sort?.field,
+			orderby,
 			search: view.search,
-			...additionalParams,
+			...filters,
 		};
 	}, [ location.params, view ] );
 
@@ -237,6 +255,14 @@ export default function ProductList( {
 			};
 		},
 		[ queryParams ]
+	);
+
+	const paginationInfo = useMemo(
+		() => ( {
+			totalItems: totalCount,
+			totalPages: Math.ceil( totalCount / ( view.perPage || PAGE_SIZE ) ),
+		} ),
+		[ totalCount, view.perPage ]
 	);
 
 	const classes = classNames( 'edit-site-page', className );
@@ -279,19 +305,19 @@ export default function ProductList( {
 					</VStack>
 				) }
 				<DataViews
+					key={ activeView + isCustom }
+					paginationInfo={ paginationInfo }
+					// @ts-expect-error types seem rather strict for this still.
+					fields={ fields }
+					actions={ EMPTY_ACTIONS_ARRAY }
 					data={ records || EMPTY_ARRAY }
+					isLoading={ isLoading }
 					view={ view }
 					onChangeView={ setView }
 					onChangeSelection={ onChangeSelection }
-					isLoading={ isLoading }
+					getItemId={ getItemId }
 					selection={ selection }
-					// @ts-expect-error types seem rather strict for this still.
-					fields={ fields }
 					defaultLayouts={ defaultLayouts }
-					paginationInfo={ {
-						totalItems: totalCount,
-						totalPages: Math.ceil( totalCount / PAGE_SIZE ),
-					} }
 					header={
 						<Button
 							// @ts-expect-error outdated type.
