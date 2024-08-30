@@ -321,7 +321,7 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 			return (
 				<EmptyContent
 					title={ __(
-						"You currently don't have any actionable statuses. " +
+						'You currently don’t have any actionable statuses. ' +
 							'To display orders here, select orders that require further review in settings.',
 						'woocommerce'
 					) }

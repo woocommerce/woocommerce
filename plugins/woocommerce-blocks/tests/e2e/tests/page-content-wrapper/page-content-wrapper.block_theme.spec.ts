@@ -54,7 +54,7 @@ for ( const template of templates ) {
 			// Prevent trying to insert the paragraph block before the editor is
 			// ready.
 			await expect(
-				page.locator( template.blockClassName )
+				editor.canvas.locator( template.blockClassName )
 			).toBeVisible();
 
 			await editor.insertBlock( {

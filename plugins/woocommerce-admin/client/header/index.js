@@ -118,10 +118,9 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 
 	const isHomescreen =
 		isWCAdmin() && getScreenFromPath() === 'homescreen' && ! query.task;
-	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
-		useLaunchYourStore( {
-			enabled: isHomescreen,
-		} );
+	const { isLoading, launchYourStoreEnabled } = useLaunchYourStore( {
+		enabled: isHomescreen,
+	} );
 	const showLaunchYourStoreStatus =
 		isHomescreen && launchYourStoreEnabled && ! isLoading;
 
@@ -157,12 +156,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 					) }
 				</Text>
 
-				{ showLaunchYourStoreStatus && (
-					<LaunchYourStoreStatus
-						comingSoon={ comingSoon }
-						storePagesOnly={ storePagesOnly }
-					/>
-				) }
+				{ showLaunchYourStoreStatus && <LaunchYourStoreStatus /> }
 
 				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
 			</div>

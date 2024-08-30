@@ -15,7 +15,7 @@ import { blockName, attributes } from './attributes';
 import './inner-blocks';
 
 const settings: BlockConfiguration = {
-	apiVersion: 2,
+	apiVersion: 3,
 	title: __( 'Mini-Cart Contents', 'woocommerce' ),
 	icon: {
 		src: (
