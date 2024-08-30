@@ -1160,20 +1160,21 @@ test.describe( 'Product picker', () => {
 				pageObject,
 				admin,
 				page,
+				editor,
 			} ) => {
 				await admin.createNewPost();
 				await pageObject.insertProductCollection();
 				await pageObject.chooseCollectionInPost( key as Collections );
 
 				// Verify that product picker is shown in Editor
-				const editorProductPicker = admin.page.locator(
+				const editorProductPicker = editor.canvas.locator(
 					SELECTORS.productPicker
 				);
 				await expect( editorProductPicker ).toBeVisible();
 
 				// Once a product is selected, the product picker should be hidden
 				await pageObject.chooseProductInEditorProductPickerIfAvailable(
-					admin.page
+					editor.canvas
 				);
 				await expect( editorProductPicker ).toBeHidden();
 
