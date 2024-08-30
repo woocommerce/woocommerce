@@ -214,10 +214,10 @@ export const getProductCollectionUIStateInEditor = ( {
 	const isProductContextSelected =
 		( attributes.query?.productReference ?? null ) !== null;
 	if (
+		isCollectionSelected &&
 		isProductContextRequired &&
 		! isInRequiredLocation &&
-		! isProductContextSelected &&
-		isCollectionSelected
+		! isProductContextSelected
 	) {
 		return ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER;
 	}
