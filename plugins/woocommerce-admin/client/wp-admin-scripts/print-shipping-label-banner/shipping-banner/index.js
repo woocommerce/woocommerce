@@ -25,7 +25,7 @@ import {
 } from '../wcs-api';
 
 const wcAssetUrl = getSetting( 'wcAssetUrl', '' );
-const wcsPluginSlug = 'woocommerce-shipping';
+const wcShippingPluginSlug = 'woocommerce-shipping';
 const wcstPluginSlug = 'woocommerce-services';
 
 export class ShippingBanner extends Component {
@@ -74,8 +74,8 @@ export class ShippingBanner extends Component {
 		const { activePlugins } = this.props;
 		this.setState( { isShippingLabelButtonBusy: true } );
 		this.trackElementClicked( 'shipping_banner_create_label' );
-		if ( ! activePlugins.includes( wcsPluginSlug ) ) {
-			this.installAndActivatePlugins( wcsPluginSlug );
+		if ( ! activePlugins.includes( wcShippingPluginSlug ) ) {
+			this.installAndActivatePlugins( wcShippingPluginSlug );
 		} else {
 			this.acceptTosAndGetWCSAssets();
 		}
@@ -111,7 +111,10 @@ export class ShippingBanner extends Component {
 			return;
 		}
 
-		if ( ! activePlugins.includes( wcsPluginSlug ) && isWcstCompatible ) {
+		if (
+			! activePlugins.includes( wcShippingPluginSlug ) &&
+			isWcstCompatible
+		) {
 			this.acceptTosAndGetWCSAssets();
 		} else {
 			this.setState( {
@@ -130,7 +133,7 @@ export class ShippingBanner extends Component {
 			banner_name: 'wcadmin_install_wcs_prompt',
 			jetpack_installed: activePlugins.includes( 'jetpack' ),
 			jetpack_connected: isJetpackConnected,
-			wcs_installed: activePlugins.includes( wcsPluginSlug ),
+			wcs_installed: activePlugins.includes( wcShippingPluginSlug ),
 			...customProps,
 		} );
 	};
