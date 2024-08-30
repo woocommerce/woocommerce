@@ -6,7 +6,7 @@ tags: how-to
 
 # Product Collection - DOM Events
 
-## `wc-blocks_product_list_rendered`
+## Event: `wc-blocks_product_list_rendered`
 
 This event is triggered when Product Collection block was rendered or re-rendered (e.g. due to page change).
 
@@ -28,7 +28,7 @@ window.document.addEventListener(
 );
 ```
 
-## `wc-blocks_viewed_product`
+## Event: `wc-blocks_viewed_product`
 
 This event is triggered when some blocks are clicked in order to view product (redirect to product page).
 
