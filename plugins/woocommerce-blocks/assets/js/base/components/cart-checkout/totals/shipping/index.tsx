@@ -100,7 +100,7 @@ export const TotalsShipping = ( {
 			) }
 		>
 			<TotalsItem
-				label={ __( 'Shipping', 'woocommerce' ) }
+				label={ __( 'Delivery', 'woocommerce' ) }
 				value={
 					! shippingMethodsMissing && cartHasCalculatedShipping
 						? // if address is not complete, display the link to add an address.
