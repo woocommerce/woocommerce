@@ -1,0 +1,64 @@
+/**
+ * External dependencies
+ */
+import type { InnerBlockTemplate } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
+import { Icon, loop } from '@wordpress/icons';
+
+/**
+ * Internal dependencies
+ */
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
+import { CoreCollectionNames, CoreFilterNames, LayoutOptions } from '../types';
+
+const collection = {
+	name: CoreCollectionNames.RELATED,
+	title: __( 'Related Products', 'woocommerce' ),
+	icon: <Icon icon={ loop } />,
+	description: __( 'Recommend products like this one.', 'woocommerce' ),
+	keywords: [ 'related', 'product collection' ],
+	scope: [],
+	preview: {
+		initialPreviewState: {
+			isPreview: true,
+			previewMessage: __(
+				'Actual products will vary depending on the product being viewed.',
+				'woocommerce'
+			),
+		},
+	},
+};
+
+const attributes = {
+	displayLayout: {
+		type: LayoutOptions.GRID,
+		columns: 4,
+		shrinkColumns: true,
+	},
+	query: {
+		perPage: 4,
+		pages: 1,
+	},
+	hideControls: [ CoreFilterNames.FILTERABLE ],
+};
+
+const heading: InnerBlockTemplate = [
+	'core/heading',
+	{
+		textAlign: 'center',
+		level: 2,
+		content: __( 'You may also like', 'woocommerce' ),
+		style: { spacing: { margin: { bottom: '1rem' } } },
+	},
+];
+
+const innerBlocks: InnerBlockTemplate[] = [
+	heading,
+	INNER_BLOCKS_PRODUCT_TEMPLATE,
+];
+
+export default {
+	...collection,
+	attributes,
+	innerBlocks,
+};
