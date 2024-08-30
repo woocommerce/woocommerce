@@ -208,13 +208,14 @@ class ProductCollectionPage {
 			SELECTORS.productPicker
 		);
 
-		await editorProductPicker
-			.locator( 'label' )
-			.filter( {
-				hasText: 'Album',
-			} )
-			.click( { timeout: 3000 } )
-			.catch( () => null );
+		if ( await editorProductPicker.isVisible() ) {
+			await editorProductPicker
+				.locator( 'label' )
+				.filter( {
+					hasText: 'Album',
+				} )
+				.click();
+		}
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
