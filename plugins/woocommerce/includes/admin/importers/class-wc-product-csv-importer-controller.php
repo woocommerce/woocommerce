@@ -104,6 +104,56 @@ class WC_Product_CSV_Importer_Controller {
 	}
 
 	/**
+	 * Runs before controller actions to check that the file used during the import is valid.
+	 *
+	 * @since 9.3.0
+	 *
+	 * @param string $path Path to test.
+	 *
+	 * @throws \Exception When file validation fails.
+	 */
+	protected static function check_file_path( string $path ): void {
+		$is_valid_file = false;
+
+		if ( ! empty( $path ) ) {
+			$path          = realpath( $path );
+			$is_valid_file = false !== $path;
+		}
+
+		// File must be readable.
+		$is_valid_file = $is_valid_file && is_readable( $path );
+
+		// Check that file is within an allowed location.
+		if ( $is_valid_file ) {
+			$in_valid_location = false;
+			$valid_locations   = array();
+			$valid_locations[] = ABSPATH;
+
+			$upload_dir = wp_get_upload_dir();
+			if ( false === $upload_dir['error'] ) {
+				$valid_locations[] = $upload_dir['basedir'];
+			}
+
+			foreach ( $valid_locations as $valid_location ) {
+				if ( 0 === stripos( $path, trailingslashit( realpath( $valid_location ) ) ) ) {
+					$in_valid_location = true;
+					break;
+				}
+			}
+
+			$is_valid_file = $in_valid_location;
+		}
+
+		if ( ! $is_valid_file ) {
+			throw new \Exception( esc_html__( 'File path provided for import is invalid.', 'woocommerce' ) );
+		}
+
+		if ( ! self::is_file_valid_csv( $path ) ) {
+			throw new \Exception( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+		}
+	}
+
+	/**
 	 * Get all the valid filetypes for a CSV file.
 	 *
 	 * @return array
@@ -263,14 +313,31 @@ class WC_Product_CSV_Importer_Controller {
 	 * Dispatch current step and show correct view.
 	 */
 	public function dispatch() {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		if ( ! empty( $_POST['save_step'] ) && ! empty( $this->steps[ $this->step ]['handler'] ) ) {
-			call_user_func( $this->steps[ $this->step ]['handler'], $this );
+		$output = '';
+
+		try {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			if ( ! empty( $_POST['save_step'] ) && ! empty( $this->steps[ $this->step ]['handler'] ) ) {
+				if ( is_callable( $this->steps[ $this->step ]['handler'] ) ) {
+					call_user_func( $this->steps[ $this->step ]['handler'], $this );
+				}
+			}
+
+			ob_start();
+
+			if ( is_callable( $this->steps[ $this->step ]['view'] ) ) {
+				call_user_func( $this->steps[ $this->step ]['view'], $this );
+			}
+
+			$output = ob_get_clean();
+		} catch ( \Exception $e ) {
+			$this->add_error( $e->getMessage() );
 		}
+
 		$this->output_header();
 		$this->output_steps();
 		$this->output_errors();
-		call_user_func( $this->steps[ $this->step ]['view'], $this );
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- output is HTML we've generated ourselves.
 		$this->output_footer();
 	}
 
@@ -286,6 +353,8 @@ class WC_Product_CSV_Importer_Controller {
 
 		try {
 			$file = wc_clean( wp_unslash( $_POST['file'] ?? '' ) ); // PHPCS: input var ok.
+			self::check_file_path( $file );
+
 			$params = array(
 				'delimiter'          => ! empty( $_POST['delimiter'] ) ? wc_clean( wp_unslash( $_POST['delimiter'] ) ) : ',', // PHPCS: input var ok.
 				'start_pos'          => isset( $_POST['position'] ) ? absint( $_POST['position'] ) : 0, // PHPCS: input var ok.
@@ -490,6 +559,8 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected function mapping_form() {
 		check_admin_referer( 'woocommerce-csv-importer' );
+		self::check_file_path( $this->file );
+
 		$args = array(
 			'lines'              => 1,
 			'delimiter'          => $this->delimiter,
@@ -527,18 +598,7 @@ class WC_Product_CSV_Importer_Controller {
 		// Displaying this page triggers Ajax action to run the import with a valid nonce,
 		// therefore this page needs to be nonce protected as well.
 		check_admin_referer( 'woocommerce-csv-importer' );
-
-		if ( ! self::is_file_valid_csv( $this->file ) ) {
-			$this->add_error( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
-			$this->output_errors();
-			return;
-		}
-
-		if ( ! is_file( $this->file ) ) {
-			$this->add_error( __( 'The file does not exist, please try again.', 'woocommerce' ) );
-			$this->output_errors();
-			return;
-		}
+		self::check_file_path( $this->file );
 
 		if ( ! empty( $_POST['map_from'] ) && ! empty( $_POST['map_to'] ) ) {
 			$mapping_from = wc_clean( wp_unslash( $_POST['map_from'] ) );
