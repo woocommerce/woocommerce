@@ -139,15 +139,17 @@ test.describe(
 				await addAProductToCart( page, product1Id );
 				await page.goto( cartBlockPage.slug );
 
-				// Set shipping country to Netherlands
-				await page.getByLabel( 'Add an address for shipping' ).click();
-				await page
-					.getByRole( 'combobox' )
-					.first()
-					.selectOption( 'Netherlands' );
-				await page.getByLabel( 'Postal code' ).fill( '1011AA' );
-				await page.getByLabel( 'City' ).fill( 'Amsterdam' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Set shipping country to Netherlands
+			await page
+				.getByLabel( 'Enter address to check delivery options' )
+				.click();
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Netherlands' );
+			await page.getByLabel( 'Postal code' ).fill( '1011AA' );
+			await page.getByLabel( 'City' ).fill( 'Amsterdam' );
+			await page.getByRole( 'button', { name: 'Update' } ).click();
 
 				// Verify shipping costs
 				await expect(
@@ -173,15 +175,17 @@ test.describe(
 				await addAProductToCart( page, product1Id );
 				await page.goto( cartBlockPage.slug );
 
-				// Set shipping country to Portugal
-				await page.getByLabel( 'Add an address for shipping' ).click();
-				await page
-					.getByRole( 'combobox' )
-					.first()
-					.selectOption( 'Portugal' );
-				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
-				await page.getByLabel( 'City' ).fill( 'Lisbon' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Set shipping country to Portugal
+			await page
+				.getByLabel( 'Enter address to check delivery options' )
+				.click();
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Portugal' );
+			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
+			await page.getByLabel( 'City' ).fill( 'Lisbon' );
+			await page.getByRole( 'button', { name: 'Update' } ).click();
 
 				// Verify shipping costs
 				await expect(
@@ -219,15 +223,17 @@ test.describe(
 				await addAProductToCart( page, product1Id );
 				await page.goto( cartBlockPage.slug );
 
-				// Set shipping country to Portugal
-				await page.getByLabel( 'Add an address for shipping' ).click();
-				await page
-					.getByRole( 'combobox' )
-					.first()
-					.selectOption( 'Portugal' );
-				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
-				await page.getByLabel( 'City' ).fill( 'Lisbon' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Set shipping country to Portugal
+			await page
+				.getByLabel( 'Enter address to check delivery options' )
+				.click();
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Portugal' );
+			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
+			await page.getByLabel( 'City' ).fill( 'Lisbon' );
+			await page.getByRole( 'button', { name: 'Update' } ).click();
 
 				// Increase product quantity and verify the updated price
 				await page.getByLabel( 'Increase quantity of First' ).click();
@@ -253,15 +259,17 @@ test.describe(
 				await addAProductToCart( page, product2Id );
 				await page.goto( cartBlockPage.slug );
 
-				// Set shipping country to Portugal
-				await page.getByLabel( 'Add an address for shipping' ).click();
-				await page
-					.getByRole( 'combobox' )
-					.first()
-					.selectOption( 'Portugal' );
-				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
-				await page.getByLabel( 'City' ).fill( 'Lisbon' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Set shipping country to Portugal
+			await page
+				.getByLabel( 'Enter address to check delivery options' )
+				.click();
+			await page
+				.getByRole( 'combobox' )
+				.first()
+				.selectOption( 'Portugal' );
+			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
+			await page.getByLabel( 'City' ).fill( 'Lisbon' );
+			await page.getByRole( 'button', { name: 'Update' } ).click();
 
 				// Verify shipping costs
 				await expect(
