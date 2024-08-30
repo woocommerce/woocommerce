@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { _n, sprintf } from '@wordpress/i18n';
 import {
 	getCurrencyFromPriceResponse,
 	formatPrice,
