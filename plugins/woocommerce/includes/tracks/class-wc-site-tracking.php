@@ -51,6 +51,7 @@ class WC_Site_Tracking {
 	 */
 	public static function register_scripts() {
 		wp_register_script( 'woo-tracks', 'https://stats.wp.com/w.js', array( 'wp-hooks' ), gmdate( 'YW' ), false );
+		wp_script_add_data( 'woo-tracks', 'strategy', 'async' );
 	}
 
 	/**
