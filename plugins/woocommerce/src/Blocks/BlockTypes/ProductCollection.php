@@ -417,13 +417,13 @@ class ProductCollection extends AbstractBlock {
          * @return string   Modified block content with added interactivity.
          */
 	public function add_click_event_directives( $block_content, $block, $instance ) {
-		$is_link                     = $instance->attributes['isLink'] ?? false;
-		$namespace                   = $instance->attributes['__woocommerceNamespace'] ?? '';
-		$is_product_collection_block = 'woocommerce/product-collection/product-title' === $namespace;
+		$is_link                = $instance->attributes['isLink'] ?? false;
+		$namespace              = $instance->attributes['__woocommerceNamespace'] ?? '';
+		$is_product_title_block = 'woocommerce/product-collection/product-title' === $namespace;
 
 		// Only proceed if the block is a product collection block,
 		// enhaced pagination is enabled and query IDs match.
-		if ( $is_product_collection_block && $is_link ) {
+		if ( $is_product_title_block && $is_link ) {
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 			$p->next_tag( array( 'class_name' => 'wp-block-post-title' ) );
 			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
