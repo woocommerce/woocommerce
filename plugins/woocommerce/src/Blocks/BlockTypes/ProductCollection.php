@@ -407,14 +407,15 @@ class ProductCollection extends AbstractBlock {
 		return $block_content;
 	}
 
-	/**
-	 * Add interactive links to all anchors inside the Query Pagination block.
-	 * This enabled client-side navigation for the product collection block.
-	 *
-	 * @param string    $block_content The block content.
-	 * @param array     $block         The full block, including name and attributes.
-	 * @param \WP_Block $instance      The block instance.
-	 */
+        /**
+         * Add interactivity to the Product Title block within Product Collection.
+         * This enables the triggering of a custom event when the product title is clicked.
+         *
+         * @param string    $block_content The block content.
+         * @param array     $block         The full block, including name and attributes.
+         * @param \WP_Block $instance      The block instance.
+         * @return string   Modified block content with added interactivity.
+         */
 	public function add_click_event_directives( $block_content, $block, $instance ) {
 		$is_link                     = $instance->attributes['isLink'] ?? false;
 		$namespace                   = $instance->attributes['__woocommerceNamespace'] ?? '';
