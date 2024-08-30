@@ -643,7 +643,7 @@ class WC_Shortcode_Products {
 
 			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
 				/**
-				 * Fire the hook that displays the pagination.
+				 * Fire the standard shop hooks when paginating so we can display result counts etc.
 				 * If the pagination is not enabled, this hook will not be fired.
 				 *
 				 * @since 3.3.1
@@ -674,7 +674,7 @@ class WC_Shortcode_Products {
 
 			if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
 				/**
-				 * Fire the hook that displays the pagination.
+				 * Fire the standard shop hooks when paginating so we can display the pagination.
 				 * If the pagination is not enabled, this hook will not be fired.
 				 *
 				 * @since 3.3.1
