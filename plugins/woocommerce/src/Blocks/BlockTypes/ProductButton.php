@@ -127,12 +127,17 @@ class ProductButton extends AbstractBlock {
 			*/
 			$quantity_to_add = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
 
-			$context = array(
+			// Context has two variants:
+			// - more complex for Add to Cart button (ajax button),
+			// - simplified with productId only when it's anchor (not ajax button).
+			$context = $is_ajax_button ? array(
 				'quantityToAdd'          => $quantity_to_add,
 				'productId'              => $product->get_id(),
 				'addToCartText'          => null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' ),
 				'temporaryNumberOfItems' => $number_of_items_in_cart,
 				'animationStatus'        => 'IDLE',
+			) : array(
+				'productId' => $product->get_id(),
 			);
 
 			/**
