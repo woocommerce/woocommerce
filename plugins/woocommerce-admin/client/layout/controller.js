@@ -275,6 +275,13 @@ export const getPages = () => {
 					__( 'Profiler', 'woocommerce' ),
 				],
 				capability: 'manage_woocommerce',
+				layout: {
+					header: false,
+					footer: true,
+					showNotices: true,
+					showStoreAlerts: false,
+					showPluginArea: false,
+				},
 			} );
 		}
 	}
