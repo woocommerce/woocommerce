@@ -78,7 +78,12 @@ export const TotalsShipping = ( {
 				.flatMap( ( rate ) => rate.name );
 		}
 	);
-	const addressComplete = isAddressComplete( shippingAddress );
+	const addressComplete = isAddressComplete( shippingAddress, [
+		'state',
+		'country',
+		'postcode',
+		'city',
+	] );
 	const shippingMethodsMissing = areShippingMethodsMissing(
 		hasRates,
 		prefersCollection,
