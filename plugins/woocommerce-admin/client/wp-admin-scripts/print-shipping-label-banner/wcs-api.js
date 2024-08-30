@@ -21,7 +21,7 @@ export function getWcsAssets() {
 }
 
 export function getWcsLabelPurchaseConfigs( orderId ) {
-	const path = `wcshipping/v1/config/label_purchase/${ orderId }`;
+	const path = `wcshipping/v1/config/label-purchase/${ orderId }`;
 	return apiFetch( {
 		path,
 		method: 'GET',
