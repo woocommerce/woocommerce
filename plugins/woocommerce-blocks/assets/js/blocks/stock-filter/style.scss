@@ -12,14 +12,14 @@
 }
 
 .wc-block-stock-filter {
+	display: grid;
+
 	&.is-loading {
 		@include placeholder();
 		margin-top: $gap;
 		box-shadow: none;
 		border-radius: 0;
 	}
-
-	margin-bottom: $gap-large;
 
 	.wc-block-stock-filter-list {
 		margin: 0;

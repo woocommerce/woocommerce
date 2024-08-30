@@ -58,6 +58,8 @@ class WC_Post_Data {
 
 		// Meta cache flushing.
 		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
+		add_action( 'added_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
+		add_action( 'deleted_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 	}
 
