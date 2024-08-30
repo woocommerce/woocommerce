@@ -203,7 +203,6 @@
 				"@wordpress/edit-site",
 				"@wordpress/private-apis",
 				"@wordpress/dataviews",
-				"@wordpress/dom",
 				"@wordpress/icons"
 			],
 			"packages": [
