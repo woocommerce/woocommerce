@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { BlockOverlayAttributeOptions as ProductFiltersBlockOverlayAttributeOptions } from '../product-filters/types';
+import { BlockOverlayAttributeOptions as ProductFiltersBlockOverlayAttributeOptions } from '../../types';
 
 type BorderRadius = {
 	bottomLeft: string;
