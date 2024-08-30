@@ -75,7 +75,7 @@ const ProductCollectionContent = ( {
 		attributes,
 		setAttributes,
 		location,
-		isUsesReferencePreviewMode,
+		isUsingReferencePreviewMode,
 	} = props;
 
 	useSetPreviewState( {
@@ -83,7 +83,7 @@ const ProductCollectionContent = ( {
 		setAttributes,
 		location,
 		attributes,
-		isUsesReferencePreviewMode,
+		isUsingReferencePreviewMode,
 	} );
 
 	const blockProps = useBlockProps();

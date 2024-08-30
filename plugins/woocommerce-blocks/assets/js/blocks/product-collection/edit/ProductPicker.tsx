@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Icon, info } from '@wordpress/icons';
 import ProductControl from '@woocommerce/editor-components/product-control';
-import { SelectedOption } from '@woocommerce/block-hocs';
+import type { SelectedOption } from '@woocommerce/block-hocs';
 import { createInterpolateElement } from '@wordpress/element';
 import {
 	Placeholder,

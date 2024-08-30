@@ -119,7 +119,7 @@ export type ProductCollectionEditComponentProps =
 		context: {
 			templateSlug: string;
 		};
-		isUsesReferencePreviewMode: boolean;
+		isUsingReferencePreviewMode: boolean;
 		location: WooCommerceBlockLocation;
 	};
 

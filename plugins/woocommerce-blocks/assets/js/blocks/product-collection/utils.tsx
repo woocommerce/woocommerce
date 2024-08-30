@@ -174,9 +174,9 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
  */
 export const getUsesReferencePreviewMessage = (
 	location: WooCommerceBlockLocation,
-	isUsesReferencePreviewMode: boolean
+	isUsingReferencePreviewMode: boolean
 ) => {
-	if ( isUsesReferencePreviewMode ) {
+	if ( isUsingReferencePreviewMode ) {
 		if ( location.type === LocationType.Product ) {
 			return __(
 				'Actual products will vary depending on the product being viewed.',
@@ -263,7 +263,7 @@ export const useSetPreviewState = ( {
 	location,
 	attributes,
 	setAttributes,
-	isUsesReferencePreviewMode,
+	isUsingReferencePreviewMode,
 }: {
 	setPreviewState?: SetPreviewState | undefined;
 	location: WooCommerceBlockLocation;
@@ -272,7 +272,7 @@ export const useSetPreviewState = ( {
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
 	usesReference?: string[] | undefined;
-	isUsesReferencePreviewMode: boolean;
+	isUsingReferencePreviewMode: boolean;
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
@@ -289,10 +289,10 @@ export const useSetPreviewState = ( {
 	 */
 	const usesReferencePreviewMessage = getUsesReferencePreviewMessage(
 		location,
-		isUsesReferencePreviewMode
+		isUsingReferencePreviewMode
 	);
 	useLayoutEffect( () => {
-		if ( isUsesReferencePreviewMode ) {
+		if ( isUsingReferencePreviewMode ) {
 			setAttributes( {
 				__privatePreviewState: {
 					isPreview: usesReferencePreviewMessage.length > 0,
@@ -303,12 +303,12 @@ export const useSetPreviewState = ( {
 	}, [
 		setAttributes,
 		usesReferencePreviewMessage,
-		isUsesReferencePreviewMode,
+		isUsingReferencePreviewMode,
 	] );
 
 	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
-		if ( ! setPreviewState && ! isUsesReferencePreviewMode ) {
+		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
 			return;
 		}
 
@@ -339,7 +339,7 @@ export const useSetPreviewState = ( {
 			? location.sourceData?.termId
 			: null;
 	useLayoutEffect( () => {
-		if ( ! setPreviewState && ! isUsesReferencePreviewMode ) {
+		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
@@ -362,7 +362,7 @@ export const useSetPreviewState = ( {
 		location.type,
 		setAttributes,
 		setPreviewState,
-		isUsesReferencePreviewMode,
+		isUsingReferencePreviewMode,
 	] );
 };
 
