@@ -1,10 +1,10 @@
 /**
  * Internal dependencies
  */
-import { ComboboxProps } from '../combobox';
+import { SelectProps } from '../select';
 import { countries } from './stories/countries-filler';
 
-export interface CountryInputProps extends Omit< ComboboxProps, 'options' > {
+export interface CountryInputProps extends Omit< SelectProps, 'options' > {
 	/**
 	 * Classes to assign to the wrapper component of the input
 	 */
