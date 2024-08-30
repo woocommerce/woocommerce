@@ -72,6 +72,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				}
 				isUsesReferencePreviewMode={ isUsesReferencePreviewMode }
 				location={ location }
+				usesReference={ props.usesReference }
 			/>
 			{ isSelectionModalOpen && (
 				<CollectionSelectionModal

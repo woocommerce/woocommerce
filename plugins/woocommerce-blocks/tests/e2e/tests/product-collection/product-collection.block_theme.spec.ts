@@ -1094,7 +1094,7 @@ test.describe( 'Testing "usesReference" argument in "registerProductCollection"'
 	);
 } );
 
-test.describe( 'Editor product picker', () => {
+test.describe( 'Product picker', () => {
 	const MY_REGISTERED_COLLECTIONS_THAT_NEEDS_PRODUCT = {
 		myCustomCollectionWithProductContext: {
 			name: 'My Custom Collection - Product Context',
@@ -1140,6 +1140,60 @@ test.describe( 'Editor product picker', () => {
 					editor.canvas
 				);
 				await expect( editorProductPicker ).toBeHidden();
+
+				// On Frontend, verify that product reference is a number
+				await pageObject.publishAndGoToFrontend();
+				const collectionWithProductContext = page.locator(
+					`[data-collection="${ collection.collection }"]`
+				);
+				const queryAttribute = JSON.parse(
+					( await collectionWithProductContext.getAttribute(
+						'data-query'
+					) ) || '{}'
+				);
+				expect( typeof queryAttribute?.productReference ).toBe(
+					'number'
+				);
+			} );
+
+			test( `For collection "${ collection.name }" - changing product using inspector control`, async ( {
+				pageObject,
+				admin,
+				page,
+				editor,
+			} ) => {
+				await admin.createNewPost();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInPost( key as Collections );
+
+				// Verify that product picker is shown in Editor
+				const editorProductPicker = editor.canvas.locator(
+					SELECTORS.productPicker
+				);
+				await expect( editorProductPicker ).toBeVisible();
+
+				// Once a product is selected, the product picker should be hidden
+				await pageObject.chooseProductInEditorProductPickerIfAvailable(
+					editor.canvas
+				);
+				await expect( editorProductPicker ).toBeHidden();
+
+				// Verify that Album is selected
+				await expect(
+					admin.page.locator( SELECTORS.linkedProductControl.button )
+				).toContainText( 'Album' );
+
+				// Change product using inspector control to Beanie
+				await admin.page
+					.locator( SELECTORS.linkedProductControl.button )
+					.click();
+				await admin.page
+					.locator( SELECTORS.linkedProductControl.popoverContent )
+					.getByLabel( 'Beanie', { exact: true } )
+					.click();
+				await expect(
+					admin.page.locator( SELECTORS.linkedProductControl.button )
+				).toContainText( 'Beanie' );
 
 				// On Frontend, verify that product reference is a number
 				await pageObject.publishAndGoToFrontend();
