@@ -20,6 +20,7 @@ import { CoreCollectionNames } from './types';
 import './style.scss';
 
 export type ProductCollectionStoreContext = {
+	productId: string;
 	isPrefetchNextOrPreviousLink: boolean;
 	animation: 'start' | 'finish';
 	accessibilityMessage: string;
@@ -168,7 +169,7 @@ const productCollectionStore = {
 			}
 		},
 		*viewProduct() {
-			const context = getContext< Context >();
+			const context = getContext< ProductCollectionStoreContext >();
 			const { productId } = context;
 
 			triggerViewedProductEvent( { productId } );
