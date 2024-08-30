@@ -69,14 +69,14 @@ class ShippingLabelBanner {
 	/**
 	 * Add metabox to order page.
 	 *
-	 * @param string   $post_type current post type.
-	 * @param \WP_Post $post Current post object.
+	 * @param string             $order_type current post type.
+	 * @param \WP_Post|\WC_Order $post_or_order Current post object.
 	 */
-	public function add_meta_boxes( $post_type, $post ) {
+	public function add_meta_boxes( $order_type, $post_or_order ) {
 		if ( ! OrderUtil::is_order_edit_screen() ) {
 			return;
 		}
-		$order = wc_get_order( $post );
+		$order = wc_get_order( $post_or_order );
 		if ( $this->should_show_meta_box() ) {
 			add_meta_box(
 				'woocommerce-admin-print-label',
@@ -87,7 +87,7 @@ class ShippingLabelBanner {
 				'high',
 				array(
 					'context' => 'shipping_label',
-					'order'   => $post->ID,
+					'order'   => $order->get_id(),
 					'items'   => $this->count_shippable_items( $order ),
 				)
 			);
