@@ -155,10 +155,17 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	font-family: var(--wp--preset--font-family--system-sans-serif);
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
+	cursor: default;
 
 	&.is-primary:focus:not(:disabled) {
 		outline: none;
 		box-shadow: none;
+	}
+
+	&:hover.is-primary:not(:disabled),
+	&:active.is-primary:not(:disabled) {
+		background: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+		color: var(--wp-components-color-accent-inverted, #fff);
 	}
 }
 

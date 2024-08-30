@@ -42,6 +42,28 @@ Display a call to action button which either adds the product to the cart, or li
 -	**Supports:** align (full, wide), color (link, text, ~~background~~), interactivity, typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, textAlign, width
 
+## Product Image - woocommerce/product-image
+
+Display the main product image.
+
+-	**Name:** woocommerce/product-image
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** 
+-	**Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
+
+## Product Price - woocommerce/product-price
+
+Display the price of a product.
+
+-	**Name:** woocommerce/product-price
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** woocommerce/all-products,woocommerce/single-product,woocommerce/product-template,core/post-template
+-   **Parent:** 
+-	**Supports:** ~~html~~
+-	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
+
 ## Product Details - woocommerce/product-details
 
 Display a product's description, attributes, and reviews.
@@ -51,7 +73,7 @@ Display a product's description, attributes, and reviews.
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** align, spacing (margin)
--	**Attributes:** 
+-	**Attributes:** hideTabTitle
 
 ## Product Image Gallery - woocommerce/product-image-gallery
 
@@ -129,6 +151,17 @@ Display related products.
 -   **Parent:** 
 -	**Supports:** align, ~~reusable~~
 -	**Attributes:** 
+
+## On-Sale Badge - woocommerce/product-sale-badge
+
+Displays an on-sale badge if the product is on-sale.
+
+-	**Name:** woocommerce/product-sale-badge
+-	**Category:** woocommerce-product-elements
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** 
+-	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductTemplate, productId
 
 ## Active Filters Controls - woocommerce/active-filters
 
