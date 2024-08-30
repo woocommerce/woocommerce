@@ -357,7 +357,43 @@ $on_duplicate_clause
 		global $wpdb;
 		$address_table = $wpdb->prefix . 'wc_order_addresses';
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $address_table is hardcoded.
-		$wpdb->query( "CREATE FULLTEXT INDEX order_addresses_fts ON $address_table (first_name, last_name, company, address_1, address_2, city, state, postcode, country, email)" );
+		$wpdb->query( "CREATE FULLTEXT INDEX order_addresses_fts ON $address_table (first_name, last_name, company, address_1, address_2, city, state, postcode, country, email, phone)" );
+	}
+
+	/**
+	 * Sanitize FTS Search params to remove relevancy operators for performance, and add partial matches. Useful when the sorting is already happening based on some other conditions, so relevancy calculation is not needed.
+	 *
+	 * @since 9.4.0
+	 *
+	 * @param string $param Search term.
+	 *
+	 * @return string Sanitized search term.
+	 */
+	public function sanitise_boolean_fts_search_term( string $param ): string {
+		// Replace fts stopwords with spaces.
+		$param = preg_replace( '/[^\p{L}\p{N}_]+/u', ' ', $param );
+		// Split the search phrase into words so that we can add operators when needed.
+		$words           = explode( ' ', $param );
+		$sanitized_words = array();
+		foreach ( $words as $word ) {
+			// If quotes are provided, then we need to search as is.
+			if ( str_starts_with( $word, '"' ) && str_ends_with( $word, '"' ) ) {
+				$sanitized_words[] = $word;
+				continue;
+			}
+
+			// Strip away relevancy operators to keep the search performant.
+			$word = preg_replace( '/[><\(\)~*\"@]+/', '', $word );
+			if ( strlen( $word ) === 0 ) {
+				continue;
+			}
+
+			// Add `*` as suffix to every term so that partial matches happens.
+			$word = str_ends_with( $word, '*' ) ? $word : $word . '*';
+
+			$sanitized_words[] = $word;
+		}
+		return implode( ' ', $sanitized_words );
 	}
 
 	/**
