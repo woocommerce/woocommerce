@@ -117,7 +117,7 @@ class ProductCollection extends AbstractBlock {
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_rendering' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
-		add_filter( 'render_block_core/post-title', array( $this, 'add_click_event_directives' ), 10, 3 );
+		add_filter( 'render_block_core/post-title', array( $this, 'add_product_title_click_event_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
 
@@ -416,7 +416,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param \WP_Block $instance      The block instance.
 	 * @return string   Modified block content with added interactivity.
 	 */
-	public function add_click_event_directives( $block_content, $block, $instance ) {
+	public function add_product_title_click_event_directives( $block_content, $block, $instance ) {
 		$is_link                = $instance->attributes['isLink'] ?? false;
 		$namespace              = $instance->attributes['__woocommerceNamespace'] ?? '';
 		$is_product_title_block = 'woocommerce/product-collection/product-title' === $namespace;
