@@ -82,6 +82,87 @@ test.describe( 'Product Collection', () => {
 		).toBeVisible();
 	} );
 
+	test.describe( 'when no results are found', () => {
+		test.beforeEach( async ( { admin } ) => {
+			await admin.createNewPost();
+		} );
+
+		test( 'does not render', async ( { page, editor, pageObject } ) => {
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				max: '1',
+			} );
+
+			const featuredBlock = editor.canvas.getByLabel( 'Block: Featured' );
+
+			await expect(
+				featuredBlock.getByText( 'Featured products' )
+			).toBeVisible();
+			// The "No results found" info is rendered in editor for all collections.
+			await expect(
+				featuredBlock.getByText( 'No results found' )
+			).toBeVisible();
+
+			await pageObject.publishAndGoToFrontend();
+
+			const content = page.locator( 'main' );
+
+			await expect( content ).not.toContainText( 'Featured products' );
+			await expect( content ).not.toContainText( 'No results found' );
+		} );
+
+		// This test ensures the runtime render state is correctly reset for
+		// each block.
+		test( 'does not prevent subsequent blocks from render', async ( {
+			page,
+			pageObject,
+		} ) => {
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				max: '1',
+			} );
+
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'topRated' );
+
+			await pageObject.refreshLocators( 'editor' );
+			await expect( pageObject.products ).toHaveCount( 5 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await pageObject.refreshLocators( 'frontend' );
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( page.locator( 'main' ) ).not.toContainText(
+				'Featured products'
+			);
+		} );
+
+		test( 'renders if No Results block is present', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
+			await pageObject.insertProductCollection();
+			await pageObject.chooseCollectionInPost( 'productCatalog' );
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				max: '1',
+			} );
+
+			await expect(
+				editor.canvas.getByText( 'No results found' )
+			).toBeVisible();
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( page.getByText( 'No results found' ) ).toBeVisible();
+		} );
+	} );
+
 	test.describe( 'Renders correctly with all Product Elements', () => {
 		const expectedProductContent = [
 			'Beanie', // core/post-title
