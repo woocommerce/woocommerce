@@ -35,8 +35,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->cleanup_filters();
 		delete_option( 'woocommerce_feature_remote_logging_enabled' );
-		delete_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT );
-		delete_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY );
+		delete_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
 		WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
@@ -56,6 +55,7 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 			'plugins_api',
 			'pre_http_request',
 			'woocommerce_remote_logger_formatted_log_data',
+			'pre_site_transient_update_plugins',
 		);
 		foreach ( $filters as $filter ) {
 			remove_all_filters( $filter );
@@ -90,18 +90,23 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 	 */
 	public function remote_logging_disallowed_provider() {
 		return array(
-			'feature flag disabled' => array(
+			'feature flag disabled'   => array(
 				'condition' => 'feature flag disabled',
 				'setup'     => fn() => update_option( 'woocommerce_feature_remote_logging_enabled', 'no' ),
 			),
-			'tracking opted out'    => array(
+			'tracking opted out'      => array(
 				'condition' => 'tracking opted out',
 				'setup'     => fn() => add_filter( 'option_woocommerce_allow_tracking', fn() => 'no' ),
 			),
-			'outdated version'      => array(
-				'condition'               => 'outdated version',
-				'setup'                   => function () {
+			'high variant assignment' => array(
+				'condition' => 'high variant assignment',
+				'setup'     => fn() => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
+			),
+			'outdated version'        => array(
+				'condition' => 'outdated version',
+				'setup'     => function () {
 					$version = WC()->version;
+					// Next major version. (e.g. 9.0.1 -> 10.0.0).
 					$next_version = implode(
 						'.',
 						array_map(
@@ -112,28 +117,79 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 							array_keys( explode( '.', $version ) )
 						)
 					);
-					set_transient( RemoteLogger::WC_LATEST_VERSION_TRANSIENT, $next_version );
+
+					set_site_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT, $next_version, WEEK_IN_SECONDS );
 				},
-				'high variant assignment' => array(
-					'condition' => 'high variant assignment',
-					'setup'     => fn() => add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 15 ),
-				),
 			),
 		);
 	}
 
-	/**
-	 * @testdox Fetch latest WooCommerce version retries on API failure
-	 */
-	public function test_fetch_latest_woocommerce_version_retry() {
-		$this->setup_remote_logging_conditions( true );
-		add_filter( 'plugins_api', fn() => new \WP_Error(), 10, 3 );
 
-		for ( $i = 1; $i <= 4; $i++ ) {
-			$this->sut->is_remote_logging_allowed();
-			$retry_count = get_transient( RemoteLogger::FETCH_LATEST_VERSION_RETRY );
-			$this->assertEquals( min( $i, 3 ), $retry_count );
+	/**
+	 * @testdox should_current_version_be_logged method behaves correctly
+	 * @dataProvider should_current_version_be_logged_provider
+	 *
+	 * @param string $current_version The current WooCommerce version.
+	 * @param string $new_version The new WooCommerce version.
+	 * @param string $transient_value The value of the transient.
+	 * @param bool   $expected The expected result.
+	 */
+	public function test_should_current_version_be_logged( $current_version, $new_version, $transient_value, $expected ) {
+		$wc_version   = WC()->version;
+		WC()->version = $current_version;
+
+		// Set up the transient.
+		if ( null !== $transient_value ) {
+			set_site_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT, $transient_value, WEEK_IN_SECONDS );
+		} else {
+			delete_site_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
+
+			$this->setup_mock_plugin_updates( $new_version );
 		}
+
+		$result = $this->invoke_private_method( $this->sut, 'should_current_version_be_logged', array() );
+		$this->assertEquals( $expected, $result );
+
+		// Clean up.
+		delete_site_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
+
+		WC()->version = $wc_version;
+	}
+
+	/**
+	 * Data provider for test_should_current_version_be_logged.
+	 */
+	public function should_current_version_be_logged_provider() {
+		return array(
+			'current version is latest (transient set)'    => array( '9.2.0', '9.2.0', '9.2.0', true ),
+			'current version is newer (transient set)'     => array( '9.3.0', '9.2.0', '9.2.0', true ),
+			'current version is older (transient set)'     => array( '9.1.0', '9.2.0', '9.2.0', false ),
+			'new version is null (transient set)'          => array( '9.2.0', null, null, true ),
+			'transient not set, current version is latest' => array( '9.2.0', '9.2.0', null, true ),
+			'transient not set, current version is newer'  => array( '9.3.0', '9.2.0', null, true ),
+			'transient not set, current version is older'  => array( '9.1.0', '9.2.0', null, false ),
+			'transient not set, new version is null'       => array( '9.2.0', null, null, true ),
+		);
+	}
+
+	/**
+	 * @testdox fetch_new_woocommerce_version method returns correct version
+	 */
+	public function test_fetch_new_woocommerce_version() {
+		$this->setup_mock_plugin_updates( '9.3.0' );
+
+		$result = $this->invoke_private_method( $this->sut, 'fetch_new_woocommerce_version', array() );
+		$this->assertEquals( '9.3.0', $result, 'The result should be the latest version when an update is available.' );
+	}
+
+	/**
+	 * @testdox fetch_new_woocommerce_version method returns null when no update is available
+	 */
+	public function test_fetch_new_woocommerce_version_no_update() {
+		add_filter( 'pre_site_transient_update_plugins', fn() => array() );
+
+		$result = $this->invoke_private_method( $this->sut, 'fetch_new_woocommerce_version', array() );
+		$this->assertNull( $result, 'The result should be null when no update is available.' );
 	}
 
 	/**
@@ -421,17 +477,26 @@ class RemoteLoggerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_remote_logging_enabled', $enabled ? 'yes' : 'no' );
 		add_filter( 'option_woocommerce_allow_tracking', fn() => 'yes' );
 		add_filter( 'option_woocommerce_remote_variant_assignment', fn() => 5 );
-		add_filter(
-			'plugins_api',
-			function ( $result, $action, $args ) use ( $enabled ) {
-				if ( 'plugin_information' === $action && 'woocommerce' === $args->slug ) {
-					return (object) array( 'version' => $enabled ? WC()->version : '9.0.0' );
-				}
-				return $result;
-			},
-			10,
-			3
+		$this->setup_mock_plugin_updates( $enabled ? WC()->version : '9.0.0' );
+	}
+
+
+	/**
+	 * Set up mock plugin updates.
+	 *
+	 * @param string $new_version The new version of WooCommerce to simulate.
+	 */
+	private function setup_mock_plugin_updates( $new_version ) {
+		$update_plugins = (object) array(
+			'response' => array(
+				WC_PLUGIN_BASENAME => (object) array(
+					'new_version' => $new_version,
+					'package'     => 'https://downloads.wordpress.org/plugin/woocommerce.zip',
+					'slug'        => 'woocommerce',
+				),
+			),
 		);
+		add_filter( 'pre_site_transient_update_plugins', fn() => $update_plugins );
 	}
 
 	/**
