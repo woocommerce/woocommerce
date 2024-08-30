@@ -277,7 +277,7 @@ export const getPages = () => {
 				capability: 'manage_woocommerce',
 				layout: {
 					header: false,
-					footer: true,
+					footer: false,
 					showNotices: true,
 					showStoreAlerts: false,
 					showPluginArea: false,
