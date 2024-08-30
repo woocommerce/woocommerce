@@ -5,7 +5,7 @@ import { isRTL } from '@wordpress/i18n';
 import { chevronRightSmall, chevronLeftSmall, Icon } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import classNames from 'classnames';
-import { createElement, useContext } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import {
 	// @ts-expect-error missing type.
 	__experimentalItem as Item,
@@ -18,7 +18,6 @@ import {
  * Internal dependencies
  */
 import { unlock } from '../../lock-unlock';
-import { SidebarNavigationContext } from '../sidebar';
 
 const { useHistory } = unlock( routerPrivateApis );
 
@@ -45,16 +44,13 @@ export default function SidebarNavigationItem( {
 	...props
 }: SidebarNavigationItemProps ) {
 	const history = useHistory();
-	const { navigate } = useContext( SidebarNavigationContext );
 	// If there is no custom click handler, create one that navigates to `params`.
 	function handleClick( e: Event ) {
 		if ( onClick ) {
 			onClick( e );
-			navigate( 'forward' );
 		} else if ( params ) {
 			e.preventDefault();
 			history.push( params );
-			navigate( 'forward', `[id="${ uid }"]` );
 		}
 	}
 
