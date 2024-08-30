@@ -1109,16 +1109,16 @@ The contents of this block will display when there are no products found.
 -	**Supports:** align, color (background, gradients, link, text), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 -	**Attributes:** 
 
-## Product Filter (Experimental) - woocommerce/product-filter
+## Product Filters (Experimental) - woocommerce/product-filters
 
-A block that adds product filters to the product collection.
+Let shoppers filter products displayed on the page.
 
--	**Name:** woocommerce/product-filter
+-	**Name:** woocommerce/product-filters
 -	**Category:** woocommerce
--   **Ancestor:** woocommerce/product-filters
+-   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** ~~html~~, ~~inserter~~, ~~reusable~~
--	**Attributes:** attributeId, filterType, heading, isPreview
+-	**Supports:** align, color (background, text), interactivity, layout (allowJustification, allowOrientation, allowVerticalAlignment, default, ~~allowInheriting~~), spacing (blockGap), typography (fontSize, textAlign), ~~inserter~~, ~~multiple~~
+-	**Attributes:** overlay, overlayButtonStyle, overlayIcon, overlayIconSize
 
 ## Filter Options - woocommerce/product-filter-active
 
@@ -1153,6 +1153,28 @@ Allows shoppers to reset this filter.
 -	**Supports:** interactivity, ~~inserter~~
 -	**Attributes:** 
 
+## Product Filters Overlay (Experimental) - woocommerce/product-filters-overlay
+
+Display product filters in an overlay on top of a page.
+
+-	**Name:** woocommerce/product-filters-overlay
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** align, color (background, text), dimensions (), layout (allowCustomContentAndWideSize), spacing (blockGap, padding), typography (), ~~inserter~~, ~~multiple~~
+-	**Attributes:** overlayPosition, overlayStyle, style
+
+## Overlay Navigation (Experimental) - woocommerce/product-filters-overlay-navigation
+
+Display overlay navigation controls.
+
+-	**Name:** woocommerce/product-filters-overlay-navigation
+-	**Category:** woocommerce
+-   **Ancestor:** woocommerce/product-filters-overlay,woocommerce/product-filters
+-   **Parent:** 
+-	**Supports:** align (center, left, right), color (background, text), layout (default, ~~allowEditing~~), position (sticky), spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~inserter~~
+-	**Attributes:** align, buttonStyle, iconSize, navigationStyle, overlayMode, style, triggerType
+
 ## Filter Options - woocommerce/product-filter-price
 
 Enable customers to filter the product collection by choosing a price range.
@@ -1163,6 +1185,17 @@ Enable customers to filter the product collection by choosing a price range.
 -   **Parent:** 
 -	**Supports:** interactivity, ~~inserter~~
 -	**Attributes:** inlineInput, showInputFields
+
+## Product Filter (Experimental) - woocommerce/product-filter
+
+A block that adds product filters to the product collection.
+
+-	**Name:** woocommerce/product-filter
+-	**Category:** woocommerce
+-   **Ancestor:** woocommerce/product-filters
+-   **Parent:** 
+-	**Supports:** ~~html~~, ~~inserter~~, ~~reusable~~
+-	**Attributes:** attributeId, filterType, heading, isPreview
 
 ## Filter Options - woocommerce/product-filter-rating
 
@@ -1185,39 +1218,6 @@ Enable customers to filter the product collection by stock status.
 -   **Parent:** 
 -	**Supports:** color (text, ~~background~~), interactivity, ~~html~~, ~~inserter~~, ~~multiple~~
 -	**Attributes:** className, displayStyle, isPreview, selectType, showCounts
-
-## Product Filters (Experimental) - woocommerce/product-filters
-
-Let shoppers filter products displayed on the page.
-
--	**Name:** woocommerce/product-filters
--	**Category:** woocommerce
--   **Ancestor:** 
--   **Parent:** 
--	**Supports:** align, color (background, text), interactivity, layout (allowJustification, allowOrientation, allowVerticalAlignment, default, ~~allowInheriting~~), spacing (blockGap), typography (fontSize, textAlign), ~~inserter~~, ~~multiple~~
--	**Attributes:** overlay, overlayButtonStyle, overlayIcon, overlayIconSize
-
-## Product Filters Overlay (Experimental) - woocommerce/product-filters-overlay
-
-Display product filters in an overlay on top of a page.
-
--	**Name:** woocommerce/product-filters-overlay
--	**Category:** woocommerce
--   **Ancestor:** 
--   **Parent:** 
--	**Supports:** align, color (background, text), dimensions (), layout (allowCustomContentAndWideSize), spacing (blockGap, padding), typography (), ~~inserter~~, ~~multiple~~
--	**Attributes:** overlayPosition, overlayStyle, style
-
-## Overlay Navigation (Experimental) - woocommerce/product-filters-overlay-navigation
-
-Display overlay navigation controls.
-
--	**Name:** woocommerce/product-filters-overlay-navigation
--	**Category:** woocommerce
--   **Ancestor:** woocommerce/product-filters-overlay,woocommerce/product-filters
--   **Parent:** 
--	**Supports:** align (center, left, right), color (background, text), layout (default, ~~allowEditing~~), position (sticky), spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~inserter~~
--	**Attributes:** align, buttonStyle, iconSize, navigationStyle, overlayMode, style, triggerType
 
 ## Product Gallery (Beta) - woocommerce/product-gallery
 
