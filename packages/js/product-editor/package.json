@@ -59,7 +59,6 @@
 		"@wordpress/dataviews": "^4.2.0",
 		"@wordpress/date": "wp-6.0",
 		"@wordpress/deprecated": "wp-6.0",
-		"@wordpress/dom": "^4.6.0",
 		"@wordpress/edit-post": "wp-6.0",
 		"@wordpress/editor": "wp-6.0",
 		"@wordpress/element": "wp-6.0",

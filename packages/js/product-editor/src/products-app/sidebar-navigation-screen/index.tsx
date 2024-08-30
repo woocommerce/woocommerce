@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { chevronRight, chevronLeft } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { useContext, createElement, Fragment } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import {
 	// @ts-expect-error missing type.
 	__experimentalHStack as HStack,
@@ -22,7 +22,6 @@ import {
  */
 import { unlock } from '../../lock-unlock';
 import SidebarButton from './sidebar-button';
-import { SidebarNavigationContext } from '../sidebar';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -56,7 +55,6 @@ export default function SidebarNavigationScreen( {
 	}, [] );
 	const location = useLocation();
 	const history = useHistory();
-	const { navigate } = useContext( SidebarNavigationContext );
 	const backPath = backPathProp ?? location.state?.backPath;
 	const icon = isRTL() ? chevronRight : chevronLeft;
 
@@ -81,7 +79,6 @@ export default function SidebarNavigationScreen( {
 						<SidebarButton
 							onClick={ () => {
 								history.push( backPath );
-								navigate( 'back' );
 							} }
 							icon={ icon }
 							label={ __( 'Back', 'woocommerce' ) }

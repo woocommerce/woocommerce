@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
 import { createElement, Fragment, useRef } from '@wordpress/element';
 import {
 	useViewportMatch,
@@ -9,7 +8,6 @@ import {
 	useReducedMotion,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
 import {
 	// @ts-expect-error missing type.
 	EditorSnackbars,
@@ -44,12 +42,6 @@ export function Layout( { route }: LayoutProps ) {
 	const [ fullResizer ] = useResizeObserver();
 	const toggleRef = useRef< HTMLAnchorElement >( null );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
-	const { canvasMode } = useSelect( ( select ) => {
-		const { getCanvasMode } = unlock( select( 'core/edit-site' ) );
-		return {
-			canvasMode: getCanvasMode(),
-		};
-	}, [] );
 	const disableMotion = useReducedMotion();
 
 	const { key: routeKey, areas, widths } = route;
@@ -57,11 +49,7 @@ export function Layout( { route }: LayoutProps ) {
 	return (
 		<>
 			{ fullResizer }
-			<div
-				className={ classNames( 'edit-site-layout', {
-					'is-full-canvas': canvasMode === 'edit',
-				} ) }
-			>
+			<div className="edit-site-layout">
 				<div className="edit-site-layout__content">
 					{ /*
 						The NavigableRegion must always be rendered and not use
@@ -102,18 +90,16 @@ export function Layout( { route }: LayoutProps ) {
 
 					<EditorSnackbars />
 
-					{ ! isMobileViewport &&
-						areas.content &&
-						canvasMode !== 'edit' && (
-							<div
-								className="edit-site-layout__area"
-								style={ {
-									maxWidth: widths?.content,
-								} }
-							>
-								{ areas.content }
-							</div>
-						) }
+					{ ! isMobileViewport && areas.content && (
+						<div
+							className="edit-site-layout__area"
+							style={ {
+								maxWidth: widths?.content,
+							} }
+						>
+							{ areas.content }
+						</div>
+					) }
 
 					{ ! isMobileViewport && areas.edit && (
 						<div
