@@ -1516,7 +1516,7 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 			)
 		);
 		$orderedby                 = isset( $catalog_orderedby_options[ $orderby ] ) ? $catalog_orderedby_options[ $orderby ] : '';
-		$orderedby								 = is_string( $orderedby ) ? $orderedby : '';
+		$orderedby                 = is_string( $orderedby ) ? $orderedby : '';
 		$args                      = array(
 			'total'     => wc_get_loop_prop( 'total' ),
 			'per_page'  => wc_get_loop_prop( 'per_page' ),
