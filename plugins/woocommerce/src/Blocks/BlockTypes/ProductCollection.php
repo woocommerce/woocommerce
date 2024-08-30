@@ -48,6 +48,18 @@ class ProductCollection extends AbstractBlock {
 
 
 	/**
+	 * The render state of the product collection block.
+	 *
+	 * These props are runtime-based and reinitialize for every block on a page.
+	 *
+	 * @var array
+	 */
+	private $render_state = array(
+		'has_results'          => false,
+		'has_no_results_block' => false,
+	);
+
+	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -80,8 +92,30 @@ class ProductCollection extends AbstractBlock {
 		// Provide location context into block's context.
 		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
 
+		// Disable block render if the ProductTemplate block is empty.
+		add_filter(
+			'render_block_woocommerce/product-template',
+			function ( $html ) {
+				$this->render_state['has_results'] = ! empty( $html );
+				return $html;
+			},
+			100,
+			1
+		);
+
+		// Enable block render if the ProductCollectionNoResults block is rendered.
+		add_filter(
+			'render_block_woocommerce/product-collection-no-results',
+			function ( $html ) {
+				$this->render_state['has_no_results_block'] = ! empty( $html );
+				return $html;
+			},
+			100,
+			1
+		);
+
 		// Interactivity API: Add navigation directives to the product collection block.
-		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
+		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_rendering' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 		add_filter( 'render_block_core/post-title', array( $this, 'add_click_event_directives' ), 10, 3 );
 
@@ -90,6 +124,46 @@ class ProductCollection extends AbstractBlock {
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 	}
+
+	/**
+	 * Handle the rendering of the block.
+	 *
+	 * @param string $block_content The block content about to be rendered.
+	 * @param array  $block The block being rendered.
+	 *
+	 * @return string
+	 */
+	public function handle_rendering( $block_content, $block ) {
+		if ( $this->should_prevent_render() ) {
+			return ''; // Prevent rendering.
+		}
+
+		// Reset the render state for the next render.
+		$this->reset_render_state();
+
+		return $this->enhance_product_collection_with_interactivity( $block_content, $block );
+	}
+
+	/**
+	 * Check if the block should be prevented from rendering.
+	 *
+	 * @return bool
+	 */
+	private function should_prevent_render() {
+		return ! $this->render_state['has_results'] && ! $this->render_state['has_no_results_block'];
+	}
+
+	/**
+	 * Reset the render state.
+	 */
+	private function reset_render_state() {
+		$this->render_state = array(
+			'has_results'          => false,
+			'has_no_results_block' => false,
+		);
+	}
+
+
 
 	/**
 	 * Provides the location context to each inner block of the product collection block.

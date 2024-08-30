@@ -6,7 +6,7 @@ import { store, getContext } from '@woocommerce/interactivity';
 /**
  * Internal dependencies
  */
-import { navigate } from '../../frontend';
+import { navigate } from '../product-filter/frontend';
 
 type ActiveFiltersContext = {
 	queryId: number;
