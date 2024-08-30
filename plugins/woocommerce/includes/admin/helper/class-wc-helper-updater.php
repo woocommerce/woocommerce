@@ -379,16 +379,15 @@ class WC_Helper_Updater {
 			PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
 		);
 
-
 		$product_price = self::get_regular_price_for_product_without_subscription( $product_id );
 		/* translators: 1: Product regular price */
 		$product_price_formatted = $product_price ? sprintf( __( ' for %s ', 'woocommerce' ), $product_price ) : '';
 
 		$notice = sprintf(
 			/* translators: 1: URL to My Subscriptions page 2: Product price */
-				__( ' You don\'t have a subscription, <a href="%1$s" class="woocommerce-purchase-subscription">subscribe%2$s</a> to update.', 'woocommerce' ),
-				esc_url( $purchase_link ),
-				$product_price_formatted
+			__( ' You don\'t have a subscription, <a href="%1$s" class="woocommerce-purchase-subscription">subscribe%2$s</a> to update.', 'woocommerce' ),
+			esc_url( $purchase_link ),
+			$product_price_formatted
 		);
 
 		// Display the expiry notice.
@@ -423,7 +422,7 @@ class WC_Helper_Updater {
 			return $cached_data;
 		}
 
-		$url     = sprintf( "https://woocommerce.com/wp-json/wccom/v1.0/products/%s/price", $product_id );
+		$url     = sprintf( 'https://woocommerce.com/wp-json/wccom/v1.0/products/%s/price', $product_id );
 		$request = wp_safe_remote_get(
 			$url,
 			array(
@@ -446,8 +445,8 @@ class WC_Helper_Updater {
 			return null;
 		}
 
-		$price = isset($body['currencySymbol'], $body['regularPrice']) ?
-			sprintf("%s%s", $body['currencySymbol'], $body['regularPrice'])
+		$price = isset( $body['currencySymbol'], $body['regularPrice'] ) ?
+			sprintf( '%s%s', $body['currencySymbol'], $body['regularPrice'] )
 			: null;
 
 		wp_cache_set( $cache_key, $price, 'wc-helper-updater', 24 * HOUR_IN_SECONDS );
