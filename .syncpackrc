@@ -88,7 +88,8 @@
 				"webpack*"
 			],
 			"packages": [
-				"@woocommerce/block-library"
+				"@woocommerce/block-library",
+				"@woocommerce/storybook"
 			],
 			"isIgnored": true
 		},
@@ -199,7 +200,8 @@
 				"@wordpress/viewport",
 				"@wordpress/interface",
 				"@wordpress/router",
-				"@wordpress/edit-site"
+				"@wordpress/edit-site",
+				"@wordpress/private-apis"
 			],
 			"packages": [
 				"@woocommerce/block-templates",

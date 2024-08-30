@@ -57,7 +57,6 @@ class CouponsReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="coupons"
-					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }

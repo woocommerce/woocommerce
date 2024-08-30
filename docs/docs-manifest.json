@@ -23,7 +23,7 @@
           "menu_title": "Theming for Woo Blocks",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/theming-woo-blocks.md",
-          "hash": "1ce763e8afcc7dfdd8c5eca4da799add21dfac48279c08fc7b614071edb67a7d",
+          "hash": "cec80a34a38b7286be676a35624e2e441f5ccbb1aa318def6afe56a5a2bb6558",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/theming-woo-blocks.md",
           "id": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
         },
@@ -69,6 +69,14 @@
           "hash": "7efe019f643f79cd143a7c555b40d61d3a7c91d1d28db43888ea12c1fdd71dc8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
+        },
+        {
+          "post_title": "Blocks reference",
+          "menu_title": "Blocks Reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
+          "hash": "329f17097ce67074a915d7814b2363e8b9e908910c1f7b196c8f4fd8594cc55c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
+          "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
         {
           "post_title": "How to add a custom field to simple and variable products",
@@ -259,7 +267,7 @@
               "menu_title": "Legacy Hooks",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "hash": "025731fc8884e13e09ecc857bee7d669a091f11640e023e40c08ffc521f38964",
+              "hash": "be4cf6862932c6696568b210e5f6ae4bd5313dacfb66724e23fab830baeb94e1",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
               "id": "5264fa45d393327b2c9cffb038c4d3670879d911"
             }
@@ -1246,15 +1254,15 @@
       ],
       "categories": [
         {
-          "content": "\nReviews are an integral part of the online shopping experience, and people installing software pay attention to them. Prospective users of your extensions will likely consider average ratings when making software choices.\n\nMany of today's most popular online review platforms — from Yelp business reviews, to Amazon product reviews — have a range of opinion that can be polarized, with many extremely positive and/or negative reviews, and fewer moderate opinions. This creates a \"J-shaped\" distribution of reviews that isn't as accurate or as helpful as could be.\n\nWooCommerce.com and WordPress.org both feature reviews heavily, and competing extensions having a higher rating likely have the edge in user choice. \n\n## Primary considerations around reviews\n\nRequesting more reviews for a extension with major issues will not generate good reviews, and analyzing existing reviews will help surface areas to address before soliciting reviews.\n\nIt is extremely rare for users of WordPress plugins to leave reviews organically (.2% of users for WordPress.org leave reviews), which means that there's an untapped market of 99.8% of users of the average plugin.\n\nThese plugins are competing with other plugins on the same search terms in the WordPress.org plugin directory, and ratings are a large factor in the ranking algorithm. This is not usually a factor to the same extent on the WooCommerce Marketplace. For instance, WooCommerce's PayPal extension directly competes on all possible keywords with other PayPal extensions on the WordPress.org repository, while it does not compete with other PayPal payments extensions on the Marketplace.\n",
+          "content": "\nReviews are an integral part of the online shopping experience, and people installing software pay attention to them. Prospective users of your extensions will likely consider average ratings when making software choices.\n\nMany of today's most popular online review platforms - from Yelp business reviews, to Amazon product reviews - have a range of opinion that can be polarized, with many extremely positive and/or negative reviews, and fewer moderate opinions. This creates a \"J-shaped\" distribution of reviews that isn't as accurate or as helpful as could be.\n\nWooCommerce.com and WordPress.org both feature reviews heavily, and competing extensions having a higher rating likely have the edge in user choice. \n\n## Primary considerations around reviews\n\nRequesting more reviews for a extension with major issues will not generate good reviews, and analyzing existing reviews will help surface areas to address before soliciting reviews.\n\nIt is extremely rare for users of WordPress plugins to leave reviews organically (.2% of users for WordPress.org leave reviews), which means that there's an untapped market of 99.8% of users of the average plugin.\n\nThese plugins are competing with other plugins on the same search terms in the WordPress.org plugin directory, and ratings are a large factor in the ranking algorithm. This is not usually a factor to the same extent on the WooCommerce Marketplace. For instance, WooCommerce's PayPal extension directly competes on all possible keywords with other PayPal extensions on the WordPress.org repository, while it does not compete with other PayPal payments extensions on the Marketplace.\n",
           "category_slug": "review-guidelines",
           "category_title": "Review Guidelines",
           "posts": [
             {
               "post_title": "When to request WooCommerce extension reviews",
-              "menu_title": "When to review reviews",
+              "menu_title": "When to request reviews",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/when-to-request-reviews.md",
-              "hash": "b104db2cd0a8ff6ebac8ae93e5908f518f83c927e867f94b3745290e32af980b",
+              "hash": "7a14ceb03ac0a98d84c0d380e44534129198f8ee682e84824cbb6c793da71be8",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/when-to-request-reviews.md",
               "id": "d40eb30ff49c89545a5918f5b8c08b82e6f8f45a"
             },
@@ -1283,10 +1291,10 @@
               "id": "7cb825a3830e392aeae853b441a91237f48c3ae5"
             },
             {
-              "post_title": "Notifying users about bug fixes and features requests",
+              "post_title": "Notifying users about bug fixes and feature requests",
               "menu_title": "Notifying users about bug fixes and feature requests",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
-              "hash": "4e1508499ff11586680af208f3b90afba4c482d75aca25bc4ed18bfd1590f7e7",
+              "hash": "30b6241ebb32204910980a5dea2399a8fa2e02fa37ea22449edc549f3f14034b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/notifying-users-about-important-events.md",
               "id": "9ccc4bf579cc624002478fe8706241f4640d92b8"
             },
@@ -1302,7 +1310,7 @@
               "post_title": "How to request WooCommerce extension reviews",
               "menu_title": "Requesting reviews",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
-              "hash": "5a77783c32c1bb0fefc6888f7a3217fe6e5c7242692593a17828b2f1ffec618b",
+              "hash": "dfdf5add075777636eb628d25484e93268251437dec0253766c12d80ac82573b",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/review-guidelines/how-to-request-reviews.md",
               "id": "3d0c8bf7339a71198737d19eec7e6d71697b3727"
             }
@@ -1796,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "aed8797ef51eef8ebc3d29337a5c1e2eb321e45ee45cd20b297246ee2ec72c44"
+  "hash": "2ecf48b6181dae0526b3858df889bce4e6ee425e10f2c43d151771d845c5a948"
 }

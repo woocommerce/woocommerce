@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Ensure that active plugins shown in the System Status API endpoint actually exist
