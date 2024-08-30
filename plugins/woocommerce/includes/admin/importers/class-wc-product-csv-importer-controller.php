@@ -498,60 +498,20 @@ class WC_Product_CSV_Importer_Controller {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
 		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
 
-		if ( empty( $file_url ) ) {
-			if ( ! isset( $_FILES['import'] ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_empty', __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini or by post_max_size being defined as smaller than upload_max_filesize in php.ini.', 'woocommerce' ) );
+		try {
+			if ( ! empty( $file_url ) ) {
+				$path = ABSPATH . $file_url;
+				self::check_file_path( $path );
+			} else {
+				$csv_import_util = wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper::class );
+				$upload          = $csv_import_util->handle_csv_upload( 'product', 'import', self::get_valid_csv_filetypes() );
+				$path            = $upload['file'];
 			}
 
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-			if ( ! self::is_file_valid_csv( wc_clean( wp_unslash( $_FILES['import']['name'] ) ), false ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
-			}
-
-			$overrides = array(
-				'test_form' => false,
-				'mimes'     => self::get_valid_csv_filetypes(),
-			);
-			$import    = $_FILES['import']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			$upload    = wp_handle_upload( $import, $overrides );
-
-			if ( isset( $upload['error'] ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_upload_error', $upload['error'] );
-			}
-
-			// Construct the object array.
-			$object = array(
-				'post_title'     => basename( $upload['file'] ),
-				'post_content'   => $upload['url'],
-				'post_mime_type' => $upload['type'],
-				'guid'           => $upload['url'],
-				'context'        => 'import',
-				'post_status'    => 'private',
-			);
-
-			// Save the data.
-			$id = wp_insert_attachment( $object, $upload['file'] );
-
-			/*
-			 * Schedule a cleanup for one day from now in case of failed
-			 * import or missing wp_import_cleanup() call.
-			 */
-			wp_schedule_single_event( time() + DAY_IN_SECONDS, 'importer_scheduled_cleanup', array( $id ) );
-
-			return $upload['file'];
-		} elseif (
-			( 0 === stripos( realpath( ABSPATH . $file_url ), ABSPATH ) ) &&
-			file_exists( ABSPATH . $file_url )
-		) {
-			if ( ! self::is_file_valid_csv( ABSPATH . $file_url ) ) {
-				return new WP_Error( 'woocommerce_product_csv_importer_upload_file_invalid', __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
-			}
-
-			return ABSPATH . $file_url;
+			return $path;
+		} catch ( \Exception $e ) {
+			return new \WP_Error( 'woocommerce_product_csv_importer_upload_invalid_file', $e->getMessage() );
 		}
-		// phpcs:enable
-
-		return new WP_Error( 'woocommerce_product_csv_importer_upload_invalid_file', __( 'Please upload or provide the link to a valid CSV file.', 'woocommerce' ) );
 	}
 
 	/**
