@@ -68,11 +68,8 @@ class ShippingLabelBanner {
 
 	/**
 	 * Add metabox to order page.
-	 *
-	 * @param string             $order_type current post type.
-	 * @param \WP_Post|\WC_Order $post_or_order Current post object.
 	 */
-	public function add_meta_boxes( $order_type, $post_or_order ) {
+	public function add_meta_boxes() {
 		if ( ! OrderUtil::is_order_edit_screen() ) {
 			return;
 		}
