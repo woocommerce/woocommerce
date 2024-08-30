@@ -6,6 +6,8 @@ use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
 /**
  * Pattern Images class.
+ *
+ * @internal
  */
 class UpdateProducts {
 
