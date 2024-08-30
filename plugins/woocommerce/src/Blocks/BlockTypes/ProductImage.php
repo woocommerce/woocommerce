@@ -140,11 +140,17 @@ class ProductImage extends AbstractBlock {
 		$directives = '';
 		if ( $is_link ) {
 			$context    = array( 'productId' => $product->get_id() );
-			$directives = '
-				data-wc-interactive=\'' . wp_json_encode( array( 'namespace' => 'woocommerce/product-image' ), JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
-				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
-				data-wc-on--click=actions.triggerViewEvent
-			';
+			$directives = sprintf(
+				'data-wc-interactive=\'%1$s\' data-wc-context=\'%2$s\' data-wc-on--click="actions.triggerViewEvent"',
+				wp_json_encode(
+					array( 'namespace' => 'woocommerce/product-image' ),
+					JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				),
+				wp_json_encode(
+					$context,
+					JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				)
+			);
 		}
 
 		return sprintf(
