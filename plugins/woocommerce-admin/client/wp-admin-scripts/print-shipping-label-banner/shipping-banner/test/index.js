@@ -258,9 +258,9 @@ describe( 'Create shipping label button', () => {
 			wcshipping_create_label_script: '/path/to/wcs.js',
 			wcshipping_create_label_style: '/path/to/wcs.css',
 			wcshipping_shipment_tracking_script:
-				'wcshipping_shipment_tracking_script',
+				'/wcshipping_shipment_tracking_script',
 			wcshipping_shipment_tracking_style:
-				'wcshipping_shipment_tracking_style',
+				'/wcshipping_shipment_tracking_style',
 		};
 		getWcsAssets.mockReturnValueOnce(
 			Promise.resolve( {
@@ -304,12 +304,27 @@ describe( 'Create shipping label button', () => {
 		).toBeInTheDocument();
 
 		// Check that the script and style elements have been created.
-		expect( document.getElementsByTagName( 'script' )[ 0 ].src ).toBe(
+		const allScriptSrcs = Array.from(
+			document.querySelectorAll( 'script' )
+		).map( ( script ) => script.src );
+
+		const allLinkHrefs = Array.from(
+			document.querySelectorAll( 'link' )
+		).map( ( link ) => link.href );
+
+		expect( allScriptSrcs ).toContain(
 			'http://localhost' + mockAssets.wcshipping_create_label_script
 		);
 
-		expect( document.getElementsByTagName( 'link' )[ 0 ].href ).toBe(
+		expect( allScriptSrcs ).toContain(
+			'http://localhost' + mockAssets.wcshipping_shipment_tracking_script
+		);
+
+		expect( allLinkHrefs ).toContain(
 			'http://localhost' + mockAssets.wcshipping_create_label_style
+		);
+		expect( allLinkHrefs ).toContain(
+			'http://localhost' + mockAssets.wcshipping_shipment_tracking_style
 		);
 	} );
 
@@ -582,7 +597,7 @@ describe( 'If incompatible WCS&T is active', () => {
 		acceptWcsTos.mockClear();
 	} );
 
-	it( 'should show if there is activation error', async () => {
+	it( 'should install and activate but show an error notice when an incompatible version of WCS&T is installed', async () => {
 		const actionButtonLabel = 'Install WooCommerce Shipping';
 
 		const { getByRole, getByText } = render(
@@ -617,12 +632,22 @@ describe( 'If incompatible WCS&T is active', () => {
 			expect( acceptWcsTos ).not.toHaveBeenCalled();
 		} );
 
-		await waitFor( () =>
-			expect(
-				getByText(
-					'Please update the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.'
-				)
-			).toBeInTheDocument()
-		);
+		const notice = getByText( ( _, element ) => {
+			const hasText = ( node ) =>
+				node.textContent ===
+				'Please update the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.';
+			const nodeHasText = hasText( element );
+			const childrenDontHaveText = Array.from( element.children ).every(
+				( child ) => ! hasText( child )
+			);
+			return nodeHasText && childrenDontHaveText;
+		} );
+
+		await waitFor( () => expect( notice ).toBeInTheDocument() );
+
+		// Assert that the "update" link is present
+		const updateLink = getByText( /update/i );
+		expect( updateLink ).toBeInTheDocument();
+		expect( updateLink.tagName ).toBe( 'A' ); // Ensures it's a link
 	} );
 } );

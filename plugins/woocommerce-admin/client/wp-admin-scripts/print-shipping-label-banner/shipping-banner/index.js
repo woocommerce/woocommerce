@@ -10,7 +10,8 @@ import PropTypes from 'prop-types';
 import { PLUGINS_STORE_NAME } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, getAdminLink } from '@woocommerce/settings';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -370,10 +371,21 @@ export class ShippingBanner extends Component {
 			return (
 				<p>
 					<strong>
-						{ __(
-							'Please update the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.',
-							'woocommerce'
-						) }
+						{ interpolateComponents( {
+							mixedString: __(
+								'Please {{pluginPageLink}}update{{/pluginPageLink}} the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.',
+								'woocommerce'
+							),
+							components: {
+								pluginPageLink: (
+									<Link
+										href={ getAdminLink( 'plugins.php' ) }
+										target="_blank"
+										type="wp-admin"
+									/>
+								),
+							},
+						} ) }
 					</strong>
 				</p>
 			);
