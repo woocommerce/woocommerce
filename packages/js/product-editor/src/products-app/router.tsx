@@ -37,13 +37,12 @@ export default function useLayoutAreas() {
 		postType = 'product',
 		layout = 'table',
 		canvas,
-		quickEdit,
+		quickEdit: showQuickEdit,
 		postId,
 	} = params;
 	// Products list.
 	if ( [ 'product' ].includes( postType ) ) {
 		const isListLayout = layout === 'list' || ! layout;
-		const showQuickEdit = quickEdit && ! isListLayout;
 		return {
 			key: 'products-list',
 			areas: {
@@ -63,7 +62,7 @@ export default function useLayoutAreas() {
 			},
 			widths: {
 				content: isListLayout ? 380 : undefined,
-				edit: showQuickEdit ? 380 : undefined,
+				edit: showQuickEdit && ! isListLayout ? 380 : undefined,
 			},
 		};
 	}

@@ -236,7 +236,7 @@ export default function ProductList( {
 		postType,
 		context: 'list',
 	} );
-	const editAction = useEditProductAction();
+	const editAction = useEditProductAction( { postType } );
 	const actions = useMemo(
 		() => [ editAction, ...postTypeActions ],
 		[ postTypeActions, editAction ]
