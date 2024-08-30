@@ -9,14 +9,13 @@ import { createElement } from '@wordpress/element';
 import {
 	PRODUCT_FIELDS,
 	PRODUCT_FIELDS_KEYS,
-	ProductForm,
 	PRODUCTS_DATA,
 	ProductsView,
 } from './utilites/storybook';
 
 export default {
-	title: 'Product App/Product View',
-	component: ProductForm,
+	title: 'Product App/Products View',
+	component: ProductsView,
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
