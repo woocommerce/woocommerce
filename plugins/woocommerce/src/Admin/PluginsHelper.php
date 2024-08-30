@@ -659,6 +659,7 @@ class PluginsHelper {
 		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
 		wp_enqueue_script( 'woo-enable-autorenew' );
 		wp_enqueue_script( 'woo-renew-subscription' );
+		wp_enqueue_script( 'woo-purchase-subscription' );
 	}
 
 	/**

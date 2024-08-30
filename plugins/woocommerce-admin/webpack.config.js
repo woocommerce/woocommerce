@@ -75,6 +75,7 @@ const wpAdminScripts = [
 	'woo-plugin-update-connect-notice',
 	'woo-enable-autorenew',
 	'woo-renew-subscription',
+	'woo-purchase-subscription',
 	'woo-subscriptions-notice',
 	'woo-product-usage-notice',
 ];
