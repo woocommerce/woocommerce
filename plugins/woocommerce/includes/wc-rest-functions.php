@@ -430,7 +430,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 	 * @param string $rest_route  The REST route being checked.
 	 * @param array  $known_namespaces Known namespaces that we know are safe to not load if the request is not for them.
 	 *
-	 * @since 9.2.3
+	 * @since 9.4
 	 */
 	return apply_filters( 'wc_rest_should_load_namespace', str_starts_with( $rest_route, $ns ), $ns, $rest_route, $known_namespaces );
 }
