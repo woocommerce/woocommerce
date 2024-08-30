@@ -213,13 +213,6 @@ class ProductCollectionPage {
 			.filter( {
 				hasText: 'Album',
 			} )
-			.click();
-
-		await editorProductPicker
-			.locator( 'label' )
-			.filter( {
-				hasText: 'Album',
-			} )
 			.click( { timeout: 3000 } )
 			.catch( () => null );
 	}
