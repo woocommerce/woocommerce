@@ -142,6 +142,7 @@ const Edit = ( props: EditProps ) => {
 						],
 					],
 				],
+				[ displayStyle ],
 			],
 		}
 	);

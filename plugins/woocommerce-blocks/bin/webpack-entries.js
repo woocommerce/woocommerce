@@ -120,6 +120,14 @@ const blocks = {
 		customDir: 'product-filters/inner-blocks/clear-button',
 		isExperimental: true,
 	},
+	'product-filter-checkbox-list': {
+		customDir: 'product-filters/inner-blocks/checkbox-list',
+		isExperimental: true,
+	},
+	'product-filter-chips': {
+		customDir: 'product-filters/inner-blocks/chips',
+		isExperimental: true,
+	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
 	},

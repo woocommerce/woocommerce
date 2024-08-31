@@ -8,6 +8,12 @@ import { dispatch, useSelect } from '@wordpress/data';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
+	Block,
+	BlockInstance,
+	getBlockTypes,
+	createBlock,
+} from '@wordpress/blocks';
+import {
 	ComboboxControl,
 	PanelBody,
 	SelectControl,
@@ -29,6 +35,44 @@ import { getAttributeFromId } from '../utils';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
+let displayStyleOptions: Block[] = [];
+
+function getInnerBlockByName(
+	block: BlockInstance | null,
+	name: string
+): BlockInstance | null {
+	if ( ! block ) return null;
+
+	if ( block.innerBlocks.length === 0 ) return null;
+
+	for ( const innerBlock of block.innerBlocks ) {
+		if ( innerBlock.name === name ) return innerBlock;
+		const innerInnerBlock = getInnerBlockByName( innerBlock, name );
+		if ( innerInnerBlock ) return innerInnerBlock;
+	}
+
+	return null;
+}
+
+function replaceDisplayStyle(
+	rootBlock: BlockInstance | null,
+	currentStyle: string,
+	newStyle: string
+) {
+	if ( ! rootBlock ) return;
+	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
+	const currentStyleBlock = getInnerBlockByName( rootBlock, currentStyle );
+	if ( currentStyleBlock ) {
+		replaceBlock( currentStyleBlock.clientId, createBlock( newStyle ) );
+	} else {
+		insertBlock(
+			createBlock( newStyle ),
+			rootBlock.innerBlocks.length,
+			rootBlock.clientId
+		);
+	}
+}
+
 export const Inspector = ( {
 	clientId,
 	attributes,
@@ -44,6 +88,9 @@ export const Inspector = ( {
 		clearButton,
 	} = attributes;
 	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+	const rootBlock = useSelect( ( select ) =>
+		select( 'core/block-editor' ).getBlock( clientId )
+	);
 	const { productFilterWrapperBlockId, productFilterWrapperHeadingBlockId } =
 		useSelect(
 			( select ) => {
@@ -84,6 +131,14 @@ export const Inspector = ( {
 			},
 			[ clientId ]
 		);
+
+	if ( displayStyleOptions.length === 0 ) {
+		displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
+			blockType.ancestor?.includes(
+				'woocommerce/product-filter-attribute'
+			)
+		);
+	}
 
 	return (
 		<>
@@ -188,17 +243,23 @@ export const Inspector = ( {
 						value={ displayStyle }
 						onChange={ (
 							value: BlockAttributes[ 'displayStyle' ]
-						) => setAttributes( { displayStyle: value } ) }
+						) => {
+							setAttributes( { displayStyle: value } );
+							replaceDisplayStyle(
+								rootBlock,
+								displayStyle,
+								value
+							);
+						} }
 						style={ { width: '100%' } }
 					>
-						<ToggleGroupControlOption
-							label={ __( 'List', 'woocommerce' ) }
-							value="list"
-						/>
-						<ToggleGroupControlOption
-							label={ __( 'Chips', 'woocommerce' ) }
-							value="chips"
-						/>
+						{ displayStyleOptions.map( ( blockType ) => (
+							<ToggleGroupControlOption
+								key={ blockType.name }
+								label={ blockType.title }
+								value={ blockType.name }
+							/>
+						) ) }
 					</ToggleGroupControl>
 					<ToggleControl
 						label={ __( 'Product counts', 'woocommerce' ) }

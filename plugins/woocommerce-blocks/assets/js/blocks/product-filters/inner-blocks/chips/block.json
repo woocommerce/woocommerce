@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-chips",
+	"version": "1.0.0",
+	"title": "Chips",
+	"description": "Display filter options as chips.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter-attribute"
+	],
+	"supports": {},
+	"usesContext": [
+		"filterOptions"
+	],
+	"attributes": {}
+}
