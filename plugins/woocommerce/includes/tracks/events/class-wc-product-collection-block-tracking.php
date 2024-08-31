@@ -247,6 +247,7 @@ class WC_Product_Collection_Block_Tracking {
 		$filters     = array(
 			'inherit'      => 'no',
 			'order-by'     => 'no',
+			'related-to'   => 'no',
 			'on-sale'      => 'no',
 			'stock-status' => 'no',
 			'handpicked'   => 'no',
@@ -301,6 +302,10 @@ class WC_Product_Collection_Block_Tracking {
 
 		if ( ! empty( $query_attrs['woocommerceHandPickedProducts'] ) ) {
 			$filters['handpicked'] = 'yes';
+		}
+
+		if ( ! empty( $query_attrs['woocommerceRelatedTo'] ) ) {
+			$filters['related-to'] = 'yes';
 		}
 
 		if ( ! empty( $query_attrs['search'] ) ) {

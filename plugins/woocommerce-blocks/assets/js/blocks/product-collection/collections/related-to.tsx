@@ -12,7 +12,7 @@ import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, CoreFilterNames, LayoutOptions } from '../types';
 
 const collection = {
-	name: CoreCollectionNames.RELATED,
+	name: CoreCollectionNames.RELATED_TO,
 	title: __( 'Related Products', 'woocommerce' ),
 	icon: <Icon icon={ loop } />,
 	description: __( 'Recommend products like this one.', 'woocommerce' ),

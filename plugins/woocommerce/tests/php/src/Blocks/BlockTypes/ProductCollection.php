@@ -90,6 +90,7 @@ class ProductCollection extends \WP_UnitTestCase {
 				'woocommerceOnSale'      => false,
 				'woocommerceAttributes'  => array(),
 				'woocommerceStockStatus' => array(),
+				'woocommerceRelatedTo'   => array(),
 				'timeFrame'              => array(),
 				'priceRange'             => array(),
 			)
@@ -678,6 +679,7 @@ class ProductCollection extends \WP_UnitTestCase {
 				),
 			),
 			'woocommerceStockStatus' => array( 'instock', 'outofstock' ),
+			'woocommerceRelatedTo'   => array(),
 			'timeFrame'              => array(
 				'operator' => 'in',
 				'value'    => $time_frame_date,
@@ -936,5 +938,66 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`min_price` >= 1.", $query->request );
 		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`max_price` <= 2.", $query->request );
+	}
+
+	/**
+	 * Test handpicked products queries.
+	 */
+	public function test_handpicked_producs_queries() {
+		$handpicked_product_ids = array( 1, 2, 3, 4 );
+
+		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		foreach ( $handpicked_product_ids as $id ) {
+			$this->assertContainsEquals( $id, $merged_query['post__in'] );
+		}
+
+		$this->assertCount( count( $handpicked_product_ids ), $merged_query['post__in'] );
+	}
+
+	/**
+	 * Test related to queries.
+	 */
+	public function test_related_to_queries() {
+		$related_to_product_ids = array( 1, 2, 3, 4 );
+
+		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['woocommerceRelatedTo'] = array();
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		foreach ( $related_to_product_ids as $id ) {
+			$this->assertContainsEquals( $id, $merged_query['post__in'] );
+		}
+
+		$this->assertCount( 4, $merged_query['post__in'] );
+	}
+
+	/**
+	 * Test merging exclusive id filters.
+	 */
+	public function test_merges_exclusive_id_filters() {
+		$handpicked_product_ids = array( 3, 4, 5, 6 );
+		$related_to_product_ids = array( 1, 2, 3, 4 );
+
+		$parsed_block = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
+		$parsed_block['attrs']['query']['woocommerceRelatedTo']          = array();
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		// Since these are exclusive filters, we expect the insersection of the ID filters.
+		$expected_product_ids = array_intersect(
+			$handpicked_product_ids,
+			$related_to_product_ids
+		);
+		foreach ( $expected_product_ids as $id ) {
+			$this->assertContainsEquals( $id, $merged_query['post__in'] );
+		}
+
+		$this->assertCount( count( $expected_product_ids ), $merged_query['post__in'] );
 	}
 }

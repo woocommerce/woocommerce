@@ -609,6 +609,7 @@ class ProductCollection extends AbstractBlock {
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
 		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
+		$related_to          = $request->get_param( 'woocommerceRelatedTo' );
 		$featured            = $request->get_param( 'featured' );
 		$time_frame          = $request->get_param( 'timeFrame' );
 		$price_range         = $request->get_param( 'priceRange' );
@@ -624,6 +625,7 @@ class ProductCollection extends AbstractBlock {
 				'stock_status'        => $stock_status,
 				'product_attributes'  => $product_attributes,
 				'handpicked_products' => $handpicked_products,
+				'related_to'          => $related_to,
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
@@ -749,24 +751,35 @@ class ProductCollection extends AbstractBlock {
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
 	private function get_final_query_args( $common_query_values, $query, $is_exclude_applied_filters = false ) {
-		$handpicked_products = $query['handpicked_products'] ?? array();
-		$orderby_query       = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
-		$on_sale_query       = $this->get_on_sale_products_query( $query['on_sale'] );
-		$stock_query         = $this->get_stock_status_query( $query['stock_status'] );
-		$visibility_query    = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
-		$featured_query      = $this->get_featured_query( $query['featured'] ?? false );
-		$attributes_query    = $this->get_product_attributes_query( $query['product_attributes'] );
-		$taxonomies_query    = $query['taxonomies_query'] ?? array();
-		$tax_query           = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
-		$date_query          = $this->get_date_query( $query['timeFrame'] ?? array() );
-		$price_query_args    = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
+		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
+		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
+		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
+		$visibility_query = is_array( $query['stock_status'] ) ? $this->get_product_visibility_query( $stock_query, $query['stock_status'] ) : array();
+		$featured_query   = $this->get_featured_query( $query['featured'] ?? false );
+		$attributes_query = $this->get_product_attributes_query( $query['product_attributes'] );
+		$taxonomies_query = $query['taxonomies_query'] ?? array();
+		$tax_query        = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
+		$date_query       = $this->get_date_query( $query['timeFrame'] ?? array() );
+		$price_query_args = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
 
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
 
-		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query, $price_query_args );
+		$merged_query = $this->merge_queries(
+			$common_query_values,
+			$orderby_query,
+			$on_sale_query,
+			$stock_query,
+			$tax_query,
+			$applied_filters_query,
+			$date_query,
+			$price_query_args
+		);
 
-		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
+		$handpicked_products = $query['handpicked_products'] ?? array();
+		$related_to          = $this->get_related_to_query( $query['related_to'] );
+
+		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products, $related_to );
 
 		return $result;
 	}
@@ -1078,6 +1091,20 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
+	 * Returns a query for filtering products that are related to the ones given.
+	 *
+	 * @param array $related_to The IDs pf products that we're looking for a relationship to.
+	 * @return array The query for related products.
+	 */
+	private function get_related_to_query( $related_to ) {
+		if ( empty( $related_to ) ) {
+			return array();
+		}
+
+		return array();
+	}
+
+	/**
 	 * Generates a tax query to filter products based on their "featured" status.
 	 * If the `$featured` parameter is true, the function will return a tax query
 	 * that filters products to only those marked as featured.
@@ -1209,15 +1236,23 @@ class ProductCollection extends AbstractBlock {
 	 * Apply the query only to a subset of products
 	 *
 	 * @param array $query  The query.
-	 * @param array $ids  Array of selected product ids.
+	 * @param array ...$ids The product IDs to filter.
 	 *
 	 * @return array
 	 */
-	private function filter_query_to_only_include_ids( $query, $ids ) {
-		if ( ! empty( $ids ) ) {
-			$query['post__in'] = empty( $query['post__in'] ) ?
-				$ids : array_intersect( $ids, $query['post__in'] );
+	private function filter_query_to_only_include_ids( $query, ...$ids ) {
+		if ( empty( $ids ) ) {
+			return $query;
 		}
+
+		// Since this is an exclusive filter, we will only show products that are present in all of the ID filters.
+		$post_in_filter = ! empty( $query['post__in'] ) ? $query['post__in'] : array();
+		foreach ( $ids as $i ) {
+			if ( is_array( $i ) && ! empty( $i ) ) {
+				$post_in_filter = array_intersect( $i, $post_in_filter );
+			}
+		}
+		$query['post__in'] = $post_in_filter;
 
 		return $query;
 	}

@@ -60,6 +60,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	woocommerceStockStatus: getDefaultStockStatuses(),
 	woocommerceAttributes: [],
 	woocommerceHandPickedProducts: [],
+	woocommerceRelatedTo: [],
 	timeFrame: undefined,
 	priceRange: undefined,
 	filterable: false,
@@ -90,6 +91,7 @@ export const DEFAULT_FILTERS: Pick<
 	| 'woocommerceStockStatus'
 	| 'woocommerceAttributes'
 	| 'woocommerceHandPickedProducts'
+	| 'woocommerceRelatedTo'
 	| 'taxQuery'
 	| 'featured'
 	| 'timeFrame'
@@ -99,6 +101,7 @@ export const DEFAULT_FILTERS: Pick<
 	woocommerceStockStatus: DEFAULT_QUERY.woocommerceStockStatus,
 	woocommerceAttributes: DEFAULT_QUERY.woocommerceAttributes,
 	woocommerceHandPickedProducts: DEFAULT_QUERY.woocommerceHandPickedProducts,
+	woocommerceRelatedTo: DEFAULT_QUERY.woocommerceRelatedTo,
 	taxQuery: DEFAULT_QUERY.taxQuery,
 	featured: DEFAULT_QUERY.featured,
 	timeFrame: DEFAULT_QUERY.timeFrame,

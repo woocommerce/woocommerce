@@ -222,6 +222,15 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 			'Invalid woocommerceHandPickedProducts: woocommerceHandPickedProducts must be an array.'
 		);
 	}
+	// attributes.query.woocommerceRelatedTo
+	if (
+		config.attributes?.query?.woocommerceRelatedTo !== undefined &&
+		! Array.isArray( config.attributes.query.woocommerceRelatedTo )
+	) {
+		console.warn(
+			'Invalid woocommerceRelatedTo: woocommerceRelatedTo must be an array.'
+		);
+	}
 	// attributes.query.priceRange
 	if (
 		config.attributes?.query?.priceRange !== undefined &&
@@ -401,6 +410,9 @@ export const __experimentalRegisterProductCollection = (
 				...( query.woocommerceHandPickedProducts !== undefined && {
 					woocommerceHandPickedProducts:
 						query.woocommerceHandPickedProducts,
+				} ),
+				...( query.woocommerceRelatedTo !== undefined && {
+					woocommerceRelatedTo: query.woocommerceRelatedTo,
 				} ),
 				...( query.priceRange !== undefined && {
 					priceRange: query.priceRange,
