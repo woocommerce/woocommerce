@@ -36,9 +36,9 @@ export function homePage() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "WooCommerce Core E2E Test Suite"': ( response ) =>
+			'title is: "WooCommerce E2E Tests"': ( response ) =>
 				response.html().find( 'head title' ).text() ===
-				'WooCommerce Core E2E Test Suite',
+				'WooCommerce E2E Tests',
 			'footer contains: Built with WooCommerce': ( response ) =>
 				response
 					.html()

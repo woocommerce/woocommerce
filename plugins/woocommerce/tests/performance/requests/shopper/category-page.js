@@ -44,11 +44,11 @@ export function categoryPage() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "Accessories – WooCommerce Core E2E Test Suite"': (
+			'title is: "Accessories – WooCommerce E2E Tests"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'Accessories – WooCommerce Core E2E Test Suite',
+				'Accessories – WooCommerce E2E Tests',
 			"body contains: Category's title": ( response ) =>
 				response.body.includes(
 					`<h1 class="woocommerce-products-header__title page-title">${ product_category }</h1>`

@@ -36,11 +36,11 @@ export function shopPage() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title equals: Shop – WooCommerce Core E2E Test Suite': (
+			'title equals: Shop – WooCommerce E2E Tests': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'Shop – WooCommerce Core E2E Test Suite',
+				'Shop – WooCommerce E2E Tests',
 			'body contains: woocommerce-products-header': ( response ) =>
 				response.body.includes(
 					'<header class="woocommerce-products-header">'

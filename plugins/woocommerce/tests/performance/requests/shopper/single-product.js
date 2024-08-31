@@ -42,7 +42,7 @@ export function singleProduct() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: {product_url} – WooCommerce Core E2E Test Suite': (
+			'title is: {product_url} – WooCommerce E2E Tests': (
 				response
 			) => {
 				const title_actual = response
@@ -50,7 +50,7 @@ export function singleProduct() {
 					.find( 'head title' )
 					.text();
 				const title_expected = new RegExp(
-					`${ product_url } – WooCommerce Core E2E Test Suite`,
+					`${ product_url } – WooCommerce E2E Tests`,
 					'i'
 				);
 				return title_actual.match( title_expected );

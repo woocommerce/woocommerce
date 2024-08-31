@@ -70,11 +70,11 @@ export function checkoutCustomerLogin() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
+			'title is: "Checkout – WooCommerce E2E Tests"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
+				'Checkout – WooCommerce E2E Tests',
 			'body contains checkout class': ( response ) =>
 				response.body.includes(
 					'class="checkout woocommerce-checkout"'
@@ -273,11 +273,11 @@ export function checkoutCustomerLogin() {
 			tags: { name: 'Shopper - Order Received' },
 		} );
 		check( response, {
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
+			'title is: "Checkout – WooCommerce E2E Tests"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
+				'Checkout – WooCommerce E2E Tests',
 			"body contains: 'Thank you. Your order has been received.'": (
 				response
 			) =>

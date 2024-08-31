@@ -40,11 +40,11 @@ export function myAccountOrders() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+			'title is: "My account – WooCommerce E2E Tests"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
+				'My account – WooCommerce E2E Tests',
 			'body contains: my account welcome message': ( response ) =>
 				response.body.includes(
 					'From your account dashboard you can view'
@@ -75,11 +75,11 @@ export function myAccountOrders() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+			'title is: "My account – WooCommerce E2E Tests"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
+				'My account – WooCommerce E2E Tests',
 			"body contains: 'Orders' title": ( response ) =>
 				response.body.includes( '>Orders</h1>' ),
 			'footer contains: Built with WooCommerce': ( response ) =>
@@ -116,11 +116,11 @@ export function myAccountOrders() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+			'title is: "My account – WooCommerce E2E Tests"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
+				'My account – WooCommerce E2E Tests',
 			"body contains: 'Order number' title": ( response ) =>
 				response.body.includes( `${ my_account_order_id }</h1>` ),
 			'footer contains: Built with WooCommerce': ( response ) =>

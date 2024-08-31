@@ -45,11 +45,11 @@ export function myAccount() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
+			'title is: "My account – WooCommerce E2E Tests"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
+				'My account – WooCommerce E2E Tests',
 			"body contains: 'My account' title": ( response ) =>
 				response.body.includes( '>My account</h1>' ),
 			'footer contains: Built with WooCommerce': ( response ) =>
