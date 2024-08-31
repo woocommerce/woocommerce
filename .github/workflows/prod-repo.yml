@@ -1,0 +1,48 @@
+name: Sync Production Repositories
+on:
+  push:
+    branches:
+      - 'trunk'
+      - 'release/*'
+
+jobs:
+  get-affected:
+    name: Get affected projects
+    runs-on: 'ubuntu-20.04'
+    outputs:
+      projects: ${{ steps.affected-projects.outputs.projects }}
+    steps:
+      - uses: 'actions/checkout@v3'
+        name: 'Checkout'
+        with:
+          fetch-depth: 0
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Setup Monorepo'
+        with:
+          php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
+      - uses: actions/github-script@v6
+        name: 'Build Matrix'
+        id: 'affected-projects'
+        with:
+          script: |
+            let baseRef = ${{ toJson( github.base_ref ) }};
+            if ( baseRef ) {
+              baseRef = `--base-ref origin/${ baseRef }`;
+            }
+            const child_process = require( 'node:child_process' );
+            child_process.execSync( `pnpm utils prod-repo get-affected ${ baseRef }` );
+  update-prod-repo:
+    name: 'Push to prod repo - ${{ matrix.projectName }}'
+    runs-on: 'ubuntu-20.04'
+    needs: get-affected
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON( needs.get-affected.outputs.projects ) }}
+    steps:
+      - uses: actions/github-script@v6
+        name: 'sync project'
+        with:
+          script: |
+            const child_process = require( 'node:child_process' );
+            child_process.execSync( `pnpm utils prod-repo sync-push ${{ matrix.projectName }}` );
