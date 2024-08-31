@@ -633,7 +633,9 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
-		$args    = array();
+		$args    = array(
+			'posts_per_page' => 9,
+		);
 		$request = $this->build_request();
 
 		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
@@ -667,7 +669,9 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
-		$args            = array();
+		$args            = array(
+			'posts_per_page' => 9,
+		);
 		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
 		$params          = array(
 			'featured'               => 'true',
