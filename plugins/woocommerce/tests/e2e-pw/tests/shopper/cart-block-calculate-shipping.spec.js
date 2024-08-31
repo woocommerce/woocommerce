@@ -187,16 +187,14 @@ test.describe(
 			await page.getByLabel( 'City' ).fill( 'Lisbon' );
 			await page.getByRole( 'button', { name: 'Update' } ).click();
 
-				// Verify shipping costs
-				await expect(
-					page.getByRole( 'group' ).getByText( 'Flat rate' )
-				).toBeVisible();
-				await expect(
-					page.getByText( 'Shipping$5.00Flat' )
-				).toBeVisible();
-				await expect(
-					page.getByText( `$${ firstProductWithFlatRate }` )
-				).toBeVisible();
+			// Verify shipping costs
+			await expect(
+				page.getByRole( 'group' ).getByText( 'Flat rate' )
+			).toBeVisible();
+			await expect( page.getByText( 'Delivery$5.00Flat' ) ).toBeVisible();
+			await expect(
+				page.getByText( `$${ firstProductWithFlatRate }` )
+			).toBeVisible();
 
 				// Set shipping to local pickup instead of flat rate
 				await page
@@ -271,22 +269,20 @@ test.describe(
 			await page.getByLabel( 'City' ).fill( 'Lisbon' );
 			await page.getByRole( 'button', { name: 'Update' } ).click();
 
-				// Verify shipping costs
-				await expect(
-					page.getByRole( 'group' ).getByText( 'Flat rate' )
-				).toBeVisible();
-				await expect(
-					page.getByText( 'Shipping$5.00Flat' )
-				).toBeVisible();
-				await expect(
-					page.getByText(
-						`$${
-							parseInt( firstProductPrice, 10 ) +
-							parseInt( secondProductPrice, 10 ) +
-							5
-						}`.toString()
-					)
-				).toBeVisible();
+			// Verify shipping costs
+			await expect(
+				page.getByRole( 'group' ).getByText( 'Flat rate' )
+			).toBeVisible();
+			await expect( page.getByText( 'Delivery$5.00Flat' ) ).toBeVisible();
+			await expect(
+				page.getByText(
+					`$${
+						parseInt( firstProductPrice, 10 ) +
+						parseInt( secondProductPrice, 10 ) +
+						5
+					}`.toString()
+				)
+			).toBeVisible();
 
 				// Set shipping to local pickup instead of flat rate
 				await page
