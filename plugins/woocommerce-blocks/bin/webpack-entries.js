@@ -88,10 +88,6 @@ const blocks = {
 	'product-filters': {
 		isExperimental: true,
 	},
-	'product-filter': {
-		isExperimental: true,
-		customDir: 'product-filters/inner-blocks/product-filter',
-	},
 	'product-filters-overlay': {
 		isExperimental: true,
 		customDir: 'product-filters/inner-blocks/overlay',

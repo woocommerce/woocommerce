@@ -11,7 +11,7 @@ import {
 	AttributeTerm,
 	objectHasProp,
 } from '@woocommerce/types';
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -19,14 +19,15 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { AttributeDropdown } from './components/attribute-dropdown';
 import { Preview as CheckboxListPreview } from './components/checkbox-list-editor';
 import { Inspector } from './components/inspector';
-import { NoAttributesPlaceholder } from './components/placeholder';
 import { attributeOptionsPreview } from './constants';
 import './style.scss';
 import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
+import { getAllowedBlocks } from '../../utils';
+import { DISALLOWED_BLOCKS } from '../../constants';
+import metadata from './block.json';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -99,86 +100,57 @@ const Edit = ( props: EditProps ) => {
 		);
 	}, [ attributeTerms, filteredCounts, sortOrder, hideEmpty ] );
 
-	const Wrapper = ( { children }: { children: React.ReactNode } ) => (
-		<div { ...useBlockProps() }>
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		useBlockProps(),
+		{
+			allowedBlocks: getAllowedBlocks( DISALLOWED_BLOCKS ),
+			template: [
+				[
+					'core/group',
+					{
+						layout: {
+							type: 'flex',
+							flexWrap: 'nowrap',
+						},
+						metadata: {
+							name: __( 'Header', 'woocommerce' ),
+						},
+						style: {
+							spacing: {
+								blockGap: '0',
+							},
+						},
+					},
+					[
+						[
+							'core/heading',
+							{
+								level: 3,
+								content:
+									attributeObject?.name ||
+									__( 'Attribute', 'woocommerce' ),
+							},
+						],
+						[
+							'woocommerce/product-filter-clear-button',
+							{
+								lock: {
+									remove: true,
+									move: false,
+								},
+							},
+						],
+					],
+				],
+			],
+		}
+	);
+
+	return (
+		<div { ...innerBlocksProps }>
 			<Inspector { ...props } />
 			{ children }
 		</div>
-	);
-
-	if ( isPreview ) {
-		return (
-			<Wrapper>
-				<Disabled>
-					<CheckboxListPreview
-						items={ attributeOptionsPreview.map( ( term ) => {
-							if ( showCounts )
-								return `${ term.name } (${ term.count })`;
-							return term.name;
-						} ) }
-					/>
-				</Disabled>
-			</Wrapper>
-		);
-	}
-
-	// Block rendering starts.
-	if ( Object.keys( ATTRIBUTES ).length === 0 )
-		return (
-			<Wrapper>
-				<NoAttributesPlaceholder />
-			</Wrapper>
-		);
-
-	if ( ! attributeId || ! attributeObject )
-		return (
-			<Wrapper>
-				<Notice status="warning" isDismissible={ false }>
-					<p>
-						{ __(
-							'Please select an attribute to use this filter!',
-							'woocommerce'
-						) }
-					</p>
-				</Notice>
-			</Wrapper>
-		);
-
-	if ( attributeOptions.length === 0 )
-		return (
-			<Wrapper>
-				<Notice status="warning" isDismissible={ false }>
-					<p>
-						{ __(
-							'There are no products with the selected attributes.',
-							'woocommerce'
-						) }
-					</p>
-				</Notice>
-			</Wrapper>
-		);
-
-	return (
-		<Wrapper>
-			<Disabled>
-				{ displayStyle === 'dropdown' ? (
-					<AttributeDropdown
-						label={
-							attributeObject.label ||
-							__( 'attribute', 'woocommerce' )
-						}
-					/>
-				) : (
-					<CheckboxListPreview
-						items={ attributeOptions.map( ( term ) => {
-							if ( showCounts )
-								return `${ term.name } (${ term.count })`;
-							return term.name;
-						} ) }
-					/>
-				) }
-			</Disabled>
-		</Wrapper>
 	);
 };
 
