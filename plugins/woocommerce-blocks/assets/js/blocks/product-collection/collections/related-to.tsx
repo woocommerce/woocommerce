@@ -9,7 +9,7 @@ import { Icon, loop } from '@wordpress/icons';
  * Internal dependencies
  */
 import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
-import { CoreCollectionNames, CoreFilterNames, LayoutOptions } from '../types';
+import { CoreCollectionNames, LayoutOptions } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.RELATED_TO,
