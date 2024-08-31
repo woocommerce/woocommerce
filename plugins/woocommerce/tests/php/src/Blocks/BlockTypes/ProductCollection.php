@@ -943,7 +943,7 @@ class ProductCollection extends \WP_UnitTestCase {
 	/**
 	 * Test handpicked products queries.
 	 */
-	public function test_handpicked_producs_queries() {
+	public function test_handpicked_products_queries() {
 		$handpicked_product_ids = array( 1, 2, 3, 4 );
 
 		$parsed_block = $this->get_base_parsed_block();
@@ -955,49 +955,69 @@ class ProductCollection extends \WP_UnitTestCase {
 			$this->assertContainsEquals( $id, $merged_query['post__in'] );
 		}
 
-		$this->assertCount( count( $handpicked_product_ids ), $merged_query['post__in'] );
+		$this->assertCount( 4, $merged_query['post__in'] );
 	}
 
 	/**
 	 * Test related to queries.
 	 */
 	public function test_related_to_queries() {
-		$related_to_product_ids = array( 1, 2, 3, 4 );
+		$related_to_product_ids = array( 1, 2, 3 );
+		// This filter will turn off the data store so we don't need dummy products.
+		add_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		$related_filter = function ( $related_posts, $product_id ) use ( $related_to_product_ids ) {
+			$this->assertEquals( 4, $product_id );
+			return $related_to_product_ids;
+		};
+		add_filter( 'woocommerce_related_products', $related_filter, 10, 2 );
 
 		$parsed_block = $this->get_base_parsed_block();
-		$parsed_block['attrs']['query']['woocommerceRelatedTo'] = array();
+		$parsed_block['attrs']['query']['woocommerceRelatedTo'] = array( 4 );
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		remove_filter( 'woocommerce_related_products', $related_filter );
 
 		foreach ( $related_to_product_ids as $id ) {
 			$this->assertContainsEquals( $id, $merged_query['post__in'] );
 		}
 
-		$this->assertCount( 4, $merged_query['post__in'] );
+		$this->assertCount( 3, $merged_query['post__in'] );
 	}
 
 	/**
 	 * Test merging exclusive id filters.
 	 */
 	public function test_merges_exclusive_id_filters() {
+		$existing_id_filter     = array( 1, 4 );
 		$handpicked_product_ids = array( 3, 4, 5, 6 );
 		$related_to_product_ids = array( 1, 2, 3, 4 );
+		// The only ID present in ALL of the exclusive filters is 4.
+		$expected_product_ids = array( 4 );
 
-		$parsed_block = $this->get_base_parsed_block();
+		// This filter will turn off the data store so we don't need dummy products.
+		add_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		$related_filter = function ( $related_posts, $product_id ) use ( $related_to_product_ids ) {
+			$this->assertEquals( 10, $product_id );
+			return $related_to_product_ids;
+		};
+		add_filter( 'woocommerce_related_products', $related_filter, 10, 2 );
+
+		$parsed_block                               = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['post__in'] = $existing_id_filter;
 		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
-		$parsed_block['attrs']['query']['woocommerceRelatedTo']          = array();
+		$parsed_block['attrs']['query']['woocommerceRelatedTo']          = array( 10 );
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
 
-		// Since these are exclusive filters, we expect the insersection of the ID filters.
-		$expected_product_ids = array_intersect(
-			$handpicked_product_ids,
-			$related_to_product_ids
-		);
+		remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		remove_filter( 'woocommerce_related_products', $related_filter );
+
 		foreach ( $expected_product_ids as $id ) {
 			$this->assertContainsEquals( $id, $merged_query['post__in'] );
 		}
 
-		$this->assertCount( count( $expected_product_ids ), $merged_query['post__in'] );
+		$this->assertCount( 1, $merged_query['post__in'] );
 	}
 }
