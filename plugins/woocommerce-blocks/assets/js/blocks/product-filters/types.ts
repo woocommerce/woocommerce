@@ -18,3 +18,15 @@ export interface BlockAttributes {
 	overlayButtonStyle: 'label-icon' | 'label' | 'icon';
 	overlayIconSize?: number;
 }
+
+export type FilterDataContext< T = unknown > = {
+	filterData: {
+		collection?: T[];
+		range: {
+			min: number;
+			max: number;
+			step: number;
+		};
+	};
+	isFilterDataLoading: boolean;
+};
