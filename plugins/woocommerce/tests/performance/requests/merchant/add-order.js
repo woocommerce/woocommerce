@@ -45,7 +45,6 @@ import {
 
 // Change URL if HPOS is enabled and being used
 let admin_new_order_base;
-let admin_new_order_assert;
 let admin_created_order_assert;
 let admin_open_order_base;
 let admin_open_order_assert;
@@ -58,14 +57,12 @@ let admin_update_order_assert;
 if ( hpos_status === true ) {
 	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
 	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
-	admin_new_order_assert = 'post_status" type="hidden" value="pending';
 	admin_open_order_assert = 'post_status" type="hidden" value="pending';
 	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'changed from Pending payment to Completed';
 } else {
 	admin_new_order_base = 'post-new.php?post_type=shop_order';
 	admin_update_order_base = 'post.php';
-	admin_new_order_assert = 'Add new order</h1>';
 	admin_open_order_assert = 'Edit order</h1>';
 	admin_created_order_assert = 'Order updated.';
 	admin_update_order_assert = 'Order updated.';
@@ -116,7 +113,7 @@ export function addOrder( includeTests = {} ) {
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
 			"body contains: 'Add new order' header": ( response ) =>
-				response.body.includes( `${ admin_new_order_assert }` ),
+				response.body.includes( 'Add new order' ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
