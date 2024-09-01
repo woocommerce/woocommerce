@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
-import { productFilterOptions } from '@woocommerce/icons';
+import { productFilterAttribute } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
 import { registerBlockType } from '@wordpress/blocks';
 import { AttributeSetting } from '@woocommerce/types';
@@ -23,7 +23,7 @@ if ( isExperimentalBlocksEnabled() ) {
 
 	registerBlockType( metadata, {
 		edit: Edit,
-		icon: productFilterOptions,
+		icon: productFilterAttribute,
 		attributes: {
 			...metadata.attributes,
 			attributeId: {
