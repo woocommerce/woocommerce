@@ -5,25 +5,19 @@ import {
 	useCollection,
 	useCollectionData,
 } from '@woocommerce/base-context/hooks';
-import { getSetting } from '@woocommerce/settings';
-import {
-	AttributeSetting,
-	AttributeTerm,
-	objectHasProp,
-} from '@woocommerce/types';
+import { AttributeTerm, objectHasProp } from '@woocommerce/types';
 import {
 	useBlockProps,
 	useInnerBlocksProps,
 	BlockContextProvider,
 } from '@wordpress/block-editor';
-import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
+import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { Preview as CheckboxListPreview } from './components/checkbox-list-editor';
 import { Inspector } from './components/inspector';
 import { attributeOptionsPreview } from './constants';
 import './style.scss';
@@ -31,9 +25,7 @@ import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils';
 import { DISALLOWED_BLOCKS } from '../../constants';
-import metadata from './block.json';
-
-const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
+import { CollectionItem } from '../../types';
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -174,7 +166,7 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
-	const filterOptions = (
+	const filterOptions: CollectionItem[] = (
 		isPreview && attributeOptions.length === 0
 			? attributeOptionsPreview
 			: attributeOptions

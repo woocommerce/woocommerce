@@ -19,9 +19,14 @@ export interface BlockAttributes {
 	overlayIconSize?: number;
 }
 
-export type FilterDataContext< T = unknown > = {
+export type CollectionItem = {
+	label: string;
+	value: string;
+};
+
+export type FilterDataContext = {
 	filterData: {
-		collection?: T[];
+		collection?: CollectionItem[];
 		range: {
 			min: number;
 			max: number;

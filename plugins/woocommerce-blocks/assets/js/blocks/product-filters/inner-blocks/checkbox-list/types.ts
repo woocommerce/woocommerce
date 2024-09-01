@@ -12,11 +12,6 @@ export type BlockAttributes = {
 	className: string;
 };
 
-type CheckboxListItem = {
-	value: string;
-	label: string;
-};
-
 export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: FilterDataContext< CheckboxListItem >;
+	context: FilterDataContext;
 };
