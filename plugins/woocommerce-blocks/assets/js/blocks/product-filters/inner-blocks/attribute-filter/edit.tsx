@@ -162,12 +162,23 @@ const Edit = ( props: EditProps ) => {
 						],
 					],
 				],
-				[ displayStyle ],
+				[
+					displayStyle,
+					{
+						lock: {
+							remove: true,
+						},
+					},
+				],
 			],
 		}
 	);
 
-	const filterOptions = attributeOptions.map( ( option ) => ( {
+	const filterOptions = (
+		isPreview && attributeOptions.length === 0
+			? attributeOptionsPreview
+			: attributeOptions
+	).map( ( option ) => ( {
 		label: showCounts
 			? `${ option.name } (${ option.count })`
 			: option.name,

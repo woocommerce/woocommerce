@@ -99,5 +99,10 @@
 			"type": "boolean",
 			"default":true
 		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
+		}
 	}
 }
