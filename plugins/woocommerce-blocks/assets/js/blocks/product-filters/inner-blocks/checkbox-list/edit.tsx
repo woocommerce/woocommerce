@@ -26,32 +26,32 @@ const Edit = ( { context }: EditProps ) => {
 
 	return (
 		<div { ...blockProps }>
-			<ul className="wc-block-interactivity-components-checkbox-list__list">
+			<ul className="wc-block-product-filter-checkbox-list__list">
 				{ ( isLongList
 					? filterData.collection.slice( 0, threshold )
 					: filterData.collection
 				).map( ( item, index ) => (
 					<li
 						key={ index }
-						className="wc-block-interactivity-components-checkbox-list__item"
+						className="wc-block-product-filter-checkbox-list__item"
 					>
 						<label
 							htmlFor={ `interactive-checkbox-${ index }` }
-							className=" wc-block-interactivity-components-checkbox-list__label"
+							className=" wc-block-product-filter-checkbox-list__label"
 						>
 							<span className="wc-block-interactive-components-checkbox-list__input-wrapper">
-								<span className="wc-block-interactivity-components-checkbox-list__input-wrapper">
+								<span className="wc-block-product-filter-checkbox-list__input-wrapper">
 									<input
 										name={ `interactive-checkbox-${ index }` }
 										type="checkbox"
-										className="wc-block-interactivity-components-checkbox-list__input"
+										className="wc-block-product-filter-checkbox-list__input"
 										// Harded coded some checked items for styling purpose.
 										defaultChecked={ [ 1, 3, 4 ].includes(
 											index
 										) }
 									/>
 									<svg
-										className="wc-block-interactivity-components-checkbox-list__mark"
+										className="wc-block-product-filter-checkbox-list__mark"
 										viewBox="0 0 10 8"
 										fill="none"
 										xmlns="http://www.w3.org/2000/svg"
@@ -66,7 +66,7 @@ const Edit = ( { context }: EditProps ) => {
 									</svg>
 								</span>
 							</span>
-							<span className="wc-block-interactivity-components-checkbox-list__text">
+							<span className="wc-block-product-filter-checkbox-list__text">
 								{ item.label }
 							</span>
 						</label>
@@ -74,7 +74,7 @@ const Edit = ( { context }: EditProps ) => {
 				) ) }
 			</ul>
 			{ isLongList && (
-				<span className="wc-block-interactivity-components-checkbox-list__show-more">
+				<span className="wc-block-product-filter-checkbox-list__show-more">
 					<small>{ __( 'Show more…', 'woocommerce' ) }</small>
 				</span>
 			) }
