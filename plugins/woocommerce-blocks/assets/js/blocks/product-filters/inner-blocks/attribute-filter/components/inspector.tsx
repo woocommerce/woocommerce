@@ -7,12 +7,7 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { dispatch, useSelect } from '@wordpress/data';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	Block,
-	BlockInstance,
-	getBlockTypes,
-	createBlock,
-} from '@wordpress/blocks';
+import { Block, getBlockTypes } from '@wordpress/blocks';
 import {
 	ComboboxControl,
 	PanelBody,
@@ -32,46 +27,11 @@ import {
 import { sortOrderOptions } from '../constants';
 import { BlockAttributes, EditProps } from '../types';
 import { getAttributeFromId } from '../utils';
+import { replaceStyleBlock, getInnerBlockByName } from '../../../utils';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 let displayStyleOptions: Block[] = [];
-
-function getInnerBlockByName(
-	block: BlockInstance | null,
-	name: string
-): BlockInstance | null {
-	if ( ! block ) return null;
-
-	if ( block.innerBlocks.length === 0 ) return null;
-
-	for ( const innerBlock of block.innerBlocks ) {
-		if ( innerBlock.name === name ) return innerBlock;
-		const innerInnerBlock = getInnerBlockByName( innerBlock, name );
-		if ( innerInnerBlock ) return innerInnerBlock;
-	}
-
-	return null;
-}
-
-function replaceDisplayStyle(
-	rootBlock: BlockInstance | null,
-	currentStyle: string,
-	newStyle: string
-) {
-	if ( ! rootBlock ) return;
-	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
-	const currentStyleBlock = getInnerBlockByName( rootBlock, currentStyle );
-	if ( currentStyleBlock ) {
-		replaceBlock( currentStyleBlock.clientId, createBlock( newStyle ) );
-	} else {
-		insertBlock(
-			createBlock( newStyle ),
-			rootBlock.innerBlocks.length,
-			rootBlock.clientId
-		);
-	}
-}
 
 export const Inspector = ( {
 	clientId,
@@ -91,46 +51,17 @@ export const Inspector = ( {
 	const rootBlock = useSelect( ( select ) =>
 		select( 'core/block-editor' ).getBlock( clientId )
 	);
-	const { productFilterWrapperBlockId, productFilterWrapperHeadingBlockId } =
-		useSelect(
-			( select ) => {
-				if ( ! clientId )
-					return {
-						productFilterWrapperBlockId: undefined,
-						productFilterWrapperHeadingBlockId: undefined,
-					};
+	const filterBlock = useSelect(
+		( select ) => {
+			return select( 'core/block-editor' ).getBlock( clientId );
+		},
+		[ clientId ]
+	);
 
-				const { getBlockParentsByBlockName, getBlock } =
-					select( 'core/block-editor' );
-
-				const parentBlocksByBlockName = getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/product-filter'
-				);
-
-				if ( parentBlocksByBlockName.length === 0 )
-					return {
-						productFilterWrapperBlockId: undefined,
-						productFilterWrapperHeadingBlockId: undefined,
-					};
-
-				const parentBlockId = parentBlocksByBlockName[ 0 ];
-
-				const parentBlock = getBlock( parentBlockId );
-				const headerGroupBlock = parentBlock?.innerBlocks.find(
-					( block ) => block.name === 'core/group'
-				);
-				const headingBlock = headerGroupBlock?.innerBlocks.find(
-					( block ) => block.name === 'core/heading'
-				);
-
-				return {
-					productFilterWrapperBlockId: parentBlockId,
-					productFilterWrapperHeadingBlockId: headingBlock?.clientId,
-				};
-			},
-			[ clientId ]
-		);
+	const filterHeadingBlock = getInnerBlockByName(
+		filterBlock,
+		'core/heading'
+	);
 
 	if ( displayStyleOptions.length === 0 ) {
 		displayStyleOptions = getBlockTypes().filter( ( blockType ) =>
@@ -157,17 +88,9 @@ export const Inspector = ( {
 							} );
 							const attributeObject =
 								getAttributeFromId( numericId );
-							if ( productFilterWrapperBlockId ) {
+							if ( filterHeadingBlock ) {
 								updateBlockAttributes(
-									productFilterWrapperBlockId,
-									{
-										attributeId: numericId,
-									}
-								);
-							}
-							if ( productFilterWrapperHeadingBlockId ) {
-								updateBlockAttributes(
-									productFilterWrapperHeadingBlockId,
+									filterHeadingBlock.clientId,
 									{
 										content:
 											attributeObject?.label ??
@@ -245,11 +168,7 @@ export const Inspector = ( {
 							value: BlockAttributes[ 'displayStyle' ]
 						) => {
 							setAttributes( { displayStyle: value } );
-							replaceDisplayStyle(
-								rootBlock,
-								displayStyle,
-								value
-							);
+							replaceStyleBlock( rootBlock, displayStyle, value );
 						} }
 						style={ { width: '100%' } }
 					>
