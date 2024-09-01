@@ -49,7 +49,8 @@ export const replaceStyleBlock = (
 		insertBlock(
 			createBlock( newStyle ),
 			rootBlock.innerBlocks.length,
-			rootBlock.clientId
+			rootBlock.clientId,
+			false
 		);
 	}
 };
