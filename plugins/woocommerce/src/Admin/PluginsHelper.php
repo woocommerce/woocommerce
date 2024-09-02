@@ -738,7 +738,7 @@ class PluginsHelper {
 	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
 		$utm_campaign = 'expired' === $type ?
 				'pu_settings_screen_renew' :
-				( 'missing' === $type ? 'pu_settings_screen_purchase' :  'pu_settings_screen_enable_autorenew' );
+				( 'missing' === $type ? 'pu_settings_screen_purchase' : 'pu_settings_screen_enable_autorenew' );
 
 		if ( 1 < $total ) {
 			$hyperlink_url = add_query_arg(
@@ -789,7 +789,7 @@ class PluginsHelper {
 				'product_id'   => $product_id,
 				'type'         => $type,
 				'utm_source'   => 'pu',
-				'utm_campaign' => $utm_campaign
+				'utm_campaign' => $utm_campaign,
 
 			),
 			self::WOO_SUBSCRIPTION_PAGE_URL
@@ -806,8 +806,8 @@ class PluginsHelper {
 				esc_attr( $subscription['product_name'] ),
 				esc_attr( $expiry_date ),
 				esc_url( $hyperlink_url ),
-				// Show subscribe for missing subscriptions, renew otherwise
-				'missing' === $type ? esc_attr( $subscribe_string) : esc_attr( $renew_string ),
+				// Show subscribe for missing subscriptions, renew otherwise.
+				'missing' === $type ? esc_attr( $subscribe_string ) : esc_attr( $renew_string ),
 			);
 
 			return array(
@@ -861,7 +861,7 @@ class PluginsHelper {
 		$total_expiring_subscriptions = count( $expiring_subscriptions );
 
 		// Don't show missing notice if there are expiring subscriptions.
-		// self::$can_show_expiring_or_missing_subs_notice = false;
+		self::$can_show_expiring_or_missing_subs_notice = false;
 
 		// When payment method is missing on WooCommerce.com.
 		$helper_notices = WC_Helper::get_notices();
@@ -1058,7 +1058,7 @@ class PluginsHelper {
 			$regular_price = html_entity_decode( // React does its own encoding, so we need to decode it here.
 				WC_Helper_Updater::get_regular_price_for_product_without_subscription( $notice_data['product_id'] )
 			);
-			$button_text =
+			$button_text   =
 				sprintf(
 					/* translators: %s: Product price */
 					__( 'Subscribe for %s', 'woocommerce' ),
@@ -1068,7 +1068,7 @@ class PluginsHelper {
 
 		return array(
 			'description' => $notice_data['parsed_message'],
-			'button_text' => __( $button_text, 'woocommerce' ),
+			'button_text' => $button_text,
 			'button_link' => $button_link,
 		);
 	}
