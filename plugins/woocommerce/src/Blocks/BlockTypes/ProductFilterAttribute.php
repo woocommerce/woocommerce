@@ -26,6 +26,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * - Register the block with WordPress.
 	 */
 	protected function initialize() {
+		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
 		parent::initialize();
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
@@ -181,7 +182,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 				get_block_wrapper_attributes(
 					array(
 						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-						'data-has-filter'     => 'no',
 					)
 				),
 			);
@@ -218,18 +218,34 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 		);
 
-		$filter_content = 'dropdown' === $attributes['displayStyle'] ?
-			$this->render_attribute_dropdown( $filtered_options, $attributes ) :
-			$this->render_attribute_checkbox_list( $filtered_options, $attributes );
-
 		$context = array(
 			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
 			'queryType'     => $attributes['queryType'],
 			'selectType'    => 'multiple',
 		);
 
+		$list_options   = array_map(
+			function ( $option ) use ( $attributes ) {
+				return array(
+					'checked' => $option['selected'],
+					'id'      => $option['slug'] . '-' . $option['term_id'],
+					'label'   => $attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $option['name'], $option['count'] ) : $option['name'],
+					'value'   => $option['slug'],
+				);
+			},
+			$filtered_options
+		);
+		$filter_context = array(
+			'on_change' => "{$this->get_full_block_name()}::actions.updateProducts",
+			'items'     => $list_options,
+		);
+
+		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
+			$content .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
+		}
+
 		return sprintf(
-			'<div %1$s>%2$s%3$s</div>',
+			'<div %1$s>%2$s</div>',
 			get_block_wrapper_attributes(
 				array(
 					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
@@ -237,8 +253,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 					'data-has-filter'     => 'yes',
 				)
 			),
-			$content,
-			$filter_content
+			$content
 		);
 	}
 
@@ -477,5 +492,19 @@ final class ProductFilterAttribute extends AbstractBlock {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Skip default rendering routine for inner blocks.
+	 *
+	 * @param array $settings Array of determined settings for registering a block type.
+	 * @param array $metadata Metadata provided for registering a block type.
+	 * @return array
+	 */
+	public function add_block_type_metadata_settings( $settings, $metadata ) {
+		if ( ! empty( $metadata['name'] ) && "woocommerce/{$this->block_name}" === $metadata['name'] ) {
+			$settings['skip_inner_blocks'] = true;
+		}
+		return $settings;
 	}
 }
