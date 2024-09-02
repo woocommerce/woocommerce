@@ -24,7 +24,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 		test.beforeAll( async () => {
 			for ( let i = 1; i <= 5; i++ ) {
 				const product = {
-					name: `Product ${uniqueId} ${ i } ${ new Date()
+					name: `Product ${ uniqueId } ${ i } ${ new Date()
 						.getTime()
 						.toString() }`,
 					productPrice: `${ i }00`,
@@ -94,7 +94,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 
 			await page.pause();
 			await expect(
-				page.getByRole( 'row', { name: `Product ${uniqueId}` } )
+				page.getByRole( 'row', { name: `Product ${ uniqueId }` } )
 			).toHaveCount( 4 );
 
 			const upsellsRows = page.locator(
