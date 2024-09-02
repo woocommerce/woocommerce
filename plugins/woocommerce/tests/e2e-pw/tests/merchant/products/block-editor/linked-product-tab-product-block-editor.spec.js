@@ -90,7 +90,6 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await page.getByText( 'Choose products for me' ).first().click();
 			await chooseProductsResponsePromise;
 
-			await page.pause();
 			await expect(
 				page.getByRole( 'row', { name: `Product ${ uniqueId }` } )
 			).toHaveCount( 4 );
