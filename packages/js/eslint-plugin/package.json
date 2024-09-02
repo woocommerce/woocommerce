@@ -32,7 +32,7 @@
 	"dependencies": {
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
-		"@wordpress/eslint-plugin": "14.7.0",
+		"@wordpress/eslint-plugin": "20.3.0",
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"eslint-plugin-testing-library": "^5.11.1",
 		"prettier": "npm:wp-prettier@^2.8.5"
