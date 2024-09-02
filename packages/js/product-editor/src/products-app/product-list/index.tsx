@@ -13,6 +13,7 @@ import {
 import { Product, ProductQuery } from '@woocommerce/data';
 import { drawerRight } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
+import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
@@ -217,7 +218,7 @@ export default function ProductList( {
 
 	const { labels, canCreateRecord } = useSelect(
 		( select ) => {
-			const { getPostType, canUser } = select( 'core' );
+			const { getPostType, canUser } = select( coreStore );
 			const postTypeData:
 				| { labels: Record< string, string > }
 				| undefined = getPostType( postType );
