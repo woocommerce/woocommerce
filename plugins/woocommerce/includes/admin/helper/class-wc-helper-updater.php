@@ -409,7 +409,7 @@ class WC_Helper_Updater {
 	 * @param mixed $product_id The product ID.
 	 * @return null|string The price of the product.
 	 */
-	private static function get_regular_price_for_product_without_subscription( $product_id ) {
+	public static function get_regular_price_for_product_without_subscription( $product_id ) {
 		$product_id = absint( $product_id );
 		if ( ! $product_id ) {
 			return null;

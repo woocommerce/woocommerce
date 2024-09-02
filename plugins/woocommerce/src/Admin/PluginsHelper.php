@@ -37,7 +37,7 @@ class PluginsHelper {
 	 *
 	 * @var bool
 	 */
-	public static $can_show_expiring_subs_notice = true;
+	public static $can_show_expiring_or_missing_subs_notice = true;
 
 	/**
 	 * The URL for the WooCommerce subscription page.
@@ -58,6 +58,11 @@ class PluginsHelper {
 	 * Meta key for dismissing expiring subscription notices
 	 */
 	const DISMISS_EXPIRING_SUBS_NOTICE = 'woo_subscription_expiring_notice_dismiss';
+
+	/**
+	 * Meta key for dismissing missing subscription notices
+	 */
+	const DISMISS_MISSING_SUBS_NOTICE = 'woo_subscription_missing_notice_dismiss';
 
 	/**
 	 * Initialize hooks.
@@ -734,11 +739,15 @@ class PluginsHelper {
 	 * @return array notice data to return. Contains type, parsed_message and product_id.
 	 */
 	public static function get_subscriptions_notice_data( array $all_subs, array $subs_to_show, int $total, array $messages, string $type ) {
+		$utm_campaign = 'expired' === $type ?
+				'pu_settings_screen_renew' :
+				( 'missing' === $type ? 'pu_settings_screen_purchase' :  'pu_settings_screen_enable_autorenew' );
+
 		if ( 1 < $total ) {
 			$hyperlink_url = add_query_arg(
 				array(
 					'utm_source'   => 'pu',
-					'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
+					'utm_campaign' => $utm_campaign,
 
 				),
 				self::WOO_SUBSCRIPTION_PAGE_URL
@@ -770,8 +779,9 @@ class PluginsHelper {
 			)
 		);
 
-		$message_key  = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
-		$renew_string = __( 'Renew', 'woocommerce' );
+		$message_key      = $has_multiple_subs_for_product ? 'multiple_manage' : 'single_manage';
+		$renew_string     = __( 'Renew', 'woocommerce' );
+		$subscribe_string = __( 'Subscribe', 'woocommerce' );
 		if ( isset( $subscription['product_regular_price'] ) ) {
 			/* translators: 1: Product price */
 			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
@@ -782,7 +792,7 @@ class PluginsHelper {
 				'product_id'   => $product_id,
 				'type'         => $type,
 				'utm_source'   => 'pu',
-				'utm_campaign' => 'expired' === $type ? 'pu_settings_screen_renew' : 'pu_settings_screen_enable_autorenew',
+				'utm_campaign' => $utm_campaign
 
 			),
 			self::WOO_SUBSCRIPTION_PAGE_URL
@@ -799,7 +809,8 @@ class PluginsHelper {
 				esc_attr( $subscription['product_name'] ),
 				esc_attr( $expiry_date ),
 				esc_url( $hyperlink_url ),
-				esc_attr( $renew_string ),
+				// Show subscribe for missing subscriptions, renew otherwise
+				'missing' === $type ? esc_attr( $subscribe_string) : esc_attr( $renew_string ),
 			);
 
 			return array(
@@ -827,7 +838,7 @@ class PluginsHelper {
 			return array();
 		}
 
-		if ( ! self::$can_show_expiring_subs_notice ) {
+		if ( ! self::$can_show_expiring_or_missing_subs_notice ) {
 			return array();
 		}
 
@@ -851,6 +862,9 @@ class PluginsHelper {
 		}
 
 		$total_expiring_subscriptions = count( $expiring_subscriptions );
+
+		// Don't show missing notice if there are expiring subscriptions.
+		// self::$can_show_expiring_or_missing_subs_notice = false;
 
 		// When payment method is missing on WooCommerce.com.
 		$helper_notices = WC_Helper::get_notices();
@@ -928,8 +942,8 @@ class PluginsHelper {
 			return array();
 		}
 
-		$total_expired_subscriptions         = count( $expired_subscriptions );
-		self::$can_show_expiring_subs_notice = false;
+		$total_expired_subscriptions                    = count( $expired_subscriptions );
+		self::$can_show_expiring_or_missing_subs_notice = false;
 
 		$notice_data = self::get_subscriptions_notice_data(
 			$subscriptions,
@@ -967,6 +981,97 @@ class PluginsHelper {
 		return array(
 			'description' => $allowed_link ? $notice_data['parsed_message'] : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $notice_data['parsed_message'] ),
 			'button_text' => __( 'Renew', 'woocommerce' ),
+			'button_link' => $button_link,
+		);
+	}
+
+	/**
+	 * Get formatted notice information for missing subscription.
+	 *
+	 * @return array notice information.
+	 */
+	public static function get_missing_subscription_notice() {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return array();
+		}
+
+		if ( ! self::$can_show_expiring_or_missing_subs_notice ) {
+			return array();
+		}
+
+		if ( ! self::should_show_notice( self::DISMISS_MISSING_SUBS_NOTICE ) ) {
+			return array();
+		}
+
+		$subscriptions         = WC_Helper::get_subscription_list_data();
+		$missing_subscriptions = array_filter(
+			$subscriptions,
+			function ( $sub ) {
+				return ( ! empty( $sub['local']['installed'] ) && empty( $sub['product_key'] ) );
+			},
+		);
+
+		// Remove WUM from missing subscriptions list.
+		$missing_subscriptions = array_filter(
+			$missing_subscriptions,
+			function ( $sub ) {
+				return 'woo-update-manager' !== $sub['zip_slug'];
+			}
+		);
+
+		if ( ! $missing_subscriptions ) {
+			return array();
+		}
+
+		$total_missing_subscriptions = count( $missing_subscriptions );
+
+		$notice_data = self::get_subscriptions_notice_data(
+			$subscriptions,
+			$missing_subscriptions,
+			$total_missing_subscriptions,
+			array(
+				/* translators: 1) product name */
+				'single_manage'           => __( 'You don\'t have a subscription for <strong>%1$s</strong>. Subscribe to receive updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) total expired subscriptions */
+				'different_subscriptions' => __( 'You don\'t have subscriptions for <strong>%1$s Woo extensions</strong>. Subscribe to receive updates and streamlined support.', 'woocommerce' ),
+			),
+			'missing',
+		);
+
+		$button_link = add_query_arg(
+			array(
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_in_apps_screen_purchase',
+			),
+			self::WOO_SUBSCRIPTION_PAGE_URL
+		);
+
+		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
+			$button_link = add_query_arg(
+				array(
+					'product_id' => $notice_data['product_id'],
+					'type'       => 'purchase',
+				),
+				$button_link
+			);
+		}
+
+		$button_text = __( 'Subscribe', 'woocommerce' );
+		if ( 'single_manage' === $notice_data['type'] ) {
+			$regular_price = html_entity_decode( // React does its own encoding, so we need to decode it here.
+				WC_Helper_Updater::get_regular_price_for_product_without_subscription( $notice_data['product_id'] )
+			);
+			$button_text =
+				sprintf(
+					/* translators: %s: Product price */
+					__( 'Subscribe for %s', 'woocommerce' ),
+					$regular_price
+				);
+		}
+
+		return array(
+			'description' => $notice_data['parsed_message'],
+			'button_text' => __( $button_text, 'woocommerce' ),
 			'button_link' => $button_link,
 		);
 	}
