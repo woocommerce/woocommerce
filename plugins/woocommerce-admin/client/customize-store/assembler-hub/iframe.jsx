@@ -25,7 +25,11 @@ import {
 } from '@wordpress/compose';
 import { __experimentalStyleProvider as StyleProvider } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { store as blockEditorStore } from '@wordpress/block-editor';
+import {
+	store as blockEditorStore,
+	__experimentalUseResizeCanvas as useResizeCanvas,
+} from '@wordpress/block-editor';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -51,6 +55,14 @@ function Iframe( {
 			resolvedAssets: settings.__unstableResolvedAssets,
 		};
 	}, [] );
+
+	const { deviceType } = useSelect( ( select ) => {
+		const { getDeviceType } = select( editorStore );
+
+		return {
+			deviceType: getDeviceType(),
+		};
+	} );
 
 	const { styles = '', scripts = '' } = resolvedAssets;
 	const [ iframeDocument, setIframeDocument ] = useState();
@@ -124,6 +136,7 @@ function Iframe( {
 		};
 	}, [] );
 
+	const deviceStyles = useResizeCanvas( deviceType );
 	const isZoomedOut = scale !== 1 && canEnableZoomOutView;
 
 	useEffect( () => {
@@ -301,10 +314,12 @@ function Iframe( {
 					isZoomedOut && 'is-zoomed-out'
 				) }
 				style={ {
+					transition: 'all .3s',
 					'--wp-block-editor-iframe-zoom-out-container-width':
 						isZoomedOut && `${ containerWidth }px`,
 					'--wp-block-editor-iframe-zoom-out-prev-container-width':
 						isZoomedOut && `${ prevContainerWidth.current }px`,
+					...deviceStyles,
 				} }
 			>
 				{ iframe }
