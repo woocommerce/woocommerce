@@ -127,6 +127,8 @@ jQuery( function( $ ) {
 		this.onResetSlidePosition = this.onResetSlidePosition.bind( this );
 		this.getGalleryItems      = this.getGalleryItems.bind( this );
 		this.openPhotoswipe       = this.openPhotoswipe.bind( this );
+		this.trapFocusPhotoswipe  = this.trapFocusPhotoswipe.bind( this );
+		this.handlePswpTrapFocus  = this.handlePswpTrapFocus.bind( this );
 
 		if ( this.flexslider_enabled ) {
 			this.initFlexslider( args.flexslider );
@@ -307,8 +309,10 @@ jQuery( function( $ ) {
 		e.preventDefault();
 
 		var pswpElement = $( '.pswp' )[0],
-			items       = this.getGalleryItems(),
-			eventTarget = $( e.target ),
+			items         = this.getGalleryItems(),
+			eventTarget   = $( e.target ),
+			currentTarget = e.currentTarget,
+			self          = this,
 			clicked;
 
 		if ( 0 < eventTarget.closest( '.woocommerce-product-gallery__trigger' ).length ) {
@@ -326,12 +330,71 @@ jQuery( function( $ ) {
 				}
 				captionEl.children[0].textContent = item.title;
 				return true;
-			}
+			},
+			timeToIdle: 0, // Ensure the gallery controls are always visible to avoid keyboard navigation issues.
 		}, wc_single_product_params.photoswipe_options );
 
 		// Initializes and opens PhotoSwipe.
 		var photoswipe = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options );
+
+		photoswipe.listen( 'afterInit', function() {
+			self.trapFocusPhotoswipe( true );
+		});
+
+		photoswipe.listen( 'close', function() {
+			self.trapFocusPhotoswipe( false );
+			currentTarget.focus();
+		});
+
 		photoswipe.init();
+	};
+
+	/**
+	 * Control focus in photoswipe modal.
+	 * 
+	 * @param {boolean} trapFocus - Whether to trap focus or not.
+	 */
+	ProductGallery.prototype.trapFocusPhotoswipe = function( trapFocus ) {
+		var pswp = document.querySelector( '.pswp' );
+
+		if ( ! pswp ) {
+			return;
+		}
+
+		if ( trapFocus ) {
+			pswp.addEventListener( 'keydown', this.handlePswpTrapFocus );
+		} else {
+			pswp.removeEventListener( 'keydown', this.handlePswpTrapFocus );
+		}
+	};
+	
+	/**
+	 * Handle keydown event in photoswipe modal.
+	 */
+	ProductGallery.prototype.handlePswpTrapFocus = function( e ) {
+		var allFocusablesEls      = e.currentTarget.querySelectorAll( 'button:not([disabled])' );
+		var filteredFocusablesEls = Array.from( allFocusablesEls ).filter( function( btn ) {
+			return btn.style.display !== 'none' && window.getComputedStyle( btn ).display !== 'none';
+		} );
+
+		if ( 1 >= filteredFocusablesEls.length ) {
+			return;
+		}
+
+		var firstTabStop = filteredFocusablesEls[0];
+		var lastTabStop  = filteredFocusablesEls[filteredFocusablesEls.length - 1];
+
+		if ( e.key === 'Tab' ) {
+			if ( e.shiftKey ) {
+				if ( document.activeElement === firstTabStop ) {
+					e.preventDefault();
+					lastTabStop.focus();
+				}
+			} else if ( document.activeElement === lastTabStop ) {
+				e.preventDefault();
+				firstTabStop.focus();
+			}
+		}
 	};
 
 	/**

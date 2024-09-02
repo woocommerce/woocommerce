@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update webpack config to bundle in @wordpress/dataviews package.
