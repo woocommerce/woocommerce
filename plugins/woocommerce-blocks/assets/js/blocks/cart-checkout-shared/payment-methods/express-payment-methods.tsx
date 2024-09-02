@@ -142,20 +142,6 @@ const ExpressPaymentMethods = () => {
 		[ __internalSetExpressPaymentError, onExpressPaymentError ]
 	);
 
-	// In the editor, we apply styles to the button containers to show the changes of the height and border-radius controls,
-	// which would be passed to the payment APIs on the front-end
-	const stylesForButtonContainers = isEditor
-		? {
-				height: `${ showButtonStyles ? buttonHeight : '48' }px`,
-				borderRadius: `${
-					showButtonStyles ? buttonBorderRadius : '4'
-				}px`,
-				pointerEvents: 'none',
-				userSelect: 'none',
-				ariaDisabled: true,
-		  }
-		: {};
-
 	/**
 	 * @todo Find a way to Memoize Express Payment Method Content
 	 *
@@ -167,15 +153,9 @@ const ExpressPaymentMethods = () => {
 	const content =
 		entries.length > 0 ? (
 			entries.map( ( [ id, paymentMethod ] ) => {
-				const expressPaymentMethod = isEditor
-					? paymentMethod.edit
-					: paymentMethod.content;
+				const expressPaymentMethod = paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
-					<li
-						key={ id }
-						id={ `express-payment-method-${ id }` }
-						style={ stylesForButtonContainers }
-					>
+					<li key={ id } id={ `express-payment-method-${ id }` }>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
 							onClick: onExpressPaymentClick( id ),
