@@ -575,7 +575,6 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
 						"on-demand"
 					],
 					"report": {
