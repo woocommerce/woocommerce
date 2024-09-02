@@ -2,6 +2,7 @@
 	dialog {
 		&.wc-block-product-filters--dialog-open {
 			display: flex;
+			padding-left: 0;
 		}
 
 		flex-direction: column;
@@ -9,7 +10,6 @@
 		border: none;
 		top: 0;
 		z-index: 9999;
-		padding: $gap;
 		height: 100vh;
 		width: 100vw;
 	}
