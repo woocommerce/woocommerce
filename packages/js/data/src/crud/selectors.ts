@@ -170,11 +170,12 @@ export const createSelectors = ( {
 		const sanitizedArgs = maybeReplaceIdQuery( args, namespace );
 		const actionName = getGenericActionName( action, resourceName );
 		const requestId = getRequestIdentifier( actionName, ...sanitizedArgs );
-		if ( action )
+		if ( action ) {
 			return (
 				state.requesting.hasOwnProperty( requestId ) &&
 				! state.requesting[ requestId ]
 			);
+		}
 	};
 
 	const isRequesting = (

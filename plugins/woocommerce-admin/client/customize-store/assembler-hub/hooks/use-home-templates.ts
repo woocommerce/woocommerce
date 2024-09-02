@@ -52,7 +52,9 @@ export const useHomeTemplates = () => {
 	);
 
 	const homeTemplates = useMemo( () => {
-		if ( isLoading ) return {};
+		if ( isLoading ) {
+			return {};
+		}
 		const recommendedTemplates = HOMEPAGE_TEMPLATES;
 
 		return Object.entries( recommendedTemplates ).reduce(

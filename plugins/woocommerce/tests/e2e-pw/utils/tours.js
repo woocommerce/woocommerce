@@ -12,7 +12,7 @@ const headers = {
  * Enables or disables the product editor tour.
  *
  * @param {import('@playwright/test').APIRequestContext} request Request context from calling function.
- * @param {boolean} enable Set to `true` if you want to enable the block product tour. `false` if otherwise.
+ * @param {boolean}                                      enable  Set to `true` if you want to enable the block product tour. `false` if otherwise.
  */
 const toggleBlockProductTour = async ( request, enable ) => {
 	const url = '/wp-json/wc-admin/options';

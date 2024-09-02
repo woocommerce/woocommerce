@@ -122,7 +122,7 @@ export const getMiniCartTotalsFromLocalStorage = ():
 	const cartData = JSON.parse( rawMiniCartTotals );
 	return [ cartData.totals, cartData.itemsCount ] as [
 		CartResponseTotals,
-		number
+		number,
 	];
 };
 
@@ -144,7 +144,7 @@ export const getMiniCartTotalsFromServer = async (): Promise<
 			);
 			return [ data.totals, data.items_count ] as [
 				CartResponseTotals,
-				number
+				number,
 			];
 		} )
 		.catch( ( error ) => {
@@ -193,5 +193,5 @@ export function migrateAttributesToColorPanel(
 		delete attrs.productCountColorValue;
 	}
 
-	return <Attributes>attrs;
+	return < Attributes >attrs;
 }

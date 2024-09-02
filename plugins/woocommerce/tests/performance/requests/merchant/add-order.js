@@ -87,7 +87,8 @@ export function addOrder( includeTests = {} ) {
 	let api_x_wp_nonce;
 	let apiNonceHeader;
 	let heartbeat_nonce;
-	let includedTests = Object.assign( {
+	const includedTests = Object.assign(
+		{
 			create: true,
 			heartbeat: true,
 			open: true,
@@ -252,7 +253,9 @@ export function addOrder( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.create ) {
@@ -271,8 +274,14 @@ export function addOrder( includeTests = {} ) {
 
 			const orderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -281,12 +290,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -294,9 +315,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -337,8 +364,14 @@ export function addOrder( includeTests = {} ) {
 
 			const hposOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -347,12 +380,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -360,9 +405,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -414,7 +465,9 @@ export function addOrder( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.open ) {
@@ -447,7 +500,9 @@ export function addOrder( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.update ) {
@@ -463,8 +518,14 @@ export function addOrder( includeTests = {} ) {
 
 			const orderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -473,12 +534,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -486,9 +559,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -528,8 +607,14 @@ export function addOrder( includeTests = {} ) {
 
 			const hposOrderParams = new URLSearchParams( [
 				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
-				[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_billing_city', `${ addresses_guest_billing_city }` ],
 				[ '_billing_company', `${ addresses_guest_billing_company }` ],
 				[ '_billing_country', `${ addresses_guest_billing_country }` ],
@@ -538,12 +623,24 @@ export function addOrder( includeTests = {} ) {
 					'_billing_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_billing_state', `${ addresses_guest_billing_state }` ],
-				[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
-				[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
 				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
 				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
 				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
@@ -551,9 +648,15 @@ export function addOrder( includeTests = {} ) {
 					'_shipping_first_name',
 					`${ addresses_guest_billing_first_name }`,
 				],
-				[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
 				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
-				[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
 				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
@@ -948,7 +1051,7 @@ export function addOrder( includeTests = {} ) {
 				response.body.includes( `${ admin_update_order_assert }` ),
 		} );
 	} );
-};
+}
 
 export default function () {
 	addOrder();

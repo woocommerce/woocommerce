@@ -103,7 +103,9 @@ const HandPickedProductsControl = ( {
 					const product =
 						productsMap.get( nameOrId ) ||
 						productsMap.get( Number( nameOrId ) );
-					if ( product ) acc.add( String( product.id ) );
+					if ( product ) {
+						acc.add( String( product.id ) );
+					}
 					return acc;
 				},
 				new Set< string >()

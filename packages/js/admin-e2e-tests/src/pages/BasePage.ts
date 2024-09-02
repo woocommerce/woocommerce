@@ -94,7 +94,7 @@ export abstract class BasePage {
 		if ( checkbox ) {
 			const checkboxStatus = await (
 				await checkbox.getProperty( 'checked' )
-			 ).jsonValue();
+			).jsonValue();
 
 			if ( checkboxStatus !== true ) {
 				await checkbox.click();
@@ -129,7 +129,7 @@ export abstract class BasePage {
 	): Promise< void > {
 		const checkboxStatus = await (
 			await checkbox.getProperty( 'checked' )
-		 ).jsonValue();
+		).jsonValue();
 
 		if ( checkboxStatus !== checked ) {
 			await checkbox.click();

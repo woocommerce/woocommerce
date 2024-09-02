@@ -152,8 +152,8 @@ subscribe( () => {
 		return;
 	}
 
-	const isWooTemplate = templateSlugs.some( ( slug ) =>
-		currentTemplateId?.includes( slug )
+	const isWooTemplate = templateSlugs.some(
+		( slug ) => currentTemplateId?.includes( slug )
 	);
 
 	const hasSupportForPluginTemplateSettingPanel =

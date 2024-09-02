@@ -224,9 +224,8 @@ const runCreateOrderTest = () => {
 					'#wc-backbone-modal-dialog + .select2-container .select2-search__field',
 					name
 				);
-				const firstResult = await page.waitForSelector(
-					'li[data-selected]'
-				);
+				const firstResult =
+					await page.waitForSelector( 'li[data-selected]' );
 				await firstResult.click();
 				await expect( page ).toMatchElement(
 					'.wc-backbone-modal-content tr:nth-last-child(2) .wc-product-search option',

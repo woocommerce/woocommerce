@@ -7,7 +7,6 @@ const { coupon, order } = require( '../../data' );
  *
  * @group api
  * @group coupons
- *
  */
 describe( 'Coupons API tests', () => {
 	let couponId;
@@ -90,9 +89,8 @@ describe( 'Coupons API tests', () => {
 			const batchCreatePayload = {
 				create: expectedCoupons,
 			};
-			const batchCreateResponse = await couponsApi.batch.coupons(
-				batchCreatePayload
-			);
+			const batchCreateResponse =
+				await couponsApi.batch.coupons( batchCreatePayload );
 			expect( batchCreateResponse.status ).toEqual(
 				couponsApi.batch.responseCode
 			);
@@ -127,9 +125,8 @@ describe( 'Coupons API tests', () => {
 					},
 				],
 			};
-			const batchUpdateResponse = await couponsApi.batch.coupons(
-				batchUpdatePayload
-			);
+			const batchUpdateResponse =
+				await couponsApi.batch.coupons( batchUpdatePayload );
 
 			// Verify the response code and the number of coupons that were updated.
 			const updatedCoupons = batchUpdateResponse.body.update;
@@ -153,9 +150,8 @@ describe( 'Coupons API tests', () => {
 			const batchDeletePayload = {
 				delete: couponIdsToDelete,
 			};
-			const batchDeleteResponse = await couponsApi.batch.coupons(
-				batchDeletePayload
-			);
+			const batchDeleteResponse =
+				await couponsApi.batch.coupons( batchDeletePayload );
 
 			// Verify that the response shows the 2 coupons.
 			const deletedCouponIds = batchDeleteResponse.body.delete.map(
@@ -238,9 +234,8 @@ describe( 'Coupons API tests', () => {
 		it( 'can limit result set to matching code', async () => {
 			const matchingCoupon = allCoupons[ 1 ];
 			const payload = { code: matchingCoupon.code };
-			const { status, body } = await couponsApi.listAll.coupons(
-				payload
-			);
+			const { status, body } =
+				await couponsApi.listAll.coupons( payload );
 
 			expect( status ).toEqual( couponsApi.listAll.responseCode );
 			expect( body ).toHaveLength( 1 );
@@ -253,9 +248,8 @@ describe( 'Coupons API tests', () => {
 				page: 1,
 				per_page: pageSize,
 			};
-			const { status, body } = await couponsApi.listAll.coupons(
-				payload
-			);
+			const { status, body } =
+				await couponsApi.listAll.coupons( payload );
 
 			expect( status ).toEqual( couponsApi.listAll.responseCode );
 			expect( body ).toHaveLength( pageSize );
@@ -269,9 +263,8 @@ describe( 'Coupons API tests', () => {
 				search: matchingString,
 			};
 
-			const { status, body } = await couponsApi.listAll.coupons(
-				payload
-			);
+			const { status, body } =
+				await couponsApi.listAll.coupons( payload );
 
 			expect( status ).toEqual( couponsApi.listAll.responseCode );
 			expect( body ).toHaveLength( 1 );
@@ -289,9 +282,8 @@ describe( 'Coupons API tests', () => {
 
 		beforeAll( async () => {
 			// Create a coupon
-			const createCouponResponse = await couponsApi.create.coupon(
-				testCoupon
-			);
+			const createCouponResponse =
+				await couponsApi.create.coupon( testCoupon );
 			testCoupon.id = createCouponResponse.body.id;
 		} );
 
@@ -306,9 +298,8 @@ describe( 'Coupons API tests', () => {
 				...order,
 				coupon_lines: [ { code: testCoupon.code } ],
 			};
-			const { status, body } = await ordersApi.create.order(
-				orderWithCoupon
-			);
+			const { status, body } =
+				await ordersApi.create.order( orderWithCoupon );
 			orderId = body.id;
 
 			expect( status ).toEqual( ordersApi.create.responseCode );

@@ -27,8 +27,12 @@ describe( 'PluginCard', () => {
 		const description = queryByText( 'Plugin description' );
 		expect( title ).toBeInTheDocument();
 		expect( description ).toBeInTheDocument();
-		if ( title ) fireEvent.click( title );
-		if ( description ) fireEvent.click( description );
+		if ( title ) {
+			fireEvent.click( title );
+		}
+		if ( description ) {
+			fireEvent.click( description );
+		}
 		expect( onChange ).toHaveBeenCalledTimes( 2 );
 	} );
 } );

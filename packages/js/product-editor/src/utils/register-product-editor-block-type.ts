@@ -48,7 +48,7 @@ function augmentUsesContext( usesContext?: string[] ) {
 
 export function registerProductEditorBlockType<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	T extends Record< string, any > = Record< string, any >
+	T extends Record< string, any > = Record< string, any >,
 >( block: BlockRepresentation< T > ): Block< T > | undefined {
 	const { metadata, settings, name } = block;
 

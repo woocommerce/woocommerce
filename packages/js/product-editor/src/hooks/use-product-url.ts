@@ -13,7 +13,9 @@ export function useProductURL( productType: string ) {
 
 	const getProductURL = useCallback(
 		( isPreview: boolean ) => {
-			if ( ! permalink ) return undefined;
+			if ( ! permalink ) {
+				return undefined;
+			}
 
 			const productURL = new URL( permalink );
 			if ( isPreview ) {

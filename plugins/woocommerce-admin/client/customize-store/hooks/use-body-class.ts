@@ -8,7 +8,9 @@ const classCounter: Record< string, number > = {};
 
 const useBodyClass = ( className: string ) => {
 	useEffect( () => {
-		if ( typeof document === 'undefined' ) return;
+		if ( typeof document === 'undefined' ) {
+			return;
+		}
 
 		// Initialize or increment the counter for this class
 		classCounter[ className ] = ( classCounter[ className ] || 0 ) + 1;

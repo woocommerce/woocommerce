@@ -19,7 +19,9 @@ export const useLayoutTemplate = ( layoutTemplateId: string | null ) => {
 	const [ isEntityRegistered, setIsEntityRegistered ] = useState( false );
 
 	useEffect( () => {
-		if ( ! layoutTemplateId ) return;
+		if ( ! layoutTemplateId ) {
+			return;
+		}
 
 		const layoutTemplateEntity = select( 'core' ).getEntityConfig(
 			'root',

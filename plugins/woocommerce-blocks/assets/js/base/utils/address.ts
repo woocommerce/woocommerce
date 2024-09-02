@@ -87,7 +87,7 @@ const isValidAddressKey = (
  * @return {Object} The address with hidden fields values removed.
  */
 export const emptyHiddenAddressFields = <
-	T extends CartResponseBillingAddress | CartResponseShippingAddress
+	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T
 ): T => {
@@ -114,7 +114,7 @@ export const emptyHiddenAddressFields = <
  * @return {Object} The address with all fields values removed.
  */
 export const emptyAddressFields = <
-	T extends CartResponseBillingAddress | CartResponseShippingAddress
+	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T
 ): T => {

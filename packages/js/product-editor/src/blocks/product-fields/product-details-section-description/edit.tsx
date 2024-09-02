@@ -133,7 +133,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		[ productId ]
 	);
 
-	if ( ! rootClientId ) return;
+	if ( ! rootClientId ) {
+		return;
+	}
 
 	function menuItemClickHandler(
 		productTemplate: ProductTemplate,
@@ -203,7 +205,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	}
 
 	function resolveIcon( iconId?: string | null, alt?: string ) {
-		if ( ! iconId ) return undefined;
+		if ( ! iconId ) {
+			return undefined;
+		}
 
 		const { Icon } = icons;
 		let icon: JSX.Element;
@@ -211,7 +215,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		if ( /^https?:\/\//.test( iconId ) ) {
 			icon = <img src={ iconId } alt={ alt } />;
 		} else {
-			if ( ! ( iconId in icons || iconId in wooIcons ) ) return undefined;
+			if ( ! ( iconId in icons || iconId in wooIcons ) ) {
+				return undefined;
+			}
 
 			icon = icons[ iconId as never ] || wooIcons[ iconId as never ];
 		}
@@ -257,7 +263,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	async function handleModalChangeClick() {
 		try {
-			if ( isSaving ) return;
+			if ( isSaving ) {
+				return;
+			}
 
 			const { id: productTemplateId, productData } =
 				unsupportedProductTemplate as ProductTemplate;
@@ -475,7 +483,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 								variant="secondary"
 								aria-disabled={ isSaving }
 								onClick={ () => {
-									if ( isSaving ) return;
+									if ( isSaving ) {
+										return;
+									}
 									setUnsupportedProductTemplate( undefined );
 								} }
 							>

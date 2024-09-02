@@ -36,7 +36,10 @@ const resolveSelect =
 	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 class PluginError extends Error {
-	constructor( message: string, public data: unknown ) {
+	constructor(
+		message: string,
+		public data: unknown
+	) {
 		super( message );
 	}
 }

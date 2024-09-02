@@ -20,7 +20,6 @@ const shippingMethods = [
  *
  * @group api
  * @group shipping-methods
- *
  */
 describe( 'Shipping methods API tests', () => {
 	it.each( shippingMethods )(

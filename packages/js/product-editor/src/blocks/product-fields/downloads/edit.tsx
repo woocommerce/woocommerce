@@ -104,7 +104,9 @@ export function DownloadBlockEdit( {
 	}
 
 	function handleFileUpload( files: MediaItem | MediaItem[] ) {
-		if ( ! Array.isArray( files ) ) return;
+		if ( ! Array.isArray( files ) ) {
+			return;
+		}
 
 		const newFiles = files.filter(
 			( file ) =>

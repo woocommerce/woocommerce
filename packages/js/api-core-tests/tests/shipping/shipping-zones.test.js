@@ -11,7 +11,6 @@ const shippingZone = getShippingZoneExample();
  *
  * @group api
  * @group shipping-zones
- *
  */
 describe( 'Shipping zones API tests', () => {
 	it( 'cannot delete the default shipping zone "Locations not covered by your other zones"', async () => {
@@ -54,9 +53,8 @@ describe( 'Shipping zones API tests', () => {
 	} );
 
 	it( 'can create a shipping zone', async () => {
-		const { status, body } = await shippingZonesApi.create.shippingZone(
-			shippingZone
-		);
+		const { status, body } =
+			await shippingZonesApi.create.shippingZone( shippingZone );
 
 		expect( status ).toEqual( shippingZonesApi.create.responseCode );
 		expect( typeof body.id ).toEqual( 'number' );
@@ -79,9 +77,8 @@ describe( 'Shipping zones API tests', () => {
 		const param = {
 			_fields: 'id',
 		};
-		const { status, body } = await shippingZonesApi.listAll.shippingZones(
-			param
-		);
+		const { status, body } =
+			await shippingZonesApi.listAll.shippingZones( param );
 
 		expect( body ).toHaveLength( 2 ); // the test shipping zone, and the default 'Locations not covered by your other zones'
 		expect( status ).toEqual( shippingZonesApi.listAll.responseCode );

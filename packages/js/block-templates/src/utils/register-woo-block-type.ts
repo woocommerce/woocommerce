@@ -37,7 +37,7 @@ function defaultUseEvaluationContext( context: Record< string, unknown > ) {
 
 function getEdit<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	T extends Record< string, object > = Record< string, object >
+	T extends Record< string, object > = Record< string, object >,
 >(
 	edit: ComponentType< BlockEditProps< T > >,
 	useEvaluationContext: UseEvaluationContext
@@ -91,7 +91,7 @@ function getEdit<
 
 function augmentAttributes<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	T extends Record< string, any > = Record< string, any >
+	T extends Record< string, any > = Record< string, any >,
 >( attributes: T ) {
 	// Note: If you modify this function, also update the server-side
 	// Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry::augment_attributes() function.
@@ -130,7 +130,7 @@ function augmentAttributes<
  */
 export function registerWooBlockType<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	T extends Record< string, any > = Record< string, any >
+	T extends Record< string, any > = Record< string, any >,
 >(
 	block: BlockRepresentation< T >,
 	useEvaluationContext?: UseEvaluationContext

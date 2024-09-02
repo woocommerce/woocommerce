@@ -63,7 +63,7 @@ const deleteAllProductCategories = async () => {
 	while (
 		( categories = (
 			await api.get.productCategories( { per_page: 100, page: page++ } )
-		 ).filter( ( { slug } ) => slug !== 'uncategorized' ) ).length > 0
+		).filter( ( { slug } ) => slug !== 'uncategorized' ) ).length > 0
 	) {
 		const ids = categories.map( ( { id } ) => id );
 		await api.deletePost.productCategories( ids );
@@ -121,7 +121,7 @@ const deleteAllShippingZones = async () => {
 				per_page: 100,
 				page: page++,
 			} )
-		 ).filter(
+		).filter(
 			( { name } ) => name !== 'Locations not covered by your other zones'
 		) ).length > 0
 	) {

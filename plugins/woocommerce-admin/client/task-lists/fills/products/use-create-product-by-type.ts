@@ -54,9 +54,8 @@ export const useCreateProductByType = () => {
 			type === 'grouped' ||
 			type === 'external'
 		) {
-			const assignment = await loadExperimentAssignment(
-				EXPERIMENT_NAME
-			);
+			const assignment =
+				await loadExperimentAssignment( EXPERIMENT_NAME );
 			if ( assignment.variationName === 'treatment' ) {
 				const url = await getProductEditPageLink( type );
 				const _feature_nonce = getAdminSetting( '_feature_nonce' );

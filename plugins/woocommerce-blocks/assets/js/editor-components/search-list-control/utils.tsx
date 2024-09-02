@@ -37,16 +37,19 @@ export const buildTermsTree = (
 	filteredList: SearchListItem[],
 	list = filteredList
 ): SearchListItem[] | [] => {
-	const termsByParent = filteredList.reduce( ( acc, currentValue ) => {
-		const key = currentValue.parent || 0;
+	const termsByParent = filteredList.reduce(
+		( acc, currentValue ) => {
+			const key = currentValue.parent || 0;
 
-		if ( ! acc[ key ] ) {
-			acc[ key ] = [];
-		}
+			if ( ! acc[ key ] ) {
+				acc[ key ] = [];
+			}
 
-		acc[ key ].push( currentValue );
-		return acc;
-	}, {} as Record< string, SearchListItem[] > );
+			acc[ key ].push( currentValue );
+			return acc;
+		},
+		{} as Record< string, SearchListItem[] >
+	);
 
 	const listById = keyBy( list, 'id' );
 	const builtParents = [ '0' ];

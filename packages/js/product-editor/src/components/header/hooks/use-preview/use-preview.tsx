@@ -144,7 +144,9 @@ export function usePreview( {
 		target: '_blank',
 		...props,
 		ref( element: HTMLAnchorElement ) {
-			if ( typeof props.ref === 'function' ) props.ref( element );
+			if ( typeof props.ref === 'function' ) {
+				props.ref( element );
+			}
 			anchorRef.current = element;
 		},
 		'aria-disabled': ariaDisabled,

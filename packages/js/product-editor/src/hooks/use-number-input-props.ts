@@ -54,11 +54,15 @@ export const useNumberInputProps = ( {
 
 			if ( event.code === 'ArrowUp' ) {
 				event.preventDefault();
-				if ( amount + step <= max ) onChange( String( amount + step ) );
+				if ( amount + step <= max ) {
+					onChange( String( amount + step ) );
+				}
 			}
 			if ( event.code === 'ArrowDown' ) {
 				event.preventDefault();
-				if ( amount - step >= min ) onChange( String( amount - step ) );
+				if ( amount - step >= min ) {
+					onChange( String( amount - step ) );
+				}
 			}
 			if ( onKeyDown ) {
 				onKeyDown( event );

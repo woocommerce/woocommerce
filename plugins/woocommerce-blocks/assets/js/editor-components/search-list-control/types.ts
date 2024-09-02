@@ -15,7 +15,7 @@ interface ItemProps< T extends object = object > {
 	search: string;
 	useExpandedPanelId: [
 		number,
-		React.Dispatch< React.SetStateAction< number > >
+		React.Dispatch< React.SetStateAction< number > >,
 	];
 }
 

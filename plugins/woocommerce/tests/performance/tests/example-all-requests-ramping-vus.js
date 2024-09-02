@@ -19,113 +19,114 @@ import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
 
-export let options = {
-    scenarios: {
-        merchantBackgroundActivity: {
-            executor: 'ramping-vus',
+export const options = {
+	scenarios: {
+		merchantBackgroundActivity: {
+			executor: 'ramping-vus',
 			startVUs: 1,
 			stages: [
-			  { target: 1, duration: '5s' },
-			  { target: 2, duration: '600s' },
-			  { target: 2, duration: '120s' },
-			  { target: 4, duration: '600s' },
-			  { target: 4, duration: '120s' },
-			  { target: 0, duration: '120s' },
+				{ target: 1, duration: '5s' },
+				{ target: 2, duration: '600s' },
+				{ target: 2, duration: '120s' },
+				{ target: 4, duration: '600s' },
+				{ target: 4, duration: '120s' },
+				{ target: 0, duration: '120s' },
 			],
 			gracefulRampDown: '0',
-            exec: 'merchantAllFlows',
-        },
-        merchantIdleBackgroundActivity: {
-            executor: 'ramping-vus',
+			exec: 'merchantAllFlows',
+		},
+		merchantIdleBackgroundActivity: {
+			executor: 'ramping-vus',
 			startVUs: 1,
 			stages: [
-			  { target: 1, duration: '5s' },
-			  { target: 2, duration: '600s' },
-			  { target: 2, duration: '120s' },
-			  { target: 4, duration: '600s' },
-			  { target: 4, duration: '120s' },
-			  { target: 0, duration: '120s' },
+				{ target: 1, duration: '5s' },
+				{ target: 2, duration: '600s' },
+				{ target: 2, duration: '120s' },
+				{ target: 4, duration: '600s' },
+				{ target: 4, duration: '120s' },
+				{ target: 0, duration: '120s' },
 			],
 			gracefulRampDown: '0',
-            exec: 'merchantHeartbeatFlow',
-        },
-        shopperBackgroundActivity: {
-            executor: 'ramping-vus',
+			exec: 'merchantHeartbeatFlow',
+		},
+		shopperBackgroundActivity: {
+			executor: 'ramping-vus',
 			startVUs: 1,
 			stages: [
-			  { target: 1, duration: '5s' },
-			  { target: 2, duration: '600s' },
-			  { target: 2, duration: '120s' },
-			  { target: 4, duration: '600s' },
-			  { target: 4, duration: '120s' },
-			  { target: 0, duration: '120s' },
+				{ target: 1, duration: '5s' },
+				{ target: 2, duration: '600s' },
+				{ target: 2, duration: '120s' },
+				{ target: 4, duration: '600s' },
+				{ target: 4, duration: '120s' },
+				{ target: 0, duration: '120s' },
 			],
 			gracefulRampDown: '0',
-            exec: 'shopperBrowsingFlows',
-        },
-        shopperGuestCheckouts: {
-            executor: 'ramping-vus',
+			exec: 'shopperBrowsingFlows',
+		},
+		shopperGuestCheckouts: {
+			executor: 'ramping-vus',
 			startVUs: 1,
 			stages: [
-			  { target: 1, duration: '5s' },
-			  { target: 4, duration: '600s' },
-			  { target: 4, duration: '120s' },
-			  { target: 8, duration: '600s' },
-			  { target: 8, duration: '120s' },
-			  { target: 0, duration: '120s' },
+				{ target: 1, duration: '5s' },
+				{ target: 4, duration: '600s' },
+				{ target: 4, duration: '120s' },
+				{ target: 8, duration: '600s' },
+				{ target: 8, duration: '120s' },
+				{ target: 0, duration: '120s' },
 			],
 			gracefulRampDown: '0',
-            exec: 'checkoutGuestFlow',
-        },
-        shopperCustomerCheckouts: {
-            executor: 'ramping-vus',
+			exec: 'checkoutGuestFlow',
+		},
+		shopperCustomerCheckouts: {
+			executor: 'ramping-vus',
 			startVUs: 1,
 			stages: [
-			  { target: 1, duration: '5s' },
-			  { target: 2, duration: '600s' },
-			  { target: 2, duration: '120s' },
-			  { target: 4, duration: '600s' },
-			  { target: 4, duration: '120s' },
-			  { target: 0, duration: '120s' },
+				{ target: 1, duration: '5s' },
+				{ target: 2, duration: '600s' },
+				{ target: 2, duration: '120s' },
+				{ target: 4, duration: '600s' },
+				{ target: 4, duration: '120s' },
+				{ target: 0, duration: '120s' },
 			],
 			gracefulRampDown: '0',
-            exec: 'checkoutCustomerLoginFlow',
-        },
-    },
+			exec: 'checkoutCustomerLoginFlow',
+		},
+	},
 };
 
 // Use myAccountMerchantLogin() instead of wpLogin() if having issues with login.
 export function merchantAllFlows() {
-    myAccountMerchantLogin();
-    homeWCAdmin();
-    orders();
+	myAccountMerchantLogin();
+	homeWCAdmin();
+	orders();
 	ordersSearch();
-    products();
-    addProduct();
+	products();
+	addProduct();
 	coupons();
 }
 // Use myAccountMerchantLogin() instead of wpLogin() if having issues with login.
 export function merchantHeartbeatFlow() {
 	// Login only on first iteration
-	if (__ITER == 0) {
-    	myAccountMerchantLogin();}
-    ordersHeartbeat();
+	if ( __ITER == 0 ) {
+		myAccountMerchantLogin();
+	}
+	ordersHeartbeat();
 }
 export function shopperBrowsingFlows() {
-    homePage();
-    shopPage();
-    searchProduct();
-    singleProduct();
-    cartRemoveItem();
+	homePage();
+	shopPage();
+	searchProduct();
+	singleProduct();
+	cartRemoveItem();
 	cartApplyCoupon();
-    myAccount();
+	myAccount();
 	categoryPage();
 }
 export function checkoutGuestFlow() {
-    cart();
-    checkoutGuest();
+	cart();
+	checkoutGuest();
 }
 export function checkoutCustomerLoginFlow() {
-    cart();
-    checkoutCustomerLogin();
+	cart();
+	checkoutCustomerLogin();
 }

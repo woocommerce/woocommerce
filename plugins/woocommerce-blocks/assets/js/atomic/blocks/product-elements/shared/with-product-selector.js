@@ -18,7 +18,6 @@ import './editor.scss';
  * This HOC shows a product selection interface if context is not present in the editor.
  *
  * @param {Object} selectorArgs Options for the selector.
- *
  */
 const withProductSelector = ( selectorArgs ) => ( OriginalComponent ) => {
 	return ( props ) => {

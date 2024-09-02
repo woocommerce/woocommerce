@@ -21,7 +21,7 @@ function filterProductEdits( edits: EntityEdits ) {
 	return edits;
 }
 
-export function useProductEdits( productType = <string>'product' ) {
+export function useProductEdits( productType = < string >'product' ) {
 	const productId = useEntityId( 'postType', productType );
 
 	const { edits } = useSelect(

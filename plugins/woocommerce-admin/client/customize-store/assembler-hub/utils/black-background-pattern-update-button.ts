@@ -14,10 +14,11 @@ const updateFeaturedCategoryCoverImagePattern = (
 			)
 	);
 
-	const parentButtonBlocks = coverBlocks.map( ( coverBlock ) =>
-		coverBlock?.innerBlocks.find(
-			( block ) => block.name === 'core/buttons'
-		)
+	const parentButtonBlocks = coverBlocks.map(
+		( coverBlock ) =>
+			coverBlock?.innerBlocks.find(
+				( block ) => block.name === 'core/buttons'
+			)
 	);
 
 	const buttonBlocks = parentButtonBlocks.map(

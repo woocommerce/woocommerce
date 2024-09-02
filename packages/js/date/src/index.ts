@@ -364,7 +364,7 @@ const getDateParamsFromQueryMemoized = memoize<
 			string | undefined,
 			string | undefined,
 			string | undefined,
-			string
+			string,
 		]
 	) => DateParams
 >(
@@ -468,7 +468,7 @@ const getCurrentDatesMemoized = memoize<
 			moment.Moment,
 			moment.Moment,
 			moment.Moment,
-			moment.Moment
+			moment.Moment,
 		]
 	) => {
 		primary: DataPickerOptions;

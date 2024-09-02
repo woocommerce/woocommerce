@@ -50,7 +50,9 @@ export const guessCountryKey = (
 	// Match each digit against countryCodes until a match is found
 	for ( let i = number.length; i > 0; i-- ) {
 		const match = countryCodes[ number.substring( 0, i ) ];
-		if ( match ) return match[ 0 ];
+		if ( match ) {
+			return match[ 0 ];
+		}
 	}
 	return 'US';
 };
@@ -100,7 +102,9 @@ const pushOrAdd = (
 	value: string
 ) => {
 	if ( acc[ key ] ) {
-		if ( ! acc[ key ].includes( value ) ) acc[ key ].push( value );
+		if ( ! acc[ key ].includes( value ) ) {
+			acc[ key ].push( value );
+		}
 	} else {
 		acc[ key ] = [ value ];
 	}
@@ -117,17 +121,24 @@ export const parseData = ( data: DataType ) => ( {
 	} ) ),
 	countryCodes: Object.values( data )
 		.sort( ( a, b ) => ( a.priority > b.priority ? 1 : -1 ) )
-		.reduce( ( acc, { code, alpha2, start } ) => {
-			pushOrAdd( acc, code, alpha2 );
-			if ( start ) {
-				for ( const str of start ) {
-					for ( let i = 1; i <= str.length; i++ ) {
-						pushOrAdd( acc, code + str.substring( 0, i ), alpha2 );
+		.reduce(
+			( acc, { code, alpha2, start } ) => {
+				pushOrAdd( acc, code, alpha2 );
+				if ( start ) {
+					for ( const str of start ) {
+						for ( let i = 1; i <= str.length; i++ ) {
+							pushOrAdd(
+								acc,
+								code + str.substring( 0, i ),
+								alpha2
+							);
+						}
 					}
 				}
-			}
-			return acc;
-		}, {} as Record< string, string[] > ),
+				return acc;
+			},
+			{} as Record< string, string[] >
+		),
 } );
 
 export type Country = ReturnType< typeof parseData >[ 'countries' ][ 0 ];

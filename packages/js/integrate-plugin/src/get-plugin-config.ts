@@ -11,10 +11,13 @@ import { info } from './log';
 
 const { writeFile } = promises;
 function getUniqueItems( arr: string[] ) {
-	const uniqueObject = arr.reduce( ( unique, item ) => {
-		unique[ item ] = true;
-		return unique;
-	}, {} as Record< string, boolean > );
+	const uniqueObject = arr.reduce(
+		( unique, item ) => {
+			unique[ item ] = true;
+			return unique;
+		},
+		{} as Record< string, boolean >
+	);
 
 	return Object.keys( uniqueObject );
 }
@@ -35,10 +38,13 @@ const updateConfig = async ( { modules }: { modules: string[] } ) => {
 	const cwd = join( process.cwd() );
 	const config = getPluginConfig();
 
-	const uniqueModules = modules.reduce( ( unique, module ) => {
-		unique[ module ] = true;
-		return unique;
-	}, {} as Record< string, boolean > );
+	const uniqueModules = modules.reduce(
+		( unique, module ) => {
+			unique[ module ] = true;
+			return unique;
+		},
+		{} as Record< string, boolean >
+	);
 
 	config.modules = Object.keys( uniqueModules );
 

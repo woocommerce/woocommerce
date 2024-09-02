@@ -154,7 +154,9 @@ export function useProductHelper() {
 		productId: number,
 		variationsOrder?: { [ page: number ]: { [ id: number ]: number } }
 	) {
-		if ( ! variationsOrder ) return undefined;
+		if ( ! variationsOrder ) {
+			return undefined;
+		}
 
 		return batchUpdateProductVariations<
 			Promise< { update: ProductVariation[] } >

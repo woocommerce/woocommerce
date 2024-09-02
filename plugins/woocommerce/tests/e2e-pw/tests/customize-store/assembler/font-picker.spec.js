@@ -146,7 +146,7 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 			await fontPicker.click();
 			const [ primaryFont, secondaryFont ] = (
 				await fontPicker.getAttribute( 'aria-label' )
-			 )
+			)
 				.split( '+' )
 				.map( ( e ) => e.trim() );
 
@@ -196,7 +196,7 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 
 		const [ primaryFont, secondaryFont ] = (
 			await fontPicker.getAttribute( 'aria-label' )
-		 )
+		)
 			.split( '+' )
 			.map( ( e ) => e.trim() );
 
@@ -272,7 +272,7 @@ test.describe( 'Assembler -> Font Picker', { tag: '@gutenberg' }, () => {
 			await fontPicker.click();
 			const [ primaryFont, secondaryFont ] = (
 				await fontPicker.getAttribute( 'aria-label' )
-			 )
+			)
 				.split( '+' )
 				.map( ( e ) => e.trim() );
 

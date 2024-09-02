@@ -181,7 +181,9 @@ const TreeSelectControl = ( {
 		const highlightOptionLabel = ( optionLabel, matchPosition ) => {
 			const matchLength = matchPosition + filter.length;
 
-			if ( ! isSearching ) return optionLabel;
+			if ( ! isSearching ) {
+				return optionLabel;
+			}
 
 			return (
 				<span>
@@ -373,7 +375,9 @@ const TreeSelectControl = ( {
 	 * @param {Event} event The key down event
 	 */
 	const onKeyDown = ( event ) => {
-		if ( disabled ) return;
+		if ( disabled ) {
+			return;
+		}
 
 		if ( ESCAPE === event.key ) {
 			setTreeVisible( false );

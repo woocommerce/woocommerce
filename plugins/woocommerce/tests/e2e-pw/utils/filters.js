@@ -1,5 +1,5 @@
 const defaultConfig = require( '../playwright.config' );
-const testURL    = new URL( defaultConfig.use.baseURL );
+const testURL = new URL( defaultConfig.use.baseURL );
 
 /**
  * Request that a WordPress filter be established for the specified hook and returning the specified value.
@@ -14,9 +14,9 @@ const testURL    = new URL( defaultConfig.use.baseURL );
  * @param priority
  */
 export async function setFilterValue( page, hook, value, priority = 10 ) {
-	const context         = page.context();
+	const context = page.context();
 	const existingCookies = await context.cookies();
-	let   filterSpecs     = {};
+	let filterSpecs = {};
 
 	for ( const cookie of existingCookies ) {
 		if ( cookie.name === 'e2e-filters' ) {
@@ -25,17 +25,19 @@ export async function setFilterValue( page, hook, value, priority = 10 ) {
 		}
 	}
 
-	filterSpecs[hook] = {
-		value:    value,
-		priority: priority
+	filterSpecs[ hook ] = {
+		value,
+		priority,
 	};
 
-	await context.addCookies( [ {
-		name:  'e2e-filters',
-		value:  JSON.stringify( filterSpecs ),
-		path:   '/',
-		domain: testURL.hostname
-	} ] );
+	await context.addCookies( [
+		{
+			name: 'e2e-filters',
+			value: JSON.stringify( filterSpecs ),
+			path: '/',
+			domain: testURL.hostname,
+		},
+	] );
 }
 
 /**
@@ -47,10 +49,12 @@ export async function setFilterValue( page, hook, value, priority = 10 ) {
  * @param page
  */
 export async function clearFilters( page ) {
-	await page.context().addCookies( [ {
-		name:  'e2e-filters',
-		value:  '',
-		path:   '/',
-		domain: testURL.hostname
-	} ] );
+	await page.context().addCookies( [
+		{
+			name: 'e2e-filters',
+			value: '',
+			path: '/',
+			domain: testURL.hostname,
+		},
+	] );
 }

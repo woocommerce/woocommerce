@@ -30,7 +30,9 @@ const getUrl = ( context: PriceFilterContext ) => {
 	}
 
 	searchParams.forEach( ( _, key ) => {
-		if ( /query-[0-9]+-page/.test( key ) ) searchParams.delete( key );
+		if ( /query-[0-9]+-page/.test( key ) ) {
+			searchParams.delete( key );
+		}
 	} );
 
 	return url.href;

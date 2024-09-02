@@ -87,8 +87,8 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 			const attributes = getBlockAttributes( clientId );
 			const categories = attributes?.metadata?.categories;
 			// We know that the category is one of the keys of PATTERN_CATEGORIES.
-			const _category = Object.keys( PATTERN_CATEGORIES ).find( ( cat ) =>
-				categories?.includes( cat )
+			const _category = Object.keys( PATTERN_CATEGORIES ).find(
+				( cat ) => categories?.includes( cat )
 			) as string;
 
 			const _patternName = attributes?.metadata?.patternName;

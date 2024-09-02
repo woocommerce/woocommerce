@@ -12,7 +12,7 @@ import { preventLeavingProductForm } from '../utils/prevent-leaving-product-form
 import { useProductEdits } from './use-product-edits';
 
 export function useConfirmUnsavedProductChanges(
-	productType = <string>'product'
+	productType = < string >'product'
 ) {
 	const productId = useEntityId( 'postType', productType );
 

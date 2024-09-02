@@ -238,7 +238,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "14.7.0"
+			"pinVersion": "20.3.0"
 		},
 		{
 			"dependencies": [

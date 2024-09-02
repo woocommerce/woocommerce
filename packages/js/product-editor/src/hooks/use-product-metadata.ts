@@ -51,10 +51,13 @@ function useProductMetadata( options?: Options ) {
 	);
 
 	return {
-		metadata: meta_data.reduce( function ( acc, cur ) {
-			acc[ cur.key ] = cur.value;
-			return acc;
-		}, {} as Record< string, string | undefined > ),
+		metadata: meta_data.reduce(
+			function ( acc, cur ) {
+				acc[ cur.key ] = cur.value;
+				return acc;
+			},
+			{} as Record< string, string | undefined >
+		),
 		update: ( entries: Metadata< string >[] ) =>
 			editEntityRecord( 'postType', postType, id, {
 				meta_data: [

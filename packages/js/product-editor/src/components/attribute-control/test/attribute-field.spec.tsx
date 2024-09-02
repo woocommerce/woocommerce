@@ -175,7 +175,7 @@ describe( 'AttributeControl', () => {
 			} );
 			(
 				await screen.findAllByLabelText( 'Remove attribute' )
-			 )[ 0 ].click();
+			)[ 0 ].click();
 			expect( globalThis.confirm ).toHaveBeenCalled();
 		} );
 
@@ -194,7 +194,7 @@ describe( 'AttributeControl', () => {
 
 			(
 				await screen.findAllByLabelText( 'Remove attribute' )
-			 )[ 0 ].click();
+			)[ 0 ].click();
 
 			expect( globalThis.confirm ).toHaveBeenCalled();
 			expect( onChange ).toHaveBeenCalledWith( [ attributeList[ 1 ] ] );
@@ -213,7 +213,7 @@ describe( 'AttributeControl', () => {
 			} );
 			(
 				await screen.findAllByLabelText( 'Remove attribute' )
-			 )[ 0 ].click();
+			)[ 0 ].click();
 			expect( globalThis.confirm ).toHaveBeenCalled();
 			expect( onChange ).not.toHaveBeenCalled();
 		} );
@@ -242,7 +242,7 @@ describe( 'AttributeControl', () => {
 
 			(
 				await screen.findAllByLabelText( 'Remove attribute' )
-			 )[ 0 ].click();
+			)[ 0 ].click();
 
 			expect( onChange ).toHaveBeenCalledWith( [
 				{ ...attributeList[ 1 ], position: 0 },

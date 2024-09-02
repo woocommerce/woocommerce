@@ -39,7 +39,9 @@ export const SimpleTree: React.FC = () => {
 };
 
 function shouldItemBeExpanded( item: LinkedTree, filter: string ) {
-	if ( ! filter || ! item.children?.length ) return false;
+	if ( ! filter || ! item.children?.length ) {
+		return false;
+	}
 	return item.children.some( ( child ) => {
 		if ( new RegExp( filter, 'ig' ).test( child.data.label ) ) {
 			return true;
@@ -212,8 +214,12 @@ function getFirstMatchingItem(
 	text: string,
 	memo: Record< string, string >
 ) {
-	if ( ! text ) return false;
-	if ( memo[ text ] === item.data.value ) return true;
+	if ( ! text ) {
+		return false;
+	}
+	if ( memo[ text ] === item.data.value ) {
+		return true;
+	}
 
 	const matcher = new RegExp( text, 'ig' );
 	if ( matcher.test( item.data.label ) ) {

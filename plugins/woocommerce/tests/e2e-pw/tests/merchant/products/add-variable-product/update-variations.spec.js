@@ -32,9 +32,8 @@ test.describe( 'Update variations', { tag: '@gutenberg' }, () => {
 
 	test.beforeAll( async ( { browser } ) => {
 		await test.step( 'Create variable product for individual edit test', async () => {
-			productId_indivEdit = await createVariableProduct(
-				productAttributes
-			);
+			productId_indivEdit =
+				await createVariableProduct( productAttributes );
 
 			variationIds_indivEdit = await createVariations(
 				productId_indivEdit,
@@ -43,25 +42,22 @@ test.describe( 'Update variations', { tag: '@gutenberg' }, () => {
 		} );
 
 		await test.step( 'Create variable product for bulk edit test', async () => {
-			productId_bulkEdit = await createVariableProduct(
-				productAttributes
-			);
+			productId_bulkEdit =
+				await createVariableProduct( productAttributes );
 
 			await createVariations( productId_bulkEdit, sampleVariations );
 		} );
 
 		await test.step( 'Create variable product for "delete all" test', async () => {
-			productId_deleteAll = await createVariableProduct(
-				productAttributes
-			);
+			productId_deleteAll =
+				await createVariableProduct( productAttributes );
 
 			await createVariations( productId_deleteAll, sampleVariations );
 		} );
 
 		await test.step( 'Create variable product for "manage stock" test', async () => {
-			productId_manageStock = await createVariableProduct(
-				productAttributes
-			);
+			productId_manageStock =
+				await createVariableProduct( productAttributes );
 
 			const variation = sampleVariations.slice( -1 );
 
@@ -69,9 +65,8 @@ test.describe( 'Update variations', { tag: '@gutenberg' }, () => {
 		} );
 
 		await test.step( 'Create variable product for "variation defaults" test', async () => {
-			productId_variationDefaults = await createVariableProduct(
-				productAttributes
-			);
+			productId_variationDefaults =
+				await createVariableProduct( productAttributes );
 
 			await createVariations(
 				productId_variationDefaults,
@@ -82,9 +77,8 @@ test.describe( 'Update variations', { tag: '@gutenberg' }, () => {
 		} );
 
 		await test.step( 'Create variable product with 1 variation for "remove variation" test', async () => {
-			productId_removeVariation = await createVariableProduct(
-				productAttributes
-			);
+			productId_removeVariation =
+				await createVariableProduct( productAttributes );
 
 			await createVariations(
 				productId_removeVariation,

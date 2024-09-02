@@ -110,8 +110,9 @@ export const NumberControl: React.FC< NumberProps > = forwardRef(
 
 		function incrementValue() {
 			const newValue = parseFloat( value || '0' ) + increment;
-			if ( newValue >= min && newValue <= max )
+			if ( newValue >= min && newValue <= max ) {
 				onChange( String( newValue ) );
+			}
 		}
 
 		useEffect( () => {

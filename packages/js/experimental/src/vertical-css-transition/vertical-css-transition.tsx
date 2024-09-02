@@ -12,7 +12,7 @@ import { CSSTransitionProps } from 'react-transition-group/CSSTransition';
 import { CSSTransition } from 'react-transition-group';
 
 export type VerticalCSSTransitionProps<
-	Ref extends HTMLElement | undefined = undefined
+	Ref extends HTMLElement | undefined = undefined,
 > = CSSTransitionProps< Ref > & {
 	defaultStyle?: React.CSSProperties;
 };

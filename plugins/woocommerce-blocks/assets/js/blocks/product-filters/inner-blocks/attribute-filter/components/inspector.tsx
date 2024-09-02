@@ -47,11 +47,12 @@ export const Inspector = ( {
 	const { productFilterWrapperBlockId, productFilterWrapperHeadingBlockId } =
 		useSelect(
 			( select ) => {
-				if ( ! clientId )
+				if ( ! clientId ) {
 					return {
 						productFilterWrapperBlockId: undefined,
 						productFilterWrapperHeadingBlockId: undefined,
 					};
+				}
 
 				const { getBlockParentsByBlockName, getBlock } =
 					select( 'core/block-editor' );
@@ -61,11 +62,12 @@ export const Inspector = ( {
 					'woocommerce/product-filter'
 				);
 
-				if ( parentBlocksByBlockName.length === 0 )
+				if ( parentBlocksByBlockName.length === 0 ) {
 					return {
 						productFilterWrapperBlockId: undefined,
 						productFilterWrapperHeadingBlockId: undefined,
 					};
+				}
 
 				const parentBlockId = parentBlocksByBlockName[ 0 ];
 

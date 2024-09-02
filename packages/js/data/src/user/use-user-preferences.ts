@@ -144,7 +144,7 @@ export const useUserPreferences = () => {
 	} );
 
 	const updateUserPreferences = <
-		T extends Record< string, unknown > = UserPreferences
+		T extends Record< string, unknown > = UserPreferences,
 	>(
 		userPrefs: UserPreferences | T
 	) => {

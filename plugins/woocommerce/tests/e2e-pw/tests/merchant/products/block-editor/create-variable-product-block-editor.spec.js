@@ -44,15 +44,12 @@ let productId_editVariations,
 test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Create variable products', () => {
 		test.beforeAll( async ( { browser } ) => {
-			productId_editVariations = await createVariableProduct(
-				productAttributes
-			);
-			productId_deleteVariations = await createVariableProduct(
-				productAttributes
-			);
-			productId_singleVariation = await createVariableProduct(
-				productAttributes
-			);
+			productId_editVariations =
+				await createVariableProduct( productAttributes );
+			productId_deleteVariations =
+				await createVariableProduct( productAttributes );
+			productId_singleVariation =
+				await createVariableProduct( productAttributes );
 			await showVariableProductTour( browser, false );
 		} );
 

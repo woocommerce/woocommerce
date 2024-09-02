@@ -65,7 +65,7 @@ export const receiveApplyingCoupon = ( couponCode: string ) =>
 	( {
 		type: types.APPLYING_COUPON,
 		couponCode,
-	} as const );
+	} ) as const;
 
 /**
  * Returns an action object used to track when a coupon is removing.
@@ -76,7 +76,7 @@ export const receiveRemovingCoupon = ( couponCode: string ) =>
 	( {
 		type: types.REMOVING_COUPON,
 		couponCode,
-	} as const );
+	} ) as const;
 
 /**
  * Returns an action object for updating a single cart item in the store.
@@ -87,7 +87,7 @@ export const receiveCartItem = ( response: CartResponseItem | null = null ) =>
 	( {
 		type: types.RECEIVE_CART_ITEM,
 		cartItem: response,
-	} as const );
+	} ) as const;
 
 /**
  * Returns an action object to indicate if the specified cart item quantity is
@@ -105,7 +105,7 @@ export const itemIsPendingQuantity = (
 		type: types.ITEM_PENDING_QUANTITY,
 		cartItemKey,
 		isPendingQuantity,
-	} as const );
+	} ) as const;
 
 /**
  * Returns an action object to remove a cart item from the store.
@@ -122,7 +122,7 @@ export const itemIsPendingDelete = (
 		type: types.RECEIVE_REMOVED_ITEM,
 		cartItemKey,
 		isPendingDelete,
-	} as const );
+	} ) as const;
 
 /**
  * Returns an action object to mark the cart data in the store as stale.
@@ -135,7 +135,7 @@ export const setIsCartDataStale = ( isCartDataStale = true ) =>
 	( {
 		type: types.SET_IS_CART_DATA_STALE,
 		isCartDataStale,
-	} as const );
+	} ) as const;
 
 /**
  * Returns an action object used to track when customer data is being updated
@@ -145,7 +145,7 @@ export const updatingCustomerData = ( isResolving: boolean ) =>
 	( {
 		type: types.UPDATING_CUSTOMER_DATA,
 		isResolving,
-	} as const );
+	} ) as const;
 
 /**
  * Returns an action object used to track whether the shipping rate is being
@@ -157,7 +157,7 @@ export const shippingRatesBeingSelected = ( isResolving: boolean ) =>
 	( {
 		type: types.UPDATING_SELECTED_SHIPPING_RATE,
 		isResolving,
-	} as const );
+	} ) as const;
 
 /**
  * POSTs to the /cart/extensions endpoint with the data supplied by the extension.
@@ -432,14 +432,14 @@ export const selectShippingRate =
  */
 export const setBillingAddress = (
 	billingAddress: Partial< BillingAddress >
-) => ( { type: types.SET_BILLING_ADDRESS, billingAddress } as const );
+) => ( { type: types.SET_BILLING_ADDRESS, billingAddress } ) as const;
 
 /**
  * Sets shipping address locally, as opposed to updateCustomerData which sends it to the server.
  */
 export const setShippingAddress = (
 	shippingAddress: Partial< ShippingAddress >
-) => ( { type: types.SET_SHIPPING_ADDRESS, shippingAddress } as const );
+) => ( { type: types.SET_SHIPPING_ADDRESS, shippingAddress } ) as const;
 
 /**
  * Updates the shipping and/or billing address for the customer and returns an updated cart.

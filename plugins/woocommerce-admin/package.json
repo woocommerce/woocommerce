@@ -211,7 +211,7 @@
 		"postcss": "^8.4.32",
 		"postcss-color-function": "^4.1.0",
 		"postcss-loader": "^4.3.0",
-		"prettier": "npm:wp-prettier@^2.8.5",
+		"prettier": "npm:wp-prettier@^3.0.3",
 		"promptly": "^3.2.0",
 		"prop-types": "^15.8.1",
 		"puppeteer": "^2.1.1",

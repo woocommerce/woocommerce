@@ -118,10 +118,11 @@ export const EditAttributeModal: React.FC< EditAttributeModalProps > = ( {
 			currentAttributeTermsCount + addedTermsCount || 1;
 
 		const remainedTermsCount =
-			attribute.terms?.filter( ( currentTerm ) =>
-				editableAttribute?.terms?.some(
-					( editedTerm ) => currentTerm.id === editedTerm.id
-				)
+			attribute.terms?.filter(
+				( currentTerm ) =>
+					editableAttribute?.terms?.some(
+						( editedTerm ) => currentTerm.id === editedTerm.id
+					)
 			)?.length ?? 0;
 
 		return {

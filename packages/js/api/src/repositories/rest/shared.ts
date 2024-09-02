@@ -48,7 +48,7 @@ export function createMetaDataTransformer(): ModelTransformer< MetaData > {
  * @return {string} The URL to make the request to.
  */
 type BuildURLFn< T extends 'list' | 'general' = 'general' > = [ T ] extends [
-	'list'
+	'list',
 ]
 	? () => string
 	: ( id: ModelID ) => string;
@@ -64,7 +64,7 @@ type BuildURLFn< T extends 'list' | 'general' = 'general' > = [ T ] extends [
  */
 type BuildURLWithParentFn<
 	P extends ModelRepositoryParams,
-	T extends 'list' | 'general' = 'general'
+	T extends 'list' | 'general' = 'general',
 > = [ T ] extends [ 'list' ]
 	? ( parent: ParentID< P > ) => string
 	: ( parent: ParentID< P >, id: ModelID ) => string;

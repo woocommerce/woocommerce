@@ -23,7 +23,9 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 		isEditor: true,
 	} );
 
-	if ( isLoading ) return null;
+	if ( isLoading ) {
+		return null;
+	}
 
 	const { minPrice, maxPrice, formattedMinPrice, formattedMaxPrice } =
 		getFormattedPrice( results );

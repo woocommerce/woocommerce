@@ -49,7 +49,8 @@ export function orders( includeTests = {} ) {
 	let api_x_wp_nonce;
 	let apiNonceHeader;
 	let heartbeat_nonce;
-	let includedTests = Object.assign( {
+	const includedTests = Object.assign(
+		{
 			completed: true,
 			heartbeat: true,
 			other: true,
@@ -169,7 +170,9 @@ export function orders( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.completed ) {
@@ -196,7 +199,9 @@ export function orders( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 }
 

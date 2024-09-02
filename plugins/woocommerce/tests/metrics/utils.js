@@ -4,7 +4,9 @@
 import { existsSync, readFileSync } from 'fs';
 
 export function median( array ) {
-	if ( ! array || ! array.length ) return undefined;
+	if ( ! array || ! array.length ) {
+		return undefined;
+	}
 
 	const numbers = [ ...array ].sort( ( a, b ) => a - b );
 	const middleIndex = Math.floor( numbers.length / 2 );

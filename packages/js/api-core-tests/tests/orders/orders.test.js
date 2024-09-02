@@ -40,7 +40,6 @@ const updatedCustomerShipping = {
  *
  * @group api
  * @group orders
- *
  */
 describe( 'Orders API tests', () => {
 	let orderId, sampleData;

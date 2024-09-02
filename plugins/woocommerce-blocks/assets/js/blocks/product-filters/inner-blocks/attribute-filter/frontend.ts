@@ -66,7 +66,9 @@ store( 'woocommerce/product-filter-attribute', {
 			);
 		},
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-			if ( ! event.target.value ) return;
+			if ( ! event.target.value ) {
+				return;
+			}
 
 			const context = getContext< AttributeFilterContext >();
 
@@ -78,10 +80,12 @@ store( 'woocommerce/product-filter-attribute', {
 				event.target.checked &&
 				! selectedTerms.includes( event.target.value )
 			) {
-				if ( context.selectType === 'multiple' )
+				if ( context.selectType === 'multiple' ) {
 					selectedTerms.push( event.target.value );
-				if ( context.selectType === 'single' )
+				}
+				if ( context.selectType === 'single' ) {
 					selectedTerms = [ event.target.value ];
+				}
 			} else {
 				selectedTerms = selectedTerms.filter(
 					( value ) => value !== event.target.value

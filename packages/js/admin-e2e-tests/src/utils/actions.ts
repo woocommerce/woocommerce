@@ -89,7 +89,7 @@ const getInputValue = async ( selector: string ): Promise< unknown > => {
 	if ( field ) {
 		const fieldValue = await (
 			await field.getProperty( 'value' )
-		 ).jsonValue();
+		).jsonValue();
 
 		return fieldValue;
 	}
@@ -105,7 +105,7 @@ const getAttribute = async (
 	if ( field ) {
 		const fieldValue = await (
 			await field.getProperty( attribute )
-		 ).jsonValue();
+		).jsonValue();
 
 		return fieldValue;
 	}

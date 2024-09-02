@@ -70,9 +70,10 @@ export function VariationsFilter( {
 				search: searchText,
 			};
 
-			const terms = await getProductAttributeTerms<
-				ProductAttributeTerm[]
-			>( sharedRequestArgs );
+			const terms =
+				await getProductAttributeTerms< ProductAttributeTerm[] >(
+					sharedRequestArgs
+				);
 
 			const totalTerms =
 				await getProductAttributeTermsTotalCount< number >(
@@ -109,7 +110,9 @@ export function VariationsFilter( {
 	}
 
 	async function handleScroll( event: UIEvent< HTMLDivElement > ) {
-		if ( isLoading || options.length >= totalOptions ) return;
+		if ( isLoading || options.length >= totalOptions ) {
+			return;
+		}
 
 		const scrollableElement = event.currentTarget;
 

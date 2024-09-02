@@ -106,9 +106,8 @@ export function useProductVariationsHelper() {
 			( attr ) => attr.variation
 		);
 
-		const defaultVariationValues = await getDefaultVariationValues(
-			productId
-		);
+		const defaultVariationValues =
+			await getDefaultVariationValues( productId );
 
 		await Promise.all(
 			variations.map( ( variationId ) =>
@@ -187,8 +186,7 @@ export function useProductVariationsHelper() {
 					navigateTo( { url } );
 				}
 			} );
-	},
-	[] );
+	}, [] );
 
 	return {
 		generateProductVariations,

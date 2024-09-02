@@ -2118,13 +2118,11 @@ test.describe.serial( 'Orders API tests', () => {
 				tags
 			);
 
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
+			const externalProducts =
+				await createSampleExternalProducts( categories );
 
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
+			const groupedProducts =
+				await createSampleGroupedProduct( categories );
 
 			const variableProducts = await createSampleVariableProducts(
 				categories,
@@ -2134,9 +2132,8 @@ test.describe.serial( 'Orders API tests', () => {
 			const hierarchicalProducts =
 				await createSampleHierarchicalProducts();
 
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
+			const reviewIds =
+				await createSampleProductReviews( simpleProducts );
 
 			const orders = await createSampleProductOrders( simpleProducts );
 

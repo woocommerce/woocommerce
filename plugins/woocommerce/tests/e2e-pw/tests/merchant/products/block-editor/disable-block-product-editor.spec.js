@@ -31,9 +31,8 @@ test.describe.serial(
 		} );
 
 		test.beforeEach( async ( { page } ) => {
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
+			isNewProductEditorEnabled =
+				await isBlockProductEditorEnabled( page );
 			if ( ! isNewProductEditorEnabled ) {
 				await toggleBlockProductEditor( 'enable', page );
 			}
@@ -42,9 +41,8 @@ test.describe.serial(
 		test.afterEach( async ( { browser } ) => {
 			const context = await browser.newContext();
 			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
+			isNewProductEditorEnabled =
+				await isBlockProductEditorEnabled( page );
 			if ( isNewProductEditorEnabled ) {
 				await toggleBlockProductEditor( 'disable', page );
 			}

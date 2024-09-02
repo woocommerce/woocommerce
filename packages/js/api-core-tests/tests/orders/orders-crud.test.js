@@ -60,7 +60,6 @@ const simpleProduct = {
  *
  * @group api
  * @group orders
- *
  */
 describe( 'Orders API tests: CRUD', () => {
 	let orderId;
@@ -72,9 +71,8 @@ describe( 'Orders API tests: CRUD', () => {
 				...order,
 				status: null,
 			};
-			const { body, status } = await ordersApi.create.order(
-				requestPayload
-			);
+			const { body, status } =
+				await ordersApi.create.order( requestPayload );
 			// Save the order ID. It will be used by the retrieve, update, and delete tests.
 			orderId = body.id;
 
@@ -91,9 +89,8 @@ describe( 'Orders API tests: CRUD', () => {
 					...order,
 					status: expectedStatus,
 				};
-				const { status, body } = await ordersApi.create.order(
-					requestPayload
-				);
+				const { status, body } =
+					await ordersApi.create.order( requestPayload );
 
 				expect( status ).toEqual( ordersApi.create.responseCode );
 				expect( typeof body.id ).toEqual( 'number' );

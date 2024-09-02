@@ -207,22 +207,26 @@ test.describe(
 			).toBeVisible();
 
 			const addToCart = page.getByRole( 'add_to_cart_button' );
-			for ( let i = 0; i < addToCart.count(); ++i )
+			for ( let i = 0; i < addToCart.count(); ++i ) {
 				await expect( addToCart.nth( i ) ).toBeVisible();
+			}
 
 			const productPrice = page.getByRole( 'woocommerce-Price-amount' );
-			for ( let i = 0; i < productPrice.count(); ++i )
+			for ( let i = 0; i < productPrice.count(); ++i ) {
 				await expect( productPrice.nth( i ) ).toBeVisible();
+			}
 
 			const productTitle = page.getByRole(
 				'woocommerce-loop-product__title'
 			);
-			for ( let i = 0; i < productTitle.count(); ++i )
+			for ( let i = 0; i < productTitle.count(); ++i ) {
 				await expect( productTitle.nth( i ) ).toBeVisible();
+			}
 
 			const productImage = page.getByRole( 'wp-post-image' );
-			for ( let i = 0; i < productImage.count(); ++i )
+			for ( let i = 0; i < productImage.count(); ++i ) {
 				await expect( productImage.nth( i ) ).toBeVisible();
+			}
 		} );
 
 		test( 'should see and sort tags page with all the products', async ( {
@@ -340,18 +344,21 @@ test.describe(
 			).toBeGreaterThan( 0 );
 
 			const productPrice = page.locator( '.woocommerce-Price-amount' );
-			for ( let i = 0; i < productPrice.count(); ++i )
+			for ( let i = 0; i < productPrice.count(); ++i ) {
 				await expect( productPrice.nth( i ) ).toBeVisible();
+			}
 
 			const productTitle = page.locator(
 				'.woocommerce-loop-product__title'
 			);
-			for ( let i = 0; i < productTitle.count(); ++i )
+			for ( let i = 0; i < productTitle.count(); ++i ) {
 				await expect( productTitle.nth( i ) ).toBeVisible();
+			}
 
 			const productImage = page.locator( '.wp-post-image' );
-			for ( let i = 0; i < productImage.count(); ++i )
+			for ( let i = 0; i < productImage.count(); ++i ) {
 				await expect( productImage.nth( i ) ).toBeVisible();
+			}
 		} );
 	}
 );

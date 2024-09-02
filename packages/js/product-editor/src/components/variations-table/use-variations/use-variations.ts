@@ -64,13 +64,13 @@ export function useVariations( { productId }: UseVariationsProps ) {
 			setIsLoading( true );
 			setGetVariationsError( undefined );
 
-			const data = await getProductVariations< ProductVariation[] >(
-				requestParams
-			);
+			const data =
+				await getProductVariations< ProductVariation[] >(
+					requestParams
+				);
 
-			const total = await getProductVariationsTotalCount< number >(
-				requestParams
-			);
+			const total =
+				await getProductVariationsTotalCount< number >( requestParams );
 
 			setVariations( data );
 			setTotalCount( total );
@@ -267,7 +267,9 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		id: variationId,
 		...variation
 	}: PartialProductVariation ) {
-		if ( isUpdating[ variationId ] ) return;
+		if ( isUpdating[ variationId ] ) {
+			return;
+		}
 
 		setVariations( ( current ) =>
 			current.map( ( currentVariation ) => {
@@ -307,7 +309,9 @@ export function useVariations( { productId }: UseVariationsProps ) {
 	}
 
 	async function onDelete( variationId: number ) {
-		if ( isUpdating[ variationId ] ) return;
+		if ( isUpdating[ variationId ] ) {
+			return;
+		}
 
 		const { deleteProductVariation, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );

@@ -23,9 +23,8 @@ export const useProductSlug = (): UseProductSlugHook => {
 		if ( editSlugBox ) {
 			editSlugBox.innerHTML = responseData;
 
-			const newSlug = document.getElementById(
-				'editable-post-name-full'
-			)?.innerText;
+			const newSlug = document.getElementById( 'editable-post-name-full' )
+				?.innerText;
 			if ( newSlug && slugInputRef.current ) {
 				slugInputRef.current.value = newSlug;
 				slugInputRef.current.setAttribute( 'value', newSlug );

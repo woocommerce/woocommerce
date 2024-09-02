@@ -62,7 +62,7 @@ export const testAdminAnalyticsOverview = () => {
 						await analyticsPage.getEllipsisMenuItems(
 							section.title
 						)
-					 ).map( ( item ) => item.title );
+					).map( ( item ) => item.title );
 					if ( index === 0 ) {
 						expect( menuItems ).toContain( 'Move down' );
 						expect( menuItems ).not.toContain( 'Move up' );

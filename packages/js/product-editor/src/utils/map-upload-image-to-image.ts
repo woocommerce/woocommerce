@@ -13,7 +13,9 @@ export interface Image {
  * Converts an uploaded image into an Image object.
  */
 export function mapUploadImageToImage( upload: UploadImage ): Image | null {
-	if ( ! upload.id ) return null;
+	if ( ! upload.id ) {
+		return null;
+	}
 	return {
 		id: upload.id,
 		name: upload.title,

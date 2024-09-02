@@ -71,7 +71,7 @@ export const normalizeAddressProp = (
  * Compares two address objects and returns an array of keys that have changed.
  */
 export const getDirtyKeys = <
-	T extends CartBillingAddress & CartShippingAddress
+	T extends CartBillingAddress & CartShippingAddress,
 >(
 	// An object containing all previous address information
 	previousAddress: Partial< T >,

@@ -64,7 +64,7 @@ interface FeaturedItemRequiredProps< T > {
 	attributes: (
 		| FeaturedCategoryRequiredAttributes
 		| FeaturedProductRequiredAttributes
-	 ) &
+	) &
 		EditorBlock< T >[ 'attributes' ] & {
 			// This is hardcoded because border and color are not yet included
 			// in Gutenberg's official types.

@@ -49,7 +49,6 @@ const searchParams = [
  *
  * @group api
  * @group orders
- *
  */
 describe( 'Order Search API tests', () => {
 	beforeAll( async () => {

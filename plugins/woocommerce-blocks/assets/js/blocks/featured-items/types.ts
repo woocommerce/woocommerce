@@ -24,7 +24,9 @@ export interface ImageObject {
 }
 
 export function isImageObject( obj: unknown ): obj is ImageObject {
-	if ( ! obj ) return false;
+	if ( ! obj ) {
+		return false;
+	}
 
 	return (
 		isNumber( ( obj as ImageObject ).id ) &&

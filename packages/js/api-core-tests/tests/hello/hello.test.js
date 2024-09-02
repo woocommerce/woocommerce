@@ -4,7 +4,6 @@ const { getRequest } = require( '../../utils/request' );
  * Tests to verify connection to the API.
  *
  * @group hello
- *
  */
 describe( 'Test API connectivity', () => {
 	it( 'can access a non-authenticated endpoint', async () => {

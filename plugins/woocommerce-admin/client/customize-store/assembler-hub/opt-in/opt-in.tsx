@@ -37,7 +37,7 @@ export const OptInSubscribe = () => {
 		( font: {
 			custom: Array< FontFamily >;
 			theme: Array< FontFamily >;
-		} ) => void
+		} ) => void,
 	] = useGlobalSetting( 'typography.fontFamilies' );
 
 	const {

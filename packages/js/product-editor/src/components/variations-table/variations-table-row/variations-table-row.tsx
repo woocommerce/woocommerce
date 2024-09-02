@@ -216,7 +216,9 @@ export function VariationsTableRow( {
 	}
 
 	function renderPriceCellContent() {
-		if ( ! variation.regular_price ) return null;
+		if ( ! variation.regular_price ) {
+			return null;
+		}
 		return (
 			<Dropdown
 				contentClassName="woocommerce-product-variations__pricing-actions-menu"
@@ -266,7 +268,9 @@ export function VariationsTableRow( {
 	}
 
 	function renderStockCellContent() {
-		if ( ! variation.regular_price ) return null;
+		if ( ! variation.regular_price ) {
+			return null;
+		}
 
 		return (
 			<Dropdown

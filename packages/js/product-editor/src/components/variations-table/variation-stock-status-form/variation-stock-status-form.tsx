@@ -100,7 +100,9 @@ export function VariationStockStatusForm( {
 	}
 
 	function renderTrackInventoryToggleHelp() {
-		if ( isLoadingManageStockOption || canManageStock ) return undefined;
+		if ( isLoadingManageStockOption || canManageStock ) {
+			return undefined;
+		}
 		return createInterpolateElement(
 			/* translators: <Link>: Learn more link opening tag. </Link>: Learn more link closing tag.*/
 			__(

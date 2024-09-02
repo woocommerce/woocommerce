@@ -28,7 +28,9 @@ export const WCPayInstallButton = () => {
 	};
 
 	const installWooCommercePayments = async () => {
-		if ( installing ) return;
+		if ( installing ) {
+			return;
+		}
 
 		setInstalling( true );
 		recordEvent( 'settings_payments_recommendations_setup', {

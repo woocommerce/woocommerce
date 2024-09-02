@@ -103,7 +103,7 @@ export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
 	( {
 		type: 'API_FETCH_WITH_HEADERS',
 		options,
-	} as const );
+	} ) as const;
 
 // List of paths which should not be batched.
 const preventBatching = [ '/wc/store/v1/cart/select-shipping-rate' ];

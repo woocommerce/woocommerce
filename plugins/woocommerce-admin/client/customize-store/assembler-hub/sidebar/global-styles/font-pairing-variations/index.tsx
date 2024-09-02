@@ -52,7 +52,7 @@ export const FontPairing = () => {
 	const { useGlobalSetting } = unlock( blockEditorPrivateApis );
 
 	const [ custom ] = useGlobalSetting( 'typography.fontFamilies.custom' ) as [
-		Array< FontFamily >
+		Array< FontFamily >,
 	];
 
 	// theme.json file font families
@@ -63,7 +63,7 @@ export const FontPairing = () => {
 	) as [
 		{
 			theme: Array< FontFamily >;
-		}
+		},
 	];
 
 	const { context } = useContext( CustomizeStoreContext );

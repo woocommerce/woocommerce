@@ -2078,12 +2078,10 @@ test.describe( 'Products API tests: List All Products', () => {
 				attributes,
 				tags
 			);
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
+			const externalProducts =
+				await createSampleExternalProducts( categories );
+			const groupedProducts =
+				await createSampleGroupedProduct( categories );
 			const variableProducts = await createSampleVariableProducts(
 				categories,
 				attributes
@@ -2091,9 +2089,8 @@ test.describe( 'Products API tests: List All Products', () => {
 			const hierarchicalProducts =
 				await createSampleHierarchicalProducts();
 
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
+			const reviewIds =
+				await createSampleProductReviews( simpleProducts );
 			const orders = await createSampleProductOrders( simpleProducts );
 
 			return {

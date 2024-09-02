@@ -12,7 +12,7 @@ import type { Metadata } from '../../types';
 import { disjoinMetas } from './utils';
 
 export function useCustomFields<
-	T extends Metadata< string > = Metadata< string >
+	T extends Metadata< string > = Metadata< string >,
 >() {
 	const [ metas, setMetas ] = useEntityProp< T[] >(
 		'postType',

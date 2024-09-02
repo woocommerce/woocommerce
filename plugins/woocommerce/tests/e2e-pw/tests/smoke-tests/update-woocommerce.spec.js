@@ -37,7 +37,6 @@ const skipTestIfUndefined = () => {
  * - 'List releases' request was unsuccessful, or
  * - no release with the given tag was found, or
  * - when a WooCommerce ZIP asset was not found.
- *
  */
 const getWCDownloadURL = async () => {
 	const requestConfig = {

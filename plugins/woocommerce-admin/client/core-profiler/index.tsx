@@ -236,9 +236,8 @@ const handleOnboardingProfileOption = assign( {
 } );
 
 const getCurrentUserEmail = fromPromise( async () => {
-	const currentUser: WCUser< 'email' > = await resolveSelect(
-		USER_STORE_NAME
-	).getCurrentUser();
+	const currentUser: WCUser< 'email' > =
+		await resolveSelect( USER_STORE_NAME ).getCurrentUser();
 	return currentUser?.email;
 } );
 
@@ -363,9 +362,8 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 };
 
 const updateStoreCurrency = async ( countryAndState: string ) => {
-	const { general: settings = {} } = await resolveSelect(
-		SETTINGS_STORE_NAME
-	).getSettings( 'general' );
+	const { general: settings = {} } =
+		await resolveSelect( SETTINGS_STORE_NAME ).getSettings( 'general' );
 
 	const countryCode = getCountryCode( countryAndState ) as string;
 	const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(

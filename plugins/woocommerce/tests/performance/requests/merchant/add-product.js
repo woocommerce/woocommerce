@@ -46,7 +46,8 @@ export function addProduct( includeTests = {} ) {
 	let post_id;
 	let api_x_wp_nonce;
 	let apiNonceHeader;
-	let includedTests = Object.assign( {
+	const includedTests = Object.assign(
+		{
 			heartbeat: true,
 			other: true,
 			permalink: true,
@@ -186,7 +187,9 @@ export function addProduct( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.heartbeat ) {
@@ -260,7 +263,9 @@ export function addProduct( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.update ) {
@@ -377,8 +382,9 @@ export function addProduct( includeTests = {} ) {
 				'is status 200': ( r ) => r.status === 200,
 				"body contains: 'Edit product' header": ( response ) =>
 					response.body.includes( 'Edit product</h1>' ),
-				"body contains: 'Product published' confirmation": ( response ) =>
-					response.body.includes( 'Product published.' ),
+				"body contains: 'Product published' confirmation": (
+					response
+				) => response.body.includes( 'Product published.' ),
 			} );
 		} );
 	}

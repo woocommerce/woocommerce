@@ -32,7 +32,7 @@ export const PreloadFonts = () => {
 		( font: {
 			custom: Array< FontFamily >;
 			theme: Array< FontFamily >;
-		} ) => void
+		} ) => void,
 	] = useGlobalSetting( 'typography.fontFamilies' );
 
 	// theme.json file font families

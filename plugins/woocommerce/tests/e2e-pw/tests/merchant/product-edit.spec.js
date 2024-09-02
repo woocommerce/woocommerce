@@ -276,7 +276,7 @@ test(
 					.toBe( 0 );
 
 				await expect
-					.soft( await page.locator( 'bdi' ).first() )
+					.soft( page.locator( 'bdi' ).first() )
 					.toContainText( expectedRegularPrice );
 			}
 		} );

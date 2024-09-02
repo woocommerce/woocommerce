@@ -94,7 +94,7 @@ const sampleVariations = [
  * Create a variable product using the WooCommerce REST API.
  *
  * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes List of attributes. See [Product - Attributes properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-attributes-properties).
- * @returns {Promise<number>} ID of the created variable product
+ * @return {Promise<number>} ID of the created variable product
  */
 async function createVariableProduct( attributes = [] ) {
 	const randomNum = Math.floor( Math.random() * 1000 );
@@ -122,7 +122,7 @@ async function deleteProductsAddedByTests() {
  * Enable or disable the variable product tour through JavaScript.
  *
  * @param {import('@playwright/test').Browser} browser
- * @param {boolean} show Whether to show the variable product tour or not.
+ * @param {boolean}                            show    Whether to show the variable product tour or not.
  */
 async function showVariableProductTour( browser, show ) {
 	const productPageURL = 'wp-admin/post-new.php?post_type=product';
@@ -163,7 +163,7 @@ async function showVariableProductTour( browser, show ) {
  * Generate all possible variations from the given attributes.
  *
  * @param {{ name: string, visible: boolean, variation: boolean, options: string[] }[]} attributes
- * @returns All possible variations from the given attributes
+ * @return All possible variations from the given attributes
  */
 function generateVariationsFromAttributes( attributes ) {
 	const combine = ( runningList, nextAttribute ) => {
@@ -207,9 +207,9 @@ function generateVariationsFromAttributes( attributes ) {
 /**
  * Create variations through the WooCommerce REST API.
  *
- * @param {number} productId Product ID to add variations to.
+ * @param {number}                                                                  productId  Product ID to add variations to.
  * @param {{regular_price: string, attributes: {name: string, option: string}[]}[]} variations List of variations to create.
- * @returns {Promise<number[]>} Array of variation ID's created.
+ * @return {Promise<number[]>} Array of variation ID's created.
  */
 async function createVariations( productId, variations ) {
 	return await api.create.productVariations( productId, variations );

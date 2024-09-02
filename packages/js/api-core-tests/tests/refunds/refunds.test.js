@@ -8,7 +8,6 @@ const { refund } = require( '../../data' );
  *
  * @group api
  * @group refunds
- *
  */
 describe( 'Refunds API tests', () => {
 	let expectedRefund;
@@ -21,9 +20,8 @@ describe( 'Refunds API tests', () => {
 			name: 'Simple Product for Refunds API tests',
 			regular_price: '100',
 		};
-		const createProductResponse = await productsApi.create.product(
-			product
-		);
+		const createProductResponse =
+			await productsApi.create.product( product );
 		productId = createProductResponse.body.id;
 
 		// Create an order with a product line item, and save its Order ID

@@ -181,7 +181,9 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 
 	buttonBlockStyles.forEach(
 		( buttonBlockStyle: { name: string; label: string } ) => {
-			if ( buttonBlockStyle.name === 'link' ) return;
+			if ( buttonBlockStyle.name === 'link' ) {
+				return;
+			}
 			buttonStyles.push( {
 				value: buttonBlockStyle.name,
 				label: buttonBlockStyle.label,

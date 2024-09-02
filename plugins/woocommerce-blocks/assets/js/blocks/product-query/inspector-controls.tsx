@@ -14,7 +14,6 @@ import {
 	MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
 } from '@woocommerce/blocks/migration-products-to-product-collection';
 import { getSettingWithCoercion } from '@woocommerce/settings';
-import { ProductQueryBlockQuery } from '@woocommerce/blocks/product-query/types';
 import {
 	FormTokenField,
 	ToggleControl,

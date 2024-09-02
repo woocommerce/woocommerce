@@ -31,7 +31,7 @@ type Option = { key: string; label: string };
  * @return {Function} Validator function.
  */
 // Note: param was removed because its not used, callers still assume its needed. TODO: Fix this.
-export function getStoreAddressValidator(/* locale: Locale = {} */) {
+export function getStoreAddressValidator( /* locale: Locale = {} */ ) {
 	/**
 	 * Form validator.
 	 *

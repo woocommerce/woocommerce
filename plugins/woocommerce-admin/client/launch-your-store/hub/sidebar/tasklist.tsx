@@ -48,7 +48,6 @@ export const getLysTasklist = async () => {
 	 *
 	 * @filter woocommerce_launch_your_store_tasklist_whitelist
 	 * @param {string[]} LYS_TASKS_WHITELIST Default list of task IDs to show in LYS.
-	 *
 	 */
 	const filteredTasks = applyFilters(
 		'woocommerce_launch_your_store_tasklist_whitelist',

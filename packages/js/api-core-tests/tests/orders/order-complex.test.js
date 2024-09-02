@@ -87,29 +87,25 @@ const createTaxRates = async () => {
  */
 const createProducts = async () => {
 	// Create a simple product
-	const { body: createdSimpleProduct } = await productsApi.create.product(
-		simpleProduct
-	);
+	const { body: createdSimpleProduct } =
+		await productsApi.create.product( simpleProduct );
 	simpleProduct.id = createdSimpleProduct.id;
 
 	// Create a variable product with 1 variation
-	const { body: createdVariableProduct } = await productsApi.create.product(
-		variableProduct
-	);
+	const { body: createdVariableProduct } =
+		await productsApi.create.product( variableProduct );
 	variableProduct.id = createdVariableProduct.id;
 	await variationsApi.create.variation( variableProduct.id, variation );
 
 	// Create a grouped product using the simple product created earlier.
 	groupedProduct.grouped_products = [ simpleProduct.id ];
-	const { body: createdGroupedProduct } = await productsApi.create.product(
-		groupedProduct
-	);
+	const { body: createdGroupedProduct } =
+		await productsApi.create.product( groupedProduct );
 	groupedProduct.id = createdGroupedProduct.id;
 
 	// Create an external product
-	const { body: createdExternalProduct } = await productsApi.create.product(
-		externalProduct
-	);
+	const { body: createdExternalProduct } =
+		await productsApi.create.product( externalProduct );
 	externalProduct.id = createdExternalProduct.id;
 };
 
@@ -139,7 +135,6 @@ const expectedExternalProductTaxTotal = '0.00';
  *
  * @group api
  * @group orders
- *
  */
 describe( 'Orders API test', () => {
 	beforeAll( async () => {

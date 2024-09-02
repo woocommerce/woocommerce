@@ -11,7 +11,9 @@ const shouldItemBeExpanded = (
 	item: LinkedTree,
 	createValue: string | undefined
 ): boolean => {
-	if ( ! createValue || ! item.children?.length ) return false;
+	if ( ! createValue || ! item.children?.length ) {
+		return false;
+	}
 	return item.children.some( ( child ) => {
 		if ( new RegExp( createValue || '', 'ig' ).test( child.data.label ) ) {
 			return true;

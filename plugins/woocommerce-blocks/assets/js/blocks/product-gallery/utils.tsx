@@ -230,8 +230,7 @@ export const moveInnerBlocksToPosition = (
 export const getClassNameByNextPreviousButtonsPosition = (
 	nextPreviousButtonsPosition: NextPreviousButtonSettingValues
 ) => {
-	return `wc-block-product-gallery--has-next-previous-buttons-${
-		getNextPreviousImagesWithClassName( nextPreviousButtonsPosition )
-			?.classname
-	}`;
+	return `wc-block-product-gallery--has-next-previous-buttons-${ getNextPreviousImagesWithClassName(
+		nextPreviousButtonsPosition
+	)?.classname }`;
 };

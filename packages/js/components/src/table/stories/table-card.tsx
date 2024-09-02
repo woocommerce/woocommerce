@@ -27,7 +27,8 @@ const TableCardExample = () => {
 					query: {
 						[ param ]: value,
 					},
-				} ) }
+				} )
+			}
 			query={ query }
 			rowsPerPage={ 7 }
 			totalRows={ 10 }
@@ -75,7 +76,8 @@ const TableCardWithActionsExample = () => {
 					query: {
 						[ param ]: value,
 					},
-				} ) }
+				} )
+			}
 			query={ query }
 			rowsPerPage={ 7 }
 			totalRows={ 10 }

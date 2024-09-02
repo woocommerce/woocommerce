@@ -57,7 +57,9 @@ export function ProductListBlockEdit( {
 
 	useEffect(
 		function loadGroupedProducts() {
-			if ( preventFetch ) return;
+			if ( preventFetch ) {
+				return;
+			}
 
 			if ( groupedProductIds.length ) {
 				setIsLoading( false );

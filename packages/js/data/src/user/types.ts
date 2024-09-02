@@ -42,7 +42,8 @@ export type WoocommerceMeta = {
 };
 
 export type WCUser<
-	T extends keyof schema.Schema.BaseUser< 'view' > = schema.Schema.ViewKeys.User
+	T extends
+		keyof schema.Schema.BaseUser< 'view' > = schema.Schema.ViewKeys.User,
 > = Pick<
 	schema.Schema.BaseUser< 'view' >,
 	schema.Schema.ViewKeys.User | T

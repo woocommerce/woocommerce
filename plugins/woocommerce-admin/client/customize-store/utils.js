@@ -113,7 +113,6 @@ export const setLogoWidth = ( content, width = DEFAULT_LOGO_WIDTH ) => {
  * @param {Array}  steps
  * @param {number} numOfDupes
  * @return {Array} augmentedSteps
- *
  */
 export const createAugmentedSteps = ( steps, numOfDupes ) => {
 	// Duplicate each step, so we can animate each one
@@ -125,7 +124,9 @@ export const createAugmentedSteps = ( steps, numOfDupes ) => {
 			const nextItem = array[ index + 1 ];
 			// If there is no next item, we're at the end of the array
 			// so just return the current item
-			if ( ! nextItem ) return [ item ];
+			if ( ! nextItem ) {
+				return [ item ];
+			}
 
 			// If there is a next item, we're not at the end of the array
 			// so return the current item, plus duplicates

@@ -147,9 +147,8 @@ const runEditOrderTest = () => {
 		it( 'can add downloadable product permissions to order with product', async () => {
 			// Create new downloadable product
 			const newProductName = 'TDP 002';
-			const newProductId = await createSimpleDownloadableProduct(
-				newProductName
-			);
+			const newProductId =
+				await createSimpleDownloadableProduct( newProductName );
 
 			// Open order we created
 			await merchant.goToOrder( orderId );

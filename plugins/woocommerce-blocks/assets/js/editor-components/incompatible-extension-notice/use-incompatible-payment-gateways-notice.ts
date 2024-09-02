@@ -11,7 +11,7 @@ import { STORE_KEY as PAYMENT_STORE_KEY } from '../../data/payment/constants';
 export const useIncompatiblePaymentGatewaysNotice = (): [
 	{ [ k: string ]: string },
 	string[],
-	number
+	number,
 ] => {
 	const { incompatiblePaymentMethods } = useSelect( ( select ) => {
 		const { getIncompatiblePaymentMethods } = select( PAYMENT_STORE_KEY );

@@ -315,7 +315,7 @@ const runAddVariableProductTest = () => {
 				);
 				const isChecked = await (
 					await chkbox.getProperty( 'checked' )
-				 ).jsonValue();
+				).jsonValue();
 				expect( isChecked ).toEqual( false );
 			}
 
@@ -334,7 +334,7 @@ const runAddVariableProductTest = () => {
 				);
 				const isChecked = await (
 					await chkbox.getProperty( 'checked' )
-				 ).jsonValue();
+				).jsonValue();
 				expect( isChecked ).toEqual( true );
 			}
 		} );

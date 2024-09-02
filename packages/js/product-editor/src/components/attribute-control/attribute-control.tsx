@@ -202,7 +202,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	);
 
 	function renderEmptyState() {
-		if ( value.length ) return null;
+		if ( value.length ) {
+			return null;
+		}
 
 		if ( renderCustomEmptyState ) {
 			return renderCustomEmptyState( {
@@ -224,7 +226,9 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	}
 
 	function renderSectionActions() {
-		if ( renderCustomEmptyState && value.length === 0 ) return null;
+		if ( renderCustomEmptyState && value.length === 0 ) {
+			return null;
+		}
 
 		return (
 			<SectionActions>

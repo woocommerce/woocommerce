@@ -50,7 +50,9 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	};
 
 	const isImage = ( filename = '' ) => {
-		if ( ! filename ) return;
+		if ( ! filename ) {
+			return;
+		}
 		const imageExtensions = [ 'jpg', 'jpeg', 'png', 'gif', 'webp' ];
 		const fileExtension = (
 			filename.split( '.' ).pop() || ''

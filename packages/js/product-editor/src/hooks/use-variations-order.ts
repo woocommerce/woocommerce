@@ -27,8 +27,9 @@ function sort(
 	currentPage: number,
 	{ variationsOrder }: ProductVariationsOrder
 ) {
-	if ( ! variationsOrder || ! variationsOrder[ currentPage ] )
+	if ( ! variationsOrder || ! variationsOrder[ currentPage ] ) {
 		return variations;
+	}
 
 	const currentPageVariationsOrder = variationsOrder[ currentPage ];
 
@@ -36,8 +37,9 @@ function sort(
 		if (
 			! currentPageVariationsOrder[ a.id ] ||
 			! currentPageVariationsOrder[ b.id ]
-		)
+		) {
 			return 0;
+		}
 		return (
 			currentPageVariationsOrder[ a.id ] -
 			currentPageVariationsOrder[ b.id ]

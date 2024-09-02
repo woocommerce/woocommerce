@@ -77,7 +77,9 @@ const getButtonText = (
 	inTheCart: string,
 	numberOfItems: number
 ): string => {
-	if ( numberOfItems === 0 ) return addToCart;
+	if ( numberOfItems === 0 ) {
+		return addToCart;
+	}
 	return inTheCart.replace( '###', numberOfItems.toString() );
 };
 
@@ -122,7 +124,9 @@ const { state } = store< Store >( 'woocommerce/product-button', {
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart, temporaryNumberOfItems } = getContext();
-			if ( ! displayViewCart ) return false;
+			if ( ! displayViewCart ) {
+				return false;
+			}
 			if ( ! state.hasCartLoaded ) {
 				return temporaryNumberOfItems > 0;
 			}

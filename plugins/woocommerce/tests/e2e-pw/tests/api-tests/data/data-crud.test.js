@@ -3966,7 +3966,9 @@ test.describe( 'Data API tests', () => {
 
 		// loop through all the countries and validate against the expected data
 		for ( const country of countryCodes ) {
-			const countryData = require( `../../../data/countries/${ country }.json` );
+			const countryData = require(
+				`../../../data/countries/${ country }.json`
+			);
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {

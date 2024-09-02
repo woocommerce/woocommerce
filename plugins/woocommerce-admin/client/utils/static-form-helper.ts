@@ -14,8 +14,9 @@ export function staticFormDataToObject( elForm: HTMLFormElement ) {
 			field.type === 'submit' ||
 			field.type === 'hidden' ||
 			! sKey
-		)
+		) {
 			continue;
+		}
 		switch ( field.type ) {
 			case 'checkbox':
 				values[ sKey ] = +( field as HTMLInputElement ).checked;

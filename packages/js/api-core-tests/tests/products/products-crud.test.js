@@ -15,15 +15,13 @@ const { productsApi } = require( '../../endpoints/products' );
  *
  * @group api
  * @group products
- *
  */
 describe( 'Products API tests: CRUD', () => {
 	let productId;
 
 	it( 'can add a simple product', async () => {
-		const { status, body } = await productsApi.create.product(
-			simpleProduct
-		);
+		const { status, body } =
+			await productsApi.create.product( simpleProduct );
 		productId = body.id;
 
 		expect( status ).toEqual( productsApi.create.responseCode );
@@ -37,9 +35,8 @@ describe( 'Products API tests: CRUD', () => {
 	} );
 
 	it( 'can add a virtual product', async () => {
-		const { status, body } = await productsApi.create.product(
-			virtualProduct
-		);
+		const { status, body } =
+			await productsApi.create.product( virtualProduct );
 		const virtualProductId = body.id;
 
 		expect( status ).toEqual( productsApi.create.responseCode );
@@ -54,9 +51,8 @@ describe( 'Products API tests: CRUD', () => {
 	} );
 
 	it( 'can add a variable product', async () => {
-		const { status, body } = await productsApi.create.product(
-			variableProduct
-		);
+		const { status, body } =
+			await productsApi.create.product( variableProduct );
 		const variableProductId = body.id;
 
 		expect( status ).toEqual( productsApi.create.responseCode );
@@ -69,9 +65,8 @@ describe( 'Products API tests: CRUD', () => {
 	} );
 
 	it( 'can view a single product', async () => {
-		const { status, body } = await productsApi.retrieve.product(
-			productId
-		);
+		const { status, body } =
+			await productsApi.retrieve.product( productId );
 
 		expect( status ).toEqual( productsApi.retrieve.responseCode );
 		expect( body.id ).toEqual( productId );
@@ -114,9 +109,8 @@ describe( 'Products API tests: CRUD', () => {
 		it( 'can batch create products', async () => {
 			// Send request to batch create products
 			const batchCreatePayload = batch( 'create', expectedProducts );
-			const { status, body } = await productsApi.batch.products(
-				batchCreatePayload
-			);
+			const { status, body } =
+				await productsApi.batch.products( batchCreatePayload );
 			const actualBatchCreatedProducts = body.create;
 
 			expect( status ).toEqual( productsApi.batch.responseCode );
@@ -143,9 +137,8 @@ describe( 'Products API tests: CRUD', () => {
 				expectedProducts[ i ].regular_price = newRegularPrice;
 			}
 			const batchUpdatePayload = batch( 'update', expectedProducts );
-			const { status, body } = await productsApi.batch.products(
-				batchUpdatePayload
-			);
+			const { status, body } =
+				await productsApi.batch.products( batchUpdatePayload );
 			const actualUpdatedProducts = body.update;
 
 			expect( status ).toEqual( productsApi.batch.responseCode );
@@ -167,9 +160,8 @@ describe( 'Products API tests: CRUD', () => {
 			// Send request to batch delete the products created earlier
 			const idsToDelete = expectedProducts.map( ( { id } ) => id );
 			const batchDeletePayload = batch( 'delete', idsToDelete );
-			const { status, body } = await productsApi.batch.products(
-				batchDeletePayload
-			);
+			const { status, body } =
+				await productsApi.batch.products( batchDeletePayload );
 			const actualBatchDeletedProducts = body.delete;
 
 			expect( status ).toEqual( productsApi.batch.responseCode );

@@ -73,14 +73,16 @@ const Edit = ( props: EditProps ) => {
 				? filteredCounts.attribute_counts.map( ( term ) => term.term )
 				: [];
 
-		if ( termIdHasProducts.length === 0 && hideEmpty )
+		if ( termIdHasProducts.length === 0 && hideEmpty ) {
 			return setAttributeOptions( [] );
+		}
 
 		setAttributeOptions(
 			attributeTerms
 				.filter( ( term ) => {
-					if ( hideEmpty )
+					if ( hideEmpty ) {
 						return termIdHasProducts.includes( term.id );
+					}
 					return true;
 				} )
 				.sort( ( a, b ) => {
@@ -112,8 +114,9 @@ const Edit = ( props: EditProps ) => {
 				<Disabled>
 					<CheckboxListPreview
 						items={ attributeOptionsPreview.map( ( term ) => {
-							if ( showCounts )
+							if ( showCounts ) {
 								return `${ term.name } (${ term.count })`;
+							}
 							return term.name;
 						} ) }
 					/>
@@ -123,14 +126,15 @@ const Edit = ( props: EditProps ) => {
 	}
 
 	// Block rendering starts.
-	if ( Object.keys( ATTRIBUTES ).length === 0 )
+	if ( Object.keys( ATTRIBUTES ).length === 0 ) {
 		return (
 			<Wrapper>
 				<NoAttributesPlaceholder />
 			</Wrapper>
 		);
+	}
 
-	if ( ! attributeId || ! attributeObject )
+	if ( ! attributeId || ! attributeObject ) {
 		return (
 			<Wrapper>
 				<Notice status="warning" isDismissible={ false }>
@@ -143,8 +147,9 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</Wrapper>
 		);
+	}
 
-	if ( attributeOptions.length === 0 )
+	if ( attributeOptions.length === 0 ) {
 		return (
 			<Wrapper>
 				<Notice status="warning" isDismissible={ false }>
@@ -157,6 +162,7 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</Wrapper>
 		);
+	}
 
 	return (
 		<Wrapper>
@@ -171,8 +177,9 @@ const Edit = ( props: EditProps ) => {
 				) : (
 					<CheckboxListPreview
 						items={ attributeOptions.map( ( term ) => {
-							if ( showCounts )
+							if ( showCounts ) {
 								return `${ term.name } (${ term.count })`;
+							}
 							return term.name;
 						} ) }
 					/>

@@ -80,8 +80,12 @@ const runPageLoadTest = () => {
 						)
 					);
 
-					if ( resType === 'script' ) hasChunks.js = true;
-					if ( resType === 'stylesheet' ) hasChunks.css = true;
+					if ( resType === 'script' ) {
+						hasChunks.js = true;
+					}
+					if ( resType === 'stylesheet' ) {
+						hasChunks.css = true;
+					}
 				}
 			} );
 			await Promise.all( [

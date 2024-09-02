@@ -27,7 +27,8 @@ export function homeWCAdmin( includeTests = {} ) {
 	let response;
 	let api_x_wp_nonce;
 	let apiNonceHeader;
-	let includedTests = Object.assign( {
+	const includedTests = Object.assign(
+		{
 			orders: true,
 			other: true,
 			products: true,

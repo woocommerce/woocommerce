@@ -22,7 +22,7 @@ export const useEditorBlocks = (
 	const [ blocks, onInput, onChange ]: [
 		BlockInstance[] | undefined,
 		ChangeHandler,
-		ChangeHandler
+		ChangeHandler,
 	] = useEntityBlockEditor( 'postType', templateType, {
 		id: templateId,
 	} );

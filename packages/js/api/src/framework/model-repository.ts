@@ -24,7 +24,7 @@ export interface ModelRepositoryParams<
 	// @ts-ignore
 	ListParams = never,
 	// @ts-ignore
-	UpdateParams extends keyof T = never
+	UpdateParams extends keyof T = never,
 > {
 	// Since TypeScript's type system is structural we need to add something to this type to prevent
 	// it from matching with everything else (since it is an empty interface).
@@ -35,28 +35,28 @@ export interface ModelRepositoryParams<
  * These helpers will extract information about a model from its repository params to be used in the repository.
  */
 export type ModelClass< T extends ModelRepositoryParams > = [ T ] extends [
-	ModelRepositoryParams< infer X >
+	ModelRepositoryParams< infer X >,
 ]
 	? X
 	: never;
 export type ParentID< T extends ModelRepositoryParams > = [ T ] extends [
-	ModelRepositoryParams< any, infer X >
+	ModelRepositoryParams< any, infer X >,
 ]
 	? X
 	: never;
 export type HasParent< T extends ModelRepositoryParams, P, C > = [
-	ParentID< T >
+	ParentID< T >,
 ] extends [ never ]
 	? C
 	: P;
 type ListParams< T extends ModelRepositoryParams > = [ T ] extends [
-	ModelRepositoryParams< any, any, infer X >
+	ModelRepositoryParams< any, any, infer X >,
 ]
 	? X
 	: never;
 type PickUpdateParams< T, K extends keyof T > = { [ P in K ]?: T[ P ] };
 type UpdateParams< T extends ModelRepositoryParams > = [ T ] extends [
-	ModelRepositoryParams< infer C, any, any, infer X >
+	ModelRepositoryParams< infer C, any, any, infer X >,
 ]
 	? [ X ] extends [ keyof C ]
 		? PickUpdateParams< C, X >

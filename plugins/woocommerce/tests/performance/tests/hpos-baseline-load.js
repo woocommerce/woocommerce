@@ -277,7 +277,12 @@ export function merchantOtherFlows() {
 		wpLogin();
 	}
 	homeWCAdmin( { other: false, products: false, reviews: false } );
-	addProduct( { heartbeat: false, other: false, permalink: false, update: false } );
+	addProduct( {
+		heartbeat: false,
+		other: false,
+		permalink: false,
+		update: false,
+	} );
 	coupons();
 }
 export function shopperBrowsingFlows() {

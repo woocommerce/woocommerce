@@ -33,6 +33,7 @@
 	"devDependencies": {
 		"@babel/core": "7.12.9",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"prettier": "npm:wp-prettier@^3.0.3",
 		"chalk": "^4.1.2",
 		"eslint": "^8.55.0",
 		"glob": "^10.3.10",

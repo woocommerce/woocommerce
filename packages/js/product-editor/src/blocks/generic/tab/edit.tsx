@@ -36,7 +36,9 @@ export function TabBlockEdit( {
 	const [ canRenderChildren, setCanRenderChildren ] = useState( false );
 
 	useEffect( () => {
-		if ( ! context.selectedTab ) return;
+		if ( ! context.selectedTab ) {
+			return;
+		}
 
 		const isSelectedInContext = context.selectedTab === id;
 

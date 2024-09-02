@@ -4,7 +4,7 @@
 import { recordEvent } from '@woocommerce/tracks';
 
 export const recordTracksFactory = <
-	T = Record< string, string | number | null >
+	T = Record< string, string | number | null >,
 >(
 	feature: string,
 	propertiesCallback: () => Record< string, string | number | null >

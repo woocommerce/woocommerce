@@ -15,7 +15,7 @@ export interface ProductCollectionAttributes {
 	queryContext: [
 		{
 			page: number;
-		}
+		},
 	];
 	templateSlug: string;
 	displayLayout: ProductCollectionDisplayLayout;

@@ -18,7 +18,6 @@ import {
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent, FlowType } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
 import { ThemeCard } from './theme-card';
 import {
@@ -44,7 +43,11 @@ import {
 import welcomeTourImg from '../assets/images/design-your-own.svg';
 import professionalThemeImg from '../assets/images/professional-theme.svg';
 import { navigateOrParent } from '~/customize-store/utils';
-import { RecommendThemesAPIResponse } from '~/customize-store/types';
+import {
+	RecommendThemesAPIResponse,
+	CustomizeStoreComponent,
+	FlowType,
+} from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
 import { trackEvent } from '~/customize-store/tracking';
 import { isNoAIFlow as isNoAiFlowGuard } from '../guards';

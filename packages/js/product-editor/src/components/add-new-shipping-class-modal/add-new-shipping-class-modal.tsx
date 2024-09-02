@@ -224,8 +224,7 @@ export function AddNewShippingClassModal( {
 					...current,
 					[ name ]: value === '' ? undefined : value,
 				};
-			},
-			{} )
+			}, {} )
 		);
 	}
 

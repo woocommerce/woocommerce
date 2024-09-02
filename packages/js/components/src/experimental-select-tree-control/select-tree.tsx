@@ -445,7 +445,9 @@ export const SelectTree = function SelectTree( {
 									props.createValue || ''
 								) }
 								onChange={ ( value ) => {
-									if ( onInputChange ) onInputChange( value );
+									if ( onInputChange ) {
+										onInputChange( value );
+									}
 									const item = items.find(
 										( i ) => i.label === escapeHTML( value )
 									);

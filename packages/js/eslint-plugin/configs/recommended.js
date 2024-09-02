@@ -31,6 +31,7 @@ module.exports = {
 		camelcase: 'off',
 		'no-use-before-define': 'off',
 		'jsdoc/require-param': 'off',
+		'@typescript-eslint/method-signature-style': 'off',
 		// Making use of typescript no-shadow instead, fixes issues with enum.
 		'no-shadow': 'off',
 		'@wordpress/no-unsafe-wp-apis': 'warn',

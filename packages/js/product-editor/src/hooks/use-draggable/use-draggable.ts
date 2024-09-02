@@ -64,7 +64,9 @@ export function useDraggable< T >( { onSort }: DraggableProps< T > ) {
 
 		dropIndexRef.current = index;
 
-		if ( dragIndexRef.current === dropIndexRef.current ) return;
+		if ( dragIndexRef.current === dropIndexRef.current ) {
+			return;
+		}
 		if ( dragIndexRef.current < dropIndexRef.current ) {
 			draggable?.classList.add( 'is-dragging-after' );
 		} else {

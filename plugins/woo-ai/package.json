@@ -32,7 +32,7 @@
 		"@wordpress/scripts": "^19.2.4",
 		"babel-jest": "~27.5.1",
 		"eslint": "^8.55.0",
-		"prettier": "npm:wp-prettier@^2.8.5",
+		"prettier": "npm:wp-prettier@^3.0.3",
 		"ts-loader": "^9.5.1",
 		"typescript": "^5.3.3",
 		"uglify-js": "^3.17.4",

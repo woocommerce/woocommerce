@@ -74,7 +74,9 @@ export const SelectTreeMenu = ( {
 	}, [ isOpen, scrollIntoViewOnOpen ] );
 
 	const shouldItemBeExpanded = ( item: LinkedTree ): boolean => {
-		if ( ! props.createValue || ! item.children?.length ) return false;
+		if ( ! props.createValue || ! item.children?.length ) {
+			return false;
+		}
 		return item.children.some( ( child ) => {
 			if (
 				new RegExp(

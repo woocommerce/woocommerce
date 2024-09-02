@@ -58,7 +58,9 @@ export function Edit( {
 	} = useValidation< Product >(
 		property,
 		async function validator() {
-			if ( ! inputRef.current ) return;
+			if ( ! inputRef.current ) {
+				return;
+			}
 
 			const input = inputRef.current;
 
@@ -141,7 +143,9 @@ export function Edit( {
 	);
 
 	function getSuffix() {
-		if ( ! suffix || ! value || ! inputRef.current ) return;
+		if ( ! suffix || ! value || ! inputRef.current ) {
+			return;
+		}
 
 		const isValidUrl =
 			inputRef.current.type === 'url' &&

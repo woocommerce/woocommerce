@@ -17,13 +17,11 @@ test.describe( 'Add variations', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { browser } ) => {
-		productId_generateVariations = await createVariableProduct(
-			productAttributes
-		);
+		productId_generateVariations =
+			await createVariableProduct( productAttributes );
 
-		productId_addManually = await createVariableProduct(
-			productAttributes
-		);
+		productId_addManually =
+			await createVariableProduct( productAttributes );
 
 		expectedGeneratedVariations =
 			generateVariationsFromAttributes( productAttributes );
