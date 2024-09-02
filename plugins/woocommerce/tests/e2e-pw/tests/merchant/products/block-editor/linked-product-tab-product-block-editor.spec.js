@@ -34,7 +34,6 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				} );
 
 			for ( let i = 1; i <= 5; i++ ) {
-				// const id = await api.create.product( product );
 				const product = {
 					name: `Product ${ uniqueId } ${ i }`,
 					regular_price: `${ i }0000`,
@@ -51,12 +50,10 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 
 		test.afterAll( async ( { api } ) => {
 			for ( const aProductId of productIds ) {
-				// await api.deletePost.product( aProductId );
 				await api.delete( `products/${ aProductId }`, {
 					force: true,
 				} );
 			}
-			// await api.deletePost.product( productId );
 			await api.delete( `products/${ productId }`, {
 				force: true,
 			} );
@@ -123,7 +120,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				)
 				.first()
 				.getByRole( 'combobox' )
-				.pressSequentially( productName );
+				.fill( productName );
 
 			await page.getByText( linkedProductsData[ 0 ].name ).click();
 
