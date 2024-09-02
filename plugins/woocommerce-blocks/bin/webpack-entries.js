@@ -223,8 +223,10 @@ const entries = {
 			'./packages/interactivity-components/checkbox-list/index.ts',
 		'wc-interactivity-dropdown':
 			'./packages/interactivity-components/dropdown/index.ts',
-
-		// Templates
+		'wc-interactivity-drawer':
+			'./packages/interactivity-components/drawer/index.ts',
+		
+			// Templates
 		'wc-blocks-classic-template-revert-button-style':
 			'./assets/js/templates/revert-button/index.tsx',
 	},
@@ -243,6 +245,8 @@ const entries = {
 			'./packages/interactivity-components/dropdown/index.ts',
 		'wc-interactivity-checkbox-list':
 			'./packages/interactivity-components/checkbox-list/index.ts',
+		'wc-interactivity-drawer':
+			'./packages/interactivity-components/drawer/index.ts',
 	},
 	main: {
 		// Shared blocks code

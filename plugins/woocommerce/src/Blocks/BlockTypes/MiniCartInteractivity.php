@@ -511,32 +511,25 @@ class MiniCartInteractivity extends AbstractBlock {
 
 		ob_start();
 		?>
-		<div style="<?php echo esc_attr( $wrapper_styles ); ?>" <?php echo esc_attr( $wrapper_attributes ); ?> >
+		<div style="<?php echo esc_attr( $wrapper_styles ); ?>"  class="wp-block-woocommerce-mini-cart-interactivity">
 				<div data-wc-interactive='<?php echo esc_attr( $interactivity_namespace ); ?>' data-wc-context='<?php echo esc_attr( wp_json_encode( $cart_context ) ); ?>'>
 					<?php
 						// Output is already escaped in the function call.
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						echo $this->render_mini_cart_button( $attributes, $cart_item_count, false );
 					?>
+					<?php
+						echo Drawer::render(
+							array(
+								'is_initially_open'        => false,
+								'children'                 => $this->get_template_part_contents_container( $template_part_contents ),
+								// TODO - clean up this concept.
+								'is_open_context_property' => 'woocommerce/mini-cart-interactivity::context.drawerOpen',
+							)
+						);
+					?>
 				</div>
-				<?php
-					echo Drawer::render(
-						array(
-							'is_initially_open' => false,
-							'children'          => $this->get_template_part_contents_container( $template_part_contents ),
-						)
-					);
-				?>
-				<?php // Keep the drawer separate so that we don't mutate DOM within the interactivity API powered mini cart icon. ?>
-				<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
-					<div class="wc-block-mini-cart-interactivity__template-part" style="display:none">
-						<?php echo wp_kses_post( $template_part_contents ); ?>
-					</div>
-					<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
-						<div class="wc-block-components-drawer__content">
-						</div>
-					</div>
-				</div>
+				
 		</div> 
 		<?php
 		return ob_get_clean();
