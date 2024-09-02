@@ -16,8 +16,8 @@ import type {
 	BlockContext,
 	BlockVariationTriggerType,
 } from './types';
-import { default as productFiltersIcon } from '../product-filters/icon';
-import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../product-filters/constants';
+import { default as productFiltersIcon } from '../../icon';
+import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../../constants';
 import './editor.scss';
 import { Inspector } from './inspector-controls';
 

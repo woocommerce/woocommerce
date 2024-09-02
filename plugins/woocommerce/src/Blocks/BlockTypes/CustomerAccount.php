@@ -68,6 +68,7 @@ class CustomerAccount extends AbstractBlock {
 	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
 		$parsed_hooked_block['attrs']['displayStyle'] = 'icon_only';
 		$parsed_hooked_block['attrs']['iconStyle']    = 'line';
+		$parsed_hooked_block['attrs']['iconClass']    = 'wc-block-customer-account__account-icon';
 
 		/*
 		* The Mini Cart block (which is hooked into the header) has a margin of 0.5em on the left side.
