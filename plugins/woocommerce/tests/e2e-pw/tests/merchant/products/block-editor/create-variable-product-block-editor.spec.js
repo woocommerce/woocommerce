@@ -368,7 +368,9 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 			await page.getByLabel( 'Delete variation' ).click();
 
 			await expect(
-				page.getByText( '1 variation deleted.' )
+				page
+					.getByLabel( 'Dismiss this notice' )
+					.getByText( '1 variation deleted.' )
 			).toBeVisible();
 
 			await page.waitForSelector(

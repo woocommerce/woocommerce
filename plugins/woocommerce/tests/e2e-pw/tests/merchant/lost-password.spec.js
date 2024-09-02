@@ -19,20 +19,16 @@ test.describe( 'Can go to lost password page and submit the form', () => {
 			.fill( admin.username );
 		await page.getByRole( 'button', { name: 'Get New Password' } ).click();
 
-		try {
-			// For local testing, the email might not be sent, so we can ignore this error.
-			await expect(
-				page.getByText(
-					/The email could not be sent. Your site may not be correctly configured to send emails/i
-				)
-			).toBeVisible();
-		} catch ( e ) {
-			// eslint-disable-next-line jest/no-try-expect
-			await page.waitForURL( '**/wp-login.php?checkemail=confirm' );
-			// eslint-disable-next-line jest/no-try-expect
-			await expect(
-				page.getByText( /Check your email for the confirmation link/i )
-			).toBeVisible();
-		}
+		const emailSentMessage = page.getByText(
+			'check your email for the confirmation link'
+		);
+		const emailNotSentMessage = page.getByText(
+			'the email could not be sent'
+		);
+
+		// We don't have to care if the email was sent, we just want to know the button click attempts a reset.
+		await expect(
+			emailSentMessage.or( emailNotSentMessage )
+		).toBeVisible();
 	} );
 } );

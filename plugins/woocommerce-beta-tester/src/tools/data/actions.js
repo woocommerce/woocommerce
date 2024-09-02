@@ -282,3 +282,28 @@ export function* updateWccomRequestErrorsMode( params ) {
 		} );
 	} );
 }
+
+export function* fakeWooPayments( params ) {
+	yield runCommand( 'Toggle Fake WooPayments Completion', function* () {
+		const newStatus = params.enabled === 'yes' ? 'no' : 'yes';
+
+		yield apiFetch( {
+			path: API_NAMESPACE + '/tools/fake-wcpay-completion/v1',
+			method: 'POST',
+			data: {
+				enabled: newStatus,
+			},
+		} );
+
+		yield updateCommandParams( 'fakeWooPayments', {
+			enabled: newStatus,
+		} );
+
+		yield updateMessage(
+			'Toggle Fake WooPayments Completion',
+			`Fake WooPayments completion ${
+				newStatus === 'yes' ? 'disabled' : 'enabled'
+			}`
+		);
+	} );
+}

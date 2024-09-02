@@ -457,6 +457,15 @@ function wc_clear_template_cache() {
 }
 
 /**
+ * Clear the system status theme info cache.
+ *
+ * @since 9.4.0
+ */
+function wc_clear_system_status_theme_info_cache() {
+	delete_transient( 'wc_system_status_theme_info' );
+}
+
+/**
  * Get Base Currency Code.
  *
  * @return string
@@ -1824,7 +1833,7 @@ function wc_uasort_comparison( $a, $b ) {
 }
 
 /**
- * Sort values based on ascii, usefull for special chars in strings.
+ * Sort values based on ascii, useful for special chars in strings.
  *
  * @param string $a First value.
  * @param string $b Second value.
@@ -2515,7 +2524,7 @@ function wc_selected( $value, $options ) {
  * Retrieves the MySQL server version. Based on $wpdb.
  *
  * @since 3.4.1
- * @return array Vesion information.
+ * @return array Version information.
  */
 function wc_get_server_database_version() {
 	global $wpdb;

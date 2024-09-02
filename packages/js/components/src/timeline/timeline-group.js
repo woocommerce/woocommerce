@@ -94,8 +94,8 @@ TimelineGroup.propTypes = {
 				 */
 				hideTimestamp: PropTypes.bool,
 			} )
-		).isRequired,
-	} ).isRequired,
+		),
+	} ),
 	/**
 	 * Defines how items should be ordered.
 	 */

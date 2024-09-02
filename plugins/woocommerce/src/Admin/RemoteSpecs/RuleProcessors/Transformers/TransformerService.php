@@ -39,7 +39,7 @@ class TransformerService {
 	 * @param bool   $is_default_set flag on is default value set.
 	 * @param string $default_value default value.
 	 *
-	 * @throws InvalidArgumentException Throws when one of the requried arguments is missing.
+	 * @throws InvalidArgumentException Throws when one of the required arguments is missing.
 	 * @return mixed|null
 	 */
 	public static function apply( $target_value, array $transformer_configs, $is_default_set, $default_value ) {
