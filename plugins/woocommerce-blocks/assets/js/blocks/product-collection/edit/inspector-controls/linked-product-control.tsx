@@ -15,6 +15,7 @@ import {
 	Flex,
 	FlexItem,
 	Dropdown,
+	RadioControl,
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalText as Text,
@@ -86,7 +87,7 @@ const LinkedProductPopoverContent: React.FC< {
 } > = ( { query, setAttributes, setIsDropdownOpen } ) => (
 	<ProductControl
 		selected={ query?.productReference as SelectedOption }
-		onChange={ ( value: SelectedOption[] = [] ) => {
+		onChange={ ( value: { id: number }[] = [] ) => {
 			const productId = value[ 0 ]?.id ?? null;
 			if ( productId !== null ) {
 				setAttributes( {
@@ -104,6 +105,11 @@ const LinkedProductPopoverContent: React.FC< {
 	/>
 );
 
+const enum PRODUCT_REF {
+	CURRENT_PRODUCT = 'CURRENT_PRODUCT',
+	SPECIFIC_PRODUCT = 'SPECIFIC_PRODUCT',
+}
+
 const LinkedProductControl = ( {
 	query,
 	setAttributes,
@@ -116,6 +122,8 @@ const LinkedProductControl = ( {
 	usesReference: string[] | undefined;
 } ) => {
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
+	const [ isCurrentProductReference, setIsCurrentProductReference ] =
+		useState< PRODUCT_REF >( PRODUCT_REF.CURRENT_PRODUCT );
 	const { product, isLoading } = useGetProduct( query.productReference );
 
 	const showLinkedProductControl = useMemo( () => {
@@ -136,28 +144,46 @@ const LinkedProductControl = ( {
 	return (
 		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
 			<PanelRow>
-				<Dropdown
-					className="wc-block-product-collection-linked-product-control"
-					contentClassName="wc-block-product-collection-linked-product__popover-content"
-					popoverProps={ { placement: 'left-start' } }
-					renderToggle={ ( { isOpen, onToggle } ) => (
-						<ProductButton
-							isOpen={ isOpen }
-							onToggle={ onToggle }
-							product={ product }
-							isLoading={ isLoading }
-						/>
-					) }
-					renderContent={ () => (
-						<LinkedProductPopoverContent
-							query={ query }
-							setAttributes={ setAttributes }
-							setIsDropdownOpen={ setIsDropdownOpen }
-						/>
-					) }
-					open={ isDropdownOpen }
-					onToggle={ () => setIsDropdownOpen( ! isDropdownOpen ) }
+				<RadioControl
+					label="Products to show"
+					help="The type of the current user"
+					selected={ isCurrentProductReference }
+					options={ [
+						{
+							label: 'From the current product',
+							value: PRODUCT_REF.CURRENT_PRODUCT,
+						},
+						{
+							label: 'From a specific product',
+							value: PRODUCT_REF.SPECIFIC_PRODUCT,
+						},
+					] }
+					onChange={ setIsCurrentProductReference }
 				/>
+				{ ! isCurrentProductReference && (
+					<Dropdown
+						className="wc-block-product-collection-linked-product-control"
+						contentClassName="wc-block-product-collection-linked-product__popover-content"
+						popoverProps={ { placement: 'left-start' } }
+						renderToggle={ ( { isOpen, onToggle } ) => (
+							<ProductButton
+								isOpen={ isOpen }
+								onToggle={ onToggle }
+								product={ product }
+								isLoading={ isLoading }
+							/>
+						) }
+						renderContent={ () => (
+							<LinkedProductPopoverContent
+								query={ query }
+								setAttributes={ setAttributes }
+								setIsDropdownOpen={ setIsDropdownOpen }
+							/>
+						) }
+						open={ isDropdownOpen }
+						onToggle={ () => setIsDropdownOpen( ! isDropdownOpen ) }
+					/>
+				) }
 			</PanelRow>
 		</PanelBody>
 	);
