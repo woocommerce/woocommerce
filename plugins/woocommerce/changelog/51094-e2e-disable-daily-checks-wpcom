@@ -1,0 +1,4 @@
+Significance: major
+Type: fix
+
+Disable daily run of e2e tests against WPCOM website
