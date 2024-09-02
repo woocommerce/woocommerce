@@ -361,6 +361,20 @@ $on_duplicate_clause
 	}
 
 	/**
+	 * Helper method to drop the fulltext index on order address table.
+	 *
+	 * @since 9.4.0
+	 *
+	 * @return void
+	 */
+	public function drop_fts_index_order_address_table(): void {
+		global $wpdb;
+		$address_table = $wpdb->prefix . 'wc_order_addresses';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $address_table is hardcoded.
+		$wpdb->query( "ALTER TABLE $address_table DROP INDEX order_addresses_fts;" );
+	}
+
+	/**
 	 * Sanitize FTS Search params to remove relevancy operators for performance, and add partial matches. Useful when the sorting is already happening based on some other conditions, so relevancy calculation is not needed.
 	 *
 	 * @since 9.4.0

@@ -286,12 +286,19 @@ $orders_table.id in (
 		$fts_enabled = get_option( CustomOrdersTableController::HPOS_FTS_INDEX_OPTION ) === 'yes' && get_option( CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION ) === 'yes';
 
 		if ( $fts_enabled ) {
+			$matchers = "$address_table.first_name, $address_table.last_name, $address_table.company, $address_table.address_1, $address_table.address_2, $address_table.city, $address_table.state, $address_table.postcode, $address_table.country, $address_table.email";
+
+			// Support for phone was added in 9.4.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '9.4.0', '>=' ) ) {
+				$matchers .= ", $address_table.phone";
+			}
+
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table and $address_table are hardcoded.
 			return $wpdb->prepare(
 				"
 $order_table.id IN (
 	SELECT order_id FROM $address_table WHERE
-	MATCH( $address_table.first_name, $address_table.last_name, $address_table.company, $address_table.address_1, $address_table.address_2, $address_table.city, $address_table.state, $address_table.postcode, $address_table.country, $address_table.email, $address_table.phone ) AGAINST ( %s IN BOOLEAN MODE )
+	MATCH( $matchers ) AGAINST ( %s IN BOOLEAN MODE )
 )
 ",
 				$wpdb->esc_like( $db_util->sanitise_boolean_fts_search_term( $this->search_term ) )

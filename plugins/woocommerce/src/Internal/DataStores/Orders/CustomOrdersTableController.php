@@ -322,7 +322,7 @@ class CustomOrdersTableController {
 	 *
 	 * @return void
 	 */
-	private function process_updated_option_fts_index( $option, $old_value, $value ) {
+	public function process_updated_option_fts_index( $option, $old_value, $value ) {
 		if ( self::HPOS_FTS_INDEX_OPTION !== $option ) {
 			return;
 		}
@@ -365,6 +365,39 @@ class CustomOrdersTableController {
 			if ( class_exists( 'WC_Admin_Settings ' ) ) {
 				WC_Admin_Settings::add_error( __( 'Failed to create FTS index on order item table', 'woocommerce' ) );
 			}
+		}
+	}
+
+	/**
+	 * Recreate order addresses FTS index. Useful when updating to 9.4 when phone number was added to index, or when other recreating index is needed.
+	 *
+	 * @since 9.4.0.
+	 *
+	 * @return array Array with keys status (bool) and message (string).
+	 */
+	public function recreate_order_address_fts_index(): array {
+		$this->db_util->drop_fts_index_order_address_table();
+		if ( $this->db_util->fts_index_on_order_address_table_exists() ) {
+			return array(
+				'status'  => false,
+				'message' => __( 'Failed to modify existing FTS index. Please go to WooCommerce > Status > Tools and run the "Re-create Order Address FTS index" tool.', 'woocommerce' ),
+			);
+		} else {
+			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'no', true );
+		}
+
+		$this->db_util->create_fts_index_order_address_table();
+		if ( ! $this->db_util->fts_index_on_order_address_table_exists() ) {
+			return array(
+				'status'  => false,
+				'message' => __( 'Failed to create FTS index on order address table. Please go to WooCommerce > Status > Tools and run the "Re-create Order Address FTS index" tool.', 'woocommerce' ),
+			);
+		} else {
+			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'yes' );
+			return array(
+				'status'  => true,
+				'message' => __( 'FTS index recreated.', 'woocommerce' ),
+			);
 		}
 	}
 

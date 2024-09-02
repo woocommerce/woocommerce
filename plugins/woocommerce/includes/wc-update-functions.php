@@ -24,12 +24,14 @@ use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
@@ -2851,4 +2853,22 @@ function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
 			'woocommerce_coming_soon_banner_dismissed'
 		)
 	);
+}
+
+/**
+ * Recreate FTS index if it already exists, so that phone number can be added to the index.
+ */
+function wc_update_940_add_phone_to_order_address_fts_index(): void {
+	$fts_already_exists = get_option( CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION ) === 'yes';
+	if ( ! $fts_already_exists ) {
+		return;
+	}
+
+	$hpos_controller = wc_get_container()->get( CustomOrdersTableController::class );
+	$result          = $hpos_controller->recreate_order_address_fts_index();
+	if ( ! $result['status'] ) {
+		if ( class_exists( 'WC_Admin_Settings ' ) ) {
+			WC_Admin_Settings::add_error( $result['message'] );
+		}
+	}
 }
