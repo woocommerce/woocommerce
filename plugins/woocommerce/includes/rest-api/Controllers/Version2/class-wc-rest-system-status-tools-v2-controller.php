@@ -221,7 +221,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				),
 			),
 			'recreate_order_address_fts_index'     => array(
-				'name'   => __( 'Recreate order address FTS index', 'woocommerce' ),
+				'name'   => __( 'Re-create Order Address FTS index', 'woocommerce' ),
 				'button' => __( 'Recreate index', 'woocommerce' ),
 				'desc'   => __( 'This tool will recreate the full text search index for order addresses. If the index does not exist, it will try to create it.', 'woocommerce' ),
 			),

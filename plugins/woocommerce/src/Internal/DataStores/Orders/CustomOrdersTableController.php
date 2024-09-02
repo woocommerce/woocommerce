@@ -322,7 +322,7 @@ class CustomOrdersTableController {
 	 *
 	 * @return void
 	 */
-	public function process_updated_option_fts_index( $option, $old_value, $value ) {
+	private function process_updated_option_fts_index( $option, $old_value, $value ) {
 		if ( self::HPOS_FTS_INDEX_OPTION !== $option ) {
 			return;
 		}
