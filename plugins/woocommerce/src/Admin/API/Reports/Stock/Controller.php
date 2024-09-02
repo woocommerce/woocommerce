@@ -443,15 +443,7 @@ class Controller extends GenericController implements ExportableInterface {
 		);
 		$params['order']['default']   = 'asc';
 		$params['orderby']['default'] = 'stock_status';
-		/**
-		 * Filter to add or remove orderby params.
-		 *
-		 * @param array $orderby_enum Array of params permitted for orderby.
-		 *
-		 * @since 9.2.0
-		 */
-		$params['orderby']['enum'] = apply_filters(
-			'woocommerce_report_stock_orderby_params',
+		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
 			array(
 				'stock_status',
 				'stock_quantity',
@@ -462,7 +454,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'sku',
 			)
 		);
-		$params['parent']          = array(
+		$params['parent']             = array(
 			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -471,7 +463,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'default'           => array(),
 		);
-		$params['parent_exclude']  = array(
+		$params['parent_exclude']     = array(
 			'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -480,7 +472,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'default'           => array(),
 		);
-		$params['type']            = array(
+		$params['type']               = array(
 			'description' => __( 'Limit result set to items assigned a stock report type.', 'woocommerce' ),
 			'type'        => 'string',
 			'default'     => 'all',

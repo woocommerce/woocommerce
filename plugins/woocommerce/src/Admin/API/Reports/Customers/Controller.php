@@ -290,29 +290,21 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                       = parent::get_collection_params();
-		$params['registered_before']  = array(
+		$params                            = parent::get_collection_params();
+		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['registered_after']   = array(
+		$params['registered_after']        = array(
 			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']['default'] = 'date_registered';
-		/**
-		 * Filter to add or remove orderby params.
-		 *
-		 * @param array $orderby_enum Array of params permitted for orderby.
-		 *
-		 * @since 9.2.0
-		 */
-		$params['orderby']['enum']         = apply_filters(
-			'woocommerce_report_customers_orderby_params',
+		$params['orderby']['default']      = 'date_registered';
+		$params['orderby']['enum']         = $this->apply_custom_orderby_filters(
 			array(
 				'username',
 				'name',

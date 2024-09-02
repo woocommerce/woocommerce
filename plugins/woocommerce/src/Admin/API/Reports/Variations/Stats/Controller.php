@@ -199,8 +199,8 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params          = parent::get_collection_params();
-		$params['match'] = array(
+		$params                      = parent::get_collection_params();
+		$params['match']             = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'all',
@@ -210,15 +210,7 @@ class Controller extends GenericStatsController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		/**
-		 * Filter to add or remove orderby params.
-		 *
-		 * @param array $orderby_enum Array of params permitted for orderby.
-		 *
-		 * @since 9.2.0
-		 */
-		$params['orderby']['enum']   = apply_filters(
-			'woocommerce_report_variations_stats_orderby_params',
+		$params['orderby']['enum']   = $this->apply_custom_orderby_filters(
 			array(
 				'date',
 				'net_revenue',

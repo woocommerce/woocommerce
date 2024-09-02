@@ -196,16 +196,8 @@ class Controller extends GenericStatsController {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
-		/**
-		 * Filter to add or remove orderby params.
-		 *
-		 * @param array $orderby_enum Array of params permitted for orderby.
-		 *
-		 * @since 9.2.0
-		 */
-		$params['orderby']['enum'] = apply_filters(
-			'woocommerce_report_products_stats_orderby_params',
+		$params                    = parent::get_collection_params();
+		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
 			array(
 				'date',
 				'net_revenue',
