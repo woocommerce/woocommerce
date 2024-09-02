@@ -1,0 +1,28 @@
+{
+    "name": "msalsouri/woocommerce",
+    "description": "A WooCommerce plugin for additional functionality in WordPress.",
+    "type": "library",
+    "require": {
+        "woocommerce/woocommerce": "^5.9",
+        "php": "^8.2",
+        "psr/log": "^3.0",
+        "guzzlehttp/guzzle": "^7.9",
+        "symfony/http-client": "^7.1",
+        "monolog/monolog": "^3.7",
+        "phpunit/phpunit": "^11.3",
+        "wp-cli/wp-cli": "^2.11"
+    },
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Msalsouri\\Woocommerce\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "msalsouri",
+            "email": "msalsouri@hotmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
