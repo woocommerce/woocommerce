@@ -4,6 +4,7 @@ const {
 	fillPageTitle,
 	getCanvas,
 	publishPage,
+	closeChoosePatternModal,
 } = require( '../../utils/editor' );
 
 const test = baseTest.extend( {
@@ -17,6 +18,8 @@ test.describe(
 		// eslint-disable-next-line playwright/expect-expect
 		test( 'can create new page', async ( { page, testPage } ) => {
 			await goToPageEditor( { page } );
+
+			await closeChoosePatternModal( { page } );
 
 			await fillPageTitle( page, testPage.title );
 

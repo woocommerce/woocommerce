@@ -56,7 +56,7 @@
 		margin: 0;
 		box-sizing: border-box;
 		min-height: 0;
-		max-height: 52px;
+		height: 50px;
 		background-color: #fff;
 		color: $input-text-active;
 
@@ -92,7 +92,7 @@
 
 	&.is-active label,
 	input:-webkit-autofill + label {
-		transform: translateY(em($gap-smaller)) scale(0.875);
+		transform: translateY(#{$gap-smaller}) scale(0.75);
 	}
 
 	&.has-error input {

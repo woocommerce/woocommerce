@@ -106,7 +106,8 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 	// @ts-expect-error missing type
 	const { replaceBlocks } = useDispatch( blockEditorStore );
 
-	if ( patterns.length === 0 ) {
+	// We need at least two patterns to shuffle.
+	if ( patterns.length < 2 ) {
 		return null;
 	}
 

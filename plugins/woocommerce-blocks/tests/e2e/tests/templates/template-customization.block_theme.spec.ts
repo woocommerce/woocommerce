@@ -58,7 +58,7 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postType: testData.templateType,
 				} );
-				await editor.revertTemplateCustomizations( {
+				await editor.revertTemplate( {
 					templateName: testData.templateName,
 				} );
 				await testData.visitPage( { frontendUtils, page } );
@@ -97,7 +97,7 @@ test.describe( 'Template customization', () => {
 					await admin.visitSiteEditor( {
 						postType: testData.templateType,
 					} );
-					await editor.revertTemplateCustomizations( {
+					await editor.revertTemplate( {
 						templateName:
 							testData.fallbackTemplate?.templateName || '',
 					} );
@@ -180,7 +180,7 @@ test.describe( 'Template customization', () => {
 					postType: testData.templateType,
 				} );
 
-				await editor.revertTemplateCustomizations( {
+				await editor.revertTemplate( {
 					templateName: testData.templateName,
 				} );
 

@@ -10,7 +10,7 @@ import clsx from 'clsx';
  */
 import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
-import { Select } from '../select';
+import { Select, SelectOption } from '../select';
 
 export const CountryInput = ( {
 	className,
@@ -22,31 +22,26 @@ export const CountryInput = ( {
 	autoComplete = 'off',
 	required = false,
 }: CountryInputWithCountriesProps ): JSX.Element => {
-	const options = useMemo(
-		() =>
-			Object.entries( countries ).map(
-				( [ countryCode, countryName ] ) => ( {
-					value: countryCode,
-					label: decodeEntities( countryName ),
-				} )
-			),
-		[ countries ]
-	);
+	const options = useMemo< SelectOption[] >( () => {
+		return Object.entries( countries ).map(
+			( [ countryCode, countryName ] ) => ( {
+				value: countryCode,
+				label: decodeEntities( countryName ),
+			} )
+		);
+	}, [ countries ] );
 
 	return (
-		<div
+		<Select
 			className={ clsx( className, 'wc-block-components-country-input' ) }
-		>
-			<Select
-				id={ id }
-				label={ label || '' }
-				onChange={ onChange }
-				options={ options }
-				value={ value }
-				required={ required }
-				autoComplete={ autoComplete }
-			/>
-		</div>
+			id={ id }
+			label={ label || '' }
+			onChange={ onChange }
+			options={ options }
+			value={ value }
+			required={ required }
+			autoComplete={ autoComplete }
+		/>
 	);
 };
 

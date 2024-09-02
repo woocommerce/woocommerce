@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Check if parent product exists when creating attribute lookup data for variations

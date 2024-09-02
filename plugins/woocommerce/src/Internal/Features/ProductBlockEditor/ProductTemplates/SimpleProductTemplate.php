@@ -765,8 +765,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'             => 20,
 				'attributes'        => array(
 					'property' => 'global_unique_id',
-					'label'    => __( 'GTIN, UPC, EAN or ISBN', 'woocommerce' ),
+					// translators: %1$s GTIN %2$s UPC %3$s EAN %4$s ISBN.
+					'label'    => sprintf( __( '%1$s, %2$s, %3$s, or %4$s', 'woocommerce' ), '<abbr title="' . esc_attr__( 'Global Trade Item Number', 'woocommerce' ) . '">' . esc_html__( 'GTIN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'Universal Product Code', 'woocommerce' ) . '">' . esc_html__( 'UPC', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'European Article Number', 'woocommerce' ) . '">' . esc_html__( 'EAN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'International Standard Book Number', 'woocommerce' ) . '">' . esc_html__( 'ISBN', 'woocommerce' ) . '</abbr>' ),
 					'tooltip'  => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+					'pattern'  => array(
+						'value'   => '[0-9\-]*',
+						'message' => __( 'Please enter only numbers and hyphens (-).', 'woocommerce' ),
+					),
 				),
 				'disableConditions' => array(
 					array(

@@ -7,11 +7,6 @@
 	position: relative;
 	transition: box-shadow 0.1s linear;
 
-	// Prevents spinners displaying inside the button from overflowing.
-	.wc-block-components-spinner {
-		position: static;
-	}
-
 	&:focus {
 		box-shadow: 0 0 0 2px $studio-blue;
 		box-shadow: inset 0 0 0 1px $white, 0 0 0 2px $studio-blue;

@@ -6,6 +6,8 @@ $control-size: $gap-large;
 	&--highlighted {
 		> .experimental-woocommerce-tree-item__heading {
 			background-color: $gray-100;
+			outline: 1.5px solid var( --wp-admin-theme-color );
+			outline-offset: -1.5px;
 		}
 	}
 

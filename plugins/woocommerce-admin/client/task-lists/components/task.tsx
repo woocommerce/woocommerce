@@ -9,7 +9,7 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { useCallback } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, resolveSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
@@ -31,25 +31,28 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 	const { invalidateResolutionForStoreSelector, optimisticallyCompleteTask } =
 		useDispatch( ONBOARDING_STORE_NAME );
 
-	const updateBadge = useCallback( () => {
-		const badgeElements: Array< HTMLElement > | null = Array.from(
-			document.querySelectorAll(
-				'#adminmenu .woocommerce-task-list-remaining-tasks-badge'
-			)
+	const updateBadge = useCallback( async () => {
+		const badgeElements = document.querySelectorAll(
+			'#adminmenu .woocommerce-task-list-remaining-tasks-badge'
 		);
 
 		if ( ! badgeElements?.length ) {
 			return;
 		}
 
-		badgeElements.forEach( ( badgeElement ) => {
-			const currentBadgeCount = Number( badgeElement.innerText );
+		const setupTaskList = await resolveSelect(
+			ONBOARDING_STORE_NAME
+		).getTaskList( 'setup' );
+		if ( ! setupTaskList ) {
+			return;
+		}
 
-			if ( currentBadgeCount === 1 ) {
-				badgeElement.remove();
-			} else {
-				badgeElement.innerHTML = String( currentBadgeCount - 1 );
-			}
+		const remainingTasksCount = setupTaskList.tasks.filter(
+			( _task ) => ! _task.isComplete
+		).length;
+
+		badgeElements.forEach( ( badge ) => {
+			badge.textContent = remainingTasksCount.toString();
 		} );
 	}, [] );
 
@@ -64,7 +67,12 @@ export const Task: React.FC< TaskProps > = ( { query, task } ) => {
 			invalidateResolutionForStoreSelector( 'getTaskLists' );
 			updateBadge();
 		},
-		[ id ]
+		[
+			id,
+			invalidateResolutionForStoreSelector,
+			optimisticallyCompleteTask,
+			updateBadge,
+		]
 	);
 
 	return (

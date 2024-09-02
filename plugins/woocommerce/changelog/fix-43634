@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Replace the red CSS color with the $red SASS variable in WooCommerce legacy elements

@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { encodeCredentials } from './plugin-utils';
+const { admin } = require( '../test-data/data' );
 
 export const setOption = async (
 	request,
@@ -13,8 +14,8 @@ export const setOption = async (
 		baseURL,
 		extraHTTPHeaders: {
 			Authorization: `Basic ${ encodeCredentials(
-				'admin',
-				'password'
+				admin.username,
+				admin.password
 			) }`,
 			cookie: '',
 		},

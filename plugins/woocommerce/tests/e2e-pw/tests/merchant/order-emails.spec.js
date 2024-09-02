@@ -5,7 +5,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe(
 	'Merchant > Order Action emails received',
-	{ tag: '@services' },
+	{ tag: [ '@services', '@hpos' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 

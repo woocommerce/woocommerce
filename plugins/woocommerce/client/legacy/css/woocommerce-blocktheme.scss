@@ -310,6 +310,7 @@ a.added_to_cart {
 		.coupon {
 			display: flex;
 			align-items: center;
+			flex-wrap: wrap;
 		}
 
 		#coupon_code {

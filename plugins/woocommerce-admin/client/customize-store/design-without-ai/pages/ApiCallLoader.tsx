@@ -116,10 +116,6 @@ const AssemblerHub = ( { sendEvent }: { sendEvent: SendEventFn } ) => {
 			if ( event.data?.type === 'INSTALL_FONTS' ) {
 				sendEvent( { type: 'INSTALL_FONTS' } );
 			}
-
-			if ( event.data?.type === 'INSTALL_PATTERNS' ) {
-				sendEvent( { type: 'INSTALL_PATTERNS' } );
-			}
 		} );
 	}, [ sendEvent ] );
 

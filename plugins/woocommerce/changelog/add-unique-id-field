@@ -1,5 +1,0 @@
-Significance: major
-Type: add
-
-Add column `global_unique_id` to `wc_product_meta_lookup` table
-Add global_unique_id field to product and product variations

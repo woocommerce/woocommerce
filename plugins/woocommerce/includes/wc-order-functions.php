@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -147,9 +148,9 @@ function wc_get_is_pending_statuses() {
  */
 function wc_get_order_status_name( $status ) {
 	$statuses = wc_get_order_statuses();
-	$status   = 'wc-' === substr( $status, 0, 3 ) ? substr( $status, 3 ) : $status;
-	$status   = isset( $statuses[ 'wc-' . $status ] ) ? $statuses[ 'wc-' . $status ] : $status;
-	return $status;
+	$status   = OrderUtil::remove_status_prefix( $status );
+
+	return $statuses[ 'wc-' . $status ] ?? $status;
 }
 
 /**
@@ -539,10 +540,11 @@ function wc_create_refund( $args = array() ) {
 			throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 		}
 
-		$remaining_refund_amount = $order->get_remaining_refund_amount();
-		$remaining_refund_items  = $order->get_remaining_refund_items();
-		$refund_item_count       = 0;
-		$refund                  = new WC_Order_Refund( $args['refund_id'] );
+		$remaining_refund_amount     = $order->get_remaining_refund_amount();
+		$remaining_refund_items      = $order->get_remaining_refund_items();
+		$refund_item_count           = 0;
+		$refund                      = new WC_Order_Refund( $args['refund_id'] );
+		$refunded_order_and_products = array();
 
 		if ( 0 > $args['amount'] || $args['amount'] > $remaining_refund_amount ) {
 			throw new Exception( __( 'Invalid refund amount.', 'woocommerce' ) );
@@ -573,6 +575,16 @@ function wc_create_refund( $args = array() ) {
 
 				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
 					continue;
+				}
+
+				// array of order id and product id which were refunded.
+				// later to be used for revoking download permission.
+				// checking if the item is a product, as we only need to revoke download permission for products.
+				if ( $item->is_type( 'line_item' ) ) {
+					$refunded_order_and_products[ $item_id ] = array(
+						'order_id'   => $order->get_id(),
+						'product_id' => $item->get_product_id(),
+					);
 				}
 
 				$class         = get_class( $item );
@@ -632,6 +644,19 @@ function wc_create_refund( $args = array() ) {
 
 			if ( $args['restock_items'] ) {
 				wc_restock_refunded_items( $order, $args['line_items'] );
+			}
+
+			// delete downloads that were refunded using order and product id, if present.
+			if ( ! empty( $refunded_order_and_products ) ) {
+				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
+					$download_data_store = WC_Data_Store::load( 'customer-download' );
+					$downloads           = $download_data_store->get_downloads( $refunded_order_and_product );
+					if ( ! empty( $downloads ) ) {
+						foreach ( $downloads as $download ) {
+							$download_data_store->delete_by_id( $download->get_id() );
+						}
+					}
+				}
 			}
 
 			/**

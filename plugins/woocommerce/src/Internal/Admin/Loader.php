@@ -111,7 +111,7 @@ class Loader {
 
 	/**
 	 * Set up a div for the header embed to render into.
-	 * The initial contents here are meant as a place loader for when the PHP page initialy loads.
+	 * The initial contents here are meant as a place loader for when the PHP page initially loads.
 	 */
 	public static function embed_page_header() {
 		if ( ! PageController::is_admin_page() && ! PageController::is_embed_page() ) {
@@ -541,7 +541,7 @@ class Loader {
 	}
 
 	/**
-	 * Return an object defining the currecy options for the site's current currency
+	 * Return an object defining the currency options for the site's current currency
 	 *
 	 * @return  array  Settings for the current currency {
 	 *     Array of settings.

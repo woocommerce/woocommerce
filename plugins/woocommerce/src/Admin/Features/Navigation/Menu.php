@@ -2,6 +2,7 @@
 /**
  * WooCommerce Navigation Menu
  *
+ * @deprecated 9.3.0 Navigation is no longer a feature and its classes will be removed in WooCommerce 9.4.
  * @package Woocommerce Navigation
  */
 
@@ -10,6 +11,7 @@ namespace Automattic\WooCommerce\Admin\Features\Navigation;
 use Automattic\WooCommerce\Admin\Features\Navigation\Favorites;
 use Automattic\WooCommerce\Admin\Features\Navigation\Screen;
 use Automattic\WooCommerce\Admin\Features\Navigation\CoreMenu;
+use Automattic\WooCommerce\Admin\Features\Navigation\Init;
 
 /**
  * Contains logic for the WooCommerce Navigation menu.
@@ -95,172 +97,33 @@ class Menu {
 
 	/**
 	 * Init.
+	 *
+	 * @internal
 	 */
-	public function init() {
-		add_action( 'admin_menu', array( $this, 'add_core_items' ), 100 );
-		add_filter( 'admin_enqueue_scripts', array( $this, 'enqueue_data' ), 20 );
-
-		add_filter( 'admin_menu', array( $this, 'migrate_core_child_items' ), PHP_INT_MAX - 1 );
-		add_filter( 'admin_menu', array( $this, 'migrate_menu_items' ), PHP_INT_MAX - 2 );
-	}
+	final public function init() {}
 
 	/**
 	 * Convert a WordPress menu callback to a URL.
-	 *
-	 * @param string $callback Menu callback.
-	 * @return string
 	 */
-	public static function get_callback_url( $callback ) {
-		// Return the full URL.
-		if ( strpos( $callback, 'http' ) === 0 ) {
-			return $callback;
-		}
-
-		$pos  = strpos( $callback, '?' );
-		$file = $pos > 0 ? substr( $callback, 0, $pos ) : $callback;
-		if ( file_exists( ABSPATH . "/wp-admin/$file" ) ) {
-			return $callback;
-		}
-		return 'admin.php?page=' . $callback;
-	}
+	public static function get_callback_url() {}
 
 	/**
 	 * Get the parent key if one exists.
-	 *
-	 * @param string $callback Callback or URL.
-	 * @return string|null
 	 */
-	public static function get_parent_key( $callback ) {
-		global $submenu;
-
-		if ( ! $submenu ) {
-			return null;
-		}
-
-		// This is already a parent item.
-		if ( isset( $submenu[ $callback ] ) ) {
-			return null;
-		}
-
-		foreach ( $submenu as $key => $menu ) {
-			foreach ( $menu as $item ) {
-				if ( $item[ self::CALLBACK ] === $callback ) {
-					return $key;
-				}
-			}
-		}
-
-		return null;
-	}
+	public static function get_parent_key() {}
 
 	/**
 	 * Adds a top level menu item to the navigation.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'      => (string) The unique ID of the menu item. Required.
-	 *      'title'   => (string) Title of the menu item. Required.
-	 *      'url'     => (string) URL or callback to be used. Required.
-	 *      'order'   => (int) Menu item order.
-	 *      'migrate' => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'menuId'  => (string) The ID of the menu to add the category to.
-	 *    ).
 	 */
-	private static function add_category( $args ) {
-		if ( ! isset( $args['id'] ) || isset( self::$menu_items[ $args['id'] ] ) ) {
-			return;
-		}
-
-		$defaults           = array(
-			'id'         => '',
-			'title'      => '',
-			'order'      => 100,
-			'migrate'    => true,
-			'menuId'     => 'primary',
-			'isCategory' => true,
-		);
-		$menu_item          = wp_parse_args( $args, $defaults );
-		$menu_item['title'] = wp_strip_all_tags( wp_specialchars_decode( $menu_item['title'] ) );
-		unset( $menu_item['url'] );
-		unset( $menu_item['capability'] );
-
-		if ( ! isset( $menu_item['parent'] ) ) {
-			$menu_item['parent']          = 'woocommerce';
-			$menu_item['backButtonLabel'] = __(
-				'WooCommerce Home',
-				'woocommerce'
-			);
-		}
-
-		self::$menu_items[ $menu_item['id'] ]       = $menu_item;
-		self::$categories[ $menu_item['id'] ]       = array();
-		self::$categories[ $menu_item['parent'] ][] = $menu_item['id'];
-
-		if ( isset( $args['url'] ) ) {
-			self::$callbacks[ $args['url'] ] = $menu_item['migrate'];
-		}
+	private static function add_category() {
+		Init::deprecation_notice( 'Menu::add_category' );
 	}
 
 	/**
 	 * Adds a child menu item to the navigation.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'              => (string) The unique ID of the menu item. Required.
-	 *      'title'           => (string) Title of the menu item. Required.
-	 *      'parent'          => (string) Parent menu item ID.
-	 *      'capability'      => (string) Capability to view this menu item.
-	 *      'url'             => (string) URL or callback to be used. Required.
-	 *      'order'           => (int) Menu item order.
-	 *      'migrate'         => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'menuId'          => (string) The ID of the menu to add the item to.
-	 *      'matchExpression' => (string) A regular expression used to identify if the menu item is active.
-	 *    ).
 	 */
-	private static function add_item( $args ) {
-		if ( ! isset( $args['id'] ) ) {
-			return;
-		}
-
-		if ( isset( self::$menu_items[ $args['id'] ] ) ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					/* translators: 1: Duplicate menu item path. */
-					esc_html__( 'You have attempted to register a duplicate item with WooCommerce Navigation: %1$s', 'woocommerce' ),
-					'`' . $args['id'] . '`'
-				),
-				'6.5.0'
-			);
-
-			return;
-		}
-
-		$defaults           = array(
-			'id'         => '',
-			'title'      => '',
-			'capability' => 'manage_woocommerce',
-			'url'        => '',
-			'order'      => 100,
-			'migrate'    => true,
-			'menuId'     => 'primary',
-		);
-		$menu_item          = wp_parse_args( $args, $defaults );
-		$menu_item['title'] = wp_strip_all_tags( wp_specialchars_decode( $menu_item['title'] ) );
-		$menu_item['url']   = self::get_callback_url( $menu_item['url'] );
-
-		if ( ! isset( $menu_item['parent'] ) ) {
-			$menu_item['parent'] = 'woocommerce';
-		}
-
-		$menu_item['menuId'] = self::get_item_menu_id( $menu_item );
-
-		self::$menu_items[ $menu_item['id'] ]       = $menu_item;
-		self::$categories[ $menu_item['parent'] ][] = $menu_item['id'];
-
-		if ( isset( $args['url'] ) ) {
-			self::$callbacks[ $args['url'] ] = $menu_item['migrate'];
-		}
+	private static function add_item() {
+		Init::deprecation_notice( 'Menu::add_item' );
 	}
 
 	/**
@@ -287,111 +150,24 @@ class Menu {
 
 	/**
 	 * Adds a plugin category.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'      => (string) The unique ID of the menu item. Required.
-	 *      'title'   => (string) Title of the menu item. Required.
-	 *      'url'     => (string) URL or callback to be used. Required.
-	 *      'migrate' => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'order'   => (int) Menu item order.
-	 *    ).
 	 */
-	public static function add_plugin_category( $args ) {
-		$category_args = array_merge(
-			$args,
-			array(
-				'menuId' => 'plugins',
-			)
-		);
-
-		if ( ! isset( $category_args['parent'] ) ) {
-			unset( $category_args['order'] );
-		}
-
-		$menu_id = self::get_item_menu_id( $category_args );
-		if ( ! in_array( $menu_id, array( 'plugins', 'favorites' ), true ) ) {
-			return;
-		}
-
-		$category_args['menuId'] = $menu_id;
-
-		self::add_category( $category_args );
+	public static function add_plugin_category() {
+		Init::deprecation_notice( 'Menu::add_plugin_category' );
 	}
 
 	/**
 	 * Adds a plugin item.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'              => (string) The unique ID of the menu item. Required.
-	 *      'title'           => (string) Title of the menu item. Required.
-	 *      'parent'          => (string) Parent menu item ID.
-	 *      'capability'      => (string) Capability to view this menu item.
-	 *      'url'             => (string) URL or callback to be used. Required.
-	 *      'migrate'         => (bool) Whether or not to hide the item in the wp admin menu.
-	 *      'order'           => (int) Menu item order.
-	 *      'matchExpression' => (string) A regular expression used to identify if the menu item is active.
-	 *    ).
 	 */
-	public static function add_plugin_item( $args ) {
-		if ( ! isset( $args['parent'] ) ) {
-			unset( $args['order'] );
-		}
-
-		$item_args = array_merge(
-			$args,
-			array(
-				'menuId' => 'plugins',
-			)
-		);
-
-		$menu_id = self::get_item_menu_id( $item_args );
-
-		if ( 'plugins' !== $menu_id ) {
-			return;
-		}
-
-		self::add_item( $item_args );
+	public static function add_plugin_item() {
+		Init::deprecation_notice( 'Menu::add_plugin_item' );
 	}
 
 	/**
 	 * Adds a plugin setting item.
-	 *
-	 * @param array $args Array containing the necessary arguments.
-	 *    $args = array(
-	 *      'id'         => (string) The unique ID of the menu item. Required.
-	 *      'title'      => (string) Title of the menu item. Required.
-	 *      'capability' => (string) Capability to view this menu item.
-	 *      'url'        => (string) URL or callback to be used. Required.
-	 *      'migrate'    => (bool) Whether or not to hide the item in the wp admin menu.
-	 *    ).
 	 */
-	public static function add_setting_item( $args ) {
-		unset( $args['order'] );
-
-		if ( isset( $args['parent'] ) || isset( $args['menuId'] ) ) {
-			error_log(  // phpcs:ignore
-				sprintf(
-					/* translators: 1: Duplicate menu item path. */
-					esc_html__( 'The item ID %1$s attempted to register using an invalid option. The arguments `menuId` and `parent` are not allowed for add_setting_item()', 'woocommerce' ),
-					'`' . $args['id'] . '`'
-				)
-			);
-		}
-
-		$item_args = array_merge(
-			$args,
-			array(
-				'menuId' => 'secondary',
-				'parent' => 'woocommerce-settings',
-			)
-		);
-
-		self::add_item( $item_args );
+	public static function add_setting_item() {
+		Init::deprecation_notice( 'Menu::add_setting_item' );
 	}
-
-
 
 	/**
 	 * Get menu item templates for a given post type.

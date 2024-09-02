@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduced number of recalculations on Store API cart routes

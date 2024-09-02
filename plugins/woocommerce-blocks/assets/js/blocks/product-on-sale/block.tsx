@@ -6,6 +6,7 @@ import { Disabled, Placeholder } from '@wordpress/components';
 import ServerSideRender from '@wordpress/server-side-render';
 import { gridBlockPreview } from '@woocommerce/resource-previews';
 import { Icon, percent } from '@wordpress/icons';
+import { useBlockProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -39,13 +40,14 @@ const ProductOnSaleBlock: React.FunctionComponent< Props > = (
 	props: Props
 ) => {
 	const { attributes, setAttributes, name } = props;
+	const blockProps = useBlockProps();
 
 	if ( attributes.isPreview ) {
-		return gridBlockPreview;
+		return <div { ...blockProps }>{ gridBlockPreview }</div>;
 	}
 
 	return (
-		<>
+		<div { ...blockProps }>
 			<ProductOnSaleInspectorControls
 				attributes={ attributes }
 				setAttributes={ setAttributes }
@@ -57,7 +59,7 @@ const ProductOnSaleBlock: React.FunctionComponent< Props > = (
 					EmptyResponsePlaceholder={ EmptyPlaceholder }
 				/>
 			</Disabled>
-		</>
+		</div>
 	);
 };
 

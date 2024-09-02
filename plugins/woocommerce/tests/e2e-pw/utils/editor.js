@@ -1,14 +1,13 @@
 const { expect } = require( '@playwright/test' );
 
-const closeWelcomeModal = async ( { page } ) => {
-	// Close welcome popup if prompted
-	try {
-		await page
-			.getByLabel( 'Close', { exact: true } )
-			.click( { timeout: 5000 } );
-	} catch ( error ) {
-		// Welcome modal wasn't present, skipping action.
-	}
+const closeChoosePatternModal = async ( { page } ) => {
+	const closeModal = page.getByRole( 'button', {
+		name: 'Close',
+		exact: true,
+	} );
+	await page.addLocatorHandler( closeModal, async () => {
+		await closeModal.click();
+	} );
 };
 
 const disableWelcomeModal = async ( { page } ) => {
@@ -40,16 +39,27 @@ const getCanvas = async ( page ) => {
 };
 
 const goToPageEditor = async ( { page } ) => {
+	const responsePromise = page.waitForResponse(
+		( response ) =>
+			response.url().includes( '//page' ) && response.status() === 200
+	);
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 	await disableWelcomeModal( { page } );
+	await responsePromise;
 };
 
 const goToPostEditor = async ( { page } ) => {
+	const responsePromise = page.waitForResponse(
+		( response ) =>
+			response.url().includes( '//single' ) && response.status() === 200
+	);
 	await page.goto( 'wp-admin/post-new.php' );
 	await disableWelcomeModal( { page } );
+	await responsePromise;
 };
 
 const fillPageTitle = async ( page, title ) => {
+	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).click();
 	await ( await getCanvas( page ) ).getByLabel( 'Add title' ).fill( title );
 };
 
@@ -96,7 +106,7 @@ const insertBlockByShortcut = async ( page, blockName ) => {
 	).toBeVisible();
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 	await expect(
-		page.getByLabel( `Block: ${ blockName }` ).first()
+		canvas.getByLabel( `Block: ${ blockName }` ).first()
 	).toBeVisible();
 };
 
@@ -132,7 +142,7 @@ const publishPage = async ( page, pageTitle ) => {
 };
 
 module.exports = {
-	closeWelcomeModal,
+	closeChoosePatternModal,
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,

@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"pnpm": "9.1.3"
 	},
 	"keywords": [
 		"wordpress",

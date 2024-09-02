@@ -7,6 +7,7 @@ on:
 jobs:
   run-tests:
     name: 'Run tests'
+    if: github.repository == 'woocommerce/woocommerce'
     uses: ./.github/workflows/ci.yml
     with:
       trigger: 'daily-checks'

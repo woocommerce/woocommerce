@@ -10,7 +10,7 @@ const wcPages = [
 				name: 'Home',
 				heading: 'Home',
 				element:
-					'.wooocommerce-inbox-card__header > .components-truncate',
+					'.woocommerce-inbox-card__header > .components-truncate',
 				text: 'Inbox',
 			},
 			{
@@ -22,8 +22,8 @@ const wcPages = [
 			{
 				name: 'Customers',
 				heading: 'Customers',
-				element: '#search-inline-input-0',
-				text: 'Move backward for selected items',
+				element: '.woocommerce-dropdown-button__labels',
+				text: 'All Customers',
 			},
 			{
 				name: 'Reports',
@@ -206,8 +206,7 @@ for ( const currentPage of wcPages ) {
 				} ) => {
 					await page
 						.locator(
-							`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
-							{ waitForLoadState: 'networkidle' }
+							`li.wp-menu-open > ul.wp-submenu > li a:text-is("${ currentPage.subpages[ i ].name }")`
 						)
 						.click();
 

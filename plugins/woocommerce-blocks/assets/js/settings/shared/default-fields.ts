@@ -40,6 +40,8 @@ export interface FormField {
 	type?: string;
 	// The options if this is a select field
 	options?: ComboboxControlOption[];
+	// The placeholder for the field, only applicable for select fields.
+	placeholder?: string;
 	// Additional attributes added when registering a field. String in key is required for data attributes.
 	attributes?: Record< keyof CustomFieldAttributes, string >;
 }

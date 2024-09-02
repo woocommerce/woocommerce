@@ -77,6 +77,25 @@ const PrivateSelectedItems = < ItemType, >(
 		);
 	}
 
+	const focusSibling = ( event: React.KeyboardEvent< HTMLDivElement > ) => {
+		const selectedItem = ( event.target as HTMLElement ).closest(
+			'.woocommerce-experimental-select-control__selected-item'
+		);
+		const sibling =
+			event.key === 'ArrowLeft' || event.key === 'Backspace'
+				? selectedItem?.previousSibling
+				: selectedItem?.nextSibling;
+		if ( sibling ) {
+			(
+				( sibling as HTMLElement ).querySelector(
+					'.woocommerce-tag__remove'
+				) as HTMLElement
+			 )?.focus();
+			return true;
+		}
+		return false;
+	};
+
 	return (
 		<div className={ classes }>
 			{ items.map( ( item, index ) => {
@@ -102,24 +121,9 @@ const PrivateSelectedItems = < ItemType, >(
 								event.key === 'ArrowLeft' ||
 								event.key === 'ArrowRight'
 							) {
-								const selectedItem = (
-									event.target as HTMLElement
-								 ).closest(
-									'.woocommerce-experimental-select-control__selected-item'
-								);
-								const sibling =
-									event.key === 'ArrowLeft'
-										? selectedItem?.previousSibling
-										: selectedItem?.nextSibling;
-								if ( sibling ) {
-									(
-										(
-											sibling as HTMLElement
-										 ).querySelector(
-											'.woocommerce-tag__remove'
-										) as HTMLElement
-									 )?.focus();
-								} else if (
+								const focused = focusSibling( event );
+								if (
+									! focused &&
 									event.key === 'ArrowRight' &&
 									onSelectedItemsEnd
 								) {
@@ -130,6 +134,9 @@ const PrivateSelectedItems = < ItemType, >(
 								event.key === 'ArrowDown'
 							) {
 								event.preventDefault(); // prevent unwanted scroll
+							} else if ( event.key === 'Backspace' ) {
+								onRemove( item );
+								focusSibling( event );
 							}
 						} }
 						onBlur={ onBlur }

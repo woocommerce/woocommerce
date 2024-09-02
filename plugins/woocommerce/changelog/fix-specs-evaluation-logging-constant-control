@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: We fix the way we interpret the constant presence and its value when it comes to logging specs evaluation.
-
-

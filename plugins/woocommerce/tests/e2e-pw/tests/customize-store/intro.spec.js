@@ -111,53 +111,42 @@ test.describe(
 				'Customize your theme'
 			);
 			await expect(
-				page.getByRole( 'button', { name: 'Customize your theme' } )
+				page.getByRole( 'button', { name: 'Customize your store' } )
 			).toBeVisible();
 		} );
 
-		test( 'Clicking on "Customize your theme" with a block theme should go to the assembler', async ( {
-			page,
-			assemblerPageObject,
-		} ) => {
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await page.click( 'text=Start designing' );
-			await assemblerPageObject.waitForLoadingScreenFinish();
+		test(
+			'it shows the "non default block theme" banner when the theme is a block theme different than TT4',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page } ) => {
+				await activateTheme( 'twentytwentythree' );
 
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await page
-				.getByRole( 'button', { name: 'Customize your theme' } )
-				.click();
+				await page.goto( CUSTOMIZE_STORE_URL );
 
-			const assembler = await assemblerPageObject.getAssembler();
-			await expect(
-				assembler.locator( "text=Let's get creative" )
-			).toBeVisible();
-		} );
-
-		test( 'clicking on "Customize your theme" with a classic theme should go to the customizer', async ( {
-			page,
-			baseURL,
-		} ) => {
-			await activateTheme( 'twentytwenty' );
-
-			try {
-				await setOption(
-					request,
-					baseURL,
-					'woocommerce_admin_customize_store_completed',
-					'yes'
+				await expect( page.locator( 'h1' ) ).toHaveText(
+					'Customize your theme'
 				);
-			} catch ( error ) {
-				console.log( 'Store completed option not updated' );
+				await expect(
+					page.getByRole( 'button', { name: 'Go to the Editor' } )
+				).toBeVisible();
 			}
-			await page.goto( CUSTOMIZE_STORE_URL );
+		);
 
-			await page
-				.getByRole( 'button', { name: 'Customize your theme' } )
-				.click();
+		test(
+			'clicking on "Go to the Customizer" with a classic theme should go to the customizer',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page } ) => {
+				await activateTheme( 'twentytwenty' );
 
-			await page.waitForNavigation();
-			await expect( page.url() ).toContain( 'customize.php' );
-		} );
+				await page.goto( CUSTOMIZE_STORE_URL );
+
+				await page
+					.getByRole( 'button', { name: 'Go to the Customizer' } )
+					.click();
+
+				await page.waitForNavigation();
+				await expect( page.url() ).toContain( 'customize.php' );
+			}
+		);
 	}
 );

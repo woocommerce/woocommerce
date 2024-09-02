@@ -20,8 +20,8 @@ $button_link   = __( 'Get started', 'woocommerce' );
 <!-- /wp:spacer -->
 
 <!-- wp:group {"align":"wide","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"full","style":{"typography":{"fontStyle":"normal","fontWeight":"700"}}} -->
-<h2 class="wp-block-heading alignfull has-text-align-left" style="font-style:normal;font-weight:700"><?php echo esc_html( $header ); ?></h2>
+<div class="wp-block-group alignwide"><!-- wp:heading {"textAlign":"left","align":"full","style":{"typography":{"fontStyle":"normal"}}} -->
+<h2 class="wp-block-heading alignfull has-text-align-left" style="font-style:normal;"><?php echo esc_html( $header ); ?></h2>
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 

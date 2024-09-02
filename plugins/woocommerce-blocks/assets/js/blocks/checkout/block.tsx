@@ -139,7 +139,8 @@ const ScrollOnError = ( {
 			// Scroll after a short timeout to allow a re-render. This will allow focusableSelector to match updated components.
 			scrollToTopTimeout = window.setTimeout( () => {
 				scrollToTop( {
-					focusableSelector: 'input:invalid, .has-error input',
+					focusableSelector:
+						'input:invalid, .has-error input, .has-error select',
 				} );
 			}, 50 );
 		}

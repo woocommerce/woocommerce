@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Trigger doing_it_wrong() when using HPOS query args for CPT order queries.
