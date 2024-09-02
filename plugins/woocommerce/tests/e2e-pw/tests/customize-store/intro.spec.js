@@ -58,21 +58,24 @@ test.describe(
 			);
 		} );
 
-		test( 'it shows the "offline banner" when the network is offline', async ( {
-			page,
-			context,
-		} ) => {
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await expect(
-				page.locator( 'text=Design your own' )
-			).toBeVisible();
-			await context.setOffline( true );
+		test(
+			'it shows the "offline banner" when the network is offline',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page, context } ) => {
+				await page.goto( CUSTOMIZE_STORE_URL );
+				await expect(
+					page.locator( 'text=Design your own' )
+				).toBeVisible();
+				await context.setOffline( true );
 
-			await expect( page.locator( '.offline-banner' ) ).toBeVisible();
-			await expect(
-				page.locator( 'text=Looking to design your store using AI?' )
-			).toBeVisible();
-		} );
+				await expect( page.locator( '.offline-banner' ) ).toBeVisible();
+				await expect(
+					page.locator(
+						'text=Looking to design your store using AI?'
+					)
+				).toBeVisible();
+			}
+		);
 
 		test( 'it shows the "no AI" banner on Core when the task is not completed', async ( {
 			page,

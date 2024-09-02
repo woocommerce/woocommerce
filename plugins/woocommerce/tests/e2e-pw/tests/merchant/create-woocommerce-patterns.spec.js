@@ -28,7 +28,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Add WooCommerce Patterns Into Page',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@skip-on-default-pressable' ] },
 	() => {
 		test( 'can insert WooCommerce patterns into page', async ( {
 			page,

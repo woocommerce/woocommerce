@@ -1,11 +1,12 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Admin\ShippingPartnerSuggestions;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\MarketingRecommendations;
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
-use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\Init;
 use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\DefaultMarketingRecommendations;
+use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\Init;
 use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\MarketingRecommendationsDataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 use WC_Unit_Test_Case;
 
 /**
