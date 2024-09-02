@@ -7,4 +7,6 @@ $notification-color: $highlight-color;
 $link: $highlight-color;
 $link-focus: darken($highlight-color, 10%);
 
+$custom-welcome-panel: "false";
+
 @import "../_admin.scss";

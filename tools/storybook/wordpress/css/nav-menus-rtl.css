@@ -22,6 +22,7 @@ ul.add-menu-item-tabs li {
 
 #nav-menu-meta .accordion-section-content {
 	padding: 18px 13px;
+	resize: vertical;
 }
 
 #nav-menu-meta .button-controls {
@@ -49,6 +50,26 @@ ul.add-menu-item-tabs li {
 #menu-settings-column .inside {
 	clear: both;
 	margin: 10px 0 0;
+	height: 100%;
+	max-height: inherit;
+}
+
+#menu-settings-column .categorydiv,
+#menu-settings-column .customlinkdiv,
+#menu-settings-column .posttypediv,
+#menu-settings-column .taxonomydiv {
+	max-height: inherit;
+	height: 100%;
+}
+
+#menu-settings-column .wp-tab-panel,
+#menu-settings-column .categorydiv div.tabs-panel,
+#menu-settings-column .customlinkdiv div.tabs-panel,
+#menu-settings-column .posttypediv div.tabs-panel,
+#menu-settings-column .taxonomydiv div.tabs-panel {
+	/* Allow space for content after tab panels in nav menu editor. */
+	max-height: calc( 100% - 75px );
+	height: 100%;
 }
 
 .metabox-holder-disabled .postbox,
@@ -104,7 +125,7 @@ ul.add-menu-item-tabs li {
 
 #nav-menu-bulk-actions-bottom {
 	margin: 1em 0;
-	margin: calc( 1em + 9px ) 0 ; 
+	margin: calc( 1em + 9px ) 0;
 }
 
 .bulk-actions input.button {
@@ -170,12 +191,11 @@ label.bulk-select-button:focus-within {
 	color: #0a4b78;
 }
 
-input.bulk-select-switcher:focus + .bulk-select-button-label{
+input.bulk-select-switcher:focus + .bulk-select-button-label {
 	color: #0a4b78;
 }
 
 .bulk-actions input.menu-items-delete {
-	-webkit-appearance: none;
 	appearance: none;
 	font-size: inherit;
 	border: 0;
@@ -192,9 +212,7 @@ input.bulk-select-switcher:focus + .bulk-select-button-label{
 }
 
 .bulk-actions input.menu-items-delete.disabled {
-	cursor: default;
-	color: #a7aaad;
-	box-shadow: none;
+	display: none;
 }
 
 .menu-settings {
@@ -707,7 +725,6 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 
 .no-js.nav-menus-php .item-edit .screen-reader-text {
 	position: static;
-	-webkit-clip-path: none;
 	clip-path: none;
 	width: auto;
 	height: auto;
@@ -735,9 +752,9 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 }
 
 .nav-menus-php .item-edit:focus:before {
-	box-shadow:
-		0 0 0 1px #4f94d4,
-		0 0 2px 1px rgba(79, 148, 212, 0.8);
+	box-shadow: 0 0 0 2px #2271b1;
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
 }
 
 /* Menu editing */
@@ -840,20 +857,13 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 
 /* Major/minor publishing actions (classes) */
 .nav-menus-php .major-publishing-actions {
-	clear: both;
 	padding: 10px 0;
-	line-height: 2.15384615;
+	display: flex;
+	align-items: center;
 }
 
-.nav-menus-php .major-publishing-actions .publishing-action {
-	text-align: left;
-	float: left;
-}
-
-/* Same as the Publish Meta Box #delete-action */
-.nav-menus-php .delete-action {
-	float: right;
-	line-height: 2.1;
+.nav-menus-php .major-publishing-actions > * {
+	margin-left: 10px;
 }
 
 .nav-menus-php .major-publishing-actions .form-invalid {
@@ -1001,7 +1011,7 @@ body.menu-max-depth-11 { min-width: 1280px !important; }
 
 @media only screen and (min-width: 783px) {
     @supports (position: sticky) and (scroll-margin-bottom: 130px) {
-		
+
 		#nav-menu-footer {
                 position: sticky;
 				bottom: 0;

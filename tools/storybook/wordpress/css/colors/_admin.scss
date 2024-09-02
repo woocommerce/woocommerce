@@ -2,6 +2,10 @@
 @import 'variables';
 @import 'mixins';
 
+/**
+ * This function name uses British English to maintain backward compatibility, as developers
+ * may use the function in their own admin CSS files. See #56811.
+ */
 @function url-friendly-colour( $color ) {
 	@return '%23' + str-slice( '#{ $color }', 2, -1 );
 }
@@ -350,6 +354,7 @@ ul#adminmenu > li.current > a.current:after {
 
 /* Admin Menu: bubble */
 
+#adminmenu .menu-counter,
 #adminmenu .awaiting-mod,
 #adminmenu .update-plugins {
 	color: $menu-bubble-text;
@@ -779,19 +784,5 @@ div#wp-responsive-toggle a:before {
 	&.wp-customizer .theme-overlay .theme-header .left:hover {
 		border-bottom-color: $button-color;
 		color: $link;
-	}
-}
-
-/* Welcome Panel */
-
-.welcome-panel {
-	background-color: $highlight-color;
-}
-
-[class*="welcome-panel-icon"] {
-	@if ( $scheme-name == "light" ) {
-		background-color: $icon-color;
-	} @else {
-		background-color: $base-color;
 	}
 }

@@ -262,8 +262,10 @@
 }
 
 th .comment-grey-bubble {
-	height: 16px;
 	width: 16px;
+	/* Make sure the link clickable area fills the entire table header. */
+	position: relative;
+	top: 2px;
 }
 
 th .comment-grey-bubble:before {
@@ -344,7 +346,6 @@ table.fixed {
 
 .fixed .column-comments {
 	width: 5.5em;
-	padding: 8px 0;
 	text-align: right;
 }
 
@@ -462,48 +463,62 @@ table.media .column-title .filename {
 	width: 160px;
 }
 
+.sorting-indicators {
+	display: grid;
+}
+
 .sorting-indicator {
 	display: block;
-	visibility: hidden;
 	width: 10px;
 	height: 4px;
-	margin-top: 8px;
+	margin-top: 4px;
 	margin-right: 7px;
 }
 
 .sorting-indicator:before {
-	content: "\f142";
 	font: normal 20px/1 dashicons;
 	speak: never;
 	display: inline-block;
 	padding: 0;
 	top: -4px;
 	right: -8px;
-	color: #3c434a;
 	line-height: 0.5;
 	position: relative;
 	vertical-align: top;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-decoration: none !important;
-	color: #3c434a;
+	color: #a7aaad;
 }
 
-.column-comments .sorting-indicator:before {
-	top: 0;
-	right: -10px;
-}
-
-th.sorted.asc .sorting-indicator:before,
-th.desc:hover span.sorting-indicator:before,
-th.desc a:focus span.sorting-indicator:before {
+.sorting-indicator.asc:before {
 	content: "\f142";
 }
 
-th.sorted.desc .sorting-indicator:before,
-th.asc:hover span.sorting-indicator:before,
-th.asc a:focus span.sorting-indicator:before {
+.sorting-indicator.desc:before {
 	content: "\f140";
+}
+
+th.sorted.desc .sorting-indicator.desc:before {
+	color: #1d2327;
+}
+
+th.sorted.asc .sorting-indicator.asc:before {
+	color: #1d2327;
+}
+
+th.sorted.asc a:focus .sorting-indicator.asc:before,
+th.sorted.asc:hover .sorting-indicator.asc:before,
+th.sorted.desc a:focus .sorting-indicator.desc:before,
+th.sorted.desc:hover .sorting-indicator.desc:before {
+	color: #a7aaad;
+}
+
+th.sorted.asc a:focus .sorting-indicator.desc:before,
+th.sorted.asc:hover .sorting-indicator.desc:before,
+th.sorted.desc a:focus .sorting-indicator.asc:before,
+th.sorted.desc:hover .sorting-indicator.asc:before {
+	color: #1d2327;
 }
 
 .wp-list-table .toggle-row {
@@ -524,9 +539,9 @@ th.asc a:focus span.sorting-indicator:before {
 }
 
 .wp-list-table .toggle-row:focus:before {
-	box-shadow:
-		0 0 0 1px #4f94d4,
-		0 0 2px 1px rgba(79, 148, 212, 0.8);
+	box-shadow: 0 0 0 2px #2271b1;
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
 }
 
 .wp-list-table .toggle-row:active {
@@ -551,6 +566,34 @@ th.asc a:focus span.sorting-indicator:before {
 
 .wp-list-table .is-expanded .toggle-row:before {
 	content: "\f142";
+}
+
+.check-column {
+	position: relative;
+}
+
+.check-column label {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	display: block;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.check-column input {
+	position: relative;
+	z-index: 1;
+}
+
+.check-column .label-covers-full-cell:hover + input:not(:disabled) {
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.check-column label:hover,
+.check-column input:hover + label {
+	background: rgba(0, 0, 0, 0.05);
 }
 
 .locked-indicator {
@@ -592,10 +635,6 @@ tr.wp-locked .row-actions .trash {
 	display: none;
 }
 
-.fixed .column-comments .sorting-indicator {
-	margin-top: 3px;
-}
-
 #menu-locations-wrap .widefat {
 	width: 60%;
 }
@@ -612,23 +651,17 @@ th.sorted a {
 	padding: 8px;
 }
 
-.fixed .column-comments.sortable a,
-.fixed .column-comments.sorted a {
-	padding: 8px 0;
+th.sortable a:focus,
+th.sorted a:focus {
+	box-shadow: inset 0 0 0 2px #2271b1;
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
 }
 
 th.sortable a span,
 th.sorted a span {
 	float: right;
 	cursor: pointer;
-}
-
-th.sorted .sorting-indicator,
-th.desc:hover span.sorting-indicator,
-th.desc a:focus span.sorting-indicator,
-th.asc:hover span.sorting-indicator,
-th.asc a:focus span.sorting-indicator {
-	visibility: visible;
 }
 
 .tablenav-pages .current-page {
@@ -1099,7 +1132,7 @@ tr.inline-edit-row td {
 	width: 75%;
 }
 
-.inline-edit-row #post_parent,
+.inline-edit-row select[name="post_parent"],
 .inline-edit-row select[name="page_template"] {
 	max-width: 80%;
 }
@@ -1115,6 +1148,17 @@ ul.cat-checklist {
 	margin: 0 0 5px;
 	padding: 0.2em 5px;
 	overflow-y: scroll;
+}
+
+ul.cat-checklist input[name="post_category[]"]:indeterminate::before {
+	content: '';
+	border-top: 2px solid grey;
+	width: 65%;
+	height: 2px;
+	position: absolute;
+	top: calc( 50% + 1px );
+	right: 50%;
+	transform: translate( 50%, -50% );
 }
 
 #bulk-titles .ntdelbutton,
@@ -1345,7 +1389,7 @@ ul.cat-checklist {
 }
 
 .plugins tr.paused th.check-column {
-	border-right: 4px solid #d63638;
+	border-right: 4px solid #b32d2e;
 }
 
 .plugins tr.paused th,
@@ -1355,7 +1399,7 @@ ul.cat-checklist {
 
 .plugins tr.paused .plugin-title,
 .plugins .paused .dashicons-warning {
-	color: #d63638;
+	color: #b32d2e;
 }
 
 .plugins .paused .error-display p,
@@ -1365,7 +1409,7 @@ ul.cat-checklist {
 }
 
 .plugins .resume-link {
-	color: #d63638;
+	color: #b32d2e;
 }
 
 .plugin-card .update-now:before {
@@ -1373,11 +1417,11 @@ ul.cat-checklist {
 	content: "\f463";
 	display: inline-block;
 	font: normal 20px/1 dashicons;
-	margin: 3px -2px 0 5px;
+	margin: -3px -2px 0 5px;
 	speak: never;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 .plugin-card .updating-message:before {
@@ -1397,6 +1441,17 @@ ul.cat-checklist {
 .plugin-card .updated-message:before {
 	color: #68de7c;
 	content: "\f147";
+}
+
+.plugin-install-php #the-list {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.plugin-install-php .plugin-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }
 
 .plugin-install-php h2 {
@@ -1507,10 +1562,84 @@ div.action-links,
 	line-height: 1.3;
 }
 
-.plugin-card .name,
 .plugin-card .desc {
-	margin-right: 148px; /* icon + margin */
-	margin-left: 128px; /* action links + margin */
+	margin-inline: 0;
+}
+
+.plugin-card .name, .plugin-card .desc > p {
+	margin-right: 148px;
+}
+
+@media (min-width: 1101px) {
+	.plugin-card .name, .plugin-card .desc > p {
+		margin-left: 128px;
+	}
+}
+
+@media (min-width: 481px) and (max-width: 781px) {
+	.plugin-card .name, .plugin-card .desc > p {
+		margin-left: 128px;
+	}
+}
+
+.plugin-card .column-description {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+}
+
+.plugin-card .column-description > p {
+	margin-top: 0;
+}
+
+.plugin-card .column-description p:empty {
+	display: none;
+}
+
+.plugin-card .notice.plugin-dependencies {
+	margin: auto 20px 20px;
+	padding: 15px;
+}
+
+.plugin-card .plugin-dependencies-explainer-text {
+	margin-block: 0;
+}
+
+.plugin-card .plugin-dependency {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: .5em;
+	column-gap: 1%;
+	row-gap: .5em;
+}
+
+.plugin-card .plugin-dependency:nth-child(2),
+.plugin-card .plugin-dependency:last-child {
+	margin-top: 1em;
+}
+
+.plugin-card .plugin-dependency-name {
+	flex-basis: 74%;
+}
+
+.plugin-card .plugin-dependency .more-details-link {
+	margin-right: auto;
+}
+
+.rtl .plugin-card .plugin-dependency .more-details-link {
+	margin-left: auto;
+}
+
+@media (max-width: 939px) {
+	.plugin-card .plugin-dependency-name {
+		flex-basis: 69%;
+	}
+}
+
+.plugins #the-list .required-by,
+.plugins #the-list .requires {
+	margin-top: 1em;
 }
 
 .plugin-card .action-links {
@@ -1626,6 +1755,7 @@ div.action-links,
 	font-style: normal;
 	margin: 0;
 	padding: 100px 0 0;
+	width: 100%;
 	text-align: center;
 }
 
@@ -1753,6 +1883,15 @@ div.action-links,
 		display: none;
 	}
 
+	.tablenav.bottom .actions select {
+		margin-bottom: 5px;
+	}
+
+	.tablenav.bottom .actions.alignleft + .actions.alignleft {
+		clear: right;
+		margin-top: 10px;
+	}
+
 	.tablenav.bottom .tablenav-pages.one-page {
 		margin-top: 15px;
 		height: 0;
@@ -1865,7 +2004,6 @@ div.action-links,
 	/* Show comment bubble as text instead */
 	.post-com-count .screen-reader-text {
 		position: static;
-		-webkit-clip-path: none;
 		clip-path: none;
 		width: auto;
 		height: auto;
@@ -2090,6 +2228,11 @@ div.action-links,
 		display: block;
 		width: auto;
 		padding: 10px 9px; /* reset from other list tables that have a label at this width */
+	}
+
+	#wpbody-content .wp-list-table.plugins .plugin-deleted-tr td,
+	#wpbody-content .wp-list-table.plugins .no-items td {
+		display: table-cell;
 	}
 
 	/* Plugin description hidden via Screen Options */

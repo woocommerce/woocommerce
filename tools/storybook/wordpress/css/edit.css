@@ -725,6 +725,17 @@ form#tags-filter {
 	padding-left: 0;
 }
 
+/* Better position for the WordPress admin notices. */
+.privacy-settings .notice,
+.site-health .notice {
+	margin: 25px 20px 15px 22px;
+}
+
+.privacy-settings .notice ~ .notice,
+.site-health .notice ~ .notice {
+	margin-top: 5px;
+}
+
 /* Emulates .wrap h1 styling */
 .privacy-settings-header h1,
 .health-check-header h1 {
@@ -964,7 +975,7 @@ form#tags-filter {
 
 .privacy-settings-accordion-actions .success {
 	display: none;
-	color: #008a20;
+	color: #007017;
 	padding-right: 1em;
 	padding-top: 6px;
 }
@@ -1057,6 +1068,10 @@ form#tags-filter {
 	padding: 0 8px 8px;
 }
 
+#postcustom #postcustomstuff .add-custom-field {
+	padding: 12px 8px 8px;
+}
+
 #side-sortables #postcustom #postcustomstuff .submit {
 	margin: 0;
 	padding: 0;
@@ -1107,7 +1122,8 @@ form#tags-filter {
 	width: auto;
 }
 
-#postcustomstuff #newmetaleft a {
+#postcustomstuff #newmetaleft a,
+#postcustomstuff #newmeta-button {
 	display: inline-block;
 	margin: 0 8px 8px;
 	text-decoration: none;
@@ -1277,8 +1293,9 @@ div.tabs-panel-inactive {
 }
 
 div.tabs-panel-active:focus {
-	box-shadow: inset 0 0 0 1px #4f94d4, inset 0 0 2px 1px rgba(79, 148, 212, 0.8);
-	outline: 0 none;
+	box-shadow: inset 0 0 0 2px #2271b1;
+	/* Only visible in Windows High Contrast mode */
+	outline: 2px solid transparent;
 }
 
 #front-page-warning,
@@ -1672,7 +1689,6 @@ table.links-table {
  * HiDPI Displays
  */
 @media print,
-  (-webkit-min-device-pixel-ratio: 1.25),
   (min-resolution: 120dpi) {
 	#content-resize-handle,
 	#post-body .wp_themeSkin .mceStatusbar a.mceResize {

@@ -121,24 +121,10 @@
 	position: relative;
 	overflow: auto;
 	margin: 16px 0;
-	background: #2271b1 url(../images/about-texture.png) center repeat;
-	background-size: 500px 500px;
-	background-blend-mode: overlay;
+	background-color: #151515;
 	font-size: 14px;
 	line-height: 1.3;
 	clear: both;
-}
-
-.welcome-panel::before {
-	content: "";
-	position: absolute;
-	top: -16px;
-	left: 96px;
-	z-index: 0;
-	width: 300px;
-	height: 382px;
-	background: url(../images/about-header-about.svg) no-repeat center;
-	background-size: contain;
 }
 
 .welcome-panel h2 {
@@ -146,7 +132,6 @@
 	font-size: 48px;
 	font-weight: 600;
 	line-height: 1.25;
-	color: #fff;
 }
 
 .welcome-panel h3 {
@@ -162,16 +147,40 @@
 }
 
 .welcome-panel-header {
+	position: relative;
 	color: #fff;
 }
 
-.welcome-panel-header a {
-	color: #fff;
+.welcome-panel-header-image {
+	position: absolute !important;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 0 !important;
+	overflow: hidden;
+}
+
+.welcome-panel-header-image svg {
+	display: block;
+	margin: auto;
+	width: 100%;
+	height: 100%;
+}
+
+.rtl .welcome-panel-header-image svg {
+	transform: scaleX(-1);
+}
+
+.welcome-panel-header * {
+	color: inherit;
+	position: relative;
+	z-index: 1;
 }
 
 .welcome-panel-header a:focus,
 .welcome-panel-header a:hover {
-	color: #f5e6ab;
+	color: inherit;
 	text-decoration: none;
 }
 
@@ -196,6 +205,7 @@
 	font-size: 13px;
 	line-height: 1.23076923; /* Chrome rounding, needs to be 16px equivalent */
 	text-decoration: none;
+	z-index: 1; /* Raise above the version image. */
 }
 
 .welcome-panel .welcome-panel-close:before {
@@ -216,7 +226,7 @@
 .welcome-panel .welcome-panel-close:focus,
 .welcome-panel .welcome-panel-close:hover::before,
 .welcome-panel .welcome-panel-close:focus::before {
-	color: #f5e6ab;
+	color: #fff972;
 }
 
 /* @deprecated 5.9.0 -- Button removed from panel. */
@@ -241,8 +251,7 @@
 	margin-left: auto;
 	max-width: 1500px;
 	width: 100%;
-	/* 408px = 300px (balloon width) + 96px (offset from edge) + 16px (spacing). */
-	padding: 48px 48px 48px 408px;
+	padding: 48px 48px 80px 0;
 }
 
 .welcome-panel .welcome-panel-column-container {
@@ -251,7 +260,6 @@
 	clear: both;
 	display: grid;
 	z-index: 1;
-	margin-top: 32px;
 	padding: 48px;
 	grid-template-columns: repeat(3, 1fr);
 	gap: 32px;
@@ -262,11 +270,14 @@
 [class*="welcome-panel-icon"] {
 	height: 60px;
 	width: 60px;
-	background-color: #1d2327;
 	background-position: center;
 	background-size: 24px 24px;
 	background-repeat: no-repeat;
 	border-radius: 100%;
+}
+
+.welcome-panel-column > svg {
+	margin-top: 4px;
 }
 
 .welcome-panel-column {
@@ -548,6 +559,10 @@
 	display: block;
 }
 
+.community-events .ce-separator::before {
+	content: "\2022";
+}
+
 .event-icon {
 	height: 18px;
 	padding-left: 10px;
@@ -696,6 +711,11 @@ body #dashboard-widgets .postbox form .submit {
 	padding: 0;
 	font-size: 14px;
 	font-weight: 400;
+}
+
+#network_dashboard_right_now p input {
+	margin: 2px 1px;
+	vertical-align: middle;
 }
 
 /* Dashboard right now - Colors */
@@ -879,31 +899,32 @@ body #dashboard-widgets .postbox form .submit {
 
 #future-posts ul,
 #published-posts ul {
-	clear: both;
-	margin-bottom: 0;
+	margin: 8px -12px 0 -12px;
 }
 
 #future-posts li,
 #published-posts li {
-	margin-bottom: 8px;
+	display: grid;
+	grid-template-columns: clamp(160px, calc(2vw + 140px), 200px) auto;
+	column-gap: 10px;
+	color: #646970;
+	padding: 4px 12px;
 }
 
-#future-posts ul span,
-#published-posts ul span {
-	display: inline-block;
-	margin-left: 5px;
-	min-width: 150px;
-	color: #646970;
+#future-posts li:nth-child(odd),
+#published-posts li:nth-child(odd) {
+	background-color: #f6f7f7;
 }
 
 .activity-block {
 	border-bottom: 1px solid #f0f0f1;
-	margin: 0 -12px;
+	margin: 0 -12px 6px -12px;
 	padding: 8px 12px 4px;
 }
 
 .activity-block:last-child {
 	border-bottom: none;
+	margin-bottom: 0;
 }
 
 .activity-block .subsubsub li {
@@ -1184,7 +1205,8 @@ a.rsswidget {
 	padding-left: 6px;
 }
 
-#dashboard_php_nag.php-insecure .dashicons-warning {
+#dashboard_php_nag.php-no-security-updates .dashicons-warning,
+#dashboard_php_nag.php-version-lower-than-future-minimum .dashicons-warning {
 	color: #d63638;
 }
 
@@ -1196,12 +1218,13 @@ a.rsswidget {
 	margin: 12px 0;
 }
 
-#dashboard_php_nag h3 {
-	font-weight: 600;
-}
-
 #dashboard_php_nag .button .dashicons-external {
 	line-height: 25px;
+}
+
+.bigger-bolder-text {
+	font-weight: 600;
+	font-size: 14px;
 }
 
 /* =Media Queries
@@ -1348,23 +1371,13 @@ a.rsswidget {
 		grid-template-columns: 1fr;
 	}
 
-	[class*="welcome-panel-icon"] {
+	[class*="welcome-panel-icon"],
+	.welcome-panel-column > svg {
 		display: none;
 	}
 }
 
 @media screen and (max-width: 782px) {
-	.welcome-panel::before {
-		width: 240px;
-		height: 305px;
-		left: 32px;
-	}
-
-	.welcome-panel-header {
-		/* 288px = 240px (balloon width) + 32px (offset from edge) + 16px (spacing). */
-		padding: 32px 32px 32px 288px;
-	}
-
 	.welcome-panel .welcome-panel-column-container {
 		grid-template-columns: 1fr;
 		box-sizing: border-box;
@@ -1435,12 +1448,12 @@ a.rsswidget {
 
 /* Smartphone */
 @media screen and (max-width: 600px) {
-	.welcome-panel::before {
-		display: none;
+	.welcome-panel-header {
+		padding: 32px 32px 64px;
 	}
 
-	.welcome-panel-header {
-		padding: 32px;
+	.welcome-panel-header-image {
+		display: none;
 	}
 }
 
@@ -1455,7 +1468,8 @@ a.rsswidget {
 		grid-template-columns: 1fr;
 	}
 
-	[class*="welcome-panel-icon"] {
+	[class*="welcome-panel-icon"],
+	.welcome-panel-column > svg {
 		display: none;
 	}
 }

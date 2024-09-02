@@ -2,12 +2,13 @@
 /*------------------------------------------------------------------------------
   22.0 - About Pages
 
-   1.0 Global: About, Credits, Freedoms, Privacy
+   1.0 Global: About, Credits, Freedoms, Privacy, Get Involved
     1.1 Layout
     1.2 Typography & Elements
     1.3 Header
    2.0 Credits Page
    3.0 Freedoms Page
+   4.0 Privacy Page
    x.2.0 Legacy About Styles: Global
     x.2.1 Typography
     x.2.2 Structure
@@ -21,16 +22,17 @@
 
 .about__container {
 	/* Section backgrounds */
-	--background: transparent;
-	--subtle-background: #def;
+	--background: #ededed;
+	--subtle-background: #eef0fd;
 
 	/* Main text color */
-	--text: #000;
+	--text: #1e1e1e;
 	--text-light: #fff;
 
 	/* Accent colors: used in header, on special classes. */
-	--accent-1: #3858e9; /* Accent background, link color */
-	--accent-2: #3858e9; /* Header background */
+	--accent-1: #3858e9; /* Link color */
+	--accent-2: #3858e9; /* Accent background */
+	--accent-3: #ededed; /* hr background */
 
 	/* Navigation colors. */
 	--nav-background: #fff;
@@ -38,25 +40,29 @@
 	--nav-color: var(--text);
 	--nav-current: var(--accent-1);
 
+	--border-radius: 16px;
+
 	--gap: 2rem;
 }
 
 /*------------------------------------------------------------------------------
-  1.0 - Global: About, Credits, Freedoms, Privacy
+  1.0 - Global: About, Credits, Freedoms, Privacy, Get Involved
 ------------------------------------------------------------------------------*/
 
 .about-php,
 .credits-php,
 .freedoms-php,
-.privacy-php {
-	background: #f0f7ff;
+.privacy-php,
+.contribute-php {
+	background: #fff;
 }
 
 .about-php #wpcontent,
 .credits-php #wpcontent,
 .freedoms-php #wpcontent,
-.privacy-php #wpcontent {
-	background: linear-gradient(-180deg, #fff 50%, #f0f7ff 100%);
+.privacy-php #wpcontent,
+.contribute-php #wpcontent {
+	background: #fff;
 	padding: 0 24px;
 }
 
@@ -64,7 +70,8 @@
 	.about-php.auto-fold #wpcontent,
 	.credits-php.auto-fold #wpcontent,
 	.freedoms-php.auto-fold #wpcontent,
-	.privacy-php.auto-fold #wpcontent {
+	.privacy-php.auto-fold #wpcontent,
+	.contribute-php.auto-fold #wpcontent {
 		padding-right: 24px;
 	}
 }
@@ -100,17 +107,13 @@
 }
 
 .about__section {
-	background: var(--background);
+	background: transparent;
 	clear: both;
 }
 
 .about__container .has-accent-background-color {
-	background-color: var(--accent-1);
 	color: var(--text-light);
-}
-
-.about__container .has-accent-background-color a {
-	color: var(--text-light);
+	background-color: var(--accent-2);
 }
 
 .about__container .has-transparent-background-color {
@@ -118,7 +121,7 @@
 }
 
 .about__container .has-accent-color {
-	color: var(--accent-1);
+	color: var(--accent-2);
 }
 
 .about__container .has-border {
@@ -138,7 +141,7 @@
 /* 1.1 - Layout */
 
 .about__section {
-	margin: 0 0 var(--gap);
+	margin: 0;
 }
 
 .about__section .column:not(.is-edge-to-edge) {
@@ -149,9 +152,9 @@
 	padding-bottom: var(--gap);
 }
 
-.about__section .column[class*="background-color"],
-.about__section:where([class*="background-color"]) .column,
-.about__section .column.has-border {
+.about__section .column[class*="background-color"]:not(.is-edge-to-edge),
+.about__section:where([class*="background-color"]) .column:not(.is-edge-to-edge),
+.about__section .column.has-border:not(.is-edge-to-edge) {
 	padding-top: var(--gap);
 	padding-bottom: var(--gap);
 }
@@ -210,7 +213,7 @@
 
 .about__section.has-gutters {
 	gap: var(--gap);
-	margin-bottom: calc(var(--gap) * 2);
+	margin-bottom: var(--gap);
 }
 
 .about__section.has-2-columns {
@@ -225,74 +228,17 @@
 	grid-template-columns: 3fr 2fr;
 }
 
-.about__section.has-2-columns .is-section-header {
+.about__section .is-section-header {
 	grid-column-start: 1;
-	-ms-grid-column-span: 2;
-	grid-column-end: span 2;
-}
-
-.about__section.has-2-columns .column:nth-of-type(2n+1) {
-	grid-column-start: 1;
-}
-
-.about__section.has-2-columns .column:nth-of-type(2n) {
-	grid-column-start: 2;
+	grid-column-end: -1;
 }
 
 .about__section.has-3-columns {
 	grid-template-columns: repeat(3, 1fr);
 }
 
-.about__section.has-3-columns .is-section-header {
-	grid-column-start: 1;
-	-ms-grid-column-span: 3;
-	grid-column-end: span 3;
-}
-
-.about__section.has-3-columns .column:nth-of-type(3n+1) {
-	grid-column-start: 1;
-}
-
-.about__section.has-3-columns .column:nth-of-type(3n+2) {
-	grid-column-start: 2;
-}
-
-.about__section.has-3-columns .column:nth-of-type(3n) {
-	grid-column-start: 3;
-}
-
 .about__section.has-4-columns {
 	grid-template-columns: repeat(4, 1fr);
-}
-
-.about__section.has-4-columns .is-section-header {
-	grid-column-start: 1;
-	-ms-grid-column-span: 4;
-	grid-column-end: span 4;
-}
-
-.about__section.has-4-columns .column:nth-of-type(4n+1) {
-	grid-column-start: 1;
-}
-
-.about__section.has-4-columns .column:nth-of-type(4n+2) {
-	grid-column-start: 2;
-}
-
-.about__section.has-4-columns .column:nth-of-type(4n+3) {
-	grid-column-start: 3;
-}
-
-.about__section.has-4-columns .column:nth-of-type(4n) {
-	grid-column-start: 4;
-}
-
-/* Any columns following a section header need to be explicitly put into the second row, for IE support. */
-.about__section.has-2-columns .is-section-header ~ .column,
-.about__section.has-3-columns .is-section-header ~ .column,
-.about__section.has-4-columns .is-section-header ~ .column,
-.about__section.has-overlap-style .is-section-header ~ .column {
-	grid-row-start: 2;
 }
 
 .about__section.has-overlap-style {
@@ -305,13 +251,11 @@
 
 .about__section.has-overlap-style .column:nth-of-type(2n+1) {
 	grid-column-start: 2;
-	-ms-grid-column-span: 3;
 	grid-column-end: span 3;
 }
 
 .about__section.has-overlap-style .column:nth-of-type(2n) {
 	grid-column-start: 4;
-	-ms-grid-column-span: 3;
 	grid-column-end: span 3;
 }
 
@@ -359,29 +303,6 @@
 		grid-template-columns: repeat(2, 1fr);
 	}
 
-	.about__section.has-4-columns .column:nth-of-type(2n+1) {
-		grid-column-start: 1;
-	}
-
-	.about__section.has-4-columns .column:nth-of-type(2n) {
-		grid-column-start: 2;
-	}
-
-	.about__section.has-4-columns .column:nth-of-type(4n+3),
-	.about__section.has-4-columns .column:nth-of-type(4n) {
-		grid-row-start: 2;
-	}
-
-	.about__section.has-4-columns .is-section-header {
-		-ms-grid-column-span: 2;
-		grid-column-end: span 2;
-	}
-
-	.about__section.has-4-columns .is-section-header ~ .column:nth-of-type(4n+3),
-	.about__section.has-4-columns .is-section-header ~ .column:nth-of-type(4n) {
-		grid-row-start: 3;
-	}
-
 	.about__section.has-overlap-style {
 		grid-template-columns: 1fr;
 	}
@@ -389,10 +310,8 @@
 	/* At this size, the two columns fully overlap */
 	.about__section.has-overlap-style .column.column {
 		grid-column-start: 1;
-		-ms-grid-column-span: 1;
 		grid-column-end: 2;
 		grid-row-start: 1;
-		-ms-grid-row-span: 1;
 		grid-row-end: 2;
 	}
 }
@@ -422,7 +341,8 @@
 }
 
 @media screen and (max-width: 480px) {
-	.about__section.is-feature .column {
+	.about__section.is-feature .column,
+	.about__section .is-section-header {
 		padding: 0;
 	}
 
@@ -454,26 +374,46 @@
 
 .about__container h1 {
 	padding: 0;
-	color: inherit;
 }
 
 .about__container h1,
 .about__container h2,
 .about__container h3.is-larger-heading {
 	margin-top: 0;
-	margin-bottom: 0.5em;
-	font-size: 2em;
-	line-height: 1.2;
+	margin-bottom: calc(0.5 * var(--gap));
+	font-size: 2rem;
 	font-weight: 700;
+	line-height: 1.16;
 }
 
 .about__container h3,
 .about__container h1.is-smaller-heading,
 .about__container h2.is-smaller-heading {
 	margin-top: 0;
-	font-size: 1.6em;
-	line-height: 1.3;
-	font-weight: 400;
+	margin-bottom: calc(0.5 * var(--gap));
+	font-size: 1.625rem;
+	font-weight: 700;
+	line-height: 1.4;
+}
+
+.about__container h4,
+.about__container h3.is-smaller-heading {
+	margin-top: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.about__container h1,
+.about__container h2,
+.about__container h3,
+.about__container h4 {
+	text-wrap: balance;
+	color: inherit;
+}
+
+.about__container p {
+	text-wrap: pretty;
 }
 
 .about__container p {
@@ -483,7 +423,9 @@
 
 .about__container p.is-subheading {
 	margin-top: 0;
-	font-size: 1.8em;
+	font-size: 1.5rem;
+	font-weight: 300;
+	line-height: 160%;
 }
 
 .about__section a {
@@ -508,9 +450,17 @@
 	text-decoration: underline;
 }
 
+.about__section a.button.button-hero {
+	font-size: 1.5rem;
+}
+
 .about__container ul {
 	list-style: disc;
 	margin-right: calc(var(--gap) / 2);
+}
+
+.about__container li {
+	margin-bottom: 0.5rem;
 }
 
 .about__container img {
@@ -527,6 +477,7 @@
 	max-width: 100%;
 	width: 100%;
 	height: auto;
+	border-radius: var(--border-radius);
 }
 
 .about__container .about__image figcaption {
@@ -539,23 +490,32 @@
 	margin-left: auto;
 }
 
+.about__container .about__image svg {
+	vertical-align: middle;
+}
+
 .about__container .about__image + h3 {
-	margin-top: 1.5em;
+	margin-top: calc(0.75 * var(--gap));
 }
 
 .about__container hr {
-	margin: 0;
-	height: var(--gap);
+	margin: calc(var(--gap) / 2) var(--gap);
+	height: 0;
 	border: none;
+	border-top: 4px solid var(--accent-3);
 }
 
 .about__container hr.is-small {
-	height: calc(var(--gap) / 4);
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 .about__container hr.is-large {
-	height: calc(var(--gap) * 2);
-	margin: calc(var(--gap) / 2) auto;
+	margin: var(--gap) auto;
+}
+
+.about__container hr.is-invisible {
+	border: none;
 }
 
 .about__container div.updated,
@@ -564,12 +524,22 @@
 	display: none !important;
 }
 
+.about__container code {
+	font-size: inherit;
+}
+
 .about__section {
-	font-size: 1.2em;
+	font-size: 1.125rem;
+	line-height: 1.55;
 }
 
 .about__section.is-feature {
 	font-size: 1.6em;
+}
+
+.about__section.has-3-columns,
+.about__section.has-4-columns {
+	font-size: 1rem;
 }
 
 @media screen and (max-width: 480px) {
@@ -588,46 +558,17 @@
 
 .about__header {
 	position: relative;
-	margin-bottom: var(--gap);
-	padding-top: 0;
-	background-image: url('../images/about-texture.png');
-	background-color: var(--accent-2);
-	background-size: 500px 500px;
-	background-blend-mode: overlay;
-	color: var(--text-light);
-}
-
-.about__header::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	left: 64px;
-	z-index: 0;
-	width: 300px;
-	height: 382px;
-	background: url(../images/about-header-about.svg) no-repeat center;
-	background-size: contain;
-}
-
-.credits-php .about__header::before {
-	top: auto;
-	bottom: 70px;
-	height: 310px;
-	background-image: url('../images/about-header-credits.svg');
-}
-
-.freedoms-php .about__header::before {
-	top: calc(50% - 182px);
-	left: 32px;
-	width: 375px;
-	height: 300px;
-	background-image: url('../images/about-header-freedoms.svg');
-}
-
-.privacy-php .about__header::before {
-	top: auto;
-	bottom: -16px;
-	background-image: url('../images/about-header-privacy.svg');
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-end;
+	box-sizing: border-box;
+	padding: calc(var(--gap) * 1.5);
+	min-height: clamp(10rem, 25vw, 18.75rem);
+	border-radius: var(--border-radius);
+	background-repeat: no-repeat;
+	background-position: left 7% center, top right;
+	background-color: var(--background);
 }
 
 .about__header-image {
@@ -636,44 +577,52 @@
 
 .about__header-title {
 	box-sizing: border-box;
-	/* 380px = 300px (balloon width) + 64px (offset from edge) + 16px (spacing). */
-	padding: 6rem 0 0 380px;
-	margin: 0 2rem;
+	margin: 0;
+	padding: 0;
 }
 
 .about__header-title h1 {
-	margin: 0 0 0.5rem;
+	margin: 0;
 	padding: 0;
-	font-size: 4.5rem;
+	/* Fluid font size scales on browser size 960px - 1200px. */
+	font-size: clamp(2rem, 20vw - 9rem, 4rem);
 	line-height: 1;
-	font-weight: 400;
+	font-weight: 600;
+}
+
+.about-php .about__header-title h1,
+.credits-php .about__header-title h1,
+.freedoms-php .about__header-title h1,
+.privacy-php .about__header-title h1,
+.contribute-php .about__header-title h1 {
+	/* Fluid font size scales on browser size 960px - 1200px. */
+	font-size: clamp(2rem, 20vw - 9rem, 4rem);
 }
 
 .about__header-text {
 	box-sizing: border-box;
-	margin: 0 0 7rem;
-	/* 380px = 300px (balloon width) + 64px (offset from edge) + 16px (spacing). */
-	padding: 0 2rem 0 380px;
+	max-width: 26em;
+	margin: 1rem 0 0;
+	padding: 0;
 	font-size: 1.6rem;
 	line-height: 1.15;
-}
-
-.freedoms-php .about__header-title,
-.freedoms-php .about__header-text {
-	/* 423px = 375px (balloon width) + 32px (offset from edge) + 16px (spacing). */
-	padding-left: 423px;
-	margin-left: 0;
 }
 
 .about__header-navigation {
 	position: relative;
 	z-index: 1;
 	display: flex;
-	justify-content: center;
+	flex-wrap: wrap;
+	justify-content: space-between;
 	padding-top: 0;
+	margin-bottom: var(--gap);
 	background: var(--nav-background);
 	color: var(--nav-color);
 	border-bottom: 3px solid var(--nav-border);
+}
+
+.about__header-navigation::after {
+	display: none;
 }
 
 .about__header-navigation .nav-tab {
@@ -709,34 +658,23 @@
 	border-color: var(--nav-current);
 }
 
-@media screen and (max-width: 960px){
-	.about__header-title h1 {
-		font-size: 4.8em;
+@media screen and (max-width: 960px) {
+
+	.about-php .about__header-title h1,
+	.credits-php .about__header-title h1,
+	.freedoms-php .about__header-title h1,
+	.privacy-php .about__header-title h1,
+	.contribute-php .about__header-title h1 {
+		/* Fluid font size scales on browser size 600px - 960px. */
+		font-size: clamp(2rem, 20vw - 9rem, 4rem);
+	}
+
+	.about__header-navigation .nav-tab {
+		padding: calc(var(--gap) * 0.75) calc(var(--gap) * 0.5);
 	}
 }
 
 @media screen and (max-width: 782px) {
-	.about__header::before {
-		width: 240px;
-		height: 305px;
-		left: 32px;
-	}
-
-	.credits-php .about__header::before {
-		height: 248px;
-	}
-
-	.freedoms-php .about__header::before {
-		top: calc(50% - 132px);
-		height: 192px;
-		width: 240px;
-	}
-
-	.privacy-php .about__header::before {
-		bottom: 0;
-		height: 280px;
-	}
-
 	.about__container .about__header-text {
 		font-size: 1.4em;
 	}
@@ -745,54 +683,32 @@
 		display: block;
 	}
 
-	.about__header-title,
-	.about__header-text {
-		/* 288px = 240px (balloon width) + 32px (offset from edge) + 16px (spacing). */
-		padding-left: 288px !important;
-	}
-
-	.about__header-title,
-	.about__header-image {
-		margin-right: calc(var(--gap) / 2);
-		margin-left: calc(var(--gap) / 2);
+	.about__header {
+		padding: var(--gap);
 	}
 
 	.about__header-text {
-		margin-top: 0;
-		margin-left: 0;
-		padding-right: calc(var(--gap) / 2);
+		margin-top: 0.5rem;
 	}
 
 	.about__header-navigation .nav-tab {
 		margin-top: 0;
 		margin-left: 0;
-		padding-right: calc(var(--gap) / 2);
-		padding-left: calc(var(--gap) / 2);
+		font-size: 1.2em;
 	}
 }
 
 @media screen and (max-width: 600px) {
-	.about__header::before {
-		display: none;
+	.about__header {
+		min-height: auto;
 	}
 
-	.about__header-title,
-	.about__header-text {
-		padding-left: calc(var(--gap) / 2) !important;
-	}
-}
-
-@media screen and (max-width: 480px) {
-	.about__header-title p {
-		font-size: 2.4em;
-	}
-
-	.about__header-title {
-		padding-top: 2rem;
-	}
-
-	.about__header-text {
-		margin-bottom: 2rem;
+	.about__header,
+	.credits-php .about__header,
+	.freedoms-php .about__header,
+	.privacy-php .about__header,
+	.contribute-php .about__header {
+		background-image: none;
 	}
 
 	.about__header-navigation {
@@ -819,7 +735,7 @@
 ------------------------------------------------------------------------------*/
 
 .about__section .wp-people-group-title {
-	margin-bottom: calc(var(--gap) * 2);
+	margin-bottom: calc(var(--gap) * 2 - 10px);
 	text-align: center;
 
 }
@@ -834,7 +750,7 @@
 	display: inline-block;
 	vertical-align: top;
 	box-sizing: border-box;
-	margin-bottom: var(--gap);
+	margin-bottom: calc(var(--gap) - 10px);
 	width: 25%;
 	text-align: center;
 }
@@ -851,14 +767,12 @@
 	height: 140px;
 	border-radius: 100%;
 	overflow: hidden;
-	background: var(--accent-1);
 }
 
 .about__section .wp-person .gravatar {
 	width: 140px;
 	height: 140px;
 	filter: grayscale(100%);
-	mix-blend-mode: screen;
 }
 
 .about__section .compact .wp-person-avatar,
@@ -868,8 +782,10 @@
 }
 
 .about__section .wp-person .web {
+	display: block;
 	font-size: 1.4em;
 	font-weight: 600;
+	padding: 10px 10px 0;
 	text-decoration: none;
 }
 
@@ -937,7 +853,19 @@
 
 .about__section .column .freedom-image {
 	margin-bottom: var(--gap);
-	max-height: 140px;
+	max-height: 180px;
+}
+
+
+/*------------------------------------------------------------------------------
+  4.0 - Privacy Page
+------------------------------------------------------------------------------*/
+
+.about__section .column .privacy-image {
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+	max-width: 25rem;
 }
 
 
@@ -1196,7 +1124,7 @@
 }
 
 .about-wrap .is-vertically-aligned-top {
-	align-self: start;
+	align-self: flex-start;
 }
 
 .about-wrap .is-vertically-aligned-center {
@@ -1361,24 +1289,6 @@
 .freedoms-php .about-wrap ol p {
 	font-weight: 400;
 	margin: 0.6em 0;
-}
-
-.freedoms-php .column .freedoms-image {
-	background-image: url('../images/freedoms.png');
-	background-size: 100%;
-	padding-top: 100%;
-}
-
-.freedoms-php .column:nth-of-type(2) .freedoms-image {
-	background-position: 100% 34%;
-}
-
-.freedoms-php .column:nth-of-type(3) .freedoms-image {
-	background-position: 100% 66%;
-}
-
-.freedoms-php .column:nth-of-type(4) .freedoms-image {
-	background-position: 100% 100%;
 }
 
 /*------------------------------------------------------------------------------
