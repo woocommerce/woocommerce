@@ -202,15 +202,12 @@ test.describe(
 					.getByText( 'Local pickup' )
 					.click();
 
-				// Verify updated shipping costs
-				await expect(
-					page.getByText( 'ShippingFreeLocal' )
-				).toBeVisible();
-				await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
-					firstProductPrice
-				);
-			}
-		);
+			// Verify updated shipping costs
+			await expect( page.getByText( 'DeliveryFreeLocal' ) ).toBeVisible();
+			await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
+				firstProductPrice
+			);
+		} );
 
 		test(
 			'should show correct total cart block price after updating quantity',
@@ -290,17 +287,14 @@ test.describe(
 					.getByText( 'Local pickup' )
 					.click();
 
-				// Verify updated shipping costs
-				await expect(
-					page.getByText( 'ShippingFreeLocal' )
-				).toBeVisible();
-				await expect(
-					page
-						.locator( 'div' )
-						.filter( { hasText: /^\$30\.00$/ } )
-						.locator( 'span' )
-				).toBeVisible();
-			}
-		);
+			// Verify updated shipping costs
+			await expect( page.getByText( 'DeliveryFreeLocal' ) ).toBeVisible();
+			await expect(
+				page
+					.locator( 'div' )
+					.filter( { hasText: /^\$30\.00$/ } )
+					.locator( 'span' )
+			).toBeVisible();
+		} );
 	}
 );
