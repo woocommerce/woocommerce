@@ -29,24 +29,9 @@ class ProductFilters extends AbstractBlock {
 	 * @return string
 	 */
 	protected function render_dialog() {
-		$template_part = BlockTemplateUtils::get_template_part( 'product-filters' );
+		$template_part = BlockTemplateUtils::get_template_part( 'product-filters-overlay' );
 
-		$parsed_blocks         = parse_blocks(
-			$template_part
-		);
-		$product_filters_block = $parsed_blocks[0];
-		$html                  = $product_filters_block['innerHTML'];
-		$target_div            = '</div>';
-
-		$product_filters_content_html = array_reduce(
-			$product_filters_block['innerBlocks'],
-			function ( $carry, $item ) {
-				return $carry . render_block( $item );
-			},
-			''
-		);
-
-		$html = str_replace( $target_div, $product_filters_content_html . $target_div, $html );
+		$html = $this->render_template_part( $template_part );
 
 		$html = strtr(
 			'<dialog hidden role="dialog" aria-modal="true">
@@ -57,13 +42,46 @@ class ProductFilters extends AbstractBlock {
 			)
 		);
 
-		$p    = new \WP_HTML_Tag_Processor( $html );
+		$p = new \WP_HTML_Tag_Processor( $html );
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute( 'data-wc-bind--hidden', '!state.isDialogOpen' );
 			$p->set_attribute( 'data-wc-class--wc-block-product-filters--dialog-open', 'state.isDialogOpen' );
 			$html = $p->get_updated_html();
 		}
+
+		return $html;
+	}
+
+	/**
+	 * This method is used to render the template part. For each template part, we parse the blocks and render them.
+	 *
+	 * @param string $template_part The template part to render.
+	 * @return string The rendered template part.
+	 */
+	protected function render_template_part( $template_part ) {
+		$parsed_blocks         = parse_blocks(
+			$template_part
+		);
+		$wrapper_template_part_block = $parsed_blocks[0];
+		$html                  = $wrapper_template_part_block['innerHTML'];
+		$target_div            = '</div>';
+
+		$template_part_content_html = array_reduce(
+			$wrapper_template_part_block['innerBlocks'],
+			function ( $carry, $item ) {
+				if ( 'core/template-part' === $item['blockName'] ) {
+					$inner_template_part = BlockTemplateUtils::get_template_part( $item['attrs']['slug'] );
+					$inner_template_part_content_html = $this->render_template_part( $inner_template_part );
+
+					return $carry . $inner_template_part_content_html;
+				}
+				return $carry . render_block( $item );
+			},
+						''
+					);
+
+		$html = str_replace( $target_div, $template_part_content_html . $target_div, $html );
 
 		return $html;
 	}

@@ -61,6 +61,7 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 				'data-wc-on--click',
 				'open-overlay' === $attributes['triggerType'] ? 'actions.openDialog' : 'actions.closeDialog'
 			);
+			$p->set_attribute( 'data-wc-class--hidden', 'open-overlay' === $attributes['triggerType'] ? 'state.isDialogOpen' : '!state.isDialogOpen' );
 			$html = $p->get_updated_html();
 		}
 
