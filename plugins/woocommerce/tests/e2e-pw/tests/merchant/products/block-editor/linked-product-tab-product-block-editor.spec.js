@@ -2,7 +2,7 @@ const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
 
 const { clickOnTab } = require( '../../../../utils/simple-products' );
-const { api, helpers } = require( '../../../../utils' );
+const { helpers } = require( '../../../../utils' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -10,8 +10,11 @@ const NEW_EDITOR_ADD_PRODUCT_URL =
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 const uniqueId = helpers.random();
+let categoryId = 0;
+const categoryName = `cat_${ uniqueId }`;
+const productName = `Product ${ uniqueId }`;
 const productData = {
-	name: `Linked product name ${ uniqueId }`,
+	name: `Linked ${ productName }`,
 	summary: 'This is a product summary',
 };
 
@@ -21,25 +24,48 @@ let productId = 0;
 
 test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Linked product', () => {
-		test.beforeAll( async () => {
+		test.beforeAll( async ( { api } ) => {
+			await api
+				.post( 'products/categories', {
+					name: categoryName,
+				} )
+				.then( ( response ) => {
+					categoryId = response.data.id;
+				} );
+
 			for ( let i = 1; i <= 5; i++ ) {
+				// const id = await api.create.product( product );
 				const product = {
 					name: `Product ${ uniqueId } ${ i }`,
-					productPrice: `${ i }00`,
+					regular_price: `${ i }0000`,
+					sale_price: `${ i }000`,
 					type: 'simple',
+					categories: [ { id: categoryId } ],
 				};
-				linkedProductsData.push( product );
-				const id = await api.create.product( product );
-				productIds.push( id );
+				await api.post( 'products', product ).then( ( response ) => {
+					productIds.push( response.data.id );
+					linkedProductsData.push( product );
+				} );
 			}
 		} );
 
-		test.afterAll( async () => {
+		test.afterAll( async ( { api } ) => {
 			for ( const aProductId of productIds ) {
-				await api.deletePost.product( aProductId );
+				// await api.deletePost.product( aProductId );
+				await api.delete( `products/${ aProductId }`, {
+					force: true,
+				} );
 			}
-			await api.deletePost.product( productId );
+			// await api.deletePost.product( productId );
+			await api.delete( `products/${ productId }`, {
+				force: true,
+			} );
+
+			await api.delete( `products/categories/${ categoryId }`, {
+				force: true,
+			} );
 		} );
+
 		test.skip(
 			isTrackingSupposedToBeEnabled,
 			'The block product editor is not being tested'
@@ -60,7 +86,24 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				.last()
 				.fill( productData.summary );
 
+			// Include in category
+			await clickOnTab( 'Organization', page );
+			await page.getByLabel( 'Categories' ).click();
+			await page.getByLabel( categoryName ).check();
+			await page.getByLabel( `Remove Uncategorized` ).click();
+			await expect(
+				page.getByLabel( `Remove ${ categoryName }` )
+			).toBeVisible();
+
+			const waitForProductsSearchResponse = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes( '/wp-json/wc/v3/products?search' ) &&
+					response.status() === 200
+			);
 			await clickOnTab( 'Linked products', page );
+			await waitForProductsSearchResponse;
 
 			await expect(
 				page.getByRole( 'heading', {
@@ -74,7 +117,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 				)
 				.first()
 				.getByRole( 'combobox' )
-				.fill( linkedProductsData[ 0 ].name );
+				.pressSequentially( productName );
 
 			await page.getByText( linkedProductsData[ 0 ].name ).click();
 
@@ -91,7 +134,7 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await chooseProductsResponsePromise;
 
 			await expect(
-				page.getByRole( 'row', { name: `Product ${ uniqueId }` } )
+				page.getByRole( 'row', { name: productName } )
 			).toHaveCount( 4 );
 
 			const upsellsRows = page.locator(
