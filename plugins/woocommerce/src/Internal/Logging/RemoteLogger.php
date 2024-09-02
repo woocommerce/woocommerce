@@ -70,7 +70,7 @@ class RemoteLogger extends \WC_Log_Handler {
 				'wc_version'  => WC()->version,
 				'php_version' => phpversion(),
 				'wp_version'  => get_bloginfo( 'version' ),
-				'request_uri' => filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL ),
+				'request_uri' => $this->sanitize_request_uri( filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL ) ),
 			),
 		);
 
@@ -430,5 +430,53 @@ class RemoteLogger extends \WC_Log_Handler {
 	 */
 	protected function is_dev_or_local_environment() {
 		return in_array( wp_get_environment_type(), array( 'development', 'local' ), true );
+	}
+	/**
+	 * Sanitize the request URI to only allow certain query parameters.
+	 *
+	 * @param string $request_uri The request URI to sanitize.
+	 * @return string The sanitized request URI.
+	 */
+	private function sanitize_request_uri( $request_uri ) {
+		$default_whitelist = array( 'path', 'page', 'step', 'task', 'tab' );
+
+		/**
+		 * Filter to allow other plugins to whitelist request_uri query parameter values for unmasked remote logging.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param string   $default_whitelist The default whitelist of query parameters.
+		 */
+		$whitelist = apply_filters( 'woocommerce_remote_logger_request_uri_whitelist', $default_whitelist );
+
+		$parsed_url = wp_parse_url( $request_uri );
+		if ( ! isset( $parsed_url['query'] ) ) {
+			return $request_uri;
+		}
+
+		parse_str( $parsed_url['query'], $query_params );
+
+		foreach ( $query_params as $key => &$value ) {
+			if ( ! in_array( $key, $whitelist, true ) ) {
+				$value = 'xxxxxx';
+			}
+		}
+
+		$parsed_url['query'] = http_build_query( $query_params );
+		return $this->build_url( $parsed_url );
+	}
+
+	/**
+	 * Build a URL from its parsed components.
+	 *
+	 * @param array $parsed_url The parsed URL components.
+	 * @return string The built URL.
+	 */
+	private function build_url( $parsed_url ) {
+		$path     = $parsed_url['path'] ?? '';
+		$query    = isset( $parsed_url['query'] ) ? "?{$parsed_url['query']}" : '';
+		$fragment = isset( $parsed_url['fragment'] ) ? "#{$parsed_url['fragment']}" : '';
+
+		return "$path$query$fragment";
 	}
 }
