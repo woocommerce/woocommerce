@@ -88,7 +88,13 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 
 			// Include in category
 			await clickOnTab( 'Organization', page );
+			const waitForCategoriesResponse = page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wp-json/wp/v2/product_cat' ) &&
+					response.status() === 200
+			);
 			await page.getByLabel( 'Categories' ).click();
+			await waitForCategoriesResponse;
 			await page.getByLabel( categoryName ).check();
 			await page.getByLabel( `Remove Uncategorized` ).click();
 			await expect(
