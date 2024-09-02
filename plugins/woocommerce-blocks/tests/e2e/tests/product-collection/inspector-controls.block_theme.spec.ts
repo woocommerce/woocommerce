@@ -68,9 +68,7 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		// Products can be filtered based on 'on sale' status.
-		test( 'Products can be filtered based on "on sale" status', async ( {
-			pageObject,
-		} ) => {
+		test( 'Show "on sale" products only', async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 
 			let allProducts = pageObject.products;
@@ -82,7 +80,7 @@ test.describe( 'Product Collection', () => {
 			await expect( saleProducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
-				onSale: true,
+				onSale: 'show-only',
 			} );
 
 			await expect( allProducts ).toHaveCount( 6 );
@@ -97,6 +95,35 @@ test.describe( 'Product Collection', () => {
 
 			await expect( allProducts ).toHaveCount( 6 );
 			await expect( saleProducts ).toHaveCount( 6 );
+		} );
+
+		test( 'Hide "on sale" products', async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+
+			let allProducts = pageObject.products;
+			let saleProducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
+
+			await expect( allProducts ).toHaveCount( 9 );
+			await expect( saleProducts ).toHaveCount( 6 );
+
+			await pageObject.setShowOnlyProductsOnSale( {
+				onSale: 'dont-show',
+			} );
+
+			await expect( allProducts ).toHaveCount( 9 );
+			await expect( saleProducts ).toHaveCount( 0 );
+
+			await pageObject.publishAndGoToFrontend();
+			await pageObject.refreshLocators( 'frontend' );
+			allProducts = pageObject.products;
+			saleProducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
+
+			await expect( allProducts ).toHaveCount( 9 );
+			await expect( saleProducts ).toHaveCount( 0 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
@@ -479,7 +506,7 @@ test.describe( 'Product Collection', () => {
 
 				// "On sale control" should retain its state when inherit query from template is enabled again
 				await pageObject.setShowOnlyProductsOnSale( {
-					onSale: true,
+					onSale: 'show-only',
 					isLocatorsRefreshNeeded: false,
 				} );
 				await expect(

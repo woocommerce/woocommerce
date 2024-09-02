@@ -405,6 +405,8 @@ class ProductCollectionPage {
 			| 'Featured'
 			| 'Created'
 			| 'Price Range'
+			| 'Hide and reset On Sale'
+			| 'Show On Sale'
 	) {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
@@ -483,19 +485,26 @@ class ProductCollectionPage {
 			onSale,
 			isLocatorsRefreshNeeded,
 		}: {
-			onSale: boolean;
+			onSale: 'show-only' | 'dont-show' | undefined;
 			isLocatorsRefreshNeeded?: boolean;
 		} = {
 			isLocatorsRefreshNeeded: true,
-			onSale: true,
+			onSale: 'show-only',
 		}
 	) {
-		if ( onSale ) {
+		const onSaleControl = this.getOnSaleControl();
+		if ( ! ( await onSaleControl.isVisible() ) ) {
+			await this.addFilter( 'Show On Sale' );
+		}
+
+		if ( onSale === 'show-only' ) {
 			const showOnlyOption = this.getOnSaleControlShowOnlyOption();
 			await showOnlyOption.click();
-		} else {
+		} else if ( onSale === 'dont-show' ) {
 			const dontShowOption = this.getOnSaleControlDontShowOption();
 			await dontShowOption.click();
+		} else {
+			await this.addFilter( 'Hide and reset On Sale' );
 		}
 
 		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );

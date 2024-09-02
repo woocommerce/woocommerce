@@ -189,10 +189,10 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// attributes.query.woocommerceOnSale
 	if (
 		config.attributes?.query?.woocommerceOnSale !== undefined &&
-		typeof config.attributes.query.woocommerceOnSale !== 'boolean'
+		typeof config.attributes.query.woocommerceOnSale !== 'string'
 	) {
 		console.warn(
-			'Invalid woocommerceOnSale: woocommerceOnSale must be a boolean.'
+			'Invalid woocommerceOnSale: woocommerceOnSale must be a string.'
 		);
 	}
 	// attributes.query.woocommerceStockStatus

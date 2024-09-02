@@ -30,7 +30,7 @@ const attributes = {
 		shrinkColumns: true,
 	},
 	query: {
-		woocommerceOnSale: true,
+		woocommerceOnSale: 'show-only',
 		perPage: 5,
 		pages: 1,
 	},
