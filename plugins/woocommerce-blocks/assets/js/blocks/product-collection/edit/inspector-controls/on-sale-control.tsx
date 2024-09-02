@@ -17,27 +17,35 @@ import {
 /**
  * Internal dependencies
  */
-import { CoreFilterNames, QueryControlProps } from '../../types';
+import {
+	CoreFilterNames,
+	type ProductCollectionQuery,
+	type QueryControlProps,
+} from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const OnSaleControl = ( props: QueryControlProps ) => {
 	const { query, trackInteraction, setQueryAttribute } = props;
 
-	function changeOnSaleQueryAttribute( woocommerceOnSale?: boolean ) {
+	function changeOnSaleQueryAttribute(
+		woocommerceOnSale?: ProductCollectionQuery[ 'woocommerceOnSale' ]
+	) {
 		setQueryAttribute( { woocommerceOnSale } );
 		trackInteraction( CoreFilterNames.ON_SALE );
 	}
 
 	function handleToolsPanelItemSelect() {
-		changeOnSaleQueryAttribute( true );
+		changeOnSaleQueryAttribute( 'show-only' );
 	}
 
 	function handleToolsPanelItemDeselect() {
 		changeOnSaleQueryAttribute( DEFAULT_FILTERS.woocommerceOnSale );
 	}
 
-	function handleOnSaleProductsChange( optionValue: string ) {
-		changeOnSaleQueryAttribute( optionValue === 'show-only' );
+	function handleOnSaleProductsChange(
+		optionValue: ProductCollectionQuery[ 'woocommerceOnSale' ]
+	) {
+		changeOnSaleQueryAttribute( optionValue );
 	}
 
 	return (
@@ -57,7 +65,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 					'woocommerce'
 				) }
 				isBlock
-				value={ query.woocommerceOnSale ? 'show-only' : 'dont-show' }
+				value={ query.woocommerceOnSale }
 				onChange={ handleOnSaleProductsChange }
 			>
 				<ToggleGroupControlOption
