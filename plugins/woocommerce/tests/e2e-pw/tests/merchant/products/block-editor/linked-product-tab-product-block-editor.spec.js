@@ -2,7 +2,7 @@ const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
 
 const { clickOnTab } = require( '../../../../utils/simple-products' );
-const { api } = require( '../../../../utils' );
+const { api, helpers } = require( '../../../../utils' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -17,13 +17,14 @@ const productData = {
 const linkedProductsData = [],
 	productIds = [];
 let productId = 0;
+const uniqueId = helpers.random();
 
 test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Linked product', () => {
 		test.beforeAll( async () => {
 			for ( let i = 1; i <= 5; i++ ) {
 				const product = {
-					name: `Product name ${ i } ${ new Date()
+					name: `Product ${uniqueId} ${ i } ${ new Date()
 						.getTime()
 						.toString() }`,
 					productPrice: `${ i }00`,
@@ -91,8 +92,9 @@ test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 			await page.getByText( 'Choose products for me' ).first().click();
 			await chooseProductsResponsePromise;
 
+			await page.pause();
 			await expect(
-				page.getByRole( 'row', { name: 'Product name' } )
+				page.getByRole( 'row', { name: `Product ${uniqueId}` } )
 			).toHaveCount( 4 );
 
 			const upsellsRows = page.locator(
