@@ -9,24 +9,22 @@ const NEW_EDITOR_ADD_PRODUCT_URL =
 
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
+const uniqueId = helpers.random();
 const productData = {
-	name: `Linked product Name ${ new Date().getTime().toString() }`,
+	name: `Linked product name ${ uniqueId }`,
 	summary: 'This is a product summary',
 };
 
 const linkedProductsData = [],
 	productIds = [];
 let productId = 0;
-const uniqueId = helpers.random();
 
 test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Linked product', () => {
 		test.beforeAll( async () => {
 			for ( let i = 1; i <= 5; i++ ) {
 				const product = {
-					name: `Product ${ uniqueId } ${ i } ${ new Date()
-						.getTime()
-						.toString() }`,
+					name: `Product ${ uniqueId } ${ i }`,
 					productPrice: `${ i }00`,
 					type: 'simple',
 				};
