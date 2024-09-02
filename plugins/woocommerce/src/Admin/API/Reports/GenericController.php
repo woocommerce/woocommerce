@@ -257,4 +257,24 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 
 		return $args;
 	}
+
+	/**
+	 * Apply a filter for custom orderby enum.
+	 *
+	 * @param array $orderby_enum An array of orderby enum options.
+	 *
+	 * @return array An array of orderby enum options.
+	 *
+	 * @since 9.4.0
+	 */
+	protected function apply_custom_orderby_filters( $orderby_enum ) {
+		/**
+		 * Filter orderby query parameter enum.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param array $orderby_enum The orderby query parameter enum.
+		 */
+		return apply_filters( "woocommerce_analytics_orderby_enum_{$this->rest_base}", $orderby_enum );
+	}
 }
