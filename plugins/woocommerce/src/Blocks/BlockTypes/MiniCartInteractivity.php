@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
+use Automattic\WooCommerce\Blocks\InteractivityComponents\Drawer;
 
 /**
  * Mini-Cart class.
@@ -466,6 +467,16 @@ class MiniCartInteractivity extends AbstractBlock {
 		<?php
 	}
 
+	protected function get_template_part_contents_container( $template_contents ) {
+		ob_start();
+		?>
+		<div class="wc-block-mini-cart-interactivity__template-part" style="display:none">
+			<?php echo wp_kses_post( $template_contents ); ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
 	/**
 	 * Get the markup for the Mini-Cart block.
 	 *
@@ -508,6 +519,14 @@ class MiniCartInteractivity extends AbstractBlock {
 						echo $this->render_mini_cart_button( $attributes, $cart_item_count, false );
 					?>
 				</div>
+				<?php
+					echo Drawer::render(
+						array(
+							'is_initially_open' => false,
+							'children'          => $this->get_template_part_contents_container( $template_part_contents ),
+						)
+					);
+				?>
 				<?php // Keep the drawer separate so that we don't mutate DOM within the interactivity API powered mini cart icon. ?>
 				<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 					<div class="wc-block-mini-cart-interactivity__template-part" style="display:none">
