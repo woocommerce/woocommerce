@@ -59,7 +59,7 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute(
 				'data-wc-on--click',
-				'actions.openDialog'
+				'open-overlay' === $attributes['triggerType'] ? 'actions.openDialog' : 'actions.closeDialog'
 			);
 			$html = $p->get_updated_html();
 		}

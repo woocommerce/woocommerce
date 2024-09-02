@@ -19,8 +19,8 @@ const productFilters = {
 	},
 	actions: {
 		closeDialog: () => {
-			// const context = getContext();
-			// context.isDialogOpen = false;
+			const context = getContext();
+			context.isDialogOpen = false;
 		},
 		openDialog: () => {
 			const context = getContext();
