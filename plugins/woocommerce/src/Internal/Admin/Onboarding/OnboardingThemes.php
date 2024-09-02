@@ -110,7 +110,7 @@ class OnboardingThemes {
 			$themes     = array();
 
 			if ( ! is_wp_error( $theme_data ) ) {
-				$theme_data    = json_decode( $theme_data['body'] );
+				$theme_data = json_decode( $theme_data['body'] );
 
 				if ( $theme_data ) {
 					$woo_themes    = property_exists( $theme_data, 'products' ) ? $theme_data->products : array();
