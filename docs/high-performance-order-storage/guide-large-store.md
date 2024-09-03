@@ -39,11 +39,11 @@ Remember that you can [toggle synchronization](https://woocommerce.com/document/
 
 ## Phase 2: Migrations and testing on a staging site
 
-When you're happy with how things are working in your local environment, it is time to copy over your production database to the staging site and test out HPOS migrations. For large sites, we recommend setting synchronization to on but, instead of relying on the scheduled jobs to perform the migration, you can speed things up by using the CLI: specifically, the command **wp wc cot sync**.
+When you're happy with how things are working in your local environment, it is time to copy over your production database to the staging site and test out HPOS migrations. For large sites, we recommend setting synchronization to on but, instead of relying on the scheduled jobs to perform the migration, you can speed things up by using the CLI: specifically, the command **wp wc hpos sync**.
 
 To get a sense of how much the final migration (on production) is going to take, make sure to time how much it takes for this command to run. For example, for our test store of 9 million orders, this took about a week to complete.
 
-For extra peace of mind, you can run `wp wc cot verify_cot_data --verbose` to check that the data has migrated successfully.
+For extra peace of mind, you can run `wp wc hpos verify_cot_data --verbose` to check that the data has migrated successfully.
 Once migration is complete on your staging site, and still with synchronization enabled, re-run the tests defined in Phase 1. **Disable the sync, and go through all testing again.**
 
 ### Test out 3rd party and external systems
@@ -56,7 +56,7 @@ You may have non-PHP systems directly connected to DB that would escape a normal
 2. [ ] Migrate production database to staging site using CLI.
 3. [ ] Monitor migration time for insights into production migration duration.
 4. [ ] Test Phase 1 flows on the staging site with synchronization on.
-5. [ ] Optionally, verify data migration integrity using _wp wc cot verify_cot_data --verbose._
+5. [ ] Optionally, verify data migration integrity using _wp wc hpos verify_cot_data --verbose._
 6. [ ] Test Phase 1 flows on the staging site with synchronization off.
 7. [ ] Audit third-party systems to ensure they do not directly access posts tables.
 
@@ -75,11 +75,11 @@ This will make sure that orders will start appearing in the HPOS tables, and tha
 
 Now, start the migration by enabling synchronization by toggling on the "**Enable compatibility mode**" checkbox.
 
-Right after enabling synchronization, you can start migrating past orders from the post tables to the new HPOS tables via CLI using the `wp wc cot sync` command.
+Right after enabling synchronization, you can start migrating past orders from the post tables to the new HPOS tables via CLI using the `wp wc hpos sync` command.
 
 In case you see any errors, turning off the sync, or interrupting the sync CLI job is considered safe. You can resume once you have resolved the error (or if the error was unrelated to the sync process).
 
-Optionally, you can also run the verify command (`wp wc cot verify_cot_data --verbose`) to check that data migrated is as expected.
+Optionally, you can also run the verify command (`wp wc hpos verify_cot_data --verbose`) to check that data migrated is as expected.
 
 Important: Even if the CLI job has completed, don't turn off synchronization just yet. For a production site, we recommend disabling sync progressively: disabling sync on read and then fully disabling sync.
 
@@ -109,9 +109,9 @@ We disable sync on read first because it demands more resources. If your site is
 
 If everything is working as expected, you can disable sync on write as well. Given sync on read was already disabled, you can disable sync altogether from the settings. As usual, go to **WooCommerce > Settings > Advanced > Features**, and uncheck **“Enable compatibility mode"**.
 
-On our high-volume site, we fully disabled sync after 1 week. We still run some manual synchronization (via `wp wc cot sync`) periodically so that we have the opportunity to fall back to posts immediately should anything happen.
+On our high-volume site, we fully disabled sync after 1 week. We still run some manual synchronization (via `wp wc hpos sync`) periodically so that we have the opportunity to fall back to posts immediately should anything happen.
 
-Keep in mind that disabling synchronization does not remove the ability to revert to the posts datastore, but you'd have to wait for the migration jobs to backfill the posts table with any data in the HPOS tables that they are missing. As always, `wp wc cot sync` can also be used for this purpose.
+Keep in mind that disabling synchronization does not remove the ability to revert to the posts datastore, but you'd have to wait for the migration jobs to backfill the posts table with any data in the HPOS tables that they are missing. As always, `wp wc hpos sync` can also be used for this purpose.
 
 Now with synchronization fully disabled, test out various critical flows, check that orders are coming in naturally as expected, and keep an eye on your support and contact channels.
 
@@ -119,9 +119,9 @@ Now with synchronization fully disabled, test out various critical flows, check 
 
 1. [ ] Plan to be online and monitoring your live site for a period of time.
 2. [ ] Enable synchronization with posts set as authoritative: in **WooCommerce > Settings > Advanced > Features** > select “**Use the WordPress posts tables**".
-3. [ ] Start migration via CLI using the `wp wc cot sync` command.
+3. [ ] Start migration via CLI using the `wp wc hpos sync` command.
 4. [ ] Monitor for errors during migration; halt or resume as necessary.
-5. [ ] Verify migrated data integrity using the verify command `wp wc cot verify_cot_data`.
+5. [ ] Verify migrated data integrity using the verify command `wp wc hpos verify_cot_data`.
 6. [ ] Enable synchronization with HPOS set as authoritative: in **WooCommerce > Settings > Advanced > Features** > select “Use the **WooCommerce orders tables**".
 7. [ ] Test all critical flows, perform checkouts with multiple payment methods, and verify order data accuracy.
 8. [ ] Monitor support tickets for any issues.
