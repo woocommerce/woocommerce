@@ -23,7 +23,6 @@ import {
 	getMiniCartTotalsFromServer,
 } from './utils/data';
 import setStyles from '../mini-cart/utils/set-styles';
-import { DrawerContext } from '../../../../packages/interactivity-components/drawer';
 
 interface dependencyData {
 	src: string;
@@ -180,15 +179,8 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 		},
 
 		toggleDrawerOpen: () => {
-			console.log('toggleDrawerOpen');
 			const context = getContext< Context >();
 			context.drawerOpen = ! context.drawerOpen;
-
-			// if ( context.drawerOpen ) {
-			// 	document.body.dispatchEvent(
-			// 		new Event( 'wc-mini-cart-interactivity-open-drawer' )
-			// 	);
-			// }
 		},
 
 		loadScripts: async () => {
