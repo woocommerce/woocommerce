@@ -4129,12 +4129,12 @@ function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
 			} else {
 				$n = $args['current'] - $args['mid_size'] - 1;
 			}
-			$n++;
+			++$n;
 			continue;
 		}
 
 		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( $n ) );
-		$n++;
+		++$n;
 	}
 
 	$html = $p->get_updated_html();
