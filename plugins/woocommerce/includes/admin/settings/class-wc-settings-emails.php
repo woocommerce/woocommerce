@@ -35,7 +35,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 */
 	protected function get_own_sections() {
 		return array(
-			'' => __( 'Email options', 'woocommerce' ),
+			'' => __( 'General', 'woocommerce' ),
+			'template' => __( 'Template design', 'woocommerce' ),
+			'notifications' => __( 'Notifications', 'woocommerce' ),
 		);
 	}
 
@@ -45,34 +47,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_default_section() {
-		$desc_help_text = sprintf(
-		/* translators: %1$s: Link to WP Mail Logging plugin, %2$s: Link to Email FAQ support page. */
-			__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
-			'https://wordpress.org/plugins/wp-mail-logging/',
-			'https://woocommerce.com/document/email-faq'
-		);
+
 		$settings =
 			array(
-				array(
-					'title' => __( 'Email notifications', 'woocommerce' ),
-					/* translators: %s: help description with link to WP Mail logging and support page. */
-					'desc'  => sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text ),
-					'type'  => 'title',
-					'id'    => 'email_notification_settings',
-				),
-
-				array( 'type' => 'email_notification' ),
-
-				array(
-					'type' => 'sectionend',
-					'id'   => 'email_notification_settings',
-				),
-
-				array(
-					'type' => 'sectionend',
-					'id'   => 'email_recipient_options',
-				),
-
 				array(
 					'title' => __( 'Email sender options', 'woocommerce' ),
 					'type'  => 'title',
@@ -107,9 +84,42 @@ class WC_Settings_Emails extends WC_Settings_Page {
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'email_options',
+					'id'   => 'email_template_options',
 				),
 
+				array(
+					'title' => __( 'Store management insights', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'email_merchant_notes',
+				),
+
+				array(
+					'title'         => __( 'Enable email insights', 'woocommerce' ),
+					'desc'          => __( 'Receive email notifications with additional guidance to complete the basic store setup and helpful insights', 'woocommerce' ),
+					'id'            => 'woocommerce_merchant_email_notifications',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'no',
+					'autoload'      => false,
+				),
+
+				array(
+					'type' => 'sectionend',
+					'id'   => 'email_merchant_notes',
+				),
+			);
+
+		return apply_filters( 'woocommerce_email_settings', $settings );
+	}
+
+	/**
+	 * Get settings array.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_template_section() {
+		$settings =
+			array(
 				array(
 					'title' => __( 'Email template', 'woocommerce' ),
 					'type'  => 'title',
@@ -207,30 +217,42 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'email_template_options',
 				),
+			);
 
+		return apply_filters( 'woocommerce_email_settings_template', $settings );
+	}
+
+	/**
+	 * Get settings array.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_notifications_section() {
+		$desc_help_text = sprintf(
+		/* translators: %1$s: Link to WP Mail Logging plugin, %2$s: Link to Email FAQ support page. */
+			__( 'To ensure your store&rsquo;s notifications arrive in your and your customers&rsquo; inboxes, we recommend connecting your email address to your domain and setting up a dedicated SMTP server. If something doesn&rsquo;t seem to be sending correctly, install the <a href="%1$s">WP Mail Logging Plugin</a> or check the <a href="%2$s">Email FAQ page</a>.', 'woocommerce' ),
+			'https://wordpress.org/plugins/wp-mail-logging/',
+			'https://woocommerce.com/document/email-faq'
+		);
+		$settings =
+			array(
 				array(
-					'title' => __( 'Store management insights', 'woocommerce' ),
+					'title' => __( 'Email notifications', 'woocommerce' ),
+					/* translators: %s: help description with link to WP Mail logging and support page. */
+					'desc'  => sprintf( __( 'Email notifications sent from WooCommerce are listed below. Click on an email to configure it.<br>%s', 'woocommerce' ), $desc_help_text ),
 					'type'  => 'title',
-					'id'    => 'email_merchant_notes',
+					'id'    => 'email_notification_settings',
 				),
 
-				array(
-					'title'         => __( 'Enable email insights', 'woocommerce' ),
-					'desc'          => __( 'Receive email notifications with additional guidance to complete the basic store setup and helpful insights', 'woocommerce' ),
-					'id'            => 'woocommerce_merchant_email_notifications',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'default'       => 'no',
-					'autoload'      => false,
-				),
+				array( 'type' => 'email_notification' ),
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'email_merchant_notes',
+					'id'   => 'email_notification_settings',
 				),
 			);
 
-		return apply_filters( 'woocommerce_email_settings', $settings );
+		return apply_filters( 'woocommerce_email_settings_notifications', $settings );
 	}
 
 	/**
