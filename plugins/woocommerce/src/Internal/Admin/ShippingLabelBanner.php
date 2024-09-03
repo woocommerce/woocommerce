@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use function WP_CLI\Utils\get_plugin_name;
 
 /**
  * Shows print shipping label banner on edit order page.
