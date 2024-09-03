@@ -33,11 +33,7 @@ const v1 = {
 	 */
 	isEligible( attributes: { query: { woocommerceOnSale: boolean } } ) {
 		const { query } = attributes;
-		return (
-			query &&
-			( query.woocommerceOnSale === true ||
-				query.woocommerceOnSale === false )
-		);
+		return query && typeof query.woocommerceOnSale === 'boolean';
 	},
 	/**
 	 * Migrate the old `attributes.query.woocommerceOnSale` attibute, to the current
