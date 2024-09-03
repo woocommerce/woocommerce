@@ -21,10 +21,6 @@ abstract class AbstractTemplateCompatibility {
 	 * Initialization method.
 	 */
 	public function init() {
-		if ( ! wc_current_theme_is_fse_theme() ) {
-			return;
-		}
-
 		$this->set_hook_data();
 
 		add_filter(
