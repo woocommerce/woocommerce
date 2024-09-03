@@ -500,9 +500,9 @@ test.describe( 'Product Collection', () => {
 				// "On sale control" should be hidden when inherit query from template is enabled
 				await expect( pageObject.getOnSaleControl() ).toBeHidden();
 
-				// "On sale control" should be visible when inherit query from template is disabled
+				// "On sale control" should remains hidden when inherit query from template is disabled
 				await pageObject.setInheritQueryFromTemplate( false );
-				await expect( pageObject.getOnSaleControl() ).toBeVisible();
+				await expect( pageObject.getOnSaleControl() ).toBeHidden();
 
 				// "On sale control" should retain its state when inherit query from template is enabled again
 				await pageObject.setShowOnlyProductsOnSale( {
