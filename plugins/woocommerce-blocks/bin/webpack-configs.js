@@ -406,8 +406,7 @@ const getFrontConfig = ( options = {} ) => {
 						name: 'wc-blocks-frontend-vendors',
 						chunks: ( chunk ) => {
 							return (
-								chunk.name !== 'product-button-interactivity' ||
-								chunk.name !== 'product-image-interactivity'
+								chunk.name !== 'product-button-interactivity'
 							);
 						},
 						enforce: true,
