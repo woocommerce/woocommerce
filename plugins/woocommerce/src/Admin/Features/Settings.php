@@ -1,21 +1,16 @@
-<?php
+<?php //phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * WooCommerce Settings.
  */
 
-namespace Automattic\WooCommerce\Internal\Admin;
+namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
  * Contains backend logic for the Settings feature.
  */
-class SettingsNavigationFeature {
-	/**
-	 * Option name used to toggle this feature.
-	 */
-	const TOGGLE_OPTION_NAME = 'woocommerce_settings_enabled';
-
+class Settings {
 	/**
 	 * Class instance.
 	 *
@@ -38,12 +33,6 @@ class SettingsNavigationFeature {
 	 */
 	public function __construct() {
 		if ( ! is_admin() ) {
-			return;
-		}
-
-		add_filter( 'woocommerce_settings_features', array( $this, 'add_feature_toggle' ) );
-
-		if ( 'yes' !== get_option( 'woocommerce_settings_enabled', 'no' ) ) {
 			return;
 		}
 
@@ -73,26 +62,6 @@ class SettingsNavigationFeature {
 		$settings['settingsPages'] = $pages;
 
 		return $settings;
-	}
-
-	/**
-	 * Add the feature toggle to the features settings.
-	 *
-	 * @param array $features Feature sections.
-	 * @return array
-	 */
-	public static function add_feature_toggle( $features ) {
-		$features[] = array(
-			'title' => __( 'Settings', 'woocommerce' ),
-			'desc'  => __(
-				'Adds the new WooCommerce settings UI.',
-				'woocommerce'
-			),
-			'id'    => 'woocommerce_settings_enabled',
-			'type'  => 'checkbox',
-		);
-
-		return $features;
 	}
 
 	/**
