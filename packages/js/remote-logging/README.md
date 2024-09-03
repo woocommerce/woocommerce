@@ -191,7 +191,7 @@ import { addFilter } from '@wordpress/hooks';
 addFilter(
   'woocommerce_remote_logging_request_uri_whitelist',
   'my-plugin',
-  (whitelist) => {
+  ( whitelist ) => {
     return [ ...whitelist, 'exampleParam' ]
   }
 );
