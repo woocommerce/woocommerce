@@ -112,6 +112,7 @@ const Edit = ( props: EditProps ) => {
 		isFilterCountsLoading,
 	] );
 
+	const blockProps = useBlockProps();
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
@@ -187,6 +188,7 @@ const Edit = ( props: EditProps ) => {
 						isTermsLoading ||
 						isFilterCountsLoading ||
 						isOptionsLoading,
+					isParentSelected: props.isSelected,
 				} }
 			>
 				{ children }

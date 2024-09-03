@@ -16,7 +16,8 @@
 	"supports": {},
 	"usesContext": [
 		"filterData",
-		"isFilterDataLoading"
+		"isFilterDataLoading",
+		"isParentSelected"
 	],
 	"attributes": {}
 }

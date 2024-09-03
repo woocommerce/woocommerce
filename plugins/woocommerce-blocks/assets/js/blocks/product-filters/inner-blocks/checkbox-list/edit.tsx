@@ -3,6 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+import { Disabled } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -11,7 +12,7 @@ import './style.scss';
 import { EditProps } from './types';
 
 const Edit = ( { context }: EditProps ) => {
-	const { filterData, isFilterDataLoading } = context;
+	const { filterData, isFilterDataLoading, isParentSelected } = context;
 	const blockProps = useBlockProps();
 
 	if ( ! filterData.collection ) {
@@ -24,7 +25,7 @@ const Edit = ( { context }: EditProps ) => {
 	const threshold = 15;
 	const isLongList = filterData.collection.length > threshold;
 
-	return (
+	const Block = () => (
 		<div { ...blockProps }>
 			<ul className="wc-block-product-filter-checkbox-list__list">
 				{ ( isLongList
@@ -80,6 +81,14 @@ const Edit = ( { context }: EditProps ) => {
 			) }
 		</div>
 	);
+	if ( isParentSelected === false ) {
+		return (
+			<Disabled>
+				<Block />
+			</Disabled>
+		);
+	}
+	return <Block />;
 };
 
 export default Edit;
