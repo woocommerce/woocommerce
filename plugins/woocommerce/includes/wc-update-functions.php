@@ -2731,39 +2731,6 @@ function wc_update_910_add_launch_your_store_tour_option() {
 }
 
 /**
- * Add old refunded order items to the product_lookup_table.
- */
-function wc_update_910_add_old_refunded_order_items_to_product_lookup_table() {
-	global $wpdb;
-
-	// Get every order ID where the total sales is less than 0 and is not present in the table wc_order_product_lookup.
-	$select_query = "
-	SELECT order_stats.order_id FROM {$wpdb->prefix}wc_order_stats AS order_stats
-	WHERE order_stats.total_sales < 0
-    AND (
-        SELECT COUNT(*)
-        FROM {$wpdb->prefix}wc_order_product_lookup AS product_lookup
-        WHERE product_lookup.order_id = order_stats.parent_id
-          AND product_lookup.product_net_revenue = order_stats.total_sales
-    ) = 0";
-
-	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input in the query, everything is hardcoded.
-	$orders = $wpdb->get_results( $select_query );
-
-	if ( $orders ) {
-		foreach ( $orders as $order ) {
-			/**
-			 * Trigger an action to schedule the data import for old refunded order items.
-			 *
-			 * @param int $order_id The ID of the order to be synced.
-			 * @since 9.2.0
-			 */
-			do_action( 'woocommerce_schedule_import', intval( $order->order_id ) );
-		}
-	}
-}
-
-/**
  * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
  */
 function wc_update_920_add_wc_hooked_blocks_version_option() {
@@ -2885,3 +2852,37 @@ function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
 		)
 	);
 }
+
+/**
+ * Add old refunded order items to the product_lookup_table.
+ */
+function wc_update_930_add_old_refunded_order_items_to_product_lookup_table() {
+	global $wpdb;
+
+	// Get every order ID where the total sales is less than 0 and is not present in the table wc_order_product_lookup.
+	$select_query = "
+	SELECT order_stats.order_id FROM {$wpdb->prefix}wc_order_stats AS order_stats
+	WHERE order_stats.total_sales < 0
+    AND (
+        SELECT COUNT(*)
+        FROM {$wpdb->prefix}wc_order_product_lookup AS product_lookup
+        WHERE product_lookup.order_id = order_stats.parent_id
+          AND product_lookup.product_net_revenue = order_stats.total_sales
+    ) = 0";
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input in the query, everything is hardcoded.
+	$orders = $wpdb->get_results( $select_query );
+
+	if ( $orders ) {
+		foreach ( $orders as $order ) {
+			/**
+			 * Trigger an action to schedule the data import for old refunded order items.
+			 *
+			 * @param int $order_id The ID of the order to be synced.
+			 * @since 9.3.0
+			 */
+			do_action( 'woocommerce_schedule_import', intval( $order->order_id ) );
+		}
+	}
+}
+
