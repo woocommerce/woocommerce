@@ -252,6 +252,7 @@ trait Woo_Analytics_Trait {
 	public function get_common_properties() {
 		$site_info          = array(
 			'blog_id'                            => Jetpack_Connection::get_site_id(),
+			'store_id'                           => get_option( \WC_Install::STORE_ID_OPTION ),
 			'ui'                                 => $this->get_user_id(),
 			'url'                                => home_url(),
 			'woo_version'                        => WC()->version,
