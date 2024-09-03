@@ -97,7 +97,7 @@
 			$( 'input, textarea, select, checkbox' ).on( 'change input', function (
 				event
 			) {
-				// Toggling WP List Table checkboxes should not trigger navigation warnings.
+				// Toggling WP List Table checkboxes should not trigger navigation warnings. Theses checkboxes only select/unselect rows, they don't change the form.
 				if (
 					$check_column.length &&
 					$check_column.has( event.target ).length
