@@ -6,8 +6,8 @@
  * @todo Finish up unit testing to verify bug-free order reports.
  */
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Variations\DataStore as VariationsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Variations\Query as VariationsQuery;
 
 /**
  * Reports order stats tests class.
@@ -71,8 +71,8 @@ class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new VariationsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'variations' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 

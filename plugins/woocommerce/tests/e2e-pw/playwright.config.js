@@ -15,7 +15,6 @@ const {
 	CI,
 	DEFAULT_TIMEOUT_OVERRIDE,
 	E2E_MAX_FAILURES,
-	PLAYWRIGHT_HTML_REPORT,
 	REPEAT_EACH,
 } = process.env;
 
@@ -54,9 +53,7 @@ if ( process.env.CI ) {
 	reporter.push( [
 		'html',
 		{
-			outputFolder:
-				PLAYWRIGHT_HTML_REPORT ??
-				`${ testsResultsPath }/reports/playwright-report`,
+			outputFolder: `${ testsRootPath }/playwright-report`,
 			open: 'on-failure',
 		},
 	] );
@@ -77,6 +74,7 @@ const config = {
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
+	forbidOnly: !! CI,
 	use: {
 		baseURL: BASE_URL,
 		screenshot: { mode: 'only-on-failure', fullPage: true },

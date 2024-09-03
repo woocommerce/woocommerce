@@ -63,17 +63,65 @@ const prepareIsInGenericTemplate =
 	( entitySlug: string ): boolean =>
 		templateSlug === entitySlug;
 
-export type WooCommerceBlockLocation = ReturnType<
-	typeof createLocationObject
->;
+interface WooCommerceBaseLocation {
+	type: LocationType;
+	sourceData?: object | undefined;
+}
 
-const createLocationObject = (
-	type: LocationType,
-	sourceData: Record< string, unknown > = {}
-) => ( {
-	type,
-	sourceData,
-} );
+interface ProductLocation extends WooCommerceBaseLocation {
+	type: LocationType.Product;
+	sourceData?:
+		| {
+				productId: number;
+		  }
+		| undefined;
+}
+
+interface ArchiveLocation extends WooCommerceBaseLocation {
+	type: LocationType.Archive;
+	sourceData?:
+		| {
+				taxonomy: string;
+				termId: number;
+		  }
+		| undefined;
+}
+
+interface CartLocation extends WooCommerceBaseLocation {
+	type: LocationType.Cart;
+	sourceData?:
+		| {
+				productIds: number[];
+		  }
+		| undefined;
+}
+
+interface OrderLocation extends WooCommerceBaseLocation {
+	type: LocationType.Order;
+	sourceData?:
+		| {
+				orderId: number;
+		  }
+		| undefined;
+}
+
+interface SiteLocation extends WooCommerceBaseLocation {
+	type: LocationType.Site;
+	sourceData?: object | undefined;
+}
+
+export type WooCommerceBlockLocation =
+	| ProductLocation
+	| ArchiveLocation
+	| CartLocation
+	| OrderLocation
+	| SiteLocation;
+
+const createLocationObject = ( type: LocationType, sourceData: object = {} ) =>
+	( {
+		type,
+		sourceData,
+	} as WooCommerceBlockLocation );
 
 type ContextProperties = {
 	templateSlug: string;
@@ -83,7 +131,7 @@ type ContextProperties = {
 export const useGetLocation = < T, >(
 	context: Context< T & ContextProperties >,
 	clientId: string
-) => {
+): WooCommerceBlockLocation => {
 	const templateSlug = context.templateSlug || '';
 	const postId = context.postId || null;
 

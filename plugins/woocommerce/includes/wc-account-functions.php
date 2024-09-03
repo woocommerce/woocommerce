@@ -136,21 +136,15 @@ function wc_get_account_menu_items() {
 }
 
 /**
- * Get account menu item classes.
+ * Find current item in account menu.
  *
- * @since 2.6.0
+ * @since 9.3.0
  * @param string $endpoint Endpoint.
- * @return string
+ * @return bool
  */
-function wc_get_account_menu_item_classes( $endpoint ) {
+function wc_is_current_account_menu_item( $endpoint ) {
 	global $wp;
 
-	$classes = array(
-		'woocommerce-MyAccount-navigation-link',
-		'woocommerce-MyAccount-navigation-link--' . $endpoint,
-	);
-
-	// Set current item class.
 	$current = isset( $wp->query_vars[ $endpoint ] );
 	if ( 'dashboard' === $endpoint && ( isset( $wp->query_vars['page'] ) || empty( $wp->query_vars ) ) ) {
 		$current = true; // Dashboard is not an endpoint, so needs a custom check.
@@ -160,7 +154,23 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		$current = true;
 	}
 
-	if ( $current ) {
+	return $current;
+}
+
+/**
+ * Get account menu item classes.
+ *
+ * @since 2.6.0
+ * @param string $endpoint Endpoint.
+ * @return string
+ */
+function wc_get_account_menu_item_classes( $endpoint ) {
+	$classes = array(
+		'woocommerce-MyAccount-navigation-link',
+		'woocommerce-MyAccount-navigation-link--' . $endpoint,
+	);
+
+	if ( wc_is_current_account_menu_item( $endpoint ) ) {
 		$classes[] = 'is-active';
 	}
 

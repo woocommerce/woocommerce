@@ -282,7 +282,10 @@ test(
 		} );
 
 		await test.step( 'add an existing attribute', async () => {
-			await page.getByRole( 'button', { name: 'Add new' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add new' } )
+				.first()
+				.click();
 
 			await page.waitForLoadState( 'domcontentloaded' );
 
@@ -370,6 +373,13 @@ test(
 			await expect(
 				async () => {
 					await page.reload();
+					// Waiting for the "Block: Product attributes" will ensure
+					// that test will pass against the Pressable environment
+					await expect(
+						page.locator(
+							`[aria-label="Block: Product attributes"]`
+						)
+					).toBeVisible();
 					await page.getByRole( 'button', { name: 'Edit' } ).click();
 					await expect(
 						page.locator(

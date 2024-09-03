@@ -1,0 +1,28 @@
+{
+  "name": "woocommerce/blueprint",
+  "version": "0.0.1",
+  "autoload": {
+	"psr-4": {
+	  "Automattic\\WooCommerce\\Blueprint\\": "src/",
+	  "Automattic\\WooCommerce\\Blueprint\\Tests\\": "tests/"
+	}
+  },
+  "require": {
+	"opis/json-schema": "^2.3"
+  },
+  "scripts": {
+	"test:setup": "wp-env start",
+	"test:unit": "wp-env run tests-cli --env-cwd=wp-content/plugins/blueprint ./vendor/bin/phpunit",
+	"phpcs": [
+	  "phpcs -s -p"
+	],
+	"phpcbf": [
+	  "phpcbf -p"
+	]
+  },
+  "require-dev": {
+	"phpunit/phpunit": "^9",
+	"mockery/mockery": "^1.6",
+    "yoast/phpunit-polyfills": "^2.0"
+  }
+}

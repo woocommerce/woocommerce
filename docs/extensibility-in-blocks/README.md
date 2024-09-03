@@ -7,7 +7,7 @@ post_title:  Extensibility in blocks
 
 These documents are all dealing with extensibility in the various WooCommerce Blocks.
 
-## Imports and dependency extration
+## Imports and dependency extraction
 
 The documentation in this section will use window globals in code examples, for example:
 
