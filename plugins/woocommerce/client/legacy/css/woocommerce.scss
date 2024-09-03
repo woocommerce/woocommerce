@@ -66,14 +66,14 @@ p.demo_store,
 	width: 10px;
 
 	.asterisk-line {
-		background: red;
+		background: var(--wc-red);
 		display: block;
 		height: 2px;
 		left: 0;
 		position: absolute;
 		top: 0;
 		transform-origin: center;
-		width: 11px;
+		width: 7px;
 
 		&:nth-child(2) {
 			transform: rotate(60deg);
