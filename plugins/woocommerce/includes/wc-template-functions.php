@@ -4107,25 +4107,37 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
  */
 function wc_add_aria_label_to_pagination_numbers( $r, $args ) {
 	$p         = new WP_HTML_Tag_Processor( $r );
-	$tag_index = 1;
+	$n         = 1;
 	$page_text = __( 'Page', 'woocommerce' );
 
-	while ( $p->next_tag(
-		array( 'class_name' => 'page-numbers' )
-	) ) {
-		if ( 
-			$p->has_class( 'next' ) || 
-			$p->has_class( 'prev' ) || 
-			'SPAN' !== $p->get_tag() &&
-			'A' !== $p->get_tag() ) {
+	while ( $p->next_tag( array( 'class_name' => 'page-numbers' ) ) ) {
+		if (
+			$p->has_class( 'prev' ) ||
+			$p->has_class( 'next' ) ||
+			( 'SPAN' !== $p->get_tag() && 'A' !== $p->get_tag() ) ) {
 			continue;
 		}
 
-		$p->set_attribute( 'aria-label', $page_text . ' ' . $tag_index++ );
+		if ( $p->has_class( 'current' ) ) {
+			$n = $args['current'];
+		}
+
+		if ( $p->has_class( 'dots' ) ) {
+			// If current page is before the dots.
+			if ( $args['current'] + $args['mid_size'] < $args['total'] - $args['end_size'] ) {
+				$n = $args['total'] - $args['end_size'];
+			} else {
+				$n = $args['current'] - $args['mid_size'] - 1;
+			}
+			$n++;
+			continue;
+		}
+
+		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( $n ) );
+		$n++;
 	}
 
 	$r = $p->get_updated_html();
-
 	return $r;
 }
 add_filter( 'paginate_links_output', 'wc_add_aria_label_to_pagination_numbers', 10, 2 );
