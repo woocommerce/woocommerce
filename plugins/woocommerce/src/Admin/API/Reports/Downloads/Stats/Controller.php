@@ -60,7 +60,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'downloads-stats'` Query.
+	 * Get data from `'downloads-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *

@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Product Collection: Fix max price query to include prices less or equal to the given max value.

@@ -31,7 +31,7 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/coupons';
 
 	/**
-	 * Get data from `'coupons'` Query.
+	 * Get data from `'coupons'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
