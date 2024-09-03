@@ -42,6 +42,7 @@
 			"@woocommerce/base-hooks": [ "assets/js/base/hooks" ],
 			"@woocommerce/interactivity": [ "assets/js/interactivity" ],
 			"@woocommerce/interactivity/*": [ "assets/js/interactivity/*" ],
+			"@woocommerce/interactivity-router": [ "assets/js/interactivity-router" ],
 			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
 			"@woocommerce/base-utils/*": [ "assets/js/base/utils/*" ],
 			"@woocommerce/blocks/*": [ "assets/js/blocks/*" ],
