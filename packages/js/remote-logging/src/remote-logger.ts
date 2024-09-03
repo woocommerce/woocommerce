@@ -42,6 +42,11 @@ export const REMPOTE_LOGGING_REQUEST_URI_PARAMS_DEFAULT_WHITELIST = [
 	'step',
 	'task',
 	'tab',
+	'section',
+	'status',
+	'post_type',
+	'taxonomy',
+	'action',
 ];
 
 export const sanitiseRequestUriParams = ( search: string ) => {
