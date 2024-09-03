@@ -5,11 +5,6 @@ import { store, getContext } from '@woocommerce/interactivity';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 import { HTMLElementEvent } from '@woocommerce/types';
 
-/**
- * Internal dependencies
- */
-import { navigate } from '../product-filter/frontend';
-
 type AttributeFilterContext = {
 	attributeSlug: string;
 	queryType: 'or' | 'and';
@@ -52,7 +47,7 @@ function getSelectedTermsFromUrl( slug: string ) {
 
 store( 'woocommerce/product-filter-attribute', {
 	actions: {
-		navigate: () => {
+		*navigate() {
 			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
 			);
@@ -61,11 +56,12 @@ store( 'woocommerce/product-filter-attribute', {
 				.map( ( item ) => item.value )
 				.filter( nonNullable );
 
-			navigate(
+			const { navigate } = yield import( '../product-filter/frontend' );
+			yield navigate(
 				getUrl( filters, context.attributeSlug, context.queryType )
 			);
 		},
-		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+		*updateProducts( event: HTMLElementEvent< HTMLInputElement > ) {
 			if ( ! event.target.value ) return;
 
 			const context = getContext< AttributeFilterContext >();
@@ -88,7 +84,8 @@ store( 'woocommerce/product-filter-attribute', {
 				);
 			}
 
-			navigate(
+			const { navigate } = yield import( '../product-filter/frontend' );
+			yield navigate(
 				getUrl(
 					selectedTerms,
 					context.attributeSlug,
