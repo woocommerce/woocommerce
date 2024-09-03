@@ -10,6 +10,7 @@ import { useEffect, useLayoutEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { getProduct } from '@woocommerce/editor-components/utils';
+import apiFetch from '@wordpress/api-fetch';
 import {
 	createBlock,
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
@@ -193,69 +194,124 @@ export const getUsesReferencePreviewMessage = (
 	return '';
 };
 
-export const getProductCollectionUIStateInEditor = ( {
+export const useProductCollectionUIState = ( {
 	location,
 	usesReference,
 	attributes,
 	hasInnerBlocks,
 }: {
 	location: WooCommerceBlockLocation;
-	usesReference?: string[] | undefined;
+	usesReference?: string[];
 	attributes: ProductCollectionAttributes;
 	hasInnerBlocks: boolean;
-} ): ProductCollectionUIStatesInEditor => {
-	const isInRequiredLocation = usesReference?.includes( location.type );
-	const isCollectionSelected = !! attributes.collection;
+} ) => {
+	const [ uiState, setUIState ] =
+		useState< ProductCollectionUIStatesInEditor | null >( null );
 
-	/**
-	 * Case 1: Product context picker
-	 */
-	const isProductContextRequired = usesReference?.includes( 'product' );
-	const isProductContextSelected =
-		( attributes.query?.productReference ?? null ) !== null;
-	if (
-		isCollectionSelected &&
-		isProductContextRequired &&
-		! isInRequiredLocation &&
-		! isProductContextSelected
-	) {
-		return ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER;
-	}
+	useEffect( () => {
+		const fetchUIState = async () => {
+			const isInRequiredLocation = usesReference?.includes(
+				location.type
+			);
+			const isCollectionSelected = !! attributes.collection;
+			const isProductContextRequired =
+				usesReference?.includes( 'product' );
+			const isProductContextSelected =
+				( attributes.query?.productReference ?? null ) !== null;
 
-	/**
-	 * Case 2: Preview mode - based on `usesReference` value
-	 */
-	if ( isInRequiredLocation ) {
-		/**
-		 * Block shouldn't be in preview mode when:
-		 * 1. Current location is archive and termId is available.
-		 * 2. Current location is product and productId is available.
-		 *
-		 * Because in these cases, we have required context on the editor side.
-		 */
-		const isArchiveLocationWithTermId =
-			location.type === LocationType.Archive &&
-			( location.sourceData?.termId ?? null ) !== null;
-		const isProductLocationWithProductId =
-			location.type === LocationType.Product &&
-			( location.sourceData?.productId ?? null ) !== null;
+			/**
+			 * Case 1: Product context picker
+			 */
+			if (
+				isCollectionSelected &&
+				isProductContextRequired &&
+				! isInRequiredLocation &&
+				! isProductContextSelected
+			) {
+				setUIState(
+					ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER
+				);
+				return;
+			}
 
-		if (
-			! isArchiveLocationWithTermId &&
-			! isProductLocationWithProductId
-		) {
-			return ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW;
-		}
-	}
+			/**
+			 * Case 2: Check if product reference is deleted
+			 */
+			if (
+				isCollectionSelected &&
+				isProductContextRequired &&
+				! isInRequiredLocation &&
+				isProductContextSelected
+			) {
+				const productId = attributes.query?.productReference;
+				if ( productId ) {
+					try {
+						await apiFetch( {
+							path: `/wc/v3/products/${ productId }`,
+						} );
+					} catch ( error ) {
+						setUIState(
+							ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE
+						);
+						return;
+					}
+				}
+			}
 
-	/**
-	 * Case 3: Collection chooser
-	 */
-	if ( ! hasInnerBlocks && ! isCollectionSelected ) {
-		return ProductCollectionUIStatesInEditor.COLLECTION_PICKER;
-	}
+			/**
+			 * Case 3: Preview mode - based on `usesReference` value
+			 */
+			if ( isInRequiredLocation ) {
+				/**
+				 * Block shouldn't be in preview mode when:
+				 * 1. Current location is archive and termId is available.
+				 * 2. Current location is product and productId is available.
+				 *
+				 * Because in these cases, we have required context on the editor side.
+				 */
+				const isArchiveLocationWithTermId =
+					location.type === LocationType.Archive &&
+					( location.sourceData?.termId ?? null ) !== null;
+				const isProductLocationWithProductId =
+					location.type === LocationType.Product &&
+					( location.sourceData?.productId ?? null ) !== null;
 
-	return ProductCollectionUIStatesInEditor.VALID;
+				if (
+					! isArchiveLocationWithTermId &&
+					! isProductLocationWithProductId
+				) {
+					setUIState(
+						ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW
+					);
+					return;
+				}
+			}
+
+			/**
+			 * Case 4: Collection chooser
+			 */
+			if ( ! hasInnerBlocks && ! isCollectionSelected ) {
+				setUIState(
+					ProductCollectionUIStatesInEditor.COLLECTION_PICKER
+				);
+				return;
+			}
+
+			setUIState( ProductCollectionUIStatesInEditor.VALID );
+		};
+
+		fetchUIState();
+	}, [
+		location.type,
+		location?.sourceData?.termId,
+		location?.sourceData?.productId,
+		usesReference,
+		attributes.collection,
+		attributes.query.productReference,
+		hasInnerBlocks,
+	] );
+
+	return uiState;
 };
 
 export const useSetPreviewState = ( {

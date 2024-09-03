@@ -5,6 +5,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
+import { Spinner, Flex } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -17,7 +18,7 @@ import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
-import { getProductCollectionUIStateInEditor } from '../utils';
+import { useProductCollectionUIState } from '../utils';
 import ProductPicker from './ProductPicker';
 
 const Edit = ( props: ProductCollectionEditComponentProps ) => {
@@ -31,13 +32,12 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		[ clientId ]
 	);
 
-	const productCollectionUIStateInEditor =
-		getProductCollectionUIStateInEditor( {
-			hasInnerBlocks,
-			location,
-			attributes: props.attributes,
-			usesReference: props.usesReference,
-		} );
+	const productCollectionUIStateInEditor = useProductCollectionUIState( {
+		location,
+		attributes,
+		hasInnerBlocks,
+		...( props.usesReference && { usesReference: props.usesReference } ),
+	} );
 
 	/**
 	 * Component to render based on the UI state.
@@ -49,6 +49,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			Component = ProductCollectionPlaceholder;
 			break;
 		case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
+		case ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE:
 			Component = ProductPicker;
 			break;
 		case ProductCollectionUIStatesInEditor.VALID:
@@ -63,6 +64,15 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			Component = ProductCollectionPlaceholder;
 	}
 
+	// Show spinner while fetching UI state.
+	if ( productCollectionUIStateInEditor === null ) {
+		return (
+			<Flex justify="center" align="center">
+				<Spinner />
+			</Flex>
+		);
+	}
+
 	return (
 		<>
 			<Component
@@ -73,6 +83,10 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				isUsingReferencePreviewMode={ isUsingReferencePreviewMode }
 				location={ location }
 				usesReference={ props.usesReference }
+				isDeletedProductReference={
+					productCollectionUIStateInEditor ===
+					ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE
+				}
 			/>
 			{ isSelectionModalOpen && (
 				<CollectionSelectionModal

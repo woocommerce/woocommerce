@@ -14,9 +14,9 @@ export enum ProductCollectionUIStatesInEditor {
 	PRODUCT_REFERENCE_PICKER = 'product_context_picker',
 	VALID_WITH_PREVIEW = 'uses_reference_preview_mode',
 	VALID = 'valid',
+	DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',
 	// Future states
 	// INVALID = 'invalid',
-	// DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',
 }
 
 export interface ProductCollectionAttributes {
@@ -121,6 +121,7 @@ export type ProductCollectionEditComponentProps =
 		};
 		isUsingReferencePreviewMode: boolean;
 		location: WooCommerceBlockLocation;
+		isDeletedProductReference?: boolean;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
