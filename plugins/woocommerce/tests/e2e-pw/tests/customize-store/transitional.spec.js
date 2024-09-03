@@ -60,17 +60,20 @@ test.describe(
 			);
 		} );
 
-		test( 'Accessing the transitional page when the CYS flow is not completed should redirect to the Intro page', async ( {
-			page,
-			baseURL,
-		} ) => {
-			await page.goto( TRANSITIONAL_URL );
+		test(
+			'Accessing the transitional page when the CYS flow is not completed should redirect to the Intro page',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page, baseURL } ) => {
+				await page.goto( TRANSITIONAL_URL );
 
-			const locator = page.locator( 'h1:visible' );
-			await expect( locator ).not.toHaveText( 'Your store looks great!' );
+				const locator = page.locator( 'h1:visible' );
+				await expect( locator ).not.toHaveText(
+					'Your store looks great!'
+				);
 
-			await expect( page.url() ).toBe( `${ baseURL }${ INTRO_URL }` );
-		} );
+				await expect( page.url() ).toBe( `${ baseURL }${ INTRO_URL }` );
+			}
+		);
 
 		test( 'Clicking on "Finish customizing" in the assembler should go to the transitional page', async ( {
 			pageObject,
