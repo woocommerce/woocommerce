@@ -47,6 +47,7 @@ class WcPayWelcomePage {
 		add_filter( 'woocommerce_admin_shared_settings', [ $this, 'shared_settings' ] );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', [ $this, 'allowed_promo_notes' ] );
 		add_filter( 'woocommerce_admin_woopayments_onboarding_task_badge', [ $this, 'onboarding_task_badge' ] );
+		add_filter( 'woocommerce_admin_woopayments_onboarding_task_additional_data', [ $this, 'onboarding_task_additional_data' ] );
 	}
 
 	/**
@@ -209,6 +210,30 @@ class WcPayWelcomePage {
 		}
 
 		return $this->get_incentive()['task_badge'] ?? $badge;
+	}
+
+	/**
+	 * Adds the WooPayments incentive data to the onboarding task additional data.
+	 *
+	 * @param ?array $additional_data The current task additional data.
+	 *
+	 * @return ?array
+	 */
+	public function onboarding_task_additional_data( ?array $additional_data ): ?array {
+		// Return early if the incentive must not be visible.
+		if ( ! $this->must_be_visible() ) {
+			return $additional_data;
+		}
+
+		// If we have an incentive, add the incentive ID to the additional data.
+		if ( $this->get_incentive()['id'] ) {
+			if ( empty( $additional_data ) ) {
+				$additional_data = [];
+			}
+			$additional_data['wooPaymentsIncentiveId'] = $this->get_incentive()['id'];
+		}
+
+		return $additional_data;
 	}
 
 	/**
