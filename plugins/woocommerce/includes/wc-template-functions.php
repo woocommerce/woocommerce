@@ -4099,14 +4099,14 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 /**
  * Add aria-label to pagination numbers.
  *
- * @param string $r    HTML output.
+ * @param string $html HTML output.
  * @param array  $args An array of arguments. See paginate_links()
  *                     for information on accepted arguments.
  *
  * @return string
  */
-function wc_add_aria_label_to_pagination_numbers( $r, $args ) {
-	$p         = new WP_HTML_Tag_Processor( $r );
+function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
+	$p         = new WP_HTML_Tag_Processor( $html );
 	$n         = 1;
 	$page_text = __( 'Page', 'woocommerce' );
 
@@ -4137,7 +4137,7 @@ function wc_add_aria_label_to_pagination_numbers( $r, $args ) {
 		$n++;
 	}
 
-	$r = $p->get_updated_html();
-	return $r;
+	$html = $p->get_updated_html();
+	return $html;
 }
 add_filter( 'paginate_links_output', 'wc_add_aria_label_to_pagination_numbers', 10, 2 );
