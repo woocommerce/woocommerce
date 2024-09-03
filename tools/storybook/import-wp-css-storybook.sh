@@ -17,6 +17,7 @@ function download_and_extract_css {
     rsync -a "$TMP_DIR/$ARCHIVE_IMG_PATH" "$STORYBOOK_WORDPRESS_DIR";
     rsync -a "$TMP_DIR/$ARCHIVE_EDIT_SITE_PATH" "$STORYBOOK_WORDPRESS_DIR/css/edit-site.css";
     rm -r "$TMP_DIR";
+	rm -r "$STORYBOOK_WORDPRESS_DIR/wordpress-latest.zip";
 }
 
 if [ -z "$(find "$STORY_BOOK_CSS_PATH" -iname '*.css')" ] || [ "$1" == "-f" ]
