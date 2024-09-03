@@ -165,6 +165,7 @@ const blocks = {
 	},
 	'order-confirmation-create-account': {
 		customDir: 'order-confirmation/create-account',
+		isExperimental: true,
 	},
 };
 

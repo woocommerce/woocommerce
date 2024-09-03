@@ -3,6 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { Icon, info } from '@wordpress/icons';
+import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -10,19 +11,21 @@ import { Icon, info } from '@wordpress/icons';
 import metadata from './block.json';
 import { Save, Edit } from './edit';
 
-registerBlockType( metadata, {
-	apiVersion: 3,
-	icon: {
-		src: (
-			<Icon
-				icon={ info }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-	attributes: {
-		...metadata.attributes,
-	},
-	edit: Edit,
-	save: Save,
-} );
+if ( isExperimentalBlocksEnabled() ) {
+	registerBlockType( metadata, {
+		apiVersion: 3,
+		icon: {
+			src: (
+				<Icon
+					icon={ info }
+					className="wc-block-editor-components-block-icon"
+				/>
+			),
+		},
+		attributes: {
+			...metadata.attributes,
+		},
+		edit: Edit,
+		save: Save,
+	} );
+}
