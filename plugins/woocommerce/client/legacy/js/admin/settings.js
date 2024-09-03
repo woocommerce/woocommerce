@@ -100,7 +100,7 @@
 				// Toggling WP List Table checkboxes should not trigger navigation warnings.
 				if (
 					$check_column.length &&
-					$check_column.has( event.target )
+					$check_column.has( event.target ).length
 				) {
 					return;
 				}
