@@ -952,13 +952,12 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 	const { alias, resolvePlugins = [] } = options;
 	return {
 		entry: {
-			interactivity: './assets/js/interactivity',
-			'interactivity-router': './assets/js/interactivity-router',
+			'wc-interactivity': './assets/js/interactivity',
 		},
 		output: {
-			filename: 'wc-[name].js',
+			filename: '[name].js',
 			path: path.resolve( __dirname, '../build/' ),
-			library: [ 'wc', '__experimentalInteractivity', '[name]' ],
+			library: [ 'wc', '__experimentalInteractivity' ],
 			libraryTarget: 'this',
 			chunkLoadingGlobal: 'webpackWcBlocksJsonp',
 		},

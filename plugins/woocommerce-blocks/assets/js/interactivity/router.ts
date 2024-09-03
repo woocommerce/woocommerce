@@ -1,12 +1,8 @@
 /**
- * External dependencies
- */
-import { store, privateApis, getConfig } from '@woocommerce/interactivity';
-
-/**
  * Internal dependencies
  */
 import { fetchHeadAssets, updateHead } from './head';
+import { store, privateApis, getConfig } from './index';
 
 const {
 	directivePrefix,
@@ -209,7 +205,7 @@ const isValidEvent = ( event: MouseEvent ) =>
 // Variable to store the current navigation.
 let navigatingTo = '';
 
-export const { state, actions } = store( 'woocommerce/router', {
+export const { state, actions } = store( 'core/router', {
 	state: {
 		url: window.location.href,
 		navigation: {
