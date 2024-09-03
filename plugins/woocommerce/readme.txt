@@ -262,6 +262,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Track frequency of unhandled JS errors with MC Stats [#50155](https://github.com/woocommerce/woocommerce/pull/50155)
 * Add - Use MC Stats for PHP fatal error counting [#49658](https://github.com/woocommerce/woocommerce/pull/49658)
 * Add - [E2E tests]: Add product description using the block editor #50232 [#50232](https://github.com/woocommerce/woocommerce/pull/50232)
+* Update - Update WooCommerce Shipping Promo Banner to install the latest version of WooCommerce Shipping instead of WCS&T. [#50970](https://github.com/woocommerce/woocommerce/pull/50970)
 * Update - Add abbreviations for fields GTIN, UPC, EAN, OR ISBN [#50042](https://github.com/woocommerce/woocommerce/pull/50042)
 * Update - Add additional fields to new product editor e2e tests. [#50241](https://github.com/woocommerce/woocommerce/pull/50241)
 * Update - Add confirmation prompt for site visibility settings when changing from live to coming soon mode [#50759](https://github.com/woocommerce/woocommerce/pull/50759)
