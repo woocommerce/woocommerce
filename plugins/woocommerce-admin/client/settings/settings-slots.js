@@ -12,13 +12,8 @@ export const SETTINGS_SLOT_FILL_CONSTANT =
 const { Slot } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 const roots = {};
-let previousSidebarVisible = null;
 
-export const possiblyRenderSettingsSlots = (
-	toggleSidebar,
-	setSidebarContent,
-	sidebarVisisble
-) => {
+export const possiblyRenderSettingsSlots = () => {
 	//@TODO  We need to automatically register these based on the settings data so
 	// this way extensions don't need to add to this configuration.
 	const slots = [
@@ -52,12 +47,7 @@ export const possiblyRenderSettingsSlots = (
 		const slotFill = (
 			<>
 				<SlotFillProvider>
-					<Slot
-						fillProps={ {
-							toggleSidebar,
-							setSidebarContent,
-						} }
-					/>
+					<Slot />
 					<PluginArea scope={ slot.scope } />
 				</SlotFillProvider>
 			</>
@@ -65,17 +55,13 @@ export const possiblyRenderSettingsSlots = (
 
 		if ( createRoot ) {
 			// This is a bit hacky, but we can only call render if the element is visible.
-			if (
-				roots[ slot.id ] &&
-				previousSidebarVisible !== sidebarVisisble
-			) {
+			if ( roots[ slot.id ] ) {
 				roots[ slot.id ].render( slotFill );
 			} else {
 				const root = createRoot( slotDomElement );
 				root.render( slotFill );
 				roots[ slot.id ] = root;
 			}
-			previousSidebarVisible = sidebarVisisble;
 		} else {
 			render( slotFill, slotDomElement );
 		}

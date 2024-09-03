@@ -30,19 +30,6 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get own sections.
-	 *
-	 * @return array
-	 */
-	protected function get_own_sections() {
-		return array(
-			''            => __( 'General', 'woocommerce' ),
-			'custom_view' => __( 'Custom View', 'woocommerce' ),
-		);
-	}
-
-
-	/**
 	 * Get settings for the default section.
 	 *
 	 * @return array
@@ -52,23 +39,6 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 			array(
 				array(
 					'id'   => 'wc_settings_site_visibility_slotfill',
-					'type' => 'slotfill_placeholder',
-				),
-			);
-
-		return $settings;
-	}
-
-	/**
-	 * Get settings for the Custom View section.
-	 *
-	 * @return array
-	 */
-	protected function get_settings_for_custom_view_section() {
-		$settings =
-			array(
-				array(
-					'id'   => 'wc_site_visibility_settings_view',
 					'type' => 'slotfill_placeholder',
 				),
 			);

@@ -17,7 +17,6 @@ import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from '../launch-your-store';
-import { registerExampleSettingsView } from './settings-view-example';
 import { useFullScreen } from '~/utils';
 import './style.scss';
 
@@ -67,19 +66,15 @@ const Settings = ( { params } ) => {
 			? {}
 			: sections[ section || '' ];
 
-	const [ sidebarVisisble, setSidebarVisisble ] = useState( false );
-	const [ sidebarContent, setSidebarContent ] = useState( null );
-	const toggleSidebar = () => {
-		setSidebarVisisble( ! sidebarVisisble );
-	};
+	// const [ sidebarVisisble, setSidebarVisisble ] = useState( false );
+	// const [ sidebarContent, setSidebarContent ] = useState( null );
+	// const toggleSidebar = () => {
+	// 	setSidebarVisisble( ! sidebarVisisble );
+	// };
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
-		possiblyRenderSettingsSlots(
-			toggleSidebar,
-			setSidebarContent,
-			sidebarVisisble
-		);
+		possiblyRenderSettingsSlots();
 
 		const scripts = appendSettingsScripts();
 
@@ -87,19 +82,14 @@ const Settings = ( { params } ) => {
 		return () => {
 			removeSettingsScripts( scripts );
 		};
-	}, [ params.page, section, sidebarVisisble ] );
+	}, [ params.page, section ] );
 
 	// Register the slot fills for the settings page just once.
 	useEffect( () => {
 		registerTaxSettingsConflictErrorFill();
 		registerPaymentsSettingsBannerFill();
 		registerSiteVisibilitySlotFill();
-		registerExampleSettingsView();
 	}, [] );
-
-	useEffect( () => {
-		setSidebarVisisble( false );
-	}, [ params.page, section ] );
 
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;
@@ -129,12 +119,8 @@ const Settings = ( { params } ) => {
 						</div>
 					</SectionNav>
 				</div>
-				<div
-					className={ clsx( 'woocommerce-settings-layout-sidebar', {
-						'is-open': sidebarVisisble,
-					} ) }
-				>
-					{ sidebarVisisble && sidebarContent }
+				<div className="woocommerce-settings-layout-sidebar">
+					Sidebar Content
 				</div>
 			</div>
 		</>
