@@ -265,6 +265,10 @@ class WC_Email extends WC_Settings_API {
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
+	public function set_order( $order ) {
+		$this->object = $order;
+	}
+
 	/**
 	 * Handle multipart mail.
 	 *

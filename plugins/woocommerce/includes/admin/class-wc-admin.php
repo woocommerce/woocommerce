@@ -39,6 +39,23 @@ class WC_Admin {
 		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) {
 			add_filter( 'admin_body_class', array( 'WC_Admin_Addons', 'filter_admin_body_classes' ) );
 		}
+
+		add_action('admin_init', function() {
+			if ( isset( $_GET['email_preview'] ) && isset( $_GET['order_id'] ) && isset( $_GET['email_type'] ) ) {
+				$order = wc_get_order($_GET['order_id']);
+				if ( ! $order ) return;
+
+				$mailer = WC()->mailer();
+				$emails = $mailer->get_emails();
+				if (isset($emails[$_GET['email_type']])) {
+					$email = $emails[$_GET['email_type']];
+					$email->set_order($order);
+					$content = $email->get_content_html();
+					echo $email->style_inline($content);
+				}
+				exit;
+			}
+		});
 	}
 
 	/**
