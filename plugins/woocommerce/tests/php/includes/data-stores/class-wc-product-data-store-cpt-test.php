@@ -114,4 +114,67 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product2->save();
 		$product3->save();
 	}
+
+	/**
+	 * @testDox Test that meta cache key is changed on direct post meta add.
+	 */
+	public function test_get_meta_data_is_busted_on_post_meta_add() {
+		$product = new WC_Product();
+		$product->save();
+
+		// Set the cache.
+		$product->get_meta_data();
+
+		$object_id_cache_key = WC_Cache_Helper::get_cache_prefix( 'object_' . $product->get_id() );
+		add_post_meta( $product->get_id(), 'test', 'value' );
+
+		$r_object_id_cache_key = WC_Cache_Helper::get_cache_prefix( 'object_' . $product->get_id() );
+		$this->assertNotEquals( $object_id_cache_key, $r_object_id_cache_key );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 'value', $product->get_meta( 'test', true ) );
+	}
+
+
+	/**
+	 * @testDox Test that meta cache key is changed on direct post meta update.
+	 */
+	public function test_get_meta_data_is_busted_on_post_meta_update() {
+		$product = new WC_Product();
+		$product->add_meta_data( 'test', 'value' );
+		$product->save();
+
+		// Set the cache.
+		$product->get_meta_data();
+
+		$object_id_cache_key = WC_Cache_Helper::get_cache_prefix( 'object_' . $product->get_id() );
+		update_post_meta( $product->get_id(), 'test', 'value2' );
+
+		$r_object_id_cache_key = WC_Cache_Helper::get_cache_prefix( 'object_' . $product->get_id() );
+		$this->assertNotEquals( $object_id_cache_key, $r_object_id_cache_key );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 'value2', $product->get_meta( 'test', true ) );
+	}
+
+	/**
+	 * @testDox Test that meta cache key is changed on direct post meta delete.
+	 */
+	public function test_get_meta_data_is_busted_on_post_meta_delete() {
+		$product = new WC_Product();
+		$product->add_meta_data( 'test', 'value' );
+		$product->save();
+
+		// Set the cache.
+		$product->get_meta_data();
+
+		$object_id_cache_key = WC_Cache_Helper::get_cache_prefix( 'object_' . $product->get_id() );
+		delete_post_meta( $product->get_id(), 'test' );
+
+		$r_object_id_cache_key = WC_Cache_Helper::get_cache_prefix( 'object_' . $product->get_id() );
+		$this->assertNotEquals( $object_id_cache_key, $r_object_id_cache_key );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEmpty( $product->get_meta( 'test', true ) );
+	}
 }

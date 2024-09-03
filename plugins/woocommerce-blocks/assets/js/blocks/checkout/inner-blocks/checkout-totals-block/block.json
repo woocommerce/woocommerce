@@ -26,8 +26,10 @@
 			"required": false
 		}
 	},
-	"parent": [ "woocommerce/checkout" ],
+	"parent": [
+		"woocommerce/checkout"
+	],
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2
+	"apiVersion": 3
 }

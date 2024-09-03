@@ -5,8 +5,6 @@ tags: code-snippet
 current wccom url: https://woocommerce.com/document/woocommerce-localization/#making-your-translation-upgrade-safe
 ---
 
-# Making your translation upgrade safe
-
 Like all other plugins, WooCommerce keeps translations in `wp-content/languages/plugins`. 
 
 However, if you want to include a custom translation, you can add them to `wp-content/languages/woocommerce`, or you can use a snippet to load a custom translation stored elsewhere:

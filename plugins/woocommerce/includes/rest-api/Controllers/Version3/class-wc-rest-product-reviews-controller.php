@@ -1065,7 +1065,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get the reivew, if the ID is valid.
+	 * Get the review, if the ID is valid.
 	 *
 	 * @since 3.5.0
 	 * @param int $id Supplied ID.

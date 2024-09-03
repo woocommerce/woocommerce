@@ -99,7 +99,7 @@ Timeline.propTypes = {
 			 */
 			hideTimestamp: PropTypes.bool,
 		} )
-	).isRequired,
+	),
 	/**
 	 * Defines how items should be grouped together.
 	 */

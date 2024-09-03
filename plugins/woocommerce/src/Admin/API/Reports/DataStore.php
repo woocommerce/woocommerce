@@ -9,12 +9,59 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
- * Admin\API\Reports\DataStore: Common parent for custom report data stores.
+ * Common parent for custom report data stores.
+ *
+ * We use Report DataStores to separate DB data retrieval logic from the REST API controllers.
+ *
+ * Handles caching, data normalization, intervals-related methods, and other common functionality.
+ * So, in your custom report DataStore class that extends this class
+ * you can focus on specifics by overriding the `get_noncached_data` method.
+ *
+ * Minimalistic example:
+ * <pre><code class="language-php">class MyDataStore extends DataStore implements DataStoreInterface {
+ *     /** Cache identifier, used by the `DataStore` class to handle caching for you. &ast;/
+ *     protected $cache_key = 'my_thing';
+ *     /** Data store context used to pass to filters. &ast;/
+ *     protected $context = 'my_thing';
+ *     /** Table used to get the data. &ast;/
+ *     protected static $table_name = 'my_table';
+ *     /**
+ *      * Method that overrides the `DataStore::get_noncached_data()` to return the report data.
+ *      * Will be called by `get_data` if there is no data in cache.
+ *      &ast;/
+ *     public function get_noncached_data( $query ) {
+ *         // Do your magic.
+ *
+ *         // Then return your data in conforming object structure.
+ *         return (object) array(
+ *             'data' => $product_data,
+ *             'total' => 1,
+ *             'page_no' => 1,
+ *             'pages' => 1,
+ *         );
+ *     }
+ * }
+ * </code></pre>
+ *
+ * Please use the `woocommerce_data_stores` filter to add your custom data store to the list of available ones.
+ * Then, your store could be accessed by Controller classes ({@see GenericController::get_datastore_data() GenericController::get_datastore_data()})
+ * or using {@link \WC_Data_Store::load() \WC_Data_Store::load()}.
+ *
+ * We recommend registering using the REST base name of your Controller as the key, e.g.:
+ * <pre><code class="language-php">add_filter( 'woocommerce_data_stores', function( $stores ) {
+ *     $stores['reports/my-thing'] = 'MyExtension\Admin\Analytics\Rest_API\MyDataStore';
+ * } );
+ * </code></pre>
+ * This way, `GenericController` will pick it up automatically.
+ *
+ * Note that this class is NOT {@link https://developer.woocommerce.com/docs/how-to-manage-woocommerce-data-stores/ a CRUD data store}.
+ * It does not implement the {@see WC_Object_Data_Store_Interface WC_Object_Data_Store_Interface} nor extend WC_Data & WC_Data_Store_WP classes.
  */
-class DataStore extends SqlQuery {
+class DataStore extends SqlQuery implements DataStoreInterface {
 
 	/**
 	 * Cache group for the reports.
@@ -90,6 +137,8 @@ class DataStore extends SqlQuery {
 	/**
 	 * Data store context used to pass to filters.
 	 *
+	 * @override SqlQuery
+	 *
 	 * @var string
 	 */
 	protected $context = 'reports';
@@ -138,6 +187,8 @@ class DataStore extends SqlQuery {
 
 	/**
 	 * Class constructor.
+	 *
+	 * @override SqlQuery::__construct()
 	 */
 	public function __construct() {
 		self::set_db_table_name();
@@ -160,12 +211,73 @@ class DataStore extends SqlQuery {
 		}
 	}
 
+
+	/**
+	 * Get the data based on args.
+	 *
+	 * Returns the report data based on parameters supplied by the user.
+	 * Fetches it from cache or returns `get_noncached_data` result.
+	 *
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error
+	 */
+	public function get_data( $query_args ) {
+		$defaults   = $this->get_default_query_vars();
+		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
+
+		/*
+		 * We need to get the cache key here because
+		 * parent::update_intervals_sql_params() modifies $query_args.
+		 */
+		$cache_key = $this->get_cache_key( $query_args );
+		$data      = $this->get_cached_data( $cache_key );
+
+		if ( false === $data ) {
+			$data = $this->get_noncached_data( $query_args );
+			$this->set_cached_data( $cache_key, $data );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Get the default query arguments to be used by get_data().
+	 * These defaults are only partially applied when used via REST API, as that has its own defaults.
+	 *
+	 * @return array Query parameters.
+	 */
+	public function get_default_query_vars() {
+		return array(
+			'per_page' => get_option( 'posts_per_page' ),
+			'page'     => 1,
+			'order'    => 'DESC',
+			'orderby'  => 'date',
+			'before'   => TimeInterval::default_before(),
+			'after'    => TimeInterval::default_after(),
+			'fields'   => '*',
+		);
+	}
+
 	/**
 	 * Get table name from database class.
 	 */
 	public static function get_db_table_name() {
 		global $wpdb;
 		return isset( $wpdb->{static::$table_name} ) ? $wpdb->{static::$table_name} : $wpdb->prefix . static::$table_name;
+	}
+
+	/**
+	 * Returns the report data based on normalized parameters.
+	 * Will be called by `get_data` if there is no data in cache.
+	 *
+	 * @see get_data
+	 * @param array $query_args Query parameters.
+	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 */
+	public function get_noncached_data( $query_args ) {
+		/* translators: %s: Method name */
+		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**

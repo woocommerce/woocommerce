@@ -1,3 +1,4 @@
+/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /* eslint-disable @typescript-eslint/naming-convention */
 /**
  * External dependencies
@@ -265,7 +266,7 @@ const ProductTemplateEdit = (
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
-					location,
+					productCollectionLocation: location,
 					productCollectionQueryContext,
 					previewState: __privateProductCollectionPreviewState,
 					/**
