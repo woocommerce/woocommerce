@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Don't update the script data transient for the same data
