@@ -6,6 +6,11 @@ import { DropdownContext } from '@woocommerce/interactivity-components/dropdown'
 import { HTMLElementEvent } from '@woocommerce/types';
 import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
 
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../product-filter/frontend';
+
 const getUrl = ( activeFilters: string ) => {
 	const url = new URL( window.location.href );
 	const { searchParams } = url;
@@ -21,7 +26,7 @@ const getUrl = ( activeFilters: string ) => {
 
 store( 'woocommerce/product-filter-stock-status', {
 	actions: {
-		*onCheckboxChange() {
+		onCheckboxChange: () => {
 			const checkboxContext = getContext< CheckboxListContext >(
 				'woocommerce/interactivity-checkbox-list'
 			);
@@ -34,10 +39,9 @@ store( 'woocommerce/product-filter-stock-status', {
 					return item.value;
 				} );
 
-			const { navigate } = yield import( '../product-filter/frontend' );
-			yield navigate( getUrl( filters.join( ',' ) ) );
+			navigate( getUrl( filters.join( ',' ) ) );
 		},
-		*onDropdownChange() {
+		onDropdownChange: () => {
 			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
 			);
@@ -45,10 +49,10 @@ store( 'woocommerce/product-filter-stock-status', {
 			const selectedItems = dropdownContext.selectedItems;
 			const items = selectedItems || [];
 			const filters = items.map( ( i ) => i.value );
-			const { navigate } = yield import( '../product-filter/frontend' );
-			yield navigate( getUrl( filters.join( ',' ) ) );
+
+			navigate( getUrl( filters.join( ',' ) ) );
 		},
-		*updateProducts( event: HTMLElementEvent< HTMLInputElement > ) {
+		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			// get the active filters from the url:
 			const url = new URL( window.location.href );
 			const currentFilters =
@@ -70,10 +74,10 @@ store( 'woocommerce/product-filter-stock-status', {
 					filtersArr.splice( index, 1 );
 				}
 			}
-			const { navigate } = yield import( '../product-filter/frontend' );
-			yield navigate( getUrl( filtersArr.join( ',' ) ) );
+
+			navigate( getUrl( filtersArr.join( ',' ) ) );
 		},
-		*removeFilter() {
+		removeFilter: () => {
 			const { value } = getContext< { value: string } >();
 			// get the active filters from the url:
 			const url = new URL( window.location.href );
@@ -90,8 +94,7 @@ store( 'woocommerce/product-filter-stock-status', {
 				filtersArr.splice( index, 1 );
 			}
 
-			const { navigate } = yield import( '../product-filter/frontend' );
-			yield navigate( getUrl( filtersArr.join( ',' ) ) );
+			navigate( getUrl( filtersArr.join( ',' ) ) );
 		},
 	},
 } );

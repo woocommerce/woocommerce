@@ -5,6 +5,11 @@ import { getContext, store } from '@woocommerce/interactivity';
 import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../product-filter/frontend';
+
 function getUrl( filters: Array< string | null > ) {
 	filters = filters.filter( Boolean );
 	const url = new URL( window.location.href );
@@ -22,7 +27,7 @@ function getUrl( filters: Array< string | null > ) {
 
 store( 'woocommerce/product-filter-rating', {
 	actions: {
-		*onCheckboxChange() {
+		onCheckboxChange: () => {
 			const checkboxContext = getContext< CheckboxListContext >(
 				'woocommerce/interactivity-checkbox-list'
 			);
@@ -35,11 +40,9 @@ store( 'woocommerce/product-filter-rating', {
 					return item.value;
 				} );
 
-			const { navigate } = yield import( '../product-filter/frontend' );
-
-			yield navigate( getUrl( filters ) );
+			navigate( getUrl( filters ) );
 		},
-		*onDropdownChange() {
+		onDropdownChange: () => {
 			const dropdownContext = getContext< DropdownContext >(
 				'woocommerce/interactivity-dropdown'
 			);
@@ -48,10 +51,9 @@ store( 'woocommerce/product-filter-rating', {
 			const items = selectedItems || [];
 			const filters = items.map( ( i ) => i.value );
 
-			const { navigate } = yield import( '../product-filter/frontend' );
-			yield navigate( getUrl( filters ) );
+			navigate( getUrl( filters ) );
 		},
-		*removeFilter() {
+		removeFilter: () => {
 			const { value } = getContext< { value: string } >();
 			// get the active filters from the url:
 			const url = new URL( window.location.href );
@@ -68,8 +70,7 @@ store( 'woocommerce/product-filter-rating', {
 				filtersArr.splice( index, 1 );
 			}
 
-			const { navigate } = yield import( '../product-filter/frontend' );
-			yield navigate( getUrl( filtersArr ) );
+			navigate( getUrl( filtersArr ) );
 		},
 	},
 } );
