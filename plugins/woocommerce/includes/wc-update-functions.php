@@ -2856,7 +2856,7 @@ function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
 /**
  * Add old refunded order items to the product_lookup_table.
  */
-function wc_update_930_add_old_refunded_order_items_to_product_lookup_table() {
+function wc_update_940_add_old_refunded_order_items_to_product_lookup_table() {
 	global $wpdb;
 
 	// Get every order ID where the total sales is less than 0 and is not present in the table wc_order_product_lookup.
@@ -2879,10 +2879,9 @@ function wc_update_930_add_old_refunded_order_items_to_product_lookup_table() {
 			 * Trigger an action to schedule the data import for old refunded order items.
 			 *
 			 * @param int $order_id The ID of the order to be synced.
-			 * @since 9.3.0
+			 * @since 9.4.0
 			 */
 			do_action( 'woocommerce_schedule_import', intval( $order->order_id ) );
 		}
 	}
 }
-
