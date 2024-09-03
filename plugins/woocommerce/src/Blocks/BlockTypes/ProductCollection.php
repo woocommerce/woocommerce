@@ -304,14 +304,16 @@ class ProductCollection extends AbstractBlock {
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
-					array(
-						...$current_context,
-						// The message to be announced by the screen reader when the page is loading or loaded.
-						'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
-						'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
-						// We don't prefetch the links if user haven't clicked on pagination links yet.
-						// This way we avoid prefetching when the page loads.
-						'isPrefetchNextOrPreviousLink' => false,
+					array_merge(
+						$current_context,
+						array(
+							// The message to be announced by the screen reader when the page is loading or loaded.
+							'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
+							'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
+							// We don't prefetch the links if user haven't clicked on pagination links yet.
+							// This way we avoid prefetching when the page loads.
+							'isPrefetchNextOrPreviousLink' => false,
+						),
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
