@@ -2,7 +2,7 @@
 	"name": "woocommerce/order-confirmation-create-account",
 	"version": "1.0.0",
 	"title": "Account Creation",
-	"description": "Display the order confirmation create account section.",
+	"description": "Allow customers to create an account after their purchase. Configure this feature in your store settings.",
 	"category": "woocommerce",
 	"keywords": [
 		"WooCommerce"
