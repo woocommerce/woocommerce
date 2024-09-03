@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
+import { DataForm, FieldType, Form } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -9,9 +10,39 @@ import { createElement } from '@wordpress/element';
 import {
 	PRODUCT_FIELDS,
 	PRODUCT_FIELDS_KEYS,
-	ProductForm,
 	PRODUCTS_DATA,
-} from './utilites/storybook';
+} from './utilites/product-data-view-data';
+
+type ProductFormProps = {
+	productData: ( typeof PRODUCTS_DATA )[ 0 ];
+	fields: {
+		label: string;
+		id: string;
+		type: FieldType;
+		options?: string[];
+		Edit?: () => JSX.Element;
+	}[];
+	form: Form;
+};
+
+// ProductForm component is just a wrapper around DataViews component. Currently, it is needed to experiment with the DataViews component in isolation.
+// We expect that this component will be removed in the future, instead it will be used the component used in Products App.
+const ProductForm = ( { fields, form, productData }: ProductFormProps ) => {
+	const [ product, setProduct ] = useState( productData );
+	return (
+		<DataForm
+			data={ product }
+			fields={ fields }
+			form={ form }
+			onChange={ ( newProduct ) =>
+				setProduct( ( prev ) => ( {
+					...prev,
+					...newProduct,
+				} ) )
+			}
+		/>
+	);
+};
 
 export default {
 	title: 'Product App/Product Form',
