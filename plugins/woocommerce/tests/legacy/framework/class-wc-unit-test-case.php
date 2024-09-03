@@ -139,13 +139,31 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		$url_domain = parse_url( $url, PHP_URL_HOST );
+		$url_path   = parse_url( $url, PHP_URL_PATH );
 
 		// Step 2: route localhost-addressed requests (REST-testing and co).
 		if ( $url_domain === 'localhost' ) {
 			return $preempt;
 		}
 
-		// Step 3: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
+		// Step 3: when loading images, pick them from data-folder instead of network (product images in the most cases).
+		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
+		if ( in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) && in_array( $url_domain, [ 'cldup.com', 'woocommerce.com' ], true ) ) {
+			$local_image_file = __DIR__ . '/../data/images/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
+			// Ensure we are getting the file copy of new files (so we can git-push them).
+			if ( ! file_exists( $local_image_file ) ) {
+				file_put_contents( $local_image_file, file_get_contents( $url ) );
+			}
+			// Return the local files content.
+			if ( file_exists( $local_image_file ) ) {
+				return [
+					'body'     => file_get_contents( $local_image_file ),
+					'response' => [ 'code' => WP_Http::OK ],
+				];
+			}
+		}
+
+		// Step 4: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
 		// Main suit:
 		//	https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json?country=IN&locale=en_US
 		//	https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json?locale=en_US
@@ -156,20 +174,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		//	https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json?locale=en_US
 		//	https://public-api.wordpress.com/rest/v1.1/logstash
 		// Legacy suit:
-		//	http://cldup.com/Dr1Bczxq4q.png
 		//	https://www.paypal.com/cgi-bin/webscr
 		//	https://woocommerce.com/wc-api/product-key-api?request=ping&network=0
 		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	https://woocommerce.com/wp-json/wccom-extensions/1.0/search?locale=en_US
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113836-efdbde32-7863-4a24-9d2d-979025b51260.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113854-b669deff-4c3e-4bb0-b00f-96cfbdc4087e.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113857-839785e4-d25a-45f0-b647-cd8d9be8bc2d.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113861-531ebbcd-f9b5-4c18-b5c7-a878d5017ca2.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113864-14d59cf5-1233-4053-8193-070413ea3434.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113817-0fd3751e-b81b-4def-be53-040d8fa049f2.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296.jpeg
-		//	https://woocommerce.com/wp-content/plugins/wccom-plugins/sample-products/images/167113811-0be977aa-edfe-4a09-b36d-a62f02de4a29.jpeg
 		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=invalid-theme-name&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
