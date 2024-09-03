@@ -492,10 +492,7 @@ class ProductCollectionPage {
 			onSale: 'show-only',
 		}
 	) {
-		const onSaleControl = this.getOnSaleControl();
-		if ( ! ( await onSaleControl.isVisible() ) ) {
-			await this.addFilter( 'Show On Sale' );
-		}
+		await this.addFilter( 'Show On Sale' );
 
 		if ( onSale === 'show-only' ) {
 			const showOnlyOption = this.getOnSaleControlShowOnlyOption();
