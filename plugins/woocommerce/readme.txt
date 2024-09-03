@@ -171,6 +171,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 9.3.0 2024-XX-XX =
 
+* Fix - Add check to ensure themes API is safe [#51081](https://github.com/woocommerce/woocommerce/pull/51081)
 * Fix - CYS - Remove usage of `prepare_item_for_response` function in `Images` endpoint. [#50923](https://github.com/woocommerce/woocommerce/pull/50923)
 * Fix - Add ability for a screen reader to announce the current tab on a single product page. [#50373](https://github.com/woocommerce/woocommerce/pull/50373)
 * Fix - Add a label to the product pagination for the woocommerce pagination [#49924](https://github.com/woocommerce/woocommerce/pull/49924)
