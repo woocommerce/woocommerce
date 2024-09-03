@@ -17,7 +17,7 @@ const awaitCartPageResponse = ( page ) =>
 
 test.describe(
 	'Cart & Checkout Restricted Coupons',
-	{ tag: [ '@payments', '@services', '@hpos' ] },
+	{ tag: [ '@payments', '@services', '@hpos', '@could-be-unit-test' ] },
 	() => {
 		let firstProductId,
 			secondProductId,
