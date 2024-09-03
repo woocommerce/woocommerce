@@ -5,6 +5,7 @@
     container: edit-site-page/inline-size;
     height: 100%;
     transition: width .2s ease-out;
+    overflow: auto;
 
     .edit-product-content {
         display: flex;
@@ -21,4 +22,9 @@
         justify-content: center;
     }
 
+    .woocommerce-error-boundary {
+        .woocommerce-empty-content__actions {
+            display: none;
+        }
+    }
 }

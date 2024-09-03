@@ -3,7 +3,12 @@
  */
 import { DataForm, isItemValid } from '@wordpress/dataviews';
 import type { Form } from '@wordpress/dataviews';
-import { createElement, useState, useMemo } from '@wordpress/element';
+import {
+	createElement,
+	useState,
+	useMemo,
+	useEffect,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import classNames from 'classnames';
