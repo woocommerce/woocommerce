@@ -24,6 +24,14 @@ export const blockAttributes: BlockAttributes = {
 		type: 'boolean',
 		default: false,
 	},
+	prefix: {
+		type: 'string',
+		default: 'SKU:',
+	},
+	suffix: {
+		type: 'string',
+		default: '',
+	},
 };
 
 export default blockAttributes;

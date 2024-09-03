@@ -13,12 +13,16 @@ import {
  * Internal dependencies
  */
 import { unlock } from '../lock-unlock';
+import useLayoutAreas from './router';
+import { Layout } from './layout';
 
 const { RouterProvider } = unlock( routerPrivateApis );
 const { GlobalStylesProvider } = unlock( editorPrivateApis );
 
 function ProductsLayout() {
-	return <div>Initial Products Layout</div>;
+	// This ensures the edited entity id and type are initialized properly.
+	const route = useLayoutAreas();
+	return <Layout route={ route } />;
 }
 
 export function ProductsApp() {
