@@ -1,16 +1,3 @@
-/**
- * External dependencies
- */
-import {
-	DataForm,
-	DataViews,
-	FieldType,
-	Form,
-	SupportedLayouts,
-	View,
-} from '@wordpress/dataviews';
-import { createElement, useState } from '@wordpress/element';
-
 export const PRODUCTS_DATA = [
 	{
 		id: 236,
