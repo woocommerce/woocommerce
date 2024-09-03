@@ -439,10 +439,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
+			$net_revenue         = round( $order_item->get_total( 'edit' ), $decimals );
+			$is_refund           = $net_revenue < 0;
 
 			// Skip line items without changes to product quantity.
-			if ( ! $product_qty ) {
-				$num_updated++;
+			if ( ! $product_qty && ! $is_refund ) {
+				++$num_updated;
 				continue;
 			}
 
@@ -455,7 +457,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? (float) $tax_data['total'][ $tax_item_id ] : 0;
 			}
 
-			$net_revenue = round( $order_item->get_total( 'edit' ), $decimals );
 			if ( $round_tax ) {
 				$tax_amount = round( $tax_amount, $decimals );
 			}
