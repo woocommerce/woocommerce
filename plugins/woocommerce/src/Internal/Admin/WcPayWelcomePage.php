@@ -43,11 +43,11 @@ class WcPayWelcomePage {
 	 * WCPayWelcomePage constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', [ $this, 'register_payments_welcome_page' ] );
-		add_filter( 'woocommerce_admin_shared_settings', [ $this, 'shared_settings' ] );
-		add_filter( 'woocommerce_admin_allowed_promo_notes', [ $this, 'allowed_promo_notes' ] );
-		add_filter( 'woocommerce_admin_woopayments_onboarding_task_badge', [ $this, 'onboarding_task_badge' ] );
-		add_filter( 'woocommerce_admin_woopayments_onboarding_task_additional_data', [ $this, 'onboarding_task_additional_data' ] );
+		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'shared_settings' ) );
+		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'allowed_promo_notes' ) );
+		add_filter( 'woocommerce_admin_woopayments_onboarding_task_badge', array( $this, 'onboarding_task_badge' ) );
+		add_filter( 'woocommerce_admin_woopayments_onboarding_task_additional_data', array( $this, 'onboarding_task_additional_data' ) );
 	}
 
 	/**
@@ -228,7 +228,7 @@ class WcPayWelcomePage {
 		// If we have an incentive, add the incentive ID to the additional data.
 		if ( $this->get_incentive()['id'] ) {
 			if ( empty( $additional_data ) ) {
-				$additional_data = [];
+				$additional_data = array();
 			}
 			$additional_data['wooPaymentsIncentiveId'] = $this->get_incentive()['id'];
 		}
