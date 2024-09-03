@@ -1,10 +1,10 @@
 /**
  * Internal dependencies
  */
-import { ComboboxProps } from '../combobox';
+import { SelectProps } from '../select';
 import { countries } from './stories/countries-filler';
 
-export interface CountryInputProps extends Omit< ComboboxProps, 'options' > {
+export interface CountryInputProps extends Omit< SelectProps, 'options' > {
 	/**
 	 * Classes to assign to the wrapper component of the input
 	 */
@@ -12,7 +12,7 @@ export interface CountryInputProps extends Omit< ComboboxProps, 'options' > {
 	/**
 	 * Whether input elements can by default have their values automatically completed by the browser.
 	 *
-	 * This value gets assigned to both the wrapper `Combobox` and the wrapped input element.
+	 * This value gets assigned to both the wrapper `Select` and the wrapped input element.
 	 */
 	autoComplete?: string | undefined;
 }
