@@ -1,3 +1,16 @@
+/**
+ * This script generates a PHP file from block JSON files.
+ * To run it ( this script only ):
+ *   pnpm run watch:build:project:blocks-json-to-php
+ * Or, it will be run automatically when you run:
+ *   pnpm run watch:build
+ *
+ * In watch mode:
+ *   pnpm run watch:build:project:blocks-json-to-php
+ * Or
+ *   pnpm run watch:build
+ */
+
 const fs = require( 'fs' );
 const path = require( 'path' );
 const glob = require( 'glob' );

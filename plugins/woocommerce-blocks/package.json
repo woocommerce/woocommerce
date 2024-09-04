@@ -101,7 +101,8 @@
 		"wp-env:config": "./bin/wp-env-pre-config.sh",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "wireit"
+		"watch:build:project:bundle": "wireit",
+		"watch:build:project:blocks-json-to-php": "pnpm run build:project:blocks-json-to-php --watch"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "2.5.0",
@@ -386,7 +387,8 @@
 			],
 			"output": [
 				"build",
-				"blocks.ini"
+				"blocks.ini",
+				"!build/blocks-json.php"
 			],
 			"dependencies": [
 				"dependencyOutputs"
@@ -399,7 +401,8 @@
 		"build:project:blocks-json-to-php": {
 			"command": "node ./bin/blocks-json-to-php.js",
 			"files": [
-				"assets/js/blocks/**/block.json"
+				"assets/js/blocks/**/block.json",
+				"bin/blocks-json-to-php.js"
 			],
 			"output": [
 				"build/blocks-json.php"
