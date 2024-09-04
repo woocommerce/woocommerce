@@ -28,4 +28,28 @@ test.describe( `${ blockData.slug } Block`, () => {
 			blockLocatorFrontend.getByRole( 'listitem' )
 		).toHaveCount( 9 );
 	} );
+
+	test( 'can change attributes from the sidebar', async ( {
+		editor,
+		admin,
+		frontendUtils,
+		page,
+	} ) => {
+		await admin.createNewPost();
+		await editor.insertBlock( { name: blockData.slug } );
+		const blockLocator = await editor.getBlockByName( blockData.slug );
+		await blockLocator.getByText( 'Color' ).click();
+		await blockLocator.getByText( 'Done' ).click();
+		await page.getByText( 'Filter by Product Attribute' ).click();
+		await page.getByText( 'Color' ).click();
+		await page.getByText( 'Size' ).click();
+		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 1 );
+		await editor.publishAndVisitPost();
+		const blockLocatorFrontend = await frontendUtils.getBlockByName(
+			blockData.slug
+		);
+		await expect(
+			blockLocatorFrontend.getByRole( 'listitem' )
+		).toHaveCount( 1 );
+	} );
 } );

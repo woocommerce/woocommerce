@@ -1,9 +1,12 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { CustomizeStorePage } = require( '../customize-store.page' );
+const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
+const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
+const { admin } = require( '../../../test-data/data' );
 
 const test = base.extend( {
 	assemblerPageObject: async ( { page }, use ) => {
@@ -223,7 +226,7 @@ const colorPalette = {
 	},
 };
 
-test.describe( 'Assembler -> Color Pickers', () => {
+test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -300,17 +303,13 @@ test.describe( 'Assembler -> Color Pickers', () => {
 
 			await assembler.locator( '[aria-label="Back"]' ).click();
 
-			const saveButton = assembler.getByText( 'Save' );
+			const saveButton = assembler.getByText( 'Finish customizing' );
 
 			const waitResponse = page.waitForResponse(
 				( response ) =>
 					response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
 					response.status() === 200
 			);
-
-			await saveButton.click();
-
-			await waitResponse;
 
 			const buttons = await editor
 				.locator( '.wp-block-button > .wp-block-button__link' )
@@ -350,6 +349,25 @@ test.describe( 'Assembler -> Color Pickers', () => {
 					} )
 				);
 
+			const headersInCoverBlock = await editor
+				.locator(
+					`.wp-block-cover__inner-container h1,
+					 .wp-block-cover__inner-container h2,
+					 .wp-block-cover__inner-container h3,
+					 .wp-block-cover__inner-container h4,
+					 .wp-block-cover__inner-container h5,
+					 .wp-block-cover__inner-container h6`
+				)
+				.evaluateAll( ( elements ) =>
+					elements.map( ( element ) => {
+						const style = window.getComputedStyle( element );
+						return {
+							background: style.backgroundColor,
+							color: style.color,
+						};
+					} )
+				);
+
 			for ( const element of buttons ) {
 				await expect( element.background ).toEqual(
 					colors.button.background
@@ -367,6 +385,16 @@ test.describe( 'Assembler -> Color Pickers', () => {
 					true
 				);
 			}
+
+			// Check that the headers in the cover block are white text.
+			// See: https://github.com/woocommerce/woocommerce/pull/48447
+			for ( const element of headersInCoverBlock ) {
+				expect( element.color ).toEqual( 'rgb(255, 255, 255)' );
+			}
+
+			await saveButton.click();
+
+			await waitResponse;
 		} );
 	}
 
@@ -384,152 +412,223 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		await expect( colorPicker ).toHaveClass( /is-active/ );
 	} );
 
-	test( 'Selected color palette should be applied on the frontend', async ( {
-		assemblerPageObject,
-		page,
-		baseURL,
-	} ) => {
-		const assembler = await assemblerPageObject.getAssembler();
-		const colorPicker = assembler
-			.locator(
-				'.woocommerce-customize-store_global-styles-variations_item'
-			)
-			.last();
-
-		await colorPicker.click();
-
-		await assembler.locator( '[aria-label="Back"]' ).click();
-
-		const saveButton = assembler.getByText( 'Save' );
-
-		const waitResponseGlobalStyles = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-				response.status() === 200
-		);
-
-		const waitResponseTemplate = page.waitForResponse(
-			( response ) =>
-				response.url().includes(
-					// When CYS will support all block themes, this URL will change.
-					'wp-json/wp/v2/templates/twentytwentyfour//home'
-				) && response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await Promise.all( [ waitResponseGlobalStyles, waitResponseTemplate ] );
-
-		await page.goto( baseURL );
-
-		const paragraphs = await page
-			.locator(
-				'p.wp-block.wp-block-paragraph:not([aria-label="Empty block; start writing or type forward slash to choose a block"])'
-			)
-			.evaluateAll( ( elements ) =>
-				elements.map( ( element ) => {
-					const style = window.getComputedStyle( element );
-					return {
-						background: style.backgroundColor,
-						color: style.color,
-					};
-				} )
-			);
-
-		const buttons = await page
-			.locator( '.wp-block-button > .wp-block-button__link' )
-			.evaluateAll( ( elements ) =>
-				elements.map( ( element ) => {
-					const style = window.getComputedStyle( element );
-					return {
-						background: style.backgroundColor,
-						color: style.color,
-					};
-				} )
-			);
-
-		const headers = await page
-			.locator( 'h1, h2, h3, h4, h5, h6' )
-			.evaluateAll( ( elements ) =>
-				elements.map( ( element ) => {
-					const style = window.getComputedStyle( element );
-					return {
-						background: style.backgroundColor,
-						color: style.color,
-					};
-				} )
-			);
-
-		for ( const element of buttons ) {
-			await expect( element.background ).toEqual(
-				colorPalette.Slate.button.background
-			);
-		}
-
-		for ( const element of paragraphs ) {
-			expect(
-				colorPalette.Slate.paragraph.color.includes( element.color )
-			).toBe( true );
-		}
-
-		for ( const element of headers ) {
-			expect(
-				colorPalette.Slate.header.color.includes( element.color )
-			).toBe( true );
-		}
-	} );
-
-	test( 'Create "your own" pickers should be visible', async ( {
-		assemblerPageObject,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
-		const assembler = await assemblerPageObject.getAssembler();
-		const colorPicker = assembler.getByText( 'Create your own' );
-
-		await colorPicker.click();
-
-		const mapTypeFeatures = {
-			background: [ 'solid', 'gradient' ],
-			text: [],
-			heading: [ 'text', 'background', 'gradient' ],
-			button: [ 'text', 'background', 'gradient' ],
-			link: [ 'default', 'hover' ],
-			captions: [],
-		};
-
-		const mapFeatureSelectors = {
-			solid: '.components-color-palette__custom-color-button',
-			text: '.components-color-palette__custom-color-button',
-			background: '.components-color-palette__custom-color-button',
-			default: '.components-color-palette__custom-color-button',
-			hover: '.components-color-palette__custom-color-button',
-			gradient:
-				'.components-custom-gradient-picker__gradient-bar-background',
-		};
-
-		for ( const type of Object.keys( mapTypeFeatures ) ) {
-			await assembler
+	test(
+		'Selected color palette should be applied on the frontend',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { assemblerPageObject, page, baseURL } ) => {
+			const assembler = await assemblerPageObject.getAssembler();
+			const colorPicker = assembler
 				.locator(
-					'.woocommerce-customize-store__color-panel-container'
+					'.woocommerce-customize-store_global-styles-variations_item'
 				)
-				.getByText( type )
-				.click();
+				.last();
 
-			for ( const feature of mapTypeFeatures[ type ] ) {
-				const container = assembler.locator(
-					'.block-editor-panel-color-gradient-settings__dropdown-content'
-				);
-				await container
-					.getByRole( 'tab', {
-						name: feature,
+			await colorPicker.click();
+
+			await assembler.locator( '[aria-label="Back"]' ).click();
+
+			const saveButton = assembler.getByText( 'Finish customizing' );
+
+			const waitResponseGlobalStyles = page.waitForResponse(
+				( response ) =>
+					response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
+					response.status() === 200
+			);
+
+			const wordPressVersion = await getInstalledWordPressVersion();
+
+			await saveButton.click();
+
+			await Promise.all( [
+				waitResponseGlobalStyles,
+				wordPressVersion < 6.6
+					? page.waitForResponse(
+							( response ) =>
+								response.url().includes(
+									// When CYS will support all block themes, this URL will change.
+									'wp-json/wp/v2/templates/twentytwentyfour//home'
+								) && response.status() === 200
+					  )
+					: Promise.resolve(),
+			] );
+
+			await page.goto( baseURL );
+
+			const paragraphs = await page
+				.locator(
+					'p.wp-block.wp-block-paragraph:not([aria-label="Empty block; start writing or type forward slash to choose a block"])'
+				)
+				.evaluateAll( ( elements ) =>
+					elements.map( ( element ) => {
+						const style = window.getComputedStyle( element );
+						return {
+							background: style.backgroundColor,
+							color: style.color,
+						};
 					} )
-					.click();
+				);
 
-				const selector = mapFeatureSelectors[ feature ];
-				const featureSelector = container.locator( selector );
+			const buttons = await page
+				.locator( '.wp-block-button > .wp-block-button__link' )
+				.evaluateAll( ( elements ) =>
+					elements.map( ( element ) => {
+						const style = window.getComputedStyle( element );
+						return {
+							background: style.backgroundColor,
+							color: style.color,
+						};
+					} )
+				);
 
-				await expect( featureSelector ).toBeVisible();
+			const headers = await page
+				.locator( 'h1, h2, h3, h4, h5, h6' )
+				.evaluateAll( ( elements ) =>
+					elements.map( ( element ) => {
+						const style = window.getComputedStyle( element );
+						return {
+							background: style.backgroundColor,
+							color: style.color,
+						};
+					} )
+				);
+
+			for ( const element of buttons ) {
+				await expect( element.background ).toEqual(
+					colorPalette.Slate.button.background
+				);
+			}
+
+			for ( const element of paragraphs ) {
+				expect(
+					colorPalette.Slate.paragraph.color.includes( element.color )
+				).toBe( true );
+			}
+
+			for ( const element of headers ) {
+				expect(
+					colorPalette.Slate.header.color.includes( element.color )
+				).toBe( true );
 			}
 		}
-	} );
+	);
+
+	test(
+		'Create "your own" pickers should be visible',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { assemblerPageObject, baseURL }, testInfo ) => {
+			testInfo.snapshotSuffix = '';
+			const wordPressVersion = await getInstalledWordPressVersion();
+
+			const assembler = await assemblerPageObject.getAssembler();
+			const colorPicker = assembler.getByText( 'Create your own' );
+
+			await colorPicker.click();
+
+			// Check if Gutenberg is installed
+			const apiContext = await request.newContext( {
+				baseURL,
+				extraHTTPHeaders: {
+					Authorization: `Basic ${ encodeCredentials(
+						admin.username,
+						admin.password
+					) }`,
+					cookie: '',
+				},
+			} );
+			const listPluginsResponse = await apiContext.get(
+				`/wp-json/wp/v2/plugins`,
+				{
+					failOnStatusCode: true,
+				}
+			);
+			const pluginsList = await listPluginsResponse.json();
+			const gutenbergPlugin = pluginsList.find(
+				( { textdomain } ) => textdomain === 'gutenberg'
+			);
+
+			const mapTypeFeatures = {
+				background: [ 'solid', 'gradient' ],
+				text: [],
+				heading: [ 'text', 'background', 'gradient' ],
+				button: [ 'text', 'background', 'gradient' ],
+				link: [ 'default', 'hover' ],
+				captions: [],
+			};
+			const mapTypeFeaturesGutenberg = {
+				background: [ 'color', 'gradient' ],
+				text: [],
+				heading: [ 'text', 'background', 'gradient' ],
+				button: [ 'text', 'background', 'gradient' ],
+				link: [ 'default', 'hover' ],
+				captions: [],
+			};
+
+			const customColorSelector =
+				'.components-color-palette__custom-color-button';
+			const gradientColorSelector =
+				'.components-custom-gradient-picker__gradient-bar-background';
+
+			const mapFeatureSelectors = {
+				solid: customColorSelector,
+				text: customColorSelector,
+				background: customColorSelector,
+				default: customColorSelector,
+				hover: customColorSelector,
+				gradient: gradientColorSelector,
+			};
+			const mapFeatureSelectorsGutenberg = {
+				color: customColorSelector,
+				text: customColorSelector,
+				background: customColorSelector,
+				default: customColorSelector,
+				hover: customColorSelector,
+				gradient: gradientColorSelector,
+			};
+
+			for ( const type of Object.keys( mapTypeFeatures ) ) {
+				await assembler
+					.locator(
+						'.woocommerce-customize-store__color-panel-container'
+					)
+					.getByText( type )
+					.click();
+
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				if ( gutenbergPlugin || wordPressVersion >= 6.6 ) {
+					for ( const feature of mapTypeFeaturesGutenberg[ type ] ) {
+						const container = assembler.locator(
+							'.block-editor-panel-color-gradient-settings__dropdown-content'
+						);
+						await container
+							.getByRole( 'tab', {
+								name: feature,
+							} )
+							.click();
+
+						const selector =
+							mapFeatureSelectorsGutenberg[ feature ];
+						const featureSelector = container.locator( selector );
+
+						await expect( featureSelector ).toBeVisible();
+					}
+				} else {
+					for ( const feature of mapTypeFeatures[ type ] ) {
+						const container = assembler.locator(
+							'.block-editor-panel-color-gradient-settings__dropdown-content'
+						);
+						await container
+							.getByRole( 'tab', {
+								name: feature,
+							} )
+							.click();
+
+						const selector = mapFeatureSelectors[ feature ];
+						const featureSelector = container.locator( selector );
+
+						await expect( featureSelector ).toBeVisible();
+					}
+				}
+			}
+		}
+	);
 } );

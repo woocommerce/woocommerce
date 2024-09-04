@@ -232,7 +232,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		if ( wc_product_sku_enabled() ) {
-			// Do a partial match for a sku. Supercedes sku parameter that does exact matching.
+			// Do a partial match for a sku. Supersedes sku parameter that does exact matching.
 			if ( ! empty( $request['search_sku'] ) ) {
 				// Store this for use in the query clause filters.
 				$this->search_sku_in_product_lookup_table = $request['search_sku'];
@@ -559,6 +559,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
 			$product->set_sku( wc_clean( $request['sku'] ) );
+		}
+
+		// Unique ID.
+		if ( isset( $request['global_unique_id'] ) ) {
+			$product->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
 		}
 
 		// Attributes.
@@ -987,7 +992,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sku'                   => array(
-					'description' => __( 'Unique identifier.', 'woocommerce' ),
+					'description' => __( 'Stock Keeping Unit.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'global_unique_id'      => array(
+					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1131,7 +1141,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'stock_quantity'        => array(
 					'description' => __( 'Stock quantity.', 'woocommerce' ),
-					'type'        => 'integer',
+					'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_status'          => array(
@@ -1660,6 +1670,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'post_password', $fields, true ) ) {
 				$data['post_password'] = $product->get_post_password( $context );
+			}
+
+			if ( in_array( 'global_unique_id', $fields, true ) ) {
+				$data['global_unique_id'] = $product->get_global_unique_id( $context );
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

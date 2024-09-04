@@ -21,7 +21,7 @@ const steps = [
 	'Opening the doors',
 ];
 
-test.describe( 'Assembler - Loading Page', () => {
+test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -123,7 +123,9 @@ test.describe( 'Assembler - Loading Page', () => {
 		await pageObject.waitForLoadingScreenFinish();
 
 		const assembler = await pageObject.getAssembler();
-		await assembler.getByRole( 'button', { name: 'Save' } ).click();
+		await assembler
+			.getByRole( 'button', { name: 'Finish customizing' } )
+			.click();
 		await assembler.getByText( 'Your store looks great!' ).waitFor();
 		// Abort any additional unnecessary requests
 		await page.evaluate( () => window.stop() );

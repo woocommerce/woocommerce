@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -242,10 +243,15 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 									);
 
 								} else {
+									/* translators: %s: Local pickup settings page URL. */
+									$message = __( 'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' );
+									if ( LocalPickupUtils::is_local_pickup_enabled() ) {
+										/* translators: %s: Local pickup settings page URL. */
+										$message = __( 'Local pickup: Manage existing pickup locations in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' );
+									}
 									printf(
 										wp_kses(
-										/* translators: %s: Local pickup settings page URL. */
-											__( 'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' ),
+											$message,
 											array( 'a' => array( 'href' => array() ) )
 										),
 										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )

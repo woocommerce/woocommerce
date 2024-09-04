@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * External dependencies
@@ -37,6 +38,17 @@ module.exports = ( storybookConfig ) => {
 	storybookConfig.resolve.alias[ '@woocommerce/settings' ] = path.resolve(
 		__dirname,
 		'./setting.mock.js'
+	);
+
+	// We need to use react 18 for the storybook since some dependencies are not compatible with react 17
+	// Once we upgrade react to 18 in repo, we can remove this alias
+	storybookConfig.resolve.alias.react = path.resolve(
+		__dirname,
+		'./node_modules/react'
+	);
+	storybookConfig.resolve.alias[ 'react-dom' ] = path.resolve(
+		__dirname,
+		'./node_modules/react-dom'
 	);
 
 	storybookConfig.resolve.modules = [

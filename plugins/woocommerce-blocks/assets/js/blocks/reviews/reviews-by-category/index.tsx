@@ -17,7 +17,7 @@ import { example } from '../example.js';
  * Register and run the "Reviews by category" block.
  */
 registerBlockType( 'woocommerce/reviews-by-category', {
-	apiVersion: 2,
+	apiVersion: 3,
 	title: __( 'Reviews by Category', 'woocommerce' ),
 	icon: {
 		src: (

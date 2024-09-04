@@ -36,15 +36,17 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( "should allow changing the block's title", async ( { page } ) => {
+	test( "should allow changing the block's title", async ( { editor } ) => {
 		const textSelector =
 			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
 
 		const title = 'New Title';
 
-		await page.locator( textSelector ).fill( title );
+		await editor.canvas.locator( textSelector ).fill( title );
 
-		await expect( page.locator( textSelector ) ).toHaveText( title );
+		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+			title
+		);
 	} );
 
 	test( 'should allow changing the display style', async ( {
@@ -55,7 +57,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.selectBlocks( stockFilter );
 
 		await expect(
-			page.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			editor.canvas.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
 		).toBeVisible();
 
 		await page.getByLabel( 'DropDown' ).click();
@@ -67,10 +69,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		).toBeHidden();
 
 		await expect(
-			page.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
+			editor.canvas.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
 		).toBeHidden();
 
-		await expect( page.getByRole( 'combobox' ) ).toBeVisible();
+		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
 	} );
 
 	test( 'should allow toggling the visibility of the filter button', async ( {
@@ -107,9 +109,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-
-		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -120,7 +121,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		} );
 
 		await page.keyboard.press( 'Escape' );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		await page.goto( '/shop' );
 	} );
@@ -210,9 +213,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await admin.visitSiteEditor( {
 			postId: template.id,
 			postType: template.type,
+			canvas: 'edit',
 		} );
-
-		await editor.enterEditMode();
 
 		const ratingFilterControls = await editor.getBlockByName(
 			'woocommerce/rating-filter'
@@ -222,7 +224,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 		await page.goto( '/shop' );
 
 		await page

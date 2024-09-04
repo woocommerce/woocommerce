@@ -12,7 +12,13 @@
 import fs from 'fs';
 import type { Reporter, TestCase, TestResult } from '@playwright/test/reporter';
 
+/**
+ * Internal dependencies
+ */
+import pwConfig from './playwright.config';
+
 type FormattedTestResult = Omit< TestResult, 'steps' >;
+const flakyTestsDir = `${ pwConfig.outputDir }/flaky-tests`;
 
 // Remove "steps" to prevent stringify circular structure.
 function formatTestResult( testResult: TestResult ): FormattedTestResult {
@@ -26,7 +32,9 @@ class FlakyTestsReporter implements Reporter {
 
 	onBegin() {
 		try {
-			fs.mkdirSync( 'flaky-tests' );
+			fs.mkdirSync( flakyTestsDir, {
+				recursive: true,
+			} );
 		} catch ( err ) {
 			if (
 				err instanceof Error &&
@@ -49,14 +57,14 @@ class FlakyTestsReporter implements Reporter {
 					this.failingTestCaseResults.set( testTitle, [] );
 				}
 				this.failingTestCaseResults
-					.get( testTitle )!
-					.push( formatTestResult( testCaseResult ) );
+					.get( testTitle )
+					?.push( formatTestResult( testCaseResult ) );
 				break;
 			}
 			case 'flaky': {
 				const safeFileName = testTitle.replace( /[^a-z0-9]/gi, '_' );
 				fs.writeFileSync(
-					`flaky-tests/${ safeFileName }.json`,
+					`${ flakyTestsDir }/${ safeFileName }.json`,
 					JSON.stringify( {
 						version: 1,
 						runner: '@playwright/test',

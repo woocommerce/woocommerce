@@ -24,7 +24,7 @@ namespace Automattic\WooCommerce\Internal\BatchProcessing;
 /**
  * Class BatchProcessingController
  *
- * @package Automattic\WooCommerce\Internal\Updates.
+ * @package Automattic\WooCommerce\Internal\BatchProcessing.
  */
 class BatchProcessingController {
 	/*
@@ -220,17 +220,19 @@ class BatchProcessingController {
 	 * @return array Current state for the processor, or a "blank" state if none exists yet.
 	 */
 	private function get_process_details( BatchProcessorInterface $batch_processor ): array {
-		return get_option(
-			$this->get_processor_state_option_name( $batch_processor ),
-			array(
-				'total_time_spent'    => 0,
-				'current_batch_size'  => $batch_processor->get_default_batch_size(),
-				'last_error'          => null,
-				'recent_failures'     => 0,
-				'batch_first_failure' => null,
-				'batch_last_failure'  => null,
-			)
+		$defaults = array(
+			'total_time_spent'    => 0,
+			'current_batch_size'  => $batch_processor->get_default_batch_size(),
+			'last_error'          => null,
+			'recent_failures'     => 0,
+			'batch_first_failure' => null,
+			'batch_last_failure'  => null,
 		);
+
+		$process_details = get_option( $this->get_processor_state_option_name( $batch_processor ) );
+		$process_details = wp_parse_args( is_array( $process_details ) ? $process_details : array(), $defaults );
+
+		return $process_details;
 	}
 
 	/**
@@ -349,7 +351,15 @@ class BatchProcessingController {
 	 * @return array List (of string) of the class names of the enqueued processors.
 	 */
 	public function get_enqueued_processors(): array {
-		return get_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, array() );
+		$enqueued_processors = get_option( self::ENQUEUED_PROCESSORS_OPTION_NAME, array() );
+
+		if ( ! is_array( $enqueued_processors ) ) {
+			$this->logger->error( 'Could not fetch list of processors. Clearing up queue.', array( 'source' => 'batch-processing' ) );
+			delete_option( self::ENQUEUED_PROCESSORS_OPTION_NAME );
+			$enqueued_processors = array();
+		}
+
+		return $enqueued_processors;
 	}
 
 	/**
@@ -528,7 +538,20 @@ class BatchProcessingController {
 	 * @since 9.1.0
 	 */
 	private function remove_or_retry_failed_processors(): void {
-		if ( as_has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		if ( ! did_action( 'wp_loaded' ) ) {
+			return;
+		}
+
+		$last_error = error_get_last();
+		if ( ! is_null( $last_error ) && in_array( $last_error['type'], array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+			return;
+		}
+
+		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
+		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action') ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
+
+		if ( call_user_func( $has_scheduled_action, self::WATCHDOG_ACTION_NAME ) ) {
 			return;
 		}
 

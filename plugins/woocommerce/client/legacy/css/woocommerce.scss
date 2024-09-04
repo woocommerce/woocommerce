@@ -80,14 +80,14 @@ p.demo_store,
 		text-align: center;
 		line-height: 1;
 		border-radius: 100%;
-		color: red !important; // Required for default theme compatibility
+		color: var(--wc-red) !important; // Required for default theme compatibility
 		text-decoration: none;
 		font-weight: 700;
 		border: 0;
 
 		&:hover {
 			color: #fff !important; // Required for default theme compatibility
-			background: red;
+			background: var(--wc-red);
 		}
 	}
 
@@ -445,6 +445,18 @@ p.demo_store,
 					min-width: 75%;
 					display: inline-block;
 					margin-right: 1em;
+
+					/* We hide the default chevron because it cannot be directly modified. Instead, we add a custom chevron using a background image. */
+					appearance: none;
+					-webkit-appearance: none;
+					-moz-appearance: none;
+					padding-right: 2em;
+					background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=)
+						no-repeat;
+					background-size: 16px;
+					-webkit-background-size: 16px;
+					background-position: calc(100% - 12px) 50%;
+					-webkit-background-position: calc(100% - 12px) 50%;
 				}
 
 				td.label {
@@ -1224,7 +1236,7 @@ p.demo_store,
 		}
 
 		.required {
-			color: red;
+			color: var(--wc-red);
 			font-weight: 700;
 			border: 0 !important;
 			text-decoration: none;
@@ -1265,13 +1277,13 @@ p.demo_store,
 
 		&.woocommerce-invalid {
 			label {
-				color: $red;
+				color: var(--wc-red);
 			}
 
 			.select2-container,
 			input.input-text,
 			select {
-				border-color: $red;
+				border-color: var(--wc-red);
 			}
 		}
 
@@ -1304,6 +1316,16 @@ p.demo_store,
 		margin: 2em 0;
 		text-align: left;
 		border-radius: 5px;
+	}
+
+	form.checkout_coupon {
+		.coupon-error-notice {
+			@include coupon-error-notice-checkout();
+		}
+
+		.input-text.has-error:focus {
+			border-color: var(--wc-red);
+		}
 	}
 
 	ul#shipping_method {
@@ -1521,7 +1543,7 @@ p.demo_store,
 
 		.woocommerce-widget-layered-nav-list__item--chosen a::before {
 			@include iconbefore("\e013");
-			color: $red;
+			color: var(--wc-red);
 		}
 	}
 
@@ -1547,7 +1569,7 @@ p.demo_store,
 
 				&::before {
 					@include iconbefore("\e013");
-					color: $red;
+					color: var(--wc-red);
 					vertical-align: inherit;
 					margin-right: 0.5em;
 				}
@@ -1657,7 +1679,7 @@ p.demo_store,
 
 		li.chosen a::before {
 			@include iconbefore("\e013");
-			color: $red;
+			color: var(--wc-red);
 		}
 	}
 
@@ -1793,7 +1815,7 @@ p.demo_store,
 		}
 
 		.out-of-stock {
-			color: red;
+			color: var(--wc-red);
 		}
 	}
 
@@ -1838,6 +1860,7 @@ p.demo_store,
 	&::before {
 		font-family: "WooCommerce";
 		content: "\e028";
+		content: "\e028" / ""; // Add an empty alternative text so screen readers ignore it
 		display: inline-block;
 		position: absolute;
 		top: 1em;
@@ -1970,6 +1993,14 @@ p.demo_store,
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
+
+			&.has-error:focus {
+				border-color: var(--wc-red);
+			}
+		}
+
+		td.actions .coupon .coupon-error-notice {
+			@include coupon-error-notice-cart();
 		}
 
 		input {
@@ -2290,7 +2321,7 @@ p.demo_store,
 
 .woocommerce-invalid {
 	#terms {
-		outline: 2px solid red;
+		outline: 2px solid var(--wc-red);
 		outline-offset: 2px;
 	}
 }

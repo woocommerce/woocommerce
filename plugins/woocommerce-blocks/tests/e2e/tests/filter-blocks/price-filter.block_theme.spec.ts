@@ -93,7 +93,10 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 			);
 			const minPriceInput = leftInputContainer.locator( '.min' );
 			await minPriceInput.fill( String( defaultMinRange ) );
-			await minPriceInput.blur();
+
+			await page.waitForURL(
+				( url ) => ! url.href.includes( 'min_price' )
+			);
 
 			// Max price input field
 			const rightInputContainer = page.locator(
@@ -101,7 +104,10 @@ test.describe( 'Product Filter: Price Filter Block', () => {
 			);
 			const maxPriceInput = rightInputContainer.locator( '.max' );
 			await maxPriceInput.fill( String( defaultMaxRange ) );
-			await maxPriceInput.blur();
+
+			await page.waitForURL(
+				( url ) => ! url.href.includes( 'max_price' )
+			);
 
 			const button = page.getByRole( 'button', { name: 'Clear' } );
 

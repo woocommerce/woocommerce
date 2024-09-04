@@ -15,7 +15,6 @@ import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 import {
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
-	camelCaseKeys,
 } from '@woocommerce/base-utils';
 
 /**
@@ -54,27 +53,6 @@ export const setErrorData = (
 	return {
 		type: types.SET_ERROR_DATA,
 		error,
-	};
-};
-
-/**
- * Returns an action object used in updating the store with the provided cart.
- *
- * This omits the customer addresses so that only updates to cart items and totals are received. This is useful when
- * currently editing address information to prevent it being overwritten from the server.
- *
- * This is a generic response action.
- *
- * @param {CartResponse} response
- */
-export const receiveCartContents = (
-	response: CartResponse
-): { type: string; response: Partial< Cart > } => {
-	const cart = camelCaseKeys( response ) as unknown as Cart;
-	const { shippingAddress, billingAddress, ...cartWithoutAddress } = cart;
-	return {
-		type: types.SET_CART_DATA,
-		response: cartWithoutAddress,
 	};
 };
 
@@ -376,6 +354,9 @@ export const changeCartItemQuantity =
 		}
 	};
 
+// Facilitates aborting fetch requests.
+let abortController = null as AbortController | null;
+
 /**
  * Selects a shipping rate.
  *
@@ -401,11 +382,21 @@ export const selectShippingRate =
 				( rate: CartShippingPackageShippingRate ) =>
 					rate.selected === true
 			);
+
 		if ( selectedShippingRate?.rate_id === rateId ) {
 			return;
 		}
+
 		try {
 			dispatch.shippingRatesBeingSelected( true );
+			if ( abortController ) {
+				abortController.abort();
+			}
+			abortController =
+				typeof AbortController === 'undefined'
+					? undefined
+					: new AbortController();
+
 			const { response } = await apiFetchWithHeaders( {
 				path: `/wc/store/v1/cart/select-shipping-rate`,
 				method: 'POST',
@@ -414,7 +405,9 @@ export const selectShippingRate =
 					rate_id: rateId,
 				},
 				cache: 'no-store',
+				signal: abortController?.signal || null,
 			} );
+
 			// Remove shipping and billing address from the response, so we don't overwrite what the shopper is
 			// entering in the form if rates suddenly appear mid-edit.
 			const {
@@ -422,13 +415,15 @@ export const selectShippingRate =
 				billing_address: billingAddress,
 				...rest
 			} = response;
+
 			dispatch.receiveCart( rest );
+			dispatch.shippingRatesBeingSelected( false );
+
 			return response as CartResponse;
 		} catch ( error ) {
 			dispatch.receiveError( error );
-			return Promise.reject( error );
-		} finally {
 			dispatch.shippingRatesBeingSelected( false );
+			return Promise.reject( error );
 		}
 	};
 
@@ -486,7 +481,6 @@ type Actions =
 	| typeof itemIsPendingDelete
 	| typeof itemIsPendingQuantity
 	| typeof receiveApplyingCoupon
-	| typeof receiveCartContents
 	| typeof receiveCartItem
 	| typeof receiveRemovingCoupon
 	| typeof removeCoupon

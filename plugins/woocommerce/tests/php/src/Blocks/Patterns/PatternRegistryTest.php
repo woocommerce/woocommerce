@@ -126,7 +126,7 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 		$cat1 = \WP_Block_Pattern_Categories_Registry::get_instance()->get_registered( 'cat-1' );
 		$this->assertEquals(
 			array(
-				'label' => 'cat1',
+				'label' => 'Cat 1',
 				'name'  => 'cat-1',
 			),
 			$cat1,
@@ -135,7 +135,7 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 		$cat2 = \WP_Block_Pattern_Categories_Registry::get_instance()->get_registered( 'cat-2' );
 		$this->assertEquals(
 			array(
-				'label' => 'cat2',
+				'label' => 'Cat 2',
 				'name'  => 'cat-2',
 			),
 			$cat2,
@@ -162,7 +162,7 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 
 		$this->assertEquals(
 			array(
-				'label' => 'cat1',
+				'label' => 'Cat 1',
 				'name'  => 'cat-1',
 			),
 			$cat1,
@@ -171,7 +171,7 @@ class PatternRegistryTest extends \WP_UnitTestCase {
 		$cat2 = \WP_Block_Pattern_Categories_Registry::get_instance()->get_registered( 'cat-2' );
 		$this->assertEquals(
 			array(
-				'label' => 'cat2',
+				'label' => 'Cat 2',
 				'name'  => 'cat-2',
 			),
 			$cat2,

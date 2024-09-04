@@ -23,6 +23,7 @@ import { updateTemplate } from '../data/actions';
 import { installAndActivateTheme as setTheme } from '../data/service';
 import { THEME_SLUG } from '../data/constants';
 import { trackEvent } from '../tracking';
+import { installPatterns } from '../design-without-ai/services';
 
 const { escalate } = actions;
 
@@ -205,7 +206,7 @@ const resetPatternsAndProducts = () => async () => {
 	const response = await apiFetch< {
 		is_ai_generated: boolean;
 	} >( {
-		path: '/wc/private/ai/store-info',
+		path: '/wc-admin/ai/store-info',
 		method: 'GET',
 	} );
 
@@ -215,11 +216,11 @@ const resetPatternsAndProducts = () => async () => {
 
 	return Promise.all( [
 		apiFetch( {
-			path: '/wc/private/ai/patterns',
+			path: '/wc-admin/ai/patterns',
 			method: 'DELETE',
 		} ),
 		apiFetch( {
-			path: '/wc/private/ai/products',
+			path: '/wc-admin/ai/products',
 			method: 'DELETE',
 		} ),
 	] );
@@ -238,7 +239,7 @@ export const updateStorePatterns = async (
 			ai_content_generated: boolean;
 			images: { images: Array< unknown >; search_term: string };
 		} >( {
-			path: '/wc/private/ai/images',
+			path: '/wc-admin/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
@@ -249,7 +250,7 @@ export const updateStorePatterns = async (
 		const { is_ai_generated } = await apiFetch< {
 			is_ai_generated: boolean;
 		} >( {
-			path: '/wc/private/ai/store-info',
+			path: '/wc-admin/ai/store-info',
 			method: 'GET',
 		} );
 
@@ -277,7 +278,7 @@ export const updateStorePatterns = async (
 			additional_errors?: unknown[];
 		} >( [
 			apiFetch( {
-				path: '/wc/private/ai/products',
+				path: '/wc-admin/ai/products',
 				method: 'POST',
 				data: {
 					business_description:
@@ -286,7 +287,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/patterns',
+				path: '/wc-admin/ai/patterns',
 				method: 'POST',
 				data: {
 					business_description:
@@ -299,7 +300,7 @@ export const updateStorePatterns = async (
 		const productContents = response.product_content.map(
 			( product, index ) => {
 				return apiFetch( {
-					path: '/wc/private/ai/product',
+					path: '/wc-admin/ai/product',
 					method: 'POST',
 					data: {
 						products_information: product,
@@ -313,7 +314,7 @@ export const updateStorePatterns = async (
 		await Promise.all( [
 			...productContents,
 			apiFetch( {
-				path: '/wc/private/ai/business-description',
+				path: '/wc-admin/ai/business-description',
 				method: 'POST',
 				data: {
 					business_description:
@@ -321,7 +322,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/store-title',
+				path: '/wc-admin/ai/store-title',
 				method: 'POST',
 				data: {
 					business_description:
@@ -418,8 +419,7 @@ export const assembleSite = async (
 	try {
 		await updateTemplate( {
 			// TODO: Get from context
-			homepageTemplateId: context.aiSuggestions
-				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
+			homepageTemplateId: 'template1' as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
 		trackEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
@@ -464,4 +464,5 @@ export const services = {
 	saveAiResponseToOption,
 	installAndActivateTheme,
 	resetPatternsAndProducts,
+	installPatterns,
 };

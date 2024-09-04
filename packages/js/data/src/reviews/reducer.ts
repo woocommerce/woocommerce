@@ -59,7 +59,7 @@ const reducer: Reducer< ReviewsState, Action > = (
 				...state,
 				errors: {
 					...state.errors,
-					[ JSON.stringify( action.query ) ]: action.error,
+					[ action.query ]: action.error,
 				},
 			};
 		case TYPES.SET_REVIEW_IS_UPDATING:

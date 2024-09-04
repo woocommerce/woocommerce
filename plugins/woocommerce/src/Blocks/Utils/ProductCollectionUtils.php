@@ -8,6 +8,7 @@ use WP_Query;
  * {@internal This class and its methods are not intended for public use.}
  */
 class ProductCollectionUtils {
+
 	/**
 	 * Prepare and execute a query for the Product Collection block.
 	 * This method is used by the Product Collection block and the No Results block.
@@ -76,6 +77,87 @@ class ProductCollectionUtils {
 		}
 
 		return self::remove_empty_array_recursive( $queries );
+	}
+
+	/**
+	 * Parse WP Query's front-end context for the Product Collection block.
+	 *
+	 * The sourceData structure depends on the context type as follows:
+	 * - site:    [ ]
+	 * - order:   [ 'orderId'    => int ]
+	 * - cart:    [ 'productIds' => int[] ]
+	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
+	 * - product: [ 'productId'  => int ]
+	 *
+	 * @return array $context {
+	 *     @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 *     @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order, etc.
+	 * }
+	 */
+	public static function parse_frontend_location_context() {
+		global $wp_query;
+
+		// Default context.
+		// Hint: The Shop page uses the default context.
+		$type        = 'site';
+		$source_data = array();
+
+		if ( ! ( $wp_query instanceof WP_Query ) ) {
+
+			return array(
+				'type'       => $type,
+				'sourceData' => $source_data,
+			);
+		}
+
+		// As more areas are blockified, expected future contexts include:
+		// - is_checkout_pay_page().
+		// - is_view_order_page().
+		if ( is_order_received_page() ) {
+
+			$type        = 'order';
+			$source_data = array( 'orderId' => absint( $wp_query->query_vars['order-received'] ) );
+
+		} elseif ( ( is_cart() || is_checkout() ) && isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' ) ) {
+
+			$type  = 'cart';
+			$items = array();
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				if ( ! isset( $cart_item['product_id'] ) ) {
+					continue;
+				}
+
+				$items[] = absint( $cart_item['product_id'] );
+			}
+			$items       = array_unique( array_filter( $items ) );
+			$source_data = array( 'productIds' => $items );
+
+		} elseif ( is_product_taxonomy() ) {
+
+			$source      = $wp_query->get_queried_object();
+			$is_valid    = is_a( $source, 'WP_Term' );
+			$taxonomy    = $is_valid ? $source->taxonomy : '';
+			$term_id     = $is_valid ? $source->term_id : '';
+			$type        = 'archive';
+			$source_data = array(
+				'taxonomy' => wc_clean( $taxonomy ),
+				'termId'   => absint( $term_id ),
+			);
+
+		} elseif ( is_product() ) {
+
+			$source      = $wp_query->get_queried_object();
+			$product_id  = is_a( $source, 'WP_Post' ) ? absint( $source->ID ) : 0;
+			$type        = 'product';
+			$source_data = array( 'productId' => $product_id );
+		}
+
+		$context = array(
+			'type'       => $type,
+			'sourceData' => $source_data,
+		);
+
+		return $context;
 	}
 
 	/**

@@ -117,6 +117,7 @@ const DeprecatedBlockEdit = ( { clientId }: { clientId: string } ) => {
 
 registerBlockType( 'woocommerce/product-search', {
 	title: __( 'Product Search', 'woocommerce' ),
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon

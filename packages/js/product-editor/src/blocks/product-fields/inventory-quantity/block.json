@@ -1,11 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-inventory-quantity-field",
 	"title": "Product inventory quantity available",
 	"category": "woocommerce",
 	"description": "The product available quantity.",
-	"keywords": [ "products", "quantity", "inventory" ],
+	"keywords": [
+		"products",
+		"quantity",
+		"inventory"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
@@ -22,5 +26,7 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }

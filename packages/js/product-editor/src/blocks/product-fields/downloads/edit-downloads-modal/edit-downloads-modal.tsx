@@ -30,7 +30,7 @@ export interface Image {
 }
 
 export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
-	downloableItem,
+	downloadableItem,
 	onCancel,
 	onChange,
 	onRemove,
@@ -40,7 +40,7 @@ export const EditDownloadsModal: React.FC< EditDownloadsModalProps > = ( {
 	const [ isCopingToClipboard, setIsCopingToClipboard ] =
 		useState< boolean >( false );
 
-	const { id = 0, file = '', name = '' } = downloableItem;
+	const { id = 0, file = '', name = '' } = downloadableItem;
 
 	const onCopySuccess = () => {
 		createNotice(

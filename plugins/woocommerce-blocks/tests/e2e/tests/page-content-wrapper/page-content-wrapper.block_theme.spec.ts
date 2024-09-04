@@ -54,7 +54,7 @@ for ( const template of templates ) {
 			// Prevent trying to insert the paragraph block before the editor is
 			// ready.
 			await expect(
-				page.locator( template.blockClassName )
+				editor.canvas.locator( template.blockClassName )
 			).toBeVisible();
 
 			await editor.insertBlock( {
@@ -62,7 +62,9 @@ for ( const template of templates ) {
 				attributes: { content: userText },
 			} );
 
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Save', exact: true } )
+				.click();
 
 			await page
 				.getByRole( 'button', { name: 'Dismiss this notice' } )

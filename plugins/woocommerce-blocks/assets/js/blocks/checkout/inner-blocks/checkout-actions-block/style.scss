@@ -26,12 +26,17 @@
 
 .is-mobile {
 	.wc-block-checkout__actions {
-		.wc-block-components-checkout-return-to-cart-button {
-			display: none;
+
+		.wc-block-checkout__actions_row {
+			flex-direction: column-reverse;
 		}
 
 		.wc-block-components-checkout-place-order-button {
 			width: 100%;
+		}
+
+		.wc-block-components-checkout-return-to-cart-button {
+			margin: $gap auto;
 		}
 	}
 }

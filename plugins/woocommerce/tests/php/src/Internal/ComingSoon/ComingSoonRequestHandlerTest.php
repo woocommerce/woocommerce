@@ -70,4 +70,62 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $wp->query_vars['page_id'], null );
 	}
+
+	/**
+	 * @testdox Tests that the method adds the 'Inter' and 'Cardo' fonts to the theme JSON data.
+	 */
+	public function test_experimental_filter_theme_json_theme() {
+		$theme_json   = $this->createMock( \WP_Theme_JSON_Data::class );
+		$initial_data = array(
+			'settings' => array(
+				'typography' => array(
+					'fontFamilies' => array(
+						'theme' => array(
+							array(
+								'fontFamily' => 'Existing Font',
+								'name'       => 'Existing Font',
+								'slug'       => 'existing-font',
+								'fontFace'   => array(
+									array(
+										'fontFamily' => 'Existing Font',
+										'fontStyle'  => 'normal',
+										'fontWeight' => '400',
+										'src'        => array( 'existing-font.woff2' ),
+									),
+								),
+							),
+							array(
+								'fontFamily' => 'Unnamed Font',
+								'slug'       => 'unnamed-font',
+								'fontFace'   => array(
+									array(
+										'fontFamily' => 'Unnamed Font',
+										'fontStyle'  => 'normal',
+										'fontWeight' => '400',
+										'src'        => array( 'unnamed-font.woff2' ),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$theme_json->method( 'get_data' )->willReturn( $initial_data );
+
+		$theme_json->expects( $this->once() )
+			->method( 'update_with' )
+			->with(
+				$this->callback(
+					function ( $new_data ) {
+						$fonts      = $new_data['settings']['typography']['fontFamilies']['theme'];
+						$font_names = array_column( $fonts, 'name' );
+						return in_array( 'Inter', $font_names, true ) && in_array( 'Cardo', $font_names, true );
+					}
+				)
+			);
+
+		$this->sut->experimental_filter_theme_json_theme( $theme_json );
+	}
 }

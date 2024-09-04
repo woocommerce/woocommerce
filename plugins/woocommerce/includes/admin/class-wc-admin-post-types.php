@@ -43,6 +43,12 @@ class WC_Admin_Post_Types {
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 		add_filter( 'woocommerce_order_updated_messages', array( $this, 'order_updated_messages' ) );
 		add_filter( 'bulk_post_updated_messages', array( $this, 'bulk_post_updated_messages' ), 10, 2 );
+		add_action(
+			'admin_notices',
+			function () {
+				$this->maybe_display_warning_for_password_protected_coupon();
+			}
+		);
 
 		// Disable Auto Save.
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
@@ -254,6 +260,33 @@ class WC_Admin_Post_Types {
 		);
 
 		return $bulk_messages;
+	}
+
+	/**
+	 * Shows a warning when editing a password-protected coupon.
+	 *
+	 * @since 9.2.0
+	 */
+	private function maybe_display_warning_for_password_protected_coupon() {
+		if ( ! function_exists( 'get_current_screen' ) || 'shop_coupon' !== get_current_screen()->id ) {
+			return;
+		}
+
+		if ( ! isset( $GLOBALS['post'] ) || 'shop_coupon' !== $GLOBALS['post']->post_type ) {
+			return;
+		}
+
+		wp_admin_notice(
+			__(
+				'This coupon is password protected. WooCommerce does not support password protection for coupons. You can temporarily hide a coupon by making it private. Alternatively, usage limits and restrictions can be configured below.',
+				'woocommerce'
+			),
+			array(
+				'type'               => 'warning',
+				'id'                 => 'wc-password-protected-coupon-warning',
+				'additional_classes' => empty( $GLOBALS['post']->post_password ) ? array( 'hidden' ) : array(),
+			)
+		);
 	}
 
 	/**
@@ -863,7 +896,8 @@ class WC_Admin_Post_Types {
 			return false;
 		}
 
-		$old_price     = (float) $product->{"get_{$price_type}_price"}();
+		$old_price     = $product->{"get_{$price_type}_price"}();
+		$old_price     = '' === $old_price ? (float) $product->get_regular_price() : (float) $old_price;
 		$price_changed = false;
 
 		$change_price  = absint( $request_data[ "change_{$price_type}_price" ] );
@@ -873,13 +907,17 @@ class WC_Admin_Post_Types {
 
 		switch ( $change_price ) {
 			case 1:
-				$new_price = $price;
+				if ( empty( $price ) ) {
+					$new_price = $product->get_regular_price();
+				} else {
+					$new_price = $price;
+				}
 				break;
 			case 2:
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = $old_price + ( $old_price * $percent );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = $old_price + $price;
 				}
 				break;
@@ -887,7 +925,7 @@ class WC_Admin_Post_Types {
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = max( 0, $old_price - ( $old_price * $percent ) );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = max( 0, $old_price - $price );
 				}
 				break;

@@ -29,12 +29,19 @@
 			&::after {
 				position: absolute;
 				content: "";
-				bottom: -$gap-larger;
-				left: -100vw;
-				width: 200vw;
+				// Required because the box shadows are offset by 1px down so we need to move the element up by 1px.
+				bottom: calc(1px - $gap-larger);
+				width: 100%;
 				height: 1px;
-				background: currentColor;
 				opacity: 0.11;
+				background: currentColor;
+				// This box-shadow rule creates two visible shadows:
+				// - One 50vw to the left of the element.
+				// - Another 50vw to the right
+				// Both shadows are sharp (no blur) and use the current color of the element.
+				// Its purpose is to add a full-width divider between checkout sections which is otherwise impossible as
+				// the parent element has padding.
+				box-shadow: -50vw 0 0 0 currentColor, 50vw 0 0 0 currentColor;
 			}
 		}
 	}

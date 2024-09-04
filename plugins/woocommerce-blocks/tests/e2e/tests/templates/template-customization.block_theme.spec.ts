@@ -4,7 +4,6 @@
 import {
 	test,
 	expect,
-	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
 
@@ -32,15 +31,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 				// Verify template name didn't change.
 				// See: https://github.com/woocommerce/woocommerce/issues/42221
 				await expect(
@@ -53,6 +53,16 @@ test.describe( 'Template customization', () => {
 				await expect(
 					page.getByText( userText ).first()
 				).toBeVisible();
+
+				// Verify the edition can be reverted.
+				await admin.visitSiteEditor( {
+					postType: testData.templateType,
+				} );
+				await editor.revertTemplate( {
+					templateName: testData.templateName,
+				} );
+				await testData.visitPage( { frontendUtils, page } );
+				await expect( page.getByText( userText ) ).toBeHidden();
 			} );
 
 			if ( testData.fallbackTemplate ) {
@@ -66,9 +76,8 @@ test.describe( 'Template customization', () => {
 					await admin.visitSiteEditor( {
 						postId: `woocommerce/woocommerce//${ testData.fallbackTemplate?.templatePath }`,
 						postType: testData.templateType,
+						canvas: 'edit',
 					} );
-
-					await editor.enterEditMode();
 
 					await editor.insertBlock( {
 						name: 'core/paragraph',
@@ -76,11 +85,26 @@ test.describe( 'Template customization', () => {
 							content: fallbackTemplateUserText,
 						},
 					} );
-					await editor.saveSiteEditorEntities();
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
 					await testData.visitPage( { frontendUtils, page } );
 					await expect(
 						page.getByText( fallbackTemplateUserText ).first()
 					).toBeVisible();
+
+					// Verify the edition can be reverted.
+					await admin.visitSiteEditor( {
+						postType: testData.templateType,
+					} );
+					await editor.revertTemplate( {
+						templateName:
+							testData.fallbackTemplate?.templateName || '',
+					} );
+					await testData.visitPage( { frontendUtils, page } );
+					await expect(
+						page.getByText( fallbackTemplateUserText )
+					).toBeHidden();
 				} );
 			}
 		} );
@@ -106,14 +130,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `woocommerce/woocommerce//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: woocommerceTemplateUserText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
 				await requestUtils.activateTheme(
 					BLOCK_THEME_WITH_TEMPLATES_SLUG
@@ -125,14 +151,16 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 					postType: testData.templateType,
+					canvas: 'edit',
 				} );
-				await editor.enterEditMode();
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities();
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
 				// Verify the template is the one modified by the user based on the theme.
 				await testData.visitPage( { frontendUtils, page } );
@@ -141,7 +169,7 @@ test.describe( 'Template customization', () => {
 				).toBeVisible();
 				await expect(
 					page.getByText( woocommerceTemplateUserText )
-				).toHaveCount( 0 );
+				).toBeHidden();
 
 				// Revert edition and verify the user-modified WC template is used.
 				// Note: we need to revert it from the admin (instead of calling
@@ -149,42 +177,19 @@ test.describe( 'Template customization', () => {
 				// duplicate templates with the same name.
 				// See: https://github.com/woocommerce/woocommerce/issues/42220
 				await admin.visitSiteEditor( {
-					path: `/${ testData.templateType }/all`,
+					postType: testData.templateType,
 				} );
 
-				await page
-					.getByPlaceholder( 'Search' )
-					.fill( testData.templateName );
-
-				const templateRow = page.getByRole( 'row' ).filter( {
-					has: page.getByRole( 'link', {
-						name: testData.templateName,
-						exact: true,
-					} ),
+				await editor.revertTemplate( {
+					templateName: testData.templateName,
 				} );
-				const resetButton = templateRow.getByLabel( 'Reset', {
-					exact: true,
-				} );
-				const revertedNotice = page
-					.getByLabel( 'Dismiss this notice' )
-					.getByText( `"${ testData.templateName }" reverted.` );
-				const savedButton = page.getByRole( 'button', {
-					name: 'Saved',
-				} );
-
-				await resetButton.click();
-
-				await expect( revertedNotice ).toBeVisible();
-				await expect( savedButton ).toBeVisible();
 
 				await testData.visitPage( { frontendUtils, page } );
 
 				await expect(
 					page.getByText( woocommerceTemplateUserText ).first()
 				).toBeVisible();
-				await expect( page.getByText( userText ) ).toHaveCount( 0 );
-
-				await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+				await expect( page.getByText( userText ) ).toBeHidden();
 			} );
 		} );
 	}

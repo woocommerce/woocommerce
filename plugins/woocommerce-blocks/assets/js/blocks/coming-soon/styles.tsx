@@ -1,3 +1,4 @@
+// Deprecated styles since 9.2. Please use *.scss file instead.
 export const generateStyles = ( color = '#bea0f2' ) => {
 	return `
     /* Reset */

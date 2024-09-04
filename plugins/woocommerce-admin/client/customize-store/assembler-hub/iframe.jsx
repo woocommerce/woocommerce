@@ -39,6 +39,8 @@ function Iframe( {
 } ) {
 	const [ iframeDocument, setIframeDocument ] = useState();
 
+	const [ bodyClasses, setBodyClasses ] = useState( [] );
+
 	const { resolvedAssets } = useSelect( ( select ) => {
 		const settings = select( blockEditorStore ).getSettings();
 
@@ -53,6 +55,28 @@ function Iframe( {
 	const setRef = useRefEffect( ( node ) => {
 		node._load = () => {
 			setIframeDocument( node.contentDocument );
+		};
+		function onLoad() {
+			const { contentDocument, ownerDocument } = node;
+			const { documentElement } = contentDocument;
+
+			documentElement.classList.add( 'block-editor-iframe__html' );
+
+			setBodyClasses(
+				Array.from( ownerDocument?.body.classList ).filter(
+					( name ) =>
+						name.startsWith( 'admin-color-' ) ||
+						name.startsWith( 'post-type-' ) ||
+						name === 'wp-embed-responsive'
+				)
+			);
+		}
+
+		node.addEventListener( 'load', onLoad );
+
+		return () => {
+			delete node._load;
+			node.removeEventListener( 'load', onLoad );
 		};
 	}, [] );
 
@@ -125,7 +149,8 @@ function Iframe( {
 							ref={ bodyRef }
 							className={ clsx(
 								'block-editor-iframe__body',
-								'editor-styles-wrapper'
+								'editor-styles-wrapper',
+								...bodyClasses
 							) }
 						>
 							{ contentResizeListener }

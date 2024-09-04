@@ -36,18 +36,12 @@ const PatternSelectionModal = ( props: {
 	return (
 		<Modal
 			overlayClassName="wc-blocks-product-collection__modal"
-			title={ __( 'Choose a collection', 'woocommerce' ) }
+			title={ __( 'What products do you want to show?', 'woocommerce' ) }
 			onRequestClose={ props.closePatternSelectionModal }
 			// @ts-expect-error Type definitions are missing in the version we are using i.e. 19.1.5,
 			size={ 'large' }
 		>
 			<div className="wc-blocks-product-collection__content">
-				<p className="wc-blocks-product-collection__subtitle">
-					{ __(
-						"Pick what products are shown. Don't worry, you can switch and tweak this collection any time.",
-						'woocommerce'
-					) }
-				</p>
 				<CollectionChooser
 					chosenCollection={ chosenCollection }
 					onCollectionClick={ selectCollectionName }

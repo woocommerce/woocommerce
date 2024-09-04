@@ -196,9 +196,11 @@ export const StartOverWarningModal = ( {
 };
 
 export const ThemeSwitchWarningModal = ( {
+	isNoAiFlow = true,
 	setIsModalOpen,
 	redirectToCYSFlow,
 }: {
+	isNoAiFlow?: boolean;
 	setIsModalOpen: ( arg0: boolean ) => void;
 	redirectToCYSFlow: () => void;
 } ) => {
@@ -215,10 +217,31 @@ export const ThemeSwitchWarningModal = ( {
 			shouldCloseOnClickOutside={ false }
 		>
 			<p>
-				{ __(
-					'Your active theme will be changed and you could lose any changes you’ve made to it.',
-					'woocommerce'
-				) }
+				{ isNoAiFlow
+					? __(
+							'Your active theme will be changed and you could lose any changes you’ve made to it.',
+							'woocommerce'
+					  )
+					: createInterpolateElement(
+							__(
+								"The Store Designer will create a new store design for you, and you'll lose any changes you've made to your active theme. If you'd prefer to continue editing your theme, you can do so via the <EditorLink>Editor</EditorLink>.",
+								'woocommerce'
+							),
+							{
+								EditorLink: (
+									<Link
+										onClick={ () => {
+											window.open(
+												`${ ADMIN_URL }site-editor.php`,
+												'_blank'
+											);
+											return false;
+										} }
+										href=""
+									/>
+								),
+							}
+					  ) }
 			</p>
 			<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
 				<Button

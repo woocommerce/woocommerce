@@ -15,6 +15,7 @@ import {
 	hasInnerBlocks,
 } from '@woocommerce/blocks-checkout';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
+import type { ReactRootWithContainer } from '@woocommerce/base-utils';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React
@@ -227,7 +228,7 @@ const renderInnerBlocks = ( {
 						>
 							{
 								/**
-								 * Within this Inner Block Component we also need to recursively render it's children. This
+								 * Within this Inner Block Component we also need to recursively render its children. This
 								 * is done here with a depth+1. The same block map and parent is used, but we pass new
 								 * children from this element.
 								 */
@@ -294,7 +295,7 @@ export const renderParentBlock = ( {
 	selector: string;
 	// Function to generate the props object for the block.
 	getProps: ( el: Element, i: number ) => Record< string, unknown >;
-} ): void => {
+} ): ReactRootWithContainer[] => {
 	/**
 	 * In addition to getProps, we need to render and return the children. This adds children to props.
 	 */
@@ -310,7 +311,7 @@ export const renderParentBlock = ( {
 	/**
 	 * The only difference between using renderParentBlock and renderFrontend is that here we provide children.
 	 */
-	renderFrontend( {
+	return renderFrontend( {
 		Block,
 		selector,
 		getProps: getPropsWithChildren,

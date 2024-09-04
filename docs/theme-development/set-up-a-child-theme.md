@@ -4,7 +4,7 @@ menu_title: Set up and use a child theme
 tags: how-to
 ---
 
-**Note:** This document is intended for creating and using classic child themes. For a comprehensive guide on creating a child block theme and understanding the differences between a classic and block theme, please refer to [this detailed documentation](https://learn.wordpress.org/lesson-plan/create-a-basic-child-theme-for-block-themes/).
+**Note:** This document is intended for creating and using classic child themes. For a comprehensive guide on creating a child block theme and understanding the differences between a classic and block theme, please refer to [WooCommerce block theme development](../../plugins/woocommerce-blocks/docs/designers/theming/README.md) and [WordPress block child theme development](https://learn.wordpress.org/lesson-plan/create-a-basic-child-theme-for-block-themes/).
 
 
 Sometimes, you might need to customize your theme or WooCommerce beyond what is possible via the options. These guidelines will teach you the basics of how to go about customizing your site by using a child theme.

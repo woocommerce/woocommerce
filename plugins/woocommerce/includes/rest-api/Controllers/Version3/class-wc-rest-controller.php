@@ -435,26 +435,14 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate textarea based settings.
 	 *
 	 * @since 3.0.0
+	 * @since 9.0.0 No longer allows storing IFRAME, which was allowed for "ShareThis" integration no longer found in core.
 	 * @param string $value Value.
 	 * @param array  $setting Setting.
 	 * @return string
 	 */
 	public function validate_setting_textarea_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses(
-			trim( stripslashes( $value ) ),
-			array_merge(
-				array(
-					'iframe' => array(
-						'src'   => true,
-						'style' => true,
-						'id'    => true,
-						'class' => true,
-					),
-				),
-				wp_kses_allowed_html( 'post' )
-			)
-		);
+		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
 
 	/**
@@ -491,7 +479,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type'    => 'object',
+						'type' => 'object',
 					),
 				),
 				'update' => array(
@@ -499,7 +487,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type'    => 'object',
+						'type' => 'object',
 					),
 				),
 				'delete' => array(
@@ -507,7 +495,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type'    => 'integer',
+						'type' => 'integer',
 					),
 				),
 			),
@@ -578,7 +566,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		// Return the list of all requested fields which appear in the schema.
 		$this->_fields = array_reduce(
 			$requested_fields,
-			function( $response_fields, $field ) use ( $fields ) {
+			function ( $response_fields, $field ) use ( $fields ) {
 				if ( in_array( $field, $fields, true ) ) {
 					$response_fields[] = $field;
 					return $response_fields;
@@ -620,7 +608,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		if ( ! empty( $include ) ) {
 			$meta_data = array_filter(
 				$meta_data,
-				function( WC_Meta_Data $item ) use ( $include ) {
+				function ( WC_Meta_Data $item ) use ( $include ) {
 					$data = $item->get_data();
 					return in_array( $data['key'], $include, true );
 				}
@@ -628,7 +616,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		} elseif ( ! empty( $exclude ) ) {
 			$meta_data = array_filter(
 				$meta_data,
-				function( WC_Meta_Data $item ) use ( $exclude ) {
+				function ( WC_Meta_Data $item ) use ( $exclude ) {
 					$data = $item->get_data();
 					return ! in_array( $data['key'], $exclude, true );
 				}

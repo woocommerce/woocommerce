@@ -24,12 +24,12 @@ test.describe( 'Merchant → Cart', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
 	test.describe( 'in page editor', () => {
-		test.beforeEach( async ( { editor, admin } ) => {
+		test.beforeEach( async ( { admin } ) => {
 			await admin.visitSiteEditor( {
 				postId: 'woocommerce/woocommerce//page-cart',
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editor.enterEditMode();
 		} );
 
 		test( 'renders without crashing and can only be inserted once', async ( {

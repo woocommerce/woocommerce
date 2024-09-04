@@ -9,6 +9,7 @@ import type {
 import clsx from 'clsx';
 import type { ReactElement } from 'react';
 import type { Currency } from '@woocommerce/types';
+import { SITE_CURRENCY } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -22,7 +23,7 @@ export interface FormattedMonetaryAmountProps
 	allowNegative?: boolean;
 	isAllowed?: ( formattedValue: NumberFormatValues ) => boolean;
 	value: number | string; // Value of money amount.
-	currency: Currency | Record< string, never >; // Currency configuration object.
+	currency?: Currency | undefined; // Currency configuration object. Defaults to site currency.
 	onValueChange?: ( unit: number ) => void; // Function to call when value changes.
 	style?: React.CSSProperties | undefined;
 	renderText?: ( value: string ) => JSX.Element;
@@ -31,34 +32,23 @@ export interface FormattedMonetaryAmountProps
 /**
  * Formats currency data into the expected format for NumberFormat.
  */
-const currencyToNumberFormat = (
-	currency: FormattedMonetaryAmountProps[ 'currency' ]
-) => {
-	const hasSimiliarSeparators =
-		currency?.thousandSeparator === currency?.decimalSeparator;
-	if ( hasSimiliarSeparators ) {
+const currencyToNumberFormat = ( currency: Currency ) => {
+	const { prefix, suffix, thousandSeparator, decimalSeparator } = currency;
+	const hasDuplicateSeparator = thousandSeparator === decimalSeparator;
+	if ( hasDuplicateSeparator ) {
 		// eslint-disable-next-line no-console
 		console.warn(
 			'Thousand separator and decimal separator are the same. This may cause formatting issues.'
 		);
 	}
 	return {
-		thousandSeparator: hasSimiliarSeparators
-			? ''
-			: currency?.thousandSeparator,
-		decimalSeparator: currency?.decimalSeparator,
+		thousandSeparator: hasDuplicateSeparator ? '' : thousandSeparator,
+		decimalSeparator,
 		fixedDecimalScale: true,
-		prefix: currency?.prefix,
-		suffix: currency?.suffix,
+		prefix,
+		suffix,
 		isNumericString: true,
 	};
-};
-
-type CustomFormattedMonetaryAmountProps = Omit<
-	FormattedMonetaryAmountProps,
-	'currency'
-> & {
-	currency: Currency | Record< string, never >;
 };
 
 /**
@@ -71,11 +61,18 @@ type CustomFormattedMonetaryAmountProps = Omit<
 const FormattedMonetaryAmount = ( {
 	className,
 	value: rawValue,
-	currency,
+	currency: rawCurrency = SITE_CURRENCY,
 	onValueChange,
 	displayType = 'text',
 	...props
-}: CustomFormattedMonetaryAmountProps ): ReactElement | null => {
+}: FormattedMonetaryAmountProps ): ReactElement | null => {
+	// Merge currency configuration with site currency.
+	const currency = {
+		...SITE_CURRENCY,
+		...rawCurrency,
+	};
+
+	// Convert values to int.
 	const value =
 		typeof rawValue === 'string' ? parseInt( rawValue, 10 ) : rawValue;
 

@@ -12,6 +12,7 @@ import {
 	createInterpolateElement,
 	createElement,
 	useEffect,
+	useRef,
 } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
@@ -29,6 +30,7 @@ import {
 	COMING_SOON_PAGE_EDITOR_LINK,
 	SITE_VISIBILITY_DOC_LINK,
 } from '../constants';
+import { ConfirmationModal } from './components/confirmation-modal';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -45,6 +47,21 @@ const SiteVisibility = () => {
 	const [ privateLink, setPrivateLink ] = useState(
 		setting?.woocommerce_private_link || 'no'
 	);
+	const formRef = useRef( null );
+	const saveButtonRef = useRef( null );
+
+	useEffect( () => {
+		const saveButton = document.getElementsByClassName(
+			'woocommerce-save-button'
+		)[ 0 ];
+		if ( saveButton ) {
+			saveButtonRef.current = saveButton;
+		}
+		const form = document.querySelector( '#mainform' );
+		if ( form ) {
+			formRef.current = form;
+		}
+	}, [] );
 
 	useEffect( () => {
 		const initValues = {
@@ -70,16 +87,23 @@ const SiteVisibility = () => {
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
 
 	const getPrivateLink = () => {
+		const settings = window?.wcSettings;
+		const homeUrl = settings?.homeUrl;
+		const urlObject = new URL( homeUrl );
+
 		if ( storePagesOnly === 'yes' ) {
-			return (
-				window?.wcSettings?.admin?.siteVisibilitySettings
-					?.shop_permalink +
-				'?woo-share=' +
-				shareKey
-			);
+			const shopPermalink =
+				settings?.admin?.siteVisibilitySettings?.shop_permalink;
+			if ( shopPermalink ) {
+				urlObject.href = shopPermalink;
+			}
 		}
 
-		return window?.wcSettings?.homeUrl + '?woo-share=' + shareKey;
+		const params = new URLSearchParams( urlObject.search );
+		params.set( 'woo-share', shareKey );
+		urlObject.search = params.toString();
+
+		return urlObject.toString();
 	};
 
 	const copyClipboardRef = useCopyToClipboard( getPrivateLink, () => {
@@ -108,9 +132,18 @@ const SiteVisibility = () => {
 			/>
 			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
-				{ __(
-					'Manage how your site appears to visitors.',
-					'woocommerce'
+				{ createInterpolateElement(
+					__(
+						'Manage how your site appears to visitors. <a>Learn more</a>',
+						'woocommerce'
+					),
+					{
+						a: createElement( 'a', {
+							target: '_blank',
+							rel: 'noreferrer',
+							href: SITE_VISIBILITY_DOC_LINK,
+						} ),
+					}
 				) }
 			</p>
 			<div className="site-visibility-settings-slotfill-section">
@@ -123,7 +156,7 @@ const SiteVisibility = () => {
 					} }
 					options={ [
 						{
-							label: 'Coming soon',
+							label: __( 'Coming soon', 'woocommerce' ),
 							value: 'yes',
 						},
 					] }
@@ -138,6 +171,7 @@ const SiteVisibility = () => {
 								),
 								{
 									a: createElement( 'a', {
+										target: '_blank',
 										href: COMING_SOON_PAGE_EDITOR_LINK,
 									} ),
 								}
@@ -159,20 +193,13 @@ const SiteVisibility = () => {
 						label={
 							<>
 								{ __(
-									'Restrict to store pages only',
+									'Apply to store pages only',
 									'woocommerce'
 								) }
 								<p>
-									{ createInterpolateElement(
-										__(
-											'Display a "coming soon" message on your <a>store pages</a> — the rest of your site will remain visible.',
-											'woocommerce'
-										),
-										{
-											a: createElement( 'a', {
-												href: SITE_VISIBILITY_DOC_LINK,
-											} ),
-										}
+									{ __(
+										'Display a “coming soon” message on your store pages — the rest of your site will remain visible.',
+										'woocommerce'
 									) }
 								</p>
 							</>
@@ -246,7 +273,7 @@ const SiteVisibility = () => {
 					} }
 					options={ [
 						{
-							label: 'Live',
+							label: __( 'Live', 'woocommerce' ),
 							value: 'no',
 						},
 					] }
@@ -259,6 +286,13 @@ const SiteVisibility = () => {
 					) }
 				</p>
 			</div>
+			{ formRef.current && saveButtonRef.current ? (
+				<ConfirmationModal
+					saveButtonRef={ saveButtonRef }
+					formRef={ formRef }
+					currentSetting={ setting }
+				/>
+			) : null }
 		</div>
 	);
 };

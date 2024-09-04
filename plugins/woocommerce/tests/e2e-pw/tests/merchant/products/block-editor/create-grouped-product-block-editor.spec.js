@@ -29,7 +29,7 @@ const groupedProductsData = [
 
 const productIds = [];
 
-test.describe( 'General tab', () => {
+test.describe( 'General tab', { tag: '@gutenberg' }, () => {
 	test.describe( 'Grouped product', () => {
 		test.beforeAll( async () => {
 			for ( const product of groupedProductsData ) {

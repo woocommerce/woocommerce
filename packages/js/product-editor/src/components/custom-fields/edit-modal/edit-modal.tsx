@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Modal } from '@wordpress/components';
-import { createElement, useState, useRef } from '@wordpress/element';
+import { createElement, useState, useRef, useEffect } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
@@ -15,6 +15,7 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { TextControl } from '../../text-control';
 import type { Metadata } from '../../../types';
 import { type ValidationError, validate } from '../utils/validations';
+import { CustomFieldNameControl } from '../custom-field-name-control';
 import type { EditModalProps } from './types';
 
 export function EditModal( {
@@ -31,6 +32,10 @@ export function EditModal( {
 	const keyInputRef = useRef< HTMLInputElement >( null );
 	const valueInputRef = useRef< HTMLInputElement >( null );
 
+	useEffect( function focusNameInputOnMount() {
+		keyInputRef.current?.focus();
+	}, [] );
+
 	function renderTitle() {
 		return sprintf(
 			/* translators: %s: the name of the custom field */
@@ -40,7 +45,7 @@ export function EditModal( {
 	}
 
 	function changeHandler( prop: keyof Metadata< string > ) {
-		return function handleChange( value: string ) {
+		return function handleChange( value: string | null ) {
 			setCustomField( ( current ) => ( {
 				...current,
 				[ prop ]: value,
@@ -101,13 +106,17 @@ export function EditModal( {
 				props.className
 			) }
 		>
-			<TextControl
+			<CustomFieldNameControl
 				ref={ keyInputRef }
 				label={ __( 'Name', 'woocommerce' ) }
-				error={ validationError?.key }
+				allowReset={ false }
+				help={ validationError?.key }
 				value={ customField.key }
 				onChange={ changeHandler( 'key' ) }
 				onBlur={ blurHandler( 'key' ) }
+				className={ classNames( {
+					'has-error': validationError?.key,
+				} ) }
 			/>
 
 			<TextControl

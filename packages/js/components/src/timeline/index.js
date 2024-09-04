@@ -13,9 +13,16 @@ import { createElement } from '@wordpress/element';
 import TimelineGroup from './timeline-group';
 import { sortByDateUsing, groupItemsUsing } from './util';
 
-const Timeline = ( props ) => {
-	const { className, items, groupBy, orderBy, dateFormat, clockFormat } =
-		props;
+const Timeline = ( {
+	className = '',
+	items = [],
+	groupBy = 'day',
+	orderBy = 'desc',
+	/* translators: PHP date format string used to display dates, see php.net/date. */
+	dateFormat = __( 'F j, Y', 'woocommerce' ),
+	/* translators: PHP clock format string used to display times, see php.net/date. */
+	clockFormat = __( 'g:ia', 'woocommerce' ),
+} ) => {
 	const timelineClassName = classnames( 'woocommerce-timeline', className );
 
 	// Early return in case no data was passed to the component.
@@ -92,7 +99,7 @@ Timeline.propTypes = {
 			 */
 			hideTimestamp: PropTypes.bool,
 		} )
-	).isRequired,
+	),
 	/**
 	 * Defines how items should be grouped together.
 	 */
@@ -109,17 +116,6 @@ Timeline.propTypes = {
 	 * The PHP clock format string used to format times, see php.net/date.
 	 */
 	clockFormat: PropTypes.string,
-};
-
-Timeline.defaultProps = {
-	className: '',
-	items: [],
-	groupBy: 'day',
-	orderBy: 'desc',
-	/* translators: PHP date format string used to display dates, see php.net/date. */
-	dateFormat: __( 'F j, Y', 'woocommerce' ),
-	/* translators: PHP clock format string used to display times, see php.net/date. */
-	clockFormat: __( 'g:ia', 'woocommerce' ),
 };
 
 export { orderByOptions, groupByOptions } from './util';

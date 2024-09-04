@@ -121,15 +121,19 @@ class Tax extends Task {
 	}
 
 	/**
-	 * Addtional data.
+	 * Additional data.
 	 *
 	 * @return array
 	 */
 	public function get_additional_data() {
 		return array(
-			'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-			'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
-			'woocommerce_tax_countries' => self::get_automated_support_countries(),
+			'avalara_activated'              => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
+			'tax_jar_activated'              => class_exists( 'WC_Taxjar' ),
+			'stripe_tax_activated'           => PluginsHelper::is_plugin_active( 'stripe-tax-for-woocommerce' ),
+			'woocommerce_tax_activated'      => PluginsHelper::is_plugin_active( 'woocommerce-tax' ),
+			'woocommerce_shipping_activated' => PluginsHelper::is_plugin_active( 'woocommerce-shipping' ),
+			'woocommerce_tax_countries'      => self::get_automated_support_countries(),
+			'stripe_tax_countries'           => self::get_stripe_tax_support_countries(),
 		);
 	}
 
@@ -159,5 +163,55 @@ class Tax extends Task {
 		);
 
 		return $tax_supported_countries;
+	}
+
+	/**
+	 * Get an array of countries that support Stripe tax.
+	 *
+	 * @return array
+	 */
+	private static function get_stripe_tax_support_countries() {
+		// https://docs.stripe.com/tax/supported-countries#supported-countries accurate as of 2024-08-26.
+		// countries with remote sales not included.
+		return array(
+			'AU',
+			'AT',
+			'BE',
+			'BG',
+			'CA',
+			'HR',
+			'CY',
+			'CZ',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HK',
+			'HU',
+			'IE',
+			'IT',
+			'JP',
+			'LV',
+			'LT',
+			'LU',
+			'MT',
+			'NL',
+			'NZ',
+			'NO',
+			'PL',
+			'PT',
+			'RO',
+			'SG',
+			'SK',
+			'SI',
+			'ES',
+			'SE',
+			'CH',
+			'AE',
+			'GB',
+			'US',
+		);
 	}
 }

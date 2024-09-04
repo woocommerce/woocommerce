@@ -35,32 +35,32 @@ class ArrayUtil {
 	 *
 	 * E.g. for [ 'foo' => [ 'bar' => [ 'fizz' => 'buzz' ] ] ] the value for key 'foo::bar::fizz' would be 'buzz'.
 	 *
-	 * @param array  $array The array to get the value from.
+	 * @param array  $items The array to get the value from.
 	 * @param string $key The complete key hierarchy, using '::' as separator.
-	 * @param mixed  $default The value to return if the key doesn't exist in the array.
+	 * @param mixed  $default_value The value to return if the key doesn't exist in the array.
 	 *
 	 * @return mixed The retrieved value, or the supplied default value.
 	 * @throws \Exception $array is not an array.
 	 */
-	public static function get_nested_value( array $array, string $key, $default = null ) {
+	public static function get_nested_value( array $items, string $key, $default_value = null ) {
 		$key_stack = explode( '::', $key );
 		$subkey    = array_shift( $key_stack );
 
-		if ( isset( $array[ $subkey ] ) ) {
-			$value = $array[ $subkey ];
+		if ( isset( $items[ $subkey ] ) ) {
+			$value = $items[ $subkey ];
 
 			if ( count( $key_stack ) ) {
 				foreach ( $key_stack as $subkey ) {
 					if ( is_array( $value ) && isset( $value[ $subkey ] ) ) {
 						$value = $value[ $subkey ];
 					} else {
-						$value = $default;
+						$value = $default_value;
 						break;
 					}
 				}
 			}
 		} else {
-			$value = $default;
+			$value = $default_value;
 		}
 
 		return $value;
@@ -69,12 +69,12 @@ class ArrayUtil {
 	/**
 	 * Checks if a given key exists in an array and its value can be evaluated as 'true'.
 	 *
-	 * @param array  $array The array to check.
+	 * @param array  $items The array to check.
 	 * @param string $key The key for the value to check.
 	 * @return bool True if the key exists in the array and the value can be evaluated as 'true'.
 	 */
-	public static function is_truthy( array $array, string $key ) {
-		return isset( $array[ $key ] ) && $array[ $key ];
+	public static function is_truthy( array $items, string $key ) {
+		return isset( $items[ $key ] ) && $items[ $key ];
 	}
 
 	/**
@@ -87,13 +87,13 @@ class ArrayUtil {
 	 * $array['key'] ?? 'default' => 'default'
 	 * ArrayUtil::get_value_or_default($array, 'key', 'default') => null
 	 *
-	 * @param array  $array The array to get the value from.
+	 * @param array  $items The array to get the value from.
 	 * @param string $key The key to use to retrieve the value.
-	 * @param null   $default The default value to return if the key doesn't exist in the array.
+	 * @param null   $default_value The default value to return if the key doesn't exist in the array.
 	 * @return mixed|null The value for the key, or the default value passed.
 	 */
-	public static function get_value_or_default( array $array, string $key, $default = null ) {
-		return array_key_exists( $key, $array ) ? $array[ $key ] : $default;
+	public static function get_value_or_default( array $items, string $key, $default_value = null ) {
+		return array_key_exists( $key, $items ) ? $items[ $key ] : $default_value;
 	}
 
 	/**
@@ -149,19 +149,19 @@ class ArrayUtil {
 	 */
 	private static function get_selector_callback( string $selector_name, int $selector_type = self::SELECT_BY_AUTO ): \Closure {
 		if ( self::SELECT_BY_OBJECT_METHOD === $selector_type ) {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = function ( $item ) use ( $selector_name ) {
 				return $item->$selector_name();
 			};
 		} elseif ( self::SELECT_BY_OBJECT_PROPERTY === $selector_type ) {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = function ( $item ) use ( $selector_name ) {
 				return $item->$selector_name;
 			};
 		} elseif ( self::SELECT_BY_ARRAY_KEY === $selector_type ) {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = function ( $item ) use ( $selector_name ) {
 				return $item[ $selector_name ];
 			};
 		} else {
-			$callback = function( $item ) use ( $selector_name ) {
+			$callback = function ( $item ) use ( $selector_name ) {
 				if ( is_array( $item ) ) {
 					return $item[ $selector_name ];
 				} elseif ( method_exists( $item, $selector_name ) ) {
@@ -269,14 +269,12 @@ class ArrayUtil {
 					}
 					$diff[ $key ] = $value;
 				}
-			} else {
-				// phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison -- Intentional when $strict is false.
-				if ( ! array_key_exists( $key, $array2 ) || $value != $array2[ $key ] ) {
-					if ( $compare ) {
-						return true;
-					}
-					$diff[ $key ] = $value;
+            // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- Intentional when $strict is false.
+			} elseif ( ! array_key_exists( $key, $array2 ) || $value != $array2[ $key ] ) {
+				if ( $compare ) {
+					return true;
 				}
+				$diff[ $key ] = $value;
 			}
 		}
 
@@ -286,40 +284,66 @@ class ArrayUtil {
 	/**
 	 * Push a value to an array, but only if the value isn't in the array already.
 	 *
-	 * @param array $array The array.
+	 * @param array $items The array.
 	 * @param mixed $value The value to maybe push.
 	 * @return bool True if the value has been added to the array, false if the value was already in the array.
 	 */
-	public static function push_once( array &$array, $value ) : bool {
-		if ( in_array( $value, $array, true ) ) {
+	public static function push_once( array &$items, $value ): bool {
+		if ( in_array( $value, $items, true ) ) {
 			return false;
 		}
 
-		$array[] = $value;
+		$items[] = $value;
 		return true;
 	}
 
 	/**
 	 * Ensure that an associative array has a given key, and if not, set the key to an empty array.
 	 *
-	 * @param array  $array The array to check.
+	 * @param array  $items The array to check.
 	 * @param string $key The key to check.
 	 * @param bool   $throw_if_existing_is_not_array If true, an exception will be thrown if the key already exists in the array but the value is not an array.
 	 * @return bool True if the key has been added to the array, false if not (the key already existed).
 	 * @throws \Exception The key already exists in the array but the value is not an array.
 	 */
-	public static function ensure_key_is_array( array &$array, string $key, bool $throw_if_existing_is_not_array = false ): bool {
-		if ( ! isset( $array[ $key ] ) ) {
-			$array[ $key ] = array();
+	public static function ensure_key_is_array( array &$items, string $key, bool $throw_if_existing_is_not_array = false ): bool {
+		if ( ! isset( $items[ $key ] ) ) {
+			$items[ $key ] = array();
 			return true;
 		}
 
-		if ( $throw_if_existing_is_not_array && ! is_array( $array[ $key ] ) ) {
-			$type = is_object( $array[ $key ] ) ? get_class( $array[ $key ] ) : gettype( $array[ $key ] );
+		if ( $throw_if_existing_is_not_array && ! is_array( $items[ $key ] ) ) {
+			$type = is_object( $items[ $key ] ) ? get_class( $items[ $key ] ) : gettype( $items[ $key ] );
+            // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new \Exception( "Array key exists but it's not an array, it's a {$type}" );
 		}
 
 		return false;
 	}
-}
 
+	/**
+	 * Given an array of associative arrays, all having a shared key name ("column"), generates a new array in which
+	 * keys are the distinct column values found, and values are arrays with all the matches found
+	 * (or only the last matching array found, if $single_values is true).
+	 * See ArrayUtilTest for examples.
+	 *
+	 * @param array  $items The array to process.
+	 * @param string $column The name of the key to group by.
+	 * @param bool   $single_values True to only return the last suitable array found for each column value.
+	 * @return array The grouped array.
+	 */
+	public static function group_by_column( array $items, string $column, bool $single_values = false ): array {
+		if ( $single_values ) {
+			return array_combine( array_column( $items, $column ), array_values( $items ) );
+		}
+
+		$distinct_column_values = array_unique( array_column( $items, $column ), SORT_REGULAR );
+		$result                 = array_fill_keys( $distinct_column_values, array() );
+
+		foreach ( $items as $value ) {
+			$result[ $value[ $column ] ][] = $value;
+		}
+
+		return $result;
+	}
+}

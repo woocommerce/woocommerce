@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 
 /**
  * WooCommercePayments Task
@@ -103,8 +104,7 @@ class WooCommercePayments extends Task {
 	public function can_view() {
 		$payments = $this->task_list->get_task( 'payments' );
 
-		return ! $payments->is_complete() && // Do not re-display the task if the "add payments" task has already been completed.
-			self::is_installed() &&
+		return ! $payments->is_complete() && // Do not re-display the task if the general "Payments" task has already been completed.
 			self::is_supported();
 	}
 
@@ -147,11 +147,9 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_connected() {
-		if ( class_exists( '\WC_Payments' ) ) {
-			$wc_payments_gateway = \WC_Payments::get_gateway();
-			return method_exists( $wc_payments_gateway, 'is_connected' )
-				? $wc_payments_gateway->is_connected()
-				: false;
+		$wc_payments_gateway = self::get_woo_payments_gateway();
+		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_connected' ) ) {
+			return $wc_payments_gateway->is_connected();
 		}
 
 		return false;
@@ -164,27 +162,25 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_account_partially_onboarded() {
-		if ( class_exists( '\WC_Payments' ) ) {
-			$wc_payments_gateway = \WC_Payments::get_gateway();
-			return method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' )
-				? $wc_payments_gateway->is_account_partially_onboarded()
-				: false;
+		$wc_payments_gateway = self::get_woo_payments_gateway();
+		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' ) ) {
+			return $wc_payments_gateway->is_account_partially_onboarded();
 		}
 
 		return false;
 	}
 
 	/**
-	 * Check if the store is in a supported country.
+	 * Check if the store is in a WooPayments supported country.
 	 *
 	 * @return bool
 	 */
 	public static function is_supported() {
-		$suggestions              = Suggestions::get_suggestions();
+		$suggestions              = Suggestions::get_suggestions( DefaultPaymentGateways::get_all() );
 		$suggestion_plugins       = array_merge(
 			...array_filter(
 				array_column( $suggestions, 'plugins' ),
-				function( $plugins ) {
+				function ( $plugins ) {
 					return is_array( $plugins );
 				}
 			)
@@ -194,5 +190,18 @@ class WooCommercePayments extends Task {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Get the WooPayments gateway.
+	 *
+	 * @return \WC_Payments|null
+	 */
+	private static function get_woo_payments_gateway() {
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		if ( isset( $payment_gateways['woocommerce_payments'] ) ) {
+			return $payment_gateways['woocommerce_payments'];
+		}
+		return null;
 	}
 }

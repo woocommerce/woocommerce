@@ -1,18 +1,20 @@
 /**
  * External dependencies
  */
-import {
-	createBlock,
-	createBlocksFromInnerBlocksTemplate,
-	type BlockInstance,
-} from '@wordpress/blocks';
+
 import { isWpVersion } from '@woocommerce/settings';
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	INNER_BLOCKS_TEMPLATE as productsInnerBlocksTemplate,
-	QUERY_DEFAULT_ATTRIBUTES as productsQueryDefaultAttributes,
-	PRODUCT_QUERY_VARIATION_NAME as productsVariationName,
-} from '@woocommerce/blocks/product-query/constants';
+	INNER_BLOCKS_TEMPLATE as productCollectionInnerBlocksTemplate,
+	DEFAULT_ATTRIBUTES as productCollectionDefaultAttributes,
+	DEFAULT_QUERY as productCollectionDefaultQuery,
+} from '@woocommerce/blocks/product-collection/constants';
+import {
+	createBlock,
+	// @ts-expect-error Type definitions for this function are missing in Gutenberg
+	createBlocksFromInnerBlocksTemplate,
+	type BlockInstance,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -20,19 +22,22 @@ import {
 import { createArchiveTitleBlock, createRowBlock } from './utils';
 import { OnClickCallbackParameter, type InheritedAttributes } from './types';
 
-const createProductsBlock = ( inheritedAttributes: InheritedAttributes ) =>
+const createProductCollectionBlock = (
+	inheritedAttributes: InheritedAttributes
+) =>
 	createBlock(
-		'core/query',
+		'woocommerce/product-collection',
 		{
-			...productsQueryDefaultAttributes,
+			...productCollectionDefaultAttributes,
 			...inheritedAttributes,
-			namespace: productsVariationName,
 			query: {
-				...productsQueryDefaultAttributes.query,
+				...productCollectionDefaultQuery,
 				inherit: true,
 			},
 		},
-		createBlocksFromInnerBlocksTemplate( productsInnerBlocksTemplate )
+		createBlocksFromInnerBlocksTemplate(
+			productCollectionInnerBlocksTemplate
+		)
 	);
 
 const getBlockifiedTemplate = (
@@ -53,7 +58,7 @@ const getBlockifiedTemplate = (
 			],
 			inheritedAttributes
 		),
-		createProductsBlock( inheritedAttributes ),
+		createProductCollectionBlock( inheritedAttributes ),
 	].filter( Boolean ) as BlockInstance[];
 
 const getBlockifiedTemplateWithTermDescription = (

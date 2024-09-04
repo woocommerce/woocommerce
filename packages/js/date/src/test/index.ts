@@ -781,7 +781,7 @@ describe( 'loadLocaleData', () => {
 	} );
 
 	it( 'should load locale data on user locale', () => {
-		// initialize locale. Gutenberg normaly does this, but not in test environment.
+		// initialize locale. Gutenberg normally does this, but not in test environment.
 		moment.locale( 'fr_FR', {} );
 
 		const weekdaysShort = [
@@ -1052,7 +1052,7 @@ describe( 'getStoreTimeZoneMoment', () => {
 		expect( utcOffset ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should use the utc offest when it is set', () => {
+	it( 'should use the utc offset when it is set', () => {
 		global.window.wcSettings = {
 			timeZone: '+06:00',
 		};

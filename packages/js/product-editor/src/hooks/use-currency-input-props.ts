@@ -27,6 +27,8 @@ type Props = {
 	onKeyUp?: ( event: React.KeyboardEvent< HTMLInputElement > ) => void;
 };
 
+const CURRENCY_INPUT_MAX = 1_000_000_000_000_000_000.0;
+
 export const useCurrencyInputProps = ( {
 	value,
 	onChange,
@@ -72,7 +74,11 @@ export const useCurrencyInputProps = ( {
 		onChange( newValue: string ) {
 			const sanitizeValue = sanitizePrice( newValue );
 			if ( onChange ) {
-				onChange( sanitizeValue );
+				onChange(
+					Number( sanitizeValue ) <= CURRENCY_INPUT_MAX
+						? sanitizeValue
+						: String( CURRENCY_INPUT_MAX )
+				);
 			}
 		},
 	};

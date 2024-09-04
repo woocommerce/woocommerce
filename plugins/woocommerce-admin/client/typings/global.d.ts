@@ -27,6 +27,7 @@ declare global {
 					symbol: string;
 				};
 				currentUserId: number;
+				blueprint_upload_nonce?: string;
 			};
 		};
 		wcAdminFeatures: {
@@ -43,6 +44,7 @@ declare global {
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
 			'pattern-toolkit-full-composability': boolean;
+			printful: boolean;
 			'product-pre-publish-modal': boolean;
 			'product-custom-fields': boolean;
 			'remote-inbox-notifications': boolean;
@@ -58,6 +60,8 @@ declare global {
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
+			'blueprint': boolean;
+			'reactify-classic-payments-settings': boolean;
 		};
 		wp: {
 			updates?: {
@@ -84,6 +88,12 @@ declare global {
 		getUserSetting?: ( name: string ) => string | undefined;
 		setUserSetting?: ( name: string, value: string ) => void;
 		deleteUserSetting?: ( name: string ) => void;
+		woocommerce_admin: {
+			ajax_url: string;
+			nonces: {
+				gateway_toggle?: string;
+			}
+		}
 	}
 }
 

@@ -23,6 +23,9 @@ final class StoreApi {
 		add_action(
 			'rest_api_init',
 			function () {
+				if ( ! wc_rest_should_load_namespace( 'wc/store' ) && ! wc_rest_should_load_namespace( 'wc/private' ) ) {
+					return;
+				}
 				self::container()->get( Legacy::class )->init();
 				self::container()->get( RoutesController::class )->register_all_routes();
 			}
@@ -31,6 +34,9 @@ final class StoreApi {
 		add_action(
 			'rest_api_init',
 			function () {
+				if ( ! wc_rest_should_load_namespace( 'wc/store' ) ) {
+					return;
+				}
 				self::container()->get( Authentication::class )->init();
 			},
 			11

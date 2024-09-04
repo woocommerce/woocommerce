@@ -2,11 +2,9 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
-use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
-use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -64,7 +62,7 @@ class Checkout extends AbstractCartRoute {
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		return true;
+		return ! $this->has_cart_token( $request );
 	}
 
 	/**
@@ -88,7 +86,7 @@ class Checkout extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => array_merge(
 					[
-						'payment_data' => [
+						'payment_data'      => [
 							'description' => __( 'Data to pass through to the payment method when processing payment.', 'woocommerce' ),
 							'type'        => 'array',
 							'items'       => [
@@ -102,6 +100,10 @@ class Checkout extends AbstractCartRoute {
 									],
 								],
 							],
+						],
+						'customer_password' => [
+							'description' => __( 'Customer password for new accounts, if applicable.', 'woocommerce' ),
+							'type'        => 'string',
 						],
 					],
 					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
@@ -121,7 +123,6 @@ class Checkout extends AbstractCartRoute {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		$this->load_cart_session( $request );
-		$this->cart_controller->calculate_totals();
 
 		$response    = null;
 		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
@@ -144,6 +145,11 @@ class Checkout extends AbstractCartRoute {
 
 		if ( is_wp_error( $response ) ) {
 			$response = $this->error_to_response( $response );
+
+			// If we encountered an exception, free up stock.
+			if ( $this->order ) {
+				wc_release_stock_for_order( $this->order );
+			}
 		}
 
 		return $this->add_response_headers( $response );
@@ -169,6 +175,54 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Validate required additional fields on request.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @throws RouteException When a required additional field is missing.
+	 */
+	public function validate_required_additional_fields( \WP_REST_Request $request ) {
+		$contact_fields           = $this->additional_fields_controller->get_fields_for_location( 'contact' );
+		$order_fields             = $this->additional_fields_controller->get_fields_for_location( 'order' );
+		$order_and_contact_fields = array_merge( $contact_fields, $order_fields );
+
+		if ( ! empty( $order_and_contact_fields ) ) {
+			foreach ( $order_and_contact_fields as $field_key => $order_and_contact_field ) {
+				if ( $order_and_contact_field['required'] && ! isset( $request['additional_fields'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided additional fields: %s is required', 'woocommerce' ), $order_and_contact_field['label'] ) ),
+						400
+					);
+				}
+			}
+		}
+
+		$address_fields = $this->additional_fields_controller->get_fields_for_location( 'address' );
+		if ( ! empty( $address_fields ) ) {
+			foreach ( $address_fields as $field_key => $address_field ) {
+				if ( $address_field['required'] && ! isset( $request['billing_address'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided billing address: %s is required', 'woocommerce' ), $address_field['label'] ) ),
+						400
+					);
+				}
+				if ( $address_field['required'] && ! isset( $request['shipping_address'][ $field_key ] ) ) {
+					throw new RouteException(
+						'woocommerce_rest_checkout_missing_required_field',
+						/* translators: %s: is the field label */
+						esc_html( sprintf( __( 'There was a problem with the provided shipping address: %s is required', 'woocommerce' ), $address_field['label'] ) ),
+						400
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Process an order.
 	 *
 	 * 1. Obtain Draft Order
@@ -178,7 +232,6 @@ class Checkout extends AbstractCartRoute {
 	 * 5. Process Payment
 	 *
 	 * @throws RouteException On error.
-	 * @throws InvalidStockLevelsInCartException On error.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -186,34 +239,66 @@ class Checkout extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		/**
-		 * Validate items etc are allowed in the order before the order is processed. This will fix violations and tell
-		 * the customer.
+		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
+		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
+		 */
+		$this->cart_controller->calculate_totals();
+
+		/**
+		 * Validate items and fix violations before the order is processed.
 		 */
 		$this->cart_controller->validate_cart();
 
 		/**
-		 * Obtain Draft Order and process request data.
-		 *
-		 * Note: Customer data is persisted from the request first so that OrderController::update_addresses_from_cart
+		 * Validate additional fields on request.
+		 */
+		$this->validate_required_additional_fields( $request );
+
+		/**
+		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
 		 * uses the up to date customer address.
 		 */
 		$this->update_customer_from_request( $request );
-		$this->create_or_update_draft_order( $request );
-		$this->update_order_from_request( $request );
 
 		/**
-		 * Process customer data.
-		 *
-		 * Update order with customer details, and sign up a user account as necessary.
+		 * Create (or update) Draft Order and process request data.
 		 */
+		$this->create_or_update_draft_order( $request );
+		$this->update_order_from_request( $request );
 		$this->process_customer( $request );
 
 		/**
-		 * Validate order.
-		 *
-		 * This logic ensures the order is valid before payment is attempted.
+		 * Validate updated order before payment is attempted.
 		 */
 		$this->order_controller->validate_order_before_payment( $this->order );
+
+		/**
+		 * Reserve stock for the order.
+		 *
+		 * In the shortcode based checkout, when POSTing the checkout form the order would be created and fire the
+		 * `woocommerce_checkout_order_created` action. This in turn would trigger the `wc_reserve_stock_for_order`
+		 * function so that stock would be held pending payment.
+		 *
+		 * Via the block based checkout and Store API we already have a draft order, but when POSTing to the /checkout
+		 * endpoint we do the same; reserve stock for the order to allow time to process payment.
+		 *
+		 * Note, stock is only "held" while the order has the status wc-checkout-draft or pending. Stock is freed when
+		 * the order changes status, or there is an exception.
+		 *
+		 * @see ReserveStock::get_query_for_reserved_stock()
+		 *
+		 * @since 9.2 Stock is no longer held for all draft orders, nor on non-POST requests. See https://github.com/woocommerce/woocommerce/issues/44231
+		 * @since 9.2 Uses wc_reserve_stock_for_order() instead of using the ReserveStock class directly.
+		 */
+		try {
+			wc_reserve_stock_for_order( $this->order );
+		} catch ( ReserveStockException $e ) {
+			throw new RouteException(
+				esc_html( $e->getErrorCode() ),
+				esc_html( $e->getMessage() ),
+				esc_html( $e->getCode() )
+			);
+		}
 
 		wc_do_deprecated_action(
 			'__experimental_woocommerce_blocks_checkout_order_processed',
@@ -393,24 +478,6 @@ class Checkout extends AbstractCartRoute {
 
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
-
-		/**
-		 * Try to reserve stock for the order.
-		 *
-		 * If creating a draft order on checkout entry, set the timeout to 10 mins.
-		 * If POSTing to the checkout (attempting to pay), set the timeout to 60 mins (using the woocommerce_hold_stock_minutes option).
-		 */
-		try {
-			$reserve_stock = new ReserveStock();
-			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : 10;
-			$reserve_stock->reserve_stock_for_order( $this->order, $duration );
-		} catch ( ReserveStockException $e ) {
-			throw new RouteException(
-				$e->getErrorCode(),
-				$e->getMessage(),
-				$e->getCode()
-			);
-		}
 	}
 
 	/**
@@ -519,44 +586,32 @@ class Checkout extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	private function process_customer( \WP_REST_Request $request ) {
-		try {
-			if ( $this->should_create_customer_account( $request ) ) {
-				$customer_id = $this->create_customer_account(
-					$request['billing_address']['email'],
-					$request['billing_address']['first_name'],
-					$request['billing_address']['last_name']
+		if ( $this->should_create_customer_account( $request ) ) {
+			$customer_id = wc_create_new_customer(
+				$request['billing_address']['email'],
+				'',
+				$request['customer_password'],
+				[
+					'first_name' => $request['billing_address']['first_name'],
+					'last_name'  => $request['billing_address']['last_name'],
+					'source'     => 'store-api',
+				]
+			);
+
+			if ( is_wp_error( $customer_id ) ) {
+				throw new RouteException(
+					esc_html( $customer_id->get_error_code() ),
+					esc_html( $customer_id->get_error_message() ),
+					400
 				);
-
-				// Associate customer with the order. This is done before login to ensure the order is associated with
-				// the correct customer if login fails.
-				$this->order->set_customer_id( $customer_id );
-				$this->order->save();
-
-				// Log the customer in to WordPress. Doing this inline instead of using `wc_set_customer_auth_cookie`
-				// because wc_set_customer_auth_cookie forces the use of session cookie.
-				wp_set_current_user( $customer_id );
-				wp_set_auth_cookie( $customer_id, true );
-
-				// Init session cookie if the session cookie handler exists.
-				if ( is_callable( [ WC()->session, 'init_session_cookie' ] ) ) {
-					WC()->session->init_session_cookie();
-				}
 			}
-		} catch ( \Exception $error ) {
-			switch ( $error->getMessage() ) {
-				case 'registration-error-invalid-email':
-					throw new RouteException(
-						'registration-error-invalid-email',
-						__( 'Please provide a valid email address.', 'woocommerce' ),
-						400
-					);
-				case 'registration-error-email-exists':
-					throw new RouteException(
-						'registration-error-email-exists',
-						__( 'An account is already registered with your email address. Please log in before proceeding.', 'woocommerce' ),
-						400
-					);
-			}
+
+			// Associate customer with the order.
+			$this->order->set_customer_id( $customer_id );
+			$this->order->save();
+
+			// Set the customer auth cookie.
+			wc_set_customer_auth_cookie( $customer_id );
 		}
 
 		// Persist customer address data to account.
@@ -592,150 +647,5 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Create a new account for a customer.
-	 *
-	 * The account is created with a generated username. The customer is sent
-	 * an email notifying them about the account and containing a link to set
-	 * their (initial) password.
-	 *
-	 * Intended as a replacement for wc_create_new_customer in WC core.
-	 *
-	 * @throws \Exception If an error is encountered when creating the user account.
-	 *
-	 * @param string $user_email The email address to use for the new account.
-	 * @param string $first_name The first name to use for the new account.
-	 * @param string $last_name  The last name to use for the new account.
-	 *
-	 * @return int User id if successful
-	 */
-	private function create_customer_account( $user_email, $first_name, $last_name ) {
-		if ( empty( $user_email ) || ! is_email( $user_email ) ) {
-			throw new \Exception( 'registration-error-invalid-email' );
-		}
-
-		if ( email_exists( $user_email ) ) {
-			throw new \Exception( 'registration-error-email-exists' );
-		}
-
-		$username = wc_create_new_customer_username( $user_email );
-
-		// Handle password creation.
-		$password           = wp_generate_password();
-		$password_generated = true;
-
-		// Use WP_Error to handle registration errors.
-		$errors = new \WP_Error();
-
-		/**
-		 * Fires before a customer account is registered.
-		 *
-		 * This hook fires before customer accounts are created and passes the form data (username, email) and an array
-		 * of errors.
-		 *
-		 * This could be used to add extra validation logic and append errors to the array.
-		 *
-		 * @since 7.2.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param string $username Customer username.
-		 * @param string $user_email Customer email address.
-		 * @param \WP_Error $errors Error object.
-		 */
-		do_action( 'woocommerce_register_post', $username, $user_email, $errors );
-
-		/**
-		 * Filters registration errors before a customer account is registered.
-		 *
-		 * This hook filters registration errors. This can be used to manipulate the array of errors before
-		 * they are displayed.
-		 *
-		 * @since 7.2.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param \WP_Error $errors Error object.
-		 * @param string $username Customer username.
-		 * @param string $user_email Customer email address.
-		 * @return \WP_Error
-		 */
-		$errors = apply_filters( 'woocommerce_registration_errors', $errors, $username, $user_email );
-
-		if ( is_wp_error( $errors ) && $errors->get_error_code() ) {
-			throw new \Exception( $errors->get_error_code() );
-		}
-
-		/**
-		 * Filters customer data before a customer account is registered.
-		 *
-		 * This hook filters customer data. It allows user data to be changed, for example, username, password, email,
-		 * first name, last name, and role.
-		 *
-		 * @since 7.2.0
-		 *
-		 * @param array $customer_data An array of customer (user) data.
-		 * @return array
-		 */
-		$new_customer_data = apply_filters(
-			'woocommerce_new_customer_data',
-			array(
-				'user_login' => $username,
-				'user_pass'  => $password,
-				'user_email' => $user_email,
-				'first_name' => $first_name,
-				'last_name'  => $last_name,
-				'role'       => 'customer',
-				'source'     => 'store-api',
-			)
-		);
-
-		$customer_id = wp_insert_user( $new_customer_data );
-
-		if ( is_wp_error( $customer_id ) ) {
-			throw $this->map_create_account_error( $customer_id );
-		}
-
-		// Set account flag to remind customer to update generated password.
-		update_user_option( $customer_id, 'default_password_nag', true, true );
-
-		/**
-		 * Fires after a customer account has been registered.
-		 *
-		 * This hook fires after customer accounts are created and passes the customer data.
-		 *
-		 * @since 7.2.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param integer $customer_id New customer (user) ID.
-		 * @param array $new_customer_data Array of customer (user) data.
-		 * @param string $password_generated The generated password for the account.
-		 */
-		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
-
-		return $customer_id;
-	}
-
-	/**
-	 * Convert an account creation error to an exception.
-	 *
-	 * @param \WP_Error $error An error object.
-	 * @return \Exception.
-	 */
-	private function map_create_account_error( \WP_Error $error ) {
-		switch ( $error->get_error_code() ) {
-			// WordPress core error codes.
-			case 'empty_username':
-			case 'invalid_username':
-			case 'empty_email':
-			case 'invalid_email':
-			case 'email_exists':
-			case 'registerfail':
-				return new \Exception( 'woocommerce_rest_checkout_create_account_failure' );
-		}
-		return new \Exception( 'woocommerce_rest_checkout_create_account_failure' );
 	}
 }

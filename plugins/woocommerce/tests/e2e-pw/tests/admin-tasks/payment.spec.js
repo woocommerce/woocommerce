@@ -31,9 +31,26 @@ test.describe( 'Payment setup task', () => {
 	} );
 
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
+		baseURL,
 		page,
 	} ) => {
-		// load the bank transfer page
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// Ensure store's base country location is a WooPayments non-supported country (AF).
+		// Otherwise, the WooPayments task page logic or WooPayments redirects will kick in.
+		await api.post( 'settings/general/batch', {
+			update: [
+				{
+					id: 'woocommerce_default_country',
+					value: 'AF',
+				},
+			],
+		} );
+		// Load the bank transfer page.
 		await page.goto(
 			'wp-admin/admin.php?page=wc-admin&task=payments&id=bacs'
 		);
@@ -42,7 +59,7 @@ test.describe( 'Payment setup task', () => {
 			.click()
 			.catch( () => {} );
 
-		// fill in bank transfer form
+		// Fill in bank transfer form.
 		await page
 			.locator( '//input[@placeholder="Account name"]' )
 			.fill( 'Savings' );
@@ -61,7 +78,7 @@ test.describe( 'Payment setup task', () => {
 			.fill( 'ABBA' );
 		await page.locator( 'text=Save' ).click();
 
-		// check that bank transfers were set up
+		// Check that bank transfers were set up.
 		await expect(
 			page.locator( 'div.components-snackbar__content' )
 		).toContainText( 'Direct bank transfer details added successfully' );
@@ -85,25 +102,13 @@ test.describe( 'Payment setup task', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		// ensure store address is a non supported country
+		// Ensure store's base country location is a WooPayments non-supported country (AF).
+		// Otherwise, the WooPayments task page logic or WooPayments redirects will kick in.
 		await api.post( 'settings/general/batch', {
 			update: [
 				{
-					id: 'woocommerce_store_address',
-					value: 'addr 1',
-				},
-				{
-					id: 'woocommerce_store_city',
-					value: 'San Francisco',
-				},
-				{
 					id: 'woocommerce_default_country',
-					// Morocco: Unsupported country:region
-					value: 'MA:maagd',
-				},
-				{
-					id: 'woocommerce_store_postcode',
-					value: '80000',
+					value: 'AF',
 				},
 			],
 		} );
@@ -118,31 +123,19 @@ test.describe( 'Payment setup task', () => {
 		page,
 		baseURL,
 	} ) => {
-		// Payments page differs if located outside of a WCPay-supported country, so make sure we aren't.
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		// ensure store address is US
+		// Ensure store's base country location is a WooPayments non-supported country (AF).
+		// Otherwise, the WooPayments task page logic or WooPayments redirects will kick in.
 		await api.post( 'settings/general/batch', {
 			update: [
 				{
-					id: 'woocommerce_store_address',
-					value: 'addr 1',
-				},
-				{
-					id: 'woocommerce_store_city',
-					value: 'San Francisco',
-				},
-				{
 					id: 'woocommerce_default_country',
-					value: 'US:CA',
-				},
-				{
-					id: 'woocommerce_store_postcode',
-					value: '94107',
+					value: 'AF',
 				},
 			],
 		} );
@@ -152,18 +145,23 @@ test.describe( 'Payment setup task', () => {
 		page.locator( '.components-button.is-small.has-icon' )
 			.click()
 			.catch( () => {} );
-		await page.waitForLoadState( 'networkidle' );
 
-		// enable COD payment option
+		// Enable COD payment option.
 		await page
 			.locator(
-				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > button'
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > .woocommerce-task-payment__action'
 			)
 			.click();
-		await page.waitForLoadState( 'networkidle' );
+		// Check that COD was set up.
+		await expect(
+			page.locator(
+				'div.woocommerce-task-payment-cod > div.woocommerce-task-payment__footer > .woocommerce-task-payment__action'
+			)
+		).toContainText( 'Manage' );
 
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=checkout' );
 
+		// Check that the COD payment method was enabled.
 		await expect(
 			page.locator( '//tr[@data-gateway_id="cod"]/td[@class="status"]/a' )
 		).toHaveClass( 'wc-payment-gateway-method-toggle-enabled' );
