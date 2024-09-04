@@ -61,7 +61,12 @@
 		}
 	},
 	"config": {
-		"build_step": "pnpm run build:zip"
+		"build_step": "pnpm run build:zip",
+		"prod": {
+			"repo": "plugin-woocommerce-beta-tester",
+			"branch": "trunk",
+			"archive": "woocommerce-beta-tester.zip"
+		}
 	},
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/' && pnpm build:project",

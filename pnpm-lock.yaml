@@ -21928,7 +21928,7 @@ packages:
   react-with-direction@1.4.0:
     resolution: {integrity: sha512-ybHNPiAmaJpoWwugwqry9Hd1Irl2hnNXlo/2SXQBwbLn/jGMauMS2y9jw+ydyX5V9ICryCqObNSthNt5R94xpg==}
     peerDependencies:
-      react: ^17.0.2
+      react: ^0.14 || ^15 || ^16
       react-dom: ^0.14 || ^15 || ^16
 
   react-with-styles-interface-css@4.0.3:
@@ -25529,7 +25529,7 @@ snapshots:
     dependencies:
       '@automattic/load-script': 1.0.0
       cookie: 0.4.2
-      debug: 4.3.5
+      debug: 4.3.6
       hash.js: 1.1.7
       tslib: 2.6.3
       uuid: 9.0.1
@@ -50627,7 +50627,7 @@ snapshots:
       '@babel/runtime': 7.25.0
       '@tannin/sprintf': 1.2.0
       '@wordpress/compose': 6.34.0(react@17.0.2)
-      debug: 4.3.5
+      debug: 4.3.6
       events: 3.3.0
       hash.js: 1.1.7
       lodash: 4.17.21

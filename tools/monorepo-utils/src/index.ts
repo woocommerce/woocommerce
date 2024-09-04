@@ -15,6 +15,7 @@ import Slack from './slack/commands/slack';
 import Manifest from './md-docs/commands';
 import Changefile from './changefile';
 import CIJobs from './ci-jobs';
+import ProdRepo from './prod-repo';
 import WorkflowProfiler from './workflow-profiler/commands';
 import SlackTestReport from './slack-test-report';
 import { Logger } from './core/logger';
@@ -37,6 +38,7 @@ const program = new Command()
 	.addCommand( Slack )
 	.addCommand( Changefile )
 	.addCommand( CIJobs )
+	.addCommand( ProdRepo )
 	.addCommand( WorkflowProfiler )
 	.addCommand( Manifest )
 	.addCommand( SlackTestReport )

@@ -6,7 +6,7 @@ import path from 'node:path';
 
 export interface PackageJSON {
 	name: string;
-	config?: { ci?: any };
+	config?: { ci?: any; prod?: any };
 	dependencies?: { [ key: string ]: string };
 	devDependencies?: { [ key: string ]: string };
 }

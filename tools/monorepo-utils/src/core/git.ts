@@ -460,3 +460,83 @@ export const checkoutRemoteBranch = async (
 	await git.raw( fetchArgs );
 	await git.raw( [ 'checkout', '-b', branch, `origin/${ branch }` ] );
 };
+
+/**
+ * Create a new orphan branch.
+ *
+ * @param {string}  tmpRepoPath    path to temporary repo.
+ * @param {string}  branch         the name of the branch to create.
+ * @param {boolean} deleteExisting when true, existing local branch will be deleted if it exists.
+ */
+export const createEmptyOrphanBranch = async (
+	tmpRepoPath: string,
+	branch: string,
+	deleteExisting: boolean
+): Promise< void > => {
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
+
+	if ( deleteExisting ) {
+		let ref = null;
+		try {
+			// If the branch exists, ref will be its reference, otherwise an exception will be thrown.
+			ref = git.raw( [ 'rev-parse', '--verify', branch ] );
+		} catch ( e ) {}
+
+		if ( ref ) {
+			git.deleteLocalBranch( branch, true );
+		}
+	}
+
+	await git.raw( [ 'checkout', '--orphan', branch ] );
+	await git.raw( [ 'rm', '-rf', '.' ] );
+};
+
+/**
+ * Push a branch to remote.
+ *
+ * @param {string}  tmpRepoPath  path to temporary repo.
+ * @param {string}  branch       the name of the branch to push.
+ * @param {boolean} force        when true, existing local branch will be deleted if it exists.
+ * @param {string}  remoteBranch the remote branch to push to.
+ */
+export const pushBranchToRemote = async (
+	tmpRepoPath: string,
+	branch: string,
+	force = false,
+	remoteBranch?: string
+): Promise< void > => {
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
+
+	const branchArg = remoteBranch ?? `${ branch }:${ remoteBranch }`;
+	const pushArgs = [ 'push', 'origin', branchArg ];
+	if ( force ) {
+		pushArgs.push( '-f' );
+	}
+
+	await git.raw( pushArgs );
+};
+
+/**
+ * Get commit message.
+ *
+ * @param {string} tmpRepoPath path to temporary repo.
+ * @param {string} hash        the hash for which to get commit message.
+ * @return {string} the commit message.
+ */
+export const getCommitMessage = async (
+	tmpRepoPath: string,
+	hash: string
+): Promise< string > => {
+	const git = simpleGit( {
+		baseDir: tmpRepoPath,
+		config: [ 'core.hooksPath=/dev/null' ],
+	} );
+
+	return git.raw( [ 'show', '-s', '--format=%B', hash ] );
+};
