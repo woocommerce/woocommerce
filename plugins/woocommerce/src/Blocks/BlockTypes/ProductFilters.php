@@ -18,7 +18,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId' ];
+		return array( 'postId' );
 	}
 
 	/**
@@ -39,6 +39,24 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		return $content;
+		$tags = new \WP_HTML_Tag_Processor( $content );
+		if ( $tags->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-filters' ) ) ) {
+			$tags->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocmmerce/' . $this->block_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$tags->set_attribute( 'data-wc-navigation-id', $this->generate_navigation_id( $block ) );
+			return $tags->get_updated_html();
+		}
+	}
+
+	/**
+	 * Generate a unique navigation ID for the block.
+	 *
+	 * @param mixed $block - Block instance.
+	 * @return string - Unique navigation ID.
+	 */
+	private function generate_navigation_id( $block ) {
+		return sprintf(
+			'wc-product-filters-%s',
+			md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
+		);
 	}
 }
