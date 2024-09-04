@@ -153,6 +153,7 @@ export enum CoreCollectionNames {
 	NEW_ARRIVALS = 'woocommerce/product-collection/new-arrivals',
 	ON_SALE = 'woocommerce/product-collection/on-sale',
 	TOP_RATED = 'woocommerce/product-collection/top-rated',
+	HAND_PICKED = 'woocommerce/product-collection/hand-picked',
 }
 
 export enum CoreFilterNames {
