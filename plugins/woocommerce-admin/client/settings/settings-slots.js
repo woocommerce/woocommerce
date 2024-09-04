@@ -11,8 +11,6 @@ export const SETTINGS_SLOT_FILL_CONSTANT =
 // @TODO: This needs to be exposed at @woocommerce/<something> so extensions can use it.
 const { Slot } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const roots = {};
-
 export const possiblyRenderSettingsSlots = () => {
 	//@TODO  We need to automatically register these based on the settings data so
 	// this way extensions don't need to add to this configuration.
@@ -53,17 +51,7 @@ export const possiblyRenderSettingsSlots = () => {
 			</>
 		);
 
-		if ( createRoot ) {
-			// This is a bit hacky, but we can only call render if the element is visible.
-			if ( roots[ slot.id ] ) {
-				roots[ slot.id ].render( slotFill );
-			} else {
-				const root = createRoot( slotDomElement );
-				root.render( slotFill );
-				roots[ slot.id ] = root;
-			}
-		} else {
-			render( slotFill, slotDomElement );
-		}
+		const root = createRoot( slotDomElement );
+		root.render( slotFill );
 	} );
 };
