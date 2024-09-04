@@ -594,7 +594,7 @@
           "post_title": "Contributing Technical Documentation",
           "menu_title": "Contributing Docs",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "ee2eed4bc33ccbc4a84a2c73ee503f2df5a92183013e3f703bb439edab0a3fe3",
+          "hash": "6733ba23f82a6e784ef10e2862aa3afd8a61e32181e157f67ccabfc8354aa989",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
           "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
         }
@@ -1033,7 +1033,7 @@
           "menu_title": "Performance best practices",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/performance/performance-best-practices.md",
-          "hash": "5af1f4e4085e85a1693390f40e238cbd6a4a0b7d5d304afdda935c34fed97c64",
+          "hash": "3c49b5553e99b64ecdbdad565866479f7af5e474dbbcc9aa36d711c02d8b0906",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/performance/performance-best-practices.md",
           "id": "35bda1cd7068d6179a9e46cca8d7dc2694d0df96"
         }
@@ -1554,7 +1554,7 @@
           "post_title": "WooCommerce Extension Guidelines - Navigation",
           "menu_title": "Navigation",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/navigation.md",
-          "hash": "f14cbd3750451934d173ec43aa996067699bdd8fc05f5c34097d1967a79145db",
+          "hash": "9c5313a31ebe26909a2cfaaa0bcfcdc9d5a0855ac0ddb9808832524be313ebb6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/navigation.md",
           "id": "9922abbcea787a91b3360f49fa53d5402a604e6b"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "2ecf48b6181dae0526b3858df889bce4e6ee425e10f2c43d151771d845c5a948"
+  "hash": "6a6133371a5f1eb5eb6109c80d71099e298fba4d3685f30320e38a5ee4cbe0bd"
 }
