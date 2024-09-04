@@ -10,7 +10,5 @@ As an example, the `payment-method-promotions` wp-admin-scripts has generated `p
 
 And is registered as a script like so: [`plugins/woocommerce/src/Internal/Admin/WCPayPromotion/Init.php`](../../../../plugins/woocommerce/src/Internal/Admin/WCPayPromotion/Init.php#L179),
 
-```
-WCAdminAssets::register_script( 'wp-admin-scripts', 'payment-method-promotions', true );
-```
+`WCAdminAssets::register_script( 'wp-admin-scripts', 'payment-method-promotions', true );`
 
