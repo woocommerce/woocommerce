@@ -164,11 +164,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Step 4: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
 		// Main suit:
 		//	https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json?country=IN&locale=en_US
-		//	https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json?locale=en_US
 		//	https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0
 		//	https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	https://api-3t.paypal.com/nvp
-		//	https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json?locale=en_US
 		// Legacy suit:
 		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	https://woocommerce.com/wp-json/wccom-extensions/1.0/search?locale=en_US
@@ -185,12 +183,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			'https://public-api.wordpress.com/rest/v1.1/logstash',
 			// System status related.
 			'https://www.paypal.com/cgi-bin/webscr',
-			'https://woocommerce.com/wc-api/product-key-api?request=ping&network=0',
+			'https://woocommerce.com/wc-api/product-key-api',
 			// Marketing and onboarding.
-			'https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json?locale=en_US',
-			'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json?locale=en_US',
+			'https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
+			'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json',
+			'https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json'
 		];
-		if ( in_array( $url, $stubbed_urls, true ) ) {
+		if ( in_array( strtok( $url, '?' ), $stubbed_urls, true ) ) {
 			return [
 				'response' => [ 'code' => WP_Http::OK ],
 			];
