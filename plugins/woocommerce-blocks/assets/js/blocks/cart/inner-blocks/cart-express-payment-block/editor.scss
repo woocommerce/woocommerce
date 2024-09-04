@@ -37,6 +37,8 @@
 .wc-block-components-express-payment {
 	.wc-block-components-express-payment__event-buttons {
 		> li {
+			pointer-events: none;
+			user-select: none;
 			display: flex;
 			align-items: center;
 			justify-content: center;
