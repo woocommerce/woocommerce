@@ -54,7 +54,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'coupons-stats'` Query.
+	 * Get data from `'coupons-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
