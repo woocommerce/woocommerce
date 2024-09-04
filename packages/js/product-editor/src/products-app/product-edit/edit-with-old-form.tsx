@@ -2,15 +2,16 @@
  * External dependencies
  */
 import { DataForm, isItemValid } from '@wordpress/dataviews';
-import type { Form } from '@wordpress/dataviews';
+import type { Field, Form } from '@wordpress/dataviews';
 import {
 	createElement,
 	useState,
 	useMemo,
 	useEffect,
+	Fragment,
 } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import { getBlockType } from '@wordpress/blocks';
+import { __, sprintf } from '@wordpress/i18n';
+import { BlockEditProps, Template, getBlockType } from '@wordpress/blocks';
 import { Product } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
@@ -40,7 +41,6 @@ import { EntityProvider } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { unlock } from '../../lock-unlock';
-import { productFields } from '../product-list/fields';
 import { initBlocks } from '../../components/editor/init-blocks';
 import { useProductTemplate } from '../../hooks/use-product-template';
 import { productApiFetchMiddleware } from '../../utils/product-apifetch-middleware';
@@ -116,15 +116,17 @@ export default function ProductEditWithOldForm( {
 			// @ts-ignore
 			const { getEntityRecordNonTransientEdits } = select( 'core' );
 
+			const _edits: Product | null =
+				pr &&
+				getEntityRecordNonTransientEdits(
+					'postType',
+					pr.type,
+					ids[ 0 ]
+				);
+
 			if ( ! pr ) {
 				return { itemWithEdits: null };
 			}
-
-			const _edits = getEntityRecordNonTransientEdits(
-				'postType',
-				pr.type,
-				ids[ 0 ]
-			);
 
 			return {
 				itemWithEdits: _edits,
@@ -149,15 +151,15 @@ export default function ProductEditWithOldForm( {
 	const { layoutTemplate } = useLayoutTemplate(
 		initialEdits ? getLayoutTemplateId( productTemplate, postType ) : null
 	);
-	let flattendedLayoutTemplate = useMemo( () => {
+	const flattendedLayoutTemplate: Template[] = useMemo( () => {
 		if ( ! layoutTemplate ) {
 			return [];
 		}
-		return layoutTemplate.blockTemplates.flatMap( ( item ) => {
-			if ( item[ 0 ] === 'woocommerce/product-tab' ) {
+		return layoutTemplate.blockTemplates.flatMap( ( item: Template ) => {
+			if ( item[ 0 ] === 'woocommerce/product-tab' && item[ 2 ] ) {
 				return item[ 2 ].flatMap( ( tabItems ) => {
 					if ( tabItems[ 0 ] === 'woocommerce/product-section' ) {
-						return tabItems[ 2 ];
+						return tabItems[ 2 ] || [];
 					}
 					return [];
 				} );
@@ -165,78 +167,100 @@ export default function ProductEditWithOldForm( {
 			return [];
 		} );
 	}, [ layoutTemplate ] );
-	const productRenderedFields = useMemo( () => {
-		return flattendedLayoutTemplate
-			.map( ( item ) => {
-				const Block = getBlockType( item[ 0 ] );
+	const productRenderedFields: Field< Product >[] = useMemo( () => {
+		function isField(
+			item: Field< Product > | null
+		): item is Field< Product > {
+			return !! item;
+		}
+		const mappedItems: Array< Field< Product > | null > =
+			flattendedLayoutTemplate.map( ( block ) => {
+				const Block = getBlockType( block[ 0 ] );
 				if (
 					! Block ||
 					Block.name.includes( 'column' ) ||
-					Block.name.includes( 'section-description' )
+					Block.name.includes( 'section-description' ) ||
+					! block[ 1 ] ||
+					! Block.edit
 				) {
 					return null;
 				}
-				let id = item[ 1 ]._templateBlockId;
-				if ( item[ 1 ].property ) {
-					id = item[ 1 ].property;
+				let id = block[ 1 ]._templateBlockId;
+				if ( block[ 1 ].property ) {
+					id = block[ 1 ].property;
 				}
 				return {
 					id,
-					label: item[ 1 ].label || Block.title,
+					label: block[ 1 ].label || Block.title,
 					render: ( { item: product }: { item: Product } ) => {
-						if ( item[ 1 ].property ) {
-							return JSON.stringify(
-								product[ item[ 1 ].property ]
+						if ( block[ 1 ] && block[ 1 ].property ) {
+							return (
+								<>
+									{ JSON.stringify(
+										product[ block[ 1 ].property ]
+									) }
+								</>
 							);
 						}
-						return '';
+						return null;
 					},
 					Edit: () => {
+						const BlockEdit = Block.edit as
+							| React.ComponentType<
+									Partial<
+										// eslint-disable-next-line @typescript-eslint/no-explicit-any
+										BlockEditProps< Record< string, any > >
+									> & {
+										context?: string;
+									}
+							  >
+							| undefined;
 						return (
 							<ErrorBoundary
-								errorMessage={ __(
-									`The ${ Block.name } failed to render.`,
-									'woocommerce'
+								errorMessage={ sprintf(
+									/* translators: %1$s: rating, %2$s: total number of stars */
+									__(
+										'The %s failed to render.',
+										'woocommerce'
+									),
+									Block.name
 								) }
 							>
-								<Block.edit
-									attributes={ item[ 1 ] }
-									context={ postType }
-								/>
+								{ BlockEdit && (
+									<BlockEdit
+										attributes={ block[ 1 ] || {} }
+										context={ postType }
+									/>
+								) }
 							</ErrorBoundary>
 						);
 					},
 				};
-			} )
-			.filter( ( item ) => !! item );
+			} );
+		return mappedItems.filter( isField );
 	}, [ flattendedLayoutTemplate ] );
 
 	const updatedForm = useMemo( () => {
 		return {
 			...form,
 			fields: flattendedLayoutTemplate.map( ( field ) => {
-				if ( field[ 1 ].property ) {
+				if ( field[ 1 ] && field[ 1 ].property ) {
 					return field[ 1 ].property;
 				}
-				return field[ 1 ]._templateBlockId;
+				return field[ 1 ] ? field[ 1 ]._templateBlockId : null;
 			} ),
 		};
 	}, [ flattendedLayoutTemplate ] );
 
-	const [ edits, setEdits ] = useState( {} );
+	const [ , setEdits ] = useState( {} );
 
-	const isUpdateDisabled = ! isItemValid(
-		itemWithEdits,
-		productFields,
-		form
-	);
+	const isUpdateDisabled =
+		itemWithEdits &&
+		isItemValid( itemWithEdits, productRenderedFields, form );
 
 	const onSubmit = async ( event: Event ) => {
 		event.preventDefault();
 
-		if ( ! isItemValid( itemWithEdits, productFields, form ) ) {
-			return;
-		}
 		// Empty save.
 
 		setEdits( {} );
@@ -282,12 +306,12 @@ export default function ProductEditWithOldForm( {
 				{ ! postId && (
 					<p>{ __( 'Select a product to edit', 'woocommerce' ) }</p>
 				) }
-				{ postId && (
+				{ postId && itemWithEdits && (
 					<VStack spacing={ 4 } as="form" onSubmit={ onSubmit }>
 						<EntityProvider
 							kind="postType"
 							type={ postType }
-							id={ itemWithEdits.id }
+							id={ parseInt( postId, 10 ) }
 						>
 							<DataForm
 								data={ itemWithEdits }
@@ -301,7 +325,7 @@ export default function ProductEditWithOldForm( {
 									type="submit"
 									// @ts-expect-error missing type.
 									accessibleWhenDisabled
-									disabled={ isUpdateDisabled }
+									disabled={ !! isUpdateDisabled }
 									__next40pxDefaultSize
 								>
 									{ __( 'Update', 'woocommerce' ) }
