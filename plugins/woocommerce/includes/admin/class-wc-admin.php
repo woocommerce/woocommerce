@@ -42,7 +42,7 @@ class WC_Admin {
 
 		add_action('admin_init', function() {
 			if ( isset( $_GET['email_preview'] ) && isset( $_GET['order_id'] ) && isset( $_GET['email_type'] ) ) {
-				$order = wc_get_order($_GET['order_id']);
+				$order = wc_get_order( $_GET[ 'order_id' ] );
 				if ( ! $order ) {
 					// Create a dummy product object
 					$product = new WC_Product();
@@ -79,13 +79,13 @@ class WC_Admin {
 
 				$mailer = WC()->mailer();
 				$emails = $mailer->get_emails();
-				if (isset($emails[$_GET['email_type']])) {
-					$email = $emails[$_GET['email_type']];
-					$email->set_order($order);
+				if ( isset( $emails[ $_GET[ 'email_type' ] ] ) ) {
+					$email = $emails[ $_GET[ 'email_type' ] ];
+					$email->set_order( $order );
 					$content = $email->get_content_html();
-					$styles = $_GET['styles'] ?? '{}';
-					$styles = json_decode(urldecode(stripslashes($styles)), true);
-					echo $email->style_inline($content, $styles);
+					$styles = $_GET[ 'styles' ] ?? '{}';
+					$styles = json_decode( urldecode( stripslashes( $styles ) ), true );
+					echo apply_filters( 'woocommerce_mail_content', $email->style_inline( $content, $styles ) );
 				}
 				exit;
 			}
