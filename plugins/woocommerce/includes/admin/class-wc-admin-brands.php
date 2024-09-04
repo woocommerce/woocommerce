@@ -233,7 +233,7 @@ class WC_Brands_Admin {
 	 *
 	 * @return void
 	 */
-	function scripts() {
+	public function scripts() {
 		$screen  = get_current_screen();
 		$version = Constants::get_constant( 'WC_VERSION' );
 		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
@@ -249,12 +249,12 @@ class WC_Brands_Admin {
 			wp_localize_script(
 				'wc-brands-enhanced-select',
 				'wc_brands_enhanced_select_params',
-				[ 'ajax_url' => get_rest_url() . 'brands/search' ]
+				array( 'ajax_url' => get_rest_url() . 'brands/search' )
 			);
-			wp_enqueue_script('wc-brands-enhanced-select' );
+			wp_enqueue_script( 'wc-brands-enhanced-select' );
 		}
 
-		if ( in_array( $screen->id, array( 'edit-product_brand' ) ) ) {
+		if ( in_array( $screen->id, array( 'edit-product_brand' ), true ) ) {
 			wp_enqueue_media();
 		}
 	}
