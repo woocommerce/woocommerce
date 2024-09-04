@@ -41,18 +41,6 @@
 	overflow: scroll;
 }
 
-.woocommerce-settings-layout-sidebar {
-	flex: 1;
-	background-color: white;
-	border-radius: 10px;
-	height: 100%;
-	overflow: scroll;
-	max-width: 500px;
-	padding: 16px;
-	overflow: hidden;
-	transition: max-width 0.3s ease;
-}
-
 .woocommerce-settings-tabs {
 	.components-tab-panel__tabs {
 		padding: 14px 14px 0 14px;

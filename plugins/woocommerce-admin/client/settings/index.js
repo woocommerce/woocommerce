@@ -10,8 +10,7 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from './tabs';
-import { SectionNav } from './section-nav';
-import { Content } from './content';
+import LegacySettings from './legacy-settings';
 import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
@@ -58,12 +57,7 @@ const removeSettingsScripts = ( scripts ) => {
 const Settings = ( { params } ) => {
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const settingsData = window.wcSettings?.admin?.settingsPages;
-	const sections = settingsData[ params.page ]?.sections;
 	const { section } = getQuery();
-	const contentData =
-		Array.isArray( sections ) && sections.length === 0
-			? {}
-			: sections[ section || '' ];
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
@@ -87,7 +81,6 @@ const Settings = ( { params } ) => {
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;
 	}
-	const title = settingsData[ params.page ]?.label;
 
 	return (
 		<>
@@ -100,19 +93,9 @@ const Settings = ( { params } ) => {
 					<Tabs data={ settingsData } page={ params.page } />
 				</div>
 				<div className="woocommerce-settings-layout-content">
-					<div className="woocommerce-settings-layout-title">
-						<h1>{ title }</h1>
-					</div>
-					<SectionNav
-						data={ settingsData[ params.page ] }
-						section={ section }
-					>
-						<div className="woocommerce-settings-layout-main">
-							<Content data={ contentData } />
-						</div>
-					</SectionNav>
+					<LegacySettings page={ params.page } />
 				</div>
-				<div className="woocommerce-settings-layout-sidebar">
+				<div className="woocommerce-settings-layout-content">
 					Sidebar Content
 				</div>
 			</div>
