@@ -174,9 +174,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=invalid-theme-name&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	 https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//   A/B testing in Experimental_Abtest_Test:
-		//	 https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=control&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1725440271&test=test
-		//	 https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=test_experiment_name&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1725440271
 
 		$stubbed_urls = [
 			// Tracking and logging related.
