@@ -1,3 +1,5 @@
+# WP Admin Scripts
+
 Scripts located in this directory are meant to be loaded on wp-admin pages outside the context of WooCommerce Admin, such as the post editor. 
 
 Each subdirectory of this directory is automatically added as an entrypoint in the [webpack build script](../../../../plugins/woocommerce-admin/webpack.config.js#L71) of WooCommerce Admin. When they are built, each one results in a pair of `<subdirectory-name>.asset.php` and `<subdirectory-name>.js` file in the `build\wp-admin-scripts\` path, but they will not be automatically loaded on every PHP page.
