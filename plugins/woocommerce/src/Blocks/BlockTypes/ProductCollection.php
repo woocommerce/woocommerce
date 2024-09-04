@@ -605,7 +605,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$orderby             = $request->get_param( 'orderBy' );
-		$on_sale             = is_null( $request->get_param( 'woocommerceOnSale' ) ) ? null : $request->get_param( 'woocommerceOnSale' );
+		$on_sale             = $request->get_param( 'woocommerceOnSale' );
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
 		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
@@ -878,13 +878,42 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
+	 * Return a query for on sale products managed by the deprecated
+	 * version v1 of the product collection block.
+	 *
+	 * @deprecated 9.4.0 $is_on_sale is no longer a bool but a string.
+	 *
+	 * @param bool $is_on_sale Whether to query for on sale products.
+	 *
+	 * @return array
+	 */
+	private function get_on_sale_products_query_v1( $is_on_sale ) {
+		if ( ! $is_on_sale ) {
+			return array();
+		}
+
+		return array(
+			'post__in' => wc_get_product_ids_on_sale(),
+		);
+	}
+
+	/**
 	 * Return a query for on sale products.
 	 *
-	 * @param string $on_sale Whether to query for on sale products.
+	 * @param string|bool $on_sale Whether to query for on sale products.
 	 *
 	 * @return array
 	 */
 	private function get_on_sale_products_query( $on_sale ) {
+		// The deprecated version v1 of the product collection block
+		// manages the `woocommerceOnSale` param as a boolean. So this
+		// check is required to support that version.
+		if ( is_bool( $on_sale ) ) {
+			return $this->get_on_sale_products_query_v1( $on_sale );
+		}
+
+		// The current version of the product collection block manages the
+		// `woocommerceOnSale` param as an optional string.
 		if ( is_null( $on_sale ) ) {
 			return array();
 		}
