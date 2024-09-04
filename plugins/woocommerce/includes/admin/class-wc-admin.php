@@ -44,8 +44,37 @@ class WC_Admin {
 			if ( isset( $_GET['email_preview'] ) && isset( $_GET['order_id'] ) && isset( $_GET['email_type'] ) ) {
 				$order = wc_get_order($_GET['order_id']);
 				if ( ! $order ) {
-					echo '<p>Order not found</p>';
-					exit;
+					// Create a dummy product object
+					$product = new WC_Product();
+					$product->set_name( 'Dummy Product' );
+					$product->set_price( 25.99 );
+					$product->set_regular_price( 30.00 );
+					$product->set_sale_price( 25.99 );
+					$product->set_sku( 'DUMMY_SKU' );
+					$product->set_description( 'This is a dummy product description.' );
+					$product->set_short_description( 'Short description for the dummy product.' );
+
+					// Create a dummy order object
+					$order = new WC_Order();
+					$order->set_id( rand(1000000, 9000000) );
+					$order->set_date_created( time() );
+					$order->set_address( array(
+						'first_name' => 'John',
+						'last_name'  => 'Doe',
+						'company'    => 'Dummy Company',
+						'email'      => 'john@example.com',
+						'phone'      => '555-555-5555',
+						'address_1'  => '123 Fake Street',
+						'address_2'  => '',
+						'city'       => 'Faketown',
+						'postcode'   => '12345',
+						'country'    => 'US',
+						'state'      => 'CA',
+					), 'billing' );
+					$order->add_product( $product, 2 );
+					$order->set_payment_method( 'bacs' );  // Bank Transfer for example
+					$order->set_currency( 'USD' );
+					$order->set_total( 52 );
 				}
 
 				$mailer = WC()->mailer();

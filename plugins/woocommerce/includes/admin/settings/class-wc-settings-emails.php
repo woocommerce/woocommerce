@@ -424,7 +424,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		<tr valign="top">
 			<th scope="row">
 				<label for="order_id">Order ID:</label><br>
-				<input type="number" id="order_id" value="12" style="width:100%" /><br>
+				<input type="number" id="order_id" style="width:100%" /><br>
 				<br>
 				<label for="email_type">Email type:</label><br>
 				<select id="email_type" style="width:100%;">
