@@ -173,7 +173,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					$tags = new WP_HTML_Tag_Processor( $html );
 					while( $tags->next_tag( array( 'tag_name' => 'script' ) ) ) {
 						$script_type = $tags->get_attribute( 'type' );
-						if ( 'text/html' !== $script_type ) {
+						if ( 'text/javascript' === $script_type ) {
 							$script_contents = $tags->get_modifiable_text();
 							$section_settings_data[] = array(
 								'type' => 'script',

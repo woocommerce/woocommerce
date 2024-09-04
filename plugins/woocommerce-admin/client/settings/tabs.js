@@ -7,7 +7,9 @@ import { getNewPath, navigateTo } from '@woocommerce/navigation';
 export const Tabs = ( { data, page, children } ) => {
 	const onSelect = ( tabName ) => {
 		const url = getNewPath( {}, `/settings/${ tabName }`, {} );
-		navigateTo( { url } );
+		if ( page !== tabName ) {
+			navigateTo( { url } );
+		}
 	};
 
 	return (
@@ -22,6 +24,7 @@ export const Tabs = ( { data, page, children } ) => {
 					name: key,
 					title: data[ key ].label,
 				} ) ) }
+				selectOnMove={ false }
 			>
 				{ () => <div>{ children }</div> }
 			</TabPanel>

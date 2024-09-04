@@ -56,7 +56,6 @@ const removeSettingsScripts = ( scripts ) => {
 };
 
 const Settings = ( { params } ) => {
-	console.log( params );
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const sections = settingsData[ params.page ]?.sections;
