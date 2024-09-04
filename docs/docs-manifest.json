@@ -414,7 +414,7 @@
           "menu_title": "Configuring special tax scenarios",
           "tags": "code-snippet, tax",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
-          "hash": "acce5111eb917b7381d9bdcb260c72870e89d723195b86522050032741c5107c",
+          "hash": "c2459568db70b97d9a901c83eecb7737746499fe03cc84133aab3cf981b5c96a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
           "id": "a8ab8b6734ba2ac5af7c6653635d15548abdab2a"
         },
@@ -939,7 +939,7 @@
           "menu_title": "Enable HPOS for large stores",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/guide-large-store.md",
-          "hash": "8bcae74d27e3a4ee9a902719c7e8d5aec4a4d82d7c14acd8665a72b9d4758181",
+          "hash": "1e144ac0d0a7c869093533bf94a1f218a42930a3f3edcbcfdd1210448243a992",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/guide-large-store.md",
           "id": "b6156ac7b77d75022867e9ebb968bc9c1c35f0da"
         },
@@ -1451,7 +1451,7 @@
         {
           "post_title": "Template structure & Overriding templates via a theme",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
-          "hash": "ff781eff7998ea93723f644bddd4f6da6f73c635bcfc3cd46950f03a8b83b26c",
+          "hash": "0d026ed5e9706b97dd03d6f7dc86aeb580b11549fa99c9d6f906bbca6f136a01",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
           "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "6a6133371a5f1eb5eb6109c80d71099e298fba4d3685f30320e38a5ee4cbe0bd"
+  "hash": "cbe507d24f0d6ae827c01a98fd2d7c6e8db74053a7b3db869c6941dd7442d250"
 }
