@@ -4,8 +4,7 @@
 import { getQuery, getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import { Icon, chevronLeft } from '@wordpress/icons';
-import { useEffect, useState } from '@wordpress/element';
-import clsx from 'clsx';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -57,6 +56,7 @@ const removeSettingsScripts = ( scripts ) => {
 };
 
 const Settings = ( { params } ) => {
+	console.log( params );
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const sections = settingsData[ params.page ]?.sections;
@@ -65,12 +65,6 @@ const Settings = ( { params } ) => {
 		Array.isArray( sections ) && sections.length === 0
 			? {}
 			: sections[ section || '' ];
-
-	// const [ sidebarVisisble, setSidebarVisisble ] = useState( false );
-	// const [ sidebarContent, setSidebarContent ] = useState( null );
-	// const toggleSidebar = () => {
-	// 	setSidebarVisisble( ! sidebarVisisble );
-	// };
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
