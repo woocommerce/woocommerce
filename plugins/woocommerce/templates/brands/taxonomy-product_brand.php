@@ -4,7 +4,7 @@
  * Use the WooCommerce archive template for brand taxonomy pages
  *
  * @package WooCommerce\Templates
- * @version 9.3.0
+ * @version 9.5.0
  */
 
 declare( strict_types = 1);

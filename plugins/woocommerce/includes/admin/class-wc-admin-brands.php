@@ -34,6 +34,8 @@ class WC_Brands_Admin {
 	 */
 	public function __construct() {
 
+		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'styles' ) );
 		add_action( 'product_brand_add_form_fields', array( $this, 'add_thumbnail_field' ) );
 		add_action( 'product_brand_edit_form_fields', array( $this, 'edit_thumbnail_field' ), 10, 1 );
 		add_action( 'created_term', array( $this, 'thumbnail_field_save' ), 10, 1 );
@@ -224,6 +226,47 @@ class WC_Brands_Admin {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Enqueue scripts.
+	 *
+	 * @return void
+	 */
+	function scripts() {
+		$screen  = get_current_screen();
+		$version = Constants::get_constant( 'WC_VERSION' );
+		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+
+		if ( 'edit-product' === $screen->id ) {
+			wp_register_script(
+				'wc-brands-enhanced-select',
+				WC()->plugin_url() . '/assets/js/admin/wc-brands-enhanced-select' . $suffix . '.js',
+				array( 'jquery', 'selectWoo', 'wc-enhanced-select', 'wp-api' ),
+				$version,
+				true
+			);
+			wp_localize_script(
+				'wc-brands-enhanced-select',
+				'wc_brands_enhanced_select_params',
+				[ 'ajax_url' => get_rest_url() . 'brands/search' ]
+			);
+			wp_enqueue_script('wc-brands-enhanced-select' );
+		}
+
+		if ( in_array( $screen->id, array( 'edit-product_brand' ) ) ) {
+			wp_enqueue_media();
+		}
+	}
+
+	/**
+	 * Enqueue styles.
+	 *
+	 * @return void
+	 */
+	public function styles() {
+		$version = Constants::get_constant( 'WC_VERSION' );
+		wp_enqueue_style( 'brands-admin-styles', WC()->plugin_url() . '/assets/css/brands-admin.css', array(), $version );
 	}
 
 	/**
