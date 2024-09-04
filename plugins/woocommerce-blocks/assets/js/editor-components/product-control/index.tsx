@@ -62,6 +62,16 @@ interface ProductControlProps {
 	 * Whether to show variations in the list of items available.
 	 */
 	showVariations?: boolean;
+	/**
+	 * Different messages to display in the component.
+	 * If any of the messages are not provided, the default message will be used.
+	 */
+	messages?: {
+		list?: string;
+		noItems?: string;
+		search?: string;
+		updated?: string;
+	};
 }
 
 const messages = {
@@ -188,7 +198,7 @@ const ProductControl = (
 		} else if ( showVariations ) {
 			return renderItemWithVariations;
 		}
-		return () => null;
+		return undefined;
 	};
 
 	if ( error ) {
@@ -216,7 +226,10 @@ const ProductControl = (
 			onChange={ onChange }
 			renderItem={ getRenderItemFunc() }
 			onSearch={ onSearch }
-			messages={ messages }
+			messages={ {
+				...messages,
+				...props.messages,
+			} }
 			isHierarchical
 		/>
 	);
