@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
@@ -46,7 +47,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		}
 
 		$user_email = sanitize_email( wp_unslash( $_POST['email'] ) );
-		$password   = wp_unslash( $_POST['password'] );
+		$password   = wp_unslash( $_POST['password'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Does order already have user?
 		if ( $order->get_customer_id() ) {
