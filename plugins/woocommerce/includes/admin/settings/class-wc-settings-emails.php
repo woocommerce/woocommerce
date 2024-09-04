@@ -25,6 +25,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		$this->label = __( 'Emails', 'woocommerce' );
 
 		add_action( 'woocommerce_admin_field_email_notification', array( $this, 'email_notification_setting' ) );
+		add_action( 'woocommerce_admin_field_email_preview', array( $this, 'email_preview' ) );
 		parent::__construct();
 	}
 
@@ -217,6 +218,23 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'email_template_options',
 				),
+
+				array(
+					'title' => __('Email Preview', 'woocommerce'),
+					'type'  => 'title',
+					'desc'  => __('Preview the selected email template with sample data.', 'woocommerce'),
+					'id'    => 'email_preview_options'
+				),
+
+				array(
+					'type' => 'email_preview',
+					'id'   => 'woocommerce_email_preview'
+				),
+
+				array(
+					'type' => 'sectionend',
+					'id'   => 'email_preview_options'
+				),
 			);
 
 		return apply_filters( 'woocommerce_email_settings_template', $settings );
@@ -396,6 +414,55 @@ class WC_Settings_Emails extends WC_Settings_Page {
 						?>
 					</tbody>
 				</table>
+			</td>
+		</tr>
+		<?php
+	}
+
+	public function email_preview() {
+		?>
+		<tr valign="top">
+			<th scope="row">
+				<label for="order_id">Order ID:</label><br>
+				<input type="number" id="order_id" value="12" style="width:100%" /><br>
+				<br>
+				<label for="email_type">Email type:</label><br>
+				<select id="email_type" style="width:100%;">
+					<option value="WC_Email_New_Order">New Order</option>
+					<option value="WC_Email_Cancelled_Order">Cancelled Order</option>
+					<option value="WC_Email_Failed_Order">Failed Order</option>
+					<option value="WC_Email_Customer_On_Hold_Order">Customer On Hold Order</option>
+					<option value="WC_Email_Customer_Processing_Order">Customer Processing Order</option>
+					<option value="WC_Email_Customer_Completed_Order">Customer Completed Order</option>
+					<option value="WC_Email_Customer_Refunded_Order">Customer Refunded Order</option>
+					<option value="WC_Email_Customer_Invoice">Customer Invoice</option>
+					<option value="WC_Email_Customer_Note">Customer Note</option>
+					<option value="WC_Email_Customer_Reset_Password">Customer Reset Password</option>
+					<option value="WC_Email_Customer_New_Account">Customer New Account</option>
+				</select>
+			</th>
+			<td>
+				<iframe id="email_preview" style="width:800px;border: 0;"></iframe>
+				<script>
+					document.addEventListener("DOMContentLoaded", function() {
+						const emailPreviewUrl = '/wp-admin/?email_preview&order_id={orderId}&email_type={emailType}';
+						const orderId = document.getElementById('order_id');
+						const emailType = document.getElementById('email_type');
+						const iframe = document.getElementById('email_preview');
+
+						const updateIframeUrl = function() {
+							iframe.src = emailPreviewUrl
+								.replace('{orderId}', orderId.value)
+								.replace('{emailType}', emailType.value);
+							iframe.onload = function() {
+								iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+							};
+						};
+						orderId.addEventListener('change', updateIframeUrl);
+						emailType.addEventListener('change', updateIframeUrl);
+						updateIframeUrl();
+					});
+				</script>
 			</td>
 		</tr>
 		<?php
