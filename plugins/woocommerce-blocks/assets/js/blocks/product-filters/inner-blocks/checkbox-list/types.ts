@@ -6,12 +6,12 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { FilterDataContext } from '../../types';
+import { FilterBlockContext } from '../../types';
 
 export type BlockAttributes = {
 	className: string;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: FilterDataContext;
+	context: FilterBlockContext;
 };

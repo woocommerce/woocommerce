@@ -11,7 +11,7 @@ import { Disabled } from '@wordpress/components';
 import './style.scss';
 import { EditProps } from './types';
 
-const Edit = ( { context }: EditProps ) => {
+const Edit = ( { context, isSelected }: EditProps ) => {
 	const { filterData, isFilterDataLoading, isParentSelected } = context;
 	const blockProps = useBlockProps();
 
@@ -81,7 +81,7 @@ const Edit = ( { context }: EditProps ) => {
 			) }
 		</div>
 	);
-	if ( isParentSelected === false ) {
+	if ( isParentSelected === false && ! isSelected ) {
 		return (
 			<Disabled>
 				<Block />

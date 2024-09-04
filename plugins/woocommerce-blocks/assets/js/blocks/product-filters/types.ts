@@ -24,7 +24,7 @@ export type CollectionItem = {
 	value: string;
 };
 
-export type FilterDataContext = {
+export type FilterBlockContext = {
 	filterData: {
 		collection?: CollectionItem[];
 		range: {
@@ -34,4 +34,5 @@ export type FilterDataContext = {
 		};
 	};
 	isFilterDataLoading: boolean;
+	isParentSelected: boolean;
 };
