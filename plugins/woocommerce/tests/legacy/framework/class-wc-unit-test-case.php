@@ -192,7 +192,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			return [
 				'body'          => '',
 				'response'      => [
-					'code' => WP_Http::SERVICE_UNAVAILABLE,
+					'code' => WP_Http::OK,
 				],
 			];
 		}
