@@ -141,14 +141,12 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$url_domain = parse_url( $url, PHP_URL_HOST );
 		$url_path   = parse_url( $url, PHP_URL_PATH );
 
-		// Step 2: route localhost-addressed requests (REST-testing and co).
-		if ( $url_domain === 'localhost' ) {
-			return $preempt;
-		}
-
-		// Step 3: when loading images, pick them from data-folder instead of network (product images in the most cases).
+		// Step 3: when loading product images, pick them from data-folder instead of network.
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
-		if ( in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) && in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ], true ) ) {
+		if (
+			in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) &&
+			in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ], true )
+		) {
 			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
 			// Ensure we are getting the copy of images (so we can git-push them).
 			if ( ! file_exists( $local_image_file ) ) {
@@ -170,13 +168,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		//	https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json?locale=en_US
 		//	https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0
 		//	https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//	https://tracking.woocommerce.com/v1/
 		//	https://api-3t.paypal.com/nvp
 		//	https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json?locale=en_US
-		//	https://public-api.wordpress.com/rest/v1.1/logstash
 		// Legacy suit:
-		//	https://www.paypal.com/cgi-bin/webscr
-		//	https://woocommerce.com/wc-api/product-key-api?request=ping&network=0
 		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	https://woocommerce.com/wp-json/wccom-extensions/1.0/search?locale=en_US
 		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
@@ -185,23 +179,23 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		//	https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=control&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1723120609&test=test
 		//	https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=test_experiment_name&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1723120609
 		//	https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json?locale=en_US
-		// Injection needs corrections
-		//	payment-gateway-suggestions-data-source.json?locale=en_US
-		//	bad-data-source.json?locale=en_US
-		//	payment-gateway-suggestions-data-source2.json?locale=en_US
-		//	mock-payment-gateway-suggestions-data-source.json?locale=en_US
-		//  mock-woopayments-promotions-data-source.json?locale=en_US
 
-		// TODO: stop loading only above URLs and return $preempt for the rest.
-		return [
-			'body'          => '',
-			'response'      => [
-				'code' => WP_Http::SERVICE_UNAVAILABLE,
-			],
-			'headers'       => [],
-			'cookies'       => [],
-			'http_response' => null,
+		$stubbed_urls = [
+			// Tracking and logging related.
+			'https://tracking.woocommerce.com/v1/',
+			'https://public-api.wordpress.com/rest/v1.1/logstash',
+			// System status related.
+			'https://www.paypal.com/cgi-bin/webscr',
+			'https://woocommerce.com/wc-api/product-key-api?request=ping&network=0'
 		];
+		if ( in_array( $url, $stubbed_urls, true ) ) {
+			return [
+				'body'          => '',
+				'response'      => [
+					'code' => WP_Http::SERVICE_UNAVAILABLE,
+				],
+			];
+		}
 
 		return $preempt;
 	}
