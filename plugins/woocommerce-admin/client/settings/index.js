@@ -10,7 +10,8 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from './tabs';
-import LegacySettings from './legacy-settings';
+import { SectionNav } from './section-nav';
+import { Content } from './content';
 import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
@@ -58,13 +59,27 @@ const NotFound = () => {
 	return <h1>Not Found</h1>;
 };
 
-const getRoute = ( settingsData, page ) => {
-	const isLegacy = Object.keys( settingsData ).includes( page );
-	if ( isLegacy ) {
+const useSettingsLocation = () => {
+	const { section, path } = getQuery();
+	const page = path.split( '/settings/' ).pop();
+	return { section, page };
+};
+
+const getRoute = () => {
+	const { section, page } = useSettingsLocation();
+	const settingsData = window.wcSettings?.admin?.settingsPages;
+	const sections = settingsData[ page ]?.sections;
+	const contentData =
+		Array.isArray( sections ) && sections.length === 0
+			? {}
+			: sections[ section || '' ];
+	const isPage = Object.keys( settingsData ).includes( page );
+
+	if ( isPage ) {
 		return {
 			page,
 			areas: {
-				content: <LegacySettings />,
+				content: <Content data={ contentData } />,
 				edit: null,
 			},
 			widths: {
@@ -88,7 +103,9 @@ const getRoute = ( settingsData, page ) => {
 
 const Settings = ( { params } ) => {
 	useFullScreen( [ 'woocommerce-settings' ] );
+	const { page } = params;
 	const settingsData = window.wcSettings?.admin?.settingsPages;
+	const title = settingsData[ page ]?.label;
 	const { section } = getQuery();
 
 	// Be sure to render Settings slots when the params change.
@@ -101,7 +118,7 @@ const Settings = ( { params } ) => {
 		return () => {
 			removeSettingsScripts( scripts );
 		};
-	}, [ params.page, section ] );
+	}, [ page, section ] );
 
 	// Register the slot fills for the settings page just once.
 	useEffect( () => {
@@ -114,7 +131,7 @@ const Settings = ( { params } ) => {
 		return <div>Error getting data</div>;
 	}
 
-	const { areas } = getRoute( settingsData, params.page );
+	const { areas } = getRoute();
 
 	return (
 		<>
@@ -128,7 +145,17 @@ const Settings = ( { params } ) => {
 				</div>
 				{ areas.content && (
 					<div className="woocommerce-settings-layout-content">
-						{ areas.content }
+						<div className="woocommerce-settings-layout-title">
+							<h1>{ title }</h1>
+						</div>
+						<SectionNav
+							data={ settingsData[ page ] }
+							section={ section }
+						>
+							<div className="woocommerce-settings-layout-main">
+								{ areas.content }
+							</div>
+						</SectionNav>
 					</div>
 				) }
 				{ areas.edit && (
