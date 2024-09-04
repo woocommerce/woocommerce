@@ -9,10 +9,16 @@ import { getQuery } from '@woocommerce/navigation';
 import { SectionNav } from './section-nav';
 import { Content } from './content';
 
-const LegacySettings = ( { page } ) => {
+const useSettingsLocation = () => {
+	const { section, path } = getQuery();
+	const page = path.split( '/settings/' ).pop();
+	return { section, page };
+};
+
+const LegacySettings = () => {
+	const { section, page } = useSettingsLocation();
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const sections = settingsData[ page ]?.sections;
-	const { section } = getQuery();
 	const contentData =
 		Array.isArray( sections ) && sections.length === 0
 			? {}

@@ -54,6 +54,38 @@ const removeSettingsScripts = ( scripts ) => {
 	} );
 };
 
+const NotFound = () => {
+	return <h1>Not Found</h1>;
+};
+
+const getRoute = ( settingsData, page ) => {
+	const isLegacy = Object.keys( settingsData ).includes( page );
+	if ( isLegacy ) {
+		return {
+			page,
+			areas: {
+				content: <LegacySettings />,
+				edit: null,
+			},
+			widths: {
+				content: undefined,
+				edit: undefined,
+			},
+		};
+	}
+	return {
+		page,
+		areas: {
+			content: <NotFound />,
+			edit: null,
+		},
+		widths: {
+			content: undefined,
+			edit: undefined,
+		},
+	};
+};
+
 const Settings = ( { params } ) => {
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const settingsData = window.wcSettings?.admin?.settingsPages;
@@ -82,6 +114,8 @@ const Settings = ( { params } ) => {
 		return <div>Error getting data</div>;
 	}
 
+	const { areas } = getRoute( settingsData, params.page );
+
 	return (
 		<>
 			<div className="woocommerce-settings-layout">
@@ -92,12 +126,16 @@ const Settings = ( { params } ) => {
 					</Button>
 					<Tabs data={ settingsData } page={ params.page } />
 				</div>
-				<div className="woocommerce-settings-layout-content">
-					<LegacySettings page={ params.page } />
-				</div>
-				<div className="woocommerce-settings-layout-content">
-					Sidebar Content
-				</div>
+				{ areas.content && (
+					<div className="woocommerce-settings-layout-content">
+						{ areas.content }
+					</div>
+				) }
+				{ areas.edit && (
+					<div className="woocommerce-settings-layout-content">
+						{ areas.edit }
+					</div>
+				) }
 			</div>
 		</>
 	);
