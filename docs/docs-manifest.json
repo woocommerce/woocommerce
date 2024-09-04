@@ -23,7 +23,7 @@
           "menu_title": "Theming for Woo Blocks",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/block-theme-development/theming-woo-blocks.md",
-          "hash": "1ce763e8afcc7dfdd8c5eca4da799add21dfac48279c08fc7b614071edb67a7d",
+          "hash": "cec80a34a38b7286be676a35624e2e441f5ccbb1aa318def6afe56a5a2bb6558",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/block-theme-development/theming-woo-blocks.md",
           "id": "90b16f4143d6db728d5ed6dce2ee2c60bdcfdbf6"
         },
@@ -71,11 +71,19 @@
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
         {
+          "post_title": "Blocks reference",
+          "menu_title": "Blocks Reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
+          "hash": "329f17097ce67074a915d7814b2363e8b9e908910c1f7b196c8f4fd8594cc55c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
+          "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
+        },
+        {
           "post_title": "How to add a custom field to simple and variable products",
           "menu_title": "Add Custom Fields to Products",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "8c244abf6351a30372ddd021dc172927b662deca7ef32a33bfb6ba6783690a0f",
+          "hash": "fe8cf43940f5166bf69f102aa4643cbe32415b1167d6b6d8968d434a4d113879",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -259,7 +267,7 @@
               "menu_title": "Legacy Hooks",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
-              "hash": "025731fc8884e13e09ecc857bee7d669a091f11640e023e40c08ffc521f38964",
+              "hash": "be4cf6862932c6696568b210e5f6ae4bd5313dacfb66724e23fab830baeb94e1",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/hooks/migrated-hooks.md",
               "id": "5264fa45d393327b2c9cffb038c4d3670879d911"
             }
@@ -406,7 +414,7 @@
           "menu_title": "Configuring special tax scenarios",
           "tags": "code-snippet, tax",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
-          "hash": "acce5111eb917b7381d9bdcb260c72870e89d723195b86522050032741c5107c",
+          "hash": "c2459568db70b97d9a901c83eecb7737746499fe03cc84133aab3cf981b5c96a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
           "id": "a8ab8b6734ba2ac5af7c6653635d15548abdab2a"
         },
@@ -586,7 +594,7 @@
           "post_title": "Contributing Technical Documentation",
           "menu_title": "Contributing Docs",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "ee2eed4bc33ccbc4a84a2c73ee503f2df5a92183013e3f703bb439edab0a3fe3",
+          "hash": "6733ba23f82a6e784ef10e2862aa3afd8a61e32181e157f67ccabfc8354aa989",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
           "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
         }
@@ -931,7 +939,7 @@
           "menu_title": "Enable HPOS for large stores",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/guide-large-store.md",
-          "hash": "8bcae74d27e3a4ee9a902719c7e8d5aec4a4d82d7c14acd8665a72b9d4758181",
+          "hash": "1e144ac0d0a7c869093533bf94a1f218a42930a3f3edcbcfdd1210448243a992",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/guide-large-store.md",
           "id": "b6156ac7b77d75022867e9ebb968bc9c1c35f0da"
         },
@@ -1025,7 +1033,7 @@
           "menu_title": "Performance best practices",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/performance/performance-best-practices.md",
-          "hash": "5af1f4e4085e85a1693390f40e238cbd6a4a0b7d5d304afdda935c34fed97c64",
+          "hash": "3c49b5553e99b64ecdbdad565866479f7af5e474dbbcc9aa36d711c02d8b0906",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/performance/performance-best-practices.md",
           "id": "35bda1cd7068d6179a9e46cca8d7dc2694d0df96"
         }
@@ -1042,7 +1050,7 @@
           "menu_title": "Registering custom collections",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
-          "hash": "e3df65c5eec52e4bb797e34c040dbb8f820ea6571e9ce50b1d518e95ca6cb169",
+          "hash": "27c321bed35524d74019e015f5eed6cdca7e6c2efe0bc89ffdd2b9b5d43c47e8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
           "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
         },
@@ -1443,7 +1451,7 @@
         {
           "post_title": "Template structure & Overriding templates via a theme",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
-          "hash": "ff781eff7998ea93723f644bddd4f6da6f73c635bcfc3cd46950f03a8b83b26c",
+          "hash": "a82d885c8395385dc51c976b2b51eec88cdcce72bf905fda78f97d77533ce079",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
           "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
         },
@@ -1546,7 +1554,7 @@
           "post_title": "WooCommerce Extension Guidelines - Navigation",
           "menu_title": "Navigation",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/navigation.md",
-          "hash": "f14cbd3750451934d173ec43aa996067699bdd8fc05f5c34097d1967a79145db",
+          "hash": "9c5313a31ebe26909a2cfaaa0bcfcdc9d5a0855ac0ddb9808832524be313ebb6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/navigation.md",
           "id": "9922abbcea787a91b3360f49fa53d5402a604e6b"
         },
@@ -1796,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "1e9fd142270fe46589cb65aa034469cd96fcb7594266ccbd9eaab5a25ca4ddfb"
+  "hash": "212688b70a2dd0e70819746e6ffc033bc2279cb5b7b6350f377bbc3bc28c080f"
 }
