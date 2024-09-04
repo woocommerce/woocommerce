@@ -41,6 +41,7 @@ interface Store {
 		initialize: () => void;
 		toggleDrawerOpen: ( event: Event ) => void;
 		loadScripts: () => Promise< void >;
+		renderMiniCart: () => Promise< void >;
 	};
 }
 
@@ -97,6 +98,22 @@ const loadScripts = async () => {
 				...dependency,
 			} );
 		}
+	}
+};
+
+const renderContents = async () => {
+	const { renderMiniCartContents } = await import(
+		'./render-mini-cart-contents'
+	);
+
+	const container = document.querySelector(
+		'.wc-block-mini-cart-interactivity__template-part'
+	);
+
+	console.log( 'renderContents', container );
+
+	if ( container ) {
+		renderMiniCartContents( container );
 	}
 };
 
@@ -178,9 +195,13 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 			} );
 		},
 
-		toggleDrawerOpen: () => {
+		toggleDrawerOpen: async () => {
 			const context = getContext< Context >();
 			context.drawerOpen = ! context.drawerOpen;
+
+			if ( context.drawerOpen ) {
+				await renderContents();
+			}
 		},
 
 		loadScripts: async () => {

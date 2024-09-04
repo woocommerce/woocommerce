@@ -525,6 +525,7 @@ class MiniCartInteractivity extends AbstractBlock {
 								'children'                 => $this->get_template_part_contents_container( $template_part_contents ),
 								// TODO - clean up this concept.
 								'is_open_context_property' => 'woocommerce/mini-cart-interactivity::context.drawerOpen',
+								'on_open'                  => 'woocommerce/mini-cart-interactivity::actions.renderMiniCart',
 							)
 						);
 					?>

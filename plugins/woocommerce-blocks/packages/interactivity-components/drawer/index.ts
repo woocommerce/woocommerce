@@ -79,9 +79,6 @@ store( 'woocommerce/interactivity-drawer', {
 			// Attach keydown event listener to document - note that when we update Interactivity API we can use on-window directive to handle this.
 			document.addEventListener( 'keydown', handleEscapeKey );
 
-			// Set initial open state
-			context.isOpen = context.isInitiallyOpen;
-
 			// Return a cleanup function to remove the event listener
 			return () => {
 				document.removeEventListener( 'keydown', handleEscapeKey );

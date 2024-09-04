@@ -24,7 +24,6 @@ class Drawer {
 		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-drawer' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 		$context   = array(
 			'isInitiallyOpen'       => $props['is_initially_open'] ?? false,
-			'isOpen'                => $props['is_initially_open'] ?? false,
 			'isOpenContextProperty' => $props['is_open_context_property'] ?? 'woocommerce/interactivity-drawer',
 		);
 
@@ -36,7 +35,7 @@ class Drawer {
 				<div class="wc-block-components-drawer" role="dialog" tab-index="-1">
 					<div class="wc-block-components-drawer__content" role="document">
 						<!-- TODO: CloseButtonPortal -->
-						
+						<?php echo $props['children']; ?>
 					</div>
 				</div>
 			</div>
