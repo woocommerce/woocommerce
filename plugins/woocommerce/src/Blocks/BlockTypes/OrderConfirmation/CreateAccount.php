@@ -128,6 +128,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		}
 
 		$processor->set_attribute( 'class', '' );
+		$processor->set_attribute( 'style', '' );
 		$processor->add_class( 'woocommerce-order-confirmation-create-account-content' );
 
 		if ( ! $processor->next_tag( array( 'class_name' => 'woocommerce-order-confirmation-create-account-form' ) ) ) {
@@ -136,6 +137,10 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 
 		$processor->set_attribute( 'data-customer-email', $order->get_billing_email() );
 		$processor->set_attribute( 'data-nonce-token', wp_create_nonce( 'wc_create_account' ) );
+
+		if ( ! empty( $attributes['hasDarkControls'] ) ) {
+			$processor->add_class( 'has-dark-controls' );
+		}
 
 		return $processor->get_updated_html();
 	}

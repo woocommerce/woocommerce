@@ -23,9 +23,18 @@
 		"className": {
 			"type": "string",
 			"default": ""
+		},
+		"hasDarkControls": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
+		"color": {
+			"background": true,
+			"text": true,
+			"button": true
+		},
 		"multiple": false,
 		"align": [
 			"wide",
