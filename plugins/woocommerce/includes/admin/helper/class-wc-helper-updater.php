@@ -366,9 +366,13 @@ class WC_Helper_Updater {
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
+		wc_get_logger()->debug( 'Checking if plugin has subscription', array( 'product_id' => $product_id ) );
+
 		if ( WC_Helper::has_product_subscription( $product_id ) ) {
 			return;
 		}
+
+		wc_get_logger()->debug( 'Nope' );
 
 		// Prepare the expiry notice based on subscription status.
 		$purchase_link = add_query_arg(
@@ -379,15 +383,10 @@ class WC_Helper_Updater {
 			PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
 		);
 
-		$product_price = self::get_regular_price_for_product_without_subscription( $product_id );
-		/* translators: 1: Product regular price */
-		$product_price_formatted = $product_price ? sprintf( __( ' for %s ', 'woocommerce' ), $product_price ) : '';
-
 		$notice = sprintf(
-			/* translators: 1: URL to My Subscriptions page 2: Product price */
-			__( ' You don\'t have a subscription, <a href="%1$s" class="woocommerce-purchase-subscription">subscribe%2$s</a> to update.', 'woocommerce' ),
+			/* translators: 1: URL to My Subscriptions page */
+			__( ' You don\'t have a subscription, <a href="%1$s" class="woocommerce-purchase-subscription">subscribe</a> to update.', 'woocommerce' ),
 			esc_url( $purchase_link ),
-			$product_price_formatted
 		);
 
 		// Display the expiry notice.
@@ -400,58 +399,6 @@ class WC_Helper_Updater {
 				),
 			)
 		);
-	}
-
-	/**
-	 * Gets the price of a product without a subscription as that is not present in the update data.
-	 * This uses the WooCommerce.com API to get the price of the product.
-	 *
-	 * @param mixed $product_id The product ID.
-	 * @return null|string The price of the product.
-	 */
-	public static function get_regular_price_for_product_without_subscription( $product_id ) {
-		$product_id = absint( $product_id );
-		if ( ! $product_id ) {
-			return null;
-		}
-
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'products' ) . 'regular_price' . $product_id;
-		$cached_data = wp_cache_get( $cache_key, 'wc-helper-updater' );
-
-		if ( false !== $cached_data ) {
-			return $cached_data;
-		}
-
-		$url     = sprintf( 'https://woocommerce.com/wp-json/wccom/v1.0/products/%s/price', $product_id );
-		$request = wp_safe_remote_get(
-			$url,
-			array(
-				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-				'timeout'    => 2,
-			)
-		);
-
-		if ( is_wp_error( $request ) ) {
-			return null;
-		}
-
-		$body = wp_remote_retrieve_body( $request );
-		if ( empty( $body ) ) {
-			return null;
-		}
-
-		$body = json_decode( $body, true );
-		if ( empty( $body ) || ! is_array( $body ) ) {
-			return null;
-		}
-
-		$price = isset( $body['currencySymbol'], $body['regularPrice'] ) ?
-			sprintf( '%s%s', $body['currencySymbol'], $body['regularPrice'] )
-			: null;
-
-		wp_cache_set( $cache_key, $price, 'wc-helper-updater', 24 * HOUR_IN_SECONDS );
-
-		return $price;
 	}
 
 	/**

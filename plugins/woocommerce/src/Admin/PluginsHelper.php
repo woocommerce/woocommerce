@@ -1054,17 +1054,6 @@ class PluginsHelper {
 		}
 
 		$button_text = __( 'Subscribe', 'woocommerce' );
-		if ( 'single_manage' === $notice_data['type'] ) {
-			$regular_price = html_entity_decode( // React does its own encoding, so we need to decode it here.
-				WC_Helper_Updater::get_regular_price_for_product_without_subscription( $notice_data['product_id'] )
-			);
-			$button_text   =
-				sprintf(
-					/* translators: %s: Product price */
-					__( 'Subscribe for %s', 'woocommerce' ),
-					$regular_price
-				);
-		}
 
 		return array(
 			'description' => $notice_data['parsed_message'],
