@@ -148,16 +148,17 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		// Step 3: when loading images, pick them from data-folder instead of network (product images in the most cases).
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
-		if ( in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) && in_array( $url_domain, [ 'cldup.com', 'woocommerce.com' ], true ) ) {
-			$local_image_file = __DIR__ . '/../data/images/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
-			// Ensure we are getting the file copy of new files (so we can git-push them).
+		if ( in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) && in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ], true ) ) {
+			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
+			// Ensure we are getting the copy of images (so we can git-push them).
 			if ( ! file_exists( $local_image_file ) ) {
 				file_put_contents( $local_image_file, file_get_contents( $url ) );
 			}
-			// Return the local files content.
+			// Place the file into the expected location.
 			if ( file_exists( $local_image_file ) ) {
+				file_put_contents( $request['filename'], file_get_contents( $local_image_file ) );
 				return [
-					'body'     => file_get_contents( $local_image_file ),
+					'body'     => '',
 					'response' => [ 'code' => WP_Http::OK ],
 				];
 			}
@@ -201,6 +202,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			'cookies'       => [],
 			'http_response' => null,
 		];
+
+		return $preempt;
 	}
 
 	/**
