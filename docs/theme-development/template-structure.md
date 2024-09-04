@@ -22,7 +22,7 @@ Below is video walkthrough showing how one may go about updating the template fi
 
 ## Template list
 
-The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Below are links to the current and earlier versions of the WooCommerce template files on Github, where you can view the code exactly as it appears in those files:
+The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Below are links to the current and earlier versions of the WooCommerce template files on Github, where you can view the code exactly as it appears in those files:
 
 | Latest Version | Files |
 | -------------- | ----- | 
