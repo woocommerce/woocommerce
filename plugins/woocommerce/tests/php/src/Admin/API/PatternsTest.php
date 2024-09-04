@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use WC_REST_Unit_Test_Case;
+use WP_HTTP_TestCase;
 
 /**
  * Patterns Controller Tests.
@@ -117,5 +118,13 @@ class PatternsTest extends WC_REST_Unit_Test_Case {
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
 		$this->assertFalse( $patterns );
+	}
+
+	/**
+	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
+	 */
+	public function http_request_listner( $preempt, $request, $url ) {
+		// TODO: not a great approach, to be revisited
+		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }
