@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFre
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\DefaultFreeExtensions;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\RemoteFreeExtensionsDataSourcePoller;
 use WC_Unit_Test_Case;
+use WP_HTTP_TestCase;
 
 /**
  * class WC_Admin_Tests_RemoteFreeExtensions_Init
@@ -146,5 +147,13 @@ class InitTest extends WC_Unit_Test_Case {
 
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . RemoteFreeExtensionsDataSourcePoller::ID . '_specs' );
 		$this->assertTrue( ( $expires - time() ) < 3 * HOUR_IN_SECONDS );
+	}
+
+	/**
+	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
+	 */
+	public function http_request_listner( $preempt, $request, $url ) {
+		// TODO: not a great approach, to be revisited
+		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }

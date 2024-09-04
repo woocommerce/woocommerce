@@ -165,16 +165,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Step 4: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
 		// Main suit:
 		//	 https://api-3t.paypal.com/nvp
-		//   https://public-api.wordpress.com/rest/v1/ptk/patterns/en?per_page=1
-		//   https://public-api.wordpress.com/rest/v1/ptk/patterns/en?site=wooblockpatterns.wpcomstaging.com&categories=_woo_intro,_woo_featured_selling,_woo_about,_woo_reviews,_woo_social_media,_woo_woocommerce,_dotcom_imported_intro,_dotcom_imported_about,_dotcom_imported_services,_dotcom_imported_reviews
-		//       https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes
-		//       https://woocommerce.com/wp-json/wccom-extensions/1.0/search?locale=en_US
+		//      https://public-api.wordpress.com/rest/v1/ptk/patterns/en?per_page=1
+		//      https://public-api.wordpress.com/rest/v1/ptk/patterns/en?site=wooblockpatterns.wpcomstaging.com&categories=_woo_intro,_woo_featured_selling,_woo_about,_woo_reviews,_woo_social_media,_woo_woocommerce,_dotcom_imported_intro,_dotcom_imported_about,_dotcom_imported_services,_dotcom_imported_reviews
 		// Legacy suit:
 		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=invalid-theme-name&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	 https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 
+		// TODO: once tests passing, stub based on domain base instead.
 		$stubbed_urls = [
 			// Tracking and logging related.
 			'https://tracking.woocommerce.com/v1/',
@@ -187,7 +186,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json',
 			'https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json',
 			'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json',
-			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search'
+			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search',
+			// Misc.
+			'https://public-api.wordpress.com/rest/v1/ptk/patterns/en'
 		];
 		if ( in_array( strtok( $url, '?' ), $stubbed_urls, true ) ) {
 			return [
