@@ -43,6 +43,7 @@ class WC_Admin {
 		add_action('admin_init', function() {
 			if ( isset( $_GET['email_preview'] ) && isset( $_GET['order_id'] ) && isset( $_GET['email_type'] ) ) {
 				$order = wc_get_order( $_GET[ 'order_id' ] );
+				add_filter( 'woocommerce_order_needs_shipping_address', '__return_true' );
 				if ( ! $order ) {
 					// Create a dummy product object
 					$product = new WC_Product();
@@ -58,7 +59,7 @@ class WC_Admin {
 					$order = new WC_Order();
 					$order->set_id( rand(1000000, 9000000) );
 					$order->set_date_created( time() );
-					$order->set_address( array(
+					$address = array(
 						'first_name' => 'John',
 						'last_name'  => 'Doe',
 						'company'    => 'Dummy Company',
@@ -70,7 +71,9 @@ class WC_Admin {
 						'postcode'   => '12345',
 						'country'    => 'US',
 						'state'      => 'CA',
-					), 'billing' );
+					);
+					$order->set_address( $address, 'billing' );
+					$order->set_address( $address, 'shipping' );
 					$order->add_product( $product, 2 );
 					$order->set_payment_method( 'bacs' );  // Bank Transfer for example
 					$order->set_currency( 'USD' );
