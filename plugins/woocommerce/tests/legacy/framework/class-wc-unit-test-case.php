@@ -132,8 +132,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 9.3.0
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
-		// Step 1: let tests to mock/process the request first.
+		// Step 1: let tests to mock/process the request first via set `http_responder`.
 		$response = parent::http_request_listner( false, $request, $url );
+		// TODO: env. variable to ensure stubbing below getting invoked only in WooCommerce tests and not 3rd-party.
 		if ( false !== $response ) {
 			return $response;
 		}
@@ -141,18 +142,18 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$url_domain = parse_url( $url, PHP_URL_HOST );
 		$url_path   = parse_url( $url, PHP_URL_PATH );
 
-		// Step 3: when loading product images, pick them from data-folder instead of network.
+		// Step 2: when loading product images, pick them from data-folder instead of network.
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
 		if (
 			in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) &&
 			in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ], true )
 		) {
 			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
-			// Ensure we are getting the copy of images (so we can git-push them).
+			// Ensure we are getting the copy of images (so we can git-push them if product definitions getting updated).
 			if ( ! file_exists( $local_image_file ) ) {
 				file_put_contents( $local_image_file, file_get_contents( $url ) );
 			}
-			// Place the file into the expected location.
+			// Place the product image into the expected location.
 			if ( file_exists( $local_image_file ) ) {
 				file_put_contents( $request['filename'], file_get_contents( $local_image_file ) );
 				return [
@@ -162,31 +163,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			}
 		}
 
-		// Step 4: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
-		// TODO: once tests passing, stub based on domain base instead.
-		$stubbed_urls = [
-			// Tracking and logging related.
-			'https://tracking.woocommerce.com/v1/',
-			'https://public-api.wordpress.com/rest/v1.1/logstash',
-			// System status related.
-			'https://www.paypal.com/cgi-bin/webscr',
-			'https://woocommerce.com/wc-api/product-key-api',
-			// Marketing, onboarding and communications.
-			'https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json',
-			'https://woocommerce.com/wp-json/wccom/marketing-tab/1.3/recommendations.json',
-			'https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json',
-			'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json',
-			'https://woocommerce.com/wp-json/wccom-extensions/1.0/search',
-			// Misc.
-			'https://public-api.wordpress.com/rest/v1/ptk/patterns/en',
-			'https://api-3t.paypal.com/nvp',
-			'https://api.wordpress.org/themes/info/1.2/',
-		];
-		if ( in_array( strtok( $url, '?' ), $stubbed_urls, true ) ) {
-			return [
-				'body'     => '{}',
-				'response' => [ 'code' => WP_Http::OK ],
-			];
+		// Step 3: stub requests to certain domains.
+		$stubbed_domains = [ 'woocommerce.com', 'paypal.com', 'public-api.wordpress.com', 'api.wordpress.org' ];
+		foreach ( $stubbed_domains as $domain ) {
+			if ( $domain === $url_domain || str_ends_with( $url_domain, '.' . $domain ) ) {
+				return [
+					'body'     => '',
+					'response' => [ 'code' => WP_Http::OK ],
+				];
+			}
 		}
 
 		return $preempt;
