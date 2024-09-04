@@ -61,9 +61,9 @@ Attributes are the properties that define the behavior of the collection. All th
         - `operator` (type `string`): The operator to use for the time frame query. Accepted values are `in` and `not-in`.
         - `value` (type `string`): The value to query by. It should be a valid date string that PHP's `strtotime` function can parse.
     - `woocommerceOnSale` (type `string`) (optional): Whether to query for items on sale. Accepted values are `shown-only` and `dont-show`.
-        - When `shown-only` is set, the collection will show only items on sale.
-        - When `dont-show` is set, the collection will show only items that are not on sale.
-        - When unset, the collection will show both groups of items.
+        - `shown-only`: Include only on-sale products.
+        - `dont-show`: Exclude on-sale products.
+        - If not provided: Show all products, regardless of whether they are on sale or not.
     - `woocommerceStockStatus` (type `array`): The stock status to query by. Some of the accepted values are `instock`, `outofstock`, `onbackorder`.
     - `woocommerceAttributes` (type `array`): The attributes to query by.
         - For example, if you wanna fetch products with color `blue` & `gray` and size `Large` then you can pass `woocommerceAttributes` as `[{"termId":23,"taxonomy":"pa_color"},{"termId":26,"taxonomy":"pa_size"},{"termId":29,"taxonomy":"pa_color"}]`.
