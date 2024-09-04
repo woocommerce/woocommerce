@@ -60,10 +60,17 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 		>
 			<ToggleGroupControl
 				label={ __( 'On-sale products', 'woocommerce' ) }
-				help={ __(
-					'Only on sale products will be displayed in this collection.',
-					'woocommerce'
-				) }
+				help={
+					query.woocommerceOnSale === 'show-only'
+						? __(
+								'Only on-sale products will be displayed in this collection.',
+								'woocommerce'
+						  )
+						: __(
+								'On-sale products will be excluded from this collection.',
+								'woocommerce'
+						  )
+				}
 				isBlock
 				value={ query.woocommerceOnSale }
 				onChange={ handleOnSaleProductsChange }
