@@ -127,3 +127,9 @@ These instructions presume you're currently have your `docs/` branch open and yo
 If you are a non-technical contributor who isn't experienced with command line tools, we're still happy to receive your contributions. If you're unable to include an updated manifest, please ensure that you mention this in your pull request's description.
 
 If you're a technical contributor who is able to regenerate the manifest, we request that you do so where possible.
+
+## Caveats 
+
+* Emojis are not supported.
+* Avoid copy pasting content from editors such as Google docs. For example, quotation-mark characters in these editors may not translate properly when ingested by our plugin. 
+* You may want to references HTML like content, however, our plugin is set up to strip non-allowlisted HTML elements. You may use an [HTML named references](https://developer.mozilla.org/en-US/docs/Glossary/Character_reference) to create an HTML like tag, by using the less-than (<) and greater-than (>) symbol named references. 

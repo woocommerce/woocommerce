@@ -414,7 +414,7 @@
           "menu_title": "Configuring special tax scenarios",
           "tags": "code-snippet, tax",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
-          "hash": "acce5111eb917b7381d9bdcb260c72870e89d723195b86522050032741c5107c",
+          "hash": "c2459568db70b97d9a901c83eecb7737746499fe03cc84133aab3cf981b5c96a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/configuring_special_tax_scenarios.md",
           "id": "a8ab8b6734ba2ac5af7c6653635d15548abdab2a"
         },
@@ -594,7 +594,7 @@
           "post_title": "Contributing Technical Documentation",
           "menu_title": "Contributing Docs",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "ee2eed4bc33ccbc4a84a2c73ee503f2df5a92183013e3f703bb439edab0a3fe3",
+          "hash": "6733ba23f82a6e784ef10e2862aa3afd8a61e32181e157f67ccabfc8354aa989",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
           "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
         }
@@ -939,7 +939,7 @@
           "menu_title": "Enable HPOS for large stores",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/guide-large-store.md",
-          "hash": "8bcae74d27e3a4ee9a902719c7e8d5aec4a4d82d7c14acd8665a72b9d4758181",
+          "hash": "1e144ac0d0a7c869093533bf94a1f218a42930a3f3edcbcfdd1210448243a992",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/guide-large-store.md",
           "id": "b6156ac7b77d75022867e9ebb968bc9c1c35f0da"
         },
@@ -1033,7 +1033,7 @@
           "menu_title": "Performance best practices",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/performance/performance-best-practices.md",
-          "hash": "5af1f4e4085e85a1693390f40e238cbd6a4a0b7d5d304afdda935c34fed97c64",
+          "hash": "3c49b5553e99b64ecdbdad565866479f7af5e474dbbcc9aa36d711c02d8b0906",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/performance/performance-best-practices.md",
           "id": "35bda1cd7068d6179a9e46cca8d7dc2694d0df96"
         }
@@ -1451,7 +1451,7 @@
         {
           "post_title": "Template structure & Overriding templates via a theme",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
-          "hash": "ff781eff7998ea93723f644bddd4f6da6f73c635bcfc3cd46950f03a8b83b26c",
+          "hash": "0d026ed5e9706b97dd03d6f7dc86aeb580b11549fa99c9d6f906bbca6f136a01",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
           "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
         },
@@ -1554,7 +1554,7 @@
           "post_title": "WooCommerce Extension Guidelines - Navigation",
           "menu_title": "Navigation",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/navigation.md",
-          "hash": "f14cbd3750451934d173ec43aa996067699bdd8fc05f5c34097d1967a79145db",
+          "hash": "9c5313a31ebe26909a2cfaaa0bcfcdc9d5a0855ac0ddb9808832524be313ebb6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/navigation.md",
           "id": "9922abbcea787a91b3360f49fa53d5402a604e6b"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "2ecf48b6181dae0526b3858df889bce4e6ee425e10f2c43d151771d845c5a948"
+  "hash": "cbe507d24f0d6ae827c01a98fd2d7c6e8db74053a7b3db869c6941dd7442d250"
 }
