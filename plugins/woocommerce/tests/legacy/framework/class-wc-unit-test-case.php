@@ -145,7 +145,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
 		if (
 			in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) &&
-			in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com', 'localhost' ], true )
+			in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ], true )
 		) {
 			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
 			// Ensure we are getting the copy of images (so we can git-push them).
@@ -164,16 +164,17 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		// Step 4: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
 		// Main suit:
-		//	https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//	https://api-3t.paypal.com/nvp
+		//	 https://api-3t.paypal.com/nvp
+		//   https://public-api.wordpress.com/rest/v1/ptk/patterns/en?per_page=1
+		//   https://public-api.wordpress.com/rest/v1/ptk/patterns/en?site=wooblockpatterns.wpcomstaging.com&categories=_woo_intro,_woo_featured_selling,_woo_about,_woo_reviews,_woo_social_media,_woo_woocommerce,_dotcom_imported_intro,_dotcom_imported_about,_dotcom_imported_services,_dotcom_imported_reviews
 		// Legacy suit:
-		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//	https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=invalid-theme-name&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//	https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//  A/B testing in Experimental_Abtest_Test:
-		//	https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=control&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1723120609&test=test
-		//	https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=test_experiment_name&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1723120609
+		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=invalid-theme-name&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//	 https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
+		//   A/B testing in Experimental_Abtest_Test:
+		//	 https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=control&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1725440271&test=test
+		//	 https://public-api.wordpress.com/wpcom/v2/experiments/0.1.0/assignments/platform?experiment_name=test_experiment_name&anon_id=anon&woo_country_code=US%3ACA&woo_wcadmin_install_timestamp=1725440271
 
 		$stubbed_urls = [
 			// Tracking and logging related.
@@ -194,10 +195,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 				'body'     => '',
 				'response' => [ 'code' => WP_Http::OK ],
 			];
-		}
-
-		if ( $url_domain !== 'localhost' ) {
-			echo 'Passing thru a request: ', $url, PHP_EOL;
 		}
 
 		return $preempt;
