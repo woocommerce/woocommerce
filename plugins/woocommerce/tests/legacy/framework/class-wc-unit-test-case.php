@@ -156,7 +156,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			if ( file_exists( $local_image_file ) ) {
 				file_put_contents( $request['filename'], file_get_contents( $local_image_file ) );
 				return [
-					'body'     => '',
 					'response' => [ 'code' => WP_Http::OK ],
 				];
 			}
@@ -190,10 +189,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		];
 		if ( in_array( $url, $stubbed_urls, true ) ) {
 			return [
-				'body'          => '',
-				'response'      => [
-					'code' => WP_Http::OK,
-				],
+				'response' => [ 'code' => WP_Http::OK ],
 			];
 		}
 
