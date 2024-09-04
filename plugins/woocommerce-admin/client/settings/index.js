@@ -11,7 +11,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { Tabs } from './tabs';
 import { SectionNav } from './section-nav';
-import { Content } from './content';
+import { getRoute } from './routes';
 import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
@@ -53,52 +53,6 @@ const removeSettingsScripts = ( scripts ) => {
 	scripts.forEach( ( script ) => {
 		document.body.removeChild( script );
 	} );
-};
-
-const NotFound = () => {
-	return <h1>Not Found</h1>;
-};
-
-const useSettingsLocation = () => {
-	const { section, path } = getQuery();
-	const page = path.split( '/settings/' ).pop();
-	return { section, page };
-};
-
-const getRoute = () => {
-	const { section, page } = useSettingsLocation();
-	const settingsData = window.wcSettings?.admin?.settingsPages;
-	const sections = settingsData[ page ]?.sections;
-	const contentData =
-		Array.isArray( sections ) && sections.length === 0
-			? {}
-			: sections[ section || '' ];
-	const isPage = Object.keys( settingsData ).includes( page );
-
-	if ( isPage ) {
-		return {
-			page,
-			areas: {
-				content: <Content data={ contentData } />,
-				edit: null,
-			},
-			widths: {
-				content: undefined,
-				edit: undefined,
-			},
-		};
-	}
-	return {
-		page,
-		areas: {
-			content: <NotFound />,
-			edit: null,
-		},
-		widths: {
-			content: undefined,
-			edit: undefined,
-		},
-	};
 };
 
 const Settings = ( { params } ) => {
