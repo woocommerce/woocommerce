@@ -25,7 +25,7 @@ import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils';
 import { DISALLOWED_BLOCKS } from '../../constants';
-import { CollectionItem } from '../../types';
+import { FilterOptionItem } from '../../types';
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -43,7 +43,7 @@ const Edit = ( props: EditProps ) => {
 	const attributeObject = getAttributeFromId( attributeId );
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
-		AttributeTerm[]
+		FilterOptionItem[]
 	>( [] );
 	const [ isOptionsLoading, setIsOptionsLoading ] =
 		useState< boolean >( true );
@@ -99,11 +99,19 @@ const Edit = ( props: EditProps ) => {
 								return a.count < b.count ? 1 : -1;
 						}
 					} )
+					.map( ( term ) => ( {
+						label: showCounts
+							? `${ term.name } (${ term.count })`
+							: term.name,
+						value: term.id.toString(),
+						rawData: term,
+					} ) )
 			);
 		}
 
 		setIsOptionsLoading( false );
 	}, [
+		showCounts,
 		attributeTerms,
 		filteredCounts,
 		sortOrder,
@@ -112,7 +120,6 @@ const Edit = ( props: EditProps ) => {
 		isFilterCountsLoading,
 	] );
 
-	const blockProps = useBlockProps();
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
@@ -167,27 +174,21 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
-	const filterOptions: CollectionItem[] = (
-		isPreview && attributeOptions.length === 0
-			? attributeOptionsPreview
-			: attributeOptions
-	).map( ( option ) => ( {
-		label: showCounts
-			? `${ option.name } (${ option.count })`
-			: option.name,
-		value: option.id.toString(),
-	} ) );
-
 	return (
 		<div { ...innerBlocksProps }>
 			<Inspector { ...props } />
 			<BlockContextProvider
 				value={ {
-					filterData: { collection: filterOptions },
-					isFilterDataLoading:
-						isTermsLoading ||
-						isFilterCountsLoading ||
-						isOptionsLoading,
+					filterData: {
+						items:
+							attributeOptions.length === 0 && isPreview
+								? attributeOptionsPreview
+								: attributeOptions,
+						isLoading:
+							isTermsLoading ||
+							isFilterCountsLoading ||
+							isOptionsLoading,
+					},
 					isParentSelected: props.isSelected,
 				} }
 			>

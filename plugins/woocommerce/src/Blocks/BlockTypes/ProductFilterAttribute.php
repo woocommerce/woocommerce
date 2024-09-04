@@ -157,24 +157,24 @@ final class ProductFilterAttribute extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array    $block_attributes Block attributes.
+	 * @param string   $content          Block content.
+	 * @param WP_Block $block            Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render( $attributes, $content, $block ) {
-		if ( empty( $attributes['attributeId'] ) ) {
-			$default_product_attribute = $this->get_default_product_attribute();
-			$attributes['attributeId'] = $default_product_attribute->attribute_id;
+	protected function render( $block_attributes, $content, $block ) {
+		if ( empty( $block_attributes['attributeId'] ) ) {
+			$default_product_attribute       = $this->get_default_product_attribute();
+			$block_attributes['attributeId'] = $default_product_attribute->attribute_id;
 		}
 
 		// don't render if its admin, or ajax in progress.
-		if ( is_admin() || wp_doing_ajax() || empty( $attributes['attributeId'] ) ) {
+		if ( is_admin() || wp_doing_ajax() || empty( $block_attributes['attributeId'] ) ) {
 			return '';
 		}
 
-		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
-		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $attributes['queryType'] );
+		$product_attribute = wc_get_attribute( $block_attributes['attributeId'] );
+		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $block_attributes['queryType'] );
 
 		if ( empty( $attribute_counts ) ) {
 			return sprintf(
@@ -202,47 +202,46 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		$attribute_options = array_map(
-			function ( $term ) use ( $attribute_counts, $selected_terms ) {
+			function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
 				$term             = (array) $term;
 				$term['count']    = $attribute_counts[ $term['term_id'] ];
 				$term['selected'] = in_array( $term['slug'], $selected_terms, true );
-				return $term;
+				// return $term;
+				return array(
+					'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
+					'value'    => $term['slug'],
+					'selected' => $term['selected'],
+					'rawData'  => $term,
+				);
 			},
 			$attribute_terms
 		);
 
 		$filtered_options = array_filter(
 			$attribute_options,
-			function ( $option ) {
-				return $option['count'] > 0;
+			function ( $option ) use ( $block_attributes ) {
+				$hide_empty = $block_attributes['hideEmpty'] ?? true;
+				if ( $hide_empty ) {
+					return $option['rawData']['count'] > 0;
+				}
+				return true;
 			}
 		);
 
-		$context = array(
-			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
-			'queryType'     => $attributes['queryType'],
-			'selectType'    => 'multiple',
-		);
-
-		$list_options   = array_map(
-			function ( $option ) use ( $attributes ) {
-				return array(
-					'checked' => $option['selected'],
-					'id'      => $option['slug'] . '-' . $option['term_id'],
-					'label'   => $attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $option['name'], $option['count'] ) : $option['name'],
-					'value'   => $option['slug'],
-				);
-			},
-			$filtered_options
-		);
 		$filter_context = array(
 			'on_change' => "{$this->get_full_block_name()}::actions.updateProducts",
-			'items'     => $list_options,
+			'items'     => $filtered_options,
 		);
 
 		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
 			$content .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
 		}
+
+		$context = array(
+			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
+			'queryType'     => $block_attributes['queryType'],
+			'selectType'    => 'multiple',
+		);
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
@@ -250,85 +249,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 				array(
 					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					'data-has-filter'     => 'yes',
 				)
 			),
 			$content
-		);
-	}
-
-	/**
-	 * Render the dropdown.
-	 *
-	 * @param array $options    Data to render the dropdown.
-	 * @param bool  $attributes Block attributes.
-	 */
-	private function render_attribute_dropdown( $options, $attributes ) {
-		if ( empty( $options ) ) {
-			return '';
-		}
-
-		$list_items     = array();
-		$selected_items = array();
-
-		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
-
-		foreach ( $options as $option ) {
-			$item = array(
-				'label' => $attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $option['name'], $option['count'] ) : $option['name'],
-				'value' => $option['slug'],
-			);
-
-			$list_items[] = $item;
-
-			if ( $option['selected'] ) {
-				$selected_items[] = $item;
-			}
-		}
-
-		return Dropdown::render(
-			array(
-				'items'          => $list_items,
-				'action'         => "{$this->get_full_block_name()}::actions.navigate",
-				'selected_items' => $selected_items,
-				'select_type'    => 'multiple',
-				// translators: %s is a product attribute name.
-				'placeholder'    => sprintf( __( 'Select %s', 'woocommerce' ), $product_attribute->name ),
-			)
-		);
-	}
-
-	/**
-	 * Render the attribute filter checkbox list.
-	 *
-	 * @param mixed $options Attribute filter options to render in the checkbox list.
-	 * @param mixed $attributes Block attributes.
-	 * @return string
-	 */
-	private function render_attribute_checkbox_list( $options, $attributes ) {
-		if ( empty( $options ) ) {
-			return '';
-		}
-
-		$show_counts = $attributes['showCounts'] ?? false;
-
-		$list_options = array_map(
-			function ( $option ) use ( $show_counts ) {
-				return array(
-					'id'      => $option['slug'] . '-' . $option['term_id'],
-					'checked' => $option['selected'],
-					'label'   => $show_counts ? sprintf( '%1$s (%2$d)', $option['name'], $option['count'] ) : $option['name'],
-					'value'   => $option['slug'],
-				);
-			},
-			$options
-		);
-
-		return CheckboxList::render(
-			array(
-				'items'     => $list_options,
-				'on_change' => "{$this->get_full_block_name()}::actions.updateProducts",
-			)
 		);
 	}
 

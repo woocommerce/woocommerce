@@ -31,7 +31,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$checked_items               = array_filter(
 			$items,
 			function ( $item ) {
-				return $item['checked'];
+				return $item['selected'];
 			}
 		);
 		$show_initially              = $context['show_initially'] ?? 15;
@@ -55,7 +55,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 					<li
 						data-wc-key="<?php echo esc_attr( $item['id'] ); ?>"
 						<?php
-						if ( ! $item['checked'] ) :
+						if ( ! $item['selected'] ) :
 							if ( $count >= $remaining_initial_unchecked ) :
 								?>
 								class="wc-block-product-filter-checkbox-list__item hidden"
@@ -80,7 +80,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 									data-wc-on--change--select-item="actions.selectCheckboxItem"
 									data-wc-on--change--parent-action="<?php echo esc_attr( $on_change ); ?>"
 									value="<?php echo esc_attr( $item['value'] ); ?>"
-									<?php checked( $item['checked'], 1 ); ?>
+									<?php checked( $item['selected'], 1 ); ?>
 								>
 								<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
 									<path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
