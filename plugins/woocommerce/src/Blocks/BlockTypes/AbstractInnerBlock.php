@@ -20,9 +20,7 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 	 * for block registration.
 	 */
 	protected function register_block_type() {
-		$this->load_compiled_block_metadata();
-
-		if ( isset( parent::$compiled_block_metadata[ $this->namespace . '/' . $this->block_name ] ) ) {
+		if ( isset( $this->asset_api::get_compiled_block_metadata()[ $this->namespace . '/' . $this->block_name ] ) ) {
 			$this->register_block_type_from_compiled_metadata();
 		} else {
 			$this->register_block_type_from_file_metadata();
@@ -35,7 +33,7 @@ abstract class AbstractInnerBlock extends AbstractBlock {
 	 * This method is used when pre-compiled metadata is available for the block.
 	 */
 	protected function register_block_type_from_compiled_metadata() {
-		$block_meta = self::$compiled_block_metadata[ $this->namespace . '/' . $this->block_name ];
+		$block_meta = $this->asset_api::get_compiled_block_metadata()[ $this->namespace . '/' . $this->block_name ];
 
 		$block_settings = $this->get_block_settings();
 		$merged_settings = array_merge( $block_meta, $block_settings );

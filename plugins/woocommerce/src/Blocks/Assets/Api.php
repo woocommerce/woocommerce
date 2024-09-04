@@ -63,6 +63,13 @@ class Api {
 	private $package;
 
 	/**
+	 * Stores the compiled metadata for all inner blocks.
+	 *
+	 * @var array|null
+	 */
+	private static $compiled_block_metadata = null;
+
+	/**
 	 * Constructor for class
 	 *
 	 * @param Package $package An instance of Package.
@@ -333,6 +340,34 @@ class Api {
 			$this->inline_scripts[ $handle ][] = $script;
 		} else {
 			$this->inline_scripts[ $handle ] = array( $script );
+		}
+	}
+
+	/**
+	 * Gets the compiled block metadata.
+	 *
+	 * @return array The compiled block metadata.
+	 */
+	public static function get_compiled_block_metadata() {
+		if ( null === self::$compiled_block_metadata ) {
+			self::load_compiled_block_metadata();
+		}
+		return self::$compiled_block_metadata;
+	}
+
+	/**
+	 * Loads the compiled block metadata from a file.
+	 *
+	 * This method ensures the metadata is loaded only once and stored in a static variable.
+	 */
+	public static function load_compiled_block_metadata() {
+		if ( null === self::$compiled_block_metadata ) {
+			$meta_file_path = WC_ABSPATH . '/assets/client/blocks/blocks-json.php';
+			if ( file_exists( $meta_file_path ) ) {
+				self::$compiled_block_metadata = require $meta_file_path;
+			} else {
+				self::$compiled_block_metadata = [];
+			}
 		}
 	}
 }

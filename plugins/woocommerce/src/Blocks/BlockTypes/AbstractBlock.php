@@ -56,13 +56,6 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
-	 * Stores the compiled metadata for all inner blocks.
-	 *
-	 * @var array|null
-	 */
-	protected static $compiled_block_metadata = null;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -85,22 +78,6 @@ abstract class AbstractBlock {
 	 */
 	protected function get_full_block_name() {
 		return $this->namespace . '/' . $this->block_name;
-	}
-
-	/**
-	 * Loads the compiled block metadata from a file.
-	 *
-	 * This method ensures the metadata is loaded only once and stored in a static variable.
-	 */
-	protected function load_compiled_block_metadata() {
-		if ( null === self::$compiled_block_metadata ) {
-			$meta_file_path = WC_ABSPATH . '/assets/client/blocks/blocks-json.php';
-			if ( file_exists( $meta_file_path ) ) {
-				self::$compiled_block_metadata = require $meta_file_path;
-			} else {
-				self::$compiled_block_metadata = [];
-			}
-		}
 	}
 
 	/**
