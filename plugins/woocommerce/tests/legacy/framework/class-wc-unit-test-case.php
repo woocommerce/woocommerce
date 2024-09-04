@@ -164,9 +164,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		// Step 4: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
 		// Legacy suit:
-		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=default&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Btags%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=storefront&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-		//	 https://api.wordpress.org/themes/info/1.2/?action=theme_information&request%5Bslug%5D=invalid-theme-name&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 		//	 https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
 
 		// TODO: once tests passing, stub based on domain base instead.
@@ -186,6 +183,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// Misc.
 			'https://public-api.wordpress.com/rest/v1/ptk/patterns/en',
 			'https://api-3t.paypal.com/nvp',
+			'https://api.wordpress.org/themes/info/1.2/',
 		];
 		if ( in_array( strtok( $url, '?' ), $stubbed_urls, true ) ) {
 			return [
