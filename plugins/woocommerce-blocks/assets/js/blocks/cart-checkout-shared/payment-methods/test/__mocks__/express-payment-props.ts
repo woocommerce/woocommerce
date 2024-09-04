@@ -78,7 +78,6 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 	},
 	buttonAttributes: {
 		borderRadius: '4',
-		darkMode: false,
 		height: '48',
 	},
 	cartData: {

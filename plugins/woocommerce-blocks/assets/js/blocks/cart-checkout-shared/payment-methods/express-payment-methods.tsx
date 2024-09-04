@@ -15,7 +15,6 @@ import {
 import { useEditorContext } from '@woocommerce/base-context';
 import deprecated from '@wordpress/deprecated';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
 /**
  * Internal dependencies
@@ -27,7 +26,6 @@ import { useExpressPaymentContext } from '../../cart-checkout-shared/payment-met
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
 
-	const { hasDarkControls } = useCheckoutBlockContext();
 	const { showButtonStyles, buttonHeight, buttonBorderRadius } =
 		useExpressPaymentContext();
 
@@ -36,7 +34,6 @@ const ExpressPaymentMethods = () => {
 		? {
 				height: buttonHeight,
 				borderRadius: buttonBorderRadius,
-				darkMode: hasDarkControls,
 		  }
 		: undefined;
 
