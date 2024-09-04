@@ -331,10 +331,11 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-page';
 
 		$account_page_id = get_option( 'woocommerce_myaccount_page_id' );
+		$account_page_slug = false;
 
 		if ( !empty( $account_page_id ) ) {
 
-			$account_page_slug = get_post_field( 'post_name', get_option( 'woocommerce_myaccount_page_id' ) );
+			$account_page_slug = get_post_field( 'post_name', $account_page_id );
 
 		}
 
