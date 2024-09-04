@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,7 +9,11 @@ import userEvent from '@testing-library/user-event';
 /**
  * Internal dependencies
  */
-import { acceptWcsTos, getWcsAssets } from '../../wcs-api.js';
+import {
+	acceptWcsTos,
+	getWcsAssets,
+	getWcsLabelPurchaseConfigs,
+} from '../../wcs-api.js';
 import { ShippingBanner } from '../index.js';
 
 jest.mock( '../../wcs-api.js' );
@@ -18,25 +22,28 @@ acceptWcsTos.mockReturnValue( Promise.resolve() );
 
 jest.mock( '@woocommerce/tracks' );
 
-const wcsPluginSlug = 'woocommerce-services';
+const wcsPluginSlug = 'woocommerce-shipping';
+const wcstPluginSlug = 'woocommerce-services';
 
 describe( 'Tracking impression in shippingBanner', () => {
 	const expectedTrackingData = {
 		banner_name: 'wcadmin_install_wcs_prompt',
 		jetpack_connected: true,
 		jetpack_installed: true,
-		wcs_installed: true,
+		wcs_installed: false,
 	};
 
 	it( 'should record an event when user sees banner loaded', () => {
 		render(
 			<ShippingBanner
 				isJetpackConnected={ true }
-				activePlugins={ [ wcsPluginSlug, 'jetpack' ] }
+				activePlugins={ [ wcstPluginSlug, 'jetpack' ] }
 				itemsCount={ 1 }
 				activatePlugins={ jest.fn() }
 				installPlugins={ jest.fn() }
 				isRequesting={ false }
+				isWcstCompatible={ true }
+				orderId={ 1 }
 			/>
 		);
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
@@ -59,25 +66,31 @@ describe( 'Tracking clicks in shippingBanner', () => {
 	};
 
 	it( 'should record an event when user clicks "Create shipping label"', async () => {
+		const actionButtonLabel = 'Create shipping label';
 		const { getByRole } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
-				activePlugins={ [ wcsPluginSlug, 'jetpack' ] }
-				installPlugins={ jest.fn() }
-				activatePlugins={ jest.fn() }
+				activePlugins={ [ 'jetpack' ] }
+				installPlugins={ jest
+					.fn()
+					.mockResolvedValue( { success: true } ) }
+				activatePlugins={ jest
+					.fn()
+					.mockResolvedValue( { success: true } ) }
 				isRequesting={ false }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
 
-		userEvent.click(
-			getByRole( 'button', { name: 'Create shipping label' } )
-		);
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
 
 		await waitFor( () =>
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'banner_element_clicked',
-				getExpectedTrackingData( 'shipping_banner_create_label' )
+				getExpectedTrackingData( 'shipping_banner_create_label', false )
 			)
 		);
 	} );
@@ -92,6 +105,8 @@ describe( 'Tracking clicks in shippingBanner', () => {
 				activatePlugins={ jest.fn() }
 				isRequesting={ false }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
 			/>
 		);
 
@@ -114,11 +129,13 @@ describe( 'Tracking clicks in shippingBanner', () => {
 		const { getByRole } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
-				activePlugins={ [ wcsPluginSlug, 'jetpack' ] }
+				activePlugins={ [ wcstPluginSlug, 'jetpack' ] }
 				installPlugins={ jest.fn() }
 				activatePlugins={ jest.fn() }
 				isRequesting={ false }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
 			/>
 		);
 
@@ -129,7 +146,7 @@ describe( 'Tracking clicks in shippingBanner', () => {
 		await waitFor( () =>
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'banner_element_clicked',
-				getExpectedTrackingData( 'shipping_banner_dimiss' )
+				getExpectedTrackingData( 'shipping_banner_dimiss', false )
 			)
 		);
 	} );
@@ -148,6 +165,8 @@ describe( 'Create shipping label button', () => {
 	};
 
 	it( 'should install WooCommerce Shipping when button is clicked', async () => {
+		const actionButtonLabel = 'Create shipping label';
+
 		const { getByRole } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
@@ -156,22 +175,26 @@ describe( 'Create shipping label button', () => {
 				installPlugins={ installPlugins }
 				isRequesting={ false }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
 		userEvent.click(
 			getByRole( 'button', {
-				name: 'Create shipping label',
+				name: actionButtonLabel,
 			} )
 		);
 
 		await waitFor( () =>
 			expect( installPlugins ).toHaveBeenCalledWith( [
-				'woocommerce-services',
+				'woocommerce-shipping',
 			] )
 		);
 	} );
 
 	it( 'should activate WooCommerce Shipping when installation finishes', async () => {
+		const actionButtonLabel = 'Create shipping label';
 		const { getByRole } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
@@ -180,38 +203,46 @@ describe( 'Create shipping label button', () => {
 				installPlugins={ installPlugins }
 				isRequesting={ false }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
 		userEvent.click(
 			getByRole( 'button', {
-				name: 'Create shipping label',
+				name: actionButtonLabel,
 			} )
 		);
 
 		await waitFor( () =>
 			expect( activatePlugins ).toHaveBeenCalledWith( [
-				'woocommerce-services',
+				'woocommerce-shipping',
 			] )
 		);
 	} );
 
 	it( 'should perform a request to accept the TOS and get WCS assets to load', async () => {
+		getWcsLabelPurchaseConfigs.mockReturnValueOnce( Promise.resolve( {} ) );
 		getWcsAssets.mockReturnValueOnce( Promise.resolve( {} ) );
+		const actionButtonLabel = 'Create shipping label';
 
 		const { getByRole } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
 				activatePlugins={ activatePlugins }
-				activePlugins={ [ wcsPluginSlug ] }
+				activePlugins={ [ wcstPluginSlug ] }
 				installPlugins={ installPlugins }
 				isRequesting={ false }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
 
 		userEvent.click(
 			getByRole( 'button', {
-				name: 'Create shipping label',
+				name: actionButtonLabel,
 			} )
 		);
 
@@ -220,9 +251,16 @@ describe( 'Create shipping label button', () => {
 	} );
 
 	it( 'should load WCS assets when a path is provided', async () => {
+		const actionButtonLabel = 'Create shipping label';
+		getWcsLabelPurchaseConfigs.mockReturnValueOnce( Promise.resolve( {} ) );
+
 		const mockAssets = {
-			wc_connect_admin_script: '/path/to/wcs.js',
-			wc_connect_admin_style: '/path/to/wcs.css',
+			wcshipping_create_label_script: '/path/to/wcs.js',
+			wcshipping_create_label_style: '/path/to/wcs.css',
+			wcshipping_shipment_tracking_script:
+				'/wcshipping_shipment_tracking_script',
+			wcshipping_shipment_tracking_style:
+				'/wcshipping_shipment_tracking_style',
 		};
 		getWcsAssets.mockReturnValueOnce(
 			Promise.resolve( {
@@ -237,17 +275,20 @@ describe( 'Create shipping label button', () => {
 				<ShippingBanner
 					isJetpackConnected={ true }
 					activatePlugins={ activatePlugins }
-					activePlugins={ [ wcsPluginSlug, 'jetpack' ] }
+					activePlugins={ [ wcstPluginSlug, 'jetpack' ] }
 					installPlugins={ installPlugins }
 					isRequesting={ false }
 					itemsCount={ 1 }
+					orderId={ 1 }
+					isWcstCompatible={ true }
+					actionButtonLabel={ actionButtonLabel }
 				/>
 			</Fragment>
 		);
 
 		userEvent.click(
 			getByRole( 'button', {
-				name: 'Create shipping label',
+				name: actionButtonLabel,
 			} )
 		);
 
@@ -263,40 +304,44 @@ describe( 'Create shipping label button', () => {
 		).toBeInTheDocument();
 
 		// Check that the script and style elements have been created.
-		expect( document.getElementsByTagName( 'script' )[ 0 ].src ).toBe(
-			'http://localhost' + mockAssets.wc_connect_admin_script
+		const allScriptSrcs = Array.from(
+			document.querySelectorAll( 'script' )
+		).map( ( script ) => script.src );
+
+		const allLinkHrefs = Array.from(
+			document.querySelectorAll( 'link' )
+		).map( ( link ) => link.href );
+
+		expect( allScriptSrcs ).toContain(
+			'http://localhost' + mockAssets.wcshipping_create_label_script
 		);
 
-		expect( document.getElementsByTagName( 'link' )[ 0 ].href ).toBe(
-			'http://localhost' + mockAssets.wc_connect_admin_style
+		expect( allScriptSrcs ).toContain(
+			'http://localhost' + mockAssets.wcshipping_shipment_tracking_script
+		);
+
+		expect( allLinkHrefs ).toContain(
+			'http://localhost' + mockAssets.wcshipping_create_label_style
+		);
+		expect( allLinkHrefs ).toContain(
+			'http://localhost' + mockAssets.wcshipping_shipment_tracking_style
 		);
 	} );
 
 	it( 'should open WCS modal', async () => {
-		window.wcsGetAppStoreAsync = jest.fn();
-		const getState = jest.fn();
-		const dispatch = jest.fn();
-		const subscribe = jest.fn();
-		window.wcsGetAppStoreAsync.mockReturnValueOnce(
-			Promise.resolve( {
-				getState,
-				dispatch,
-				subscribe,
-			} )
-		);
-		getState.mockReturnValueOnce( {
-			ui: {
-				selectedSiteId: 'SITE_ID',
-			},
-		} );
-
+		const actionButtonLabel = 'Create shipping label';
+		getWcsLabelPurchaseConfigs.mockReturnValueOnce( Promise.resolve( {} ) );
 		getWcsAssets.mockReturnValueOnce(
 			Promise.resolve( {
 				assets: {
 					// Easy to identify string in our hijacked setter function.
-					wc_connect_admin_script: 'wc_connect_admin_script',
+					wcshipping_create_label_script:
+						'wcshipping_create_label_script',
+					wcshipping_shipment_tracking_script:
+						'wcshipping_create_label_script',
 					// Empty string to avoid creating a script tag we also have to hijack.
-					wc_connect_admin_style: '',
+					wcshipping_create_label_style: '',
+					wcshipping_shipment_tracking_style: '',
 				},
 			} )
 		);
@@ -306,8 +351,15 @@ describe( 'Create shipping label button', () => {
 		// const scriptSrcProperty = window.HTMLScriptElement.prototype.src;
 		Object.defineProperty( window.HTMLScriptElement.prototype, 'src', {
 			set( src ) {
-				if ( src === 'wc_connect_admin_script' ) {
-					setTimeout( () => this.onload() );
+				if (
+					[
+						'wcshipping_create_label_script',
+						'wcshipping_shipment_tracking_script',
+					].includes( src )
+				) {
+					setTimeout( () => {
+						this.onload();
+					}, 1 );
 				}
 			},
 		} );
@@ -324,33 +376,38 @@ describe( 'Create shipping label button', () => {
 					installPlugins={ installPlugins }
 					isRequesting={ false }
 					itemsCount={ 1 }
+					orderId={ 1 }
+					isWcstCompatible={ true }
+					actionButtonLabel={ actionButtonLabel }
 				/>
 			</Fragment>
+		);
+
+		const openWcsModalSpy = jest.spyOn(
+			ShippingBanner.prototype,
+			'openWcsModal'
 		);
 
 		// Initiate the loading of WCS assets on first click.
 		userEvent.click(
 			getByRole( 'button', {
-				name: 'Create shipping label',
+				name: actionButtonLabel,
 			} )
 		);
 
-		await waitFor( () =>
-			expect( window.wcsGetAppStoreAsync ).toHaveBeenCalledWith(
-				'wc-connect-create-shipping-label'
-			)
-		);
-		await waitFor( () => expect( getState ).toHaveBeenCalledTimes( 1 ) );
-		await waitFor( () => expect( subscribe ).toHaveBeenCalledTimes( 1 ) );
+		await waitFor( () => {
+			expect(
+				document.getElementById( 'woocommerce-admin-print-label' )
+			).not.toBeVisible();
+		} );
 
-		expect(
-			document.getElementById( 'woocommerce-admin-print-label' )
-		).not.toBeVisible();
+		expect( openWcsModalSpy ).toHaveBeenCalledTimes( 1 );
 	} );
 } );
 
 describe( 'In the process of installing, activating, loading assets for WooCommerce Service', () => {
 	it( 'should show a busy loading state on "Create shipping label" and should disable "Close Print Label Banner"', async () => {
+		const actionButtonLabel = 'Create shipping label';
 		const { getByRole } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
@@ -359,24 +416,25 @@ describe( 'In the process of installing, activating, loading assets for WooComme
 				installPlugins={ jest.fn() }
 				isRequesting={ true }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
 
 		expect(
-			getByRole( 'button', { name: 'Create shipping label' } )
+			getByRole( 'button', { name: actionButtonLabel } )
 		).not.toHaveClass( 'is-busy' );
 
 		expect(
 			getByRole( 'button', { name: 'Close Print Label Banner.' } )
 		).toBeEnabled();
 
-		userEvent.click(
-			getByRole( 'button', { name: 'Create shipping label' } )
-		);
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
 
 		await waitFor( () =>
 			expect(
-				getByRole( 'button', { name: 'Create shipping label' } )
+				getByRole( 'button', { name: actionButtonLabel } )
 			).toHaveClass( 'is-busy' )
 		);
 
@@ -396,6 +454,9 @@ describe( 'Setup error message', () => {
 				installPlugins={ jest.fn() }
 				itemsCount={ 1 }
 				isRequesting={ false }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel="Create shipping label"
 			/>
 		);
 
@@ -407,6 +468,7 @@ describe( 'Setup error message', () => {
 	} );
 
 	it( 'should show if there is installation error', async () => {
+		const actionButtonLabel = 'Create shipping label';
 		const { getByRole, getByText } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
@@ -417,12 +479,13 @@ describe( 'Setup error message', () => {
 				} ) }
 				itemsCount={ 1 }
 				isRequesting={ false }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
 
-		userEvent.click(
-			getByRole( 'button', { name: 'Create shipping label' } )
-		);
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
 
 		await waitFor( () =>
 			expect(
@@ -434,6 +497,8 @@ describe( 'Setup error message', () => {
 	} );
 
 	it( 'should show if there is activation error', async () => {
+		const actionButtonLabel = 'Create shipping label';
+
 		const { getByRole, getByText } = render(
 			<ShippingBanner
 				isJetpackConnected={ true }
@@ -446,12 +511,13 @@ describe( 'Setup error message', () => {
 				} ) }
 				itemsCount={ 1 }
 				isRequesting={ false }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel={ actionButtonLabel }
 			/>
 		);
 
-		userEvent.click(
-			getByRole( 'button', { name: 'Create shipping label' } )
-		);
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
 
 		await waitFor( () =>
 			expect(
@@ -471,16 +537,16 @@ describe( 'The message in the banner', () => {
 				activatePlugins={ jest.fn() }
 				activePlugins={ activePlugins }
 				installPlugins={ jest.fn() }
-				wcsPluginSlug={ 'woocommerce-services' }
 				isRequesting={ true }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel="Create shipping label"
 			/>
 		);
 
 	const notActivatedMessage =
 		'By clicking "Create shipping label", WooCommerce Shipping(opens in a new tab) will be installed and you agree to its Terms of Service(opens in a new tab).';
-	const activatedMessage =
-		'You\'ve already installed WooCommerce Shipping. By clicking "Create shipping label", you agree to its Terms of Service(opens in a new tab).';
 
 	it( 'should show install text "By clicking "Create shipping label"..." when first loaded.', () => {
 		const { container } = createShippingBannerWrapper( {
@@ -502,11 +568,13 @@ describe( 'The message in the banner', () => {
 			<ShippingBanner
 				isJetpackConnected={ true }
 				activatePlugins={ jest.fn() }
-				activePlugins={ [ 'woocommerce-services' ] }
+				activePlugins={ [ wcstPluginSlug ] }
 				installPlugins={ jest.fn() }
-				wcsPluginSlug={ 'woocommerce-services' }
 				isRequesting={ true }
 				itemsCount={ 1 }
+				orderId={ 1 }
+				isWcstCompatible={ true }
+				actionButtonLabel="Create shipping label"
 			/>
 		);
 
@@ -515,15 +583,71 @@ describe( 'The message in the banner', () => {
 				.textContent
 		).toBe( notActivatedMessage );
 	} );
+} );
 
-	it( 'should show install text "By clicking "You\'ve already installed WooCommerce Shipping."..." when WooCommerce Service is already installed.', () => {
-		const { container } = createShippingBannerWrapper( {
-			activePlugins: [ 'woocommerce-services' ],
+describe( 'If incompatible WCS&T is active', () => {
+	const installPlugins = jest.fn().mockReturnValue( {
+		success: true,
+	} );
+	const activatePlugins = jest.fn().mockReturnValue( {
+		success: true,
+	} );
+
+	beforeEach( () => {
+		acceptWcsTos.mockClear();
+	} );
+
+	it( 'should install and activate but show an error notice when an incompatible version of WCS&T is installed', async () => {
+		const actionButtonLabel = 'Install WooCommerce Shipping';
+
+		const { getByRole, getByText } = render(
+			<Fragment>
+				<div id="woocommerce-order-data" />
+				<div id="woocommerce-order-actions" />
+				<div id="woocommerce-admin-print-label" />
+				<ShippingBanner
+					isJetpackConnected={ true }
+					activatePlugins={ activatePlugins }
+					activePlugins={ [ wcstPluginSlug, 'jetpack' ] }
+					installPlugins={ installPlugins }
+					itemsCount={ 1 }
+					isRequesting={ false }
+					orderId={ 1 }
+					isWcstCompatible={ false }
+					actionButtonLabel={ actionButtonLabel }
+				/>
+			</Fragment>
+		);
+
+		userEvent.click( getByRole( 'button', { name: actionButtonLabel } ) );
+
+		await waitFor( () => {
+			expect( installPlugins ).toHaveBeenCalledWith( [ wcsPluginSlug ] );
+		} );
+		await waitFor( () => {
+			expect( activatePlugins ).toHaveBeenCalledWith( [ wcsPluginSlug ] );
 		} );
 
-		expect(
-			container.querySelector( '.wc-admin-shipping-banner-blob p' )
-				.textContent
-		).toBe( activatedMessage );
+		await waitFor( () => {
+			expect( acceptWcsTos ).not.toHaveBeenCalled();
+		} );
+
+		const notice = getByText( ( _, element ) => {
+			const hasText = ( node ) =>
+				node.textContent ===
+				'Please update the WooCommerce Shipping & Tax plugin to the latest version to ensure compatibility with WooCommerce Shipping.';
+			const nodeHasText = hasText( element );
+			const childrenDontHaveText = Array.from( element.children ).every(
+				( child ) => ! hasText( child )
+			);
+			return nodeHasText && childrenDontHaveText;
+		} );
+
+		await waitFor( () => expect( notice ).toBeInTheDocument() );
+
+		// Assert that the "update" link is present
+		const updateLink = getByText( /update/i );
+		expect( updateLink ).toBeInTheDocument();
+		expect( updateLink.tagName ).toBe( 'A' ); // Ensures it's a link
 	} );
 } );

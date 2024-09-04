@@ -10,6 +10,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import './editor.scss';
 import Block from './block';
 import type { Attributes } from './types';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
@@ -68,7 +69,7 @@ const Edit = ( {
 					attributes.isDescendantOfAllProducts ? undefined : style
 				}
 			>
-				<Block { ...blockAttrs } />
+				<Block { ...blockAttrs } setAttributes={ setAttributes } />
 			</div>
 		</>
 	);

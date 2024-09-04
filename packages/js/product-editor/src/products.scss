@@ -4,11 +4,12 @@
 .woocommerce_page_woocommerce-products-dashboard #adminmenumain {
 	display: none;
 }
+
 .woocommerce_page_woocommerce-products-dashboard #wpcontent {
 	margin-left: 0;
 }
-body.woocommerce_page_woocommerce-products-dashboard
-	#woocommerce-products-dashboard {
+
+body.woocommerce_page_woocommerce-products-dashboard #woocommerce-products-dashboard {
 	@include wp-admin-reset("#woocommerce-products-dashboard");
 	@include reset;
 	display: block !important;
@@ -38,3 +39,5 @@ body.js.is-fullscreen-mode {
 		}
 	}
 }
+
+@import "products-app/sidebar-dataviews/style.scss";

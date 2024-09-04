@@ -7,6 +7,8 @@ use WP_Upgrader;
 
 /**
  * PTKPatterns class.
+ *
+ * @internal
  */
 class PTKPatternsStore {
 	const TRANSIENT_NAME = 'ptk_patterns';
