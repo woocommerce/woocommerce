@@ -341,4 +341,12 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 		$browse_all_link = $links['browse_all'];
 		$this->assertArrayHasKey( 'href', $browse_all_link );
 	}
+
+	/**
+	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
+	 */
+	public function http_request_listner( $preempt, $request, $url ) {
+		// TODO: not a great approach, to be revisited
+		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
+	}
 }

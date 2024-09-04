@@ -163,9 +163,6 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		}
 
 		// Step 4: process requests initiated during core tests (but nothing else, so we don't break 3rd party tests).
-		// Legacy suit:
-		//	 https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request%5Bslug%5D=woocommerce-legacy-rest-api&request%5Bfields%5D%5Bsections%5D=0&request%5Blocale%5D=en_US&request%5Bwp_version%5D=6.6
-
 		// TODO: once tests passing, stub based on domain base instead.
 		$stubbed_urls = [
 			// Tracking and logging related.
