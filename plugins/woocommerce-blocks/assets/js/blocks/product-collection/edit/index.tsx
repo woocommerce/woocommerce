@@ -32,12 +32,24 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		[ clientId ]
 	);
 
-	const productCollectionUIStateInEditor = useProductCollectionUIState( {
-		location,
-		attributes,
-		hasInnerBlocks,
-		...( props.usesReference && { usesReference: props.usesReference } ),
-	} );
+	const { productCollectionUIStateInEditor, isLoading } =
+		useProductCollectionUIState( {
+			location,
+			attributes,
+			hasInnerBlocks,
+			...( props.usesReference && {
+				usesReference: props.usesReference,
+			} ),
+		} );
+
+	// Show spinner while calculating Editor UI state.
+	if ( isLoading ) {
+		return (
+			<Flex justify="center" align="center">
+				<Spinner />
+			</Flex>
+		);
+	}
 
 	/**
 	 * Component to render based on the UI state.
@@ -62,15 +74,6 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		default:
 			// By default showing collection chooser.
 			Component = ProductCollectionPlaceholder;
-	}
-
-	// Show spinner while fetching UI state.
-	if ( productCollectionUIStateInEditor === null ) {
-		return (
-			<Flex justify="center" align="center">
-				<Spinner />
-			</Flex>
-		);
 	}
 
 	return (
