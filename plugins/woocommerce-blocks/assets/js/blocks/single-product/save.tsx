@@ -4,7 +4,9 @@
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 const Save = () => {
-	const blockProps = useBlockProps.save();
+	const blockProps = useBlockProps.save( {
+		className: 'woocommerce',
+	} );
 
 	return (
 		<div { ...blockProps }>

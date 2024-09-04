@@ -125,108 +125,120 @@ test.describe(
 			} );
 		} );
 
-		test( 'allows customer to calculate Free Shipping if in Germany', async ( {
-			page,
-		} ) => {
-			await page.goto( '/cart/' );
-			// Set shipping country to Germany
-			await page.locator( 'a.shipping-calculator-button' ).click();
-			await page
-				.locator( '#calc_shipping_country' )
-				.selectOption( shippingCountryDE );
-			await page.locator( 'button[name="calc_shipping"]' ).click();
+		test(
+			'allows customer to calculate Free Shipping if in Germany',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page } ) => {
+				await page.goto( '/cart/' );
+				// Set shipping country to Germany
+				await page.locator( 'a.shipping-calculator-button' ).click();
+				await page
+					.locator( '#calc_shipping_country' )
+					.selectOption( shippingCountryDE );
+				await page.locator( 'button[name="calc_shipping"]' ).click();
 
-			// Verify shipping costs
-			await expect(
-				page.locator( '.shipping ul#shipping_method > li' )
-			).toContainText( 'Free shipping' );
-			await expect(
-				page.locator( '.order-total .amount' )
-			).toContainText( firstProductPrice );
-		} );
+				// Verify shipping costs
+				await expect(
+					page.locator( '.shipping ul#shipping_method > li' )
+				).toContainText( 'Free shipping' );
+				await expect(
+					page.locator( '.order-total .amount' )
+				).toContainText( firstProductPrice );
+			}
+		);
 
-		test( 'allows customer to calculate Flat rate and Local pickup if in France', async ( {
-			page,
-		} ) => {
-			await page.goto( '/cart/' );
-			// Set shipping country to France
-			await page.locator( 'a.shipping-calculator-button' ).click();
-			await page
-				.locator( '#calc_shipping_country' )
-				.selectOption( shippingCountryFR );
-			await page.locator( 'button[name="calc_shipping"]' ).click();
+		test(
+			'allows customer to calculate Flat rate and Local pickup if in France',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page } ) => {
+				await page.goto( '/cart/' );
+				// Set shipping country to France
+				await page.locator( 'a.shipping-calculator-button' ).click();
+				await page
+					.locator( '#calc_shipping_country' )
+					.selectOption( shippingCountryFR );
+				await page.locator( 'button[name="calc_shipping"]' ).click();
 
-			// Verify shipping costs
-			await expect( page.locator( '.shipping .amount' ) ).toContainText(
-				'$5.00'
-			);
-			await expect(
-				page.locator( '.order-total .amount' )
-			).toContainText( `$${ firstProductWithFlatRate }` );
+				// Verify shipping costs
+				await expect(
+					page.locator( '.shipping .amount' )
+				).toContainText( '$5.00' );
+				await expect(
+					page.locator( '.order-total .amount' )
+				).toContainText( `$${ firstProductWithFlatRate }` );
 
-			// Set shipping to local pickup instead of flat rate
-			await page.locator( 'text=Local pickup' ).click();
+				// Set shipping to local pickup instead of flat rate
+				await page.locator( 'text=Local pickup' ).click();
 
-			// Verify updated shipping costs
-			await expect(
-				page.locator( '.order-total .amount' ).first()
-			).toContainText( `$${ firstProductPrice }` );
-		} );
+				// Verify updated shipping costs
+				await expect(
+					page.locator( '.order-total .amount' ).first()
+				).toContainText( `$${ firstProductPrice }` );
+			}
+		);
 
-		test( 'should show correct total cart price after updating quantity', async ( {
-			page,
-		} ) => {
-			await page.goto( '/cart/' );
-			await page.locator( 'input.qty' ).fill( '4' );
-			await page.locator( 'text=Update cart' ).click();
+		test(
+			'should show correct total cart price after updating quantity',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page } ) => {
+				await page.goto( '/cart/' );
+				await page.locator( 'input.qty' ).fill( '4' );
+				await page.locator( 'text=Update cart' ).click();
 
-			// Set shipping country to France
-			await page.locator( 'a.shipping-calculator-button' ).click();
-			await page
-				.locator( '#calc_shipping_country' )
-				.selectOption( shippingCountryFR );
-			await page.locator( 'button[name="calc_shipping"]' ).click();
+				// Set shipping country to France
+				await page.locator( 'a.shipping-calculator-button' ).click();
+				await page
+					.locator( '#calc_shipping_country' )
+					.selectOption( shippingCountryFR );
+				await page.locator( 'button[name="calc_shipping"]' ).click();
 
-			await expect(
-				page.locator( '.order-total .amount' )
-			).toContainText( `$${ fourProductsWithFlatRate }` );
-		} );
+				await expect(
+					page.locator( '.order-total .amount' )
+				).toContainText( `$${ fourProductsWithFlatRate }` );
+			}
+		);
 
-		test( 'should show correct total cart price with 2 products and flat rate', async ( {
-			page,
-		} ) => {
-			await addAProductToCart( page, secondProductId );
+		test(
+			'should show correct total cart price with 2 products and flat rate',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page } ) => {
+				await addAProductToCart( page, secondProductId );
 
-			await page.goto( '/cart/' );
-			await page.locator( 'a.shipping-calculator-button' ).click();
-			await page
-				.locator( '#calc_shipping_country' )
-				.selectOption( shippingCountryFR );
-			await page.locator( 'button[name="calc_shipping"]' ).click();
+				await page.goto( '/cart/' );
+				await page.locator( 'a.shipping-calculator-button' ).click();
+				await page
+					.locator( '#calc_shipping_country' )
+					.selectOption( shippingCountryFR );
+				await page.locator( 'button[name="calc_shipping"]' ).click();
 
-			await expect( page.locator( '.shipping .amount' ) ).toContainText(
-				'$5.00'
-			);
-			await expect(
-				page.locator( '.order-total .amount' )
-			).toContainText( `$${ twoProductsWithFlatRate }` );
-		} );
+				await expect(
+					page.locator( '.shipping .amount' )
+				).toContainText( '$5.00' );
+				await expect(
+					page.locator( '.order-total .amount' )
+				).toContainText( `$${ twoProductsWithFlatRate }` );
+			}
+		);
 
-		test( 'should show correct total cart price with 2 products without flat rate', async ( {
-			page,
-		} ) => {
-			await addAProductToCart( page, secondProductId );
+		test(
+			'should show correct total cart price with 2 products without flat rate',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page } ) => {
+				await addAProductToCart( page, secondProductId );
 
-			// Set shipping country to Spain
-			await page.goto( '/cart/' );
-			await page.locator( 'a.shipping-calculator-button' ).click();
-			await page.locator( '#calc_shipping_country' ).selectOption( 'ES' );
-			await page.locator( 'button[name="calc_shipping"]' ).click();
+				// Set shipping country to Spain
+				await page.goto( '/cart/' );
+				await page.locator( 'a.shipping-calculator-button' ).click();
+				await page
+					.locator( '#calc_shipping_country' )
+					.selectOption( 'ES' );
+				await page.locator( 'button[name="calc_shipping"]' ).click();
 
-			// Verify shipping costs
-			await expect(
-				page.locator( '.order-total .amount' )
-			).toContainText( `$${ twoProductsTotal }` );
-		} );
+				// Verify shipping costs
+				await expect(
+					page.locator( '.order-total .amount' )
+				).toContainText( `$${ twoProductsTotal }` );
+			}
+		);
 	}
 );

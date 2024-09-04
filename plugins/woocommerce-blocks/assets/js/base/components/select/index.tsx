@@ -20,7 +20,7 @@ export type SelectOption = {
 	disabled?: boolean;
 };
 
-type SelectProps = Omit<
+export type SelectProps = Omit<
 	React.SelectHTMLAttributes< HTMLSelectElement >,
 	'onChange'
 > & {
