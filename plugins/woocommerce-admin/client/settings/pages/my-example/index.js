@@ -3,9 +3,31 @@
  */
 import { useSettingsLocation } from '../../routes';
 
-const MyExample = () => {
+/**
+ * External dependencies
+ */
+import { getNewPath } from '@woocommerce/navigation';
+import { Link } from '@woocommerce/components';
+
+export const MyExample = () => {
 	const { section } = useSettingsLocation();
-	return <div>My Example: { section }</div>;
+	return (
+		<>
+			<h2>My Example: { section }</h2>
+			<Link href={ getNewPath( { quickEdit: true } ) } type="wc-admin">
+				Edit
+			</Link>
+		</>
+	);
 };
 
-export default MyExample;
+export const MyExampleEdit = () => {
+	return (
+		<>
+			<h2>My Example Edit</h2>
+			<Link href={ getNewPath( { quickEdit: false } ) } type="wc-admin">
+				Close
+			</Link>
+		</>
+	);
+};

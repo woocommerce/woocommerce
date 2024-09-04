@@ -11,7 +11,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { Tabs } from './tabs';
 import { SectionNav } from './section-nav';
-import { getRoute } from './routes';
+import { getRoute, useSettingsLocation } from './routes';
 import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
@@ -85,7 +85,9 @@ const Settings = ( { params } ) => {
 		return <div>Error getting data</div>;
 	}
 
-	const { areas } = getRoute();
+	const { areas, widths } = getRoute();
+	const { quickEdit } = useSettingsLocation();
+	const showEditArea = quickEdit === 'true';
 
 	return (
 		<>
@@ -98,7 +100,12 @@ const Settings = ( { params } ) => {
 					<Tabs data={ settingsData } page={ page } />
 				</div>
 				{ areas.content && (
-					<div className="woocommerce-settings-layout-content">
+					<div
+						className="woocommerce-settings-layout-content"
+						style={ {
+							maxWidth: widths?.content,
+						} }
+					>
 						<div className="woocommerce-settings-layout-title">
 							<h1>{ title }</h1>
 						</div>
@@ -112,8 +119,13 @@ const Settings = ( { params } ) => {
 						</SectionNav>
 					</div>
 				) }
-				{ areas.edit && (
-					<div className="woocommerce-settings-layout-content">
+				{ showEditArea && areas.edit && (
+					<div
+						className="woocommerce-settings-layout-content"
+						style={ {
+							maxWidth: widths?.edit,
+						} }
+					>
 						{ areas.edit }
 					</div>
 				) }

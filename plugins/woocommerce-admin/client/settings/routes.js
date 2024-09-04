@@ -7,16 +7,16 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { Content } from './content';
-import MyExample from './pages/my-example';
+import { MyExample, MyExampleEdit } from './pages/my-example';
 
 const NotFound = () => {
 	return <h1>Not Found</h1>;
 };
 
 export const useSettingsLocation = () => {
-	const { section, path } = getQuery();
+	const { section, path, ...otherQueryParams } = getQuery();
 	const page = path.split( '/settings/' ).pop();
-	return { section, page };
+	return { ...otherQueryParams, section, page };
 };
 
 export const getRoute = () => {
@@ -65,11 +65,11 @@ export const getRoute = () => {
 			page: 'my-example',
 			areas: {
 				content: <MyExample />,
-				edit: null,
+				edit: <MyExampleEdit />,
 			},
 			widths: {
 				content: undefined,
-				edit: undefined,
+				edit: 380,
 			},
 		},
 	];
