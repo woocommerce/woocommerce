@@ -40,7 +40,8 @@ export const ValidationInputError = ( {
 	return (
 		<div className="wc-block-components-validation-error" role="alert">
 			<p id={ validationErrorId }>
-				<Icon icon={ warning } /> { errorMessage }
+				<Icon icon={ warning } />
+				<span>{ errorMessage }</span>
 			</p>
 		</div>
 	);
