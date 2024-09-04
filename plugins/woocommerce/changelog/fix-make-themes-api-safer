@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add check to ensure themes API is safe
