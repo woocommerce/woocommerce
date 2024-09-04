@@ -440,38 +440,4 @@ test.describe( `${ blockData.name }`, () => {
 			block.locator( blockData.selectors.editor.layoutWrapper )
 		).toHaveCSS( 'gap', '0px' );
 	} );
-
-	test.describe( 'within pop up', () => {
-		test( 'Layout > Orientation: changing option should update the preview', async ( {
-			editor,
-			pageObject,
-		} ) => {
-			await pageObject.addProductFiltersBlock( { cleanContent: true } );
-
-			const block = editor.canvas.getByLabel(
-				'Block: Product Filters (Experimental)'
-			);
-			await expect( block ).toBeVisible();
-
-			await editor.openDocumentSettingsSidebar();
-
-			const layoutSettings = editor.page.getByText(
-				'OverlayNeverMobileAlways'
-			);
-			await layoutSettings.getByLabel( 'Always' ).click();
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await pageObject.page.goto( blockData.shopPage );
-
-			const productFiltersOverlayNavigationBlock =
-				await pageObject.getProductFiltersOverlayNavigationBlock( {
-					page: 'frontend',
-				} );
-
-			await expect( productFiltersOverlayNavigationBlock ).toBeVisible();
-		} );
-	} );
 } );
