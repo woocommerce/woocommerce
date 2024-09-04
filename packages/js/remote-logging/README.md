@@ -172,3 +172,27 @@ addFilter(
   (endpoint) => 'https://my-custom-endpoint.com/js-error-log'
 );
 ```
+
+### `woocommerce_remote_logging_request_uri_whitelist`
+
+Modifies the list of whitelisted query parameters that won't be masked in the logged request URI
+
+**Parameters:**
+
+- `whitelist` (string[]): The default whitelist.
+
+**Return value:** (string[]) The modified whitelist.
+
+**Usage example:**
+
+```js
+import { addFilter } from '@wordpress/hooks';
+
+addFilter(
+  'woocommerce_remote_logging_request_uri_whitelist',
+  'my-plugin',
+  ( whitelist ) => {
+    return [ ...whitelist, 'exampleParam' ]
+  }
+);
+```

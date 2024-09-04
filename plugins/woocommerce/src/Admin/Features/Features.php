@@ -27,7 +27,6 @@ class Features {
 	 */
 	protected static $optional_features = array(
 		'navigation'                 => array( 'default' => 'no' ),
-		'settings'                   => array( 'default' => 'no' ),
 		'analytics'                  => array( 'default' => 'yes' ),
 		'remote-inbox-notifications' => array( 'default' => 'yes' ),
 	);
@@ -353,7 +352,6 @@ class Features {
 			'Automattic\WooCommerce\Internal\Admin\Marketing' => 'Automattic\WooCommerce\Admin\Features\Marketing',
 			'Automattic\WooCommerce\Internal\Admin\MobileAppBanner' => 'Automattic\WooCommerce\Admin\Features\MobileAppBanner',
 			'Automattic\WooCommerce\Internal\Admin\RemoteInboxNotifications' => 'Automattic\WooCommerce\Admin\Features\RemoteInboxNotifications',
-			'Automattic\WooCommerce\Internal\Admin\SettingsNavigationFeature' => 'Automattic\WooCommerce\Admin\Features\Settings',
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBanner' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBanner',
 			'Automattic\WooCommerce\Internal\Admin\ShippingLabelBannerDisplayRules' => 'Automattic\WooCommerce\Admin\Features\ShippingLabelBannerDisplayRules',
 			'Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage' => 'Automattic\WooCommerce\Admin\Features\WcPayWelcomePage',
