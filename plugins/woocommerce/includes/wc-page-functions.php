@@ -34,6 +34,36 @@ function wc_page_endpoint_title( $title ) {
 add_filter( 'the_title', 'wc_page_endpoint_title' );
 
 /**
+ * Replace the title part of the document title.
+ *
+ * @param array $title {
+ *     The document title parts.
+ *
+ *     @type string $title   Title of the viewed page.
+ *     @type string $page    Optional. Page number if paginated.
+ *     @type string $tagline Optional. Site description when on home page.
+ *     @type string $site    Optional. Site title when not on home page.
+ * }
+ * @return array
+ */
+function wc_page_endpoint_document_title_parts( $title ) {
+	global $wp_query;
+
+	if ( ! is_null( $wp_query ) && ! is_admin() && is_main_query() && is_page() && is_wc_endpoint_url() ) {
+		$endpoint       = WC()->query->get_current_endpoint();
+		$action         = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$endpoint_title = WC()->query->get_endpoint_title( $endpoint, $action );
+		$title['title'] = $endpoint_title ? $endpoint_title : $title['title'];
+
+		remove_filter( 'document_title_parts', 'wc_page_endpoint_document_title_parts' );
+	}
+
+	return $title;
+}
+
+add_filter( 'document_title_parts', 'wc_page_endpoint_document_title_parts' );
+
+/**
  * Retrieve page ids - used for myaccount, edit_address, shop, cart, checkout, pay, view_order, terms. returns -1 if no page is found.
  *
  * @param string $page Page slug.
