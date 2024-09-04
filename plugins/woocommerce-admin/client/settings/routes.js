@@ -7,6 +7,7 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { Content } from './content';
+import MyExample from './pages/my-example';
 
 const NotFound = () => {
 	return <h1>Not Found</h1>;
@@ -26,9 +27,26 @@ export const getRoute = () => {
 		Array.isArray( sections ) && sections.length === 0
 			? {}
 			: sections[ section || '' ];
-	const isPage = Object.keys( settingsData ).includes( page );
 
-	if ( isPage ) {
+	if ( ! Object.keys( settingsData ).includes( page ) ) {
+		return {
+			page,
+			areas: {
+				content: <NotFound />,
+				edit: null,
+			},
+			widths: {
+				content: undefined,
+				edit: undefined,
+			},
+		};
+	}
+
+	const legacyPages = Object.keys( settingsData ).filter(
+		( p ) => ! settingsData[ p ].is_modern
+	);
+
+	if ( legacyPages.includes( page ) ) {
 		return {
 			page,
 			areas: {
@@ -41,15 +59,20 @@ export const getRoute = () => {
 			},
 		};
 	}
-	return {
-		page,
-		areas: {
-			content: <NotFound />,
-			edit: null,
+
+	const pages = [
+		{
+			page: 'my-example',
+			areas: {
+				content: <MyExample />,
+				edit: null,
+			},
+			widths: {
+				content: undefined,
+				edit: undefined,
+			},
 		},
-		widths: {
-			content: undefined,
-			edit: undefined,
-		},
-	};
+	];
+
+	return pages.find( ( p ) => p.page === page );
 };

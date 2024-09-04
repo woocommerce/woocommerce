@@ -34,6 +34,13 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		protected $label = '';
 
 		/**
+		 * Is setting page modern.
+		 *
+		 * @var boolean
+		 */
+		protected $is_modern = false;
+
+		/**
 		 * Setting page label.
 		 *
 		 * @var string
@@ -198,6 +205,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$pages[ $this->id ] = array(
 				'label'   => html_entity_decode( $this->label ),
 				'sections' => $sections_data,
+				'is_modern' => $this->is_modern,
 			);
 
 			return $pages;

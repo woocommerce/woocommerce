@@ -95,7 +95,7 @@ const Settings = ( { params } ) => {
 						<Icon icon={ chevronLeft } />
 						Settings
 					</Button>
-					<Tabs data={ settingsData } page={ params.page } />
+					<Tabs data={ settingsData } page={ page } />
 				</div>
 				{ areas.content && (
 					<div className="woocommerce-settings-layout-content">
