@@ -3,7 +3,7 @@
  * Load assets
  *
  * @package WooCommerce\Admin
- * @version x.x.x
+ * @version 3.7.0
  */
 
 use Automattic\Jetpack\Constants;
@@ -242,7 +242,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			// Edit product category pages.
-			if ( in_array( $screen_id, array( 'edit-product_cat' ), true ) ) {
+			if ( in_array( $screen_id, array( 'edit-product_cat' ) ) ) {
 				wp_enqueue_media();
 			}
 
@@ -312,6 +312,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_variation_count_plural'         => esc_js( __( '%qty% variations', 'woocommerce' ) ),
 					'variations_per_page'                 => absint( apply_filters( 'woocommerce_admin_meta_boxes_variations_per_page', 15 ) ),
 				);
+
+				wp_localize_script( 'wc-admin-variation-meta-boxes', 'woocommerce_admin_meta_boxes_variations', $params );
 			}
 			/* phpcs: enable */
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
