@@ -196,7 +196,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			];
 		}
 
-		echo 'Passing thru a request: ', $url,  PHP_EOL;
+		if ( $url_domain !== 'localhost' ) {
+			echo 'Passing thru a request: ', $url, PHP_EOL;
+		}
 
 		return $preempt;
 	}
