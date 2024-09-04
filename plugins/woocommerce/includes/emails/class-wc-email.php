@@ -604,14 +604,14 @@ class WC_Email extends WC_Settings_API {
 	 * @param string|null $content Content that will receive inline styles.
 	 * @return string
 	 */
-	public function style_inline( $content ) {
+	public function style_inline( $content, $style_overrides = [] ) {
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
 			$css  = '';
 			$css .= $this->get_must_use_css_styles();
 			$css .= "\n";
 
 			ob_start();
-			wc_get_template( 'emails/email-styles.php' );
+			wc_get_template( 'emails/email-styles.php', array( 'style_overrides' => $style_overrides ) );
 			$css .= ob_get_clean();
 
 			/**
