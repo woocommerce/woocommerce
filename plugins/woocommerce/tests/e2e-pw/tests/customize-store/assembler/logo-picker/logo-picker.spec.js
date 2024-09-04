@@ -168,7 +168,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		const emptyLogoLocator =
 			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 		await expect( emptyLogoLocator ).toBeHidden();
-		await assembler.getByLabel( 'Options' ).click();
+		await assembler.getByLabel( 'Options', { exact: true } ).click();
 		await assembler.getByText( 'Delete' ).click();
 		await expect( emptyLogoLocator ).toBeVisible();
 	} );
@@ -182,7 +182,7 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 		await emptyLogoPicker.click();
 		await logoPickerPageObject.pickImage( assembler );
-		await assembler.getByLabel( 'Options' ).click();
+		await assembler.getByLabel( 'Options', { exact: true } ).click();
 		await assembler.getByText( 'Replace' ).click();
 		await expect( assembler.getByText( 'Media Library' ) ).toBeVisible();
 	} );
@@ -219,28 +219,29 @@ test.describe( 'Assembler -> Logo Picker', { tag: '@gutenberg' }, () => {
 		await expect( emptyLogoLocator ).toBeHidden();
 	} );
 
-	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
-		page,
-		assemblerPageObject,
-		logoPickerPageObject,
-	} ) => {
-		const assembler = await assemblerPageObject.getAssembler();
-		const emptyLogoPicker =
-			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
-		await emptyLogoPicker.click();
-		await logoPickerPageObject.pickImage( assembler );
-		await assembler.getByText( 'Use as site icon' ).click();
-		await logoPickerPageObject.saveLogoSettings( assembler );
+	test(
+		'Enabling the "use as site icon" option should set the image as the site icon',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { page, assemblerPageObject, logoPickerPageObject } ) => {
+			const assembler = await assemblerPageObject.getAssembler();
+			const emptyLogoPicker =
+				logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
+			await emptyLogoPicker.click();
+			await logoPickerPageObject.pickImage( assembler );
+			await assembler.getByText( 'Use as site icon' ).click();
+			await logoPickerPageObject.saveLogoSettings( assembler );
 
-		// alternative way to verify new site icon on the site
-		// verifying site icon shown in the new tab is impossible in headless mode
-		const date = new Date();
-		await expect(
-			page.goto(
-				`/wp-content/uploads/${ date.getFullYear() }/${ date.getMonth() }/image-03-100x100.png`
-			)
-		).toBeTruthy();
-	} );
+			// alternative way to verify new site icon on the site
+			// verifying site icon shown in the new tab is impossible in headless mode
+			const date = new Date();
+			const month = ( date.getMonth() + 1 ).toString().padStart( 2, '0' );
+			await expect(
+				page.goto(
+					`/wp-content/uploads/${ date.getFullYear() }/${ month }/image-03-100x100.png`
+				)
+			).toBeTruthy();
+		}
+	);
 
 	test( 'The selected image should be visible on the frontend', async ( {
 		page,

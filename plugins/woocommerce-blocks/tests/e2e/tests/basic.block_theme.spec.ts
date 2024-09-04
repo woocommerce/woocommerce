@@ -13,6 +13,11 @@ test.describe( 'Basic role-based functionality tests', () => {
 				page.getByRole( 'heading', { name: 'Dashboard' } )
 			).toHaveText( 'Dashboard' );
 		} );
+
+		test( 'Load iframed post editor', async ( { admin, editor } ) => {
+			await admin.createNewPost();
+			await expect( editor.canvas.owner() ).toBeVisible();
+		} );
 	} );
 
 	test.describe( 'As customer', () => {

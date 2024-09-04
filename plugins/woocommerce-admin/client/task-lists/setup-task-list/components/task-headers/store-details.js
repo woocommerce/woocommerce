@@ -26,7 +26,7 @@ const StoreDetailsHeader = ( { task, goToTask } ) => {
 				</h1>
 				<p>
 					{ __(
-						"Get your store up and running in no time. Add your store's address to set up shipping, tax and payments faster.",
+						'Get your store up and running in no time. Add your store’s address to set up shipping, tax and payments faster.',
 						'woocommerce'
 					) }
 				</p>

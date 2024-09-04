@@ -45,13 +45,12 @@ import { addFilter } from '@wordpress/hooks';
 import { CustomizeStoreComponent } from '../types';
 import { Layout } from './layout';
 import './style.scss';
-import { PreloadFonts } from './preload-fonts';
 import { GoBackWarningModal } from './go-back-warning-modal';
 import { onBackButtonClicked } from '../utils';
 import { getNewPath } from '@woocommerce/navigation';
 import useBodyClass from '../hooks/use-body-class';
-import { ZoomOutContextProvider } from './context/zoom-out-context';
-
+import { OptInSubscribe } from './opt-in/opt-in';
+import { OptInContextProvider } from './opt-in/context';
 import './tracking';
 
 const { RouterProvider } = unlock( routerPrivateApis );
@@ -151,15 +150,7 @@ const initializeAssembleHub = () => {
 export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 	const isInitializedRef = useRef( false );
 
-	// @ts-expect-error temp fix
-	const isAiFlow = window.parent?.window.cys_aiFlow ? true : false;
-
 	useBodyClass( 'woocommerce-assembler' );
-	useBodyClass(
-		isAiFlow
-			? 'woocommerce-assembler--with-ai'
-			: 'woocommerce-assembler--without-ai'
-	);
 
 	if ( ! isInitializedRef.current ) {
 		initializeAssembleHub();
@@ -190,14 +181,14 @@ export const AssemblerHub: CustomizeStoreComponent = ( props ) => {
 			) }
 			<CustomizeStoreContext.Provider value={ props }>
 				<ShortcutProvider style={ { height: '100%' } }>
-					<GlobalStylesProvider>
-						<RouterProvider>
-							<ZoomOutContextProvider>
+					<OptInContextProvider>
+						<GlobalStylesProvider>
+							<RouterProvider>
 								<Layout />
-							</ZoomOutContextProvider>
-						</RouterProvider>
-						<PreloadFonts />
-					</GlobalStylesProvider>
+							</RouterProvider>
+							<OptInSubscribe />
+						</GlobalStylesProvider>
+					</OptInContextProvider>
 				</ShortcutProvider>
 			</CustomizeStoreContext.Provider>
 		</>

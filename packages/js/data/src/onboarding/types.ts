@@ -29,8 +29,10 @@ export type TaskType = {
 	badge?: string;
 	additionalData?: {
 		woocommerceTaxCountries?: string[];
+		stripeTaxCountries?: string[];
 		taxJarActivated?: boolean;
 		avalaraActivated?: boolean;
+		stripeTaxActivated?: boolean;
 		woocommerceTaxActivated?: boolean;
 		woocommerceShippingActivated?: boolean;
 	};

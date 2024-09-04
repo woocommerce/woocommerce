@@ -58,21 +58,24 @@ test.describe(
 			);
 		} );
 
-		test( 'it shows the "offline banner" when the network is offline', async ( {
-			page,
-			context,
-		} ) => {
-			await page.goto( CUSTOMIZE_STORE_URL );
-			await expect(
-				page.locator( 'text=Design your own' )
-			).toBeVisible();
-			await context.setOffline( true );
+		test(
+			'it shows the "offline banner" when the network is offline',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page, context } ) => {
+				await page.goto( CUSTOMIZE_STORE_URL );
+				await expect(
+					page.locator( 'text=Design your own' )
+				).toBeVisible();
+				await context.setOffline( true );
 
-			await expect( page.locator( '.offline-banner' ) ).toBeVisible();
-			await expect(
-				page.locator( 'text=Looking to design your store using AI?' )
-			).toBeVisible();
-		} );
+				await expect( page.locator( '.offline-banner' ) ).toBeVisible();
+				await expect(
+					page.locator(
+						'text=Looking to design your store using AI?'
+					)
+				).toBeVisible();
+			}
+		);
 
 		test( 'it shows the "no AI" banner on Core when the task is not completed', async ( {
 			page,
@@ -115,34 +118,38 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'it shows the "non default block theme" banner when the theme is a block theme different than TT4', async ( {
-			page,
-		} ) => {
-			await activateTheme( 'twentytwentythree' );
+		test(
+			'it shows the "non default block theme" banner when the theme is a block theme different than TT4',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page } ) => {
+				await activateTheme( 'twentytwentythree' );
 
-			await page.goto( CUSTOMIZE_STORE_URL );
+				await page.goto( CUSTOMIZE_STORE_URL );
 
-			await expect( page.locator( 'h1' ) ).toHaveText(
-				'Customize your theme'
-			);
-			await expect(
-				page.getByRole( 'button', { name: 'Go to the Editor' } )
-			).toBeVisible();
-		} );
+				await expect( page.locator( 'h1' ) ).toHaveText(
+					'Customize your theme'
+				);
+				await expect(
+					page.getByRole( 'button', { name: 'Go to the Editor' } )
+				).toBeVisible();
+			}
+		);
 
-		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer', async ( {
-			page,
-		} ) => {
-			await activateTheme( 'twentytwenty' );
+		test(
+			'clicking on "Go to the Customizer" with a classic theme should go to the customizer',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page } ) => {
+				await activateTheme( 'twentytwenty' );
 
-			await page.goto( CUSTOMIZE_STORE_URL );
+				await page.goto( CUSTOMIZE_STORE_URL );
 
-			await page
-				.getByRole( 'button', { name: 'Go to the Customizer' } )
-				.click();
+				await page
+					.getByRole( 'button', { name: 'Go to the Customizer' } )
+					.click();
 
-			await page.waitForNavigation();
-			await expect( page.url() ).toContain( 'customize.php' );
-		} );
+				await page.waitForNavigation();
+				await expect( page.url() ).toContain( 'customize.php' );
+			}
+		);
 	}
 );

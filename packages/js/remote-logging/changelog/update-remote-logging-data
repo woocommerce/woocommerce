@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add request_uri prop to remote logging data

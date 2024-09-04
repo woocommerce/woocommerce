@@ -56,7 +56,7 @@ export const Partners: React.FC< TaxChildProps > = ( {
 								onDisable();
 							} }
 						>
-							{ __( "I don't charge sales tax", 'woocommerce' ) }
+							{ __( 'I don’t charge sales tax', 'woocommerce' ) }
 						</Button>
 					</li>
 				</ul>

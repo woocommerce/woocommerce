@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-single-variation-notice",
 	"title": "Notice",
 	"category": "woocommerce",
 	"description": "Notice description",
-	"keywords": [ "products", "notice" ],
+	"keywords": [
+		"products",
+		"notice"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"title": {

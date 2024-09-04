@@ -617,7 +617,7 @@ You can use the `woocommerce_get_default_value_for_{$key}` filters to provide a 
 
 ```php
 add_filter(
-	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/address-field",
+	"woocommerce_get_default_value_for_my-plugin-namespace/address-field",
 	function ( $value, $group, $wc_object ) {
 
 		if ( 'billing' === $group ) {
@@ -633,7 +633,7 @@ add_filter(
 );
 
 add_filter(
-	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/my-other-field",
+	"woocommerce_get_default_value_for_my-plugin-namespace/my-other-field",
 	function ( $value, $group, $wc_object ) {
 
 		$my_plugin_key = 'existing_order_field_key';

@@ -61,7 +61,7 @@ export const useSendMagicLink = () => {
 					createNotice(
 						'error',
 						__(
-							"We couldn't send the link. Try again in a few seconds.",
+							'We couldn’t send the link. Try again in a few seconds.',
 							'woocommerce'
 						)
 					);
@@ -71,7 +71,7 @@ export const useSendMagicLink = () => {
 					createNotice(
 						'error',
 						__(
-							"Sorry, your account doesn't have sufficient permission.",
+							'Sorry, your account doesn’t have sufficient permission.',
 							'woocommerce'
 						)
 					);
@@ -80,7 +80,7 @@ export const useSendMagicLink = () => {
 				} else {
 					createNotice(
 						'error',
-						"We couldn't send the link. Try again in a few seconds."
+						'We couldn’t send the link. Try again in a few seconds.'
 					);
 				}
 			} );

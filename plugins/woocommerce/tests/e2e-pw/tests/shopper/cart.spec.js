@@ -81,100 +81,116 @@ test.describe( 'Cart page', { tag: [ '@payments', '@services' ] }, () => {
 		await responsePromise;
 	}
 
-	test( 'should display no item in the cart', async ( { page } ) => {
-		await page.goto( '/cart/' );
-		await expect(
-			page.getByText( 'Your cart is currently empty.' )
-		).toBeVisible();
-	} );
-
-	test( 'should add the product to the cart from the shop page', async ( {
-		page,
-	} ) => {
-		await goToShopPageAndAddProductToCart( page, productName );
-
-		await page.goto( '/cart/' );
-		await expect( page.locator( 'td.product-name' ) ).toContainText(
-			productName
-		);
-	} );
-
-	test( 'should increase item quantity when "Add to cart" of the same product is clicked', async ( {
-		page,
-	} ) => {
-		let qty = 2;
-		while ( qty-- ) {
-			await goToShopPageAndAddProductToCart( page, productName );
+	test(
+		'should display no item in the cart',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page } ) => {
+			await page.goto( '/cart/' );
+			await expect(
+				page.getByText( 'Your cart is currently empty.' )
+			).toBeVisible();
 		}
+	);
 
-		await page.goto( '/cart/' );
-		await expect( page.locator( 'input.qty' ) ).toHaveValue( '2' );
-	} );
+	test(
+		'should add the product to the cart from the shop page',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page } ) => {
+			await goToShopPageAndAddProductToCart( page, productName );
 
-	test( 'should update quantity when updated via quantity input', async ( {
-		page,
-	} ) => {
-		await goToShopPageAndAddProductToCart( page, productName );
+			await page.goto( '/cart/' );
+			await expect( page.locator( 'td.product-name' ) ).toContainText(
+				productName
+			);
+		}
+	);
 
-		await page.goto( '/cart/' );
-		await page.locator( 'input.qty' ).fill( '2' );
-		await page.locator( 'text=Update cart' ).click();
+	test(
+		'should increase item quantity when "Add to cart" of the same product is clicked',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page } ) => {
+			let qty = 2;
+			while ( qty-- ) {
+				await goToShopPageAndAddProductToCart( page, productName );
+			}
 
-		await expect( page.locator( '.order-total .amount' ) ).toContainText(
-			`$${ twoProductPrice }`
-		);
-	} );
+			await page.goto( '/cart/' );
+			await expect( page.locator( 'input.qty' ) ).toHaveValue( '2' );
+		}
+	);
 
-	test( 'should remove the item from the cart when remove is clicked', async ( {
-		page,
-	} ) => {
-		await goToShopPageAndAddProductToCart( page, productName );
-		await page.goto( '/cart/' );
+	test(
+		'should update quantity when updated via quantity input',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page } ) => {
+			await goToShopPageAndAddProductToCart( page, productName );
 
-		// make sure that the product is in the cart
-		await expect( page.locator( '.order-total .amount' ) ).toContainText(
-			`$${ productPrice }`
-		);
+			await page.goto( '/cart/' );
+			await page.locator( 'input.qty' ).fill( '2' );
+			await page.locator( 'text=Update cart' ).click();
 
-		await page.locator( 'a.remove' ).click();
+			await expect(
+				page.locator( '.order-total .amount' )
+			).toContainText( `$${ twoProductPrice }` );
+		}
+	);
 
-		await expect(
-			page.getByText( `“${ productName }” removed` )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Your cart is currently empty' )
-		).toBeVisible();
-	} );
+	test(
+		'should remove the item from the cart when remove is clicked',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page } ) => {
+			await goToShopPageAndAddProductToCart( page, productName );
+			await page.goto( '/cart/' );
 
-	test( 'should update subtotal in cart totals when adding product to the cart', async ( {
-		page,
-	} ) => {
-		await goToShopPageAndAddProductToCart( page, productName );
+			// make sure that the product is in the cart
+			await expect(
+				page.locator( '.order-total .amount' )
+			).toContainText( `$${ productPrice }` );
 
-		await page.goto( '/cart/' );
-		await expect( page.locator( '.cart-subtotal .amount' ) ).toContainText(
-			`$${ productPrice }`
-		);
+			await page.locator( 'a.remove' ).click();
 
-		await page.locator( 'input.qty' ).fill( '2' );
-		await page.locator( 'text=Update cart' ).click();
+			await expect(
+				page.getByText( `“${ productName }” removed` )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Your cart is currently empty' )
+			).toBeVisible();
+		}
+	);
 
-		await expect( page.locator( '.order-total .amount' ) ).toContainText(
-			`$${ twoProductPrice }`
-		);
-	} );
+	test(
+		'should update subtotal in cart totals when adding product to the cart',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page } ) => {
+			await goToShopPageAndAddProductToCart( page, productName );
 
-	test( 'should go to the checkout page when "Proceed to Checkout" is clicked', async ( {
-		page,
-	} ) => {
-		await goToShopPageAndAddProductToCart( page, productName );
+			await page.goto( '/cart/' );
+			await expect(
+				page.locator( '.cart-subtotal .amount' )
+			).toContainText( `$${ productPrice }` );
 
-		await page.goto( '/cart/' );
+			await page.locator( 'input.qty' ).fill( '2' );
+			await page.locator( 'text=Update cart' ).click();
 
-		await page.locator( '.checkout-button' ).click();
+			await expect(
+				page.locator( '.order-total .amount' )
+			).toContainText( `$${ twoProductPrice }` );
+		}
+	);
 
-		await expect( page.locator( '#order_review' ) ).toBeVisible();
-	} );
+	test(
+		'should go to the checkout page when "Proceed to Checkout" is clicked',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page } ) => {
+			await goToShopPageAndAddProductToCart( page, productName );
+
+			await page.goto( '/cart/' );
+
+			await page.locator( '.checkout-button' ).click();
+
+			await expect( page.locator( '#order_review' ) ).toBeVisible();
+		}
+	);
 
 	test( 'can manage cross-sell products and maximum item quantity', async ( {
 		page,

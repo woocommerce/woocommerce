@@ -13,6 +13,8 @@ import {
 	REMOTE_LOGGING_ERROR_DATA_FILTER,
 	REMOTE_LOGGING_LOG_ENDPOINT_FILTER,
 	REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
+	sanitiseRequestUriParams,
+	REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER,
 } from '../remote-logger';
 import { fetchMock } from './__mocks__/fetch';
 
@@ -31,6 +33,17 @@ jest.mock( 'tracekit', () => ( {
 		],
 	} ),
 } ) );
+
+jest.mock( '@woocommerce/settings', () => {
+	return {
+		getSetting: jest.fn().mockImplementation( ( key ) => {
+			if ( key === 'wcAssetUrl' ) {
+				return 'http://example.com/woocommerce/assets';
+			}
+			return null;
+		} ),
+	};
+} );
 
 describe( 'RemoteLogger', () => {
 	const originalConsoleWarn = console.warn;
@@ -222,7 +235,7 @@ describe( 'RemoteLogger', () => {
 			const error = new Error( 'Test error' );
 			const stackFrames = [
 				{
-					url: 'http://example.com/wp-content/plugins/woocommerce/assets/js/admin/app.min.js',
+					url: 'http://example.com/woocommerce/assets/js/admin/app.min.js',
 					func: 'testFunction',
 					args: [],
 					line: 1,
@@ -241,6 +254,13 @@ describe( 'RemoteLogger', () => {
 			const stackFrames = [
 				{
 					url: 'http://example.com/other/script.js',
+					func: 'testFunction',
+					args: [],
+					line: 1,
+					column: 1,
+				},
+				{
+					url: 'http://example.com/other/plugin/woocommerce/assets/js/app.min.js',
 					func: 'testFunction',
 					args: [],
 					line: 1,
@@ -362,3 +382,24 @@ describe( 'captureException', () => {
 		expect( fetchMock ).not.toHaveBeenCalled();
 	} );
 } );
+
+describe( 'sanitiseRequestUriParams', () => {
+	afterEach(() => {
+		removeFilter(REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER, 'test' );
+	})
+	it( 'should replace non-whitelisted params with xxxxxx', () => {
+		expect(sanitiseRequestUriParams('?path=home&user=admin&token=abc123')).toEqual('path=home&user=xxxxxx&token=xxxxxx')
+	})
+	it( 'should not replace whitelisted params with xxxxxx', () => {
+		expect(sanitiseRequestUriParams('?path=home')).toEqual('path=home')
+	})
+	it( 'should not do anything if empty string is passed in', () => {
+		expect(sanitiseRequestUriParams('')).toEqual('')
+	})
+	it( 'should apply filters correctly', () => {
+		addFilter( REMOTE_LOGGING_REQUEST_URI_PARAMS_WHITELIST_FILTER, 'test', (defaultWhitelist) => {
+			return [ ... defaultWhitelist, 'foo' ];
+		})
+		expect(sanitiseRequestUriParams('?path=home&foo=bar&user=admin&token=abc123')).toEqual('path=home&foo=bar&user=xxxxxx&token=xxxxxx')
+	})
+})

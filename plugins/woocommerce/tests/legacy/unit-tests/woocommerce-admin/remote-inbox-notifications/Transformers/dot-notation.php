@@ -51,11 +51,11 @@ class WC_Admin_Tests_RemoteInboxNotifications_Transformers_DotNotation extends W
 	 * Test it get getvalue by dot notation.
 	 */
 	public function test_it_can_get_value_by_dot_notation() {
-		$arguments = (object) array( 'path' => 'teams.mothra' );
+		$arguments = (object) array( 'path' => 'teams.a' );
 
 		$items = array(
 			'teams' => array(
-				'mothra' => 'nice!',
+				'a' => 'nice!',
 			),
 		);
 
@@ -72,7 +72,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_Transformers_DotNotation extends W
 
 		$items = array(
 			'teams' => array(
-				'mothra' => 'nice!',
+				'a' => 'nice!',
 			),
 		);
 

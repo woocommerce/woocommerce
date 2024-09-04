@@ -64,6 +64,7 @@ function _wc_beta_tester_bootstrap() {
 		// Tools.
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-version-picker.php';
 		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-override-coming-soon-options.php';
+		include dirname( __FILE__ ) . '/includes/class-wc-beta-tester-wccom-requests.php';
 
 		register_activation_hook( __FILE__, array( 'WC_Beta_Tester', 'activate' ) );
 
