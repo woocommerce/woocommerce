@@ -145,7 +145,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
 		if (
 			in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) &&
-			in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ], true )
+			in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com', 'localhost' ], true )
 		) {
 			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
 			// Ensure we are getting the copy of images (so we can git-push them).
@@ -193,6 +193,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 				'response' => [ 'code' => WP_Http::OK ],
 			];
 		}
+
+		echo 'Passing thru a request: ', $url,  PHP_EOL;
 
 		return $preempt;
 	}
