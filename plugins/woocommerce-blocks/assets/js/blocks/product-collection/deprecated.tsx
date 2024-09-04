@@ -36,7 +36,7 @@ const v1 = {
 		return query && typeof query.woocommerceOnSale === 'boolean';
 	},
 	/**
-	 * Migrate the old `attributes.query.woocommerceOnSale` attibute, to the current
+	 * Migrate the old `attributes.query.woocommerceOnSale` attribute, to the current
 	 * definition from ProductCollectionQuery.
 	 *
 	 * @param attributes                         The old attributes.
