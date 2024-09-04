@@ -183,4 +183,12 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( 'Add Memberships and 2 more products to my store', $this->task->get_title() );
 	}
+
+	/**
+	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
+	 */
+	public function http_request_listner( $preempt, $request, $url ) {
+		// TODO: not a great approach, to be revisited
+		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
+	}
 }
