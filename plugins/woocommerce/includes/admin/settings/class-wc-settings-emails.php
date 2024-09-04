@@ -445,21 +445,61 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				<iframe id="email_preview" style="width:800px;border: 0;"></iframe>
 				<script>
 					document.addEventListener("DOMContentLoaded", function() {
-						const emailPreviewUrl = '/wp-admin/?email_preview&order_id={orderId}&email_type={emailType}';
+						const emailPreviewUrl = '/wp-admin/?email_preview&order_id={orderId}&email_type={emailType}&styles={styles}';
+
 						const orderId = document.getElementById('order_id');
 						const emailType = document.getElementById('email_type');
 						const iframe = document.getElementById('email_preview');
 
+						const headerImg = document.getElementById('woocommerce_email_header_image');
+						const baseColor = document.getElementById('woocommerce_email_base_color');
+						const bgColor = document.getElementById('woocommerce_email_background_color');
+						const bodyBgColor = document.getElementById('woocommerce_email_body_background_color');
+						const textColor = document.getElementById('woocommerce_email_text_color');
+						const footerText = document.getElementById('woocommerce_email_footer_text');
+						const footerTextColor = document.getElementById('woocommerce_email_footer_text_color');
+
+						let originalColors = [baseColor.value, bgColor.value, bodyBgColor.value, textColor.value, footerTextColor.value];
+
 						const updateIframeUrl = function() {
-							iframe.src = emailPreviewUrl
+							const styles = {
+								header_img: headerImg.value,
+								base_color: baseColor.value,
+								bg_color: bgColor.value,
+								body_bg_color: bodyBgColor.value,
+								text_color: textColor.value,
+								footer_text: footerText.value,
+								footer_text_color: footerTextColor.value
+							};
+							const url = emailPreviewUrl
 								.replace('{orderId}', orderId.value)
-								.replace('{emailType}', emailType.value);
+								.replace('{emailType}', emailType.value)
+								.replace('{styles}', encodeURIComponent(JSON.stringify(styles)));
+							iframe.src = url;
 							iframe.onload = function() {
 								iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
 							};
 						};
 						orderId.addEventListener('change', updateIframeUrl);
 						emailType.addEventListener('change', updateIframeUrl);
+						headerImg.addEventListener('change', updateIframeUrl);
+						footerText.addEventListener('change', updateIframeUrl);
+						baseColor.addEventListener('change', updateIframeUrl);
+						bgColor.addEventListener('change', updateIframeUrl);
+						bodyBgColor.addEventListener('change', updateIframeUrl);
+						textColor.addEventListener('change', updateIframeUrl);
+						footerTextColor.addEventListener('change', updateIframeUrl);
+
+						// Color inputs don't fire `change` event when color is selected from the color picker
+						// This is a workaround when the color is selected from the color picker
+						setInterval(function() {
+							const currentColors = [baseColor.value, bgColor.value, bodyBgColor.value, textColor.value, footerTextColor.value];
+							if (originalColors.some((item, index) => item !== currentColors[index])) {
+								originalColors = currentColors;
+								updateIframeUrl();
+							}
+						}, 1000);
+
 						updateIframeUrl();
 					});
 				</script>

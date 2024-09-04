@@ -43,7 +43,10 @@ class WC_Admin {
 		add_action('admin_init', function() {
 			if ( isset( $_GET['email_preview'] ) && isset( $_GET['order_id'] ) && isset( $_GET['email_type'] ) ) {
 				$order = wc_get_order($_GET['order_id']);
-				if ( ! $order ) return;
+				if ( ! $order ) {
+					echo '<p>Order not found</p>';
+					exit;
+				}
 
 				$mailer = WC()->mailer();
 				$emails = $mailer->get_emails();
@@ -51,7 +54,9 @@ class WC_Admin {
 					$email = $emails[$_GET['email_type']];
 					$email->set_order($order);
 					$content = $email->get_content_html();
-					echo $email->style_inline($content);
+					$styles = $_GET['styles'] ?? '{}';
+					$styles = json_decode(urldecode(stripslashes($styles)), true);
+					echo $email->style_inline($content, $styles);
 				}
 				exit;
 			}
