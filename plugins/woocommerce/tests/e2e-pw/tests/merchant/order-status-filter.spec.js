@@ -6,6 +6,7 @@ const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
 const orderStatus = [
+	[ 'All', 'all' ],
 	[ 'Pending payment', 'wc-pending' ],
 	[ 'Processing', 'wc-processing' ],
 	[ 'On hold', 'wc-on-hold' ],
@@ -53,19 +54,6 @@ test.describe(
 				version: 'wc/v3',
 			} );
 			await api.post( 'orders/batch', { delete: [ ...orderBatchId ] } );
-		} );
-
-		test( 'should filter by All', async ( { page } ) => {
-			await page.goto( '/wp-admin/admin.php?page=wc-orders' );
-
-			await page.locator( 'li.all > a' ).click();
-			// because tests are running in parallel, we can't know how many orders there
-			// are beyond the ones we created here.
-			for ( let i = 0; i < orderStatus.length; i++ ) {
-				const statusTag = 'text=' + orderStatus[ i ][ 0 ];
-				const countElements = await page.locator( statusTag ).count();
-				await expect( countElements ).toBeGreaterThan( 0 );
-			}
 		} );
 
 		for ( let i = 0; i < orderStatus.length; i++ ) {
