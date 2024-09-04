@@ -123,11 +123,7 @@ test.describe( 'Product Collection registration', () => {
 				'myCustomCollection'
 			);
 
-			const sidebarSettings = pageObject.locateSidebarSettings();
-			const onsaleControl = sidebarSettings.getByLabel(
-				SELECTORS.onSaleControlLabel
-			);
-			await expect( onsaleControl ).toBeHidden();
+			await expect( pageObject.getOnSaleControl() ).toBeHidden();
 
 			await page
 				.getByRole( 'button', { name: 'Filters options' } )

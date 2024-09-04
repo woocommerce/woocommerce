@@ -87,7 +87,6 @@ class ProductCollection extends \WP_UnitTestCase {
 			$params,
 			array(
 				'featured'               => false,
-				'woocommerceOnSale'      => false,
 				'woocommerceAttributes'  => array(),
 				'woocommerceStockStatus' => array(),
 				'timeFrame'              => array(),
@@ -134,7 +133,7 @@ class ProductCollection extends \WP_UnitTestCase {
 		set_transient( 'wc_products_onsale', $on_sale_product_ids, DAY_IN_SECONDS * 30 );
 
 		$parsed_block                                        = $this->get_base_parsed_block();
-		$parsed_block['attrs']['query']['woocommerceOnSale'] = true;
+		$parsed_block['attrs']['query']['woocommerceOnSale'] = 'show-only';
 
 		$merged_query = $this->initialize_merged_query( $parsed_block );
 
@@ -670,7 +669,7 @@ class ProductCollection extends \WP_UnitTestCase {
 		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
 		$params          = array(
 			'featured'               => 'true',
-			'woocommerceOnSale'      => 'true',
+			'woocommerceOnSale'      => 'show-only',
 			'woocommerceAttributes'  => array(
 				array(
 					'taxonomy' => 'pa_test',

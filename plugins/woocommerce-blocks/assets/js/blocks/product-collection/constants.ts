@@ -56,7 +56,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	taxQuery: {},
 	isProductCollectionBlock: true,
 	featured: false,
-	woocommerceOnSale: false,
+	woocommerceOnSale: undefined,
 	woocommerceStockStatus: getDefaultStockStatuses(),
 	woocommerceAttributes: [],
 	woocommerceHandPickedProducts: [],

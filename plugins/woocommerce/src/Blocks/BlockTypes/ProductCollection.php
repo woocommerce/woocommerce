@@ -605,7 +605,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$orderby             = $request->get_param( 'orderBy' );
-		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$on_sale             = $request->get_param( 'woocommerceOnSale' );
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
 		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
@@ -715,7 +715,7 @@ class ProductCollection extends AbstractBlock {
 			's'              => $query['search'],
 		);
 
-		$is_on_sale          = $query['woocommerceOnSale'] ?? false;
+		$on_sale             = $query['woocommerceOnSale'] ?? null;
 		$product_attributes  = $query['woocommerceAttributes'] ?? array();
 		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? array() );
 		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? array();
@@ -725,7 +725,7 @@ class ProductCollection extends AbstractBlock {
 		$final_query = $this->get_final_query_args(
 			$common_query_values,
 			array(
-				'on_sale'             => $is_on_sale,
+				'on_sale'             => $on_sale,
 				'stock_status'        => $query['woocommerceStockStatus'],
 				'orderby'             => $query['orderBy'],
 				'product_attributes'  => $product_attributes,
@@ -878,15 +878,50 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Return a query for on sale products.
+	 * Return a query for on sale products managed by the deprecated
+	 * version v1 of the product collection block.
+	 *
+	 * @deprecated 9.4.0 $is_on_sale is no longer a bool but a string.
 	 *
 	 * @param bool $is_on_sale Whether to query for on sale products.
 	 *
 	 * @return array
 	 */
-	private function get_on_sale_products_query( $is_on_sale ) {
+	private function get_on_sale_products_query_v1( $is_on_sale ) {
 		if ( ! $is_on_sale ) {
 			return array();
+		}
+
+		return array(
+			'post__in' => wc_get_product_ids_on_sale(),
+		);
+	}
+
+	/**
+	 * Return a query for on sale products.
+	 *
+	 * @param string|bool $on_sale Whether to query for on sale products.
+	 *
+	 * @return array
+	 */
+	private function get_on_sale_products_query( $on_sale ) {
+		// The deprecated version v1 of the product collection block
+		// manages the `woocommerceOnSale` param as a boolean. So this
+		// check is required to support that version.
+		if ( is_bool( $on_sale ) ) {
+			return $this->get_on_sale_products_query_v1( $on_sale );
+		}
+
+		// The current version of the product collection block manages the
+		// `woocommerceOnSale` param as an optional string.
+		if ( is_null( $on_sale ) ) {
+			return array();
+		}
+
+		if ( 'dont-show' === $on_sale ) {
+			return array(
+				'post__not_in' => wc_get_product_ids_on_sale(),
+			);
 		}
 
 		return array(

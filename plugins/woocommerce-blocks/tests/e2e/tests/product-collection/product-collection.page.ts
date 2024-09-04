@@ -36,7 +36,9 @@ export const SELECTORS = {
 		inEditor: '[data-type="core/query-pagination"]',
 		onFrontend: '.wp-block-query-pagination',
 	},
-	onSaleControlLabel: 'Show only products on sale',
+	onSaleControlLabel: 'On-sale products',
+	onSaleShowOnlyControlOptionLabel: 'Show Only',
+	onSaleDontShowControlOptionLabel: "Don't Show",
 	featuredControlLabel: 'Show only featured products',
 	usePageContextControl:
 		'.wc-block-product-collection__inherit-query-control',
@@ -403,6 +405,8 @@ class ProductCollectionPage {
 			| 'Featured'
 			| 'Created'
 			| 'Price Range'
+			| 'Hide and reset On Sale'
+			| 'Show On Sale'
 	) {
 		await this.page
 			.getByRole( 'button', { name: 'Filters options' } )
@@ -455,26 +459,49 @@ class ProductCollectionPage {
 		return await orderByComboBox.inputValue();
 	}
 
+	getOnSaleControl() {
+		const sidebarSettings = this.locateSidebarSettings();
+		return sidebarSettings.getByRole( 'radiogroup', {
+			name: SELECTORS.onSaleControlLabel,
+		} );
+	}
+
+	getOnSaleControlShowOnlyOption() {
+		const onSaleControl = this.getOnSaleControl();
+		return onSaleControl.getByRole( 'radio', {
+			name: SELECTORS.onSaleShowOnlyControlOptionLabel,
+		} );
+	}
+
+	getOnSaleControlDontShowOption() {
+		const onSaleControl = this.getOnSaleControl();
+		return onSaleControl.getByRole( 'radio', {
+			name: SELECTORS.onSaleDontShowControlOptionLabel,
+		} );
+	}
+
 	async setShowOnlyProductsOnSale(
 		{
 			onSale,
 			isLocatorsRefreshNeeded,
 		}: {
-			onSale: boolean;
+			onSale: 'show-only' | 'dont-show' | undefined;
 			isLocatorsRefreshNeeded?: boolean;
 		} = {
 			isLocatorsRefreshNeeded: true,
-			onSale: true,
+			onSale: 'show-only',
 		}
 	) {
-		const sidebarSettings = this.locateSidebarSettings();
-		const input = sidebarSettings.getByLabel(
-			SELECTORS.onSaleControlLabel
-		);
-		if ( onSale ) {
-			await input.check();
+		await this.addFilter( 'Show On Sale' );
+
+		if ( onSale === 'show-only' ) {
+			const showOnlyOption = this.getOnSaleControlShowOnlyOption();
+			await showOnlyOption.click();
+		} else if ( onSale === 'dont-show' ) {
+			const dontShowOption = this.getOnSaleControlDontShowOption();
+			await dontShowOption.click();
 		} else {
-			await input.uncheck();
+			await this.addFilter( 'Hide and reset On Sale' );
 		}
 
 		if ( isLocatorsRefreshNeeded ) await this.refreshLocators( 'editor' );
