@@ -1,10 +1,5 @@
 name: Storybook GitHub Pages
 
-# on:
-#     push:
-#         branches:
-#             - trunk
-
 jobs:
     deploy:
         runs-on: ubuntu-latest
