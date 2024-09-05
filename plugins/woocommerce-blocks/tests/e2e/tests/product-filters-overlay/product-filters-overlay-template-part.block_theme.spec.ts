@@ -125,5 +125,111 @@ test.describe( 'Filters Overlay Template Part', () => {
 
 			await expect( productFiltersDialog ).toBeHidden();
 		} );
+
+		test( 'should hide Product Filters Overlay Navigation block when the Overlay mode is set to `Never`', async ( {
+			editor,
+			page,
+			frontendUtils,
+		} ) => {
+			await editor.setContent( '' );
+			await editor.openGlobalBlockInserter();
+			await page.getByText( 'Product Filters (Experimental)' ).click();
+			const block = editor.canvas.getByLabel(
+				'Block: Product Filters (Experimental)'
+			);
+			await expect( block ).toBeVisible();
+
+			// This forces the list view to show the inner blocks of the Product Filters template part.
+			await editor.canvas
+				.getByLabel( 'Block: Active (Experimental)' )
+				.getByLabel( 'Block: Filter Options' )
+				.click();
+
+			await editor.openDocumentSettingsSidebar();
+			await page.getByLabel( 'Document Overview' ).click();
+			await page
+				.getByRole( 'link', { name: 'Product Filters (Experimental)' } )
+				.nth( 1 )
+				.click();
+
+			const layoutSettings = editor.page.getByText(
+				'OverlayNeverMobileAlways'
+			);
+			await layoutSettings.getByLabel( 'Never' ).click();
+			await editor.page
+				.getByRole( 'link', {
+					name: 'Overlay Navigation (Experimental)',
+				} )
+				.click();
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+
+			await page.goto( '/shop/' );
+
+			const productFiltersOverlayNavigation = (
+				await frontendUtils.getBlockByName(
+					'woocommerce/product-filters-overlay-navigation'
+				)
+			 ).filter( {
+				has: page.locator( ':visible' ),
+			} );
+
+			await expect( productFiltersOverlayNavigation ).toBeHidden();
+		} );
+
+		test( 'should hide Product Filters Overlay Navigation block when the Overlay mode is set to `Mobile` and user is on desktop', async ( {
+			editor,
+			page,
+			frontendUtils,
+		} ) => {
+			await editor.setContent( '' );
+			await editor.openGlobalBlockInserter();
+			await page.getByText( 'Product Filters (Experimental)' ).click();
+			const block = editor.canvas.getByLabel(
+				'Block: Product Filters (Experimental)'
+			);
+			await expect( block ).toBeVisible();
+
+			// This forces the list view to show the inner blocks of the Product Filters template part.
+			await editor.canvas
+				.getByLabel( 'Block: Active (Experimental)' )
+				.getByLabel( 'Block: Filter Options' )
+				.click();
+
+			await editor.openDocumentSettingsSidebar();
+			await page.getByLabel( 'Document Overview' ).click();
+			await page
+				.getByRole( 'link', { name: 'Product Filters (Experimental)' } )
+				.nth( 1 )
+				.click();
+
+			const layoutSettings = editor.page.getByText(
+				'OverlayNeverMobileAlways'
+			);
+			await layoutSettings.getByLabel( 'Mobile' ).click();
+			await editor.page
+				.getByRole( 'link', {
+					name: 'Overlay Navigation (Experimental)',
+				} )
+				.click();
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: false,
+			} );
+
+			await page.goto( '/shop/' );
+
+			const productFiltersOverlayNavigation = (
+				await frontendUtils.getBlockByName(
+					'woocommerce/product-filters-overlay-navigation'
+				)
+			 ).filter( {
+				has: page.locator( ':visible' ),
+			} );
+
+			await expect( productFiltersOverlayNavigation ).toBeHidden();
+		} );
 	} );
 } );
