@@ -74,15 +74,24 @@ const test = baseTest.extend( {
 	coupon: async ( { api }, use ) => {
 		const coupon = {};
 		await use( coupon );
-		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+		await api
+			.delete( `coupons/${ coupon.id }`, { force: true } )
+			.then( ( response ) => {
+				console.log( 'Delete successful:', response.data );
+			} )
+			.catch( ( error ) => {
+				console.log( 'Error response data:', error.response.data );
+				throw new Error( error.response.data );
+			} );
 	},
 
 	product: async ( { api }, use ) => {
 		let product = {};
+		const productName = `Product ${ Date.now() }`;
 
 		await api
 			.post( 'products', {
-				name: 'Product',
+				name: productName,
 				regular_price: '100',
 			} )
 			.then( ( response ) => {

@@ -1,30 +1,66 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+const {
+	test: baseTest,
+	expect,
+} = require( '../../../fixtures/api-tests-fixtures' );
 const { BASE_URL } = process.env;
+const { admin } = require( '../../../test-data/data' );
 const shouldSkip = BASE_URL !== undefined;
 
 /**
  * Internal dependencies
  */
 const {
-	simpleProduct,
 	virtualProduct,
 	variableProduct,
 } = require( '../../../data/products-crud' );
 const { batch } = require( '../../../data/shared/batch-update' );
 
-test.describe( 'Products API tests: CRUD', () => {
-	let productId;
-
-	test( 'can add a simple product', async ( { request } ) => {
+const test = baseTest.extend( {
+	extraHTTPHeaders: {
+		// Add authorization token to all requests.
+		Authorization: `Basic ${ btoa(
+			`${ admin.username }:${ admin.password }`
+		) }`,
+	},
+	simpleTestProduct: async ( { request }, use ) => {
+		let simpleTestProduct = {
+			name: 'A Simple Product',
+			regular_price: '25',
+			description: 'Description for this simple product.',
+			short_description: 'Shorter description.',
+		};
 		const response = await request.post( 'wp-json/wc/v3/products', {
-			data: simpleProduct,
+			data: simpleTestProduct,
+		} );
+		simpleTestProduct = await response.json();
+
+		await use( simpleTestProduct );
+
+		// Cleanup
+		await request.delete(
+			`wp-json/wc/v3/products/${ simpleTestProduct.id }`,
+			{
+				force: true,
+			}
+		);
+	},
+} );
+test.describe( 'Products API tests: CRUD', () => {
+	test( 'can add a simple product', async ( { request } ) => {
+		const productData = {
+			name: 'A Simple Product',
+			regular_price: '25',
+			description: 'Description for this simple product.',
+			short_description: 'Shorter description.',
+		};
+		const response = await request.post( 'wp-json/wc/v3/products', {
+			data: productData,
 		} );
 		const responseJSON = await response.json();
-		productId = responseJSON.id;
 
 		expect( response.status() ).toEqual( 201 );
-		expect( typeof productId ).toEqual( 'number' );
-		expect( responseJSON ).toMatchObject( simpleProduct );
+		expect( typeof responseJSON.id ).toEqual( 'number' );
+		expect( responseJSON ).toMatchObject( productData );
 		expect( responseJSON.type ).toEqual( 'simple' );
 		expect( responseJSON.status ).toEqual( 'publish' );
 		expect( responseJSON.virtual ).toEqual( false );
@@ -555,13 +591,18 @@ test.describe( 'Products API tests: CRUD', () => {
 
 	test.describe( 'Product review tests: CRUD', () => {
 		let productReviewId;
+		let reviewsTestProduct;
+
+		test.beforeAll( async ( { simpleTestProduct } ) => {
+			reviewsTestProduct = simpleTestProduct;
+		} );
 
 		test( 'can add a product review', async ( { request } ) => {
 			const response = await request.post(
 				'wp-json/wc/v3/products/reviews',
 				{
 					data: {
-						product_id: productId,
+						product_id: reviewsTestProduct.id,
 						review: 'Nice simple product!',
 						reviewer: 'John Doe',
 						reviewer_email: 'john.doe@example.com',
@@ -617,7 +658,7 @@ test.describe( 'Products API tests: CRUD', () => {
 				'wp-json/wc/v3/products/reviews',
 				{
 					data: {
-						product_id: productId,
+						product_id: reviewsTestProduct.id,
 						review: 'Nice simple product!',
 						reviewer: 'John Doe',
 						reviewer_email: 'john.doe@example.com',
@@ -643,7 +684,7 @@ test.describe( 'Products API tests: CRUD', () => {
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( responseJSON.id ).toEqual( productReviewId );
-			expect( responseJSON.product_id ).toEqual( productId );
+			expect( responseJSON.product_id ).toEqual( reviewsTestProduct.id );
 			expect( responseJSON.product_name ).toEqual( 'A Simple Product' );
 			expect( responseJSON.status ).toEqual( 'approved' );
 			expect( responseJSON.reviewer ).toEqual( 'John Doe' );
@@ -681,7 +722,7 @@ test.describe( 'Products API tests: CRUD', () => {
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( responseJSON.id ).toEqual( productReviewId );
-			expect( responseJSON.product_id ).toEqual( productId );
+			expect( responseJSON.product_id ).toEqual( reviewsTestProduct.id );
 			expect( responseJSON.product_name ).toEqual( 'A Simple Product' );
 			expect( responseJSON.status ).toEqual( 'approved' );
 			expect( responseJSON.reviewer ).toEqual( 'John Doe' );
@@ -722,14 +763,14 @@ test.describe( 'Products API tests: CRUD', () => {
 					data: {
 						create: [
 							{
-								product_id: productId,
+								product_id: reviewsTestProduct.id,
 								review: 'Nice product!',
 								reviewer: 'John Doe',
 								reviewer_email: 'john.doe@example.com',
 								rating: 4,
 							},
 							{
-								product_id: productId,
+								product_id: reviewsTestProduct.id,
 								review: 'I love this thing!',
 								reviewer: 'Jane Doe',
 								reviewer_email: 'Jane.doe@example.com',
@@ -741,7 +782,9 @@ test.describe( 'Products API tests: CRUD', () => {
 			);
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.create[ 0 ].product_id ).toEqual( productId );
+			expect( responseJSON.create[ 0 ].product_id ).toEqual(
+				reviewsTestProduct.id
+			);
 			expect( responseJSON.create[ 0 ].review ).toEqual(
 				'Nice product!'
 			);
@@ -751,7 +794,9 @@ test.describe( 'Products API tests: CRUD', () => {
 			);
 			expect( responseJSON.create[ 0 ].rating ).toEqual( 4 );
 
-			expect( responseJSON.create[ 1 ].product_id ).toEqual( productId );
+			expect( responseJSON.create[ 1 ].product_id ).toEqual(
+				reviewsTestProduct.id
+			);
 			expect( responseJSON.create[ 1 ].review ).toEqual(
 				'I love this thing!'
 			);
@@ -770,7 +815,7 @@ test.describe( 'Products API tests: CRUD', () => {
 					data: {
 						create: [
 							{
-								product_id: productId,
+								product_id: reviewsTestProduct.id,
 								review: 'Ok product.',
 								reviewer: 'Jack Doe',
 								reviewer_email: 'jack.doe@example.com',
@@ -1183,7 +1228,7 @@ test.describe( 'Products API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe.serial( 'Product variation tests: CRUD', () => {
+	test.describe( 'Product variation tests: CRUD', () => {
 		let variableProductId;
 		let productVariationId;
 
@@ -1397,22 +1442,28 @@ test.describe( 'Products API tests: CRUD', () => {
 		} );
 	} );
 
-	test( 'can view a single product', async ( { request } ) => {
+	test( 'can view a single product', async ( {
+		request,
+		simpleTestProduct,
+	} ) => {
 		const response = await request.get(
-			`wp-json/wc/v3/products/${ productId }`
+			`wp-json/wc/v3/products/${ simpleTestProduct.id }`
 		);
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
-		expect( responseJSON.id ).toEqual( productId );
+		expect( responseJSON.id ).toEqual( simpleTestProduct.id );
 	} );
 
-	test( 'can update a single product', async ( { request } ) => {
+	test( 'can update a single product', async ( {
+		request,
+		simpleTestProduct,
+	} ) => {
 		const updatePayload = {
 			regular_price: '25.99',
 		};
 
 		const response = await request.put(
-			`wp-json/wc/v3/products/${ productId }`,
+			`wp-json/wc/v3/products/${ simpleTestProduct.id }`,
 			{
 				data: updatePayload,
 			}
@@ -1420,15 +1471,29 @@ test.describe( 'Products API tests: CRUD', () => {
 		const responseJSON = await response.json();
 
 		expect( response.status() ).toEqual( 200 );
-		expect( responseJSON.id ).toEqual( productId );
+		expect( responseJSON.id ).toEqual( simpleTestProduct.id );
 		expect( responseJSON.regular_price ).toEqual(
 			updatePayload.regular_price
 		);
 	} );
 
 	test( 'can delete a product', async ( { request } ) => {
+		const createProductResponse = await request.post(
+			'wp-json/wc/v3/products',
+			{
+				name: 'A product to be deleted',
+				regular_price: '24',
+				description:
+					'Description for this simple product that will be deleted.',
+				short_description:
+					'Shorter description for this simple product that will be deleted.',
+			}
+		);
+
+		const product = await createProductResponse.json();
+
 		const response = await request.delete(
-			`wp-json/wc/v3/products/${ productId }`,
+			`wp-json/wc/v3/products/${ product.id }`,
 			{
 				data: {
 					force: true,
@@ -1438,22 +1503,26 @@ test.describe( 'Products API tests: CRUD', () => {
 		const responseJSON = await response.json();
 
 		expect( response.status() ).toEqual( 200 );
-		expect( responseJSON.id ).toEqual( productId );
+		expect( responseJSON.id ).toEqual( product.id );
 
 		const retrieveDeletedProductResponse = await request.get(
-			`wp-json/wc/v3/products/${ productId }`
+			`wp-json/wc/v3/products/${ product.id }`
 		);
 		expect( retrieveDeletedProductResponse.status() ).toEqual( 404 );
 	} );
 
 	test.describe( 'Batch update products', () => {
 		const product1 = {
-			...simpleProduct,
 			name: 'Batch Created Product 1',
+			regular_price: '25',
+			description: 'Description for this simple product.',
+			short_description: 'Shorter description.',
 		};
 		const product2 = {
-			...simpleProduct,
 			name: 'Batch Created Product 2',
+			regular_price: '25',
+			description: 'Description for this simple product.',
+			short_description: 'Shorter description.',
 		};
 		const expectedProducts = [ product1, product2 ];
 
