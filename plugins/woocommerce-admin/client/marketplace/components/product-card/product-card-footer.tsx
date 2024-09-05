@@ -64,7 +64,6 @@ function ProductCardFooter( props: { product: Product } ) {
 		return true;
 	}
 
-	// We hardcode this for now while we only display prices in USD.
 	const currencySymbols: { [ key: string ]: string } = {
 		USD: '$',
 		AUD: 'A$',
