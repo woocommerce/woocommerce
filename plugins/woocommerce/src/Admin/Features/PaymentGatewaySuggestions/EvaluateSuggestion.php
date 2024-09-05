@@ -65,7 +65,7 @@ class EvaluateSuggestion {
 	 * @return array The visible suggestions and errors.
 	 */
 	public static function evaluate_specs( $specs, $logger_args = array() ) {
-		$specs_key = md5( wp_json_encode( array( $specs, $logger_args ) ) );
+		$specs_key = md5( wp_json_encode( $specs ) );
 
 		if ( isset( self::$memo[ $specs_key ] ) ) {
 			return self::$memo[ $specs_key ];
