@@ -15,6 +15,8 @@ import {
 	product_id,
 	think_time_min,
 	think_time_max,
+	STORE_NAME,
+	FOOTER_TEXT,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -24,6 +26,7 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils.js';
 
 export function cart() {
 	group( 'Product Page Add to cart', function () {
@@ -67,19 +70,10 @@ export function cart() {
 			headers: requestheaders,
 			tags: { name: 'Shopper - View Cart' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "Cart – WooCommerce Core E2E Test Suite"': ( r ) =>
-				r.html().find( 'head title' ).text() ===
-				'Cart – WooCommerce Core E2E Test Suite',
-			"body does not contain: 'your cart is currently empty'": ( r ) =>
-				! r.body.includes( 'Your cart is currently empty.' ),
-			'footer contains: Built with WooCommerce': ( r ) =>
-				r
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+		checkResponse( response, 200, {
+			title: `Cart – ${ STORE_NAME }`,
+			body: 'Your cart is currently empty.',
+			footer: FOOTER_TEXT,
 		} );
 	} );
 

@@ -28,6 +28,8 @@ import {
 	payment_method,
 	think_time_min,
 	think_time_max,
+	FOOTER_TEXT,
+	STORE_NAME,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -38,6 +40,7 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils';
 
 export function checkoutGuest() {
 	let woocommerce_process_checkout_nonce_guest;
@@ -56,19 +59,10 @@ export function checkoutGuest() {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - View Checkout' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': ( r ) =>
-				r.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
-			"body contains: 'woocommerce-checkout' class": ( r ) =>
-				r.body.includes( 'class="checkout woocommerce-checkout"' ),
-			'footer contains: Built with WooCommerce': ( r ) =>
-				r
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+		checkResponse( response, 200, {
+			title: `Checkout – ${ STORE_NAME }`,
+			body: 'class="checkout woocommerce-checkout"',
+			footer: FOOTER_TEXT,
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -177,21 +171,10 @@ export function checkoutGuest() {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - Order Received' },
 		} );
-		check( response, {
-			'title is: "Order received – WooCommerce Core E2E Test Suite"': (
-				r
-			) =>
-				r.html().find( 'head title' ).text() ===
-				'Order received – WooCommerce Core E2E Test Suite',
-			"body contains: 'Thank you. Your order has been received.'": (
-				r
-			) => r.body.includes( 'Thank you. Your order has been received.' ),
-			'footer contains: Built with WooCommerce': ( r ) =>
-				r
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+		checkResponse( response, 200, {
+			title: `Order received – ${ STORE_NAME }`,
+			body: 'Thank you. Your order has been received.',
+			footer: FOOTER_TEXT,
 		} );
 
 		const requestHeadersPost = Object.assign(
