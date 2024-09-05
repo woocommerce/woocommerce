@@ -22,10 +22,6 @@ config = {
 				'**/shopper/cart-redirection.spec.js',
 				'**/shopper/cart.spec.js',
 				'**/shopper/checkout-block-coupons.spec.js',
-			],
-			grepInvert: /@skip-on-default-wpcom/,
-			testMatch: [
-				'**/basic.spec.js',
 				'**/shopper/checkout-create-account.spec.js',
 				'**/shopper/checkout-login.spec.js',
 				'**/shopper/checkout.spec.js',
