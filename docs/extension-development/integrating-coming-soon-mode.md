@@ -170,7 +170,7 @@ add_filter( 'woocommerce_coming_soon_exclude', function( $is_excluded ) {
 
 #### Custom share links
 
-The following example shows how to integrate with a custom share code:
+The following example shows how to integrate with a custom share code. We recommend using cookies or other storage to persist the access when users navigate across the site:
 
 ```php
 add_filter( 'woocommerce_coming_soon_exclude', function( $exclude ) {
