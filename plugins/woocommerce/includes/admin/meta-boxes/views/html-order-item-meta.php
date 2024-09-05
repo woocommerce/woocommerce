@@ -25,7 +25,8 @@ $hidden_order_itemmeta = apply_filters(
 		'cost',
 		'_reduced_stock',
 		'_restock_refunded_items',
-	)
+	),
+	$item
 );
 ?><div class="view">
 	<?php
