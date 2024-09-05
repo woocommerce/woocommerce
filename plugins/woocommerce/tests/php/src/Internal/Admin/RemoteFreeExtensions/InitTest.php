@@ -3,12 +3,10 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin\RemoteFreeExtensions;
 
 use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
-
-use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFreeExtensions;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\DefaultFreeExtensions;
+use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFreeExtensions;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\RemoteFreeExtensionsDataSourcePoller;
 use WC_Unit_Test_Case;
-use WP_HTTP_TestCase;
 
 /**
  * class WC_Admin_Tests_RemoteFreeExtensions_Init
@@ -68,6 +66,9 @@ class InitTest extends WC_Unit_Test_Case {
 				);
 			},
 		);
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**
@@ -153,20 +154,5 @@ class InitTest extends WC_Unit_Test_Case {
 
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . RemoteFreeExtensionsDataSourcePoller::ID . '_specs' );
 		$this->assertTrue( ( $expires - time() ) < 3 * HOUR_IN_SECONDS );
-	}
-
-	/**
-	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
-	 *
-	 * @param mixed  $preempt Response to the request, or false to not preempt it.
-	 * @param array  $request The request arguments.
-	 * @param string $url      The URL the request is being made to.
-	 *
-	 * @return mixed A response, or false.
-	 */
-	public function http_request_listner( $preempt, $request, $url ) {
-		echo 'Passed request thru: ', $url, PHP_EOL;
-		// TODO: not a great approach, to be revisited.
-		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }

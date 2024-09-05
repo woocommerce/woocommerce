@@ -17,6 +17,9 @@
 			<exclude>./tests/php/helpers</exclude>
 		</testsuite>
 	</testsuites>
+	<php>
+		<env name="WOOCOMMERCE_TESTS_MOCK_NETWORK_INTERACTIONS" value="yes"/>
+	</php>
 	<coverage includeUncoveredFiles="true">
 		<include>
 			<directory suffix=".php">./includes</directory>

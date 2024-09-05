@@ -5,10 +5,10 @@
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
-use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
-use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Purchase;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
 
 /**
  * class WC_Admin_Tests_OnboardingTasks_TaskList
@@ -59,6 +59,9 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 				),
 			)
 		);
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**
@@ -182,20 +185,5 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 'Add Memberships and 2 more products to my store', $this->task->get_title() );
-	}
-
-	/**
-	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
-	 *
-	 * @param mixed  $preempt Response to the request, or false to not preempt it.
-	 * @param array  $request The request arguments.
-	 * @param string $url     The URL the request is being made to.
-	 *
-	 * @return mixed A response, or false.
-	 */
-	public function http_request_listner( $preempt, $request, $url ) {
-		echo 'Passed request thru: ', $url, PHP_EOL;
-		// TODO: not a great approach, to be revisited.
-		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }

@@ -30,6 +30,9 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**
@@ -171,20 +174,5 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	 */
 	public function set_france_locale() {
 		return 'fr_FR';
-	}
-
-	/**
-	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
-	 *
-	 * @param mixed  $preempt Response to the request, or false to not preempt it.
-	 * @param array  $request The request arguments.
-	 * @param string $url     The URL the request is being made to.
-	 *
-	 * @return mixed A response, or false.
-	 */
-	public function http_request_listner( $preempt, $request, $url ) {
-		echo 'Passed request thru: ', $url, PHP_EOL;
-		// TODO: not a great approach, to be revisited.
-		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }

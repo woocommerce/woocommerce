@@ -8,7 +8,6 @@
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use PHPUnit\Framework\Constraint\IsType;
 
 /**
  * WC Unit Test Case.
@@ -28,6 +27,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @var WC_Unit_Test_Factory
 	 */
 	protected $factory;
+
+	/**
+	 * Flags if the mocking is active. See `http_request_listner` for details.
+	 *
+	 * @var bool
+	 */
+	protected $mock_network_interactions = false;
 
 	/**
 	 * @var int Keeps the count of how many times disable_code_hacker has been invoked.
@@ -86,7 +92,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
 
+		// Tests optimisation: bypass geolocation and mock network interactions.
 		add_filter( 'woocommerce_get_geolocation', array( $this, 'intercept_woocommerce_get_geolocation' ), 10, 2 );
+		$this->mock_network_interactions = 'yes' === getenv( 'WOOCOMMERCE_TESTS_MOCK_NETWORK_INTERACTIONS' );
 	}
 
 	/**
@@ -123,7 +131,12 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return array
 	 */
 	public function intercept_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array {
-		return $geolocation;
+		return array(
+			'country'  => 'US',
+			'state'    => '',
+			'city'     => '',
+			'postcode' => '',
+		);
 	}
 
 	/**
@@ -138,10 +151,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return mixed A response, or false.
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
-		// Step 1: let tests to mock/process the request first via set `http_responder`.
+		// Step 1: let tests to mock/process the request first as they need.
 		$response = parent::http_request_listner( false, $request, $url );
-		// TODO: env. variable to ensure stubbing below getting invoked only in WooCommerce tests and not 3rd-party.
-		if ( false !== $response ) {
+		if ( false !== $response || false === $this->mock_network_interactions ) {
 			return $response;
 		}
 
@@ -171,7 +183,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// phpcs:enable
 		}
 
-		// Step 3: stub requests to certain domains.
+		// Step 3: stub requests to certain domains (and sub-domains).
 		$stubbed_domains = array( 'woocommerce.com', 'paypal.com', 'public-api.wordpress.com', 'api.wordpress.org' );
 		foreach ( $stubbed_domains as $domain ) {
 			if ( $domain === $url_domain || str_ends_with( $url_domain, '.' . $domain ) ) {

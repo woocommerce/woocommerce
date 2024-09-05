@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use WC_REST_Unit_Test_Case;
-use WP_HTTP_TestCase;
 
 /**
  * Patterns Controller Tests.
@@ -20,6 +19,9 @@ class PatternsTest extends WC_REST_Unit_Test_Case {
 
 		$user = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user );
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**
@@ -118,20 +120,5 @@ class PatternsTest extends WC_REST_Unit_Test_Case {
 
 		$patterns = get_transient( PTKPatternsStore::TRANSIENT_NAME );
 		$this->assertFalse( $patterns );
-	}
-
-	/**
-	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
-	 *
-	 * @param mixed  $preempt Response to the request, or false to not preempt it.
-	 * @param array  $request The request arguments.
-	 * @param string $url     The URL the request is being made to.
-	 *
-	 * @return mixed A response, or false.
-	 */
-	public function http_request_listner( $preempt, $request, $url ) {
-		echo 'Passed request thru: ', $url, PHP_EOL;
-		// TODO: not a great approach, to be revisited.
-		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }
