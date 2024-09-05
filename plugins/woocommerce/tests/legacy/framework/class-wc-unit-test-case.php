@@ -115,8 +115,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	/**
 	 * Intercept geolocation requests and return mock data.
 	 *
-	 * @param array  $geolocation
-	 * @param string $ip_address
+	 * @param array  $geolocation Geolocation data.
+	 * @param string $ip_address  IP address.
 	 *
 	 * @return array
 	 *

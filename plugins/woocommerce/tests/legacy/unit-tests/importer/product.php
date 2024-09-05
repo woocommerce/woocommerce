@@ -32,7 +32,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
-		$this->csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$this->csv_file = __DIR__ . '/sample.csv';
 		$this->sut      = new WC_Product_CSV_Importer(
 			$this->csv_file,
 			array(
