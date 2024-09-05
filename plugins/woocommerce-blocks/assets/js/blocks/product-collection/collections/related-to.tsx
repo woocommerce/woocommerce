@@ -16,7 +16,7 @@ const collection = {
 	title: __( 'Related Products', 'woocommerce' ),
 	icon: <Icon icon={ loop } />,
 	description: __( 'Recommend products like this one.', 'woocommerce' ),
-	keywords: [ 'related', 'product collection' ],
+	keywords: [ 'product collection' ],
 	scope: [],
 	preview: {
 		initialPreviewState: {
