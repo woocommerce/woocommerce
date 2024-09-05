@@ -14,6 +14,13 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
  */
 class EvaluateSuggestion {
 	/**
+	 * Stores memoized results of evaluate_specs.
+	 *
+	 * @var array
+	 */
+	protected static $memo = array();
+
+	/**
 	 * Evaluates the spec and returns the suggestion.
 	 *
 	 * @param object|array $spec        The suggestion to evaluate.
@@ -58,6 +65,12 @@ class EvaluateSuggestion {
 	 * @return array The visible suggestions and errors.
 	 */
 	public static function evaluate_specs( $specs, $logger_args = array() ) {
+		$specs_key = md5( wp_json_encode( array( $specs, $logger_args ) ) );
+
+		if ( isset( self::$memo[ $specs_key ] ) ) {
+			return self::$memo[ $specs_key ];
+		}
+
 		$suggestions = array();
 		$errors      = array();
 
@@ -72,9 +85,18 @@ class EvaluateSuggestion {
 			}
 		}
 
-		return array(
+		$result = array(
 			'suggestions' => $suggestions,
 			'errors'      => $errors,
 		);
+
+		// Memoize results, with a fail safe to prevent unbounded memory growth.
+		// This limit is unlikely to be reached under normal circumstances.
+		if ( count( self::$memo ) > 50 ) {
+			self::$memo = array();
+		}
+		self::$memo[ $specs_key ] = $result;
+
+		return $result;
 	}
 }
