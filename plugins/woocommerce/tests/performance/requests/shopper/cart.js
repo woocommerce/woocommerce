@@ -26,7 +26,6 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
-import { checkResponse } from '../../utils.js';
 
 export function cart() {
 	group( 'Product Page Add to cart', function () {
