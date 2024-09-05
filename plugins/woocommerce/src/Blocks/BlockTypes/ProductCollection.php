@@ -423,7 +423,7 @@ class ProductCollection extends AbstractBlock {
 		$is_product_title_block = 'woocommerce/product-collection/product-title' === $namespace;
 		$is_link                = $instance->attributes['isLink'] ?? false;
 
-		// Only proceed if the block is a Product Title (Post Title variation) block,
+		// Only proceed if the block is a Product Title (Post Title variation) block.
 		if ( $is_product_title_block && $is_link ) {
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 			$p->next_tag( array( 'class_name' => 'wp-block-post-title' ) );

@@ -108,7 +108,7 @@ class ProductTemplate extends AbstractBlock {
 			);
 
 			$context = array(
-				'productId' => $product_id
+				'productId' => $product_id,
 			);
 
 			$li_directives = '
