@@ -23,6 +23,18 @@ jobs:
         with:
           pull-package-deps: '@woocommerce/plugin-woocommerce'
 
+      - name: 'Get the  versions for the accelerated and monthly releases'
+              id: get-versions
+              run: pnpm utils code-freeze get-version -o $TIME_OVERRIDE
+
+     - name: Generate changelog changes
+            id: changelog
+            if: steps.get-versions.outputs.isTodayMonthlyFreeze == 'yes'
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            run: pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v ${{ steps.get-versions.outputs.monthlyVersionXY }}
+
+
       - name: Build zip
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh
