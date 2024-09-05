@@ -9,7 +9,7 @@ export const SectionNav = ( { data, section, children } ) => {
 	const sectionKeys = Object.keys( sections );
 	const selectedSection = section || sectionKeys[ 0 ];
 	const onSelect = ( tabName ) => {
-		const url = getNewPath( { section: tabName } );
+		const url = getNewPath( { section: tabName, quickEdit: 'false' } );
 		navigateTo( { url } );
 	};
 

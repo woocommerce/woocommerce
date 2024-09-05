@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
-import { applyFilters } from '@wordpress/hooks';
+import { applyFilters, addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { Content } from './content';
+import { MyExample, MyExampleEdit } from './pages/my-example';
 
 const NotFound = () => {
 	return <h1>Not Found</h1>;
@@ -59,6 +60,23 @@ export const getRoute = () => {
 			},
 		};
 	}
+
+	addFilter( 'woocommerce_admin_settings_pages', 'woocommerce', ( pages ) => {
+		return [
+			...pages,
+			{
+				page: 'my-example',
+				areas: {
+					content: <MyExample />,
+					edit: <MyExampleEdit />,
+				},
+				widths: {
+					content: undefined,
+					edit: 380,
+				},
+			},
+		];
+	} );
 
 	const routes = applyFilters( 'woocommerce_admin_settings_pages', [] );
 
