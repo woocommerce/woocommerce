@@ -46,6 +46,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		featuredImage: '',
 		color: '',
 		productCategory: '',
+		billingPeriod: '',
+		billingPeriodInterval: 0,
+		currency: '',
 	};
 
 	function isSponsored(): boolean {

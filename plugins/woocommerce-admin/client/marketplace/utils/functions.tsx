@@ -144,6 +144,10 @@ async function fetchSearchResults(
 							featuredImage: product.featured_image,
 							productCategory: product.product_category,
 							color: product.color,
+							billingPeriod: product.billingPeriod,
+							billingPeriodInterval:
+								product.billingPeriodInterval,
+							currency: product.currency,
 						};
 					}
 				);
@@ -407,6 +411,7 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		averageRating: null,
 		reviewsCount: null,
 		isInstallable: false,
+		currency: '',
 	};
 };
 

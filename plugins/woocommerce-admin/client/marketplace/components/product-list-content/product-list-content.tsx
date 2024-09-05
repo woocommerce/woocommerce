@@ -105,6 +105,10 @@ export default function ProductListContent( props: {
 								color: product.color,
 								featuredImage: product.featuredImage,
 								productCategory: product.productCategory,
+								billingPeriod: product.billingPeriod,
+								billingPeriodInterval:
+									product.billingPeriodInterval,
+								currency: product.currency,
 							} }
 							tracksData={ {
 								position: index + 1,
