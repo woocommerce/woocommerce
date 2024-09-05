@@ -40,6 +40,29 @@
 	height: 100%;
 	overflow: scroll;
 	transition: 0.3s ease;
+	transform: translateX(100%);
+	animation: slideIn 0.1s ease forwards;
+	transition: 0.1s ease;
+	transition-property: transform, width, max-width;
+
+	&.removing {
+		animation: slideOut 0.1s ease forwards;
+	}
+
+	@keyframes slideOut {
+		from {
+			transform: translateX(0);
+		}
+		to {
+			transform: translateX(100%);
+		}
+	}
+
+	@keyframes slideIn {
+		to {
+			transform: translateX(0);
+		}
+	}
 }
 
 .woocommerce-settings-tabs {
