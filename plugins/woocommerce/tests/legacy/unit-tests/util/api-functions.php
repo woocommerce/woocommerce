@@ -246,7 +246,7 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 			);
 		} elseif ( 'http://somedomain.com/' . $this->file_name === $url ) {
 			// we need to manually copy the file as we are mocking the request. without this an empty file is created.
-			self::file_copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png', $request['filename'] );
+			self::file_copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/images/cldup.com-Dr1Bczxq4q.png', $request['filename'] );
 
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
