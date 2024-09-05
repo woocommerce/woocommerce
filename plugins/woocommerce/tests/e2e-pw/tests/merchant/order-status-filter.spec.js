@@ -63,8 +63,7 @@ test.describe(
 				await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 				await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
-				// eslint-disable-next-line playwright/no-networkidle
-				await page.waitForLoadState( 'networkidle' );
+				await expect(page.locator( `li.${ orderStatus[ i ][ 1 ] } > a.current` )).toBeVisible();
 				const countElements = await page
 					.locator( statusColumnTextSelector )
 					.count();
