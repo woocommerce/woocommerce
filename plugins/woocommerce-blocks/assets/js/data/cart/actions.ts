@@ -15,7 +15,7 @@ import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
 import {
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
-} from '@woocommerce/base-utils';
+} from '@woocommerce/base-events';
 
 /**
  * Internal dependencies

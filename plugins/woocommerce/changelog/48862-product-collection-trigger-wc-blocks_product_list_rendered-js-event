@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Product Collection: emit the JS event when PC block is rendered

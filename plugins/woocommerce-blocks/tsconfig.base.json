@@ -44,6 +44,7 @@
 			"@woocommerce/interactivity/*": [ "assets/js/interactivity/*" ],
 			"@woocommerce/base-utils": [ "assets/js/base/utils" ],
 			"@woocommerce/base-utils/*": [ "assets/js/base/utils/*" ],
+			"@woocommerce/base-events/": [ "assets/js/base/events" ],
 			"@woocommerce/blocks/*": [ "assets/js/blocks/*" ],
 			"@woocommerce/editor-components/*": [
 				"assets/js/editor-components/*"

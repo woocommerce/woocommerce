@@ -25,6 +25,7 @@
 		"@woocommerce/base-hocs(.*)$": "assets/js/base/hocs/$1",
 		"@woocommerce/base-hooks(.*)$": "assets/js/base/hooks/$1",
 		"@woocommerce/base-utils(.*)$": "assets/js/base/utils",
+		"@woocommerce/base-events(.*)$": "assets/js/base/events",
 		"@woocommerce/block-data": "assets/js/data",
 		"@woocommerce/resource-previews": "assets/js/previews",
 		"@woocommerce/shared-context": "assets/js/shared/context",
@@ -41,9 +42,7 @@
 		"<rootDir>/tests/js/setup-globals.js",
 		"<rootDir>/tests/js/setup-fetch.js"
 	],
-	"setupFilesAfterEnv": [
-		"<rootDir>/tests/js/setup-after-env.ts"
-	],
+	"setupFilesAfterEnv": [ "<rootDir>/tests/js/setup-after-env.ts" ],
 	"testPathIgnorePatterns": [
 		"<rootDir>/bin/",
 		"<rootDir>/build/",
@@ -52,7 +51,9 @@
 		"<rootDir>/vendor/",
 		"<rootDir>/tests/"
 	],
-	"transformIgnorePatterns": [ "node_modules/?!(simple-html-tokenizer|is-plain-obj|is-plain-object|memize)" ],
+	"transformIgnorePatterns": [
+		"node_modules/?!(simple-html-tokenizer|is-plain-obj|is-plain-object|memize)"
+	],
 	"testEnvironment": "jsdom",
 	"preset": "@wordpress/jest-preset-default",
 	"transform": {

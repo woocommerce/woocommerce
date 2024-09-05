@@ -4,10 +4,8 @@
 import { renderParentBlock } from '@woocommerce/atomic-utils';
 import Drawer from '@woocommerce/base-components/drawer';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import {
-	getValidBlockAttributes,
-	translateJQueryEventToNative,
-} from '@woocommerce/base-utils';
+import { getValidBlockAttributes } from '@woocommerce/base-utils';
+import { EVENT, translateJQueryEventToNative } from '@woocommerce/base-events';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 import {
 	formatPrice,
@@ -183,11 +181,11 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		// Make it so we can read jQuery events triggered by WC Core elements.
 		const removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 			'added_to_cart',
-			'wc-blocks_added_to_cart'
+			EVENT.WC_BLOCKS_ADDED_TO_CART
 		);
 
 		document.body.addEventListener(
-			'wc-blocks_added_to_cart',
+			EVENT.WC_BLOCKS_ADDED_TO_CART,
 			openMiniCart
 		);
 
@@ -195,7 +193,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 			removeJQueryAddedToCartEvent();
 
 			document.body.removeEventListener(
-				'wc-blocks_added_to_cart',
+				EVENT.WC_BLOCKS_ADDED_TO_CART,
 				openMiniCart
 			);
 		};

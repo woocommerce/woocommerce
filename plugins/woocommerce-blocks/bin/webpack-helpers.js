@@ -72,6 +72,10 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }base/utils/`
 		),
+		'@woocommerce/base-events': path.resolve(
+			__dirname,
+			`../assets/js/${ pathPart }base/events/`
+		),
 		'@woocommerce/blocks': path.resolve(
 			__dirname,
 			`../assets/js/${ pathPart }/blocks`
@@ -176,6 +180,19 @@ const getCacheGroups = () => ( {
 	},
 	'base-utils': {
 		test: /\/assets\/js\/base\/utils\//,
+		name( module, chunks, cacheGroupKey ) {
+			const moduleFileName = module
+				.identifier()
+				.split( '/' )
+				.reduceRight( ( item ) => item );
+			const allChunksNames = chunks
+				.map( ( item ) => item.name )
+				.join( '~' );
+			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+		},
+	},
+	'base-events': {
+		test: /\/assets\/js\/base\/events\//,
 		name( module, chunks, cacheGroupKey ) {
 			const moduleFileName = module
 				.identifier()

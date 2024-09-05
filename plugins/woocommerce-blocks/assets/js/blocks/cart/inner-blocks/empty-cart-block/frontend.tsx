@@ -3,7 +3,7 @@
  */
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
-import { dispatchEvent } from '@woocommerce/base-utils';
+import { dispatchEvent } from '@woocommerce/base-events';
 
 /**
  * Internal dependencies
