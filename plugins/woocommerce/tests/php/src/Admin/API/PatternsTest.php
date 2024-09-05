@@ -123,7 +123,11 @@ class PatternsTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
 	 *
-	 * @inheritDoc
+	 * @param mixed $preempt Response to the request, or false to not preempt it.
+	 * @param array $request The request arguments.
+	 * @param string $url The URL the request is being made to.
+	 *
+	 * @return mixed A response, or false.
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
 		// TODO: not a great approach, to be revisited.

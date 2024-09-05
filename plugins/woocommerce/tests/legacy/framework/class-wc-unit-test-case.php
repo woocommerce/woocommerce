@@ -127,8 +127,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Mocks downloading images from external sites and interacting with external APIs in UTs.
+	 *
 	 * @since 9.3.0
+	 *
+	 * @param mixed  $preempt Response to the request, or false to not preempt it.
+	 * @param array  $request The request arguments.
+	 * @param string $url     The URL the request is being made to.
+	 *
+	 * @return mixed A response, or false.
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
 		// Step 1: let tests to mock/process the request first via set `http_responder`.
@@ -138,8 +145,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			return $response;
 		}
 
-		$url_domain = parse_url( $url, PHP_URL_HOST );
-		$url_path   = parse_url( $url, PHP_URL_PATH );
+		$url_domain = wp_parse_url( $url, PHP_URL_HOST );
+		$url_path   = wp_parse_url( $url, PHP_URL_PATH );
 
 		// Step 2: when loading product images, pick them from data-folder instead of network.
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
@@ -148,6 +155,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			in_array( $url_domain, array( 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ), true )
 		) {
 			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
+			// phpcs:disable WordPress.WP.AlternativeFunctions
 			// Ensure we are getting the copy of images (so we can git-push them if product definitions getting updated).
 			if ( ! file_exists( $local_image_file ) ) {
 				file_put_contents( $local_image_file, file_get_contents( $url ) );
@@ -160,6 +168,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 					'response' => array( 'code' => WP_Http::OK ),
 				);
 			}
+			// phpcs:enable
 		}
 
 		// Step 3: stub requests to certain domains.
