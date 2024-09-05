@@ -348,7 +348,7 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 	 * @inheritDoc
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
-		// TODO: not a great approach, to be revisited
+		// TODO: not a great approach, to be revisited.
 		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }

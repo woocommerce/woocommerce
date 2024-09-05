@@ -159,7 +159,7 @@ class InitTest extends WC_Unit_Test_Case {
 	 * Bypass stubbing network interactions, as the suit needs data from external data sources.
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
-		// TODO: not a great approach, to be revisited
+		// TODO: not a great approach, to be revisited.
 		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
 }
