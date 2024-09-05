@@ -140,7 +140,6 @@ function override_update_woocommerce_coming_soon( $new_value, $old_value ) {
 }
 ```
 
-
 ### Custom exclusions filter
 
 It is possible for developers to add custom exclusions that bypass the coming soon protection. This is useful for exclusions like always bypassing the screen on a specific IP address, or making a specific landing page available.
@@ -183,5 +182,19 @@ add_filter( 'woocommerce_coming_soon_exclude', function( $exclude ) {
     }
 
     return $exclude;
+} );
+```
+
+### Extend "Apply to store pages only" setting
+
+When using the `Apply to store pages only` setting, you may want to add a custom page to the list of store pages which will be restricted by coming soon mode. You can use the following example to add a custom page:
+
+```php
+add_filter(	'woocommerce_store_pages', function( $pages ) {
+    $page = get_page_by_path( 'your-page-slug' );
+    if ( $page ) {
+        $pages[] = $page->ID;
+    }
+    return $pages;
 } );
 ```
