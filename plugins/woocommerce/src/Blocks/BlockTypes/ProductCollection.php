@@ -780,7 +780,7 @@ class ProductCollection extends AbstractBlock {
 		);
 
 		$handpicked_products = $query['handpicked_products'] ?? array();
-		$related_products    = $this->get_related_products( $query['related_to'], $common_query_values['posts_per_page'] );
+		$related_products    = $this->get_related_products( $query['related_to'] );
 
 		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products, $related_products );
 
@@ -1097,10 +1097,9 @@ class ProductCollection extends AbstractBlock {
 	 * Returns a query for filtering products that are related to the ones given.
 	 *
 	 * @param array $product_ids The IDs pf products that we're looking for a relationship to.
-	 * @param int   $per_page   The number of related products to fetch.
 	 * @return array The IDs of the related products.
 	 */
-	private function get_related_products( $product_ids, $per_page ) {
+	private function get_related_products( $product_ids ) {
 		if ( empty( $product_ids ) ) {
 			return array();
 		}
@@ -1109,7 +1108,12 @@ class ProductCollection extends AbstractBlock {
 		foreach ( $product_ids as $id ) {
 			$related_product_ids = array_merge(
 				$related_product_ids,
-				wc_get_related_products( $id, $per_page )
+				// Since this is a secondary query we want to make sure to
+				// grab enough products so that filtering in the primary
+				// query will have a subset to work with. We ALSO need
+				// to make sure that we aren't harming performance by
+				// fetching and caching too many related product IDs.
+				wc_get_related_products( $id, 100 )
 			);
 		}
 

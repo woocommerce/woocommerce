@@ -1453,7 +1453,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param array $cats_array  List of categories IDs.
 	 * @param array $tags_array  List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
-	 * @param int   $limit       Limit of results.
+	 * @param int   $limit       Limit of results, -1 for no limit.
 	 * @param int   $product_id  Product ID.
 	 * @return array
 	 */
@@ -1464,13 +1464,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'categories'  => $cats_array,
 			'tags'        => $tags_array,
 			'exclude_ids' => $exclude_ids,
-			'limit'       => $limit + 10,
+			'limit'       => $limit,
 		);
 
-		$related_product_query = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
+		$related_product_query = (array) apply_filters(
+			'woocommerce_product_related_posts_query',
+			$this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit ),
+			$product_id,
+			$args
+		);
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_col( implode( ' ', $related_product_query ) );
+		$products = $wpdb->get_col( implode( ' ', $related_product_query ) );
+
+		return array_map( 'intval', $products );
 	}
 
 	/**
@@ -1481,7 +1488,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param array $cats_array  List of categories IDs.
 	 * @param array $tags_array  List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
-	 * @param int   $limit       Limit of results.
+	 * @param int   $limit       Limit of results, -1 for no limit.
 	 *
 	 * @return array
 	 */
@@ -1511,10 +1518,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				AND p.post_type = 'product'
 
 			",
-			'limits' => '
-				LIMIT ' . absint( $limit ) . '
-			',
 		);
+
+		if ( $limit > 0 ) {
+			$query['limits'] = ' LIMIT ' . absint( $limit );
+		}
 
 		if ( count( $exclude_term_ids ) ) {
 			$query['join']  .= " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . ' ) ) AS exclude_join ON exclude_join.object_id = p.ID';
