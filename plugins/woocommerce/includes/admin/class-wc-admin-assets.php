@@ -87,6 +87,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			// Sitewide menu CSS.
 			wp_enqueue_style( 'woocommerce_admin_menu_styles' );
 
+			$is_new_settings = isset( $_GET['path'] ) && strpos( $_GET['path'], '/settings' ) !== false;
+
 			// Admin styles for WC pages only.
 			if ( in_array( $screen_id, wc_get_screen_ids() ) || $is_new_settings ) {
 				wp_enqueue_style( 'woocommerce_admin_styles' );
