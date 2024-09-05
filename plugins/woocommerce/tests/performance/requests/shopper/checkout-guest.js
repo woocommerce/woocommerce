@@ -184,11 +184,11 @@ export function checkoutGuest() {
 			tags: { name: 'Shopper - Order Received' },
 		} );
 		check( response, {
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
+			'title is: "Order received – WooCommerce Core E2E Test Suite"': (
 				response
 			) =>
 				response.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
+				'Order received – WooCommerce Core E2E Test Suite',
 			"body contains: 'Thank you. Your order has been received.'": (
 				response
 			) =>
