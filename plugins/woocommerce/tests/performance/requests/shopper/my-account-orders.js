@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -22,7 +21,6 @@ import {
 } from '../../headers.js';
 
 export function myAccountOrders() {
-	let response;
 	let my_account_order_id;
 
 	group( 'My Account', function () {
@@ -34,23 +32,19 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/my-account`, {
+		const response = http.get( `${ base_url }/my-account`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account' },
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
+			'title is: "My account – WooCommerce Core E2E Test Suite"': ( r ) =>
+				r.html().find( 'head title' ).text() ===
 				'My account – WooCommerce Core E2E Test Suite',
-			'body contains: my account welcome message': ( response ) =>
-				response.body.includes(
-					'From your account dashboard you can view'
-				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
+			'body contains: my account welcome message': ( r ) =>
+				r.body.includes( 'From your account dashboard you can view' ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r
 					.html()
 					.find( 'body footer' )
 					.text()
@@ -69,21 +63,19 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/my-account/orders/`, {
+		const response = http.get( `${ base_url }/my-account/orders/`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account Orders' },
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "Orders – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
+			'title is: "Orders – WooCommerce Core E2E Test Suite"': ( r ) =>
+				r.html().find( 'head title' ).text() ===
 				'Orders – WooCommerce Core E2E Test Suite',
-			"body contains: 'Orders' title": ( response ) =>
-				response.body.includes( '>Orders</h1>' ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
+			"body contains: 'Orders' title": ( r ) =>
+				r.body.includes( '>Orders</h1>' ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r
 					.html()
 					.find( 'body footer' )
 					.text()
@@ -107,7 +99,7 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get(
+		const response = http.get(
 			`${ base_url }/my-account/view-order/${ my_account_order_id }`,
 			{
 				headers: requestHeaders,
@@ -116,15 +108,13 @@ export function myAccountOrders() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
+			'title is: "My account – WooCommerce Core E2E Test Suite"': ( r ) =>
+				r.html().find( 'head title' ).text() ===
 				'My account – WooCommerce Core E2E Test Suite',
-			"body contains: 'Order number' title": ( response ) =>
-				response.body.includes( `${ my_account_order_id }</h1>` ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
+			"body contains: 'Order number' title": ( r ) =>
+				r.body.includes( `${ my_account_order_id }</h1>` ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r
 					.html()
 					.find( 'body footer' )
 					.text()
