@@ -151,8 +151,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Step 2: when loading product images, pick them from data-folder instead of network.
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
 		if (
-			in_array( $url_file_extension, array( 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ), true ) &&
-			in_array( $url_domain, array( 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ), true )
+			in_array( $url_file_extension, array( 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp', 'svg' ), true ) &&
+			in_array( $url_domain, array( 'cldup.com', 'woocommerce.com', 'demo.woothemes.com', 'localhost' ), true )
 		) {
 			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
 			// phpcs:disable WordPress.WP.AlternativeFunctions
