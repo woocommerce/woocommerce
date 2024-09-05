@@ -2,12 +2,12 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { Content } from './content';
-import { MyExample, MyExampleEdit } from './pages/my-example';
 
 const NotFound = () => {
 	return <h1>Not Found</h1>;
@@ -42,11 +42,11 @@ export const getRoute = () => {
 		};
 	}
 
-	const legacyPages = Object.keys( settingsData ).filter(
+	const legacyRoutes = Object.keys( settingsData ).filter(
 		( p ) => ! settingsData[ p ].is_modern
 	);
 
-	if ( legacyPages.includes( page ) ) {
+	if ( legacyRoutes.includes( page ) ) {
 		return {
 			page,
 			areas: {
@@ -60,19 +60,23 @@ export const getRoute = () => {
 		};
 	}
 
-	const pages = [
-		{
-			page: 'my-example',
+	const routes = applyFilters( 'woocommerce_admin_settings_pages', [] );
+
+	const pageRoute = routes.find( ( route ) => route.page === page );
+
+	if ( ! pageRoute ) {
+		return {
+			page,
 			areas: {
-				content: <MyExample />,
-				edit: <MyExampleEdit />,
+				content: <NotFound />,
+				edit: null,
 			},
 			widths: {
 				content: undefined,
-				edit: 380,
+				edit: undefined,
 			},
-		},
-	];
+		};
+	}
 
-	return pages.find( ( p ) => p.page === page );
+	return pageRoute;
 };

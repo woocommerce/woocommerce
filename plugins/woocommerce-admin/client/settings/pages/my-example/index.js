@@ -8,6 +8,7 @@ import { useSettingsLocation } from '../../routes';
  */
 import { getNewPath } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
+import { addFilter } from '@wordpress/hooks';
 
 export const MyExample = () => {
 	const { section } = useSettingsLocation();
@@ -31,3 +32,20 @@ export const MyExampleEdit = () => {
 		</>
 	);
 };
+
+addFilter( 'woocommerce_admin_settings_pages', 'woocommerce', ( pages ) => {
+	return [
+		...pages,
+		{
+			page: 'my-example',
+			areas: {
+				content: <MyExample />,
+				edit: <MyExampleEdit />,
+			},
+			widths: {
+				content: undefined,
+				edit: 380,
+			},
+		},
+	];
+} );
