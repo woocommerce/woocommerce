@@ -99,11 +99,12 @@ const Edit = ( props: EditProps ) => {
 								return a.count < b.count ? 1 : -1;
 						}
 					} )
-					.map( ( term ) => ( {
+					.map( ( term, index ) => ( {
 						label: showCounts
 							? `${ term.name } (${ term.count })`
 							: term.name,
 						value: term.id.toString(),
+						selected: index === 1,
 						rawData: term,
 					} ) )
 			);

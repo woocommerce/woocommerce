@@ -28,6 +28,27 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$on_change             = $context['on_change'] ?? '';
 		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
+		$classes = array(
+			'has-option-element-border-color'   => $attributes['optionElementBorder'] ?: $attributes['customOptionElementBorder'],
+			'has-option-element-selected-color' => $attributes['optionElementSelected'] ?: $attributes['customOptionElementSelected'],
+			'has-option-element-color'          => $attributes['optionElement'] ?: $attributes['customOptionElement'],
+		);
+		$classes = array_filter( $classes );
+
+		$styles = array(
+			'--wc-product-filter-checkbox-list-option-element-border' => $attributes['optionElementBorder'] ?: $attributes['customOptionElementBorder'],
+			'--wc-product-filter-checkbox-list-option-element-selected' => $attributes['optionElementSelected'] ?: $attributes['customOptionElementSelected'],
+			'--wc-product-filter-checkbox-list-option-element' => $attributes['optionElement'] ?: $attributes['customOptionElement'],
+		);
+		$style  = array_reduce(
+			array_keys( $styles ),
+			function ( $acc, $key ) use ( $styles ) {
+				if ( $styles[ $key ] ) {
+					return $acc . "{$key}:  var( --wp--preset--color--{$styles[$key]} );";
+				}
+			}
+		);
+
 		$checked_items               = array_filter(
 			$items,
 			function ( $item ) {
@@ -38,13 +59,16 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$remaining_initial_unchecked = count( $checked_items ) > $show_initially ? count( $checked_items ) : $show_initially - count( $checked_items );
 		$count                       = 0;
 
+		$wrapper_attributes = array(
+			'data-wc-interactive' => esc_attr( $namespace ),
+			'data-wc-context'     => wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'class'               => implode( ' ', array_keys( $classes ) ),
+			'style'               => $style,
+		);
+
 		ob_start();
 		?>
-		<div
-			class="wc-block-product-filter-checkbox-list"
-			data-wc-interactive='<?php echo esc_attr( $namespace ); ?>'
-			data-wc-context='<?php echo wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>'
-		>
+		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<ul class="wc-block-product-filter-checkbox-list__list">
 			<?php foreach ( $items as $item ) { ?>
 					<?php

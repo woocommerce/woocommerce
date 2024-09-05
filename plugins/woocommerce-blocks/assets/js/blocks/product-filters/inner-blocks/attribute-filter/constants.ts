@@ -20,6 +20,7 @@ export const attributeOptionsPreview = [
 	{
 		label: __( 'Gray', 'woocommerce' ),
 		value: 'gray',
+		selected: true,
 		rawData: {
 			id: 29,
 			name: __( 'Gray', 'woocommerce' ),
@@ -46,6 +47,7 @@ export const attributeOptionsPreview = [
 	{
 		label: __( 'Red', 'woocommerce' ),
 		value: 'red',
+		selected: true,
 		rawData: {
 			id: 25,
 			name: __( 'Red', 'woocommerce' ),

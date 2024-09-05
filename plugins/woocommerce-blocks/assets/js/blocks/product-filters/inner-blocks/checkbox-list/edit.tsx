@@ -1,9 +1,20 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { Disabled } from '@wordpress/components';
+import {
+	useBlockProps,
+	withColors,
+	InspectorControls,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown,
+	// @ts-expect-error - no types.
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -11,18 +22,55 @@ import { Disabled } from '@wordpress/components';
 import './style.scss';
 import { EditProps } from './types';
 
-const Edit = ( { context, isSelected }: EditProps ) => {
+const Edit = ( props: EditProps ): JSX.Element => {
+	const {
+		clientId,
+		context,
+		attributes,
+		setAttributes,
+		isSelected,
+		optionElementBorder,
+		setOptionElementBorder,
+		optionElementSelected,
+		setOptionElementSelected,
+		optionElement,
+		setOptionElement,
+	} = props;
+
+	const {
+		customOptionElementBorder,
+		customOptionElementSelected,
+		customOptionElement,
+	} = attributes;
 	const { filterData, isParentSelected } = context;
 	const { isLoading, items } = filterData;
 
-	const blockProps = useBlockProps();
+	const colorGradientSettings = useMultipleOriginColorsAndGradients();
+	const blockProps = useBlockProps( {
+		className: clsx( 'wc-block-product-filter-checkbox-list', {
+			'has-option-element-border-color':
+				optionElementBorder.color || customOptionElementBorder,
+			'has-option-element-selected-color':
+				optionElementSelected.color || customOptionElementSelected,
+			'has-option-element-color':
+				optionElement.color || customOptionElement,
+		} ),
+		style: {
+			'--wc-product-filter-checkbox-list-option-element-border':
+				optionElementBorder.color || customOptionElementBorder,
+			'--wc-product-filter-checkbox-list-option-element-selected':
+				optionElementSelected.color || customOptionElementSelected,
+			'--wc-product-filter-checkbox-list-option-element':
+				optionElement.color || customOptionElement,
+		},
+	} );
 
 	if ( ! items ) {
-		return null;
+		return <></>;
 	}
 
 	if ( isLoading ) {
-		return 'Loading…';
+		return <p>Loading</p>;
 	}
 
 	const threshold = 15;
@@ -80,14 +128,98 @@ const Edit = ( { context, isSelected }: EditProps ) => {
 			) }
 		</div>
 	);
-	if ( isParentSelected === false && ! isSelected ) {
-		return (
-			<Disabled>
+
+	return (
+		<>
+			<InspectorControls group="color">
+				{ colorGradientSettings.hasColorsOrGradients && (
+					<ColorGradientSettingsDropdown
+						__experimentalIsRenderedInSidebar
+						settings={ [
+							{
+								label: __(
+									'Option Element Border',
+									'woocommerce'
+								),
+								colorValue:
+									optionElementBorder.color ||
+									customOptionElementBorder,
+								isShownByDefault: true,
+								enableAlpha: true,
+								onColorChange: ( colorValue: string ) => {
+									setOptionElementBorder( colorValue );
+									setAttributes( {
+										customOptionElementBorder: colorValue,
+									} );
+								},
+								resetAllFilter: () => {
+									setOptionElementBorder( '' );
+									setAttributes( {
+										customOptionElementBorder: '',
+									} );
+								},
+							},
+							{
+								label: __(
+									'Option Element (Selected)',
+									'woocommerce'
+								),
+								colorValue:
+									optionElementSelected.color ||
+									customOptionElementSelected,
+								isShownByDefault: true,
+								enableAlpha: true,
+								onColorChange: ( colorValue: string ) => {
+									setOptionElementSelected( colorValue );
+									setAttributes( {
+										customOptionElementSelected: colorValue,
+									} );
+								},
+								resetAllFilter: () => {
+									setOptionElementSelected( '' );
+									setAttributes( {
+										customOptionElementSelected: '',
+									} );
+								},
+							},
+							{
+								label: __( 'Option Element', 'woocommerce' ),
+								colorValue:
+									optionElement.color || customOptionElement,
+								isShownByDefault: true,
+								enableAlpha: true,
+								onColorChange: ( colorValue: string ) => {
+									setOptionElement( colorValue );
+									setAttributes( {
+										customOptionElement: colorValue,
+									} );
+								},
+								resetAllFilter: () => {
+									setOptionElement( '' );
+									setAttributes( {
+										customOptionElement: '',
+									} );
+								},
+							},
+						] }
+						panelId={ clientId }
+						{ ...colorGradientSettings }
+					/>
+				) }
+			</InspectorControls>
+			{ isParentSelected === false && ! isSelected ? (
+				<Disabled>
+					<Block />
+				</Disabled>
+			) : (
 				<Block />
-			</Disabled>
-		);
-	}
-	return <Block />;
+			) }
+		</>
+	);
 };
 
-export default Edit;
+export default withColors( {
+	optionElementBorder: 'option-element-border',
+	optionElementSelected: 'option-element-border',
+	optionElement: 'option-element',
+} )( Edit );
