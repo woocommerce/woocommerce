@@ -136,7 +136,6 @@
 		"@storybook/addon-console": "^1.2.3",
 		"@storybook/addon-controls": "6.5.17-alpha.0",
 		"@storybook/addon-docs": "6.5.17-alpha.0",
-		"@storybook/addon-knobs": "^6.4.0",
 		"@storybook/addon-links": "6.5.17-alpha.0",
 		"@storybook/addons": "6.5.17-alpha.0",
 		"@storybook/api": "6.5.17-alpha.0",
