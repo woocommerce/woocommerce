@@ -13,7 +13,7 @@ import { useDispatch } from '@wordpress/data';
 import { Plugins } from '../index';
 
 jest.mock( '@wordpress/data', () => ( {
-	...jest.requireActual( '@wordpress/data' ),
+	__esModule: true,
 	useDispatch: jest
 		.fn()
 		.mockReturnValue( { installAndActivatePlugins: jest.fn() } ),

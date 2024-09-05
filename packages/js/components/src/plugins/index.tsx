@@ -11,8 +11,8 @@ import {
 } from '@wordpress/element';
 import { SyntheticEvent, useCallback } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	PLUGINS_STORE_NAME,
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import type {
 	InstallPluginsResponse,
 	PluginSelectors,
 	PluginActions,
