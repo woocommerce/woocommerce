@@ -24,8 +24,8 @@ export type SearchAPIProductType = {
 	featured_image: string;
 	product_category: string;
 	color: string;
-	billingPeriod: string;
-	billingPeriodInterval: number;
+	billing_period: string;
+	billing_period_interval: number;
 	currency: string;
 };
 

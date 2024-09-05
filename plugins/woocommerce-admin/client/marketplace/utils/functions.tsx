@@ -144,9 +144,9 @@ async function fetchSearchResults(
 							featuredImage: product.featured_image,
 							productCategory: product.product_category,
 							color: product.color,
-							billingPeriod: product.billingPeriod,
+							billingPeriod: product.billing_period,
 							billingPeriodInterval:
-								product.billingPeriodInterval,
+								product.billing_period_interval,
 							currency: product.currency,
 						};
 					}
