@@ -1,6 +1,6 @@
 .woocommerce-image-gallery__item {
-    height: 146px;
-    width: 146px;
+	height: 146px;
+	width: 146px;
 	position: relative;
 
 	&.is-toolbar-visible {
@@ -9,40 +9,38 @@
 		}
 	}
 
-	&:not(.is-toolbar-visible){
+	&:not(.is-toolbar-visible) {
 		img:hover {
 			border: 1.5px solid #007cba;
 		}
 	}
 
-    img {
+	img {
 		border: 1px solid $gray-200;
 		border-radius: 3px;
 		box-sizing: border-box;
 		object-fit: cover;
 		width: 100%;
 		height: 146px;
-    }
+	}
 
-    .woocommerce-pill {
-        background: var(--wp-admin-theme-color);
-        border: 0;
-        color: $white;
-        padding-top: 2px;
-        padding-bottom: 2px;
-        position: absolute;
-        top: 10px;
-        left: 10px;
-    }
+	.woocommerce-pill {
+		background: var(--wp-admin-theme-color);
+		border: 0;
+		color: $white;
+		padding-top: 2px;
+		padding-bottom: 2px;
+		position: absolute;
+		top: 10px;
+		left: 10px;
+	}
 
 	.components-toolbar-group {
 		flex-wrap: inherit;
-		border-right: 1px solid #ccc;
 
 		svg {
 			width: 24px;
 			margin-top: $gap-smallest;
 		}
 	}
-
 }

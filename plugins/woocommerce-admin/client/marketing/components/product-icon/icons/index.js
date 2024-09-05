@@ -31,6 +31,9 @@ export { default as mailchimpForWoocommerce } from './library/mailchimp';
 // MailPoet
 export { default as mailpoet } from './library/mailpoet';
 
+// Klaviyo
+export { default as klaviyo } from './library/klaviyo';
+
 // Creative Mail by Constant Contact
 export { default as creativeMailByConstantContact } from './library/creative-mail';
 

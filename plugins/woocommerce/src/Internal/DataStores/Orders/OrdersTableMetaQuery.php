@@ -389,7 +389,7 @@ class OrdersTableMetaQuery {
 			// Nested.
 			$relation = $arg['relation'];
 			unset( $arg['relation'] );
-
+			$chunks = array();
 			foreach ( $arg as $index => &$clause ) {
 				$chunks[] = $this->process( $clause, $arg );
 			}
@@ -519,6 +519,9 @@ class OrdersTableMetaQuery {
 
 		$alias = $clause['alias'];
 
+		$meta_compare_string_start = '';
+		$meta_compare_string_end   = '';
+		$subquery_alias            = '';
 		if ( in_array( $clause['compare_key'], array( '!=', 'NOT IN', 'NOT LIKE', 'NOT EXISTS', 'NOT REGEXP' ), true ) ) {
 			$i                     = count( $this->table_aliases );
 			$subquery_alias        = self::ALIAS_PREFIX . $i;
@@ -541,7 +544,7 @@ class OrdersTableMetaQuery {
 				$where              = $wpdb->prepare( "$alias.meta_key LIKE %s", $meta_compare_value ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				break;
 			case 'IN':
-				$meta_compare_string = "$alias.meta_key IN (" . substr( str_repeat( ',%s', count( $clause['key'] ) ), 1 ) . ')';
+				$meta_compare_string = "$alias.meta_key IN (" . substr( str_repeat( ',%s', count( (array) $clause['key'] ) ), 1 ) . ')';
 				$where               = $wpdb->prepare( $meta_compare_string, $clause['key'] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				break;
 			case 'RLIKE':
@@ -566,7 +569,7 @@ class OrdersTableMetaQuery {
 				$where              = $wpdb->prepare( $meta_compare_string, $meta_compare_value ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				break;
 			case 'NOT IN':
-				$array_subclause     = '(' . substr( str_repeat( ',%s', count( $clause['key'] ) ), 1 ) . ') ';
+				$array_subclause     = '(' . substr( str_repeat( ',%s', count( (array) $clause['key'] ) ), 1 ) . ') ';
 				$meta_compare_string = $meta_compare_string_start . "AND $subquery_alias.meta_key IN " . $array_subclause . $meta_compare_string_end;
 				$where               = $wpdb->prepare( $meta_compare_string, $clause['key'] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				break;
@@ -618,7 +621,7 @@ class OrdersTableMetaQuery {
 		switch ( $meta_compare ) {
 			case 'IN':
 			case 'NOT IN':
-				$where = $wpdb->prepare( '(' . substr( str_repeat( ',%s', count( $meta_value ) ), 1 ) . ')', $meta_value ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$where = $wpdb->prepare( '(' . substr( str_repeat( ',%s', count( (array) $meta_value ) ), 1 ) . ')', $meta_value ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				break;
 
 			case 'BETWEEN':

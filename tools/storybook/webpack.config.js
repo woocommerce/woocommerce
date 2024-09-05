@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * External dependencies
@@ -39,8 +40,20 @@ module.exports = ( storybookConfig ) => {
 		'./setting.mock.js'
 	);
 
+	// We need to use react 18 for the storybook since some dependencies are not compatible with react 17
+	// Once we upgrade react to 18 in repo, we can remove this alias
+	storybookConfig.resolve.alias.react = path.resolve(
+		__dirname,
+		'./node_modules/react'
+	);
+	storybookConfig.resolve.alias[ 'react-dom' ] = path.resolve(
+		__dirname,
+		'./node_modules/react-dom'
+	);
+
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),
+		path.join( __dirname, '../../packages/js/product-editor/src' ),
 		'node_modules',
 	];
 
@@ -68,9 +81,30 @@ module.exports = ( storybookConfig ) => {
 				{
 					from: path.resolve(
 						__dirname,
+						`../../packages/js/onboarding/build-style/*.css`
+					),
+					to: `./onboarding-css/[name][ext]`,
+				},
+				{
+					from: path.resolve(
+						__dirname,
+						`../../packages/js/product-editor/build-style/*.css`
+					),
+					to: `./product-editor-css/[name][ext]`,
+				},
+				{
+					from: path.resolve(
+						__dirname,
 						`../../packages/js/experimental/build-style/*.css`
 					),
 					to: `./experimental-css/[name][ext]`,
+				},
+				{
+					from: path.resolve(
+						__dirname,
+						`../../plugins/woocommerce/assets/client/admin/app/*.css`
+					),
+					to: `./app-css/[name][ext]`,
 				},
 			],
 		} )

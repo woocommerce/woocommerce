@@ -4,15 +4,16 @@
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"require": {
-		"php": ">=7.2"
+		"php": ">=7.4"
 	},
 	"require-dev": {
 		"league/container": "3.3.5",
+		"mobiledetect/mobiledetectlib": "^3.74",
 		"psr/container": "^1.1"
 	},
 	"config": {
 		"platform": {
-			"php": "7.2"
+			"php": "7.4"
 		}
 	},
 	"scripts": {
@@ -29,6 +30,7 @@
 			"dep_directory": "/packages/",
 			"packages": [
 				"league/container",
+				"mobiledetect/mobiledetectlib",
 				"psr/container"
 			],
 			"excluded_packages": [

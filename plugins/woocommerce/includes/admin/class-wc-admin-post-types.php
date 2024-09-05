@@ -43,6 +43,12 @@ class WC_Admin_Post_Types {
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 		add_filter( 'woocommerce_order_updated_messages', array( $this, 'order_updated_messages' ) );
 		add_filter( 'bulk_post_updated_messages', array( $this, 'bulk_post_updated_messages' ), 10, 2 );
+		add_action(
+			'admin_notices',
+			function () {
+				$this->maybe_display_warning_for_password_protected_coupon();
+			}
+		);
 
 		// Disable Auto Save.
 		add_action( 'admin_print_scripts', array( $this, 'disable_autosave' ) );
@@ -54,10 +60,7 @@ class WC_Admin_Post_Types {
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
-		// Uploads.
-		add_filter( 'upload_dir', array( $this, 'upload_dir' ) );
-		add_filter( 'wp_unique_filename', array( $this, 'update_filename' ), 10, 3 );
-		add_action( 'media_upload_downloadable_product', array( $this, 'media_upload_downloadable_product' ) );
+		include_once __DIR__ . '/class-wc-admin-upload-downloadable-product.php';
 
 		// Hide template for CPT archive.
 		add_filter( 'theme_page_templates', array( $this, 'hide_cpt_archive_templates' ), 10, 3 );
@@ -200,7 +203,7 @@ class WC_Admin_Post_Types {
 			9  => sprintf(
 			/* translators: %s: date */
 				__( 'Order scheduled for: %s.', 'woocommerce' ),
-				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $theorder->get_date_created() ) ) . '</strong>'
+				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $theorder->get_date_created() ?? $post->post_date ) ) . '</strong>'
 			),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
 			11 => __( 'Order updated and sent.', 'woocommerce' ),
@@ -257,6 +260,33 @@ class WC_Admin_Post_Types {
 		);
 
 		return $bulk_messages;
+	}
+
+	/**
+	 * Shows a warning when editing a password-protected coupon.
+	 *
+	 * @since 9.2.0
+	 */
+	private function maybe_display_warning_for_password_protected_coupon() {
+		if ( ! function_exists( 'get_current_screen' ) || 'shop_coupon' !== get_current_screen()->id ) {
+			return;
+		}
+
+		if ( ! isset( $GLOBALS['post'] ) || 'shop_coupon' !== $GLOBALS['post']->post_type ) {
+			return;
+		}
+
+		wp_admin_notice(
+			__(
+				'This coupon is password protected. WooCommerce does not support password protection for coupons. You can temporarily hide a coupon by making it private. Alternatively, usage limits and restrictions can be configured below.',
+				'woocommerce'
+			),
+			array(
+				'type'               => 'warning',
+				'id'                 => 'wc-password-protected-coupon-warning',
+				'additional_classes' => empty( $GLOBALS['post']->post_password ) ? array( 'hidden' ) : array(),
+			)
+		);
 	}
 
 	/**
@@ -408,6 +438,14 @@ class WC_Admin_Post_Types {
 			}
 		}
 
+		if ( ! empty( $request_data['_tax_class'] ) ) {
+			$tax_class = sanitize_title( wp_unslash( $request_data['_tax_class'] ) );
+			if ( 'standard' === $tax_class ) {
+				$tax_class = '';
+			}
+			$product->set_tax_class( $tax_class );
+		}
+
 		$product->set_featured( isset( $request_data['_featured'] ) );
 
 		if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
@@ -505,7 +543,7 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( ! empty( $request_data['_tax_class'] ) ) {
-			$tax_class = wc_clean( wp_unslash( $request_data['_tax_class'] ) );
+			$tax_class = sanitize_title( wp_unslash( $request_data['_tax_class'] ) );
 			if ( 'standard' === $tax_class ) {
 				$tax_class = '';
 			}
@@ -617,7 +655,7 @@ class WC_Admin_Post_Types {
 	public function disable_autosave() {
 		global $post;
 
-		if ( $post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ), true ) ) {
+		if ( $post instanceof WP_Post && in_array( get_post_type( $post->ID ), wc_get_order_types( 'order-meta-boxes' ), true ) ) {
 			wp_dequeue_script( 'autosave' );
 		}
 	}
@@ -735,100 +773,6 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Change upload dir for downloadable files.
-	 *
-	 * @param array $pathdata Array of paths.
-	 * @return array
-	 */
-	public function upload_dir( $pathdata ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( isset( $_POST['type'] ) && 'downloadable_product' === $_POST['type'] ) {
-
-			if ( empty( $pathdata['subdir'] ) ) {
-				$pathdata['path']   = $pathdata['path'] . '/woocommerce_uploads';
-				$pathdata['url']    = $pathdata['url'] . '/woocommerce_uploads';
-				$pathdata['subdir'] = '/woocommerce_uploads';
-			} else {
-				$new_subdir = '/woocommerce_uploads' . $pathdata['subdir'];
-
-				$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
-				$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
-				$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
-			}
-		}
-		return $pathdata;
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-	}
-
-	/**
-	 * Change filename for WooCommerce uploads and prepend unique chars for security.
-	 *
-	 * @param string $full_filename Original filename.
-	 * @param string $ext           Extension of file.
-	 * @param string $dir           Directory path.
-	 *
-	 * @return string New filename with unique hash.
-	 * @since 4.0
-	 */
-	public function update_filename( $full_filename, $ext, $dir ) {
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) {
-			return $full_filename;
-		}
-
-		if ( ! strpos( $dir, 'woocommerce_uploads' ) ) {
-			return $full_filename;
-		}
-
-		if ( 'no' === get_option( 'woocommerce_downloads_add_hash_to_filename' ) ) {
-			return $full_filename;
-		}
-
-		return $this->unique_filename( $full_filename, $ext );
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
-	}
-
-	/**
-	 * Change filename to append random text.
-	 *
-	 * @param string $full_filename Original filename with extension.
-	 * @param string $ext           Extension.
-	 *
-	 * @return string Modified filename.
-	 */
-	public function unique_filename( $full_filename, $ext ) {
-		$ideal_random_char_length = 6;   // Not going with a larger length because then downloaded filename will not be pretty.
-		$max_filename_length      = 255; // Max file name length for most file systems.
-		$length_to_prepend        = min( $ideal_random_char_length, $max_filename_length - strlen( $full_filename ) - 1 );
-
-		if ( 1 > $length_to_prepend ) {
-			return $full_filename;
-		}
-
-		$suffix   = strtolower( wp_generate_password( $length_to_prepend, false, false ) );
-		$filename = $full_filename;
-
-		if ( strlen( $ext ) > 0 ) {
-			$filename = substr( $filename, 0, strlen( $filename ) - strlen( $ext ) );
-		}
-
-		$full_filename = str_replace(
-			$filename,
-			"$filename-$suffix",
-			$full_filename
-		);
-
-		return $full_filename;
-	}
-
-	/**
-	 * Run a filter when uploading a downloadable product.
-	 */
-	public function woocommerce_media_upload_downloadable_product() {
-		do_action( 'media_upload_file' );
-	}
-
-	/**
 	 * Grant downloadable file access to any newly added files on any existing.
 	 * orders for this product that have previously been granted downloadable file access.
 	 *
@@ -871,7 +815,7 @@ class WC_Admin_Post_Types {
 		if ( $post && absint( $post->ID ) === $shop_page_id ) {
 			echo '<div class="notice notice-info">';
 			/* translators: %s: URL to read more about the shop page. */
-			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://docs.woocommerce.com/document/woocommerce-pages/#section-4' ) . '</p>';
+			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://woocommerce.com/document/woocommerce-pages/#section-4' ) . '</p>';
 			echo '</div>';
 		}
 	}
@@ -952,7 +896,8 @@ class WC_Admin_Post_Types {
 			return false;
 		}
 
-		$old_price     = (float) $product->{"get_{$price_type}_price"}();
+		$old_price     = $product->{"get_{$price_type}_price"}();
+		$old_price     = '' === $old_price ? (float) $product->get_regular_price() : (float) $old_price;
 		$price_changed = false;
 
 		$change_price  = absint( $request_data[ "change_{$price_type}_price" ] );
@@ -962,13 +907,17 @@ class WC_Admin_Post_Types {
 
 		switch ( $change_price ) {
 			case 1:
-				$new_price = $price;
+				if ( empty( $price ) ) {
+					$new_price = $product->get_regular_price();
+				} else {
+					$new_price = $price;
+				}
 				break;
 			case 2:
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = $old_price + ( $old_price * $percent );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = $old_price + $price;
 				}
 				break;
@@ -976,7 +925,7 @@ class WC_Admin_Post_Types {
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = max( 0, $old_price - ( $old_price * $percent ) );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = max( 0, $old_price - $price );
 				}
 				break;

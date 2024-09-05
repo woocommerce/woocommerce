@@ -1,0 +1,13 @@
+{
+	"root": true,
+	"extends": [ "plugin:@woocommerce/eslint-plugin/recommended" ],
+	"env": {
+		"browser": true,
+		"node": true
+	},
+	"rules": {
+		"camelcase": 0,
+		"react/react-in-jsx-scope": "off",
+		"no-alert": "off"
+	}
+}

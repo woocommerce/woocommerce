@@ -33,7 +33,7 @@ describe( 'FeedbackModal', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should close modal when cancel button pressed', async () => {
+	it( 'should close modal when X button is pressed', async () => {
 		render(
 			<FeedbackModal
 				onSubmit={ mockRecordScoreCallback }
@@ -47,7 +47,7 @@ describe( 'FeedbackModal', () => {
 		await screen.findByRole( 'dialog' );
 
 		// Press cancel button.
-		fireEvent.click( screen.getByRole( 'button', { name: /Cancel/i } ) );
+		fireEvent.click( screen.getByRole( 'button', { name: /Close/i } ) );
 
 		expect( screen.queryByRole( 'dialog' ) ).not.toBeInTheDocument();
 	} );

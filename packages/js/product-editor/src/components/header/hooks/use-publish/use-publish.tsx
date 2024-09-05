@@ -1,107 +1,90 @@
 /**
  * External dependencies
  */
-import { Product, ProductStatus } from '@woocommerce/data';
+import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { MouseEvent } from 'react';
+import type { Product } from '@woocommerce/data';
+import { useShortcut } from '@wordpress/keyboard-shortcuts';
 
-export function usePublish( {
+/**
+ * Internal dependencies
+ */
+import { useProductManager } from '../../../../hooks/use-product-manager';
+import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
+import type { WPError } from '../../../../hooks/use-error-handler';
+import type { PublishButtonProps } from '../../publish-button';
+
+export function usePublish< T = Product >( {
+	productType = 'product',
 	disabled,
 	onClick,
 	onPublishSuccess,
 	onPublishError,
 	...props
-}: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
-	onPublishSuccess?( product: Product ): void;
-	onPublishError?( error: Error ): void;
+}: PublishButtonProps & {
+	onPublishSuccess?( product: T ): void;
+	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps {
-	const [ productId ] = useEntityProp< number >(
+	const { isValidating, isDirty, isPublishing, publish } =
+		useProductManager( productType );
+
+	const [ , , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
-		'product',
-		'id'
-	);
-	const [ productStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		'product',
+		productType,
 		'status'
 	);
 
-	const { hasEdits, isDisabled, isBusy } = useSelect(
-		( select ) => {
-			const { hasEditsForEntityRecord, isSavingEntityRecord } =
-				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-			const isSavingLocked = isPostSavingLocked();
-			const isSaving = isSavingEntityRecord< boolean >(
-				'postType',
-				'product',
-				productId
-			);
+	const { isScheduled } = useProductScheduled( productType );
 
-			return {
-				isDisabled: isSavingLocked || isSaving,
-				isBusy: isSaving,
-				hasEdits: hasEditsForEntityRecord< boolean >(
-					'postType',
-					'product',
-					productId
-				),
-			};
-		},
-		[ productId ]
-	);
+	const isBusy = isPublishing || isValidating;
+	const isDisabled =
+		prevStatus !== 'draft' && ( disabled || isBusy || ! isDirty );
 
-	const isCreating = productStatus === 'auto-draft';
-	const ariaDisabled =
-		disabled || isDisabled || ( productStatus === 'publish' && ! hasEdits );
+	const handlePublish = () =>
+		publish().then( onPublishSuccess ).catch( onPublishError );
 
-	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
-
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( ariaDisabled ) {
-			return event.preventDefault();
+	function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( isDisabled ) {
+			event.preventDefault?.();
+			return;
 		}
 
 		if ( onClick ) {
 			onClick( event );
 		}
 
-		try {
-			// The publish button click not only change the status of the product
-			// but also save all the pending changes. So even if the status is
-			// publish it's possible to save the product too.
-			if ( productStatus !== 'publish' ) {
-				await editEntityRecord( 'postType', 'product', productId, {
-					status: 'publish',
-				} );
-			}
-
-			const publishedProduct = await saveEditedEntityRecord< Product >(
-				'postType',
-				'product',
-				productId
-			);
-
-			if ( onPublishSuccess ) {
-				onPublishSuccess( publishedProduct );
-			}
-		} catch ( error ) {
-			if ( onPublishError ) {
-				onPublishError( error as Error );
-			}
-		}
+		handlePublish();
 	}
 
+	function getButtonText() {
+		if ( isScheduled ) {
+			return __( 'Schedule', 'woocommerce' );
+		}
+
+		if ( prevStatus === 'publish' || prevStatus === 'future' ) {
+			return __( 'Update', 'woocommerce' );
+		}
+
+		return __( 'Publish', 'woocommerce' );
+	}
+
+	useShortcut( 'core/editor/save', ( event ) => {
+		event.preventDefault();
+		if (
+			! isDisabled &&
+			( prevStatus === 'publish' || prevStatus === 'future' )
+		) {
+			handlePublish();
+		}
+	} );
+
 	return {
-		children: isCreating
-			? __( 'Add', 'woocommerce' )
-			: __( 'Save', 'woocommerce' ),
+		children: getButtonText(),
 		...props,
-		'aria-disabled': ariaDisabled,
 		isBusy,
+		'aria-disabled': isDisabled,
 		variant: 'primary',
 		onClick: handleClick,
 	};

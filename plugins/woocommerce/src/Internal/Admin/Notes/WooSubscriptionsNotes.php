@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\PageController;
 
 /**
  * Woo_Subscriptions_Notes
@@ -18,7 +19,7 @@ use Automattic\WooCommerce\Admin\Notes\Notes;
 class WooSubscriptionsNotes {
 	const LAST_REFRESH_OPTION_KEY = 'woocommerce_admin-wc-helper-last-refresh';
 	const NOTE_NAME               = 'wc-admin-wc-helper-connection';
-	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection';
+	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection'; // deprecated.
 	const SUBSCRIPTION_NOTE_NAME  = 'wc-admin-wc-helper-subscription';
 	const NOTIFY_WHEN_DAYS_LEFT   = 60;
 
@@ -36,7 +37,7 @@ class WooSubscriptionsNotes {
 	 * Hook all the things.
 	 */
 	public function __construct() {
-		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( 'admin_head', array( $this, 'admin_head' ) );
 		add_action( 'update_option_woocommerce_helper_data', array( $this, 'update_option_woocommerce_helper_data' ), 10, 2 );
 	}
 
@@ -62,7 +63,6 @@ class WooSubscriptionsNotes {
 		// The site just disconnected.
 		if ( ! empty( $old_token ) && empty( $new_token ) ) {
 			$this->remove_notes();
-			$this->add_no_connection_note();
 			return;
 		}
 
@@ -75,9 +75,16 @@ class WooSubscriptionsNotes {
 	}
 
 	/**
-	 * Things to do on admin_init.
+	 * Runs on `admin_head` hook. Checks the connection and refreshes subscription notes on relevant pages.
 	 */
-	public function admin_init() {
+	public function admin_head() {
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			// To avoid unnecessarily calling Helper API, we only want to refresh subscription notes,
+			// if the request is initiated from the wc admin dashboard or a WC related page which includes
+			// the Activity button in WC header.
+			return;
+		}
+
 		$this->check_connection();
 
 		if ( $this->is_connected() ) {
@@ -116,7 +123,6 @@ class WooSubscriptionsNotes {
 			}
 
 			$this->remove_notes();
-			$this->add_no_connection_note();
 		}
 	}
 
@@ -179,40 +185,15 @@ class WooSubscriptionsNotes {
 	}
 
 	/**
-	 * Adds a note prompting to connect to WooCommerce.com.
-	 */
-	public function add_no_connection_note() {
-		$note = self::get_note();
-		$note->save();
-	}
-
-	/**
-	 * Get the WooCommerce.com connection note
-	 */
-	public static function get_note() {
-		$note = new Note();
-		$note->set_title( __( 'Connect to WooCommerce.com', 'woocommerce' ) );
-		$note->set_content( __( 'Connect to get important product notifications and updates.', 'woocommerce' ) );
-		$note->set_content_data( (object) array() );
-		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_name( self::CONNECTION_NOTE_NAME );
-		$note->set_source( 'woocommerce-admin' );
-		$note->add_action(
-			'connect',
-			__( 'Connect', 'woocommerce' ),
-			'?page=wc-addons&section=helper',
-			Note::E_WC_ADMIN_NOTE_UNACTIONED
-		);
-		return $note;
-	}
-
-	/**
 	 * Gets the product_id (if any) associated with a note.
 	 *
 	 * @param Note $note The note object to interrogate.
 	 * @return int|false
 	 */
 	public function get_product_id_from_subscription_note( &$note ) {
+		if ( ! is_object( $note ) ) {
+			return false;
+		}
 		$content_data = $note->get_content_data();
 
 		if ( property_exists( $content_data, 'product_id' ) ) {

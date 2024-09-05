@@ -171,14 +171,11 @@ const program = new Command()
 		const changes = await scanForChanges(
 			currentVersionRef,
 			`${ previousParsed.major }.${ previousParsed.minor }.${ previousParsed.patch }`,
-			false,
 			SOURCE_REPO,
 			previousVersionRef,
 			'cli',
 			tmpRepoPath
 		);
-
-		const schemaChanges = changes.schema.filter( ( s ) => ! s.areEqual );
 
 		Logger.startTask( 'Finding contributors' );
 		const title = `WooCommerce ${ currentVersion } Released`;
@@ -191,10 +188,7 @@ const program = new Command()
 		const postVariables = {
 			contributors,
 			title,
-			changes: {
-				...changes,
-				schema: schemaChanges,
-			},
+			changes,
 			displayVersion: currentVersion,
 		};
 

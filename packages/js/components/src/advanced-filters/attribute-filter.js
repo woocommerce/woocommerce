@@ -6,7 +6,6 @@ import { SelectControl as Select, Spinner } from '@wordpress/components';
 import classnames from 'classnames';
 import {
 	createElement,
-	createInterpolateElement,
 	Fragment,
 	useEffect,
 	useState,
@@ -19,7 +18,10 @@ import { __ } from '@wordpress/i18n';
  */
 import Search from '../search';
 import SelectControl from '../select-control';
-import { textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 const getScreenReaderText = ( {
 	attributeTerms,

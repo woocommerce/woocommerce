@@ -65,6 +65,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
+		'global_unique_id'   => '',
 		'price'              => '',
 		'regular_price'      => '',
 		'sale_price'         => '',
@@ -251,13 +252,24 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get SKU (Stock-keeping unit) - product unique ID.
+	 * Get SKU (Stock-keeping unit).
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_sku( $context = 'view' ) {
 		return $this->get_prop( 'sku', $context );
+	}
+
+	/**
+	 * Get Unique ID.
+	 *
+	 * @since 9.1.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return string
+	 */
+	public function get_global_unique_id( $context = 'view' ) {
+		return $this->get_prop( 'global_unique_id', $context );
 	}
 
 	/**
@@ -781,7 +793,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param  string $visibility Options: 'hidden', 'visible', 'search' and 'catalog'.
 	 */
 	public function set_catalog_visibility( $visibility ) {
-		$options = array_keys( wc_get_product_visibility_options() );
+		$options    = array_keys( wc_get_product_visibility_options() );
+		$visibility = in_array( $visibility, $options, true ) ? $visibility : strtolower( $visibility );
+
 		if ( ! in_array( $visibility, $options, true ) ) {
 			$this->error( 'product_invalid_catalog_visibility', __( 'Invalid catalog visibility option.', 'woocommerce' ) );
 		}
@@ -831,6 +845,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			);
 		}
 		$this->set_prop( 'sku', $sku );
+	}
+
+	/**
+	 * Set global_unique_id
+	 *
+	 * @since 9.1.0
+	 * @param string $global_unique_id Unique ID.
+	 */
+	public function set_global_unique_id( $global_unique_id ) {
+		$global_unique_id = preg_replace( '/[^0-9\-]/', '', (string) $global_unique_id );
+		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! wc_product_has_global_unique_id( $this->get_id(), $global_unique_id ) ) {
+			$global_unique_id_found = wc_get_product_id_by_global_unique_id( $global_unique_id );
+
+			$this->error(
+				'product_invalid_global_unique_id',
+				__( 'Invalid or duplicated GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
+				400,
+				array(
+					'resource_id' => $global_unique_id_found,
+				)
+			);
+		}
+		$this->set_prop( 'global_unique_id', $global_unique_id );
 	}
 
 	/**
@@ -910,6 +947,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( empty( $status ) ) {
 			$status = 'taxable';
 		}
+
+		$status = strtolower( $status );
 
 		if ( ! in_array( $status, $options, true ) ) {
 			$this->error( 'product_invalid_tax_status', __( 'Invalid product tax status.', 'woocommerce' ) );
@@ -1599,7 +1638,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 
-			if ( $parent_product && 'publish' !== $parent_product->get_status() ) {
+			if ( $parent_product && 'publish' !== $parent_product->get_status() && ! current_user_can( 'edit_post', $parent_product->get_id() ) ) {
 				$visible = false;
 			}
 		}
@@ -1930,6 +1969,23 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function single_add_to_cart_text() {
 		return apply_filters( 'woocommerce_product_single_add_to_cart_text', __( 'Add to cart', 'woocommerce' ), $this );
+	}
+
+	/**
+	 * Get the aria-describedby description for the add to cart button.
+	 *
+	 * @return string
+	 */
+	public function add_to_cart_aria_describedby() {
+		/**
+		 * Filter the aria-describedby description for the add to cart button.
+		 *
+		 * @since 7.8.0
+		 *
+		 * @param string $var Text for the 'aria-describedby' attribute.
+		 * @param WC_Product $this Product object.
+		 */
+		return apply_filters( 'woocommerce_product_add_to_cart_aria_describedby', '', $this );
 	}
 
 	/**

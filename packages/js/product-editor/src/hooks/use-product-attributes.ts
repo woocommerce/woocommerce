@@ -3,28 +3,66 @@
  */
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductAttribute,
+	Product,
+	type ProductProductAttribute,
 	ProductAttributeTerm,
+	ProductDefaultAttribute,
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { sift } from '../utils';
 
-type useProductAttributesProps = {
-	allAttributes: ProductAttribute[];
-	isVariationAttributes?: boolean;
-	onChange: ( attributes: ProductAttribute[] ) => void;
-	productId?: number;
-};
-
-export type EnhancedProductAttribute = ProductAttribute & {
+export type EnhancedProductAttribute = ProductProductAttribute & {
+	isDefault?: boolean;
 	terms?: ProductAttributeTerm[];
 	visible?: boolean;
 };
+
+type useProductAttributesProps = {
+	allAttributes: ProductProductAttribute[];
+	isVariationAttributes?: boolean;
+	onChange: (
+		attributes: ProductProductAttribute[],
+		defaultAttributes: ProductDefaultAttribute[]
+	) => void;
+	productId?: number;
+};
+
+const getFilteredAttributes = (
+	attr: ProductProductAttribute[],
+	isVariationAttributes: boolean
+) => {
+	return isVariationAttributes
+		? attr.filter( ( attribute ) => !! attribute.variation )
+		: attr.filter( ( attribute ) => ! attribute.variation );
+};
+
+function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
+	return values.reduce< Product[ 'default_attributes' ] >(
+		( prevDefaultAttributes, currentAttribute ) => {
+			if (
+				// defaults to true.
+				currentAttribute.isDefault === undefined ||
+				currentAttribute.isDefault === true
+			) {
+				return [
+					...prevDefaultAttributes,
+					{
+						id: currentAttribute.id,
+						name: currentAttribute.name,
+						option: currentAttribute.options[ 0 ],
+					},
+				];
+			}
+			return prevDefaultAttributes;
+		},
+		[]
+	);
+}
 
 export function useProductAttributes( {
 	allAttributes = [],
@@ -32,19 +70,9 @@ export function useProductAttributes( {
 	onChange,
 	productId,
 }: useProductAttributesProps ) {
-	const getFilteredAttributes = () => {
-		return isVariationAttributes
-			? allAttributes.filter( ( attribute ) => !! attribute.variation )
-			: allAttributes.filter( ( attribute ) => ! attribute.variation );
-	};
-
 	const [ attributes, setAttributes ] = useState<
 		EnhancedProductAttribute[]
-	>( getFilteredAttributes() );
-	const [ localAttributes, globalAttributes ]: ProductAttribute[][] = sift(
-		attributes,
-		( attr: ProductAttribute ) => attr.id === 0
-	);
+	>( getFilteredAttributes( allAttributes, isVariationAttributes ) );
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
@@ -53,7 +81,6 @@ export function useProductAttributes( {
 			)
 				.getProductAttributeTerms< ProductAttributeTerm[] >( {
 					attribute_id: attributeId,
-					product: productId,
 				} )
 				.then(
 					( attributeTerms ) => {
@@ -68,37 +95,86 @@ export function useProductAttributes( {
 	);
 
 	const enhanceAttribute = (
-		globalAttribute: ProductAttribute,
-		terms: ProductAttributeTerm[]
+		globalAttribute: ProductProductAttribute,
+		allTerms: ProductAttributeTerm[]
 	) => {
 		return {
 			...globalAttribute,
-			terms: terms.length > 0 ? terms : undefined,
-			options: terms.length === 0 ? globalAttribute.options : [],
+			terms: ( allTerms || [] ).filter( ( term ) =>
+				globalAttribute.options.includes( term.name )
+			),
 		};
 	};
 
-	const getAugmentedAttributes = ( atts: ProductAttribute[] ) => {
-		return atts.map( ( attribute, index ) => ( {
+	const getAugmentedAttributes = (
+		atts: EnhancedProductAttribute[],
+		variation: boolean,
+		startPosition: number
+	): ProductProductAttribute[] => {
+		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
 			...attribute,
-			variation: isVariationAttributes,
-			position: attributes.length + index,
+			variation,
+			position: startPosition + index,
 		} ) );
 	};
 
-	const handleChange = ( newAttributes: ProductAttribute[] ) => {
-		const augmentedAttributes = getAugmentedAttributes( newAttributes );
-		const otherAttributes = isVariationAttributes
+	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
+		const defaultAttributes = manageDefaultAttributes( newAttributes );
+		let otherAttributes = isVariationAttributes
 			? allAttributes.filter( ( attribute ) => ! attribute.variation )
 			: allAttributes.filter( ( attribute ) => !! attribute.variation );
-		setAttributes( augmentedAttributes );
-		onChange( [ ...otherAttributes, ...augmentedAttributes ] );
+
+		// Remove duplicate global attributes.
+		otherAttributes = otherAttributes.filter( ( attr ) => {
+			if (
+				attr.id > 0 &&
+				newAttributes.some( ( a ) => a.id === attr.id )
+			) {
+				return false;
+			}
+			// Local attributes we check by name.
+			if (
+				attr.id === 0 &&
+				newAttributes.some(
+					( a ) => a.name.toLowerCase() === attr.name.toLowerCase()
+				)
+			) {
+				return false;
+			}
+			return true;
+		} );
+		const newAugmentedAttributes = getAugmentedAttributes(
+			newAttributes,
+			isVariationAttributes,
+			isVariationAttributes ? otherAttributes.length : 0
+		);
+		const otherAugmentedAttributes = getAugmentedAttributes(
+			otherAttributes,
+			! isVariationAttributes,
+			isVariationAttributes ? 0 : newAttributes.length
+		);
+
+		if ( isVariationAttributes ) {
+			onChange(
+				[ ...otherAugmentedAttributes, ...newAugmentedAttributes ],
+				defaultAttributes
+			);
+		} else {
+			onChange(
+				[ ...newAugmentedAttributes, ...otherAugmentedAttributes ],
+				defaultAttributes
+			);
+		}
 	};
 
-	useEffect( () => {
-		if ( ! getFilteredAttributes().length || attributes.length ) {
-			return;
-		}
+	const fetchAttributes = useCallback( () => {
+		const [
+			localAttributes,
+			globalAttributes,
+		]: ProductProductAttribute[][] = sift(
+			getFilteredAttributes( allAttributes, isVariationAttributes ),
+			( attr: ProductProductAttribute ) => attr.id === 0
+		);
 
 		Promise.all(
 			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )
@@ -110,10 +186,11 @@ export function useProductAttributes( {
 				...localAttributes,
 			] );
 		} );
-	}, [ allAttributes, attributes, fetchTerms ] );
+	}, [ allAttributes, isVariationAttributes, fetchTerms ] );
 
 	return {
 		attributes,
+		fetchAttributes,
 		handleChange,
 		setAttributes,
 	};

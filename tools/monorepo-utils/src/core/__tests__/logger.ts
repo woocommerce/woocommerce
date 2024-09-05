@@ -36,7 +36,7 @@ describe( 'Logger', () => {
 			Logger.error( error );
 
 			expect( global.console.error ).toHaveBeenCalledWith(
-				chalk.red( error.message )
+				chalk.red( `${ error.message }\n${ error.stack }` )
 			);
 		} );
 

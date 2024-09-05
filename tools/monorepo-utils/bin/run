@@ -1,25 +1,13 @@
 #!/usr/bin/env node
+const fs = require( 'node:fs' );
+const path = require( 'node:path' );
 
-const { existsSync } = require( 'fs' );
-const chalk = require( 'chalk' );
-const path = require( 'path' );
-
-const nodeModulesDirectory = path.join( __dirname, '../', 'node_modules' );
-
-if ( ! existsSync( nodeModulesDirectory ) ) {
-	console.log(
-		chalk.red(
-			'The @woocommerce/monorepo-utils must be built before running the CLI.'
-		)
-	);
-	console.log(
-		chalk.yellow(
-			'run `pnpm run build` from the root of the monorepo-utils package. or `pnpm install --filter monorepo-utils` from project root.'
-		)
-	);
-	process.exit( 1 );
+// We need to make sure that the tool has been built before we can use it.
+const runFile = path.join( __dirname, '..', 'dist', 'index.js' );
+if ( ! fs.existsSync( runFile ) ) {
+    console.error( 'The "monorepo-utils" tool has not been built.' );
+    process.exit( 1 );
 }
 
-const { program } = require( '../dist/index' );
-
-program.parse( process.argv );
+// Execute the tool now that we've confirmed it exists.
+require( '../dist/index.js' );

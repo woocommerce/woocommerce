@@ -197,6 +197,7 @@ export const AllCategoryList = forwardRef<
 							></span>
 							<span className="screen-reader-text">
 								{ sprintf(
+									/* translators: %s: category name */
 									__( 'Remove term: %s', 'woocommerce' ),
 									selectedCategory.name
 								) }

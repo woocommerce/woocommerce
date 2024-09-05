@@ -62,6 +62,29 @@ export function setError( category, error ) {
 	};
 }
 
+export function* loadInstalledPluginsAfterActivation( activatedPluginSlug ) {
+	try {
+		const response = yield apiFetch( {
+			path: `${ API_NAMESPACE }/overview/installed-plugins`,
+		} );
+
+		if ( response ) {
+			yield receiveInstalledPlugins( response );
+			yield removeActivatingPlugin( activatedPluginSlug );
+		} else {
+			throw new Error();
+		}
+	} catch ( error ) {
+		yield handleFetchError(
+			error,
+			__(
+				'There was an error loading installed extensions.',
+				'woocommerce'
+			)
+		);
+	}
+}
+
 export function* activateInstalledPlugin( pluginSlug ) {
 	const { createNotice } = dispatch( 'core/notices' );
 	yield receiveActivatingPlugin( pluginSlug );
@@ -100,29 +123,6 @@ export function* activateInstalledPlugin( pluginSlug ) {
 	}
 
 	return true;
-}
-
-export function* loadInstalledPluginsAfterActivation( activatedPluginSlug ) {
-	try {
-		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/overview/installed-plugins`,
-		} );
-
-		if ( response ) {
-			yield receiveInstalledPlugins( response );
-			yield removeActivatingPlugin( activatedPluginSlug );
-		} else {
-			throw new Error();
-		}
-	} catch ( error ) {
-		yield handleFetchError(
-			error,
-			__(
-				'There was an error loading installed extensions.',
-				'woocommerce'
-			)
-		);
-	}
 }
 
 export function* installAndActivateRecommendedPlugin(

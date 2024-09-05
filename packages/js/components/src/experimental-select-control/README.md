@@ -105,4 +105,6 @@ Name | Type | Default | Description
 `onInputChange` | Function | `() => null` | A callback that fires when the user input has changed
 `onRemove` | Function | `() => null` | A callback that fires when a selected item has been removed
 `onSelect` | Function | `() => null` | A callback that fires when an item has been selected
-`selected` | Array or Item | `undefined` | An array of selected items or a single selected item
+`selected` | Array or Item | `undefined` | An array of selected items or a single selected item\
+`onKeyDown` | Function | `() => null` | A callback that fires when a key is pressed
+`readOnlyWhenClosed` | Boolean | `false` | Whether the input should be read-only when the menu is closed

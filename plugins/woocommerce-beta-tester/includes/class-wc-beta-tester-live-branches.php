@@ -15,19 +15,28 @@ class WC_Beta_Tester_Live_Branches {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'admin_menu', array( $this, 'register_page' ) );
+		add_action( 'admin_init', array( $this, 'register_scripts' ) );
+	}
 
-		// By the time this code runs it appears too late to hook into `admin_menu`.
-		$this->register_page();
+	/**
+	 * Check if WooCommerce is installed.
+	 *
+	 * @return bool - True if WooCommerce is installed, false otherwise.
+	 */
+	private function woocommerce_is_installed() {
+		return class_exists( 'WooCommerce' );
 	}
 
 	/**
 	 * Register live branches scripts.
 	 */
 	public function register_scripts() {
-		if ( ! method_exists( 'Automattic\WooCommerce\Admin\PageController', 'is_admin_or_embed_page' ) ||
-			! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
-		) {
+		if ( ! $this->woocommerce_is_installed() ) {
+			return;
+		}
+
+		if ( ! is_admin() ) {
 			return;
 		}
 
@@ -56,6 +65,10 @@ class WC_Beta_Tester_Live_Branches {
 	 * Register live branches page.
 	 */
 	public function register_page() {
+		if ( ! $this->woocommerce_is_installed() ) {
+			return;
+		}
+
 		if ( ! function_exists( 'wc_admin_register_page' ) ) {
 			return;
 		}
@@ -63,7 +76,6 @@ class WC_Beta_Tester_Live_Branches {
 		wc_admin_register_page(
 			array(
 				'id'         => 'woocommerce-beta-tester-live-branches',
-				// phpcs:disable
 				'title'      => __( 'Live Branches', 'woocommerce-beta-tester' ),
 				'path'       => '/live-branches',
 				'parent'     => 'woocommerce',

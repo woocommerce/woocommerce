@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-gallery-large-image-next-previous",
+	"version": "1.0.0",
+	"title": "Next/Previous Buttons",
+	"description": "Display next and previous buttons.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"usesContext": [
+		"nextPreviousButtonsPosition",
+		"productGalleryClientId",
+		"postId"
+	],
+	"textdomain": "woocommerce",
+	"supports": {
+		"layout": {
+			"default": {
+				"type": "flex",
+				"verticalAlignment": "bottom"
+			},
+			"allowVerticalAlignment": true,
+			"allowJustification": false,
+			"allowOrientation": false,
+			"allowInheriting": false
+		}
+	},
+	"ancestor": [
+		"woocommerce/product-gallery-large-image"
+	]
+}

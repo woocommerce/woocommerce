@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add filter for response of `wc_rest_should_load_namespace` function to allow loading namespaces.

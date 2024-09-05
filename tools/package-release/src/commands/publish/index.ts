@@ -8,7 +8,7 @@ import { execSync } from 'child_process';
  * Internal dependencies
  */
 import {
-	getAllPackges,
+	getAllPackages,
 	validatePackage,
 	getFilepathFromPackageName,
 	isValidUpdate,
@@ -59,6 +59,10 @@ export default class PackageRelease extends Command {
 			description: 'Skip pnpm install',
 			default: false,
 		} ),
+		'initial-release': Flags.boolean( {
+			default: false,
+			description: "Create a package's first release to NPM",
+		} ),
 	};
 
 	/**
@@ -91,7 +95,7 @@ export default class PackageRelease extends Command {
 		}
 
 		if ( flags.all ) {
-			this.publishPackages( getAllPackges(), flags );
+			this.publishPackages( getAllPackages(), flags );
 			return;
 		}
 
@@ -112,16 +116,25 @@ export default class PackageRelease extends Command {
 	 */
 	private publishPackages(
 		packages: Array< string >,
-		{ 'dry-run': dryRun, branch }: { 'dry-run': boolean; branch: string }
+		{
+			'dry-run': dryRun,
+			branch,
+			'initial-release': initialRelease,
+		}: { 'dry-run': boolean; branch: string; 'initial-release': boolean }
 	) {
 		packages.forEach( ( name ) => {
 			try {
 				const verb = dryRun ? 'Performing dry run of' : 'Publishing';
 				CliUx.ux.action.start( `${ verb } ${ name }` );
-				if ( isValidUpdate( name ) ) {
+				if ( isValidUpdate( name, initialRelease ) ) {
 					const cwd = getFilepathFromPackageName( name );
+					if ( cwd.includes( 'packages/php' ) ) {
+						this.error(
+							'Publishing PHP packages is not supported just yet.'
+						);
+					}
 					execSync(
-						`SKIP_TURBO=true pnpm publish ${
+						`pnpm publish ${
 							dryRun ? '--dry-run' : ''
 						} --publish-branch=${ branch }`,
 						{

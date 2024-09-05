@@ -25,12 +25,34 @@ defined( 'ABSPATH' ) || exit;
  * A facade to allow deprecating an entire class.
  */
 class DeprecatedClassFacade {
+
 	/**
 	 * The instance that this facade covers over.
 	 *
 	 * @var object
 	 */
 	protected $instance;
+
+	/**
+	 * The name of the non-deprecated class that this facade covers.
+	 *
+	 * @var string
+	 */
+	protected static $facade_over_classname;
+
+	/**
+	 * The version that this class was deprecated in.
+	 *
+	 * @var string
+	 */
+	protected static $deprecated_in_version = '';
+
+	/**
+	 * Static array of logged messages.
+	 *
+	 * @var array
+	 */
+	private static $logged_messages = array();
 
 	/**
 	 * Constructor.
@@ -45,14 +67,18 @@ class DeprecatedClassFacade {
 	 * @param string $function The name of the deprecated function being called.
 	 */
 	private static function log_deprecation( $function ) {
-		error_log( // phpcs:ignore
-			sprintf(
-				'%1$s is deprecated since version %2$s! Use %3$s instead.',
-				static::class . '::' . $function,
-				static::$deprecated_in_version,
-				static::$facade_over_classname . '::' . $function
-			)
+		$message = sprintf(
+			'%1$s is deprecated since version %2$s! Use %3$s instead.',
+			static::class . '::' . $function,
+			static::$deprecated_in_version,
+			static::$facade_over_classname . '::' . $function
 		);
+
+		// Only log when the message has not been logged before.
+		if ( ! in_array( $message, self::$logged_messages, true ) ) {
+			error_log( $message ); // phpcs:ignore
+			self::$logged_messages[] = $message;
+		}
 	}
 
 	/**

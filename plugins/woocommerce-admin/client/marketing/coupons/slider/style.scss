@@ -1,3 +1,20 @@
+@mixin animate-slider($vector, $duration: 300ms, $timing-function: ease-in) {
+	.slide-enter {
+		transform: translateX($vector * 100%);
+	}
+	.slide-enter-active {
+		transform: translateX(0%);
+		transition: transform $duration $timing-function;
+	}
+	.slide-exit {
+		transform: translateX(0%);
+	}
+	.slide-exit-active {
+		transform: translateX($vector * -100%);
+		transition: transform $duration $timing-function;
+	}
+}
+
 .woocommerce-marketing-slider {
 	display: block;
 	width: 100%;
@@ -17,7 +34,6 @@
 		top: 0;
 		left: 0;
 		width: 100%;
-		transition: transform 300ms ease-in;
 		position: relative;
 	}
 
@@ -27,33 +43,13 @@
 	}
 
 	&.animate-right {
-		.slide-enter {
-			transform: translateX(-100%);
-		}
-		.slide-enter-active {
-			transform: translateX(0%);
-		}
-		.slide-exit {
-			transform: translateX(0%);
-		}
-		.slide-exit-active {
-			transform: translateX(100%);
-		}
+		// $vector = -1 for sliding from left to right
+		@include animate-slider(-1);
 	}
 
 	&.animate-left {
-		.slide-enter {
-			transform: translateX(100%);
-		}
-		.slide-enter-active {
-			transform: translateX(0%);
-		}
-		.slide-exit {
-			transform: translateX(0%);
-		}
-		.slide-exit-active {
-			transform: translateX(-100%);
-		}
+		// $vector = 1 for sliding from right to left
+		@include animate-slider(1);
 	}
 
 	@media screen and (prefers-reduced-motion: reduce) {

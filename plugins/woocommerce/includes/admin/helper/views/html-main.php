@@ -60,7 +60,8 @@
 			$class_html = $current_filter === $key ? 'class="current"' : '';
 			?>
 			<li>
-				<a <?php echo esc_html( $class_html ); ?> href="<?php echo esc_url( $url ); ?>">
+				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<a <?php echo $class_html; ?> href="<?php echo esc_url( $url ); ?>">
 					<?php echo esc_html( $label ); ?>
 					<span class="count">(<?php echo absint( $counts[ $key ] ); ?>)</span>
 				</a>

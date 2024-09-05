@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix wrong file name in error message in update-wp-env.php.

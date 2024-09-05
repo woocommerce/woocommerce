@@ -23,7 +23,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::toggle_cot( false );
+		OrderHelper::toggle_cot_feature_and_usage( false );
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
@@ -32,7 +33,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot( $this->prev_cot_state );
+		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
 	}
 
@@ -275,4 +277,263 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test the untrashing an order works as expected when done in an agnostic way (ie, not depending directly on
+	 * functions such as `wp_untrash_post()`.
+	 *
+	 * @return void
+	 */
+	public function test_untrash(): void {
+		$order           = WC_Helper_Order::create_order();
+		$order_id        = $order->get_id();
+		$original_status = $order->get_status();
+
+		$order->delete();
+		$this->assertEquals( 'trash', $order->get_status(), 'The order was successfully trashed.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertTrue( $order->untrash(), 'The order was restored from the trash.' );
+		$this->assertEquals( $original_status, $order->get_status(), 'The original order status is restored following untrash.' );
+	}
+
+	/**
+	 * @testDox A 'suppress_filters' argument can be passed to 'delete', if true no 'woocommerce_(before_)trash/delete_order' actions will be fired.
+	 *
+	 * @testWith [null, true]
+	 *           [true, true]
+	 *           [false, true]
+	 *           [null, false]
+	 *           [true, false]
+	 *           [false, false]
+	 *
+	 * @param bool|null $suppress True or false to use a 'suppress_filters' argument with that value, null to not use it.
+	 * @param bool      $force_delete True to delete the order, false to trash it.
+	 * @return void
+	 */
+	public function test_filters_can_be_suppressed_when_trashing_or_deleting_an_order( ?bool $suppress, bool $force_delete ) {
+		$order_id_from_before_delete = null;
+		$order_id_from_after_delete  = null;
+		$order_from_before_delete    = null;
+
+		$trash_or_delete = $force_delete ? 'delete' : 'trash';
+
+		add_action(
+			"woocommerce_before_{$trash_or_delete}_order",
+			function ( $order_id, $order ) use ( &$order_id_from_before_delete, &$order_from_before_delete ) {
+				$order_id_from_before_delete = $order_id;
+				$order_from_before_delete    = $order;
+			},
+			10,
+			2
+		);
+
+		add_action(
+			"woocommerce_{$trash_or_delete}_order",
+			function ( $order_id ) use ( &$order_id_from_after_delete ) {
+				$order_id_from_after_delete = $order_id;
+			}
+		);
+
+		$args = array( 'force_delete' => $force_delete );
+		if ( null !== $suppress ) {
+			$args['suppress_filters'] = $suppress;
+		}
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		$sut = new WC_Order_Data_Store_CPT();
+		$sut->delete( $order, $args );
+
+		if ( true === $suppress ) {
+			$this->assertNull( $order_id_from_before_delete );
+			$this->assertNull( $order_id_from_after_delete );
+			$this->assertNull( $order_from_before_delete );
+		} else {
+			$this->assertEquals( $order_id, $order_id_from_before_delete );
+			$this->assertEquals( $order_id, $order_id_from_after_delete );
+			$this->assertSame( $order, $order_from_before_delete );
+		}
+	}
+
+	/**
+	 * @testDox Deleting order items should only delete items of the specified type.
+	 */
+	public function test_delete_items() {
+		$order        = WC_Helper_Order::create_order();
+		$product      = WC_Helper_Product::create_simple_product();
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_product( $product );
+		$product_item->set_quantity( 1 );
+		$product_item->save();
+
+		$fee_item_1 = new WC_Order_Item_Fee();
+		$fee_item_1->set_amount( 20 );
+		$fee_item_1->save();
+
+		$fee_item_2 = new WC_Order_Item_Fee();
+		$fee_item_2->set_amount( 30 );
+		$fee_item_2->save();
+
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_name( 'dummy shipping' );
+		$shipping_item->set_total( 20 );
+		$shipping_item->save();
+
+		$order->add_item( $product_item );
+		$order->add_item( $fee_item_1 );
+		$order->add_item( $fee_item_2 );
+		$order->add_item( $shipping_item );
+
+		$order->save();
+
+		$r_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $r_order->get_item( $fee_item_1->get_id() )->get_id() === $fee_item_1->get_id() );
+		$this->assertTrue( $r_order->get_item( $fee_item_2->get_id() )->get_id() === $fee_item_2->get_id() );
+		$this->assertTrue( $r_order->get_item( $product_item->get_id() )->get_id() === $product_item->get_id() );
+		$this->assertTrue( $r_order->get_item( $shipping_item->get_id() )->get_id() === $shipping_item->get_id() );
+
+		// Deleting single item type should only delete that item type.
+		$r_order->get_data_store()->delete_items( $r_order, $fee_item_1->get_type() );
+		$this->assertFalse( $r_order->get_item( $fee_item_1->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
+		$this->assertTrue( $r_order->get_item( $product_item->get_id() )->get_id() === $product_item->get_id() );
+		$this->assertTrue( $r_order->get_item( $shipping_item->get_id() )->get_id() === $shipping_item->get_id() );
+
+		// Deleting all items should all items.
+		$r_order->get_data_store()->delete_items( $r_order );
+		$this->assertFalse( $r_order->get_item( $fee_item_1->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $product_item->get_id() ) );
+		$this->assertFalse( $r_order->get_item( $shipping_item->get_id() ) );
+	}
+
+	/**
+	 * @testDox Deleting order item should delete items from only that order.
+	 */
+	public function test_delete_items_multi_order() {
+		$order_1        = WC_Helper_Order::create_order();
+		$product        = WC_Helper_Product::create_simple_product();
+		$product_item_1 = new WC_Order_Item_Product();
+		$product_item_1->set_product( $product );
+		$product_item_1->set_quantity( 1 );
+		$product_item_1->save();
+
+		$order_2        = WC_Helper_Order::create_order();
+		$product_item_2 = new WC_Order_Item_Product();
+		$product_item_2->set_product( $product );
+		$product_item_2->set_quantity( 1 );
+		$product_item_2->save();
+
+		$order_1->add_item( $product_item_1 );
+		$order_1->save();
+		$order_2->add_item( $product_item_2 );
+		$order_2->save();
+
+		$this->assertTrue( $order_1->get_item( $product_item_1->get_id() )->get_id() === $product_item_1->get_id() );
+		$this->assertTrue( $order_2->get_item( $product_item_2->get_id() )->get_id() === $product_item_2->get_id() );
+
+		$order_1->get_data_store()->delete_items( $order_1 );
+
+		$this->assertFalse( $order_1->get_item( $product_item_1->get_id() ) );
+		$this->assertTrue( $order_2->get_item( $product_item_2->get_id() )->get_id() === $product_item_2->get_id() );
+	}
+
+	/**
+	 * @testDox Creating an order with a draft status should not trigger the "woocommerce_new_order" action.
+	 */
+	public function test_create_draft_order_doesnt_trigger_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$draft_statuses = array( 'auto-draft', 'checkout-draft' );
+
+		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
+
+		foreach ( $draft_statuses as $status ) {
+			$order = new WC_Order();
+			$order->set_status( $status );
+			$order_data_store_cpt->create( $order );
+		}
+
+		$this->assertEquals( 0, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
+
+	/**
+	 * @testDox Updating an order status correctly triggers the "woocommerce_new_order" action.
+	 */
+	public function test_update_order_status_correctly_triggers_new_order_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
+
+		$order = new WC_Order();
+		$order->set_status( 'draft' );
+
+		$this->assertEquals( 0, $new_count );
+
+		$order->set_status( 'checkout-draft' );
+		$order_data_store_cpt->update( $order );
+		$order->save();
+		$this->assertEquals( 0, $new_count );
+
+		$triggering_order_statuses = array( 'pending', 'on-hold', 'completed', 'processing' );
+
+		foreach ( $triggering_order_statuses as $k => $status ) {
+			$current_status = $order->get_status( 'edit' );
+			$order->set_status( $status );
+			$order_data_store_cpt->update( $order );
+			$order->set_status( 'checkout-draft' ); // Revert back to draft.
+			$order->save();
+			$this->assertEquals(
+				$k + 1,
+				$new_count,
+				'Failed to trigger new order hook changing status: ' . $current_status . ' -> ' . $status
+			);
+		}
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
+
+	/**
+	 * @testDox Create a new order with processing status without saving and updating it should trigger the "woocommerce_new_order" action.
+	 */
+	public function test_update_new_processing_order_correctly_triggers_new_order_hook() {
+
+		$new_count = 0;
+
+		$callback = function () use ( &$new_count ) {
+			++$new_count;
+		};
+
+		add_action( 'woocommerce_new_order', $callback );
+
+		$order_data_store_cpt = new WC_Order_Data_Store_CPT();
+
+		$order = new WC_Order();
+		$order->set_status( 'processing' );
+
+		$this->assertEquals( 0, $new_count );
+
+		$order_data_store_cpt->update( $order );
+
+		$this->assertEquals( 1, $new_count );
+
+		remove_action( 'woocommerce_new_order', $callback );
+	}
 }

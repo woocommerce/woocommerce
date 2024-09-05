@@ -6,18 +6,19 @@
 			display: block;
 			line-height: 1.5;
 		}
-		margin-bottom: $gap-large;
+		margin-bottom: $gap-small;
 	}
 
 	&__title {
-		font-size: 16px;
-		font-weight: 600;
+		font-size: 11px;
+		font-weight: 500;
 		color: #1e1e1e;
+		text-transform: uppercase;
 	}
 
 	&__description {
 		font-size: 13px;
-		color: #1e1e1e;
+		color: $gray-700;
 	}
 
 	.components-base-control__field > .components-v-stack {

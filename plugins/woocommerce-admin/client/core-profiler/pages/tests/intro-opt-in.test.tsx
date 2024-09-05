@@ -48,20 +48,6 @@ describe( 'IntroOptIn', () => {
 		expect( screen.getByRole( 'checkbox' ) ).toBeChecked();
 	} );
 
-	it( 'should checkbox be unchecked when optInDataSharing is false', () => {
-		const newProps = {
-			...props,
-			context: {
-				optInDataSharing: false,
-			},
-		};
-		render(
-			// @ts-ignore
-			<IntroOptIn { ...newProps } />
-		);
-		expect( screen.getByRole( 'checkbox' ) ).not.toBeChecked();
-	} );
-
 	it( 'should toggle checkbox when checkbox is clicked', () => {
 		render(
 			// @ts-ignore

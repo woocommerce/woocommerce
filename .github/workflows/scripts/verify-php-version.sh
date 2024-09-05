@@ -5,7 +5,7 @@
 #
 
 cd $GITHUB_WORKSPACE/plugins/woocommerce
-ACTUAL_PHP_VERSION=$(pnpm exec wp-env run tests-cli "wp --info | grep 'PHP version:'")
+ACTUAL_PHP_VERSION=$(pnpm exec wp-env run tests-cli wp --info | grep 'PHP version:')
 EXIT_CODE=''
 
 echo "PHP version found in WP Env environment: \"$ACTUAL_PHP_VERSION\""

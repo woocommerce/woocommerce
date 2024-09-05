@@ -19,3 +19,7 @@ export const getCountries = ( state: CountriesState ) => {
 export const getCountry = ( state: CountriesState, code: string ) => {
 	return state.countries.find( ( country ) => country.code === code );
 };
+
+export const geolocate = ( state: CountriesState ) => {
+	return state.geolocation;
+};

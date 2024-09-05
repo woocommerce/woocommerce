@@ -24,6 +24,7 @@ class CouponsReport extends Component {
 			query.coupons.split( ',' ).length > 1;
 
 		const mode = isCompareView ? 'item-comparison' : 'time-comparison';
+		/* translators: %d: number of coupons */
 		const itemsLabel = __( '%d coupons', 'woocommerce' );
 
 		return {
@@ -56,7 +57,6 @@ class CouponsReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="coupons"
-					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }

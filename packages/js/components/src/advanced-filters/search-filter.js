@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	createInterpolateElement,
-	Component,
-	Fragment,
-} from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { getIdsFromQuery } from '@woocommerce/navigation';
 import { find, isEqual } from 'lodash';
@@ -17,7 +12,10 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import Search from '../search';
-import { textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 class SearchFilter extends Component {
 	constructor( { filter, config, query } ) {

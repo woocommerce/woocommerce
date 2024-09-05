@@ -1,5 +1,5 @@
-.woocommerce-page #wpcontent,
-.woocommerce-page.woocommerce_page_wc-admin #wpbody-content {
+.woocommerce-admin-page #wpcontent,
+.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
 	overflow-x: inherit !important; // Overwriting wc-admin css from elsewhere. Necessary to make the right-hand column 'stick'
 	position: relative;
 }
@@ -23,7 +23,7 @@
 			width: calc(50% - 12px);
 			margin: 0;
 
-			@include breakpoint( '<782px' ) {
+			@include breakpoint( "<782px" ) {
 				width: 100%;
 				position: inherit;
 				top: auto;
@@ -34,7 +34,7 @@
 			display: block;
 		}
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			flex-direction: column;
 
 			.your-store-today {
@@ -43,7 +43,7 @@
 		}
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		margin-left: -16px;
 		margin-right: -16px;
 	}
@@ -63,7 +63,7 @@
 		margin-left: 16px;
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		width: 100%;
 		position: inherit;
 		top: auto;

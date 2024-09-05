@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Post types Class.
@@ -108,6 +109,7 @@ class WC_Post_Types {
 						'not_found'             => __( 'No categories found', 'woocommerce' ),
 						'item_link'             => __( 'Product Category Link', 'woocommerce' ),
 						'item_link_description' => __( 'A link to a product category.', 'woocommerce' ),
+						'template_name'         => _x( 'Products by Category', 'Template name', 'woocommerce' ),
 					),
 					'show_in_rest'          => true,
 					'show_ui'               => true,
@@ -153,6 +155,7 @@ class WC_Post_Types {
 						'not_found'                  => __( 'No tags found', 'woocommerce' ),
 						'item_link'                  => __( 'Product Tag Link', 'woocommerce' ),
 						'item_link_description'      => __( 'A link to a product tag.', 'woocommerce' ),
+						'template_name'              => _x( 'Products by Tag', 'Template name', 'woocommerce' ),
 					),
 					'show_in_rest'          => true,
 					'show_ui'               => true,
@@ -365,461 +368,76 @@ class WC_Post_Types {
 					'has_archive'         => $has_archive,
 					'show_in_nav_menus'   => true,
 					'show_in_rest'        => true,
-					'template'            => array(
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'general',
-								'title' => __( 'General', 'woocommerce' ),
-								'order' => 10,
-							),
-							array(
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Basic details', 'woocommerce' ),
-										'description' => __( 'This info will be displayed on the product page, category pages, social media, and search results.', 'woocommerce' ),
-										'icon'        => array(
-											'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_basic.svg', WC_PLUGIN_FILE ),
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-name-field',
-											array(
-												'name' => 'Product name',
-											),
-										),
-										array(
-											'woocommerce/product-summary-field',
-										),
-										array(
-											'core/columns',
-											array(),
-											array(
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-regular-price-field',
-															array(
-																'name'  => 'regular_price',
-																'label' => __( 'List price', 'woocommerce' ),
-																'help'  => __( 'Manage more settings in <PricingTab>Pricing.</PricingTab>', 'woocommerce' ),
-															),
-														),
-													),
-												),
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-sale-price-field',
-															array(
-																'label' => __( 'Sale price', 'woocommerce' ),
-															),
-														),
-													),
-												),
-											),
-										),
-									),
-								),
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Description', 'woocommerce' ),
-										'description' => __( 'What makes this product unique? What are its most important features? Enrich the product page by adding rich content using blocks.', 'woocommerce' ),
-										'icon'        => array(
-											'src' => '<svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="9.91663" y1="16.5" x2="9.91663" y2="1.38889" stroke="#1E1E1E" stroke-width="1.5"/><line x1="5.47217" y1="16.5" x2="5.47217" y2="1.38889" stroke="#1E1E1E" stroke-width="1.5"/><line x1="13.3334" y1="1.25" x2="4.44448" y2="1.25" stroke="#1E1E1E" stroke-width="1.5"/><path d="M4.13889 5.38889V9.46C2.21109 9.10713 0.75 7.41864 0.75 5.38889C0.75 3.35914 2.21109 1.67065 4.13889 1.31778V5.38889Z" fill="#1E1E1E" stroke="#1E1E1E" stroke-width="1.5"/></svg>',
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-description-field',
-										),
-									),
-								),
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Images', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
-											__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
-											'<a href="http://woocommerce.com/#" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-										'icon'        => array(
-											'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_images.svg', WC_PLUGIN_FILE ),
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-images-field',
-											array(
-												'images' => array(),
-											),
-										),
-									),
-								),
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Organization & visibility', 'woocommerce' ),
-										'description' => __( 'Help customers find this product by assigning it to categories or featuring it across your sales channels.', 'woocommerce' ),
-									),
-									array(
-										array(
-											'woocommerce/product-category-field',
-											array(
-												'name' => 'categories',
-											),
-										),
-									),
-								),
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Attributes', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: Attributes guide link opening tag. %2$s: Attributes guide link closing tag.*/
-											__( 'Add descriptive pieces of information that customers can use to filter and search for this product. %1$sLearn more%2$s', 'woocommerce' ),
-											'<a href="https://woocommerce.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-										'icon'        => array(
-											'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_attributes.svg', WC_PLUGIN_FILE ),
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-attributes-field',
-										),
-									),
-								),
-							),
-						),
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'pricing',
-								'title' => __( 'Pricing', 'woocommerce' ),
-								'order' => 20,
-							),
-							array(
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Pricing', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
-											__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
-											'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-										'icon'        => array(
-											'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_pricing.svg', WC_PLUGIN_FILE ),
-										),
-									),
-									array(
-										array(
-											'core/columns',
-											array(),
-											array(
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-regular-price-field',
-															array(
-																'name'  => 'regular_price',
-																'label' => __( 'List price', 'woocommerce' ),
-															),
-														),
-													),
-												),
-												array(
-													'core/column',
-													array(
-														'templateLock' => 'all',
-													),
-													array(
-														array(
-															'woocommerce/product-sale-price-field',
-															array(
-																'label' => __( 'Sale price', 'woocommerce' ),
-															),
-														),
-													),
-												),
-											),
-										),
-										array(
-											'woocommerce/product-schedule-sale-fields',
-										),
-										array(
-											'woocommerce/product-radio-field',
-											array(
-												'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-												'property' => 'tax_status',
-												'options'  => array(
-													array(
-														'label' => __( 'Product and shipping', 'woocommerce' ),
-														'value' => 'taxable',
-													),
-													array(
-														'label' => __( 'Only shipping', 'woocommerce' ),
-														'value' => 'shipping',
-													),
-													array(
-														'label' => __( "Don't charge tax", 'woocommerce' ),
-														'value' => 'none',
-													),
-												),
-											),
-										),
-										array(
-											'woocommerce/product-collapsible',
-											array(
-												'toggleText'       => __( 'Advanced', 'woocommerce' ),
-												'initialCollapsed' => true,
-												'persistRender'    => true,
-											),
-											array(
-												array(
-													'woocommerce/product-radio-field',
-													array(
-														'title'    => __( 'Tax class', 'woocommerce' ),
-														'description' => sprintf(
-															/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-															__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
-															'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
-															'</a>'
-														),
-														'property' => 'tax_class',
-														'options'  => array(
-															array(
-																'label' => __( 'Standard', 'woocommerce' ),
-																'value' => '',
-															),
-															array(
-																'label' => __( 'Reduced rate', 'woocommerce' ),
-																'value' => 'reduced-rate',
-															),
-															array(
-																'label' => __( 'Zero rate', 'woocommerce' ),
-																'value' => 'zero-rate',
-															),
-														),
-													),
-												),
-											),
-										),
-									),
-								),
-							),
-						),
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'inventory',
-								'title' => __( 'Inventory', 'woocommerce' ),
-								'order' => 30,
-							),
-							array(
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Inventory', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: Inventory settings link opening tag. %2$s: Inventory settings link closing tag.*/
-											__( 'Set up and manage inventory for this product, including status and available quantity. %1$sManage store inventory settings%2$s', 'woocommerce' ),
-											'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-										'icon'        => array(
-											'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_inventory.svg', WC_PLUGIN_FILE ),
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-sku-field',
-										),
-										array(
-											'woocommerce/product-toggle-field',
-											array(
-												'label'    => __( 'Track stock quantity for this product', 'woocommerce' ),
-												'property' => 'manage_stock',
-												'disabled' => 'yes' !== get_option( 'woocommerce_manage_stock' ),
-											),
-										),
-										array(
-											'woocommerce/conditional',
-											array(
-												'mustMatch' => array(
-													'manage_stock' => array( true ),
-												),
-											),
-											array(
-												array(
-													'woocommerce/product-inventory-quantity-field',
-												),
-											),
-										),
-										array(
-											'woocommerce/conditional',
-											array(
-												'mustMatch' => array(
-													'manage_stock' => array( false ),
-												),
-											),
-											array(
-												array(
-													'woocommerce/product-radio-field',
-													array(
-														'title'    => __( 'Stock status', 'woocommerce' ),
-														'property' => 'stock_status',
-														'options'  => array(
-															array(
-																'label' => __( 'In stock', 'woocommerce' ),
-																'value' => 'instock',
-															),
-															array(
-																'label' => __( 'Out of stock', 'woocommerce' ),
-																'value' => 'outofstock',
-															),
-															array(
-																'label' => __( 'On backorder', 'woocommerce' ),
-																'value' => 'onbackorder',
-															),
-														),
-													),
-												),
-											),
-										),
-										array(
-											'woocommerce/product-collapsible',
-											array(
-												'toggleText'       => __( 'Advanced', 'woocommerce' ),
-												'initialCollapsed' => true,
-												'persistRender'    => true,
-											),
-											array(
-												array(
-													'woocommerce/conditional',
-													array(
-														'mustMatch' => array(
-															'manage_stock' => array( true ),
-														),
-													),
-													array(
-														array(
-															'woocommerce/product-radio-field',
-															array(
-																'title'    => __( 'When out of stock', 'woocommerce' ),
-																'property' => 'backorders',
-																'options'  => array(
-																	array(
-																		'label' => __( 'Allow purchases', 'woocommerce' ),
-																		'value' => 'yes',
-																	),
-																	array(
-																		'label' => __(
-																			'Allow purchases, but notify customers',
-																			'woocommerce'
-																		),
-																		'value' => 'notify',
-																	),
-																	array(
-																		'label' => __( "Don't allow purchases", 'woocommerce' ),
-																		'value' => 'no',
-																	),
-																),
-															),
-														),
-														array(
-															'woocommerce/product-inventory-email-field',
-														),
-													),
-												),
-												array(
-													'woocommerce/product-checkbox-field',
-													array(
-														'title'    => __(
-															'Restrictions',
-															'woocommerce'
-														),
-														'label'    => __(
-															'Limit purchases to 1 item per order',
-															'woocommerce'
-														),
-														'property' => 'sold_individually',
-														'tooltip' => __(
-															'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
-															'woocommerce'
-														),
-													),
-												),
-
-											),
-										),
-
-									),
-								),
-							),
-
-						),
-						array(
-							'woocommerce/product-tab',
-							array(
-								'id'    => 'shipping',
-								'title' => __( 'Shipping', 'woocommerce' ),
-								'order' => 40,
-							),
-							array(
-								array(
-									'woocommerce/product-section',
-									array(
-										'title'       => __( 'Fees & dimensions', 'woocommerce' ),
-										'description' => sprintf(
-											/* translators: %1$s: How to get started? link opening tag. %2$s: How to get started? link closing tag.*/
-											__( 'Set up shipping costs and enter dimensions used for accurate rate calculations. %1$sHow to get started?%2$s.', 'woocommerce' ),
-											'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
-											'</a>'
-										),
-										'icon'        => array(
-											'src' => plugins_url( '/assets/client/admin/product-editor/icons/section_shipping.svg', WC_PLUGIN_FILE ),
-										),
-									),
-									array(
-										array(
-											'woocommerce/product-shipping-fee-fields',
-											array(
-												'title' => __( 'Shipping fee', 'woocommerce' ),
-											),
-										),
-										array(
-											'woocommerce/product-shipping-dimensions-fields',
-										),
-									),
-								),
-							),
-						),
-					),
-					'template_lock'       => 'all',
 				)
 			)
 		);
+
+		// Register the product form post type wne the feature is enabled.
+		if ( Features::is_enabled( 'product-editor-template-system' ) ) {
+			register_post_type(
+				'product_form',
+				/**
+				 * Allow developers to customize the product form post type registration arguments.
+				 *
+				 * @since 9.1.0
+				 * @param array $args The default post type registration arguments.
+				 */
+				apply_filters(
+					'woocommerce_register_post_type_product_form',
+					array(
+						'labels'
+						=> array(
+							'name'                  => __( 'Product Forms', 'woocommerce' ),
+							'singular_name'         => __( 'Product Form', 'woocommerce' ),
+							'all_items'             => __( 'All Product Form', 'woocommerce' ),
+							'menu_name'             => _x( 'Product Forms', 'Admin menu name', 'woocommerce' ),
+							'add_new'               => __( 'Add New', 'woocommerce' ),
+							'add_new_item'          => __( 'Add new product form', 'woocommerce' ),
+							'edit'                  => __( 'Edit', 'woocommerce' ),
+							'edit_item'             => __( 'Edit product form', 'woocommerce' ),
+							'new_item'              => __( 'New product form', 'woocommerce' ),
+							'view_item'             => __( 'View product form', 'woocommerce' ),
+							'view_items'            => __( 'View product forms', 'woocommerce' ),
+							'search_items'          => __( 'Search product forms', 'woocommerce' ),
+							'not_found'             => __( 'No product forms found', 'woocommerce' ),
+							'not_found_in_trash'    => __( 'No product forms found in trash', 'woocommerce' ),
+							'parent'                => __( 'Parent product form', 'woocommerce' ),
+							'featured_image'        => __( 'Product form image', 'woocommerce' ),
+							'set_featured_image'    => __( 'Set product form image', 'woocommerce' ),
+							'remove_featured_image' => __( 'Remove product form image', 'woocommerce' ),
+							'use_featured_image'    => __( 'Use as product form image', 'woocommerce' ),
+							'insert_into_item'      => __( 'Insert into product form', 'woocommerce' ),
+							'uploaded_to_this_item' => __( 'Uploaded to this product form', 'woocommerce' ),
+							'filter_items_list'     => __( 'Filter product forms', 'woocommerce' ),
+							'items_list_navigation' => __( 'Product forms navigation', 'woocommerce' ),
+							'items_list'            => __( 'Product forms list', 'woocommerce' ),
+							'item_link'             => __( 'Product form Link', 'woocommerce' ),
+							'item_link_description' => __( 'A link to a product form.', 'woocommerce' ),
+						),
+						'description'         => __( 'This is where you can set up product forms for various product types in your dashboard.', 'woocommerce' ),
+						'public'              => true,
+						'menu_icon'           => 'dashicons-forms',
+						'capability_type'     => 'product',
+						'map_meta_cap'        => true,
+						'publicly_queryable'  => true,
+						'hierarchical'        => false, // Hierarchical causes memory issues - WP loads all records!
+						'rewrite'             => $permalinks['product_rewrite_slug'] ? array(
+							'slug'       => $permalinks['product_rewrite_slug'],
+							'with_front' => false,
+							'feeds'      => true,
+						) : false,
+						'query_var'           => true,
+						'supports'            => $supports,
+						'has_archive'         => $has_archive,
+						'show_in_rest'        => true,
+						'show_ui'             => true,
+						'show_in_menu'        => true,
+						'exclude_from_search' => true,
+						'show_in_nav_menus'   => false,
+					)
+				)
+			);
+		}
 
 		register_post_type(
 			'product_variation',
@@ -887,7 +505,6 @@ class WC_Post_Types {
 					'public'                           => false,
 					'hierarchical'                     => false,
 					'supports'                         => false,
-					'exclude_from_orders_screen'       => false,
 					'add_order_meta_boxes'             => false,
 					'exclude_from_order_count'         => true,
 					'exclude_from_order_views'         => false,

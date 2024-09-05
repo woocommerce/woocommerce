@@ -97,6 +97,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'description',
 			'short_description',
 			'sku',
+			'global_unique_id',
 			'price',
 			'regular_price',
 			'sale_price',
@@ -149,6 +150,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'grouped_products',
 			'menu_order',
 			'meta_data',
+			'post_password',
 		);
 	}
 
@@ -159,7 +161,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_product_api_get_all_fields() {
 		$expected_response_fields = $this->get_expected_response_fields();
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -182,7 +184,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$call_product_data_wrapper = function () use ( $product ) {
 			return $this->get_product_data( $product );
 		};
-		$response = $call_product_data_wrapper->call( new WC_REST_Products_Controller() );
+		$response                  = $call_product_data_wrapper->call( new WC_REST_Products_Controller() );
 		$this->assertArrayHasKey( 'id', $response );
 	}
 
@@ -191,7 +193,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_products_get_each_field_one_by_one() {
 		$expected_response_fields = $this->get_expected_response_fields();
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
 		foreach ( $expected_response_fields as $field ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
@@ -202,84 +204,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 			$this->assertContains( $field, $response_fields, "Field $field was expected but not present in product API response." );
 		}
-	}
-
-	/**
-	 * Test that featured field exists under images in product argument.
-	 */
-	public function test_products_args_includes_featured_field() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/products' );
-		$request->set_param( '_fields', 'endpoints.1.args.images.items.properties' );
-		$response  = $this->server->dispatch( $request );
-		$image_arg = $response->get_data()['endpoints'][1]['args']['images']['items']['properties'];
-		$this->assertArrayHasKey( 'featured', $image_arg );
-		$this->assertEquals(
-			array(
-				'description' => 'Featured image.',
-				'type'        => 'boolean',
-				'default'     => false,
-				'context'     =>
-				array(
-					0 => 'view',
-					1 => 'edit',
-				),
-			),
-			$image_arg['featured']
-		);
-	}
-
-	/**
-	 * Test that featured field exists under images in product schema.
-	 */
-	public function test_products_schema_includes_featured_field() {
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/products' );
-		$request->set_param( '_fields', 'schema.properties.images.items.properties' );
-		$response     = $this->server->dispatch( $request );
-		$image_schema = $response->get_data()['schema']['properties']['images']['items']['properties'];
-		$this->assertArrayHasKey( 'featured', $image_schema );
-		$this->assertEquals(
-			array(
-				'description' => 'Featured image.',
-				'type'        => 'boolean',
-				'default'     => false,
-				'context'     =>
-				array(
-					0 => 'view',
-					1 => 'edit',
-				),
-			),
-			$image_schema['featured']
-		);
-	}
-
-	/**
-	 * Test that feature field is returned inside images.
-	 */
-	public function test_products_get_images_array_contains_featured() {
-		global $wpdb;
-
-		$product     = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-		$gallery_url = media_sideload_image( 'https://cldup.com/6L9h56D9Bw.jpg', $product->get_id(), 'gallery', 'src' );
-		$this->assertNotWPError( $gallery_url );
-		$gallery_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $gallery_url ) );
-
-		$featured_url = media_sideload_image( 'https://cldup.com/Dr1Bczxq4q.png', $product->get_id(), 'featured', 'src' );
-		$this->assertNotWPError( $featured_url );
-		$featured_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $featured_url ) );
-
-		$product->set_image_id( $featured_id[0] );
-		$product->set_gallery_image_ids( $gallery_id[0] );
-		$product->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() );
-		$request->set_param( '_fields', 'images' );
-		$response     = $this->server->dispatch( $request );
-		$images_array = $response->get_data()['images'];
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertTrue( $images_array[0]['featured'] );
-		$this->assertEquals( 'featured', $images_array[0]['name'] );
-		$this->assertFalse( $images_array[1]['featured'] );
-		$this->assertEquals( 'gallery', $images_array[1]['name'] );
 	}
 
 	/**
@@ -402,7 +326,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -426,7 +350,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -451,7 +375,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -478,7 +402,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertArrayHasKey( 'meta_data', $order );
 			$this->assertEquals( 1, count( $order['meta_data'] ) );
 			$meta_keys = array_map(
-				function( $meta_item ) {
+				function ( $meta_item ) {
 					return $meta_item->get_data()['key'];
 				},
 				$order['meta_data']
@@ -501,5 +425,116 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
 
 		$this->assertIsArray( $decoded_data_object[0]->meta_data );
+	}
+
+	/**
+	 * Test the duplicate product endpoint with simple products.
+	 */
+	public function test_duplicate_simple_product() {
+		$product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Carrot Cake',
+				'sku'  => 'carrot-cake-1',
+			)
+		);
+		$product_id = $product->get_id();
+
+		$request  = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertNotEquals( $product, $response_data['id'] );
+
+		$duplicated_product = wc_get_product( $response_data['id'] );
+		$this->assertEquals( $product->get_name() . ' (Copy)', $duplicated_product->get_name() );
+		$this->assertEquals( 'draft', $duplicated_product->get_status() );
+	}
+
+	/**
+	 * Test the duplicate product endpoint with variable products.
+	 */
+	public function test_duplicate_variable_product() {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$product_id       = $variable_product->get_id();
+
+		$request  = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertNotEquals( $product_id, $response_data['id'] );
+
+		$duplicated_product = wc_get_product( $response_data['id'] );
+		$this->assertEquals( $variable_product->get_name() . ' (Copy)', $duplicated_product->get_name() );
+		$this->assertTrue( $duplicated_product->is_type( 'variable' ) );
+	}
+
+	/**
+	 * Test the duplicate product endpoint with extra args to also update the product.
+	 */
+	public function test_duplicate_product_with_extra_args() {
+		$product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Tiramisu Cake',
+				'sku'  => 'tiramisu-cake-1',
+			)
+		);
+		$product_id = $product->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
+		$request->set_param( 'sku', 'new-sku' );
+		$request->set_param(
+			'meta_data',
+			array(
+				array(
+					'key'   => 'test',
+					'value' => 'test',
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertNotEquals( $product_id, $response_data['id'] );
+
+		$duplicated_product = wc_get_product( $response_data['id'] );
+		$this->assertEquals( 'new-sku', $duplicated_product->get_sku() );
+		$this->assertEquals( 'test', $duplicated_product->get_meta( 'test', true ) );
+	}
+	/**
+	 * Test the duplicate product endpoint with to update product's name and stock management.
+	 */
+	public function test_duplicate_product_with_extra_args_name_stock_management() {
+		$product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Blueberry Cake',
+				'sku'  => 'blueberry-cake-1',
+			)
+		);
+		$product_id = $product->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
+		$request->set_param( 'name', 'new-name' );
+		$request->set_param( 'manage_stock', true );
+		$request->set_param( 'stock_quantity', 10 );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertNotEquals( $product_id, $response_data['id'] );
+
+		$duplicated_product = wc_get_product( $response_data['id'] );
+		$this->assertEquals( 'new-name (Copy)', $duplicated_product->get_name() );
+		$this->assertTrue( $duplicated_product->get_manage_stock() );
+		$this->assertEquals( 10, $duplicated_product->get_stock_quantity() );
 	}
 }

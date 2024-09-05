@@ -30,7 +30,7 @@ export const getTourConfig = ( {
 				spotlight: {
 					interactivity: {
 						enabled: true,
-						rootElementSelector: '.woocommerce.wc-addons-wrap',
+						rootElementSelector: '.woocommerce-marketplace',
 					},
 				},
 				autoScroll: {
@@ -39,21 +39,6 @@ export const getTourConfig = ( {
 				},
 			},
 			popperModifiers: [
-				{
-					name: 'arrow',
-					options: {
-						padding: ( {
-							popper,
-						}: {
-							popper: { width: number };
-						} ) => {
-							return {
-								// Align the arrow to the left of the popper.
-								right: popper.width - 34,
-							};
-						},
-					},
-				},
 				{
 					name: 'offset',
 					options: {

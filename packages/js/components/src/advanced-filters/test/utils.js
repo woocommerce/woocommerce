@@ -6,7 +6,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { textContent } from '../utils';
+import { getInterpolatedString, textContent } from '../utils';
 
 describe( 'textContent()', () => {
 	test( 'should get text `Hello World`', () => {
@@ -78,5 +78,41 @@ describe( 'textContent()', () => {
 		];
 
 		expect( textContent( component ) ).toBe( 'abcxy' );
+	} );
+} );
+
+describe( 'getInterpolatedString()', () => {
+	test( 'should return string `<h1>my title</h1>`', () => {
+		const interpolatedString = '{{h1}}my title{{/h1}}';
+
+		expect( getInterpolatedString( interpolatedString ) ).toBe(
+			'<h1>my title</h1>'
+		);
+	} );
+
+	test( 'should return string `<tag1>text</tag1> - <tag2>text 2</tag2>`', () => {
+		const interpolatedString =
+			'{{tag1}}text{{/tag1}} - {{tag2}}text 2{{/tag2}}';
+
+		expect( getInterpolatedString( interpolatedString ) ).toBe(
+			'<tag1>text</tag1> - <tag2>text 2</tag2>'
+		);
+	} );
+
+	test( 'should return string `<tag1><tag2> my text </tag2></tag1>`', () => {
+		const interpolatedString =
+			'{{tag1}}{{tag2}} my text {{/tag2}}{{/tag1}}';
+
+		expect( getInterpolatedString( interpolatedString ) ).toBe(
+			'<tag1><tag2> my text </tag2></tag1>'
+		);
+	} );
+
+	test( 'should return string `<tag>my text</tag> <tag2 /> <tag3 />`', () => {
+		const interpolatedString =
+			'{{tag}}my text{{/tag}} {{tag2 /}} {{tag3 /}}';
+		expect( getInterpolatedString( interpolatedString ) ).toBe(
+			'<tag>my text</tag> <tag2 /> <tag3 />'
+		);
 	} );
 } );

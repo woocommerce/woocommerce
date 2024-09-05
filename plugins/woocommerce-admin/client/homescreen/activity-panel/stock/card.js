@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { BaseControl, Button } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Component, Fragment } from '@wordpress/element';
 import { ESCAPE } from '@wordpress/keycodes';
 import { get } from 'lodash';
@@ -175,7 +175,7 @@ export class ProductStockCard extends Component {
 
 		return (
 			<span
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-stock-activity-card__stock-quantity',
 					{
 						'out-of-stock': product.stock_quantity < 1,
@@ -239,7 +239,7 @@ export class ProductStockCard extends Component {
 
 		const productImage =
 			get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
-		const productImageClasses = classnames(
+		const productImageClasses = clsx(
 			'woocommerce-stock-activity-card__image-overlay__product',
 			{
 				'is-placeholder': ! productImage || ! productImage.src,
@@ -252,12 +252,9 @@ export class ProductStockCard extends Component {
 				</div>
 			</div>
 		);
-		const activityCardClasses = classnames(
-			'woocommerce-stock-activity-card',
-			{
-				'is-dimmed': ! editing && ! isLowStock,
-			}
-		);
+		const activityCardClasses = clsx( 'woocommerce-stock-activity-card', {
+			'is-dimmed': ! editing && ! isLowStock,
+		} );
 
 		const activityCard = (
 			<ActivityCard

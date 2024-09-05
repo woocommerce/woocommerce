@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\EvaluateAndGetStatus;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\EvaluateAndGetStatus;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_EvaluateAndGetStatus
@@ -211,5 +211,56 @@ class WC_Admin_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Un
 		);
 
 		$this->assertEquals( 'unactioned', $result );
+	}
+
+	/**
+	 * Tests that for an alert note that is unactioned and eval to true,
+	 * The pending status is returned.
+	 *
+	 * @group fast
+	 */
+	public function test_unactioned_alert_note_return_pending_when_eval_to_false() {
+		$spec = json_decode(
+			'{
+				"slug": "test",
+				"type": "error",
+				"rules": []
+			}'
+		);
+
+		$result = EvaluateAndGetStatus::evaluate(
+			$spec,
+			'unactioned',
+			new stdClass(),
+			new FailingRuleEvaluator()
+		);
+
+		$this->assertEquals( 'pending', $result );
+	}
+
+	/**
+	 * Tests that for an alert note that is unactioned and eval to true,
+	 * The current status is returned.
+	 *
+	 * @group fast
+	 */
+	public function test_unactioned_info_note_return_current_status_when_eval_to_false() {
+		$spec = json_decode(
+			'{
+				"slug": "test",
+				"type": "info",
+				"rules": []
+			}'
+		);
+
+		$current_status = 'unactioned';
+		$result         = EvaluateAndGetStatus::evaluate(
+			$spec,
+			$current_status,
+			new stdClass(),
+			new FailingRuleEvaluator()
+		);
+
+		$this->assertEquals( $current_status, $result );
 	}
 }

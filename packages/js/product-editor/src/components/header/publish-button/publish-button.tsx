@@ -1,75 +1,130 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { MouseEvent } from 'react';
-import { Product, ProductStatus } from '@woocommerce/data';
-import { useDispatch } from '@wordpress/data';
+import type { MouseEvent } from 'react';
+import { Button, Dropdown } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
+import { useDispatch } from '@wordpress/data';
+import { createElement } from '@wordpress/element';
+import { type Product } from '@woocommerce/data';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { store as productEditorUiStore } from '../../../store/product-editor-ui';
+import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { recordProductEvent } from '../../../utils/record-product-event';
+import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
+import { TRACKS_SOURCE } from '../../../constants';
 import { usePublish } from '../hooks/use-publish';
+import { PublishButtonMenu } from './publish-button-menu';
+import { showSuccessNotice } from './utils';
+import type { PublishButtonProps } from './types';
 
-export function PublishButton(
-	props: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' >
-) {
-	const [ productStatus ] = useEntityProp< ProductStatus >(
+export function PublishButton( {
+	productType = 'product',
+	isMenuButton,
+	isPrePublishPanelVisible = true,
+	visibleTab = 'general',
+	...props
+}: PublishButtonProps ) {
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { maybeShowFeedbackBar } = useFeedbackBar();
+	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
+	const { getProductErrorMessageAndProps } = useErrorHandler();
+
+	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
-		'product',
+		productType,
 		'status'
 	);
 
-	const isCreating = productStatus === 'auto-draft';
-
-	const { createSuccessNotice, createErrorNotice } =
-		useDispatch( 'core/notices' );
-
 	const publishButtonProps = usePublish( {
+		productType,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
-			recordProductEvent( 'product_update', savedProduct );
+			const isPublished =
+				savedProduct.status === 'publish' ||
+				savedProduct.status === 'future';
 
-			const noticeContent = isCreating
-				? __( 'Product successfully created.', 'woocommerce' )
-				: __( 'Product published.', 'woocommerce' );
-			const noticeOptions = {
-				icon: '🎉',
-				actions: [
-					{
-						label: __( 'View in store', 'woocommerce' ),
-						// Leave the url to support a11y.
-						url: savedProduct.permalink,
-						onClick( event: MouseEvent< HTMLAnchorElement > ) {
-							event.preventDefault();
-							// Notice actions do not support target anchor prop,
-							// so this forces the page to be opened in a new tab.
-							window.open( savedProduct.permalink, '_blank' );
-						},
-					},
-				],
-			};
+			if ( isPublished ) {
+				recordProductEvent( 'product_update', savedProduct );
+			}
 
-			createSuccessNotice( noticeContent, noticeOptions );
+			showSuccessNotice( savedProduct, prevStatus );
 
-			if ( productStatus === 'auto-draft' ) {
+			maybeShowFeedbackBar();
+
+			if ( prevStatus === 'auto-draft' || prevStatus === 'draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
 		},
-		onPublishError() {
-			const noticeContent = isCreating
-				? __( 'Failed to create product.', 'woocommerce' )
-				: __( 'Failed to publish product.', 'woocommerce' );
-
-			createErrorNotice( noticeContent );
+		async onPublishError( error ) {
+			const { message, errorProps } =
+				await getProductErrorMessageAndProps( error, visibleTab );
+			createErrorNotice( message, errorProps );
 		},
 	} );
+
+	if ( productType === 'product' && isMenuButton ) {
+		function renderPublishButtonMenu(
+			menuProps: Dropdown.RenderProps
+		): React.ReactElement {
+			return (
+				<PublishButtonMenu
+					{ ...menuProps }
+					postType={ productType }
+					visibleTab={ visibleTab }
+				/>
+			);
+		}
+
+		if (
+			editedStatus !== 'publish' &&
+			editedStatus !== 'future' &&
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+			isPrePublishPanelVisible
+		) {
+			function handlePrePublishButtonClick(
+				event: MouseEvent< HTMLButtonElement >
+			) {
+				if ( publishButtonProps[ 'aria-disabled' ] ) {
+					event.preventDefault();
+					return;
+				}
+
+				recordEvent( 'product_prepublish_panel', {
+					source: TRACKS_SOURCE,
+					action: 'view',
+				} );
+				openPrepublishPanel();
+			}
+
+			return (
+				<PublishButtonMenu
+					{ ...publishButtonProps }
+					postType={ productType }
+					controls={ undefined }
+					onClick={ handlePrePublishButtonClick }
+					renderMenu={ renderPublishButtonMenu }
+					visibleTab={ visibleTab }
+				/>
+			);
+		}
+
+		return (
+			<PublishButtonMenu
+				{ ...publishButtonProps }
+				postType={ productType }
+				controls={ undefined }
+				renderMenu={ renderPublishButtonMenu }
+				visibleTab={ visibleTab }
+			/>
+		);
+	}
 
 	return <Button { ...publishButtonProps } />;
 }

@@ -10,13 +10,30 @@ import { apiFetch } from '@wordpress/data-controls';
 import { BaseQueryParams } from './types/query-params';
 import { fetchWithHeaders } from './controls';
 
-export function getResourceName(
-	prefix: string,
-	identifier: Record< string, unknown > | string
-) {
-	const identifierString = JSON.stringify(
-		identifier,
-		Object.keys( identifier ).sort()
+function replacer( _: string, value: unknown ) {
+	if ( value ) {
+		if ( Array.isArray( value ) ) {
+			return [ ...value ].sort();
+		}
+		if ( typeof value === 'object' ) {
+			return Object.entries( value )
+				.sort()
+				.reduce(
+					( current, [ propKey, propVal ] ) => ( {
+						...current,
+						[ propKey ]: propVal,
+					} ),
+					{}
+				);
+		}
+	}
+	return value;
+}
+
+export function getResourceName( prefix: string, ...identifier: unknown[] ) {
+	const identifierString = JSON.stringify( identifier, replacer ).replace(
+		/\\"/g,
+		'"'
 	);
 	return `${ prefix }:${ identifierString }`;
 }
@@ -35,7 +52,7 @@ export function getTotalCountResourceName(
 	prefix: string,
 	query: Record< string, unknown >
 ) {
-	const { _fields, page, per_page, ...totalsQuery } = query;
+	const { _fields, page, per_page, order, orderby, ...totalsQuery } = query;
 
 	return getResourceName( prefix, totalsQuery );
 }

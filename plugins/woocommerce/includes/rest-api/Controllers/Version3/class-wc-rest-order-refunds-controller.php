@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\RestApiUtil;
+use Automattic\WooCommerce\Internal\RestApiParameterUtil;
 
 /**
  * REST API Order Refunds controller class.
@@ -36,7 +36,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		RestApiUtil::adjust_create_refund_request_parameters( $request );
+		RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
 
 		$order = wc_get_order( (int) $request['order_id'] );
 

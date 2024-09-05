@@ -18,4 +18,8 @@
 		margin-bottom: $gap;
 	}
 
+	&__notice.components-notice {
+		margin: 0px;
+		padding-right: $gap-small;
+	}
 }

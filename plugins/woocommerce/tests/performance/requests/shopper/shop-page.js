@@ -1,22 +1,28 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
  */
-import { sleep, check, group } from 'k6';
+import { sleep, group } from 'k6';
 import http from 'k6/http';
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
 
 /**
  * Internal dependencies
  */
-import { base_url, think_time_min, think_time_max } from '../../config.js';
+import {
+	base_url,
+	think_time_min,
+	think_time_max,
+	FOOTER_TEXT,
+	STORE_NAME,
+} from '../../config.js';
 import {
 	htmlRequestHeader,
 	commonRequestHeaders,
 	commonGetRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils.js';
 
 export function shopPage() {
 	let response;
@@ -34,12 +40,10 @@ export function shopPage() {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - Shop Page' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'body contains: woocommerce-products-header': ( response ) =>
-				response.body.includes(
-					'<header class="woocommerce-products-header">'
-				),
+		checkResponse( response, 200, {
+			title: `Shop – ${ STORE_NAME }`,
+			body: '<header class="woocommerce-products-header">',
+			footer: FOOTER_TEXT,
 		} );
 	} );
 

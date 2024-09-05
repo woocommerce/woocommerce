@@ -250,25 +250,25 @@ class WC_Template_Loader {
 		if ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
+			$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+			$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
+			$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
+
 			if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
 				$templates[] = 'taxonomy-product_attribute.php';
 				$templates[] = WC()->template_path() . 'taxonomy-product_attribute.php';
 				$templates[] = $default_file;
-			} else {
-				$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
-				$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
-				$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
-				$templates[] = WC()->template_path() . 'taxonomy-' . $object->taxonomy . '.php';
+			}
 
-				if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-					$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
-					$cs_default  = str_replace( '_', '-', $default_file );
-					$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
-					$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
-					$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
-					$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '.php';
-					$templates[] = $cs_default;
-				}
+			if ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+				$cs_taxonomy = str_replace( '_', '-', $object->taxonomy );
+				$cs_default  = str_replace( '_', '-', $default_file );
+				$templates[] = 'taxonomy-' . $object->taxonomy . '-' . $object->slug . '.php';
+				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '-' . $object->slug . '.php';
+				$templates[] = 'taxonomy-' . $object->taxonomy . '.php';
+				$templates[] = WC()->template_path() . 'taxonomy-' . $cs_taxonomy . '.php';
+				$templates[] = $cs_default;
 			}
 		}
 

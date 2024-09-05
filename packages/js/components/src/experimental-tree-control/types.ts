@@ -4,10 +4,15 @@ export interface Item {
 	label: string;
 }
 
+export type AugmentedItem = Item & {
+	isExpanded: boolean;
+};
+
 export interface LinkedTree {
 	parent?: LinkedTree;
-	data: Item;
+	data: AugmentedItem;
 	children: LinkedTree[];
+	index?: number;
 }
 
 export type CheckedStatus = 'checked' | 'unchecked' | 'indeterminate';
@@ -18,6 +23,11 @@ type BaseTreeProps = {
 	 * a list of items if it is true.
 	 */
 	selected?: Item | Item[];
+
+	onExpand?( index: number, value: boolean ): void;
+
+	highlightedIndex?: number;
+
 	/**
 	 * Whether the tree items are single or multiple selected.
 	 */
@@ -45,7 +55,7 @@ type BaseTreeProps = {
 	 * ancestors and its descendants are also selected. If it's false
 	 * only the clicked item is selected.
 	 *
-	 * @param  value The selection
+	 * @param value The selection
 	 */
 	onSelect?( value: Item | Item[] ): void;
 	/**
@@ -54,7 +64,7 @@ type BaseTreeProps = {
 	 * are also unselected. If it's false only the clicked item is
 	 * unselected.
 	 *
-	 * @param  value The unselection
+	 * @param value The unselection
 	 */
 	onRemove?( value: Item | Item[] ): void;
 	/**
@@ -66,8 +76,8 @@ type BaseTreeProps = {
 	 * 	shouldItemBeHighlighted={ isFirstChild }
 	 * />
 	 *
-	 * @param  item The current linked tree item, useful to
-	 *              traverse the entire linked tree from this item.
+	 * @param item The current linked tree item, useful to
+	 *             traverse the entire linked tree from this item.
 	 *
 	 * @see {@link LinkedTree}
 	 */
@@ -76,6 +86,12 @@ type BaseTreeProps = {
 	 * Called when the create button is clicked to help closing any related popover.
 	 */
 	onTreeBlur?(): void;
+
+	onFirstItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;
+	/**
+	 * Called when the escape key is pressed.
+	 */
+	onEscape?(): void;
 };
 
 export type TreeProps = BaseTreeProps &
@@ -97,7 +113,7 @@ export type TreeProps = BaseTreeProps &
 		 * 	getItemLabel={ ( item ) => <span>${ item.data.label }</span> }
 		 * />
 		 *
-		 * @param  item The current rendering tree item
+		 * @param item The current rendering tree item
 		 *
 		 * @see {@link LinkedTree}
 		 */
@@ -112,7 +128,7 @@ export type TreeProps = BaseTreeProps &
 		 * 	}
 		 * />
 		 *
-		 * @param  item The tree item to determine if should be expanded.
+		 * @param item The tree item to determine if should be expanded.
 		 *
 		 * @see {@link LinkedTree}
 		 */
@@ -131,6 +147,7 @@ export type TreeItemProps = BaseTreeProps &
 		item: LinkedTree;
 		index: number;
 		isFocused?: boolean;
+		isHighlighted?: boolean;
 		getLabel?( item: LinkedTree ): JSX.Element;
 		shouldItemBeExpanded?( item: LinkedTree ): boolean;
 		onLastItemLoop?( event: React.KeyboardEvent< HTMLDivElement > ): void;

@@ -18,13 +18,19 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Notes\Note;
+use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
+use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
  * Update file paths for 2.0
@@ -164,7 +170,7 @@ function wc_update_200_taxrates() {
 						)
 					);
 
-					$loop++;
+					++$loop;
 				}
 			}
 		}
@@ -213,7 +219,7 @@ function wc_update_200_taxrates() {
 				}
 			}
 
-			$loop++;
+			++$loop;
 		}
 	}
 
@@ -410,7 +416,7 @@ function wc_update_209_brazillian_state() {
 
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
-	// Update brazillian state codes.
+	// Update Brazilian state codes.
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
@@ -2457,7 +2463,7 @@ function wc_update_700_remove_download_log_fk() {
  * Remove the transient data for recommended marketing extensions.
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
-	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
+	delete_transient( 'wc_marketing_recommended_plugins' );
 }
 
 /**
@@ -2568,7 +2574,6 @@ function wc_update_750_add_columns_to_order_stats_table() {
 			and postmeta.meta_key = '_date_completed'
 		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
 	);
-
 }
 
 /**
@@ -2588,4 +2593,262 @@ function wc_update_750_disable_new_product_management_experience() {
 function wc_update_770_remove_multichannel_marketing_feature_options() {
 	delete_option( 'woocommerce_multichannel_marketing_enabled' );
 	delete_option( 'woocommerce_marketing_overview_welcome_hidden' );
+}
+
+/**
+ * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
+ *
+ * @return bool Whether there are pending migration records.
+ */
+function wc_update_810_migrate_transactional_metadata_for_hpos() {
+	global $wpdb;
+
+	$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+	if ( ! $data_synchronizer->get_table_exists() ) {
+		return false;
+	}
+
+	$orders_table      = OrdersTableDataStore::get_orders_table_name();
+	$orders_meta_table = OrdersTableDataStore::get_meta_table_name();
+
+	/**
+	 * We are migrating payment_tokens meta that is stored in wp_postmeta table to the HPOS table. To do this with minimum db ops:
+	 * 1. We join postmeta table with wc_orders table directly, this filters out orders that are yet to be migrated and any post with non-order post type.
+	 * 2. A combination of filter on wc_orders_meta.meta_key = _payment_tokens in the join condition itself, along with a null check in a WHERE condition, allows us to only get the orders where the meta is not yet migrated.
+	 */
+	$select_query = "
+SELECT post_id, '_payment_tokens', {$wpdb->postmeta}.meta_value
+FROM {$wpdb->postmeta}
+JOIN $orders_table ON {$wpdb->postmeta}.post_id = $orders_table.id
+LEFT JOIN $orders_meta_table ON $orders_meta_table.order_id = $orders_table.id AND $orders_meta_table.meta_key = '_payment_tokens'
+WHERE
+	{$wpdb->postmeta}.meta_key = '_payment_tokens'
+	AND $orders_meta_table.order_id IS NULL
+	";
+
+	// No need to get the data in application, we can insert directly. Sync setting does not matter as this data already exist in the post table. Limit the batch size to 250.
+	$query =
+		"
+INSERT INTO $orders_meta_table (order_id, meta_key, meta_value)
+$select_query
+LIMIT 250
+";
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- No user input in the query, everything hardcoded.
+	$wpdb->query( $query );
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- No user input in the query, everything hardcoded.
+	$has_pending = $wpdb->query( "$select_query LIMIT 1;" );
+
+	return ! empty( $has_pending );
+}
+
+/**
+ * Remove the transient data for recommended marketing extensions.
+ *
+ * This is removed because it is not used anymore.
+ * It is replaced by `woocommerce_admin_marketing_recommendations_specs` transient that is created by `MarketingRecommendationsDataSourcePoller`.
+ */
+function wc_update_860_remove_recommended_marketing_plugins_transient() {
+	delete_transient( 'wc_marketing_recommended_plugins' );
+}
+
+/**
+ * Create an .htaccess file and an empty index.html file to prevent listing of the default transient files directory,
+ * if the directory exists.
+ */
+function wc_update_870_prevent_listing_of_transient_files_directory() {
+	global $wp_filesystem;
+
+	$default_transient_files_dir = untrailingslashit( wp_upload_dir()['basedir'] ) . '/woocommerce_transient_files';
+	if ( ! is_dir( $default_transient_files_dir ) ) {
+		return;
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	\WP_Filesystem();
+	$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
+	$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
+}
+
+/**
+ * If it exists, remove the inbox note that asks users to connect to `Woo.com`.
+ */
+function wc_update_890_update_connect_to_woocommerce_note() {
+	$note = Notes::get_note_by_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
+	if ( ! is_a( $note, 'Automattic\WooCommerce\Admin\Notes\Note' ) ) {
+		return;
+	}
+	if ( ! str_contains( $note->get_title(), 'Woo.com' ) ) {
+		return;
+	}
+	if ( $note->get_status() !== Note::E_WC_ADMIN_NOTE_SNOOZED && $note->get_status() !== Note::E_WC_ADMIN_NOTE_UNACTIONED ) {
+		return;
+	}
+	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
+}
+
+/**
+ * Disables the PayPal Standard gateway for stores that aren't using it.
+ *
+ * PayPal Standard has been deprecated since WooCommerce 5.5, but there are some stores that have it showing up in their
+ * list of available Payment methods even if it's not setup. In WooComerce 8.9 we will disable PayPal Standard for those stores
+ * to reduce the amount of new connections to the legacy gateway.
+ *
+ * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
+ */
+function wc_update_890_update_paypal_standard_load_eligibility() {
+	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+
+	if ( ! $paypal ) {
+		return;
+	}
+
+	// If PayPal is enabled or set to load, but the store hasn't setup PayPal Standard live API keys and doesn't have any PayPal Orders, disable it.
+	if ( ( 'yes' === $paypal->enabled || 'yes' === $paypal->get_option( '_should_load' ) ) && ! $paypal->get_option( 'api_username' ) && ! $paypal->has_paypal_orders() ) {
+		$paypal->update_option( '_should_load', wc_bool_to_string( false ) );
+	}
+}
+
+/**
+ * Create the woocommerce_history_of_autoinstalled_plugins option if it doesn't exist
+ * as a copy of woocommerce_autoinstalled_plugins if it exists.
+ */
+function wc_update_891_create_plugin_autoinstall_history_option() {
+	$autoinstalled_plugins_history_info = get_site_option( 'woocommerce_history_of_autoinstalled_plugins' );
+	if ( false === $autoinstalled_plugins_history_info ) {
+		$autoinstalled_plugins_info = get_site_option( 'woocommerce_autoinstalled_plugins' );
+		if ( false !== $autoinstalled_plugins_info ) {
+			update_site_option( 'woocommerce_history_of_autoinstalled_plugins', $autoinstalled_plugins_info );
+		}
+	}
+}
+
+/**
+ * Add woocommerce_show_lys_tour.
+ */
+function wc_update_910_add_launch_your_store_tour_option() {
+	add_option( 'woocommerce_show_lys_tour', 'yes' );
+}
+
+/**
+ * Add woocommerce_hooked_blocks_version option for existing stores that are using a theme that supports the Block Hooks API
+ */
+function wc_update_920_add_wc_hooked_blocks_version_option() {
+	if ( ! wc_current_theme_is_fse_theme() && ! current_theme_supports( 'block-template-parts' ) ) {
+		return;
+	}
+
+	$option_name  = 'woocommerce_hooked_blocks_version';
+	$option_value = get_option( $option_name );
+
+	// If the option already exists, we don't need to do anything.
+	if ( false !== $option_value ) {
+		return;
+	}
+
+	/**
+	 * A list of theme slugs to execute this with.
+	 * We are applying this filter to allow for the list to be extended by third-parties who were already using it.
+	 *
+	 * @since 8.4.0
+	 */
+	$theme_include_list               = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+	$active_theme_name                = wp_get_theme()->get( 'Name' );
+	$should_set_hooked_blocks_version = in_array( $active_theme_name, $theme_include_list, true );
+
+	if ( $should_set_hooked_blocks_version ) {
+		// Set 8.4.0 as the version for existing stores that are using a theme that supports the Block Hooks API.
+		// This will ensure that the Block Hooks API is enabled for these stores and works as expected.
+		// Existing stores that aren't running approved block themes will not have the Block Hooks API enabled.
+		add_option( $option_name, '8.4.0' );
+	} else {
+		// For block themes that aren't approved themes set this option to "no" to completely disable hooked blocks.
+		// This means we can assume the absence of the option is when a site is switching from a classic theme to a block theme for the first time.
+		// Note: We have to use "no" instead of false since the latter is the default value for the option if it doesn't exist.
+		add_option( $option_name, 'no' );
+	}
+}
+
+/**
+ * Remove user meta associated with the keys '_last_order', '_order_count' and '_money_spent'.
+ *
+ * New keys are now used for these, to improve compatibility with multisite networks.
+ *
+ * @return void
+ */
+function wc_update_910_remove_obsolete_user_meta() {
+	global $wpdb;
+
+	$deletions = $wpdb->query(
+		"
+		DELETE FROM $wpdb->usermeta
+		WHERE meta_key IN (
+			'_last_order',
+			'_order_count',
+			'_money_spent'
+		)
+	"
+	);
+
+	$logger = wc_get_logger();
+
+	if ( null === $logger ) {
+		return;
+	}
+
+	if ( false === $deletions ) {
+		$logger->notice(
+			'During the update to 9.1.0, WooCommerce attempted to remove user meta with the keys "_last_order", "_order_count" and "_money_spent" but was unable to do so.',
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	} else {
+		$logger->info(
+			sprintf(
+				1 === $deletions
+					? 'During the update to 9.1.0, WooCommerce removed %d user meta row associated with the meta keys "_last_order", "_order_count" or "_money_spent".'
+					: 'During the update to 9.1.0, WooCommerce removed %d user meta rows associated with the meta keys "_last_order", "_order_count" or "_money_spent".',
+				number_format_i18n( $deletions )
+			),
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	}
+}
+
+/**
+ * Add woocommerce_coming_soon option when it is not currently present.
+ */
+function wc_update_930_add_woocommerce_coming_soon_option() {
+	add_option( 'woocommerce_coming_soon', 'no' );
+}
+
+/**
+ * Migrate Launch Your Store tour meta keys to the woocommerce_meta user data fields.
+ */
+function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
+	// Rename `woocommerce_launch_your_store_tour_hidden` meta key to `woocommerce_admin_launch_your_store_tour_hidden`.
+	global $wpdb;
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_launch_your_store_tour_hidden',
+			'woocommerce_launch_your_store_tour_hidden'
+		)
+	);
+
+	// Rename `woocommerce_coming_soon_banner_dismissed` meta key to `woocommerce_admin_coming_soon_banner_dismissed`.
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_coming_soon_banner_dismissed',
+			'woocommerce_coming_soon_banner_dismissed'
+		)
+	);
 }

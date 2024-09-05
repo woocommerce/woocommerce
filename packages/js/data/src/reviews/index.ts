@@ -16,6 +16,7 @@ import * as resolvers from './resolvers';
 import controls from '../controls';
 import reducer, { State } from './reducer';
 import { WPDataActions, WPDataSelectors } from '../types';
+import { PromiseifySelectors } from '../types/promiseify-selectors';
 
 export * from './types';
 export type { State };
@@ -39,4 +40,7 @@ declare module '@wordpress/data' {
 	function select(
 		key: typeof STORE_NAME
 	): SelectFromMap< typeof selectors > & WPDataSelectors;
+	function resolveSelect(
+		key: typeof STORE_NAME
+	): PromiseifySelectors< ReviewSelector >;
 }

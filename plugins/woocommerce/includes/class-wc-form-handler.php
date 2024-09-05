@@ -103,13 +103,13 @@ class WC_Form_Handler {
 			return;
 		}
 
-		$load_address = isset( $wp->query_vars['edit-address'] ) ? wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) : 'billing';
+		$address_type = isset( $wp->query_vars['edit-address'] ) ? wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) : 'billing';
 
-		if ( ! isset( $_POST[ $load_address . '_country' ] ) ) {
+		if ( ! isset( $_POST[ $address_type . '_country' ] ) ) {
 			return;
 		}
 
-		$address = WC()->countries->get_address_fields( wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) ), $load_address . '_' );
+		$address = WC()->countries->get_address_fields( wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) ), $address_type . '_' );
 
 		foreach ( $address as $key => $field ) {
 			if ( ! isset( $field['type'] ) ) {
@@ -138,7 +138,7 @@ class WC_Form_Handler {
 					foreach ( $field['validate'] as $rule ) {
 						switch ( $rule ) {
 							case 'postcode':
-								$country = wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) );
+								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
 								$value   = wc_format_postcode( $value, $country );
 
 								if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
@@ -191,12 +191,13 @@ class WC_Form_Handler {
 		 *
 		 * Allow developers to add custom validation logic and throw an error to prevent save.
 		 *
+		 * @since 3.6.0
 		 * @param int         $user_id User ID being saved.
-		 * @param string      $load_address Type of address e.g. billing or shipping.
+		 * @param string      $address_type Type of address; 'billing' or 'shipping'.
 		 * @param array       $address The address fields.
-		 * @param WC_Customer $customer The customer object being saved. @since 3.6.0
+		 * @param WC_Customer $customer The customer object being saved.
 		 */
-		do_action( 'woocommerce_after_save_address_validation', $user_id, $load_address, $address, $customer );
+		do_action( 'woocommerce_after_save_address_validation', $user_id, $address_type, $address, $customer );
 
 		if ( 0 < wc_notice_count( 'error' ) ) {
 			return;
@@ -206,7 +207,16 @@ class WC_Form_Handler {
 
 		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 
-		do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
+		/**
+		 * Hook: woocommerce_customer_save_address.
+		 *
+		 * Fires after a customer address has been saved.
+		 *
+		 * @since 3.6.0
+		 * @param int    $user_id User ID being saved.
+		 * @param string $address_type Type of address; 'billing' or 'shipping'.
+		 */
+		do_action( 'woocommerce_customer_save_address', $user_id, $address_type );
 
 		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
 		exit;
@@ -343,12 +353,20 @@ class WC_Form_Handler {
 				$customer->save();
 			}
 
-			wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
-
+			/**
+			 * Hook: woocommerce_save_account_details.
+			 *
+			 * @since 3.6.0
+			 * @param int $user_id User ID being saved.
+			 */
 			do_action( 'woocommerce_save_account_details', $user->ID );
 
-			wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
-			exit;
+			// Notices are checked here so that if something created a notice during the save hooks above, the redirect will not happen.
+			if ( 0 === wc_notice_count( 'error' ) ) {
+				wc_add_notice( __( 'Account details changed successfully.', 'woocommerce' ) );
+				wp_safe_redirect( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) );
+				exit;
+			}
 		}
 	}
 
@@ -564,7 +582,6 @@ class WC_Form_Handler {
 			wp_safe_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
 			exit();
 		}
-
 	}
 
 	/**
@@ -589,7 +606,6 @@ class WC_Form_Handler {
 			wp_safe_redirect( wc_get_account_endpoint_url( 'payment-methods' ) );
 			exit();
 		}
-
 	}
 
 	/**
@@ -635,10 +651,10 @@ class WC_Form_Handler {
 				wc_add_notice( $removed_notice, apply_filters( 'woocommerce_cart_item_removed_notice_type', 'success' ) );
 			}
 
-			$referer = wp_get_referer() ? remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) : wc_get_cart_url();
-			wp_safe_redirect( $referer );
-			exit;
-
+			if ( wp_get_referer() ) {
+				wp_safe_redirect( remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), add_query_arg( 'removed_item', '1', wp_get_referer() ) ) );
+				exit;
+			}
 		} elseif ( ! empty( $_GET['undo_item'] ) && isset( $_GET['_wpnonce'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 
 			// Undo Cart Item.
@@ -646,10 +662,10 @@ class WC_Form_Handler {
 
 			WC()->cart->restore_cart_item( $cart_item_key );
 
-			$referer = wp_get_referer() ? remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) : wc_get_cart_url();
-			wp_safe_redirect( $referer );
-			exit;
-
+			if ( wp_get_referer() ) {
+				wp_safe_redirect( remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) );
+				exit;
+			}
 		}
 
 		// Update Cart - checks apply_coupon too because they are in the same form.
@@ -704,9 +720,11 @@ class WC_Form_Handler {
 				exit;
 			} elseif ( $cart_updated ) {
 				wc_add_notice( __( 'Cart updated.', 'woocommerce' ), apply_filters( 'woocommerce_cart_updated_notice_type', 'success' ) );
-				$referer = remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), ( wp_get_referer() ? wp_get_referer() : wc_get_cart_url() ) );
-				wp_safe_redirect( $referer );
-				exit;
+
+				if ( wp_get_referer() ) {
+					wp_safe_redirect( remove_query_arg( array( 'remove_coupon', 'add-to-cart' ), wp_get_referer() ) );
+					exit;
+				}
 			}
 		}
 	}
@@ -891,7 +909,7 @@ class WC_Form_Handler {
 		$quantity     = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) );  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$variations   = array();
 
-		$product      = wc_get_product( $product_id );
+		$product = wc_get_product( $product_id );
 
 		foreach ( $_REQUEST as $key => $value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( 'attribute_' !== substr( $key, 0, 10 ) ) {
@@ -929,10 +947,17 @@ class WC_Form_Handler {
 	 * @throws Exception On login error.
 	 */
 	public static function process_login() {
-		// The global form-login.php template used `_wpnonce` in template versions < 3.3.0.
-		$nonce_value = wc_get_var( $_REQUEST['woocommerce-login-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
-		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-login' ) ) {
+		static $valid_nonce = null;
+
+		if ( null === $valid_nonce ) {
+			// The global form-login.php template used `_wpnonce` in template versions < 3.3.0.
+			$nonce_value = wc_get_var( $_REQUEST['woocommerce-login-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+
+			$valid_nonce = wp_verify_nonce( $nonce_value, 'woocommerce-login' );
+		}
+
+		if ( isset( $_POST['login'], $_POST['username'], $_POST['password'] ) && $valid_nonce ) {
 
 			try {
 				$creds = array(
@@ -976,7 +1001,9 @@ class WC_Form_Handler {
 						$redirect = wc_get_page_permalink( 'myaccount' );
 					}
 
-					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_login_redirect', remove_query_arg( 'wc_error', $redirect ), $user ), wc_get_page_permalink( 'myaccount' ) ) ); // phpcs:ignore
+					$redirect = remove_query_arg( array( 'wc_error', 'password-reset' ), $redirect );
+
+					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_login_redirect', $redirect, $user ), wc_get_page_permalink( 'myaccount' ) ) ); // phpcs:ignore
 					exit;
 				}
 			} catch ( Exception $e ) {

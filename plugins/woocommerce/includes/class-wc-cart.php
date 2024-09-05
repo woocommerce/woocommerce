@@ -9,6 +9,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -98,13 +99,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function __construct() {
 		$this->session  = new WC_Cart_Session( $this );
-		$this->fees_api = new WC_Cart_Fees( $this );
+		$this->fees_api = new WC_Cart_Fees();
 
 		// Register hooks for the objects.
 		$this->session->init();
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_applied_coupon', array( $this, 'calculate_totals' ), 20, 0 );
+		add_action( 'woocommerce_removed_coupon', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_removed', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_cart_item_restored', array( $this, 'calculate_totals' ), 20, 0 );
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
@@ -120,6 +122,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function __clone() {
 		$this->session  = clone $this->session;
 		$this->fees_api = clone $this->fees_api;
+
+		$this->session->set_cart( $this );
 	}
 
 	/*
@@ -667,7 +671,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function get_cart_contents_weight() {
 		$weight = 0.0;
 
-		foreach ( $this->get_cart() as $cart_item_key => $values ) {
+		foreach ( $this->get_cart() as $values ) {
 			if ( $values['data']->has_weight() ) {
 				$weight += (float) $values['data']->get_weight() * $values['quantity'];
 			}
@@ -684,7 +688,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function get_cart_item_quantities() {
 		$quantities = array();
 
-		foreach ( $this->get_cart() as $cart_item_key => $values ) {
+		foreach ( $this->get_cart() as $values ) {
 			$product = $values['data'];
 			$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $values['quantity'] : $values['quantity'];
 		}
@@ -712,7 +716,6 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		return $return;
-
 	}
 
 	/**
@@ -757,9 +760,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function check_cart_item_stock() {
 		$error                    = new WP_Error();
 		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
+		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
 
-		foreach ( $this->get_cart() as $cart_item_key => $values ) {
+		foreach ( $this->get_cart() as $values ) {
 			$product = $values['data'];
 
 			// Check stock based on stock-status.
@@ -818,7 +821,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$cross_sells = array();
 		$in_cart     = array();
 		if ( ! $this->is_empty() ) {
-			foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			foreach ( $this->get_cart() as $values ) {
 				if ( $values['quantity'] > 0 ) {
 					$cross_sells = array_merge( $values['data']->get_cross_sell_ids(), $cross_sells );
 					$in_cart[]   = $values['product_id'];
@@ -908,7 +911,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function get_cart_item_tax_classes() {
 		$found_tax_classes = array();
 
-		foreach ( WC()->cart->get_cart() as $item ) {
+		foreach ( $this->get_cart() as $item ) {
 			if ( $item['data'] && ( $item['data']->is_taxable() || $item['data']->is_shipping_taxable() ) ) {
 				$found_tax_classes[] = $item['data']->get_tax_class();
 			}
@@ -925,7 +928,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function get_cart_item_tax_classes_for_shipping() {
 		$found_tax_classes = array();
 
-		foreach ( WC()->cart->get_cart() as $item ) {
+		foreach ( $this->get_cart() as $item ) {
 			if ( $item['data'] && ( $item['data']->is_shipping_taxable() ) ) {
 				$found_tax_classes[] = $item['data']->get_tax_class();
 			}
@@ -1167,7 +1170,7 @@ class WC_Cart extends WC_Legacy_Cart {
 					$message         = apply_filters( 'woocommerce_cart_product_cannot_add_another_message', $message, $product_data );
 					$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 
-					throw new Exception( sprintf( '<a href="%s" class="button wc-forward%s">%s</a> %s', wc_get_cart_url(), esc_attr( $wp_button_class ), __( 'View cart', 'woocommerce' ), $message ) );
+					throw new Exception( sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', $message, wc_get_cart_url(), esc_attr( $wp_button_class ), __( 'View cart', 'woocommerce' ) ) );
 				}
 			}
 
@@ -1229,12 +1232,12 @@ class WC_Cart extends WC_Legacy_Cart {
 					$wp_button_class        = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 
 					$message = sprintf(
-						'<a href="%s" class="button wc-forward%s">%s</a> %s',
+						'%s <a href="%s" class="button wc-forward%s">%s</a>',
+						/* translators: 1: quantity in stock 2: current quantity */
+						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) ),
 						wc_get_cart_url(),
 						esc_attr( $wp_button_class ),
-						__( 'View cart', 'woocommerce' ),
-						/* translators: 1: quantity in stock 2: current quantity */
-						sprintf( __( 'You cannot add that amount to the cart &mdash; we have %1$s in stock and you already have %2$s in your cart.', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_quantity, $product_data ), wc_format_stock_quantity_for_display( $stock_quantity_in_cart, $product_data ) )
+						__( 'View cart', 'woocommerce' )
 					);
 
 					/**
@@ -1536,7 +1539,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 		$needs_shipping = false;
 
-		foreach ( $this->get_cart_contents() as $cart_item_key => $values ) {
+		foreach ( $this->get_cart_contents() as $values ) {
 			if ( $values['data']->needs_shipping() ) {
 				$needs_shipping = true;
 				break;
@@ -1571,10 +1574,30 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
-			if ( isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
+			/**
+			 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
+			 * This can be used to allow shipping calculations to be done without a state.
+			 *
+			 * @since 8.4.0
+			 *
+			 * @param bool $show_state Whether to use the state field. Default true.
+			 */
+			$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
+			$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+			if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() ) {
 				return false;
 			}
-			if ( isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
+			/**
+			 * Filter to not require shipping postcode for shipping calculation, even if it is required at checkout.
+			 * This can be used to allow shipping calculations to be done without a postcode.
+			 *
+			 * @since 8.4.0
+			 *
+			 * @param bool $show_postcode Whether to use the postcode field. Default true.
+			 */
+			$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
+			$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+			if ( $postcode_enabled && $postcode_required && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
 		}
@@ -1647,7 +1670,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Limit to defined email addresses.
 				$restrictions = $coupon->get_email_restrictions();
 
-				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! $this->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
+				if ( is_array( $restrictions ) && 0 < count( $restrictions ) && ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 					$this->remove_coupon( $code );
 				}
@@ -1674,29 +1697,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param array $check_emails Array of customer email addresses.
 	 * @param array $restrictions Array of allowed email addresses.
+	 *
 	 * @return bool
+	 * @deprecated 9.0.0 In favor of static method Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed.
 	 */
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
+		wc_doing_it_wrong(
+			'WC_Cart::is_coupon_emails_allowed',
+			__( 'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.', 'woocommerce' ),
+			'9.0.0'
+		);
 
-		foreach ( $check_emails as $check_email ) {
-			// With a direct match we return true.
-			if ( in_array( $check_email, $restrictions, true ) ) {
-				return true;
-			}
-
-			// Go through the allowed emails and return true if the email matches a wildcard.
-			foreach ( $restrictions as $restriction ) {
-				// Convert to PHP-regex syntax.
-				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
-				preg_match( $regex, $check_email, $match );
-				if ( ! empty( $match ) ) {
-					return true;
-				}
-			}
-		}
-
-		// No matches, this one isn't allowed.
-		return false;
+		return DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions );
 	}
 
 

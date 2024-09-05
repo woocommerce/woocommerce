@@ -1,0 +1,24 @@
+{
+  "steps": [
+	{
+	  "step": "installPlugin",
+	  "pluginZipFile": {
+		"resource": "wordpress.org\/plugins",
+		"slug": "woocommerce"
+	  },
+	  "options": {
+		"activate": true
+	  }
+	},
+	{
+	  "step": "installPlugin",
+	  "pluginZipFile": {
+		"resource": "wordpress.org\/plugins",
+		"slug": "code-snippets"
+	  },
+	  "options": {
+		"activate": true
+	  }
+	}
+  ]
+}

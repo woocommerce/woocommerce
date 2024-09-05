@@ -1,0 +1,31 @@
+.woocommerce-customize-store_block-toolbar-popover {
+	background: transparent;
+	color: #000;
+
+	.components-popover__content {
+		width: fit-content;
+	}
+
+	.woocommerce-customize-store-block-toolbar {
+		.block-editor-block-mover__drag-handle {
+			display: none;
+		}
+
+		.block-editor-block-mover {
+			padding: 0;
+		}
+	}
+
+	.woocommerce-customize-your-store-toolbar-shuffle-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		user-select: none;
+
+		span {
+			max-width: fit-content;
+			padding-left: 6px;
+			padding-right: 6px;
+		}
+	}
+}

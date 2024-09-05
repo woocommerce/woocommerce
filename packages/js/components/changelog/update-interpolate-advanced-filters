@@ -1,4 +1,0 @@
-Significance: major
-Type: update
-
-Updated AdvancedFilter to use createInterpolateElement instead of interpolateComponents.

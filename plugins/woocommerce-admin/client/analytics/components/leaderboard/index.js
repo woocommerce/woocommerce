@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Card, CardBody, CardHeader } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { EmptyTable, TableCard } from '@woocommerce/components';
+import { EmptyTable, AnalyticsError, TableCard } from '@woocommerce/components';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { getPersistedQuery } from '@woocommerce/navigation';
@@ -14,16 +14,56 @@ import {
 	getLeaderboard,
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
+import { CurrencyContext } from '@woocommerce/currency';
+import { formatValue } from '@woocommerce/number';
 import { Text } from '@woocommerce/experimental';
 
 /**
  * Internal dependencies
  */
-import ReportError from '../report-error';
 import sanitizeHTML from '../../../lib/sanitize-html';
 import './style.scss';
 
+const formattable = new Set( [ 'currency', 'number' ] );
+
 export class Leaderboard extends Component {
+	getFormattedColumn = ( column ) => {
+		const { format } = column;
+
+		/*
+		 * The format property is used for numeric columns and is optional.
+		 * The `value` property type is specified as string in the API schema
+		 * and it's extensible from other extensions. Therefore, even if the
+		 * actual type of numeric columns returned by WooCoomerce's own API is
+		 * number, there is no guarantee the value will be a number.
+		 */
+		if ( formattable.has( column.format ) && isFinite( column.value ) ) {
+			const value = parseFloat( column.value );
+
+			if ( ! Number.isNaN( value ) ) {
+				const { formatAmount, getCurrencyConfig } = this.context;
+				const display =
+					format === 'currency'
+						? formatAmount( value )
+						: formatValue( getCurrencyConfig(), format, value );
+
+				return {
+					display,
+					value,
+				};
+			}
+		}
+
+		return {
+			display: (
+				<div
+					dangerouslySetInnerHTML={ sanitizeHTML( column.display ) }
+				/>
+			),
+			value: column.value,
+		};
+	};
+
 	getFormattedHeaders() {
 		return this.props.headers.map( ( header, i ) => {
 			return {
@@ -38,18 +78,7 @@ export class Leaderboard extends Component {
 
 	getFormattedRows() {
 		return this.props.rows.map( ( row ) => {
-			return row.map( ( column ) => {
-				return {
-					display: (
-						<div
-							dangerouslySetInnerHTML={ sanitizeHTML(
-								column.display
-							) }
-						/>
-					),
-					value: column.value,
-				};
-			} );
+			return row.map( this.getFormattedColumn );
 		} );
 	}
 
@@ -58,7 +87,7 @@ export class Leaderboard extends Component {
 		const classes = 'woocommerce-leaderboard';
 
 		if ( isError ) {
-			return <ReportError className={ classes } />;
+			return <AnalyticsError className={ classes } />;
 		}
 
 		const rows = this.getFormattedRows();
@@ -150,6 +179,8 @@ Leaderboard.defaultProps = {
 	isError: false,
 	isRequesting: false,
 };
+
+Leaderboard.contextType = CurrencyContext;
 
 export default compose(
 	withSelect( ( select, props ) => {

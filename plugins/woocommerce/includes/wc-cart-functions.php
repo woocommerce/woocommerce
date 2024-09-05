@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -107,6 +108,7 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 		$products = array_fill_keys( array_keys( $products ), 1 );
 	}
 
+	$product_id = null;
 	foreach ( $products as $product_id => $qty ) {
 		/* translators: %s: product name */
 		$titles[] = apply_filters( 'woocommerce_add_to_cart_qty_html', ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ), $product_id ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
@@ -121,9 +123,9 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ) );
 	} else {
-		$message = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ) );
 	}
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
@@ -168,6 +170,10 @@ function wc_format_list_of_items( $items ) {
 function wc_clear_cart_after_payment() {
 	global $wp;
 
+	$should_clear_cart_after_payment = false;
+	$after_payment                   = false;
+
+	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
@@ -176,21 +182,39 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order && hash_equals( $order->get_order_key(), $order_key ) ) {
-				WC()->cart->empty_cart();
+			if ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) {
+				$should_clear_cart_after_payment = true;
+				$after_payment                   = true;
 			}
 		}
 	}
 
-	if ( WC()->session->order_awaiting_payment > 0 ) {
+	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
+	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
-		if ( $order && $order->get_id() > 0 ) {
-			// If the order has not failed, or is not pending, the order must have gone through.
-			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
-				WC()->cart->empty_cart();
-			}
+		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
+			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
+			$should_clear_cart_after_payment = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
+			$after_payment                   = true;
 		}
+	}
+
+	// If it doesn't look like a payment happened, bail early.
+	if ( ! $after_payment ) {
+		return;
+	}
+
+	/**
+	 * Determine whether the cart should be cleared after payment.
+	 *
+	 * @since 9.3.0
+	 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
+	 */
+	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
+
+	if ( $should_clear_cart_after_payment ) {
+		WC()->cart->empty_cart();
 	}
 }
 add_action( 'template_redirect', 'wc_clear_cart_after_payment', 20 );
@@ -280,8 +304,6 @@ function wc_cart_totals_coupon_html( $coupon ) {
 	if ( is_string( $coupon ) ) {
 		$coupon = new WC_Coupon( $coupon );
 	}
-
-	$discount_amount_html = '';
 
 	$amount               = WC()->cart->get_coupon_discount_amount( $coupon->get_code(), WC()->cart->display_cart_ex_tax );
 	$discount_amount_html = '-' . wc_price( $amount );
@@ -391,11 +413,20 @@ function wc_cart_round_discount( $value, $precision ) {
  */
 function wc_get_chosen_shipping_method_ids() {
 	$method_ids     = array();
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$chosen_methods = array();
+
+	if ( is_callable( array( WC()->session, 'get' ) ) ) {
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	}
+
 	foreach ( $chosen_methods as $chosen_method ) {
+		if ( ! is_string( $chosen_method ) ) {
+			continue;
+		}
 		$chosen_method = explode( ':', $chosen_method );
 		$method_ids[]  = current( $chosen_method );
 	}
+
 	return $method_ids;
 }
 
@@ -405,7 +436,7 @@ function wc_get_chosen_shipping_method_ids() {
  * @since  3.2.0
  * @param  int   $key Key of package.
  * @param  array $package Package data array.
- * @return string|bool
+ * @return string|bool Either the chosen method ID or false if nothing is chosen yet.
  */
 function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -419,6 +450,10 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		$method_count = absint( $method_counts[ $key ] );
 	} else {
 		$method_count = 0;
+	}
+
+	if ( ! isset( $package['rates'] ) || ! is_array( $package['rates'] ) ) {
+		$package['rates'] = array();
 	}
 
 	// If not set, not available, or available methods have changed, set to the DEFAULT option.
@@ -441,25 +476,55 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * @since  3.2.0
  * @param  int    $key Key of package.
  * @param  array  $package Package data array.
- * @param  string $chosen_method Chosen method id.
+ * @param  string $chosen_method Chosen shipping method. e.g. flat_rate:1.
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
-	$rate_keys = array_keys( $package['rates'] );
-	$default   = current( $rate_keys );
-	$coupons   = WC()->cart->get_coupons();
-	foreach ( $coupons as $coupon ) {
-		if ( $coupon->get_free_shipping() ) {
-			foreach ( $rate_keys as $rate_key ) {
-				if ( 0 === stripos( $rate_key, 'free_shipping' ) ) {
-					$default = $rate_key;
-					break;
+	$chosen_method_id     = current( explode( ':', $chosen_method ) );
+	$rate_keys            = array_keys( $package['rates'] );
+	$chosen_method_exists = in_array( $chosen_method, $rate_keys, true );
+
+	/**
+	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
+	 * toggle between shipping and pickup even if available shipping methods are changed.
+	 *
+	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
+	 */
+	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
+	$is_local_pickup_chosen  = in_array( $chosen_method_id, $local_pickup_method_ids, true );
+
+	// Default to the first method in the package. This can be sorted in the backend by the merchant.
+	$default = current( $rate_keys );
+
+	// Default to local pickup if its chosen already.
+	if ( $chosen_method_exists && $is_local_pickup_chosen ) {
+		$default = $chosen_method;
+
+	} else {
+		// Check coupons to see if free shipping is available. If it is, we'll use that method as the default.
+		$coupons = WC()->cart->get_coupons();
+		foreach ( $coupons as $coupon ) {
+			if ( $coupon->get_free_shipping() ) {
+				foreach ( $rate_keys as $rate_key ) {
+					if ( 0 === stripos( $rate_key, 'free_shipping' ) ) {
+						$default = $rate_key;
+						break;
+					}
 				}
+				break;
 			}
-			break;
 		}
 	}
-	return apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
+
+	/**
+	 * Filters the default shipping method for a package.
+	 *
+	 * @since 3.2.0
+	 * @param string $default Default shipping method.
+	 * @param array  $rates   Shipping rates.
+	 * @param string $chosen_method Chosen method id.
+	 */
+	return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 }
 
 /**

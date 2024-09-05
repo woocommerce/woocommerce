@@ -46,6 +46,7 @@ function HistoricalDataStatus( { importDate, status } ) {
 			importDate === -1
 				? __( 'All historical data imported', 'woocommerce' )
 				: sprintf(
+						/* translators: %s: YYYY-MM-DD formatted date */
 						__(
 							'Historical data from %s onward imported',
 							'woocommerce'

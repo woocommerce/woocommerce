@@ -20,6 +20,7 @@ class TaxesReport extends Component {
 		const { query } = this.props;
 		const isCompareTaxView = query.filter === 'compare-taxes';
 		const mode = isCompareTaxView ? 'item-comparison' : 'time-comparison';
+		/* translators: %d: number of taxes */
 		const itemsLabel = __( '%d taxes', 'woocommerce' );
 
 		return {
@@ -51,7 +52,6 @@ class TaxesReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="taxes"
-					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }

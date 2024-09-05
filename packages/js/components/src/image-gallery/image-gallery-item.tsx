@@ -15,6 +15,7 @@ export type ImageGalleryItemProps = {
 	id?: string;
 	alt: string;
 	isCover?: boolean;
+	isDraggable?: boolean;
 	src: string;
 	displayToolbar?: boolean;
 	className?: string;
@@ -26,6 +27,7 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 	id,
 	alt,
 	isCover = false,
+	isDraggable = true,
 	src,
 	className = '',
 	onClick = () => null,
@@ -33,7 +35,7 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 	children,
 }: ImageGalleryItemProps ) => (
 	<ConditionalWrapper
-		condition={ isCover }
+		condition={ ! isDraggable }
 		wrapper={ ( wrappedChildren ) => (
 			<NonSortableItem>{ wrappedChildren }</NonSortableItem>
 		) }
@@ -48,15 +50,15 @@ export const ImageGalleryItem: React.FC< ImageGalleryItemProps > = ( {
 		>
 			{ children }
 
-			{ isCover ? (
-				<>
-					<Pill>{ __( 'Cover', 'woocommerce' ) }</Pill>
-					<img alt={ alt } src={ src } id={ id } />
-				</>
-			) : (
+			{ isDraggable ? (
 				<SortableHandle>
 					<img alt={ alt } src={ src } id={ id } />
 				</SortableHandle>
+			) : (
+				<>
+					{ isCover && <Pill>{ __( 'Cover', 'woocommerce' ) }</Pill> }
+					<img alt={ alt } src={ src } id={ id } />
+				</>
 			) }
 		</div>
 	</ConditionalWrapper>

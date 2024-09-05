@@ -16,8 +16,13 @@ import { recordEvent } from '@woocommerce/tracks';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
-	QueryProductAttribute,
+	ProductProductAttribute,
 } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
+import { TRACKS_SOURCE } from '../../constants';
 
 type CreateAttributeTermModalProps = {
 	initialAttributeTermName: string;
@@ -41,7 +46,7 @@ export const CreateAttributeTermModal: React.FC<
 
 	const onAdd = async ( attribute: Partial< ProductAttributeTerm > ) => {
 		recordEvent( 'product_attribute_term_add', {
-			new_product_page: true,
+			source: TRACKS_SOURCE,
 		} );
 		setIsCreating( true );
 		try {
@@ -51,14 +56,14 @@ export const CreateAttributeTermModal: React.FC<
 					attribute_id: attributeId,
 				} );
 			recordEvent( 'product_attribute_term_add_success', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 			} );
 			invalidateResolutionForStoreSelector( 'getProductAttributes' );
 			setIsCreating( false );
 			onCreated( newAttribute );
 		} catch ( e ) {
 			recordEvent( 'product_attribute_term_add_failed', {
-				new_product_page: true,
+				source: TRACKS_SOURCE,
 			} );
 			createNotice(
 				'error',
@@ -113,7 +118,7 @@ export const CreateAttributeTermModal: React.FC<
 					isValidForm,
 					setValue,
 					values,
-				}: FormContextType< QueryProductAttribute > ) => {
+				}: FormContextType< ProductProductAttribute > ) => {
 					const nameInputProps = getInputProps< string >( 'name' );
 					return (
 						<>

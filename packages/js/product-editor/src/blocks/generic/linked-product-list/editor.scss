@@ -1,0 +1,13 @@
+.wp-block-woocommerce-product-linked-list-field {
+	display: flex;
+	flex-direction: column;
+	gap: $grid-unit-30;
+
+	.woocommerce-advice-card {
+		min-height: 233px; // min height to cover the min rows rendered in the table on its back
+
+		&__footer {
+			padding: 0 calc( $gap * 6 ) $gap;
+		}
+	}
+}

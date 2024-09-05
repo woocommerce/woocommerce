@@ -1,0 +1,31 @@
+.woocommerce-iframe-editor__inserter-panel {
+	border-right: 1px solid $gray-400;
+	height: 100%;
+
+	&-content {
+		height: 100%;
+		@media only screen and (max-width: $break-medium) {
+			width: 100%;
+			position: absolute;
+			z-index: 100;
+			background-color: $studio-white;
+		}
+	}
+
+	/*
+	 * styling copied from Gutenberg to work with versions of Gutenberg that don't
+	 * have https://github.com/WordPress/gutenberg/pull/61760; once that is in all
+	 * versions of Gutenberg/WordPress supported, we can remove this
+	 */
+	.block-editor-inserter-sidebar__header {
+		border-bottom: $border-width solid $gray-300;
+		padding-right: $grid-unit-10;
+		display: flex;
+		justify-content: space-between;
+
+		.block-editor-inserter-sidebar__close-button {
+			order: 1;
+			align-self: center;
+		}
+	}
+}

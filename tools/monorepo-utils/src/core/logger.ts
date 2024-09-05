@@ -3,11 +3,12 @@
  */
 import ora, { Ora } from 'ora';
 import chalk from 'chalk';
+import Table from 'cli-table';
 
 /**
  * Internal dependencies
  */
-import { getEnvVar } from './environment';
+import { getEnvVar, isGithubCI } from './environment';
 
 const LOGGING_LEVELS: Record< string, number > = {
 	verbose: 3,
@@ -28,7 +29,7 @@ export class Logger {
 	static error( err: unknown, failOnErr = true ) {
 		if ( Logger.loggingLevel >= LOGGING_LEVELS.error ) {
 			if ( err instanceof Error ) {
-				error( chalk.red( err.message ) );
+				error( chalk.red( `${ err.message }\n${ err.stack }` ) );
 			} else if ( typeof err === 'string' ) {
 				error( chalk.red( err ) );
 			} else {
@@ -54,22 +55,34 @@ export class Logger {
 		}
 	}
 
-	static startTask( message: string ) {
-		if ( Logger.loggingLevel > LOGGING_LEVELS.silent ) {
+	static startTask( message: string, isSilentInCI = false ) {
+		if ( Logger.loggingLevel > LOGGING_LEVELS.silent && ! isGithubCI() ) {
 			const spinner = ora( chalk.green( `${ message }...` ) ).start();
 			Logger.lastSpinner = spinner;
+		} else if ( isGithubCI() && ! isSilentInCI ) {
+			Logger.notice( message );
 		}
 	}
 
-	static endTask() {
+	static table( head: Array< string >, rows: Array< string[] > ) {
+		if ( Logger.loggingLevel > LOGGING_LEVELS.silent ) {
+			const table = new Table( { head, rows } );
+			log( table.toString() );
+		}
+	}
+
+	static endTask( isSilentInCI = false ) {
 		if (
 			Logger.loggingLevel > LOGGING_LEVELS.silent &&
-			Logger.lastSpinner
+			Logger.lastSpinner &&
+			! isGithubCI()
 		) {
 			Logger.lastSpinner.succeed(
 				`${ Logger.lastSpinner.text } complete.`
 			);
 			Logger.lastSpinner = null;
+		} else if ( isGithubCI() && ! isSilentInCI ) {
+			Logger.notice( 'Task complete.' );
 		}
 	}
 }

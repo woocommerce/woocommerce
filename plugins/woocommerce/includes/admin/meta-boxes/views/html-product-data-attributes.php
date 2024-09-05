@@ -17,14 +17,15 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 ?>
 <div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
 	<div class="toolbar toolbar-top">
-		<div id="message" class="inline notice woocommerce-message">
-			<p>
+		<div id="message" class="inline notice woocommerce-message is-dismissible">
+			<p class="help">
 				<?php
 				esc_html_e(
 					'Add descriptive pieces of information that customers can use to search for this product on your store, such as “Material” or “Brand”.',
 					'woocommerce'
 				);
 				?>
+				<button type="button" class="notice-dismiss"><span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'woocommerce' ); ?></span></button>
 			</p>
 		</div>
 		<span class="expand-close">

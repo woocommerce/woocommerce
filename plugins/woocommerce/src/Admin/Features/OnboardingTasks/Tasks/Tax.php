@@ -62,13 +62,7 @@ class Tax extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
-			if ( $this->is_complete() ) {
-				return __( 'You added tax rates', 'woocommerce' );
-			}
-			return __( 'Add tax rates', 'woocommerce' );
-		}
-		return __( 'Set up tax rates', 'woocommerce' );
+		return __( 'Collect sales tax', 'woocommerce' );
 	}
 
 	/**
@@ -79,7 +73,7 @@ class Tax extends Task {
 	public function get_content() {
 		return self::can_use_automated_taxes()
 			? __(
-				'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
+				'Good news! WooCommerce Tax can automate your sales tax calculations for you.',
 				'woocommerce'
 			)
 			: __(
@@ -115,7 +109,10 @@ class Tax extends Task {
 	 */
 	public function is_complete() {
 		if ( $this->is_complete_result === null ) {
-			$this->is_complete_result = get_option( 'wc_connect_taxes_enabled' ) ||
+			$wc_connect_taxes_enabled = get_option( 'wc_connect_taxes_enabled' );
+			$is_wc_connect_taxes_enabled = ( $wc_connect_taxes_enabled === 'yes' ) || ( $wc_connect_taxes_enabled === true ); // seems that in some places boolean is used, and other places 'yes' | 'no' is used
+
+			$this->is_complete_result = $is_wc_connect_taxes_enabled ||
 				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
 				get_option( 'woocommerce_no_sales_tax' ) !== false;
 		}
@@ -124,15 +121,19 @@ class Tax extends Task {
 	}
 
 	/**
-	 * Addtional data.
+	 * Additional data.
 	 *
 	 * @return array
 	 */
 	public function get_additional_data() {
 		return array(
-			'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-			'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
-			'woocommerce_tax_countries' => self::get_automated_support_countries(),
+			'avalara_activated'              => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
+			'tax_jar_activated'              => class_exists( 'WC_Taxjar' ),
+			'stripe_tax_activated'           => PluginsHelper::is_plugin_active( 'stripe-tax-for-woocommerce' ),
+			'woocommerce_tax_activated'      => PluginsHelper::is_plugin_active( 'woocommerce-tax' ),
+			'woocommerce_shipping_activated' => PluginsHelper::is_plugin_active( 'woocommerce-shipping' ),
+			'woocommerce_tax_countries'      => self::get_automated_support_countries(),
+			'stripe_tax_countries'           => self::get_stripe_tax_support_countries(),
 		);
 	}
 
@@ -162,5 +163,55 @@ class Tax extends Task {
 		);
 
 		return $tax_supported_countries;
+	}
+
+	/**
+	 * Get an array of countries that support Stripe tax.
+	 *
+	 * @return array
+	 */
+	private static function get_stripe_tax_support_countries() {
+		// https://docs.stripe.com/tax/supported-countries#supported-countries accurate as of 2024-08-26.
+		// countries with remote sales not included.
+		return array(
+			'AU',
+			'AT',
+			'BE',
+			'BG',
+			'CA',
+			'HR',
+			'CY',
+			'CZ',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HK',
+			'HU',
+			'IE',
+			'IT',
+			'JP',
+			'LV',
+			'LT',
+			'LU',
+			'MT',
+			'NL',
+			'NZ',
+			'NO',
+			'PL',
+			'PT',
+			'RO',
+			'SG',
+			'SK',
+			'SI',
+			'ES',
+			'SE',
+			'CH',
+			'AE',
+			'GB',
+			'US',
+		);
 	}
 }

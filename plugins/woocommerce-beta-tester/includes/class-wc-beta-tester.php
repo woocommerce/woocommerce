@@ -20,19 +20,33 @@ class WC_Beta_Tester {
 	private $plugin_config;
 
 	/**
+	 * Plugin name.
+	 *
+	 * @var string
+	 */
+	private $plugin_name;
+
+	/**
 	 * Plugin instance.
 	 *
 	 * @var WC_Beta_Tester
 	 */
-	protected static $_instance = null;
+	protected static $instance = null;
+
+	/**
+	 * WP.org data
+	 *
+	 * @var object
+	 */
+	private $wporg_data;
 
 	/**
 	 * Main Instance.
 	 */
 	public static function instance() {
-		self::$_instance = is_null( self::$_instance ) ? new self() : self::$_instance;
+		self::$instance = is_null( self::$instance ) ? new self() : self::$instance;
 
-		return self::$_instance;
+		return self::$instance;
 	}
 
 	/**
@@ -101,7 +115,6 @@ class WC_Beta_Tester {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-live-branches.php';
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-menus.php';
 		include_once dirname( __FILE__ ) . '/class-wc-beta-tester-admin-assets.php';
 	}

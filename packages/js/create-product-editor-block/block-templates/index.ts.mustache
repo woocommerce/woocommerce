@@ -1,0 +1,23 @@
+/**
+ * External dependencies
+ */
+import { registerProductEditorBlockType } from '@woocommerce/product-editor';
+
+/**
+ * Internal dependencies
+ */
+import './editor.scss'; // see https://www.npmjs.com/package/@wordpress/scripts#using-css
+import blockConfiguration from './block.json';
+import { Edit } from './edit';
+
+const { name, ...metadata } = blockConfiguration;
+
+const settings = {
+	edit: Edit,
+};
+
+registerProductEditorBlockType( {
+	name,
+	metadata: metadata as never,
+	settings: settings as never,
+} );

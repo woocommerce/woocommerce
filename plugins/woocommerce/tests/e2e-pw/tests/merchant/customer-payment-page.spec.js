@@ -7,6 +7,7 @@ const productPrice = '15.99';
 
 test.describe(
 	'WooCommerce Merchant Flow: Orders > Customer Payment Page',
+	{ tag: [ '@payments', '@services', '@hpos' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -62,7 +63,7 @@ test.describe(
 			page,
 		} ) => {
 			await page.goto(
-				`wp-admin/post.php?post=${ orderId }&action=edit`
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 			);
 
 			// verify that the order is pending payment
@@ -78,16 +79,16 @@ test.describe(
 
 		test( 'should load the customer payment page', async ( { page } ) => {
 			await page.goto(
-				`wp-admin/post.php?post=${ orderId }&action=edit`
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 			);
 
 			// visit the page
-			await page.click( 'label[for=order_status] > a' );
+			await page.locator( 'label[for=order_status] > a' ).click();
 
 			// verify we landed on the customer payment page
-			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				'Pay for order'
-			);
+			await expect(
+				page.getByRole( 'button', { name: 'Pay for order' } )
+			).toBeVisible();
 			await expect( page.locator( 'td.product-name' ) ).toContainText(
 				productName
 			);
@@ -101,23 +102,23 @@ test.describe(
 		} ) => {
 			// key required, so can't go directly to the customer payment page
 			await page.goto(
-				`wp-admin/post.php?post=${ orderId }&action=edit`
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 			);
-			await page.click( 'label[for=order_status] > a' );
+			await page.locator( 'label[for=order_status] > a' ).click();
 
 			// pay for the order
-			await page.click( 'button#place_order' );
+			await page.locator( 'button#place_order' ).click();
 
 			// Verify we landed on the order received page
-			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				'Order received'
-			);
 			await expect(
-				page.locator( 'li.woocommerce-order-overview__order.order' )
-			).toContainText( orderId.toString() );
+				page.getByText( 'Your order has been received' )
+			).toBeVisible();
 			await expect(
-				page.locator( 'span.woocommerce-Price-amount.amount >> nth=0' )
-			).toContainText( productPrice );
+				page.getByText( `Order #: ${ orderId }` )
+			).toBeVisible();
+			await expect(
+				await page.getByText( `Total: $${ productPrice }` ).count()
+			).toBeGreaterThan( 0 );
 		} );
 	}
 );

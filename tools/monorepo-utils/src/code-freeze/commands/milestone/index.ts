@@ -9,11 +9,8 @@ import ora from 'ora';
  */
 import { getLatestGithubReleaseVersion } from '../../../core/github/repo';
 import { octokitWithAuth } from '../../../core/github/api';
-import { setGithubMilestoneOutputs } from './utils';
 import { WPIncrement } from '../../../core/version';
-import { Options } from './types';
 import { Logger } from '../../../core/logger';
-import { getEnvVar } from '../../../core/environment';
 
 export const milestoneCommand = new Command( 'milestone' )
 	.description( 'Create a milestone' )
@@ -32,16 +29,8 @@ export const milestoneCommand = new Command( 'milestone' )
 		'-m --milestone <milestone>',
 		'Milestone to create. Next milestone is gathered from Github if none is supplied'
 	)
-	.action( async ( options: Options ) => {
+	.action( async ( options ) => {
 		const { owner, name, dryRun, milestone } = options;
-		const isGithub = getEnvVar( 'CI' );
-
-		if ( milestone && isGithub ) {
-			Logger.error(
-				"You can't manually supply a milestone using Github mode. Please use the CLI locally to add a milestone."
-			);
-			process.exit( 1 );
-		}
 
 		let nextMilestone;
 		let nextReleaseVersion;
@@ -90,7 +79,7 @@ export const milestoneCommand = new Command( 'milestone' )
 		}
 
 		try {
-			await octokitWithAuth.request(
+			await octokitWithAuth().request(
 				`POST /repos/${ owner }/${ name }/milestones`,
 				{
 					title: nextMilestone,
@@ -106,12 +95,6 @@ export const milestoneCommand = new Command( 'milestone' )
 				Logger.notice(
 					`Milestone ${ nextMilestone } already exists in ${ owner }/${ name }`
 				);
-				if ( isGithub ) {
-					setGithubMilestoneOutputs(
-						nextReleaseVersion,
-						nextMilestone
-					);
-				}
 				process.exit( 0 );
 			} else {
 				milestoneSpinner.fail();
@@ -124,9 +107,7 @@ export const milestoneCommand = new Command( 'milestone' )
 		}
 
 		milestoneSpinner.succeed();
-		if ( isGithub ) {
-			setGithubMilestoneOutputs( nextReleaseVersion, nextMilestone );
-		}
+
 		Logger.notice(
 			`Successfully created milestone ${ nextMilestone } in ${ owner }/${ name }`
 		);

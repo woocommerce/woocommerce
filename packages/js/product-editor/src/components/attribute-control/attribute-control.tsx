@@ -8,14 +8,15 @@ import {
 	Fragment,
 	createInterpolateElement,
 } from '@wordpress/element';
-import { Button } from '@wordpress/components';
-import { ProductAttribute } from '@woocommerce/data';
+import { Button, Notice } from '@wordpress/components';
+import { ProductProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 	Link,
 } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -29,31 +30,18 @@ import {
 } from './utils';
 import { AttributeListItem } from '../attribute-list-item';
 import { NewAttributeModal } from './new-attribute-modal';
-
-type AttributeControlProps = {
-	value: ProductAttribute[];
-	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
-	onChange: ( value: ProductAttribute[] ) => void;
-	onEdit?: ( attribute: ProductAttribute ) => void;
-	onRemove?: ( attribute: ProductAttribute ) => void;
-	onRemoveCancel?: ( attribute: ProductAttribute ) => void;
-	onNewModalCancel?: () => void;
-	onNewModalClose?: () => void;
-	onNewModalOpen?: () => void;
-	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
-	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
-	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
-	uiStrings?: {
-		emptyStateSubtitle?: string;
-		newAttributeListItemLabel?: string;
-		newAttributeModalTitle?: string;
-		globalAttributeHelperMessage: string;
-	};
-};
+import { RemoveConfirmationModal } from '../remove-confirmation-modal';
+import { TRACKS_SOURCE } from '../../constants';
+import { EmptyState } from '../empty-state';
+import { SectionActions } from '../block-slot-fill';
+import { AttributeControlProps } from './types';
+import { getEmptyStateSequentialNames } from '../../utils';
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
 	onAdd = () => {},
+	onAddAnother = () => {},
+	onRemoveItem = () => {},
 	onChange,
 	onEdit = () => {},
 	onNewModalCancel = () => {},
@@ -64,17 +52,32 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onEditModalOpen = () => {},
 	onRemove = () => {},
 	onRemoveCancel = () => {},
+	onNoticeDismiss = () => {},
+	renderCustomEmptyState,
+	uiStrings,
+	createNewAttributesAsGlobal = false,
+	useRemoveConfirmationModal = false,
+	disabledAttributeIds = [],
+	termsAutoSelection,
+	defaultVisibility = false,
+} ) => {
 	uiStrings = {
-		newAttributeModalTitle: undefined,
-		emptyStateSubtitle: undefined,
-		newAttributeListItemLabel: __( 'Add attributes', 'woocommerce' ),
+		newAttributeListItemLabel: __( 'Add new', 'woocommerce' ),
 		globalAttributeHelperMessage: __(
 			`You can change the attribute's name in <link>Attributes</link>.`,
 			'woocommerce'
 		),
-	},
-} ) => {
+		attributeRemoveConfirmationMessage: __(
+			'Remove this attribute?',
+			'woocommerce'
+		),
+		...uiStrings,
+	};
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
+	const [ defaultAttributeSearch, setDefaultAttributeSearch ] =
+		useState< string >();
+	const [ removingAttribute, setRemovingAttribute ] =
+		useState< null | ProductProductAttribute >();
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
 	>( null );
@@ -94,16 +97,25 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		);
 	};
 
-	const handleRemove = ( attribute: ProductAttribute ) => {
+	const handleRemove = ( attribute: ProductProductAttribute ) => {
+		handleChange(
+			value.filter(
+				( attr ) =>
+					getAttributeId( attr ) !== getAttributeId( attribute )
+			)
+		);
+		onRemove( attribute );
+		setRemovingAttribute( null );
+	};
+
+	const showRemoveConfirmation = ( attribute: ProductProductAttribute ) => {
+		if ( useRemoveConfirmationModal ) {
+			setRemovingAttribute( attribute );
+			return;
+		}
 		// eslint-disable-next-line no-alert
-		if ( window.confirm( __( 'Remove this attribute?', 'woocommerce' ) ) ) {
-			handleChange(
-				value.filter(
-					( attr ) =>
-						getAttributeId( attr ) !== getAttributeId( attribute )
-				)
-			);
-			onRemove( attribute );
+		if ( window.confirm( uiStrings?.attributeRemoveConfirmationMessage ) ) {
+			handleRemove( attribute );
 			return;
 		}
 		onRemoveCancel( attribute );
@@ -116,35 +128,47 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const closeNewModal = () => {
 		setIsNewModalVisible( false );
+		setDefaultAttributeSearch( undefined );
 		onNewModalClose();
 	};
 
-	const openEditModal = ( attribute: ProductAttribute ) => {
+	const openEditModal = ( attribute: ProductProductAttribute ) => {
+		recordEvent( 'product_options_edit', {
+			source: TRACKS_SOURCE,
+			attribute: attribute.name,
+		} );
 		setCurrentAttributeId( getAttributeId( attribute ) );
 		onEditModalOpen( attribute );
 	};
 
-	const closeEditModal = ( attribute: ProductAttribute ) => {
+	const closeEditModal = ( attribute: ProductProductAttribute ) => {
 		setCurrentAttributeId( null );
 		onEditModalClose( attribute );
 	};
 
 	const handleAdd = ( newAttributes: EnhancedProductAttribute[] ) => {
-		handleChange( [
-			...value,
-			...newAttributes.filter(
-				( newAttr ) =>
-					! value.find(
-						( attr ) =>
-							getAttributeId( newAttr ) === getAttributeId( attr )
-					)
-			),
-		] );
+		const addedAttributesOnly = newAttributes.filter(
+			( newAttr ) =>
+				! value.some(
+					( current: ProductProductAttribute ) =>
+						getAttributeId( newAttr ) === getAttributeId( current )
+				)
+		);
+		handleChange( [ ...value, ...addedAttributesOnly ] );
 		onAdd( newAttributes );
 		closeNewModal();
 	};
 
-	const handleEdit = ( updatedAttribute: ProductAttribute ) => {
+	const handleEdit = ( updatedAttribute: EnhancedProductAttribute ) => {
+		recordEvent( 'product_options_update', {
+			source: TRACKS_SOURCE,
+			attribute: updatedAttribute.name,
+			values: updatedAttribute.terms?.map( ( term ) => term.name ),
+			default: updatedAttribute.isDefault,
+			visible: updatedAttribute.visible,
+			filter: true, // default true until attribute filter gets implemented
+		} );
+
 		const updatedAttributes = value.map( ( attr ) => {
 			if (
 				getAttributeId( attr ) === getAttributeId( updatedAttribute )
@@ -164,28 +188,73 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const attributeKeyValues = value.reduce(
 		(
-			keyValue: Record< number | string, ProductAttribute >,
-			attribute: ProductAttribute
+			keyValue: Record< number | string, ProductProductAttribute >,
+			attribute: ProductProductAttribute
 		) => {
 			keyValue[ getAttributeKey( attribute ) ] = attribute;
 			return keyValue;
 		},
-		{} as Record< number | string, ProductAttribute >
+		{} as Record< number | string, ProductProductAttribute >
 	);
 
 	const currentAttribute = value.find(
 		( attr ) => getAttributeId( attr ) === currentAttributeId
-	) as EnhancedProductAttribute;
+	);
+
+	function renderEmptyState() {
+		if ( value.length ) return null;
+
+		if ( renderCustomEmptyState ) {
+			return renderCustomEmptyState( {
+				addAttribute( search ) {
+					setDefaultAttributeSearch( search );
+					openNewModal();
+				},
+			} );
+		}
+
+		return (
+			<EmptyState
+				names={ getEmptyStateSequentialNames(
+					__( 'Attribute', 'woocommerce' ),
+					3
+				) }
+			/>
+		);
+	}
+
+	function renderSectionActions() {
+		if ( renderCustomEmptyState && value.length === 0 ) return null;
+
+		return (
+			<SectionActions>
+				{ uiStrings?.newAttributeListItemLabel && (
+					<Button
+						variant="secondary"
+						className="woocommerce-add-attribute-list-item__add-button"
+						onClick={ openNewModal }
+					>
+						{ uiStrings.newAttributeListItemLabel }
+					</Button>
+				) }
+			</SectionActions>
+		);
+	}
 
 	return (
 		<div className="woocommerce-attribute-field">
-			<Button
-				variant="secondary"
-				className="woocommerce-add-attribute-list-item__add-button"
-				onClick={ openNewModal }
-			>
-				{ uiStrings.newAttributeListItemLabel }
-			</Button>
+			{ renderSectionActions() }
+
+			{ uiStrings.notice && (
+				<Notice
+					isDismissible={ true }
+					status="warning"
+					className="woocommerce-attribute-field__notice"
+					onRemove={ onNoticeDismiss }
+				>
+					<p>{ uiStrings.notice }</p>
+				</Notice>
+			) }
 			{ Boolean( value.length ) && (
 				<Sortable
 					onOrderChange={ ( items ) => {
@@ -209,9 +278,12 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					{ sortedAttributes.map( ( attr ) => (
 						<AttributeListItem
 							attribute={ attr }
+							removeLabel={ uiStrings?.attributeRemoveLabel }
 							key={ getAttributeId( attr ) }
 							onEditClick={ () => openEditModal( attr ) }
-							onRemoveClick={ () => handleRemove( attr ) }
+							onRemoveClick={ () =>
+								showRemoveConfirmation( attr )
+							}
 						/>
 					) ) }
 				</Sortable>
@@ -220,12 +292,23 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 			{ isNewModalVisible && (
 				<NewAttributeModal
 					title={ uiStrings.newAttributeModalTitle }
+					description={ uiStrings.newAttributeModalDescription }
 					onCancel={ () => {
 						closeNewModal();
 						onNewModalCancel();
 					} }
 					onAdd={ handleAdd }
+					onAddAnother={ onAddAnother }
+					onRemoveItem={ onRemoveItem }
 					selectedAttributeIds={ value.map( ( attr ) => attr.id ) }
+					createNewAttributesAsGlobal={ createNewAttributesAsGlobal }
+					disabledAttributeIds={ disabledAttributeIds }
+					disabledAttributeMessage={
+						uiStrings.disabledAttributeMessage
+					}
+					termsAutoSelection={ termsAutoSelection }
+					defaultVisibility={ defaultVisibility }
+					defaultSearch={ defaultAttributeSearch }
 				/>
 			) }
 			<SelectControlMenuSlot />
@@ -236,22 +319,29 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						__( 'Edit %s', 'woocommerce' ),
 						currentAttribute.name
 					) }
-					globalAttributeHelperMessage={ createInterpolateElement(
-						uiStrings.globalAttributeHelperMessage,
-						{
-							link: (
-								<Link
-									href={ getAdminLink(
-										'edit.php?post_type=product&page=product_attributes'
-									) }
-									target="_blank"
-									type="wp-admin"
-								>
-									<></>
-								</Link>
-							),
-						}
-					) }
+					customAttributeHelperMessage={
+						uiStrings.customAttributeHelperMessage
+					}
+					globalAttributeHelperMessage={
+						uiStrings.globalAttributeHelperMessage
+							? createInterpolateElement(
+									uiStrings.globalAttributeHelperMessage,
+									{
+										link: (
+											<Link
+												href={ getAdminLink(
+													'edit.php?post_type=product&page=product_attributes'
+												) }
+												target="_blank"
+												type="wp-admin"
+											>
+												<></>
+											</Link>
+										),
+									}
+							  )
+							: undefined
+					}
 					onCancel={ () => {
 						closeEditModal( currentAttribute );
 						onEditModalCancel( currentAttribute );
@@ -260,8 +350,31 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 						handleEdit( updatedAttribute );
 					} }
 					attribute={ currentAttribute }
+					attributes={ value }
 				/>
 			) }
+			{ removingAttribute && (
+				<RemoveConfirmationModal
+					title={ sprintf(
+						/* translators: %s is the attribute name that is being removed */
+						__( 'Delete %(attributeName)s', 'woocommerce' ),
+						{ attributeName: removingAttribute.name }
+					) }
+					description={
+						<p>
+							{
+								uiStrings.attributeRemoveConfirmationModalMessage
+							}
+						</p>
+					}
+					onRemove={ () => handleRemove( removingAttribute ) }
+					onCancel={ () => {
+						onRemoveCancel( removingAttribute );
+						setRemovingAttribute( null );
+					} }
+				/>
+			) }
+			{ renderEmptyState() }
 		</div>
 	);
 };

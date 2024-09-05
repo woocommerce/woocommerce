@@ -10,10 +10,18 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+
 /**
  * This class adds actions to track usage of WooCommerce Products.
  */
 class WC_Products_Tracking {
+
+	/**
+	 * Tracks source.
+	 */
+	const TRACKS_SOURCE = 'product-legacy-editor';
+
 	/**
 	 * Init tracking.
 	 */
@@ -116,9 +124,13 @@ class WC_Products_Tracking {
 			return;
 		}
 
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
+		$source     = apply_filters( 'woocommerce_product_source', self::is_importing() ? 'import' : self::TRACKS_SOURCE );
 		$properties = array(
 			'product_id' => $product_id,
+			'source'     => $source,
 		);
+		/* phpcs: enable */
 
 		WC_Tracks::record_event( 'product_edit', $properties );
 	}
@@ -230,18 +242,20 @@ class WC_Products_Tracking {
 	 * @return array
 	 */
 	private static function get_possible_product_type_options_ids() {
-		$product_type_options_ids = array_merge(
+		$product_type_options_ids =
 			array_values(
 				array_map(
 					function ( $product_type_option ) {
 						return $product_type_option['id'];
 					},
 					/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-					apply_filters( 'product_type_options', array() )
+					apply_filters(
+						'product_type_options',
+						wc_get_default_product_type_options(),
+					)
+					/* phpcs: enable */
 				)
-			),
-			array( '_downloadable', '_virtual' )
-		);
+			);
 
 		return $product_type_options_ids;
 	}
@@ -327,10 +341,12 @@ class WC_Products_Tracking {
 			'product_type_options' => $product_type_options_string,
 			'purchase_note'        => $product->get_purchase_note() ? 'yes' : 'no',
 			'sale_price'           => $product->get_sale_price() ? 'yes' : 'no',
+			'source'               => apply_filters( 'woocommerce_product_source', self::is_importing() ? 'import' : self::TRACKS_SOURCE ),
 			'short_description'    => $product->get_short_description() ? 'yes' : 'no',
 			'tags'                 => count( $product->get_tag_ids() ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
 			'weight'               => $product->get_weight() ? 'yes' : 'no',
+			'global_unique_id'     => $product->get_global_unique_id() ? 'yes' : 'no',
 		);
 
 		WC_Tracks::record_event( 'product_add_publish', $properties );
@@ -530,5 +546,20 @@ class WC_Products_Tracking {
 			return;
 		}
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'add-term-tracking', false );
+	}
+
+	/**
+	 * Check if the current process is importing products.
+	 *
+	 * @return bool True if importing, false otherwise.
+	 */
+	private function is_importing() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// Check if the current request is a product import.
+		if ( isset( $_POST['action'] ) && 'woocommerce_do_ajax_product_import' === $_POST['action'] ) {
+			return true;
+		}
+		return false;
+		// phpcs:enable
 	}
 }

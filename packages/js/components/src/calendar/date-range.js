@@ -194,6 +194,7 @@ class DateRange extends Component {
 						label={ __( 'Start Date', 'woocommerce' ) }
 						error={ afterError }
 						describedBy={ sprintf(
+							/* translators: %s: date format specification */
 							__(
 								"Date input describing a selected date range's start date in format %s",
 								'woocommerce'
@@ -212,6 +213,7 @@ class DateRange extends Component {
 						label={ __( 'End Date', 'woocommerce' ) }
 						error={ beforeError }
 						describedBy={ sprintf(
+							/* translators: %s: date format specification */
 							__(
 								"Date input describing a selected date range's end date in format %s",
 								'woocommerce'

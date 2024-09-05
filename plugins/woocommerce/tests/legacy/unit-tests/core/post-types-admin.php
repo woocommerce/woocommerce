@@ -11,18 +11,19 @@
 class WC_Test_Admin_Post_Types extends WC_Unit_Test_Case {
 
 	/**
-	 * Instance of WC_Admin_Post_Types.
+	 * Instance of WC_Admin_Upload_Downloadable_Product.
 	 *
-	 * @var \WC_Admin_Post_Types
+	 * @var \WC_Admin_Upload_Downloadable_Product
 	 */
 	protected $wc_cpt;
+
 
 	/**
 	 * Setup. Create a instance to use throughout.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->wc_cpt = new WC_Admin_Post_Types();
+		$this->wc_cpt = new WC_Admin_Upload_Downloadable_Product();
 	}
 
 	/**

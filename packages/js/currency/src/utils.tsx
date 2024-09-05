@@ -66,9 +66,17 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 	let currency: Currency;
 
 	function stripTags( str: string ) {
-		const tmp = document.createElement( 'DIV' );
-		tmp.innerHTML = str;
-		return tmp.textContent || tmp.innerText || '';
+		// sanitize Polyfill - see https://github.com/WordPress/WordPress/blob/master/wp-includes/js/wp-sanitize.js
+		const strippedStr = str
+			.replace( /<!--[\s\S]*?(-->|$)/g, '' )
+			.replace( /<(script|style)[^>]*>[\s\S]*?(<\/\1>|$)/gi, '' )
+			.replace( /<\/?[a-z][\s\S]*?(>|$)/gi, '' );
+
+		if ( strippedStr !== str ) {
+			return stripTags( strippedStr );
+		}
+
+		return strippedStr;
 	}
 
 	/**
@@ -280,7 +288,7 @@ export const CurrencyFactory = CurrencyFactoryBase;
  * Dev Note: When adding new currencies below, the exchange rate array should also be updated in WooCommerce Admin's `business-details.js`.
  *
  * @deprecated
- * @return {Object} Curreny data.
+ * @return {Object} Currency data.
  */
 export function getCurrencyData() {
 	deprecated( 'getCurrencyData', {

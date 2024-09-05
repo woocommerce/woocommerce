@@ -15,8 +15,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 ?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
-
-		<?php if ( ! count( $variation_attributes ) && ( ( $global_attributes_count > 0 ) || ( $non_variation_attributes_count > 0 ) ) ) : ?>
+		<?php if ( ! isset( $variation_attributes ) || ! is_array( $variation_attributes ) || count( $variation_attributes ) === 0 ) : ?>
 
 		<div class="add-attributes-container">
 			<div class="add-attributes-message">
@@ -36,27 +35,6 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 			</div>
 		</div>
 
-		<?php elseif ( ! count( $variation_attributes ) ) : ?>
-
-		<div id="message" class="inline notice woocommerce-message">
-			<p>
-				<?php echo esc_html_e( 'Offer customers multiple product options, like size and color. Start by creating a new custom attribute and enter available values (they’ll be shown as selectable product options).', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/#add-variations"><?php esc_html_e( 'Learn more about creating variations', 'woocommerce' ); ?></a>
-			</p>
-		</div>
-		<div class="wc-metabox">
-			<div class="woocommerce_variation_new_attribute_data wc-metabox-content">
-			<?php
-				$i                    = 0;
-				$is_variations_screen = true;
-				$attribute            = new WC_Product_Attribute();
-				$attribute->set_variation( true );
-				require __DIR__ . '/html-product-attribute-inner.php';
-			?>
-				<div class="toolbar">
-					<button type="button" aria-disabled="true" class="button button-primary create-variations disabled"><?php esc_html_e( 'Create variations', 'woocommerce' ); ?></button>
-				</div>
-			</div>
-		</div>
 		<?php else : ?>
 
 			<div class="toolbar toolbar-variations-defaults">

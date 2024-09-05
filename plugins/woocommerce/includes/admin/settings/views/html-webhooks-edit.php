@@ -145,7 +145,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 								?>
 							</option>
 						<?php endforeach; ?>
-						<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>><?php esc_html_e( 'Legacy API v3 (deprecated)', 'woocommerce' ); ?></option>
+						<?php
+						$legacy_api_option_name =
+							WC()->legacy_rest_api_is_available() ?
+							__( 'Legacy API v3 (deprecated)', 'woocommerce' ) :
+							__( 'Legacy API v3 (⚠️ NOT AVAILABLE)', 'woocommerce' );
+						?>
+						<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>><?php echo esc_html( $legacy_api_option_name ); ?></option>
 					</select>
 				</td>
 			</tr>

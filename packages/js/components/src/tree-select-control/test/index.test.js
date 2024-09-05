@@ -168,6 +168,22 @@ describe( 'TreeSelectControl Component', () => {
 		expect( queryByLabelText( 'Asia' ) ).toBeFalsy(); // doesn't match pain
 	} );
 
+	it( 'Filters Option categories on Search', () => {
+		const { queryByLabelText, queryByRole } = render(
+			<TreeSelectControl options={ options } />
+		);
+
+		const control = queryByRole( 'combobox' );
+		fireEvent.click( control );
+		expect( queryByLabelText( 'Europe' ) ).toBeTruthy();
+		expect( queryByLabelText( 'Asia' ) ).toBeTruthy();
+
+		fireEvent.change( control, { target: { value: 'eur' } } );
+
+		expect( queryByLabelText( 'Europe' ) ).toBeTruthy(); // match 'eur'
+		expect( queryByLabelText( 'Asia' ) ).toBeFalsy(); // doesn't match 'eur'
+	} );
+
 	it( 'should call onInputChange when input field changed', () => {
 		const onInputChangeMock = jest.fn();
 		const { queryByRole } = render(

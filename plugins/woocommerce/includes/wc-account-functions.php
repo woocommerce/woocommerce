@@ -22,6 +22,11 @@ function wc_lostpassword_url( $default_url = '' ) {
 		return $default_url;
 	}
 
+	// Don't change the admin form.
+	if ( did_action( 'login_form_login' ) ) {
+		return $default_url;
+	}
+
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
 	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
 		return $default_url;
@@ -131,21 +136,15 @@ function wc_get_account_menu_items() {
 }
 
 /**
- * Get account menu item classes.
+ * Find current item in account menu.
  *
- * @since 2.6.0
+ * @since 9.3.0
  * @param string $endpoint Endpoint.
- * @return string
+ * @return bool
  */
-function wc_get_account_menu_item_classes( $endpoint ) {
+function wc_is_current_account_menu_item( $endpoint ) {
 	global $wp;
 
-	$classes = array(
-		'woocommerce-MyAccount-navigation-link',
-		'woocommerce-MyAccount-navigation-link--' . $endpoint,
-	);
-
-	// Set current item class.
 	$current = isset( $wp->query_vars[ $endpoint ] );
 	if ( 'dashboard' === $endpoint && ( isset( $wp->query_vars['page'] ) || empty( $wp->query_vars ) ) ) {
 		$current = true; // Dashboard is not an endpoint, so needs a custom check.
@@ -155,7 +154,23 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 		$current = true;
 	}
 
-	if ( $current ) {
+	return $current;
+}
+
+/**
+ * Get account menu item classes.
+ *
+ * @since 2.6.0
+ * @param string $endpoint Endpoint.
+ * @return string
+ */
+function wc_get_account_menu_item_classes( $endpoint ) {
+	$classes = array(
+		'woocommerce-MyAccount-navigation-link',
+		'woocommerce-MyAccount-navigation-link--' . $endpoint,
+	);
+
+	if ( wc_is_current_account_menu_item( $endpoint ) ) {
 		$classes[] = 'is-active';
 	}
 
@@ -176,11 +191,13 @@ function wc_get_account_endpoint_url( $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
 	}
 
+	$url = wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
+
 	if ( 'customer-logout' === $endpoint ) {
-		return wc_logout_url();
+		return wp_nonce_url( $url, 'customer-logout' );
 	}
 
-	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
+	return $url;
 }
 
 /**
@@ -309,11 +326,9 @@ function wc_get_account_orders_actions( $order ) {
  * Get account formatted address.
  *
  * @since  3.2.0
- * @param  string $address_type Address type.
- *                              Accepts: 'billing' or 'shipping'.
- *                              Default to 'billing'.
+ * @param  string $address_type Type of address; 'billing' or 'shipping'.
  * @param  int    $customer_id  Customer ID.
- *                              Default to 0.
+ *                              Defaults to 0.
  * @return string
  */
 function wc_get_account_formatted_address( $address_type = 'billing', $customer_id = 0 ) {
@@ -395,7 +410,7 @@ function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_toke
 
 	$card_type               = $payment_token->get_card_type();
 	$item['method']['last4'] = $payment_token->get_last4();
-	$item['method']['brand'] = ( ! empty( $card_type ) ? ucfirst( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
+	$item['method']['brand'] = ( ! empty( $card_type ) ? ucwords( str_replace( '_', ' ', $card_type ) ) : esc_html__( 'Credit card', 'woocommerce' ) );
 	$item['expires']         = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
 
 	return $item;

@@ -1,0 +1,14 @@
+.woocommerce-create-new-tag-modal {
+	&__wrapper {
+		min-width: 590px;
+		overflow: visible;
+	}
+
+	&__buttons {
+		margin-top: $gap-larger;
+		display: flex;
+		flex-direction: row;
+		gap: $gap-smaller;
+		justify-content: flex-end;
+	}
+}

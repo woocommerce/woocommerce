@@ -8,57 +8,26 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Rule processor that performs an OR operation on the rule's left and right
  * operands.
+ *
+ * @deprecated 8.8.0
  */
-class OrRuleProcessor implements RuleProcessorInterface {
+class OrRuleProcessor extends DeprecatedClassFacade {
 	/**
-	 * Constructor.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param RuleEvaluator $rule_evaluator The rule evaluator to use.
+	 * @var string
 	 */
-	public function __construct( $rule_evaluator = null ) {
-		$this->rule_evaluator = null === $rule_evaluator
-			? new RuleEvaluator()
-			: $rule_evaluator;
-	}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrRuleProcessor';
 
 	/**
-	 * Performs an OR operation on the rule's left and right operands.
+	 * The version that this class was deprecated in.
 	 *
-	 * @param object $rule         The specific rule being processed by this rule processor.
-	 * @param object $stored_state Stored state.
-	 *
-	 * @return bool The result of the operation.
+	 * @var string
 	 */
-	public function process( $rule, $stored_state ) {
-		foreach ( $rule->operands as $operand ) {
-			$evaluated_operand = $this->rule_evaluator->evaluate(
-				$operand,
-				$stored_state
-			);
-
-			if ( $evaluated_operand ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Validates the rule.
-	 *
-	 * @param object $rule The rule to validate.
-	 *
-	 * @return bool Pass/fail.
-	 */
-	public function validate( $rule ) {
-		if ( ! isset( $rule->operands ) || ! is_array( $rule->operands ) ) {
-			return false;
-		}
-
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

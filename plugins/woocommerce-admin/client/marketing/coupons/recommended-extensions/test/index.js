@@ -173,6 +173,7 @@ describe( 'Click Recommendations', () => {
 			'marketing_recommended_extension',
 			{
 				name: 'AutomateWoo',
+				source: 'plugin-woocommerce',
 			}
 		);
 	} );

@@ -1,0 +1,26 @@
+.wc-block-components-additional-fields-list {
+	margin: 0;
+	padding: 0;
+
+	dt {
+		margin: 0;
+		padding: 0;
+		font-style: normal;
+		font-weight: bold;
+		display: inline;
+
+		&::after {
+			content: ": ";
+		}
+		&::before {
+			content: "";
+			display: block;
+		}
+	}
+	dd {
+		margin: 0;
+		padding: 0;
+		font-style: normal;
+		display: inline;
+	}
+}

@@ -9,16 +9,19 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericController;
+use Automattic\WooCommerce\Admin\API\Reports\OrderAwareControllerTrait;
 
 /**
  * REST API Reports orders controller class.
  *
  * @internal
- * @extends \Automattic\WooCommerce\Admin\API\Reports\Controller
+ * @extends \Automattic\WooCommerce\Admin\API\Reports\GenericController
  */
-class Controller extends ReportsController implements ExportableInterface {
+class Controller extends GenericController implements ExportableInterface {
+
+	use OrderAwareControllerTrait;
 
 	/**
 	 * Route base.
@@ -26,6 +29,19 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @var string
 	 */
 	protected $rest_base = 'reports/orders';
+
+	/**
+	 * Get data from Orders\Query.
+	 *
+	 * @override GenericController::get_datastore_data()
+	 *
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
+	 */
+	protected function get_datastore_data( $query_args = array() ) {
+		$query = new Query( $query_args );
+		return $query->get_data();
+	}
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -65,65 +81,17 @@ class Controller extends ReportsController implements ExportableInterface {
 	}
 
 	/**
-	 * Get all reports.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		$query_args   = $this->prepare_reports_query( $request );
-		$orders_query = new Query( $query_args );
-		$report_data  = $orders_query->get_data();
-
-		$data = array();
-
-		foreach ( $report_data->data as $orders_data ) {
-			$orders_data['order_number']    = $this->get_order_number( $orders_data['order_id'] );
-			$orders_data['total_formatted'] = $this->get_total_formatted( $orders_data['order_id'] );
-			$item                           = $this->prepare_item_for_response( $orders_data, $request );
-			$data[]                         = $this->prepare_response_for_collection( $item );
-		}
-
-		$response = rest_ensure_response( $data );
-		$response->header( 'X-WP-Total', (int) $report_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
-
-		$page      = $report_data->page_no;
-		$max_pages = $report_data->pages;
-		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
-
-		return $response;
-	}
-
-	/**
-	 * Prepare a report object for serialization.
-	 *
-	 * @param stdClass        $report  Report data.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param array            $report  Report data item as returned from Data Store.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
+		$report['order_number']    = $this->get_order_number( $report['order_id'] );
+		$report['total_formatted'] = $this->get_total_formatted( $report['order_id'] );
 		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = parent::prepare_item_for_response( $report, $request );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**
@@ -226,23 +194,29 @@ class Controller extends ReportsController implements ExportableInterface {
 					'readonly'    => true,
 				),
 				'extended_info'    => array(
-					'products' => array(
+					'products'    => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'List of order product IDs, names, quantities.', 'woocommerce' ),
 					),
-					'coupons'  => array(
+					'coupons'     => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'List of order coupons.', 'woocommerce' ),
 					),
-					'customer' => array(
+					'customer'    => array(
 						'type'        => 'object',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Order customer information.', 'woocommerce' ),
+					),
+					'attribution' => array(
+						'type'        => 'object',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Order attribution information.', 'woocommerce' ),
 					),
 				),
 			),
@@ -257,56 +231,14 @@ class Controller extends ReportsController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                       = array();
-		$params['context']            = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']               = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 1,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
+		$params                        = parent::get_collection_params();
+		$params['per_page']['minimum'] = 0;
+		$params['orderby']['enum']     = array(
+			'date',
+			'num_items_sold',
+			'net_total',
 		);
-		$params['per_page']           = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
-			'type'              => 'integer',
-			'default'           => 10,
-			'minimum'           => 0,
-			'maximum'           => 100,
-			'sanitize_callback' => 'absint',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['after']              = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['before']             = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
-			'type'              => 'string',
-			'format'            => 'date-time',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['order']              = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'desc',
-			'enum'              => array( 'asc', 'desc' ),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['orderby']            = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'date',
-			'enum'              => array(
-				'date',
-				'num_items_sold',
-				'net_total',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['product_includes']   = array(
+		$params['product_includes']    = array(
 			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -316,7 +248,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product_excludes']   = array(
+		$params['product_excludes']    = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -326,7 +258,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['variation_includes'] = array(
+		$params['variation_includes']  = array(
 			'description'       => __( 'Limit result set to items that have the specified variation(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -336,7 +268,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['variation_excludes'] = array(
+		$params['variation_excludes']  = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified variation(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -346,7 +278,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_includes']    = array(
+		$params['coupon_includes']     = array(
 			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -356,7 +288,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['coupon_excludes']    = array(
+		$params['coupon_excludes']     = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -366,7 +298,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['tax_rate_includes']  = array(
+		$params['tax_rate_includes']   = array(
 			'description'       => __( 'Limit result set to items that have the specified tax rate(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -376,7 +308,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['tax_rate_excludes']  = array(
+		$params['tax_rate_excludes']   = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified tax rate(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -386,7 +318,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['status_is']          = array(
+		$params['status_is']           = array(
 			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -396,7 +328,7 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['status_is_not']      = array(
+		$params['status_is_not']       = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -406,7 +338,7 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'string',
 			),
 		);
-		$params['customer_type']      = array(
+		$params['customer_type']       = array(
 			'description'       => __( 'Limit result set to returning or new customers.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => '',
@@ -417,7 +349,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['refunds']            = array(
+		$params['refunds']             = array(
 			'description'       => __( 'Limit result set to specific types of refunds.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => '',
@@ -430,14 +362,14 @@ class Controller extends ReportsController implements ExportableInterface {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['extended_info']      = array(
+		$params['extended_info']       = array(
 			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_includes']     = array(
+		$params['order_includes']      = array(
 			'description'       => __( 'Limit result set to items that have the specified order ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -446,7 +378,7 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['order_excludes']     = array(
+		$params['order_excludes']      = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -455,7 +387,7 @@ class Controller extends ReportsController implements ExportableInterface {
 				'type' => 'integer',
 			),
 		);
-		$params['attribute_is']       = array(
+		$params['attribute_is']        = array(
 			'description'       => __( 'Limit result set to orders that include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -464,19 +396,13 @@ class Controller extends ReportsController implements ExportableInterface {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is_not']   = array(
+		$params['attribute_is_not']    = array(
 			'description'       => __( 'Limit result set to orders that don\'t include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'array',
 			),
 			'default'           => array(),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['force_cache_refresh'] = array(
-			'description'       => __( 'Force retrieval of fresh data instead of from the cache.', 'woocommerce' ),
-			'type'              => 'boolean',
-			'sanitize_callback' => 'wp_validate_boolean',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
@@ -533,14 +459,14 @@ class Controller extends ReportsController implements ExportableInterface {
 		$export_columns = array(
 			'date_created'    => __( 'Date', 'woocommerce' ),
 			'order_number'    => __( 'Order #', 'woocommerce' ),
-			'total_formatted' => __( 'N. Revenue (formatted)', 'woocommerce' ),
 			'status'          => __( 'Status', 'woocommerce' ),
 			'customer_name'   => __( 'Customer', 'woocommerce' ),
 			'customer_type'   => __( 'Customer type', 'woocommerce' ),
 			'products'        => __( 'Product(s)', 'woocommerce' ),
 			'num_items_sold'  => __( 'Items sold', 'woocommerce' ),
 			'coupons'         => __( 'Coupon(s)', 'woocommerce' ),
-			'net_total'       => __( 'N. Revenue', 'woocommerce' ),
+			'net_total' 	  => __( 'Net Sales', 'woocommerce' ),
+			'attribution'     => __( 'Attribution', 'woocommerce' ),
 		);
 
 		/**
@@ -563,16 +489,16 @@ class Controller extends ReportsController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$export_item = array(
-			'date_created'    => $item['date_created'],
+			'date_created'    => $item['date'],
 			'order_number'    => $item['order_number'],
-			'total_formatted' => $item['total_formatted'],
 			'status'          => $item['status'],
 			'customer_name'   => isset( $item['extended_info']['customer'] ) ? $this->get_customer_name( $item['extended_info']['customer'] ) : null,
 			'customer_type'   => $item['customer_type'],
 			'products'        => isset( $item['extended_info']['products'] ) ? $this->get_products( $item['extended_info']['products'] ) : null,
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
-			'net_total'       => $item['net_total'],
+			'net_total' 	  => $item['net_total'],
+			'attribution'     => $item['extended_info']['attribution']['origin'],
 		);
 
 		/**

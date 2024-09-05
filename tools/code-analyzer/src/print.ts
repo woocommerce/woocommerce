@@ -6,7 +6,6 @@ import { setOutput } from '@actions/core';
 /**
  * Internal dependencies
  */
-import { SchemaDiff } from './git';
 import { HookChangeDescription } from './lib/hook-changes';
 import { TemplateChangeDescription } from './lib/template-changes';
 
@@ -110,43 +109,6 @@ export const printHookResults = (
 			log( `NOTICE | ${ title } | ${ message }` );
 			log( '---------------------------------------------------\n' );
 		}
-	}
-};
-
-/**
- *  Print Schema change results.
- *
- * @param {Object}   schemaDiffs Schema diff object
- * @param {string}   version     Version change was introduced.
- * @param {string}   output      Output style.
- * @param {Function} log         Print method.
- */
-export const printSchemaChange = (
-	schemaDiffs: SchemaDiff[],
-	version: string,
-	output: string,
-	log: ( s: string ) => void
-) => {
-	if ( output === 'github' ) {
-		let githubCommentContent = '\\n\\n### New schema changes:';
-		schemaDiffs.forEach( ( schemaDiff ) => {
-			if ( ! schemaDiff.areEqual ) {
-				githubCommentContent += `\\n* **Schema:** ${ schemaDiff.method } introduced in ${ version }`;
-			}
-		} );
-
-		setOutput( 'schema', githubCommentContent );
-	} else {
-		log( '\n## SCHEMA CHANGES' );
-		log( '---------------------------------------------------' );
-		schemaDiffs.forEach( ( schemaDiff ) => {
-			if ( ! schemaDiff.areEqual ) {
-				log(
-					` NOTICE | Schema changes detected in ${ schemaDiff.method } as of ${ version }`
-				);
-				log( '---------------------------------------------------' );
-			}
-		} );
 	}
 };
 

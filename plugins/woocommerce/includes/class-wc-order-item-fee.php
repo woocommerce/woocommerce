@@ -10,6 +10,8 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -82,7 +84,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			// Apportion taxes to order items, shipping, and fees.
 			$order           = $this->get_order();
 			$tax_class_costs = $this->get_tax_class_costs( $order );
-			$total_costs     = array_sum( $tax_class_costs );
+			$total_costs     = NumberUtil::array_sum( $tax_class_costs );
 			$discount_taxes  = array();
 			if ( $total_costs ) {
 				foreach ( $tax_class_costs as $tax_class => $tax_class_cost ) {
@@ -182,9 +184,9 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 		$this->set_prop( 'taxes', $tax_data );
 
 		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-			$this->set_total_tax( array_sum( $tax_data['total'] ) );
+			$this->set_total_tax( NumberUtil::array_sum( $tax_data['total'] ) );
 		} else {
-			$this->set_total_tax( array_sum( array_map( 'wc_round_tax_total', $tax_data['total'] ) ) );
+			$this->set_total_tax( NumberUtil::array_sum( array_map( 'wc_round_tax_total', $tax_data['total'] ) ) );
 		}
 	}
 

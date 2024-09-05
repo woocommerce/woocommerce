@@ -103,7 +103,8 @@ class CartModal extends Component {
 			if ( themeInfo ) {
 				listItems.push( {
 					title: sprintf(
-						__( '%s — %s per year', 'woocommerce' ),
+						/* translators: 1: theme title, 2: theme price */
+						__( '%1$s — %2$s per year', 'woocommerce' ),
 						themeInfo.title,
 						decodeEntities( themeInfo.price )
 					),
@@ -136,7 +137,7 @@ class CartModal extends Component {
 
 				<p className="woocommerce-cart-modal__help-text">
 					{ __(
-						"You won't have access to this functionality until the extensions have been purchased and installed.",
+						'You won’t have access to this functionality until the extensions have been purchased and installed.',
 						'woocommerce'
 					) }
 				</p>
@@ -147,7 +148,7 @@ class CartModal extends Component {
 						isBusy={ purchaseLaterButtonBusy }
 						onClick={ () => this.onClickPurchaseLater() }
 					>
-						{ __( "I'll do it later", 'woocommerce' ) }
+						{ __( 'I’ll do it later', 'woocommerce' ) }
 					</Button>
 
 					<Button

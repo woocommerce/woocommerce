@@ -40,4 +40,26 @@ export type CountriesState = {
 	};
 	locales: Locales;
 	countries: Country[];
+	geolocation: GeolocationResponse | undefined;
+};
+
+/**
+ * Geolocation response from the WPCOM API which geolocates using ip2location.
+ * Example response:
+ * {
+ *   "latitude":"-38.23476",
+ *   "longitude":"146.39499",
+ *   "country_short":"AU",
+ *   "country_long":"Australia",
+ *   "region":"Victoria",
+ *   "city":"Morwell"
+ * }
+ */
+export type GeolocationResponse = {
+	latitude: string;
+	longitude: string;
+	country_short: string;
+	country_long: string;
+	region: string;
+	city: string;
 };

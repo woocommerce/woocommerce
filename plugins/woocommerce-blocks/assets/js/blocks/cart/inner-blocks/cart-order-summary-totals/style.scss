@@ -1,0 +1,8 @@
+.wp-block-woocommerce-cart-order-summary-totals-block {
+	border-top: 1px solid $universal-border-light;
+	padding-bottom: $gap;
+	.wc-block-components-totals-wrapper {
+		padding-bottom: 0;
+		border: 0;
+	}
+}

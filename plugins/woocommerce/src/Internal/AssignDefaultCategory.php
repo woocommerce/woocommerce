@@ -49,7 +49,7 @@ class AssignDefaultCategory {
 		$default_category = get_option( 'default_product_cat', 0 );
 
 		if ( $default_category ) {
-			$wpdb->query(
+			$affected_rows = $wpdb->query(
 				$wpdb->prepare(
 					"INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
 					SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
@@ -65,9 +65,11 @@ class AssignDefaultCategory {
 					$default_category
 				)
 			);
-			wp_cache_flush();
-			delete_transient( 'wc_term_counts' );
-			wp_update_term_count_now( array( $default_category ), 'product_cat' );
+			if ( $affected_rows > 0 ) {
+				wp_cache_flush();
+				delete_transient( 'wc_term_counts' );
+				wp_update_term_count_now( array( $default_category ), 'product_cat' );
+			}
 		}
 	}
 }

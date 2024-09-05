@@ -1,3 +1,13 @@
+/**
+ * External dependencies
+ */
+import { render, fireEvent } from '@testing-library/react';
+
+/**
+ * Internal dependencies
+ */
+import { Header, getPageTitle } from '../index.js';
+
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
 	getSetting() {
@@ -31,16 +41,6 @@ jest.mock( '@wordpress/data', () => {
 		} ),
 	};
 } );
-
-/**
- * External dependencies
- */
-import { render, fireEvent } from '@testing-library/react';
-
-/**
- * Internal dependencies
- */
-import { Header } from '../index.js';
 
 global.window.wcNavigation = {};
 
@@ -103,5 +103,29 @@ describe( 'Header', () => {
 		expect( document.title ).toBe(
 			'Accounts & Privacy ‹ Settings ‹ Fake Site Title — WooCommerce'
 		);
+	} );
+} );
+
+describe( 'getPageTitle', () => {
+	test( 'should get page title as the last item if section length is less than 3', () => {
+		const sections = [ 'Payments' ];
+		expect( getPageTitle( sections ) ).toBe( 'Payments' );
+	} );
+
+	test( "should get page title as the second item's second element if section length is 3 or more and second item has a second element", () => {
+		const sections = [
+			[ 'admin.php?page=wc-admin', 'WooCommerce' ],
+			[ 'admin.php?page=wc-settings', 'Settings' ],
+			'Payments',
+		];
+		expect( getPageTitle( sections ) ).toBe( 'Settings' );
+	} );
+
+	test( "should get page title as the last item if section length is 3 or more but second item doesn't have a second element", () => {
+		const sections = [
+			[ 'admin.php?page=wc-admin', 'WooCommerce' ],
+			'Payments',
+		];
+		expect( getPageTitle( sections ) ).toBe( 'Payments' );
 	} );
 } );

@@ -2,13 +2,13 @@
  * WooCommerce CSS Variables
  */
 
-$woocommerce:   	#a46497 !default;
+$woocommerce:   	#7F54B3 !default;
 $green:         	#7ad03a !default;
 $red:           	#a00 !default;
 $orange:        	#ffba00 !default;
 $blue:          	#2ea2cc !default;
 
-$primary:           #a46497 !default;                                  // Primary color for buttons (alt)
+$primary:           #7F54B3 !default;                                    // Primary color for buttons (alt)
 $primarytext:       desaturate(lighten($primary, 50%), 18%) !default;    // Text on primary color bg
 
 $secondary:         desaturate(lighten($primary, 40%), 21%) !default;    // Secondary buttons

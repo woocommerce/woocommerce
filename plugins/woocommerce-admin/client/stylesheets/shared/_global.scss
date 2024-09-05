@@ -1,15 +1,15 @@
-@import 'node_modules/@wordpress/base-styles/colors.native';
+@import "node_modules/@wordpress/base-styles/colors.native";
 // By using CSS variables, we can switch the spacing rhythm using a single media query.
 :root {
 	--large-gap: 40px;
 	--main-gap: 24px;
 }
-@media ( max-width: 960px ) {
+@media (max-width: 960px) {
 	:root {
 		--large-gap: 24px;
 	}
 }
-@media ( max-width: 782px ) {
+@media (max-width: 782px) {
 	:root {
 		--large-gap: 16px;
 		--main-gap: 16px;
@@ -59,9 +59,28 @@
 	}
 }
 
-body.woocommerce-page {
+body.woocommerce-admin-page {
+	// Prevent orphans
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	caption,
+	figcaption {
+		text-wrap: balance;
+	}
+
+	p,
+	ul,
+	ol,
+	blockquote {
+		text-wrap: pretty;
+	}
+
 	.components-button.is-primary {
-		&:not(:disabled):not([aria-disabled='true']):hover {
+		&:not(:disabled):not([aria-disabled="true"]):hover {
 			color: $studio-white;
 		}
 	}
@@ -69,7 +88,7 @@ body.woocommerce-page {
 	.components-snackbar .components-button.is-tertiary {
 		color: $studio-white;
 
-		&:not(:disabled):not([aria-disabled='true']):hover {
+		&:not(:disabled):not([aria-disabled="true"]):hover {
 			color: $studio-white;
 		}
 	}

@@ -2,6 +2,7 @@
 /**
  * WooCommerce Navigation Favorite
  *
+ * @deprecated 9.3.0 Navigation is no longer a feature and its classes will be removed in WooCommerce 9.4.
  * @package Woocommerce Navigation
  */
 
@@ -20,6 +21,13 @@ class Favorites {
 	 * @var int
 	 */
 	const META_NAME = 'navigation_favorites';
+
+	/**
+	 * Favorites instance.
+	 *
+	 * @var Favorites|null
+	 */
+	protected static $instance = null;
 
 	/**
 	 * Get class instance.

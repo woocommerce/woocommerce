@@ -1,0 +1,13 @@
+{
+	"type": "object",
+	"required": ["type", "publish_before"],
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["publish_before_time"]
+		},
+		"publish_before": {
+			"type": "string"
+		}
+	}
+}

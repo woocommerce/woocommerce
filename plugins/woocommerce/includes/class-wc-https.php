@@ -59,7 +59,7 @@ class WC_HTTPS {
 			if ( is_array( $content ) ) {
 				$content = array_map( 'WC_HTTPS::force_https_url', $content );
 			} else {
-				$content = str_replace( 'http:', 'https:', $content );
+				$content = str_replace( 'http:', 'https:', (string) $content );
 			}
 		}
 		return $content;

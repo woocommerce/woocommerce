@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	createInterpolateElement,
-	Component,
-	Fragment,
-} from '@wordpress/element';
+import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
 import { find } from 'lodash';
 import PropTypes from 'prop-types';
@@ -16,7 +11,10 @@ import { getDefaultOptionValue } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { textContent } from './utils';
+import {
+	backwardsCompatibleCreateInterpolateElement as createInterpolateElement,
+	textContent,
+} from './utils';
 
 class SelectFilter extends Component {
 	constructor( { filter, config, onFilterChange } ) {

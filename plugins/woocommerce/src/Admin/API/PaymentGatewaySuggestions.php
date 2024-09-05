@@ -2,7 +2,7 @@
 /**
  * REST API Payment Gateway Suggestions Controller
  *
- * Handles requests to install and activate depedent plugins.
+ * Handles requests to install and activate dependent plugins.
  */
 
 namespace Automattic\WooCommerce\Admin\API;
@@ -124,7 +124,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'payment-gateway-suggestions',
-			'type'       => 'array',
+			'type'       => 'object',
 			'properties' => array(
 				'content'                 => array(
 					'description' => __( 'Suggestion description.', 'woocommerce' ),

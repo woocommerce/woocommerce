@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Product, ProductStatus } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -9,51 +9,54 @@ import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import { useValidations } from '../../../../contexts/validation-context';
+import { WPError } from '../../../../hooks/use-error-handler';
+import { useProductURL } from '../../../../hooks/use-product-url';
+import { PreviewButtonProps } from '../../preview-button';
+import { formatProductError } from '../../../../utils/format-product-error';
+
 export function usePreview( {
+	productStatus,
+	productType = 'product',
 	disabled,
 	onClick,
 	onSaveSuccess,
 	onSaveError,
 	...props
-}: Omit< Button.AnchorProps, 'aria-disabled' | 'variant' | 'href' > & {
+}: PreviewButtonProps & {
 	onSaveSuccess?( product: Product ): void;
-	onSaveError?( error: Error ): void;
+	onSaveError?( error: WPError ): void;
 } ): Button.AnchorProps {
 	const anchorRef = useRef< HTMLAnchorElement >();
 
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
-	const [ productStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		'product',
-		'status'
-	);
-	const [ permalink ] = useEntityProp< string >(
-		'postType',
-		'product',
-		'permalink'
-	);
+
+	const { getProductURL } = useProductURL( productType );
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			const { isPostSavingLocked } = select( 'core/editor' );
-			const isSavingLocked = isPostSavingLocked();
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
-				'product',
+				productType,
 				productId
 			);
 
 			return {
-				isDisabled: isSavingLocked || isSaving,
+				isDisabled: isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
@@ -61,15 +64,13 @@ export function usePreview( {
 		[ productId ]
 	);
 
-	const ariaDisabled = disabled || isDisabled;
+	const { isValidating, validate } = useValidations();
 
+	const ariaDisabled = disabled || isDisabled || isValidating;
+
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
-
-	let previewLink: URL | undefined;
-	if ( typeof permalink === 'string' ) {
-		previewLink = new URL( permalink );
-		previewLink.searchParams.append( 'preview', 'true' );
-	}
 
 	/**
 	 * Overrides the default anchor behaviour when the product has unsaved changes.
@@ -97,11 +98,13 @@ export function usePreview( {
 		event.preventDefault();
 
 		try {
+			await validate();
+
 			// If the product status is `auto-draft` it's not possible to
 			// reach the preview page, so the status is changed to `draft`
 			// before redirecting.
 			if ( productStatus === 'auto-draft' ) {
-				await editEntityRecord( 'postType', 'product', productId, {
+				await editEntityRecord( 'postType', productType, productId, {
 					status: 'draft',
 				} );
 			}
@@ -109,8 +112,11 @@ export function usePreview( {
 			// Persist the product changes before redirecting
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
-				productId
+				productType,
+				productId,
+				{
+					throwOnError: true,
+				}
 			);
 
 			// Redirect using the default anchor behaviour. This way, the usage
@@ -122,7 +128,12 @@ export function usePreview( {
 			}
 		} catch ( error ) {
 			if ( onSaveError ) {
-				onSaveError( error as Error );
+				onSaveError(
+					formatProductError(
+						error as WPError,
+						productStatus
+					) as WPError
+				);
 			}
 		}
 	}
@@ -139,7 +150,7 @@ export function usePreview( {
 		'aria-disabled': ariaDisabled,
 		// Note that the href is always passed for a11y support. So
 		// the final rendered element is always an anchor.
-		href: previewLink?.toString(),
+		href: getProductURL( true ),
 		variant: 'tertiary',
 		onClick: handleClick,
 	};

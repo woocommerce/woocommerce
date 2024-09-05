@@ -15,7 +15,7 @@ import {
 	SETTINGS_STORE_NAME,
 } from '@woocommerce/data';
 import { compose } from 'redux';
-import { recordEvent } from '@woocommerce/tracks';
+import { recordEvent as fallbackRecordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -38,15 +38,15 @@ function getHomeItems() {
 		},
 		{
 			title: __( 'Inbox', 'woocommerce' ),
-			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-2',
-		},
-		{
-			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-4',
 		},
 		{
-			title: __( 'Store Management', 'woocommerce' ),
+			title: __( 'Stats Overview', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-5',
+		},
+		{
+			title: __( 'Store Management', 'woocommerce' ),
+			link: 'https://woocommerce.com/document/home-screen/?utm_medium=product#section-10',
 		},
 		{
 			title: __( 'Store Setup Checklist', 'woocommerce' ),
@@ -87,7 +87,7 @@ function getMarketingItems( props ) {
 			link: 'https://kb.mailpoet.com/category/114-getting-started',
 		},
 		activePlugins.includes( 'google-listings-and-ads' ) && {
-			title: __( 'Set up Google Listing & Ads', 'woocommerce' ),
+			title: __( 'Set up Google for WooCommerce', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
 		},
 		activePlugins.includes( 'pinterest-for-woocommerce' ) && {
@@ -114,11 +114,11 @@ function getPaymentGatewaySuggestions( props ) {
 			link: 'https://woocommerce.com/document/premium-payment-gateway-extensions/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.woocommerce_payments && {
-			title: __( 'WooCommerce Payments Start Up Guide', 'woocommerce' ),
+			title: __( 'WooPayments Start Up Guide', 'woocommerce' ),
 			link: 'https://woocommerce.com/document/payments/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.woocommerce_payments && {
-			title: __( 'WooCommerce Payments FAQs', 'woocommerce' ),
+			title: __( 'WooPayments FAQs', 'woocommerce' ),
 			link: 'https://woocommerce.com/documentation/woocommerce-payments/woocommerce-payments-faqs/?utm_source=help_panel&utm_medium=product',
 		},
 		paymentGatewaySuggestions.stripe && {
@@ -190,7 +190,10 @@ function getProductsItems() {
 function getShippingItems( { activePlugins, countryCode } ) {
 	const showWCS =
 		countryCode === 'US' &&
-		! activePlugins.includes( 'woocommerce-services' );
+		! activePlugins.includes( 'woocommerce-services' ) &&
+		! activePlugins.includes( 'woocommerce-shipping' ) &&
+		! activePlugins.includes( 'woocommerce-tax' );
+
 	return [
 		{
 			title: __( 'Setting up Shipping Zones', 'woocommerce' ),
@@ -235,11 +238,18 @@ function getTaxItems( props ) {
 	}
 
 	const { additionalData } = task;
-	const { woocommerceTaxCountries = [], taxJarActivated } = additionalData;
+	const {
+		woocommerceTaxCountries = [],
+		taxJarActivated,
+		woocommerceTaxActivated,
+		woocommerceShippingActivated,
+	} = additionalData;
 
 	const showWCS =
 		! taxJarActivated && // WCS integration doesn't work with the official TaxJar plugin.
-		woocommerceTaxCountries.includes( countryCode );
+		woocommerceTaxCountries.includes( countryCode ) &&
+		! woocommerceTaxActivated &&
+		! woocommerceShippingActivated;
 
 	return [
 		{
@@ -349,15 +359,18 @@ function getListItems( props ) {
 	} ) );
 }
 
-export const HelpPanel = ( props ) => {
-	const { taskName } = props;
+export const HelpPanel = ( {
+	taskName,
+	recordEvent = fallbackRecordEvent,
+	...props
+} ) => {
 	useEffect( () => {
-		props.recordEvent( 'help_panel_open', {
+		recordEvent( 'help_panel_open', {
 			task_name: taskName || 'homescreen',
 		} );
-	}, [ taskName ] );
+	}, [ taskName, recordEvent ] );
 
-	const listItems = getListItems( props );
+	const listItems = getListItems( { taskName, recordEvent, ...props } );
 
 	return (
 		<Fragment>
@@ -370,10 +383,6 @@ export const HelpPanel = ( props ) => {
 			</Section>
 		</Fragment>
 	);
-};
-
-HelpPanel.defaultProps = {
-	recordEvent,
 };
 
 export default compose(
