@@ -182,6 +182,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			}
 		}
 
+		echo 'Passed request thru: ', $url, PHP_EOL;
+
 		return $preempt;
 	}
 
