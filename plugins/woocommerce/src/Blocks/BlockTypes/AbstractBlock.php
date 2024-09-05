@@ -255,7 +255,8 @@ abstract class AbstractBlock {
 		if ( ! empty( $metadata_path ) ) {
 			register_block_type_from_metadata(
 				$metadata_path,
-				$block_settings
+				$block_settings,
+				$this->namespace . '/' . $this->block_name
 			);
 			return;
 		}
