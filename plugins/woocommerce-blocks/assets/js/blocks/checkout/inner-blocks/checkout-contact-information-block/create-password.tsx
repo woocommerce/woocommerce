@@ -6,7 +6,7 @@ import { useState } from '@wordpress/element';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
-import { PasswordStrengthMeter } from '@woocommerce/base-components/cart-checkout';
+import PasswordStrengthMeter from '@woocommerce/base-components/cart-checkout/password-strength-meter';
 
 const CreatePassword = () => {
 	const [ passwordStrength, setPasswordStrength ] = useState( 0 );

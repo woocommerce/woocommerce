@@ -4,9 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { useState, createInterpolateElement } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
+import PasswordStrengthMeter from '@woocommerce/base-components/cart-checkout/password-strength-meter';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
-import { PasswordStrengthMeter } from '@woocommerce/base-components/cart-checkout';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
