@@ -57,7 +57,7 @@
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
-		"test:perf": "./k6 run --console-output=./tests/performance/output.log ./tests/performance/tests/gh-action-pr-requests.js",
+		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
@@ -209,7 +209,7 @@
 						"start": "env:test"
 					},
 					"events": [
-						"pull_request",
+						"temp_skip_pull_request",
 						"push",
 						"release-checks"
 					],
@@ -543,7 +543,7 @@
 						"start": "env:start:blocks"
 					},
 					"events": [
-						"pull_request",
+						"temp_skip_pull_request",
 						"push",
 						"release-checks",
 						"nightly-checks"

@@ -40,7 +40,7 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
-import { checkResponse } from '../../utils';
+import { checkResponse } from '../../utils.js';
 
 export function checkoutGuest() {
 	let woocommerce_process_checkout_nonce_guest;

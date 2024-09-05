@@ -23,7 +23,7 @@ import {
 	commonGetRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
-import { checkResponse } from '../../utils';
+import { checkResponse } from '../../utils.js';
 
 export function categoryPage() {
 	let response;
