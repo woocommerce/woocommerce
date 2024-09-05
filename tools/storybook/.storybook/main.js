@@ -8,7 +8,7 @@ module.exports = {
 		'../../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)',
 		// WooCommerce Admin / @woocommerce/onboarding components
 		'../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)',
-		'../../../packages/js/product-editor/src/**/*.stories.@(js|tsx)',
+		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
 		'../../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)',
 	],
 
