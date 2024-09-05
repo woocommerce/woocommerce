@@ -74,7 +74,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "329f17097ce67074a915d7814b2363e8b9e908910c1f7b196c8f4fd8594cc55c",
+          "hash": "9bbd3555641a70a0d7c24c818323a9270e437a6446998de9a6506e0c2ed6ddf5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -1059,7 +1059,7 @@
           "menu_title": "DOM Events",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/dom-events.md",
-          "hash": "fbad20bc55cc569161e80478c0789db3c34cf35513e669554af36db1de967a26",
+          "hash": "59a4b49eb146774d33229bc60ab7d8f74381493f6e7089ca8f0e2d0eb433a7a4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/dom-events.md",
           "id": "c8d247b91472740075871e6b57a9583d893ac650"
         }
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "212688b70a2dd0e70819746e6ffc033bc2279cb5b7b6350f377bbc3bc28c080f"
+  "hash": "12e9abfbcdbeae7dd5cc12dc3af3818332f272cb4b3ad12993cc010299009013"
 }
