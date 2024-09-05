@@ -14,6 +14,7 @@ import type { BlockAttributes } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { ADMIN_URL } from '@woocommerce/settings';
+import { PlainPaymentMethods } from '@woocommerce/types';
 
 export const BlockSettings = ( {
 	attributes,
@@ -100,17 +101,29 @@ const ExpressPaymentToggle = ( {
 	return null;
 };
 
+const getMissingStyleSupport = ( supportsStyle: string[] ) => {
+	const supportedStyles = [ 'borderRadius', 'height' ];
+
+	if ( ! Array.isArray( supportsStyle ) ) {
+		return supportedStyles;
+	}
+
+	return supportedStyles.filter( ( s ) => ! supportsStyle.includes( s ) );
+};
+
 export const ExpressPaymentMethods = () => {
-	const expressMethods =
+	const availableExpressMethods =
 		select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods();
 
-	if ( Object.entries( expressMethods ).length < 1 ) {
-		<p className="wc-block-checkout__controls-text">
-			{ __(
-				'You currently have no express payment integrations active.',
-				'woocommerce'
-			) }
-		</p>;
+	if ( Object.entries( availableExpressMethods ).length < 1 ) {
+		return (
+			<p className="wc-block-checkout__controls-text">
+				{ __(
+					'You currently have no express payment integrations active.',
+					'woocommerce'
+				) }
+			</p>
+		);
 	}
 
 	return (
@@ -121,7 +134,15 @@ export const ExpressPaymentMethods = () => {
 					'woocommerce'
 				) }
 			</p>
-			{ Object.values( expressMethods ).map( ( values ) => {
+			{ Object.values( availableExpressMethods ).map( ( values ) => {
+				const missingStyleSupport = getMissingStyleSupport(
+					values?.supportsStyle
+				);
+				const warning =
+					missingStyleSupport.length > 0
+						? 'This button does not support controls for: ' +
+						  missingStyleSupport.join( ', ' ).trim()
+						: '';
 				return (
 					<ExternalLinkCard
 						key={ values.name }
@@ -130,6 +151,7 @@ export const ExpressPaymentMethods = () => {
 						) }` }
 						title={ values.title }
 						description={ values.description }
+						warning={ warning }
 					/>
 				);
 			} ) }

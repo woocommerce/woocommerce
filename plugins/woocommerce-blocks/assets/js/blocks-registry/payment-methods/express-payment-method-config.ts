@@ -40,6 +40,7 @@ export default class ExpressPaymentMethodConfig
 		this.paymentMethodId = config.paymentMethodId || this.name;
 		this.supports = {
 			features: config?.supports?.features || [ 'products' ],
+			style: config?.supports?.style || [],
 		};
 		this.canMakePaymentFromConfig = config.canMakePayment;
 	}
