@@ -7,7 +7,8 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { dispatch, useSelect } from '@wordpress/data';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Block, getBlockTypes } from '@wordpress/blocks';
+import { useLocalStorageState } from '@woocommerce/base-hooks';
+import { Block, getBlockTypes, createBlock } from '@wordpress/blocks';
 import {
 	ComboboxControl,
 	PanelBody,
@@ -27,7 +28,7 @@ import {
 import { sortOrderOptions } from '../constants';
 import { BlockAttributes, EditProps } from '../types';
 import { getAttributeFromId } from '../utils';
-import { replaceStyleBlock, getInnerBlockByName } from '../../../utils';
+import { getInnerBlockByName } from '../../../utils';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -47,7 +48,8 @@ export const Inspector = ( {
 		hideEmpty,
 		clearButton,
 	} = attributes;
-	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+	const { updateBlockAttributes, insertBlock, replaceBlock } =
+		dispatch( 'core/block-editor' );
 	const rootBlock = useSelect( ( select ) =>
 		select( 'core/block-editor' ).getBlock( clientId )
 	);
@@ -57,6 +59,11 @@ export const Inspector = ( {
 		},
 		[ clientId ]
 	);
+	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
+		useLocalStorageState< Record< string, unknown > >(
+			'product-filter-attribute',
+			{}
+		);
 
 	const filterHeadingBlock = getInnerBlockByName(
 		filterBlock,
@@ -167,8 +174,35 @@ export const Inspector = ( {
 						onChange={ (
 							value: BlockAttributes[ 'displayStyle' ]
 						) => {
+							if ( ! rootBlock ) return;
+							const currentStyleBlock = getInnerBlockByName(
+								rootBlock,
+								displayStyle
+							);
+
+							if ( currentStyleBlock ) {
+								setDisplayStyleBlocksAttributes( {
+									...displayStyleBlocksAttributes,
+									[ displayStyle ]:
+										currentStyleBlock.attributes,
+								} );
+								replaceBlock(
+									currentStyleBlock.clientId,
+									createBlock(
+										value,
+										displayStyleBlocksAttributes[ value ] ||
+											{}
+									)
+								);
+							} else {
+								insertBlock(
+									createBlock( value ),
+									rootBlock.innerBlocks.length,
+									rootBlock.clientId,
+									false
+								);
+							}
 							setAttributes( { displayStyle: value } );
-							replaceStyleBlock( rootBlock, displayStyle, value );
 						} }
 						style={ { width: '100%' } }
 					>

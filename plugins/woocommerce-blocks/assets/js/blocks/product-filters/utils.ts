@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockInstance, getBlockTypes, createBlock } from '@wordpress/blocks';
-import { dispatch } from '@wordpress/data';
+import { BlockInstance, getBlockTypes } from '@wordpress/blocks';
 
 /**
  * Returns an array of allowed block names excluding the disallowedBlocks array.
@@ -33,24 +32,4 @@ export const getInnerBlockByName = (
 	}
 
 	return null;
-};
-
-export const replaceStyleBlock = (
-	rootBlock: BlockInstance | null,
-	currentStyle: string,
-	newStyle: string
-) => {
-	if ( ! rootBlock ) return;
-	const { insertBlock, replaceBlock } = dispatch( 'core/block-editor' );
-	const currentStyleBlock = getInnerBlockByName( rootBlock, currentStyle );
-	if ( currentStyleBlock ) {
-		replaceBlock( currentStyleBlock.clientId, createBlock( newStyle ) );
-	} else {
-		insertBlock(
-			createBlock( newStyle ),
-			rootBlock.innerBlocks.length,
-			rootBlock.clientId,
-			false
-		);
-	}
 };
