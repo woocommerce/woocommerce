@@ -86,7 +86,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// in order to start the test in a clean state (without anything mocked).
 		wc_get_container()->get( LegacyProxy::class )->reset();
 
-		add_filter( 'woocommerce_get_geolocation', [ $this, 'intercept_woocommerce_get_geolocation' ], 10, 2 );
+		add_filter( 'woocommerce_get_geolocation', array( $this, 'intercept_woocommerce_get_geolocation' ), 10, 2 );
 	}
 
 	/**
@@ -97,7 +97,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter( 'woocommerce_get_geolocation', [ $this, 'intercept_woocommerce_get_geolocation' ], 10, 2 );
+		remove_filter( 'woocommerce_get_geolocation', array( $this, 'intercept_woocommerce_get_geolocation' ), 10, 2 );
 	}
 
 	/**
@@ -115,15 +115,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	/**
 	 * Intercept geolocation requests and return mock data.
 	 *
-	 * @param array $geolocation
+	 * @param array  $geolocation
 	 * @param string $ip_address
 	 *
 	 * @return array
 	 *
 	 * @since 9.3.0
 	 */
-	public function intercept_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array
-	{
+	public function intercept_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array {
 		return $geolocation;
 	}
 
@@ -145,8 +144,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Step 2: when loading product images, pick them from data-folder instead of network.
 		$url_file_extension = strtolower( pathinfo( $url_path, PATHINFO_EXTENSION ) );
 		if (
-			in_array( $url_file_extension, [ 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ], true ) &&
-			in_array( $url_domain, [ 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ], true )
+			in_array( $url_file_extension, array( 'jpg', 'jpeg', 'jpe', 'png', 'gif', 'webp' ), true ) &&
+			in_array( $url_domain, array( 'cldup.com', 'woocommerce.com', 'demo.woothemes.com' ), true )
 		) {
 			$local_image_file = realpath( __DIR__ . '/../data/images/' ) . '/' . $url_domain . '-' . pathinfo( $url_path, PATHINFO_BASENAME );
 			// Ensure we are getting the copy of images (so we can git-push them if product definitions getting updated).
@@ -156,21 +155,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// Place the product image into the expected location.
 			if ( file_exists( $local_image_file ) ) {
 				file_put_contents( $request['filename'], file_get_contents( $local_image_file ) );
-				return [
+				return array(
 					'body'     => '',
-					'response' => [ 'code' => WP_Http::OK ],
-				];
+					'response' => array( 'code' => WP_Http::OK ),
+				);
 			}
 		}
 
 		// Step 3: stub requests to certain domains.
-		$stubbed_domains = [ 'woocommerce.com', 'paypal.com', 'public-api.wordpress.com', 'api.wordpress.org' ];
+		$stubbed_domains = array( 'woocommerce.com', 'paypal.com', 'public-api.wordpress.com', 'api.wordpress.org' );
 		foreach ( $stubbed_domains as $domain ) {
 			if ( $domain === $url_domain || str_ends_with( $url_domain, '.' . $domain ) ) {
-				return [
+				return array(
 					'body'     => '',
-					'response' => [ 'code' => WP_Http::OK ],
-				];
+					'response' => array( 'code' => WP_Http::OK ),
+				);
 			}
 		}
 
