@@ -51,6 +51,27 @@ test.describe(
 				version: 'wc/v3',
 			} );
 
+			// make sure the store address is US
+			await api.post( 'settings/general/batch', {
+				update: [
+					{
+						id: 'woocommerce_store_address',
+						value: 'addr 1',
+					},
+					{
+						id: 'woocommerce_store_city',
+						value: 'San Francisco',
+					},
+					{
+						id: 'woocommerce_default_country',
+						value: 'US:CA',
+					},
+					{
+						id: 'woocommerce_store_postcode',
+						value: '94107',
+					},
+				],
+			} );
 			// make sure the currency is USD
 			await api.put( 'settings/general/woocommerce_currency', {
 				value: 'USD',

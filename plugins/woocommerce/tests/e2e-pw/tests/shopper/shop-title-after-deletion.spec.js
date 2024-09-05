@@ -8,6 +8,8 @@ test.describe(
 		test.use( { storageState: process.env.ADMINSTATE } );
 		test.beforeEach( async ( { page } ) => {
 			await page.goto( 'wp-admin/edit.php?post_type=page' );
+			await page.locator( 'input[name="s"]' ).fill( 'Shop' );
+			await page.locator( 'input[value="Search Pages"]' ).click();
 			await page.getByRole( 'cell', { name: '“Shop” (Edit)' } ).hover();
 			await page
 				.getByLabel( 'Move “Shop” to the Trash' )
