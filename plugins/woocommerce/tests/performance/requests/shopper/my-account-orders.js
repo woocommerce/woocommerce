@@ -17,6 +17,7 @@ import {
 	think_time_min,
 	think_time_max,
 	STORE_NAME,
+	FOOTER_TEXT,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -42,13 +43,11 @@ export function myAccountOrders() {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account' },
 		} );
-		checkResponse(
-			response,
-			200,
-			`My account – ${ STORE_NAME }`,
-			'From your account dashboard you can view',
-			'Built with WooCommerce'
-		);
+		checkResponse( response, 200, {
+			title: `My account – ${ STORE_NAME }`,
+			body: 'From your account dashboard you can view',
+			footer: FOOTER_TEXT,
+		} );
 	} );
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
@@ -67,13 +66,11 @@ export function myAccountOrders() {
 			tags: { name: 'Shopper - My Account Orders' },
 		} );
 
-		checkResponse(
-			response,
-			200,
-			`Orders – ${ STORE_NAME }`,
-			'>Orders</h1>',
-			'Built with WooCommerce'
-		);
+		checkResponse( response, 200, {
+			title: `Orders – ${ STORE_NAME }`,
+			body: '>Orders</h1>',
+			footer: FOOTER_TEXT,
+		} );
 
 		my_account_order_id = findBetween(
 			response.body,
@@ -100,13 +97,12 @@ export function myAccountOrders() {
 				tags: { name: 'Shopper - My Account Open Order' },
 			}
 		);
-		checkResponse(
-			response,
-			200,
-			`My account – ${ STORE_NAME }`,
-			my_account_order_id,
-			'Built with WooCommerce'
-		);
+
+		checkResponse( response, 200, {
+			title: `My account – ${ STORE_NAME }`,
+			body: my_account_order_id,
+			footer: FOOTER_TEXT,
+		} );
 	} );
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
