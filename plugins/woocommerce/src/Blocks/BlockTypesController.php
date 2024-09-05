@@ -146,12 +146,33 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
+		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
 		foreach ( $block_types as $block_type ) {
 			$block_type_class = __NAMESPACE__ . '\\BlockTypes\\' . $block_type;
 
 			new $block_type_class( $this->asset_api, $this->asset_data_registry, new IntegrationRegistry() );
+		}
+	}
+
+	public function register_block_metadata() {
+		$meta_file_path = WC_ABSPATH . '/assets/client/blocks/blocks-json.php';
+		if ( function_exists( 'wp_register_block_metadata' ) && file_exists( $meta_file_path ) ) {
+			$block_metadata = require $meta_file_path;
+			foreach ( $block_metadata as $full_block_name => $block_data ) {
+				$name_parts = explode( '/', $full_block_name, 2 );
+
+				if ( count( $name_parts ) > 1 ) {
+					$namespace = $name_parts[0];
+					$block_name = $name_parts[1];
+				} else {
+					$namespace = 'woocommerce';  // Fallback, don't expect to hit this
+					$block_name = $full_block_name;
+				}
+
+				wp_register_block_metadata( $namespace, $block_name, $block_data );
+			}
 		}
 	}
 
