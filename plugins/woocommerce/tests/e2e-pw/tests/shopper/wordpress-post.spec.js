@@ -6,7 +6,13 @@ const test = baseTest.extend( {
 
 test(
 	'logged-in customer can comment on a post',
-	{ tag: [ '@non-critical' ] },
+	{
+		tag: [
+			'@non-critical',
+			'@skip-on-default-wpcom',
+			'@skip-on-default-pressable',
+		],
+	},
 	async ( { page } ) => {
 		await page.goto( 'hello-world/' );
 		await expect(
