@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Product Elements send a JS event when user attempts to view a product
