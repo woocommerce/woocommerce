@@ -93,7 +93,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		wc_get_container()->get( LegacyProxy::class )->reset();
 
 		// Tests optimisation: bypass geolocation and mock network interactions.
-		add_filter( 'woocommerce_get_geolocation', array( $this, 'intercept_woocommerce_get_geolocation' ), 10, 2 );
+		add_filter( 'woocommerce_geolocate_ip', array( $this, 'intercept_woocommerce_geolocate_ip'), 10, 3 );
 		$this->mock_network_interactions = 'yes' === getenv( 'WOOCOMMERCE_TESTS_MOCK_NETWORK_INTERACTIONS' );
 	}
 
@@ -105,7 +105,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter( 'woocommerce_get_geolocation', array( $this, 'intercept_woocommerce_get_geolocation' ), 10, 2 );
+		remove_filter( 'woocommerce_geolocate_ip', array( $this, 'intercept_woocommerce_geolocate_ip'), 10, 3 );
 	}
 
 	/**
@@ -125,18 +125,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 *
 	 * @since 9.3.0
 	 *
-	 * @param array  $geolocation Geolocation data.
-	 * @param string $ip_address  IP address.
+	 * @param string $ip_address IP Address.
+	 * @param bool $fallback If true, fallbacks to alternative IP detection (can be slower).
+	 * @param bool $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public function intercept_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array {
-		return array(
-			'country'  => 'US',
-			'state'    => '',
-			'city'     => '',
-			'postcode' => '',
-		);
+	public function intercept_woocommerce_geolocate_ip( string $ip_address, bool $fallback, bool $api_fallback  ): string {
+		return 'US';
 	}
 
 	/**
