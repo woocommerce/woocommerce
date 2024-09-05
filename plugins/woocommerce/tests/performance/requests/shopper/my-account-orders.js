@@ -12,13 +12,19 @@ import {
 /**
  * Internal dependencies
  */
-import { base_url, think_time_min, think_time_max } from '../../config.js';
+import {
+	base_url,
+	think_time_min,
+	think_time_max,
+	STORE_NAME,
+} from '../../config.js';
 import {
 	htmlRequestHeader,
 	commonRequestHeaders,
 	commonGetRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils.js';
 
 export function myAccountOrders() {
 	let my_account_order_id;
@@ -36,20 +42,13 @@ export function myAccountOrders() {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': ( r ) =>
-				r.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
-			'body contains: my account welcome message': ( r ) =>
-				r.body.includes( 'From your account dashboard you can view' ),
-			'footer contains: Built with WooCommerce': ( r ) =>
-				r
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
-		} );
+		checkResponse(
+			response,
+			200,
+			`My account – ${ STORE_NAME }`,
+			'From your account dashboard you can view',
+			'Built with WooCommerce'
+		);
 	} );
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
@@ -67,20 +66,15 @@ export function myAccountOrders() {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account Orders' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "Orders – WooCommerce Core E2E Test Suite"': ( r ) =>
-				r.html().find( 'head title' ).text() ===
-				'Orders – WooCommerce Core E2E Test Suite',
-			"body contains: 'Orders' title": ( r ) =>
-				r.body.includes( '>Orders</h1>' ),
-			'footer contains: Built with WooCommerce': ( r ) =>
-				r
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
-		} );
+
+		checkResponse(
+			response,
+			200,
+			`Orders – ${ STORE_NAME }`,
+			'>Orders</h1>',
+			'Built with WooCommerce'
+		);
+
 		my_account_order_id = findBetween(
 			response.body,
 			'my-account/view-order/',
@@ -106,20 +100,13 @@ export function myAccountOrders() {
 				tags: { name: 'Shopper - My Account Open Order' },
 			}
 		);
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': ( r ) =>
-				r.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
-			"body contains: 'Order number' title": ( r ) =>
-				r.body.includes( `${ my_account_order_id }</h1>` ),
-			'footer contains: Built with WooCommerce': ( r ) =>
-				r
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
-		} );
+		checkResponse(
+			response,
+			200,
+			`My account – ${ STORE_NAME }`,
+			my_account_order_id,
+			'Built with WooCommerce'
+		);
 	} );
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
