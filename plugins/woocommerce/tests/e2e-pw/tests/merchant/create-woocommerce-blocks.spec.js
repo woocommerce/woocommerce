@@ -52,7 +52,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Add WooCommerce Blocks Into Page',
-	{ tag: [ '@gutenberg', '@services' ] },
+	{ tag: [ '@gutenberg', '@services', '@skip-on-default-pressable' ] },
 	() => {
 		test.beforeAll( async ( { api } ) => {
 			// add product attribute

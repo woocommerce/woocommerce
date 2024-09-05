@@ -45,6 +45,7 @@ const goToPageEditor = async ( { page } ) => {
 	);
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 	await disableWelcomeModal( { page } );
+	await closeChoosePatternModal( { page } );
 	await responsePromise;
 };
 

@@ -109,24 +109,24 @@ class WC_Admin_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit
 	 * When it uses DotNotation to select 'teams'
 	 * When it uses ArrayColumn to select 'members' in 'teams'
 	 * When it uses ArrayFlatten to flatten 'members'
-	 * When it uses ArraySearch to select 'mothra-member'
-	 * Then 'mothra-member' should be returned.
+	 * When it uses ArraySearch to select 'team-a'
+	 * Then 'team-a-member' should be returned.
 	 */
 	public function test_it_returns_transformed_value() {
 		// Given.
 		$items = array(
 			'teams' => array(
 				array(
-					'name'    => 'mothra',
-					'members' => array( 'mothra-member' ),
+					'name'    => 'team-a',
+					'members' => array( 'team-a-member' ),
 				),
 				array(
-					'name'    => 'gezora',
-					'members' => array( 'gezora-member' ),
+					'name'    => 'team-b',
+					'members' => array( 'team-b-member' ),
 				),
 				array(
-					'name'    => 'ghidorah',
-					'members' => array( 'ghidorah-member' ),
+					'name'    => 'team-c',
+					'members' => array( 'team-c-member' ),
 				),
 			),
 		);
@@ -135,12 +135,12 @@ class WC_Admin_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit
 		$dot_notation  = $this->transformer_config( 'dot_notation', array( 'path' => 'teams' ) );
 		$array_column  = $this->transformer_config( 'array_column', array( 'key' => 'members' ) );
 		$array_flatten = $this->transformer_config( 'array_flatten' );
-		$array_search  = $this->transformer_config( 'array_search', array( 'value' => 'mothra-member' ) );
+		$array_search  = $this->transformer_config( 'array_search', array( 'value' => 'team-a-member' ) );
 
 		$result = TransformerService::apply( $items, array( $dot_notation, $array_column, $array_flatten, $array_search ), false, null );
 
 		// Then.
-		$this->assertEquals( 'mothra-member', $result );
+		$this->assertEquals( 'team-a-member', $result );
 	}
 
 	/**
