@@ -352,6 +352,7 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 	 * @return mixed A response, or false.
 	 */
 	public function http_request_listner( $preempt, $request, $url ) {
+		echo 'Passed request thru: ', $url, PHP_EOL;
 		// TODO: not a great approach, to be revisited.
 		return WP_HTTP_TestCase::http_request_listner( $preempt, $request, $url );
 	}
