@@ -233,8 +233,6 @@ export const useProductCollectionUIState = ( {
 		[ productId ]
 	);
 
-	console.log( 'hasResolved', hasResolved );
-
 	const productCollectionUIStateInEditor = useMemo( () => {
 		const isInRequiredLocation = usesReference?.includes( location.type );
 		const isCollectionSelected = !! attributes.collection;
@@ -254,7 +252,7 @@ export const useProductCollectionUIState = ( {
 			return ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER;
 		}
 
-		// Case 2: Check if product reference is deleted
+		// Case 2: Deleted product reference
 		if (
 			isCollectionSelected &&
 			isProductContextRequired &&
