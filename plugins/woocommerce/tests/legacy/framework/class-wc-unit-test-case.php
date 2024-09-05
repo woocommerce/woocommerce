@@ -115,12 +115,12 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	/**
 	 * Intercept geolocation requests and return mock data.
 	 *
+	 * @since 9.3.0
+	 *
 	 * @param array  $geolocation Geolocation data.
 	 * @param string $ip_address  IP address.
 	 *
 	 * @return array
-	 *
-	 * @since 9.3.0
 	 */
 	public function intercept_woocommerce_get_geolocation( array $geolocation, string $ip_address ): array {
 		return $geolocation;
