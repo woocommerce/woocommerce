@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -41,7 +40,6 @@ import {
 } from '../../headers.js';
 
 export function checkoutGuest() {
-	let response;
 	let woocommerce_process_checkout_nonce_guest;
 	let update_order_review_nonce_guest;
 
@@ -54,23 +52,19 @@ export function checkoutGuest() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/checkout`, {
+		const response = http.get( `${ base_url }/checkout`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - View Checkout' },
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
+			'title is: "Checkout – WooCommerce Core E2E Test Suite"': ( r ) =>
+				r.html().find( 'head title' ).text() ===
 				'Checkout – WooCommerce Core E2E Test Suite',
-			"body contains: 'woocommerce-checkout' class": ( response ) =>
-				response.body.includes(
-					'class="checkout woocommerce-checkout"'
-				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
+			"body contains: 'woocommerce-checkout' class": ( r ) =>
+				r.body.includes( 'class="checkout woocommerce-checkout"' ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r
 					.html()
 					.find( 'body footer' )
 					.text()
@@ -97,7 +91,7 @@ export function checkoutGuest() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const updateResponse = http.post(
 			`${ base_url }/?wc-ajax=update_order_review`,
 			{
 				security: `${ update_order_review_nonce_guest }`,
@@ -121,7 +115,7 @@ export function checkoutGuest() {
 				tags: { name: 'Shopper - wc-ajax=update_order_review' },
 			}
 		);
-		check( response, {
+		check( updateResponse, {
 			'is status 200': ( r ) => r.status === 200,
 		} );
 	} );
@@ -137,7 +131,7 @@ export function checkoutGuest() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/?wc-ajax=checkout`,
 			{
 				billing_first_name: `${ addresses_guest_billing_first_name }`,
@@ -163,8 +157,8 @@ export function checkoutGuest() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: order-received': ( response ) =>
-				response.body.includes( 'order-received' ),
+			'body contains: order-received': ( r ) =>
+				r.body.includes( 'order-received' ),
 		} );
 	} );
 
@@ -179,24 +173,21 @@ export function checkoutGuest() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/checkout/order-received/`, {
+		const response = http.get( `${ base_url }/checkout/order-received/`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - Order Received' },
 		} );
 		check( response, {
 			'title is: "Order received – WooCommerce Core E2E Test Suite"': (
-				response
+				r
 			) =>
-				response.html().find( 'head title' ).text() ===
+				r.html().find( 'head title' ).text() ===
 				'Order received – WooCommerce Core E2E Test Suite',
 			"body contains: 'Thank you. Your order has been received.'": (
-				response
-			) =>
-				response.body.includes(
-					'Thank you. Your order has been received.'
-				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
+				r
+			) => r.body.includes( 'Thank you. Your order has been received.' ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r
 					.html()
 					.find( 'body footer' )
 					.text()
@@ -211,14 +202,14 @@ export function checkoutGuest() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const refreshResponse = http.post(
 			`${ base_url }/?wc-ajax=get_refreshed_fragments`,
 			{
 				headers: requestHeadersPost,
 				tags: { name: 'Shopper - wc-ajax=get_refreshed_fragments' },
 			}
 		);
-		check( response, {
+		check( refreshResponse, {
 			'is status 200': ( r ) => r.status === 200,
 		} );
 	} );
