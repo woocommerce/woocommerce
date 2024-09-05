@@ -17,11 +17,18 @@ const glob = require( 'glob' );
 const json2php = require( 'json2php' );
 
 const blocksDir = path.join( __dirname, '../assets/js/blocks' );
+const blocksDir2 = path.join( __dirname, '../../woocommerce/assets/client/blocks' );
 const outputFile = path.join( __dirname, '../build/blocks-json.php' );
 
 const blocks = {};
 
-glob.sync( `${ blocksDir }/**/block.json` ).forEach( ( file ) => {
+const globSync = glob.sync;
+const blockMetadataFiles = [
+	...globSync( `${ blocksDir }/**/block.json` ),
+	...globSync( `${ blocksDir2 }/**/block.json` ),
+];
+
+blockMetadataFiles.forEach( ( file ) => {
 	const blockJson = JSON.parse( fs.readFileSync( file, 'utf8' ) );
 	blocks[ blockJson.name ] = blockJson;
 } );

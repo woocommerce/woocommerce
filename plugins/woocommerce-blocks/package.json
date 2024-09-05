@@ -402,6 +402,7 @@
 			"command": "node ./bin/blocks-json-to-php.js",
 			"files": [
 				"assets/js/blocks/**/block.json",
+				"../woocommerce/assets/client/blocks/**/block.json",
 				"bin/blocks-json-to-php.js"
 			],
 			"output": [
