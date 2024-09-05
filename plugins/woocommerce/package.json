@@ -209,7 +209,7 @@
 						"start": "env:test"
 					},
 					"events": [
-						"temp_skip_pull_request",
+						"pull_request",
 						"push",
 						"release-checks"
 					],
@@ -490,7 +490,6 @@
 						"start": "env:perf"
 					},
 					"events": [
-						"pull_request",
 						"push"
 					]
 				},
@@ -543,7 +542,7 @@
 						"start": "env:start:blocks"
 					},
 					"events": [
-						"temp_skip_pull_request",
+						"pull_request",
 						"push",
 						"release-checks",
 						"nightly-checks"
