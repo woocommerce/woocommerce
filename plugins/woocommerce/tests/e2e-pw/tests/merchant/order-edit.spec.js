@@ -255,7 +255,7 @@ test.describe( 'Edit order', { tag: [ '@services', '@hpos' ] }, () => {
 
 	test( 'can load billing and shipping details', async ( { page } ) => {
 		// Open our test order and select the customer we just created.
-		await test.step( ' Open our test order and select the customer we just created.', async () => {
+		await test.step( 'Open our test order and select the customer we just created.', async () => {
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
 			);
