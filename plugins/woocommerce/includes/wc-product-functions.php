@@ -1821,14 +1821,45 @@ function wc_create_external_media_attachment( $image_url, $parent_post_id = null
 
 	$attach_id = wp_insert_attachment( $attachment, '', $parent_post_id );
 
-	// TODO: Add metadata to the attachment.
-	$attach_data = array(
-		'width'             => 0,
-		'height'            => 0,
-		'file'              => $image_url,
-		'_wp_attached_file' => $image_url,
-	);
+	// TODO: Investigate how much resource this consumes.
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	$attach_data = wp_generate_attachment_metadata( $attach_id, $image_url );
 	wp_update_attachment_metadata( $attach_id, $attach_data );
+	update_post_meta( $attach_id, 'wc_external_image', true );
+	update_post_meta( $attach_id, '_wp_attached_file', $image_url );
 
 	return $attach_id;
 }
+
+/**
+ * Replace the uploads URL with the external image URL.
+ *
+ * @since 9.4.0
+ * @param string $url The URL of the image.
+ * @param int    $post_id The ID of the post.
+ * @return string
+ */
+function replace_uploads_url( $url, $post_id ) {
+	$is_external_image = get_post_meta( $post_id, 'wc_external_image', true );
+	if ( ! $is_external_image ) {
+		return $url;
+	}
+
+	$uploads_dir = wp_upload_dir();
+	$base_url    = $uploads_dir['baseurl'];
+
+	// Check if the URL starts with the uploads directory.
+	if ( strpos( $url, $base_url ) === 0 ) {
+		// Remove the uploads directory part.
+		$relative_path = substr( $url, strlen( $base_url ) + 1 );
+
+		// Check if the remaining path starts with 'https://' or 'http://'.
+		if ( preg_match( '#^https?://#', $relative_path) ) {
+			return $relative_path;
+		}
+	}
+
+	return $url;
+}
+
+add_filter( 'wp_get_attachment_url', 'replace_uploads_url', 10, 2 );
