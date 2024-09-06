@@ -226,7 +226,7 @@ class Api {
 				'version'      => ! empty( $asset['version'] ) ? $asset['version'] : $this->get_file_version( $relative_src ),
 				'dependencies' => ! empty( $asset['dependencies'] ) ? $asset['dependencies'] : [],
 			);
-			$this->script_data_modified = true;
+			$this->script_data_modified         = true;
 		}
 
 		// Return asset details as well as the requested dependencies array.
