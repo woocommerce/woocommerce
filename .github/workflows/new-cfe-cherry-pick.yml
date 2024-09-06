@@ -4,23 +4,11 @@ on:
         types: [closed]
     workflow_dispatch:
         inputs:
-            # release_branch:
-            #     description: Provide the release branch you want to cherry pick into. Example release/6.9
-            #     default: ''
-            #     required: true
-            # pull_requests:
-            #     description: The pull request number.
-            #     default: ''
-            #     required: true
-            # skipSlackPing:
-            #     description: 'Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)'
-            #     type: boolean
-            #     required: false
-            #     default: false
-            # slackChannelOverride:
-            #     description: 'Slack Channel Override: The channel ID to send the Slack ping about the code freeze violation'
-            #     required: false
-            #     default: ''
+            skipSlackPing:
+                description: 'Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)'
+                type: boolean
+                required: false
+                default: false
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -181,6 +169,7 @@ jobs:
                       })
 
                       core.setOutput( 'cherry-pick-pr', pr.data.html_url )
+                      console.log( 'cherry-pick-pr URL:', pr.data.html_url )
 
                       // label PR
 
@@ -191,27 +180,26 @@ jobs:
                         labels: ["metric: code freeze exception"],
                       });
 
-            # - name: Notify Slack on failure
-            #   if: ${{ failure() && inputs.skipSlackPing != true }}
-            #   uses: archive/github-actions-slack@v2.0.0
-            #   with:
-            #       slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-            #       slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
-            #       slack-text: |
-            #           :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
+            - name: Notify Slack on failure
+              if: ${{ failure() && inputs.skipSlackPing != true }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+                  slack-text: |
+                      :warning-8c: CFE cherry pick failed for '${{ needs.prep.outputs.release }}'
 
-            #           An attempt to cherry pick PR(s) into outgoing release '${{ needs.prep.outputs.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
+                      An attempt to cherry pick PR(s) into outgoing trunk for '${{ needs.prep.outputs.release }}' has failed. This could be due to a merge conflict or something else that requires manual attention. Please check: https://github.com/woocommerce/woocommerce/pull/${{ needs.prep.outputs.pr }}
 
-            # - name: Notify Slack on success
-            #   if: ${{ success() && inputs.skipSlackPing != true }}
-            #   uses: archive/github-actions-slack@v2.0.0
-            #   with:
-            #       slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-            #       slack-channel: ${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
-            #       slack-text: |
-            #           :warning-8c: Code freeze violation. PR(s) created that breaks the Code Freeze for '${{ needs.prep.outputs.release }}' :ice_cube:
+            - name: Notify Slack on success
+              if: ${{ success() && inputs.skipSlackPing != true }}
+              uses: archive/github-actions-slack@v2.0.0
+              with:
+                  slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+                  slack-text: |
+                      :info: CFE cherry pick succeeded for '${{ needs.prep.outputs.release }}'
 
-            #           Release lead please review:
+                      Please merge the following PR :pr: into trunk:
 
-            #           ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}
-            #           ${{ steps.deletion-pr.outputs.deletion-pr }}
+                      ${{ steps.cherry-pick-pr.outputs.cherry-pick-pr }}
