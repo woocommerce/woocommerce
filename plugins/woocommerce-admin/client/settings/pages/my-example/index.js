@@ -9,8 +9,8 @@ import { useSettingsLocation } from '../../routes';
 import { getNewPath } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 
-export const MyExample = () => {
-	const { section } = useSettingsLocation();
+export const MyExample = ( { section } ) => {
+	// const { section } = useSettingsLocation();
 	return (
 		<>
 			<h2>My Example: { section }</h2>

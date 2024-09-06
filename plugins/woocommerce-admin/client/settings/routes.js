@@ -20,8 +20,8 @@ export const useSettingsLocation = () => {
 	return { ...otherQueryParams, section, page };
 };
 
-export const getRoute = () => {
-	const { section, page } = useSettingsLocation();
+export const getRoute = ( section ) => {
+	const { page } = useSettingsLocation();
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const sections = settingsData[ page ]?.sections;
 	const contentData =
@@ -67,7 +67,7 @@ export const getRoute = () => {
 			{
 				page: 'my-example',
 				areas: {
-					content: <MyExample />,
+					content: <MyExample section={ section } />,
 					edit: <MyExampleEdit />,
 				},
 				widths: {

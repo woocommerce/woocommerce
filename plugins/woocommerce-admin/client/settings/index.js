@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getQuery, getNewPath } from '@woocommerce/navigation';
+import { getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import { Icon, chevronLeft } from '@wordpress/icons';
 import { useEffect } from '@wordpress/element';
@@ -55,12 +55,12 @@ const removeSettingsScripts = ( scripts ) => {
 	} );
 };
 
-const Settings = ( { params } ) => {
+const Settings = ( { params, query } ) => {
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const { page } = params;
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const title = settingsData[ page ]?.label;
-	const { section } = getQuery();
+	const { section } = query;
 
 	// Be sure to render Settings slots when the params change.
 	useEffect( () => {
@@ -85,7 +85,7 @@ const Settings = ( { params } ) => {
 		return <div>Error getting data</div>;
 	}
 
-	const { areas, widths } = getRoute();
+	const { areas, widths } = getRoute( section );
 	const { quickEdit } = useSettingsLocation();
 	const showEditArea = quickEdit === 'true';
 
