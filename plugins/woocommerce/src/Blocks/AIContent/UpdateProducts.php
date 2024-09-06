@@ -194,6 +194,8 @@ class UpdateProducts {
 	public function create_new_product( $product_data ) {
 		$product          = new \WC_Product();
 		$image_src        = $product->get_external_product_image_url( $product_data['image'] );
+
+		// TODO: Add a scheduled action to replace/update these images with ones that have been correctly uploaded.
 		$product_image_id = $this->add_external_product_image( $product->get_id(), $image_src );
 
 		$saved_product = $this->product_update( $product, $product_image_id, $product_data['title'], $product_data['description'], $product_data['price'] );
