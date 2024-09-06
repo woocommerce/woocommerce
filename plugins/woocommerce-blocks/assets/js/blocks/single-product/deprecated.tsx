@@ -3,7 +3,13 @@
  */
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
+/**
+ * Internal dependencies
+ */
+import metadata from './block.json';
+
 const v1 = {
+	attributes: metadata.attributes,
 	save: () => {
 		const blockProps = useBlockProps.save();
 
