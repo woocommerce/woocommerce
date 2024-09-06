@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
-use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Package as TestedPackage;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
