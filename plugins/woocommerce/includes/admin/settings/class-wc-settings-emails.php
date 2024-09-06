@@ -428,17 +428,12 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				<br>
 				<label for="email_type">Email type:</label><br>
 				<select id="email_type" style="width:100%;">
-					<option value="WC_Email_New_Order">New Order</option>
-					<option value="WC_Email_Cancelled_Order">Cancelled Order</option>
-					<option value="WC_Email_Failed_Order">Failed Order</option>
-					<option value="WC_Email_Customer_On_Hold_Order">Customer On Hold Order</option>
-					<option value="WC_Email_Customer_Processing_Order">Customer Processing Order</option>
-					<option value="WC_Email_Customer_Completed_Order">Customer Completed Order</option>
-					<option value="WC_Email_Customer_Refunded_Order">Customer Refunded Order</option>
-					<option value="WC_Email_Customer_Invoice">Customer Invoice</option>
-					<option value="WC_Email_Customer_Note">Customer Note</option>
-					<option value="WC_Email_Customer_Reset_Password">Customer Reset Password</option>
-					<option value="WC_Email_Customer_New_Account">Customer New Account</option>
+					<?php
+					$emails = WC()->mailer()->get_emails();
+					foreach ($emails as $type => $email) {
+						echo '<option value="' . esc_attr($type) . '">' . esc_html($email->get_title()) . '</option>';
+					}
+					?>
 				</select>
 			</th>
 			<td>
