@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
@@ -190,12 +192,10 @@ class UpdateProducts {
 	 * @return bool|int|\WP_Error
 	 */
 	public function create_new_product( $product_data ) {
-		$product          = new \WC_Product();
-		$image_src        = plugins_url( $product_data['image'], dirname( __DIR__, 2 ) );
-		$image_alt        = $product_data['title'];
-		$product_image_id = $this->product_image_upload( $product->get_id(), $image_src, $image_alt );
+		$product = new \WC_Product();
 
-		$saved_product = $this->product_update( $product, $product_image_id, $product_data['title'], $product_data['description'], $product_data['price'] );
+		// TODO: Schedule an action to upload this image to the media library.
+		$saved_product = $this->product_update( $product, $product_data['image'], $product_data['title'], $product_data['description'], $product_data['price'] );
 
 		if ( is_wp_error( $saved_product ) ) {
 			return $saved_product;
@@ -474,26 +474,25 @@ class UpdateProducts {
 	 * Update the product with the new content.
 	 *
 	 * @param \WC_Product $product The product.
-	 * @param int         $product_image_id The product image ID.
+	 * @param string      $image_src The product image source.
 	 * @param string      $product_title The product title.
 	 * @param string      $product_description The product description.
 	 * @param int         $product_price The product price.
 	 *
 	 * @return int|\WP_Error
 	 */
-	private function product_update( $product, $product_image_id, $product_title, $product_description, $product_price ) {
+	private function product_update( $product, $image_src, $product_title, $product_description, $product_price ) {
 		if ( ! $product instanceof \WC_Product ) {
 			return new WP_Error( 'invalid_product', __( 'Invalid product.', 'woocommerce' ) );
 		}
 
-		if ( ! is_wp_error( $product_image_id ) ) {
-			$product->set_image_id( $product_image_id );
+		if ( '' !== $image_src ) {
+			$product->add_meta_data( '_headstart_product_image', $image_src );
 		} else {
 			wc_get_logger()->warning(
 				sprintf(
 					// translators: %s is a generated error message.
-					__( 'The image upload failed: "%s", creating the product without image', 'woocommerce' ),
-					$product_image_id->get_error_message()
+					__( 'The image upload failed: creating the product without image', 'woocommerce' )
 				),
 			);
 		}

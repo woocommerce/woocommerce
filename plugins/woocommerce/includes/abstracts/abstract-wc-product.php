@@ -2027,6 +2027,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			}
 		}
 
+		$external_image_url = get_post_meta( $this->get_id(), '_headstart_product_image', true );
+
+		if ( ! $image && $external_image_url ) {
+			$image = $this->get_external_image( $external_image_url, $size, $attr );
+		}
+
 		if ( ! $image && $placeholder ) {
 			$image = wc_placeholder_img( $size, $attr );
 		}
@@ -2197,5 +2203,50 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$class = 'in-stock';
 		}
 		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
+	}
+
+	/**
+	 * Get HTML for the product's external image
+	 *
+	 * @param  string $image_src is the image source.
+	 * @param  string $size is the image size.
+	 * @param  array  $attr is the image attributes.
+	 * @return string
+	 */
+	public function get_external_image( $image_src, $size = 'woocommerce_thumbnail', $attr ) {
+		$dimensions   = wc_get_image_size( $size );
+		$default_attr = array(
+			'class' => 'woocommerce-external-image wp-post-image',
+			'alt'   => __( 'External Image', 'woocommerce' ),
+		);
+		$attr         = wp_parse_args( $attr, $default_attr );
+		$image        = $this->get_external_product_image_url( $image_src );
+		$hwstring     = image_hwstring( $dimensions['width'], $dimensions['height'] );
+		$attributes   = array();
+
+		foreach ( $attr as $name => $value ) {
+			$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
+		}
+
+		$image_html = '<img src="' . esc_url( $image ) . '" ' . $hwstring . implode( ' ', $attributes ) . '/>';
+
+		return $image_html;
+	}
+
+	/**
+	 * Return the external image URL.
+	 *
+	 * @param string $image_src The image source.
+	 *
+	 * @return string
+	 */
+	public function get_external_product_image_url( $image_src ) {
+		$external_image_url = '';
+
+		if ( ! empty( $image_src ) ) {
+			$external_image_url = 'https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/plugins/woocommerce/' . $image_src . '?raw=true';
+		}
+
+		return $external_image_url;
 	}
 }
