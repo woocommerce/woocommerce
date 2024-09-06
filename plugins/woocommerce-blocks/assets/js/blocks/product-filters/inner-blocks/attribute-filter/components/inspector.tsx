@@ -5,9 +5,8 @@ import { getSetting } from '@woocommerce/settings';
 import { AttributeSetting } from '@woocommerce/types';
 import { InspectorControls } from '@wordpress/block-editor';
 import { dispatch, useSelect } from '@wordpress/data';
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useLocalStorageState } from '@woocommerce/base-hooks';
 import { Block, getBlockTypes, createBlock } from '@wordpress/blocks';
 import {
 	ComboboxControl,
@@ -60,10 +59,7 @@ export const Inspector = ( {
 		[ clientId ]
 	);
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
-		useLocalStorageState< Record< string, unknown > >(
-			'product-filter-attribute',
-			{}
-		);
+		useState< Record< string, unknown > >( {} );
 
 	const filterHeadingBlock = getInnerBlockByName(
 		filterBlock,
