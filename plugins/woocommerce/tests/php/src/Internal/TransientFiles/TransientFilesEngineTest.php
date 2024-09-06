@@ -263,7 +263,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 		$fake_wp_filesystem = new class() {
 			public $created_files = array();
 
-			public function put_contents( string $file, string $contents, $mode = false ): bool {
+			public function put_contents( string $file, string $contents, $mode = false ): int {
 				$this->created_files[ $file ] = $contents;
 				return strlen( $contents );
 			}
