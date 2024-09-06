@@ -23,6 +23,8 @@ test.describe(
 			await page.goto(
 				'wp-admin/edit.php?post_status=trash&post_type=page'
 			);
+			await page.locator( 'input[name="s"]' ).fill( 'Shop' );
+			await page.locator( 'input[value="Search Pages"]' ).click();
 			await page
 				.getByRole( 'cell', { name: 'Shop — Shop Page Restore “' } )
 				.hover();
