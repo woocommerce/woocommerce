@@ -263,13 +263,20 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	 *
 	 * @param array $orderby_enum An array of orderby enum options.
 	 *
-	 * @return array An array of orderby enum options.
+	 * @return array An array of filtered orderby enum options.
 	 *
 	 * @since 9.4.0
 	 */
 	protected function apply_custom_orderby_filters( $orderby_enum ) {
 		/**
 		 * Filter orderby query parameter enum.
+		 *
+		 * There was an initial concern about potential SQL injection with the custom orderby.
+		 * However, testing shows it is safely blocked by validation in the controller,
+		 * which results in an "Invalid parameter(s): orderby" error.
+		 *
+		 * Additionally, it's the responsibility of the merchant/developer to ensure the custom orderby is valid,
+		 * or a WordPress database error will occur for unknown columns.
 		 *
 		 * @since 9.4.0
 		 *
