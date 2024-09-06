@@ -31,7 +31,7 @@ export const useGetRoute = ( section ) => {
 			: sections[ section || '' ];
 
 	useEffect( () => {
-		const uniqueNamespaceIdentifier = `woocommerce_${ new Date().getTime() }`; // unique key for namespace
+		const namespaceIdentifier = `woocommerce_settings_hook_${ page }_${ section }`; // unique key for namespace
 		const newPage = {
 			page: 'my-example',
 			areas: {
@@ -45,18 +45,18 @@ export const useGetRoute = ( section ) => {
 		};
 		addFilter(
 			'woocommerce_admin_settings_pages',
-			uniqueNamespaceIdentifier,
+			namespaceIdentifier,
 			( pages ) => {
-				console.log( 'adding filter as it was not found', pages );
+				console.log( 'adding filter to', pages );
 				return [ ...pages, newPage ];
 			}
 		);
 		return () =>
 			removeFilter(
 				'woocommerce_admin_settings_pages',
-				uniqueNamespaceIdentifier
+				namespaceIdentifier
 			);
-	}, [ section ] );
+	}, [ page, section ] );
 
 	if ( ! Object.keys( settingsData ).includes( page ) ) {
 		return {
