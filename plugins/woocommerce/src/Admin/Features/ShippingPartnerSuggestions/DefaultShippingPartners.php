@@ -316,19 +316,10 @@ class DefaultShippingPartners {
 	 * @return object Rules to match.
 	 */
 	public static function get_rules_for_countries( $countries ) {
-		$rules = array();
-
-		foreach ( $countries as $country ) {
-			$rules[] = (object) array(
-				'type'      => 'base_location_country',
-				'value'     => $country,
-				'operation' => '=',
-			);
-		}
-
 		return (object) array(
-			'type'     => 'or',
-			'operands' => $rules,
+			'type'      => 'base_location_country',
+			'operation' => 'in',
+			'value'     => $countries,
 		);
 	}
 }
