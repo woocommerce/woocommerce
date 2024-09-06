@@ -18,7 +18,5 @@ export const MiniCartContentsBlock = (
 ): JSX.Element => {
 	const { children } = props;
 
-	console.log( 'MiniCartContentsBlock', children );
-
 	return <CartEventsProvider>{ children }</CartEventsProvider>;
 };
