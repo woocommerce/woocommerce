@@ -1,10 +1,10 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
-use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 
 /**
@@ -206,7 +206,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 				$term             = (array) $term;
 				$term['count']    = $attribute_counts[ $term['term_id'] ];
 				$term['selected'] = in_array( $term['slug'], $selected_terms, true );
-				// return $term;
 				return array(
 					'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
 					'value'    => $term['slug'],

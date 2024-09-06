@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
@@ -12,6 +14,26 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-filter-checkbox-list';
+
+
+	/**
+	 * Get the color value from the color attributes.
+	 *
+	 * @param string $key        The key of the color attribute.
+	 * @param array  $attributes The block attributes.
+	 * @return string
+	 */
+	private function get_color_attribute_value( $key, $attributes ) {
+		if ( $attributes[ $key ] ) {
+			return $attributes[ $key ];
+		}
+
+		if ( $attributes[ 'custom' . ucfirst( $key ) ] ) {
+			return $attributes[ 'custom' . ucfirst( $key ) ];
+		}
+
+		return '';
+	}
 
 	/**
 	 * Render the block.
@@ -29,16 +51,16 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 		$classes = array(
-			'has-option-element-border-color'   => $attributes['optionElementBorder'] ?: $attributes['customOptionElementBorder'],
-			'has-option-element-selected-color' => $attributes['optionElementSelected'] ?: $attributes['customOptionElementSelected'],
-			'has-option-element-color'          => $attributes['optionElement'] ?: $attributes['customOptionElement'],
+			'has-option-element-border-color'   => $this->get_color_attribute_value( 'optionElementBorder', $attributes ),
+			'has-option-element-selected-color' => $this->get_color_attribute_value( 'optionElementSelected', $attributes ),
+			'has-option-element-color'          => $this->get_color_attribute_value( 'optionElement', $attributes ),
 		);
 		$classes = array_filter( $classes );
 
 		$styles = array(
-			'--wc-product-filter-checkbox-list-option-element-border' => $attributes['optionElementBorder'] ?: $attributes['customOptionElementBorder'],
-			'--wc-product-filter-checkbox-list-option-element-selected' => $attributes['optionElementSelected'] ?: $attributes['customOptionElementSelected'],
-			'--wc-product-filter-checkbox-list-option-element' => $attributes['optionElement'] ?: $attributes['customOptionElement'],
+			'--wc-product-filter-checkbox-list-option-element-border' => $this->get_color_attribute_value( 'optionElementBorder', $attributes ),
+			'--wc-product-filter-checkbox-list-option-element-selected' => $this->get_color_attribute_value( 'optionElementSelected', $attributes ),
+			'--wc-product-filter-checkbox-list-option-element' => $this->get_color_attribute_value( 'optionElement', $attributes ),
 		);
 		$style  = array_reduce(
 			array_keys( $styles ),
