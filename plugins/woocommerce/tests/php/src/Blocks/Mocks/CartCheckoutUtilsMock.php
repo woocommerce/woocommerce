@@ -12,9 +12,9 @@ class CartCheckoutUtilsMock extends CartCheckoutUtils {
 	/**
 	 * Protected test wrapper for deep_sort_with_accents.
 	 *
-	 * @param array $array The array we want to sort.
+	 * @param array $array_to_sort The array we want to sort.
 	 */
-	public static function deep_sort_test( $array ) {
-		return self::deep_sort_with_accents( $array );
+	public static function deep_sort_test( $array_to_sort ) {
+		return self::deep_sort_with_accents( $array_to_sort );
 	}
 }

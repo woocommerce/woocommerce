@@ -25,10 +25,6 @@ class TotalsMock extends Totals {
 		);
 	}
 
-	public function render_content( $order, $permission = false, $attributes = [], $content = '' ) {
-		return parent::render_content( $order, $permission, $attributes, $content );
-	}
-
 	/**
 	 * For now don't need to initialize anything in tests so let's
 	 * just override the default behaviour.
