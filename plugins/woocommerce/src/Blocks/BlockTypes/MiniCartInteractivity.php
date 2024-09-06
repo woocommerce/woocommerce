@@ -470,9 +470,9 @@ class MiniCartInteractivity extends AbstractBlock {
 	protected function get_template_part_contents_container( $template_contents ) {
 		ob_start();
 		?>
-		<div class="wc-block-mini-cart-interactivity__template-part" style="display:none">
-			<?php echo wp_kses_post( $template_contents ); ?>
-		</div>
+			<div class="wc-block-mini-cart-interactivity__template-part" style="display:none">				
+				<?php echo wp_kses_post( $template_contents ); ?>
+			</div>
 		<?php
 		return ob_get_clean();
 	}
@@ -508,6 +508,7 @@ class MiniCartInteractivity extends AbstractBlock {
 		);
 
 		$interactivity_namespace = wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+		$close_button            = Drawer::render_close_button( 'woocommerce/mini-cart-interactivity::callbacks.closeDrawer' );
 
 		ob_start();
 		?>
@@ -522,7 +523,7 @@ class MiniCartInteractivity extends AbstractBlock {
 						echo Drawer::render(
 							array(
 								'is_initially_open'        => false,
-								'children'                 => $this->get_template_part_contents_container( $template_part_contents ),
+								'children'                 => $close_button . $this->get_template_part_contents_container( $template_part_contents ),
 								// TODO - clean up this concept.
 								'is_open_context_property' => 'woocommerce/mini-cart-interactivity::context.drawerOpen',
 								'on_open'                  => 'woocommerce/mini-cart-interactivity::actions.renderMiniCart',

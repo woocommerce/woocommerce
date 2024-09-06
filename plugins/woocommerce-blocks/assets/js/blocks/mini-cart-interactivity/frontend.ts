@@ -8,6 +8,7 @@ import lazyLoadScript, {
 	isScriptTagInDOM,
 } from '@woocommerce/base-utils/lazy-load-script';
 import {
+	ReactRootWithContainer,
 	getNavigationType,
 	translateJQueryEventToNative,
 } from '@woocommerce/base-utils';
@@ -32,15 +33,19 @@ interface dependencyData {
 	translations?: string;
 }
 
+interface State {
+	root: ReactRootWithContainer[] | undefined;
+	displayQuantityBadgeStyle: string;
+	priceAriaLabel: string;
+}
+
 interface Store {
-	state: {
-		displayQuantityBadgeStyle: string;
-		priceAriaLabel: string;
-	};
+	state: State;
 	callbacks: {
 		initialize: () => void;
 		toggleDrawerOpen: ( event: Event ) => void;
 		loadScripts: () => Promise< void >;
+		closeDrawer: () => void;
 	};
 }
 
@@ -100,23 +105,23 @@ const loadScripts = async () => {
 	}
 };
 
-const renderContents = async () => {
+const renderContents = async ( state: State ) => {
 	const { renderMiniCartContents } = await import(
 		'./render-mini-cart-contents'
 	);
 
-	const container = document.querySelector< HTMLDivElement >(
+	const templateContainer = document.querySelector< HTMLDivElement >(
 		'.wc-block-mini-cart-interactivity__template-part'
 	);
 
-	if ( container ) {
-		container.style.display = 'block';
-		renderMiniCartContents( container );
+	if ( templateContainer ) {
+		state.root = renderMiniCartContents( templateContainer );
 	}
 };
 
-store< Store >( 'woocommerce/mini-cart-interactivity', {
+const { state } = store< Store >( 'woocommerce/mini-cart-interactivity', {
 	state: {
+		root: undefined,
 		get displayQuantityBadgeStyle() {
 			const context = getContext< Context >();
 			return context.cartItemCount > 0 ? 'flex' : 'none';
@@ -198,8 +203,19 @@ store< Store >( 'woocommerce/mini-cart-interactivity', {
 			context.drawerOpen = ! context.drawerOpen;
 
 			if ( context.drawerOpen ) {
-				await renderContents();
+				if ( state.root ) {
+					state.root.forEach( ( root ) => {
+						root.root.unmount();
+					} );
+				}
+
+				await renderContents( state );
 			}
+		},
+
+		closeDrawer: () => {
+			const context = getContext< Context >();
+			context.drawerOpen = false;
 		},
 
 		loadScripts: async () => {
