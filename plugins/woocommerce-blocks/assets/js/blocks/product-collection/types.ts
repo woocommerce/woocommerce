@@ -110,6 +110,7 @@ export interface ProductCollectionQuery {
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
+		name: string;
 		openCollectionSelectionModal: () => void;
 		preview?: {
 			initialPreviewState?: PreviewState;
