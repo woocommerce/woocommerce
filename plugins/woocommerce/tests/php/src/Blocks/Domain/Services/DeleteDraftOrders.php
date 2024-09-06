@@ -1,6 +1,7 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Blocks\Library;
+namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use \WC_Order;
