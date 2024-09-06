@@ -10,6 +10,7 @@ import metadata from './block.json';
 
 const v1 = {
 	attributes: metadata.attributes,
+	supports: metadata.supports,
 	save: () => {
 		const blockProps = useBlockProps.save();
 
