@@ -11,6 +11,8 @@ import {
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
+import { select, dispatch } from '@wordpress/data';
 import {
 	ExternalLink,
 	PanelBody,
@@ -114,6 +116,18 @@ export const Edit = ( {
 		'templatePartProductFiltersOverlayEditUri',
 		''
 	);
+
+	useEffect( () => {
+		const overlayBlockIds = select( 'core/block-editor' ).getBlocksByName(
+			'woocommerce/product-filters-overlay-navigation'
+		);
+
+		if ( attributes.overlay === 'never' ) {
+			for ( const blockId of overlayBlockIds ) {
+				dispatch( 'core/block-editor' ).removeBlock( blockId );
+			}
+		}
+	}, [ attributes.overlay ] );
 
 	return (
 		<div { ...blockProps }>
