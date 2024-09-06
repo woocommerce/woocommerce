@@ -177,7 +177,7 @@ const variationsConfig = {
 };
 
 /**
- * Produts Report Advanced Filters.
+ * Products Report Advanced Filters.
  *
  * @filter woocommerce_admin_products_report_advanced_filters
  * @param {Object} advancedFilters         Report Advanced Filters.

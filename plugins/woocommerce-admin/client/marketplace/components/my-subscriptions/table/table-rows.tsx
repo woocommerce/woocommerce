@@ -8,7 +8,7 @@ import { TableRow } from '@woocommerce/components/build-types/table/types';
 import { Subscription } from '../types';
 import {
 	actions,
-	autoRenew,
+	subscriptionStatus,
 	expiry,
 	nameAndStatus,
 	version,
@@ -18,7 +18,7 @@ export function availableSubscriptionRow( item: Subscription ): TableRow[] {
 	return [
 		nameAndStatus( item ),
 		expiry( item ),
-		autoRenew( item ),
+		subscriptionStatus( item ),
 		version( item ),
 		actions( item ),
 	];
@@ -28,7 +28,7 @@ export function installedSubscriptionRow( item: Subscription ): TableRow[] {
 	return [
 		nameAndStatus( item ),
 		expiry( item ),
-		autoRenew( item ),
+		subscriptionStatus( item ),
 		version( item ),
 		actions( item ),
 	];

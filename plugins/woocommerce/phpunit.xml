@@ -9,19 +9,12 @@
 	verbose="true"
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
 	<testsuites>
-		<testsuite name="wc-unittests-all">
+		<testsuite name="wc-phpunit-legacy">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+		</testsuite>
+		<testsuite name="wc-phpunit-main">
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
-		</testsuite>
-		<testsuite name="shard1">
-			<directory suffix=".php">./tests/legacy/unit-tests</directory>
-			<directory suffix=".php">./tests/php</directory>
-			<exclude>./tests/legacy/unit-tests/woocommerce-admin</exclude>
-			<exclude>./tests/php/helpers</exclude>
-		</testsuite>
-		<testsuite name="shard2">
-			<directory suffix=".php">./tests/legacy/unit-tests/woocommerce-admin</directory>
 		</testsuite>
 	</testsuites>
 	<coverage includeUncoveredFiles="true">

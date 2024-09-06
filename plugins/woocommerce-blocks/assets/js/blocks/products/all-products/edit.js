@@ -1,106 +1,90 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { createBlock } from '@wordpress/blocks';
 import {
 	BlockControls,
 	InnerBlocks,
 	InspectorControls,
+	useBlockProps,
 } from '@wordpress/block-editor';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { createBlock } from '@wordpress/blocks';
 import {
-	PanelBody,
-	withSpokenMessages,
-	Placeholder,
 	Button,
-	ToolbarGroup,
 	Disabled,
+	PanelBody,
+	Placeholder,
 	Tip,
+	ToolbarGroup,
+	withSpokenMessages,
 } from '@wordpress/components';
-import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import PropTypes from 'prop-types';
+import { withDispatch, withSelect } from '@wordpress/data';
+import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { Icon, grid } from '@wordpress/icons';
+import { getBlockMap } from '@woocommerce/atomic-utils';
+import { blocksConfig } from '@woocommerce/block-settings';
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
+import { previewProducts } from '@woocommerce/resource-previews';
+import { getSetting } from '@woocommerce/settings';
 import {
 	InnerBlockLayoutContextProvider,
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
-import { getBlockMap } from '@woocommerce/atomic-utils';
-import { previewProducts } from '@woocommerce/resource-previews';
-import { getSetting } from '@woocommerce/settings';
-import { blocksConfig } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
-import { getBlockClassName } from '../utils';
-import {
-	renderHiddenContentPlaceholder,
-	renderNoProductsPlaceholder,
-} from '../edit-utils';
 import {
 	DEFAULT_PRODUCT_LIST_LAYOUT,
 	getProductLayoutConfig,
 } from '../base-utils';
 import { getSharedContentControls, getSharedListControls } from '../edit';
+import {
+	renderHiddenContentPlaceholder,
+	renderNoProductsPlaceholder,
+} from '../edit-utils';
+import { getBlockClassName } from '../utils';
 import Block from './block';
+import metadata from './block.json';
 import './editor.scss';
 
-/**
- * Component to handle edit mode of "All Products".
- */
-class Editor extends Component {
-	static propTypes = {
-		/**
-		 * The attributes for this block.
-		 */
-		attributes: PropTypes.object.isRequired,
-		/**
-		 * A callback to update attributes.
-		 */
-		setAttributes: PropTypes.func.isRequired,
-		/**
-		 * From withSpokenMessages.
-		 */
-		debouncedSpeak: PropTypes.func.isRequired,
-	};
+const blockMap = getBlockMap( 'woocommerce/all-products' );
 
-	state = {
-		isEditing: false,
-		innerBlocks: [],
-	};
+const blockIcon = <Icon icon={ grid } />;
 
-	blockMap = getBlockMap( 'woocommerce/all-products' );
+const Edit = ( {
+	block,
+	attributes,
+	setAttributes,
+	debouncedSpeak,
+	replaceInnerBlocks,
+} ) => {
+	const [ isEditing, setIsEditing ] = useState( false );
+	const [ innerBlocks, setInnerBlocks ] = useState( [] );
 
-	componentDidMount = () => {
-		const { block } = this.props;
-		this.setState( { innerBlocks: block.innerBlocks } );
-	};
+	const blockProps = useBlockProps( {
+		className: getBlockClassName( 'wc-block-all-products', attributes ),
+	} );
 
-	getTitle = () => {
-		return __( 'All Products', 'woocommerce' );
-	};
+	if ( blocksConfig.productCount === 0 ) {
+		return renderNoProductsPlaceholder(
+			metadata.title,
+			<Icon icon={ grid } />
+		);
+	}
 
-	getIcon = () => {
-		return <Icon icon={ grid } />;
-	};
+	const togglePreview = () => {
+		setIsEditing( ! isEditing );
 
-	togglePreview = () => {
-		const { debouncedSpeak } = this.props;
-
-		this.setState( { isEditing: ! this.state.isEditing } );
-
-		if ( ! this.state.isEditing ) {
+		if ( ! isEditing ) {
 			debouncedSpeak(
 				__( 'Showing All Products block preview.', 'woocommerce' )
 			);
 		}
 	};
 
-	getInspectorControls = () => {
-		const { attributes, setAttributes } = this.props;
+	const getInspectorControls = () => {
 		const { columns, rows, alignButtons } = attributes;
 
 		return (
@@ -128,9 +112,7 @@ class Editor extends Component {
 		);
 	};
 
-	getBlockControls = () => {
-		const { isEditing } = this.state;
-
+	const getBlockControls = () => {
 		return (
 			<BlockControls>
 				<ToolbarGroup
@@ -141,7 +123,7 @@ class Editor extends Component {
 								'Edit the layout of each product',
 								'woocommerce'
 							),
-							onClick: () => this.togglePreview(),
+							onClick: () => togglePreview(),
 							isActive: isEditing,
 						},
 					] }
@@ -150,46 +132,42 @@ class Editor extends Component {
 		);
 	};
 
-	renderEditMode = () => {
+	const renderEditMode = () => {
 		const onDone = () => {
-			const { block, setAttributes } = this.props;
 			setAttributes( {
 				layoutConfig: getProductLayoutConfig( block.innerBlocks ),
 			} );
-			this.setState( { innerBlocks: block.innerBlocks } );
-			this.togglePreview();
+			setInnerBlocks( block.innerBlocks );
+			togglePreview();
 		};
 
 		const onCancel = () => {
-			const { block, replaceInnerBlocks } = this.props;
-			const { innerBlocks } = this.state;
 			replaceInnerBlocks( block.clientId, innerBlocks, false );
-			this.togglePreview();
+			togglePreview();
 		};
 
 		const onReset = () => {
-			const { block, replaceInnerBlocks } = this.props;
 			const newBlocks = [];
-			DEFAULT_PRODUCT_LIST_LAYOUT.map( ( [ name, attributes ] ) => {
-				newBlocks.push( createBlock( name, attributes ) );
+			DEFAULT_PRODUCT_LIST_LAYOUT.map( ( [ name, blockAttributes ] ) => {
+				newBlocks.push( createBlock( name, blockAttributes ) );
 				return true;
 			} );
 			replaceInnerBlocks( block.clientId, newBlocks, false );
-			this.setState( { innerBlocks: block.innerBlocks } );
+			setInnerBlocks( block.innerBlocks );
 		};
 
 		const InnerBlockProps = {
-			template: this.props.attributes.layoutConfig,
+			template: attributes.layoutConfig,
 			templateLock: false,
-			allowedBlocks: Object.keys( this.blockMap ),
+			allowedBlocks: Object.keys( blockMap ),
 		};
 
-		if ( this.props.attributes.layoutConfig.length !== 0 ) {
+		if ( attributes.layoutConfig.length !== 0 ) {
 			InnerBlockProps.renderAppender = false;
 		}
 
 		return (
-			<Placeholder icon={ this.getIcon() } label={ this.getTitle() }>
+			<Placeholder icon={ blockIcon } label={ metadata.title }>
 				{ __(
 					'Display all products from your store as a grid.',
 					'woocommerce'
@@ -234,7 +212,7 @@ class Editor extends Component {
 						</Button>
 						<Button
 							className="wc-block-all-products__reset-button"
-							icon={ <Icon icon={ grid } /> }
+							icon={ blockIcon }
 							label={ __(
 								'Reset layout to default',
 								'woocommerce'
@@ -249,12 +227,10 @@ class Editor extends Component {
 		);
 	};
 
-	renderViewMode = () => {
-		const { attributes } = this.props;
+	const renderViewMode = () => {
 		const { layoutConfig } = attributes;
 		const hasContent = layoutConfig && layoutConfig.length !== 0;
-		const blockTitle = this.getTitle();
-		const blockIcon = this.getIcon();
+		const blockTitle = metadata.title;
 
 		if ( ! hasContent ) {
 			return renderHiddenContentPlaceholder( blockTitle, blockIcon );
@@ -267,30 +243,14 @@ class Editor extends Component {
 		);
 	};
 
-	render = () => {
-		const { attributes } = this.props;
-		const { isEditing } = this.state;
-		const blockTitle = this.getTitle();
-		const blockIcon = this.getIcon();
-
-		if ( blocksConfig.productCount === 0 ) {
-			return renderNoProductsPlaceholder( blockTitle, blockIcon );
-		}
-
-		return (
-			<div
-				className={ getBlockClassName(
-					'wc-block-all-products',
-					attributes
-				) }
-			>
-				{ this.getBlockControls() }
-				{ this.getInspectorControls() }
-				{ isEditing ? this.renderEditMode() : this.renderViewMode() }
-			</div>
-		);
-	};
-}
+	return (
+		<div { ...blockProps }>
+			{ getBlockControls() }
+			{ getInspectorControls() }
+			{ isEditing ? renderEditMode() : renderViewMode() }
+		</div>
+	);
+};
 
 export default compose(
 	withSpokenMessages,
@@ -306,4 +266,4 @@ export default compose(
 			replaceInnerBlocks,
 		};
 	} )
-)( Editor );
+)( Edit );

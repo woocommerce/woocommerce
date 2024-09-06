@@ -24,7 +24,7 @@ const newAccountEmail = `marge-${ new Date()
 const newAccountEmailWithCustomPassword = `homer-${ new Date()
 	.getTime()
 	.toString() }@woocommercecoree2etestsuite.com`;
-const newAccountCustomPassword = 'supersecurepassword123';
+const newAccountCustomPassword = 'sup3rS3cur3P4ssw0rd!#123';
 
 const simpleProductName = 'Very Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor.';
@@ -57,7 +57,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Checkout Block page',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@hpos', '@skip-on-default-wpcom' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
@@ -440,7 +440,7 @@ test.describe(
 
 			// verify shipping details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 			await expect(
@@ -471,7 +471,7 @@ test.describe(
 
 			// verify billing details
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit billing address', { exact: true } )
 				.last()
 				.click();
 			await expect(
@@ -782,7 +782,7 @@ test.describe(
 			).toBeVisible();
 
 			await page
-				.getByLabel( 'Edit address', { exact: true } )
+				.getByLabel( 'Edit shipping address', { exact: true } )
 				.first()
 				.click();
 

@@ -4,6 +4,7 @@ const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
+const { admin } = require( '../../../test-data/data' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -69,20 +70,21 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 		}
 	} );
 
-	test( 'Available homepage should be displayed', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
+	test(
+		'Available homepage should be displayed',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { pageObject, baseURL } ) => {
+			await prepareAssembler( pageObject, baseURL );
 
-		const assembler = await pageObject.getAssembler();
+			const assembler = await pageObject.getAssembler();
 
-		const homepages = assembler.locator(
-			'.block-editor-block-patterns-list__list-item'
-		);
+			const homepages = assembler.locator(
+				'.block-editor-block-patterns-list__list-item'
+			);
 
-		await expect( homepages ).toHaveCount( 3 );
-	} );
+			await expect( homepages ).toHaveCount( 3 );
+		}
+	);
 
 	test( 'The selected homepage should be focused when is clicked', async ( {
 		pageObject,
@@ -157,7 +159,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 
 		await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const saveButton = assembler.getByText( 'Save' );
+		const saveButton = assembler.getByText( 'Finish customizing' );
 
 		const waitResponse = page.waitForResponse(
 			( response ) =>
@@ -179,8 +181,8 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
@@ -246,31 +248,36 @@ test.describe( 'Homepage tracking banner', () => {
 		}
 	} );
 
-	test( 'Should show the "Want more patterns?" banner with the PTK API unavailable message', async ( {
-		baseURL,
-		pageObject,
-		page,
-	} ) => {
-		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
+	test(
+		'Should show the "Want more patterns?" banner with the PTK API unavailable message',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { baseURL, pageObject, page } ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'no'
+			);
 
-		await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
-			route.fulfill( {
-				status: 500,
+			await page.route( '**/wp-json/wc-admin/patterns*', ( route ) => {
+				route.fulfill( {
+					status: 500,
+				} );
 			} );
-		} );
 
-		await prepareAssembler( pageObject, baseURL );
+			await prepareAssembler( pageObject, baseURL );
 
-		const assembler = await pageObject.getAssembler();
-		await expect(
-			assembler.getByText( 'Want more patterns?' )
-		).toBeVisible();
-		await expect(
-			assembler.getByText(
-				"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
-			)
-		).toBeVisible();
-	} );
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeVisible();
+			await expect(
+				assembler.getByText(
+					"Unfortunately, we're experiencing some technical issues — please come back later to access more patterns."
+				)
+			).toBeVisible();
+		}
+	);
 
 	test( 'Should show the "Want more patterns?" banner with the Opt-in message when tracking is not allowed', async ( {
 		pageObject,
@@ -313,22 +320,23 @@ test.describe( 'Homepage tracking banner', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Should not show the "Want more patterns?" banner when tracking is allowed', async ( {
-		baseURL,
-		pageObject,
-	} ) => {
-		await setOption(
-			request,
-			baseURL,
-			'woocommerce_allow_tracking',
-			'yes'
-		);
+	test(
+		'Should not show the "Want more patterns?" banner when tracking is allowed',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { baseURL, pageObject } ) => {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_allow_tracking',
+				'yes'
+			);
 
-		await prepareAssembler( pageObject, baseURL );
+			await prepareAssembler( pageObject, baseURL );
 
-		const assembler = await pageObject.getAssembler();
-		await expect(
-			assembler.getByText( 'Want more patterns?' )
-		).toBeHidden();
-	} );
+			const assembler = await pageObject.getAssembler();
+			await expect(
+				assembler.getByText( 'Want more patterns?' )
+			).toBeHidden();
+		}
+	);
 } );

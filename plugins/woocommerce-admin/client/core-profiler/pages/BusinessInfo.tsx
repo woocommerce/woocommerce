@@ -90,7 +90,7 @@ export const selectIndustryMapping = {
 		'woocommerce'
 	),
 	im_setting_up_a_store_for_a_client: __(
-		"Which industry is your client's business in?",
+		'Which industry is your client’s business in?',
 		'woocommerce'
 	),
 };
@@ -238,7 +238,7 @@ export const BusinessInfo = ( {
 						'woocommerce'
 					) }
 					subTitle={ __(
-						"We'll use this information to help you set up payments, shipping, and taxes, as well as recommending the best theme for your store.",
+						'We’ll use this information to help you set up payments, shipping, and taxes, as well as recommending the best theme for your store.',
 						'woocommerce'
 					) }
 				/>
@@ -268,7 +268,7 @@ export const BusinessInfo = ( {
 					/>
 					<p className="woocommerce-profiler-question-subtext">
 						{ __(
-							"Don't worry — you can always change it later!",
+							'Don’t worry — you can always change it later!',
 							'woocommerce'
 						) }
 					</p>
@@ -390,7 +390,7 @@ export const BusinessInfo = ( {
 								{ createInterpolateElement(
 									__(
 										// translators: first tag is filled with the country name detected by geolocation, second tag is the country name selected by the user
-										"It looks like you're located in <geolocatedCountry></geolocatedCountry>. Are you sure you want to create a store in <selectedCountry></selectedCountry>?",
+										'It looks like you’re located in <geolocatedCountry></geolocatedCountry>. Are you sure you want to create a store in <selectedCountry></selectedCountry>?',
 										'woocommerce'
 									),
 									{

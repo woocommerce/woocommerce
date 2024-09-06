@@ -1,11 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-text-area-field",
 	"title": "Product textarea block",
 	"category": "woocommerce",
 	"description": "A text-area field for use in the product editor.",
-	"keywords": [ "textarea", "rich-text" ],
+	"keywords": [
+		"textarea",
+		"rich-text"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"property": {
@@ -32,11 +35,19 @@
 		},
 		"align": {
 			"type": "string",
-			"enum": [ "left", "center", "right", "justify" ]
+			"enum": [
+				"left",
+				"center",
+				"right",
+				"justify"
+			]
 		},
 		"mode": {
 			"type": "string",
-			"enum": [ "plain-text", "rich-text" ],
+			"enum": [
+				"plain-text",
+				"rich-text"
+			],
 			"default": "rich-text"
 		},
 		"allowedFormats": {
@@ -56,7 +67,10 @@
 		},
 		"direction": {
 			"type": "string",
-			"enum": [ "ltr", "rtl" ]
+			"enum": [
+				"ltr",
+				"rtl"
+			]
 		}
 	},
 	"supports": {

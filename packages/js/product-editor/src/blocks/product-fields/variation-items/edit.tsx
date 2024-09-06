@@ -32,10 +32,9 @@ import { EmptyState } from '../../../components/empty-state';
 
 export function Edit( {
 	attributes,
-	clientId,
 	context: { isInSelectedTab },
 }: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
-	const noticeDimissed = useRef( false );
+	const noticeDismissed = useRef( false );
 	const { invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 	);
@@ -80,19 +79,14 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice:
-					isInSelectedTab && productHasOptions
-						? getProductVariationsTotalCount< number >(
-								totalCountWithoutPriceRequestParams
-						  )
-						: 0,
+				totalCountWithoutPrice: productHasOptions
+					? getProductVariationsTotalCount< number >(
+							totalCountWithoutPriceRequestParams
+					  )
+					: 0,
 			};
 		},
-		[
-			isInSelectedTab,
-			productHasOptions,
-			totalCountWithoutPriceRequestParams,
-		]
+		[ productHasOptions, totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
@@ -113,7 +107,7 @@ export function Edit( {
 			 */
 			if (
 				totalCountWithoutPrice > 0 &&
-				! noticeDimissed.current &&
+				! noticeDismissed.current &&
 				productStatus !== 'publish' &&
 				// New status.
 				newData?.status === 'publish'
@@ -131,7 +125,6 @@ export function Edit( {
 						'Set variation prices before adding this product.',
 						'woocommerce'
 					),
-					context: clientId,
 				};
 			}
 		},
@@ -205,7 +198,7 @@ export function Edit( {
 				ref={ variationTableRef as React.Ref< HTMLDivElement > }
 				noticeText={ noticeText }
 				onNoticeDismiss={ () => {
-					noticeDimissed.current = true;
+					noticeDismissed.current = true;
 					updateUserPreferences( {
 						variable_items_without_price_notice_dismissed: {
 							...( itemsWithoutPriceNoticeDismissed || {} ),

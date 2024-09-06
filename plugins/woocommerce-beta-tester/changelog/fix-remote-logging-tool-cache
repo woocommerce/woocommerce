@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Flush cache after deleting option and resetting PHP rate limit

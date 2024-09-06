@@ -30,9 +30,6 @@ test.describe( 'Filters Overlay Template Part', () => {
 	} );
 
 	test( 'should render the correct inner blocks', async ( { editor } ) => {
-		const navigationBlock = editor.canvas.getByLabel(
-			'Block: Navigation (Experimental)'
-		);
 		const productFiltersTemplatePart = editor.canvas
 			.locator( '[data-type="core/template-part"]' )
 			.filter( {
@@ -41,7 +38,6 @@ test.describe( 'Filters Overlay Template Part', () => {
 				),
 			} );
 
-		await expect( navigationBlock ).toBeVisible();
 		await expect( productFiltersTemplatePart ).toBeVisible();
 	} );
 } );

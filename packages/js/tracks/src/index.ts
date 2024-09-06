@@ -7,6 +7,7 @@ import debug from 'debug';
  * Internal dependencies
  */
 import { isDevelopmentMode } from './utils';
+export { bumpStat } from './stats';
 
 /**
  * Module variables

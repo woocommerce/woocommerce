@@ -5,6 +5,8 @@ use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * PatternRegistry class.
+ *
+ * @internal
  */
 class PatternRegistry {
 	const SLUG_REGEX            = '/^[A-z0-9\/_-]+$/';

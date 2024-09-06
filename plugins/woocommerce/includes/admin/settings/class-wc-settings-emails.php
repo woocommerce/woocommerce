@@ -131,19 +131,6 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title'       => __( 'Footer text', 'woocommerce' ),
-					/* translators: %s: Available placeholders for use */
-					'desc'        => __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_url}' ),
-					'id'          => 'woocommerce_email_footer_text',
-					'css'         => 'width:400px; height: 75px;',
-					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'type'        => 'textarea',
-					'default'     => '{site_title} &mdash; Built with {WooCommerce}',
-					'autoload'    => false,
-					'desc_tip'    => true,
-				),
-
-				array(
 					'title'    => __( 'Base color', 'woocommerce' ),
 					/* translators: %s: default color */
 					'desc'     => sprintf( __( 'The base color for WooCommerce email templates. Default %s.', 'woocommerce' ), '<code>#7f54b3</code>' ),
@@ -184,6 +171,31 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					/* translators: %s: default color */
 					'desc'     => sprintf( __( 'The main body text color. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
 					'id'       => 'woocommerce_email_text_color',
+					'type'     => 'color',
+					'css'      => 'width:6em;',
+					'default'  => '#3c3c3c',
+					'autoload' => false,
+					'desc_tip' => true,
+				),
+
+				array(
+					'title'       => __( 'Footer text', 'woocommerce' ),
+					/* translators: %s: Available placeholders for use */
+					'desc'        => __( 'The text to appear in the footer of all WooCommerce emails.', 'woocommerce' ) . ' ' . sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '{site_title} {site_url}' ),
+					'id'          => 'woocommerce_email_footer_text',
+					'css'         => 'width:400px; height: 75px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'type'        => 'textarea',
+					'default'     => '{site_title} &mdash; Built with {WooCommerce}',
+					'autoload'    => false,
+					'desc_tip'    => true,
+				),
+
+				array(
+					'title'    => __( 'Footer text color', 'woocommerce' ),
+					/* translators: %s: footer default color */
+					'desc'     => sprintf( __( 'The footer text color. Default %s.', 'woocommerce' ), '<code>#3c3c3c</code>' ),
+					'id'       => 'woocommerce_email_footer_text_color',
 					'type'     => 'color',
 					'css'      => 'width:6em;',
 					'default'  => '#3c3c3c',
