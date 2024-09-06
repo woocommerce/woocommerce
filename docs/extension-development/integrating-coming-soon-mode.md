@@ -190,7 +190,7 @@ add_filter( 'woocommerce_coming_soon_exclude', function( $exclude ) {
 When using the `Apply to store pages only` setting, you may want to add a custom page to the list of store pages which will be restricted by coming soon mode. You can use the following example to add a custom page:
 
 ```php
-add_filter(	'woocommerce_store_pages', function( $pages ) {
+add_filter( 'woocommerce_store_pages', function( $pages ) {
     $page = get_page_by_path( 'your-page-slug' );
     if ( $page ) {
         $pages[] = $page->ID;
