@@ -1783,3 +1783,52 @@ function wc_product_attach_featured_image( $attachment_id, $product = null, $sav
 	}
 }
 add_action( 'add_attachment', 'wc_product_attach_featured_image' );
+
+/**
+ * Create an attachment from an external URL.
+ *
+ * @private
+ *
+ * @since 9.4.0
+ * @param string $image_url URL of the image.
+ * @param int    $parent_post_id Optional parent post ID.
+ * @return int Attachment ID.
+ */
+function wc_create_external_media_attachment( $image_url, $parent_post_id = null ) {
+	$file_name = basename( $image_url );
+
+	$args = array(
+		'post_type'      => 'attachment',
+		'post_status'    => 'inherit',
+		'name'           => $file_name,
+		'posts_per_page' => 1,
+	);
+
+	$query      = new WP_Query( $args );
+	$attachment = $query->posts[0] ?? null;
+
+	if ( $attachment ) {
+		return $attachment->ID;
+	}
+
+	$attachment = array(
+		'guid'           => $image_url,
+		'post_mime_type' => 'image/jpeg',
+		'post_title'     => $file_name,
+		'post_content'   => '',
+		'post_status'    => 'inherit',
+	);
+
+	$attach_id = wp_insert_attachment( $attachment, '', $parent_post_id );
+
+	// TODO: Add metadata to the attachment.
+	$attach_data = array(
+		'width'             => 0,
+		'height'            => 0,
+		'file'              => $image_url,
+		'_wp_attached_file' => $image_url,
+	);
+	wp_update_attachment_metadata( $attach_id, $attach_data );
+
+	return $attach_id;
+}

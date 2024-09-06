@@ -192,10 +192,11 @@ class UpdateProducts {
 	 * @return bool|int|\WP_Error
 	 */
 	public function create_new_product( $product_data ) {
-		$product = new \WC_Product();
+		$product          = new \WC_Product();
+		$image_src        = $product->get_external_product_image_url( $product_data['image'] );
+		$product_image_id = $this->add_external_product_image( $product->get_id(), $image_src );
 
-		// TODO: Schedule an action to upload this image to the media library.
-		$saved_product = $this->product_update( $product, $product_data['image'], $product_data['title'], $product_data['description'], $product_data['price'] );
+		$saved_product = $this->product_update( $product, $product_image_id, $product_data['title'], $product_data['description'], $product_data['price'] );
 
 		if ( is_wp_error( $saved_product ) ) {
 			return $saved_product;
@@ -316,6 +317,18 @@ class UpdateProducts {
 		wp_raise_memory_limit( 'image' );
 
 		return media_sideload_image( $image_src, $product_id, $image_alt, 'id' );
+	}
+
+	/**
+	 * Add an external product image.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param string $image_src The image source.
+	 *
+	 * @return int
+	 */
+	private function add_external_product_image( $product_id, $image_src ) {
+		return wc_create_external_media_attachment( $image_src, $product_id );
 	}
 
 	/**
@@ -474,25 +487,25 @@ class UpdateProducts {
 	 * Update the product with the new content.
 	 *
 	 * @param \WC_Product $product The product.
-	 * @param string      $image_src The product image source.
+	 * @param int         $product_image_id The product image ID.
 	 * @param string      $product_title The product title.
 	 * @param string      $product_description The product description.
 	 * @param int         $product_price The product price.
 	 *
 	 * @return int|\WP_Error
 	 */
-	private function product_update( $product, $image_src, $product_title, $product_description, $product_price ) {
+	private function product_update( $product, $product_image_id, $product_title, $product_description, $product_price ) {
 		if ( ! $product instanceof \WC_Product ) {
 			return new WP_Error( 'invalid_product', __( 'Invalid product.', 'woocommerce' ) );
 		}
 
-		if ( '' !== $image_src ) {
-			$product->add_meta_data( '_headstart_product_image', $image_src );
+		if ( ! is_wp_error( $product_image_id ) ) {
+			$product->set_image_id( $product_image_id );
 		} else {
 			wc_get_logger()->warning(
 				sprintf(
 					// translators: %s is a generated error message.
-					__( 'The image upload failed: creating the product without image', 'woocommerce' )
+					__( 'The image upload failed: "%s", creating the product without image', 'woocommerce' )
 				),
 			);
 		}
