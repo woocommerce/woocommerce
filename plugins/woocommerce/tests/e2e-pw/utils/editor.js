@@ -129,14 +129,14 @@ const transformIntoBlocks = async ( page ) => {
 	);
 };
 
-const publishPage = async ( page, pageTitle ) => {
+const publishPage = async ( page, pageTitle, isPost = false ) => {
 	await page
 		.getByRole( 'button', { name: 'Publish', exact: true } )
 		.dispatchEvent( 'click' );
 
-	const createPageResponse = page.waitForResponse(
-		( response ) =>
-			response.url().includes( '/pages' ) &&
+	const createPageResponse = page.waitForResponse( ( response ) => {
+		return (
+			response.url().includes( isPost ? '/posts/' : '/pages/' ) &&
 			response.ok() &&
 			response.request().method() === 'POST' &&
 			response
@@ -146,7 +146,8 @@ const publishPage = async ( page, pageTitle ) => {
 						json.title.rendered === pageTitle &&
 						json.status === 'publish'
 				)
-	);
+		);
+	} );
 
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
