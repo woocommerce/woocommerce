@@ -13,6 +13,7 @@ import { useSelect } from '@wordpress/data';
 import ErrorPlaceholder, {
 	ErrorObject,
 } from '@woocommerce/editor-components/error-placeholder';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -24,7 +25,6 @@ import {
 } from './utils';
 import { ProductGalleryBlockSettings } from './block-settings/index';
 import type { ProductGalleryAttributes } from './types';
-import { __ } from '@wordpress/i18n';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -136,7 +136,8 @@ export const Edit = ( {
 
 	useEffect( () => {
 		const mode = getMode( currentTemplateId, templateType );
-		const newProductGalleryClientId = attributes.productGalleryClientId || clientId;
+		const newProductGalleryClientId =
+			attributes.productGalleryClientId || clientId;
 
 		setAttributes( {
 			...attributes,

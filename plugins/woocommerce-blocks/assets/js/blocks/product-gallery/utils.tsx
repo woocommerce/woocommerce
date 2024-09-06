@@ -138,7 +138,7 @@ export const moveInnerBlocksToPosition = (
 		select( 'core/block-editor' );
 	const productGalleryBlock = getBlock( clientId );
 
-	if ( productGalleryBlock?.name === "woocommerce/product-gallery" ) {
+	if ( productGalleryBlock?.name === 'woocommerce/product-gallery' ) {
 		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		const previousLayout = productGalleryBlock.innerBlocks.length
 			? productGalleryBlock.innerBlocks[ 0 ].attributes.layout
