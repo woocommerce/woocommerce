@@ -300,15 +300,13 @@ const CollectionSpecificControls = (
 const withCollectionSpecificControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 	( props: ProductCollectionEditComponentProps ) => {
-		if ( ! isProductCollection( props.name ) ) {
+		if ( ! isProductCollection( props.name ) || ! props.isSelected ) {
 			return <BlockEdit { ...props } />;
 		}
 
 		return (
 			<>
-				{ props.isSelected && (
-					<CollectionSpecificControls { ...props } />
-				) }
+				<CollectionSpecificControls { ...props } />
 				<BlockEdit { ...props } />
 			</>
 		);
