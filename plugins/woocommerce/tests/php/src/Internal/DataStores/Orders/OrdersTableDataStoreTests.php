@@ -1,4 +1,7 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -8,13 +11,27 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use DateTime;
+use DateTimeZone;
+use WC_Helper_Order;
+use WC_Helper_Payment_Token;
+use WC_Helper_Product;
+use WC_Order;
+use WC_Order_Data_Store_CPT;
+use WC_Order_Item_Product;
+use WC_Order_Item_Shipping;
+use WC_Product;
+use WC_Product_Simple;
+use WC_Shipping_Rate;
+use WC_Tax;
+use WC_Tests_Webhook_Functions;
 
 /**
  * Class OrdersTableDataStoreTests.
  *
  * Test for OrdersTableDataStore class.
  */
-class OrdersTableDataStoreTests extends HposTestCase {
+class OrdersTableDataStoreTests extends \HposTestCase {
 	use HPOSToggleTrait;
 
 	/**
