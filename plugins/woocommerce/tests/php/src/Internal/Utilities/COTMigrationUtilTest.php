@@ -1,7 +1,7 @@
 <?php
-/**
- * Tests for COTMigration utility.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
