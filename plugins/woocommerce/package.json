@@ -417,6 +417,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
+						"tests/e2e-pw/tests/api-tests/**",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -559,7 +560,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"release-checks",
 						"on-demand"
 					],
 					"report": {
@@ -575,7 +576,7 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"release-checks",
 						"on-demand"
 					],
 					"report": {

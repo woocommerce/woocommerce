@@ -24,7 +24,7 @@ const newAccountEmail = `marge-${ new Date()
 const newAccountEmailWithCustomPassword = `homer-${ new Date()
 	.getTime()
 	.toString() }@woocommercecoree2etestsuite.com`;
-const newAccountCustomPassword = 'supersecurepassword123';
+const newAccountCustomPassword = 'sup3rS3cur3P4ssw0rd!#123';
 
 const simpleProductName = 'Very Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor.';
@@ -57,7 +57,7 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Checkout Block page',
-	{ tag: [ '@payments', '@services', '@hpos' ] },
+	{ tag: [ '@payments', '@services', '@hpos', '@skip-on-default-wpcom' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {

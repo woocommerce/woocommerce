@@ -117,6 +117,7 @@ class ProductCollection extends AbstractBlock {
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'handle_rendering' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
+		add_filter( 'render_block_core/post-title', array( $this, 'add_product_title_click_event_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
 
@@ -304,14 +305,16 @@ class ProductCollection extends AbstractBlock {
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
-					array(
-						...$current_context,
-						// The message to be announced by the screen reader when the page is loading or loaded.
-						'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
-						'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
-						// We don't prefetch the links if user haven't clicked on pagination links yet.
-						// This way we avoid prefetching when the page loads.
-						'isPrefetchNextOrPreviousLink' => false,
+					array_merge(
+						$current_context,
+						array(
+							// The message to be announced by the screen reader when the page is loading or loaded.
+							'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
+							'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
+							// We don't prefetch the links if user haven't clicked on pagination links yet.
+							// This way we avoid prefetching when the page loads.
+							'isPrefetchNextOrPreviousLink' => false,
+						),
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
@@ -401,6 +404,36 @@ class ProductCollection extends AbstractBlock {
 		// enhanced pagination is enabled and query IDs match.
 		if ( $is_product_collection_block && $is_enhanced_pagination_enabled && $query_id === $parsed_query_id ) {
 			$block_content = $this->process_pagination_links( $block_content );
+		}
+
+		return $block_content;
+	}
+
+	/**
+	 * Add interactivity to the Product Title block within Product Collection.
+	 * This enables the triggering of a custom event when the product title is clicked.
+	 *
+	 * @param string    $block_content The block content.
+	 * @param array     $block         The full block, including name and attributes.
+	 * @param \WP_Block $instance      The block instance.
+	 * @return string   Modified block content with added interactivity.
+	 */
+	public function add_product_title_click_event_directives( $block_content, $block, $instance ) {
+		$namespace              = $instance->attributes['__woocommerceNamespace'] ?? '';
+		$is_product_title_block = 'woocommerce/product-collection/product-title' === $namespace;
+		$is_link                = $instance->attributes['isLink'] ?? false;
+
+		// Only proceed if the block is a Product Title (Post Title variation) block.
+		if ( $is_product_title_block && $is_link ) {
+			$p = new \WP_HTML_Tag_Processor( $block_content );
+			$p->next_tag( array( 'class_name' => 'wp-block-post-title' ) );
+			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
+
+			if ( $is_anchor ) {
+				$p->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.viewProduct' );
+
+				$block_content = $p->get_updated_html();
+			}
 		}
 
 		return $block_content;

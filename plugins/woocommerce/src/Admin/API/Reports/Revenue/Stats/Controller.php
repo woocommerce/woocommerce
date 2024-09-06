@@ -223,17 +223,19 @@ class Controller extends GenericStatsController implements ExportableInterface {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array(
-			'date',
-			'total_sales',
-			'coupons',
-			'refunds',
-			'shipping',
-			'taxes',
-			'net_revenue',
-			'orders_count',
-			'items_sold',
-			'gross_sales',
+		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'total_sales',
+				'coupons',
+				'refunds',
+				'shipping',
+				'taxes',
+				'net_revenue',
+				'orders_count',
+				'items_sold',
+				'gross_sales',
+			)
 		);
 		$params['segmentby']       = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),

@@ -24,7 +24,14 @@ const test = baseTest.extend( {
 
 test.describe(
 	'Filter items in the shop by product price',
-	{ tag: [ '@payments', '@services' ] },
+	{
+		tag: [
+			'@payments',
+			'@services',
+			'@skip-on-default-wpcom',
+			'@skip-on-default-pressable',
+		],
+	},
 	() => {
 		test.beforeAll( async ( { api } ) => {
 			// add products
