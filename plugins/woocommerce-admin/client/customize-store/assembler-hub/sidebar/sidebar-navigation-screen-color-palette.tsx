@@ -17,6 +17,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { CustomizeStoreContext } from '../';
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ColorPalette, ColorPanel } from './global-styles';
+import { trackEvent } from '~/customize-store/tracking';
 import { FlowType } from '~/customize-store/types';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
@@ -27,6 +28,11 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 	const hasCreatedOwnColors = !! (
 		user.settings.color && user.settings.color.palette.hasCreatedOwnColors
 	);
+	function handlePanelBodyToggle() {
+		trackEvent(
+			'customize_your_store_assembler_hub_color_palette_create_toggle'
+		);
+	}
 	// Wrap in a BlockEditorProvider to ensure that the Iframe's dependencies are
 	// loaded. This is necessary because the Iframe component waits until
 	// the block editor store's `__internalIsInitialized` is true before
@@ -45,6 +51,7 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 				className="woocommerce-customize-store__color-panel-container"
 				title={ __( 'or create your own', 'woocommerce' ) }
 				initialOpen={ hasCreatedOwnColors }
+				onToggle={ handlePanelBodyToggle }
 			>
 				<ColorPanel />
 			</PanelBody>
