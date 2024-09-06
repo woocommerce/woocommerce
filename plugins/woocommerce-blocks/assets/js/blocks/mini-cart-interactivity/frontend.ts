@@ -34,7 +34,7 @@ interface dependencyData {
 }
 
 interface State {
-	root: ReactRootWithContainer[] | undefined;
+	existingRoot: ReactRootWithContainer[] | null;
 	displayQuantityBadgeStyle: string;
 	priceAriaLabel: string;
 }
@@ -114,14 +114,15 @@ const renderContents = async ( state: State ) => {
 		'.wc-block-mini-cart-interactivity__template-part'
 	);
 
-	if ( templateContainer ) {
-		state.root = renderMiniCartContents( templateContainer );
+	// Only render the contents if there is no existing root.
+	if ( templateContainer && ! state.existingRoot ) {
+		state.existingRoot = renderMiniCartContents( templateContainer );
 	}
 };
 
 const { state } = store< Store >( 'woocommerce/mini-cart-interactivity', {
 	state: {
-		root: undefined,
+		existingRoot: null,
 		get displayQuantityBadgeStyle() {
 			const context = getContext< Context >();
 			return context.cartItemCount > 0 ? 'flex' : 'none';
@@ -203,12 +204,6 @@ const { state } = store< Store >( 'woocommerce/mini-cart-interactivity', {
 			context.drawerOpen = ! context.drawerOpen;
 
 			if ( context.drawerOpen ) {
-				if ( state.root ) {
-					state.root.forEach( ( root ) => {
-						root.root.unmount();
-					} );
-				}
-
 				await renderContents( state );
 			}
 		},
