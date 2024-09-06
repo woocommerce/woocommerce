@@ -21,7 +21,6 @@ import './style.scss';
 interface ProductRatingStarsProps {
 	className?: string;
 	textAlign?: string;
-	isDescendentOfSingleProductBlock: boolean;
 	isDescendentOfQueryLoop: boolean;
 	postId: number;
 	productId: number;
@@ -31,7 +30,6 @@ interface ProductRatingStarsProps {
 export const Block = ( props: ProductRatingStarsProps ): JSX.Element | null => {
 	const {
 		textAlign = '',
-		isDescendentOfSingleProductBlock,
 		shouldDisplayMockedReviewsWhenProductHasNoReviews,
 	} = props;
 	const styleProps = useStyleProps( props );
@@ -44,7 +42,6 @@ export const Block = ( props: ProductRatingStarsProps ): JSX.Element | null => {
 	return (
 		<ProductRating
 			className={ className }
-			showReviewCount={ isDescendentOfSingleProductBlock }
 			showMockedReviews={
 				shouldDisplayMockedReviewsWhenProductHasNoReviews
 			}
