@@ -213,11 +213,11 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Adds the WooPayments incentive data to the onboarding task additional data.
+	 * Filter the onboarding task additional data to add the WooPayments incentive data to it.
 	 *
 	 * @param ?array $additional_data The current task additional data.
 	 *
-	 * @return ?array
+	 * @return ?array The filtered task additional data.
 	 */
 	public function onboarding_task_additional_data( ?array $additional_data ): ?array {
 		// Return early if the incentive must not be visible.
