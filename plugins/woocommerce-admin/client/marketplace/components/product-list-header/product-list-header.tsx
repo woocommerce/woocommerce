@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { Link } from '@woocommerce/components';
-import { __ } from '@wordpress/i18n';
+import { isRTL, __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { recordEvent } from '@woocommerce/tracks';
+import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -44,6 +45,7 @@ export default function ProductListHeader(
 						} }
 					>
 						{ __( 'See more', 'woocommerce' ) }
+						<Icon icon={ isRTL() ? chevronLeft : chevronRight } />
 					</Link>
 				</span>
 			) }
