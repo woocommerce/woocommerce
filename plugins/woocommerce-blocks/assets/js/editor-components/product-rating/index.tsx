@@ -175,9 +175,9 @@ export const ProductRating = (
 		<div className={ wrapperClassName } style={ styleProps.style }>
 			<div className={ `${ className }__container` }>
 				{ content }
-				{ isReviewCountVisible && (
+				{ isReviewCountVisible ? (
 					<ReviewsCount className={ className } reviews={ reviews } />
-				) }
+				) : null }
 			</div>
 		</div>
 	);
