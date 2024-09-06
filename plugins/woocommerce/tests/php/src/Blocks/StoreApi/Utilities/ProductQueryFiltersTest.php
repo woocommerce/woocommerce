@@ -1,9 +1,11 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class ProductQueryFiltersTest extends TestCase {
 	/**

@@ -1,12 +1,10 @@
 <?php
-/**
- * CartController Tests.
- */
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class CartControllerTests extends TestCase {
