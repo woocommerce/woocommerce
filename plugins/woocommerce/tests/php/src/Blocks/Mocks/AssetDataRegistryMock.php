@@ -52,6 +52,19 @@ class AssetDataRegistryMock extends AssetDataRegistry {
 	 * Note: core data will overwrite any externally registered data via the api.
 	 */
 	public function initialize_core_data() {
-		return parent::initialize_core_data();
+		parent::initialize_core_data();
+	}
+
+	/**
+	 * Loops through each registered lazy data callback and adds the returned
+	 * value to the data array.
+	 *
+	 * This method is executed right before preparing the data for printing to
+	 * the rendered screen.
+	 *
+	 * @return void
+	 */
+	public function execute_lazy_data() {
+		parent::execute_lazy_data();
 	}
 }
