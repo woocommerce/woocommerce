@@ -1,6 +1,7 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Blocks\Utils;
+namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
