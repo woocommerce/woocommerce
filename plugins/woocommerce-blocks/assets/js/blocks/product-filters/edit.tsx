@@ -163,6 +163,12 @@ export const Edit = ( {
 				createBlock(
 					'woocommerce/product-filters-overlay-navigation',
 					productFiltersOverlayNavigationAttributes
+						? productFiltersOverlayNavigationAttributes
+						: {
+								align: 'left',
+								triggerType: 'open-overlay',
+								lock: { move: true, remove: true },
+						  }
 				),
 				0,
 				clientId,
