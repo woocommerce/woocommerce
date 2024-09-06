@@ -44,7 +44,6 @@ export const renderMiniCartContents = ( templateElement: HTMLDivElement ) => {
 				),
 			};
 		},
-		// TODO we should get the template but not render into the same container.
 		selector: `#${ uniqueId } .wp-block-woocommerce-mini-cart-contents`,
 		blockMap: getRegisteredBlockComponents(
 			'woocommerce/mini-cart-contents'
