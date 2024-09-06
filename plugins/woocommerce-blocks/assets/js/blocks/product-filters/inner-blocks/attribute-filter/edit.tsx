@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/types';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -111,6 +111,20 @@ const Edit = ( props: EditProps ) => {
 		</div>
 	);
 
+	const loadingState = useMemo( () => {
+		return [ ...Array( 5 ) ].map( ( x, i ) => (
+			<li
+				key={ i }
+				style={ {
+					/* stylelint-disable */
+					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
+				} }
+			>
+				&nbsp;
+			</li>
+		) );
+	}, [] );
+
 	if ( isPreview ) {
 		return (
 			<Wrapper>
@@ -153,22 +167,7 @@ const Edit = ( props: EditProps ) => {
 		return (
 			<Wrapper>
 				<ul className="is-loading wp-block-woocommerce-product-filter-attribute__loading">
-					{ [ ...Array( 5 ) ].map( ( x, i ) => {
-						return (
-							<li
-								key={ i }
-								style={ {
-									/* stylelint-disable */
-									width:
-										Math.floor(
-											Math.random() * ( 100 - 25 )
-										) + '%',
-								} }
-							>
-								&nbsp;
-							</li>
-						);
-					} ) }
+					{ loadingState }
 				</ul>
 			</Wrapper>
 		);
