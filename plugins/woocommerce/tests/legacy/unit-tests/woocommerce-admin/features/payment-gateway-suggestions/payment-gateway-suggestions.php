@@ -244,7 +244,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 
 		add_filter(
 			'locale',
-			function ( $_locale ) {
+			function () {
 				return 'zh_TW';
 			}
 		);
