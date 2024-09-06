@@ -432,28 +432,39 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$decimals       = wc_get_price_decimals();
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
-		$is_full_refund = false;
-		// Order fully refunded won't have the order line items.
+		$full_refunded_orders = array();
+		// Orders fully refunded don't have the order line items.
 		if ( 'shop_order_refund' === $order->get_type() && empty( $order_items ) ) {
-			$is_full_refund = true;
-			$parent_order   = wc_get_order( $order->get_parent_id() );
-			$order_items    = $parent_order->get_items();
+			$parent_order_id    = $order->get_parent_id();
+			$parent_order       = wc_get_order( $parent_order_id );
+			$parent_order_items = $parent_order->get_items();
+
+			$full_refunded_orders['order_id'] = $parent_order_id;
+
+			$full_refunded_orders['order_item_ids'] = array_map(
+				function ( $parent_order_item ) {
+					return $parent_order_item->get_id();
+				},
+				$parent_order_items
+			);
+
+			$full_refunded_orders['product_ids'] = array_map(
+				function ( $parent_order_item ) {
+					return wc_get_order_item_meta( $parent_order_item->get_id(), '_product_id' );
+				},
+				$parent_order_items
+			);
 		}
 
 		foreach ( $order_items as $order_item ) {
 			$order_item_id = $order_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
-			$product_qty         = $is_full_refund ? 0 : $order_item->get_quantity( 'edit' );
+			$product_qty         = $order_item->get_quantity( 'edit' );
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
 			$net_revenue         = round( $order_item->get_total( 'edit' ), $decimals );
-
-			if ( $is_full_refund ) {
-				$net_revenue = -abs( $net_revenue );
-			}
-
-			$is_refund = $net_revenue < 0;
+			$is_refund           = $net_revenue < 0;
 
 			// Skip line items without changes to product quantity.
 			if ( ! $product_qty && ! $is_refund ) {
@@ -531,6 +542,28 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id in ({$format})",
 					$existing_items
+				)
+			);
+		}
+
+		if ( ! empty( $full_refunded_orders ) ) {
+			$order_item_ids_format = array_fill( 0, count( $full_refunded_orders['order_item_ids'] ), '%d' );
+			$order_item_ids_format = implode( ',', $order_item_ids_format );
+
+			$product_ids_format = array_fill( 0, count( $full_refunded_orders['product_ids'] ), '%d' );
+			$product_ids_format = implode( ',', $product_ids_format );
+
+			$replacement_params = array(
+				$full_refunded_orders['order_id'],
+				...$full_refunded_orders['order_item_ids'],
+				...$full_refunded_orders['product_ids'],
+			);
+
+			$wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id IN ({$order_item_ids_format}) AND product_id IN ({$product_ids_format})",
+					$replacement_params
 				)
 			);
 		}
