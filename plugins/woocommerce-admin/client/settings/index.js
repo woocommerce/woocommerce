@@ -11,7 +11,7 @@ import { useEffect } from '@wordpress/element';
  */
 import { Tabs } from './tabs';
 import { SectionNav } from './section-nav';
-import { getRoute, useSettingsLocation } from './routes';
+import { useGetRoute, useSettingsLocation } from './routes';
 import { possiblyRenderSettingsSlots } from './settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '../payments/payments-settings-banner-slotfill';
@@ -56,6 +56,7 @@ const removeSettingsScripts = ( scripts ) => {
 };
 
 const Settings = ( { params, query } ) => {
+	console.log("pp", params, query);
 	useFullScreen( [ 'woocommerce-settings' ] );
 	const { page } = params;
 	const settingsData = window.wcSettings?.admin?.settingsPages;
@@ -81,13 +82,13 @@ const Settings = ( { params, query } ) => {
 		registerSiteVisibilitySlotFill();
 	}, [] );
 
+	
+	const { areas, widths } = useGetRoute( section );
+	const { quickEdit } = useSettingsLocation();
+	const showEditArea = quickEdit === 'true';
 	if ( ! settingsData ) {
 		return <div>Error getting data</div>;
 	}
-
-	const { areas, widths } = getRoute( section );
-	const { quickEdit } = useSettingsLocation();
-	const showEditArea = quickEdit === 'true';
 
 	return (
 		<>

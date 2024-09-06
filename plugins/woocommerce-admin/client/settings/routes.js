@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
-import { applyFilters, addFilter } from '@wordpress/hooks';
+import { applyFilters, addFilter, removeFilter } from '@wordpress/hooks';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,7 +21,7 @@ export const useSettingsLocation = () => {
 	return { ...otherQueryParams, section, page };
 };
 
-export const getRoute = ( section ) => {
+export const useGetRoute = ( section ) => {
 	const { page } = useSettingsLocation();
 	const settingsData = window.wcSettings?.admin?.settingsPages;
 	const sections = settingsData[ page ]?.sections;
@@ -28,6 +29,34 @@ export const getRoute = ( section ) => {
 		Array.isArray( sections ) && sections.length === 0
 			? {}
 			: sections[ section || '' ];
+
+	useEffect( () => {
+		const uniqueNamespaceIdentifier = `woocommerce_${ new Date().getTime() }`; // unique key for namespace
+		const newPage = {
+			page: 'my-example',
+			areas: {
+				content: <MyExample section={ section } />,
+				edit: <MyExampleEdit />,
+			},
+			widths: {
+				content: undefined,
+				edit: 380,
+			},
+		};
+		addFilter(
+			'woocommerce_admin_settings_pages',
+			uniqueNamespaceIdentifier,
+			( pages ) => {
+				console.log( 'adding filter as it was not found', pages );
+				return [ ...pages, newPage ];
+			}
+		);
+		return () =>
+			removeFilter(
+				'woocommerce_admin_settings_pages',
+				uniqueNamespaceIdentifier
+			);
+	}, [ section ] );
 
 	if ( ! Object.keys( settingsData ).includes( page ) ) {
 		return {
@@ -61,25 +90,11 @@ export const getRoute = ( section ) => {
 		};
 	}
 
-	addFilter( 'woocommerce_admin_settings_pages', 'woocommerce', ( pages ) => {
-		return [
-			...pages,
-			{
-				page: 'my-example',
-				areas: {
-					content: <MyExample section={ section } />,
-					edit: <MyExampleEdit />,
-				},
-				widths: {
-					content: undefined,
-					edit: 380,
-				},
-			},
-		];
-	} );
-
+	console.log( 'applying filter' );
 	const routes = applyFilters( 'woocommerce_admin_settings_pages', [] );
+	console.log( 'applied filter', routes );
 
+	console.log( 'page', page );
 	const pageRoute = routes.find( ( route ) => route.page === page );
 
 	if ( ! pageRoute ) {
