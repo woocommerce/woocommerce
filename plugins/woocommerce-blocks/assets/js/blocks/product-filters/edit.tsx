@@ -9,10 +9,15 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import {
+	BlockEditProps,
+	InnerBlockTemplate,
+	createBlock,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { select, dispatch } from '@wordpress/data';
+import { useLocalStorageState } from '@woocommerce/base-hooks';
 import {
 	ExternalLink,
 	PanelBody,
@@ -109,6 +114,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 export const Edit = ( {
 	setAttributes,
 	attributes,
+	clientId,
 }: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps();
 
@@ -117,17 +123,58 @@ export const Edit = ( {
 		''
 	);
 
+	const [
+		productFiltersOverlayNavigationAttributes,
+		setProductFiltersOverlayNavigationAttributes,
+	] = useLocalStorageState< Record< string, unknown > >(
+		'product-filters-overlay-navigation-attributes',
+		{}
+	);
+
 	useEffect( () => {
-		const overlayBlockIds = select( 'core/block-editor' ).getBlocksByName(
+		const overlayClientIds = select( 'core/block-editor' ).getBlocksByName(
 			'woocommerce/product-filters-overlay-navigation'
 		);
 
-		if ( attributes.overlay === 'never' ) {
-			for ( const blockId of overlayBlockIds ) {
-				dispatch( 'core/block-editor' ).removeBlock( blockId );
-			}
+		const overlayBlockAttributes = select(
+			'core/block-editor'
+		).getBlockAttributes( overlayClientIds[ 0 ] );
+
+		if ( attributes.overlay === 'never' && overlayClientIds.length ) {
+			setProductFiltersOverlayNavigationAttributes(
+				overlayBlockAttributes
+			);
+
+			dispatch( 'core/block-editor' ).updateBlockAttributes(
+				overlayClientIds[ 0 ],
+				{
+					lock: {},
+				}
+			);
+
+			dispatch( 'core/block-editor' ).removeBlock(
+				overlayClientIds[ 0 ]
+			);
+		} else if (
+			attributes.overlay !== 'never' &&
+			! overlayClientIds.length
+		) {
+			dispatch( 'core/block-editor' ).insertBlock(
+				createBlock(
+					'woocommerce/product-filters-overlay-navigation',
+					productFiltersOverlayNavigationAttributes
+				),
+				0,
+				clientId,
+				false
+			);
 		}
-	}, [ attributes.overlay ] );
+	}, [
+		attributes.overlay,
+		clientId,
+		productFiltersOverlayNavigationAttributes,
+		setProductFiltersOverlayNavigationAttributes,
+	] );
 
 	return (
 		<div { ...blockProps }>
