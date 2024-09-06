@@ -401,9 +401,7 @@ final class ProductFilterAttribute extends AbstractBlock {
     <!-- /wp:woocommerce/product-filter-clear-button --></div>
   <!-- /wp:group -->
 
-  <!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true}} -->
-  <div class="wp-block-woocommerce-product-filter-checkbox-list"></div>
-  <!-- /wp:woocommerce/product-filter-checkbox-list -->
+  <!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true},"className":"wp-block-woocommerce-product-filter-checkbox-list"} /-->
 </div>
 <!-- /wp:woocommerce/product-filter-attribute -->
 					',
