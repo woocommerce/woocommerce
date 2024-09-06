@@ -19,8 +19,7 @@
 		}
 	},
 	"usesContext": [
-		"filterData",
-		"isParentSelected"
+		"filterData"
 	],
 	"attributes": {
 		"optionElementBorder": {

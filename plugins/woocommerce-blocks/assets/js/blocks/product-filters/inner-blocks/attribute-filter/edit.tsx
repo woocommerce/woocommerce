@@ -26,6 +26,7 @@ import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils';
 import { DISALLOWED_BLOCKS } from '../../constants';
 import { FilterOptionItem } from '../../types';
+import InitialDisabled from '../../components/initial-disabled';
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -178,23 +179,24 @@ const Edit = ( props: EditProps ) => {
 	return (
 		<div { ...innerBlocksProps }>
 			<Inspector { ...props } />
-			<BlockContextProvider
-				value={ {
-					filterData: {
-						items:
-							attributeOptions.length === 0 && isPreview
-								? attributeOptionsPreview
-								: attributeOptions,
-						isLoading:
-							isTermsLoading ||
-							isFilterCountsLoading ||
-							isOptionsLoading,
-					},
-					isParentSelected: props.isSelected,
-				} }
-			>
-				{ children }
-			</BlockContextProvider>
+			<InitialDisabled>
+				<BlockContextProvider
+					value={ {
+						filterData: {
+							items:
+								attributeOptions.length === 0 && isPreview
+									? attributeOptionsPreview
+									: attributeOptions,
+							isLoading:
+								isTermsLoading ||
+								isFilterCountsLoading ||
+								isOptionsLoading,
+						},
+					} }
+				>
+					{ children }
+				</BlockContextProvider>
+			</InitialDisabled>
 		</div>
 	);
 };
