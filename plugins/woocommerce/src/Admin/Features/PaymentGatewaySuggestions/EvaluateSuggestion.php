@@ -99,4 +99,11 @@ class EvaluateSuggestion {
 
 		return $result;
 	}
+
+	/**
+	 * Resets the memoized results. Useful for testing.
+	 */
+	public static function reset_memo() {
+		self::$memo = array();
+	}
 }

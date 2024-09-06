@@ -31,6 +31,8 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_store_address', 'foo' );
 
 		update_option( 'active_plugins', array( 'foo/foo.php' ) );
+
+		EvaluateSuggestion::reset_memo();
 	}
 
 	/**

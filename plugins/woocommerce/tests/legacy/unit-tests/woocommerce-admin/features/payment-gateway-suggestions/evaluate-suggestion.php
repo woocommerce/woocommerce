@@ -391,13 +391,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
  */
 class TestableEvaluateSuggestion extends EvaluateSuggestion {
 	/**
-	 * Reset the memo for testing.
-	 */
-	public static function reset_for_tests() {
-		self::$memo = array();
-	}
-
-	/**
 	 * Get the memo for testing.
 	 *
 	 * @return array
