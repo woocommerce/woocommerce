@@ -35,4 +35,23 @@ class AssetDataRegistryMock extends AssetDataRegistry {
 	protected function debug() {
 		return $this->debug;
 	}
+
+	/**
+	 * Exposes private registered data to child classes.
+	 *
+	 * @return array  The registered data on the private data property
+	 */
+	public function get() {
+		return parent::get();
+	}
+
+	/**
+	 * Used for on demand initialization of asset data and registering it with
+	 * the internal data registry.
+	 *
+	 * Note: core data will overwrite any externally registered data via the api.
+	 */
+	public function initialize_core_data() {
+		return parent::initialize_core_data();
+	}
 }
