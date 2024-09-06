@@ -15,7 +15,8 @@
 	],
 	"supports": {},
 	"usesContext": [
-		"filterOptions"
+		"filterData",
+		"isParentSelected"
 	],
 	"attributes": {}
 }
