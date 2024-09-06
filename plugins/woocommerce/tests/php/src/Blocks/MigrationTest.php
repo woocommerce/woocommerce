@@ -7,6 +7,9 @@ use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
 use Mockery;
 
+/**
+ * Unit tests for the Migration class.
+ */
 class MigrationTest extends \WP_UnitTestCase {
 	use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 
@@ -113,5 +116,4 @@ class MigrationTest extends \WP_UnitTestCase {
 
 		$mock->run_migrations();
 	}
-
 }

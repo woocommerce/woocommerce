@@ -36,4 +36,3 @@ class TotalsMock extends Totals {
 	protected function initialize() {
 	}
 }
-
