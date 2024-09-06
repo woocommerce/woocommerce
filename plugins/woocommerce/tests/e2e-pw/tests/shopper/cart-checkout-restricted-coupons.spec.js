@@ -265,9 +265,11 @@ test.describe(
 				await applyCoupon( page, 'min-max-spend-individual' );
 				// failed because we need to have at least $50 in cart (single product is only $20)
 				await expect(
-					page.getByText(
-						'The minimum spend for this coupon is $50.00.'
-					)
+					page
+						.getByRole( 'alert' )
+						.getByText(
+							'The minimum spend for this coupon is $50.00.'
+						)
 				).toBeVisible();
 
 				// add a couple more in order to hit minimum spend
