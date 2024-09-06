@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move Pressable and WPCOM e2e runss to release-checks instead of daily-checks

@@ -43,6 +43,9 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	/**
 	 * Create a new customer.
 	 *
+	 * @since 9.4.0 Moved woocommerce_registration_error_email_exists filter to the shortcode checkout class.
+	 * @since 9.4.0 Removed handling for generating username/password based on settings--this is consumed at form level. Here, if data is missing it will be generated.
+	 *
 	 * @param  string $email    Customer email.
 	 * @param  string $username Customer username.
 	 * @param  string $password Customer password.
@@ -55,17 +58,24 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		if ( email_exists( $email ) ) {
-			return new WP_Error( 'registration-error-email-exists', apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $email ) );
+			return new WP_Error(
+				'registration-error-email-exists',
+				sprintf(
+					// Translators: %s Email address.
+					esc_html__( 'An account is already registered with %s. Please log in or use a different email address.', 'woocommerce' ),
+					esc_html( $email )
+				)
+			);
 		}
 
-		if ( 'yes' === get_option( 'woocommerce_registration_generate_username', 'yes' ) && empty( $username ) ) {
+		if ( empty( $username ) ) {
 			$username = wc_create_new_customer_username( $email, $args );
 		}
 
 		$username = sanitize_user( $username );
 
 		if ( empty( $username ) || ! validate_username( $username ) ) {
-			return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error-invalid-username', __( 'Please provide a valid account username.', 'woocommerce' ) );
 		}
 
 		if ( username_exists( $username ) ) {
@@ -74,35 +84,88 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
 		// Handle password creation.
 		$password_generated = false;
-		if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && empty( $password ) ) {
+
+		if ( empty( $password ) ) {
 			$password           = wp_generate_password();
 			$password_generated = true;
 		}
 
 		if ( empty( $password ) ) {
-			return new WP_Error( 'registration-error-missing-password', __( 'Please enter an account password.', 'woocommerce' ) );
+			return new WP_Error( 'registration-error-missing-password', __( 'Please create a password for your account.', 'woocommerce' ) );
 		}
 
 		// Use WP_Error to handle registration errors.
 		$errors = new WP_Error();
 
+		/**
+		 * Fires before a customer account is registered.
+		 *
+		 * This hook fires before customer accounts are created and passes the form data (username, email) and an array
+		 * of errors.
+		 *
+		 * This could be used to add extra validation logic and append errors to the array.
+		 *
+		 * @since 7.2.0
+		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
+		 * @param string $username Customer username.
+		 * @param string $user_email Customer email address.
+		 * @param \WP_Error $errors Error object.
+		 */
 		do_action( 'woocommerce_register_post', $username, $email, $errors );
 
+		/**
+		 * Filters registration errors before a customer account is registered.
+		 *
+		 * This hook filters registration errors. This can be used to manipulate the array of errors before
+		 * they are displayed.
+		 *
+		 * @since 7.2.0
+		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
+		 * @param \WP_Error $errors Error object.
+		 * @param string $username Customer username.
+		 * @param string $user_email Customer email address.
+		 * @return \WP_Error
+		 */
 		$errors = apply_filters( 'woocommerce_registration_errors', $errors, $username, $email );
 
-		if ( $errors->get_error_code() ) {
+		if ( is_wp_error( $errors ) && $errors->get_error_code() ) {
 			return $errors;
 		}
 
+		// Merged passed args with sanitized username, email, and password.
+		$customer_data = array_merge(
+			$args,
+			array(
+				'user_login' => $username,
+				'user_pass'  => $password,
+				'user_email' => $email,
+				'role'       => 'customer',
+			)
+		);
+
+		/**
+		 * Filters customer data before a customer account is registered.
+		 *
+		 * This hook filters customer data. It allows user data to be changed, for example, username, password, email,
+		 * first name, last name, and role.
+		 *
+		 * @since 7.2.0
+		 *
+		 * @param array $customer_data An array of customer (user) data.
+		 * @return array
+		 */
 		$new_customer_data = apply_filters(
 			'woocommerce_new_customer_data',
-			array_merge(
-				$args,
+			wp_parse_args(
+				$customer_data,
 				array(
-					'user_login' => $username,
-					'user_pass'  => $password,
-					'user_email' => $email,
-					'role'       => 'customer',
+					'first_name' => '',
+					'last_name'  => '',
+					'source'     => 'unknown',
 				)
 			)
 		);
@@ -113,6 +176,24 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 			return $customer_id;
 		}
 
+		// Set account flag to remind customer to update generated password.
+		if ( $password_generated ) {
+			update_user_option( $customer_id, 'default_password_nag', true, true );
+		}
+
+		/**
+		 * Fires after a customer account has been registered.
+		 *
+		 * This hook fires after customer accounts are created and passes the customer data.
+		 *
+		 * @since 7.2.0
+		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
+		 * @param integer $customer_id New customer (user) ID.
+		 * @param array $new_customer_data Array of customer (user) data.
+		 * @param string $password_generated The generated password for the account.
+		 */
 		do_action( 'woocommerce_created_customer', $customer_id, $new_customer_data, $password_generated );
 
 		return $customer_id;
@@ -232,7 +313,9 @@ function wc_set_customer_auth_cookie( $customer_id ) {
 	wp_set_auth_cookie( $customer_id, true );
 
 	// Update session.
-	WC()->session->init_session_cookie();
+	if ( is_callable( array( WC()->session, 'init_session_cookie' ) ) ) {
+		WC()->session->init_session_cookie();
+	}
 }
 
 /**
@@ -272,10 +355,10 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 			do_action( 'woocommerce_update_new_customer_past_order', $order_id, $customer );
 
 			if ( $order->get_status() === 'wc-completed' ) {
-				$complete++;
+				++$complete;
 			}
 
-			$linked++;
+			++$linked;
 		}
 	}
 
@@ -356,18 +439,18 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		}
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$statuses = array_map(
+			$statuses       = array_map(
 				function ( $status ) {
 					return "wc-$status";
 				},
 				$statuses
 			);
-			$order_table = OrdersTableDataStore::get_orders_table_name();
+			$order_table    = OrdersTableDataStore::get_orders_table_name();
 			$user_id_clause = '';
 			if ( $user_id ) {
 				$user_id_clause = 'OR o.customer_id = ' . absint( $user_id );
 			}
-			$sql = "
+			$sql    = "
 SELECT DISTINCT im.meta_value FROM $order_table AS o
 INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON o.id = i.order_id
 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
@@ -568,17 +651,15 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 		case 'delete_user':
 			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
-			} else {
-				if ( ! wc_current_user_has_role( 'administrator' ) ) {
-					if ( wc_user_has_role( $args[0], 'administrator' ) ) {
+			} elseif ( ! wc_current_user_has_role( 'administrator' ) ) {
+				if ( wc_user_has_role( $args[0], 'administrator' ) ) {
+					$caps[] = 'do_not_allow';
+				} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
+					// Shop managers can only edit customer info.
+					$userdata                    = get_userdata( $args[0] );
+					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
 						$caps[] = 'do_not_allow';
-					} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
-						// Shop managers can only edit customer info.
-						$userdata                    = get_userdata( $args[0] );
-						$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
-						if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
-							$caps[] = 'do_not_allow';
-						}
 					}
 				}
 			}
@@ -596,7 +677,7 @@ add_filter( 'map_meta_cap', 'wc_modify_map_meta_cap', 10, 4 );
  */
 function wc_get_customer_download_permissions( $customer_id ) {
 	$data_store = WC_Data_Store::load( 'customer-download' );
-	return apply_filters( 'woocommerce_permission_list', $data_store->get_downloads_for_customer( $customer_id ), $customer_id );
+	return apply_filters( 'woocommerce_permission_list', $data_store->get_downloads_for_customer( $customer_id ), $customer_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 }
 
 /**
@@ -655,6 +736,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
 			}
 
 			// Download name will be 'Product Name' for products with a single downloadable file, and 'Product Name - File X' for products with multiple files.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 			$download_name = apply_filters(
 				'woocommerce_downloadable_product_name',
 				$download_file['name'],
@@ -688,10 +770,11 @@ function wc_get_customer_available_downloads( $customer_id ) {
 				),
 			);
 
-			$file_number++;
+			++$file_number;
 		}
 	}
 
+	// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 	return apply_filters( 'woocommerce_customer_available_downloads', $downloads, $customer_id );
 }
 
@@ -817,7 +900,7 @@ add_action( 'profile_update', 'wc_update_profile_last_update_time', 10, 2 );
  * @param mixed  $_meta_value Value of the meta that was changed.
  */
 function wc_meta_update_last_update_time( $meta_id, $user_id, $meta_key, $_meta_value ) {
-	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) );
+	$keys_to_track = apply_filters( 'woocommerce_user_last_update_fields', array( 'first_name', 'last_name' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 	$update_time = in_array( $meta_key, $keys_to_track, true ) ? true : false;
 	$update_time = 'billing_' === substr( $meta_key, 0, 8 ) ? true : $update_time;
@@ -848,7 +931,7 @@ function wc_set_user_last_update_time( $user_id ) {
  * @return array
  */
 function wc_get_customer_saved_methods_list( $customer_id ) {
-	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id );
+	return apply_filters( 'woocommerce_saved_payment_methods_list', array(), $customer_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 }
 
 /**

@@ -58,20 +58,20 @@ class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayColumn extends W
 	public function test_it_returns_value_by_array_column() {
 		$items = array(
 			array(
-				'name' => 'mothra',
+				'name' => 'team-a',
 			),
 			array(
-				'name' => 'gezora',
+				'name' => 'team-b',
 			),
 			array(
-				'name' => 'ghidorah',
+				'name' => 'team-c',
 			),
 		);
 
 		$arguments    = (object) array( 'key' => 'name' );
 		$array_column = new ArrayColumn();
 		$result       = $array_column->transform( $items, $arguments );
-		$expected     = array( 'mothra', 'gezora', 'ghidorah' );
+		$expected     = array( 'team-a', 'team-b', 'team-c' );
 		$this->assertEquals( $expected, $result );
 	}
 }
