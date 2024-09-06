@@ -30,6 +30,18 @@ test.describe(
 			await page
 				.getByText( '1 page restored from the Trash.' )
 				.waitFor( { state: 'visible' } );
+			await page.goto( 'wp-admin/edit.php?post_type=page' );
+			await page.getByRole( 'cell', { name: '“Shop” (Edit)' } ).hover();
+			await page
+				.getByLabel( 'Quick edit “Shop” inline' )
+				.click( { force: true } );
+			await page
+				.getByLabel( 'Status Published Pending' )
+				.selectOption( 'publish', { exact: true } );
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await page
+				.locator( '#a11y-speak-polite', { hasText: 'Changes saved.' } )
+				.waitFor();
 		} );
 
 		test( 'Check the title of the shop page after the page has been deleted', async ( {

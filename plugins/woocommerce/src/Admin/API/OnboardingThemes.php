@@ -349,36 +349,36 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woocommerce.com/products/luminate/' ),
 			),
 			array(
-				'name'           => 'Nokul',
+				'name'           => 'Gizmo',
 				/* translators: %d: price */
 				'price'          => sprintf( __( '$%d/year', 'woocommerce' ), 79 ),
 				'is_free'        => false,
 				'color_palettes' => array(
 					array(
-						'title'     => 'Foreground and background',
-						'primary'   => '#000000',
-						'secondary' => '#f1eee2',
+						'title'     => 'Primary',
+						'primary'   => '#ff5833',
+						'secondary' => '#ff5833',
 					),
 					array(
-						'title'     => 'Foreground and secondary',
-						'primary'   => '#000000',
-						'secondary' => '#999999',
+						'title'     => 'Foreground',
+						'primary'   => '#111111',
+						'secondary' => '#111111',
 					),
 					array(
-						'title'     => 'Foreground and accent',
-						'primary'   => '#000000',
-						'secondary' => '#d82f16',
+						'title'     => 'Background',
+						'primary'   => '#FFFFFF',
+						'secondary' => '#FFFFFF',
 					),
 					array(
-						'title'     => 'Primary and background',
-						'primary'   => '#d9d0bf',
-						'secondary' => '#f1eee2',
+						'title'     => 'Base',
+						'primary'   => '#595959',
+						'secondary' => '#595959',
 					),
 				),
-				'total_palettes' => 6,
-				'slug'           => 'nokul',
-				'thumbnail_url'  => 'https://woocommerce.com/wp-content/uploads/2022/11/Product-logo.jpg',
-				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woocommerce.com/products/nokul/' ),
+				'total_palettes' => 10,
+				'slug'           => 'gizmo',
+				'thumbnail_url'  => 'https://woocommerce.com/wp-content/uploads/2022/11/gizmo-regular-card-product-logo.jpg?w=900',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woocommerce.com/products/gizmo/' ),
 			),
 		);
 

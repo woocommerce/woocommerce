@@ -50,7 +50,7 @@ const tabs: Tabs = {
 	},
 	extensions: {
 		name: 'extensions',
-		title: __( 'Browse', 'woocommerce' ),
+		title: __( 'Extensions', 'woocommerce' ),
 		showUpdateCount: false,
 		updateCount: 0,
 	},
