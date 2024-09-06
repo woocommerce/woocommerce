@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 /**
  * Tests relating to HtmlSanitizer.
  */
-class HtmlSanitizerTest extends WC_Unit_Test_Case {
+class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @var HtmlSanitizer
 	 */

@@ -11,7 +11,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 /**
  * Tests for COTMigration utility.
  */
-class COTMigrationUtilTest extends WC_Unit_Test_Case {
+class COTMigrationUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var COTMigrationUtil

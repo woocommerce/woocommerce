@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 /**
  * Tests relating to DatabaseUtil.
  */
-class DatabaseUtilTest extends WC_Unit_Test_Case {
+class DatabaseUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var DatabaseUtil
