@@ -55,6 +55,12 @@
 
 		.wc-block-order-confirmation-create-account-terms {
 			@include font-size(small);
+			text-align: center;
+
+			a,
+			span {
+				white-space: nowrap;
+			}
 		}
 
 		.wc-block-components-password-strength.hidden {

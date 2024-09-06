@@ -37,22 +37,22 @@ const defaultTemplate = [
 			[
 				'core/list-item',
 				{
-					content: __( '10% off your next order', 'woocommerce' ),
+					content: __( 'Faster future purchases', 'woocommerce' ),
+				},
+			],
+			[
+				'core/list-item',
+				{
+					content: __( 'Securely save payment info', 'woocommerce' ),
 				},
 			],
 			[
 				'core/list-item',
 				{
 					content: __(
-						'Save info for future checkouts',
+						'Track orders & view shopping history',
 						'woocommerce'
 					),
-				},
-			],
-			[
-				'core/list-item',
-				{
-					content: __( 'Order and reward tracking', 'woocommerce' ),
 				},
 			],
 		],

@@ -12,10 +12,10 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 const termsPageLink = TERMS_URL ? (
 	<a href={ TERMS_URL } target="_blank" rel="noreferrer">
-		{ __( 'Terms and Conditions', 'woocommerce' ) }
+		{ __( 'Terms', 'woocommerce' ) }
 	</a>
 ) : (
-	<>{ __( 'Terms and Conditions', 'woocommerce' ) }</>
+	<span>{ __( 'Terms', 'woocommerce' ) }</span>
 );
 
 const privacyPageLink = PRIVACY_URL ? (
@@ -23,7 +23,7 @@ const privacyPageLink = PRIVACY_URL ? (
 		{ __( 'Privacy Policy', 'woocommerce' ) }
 	</a>
 ) : (
-	<>{ __( 'Privacy Policy', 'woocommerce' ) }</>
+	<span>{ __( 'Privacy Policy', 'woocommerce' ) }</span>
 );
 
 const Form = ( {
@@ -58,7 +58,7 @@ const Form = ( {
 		>
 			<p>
 				{ createInterpolateElement(
-					__( 'Set a strong password for <email/>', 'woocommerce' ),
+					__( 'Set a password for <email/>', 'woocommerce' ),
 					{
 						email: <strong>{ customerEmail }</strong>,
 					}
@@ -118,7 +118,7 @@ const Form = ( {
 				disabled={ !! hasValidationError || ! password || isLoading }
 				showSpinner={ isLoading }
 			>
-				{ __( 'Create an account', 'woocommerce' ) }
+				{ __( 'Create account', 'woocommerce' ) }
 			</Button>
 			<input type="hidden" name="email" value={ customerEmail } />
 			<input type="hidden" name="password" value={ password } />
