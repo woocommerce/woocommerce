@@ -358,6 +358,8 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Handles resetting the user's password.
 	 *
+	 * @since 9.4.0 This will log the user in after resetting the password/session.
+	 *
 	 * @param object $user     The user.
 	 * @param string $new_pass New password for the user in plaintext.
 	 */
@@ -367,6 +369,7 @@ class WC_Shortcode_My_Account {
 		wp_set_password( $new_pass, $user->ID );
 		update_user_meta( $user->ID, 'default_password_nag', false );
 		self::set_reset_password_cookie();
+		wc_set_customer_auth_cookie( $user->ID );
 
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
 			wp_password_change_notification( $user );
