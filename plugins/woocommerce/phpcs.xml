@@ -61,7 +61,12 @@
 		</properties>
 	</rule>
 
+	<rule ref="Generic.CodeAnalysis.UselessOverridingMethod.Found">
+		<exclude-pattern>plugins/woocommerce/tests/php/src/Blocks/Mocks/</exclude-pattern>
+	</rule>
+
 	<rule ref="Generic.PHP.RequireStrictTypes">
+		<include-pattern>i18n/</include-pattern>
 		<include-pattern>includes/</include-pattern>
 		<include-pattern>lib/</include-pattern>
 		<include-pattern>src/</include-pattern>
