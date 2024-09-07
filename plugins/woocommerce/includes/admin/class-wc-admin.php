@@ -90,7 +90,7 @@ class WC_Admin {
 						$product->set_image_id( 30 );
 
 						$order = new WC_Order();
-						$order->add_product( $product, 2 );
+						$order->add_product( wc_get_product(43), 2 );
 						$order->set_id( rand(1000000, 9000000) );
 						$order->set_date_created( time() );
 
