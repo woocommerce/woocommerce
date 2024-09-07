@@ -245,7 +245,7 @@ test.describe(
 
 			await expect(
 				page.getByRole( 'menuitem', {
-					name: 'Coming soon',
+					name: 'Store coming soon',
 					exact: true,
 				} )
 			).toBeVisible();
