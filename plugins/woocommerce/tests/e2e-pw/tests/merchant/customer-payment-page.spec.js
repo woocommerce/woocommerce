@@ -97,28 +97,30 @@ test.describe(
 			).toContainText( productPrice );
 		} );
 
-		test( 'can pay for the order through the customer payment page', async ( {
-			page,
-		} ) => {
-			// key required, so can't go directly to the customer payment page
-			await page.goto(
-				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-			);
-			await page.locator( 'label[for=order_status] > a' ).click();
+		test(
+			'can pay for the order through the customer payment page',
+			{ tag: '@todo-fix-in-multisite' },
+			async ( { page } ) => {
+				// key required, so can't go directly to the customer payment page
+				await page.goto(
+					`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+				);
+				await page.locator( 'label[for=order_status] > a' ).click();
 
-			// pay for the order
-			await page.locator( 'button#place_order' ).click();
+				// pay for the order
+				await page.locator( 'button#place_order' ).click();
 
-			// Verify we landed on the order received page
-			await expect(
-				page.getByText( 'Your order has been received' )
-			).toBeVisible();
-			await expect(
-				page.getByText( `Order #: ${ orderId }` )
-			).toBeVisible();
-			await expect(
-				await page.getByText( `Total: $${ productPrice }` ).count()
-			).toBeGreaterThan( 0 );
-		} );
+				// Verify we landed on the order received page
+				await expect(
+					page.getByText( 'Your order has been received' )
+				).toBeVisible();
+				await expect(
+					page.getByText( `Order #: ${ orderId }` )
+				).toBeVisible();
+				await expect(
+					await page.getByText( `Total: $${ productPrice }` ).count()
+				).toBeGreaterThan( 0 );
+			}
+		);
 	}
 );
