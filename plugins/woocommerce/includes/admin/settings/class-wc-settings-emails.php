@@ -197,7 +197,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'css'         => 'width:400px; height: 75px;',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
 					'type'        => 'textarea',
-					'default'     => '{site_title} &mdash; Built with {WooCommerce}',
+					'default'     => ' ',
 					'autoload'    => false,
 					'desc_tip'    => true,
 				),

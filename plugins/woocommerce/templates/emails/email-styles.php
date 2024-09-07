@@ -87,16 +87,34 @@ body {
 
 #template_header_image {
 	background-color: <?php echo esc_attr( $body ); ?>;
-	padding: 40px 60px 0;
+	padding: 60px 60px 0;
 	text-align: left;
 }
 
 #template_header_image p {
+	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+	font-size: 20px;
+	font-weight: bold;
 	margin: 0;
+	text-transform: uppercase;
 }
 
 #template_header_image img {
 	width: 160px;
+}
+
+.order-summary {
+	font-size: 20px;
+	margin: 30px 0 0;
+}
+
+.order-summary + p {
+	color: #aaa;
+	margin-bottom: 20px !important;
+}
+
+.order-summary + p a {
+	color: #aaa;
 }
 
 #template_footer td {
@@ -168,12 +186,17 @@ body {
 	vertical-align: middle;
 }
 
-tfoot .td {
-	font-size: 16px;
+.total .td {
+	font-size: 20px;
+	font-weight: bold;
 }
 
 .order_item:last-of-type .td {
 	padding-bottom: 20px !important;
+}
+
+tfoot .td {
+	font-weight: normal;
 }
 
 tfoot tr:first-child .td {
