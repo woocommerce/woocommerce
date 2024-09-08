@@ -93,8 +93,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );
-			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-			$taxes_where_clause .= $wpdb->prepare( " AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})" );
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- `$allowed_taxes` was prepared by get_filtered_ids above. */
+			$taxes_where_clause .= " AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})";
 			/* phpcs:enable */
 		}
 
