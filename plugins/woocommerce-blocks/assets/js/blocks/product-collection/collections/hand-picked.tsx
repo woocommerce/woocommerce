@@ -8,11 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
-import {
-	CoreCollectionNames,
-	CoreFilterNames,
-	ETimeFrameOperator,
-} from '../types';
+import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const Icon = () => {
 	return (
@@ -72,10 +68,6 @@ const attributes = {
 		order: 'desc',
 		perPage: 5,
 		pages: 1,
-		timeFrame: {
-			operator: ETimeFrameOperator.IN,
-			value: '-7 days',
-		},
 	},
 	hideControls: [ CoreFilterNames.HAND_PICKED ],
 };
