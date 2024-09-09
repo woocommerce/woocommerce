@@ -364,6 +364,7 @@ class WC_Shortcode_My_Account {
 	 * @param string $new_pass New password for the user in plaintext.
 	 */
 	public static function reset_password( $user, $new_pass ) {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
@@ -371,6 +372,7 @@ class WC_Shortcode_My_Account {
 		self::set_reset_password_cookie();
 		wc_set_customer_auth_cookie( $user->ID );
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		if ( ! apply_filters( 'woocommerce_disable_password_change_notification', false ) ) {
 			wp_password_change_notification( $user );
 		}
