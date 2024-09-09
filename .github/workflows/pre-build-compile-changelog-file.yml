@@ -1,4 +1,6 @@
 name: Pre build step - Compile changelog file
+on:
+  workflow_dispatch:
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
