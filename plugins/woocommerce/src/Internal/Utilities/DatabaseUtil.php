@@ -384,8 +384,11 @@ $on_duplicate_clause
 	 * @return string Sanitized search term.
 	 */
 	public function sanitise_boolean_fts_search_term( string $param ): string {
-		// Replace fts stopwords with spaces.
-		$param = preg_replace( '/[^\p{L}\p{N}_]+/u', ' ', $param );
+		// Remove any operator to prevent incorrect query and fatals, such as search starting with `++`. We can allow this in the future if we have proper validation for FTS search operators.
+		// Space is allowed to provide multiple words.
+		if ( preg_replace( '/[^\p{L}\p{N}_]+/u', ' ', $param ) !== $param ) {
+			return '"' . trim( $param, '"' ) . '"';
+		}
 		// Split the search phrase into words so that we can add operators when needed.
 		$words           = explode( ' ', $param );
 		$sanitized_words = array();
