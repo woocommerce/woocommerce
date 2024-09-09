@@ -478,7 +478,7 @@
 						"tests/performance/**"
 					],
 					"testEnv": {
-						"start": "env:perf:ci-setup"
+						"start": "test:perf:ci-setup"
 					},
 					"events": [
 						"pull_request",
