@@ -5,7 +5,7 @@ import * as navigation from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { updateQueryParams, createQueryParamsListener } from '../common';
+import { updateQueryParams, createQueryParamsListener } from '../url-handling';
 
 jest.mock( '@woocommerce/navigation', () => ( {
 	getHistory: jest.fn(),
