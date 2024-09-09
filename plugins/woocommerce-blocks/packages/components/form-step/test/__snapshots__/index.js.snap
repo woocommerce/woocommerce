@@ -14,7 +14,6 @@ exports[`FormStep fieldset legend should default to legend prop when title and l
     className="wc-block-components-checkout-step__heading"
   >
     <h2
-      aria-hidden="true"
       className="wc-block-components-title wc-block-components-checkout-step__title"
     >
       Lorem Ipsum
@@ -64,7 +63,6 @@ exports[`FormStep should remove step number CSS class if prop is false 1`] = `
     className="wc-block-components-checkout-step__heading"
   >
     <h2
-      aria-hidden="true"
       className="wc-block-components-title wc-block-components-checkout-step__title"
     >
       Lorem Ipsum
@@ -135,7 +133,6 @@ exports[`FormStep should render a fieldset with heading if a title is provided 1
     className="wc-block-components-checkout-step__heading"
   >
     <h2
-      aria-hidden="true"
       className="wc-block-components-title wc-block-components-checkout-step__title"
     >
       Lorem Ipsum
@@ -167,7 +164,6 @@ exports[`FormStep should render step description 1`] = `
     className="wc-block-components-checkout-step__heading"
   >
     <h2
-      aria-hidden="true"
       className="wc-block-components-title wc-block-components-checkout-step__title"
     >
       Lorem Ipsum
@@ -204,7 +200,6 @@ exports[`FormStep should render step heading content 1`] = `
     className="wc-block-components-checkout-step__heading"
   >
     <h2
-      aria-hidden="true"
       className="wc-block-components-title wc-block-components-checkout-step__title"
     >
       Lorem Ipsum
@@ -243,7 +238,6 @@ exports[`FormStep should set disabled prop to the fieldset element when disabled
     className="wc-block-components-checkout-step__heading"
   >
     <h2
-      aria-hidden="true"
       className="wc-block-components-title wc-block-components-checkout-step__title"
     >
       Lorem Ipsum
