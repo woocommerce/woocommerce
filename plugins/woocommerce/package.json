@@ -478,7 +478,7 @@
 						"tests/performance/**"
 					],
 					"testEnv": {
-						"start": "env:perf && pnpm test:perf:install-k6"
+						"start": "env:perf:ci-setup"
 					},
 					"events": [
 						"pull_request",
