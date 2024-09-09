@@ -26,7 +26,7 @@ import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils';
 import { DISALLOWED_BLOCKS } from '../../constants';
 import { FilterOptionItem } from '../../types';
-import InitialDisabled from '../../components/initial-disabled';
+import { InitialDisabled } from '../../components/initial-disabled';
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;

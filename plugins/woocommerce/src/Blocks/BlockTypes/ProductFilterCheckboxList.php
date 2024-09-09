@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * Product Filter: Attribute Block.
+ * Product Filter: Checkbox List Block.
  */
 final class ProductFilterCheckboxList extends AbstractBlock {
 

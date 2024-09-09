@@ -4,22 +4,19 @@
 import './style.scss';
 
 /**
- * The reason for this component instead of using core/disabled is, the Disabled
- * component messes up the focus on inner blocks. For example, when a there is
- * an heading block nested inside, the text cursor, which indicates the editable
- * area, isn't visible when focus on the heading block.
+ * The reason for using this component instead of the core/disabled component is
+ * that the Disabled component disrupts the focus on inner blocks. For example,
+ * when a heading block is nested inside, the text cursor, which indicates the
+ * editable area, isn't visible when focused on the heading block.
  *
- * This component only use CSS to control the selecte behavior of inner blocks,
- * which fix the issues like mentioned above.
- *
- * Limitation: being a static component comes with a limitation, this component
- * is meant to put directly inside the block wrapper element that holds block
- * props.
+ * This component only uses CSS to control the selected behavior of inner
+ * blocks, which fixes the abovementioned issues. However, being a static
+ * component comes with a limitation: this component is meant to be placed
+ * directly inside the block wrapper element that holds block props.
  */
-const InitialDisabled = ( {
+export const InitialDisabled = ( {
 	children,
 }: {
-	isDisabled: boolean;
 	children: React.ReactNode;
 } ): JSX.Element => (
 	<div className="wc-component-initial-disabled">
@@ -27,5 +24,3 @@ const InitialDisabled = ( {
 		{ children }
 	</div>
 );
-
-export default InitialDisabled;

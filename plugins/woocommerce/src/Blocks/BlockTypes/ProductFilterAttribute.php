@@ -317,7 +317,15 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$cached = get_transient( 'wc_block_product_filter_attribute_default_attribute' );
 
-		if ( $cached ) {
+		if (
+			$cached &&
+			isset( $cached->attribute_id ) &&
+			isset( $cached->attribute_name ) &&
+			isset( $cached->attribute_label ) &&
+			isset( $cached->attribute_type ) &&
+			isset( $cached->attribute_orderby ) &&
+			isset( $cached->attribute_public )
+		) {
 			return $cached;
 		}
 
@@ -367,7 +375,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$default_attribute = $attributes[ $attribute_id ];
 		}
 
-		set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute );
+		set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute, DAY_IN_SECONDS );
 
 		return $default_attribute;
 	}

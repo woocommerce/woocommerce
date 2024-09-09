@@ -3,7 +3,8 @@
  */
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
-import { Disabled } from '@wordpress/components';
+import { Icon } from '@wordpress/components';
+import { checkMark } from '@woocommerce/icons';
 import {
 	useBlockProps,
 	withColors,
@@ -28,7 +29,6 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		context,
 		attributes,
 		setAttributes,
-		isSelected,
 		optionElementBorder,
 		setOptionElementBorder,
 		optionElementSelected,
@@ -100,20 +100,10 @@ const Edit = ( props: EditProps ): JSX.Element => {
 													!! item.selected
 												}
 											/>
-											<svg
+											<Icon
 												className="wc-block-product-filter-checkbox-list__mark"
-												viewBox="0 0 10 8"
-												fill="none"
-												xmlns="http://www.w3.org/2000/svg"
-											>
-												<path
-													d="M9.25 1.19922L3.75 6.69922L1 3.94922"
-													stroke="currentColor"
-													strokeWidth="1.5"
-													strokeLinecap="round"
-													strokeLinejoin="round"
-												/>
-											</svg>
+												icon={ checkMark }
+											/>
 										</span>
 									</span>
 									<span className="wc-block-product-filter-checkbox-list__text">
