@@ -32,7 +32,7 @@ if [ "$(uname)" == "Darwin" ]; then
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 	archive="k6-v$K6_VERSION-linux-$arch.tar.gz"
     download_archive "$DOWNLOAD_URL/$archive" "$SCRIPT_PATH/$archive"
-    tar -xzf "$SCRIPT_PATH/$archive" -C "$SCRIPT_PATH"
+    tar --strip-components=1 -xzf "$SCRIPT_PATH/$archive" -C "$SCRIPT_PATH"
 else
     echo "Unsupported operating system. Please check K6 docs and install the right version for your system."
     exit 1
