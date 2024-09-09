@@ -121,7 +121,7 @@ if ( wc_tax_enabled() ) {
 					$coupon_info = $item->get_meta( 'coupon_info' );
 					if ( $coupon_info ) {
 						$coupon_info = json_decode( $coupon_info, true );
-						$post_id     = $coupon_info[0];
+						$post_id     = $coupon_info[0]; //phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					} else {
 						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", $item->get_code(), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
