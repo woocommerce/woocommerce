@@ -1,8 +1,8 @@
-# Changelog 
+# Changelog
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.2]https://packagist.org/packages/woocommerce/remote-specs-validation#1.0.2) - 2024-04-12 
+## [1.0.2](https://packagist.org/packages/woocommerce/remote-specs-validation#1.0.2) - 2024-04-12 
 
 * Fix - Fix base_location_state and base_location_country value type [#51169]
 * Update - Bump all remote spec endpoints to version `2.0`. [#45298]
