@@ -3,6 +3,35 @@
  */
 import { test, expect } from '@woocommerce/e2e-utils';
 
+const templatePartData = {
+	selectors: {
+		frontend: {},
+		editor: {
+			blocks: {
+				activeFilters: {
+					title: 'Active (Experimental)',
+					blockLabel: 'Block: Active (Experimental)',
+				},
+				productFilters: {
+					title: 'Product Filters (Experimental)',
+					blockLabel: 'Block: Product Filters (Experimental)',
+				},
+				filterOptions: {
+					title: 'Filter Options',
+					blockLabel: 'Block: Filter Options',
+				},
+				productFiltersOverlayNavigation: {
+					title: 'Overlay Navigation (Experimental)',
+					name: 'woocommerce/product-filters-overlay-navigation',
+					blockLabel: 'Block: Overlay Navigation (Experimental)',
+				},
+			},
+		},
+	},
+	slug: 'product-filters',
+	productPage: '/product/hoodie/',
+};
+
 test.describe( 'Filters Overlay Template Part', () => {
 	test.beforeEach( async ( { admin, requestUtils } ) => {
 		await requestUtils.activatePlugin(
@@ -34,7 +63,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 			.locator( '[data-type="core/template-part"]' )
 			.filter( {
 				has: editor.canvas.getByLabel(
-					'Block: Product Filters (Experimental)'
+					templatePartData.selectors.editor.blocks.productFilters
+						.blockLabel
 				),
 			} );
 
@@ -57,22 +87,37 @@ test.describe( 'Filters Overlay Template Part', () => {
 		} ) => {
 			await editor.setContent( '' );
 			await editor.openGlobalBlockInserter();
-			await page.getByText( 'Product Filters (Experimental)' ).click();
+			await page
+				.getByText(
+					templatePartData.selectors.editor.blocks.productFilters
+						.title
+				)
+				.click();
 			const block = editor.canvas.getByLabel(
-				'Block: Product Filters (Experimental)'
+				templatePartData.selectors.editor.blocks.productFilters
+					.blockLabel
 			);
 			await expect( block ).toBeVisible();
 
 			// This forces the list view to show the inner blocks of the Product Filters template part.
 			await editor.canvas
-				.getByLabel( 'Block: Active (Experimental)' )
-				.getByLabel( 'Block: Filter Options' )
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.activeFilters
+						.blockLabel
+				)
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.filterOptions
+						.blockLabel
+				)
 				.click();
 
 			await editor.openDocumentSettingsSidebar();
 			await page.getByLabel( 'Document Overview' ).click();
 			await page
-				.getByRole( 'link', { name: 'Product Filters (Experimental)' } )
+				.getByRole( 'link', {
+					name: templatePartData.selectors.editor.blocks
+						.productFilters.title,
+				} )
 				.nth( 1 )
 				.click();
 
@@ -82,7 +127,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 			await layoutSettings.getByLabel( 'Always' ).click();
 			await editor.page
 				.getByRole( 'link', {
-					name: 'Overlay Navigation (Experimental)',
+					name: templatePartData.selectors.editor.blocks
+						.productFiltersOverlayNavigation.title,
 				} )
 				.click();
 
@@ -94,7 +140,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 
 			const productFiltersOverlayNavigation = (
 				await frontendUtils.getBlockByName(
-					'woocommerce/product-filters-overlay-navigation'
+					templatePartData.selectors.editor.blocks
+						.productFiltersOverlayNavigation.name
 				)
 			 ).filter( {
 				has: page.locator( ':visible' ),
@@ -115,7 +162,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 
 			const productFiltersDialogCloseButton = (
 				await frontendUtils.getBlockByName(
-					'woocommerce/product-filters-overlay-navigation'
+					templatePartData.selectors.editor.blocks
+						.productFiltersOverlayNavigation.name
 				)
 			 ).filter( { hasText: 'Close' } );
 
@@ -133,22 +181,37 @@ test.describe( 'Filters Overlay Template Part', () => {
 		} ) => {
 			await editor.setContent( '' );
 			await editor.openGlobalBlockInserter();
-			await page.getByText( 'Product Filters (Experimental)' ).click();
+			await page
+				.getByText(
+					templatePartData.selectors.editor.blocks.productFilters
+						.title
+				)
+				.click();
 			const block = editor.canvas.getByLabel(
-				'Block: Product Filters (Experimental)'
+				templatePartData.selectors.editor.blocks.productFilters
+					.blockLabel
 			);
 			await expect( block ).toBeVisible();
 
 			// This forces the list view to show the inner blocks of the Product Filters template part.
 			await editor.canvas
-				.getByLabel( 'Block: Active (Experimental)' )
-				.getByLabel( 'Block: Filter Options' )
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.activeFilters
+						.blockLabel
+				)
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.filterOptions
+						.blockLabel
+				)
 				.click();
 
 			await editor.openDocumentSettingsSidebar();
 			await page.getByLabel( 'Document Overview' ).click();
 			await page
-				.getByRole( 'link', { name: 'Product Filters (Experimental)' } )
+				.getByRole( 'link', {
+					name: templatePartData.selectors.editor.blocks
+						.productFilters.title,
+				} )
 				.nth( 1 )
 				.click();
 
@@ -158,7 +221,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 			await layoutSettings.getByLabel( 'Never' ).click();
 			await editor.page
 				.getByRole( 'link', {
-					name: 'Overlay Navigation (Experimental)',
+					name: templatePartData.selectors.editor.blocks
+						.productFiltersOverlayNavigation.title,
 				} )
 				.click();
 
@@ -170,7 +234,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 
 			const productFiltersOverlayNavigation = (
 				await frontendUtils.getBlockByName(
-					'woocommerce/product-filters-overlay-navigation'
+					templatePartData.selectors.editor.blocks
+						.productFiltersOverlayNavigation.name
 				)
 			 ).filter( {
 				has: page.locator( ':visible' ),
@@ -186,22 +251,37 @@ test.describe( 'Filters Overlay Template Part', () => {
 		} ) => {
 			await editor.setContent( '' );
 			await editor.openGlobalBlockInserter();
-			await page.getByText( 'Product Filters (Experimental)' ).click();
+			await page
+				.getByText(
+					templatePartData.selectors.editor.blocks.productFilters
+						.title
+				)
+				.click();
 			const block = editor.canvas.getByLabel(
-				'Block: Product Filters (Experimental)'
+				templatePartData.selectors.editor.blocks.productFilters
+					.blockLabel
 			);
 			await expect( block ).toBeVisible();
 
 			// This forces the list view to show the inner blocks of the Product Filters template part.
 			await editor.canvas
-				.getByLabel( 'Block: Active (Experimental)' )
-				.getByLabel( 'Block: Filter Options' )
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.activeFilters
+						.blockLabel
+				)
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.filterOptions
+						.blockLabel
+				)
 				.click();
 
 			await editor.openDocumentSettingsSidebar();
 			await page.getByLabel( 'Document Overview' ).click();
 			await page
-				.getByRole( 'link', { name: 'Product Filters (Experimental)' } )
+				.getByRole( 'link', {
+					name: templatePartData.selectors.editor.blocks
+						.productFilters.title,
+				} )
 				.nth( 1 )
 				.click();
 
@@ -211,7 +291,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 			await layoutSettings.getByLabel( 'Mobile' ).click();
 			await editor.page
 				.getByRole( 'link', {
-					name: 'Overlay Navigation (Experimental)',
+					name: templatePartData.selectors.editor.blocks
+						.productFiltersOverlayNavigation.title,
 				} )
 				.click();
 
@@ -223,7 +304,8 @@ test.describe( 'Filters Overlay Template Part', () => {
 
 			const productFiltersOverlayNavigation = (
 				await frontendUtils.getBlockByName(
-					'woocommerce/product-filters-overlay-navigation'
+					templatePartData.selectors.editor.blocks
+						.productFiltersOverlayNavigation.name
 				)
 			 ).filter( {
 				has: page.locator( ':visible' ),
