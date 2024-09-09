@@ -750,6 +750,11 @@ class CustomOrdersTableController {
 		return $link;
 	}
 
+	/**
+	 * Set the `orders` cache group as non-persistent if Custom Order data caching is enabled.
+	 *
+	 * @return void
+	 */
 	private function maybe_set_order_cache_group_as_non_persistent() {
 		global $wp_object_cache;
 		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
