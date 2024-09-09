@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { Icon } from '@wordpress/components';
 import { checkMark } from '@woocommerce/icons';
+import { useMemo } from '@wordpress/element';
 import {
 	useBlockProps,
 	withColors,
@@ -21,6 +22,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
+import './editor.scss';
 import { EditProps } from './types';
 
 const Edit = ( props: EditProps ): JSX.Element => {
@@ -48,6 +50,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-checkbox-list', {
+			'is-loading': isLoading,
 			'has-option-element-border-color':
 				optionElementBorder.color || customOptionElementBorder,
 			'has-option-element-selected-color':
@@ -65,12 +68,22 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		},
 	} );
 
+	const loadingState = useMemo( () => {
+		return [ ...Array( 5 ) ].map( ( x, i ) => (
+			<li
+				key={ i }
+				style={ {
+					/* stylelint-disable */
+					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
+				} }
+			>
+				&nbsp;
+			</li>
+		) );
+	}, [] );
+
 	if ( ! items ) {
 		return <></>;
-	}
-
-	if ( isLoading ) {
-		return <p>Loading</p>;
 	}
 
 	const threshold = 15;
@@ -80,8 +93,12 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		<>
 			<div { ...blockProps }>
 				<ul className="wc-block-product-filter-checkbox-list__list">
-					{ ( isLongList ? items.slice( 0, threshold ) : items ).map(
-						( item, index ) => (
+					{ isLoading && loadingState }
+					{ ! isLoading &&
+						( isLongList
+							? items.slice( 0, threshold )
+							: items
+						).map( ( item, index ) => (
 							<li
 								key={ index }
 								className="wc-block-product-filter-checkbox-list__item"
@@ -111,10 +128,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									</span>
 								</label>
 							</li>
-						)
-					) }
+						) ) }
 				</ul>
-				{ isLongList && (
+				{ ! isLoading && isLongList && (
 					<span className="wc-block-product-filter-checkbox-list__show-more">
 						<small>{ __( 'Show more…', 'woocommerce' ) }</small>
 					</span>

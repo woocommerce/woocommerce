@@ -188,6 +188,7 @@ const Edit = ( props: EditProps ) => {
 									? attributeOptionsPreview
 									: attributeOptions,
 							isLoading:
+								true ||
 								isTermsLoading ||
 								isFilterCountsLoading ||
 								isOptionsLoading,

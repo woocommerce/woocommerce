@@ -184,11 +184,13 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['default'] = 'coupon_id';
-		$params['orderby']['enum']    = array(
-			'coupon_id',
-			'code',
-			'amount',
-			'orders_count',
+		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
+			array(
+				'coupon_id',
+				'code',
+				'amount',
+				'orders_count',
+			)
 		);
 		$params['coupons']            = array(
 			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
