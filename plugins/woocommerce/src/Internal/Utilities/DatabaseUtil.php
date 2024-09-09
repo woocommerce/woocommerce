@@ -386,28 +386,17 @@ $on_duplicate_clause
 	public function sanitise_boolean_fts_search_term( string $param ): string {
 		// Remove any operator to prevent incorrect query and fatals, such as search starting with `++`. We can allow this in the future if we have proper validation for FTS search operators.
 		// Space is allowed to provide multiple words.
-		if ( preg_replace( '/[^\p{L}\p{N}_]+/u', ' ', $param ) !== $param ) {
-			return '"' . trim( $param, '"' ) . '"';
+		$sanitized_param = preg_replace( '/[^\p{L}\p{N}_]+/u', ' ', $param );
+		if ( $sanitized_param !== $param ) {
+			$param = str_replace( '"', '', $param );
+			return '"' . $param . '"';
 		}
 		// Split the search phrase into words so that we can add operators when needed.
 		$words           = explode( ' ', $param );
 		$sanitized_words = array();
 		foreach ( $words as $word ) {
-			// If quotes are provided, then we need to search as is.
-			if ( str_starts_with( $word, '"' ) && str_ends_with( $word, '"' ) ) {
-				$sanitized_words[] = $word;
-				continue;
-			}
-
-			// Strip away relevancy operators to keep the search performant.
-			$word = preg_replace( '/[><\(\)~*\"@]+/', '', $word );
-			if ( strlen( $word ) === 0 ) {
-				continue;
-			}
-
 			// Add `*` as suffix to every term so that partial matches happens.
-			$word = str_ends_with( $word, '*' ) ? $word : $word . '*';
-
+			$word              = $word . '*';
 			$sanitized_words[] = $word;
 		}
 		return implode( ' ', $sanitized_words );
