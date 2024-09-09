@@ -12,7 +12,8 @@ npm install @woocommerce/e2e-utils --save
 ## Usage
 
 Example:
-~~~js
+
+```js
 import {
 	shopper,
 	merchant,
@@ -29,7 +30,7 @@ describe( 'Cart page', () => {
 		await expect( page ).toMatchElement( '.cart-empty', { text: 'Your cart is currently empty.' } );
 	} );
 } );
-~~~
+```
 
 ### Retries
 
