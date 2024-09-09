@@ -57962,7 +57962,7 @@ snapshots:
 
   react-inspector@5.1.1(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.24.7
+      '@babel/runtime': 7.25.0
       is-dom: 1.1.0
       prop-types: 15.8.1
       react: 18.3.1
@@ -58358,7 +58358,7 @@ snapshots:
 
   react-select@3.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.24.7
+      '@babel/runtime': 7.25.0
       '@emotion/cache': 10.0.29
       '@emotion/core': 10.3.1(react@18.3.1)
       '@emotion/css': 10.0.27
