@@ -24,10 +24,10 @@ import {
 /**
  * Internal dependencies
  */
-import { sortOrderOptions } from '../constants';
-import { BlockAttributes, EditProps } from '../types';
-import { getAttributeFromId } from '../utils';
-import { getInnerBlockByName } from '../../../utils';
+import { sortOrderOptions } from './constants';
+import { BlockAttributes, EditProps } from './types';
+import { getAttributeFromId } from './utils';
+import { getInnerBlockByName } from '../../utils';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 

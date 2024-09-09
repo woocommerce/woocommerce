@@ -23,7 +23,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import { Inspector } from './components/inspector';
+import { Inspector } from './inspector';
 import { attributeOptionsPreview } from './constants';
 import './style.scss';
 import { EditProps, isAttributeCounts } from './types';
