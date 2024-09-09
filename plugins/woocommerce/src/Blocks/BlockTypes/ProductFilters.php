@@ -47,6 +47,7 @@ class ProductFilters extends AbstractBlock {
 			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute( 'data-wc-bind--hidden', '!state.isDialogOpen' );
 			$p->set_attribute( 'data-wc-class--wc-block-product-filters--dialog-open', 'state.isDialogOpen' );
+			$p->set_attribute( 'data-wc-class--wc-block-product-filters--with-admin-bar', 'context.hasPageWithWordPressAdminBar' );
 			$html = $p->get_updated_html();
 		}
 
@@ -129,6 +130,7 @@ class ProductFilters extends AbstractBlock {
 				wp_json_encode(
 					array(
 						'isDialogOpen' => false,
+						'hasPageWithWordPressAdminBar' => false,
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)

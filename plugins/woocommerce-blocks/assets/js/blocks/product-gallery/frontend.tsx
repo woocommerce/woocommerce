@@ -45,7 +45,7 @@ const closeDialog = ( context: ProductGalleryContext ) => {
 	context.isDialogOpen = false;
 	// Reset the main image.
 	context.selectedImage = context.firstMainImageId;
-	document.body.classList.remove( 'wc-block-product-gallery-modal-open' );
+	document.body.classList.remove( 'wc-modal--open' );
 
 	if ( context.elementThatTriggeredDialogOpening ) {
 		context.elementThatTriggeredDialogOpening?.focus();
@@ -77,9 +77,7 @@ const productGallery = {
 		openDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = true;
-			document.body.classList.add(
-				'wc-block-product-gallery-modal-open'
-			);
+			document.body.classList.add( 'wc-modal--open' );
 			const dialogPopUp = document.querySelector(
 				'dialog[aria-label="Product gallery"]'
 			);
