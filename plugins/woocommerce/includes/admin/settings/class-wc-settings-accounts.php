@@ -83,6 +83,21 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
+				'desc'          => __( 'After checkout (recommended)', 'woocommerce' ),
+				'desc_tip'      => sprintf(
+					/* Translators: %1$s and %2$s are opening and closing <a> tags respectively. */
+					__( 'Customers can create an account after their order is placed. Customize messaging %1$shere%2$s.', 'woocommerce' ),
+					'<a href="' . esc_url( admin_url( 'site-editor.php?postId=woocommerce%2Fwoocommerce%2F%2Forder-confirmation&postType=wp_template&canvas=edit' ) ) . '">',
+					'</a>'
+				),
+				'id'            => 'woocommerce_enable_delayed_account_creation',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'autoload'      => false,
+			),
+			array(
+				'title'         => __( 'Account creation', 'woocommerce' ),
 				'desc'          => __( 'On "My account" page', 'woocommerce' ),
 				'id'            => 'woocommerce_enable_myaccount_registration',
 				'default'       => 'no',
@@ -256,6 +271,13 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				},
 				$account_settings
 			);
+		} else {
+			$account_settings = array_filter(
+				$account_settings,
+				function ( $setting ) {
+					return 'woocommerce_enable_delayed_account_creation' !== $setting['id'];
+				},
+			);
 		}
 
 		/**
@@ -281,6 +303,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				const checkboxes = [
 					document.getElementById("woocommerce_enable_signup_and_login_from_checkout"),
 					document.getElementById("woocommerce_enable_myaccount_registration"),
+					document.getElementById("woocommerce_enable_delayed_account_creation"),
 					document.getElementById("woocommerce_enable_signup_from_checkout_for_subscriptions")
 				];
 				const inputs = [
@@ -288,19 +311,47 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					document.getElementById("woocommerce_registration_generate_password")
 				];
 
-				function updateInputs() {
+				function setTooltip(element, text) {
+					if ( text ) {
+						element.setAttribute('aria-label', text);
+					} else {
+						element.removeAttribute('aria-label', text);
+					}
+				}
+
+				function updateAccountCreationInputs() {
 					const isChecked = checkboxes.some(cb => cb && cb.checked);
 					inputs.forEach(input => {
 						if ( ! input ) {
 							return;
 						}
+						const label = input.closest('label');
+
 						input.disabled = !isChecked;
-						input.closest('td').classList.toggle("disabled", !isChecked);
+						label.classList.toggle("disabled", !isChecked);
+						setTooltip(label, !isChecked ? '<?php echo esc_attr__( 'Enable an account creation method to use this feature.', 'woocommerce' ); ?>' : '');
 					});
 				}
 
-				checkboxes.forEach(cb => cb && cb.addEventListener('change', updateInputs));
-				updateInputs(); // Initial state
+				checkboxes.forEach(cb => cb && cb.addEventListener('change', updateAccountCreationInputs));
+				updateAccountCreationInputs(); // Initial state
+
+				const guestCheckoutInput = document.getElementById("woocommerce_enable_guest_checkout");
+				const delayedAccountCreationInput = document.getElementById("woocommerce_enable_delayed_account_creation");
+
+				function updateDelayedAccountCreationInput() {
+					const isChecked = guestCheckoutInput.checked;
+					const label = delayedAccountCreationInput.closest('label');
+
+					delayedAccountCreationInput.disabled = !isChecked;
+					label.classList.toggle("disabled", !isChecked);
+					setTooltip(label, !isChecked ? '<?php echo esc_attr__( 'Enable guest checkout to use this feature.', 'woocommerce' ); ?>' : '');
+				}
+
+				if ( guestCheckoutInput && delayedAccountCreationInput ) {
+					guestCheckoutInput.addEventListener('change', updateDelayedAccountCreationInput);
+					updateDelayedCheckoutInput();
+				}
 			});
 		</script>
 		<?php

@@ -5190,8 +5190,35 @@ img.help_tip {
 			float: none;
 		}
 
-		td.disabled {
-			opacity: 0.5;
+		.disabled {
+			opacity: 0.9;
+			cursor: not-allowed;
+			> input {
+				cursor: not-allowed;
+			}
+			&[aria-label] {
+				position: relative;
+			}
+			&[aria-label]::before {
+				content: attr(aria-label);
+				position: absolute;
+				top: -6px;
+				left: 6px;
+				transform: translateX(-50%) translateY(-100%);
+				background: black;
+				text-align: center;
+				color: #fff;
+				padding: 6px;
+				font-size: 12px;
+				min-width: 80px;
+				max-width: 200px;
+				border-radius: 5px;
+				pointer-events: none;
+				opacity:0;
+			}
+			&[aria-label]:hover::before {
+				opacity:1
+			}
 		}
 
 		fieldset {
