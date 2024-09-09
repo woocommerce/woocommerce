@@ -8,7 +8,7 @@ import React from 'react';
  * Internal dependencies
  */
 import { ImageGallery, ImageGalleryItem } from '../';
-import { MockMediaUpload } from '../../media-uploader/stories/index.tsx';
+import { MockMediaUpload } from '../../media-uploader/stories/mock-media-uploader';
 
 export const Basic: React.FC = () => {
 	return (
