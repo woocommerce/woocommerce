@@ -367,29 +367,16 @@ test.describe( 'Deleted product reference in Product Collection block', () => {
 			'register-product-collection-tester'
 		);
 
-		// Check if "A Test Product" exists
-		const products = await requestUtils.rest( {
-			method: 'GET',
+		// Add a new test product to the database
+		const newProduct = await requestUtils.rest( {
+			method: 'POST',
 			path: 'wc/v3/products',
-			params: {
-				search: 'A Test Product',
+			data: {
+				name: 'A Test Product',
+				price: 10,
 			},
 		} );
-
-		// Add "Test Product" only if it doesn't exist
-		if ( products.length === 0 ) {
-			const newProduct = await requestUtils.rest( {
-				method: 'POST',
-				path: 'wc/v3/products',
-				data: {
-					name: 'A Test Product',
-					price: 10,
-				},
-			} );
-			testProductId = newProduct.id;
-		} else {
-			testProductId = products[ 0 ].id;
-		}
+		testProductId = newProduct.id;
 	} );
 
 	test( 'Product picker should be shown when product reference is deleted', async ( {
@@ -420,12 +407,10 @@ test.describe( 'Deleted product reference in Product Collection block', () => {
 		await editor.saveDraft();
 
 		// Delete the product
-		if ( testProductId ) {
-			await requestUtils.rest( {
-				method: 'DELETE',
-				path: `wc/v3/products/${ testProductId }`,
-			} );
-		}
+		await requestUtils.rest( {
+			method: 'DELETE',
+			path: `wc/v3/products/${ testProductId }`,
+		} );
 
 		// Product picker should be shown in Editor
 		await admin.page.reload();
@@ -435,31 +420,27 @@ test.describe( 'Deleted product reference in Product Collection block', () => {
 		await expect( deletedProductPicker ).toBeVisible();
 
 		// Change status from "trash" to "publish"
-		if ( testProductId ) {
-			await requestUtils.rest( {
-				method: 'PUT',
-				path: `wc/v3/products/${ testProductId }`,
-				data: {
-					status: 'publish',
-				},
-			} );
-		}
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: `wc/v3/products/${ testProductId }`,
+			data: {
+				status: 'publish',
+			},
+		} );
 
 		// Product Picker shouldn't be shown as product is available now
 		await admin.page.reload();
 		await expect( editorProductPicker ).toBeHidden();
 
 		// Delete the product from database, instead of trashing it
-		if ( testProductId ) {
-			await requestUtils.rest( {
-				method: 'DELETE',
-				path: `wc/v3/products/${ testProductId }`,
-				params: {
-					// Bypass trash and permanently delete the product
-					force: true,
-				},
-			} );
-		}
+		await requestUtils.rest( {
+			method: 'DELETE',
+			path: `wc/v3/products/${ testProductId }`,
+			params: {
+				// Bypass trash and permanently delete the product
+				force: true,
+			},
+		} );
 
 		// Product picker should be shown in Editor
 		await expect( deletedProductPicker ).toBeVisible();
