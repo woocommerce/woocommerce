@@ -345,9 +345,9 @@ class CustomOrdersTableController {
 
 		// Check again to see if index was actually created.
 		if ( $this->db_util->fts_index_on_order_address_table_exists() ) {
-			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'yes', true );
+			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'yes', false );
 		} else {
-			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'no', true );
+			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'no', false );
 			if ( class_exists( 'WC_Admin_Settings ' ) ) {
 				WC_Admin_Settings::add_error( __( 'Failed to create FTS index on address table', 'woocommerce' ) );
 			}
@@ -359,9 +359,9 @@ class CustomOrdersTableController {
 
 		// Check again to see if index was actually created.
 		if ( $this->db_util->fts_index_on_order_item_table_exists() ) {
-			update_option( self::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, 'yes', true );
+			update_option( self::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, 'yes', false );
 		} else {
-			update_option( self::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, 'no', true );
+			update_option( self::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, 'no', false );
 			if ( class_exists( 'WC_Admin_Settings ' ) ) {
 				WC_Admin_Settings::add_error( __( 'Failed to create FTS index on order item table', 'woocommerce' ) );
 			}
@@ -383,7 +383,7 @@ class CustomOrdersTableController {
 				'message' => __( 'Failed to modify existing FTS index. Please go to WooCommerce > Status > Tools and run the "Re-create Order Address FTS index" tool.', 'woocommerce' ),
 			);
 		} else {
-			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'no', true );
+			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'no', false );
 		}
 
 		$this->db_util->create_fts_index_order_address_table();
@@ -393,7 +393,7 @@ class CustomOrdersTableController {
 				'message' => __( 'Failed to create FTS index on order address table. Please go to WooCommerce > Status > Tools and run the "Re-create Order Address FTS index" tool.', 'woocommerce' ),
 			);
 		} else {
-			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'yes' );
+			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'yes', false );
 			return array(
 				'status'  => true,
 				'message' => __( 'FTS index recreated.', 'woocommerce' ),
