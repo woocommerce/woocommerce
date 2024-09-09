@@ -99,7 +99,10 @@ test.describe(
 					page.locator( '#set-post-thumbnail img[src*="image-01"]' )
 				).toBeVisible();
 
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.locator( '#publishing-action' )
+					.getByRole( 'button', { name: 'Update' } )
+					.click();
 			} );
 
 			await test.step( 'Verify product image was set', async () => {
@@ -141,7 +144,10 @@ test.describe(
 					page.locator( '#set-post-thumbnail img[src*="image-02"]' )
 				).toBeVisible();
 
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.locator( '#publishing-action' )
+					.getByRole( 'button', { name: 'Update' } )
+					.click();
 			} );
 
 			await test.step( 'Verify product image was set', async () => {
@@ -176,7 +182,10 @@ test.describe(
 					page.getByRole( 'link', { name: 'Set product image' } )
 				).toBeVisible();
 
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.locator( '#publishing-action' )
+					.getByRole( 'button', { name: 'Update' } )
+					.click();
 			} );
 
 			await test.step( 'Verify product image was removed', async () => {
@@ -237,7 +246,10 @@ test.describe(
 					initialImagesCount = currentImagesCount;
 				}
 
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.locator( '#publishing-action' )
+					.getByRole( 'button', { name: 'Update' } )
+					.click();
 			} );
 
 			await test.step( 'Verify product gallery', async () => {
@@ -276,7 +288,10 @@ test.describe(
 					'number of images should decrease'
 				).toEqual( imagesCount - 1 );
 
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.locator( '#publishing-action' )
+					.getByRole( 'button', { name: 'Update' } )
+					.click();
 			} );
 
 			await test.step( 'Verify product gallery', async () => {

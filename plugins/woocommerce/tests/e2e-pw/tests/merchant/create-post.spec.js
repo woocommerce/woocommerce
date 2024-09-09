@@ -31,7 +31,7 @@ test.describe(
 				} )
 				.fill( 'Test Post' );
 
-			await publishPage( page, testPost.title );
+			await publishPage( page, testPost.title, true );
 		} );
 	}
 );

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Traits;
 
@@ -429,7 +430,7 @@ class AccessiblePrivateMethodsTest extends \WC_Unit_Test_Case {
 	}
 }
 
-//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4
 /**
  * Class used in the inherited __call method test.
  */
@@ -449,4 +450,4 @@ class BaseClass {
 	//phpcs:enable Squiz.Commenting.FunctionComment.Missing
 }
 
-//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4

@@ -1,15 +1,19 @@
 <?php
+declare( strict_types = 1 );
 
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
+
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Helper_Product;
+use WC_Order;
 
 /**
  * Class OrdersTableQueryTests.
  */
-class OrdersTableQueryTests extends WC_Unit_Test_Case {
+class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
