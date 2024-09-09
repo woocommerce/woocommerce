@@ -40,5 +40,7 @@ body.js.is-fullscreen-mode {
 	}
 }
 
-@import "products-app/sidebar-dataviews/style.scss";
-@import "products-app/product-edit/style.scss";
+.woocommerce_page_woocommerce-products-dashboard {
+	@import "products-app/sidebar-dataviews/style.scss";
+	@import "products-app/product-edit/style.scss";
+}
