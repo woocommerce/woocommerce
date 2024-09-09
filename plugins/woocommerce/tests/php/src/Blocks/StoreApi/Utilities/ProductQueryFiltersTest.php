@@ -1,10 +1,15 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
+/**
+ * Unit tests for the ProductQueryFilters class.
+ */
 class ProductQueryFiltersTest extends TestCase {
 	/**
 	 * Setup test product data. Called before every test.
@@ -16,7 +21,7 @@ class ProductQueryFiltersTest extends TestCase {
 
 		add_filter(
 			'woocommerce_product_stock_status_options',
-			function( $status ) {
+			function ( $status ) {
 				$status['custom1'] = 'Custom status 1';
 				$status['custom2'] = 'Custom status 2';
 				return $status;
