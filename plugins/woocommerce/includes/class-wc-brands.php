@@ -62,6 +62,7 @@ class WC_Brands {
 		add_filter( 'woocommerce_product_query_tax_query', array( $this, 'update_product_query_tax_query' ), 10, 1 );
 
 		// REST API.
+		add_action( 'rest_api_init', array( $this, 'rest_api_register_routes' ) );
 		add_action( 'woocommerce_rest_insert_product', array( $this, 'rest_api_maybe_set_brands' ), 10, 2 );
 		add_filter( 'woocommerce_rest_prepare_product', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 2.6.x.
 		add_filter( 'woocommerce_rest_prepare_product_object', array( $this, 'rest_api_prepare_brands_to_product' ), 10, 2 ); // WC 3.x.
@@ -783,6 +784,27 @@ class WC_Brands {
 		$out['brand'] = array_key_exists( 'brand', $atts ) ? $atts['brand'] : '';
 
 		return $out;
+	}
+
+	/**
+	 * Register REST API route for /products/brands.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return void
+	 */
+	public function rest_api_register_routes() {
+		require_once WC()->plugin_path() . '/includes/rest-api/Controllers/Version1/class-wc-rest-product-brands-v1-controller.php';
+		require_once WC()->plugin_path() . '/includes/rest-api/Controllers/Version2/class-wc-rest-product-brands-v2-controller.php';
+
+		$controllers = array(
+			'WC_REST_Product_Brands_V1_Controller',
+			'WC_REST_Product_Brands_V2_Controller',
+		);
+
+		foreach ( $controllers as $controller ) {
+			( new $controller() )->register_routes();
+		}
 	}
 
 	/**
