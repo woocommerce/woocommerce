@@ -357,3 +357,111 @@ test.describe( 'Product Collection registration', () => {
 		} );
 	} );
 } );
+
+test.describe( 'Deleted product reference in Product Collection block', () => {
+	let testProductId: number | null = null;
+
+	test.beforeEach( async ( { requestUtils } ) => {
+		// Activate plugin
+		await requestUtils.activatePlugin(
+			'register-product-collection-tester'
+		);
+
+		// Check if "A Test Product" exists
+		const products = await requestUtils.rest( {
+			method: 'GET',
+			path: 'wc/v3/products',
+			params: {
+				search: 'A Test Product',
+			},
+		} );
+
+		// Add "Test Product" only if it doesn't exist
+		if ( products.length === 0 ) {
+			const newProduct = await requestUtils.rest( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					name: 'A Test Product',
+					price: 10,
+				},
+			} );
+			testProductId = newProduct.id;
+		} else {
+			testProductId = products[ 0 ].id;
+		}
+	} );
+
+	test( 'Product picker should be shown when product reference is deleted', async ( {
+		pageObject,
+		admin,
+		editor,
+		requestUtils,
+	} ) => {
+		await admin.createNewPost();
+		await pageObject.insertProductCollection();
+		await pageObject.chooseCollectionInPost(
+			'myCustomCollectionWithProductContext'
+		);
+
+		// Verify that product picker is shown in Editor
+		const editorProductPicker = editor.canvas.locator(
+			SELECTORS.productPicker
+		);
+		await expect( editorProductPicker ).toBeVisible();
+
+		// Once a product is selected, the product picker should be hidden
+		await pageObject.chooseProductInEditorProductPickerIfAvailable(
+			editor.canvas,
+			'A Test Product'
+		);
+		await expect( editorProductPicker ).toBeHidden();
+
+		await editor.saveDraft();
+
+		// Delete the product
+		if ( testProductId ) {
+			await requestUtils.rest( {
+				method: 'DELETE',
+				path: `wc/v3/products/${ testProductId }`,
+			} );
+		}
+
+		// Product picker should be shown in Editor
+		await admin.page.reload();
+		const deletedProductPicker = editor.canvas.getByText(
+			'Previously selected product'
+		);
+		await expect( deletedProductPicker ).toBeVisible();
+
+		// Change status from "trash" to "publish"
+		if ( testProductId ) {
+			await requestUtils.rest( {
+				method: 'PUT',
+				path: `wc/v3/products/${ testProductId }`,
+				data: {
+					status: 'publish',
+				},
+			} );
+		}
+
+		// Product Picker shouldn't be shown as product is available now
+		await admin.page.reload();
+		await expect( editorProductPicker ).toBeHidden();
+
+		// Delete the product from database, instead of trashing it
+		if ( testProductId ) {
+			await requestUtils.rest( {
+				method: 'DELETE',
+				path: `wc/v3/products/${ testProductId }`,
+				params: {
+					// Bypass trash and permanently delete the product
+					force: true,
+				},
+			} );
+		}
+
+		// Product picker should be shown in Editor
+		await expect( deletedProductPicker ).toBeVisible();
+	} );
+} );

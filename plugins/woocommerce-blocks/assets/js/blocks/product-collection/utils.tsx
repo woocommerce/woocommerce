@@ -259,7 +259,9 @@ export const useProductCollectionUIState = ( {
 			! isInRequiredLocation &&
 			isProductContextSelected
 		) {
-			const isProductDeleted = productId && product === undefined;
+			const isProductDeleted =
+				productId &&
+				( product === undefined || product?.status === 'trash' );
 			if ( isProductDeleted ) {
 				return ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE;
 			}
