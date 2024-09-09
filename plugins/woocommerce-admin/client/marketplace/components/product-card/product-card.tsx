@@ -165,7 +165,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					<h2>
 						<CardLink />
 					</h2>
-					<p>{ product.description }</p>
+					<p className="woocommerce-marketplace__product-card__description">
+						{ product.description }
+					</p>
 				</div>
 				<div className="woocommerce-marketplace__business-card__badge">
 					<span>{ product.productCategory }</span>
