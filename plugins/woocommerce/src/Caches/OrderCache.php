@@ -2,10 +2,8 @@
 
 namespace Automattic\WooCommerce\Caches;
 
-use Automattic\WooCommerce\Caching\CacheEngine;
+use Automattic\WooCommerce\Caching\CacheException;
 use Automattic\WooCommerce\Caching\ObjectCache;
-use Automattic\WooCommerce\Caching\RequestLevelCacheEngine;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * A class to cache order objects.
@@ -43,18 +41,5 @@ class OrderCache extends ObjectCache {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Get the instance of the cache engine to use.
-	 *
-	 * @return CacheEngine
-	 */
-	protected function get_cache_engine_instance(): CacheEngine {
-		$container = wc_get_container();
-		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
-			return $container->get( RequestLevelCacheEngine::class );
-		}
-		return parent::get_cache_engine_instance();
 	}
 }
