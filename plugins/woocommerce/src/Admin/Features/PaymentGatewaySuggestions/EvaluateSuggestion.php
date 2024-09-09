@@ -65,7 +65,7 @@ class EvaluateSuggestion {
 	 * @return array The visible suggestions and errors.
 	 */
 	public static function evaluate_specs( $specs, $logger_args = array() ) {
-		$specs_key = md5( wp_json_encode( $specs ) );
+		$specs_key = self::get_memo_key( $specs );
 
 		if ( isset( self::$memo[ $specs_key ] ) ) {
 			return self::$memo[ $specs_key ];
@@ -93,7 +93,7 @@ class EvaluateSuggestion {
 		// Memoize results, with a fail safe to prevent unbounded memory growth.
 		// This limit is unlikely to be reached under normal circumstances.
 		if ( count( self::$memo ) > 50 ) {
-			self::$memo = array();
+			self::reset_memo();
 		}
 		self::$memo[ $specs_key ] = $result;
 
@@ -105,5 +105,23 @@ class EvaluateSuggestion {
 	 */
 	public static function reset_memo() {
 		self::$memo = array();
+	}
+
+	/**
+	 * Returns a memoization key for the given specs.
+	 *
+	 * @param array $specs The specs to generate a key for.
+	 *
+	 * @return string The memoization key.
+	 */
+	private static function get_memo_key( $specs ) {
+		$data = wp_json_encode( $specs );
+
+		if ( function_exists( 'hash' ) && in_array( 'xxh3', hash_algos(), true ) ) {
+			// Use xxHash (xxh3) if available.
+			return hash( 'xxh3', $data );
+		}
+		// Fall back to CRC32.
+		return (string) crc32( $data );
 	}
 }
