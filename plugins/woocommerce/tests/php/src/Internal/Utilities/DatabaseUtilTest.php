@@ -1,7 +1,7 @@
 <?php
-/**
- * Tests for the DatabaseUtil utility.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 /**
  * Tests relating to DatabaseUtil.
  */
-class DatabaseUtilTest extends WC_Unit_Test_Case {
+class DatabaseUtilTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var DatabaseUtil
