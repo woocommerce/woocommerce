@@ -129,17 +129,35 @@ const transformIntoBlocks = async ( page ) => {
 	);
 };
 
-const publishPage = async ( page, pageTitle ) => {
+const publishPage = async ( page, pageTitle, isPost = false ) => {
 	await page
 		.getByRole( 'button', { name: 'Publish', exact: true } )
 		.dispatchEvent( 'click' );
+
+	const createPageResponse = page.waitForResponse( ( response ) => {
+		return (
+			response.url().includes( isPost ? '/posts/' : '/pages/' ) &&
+			response.ok() &&
+			response.request().method() === 'POST' &&
+			response
+				.json()
+				.then(
+					( json ) =>
+						json.title.rendered === pageTitle &&
+						json.status === 'publish'
+				)
+		);
+	} );
+
 	await page
 		.getByRole( 'region', { name: 'Editor publish' } )
 		.getByRole( 'button', { name: 'Publish', exact: true } )
 		.click();
-	await expect(
-		page.getByText( `${ pageTitle } is now live.` )
-	).toBeVisible();
+
+	// Validating that page was published via UI elements is not reliable,
+	// installed plugins (e.g. WooCommerce PayPal Payments) can interfere and add flakiness to the flow.
+	// In WC context, checking the API response is possibly the most reliable way to ensure the page was published.
+	await createPageResponse;
 };
 
 module.exports = {

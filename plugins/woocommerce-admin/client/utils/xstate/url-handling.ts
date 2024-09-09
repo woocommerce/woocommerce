@@ -42,27 +42,21 @@ export const createQueryParamsListener = (
 	};
 };
 
-type LaunchYourStoreQueryParams = {
-	sidebar?: string;
-	content?: string;
-};
-
-export const updateQueryParams = (
-	params: Partial< LaunchYourStoreQueryParams >
+export const updateQueryParams = < T extends Record< string, string > >(
+	params: Partial< T >
 ) => {
-	const queryParams = getQuery() as LaunchYourStoreQueryParams;
+	const queryParams = getQuery() as T;
+
 	const changes = Object.entries( params ).reduce(
-		( acc: Partial< LaunchYourStoreQueryParams >, [ key, value ] ) => {
-			// Check if the value is different from the current queryParams. Include if explicitly passed, even if it's undefined.
-			// This approach assumes that `params` can only have keys that are defined in LaunchYourStoreQueryParams.
-			if (
-				queryParams[ key as keyof LaunchYourStoreQueryParams ] !== value
-			) {
-				acc[ key as keyof LaunchYourStoreQueryParams ] = value;
+		( acc: Partial< T >, [ key, value ] ) => {
+			// Check if the value is different from the current queryParams.
+			// Include if explicitly passed, even if it's undefined.
+			if ( queryParams[ key as keyof T ] !== value ) {
+				acc[ key as keyof T ] = value;
 			}
 			return acc;
 		},
-		{}
+		{} as Partial< T >
 	);
 
 	if ( Object.keys( changes ).length > 0 ) {
