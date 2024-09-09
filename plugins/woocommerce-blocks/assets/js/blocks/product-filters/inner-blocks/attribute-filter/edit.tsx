@@ -5,7 +5,11 @@ import {
 	useCollection,
 	useCollectionData,
 } from '@woocommerce/base-context/hooks';
-import { AttributeTerm, objectHasProp } from '@woocommerce/types';
+import {
+	AttributeSetting,
+	AttributeTerm,
+	objectHasProp,
+} from '@woocommerce/types';
 import {
 	useBlockProps,
 	useInnerBlocksProps,
@@ -14,6 +18,7 @@ import {
 import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -27,6 +32,9 @@ import { getAllowedBlocks } from '../../utils';
 import { DISALLOWED_BLOCKS } from '../../constants';
 import { FilterOptionItem } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
+import { Notice } from '../../components/notice';
+
+const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -176,6 +184,54 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
+	const isLoading =
+		isTermsLoading || isFilterCountsLoading || isOptionsLoading;
+
+	if ( Object.keys( ATTRIBUTES ).length === 0 )
+		return (
+			<div { ...innerBlocksProps }>
+				<Inspector { ...props } />
+				<Notice>
+					<p>
+						{ __(
+							"Attributes are needed for filtering your products. You haven't created any attributes yet.",
+							'woocommerce'
+						) }
+					</p>
+				</Notice>
+			</div>
+		);
+
+	if ( ! attributeId || ! attributeObject )
+		return (
+			<div { ...innerBlocksProps }>
+				<Inspector { ...props } />
+				<Notice>
+					<p>
+						{ __(
+							'Please select an attribute to use this filter!',
+							'woocommerce'
+						) }
+					</p>
+				</Notice>
+			</div>
+		);
+
+	if ( ! isLoading && attributeTerms.length === 0 )
+		return (
+			<div { ...innerBlocksProps }>
+				<Inspector { ...props } />
+				<Notice>
+					<p>
+						{ __(
+							'There are no products with the selected attributes.',
+							'woocommerce'
+						) }
+					</p>
+				</Notice>
+			</div>
+		);
+
 	return (
 		<div { ...innerBlocksProps }>
 			<Inspector { ...props } />
@@ -187,10 +243,7 @@ const Edit = ( props: EditProps ) => {
 								attributeOptions.length === 0 && isPreview
 									? attributeOptionsPreview
 									: attributeOptions,
-							isLoading:
-								isTermsLoading ||
-								isFilterCountsLoading ||
-								isOptionsLoading,
+							isLoading,
 						},
 					} }
 				>

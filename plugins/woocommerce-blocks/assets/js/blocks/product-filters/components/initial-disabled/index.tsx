@@ -19,8 +19,8 @@ export const InitialDisabled = ( {
 }: {
 	children: React.ReactNode;
 } ): JSX.Element => (
-	<div className="wc-component-initial-disabled">
-		<div className="wc-component-initial-disabled-overlay" />
+	<div className="wc-block-product-filter-components-initial-disabled">
+		<div className="wc-block-product-filter-components-initial-disabled-overlay" />
 		{ children }
 	</div>
 );
