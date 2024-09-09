@@ -592,9 +592,9 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Returns a URL that can be used to by WCPay to verify business details.
+	 * Returns a URL that can be used by WooPayments to verify business details.
 	 *
-	 * @return WP_Error|array Connect URL.
+	 * @return \WP_Error|array Connect URL.
 	 */
 	public function connect_wcpay() {
 		if ( ! class_exists( 'WC_Payments' ) ) {

@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: If there is a WooPayments incentive active, attach its ID to the wcadmin_tasklist_click Tracks event.
+
+
