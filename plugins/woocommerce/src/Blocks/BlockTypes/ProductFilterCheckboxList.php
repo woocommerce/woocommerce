@@ -15,26 +15,6 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 */
 	protected $block_name = 'product-filter-checkbox-list';
 
-
-	/**
-	 * Get the color value from the color attributes.
-	 *
-	 * @param string $key        The key of the color attribute.
-	 * @param array  $attributes The block attributes.
-	 * @return string
-	 */
-	private function get_color_attribute_value( $key, $attributes ) {
-		if ( $attributes[ $key ] ) {
-			return $attributes[ $key ];
-		}
-
-		if ( $attributes[ 'custom' . ucfirst( $key ) ] ) {
-			return $attributes[ 'custom' . ucfirst( $key ) ];
-		}
-
-		return '';
-	}
-
 	/**
 	 * Render the block.
 	 *
@@ -85,7 +65,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			'data-wc-interactive' => esc_attr( $namespace ),
 			'data-wc-context'     => wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'class'               => implode( ' ', array_keys( $classes ) ),
-			'style'               => $style,
+			'style'               => esc_attr( $style ),
 		);
 
 		ob_start();
@@ -152,5 +132,24 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get the color value from the color attributes.
+	 *
+	 * @param string $key        The key of the color attribute.
+	 * @param array  $attributes The block attributes.
+	 * @return string
+	 */
+	private function get_color_attribute_value( $key, $attributes ) {
+		if ( $attributes[ $key ] ) {
+			return $attributes[ $key ];
+		}
+
+		if ( $attributes[ 'custom' . ucfirst( $key ) ] ) {
+			return $attributes[ 'custom' . ucfirst( $key ) ];
+		}
+
+		return '';
 	}
 }
