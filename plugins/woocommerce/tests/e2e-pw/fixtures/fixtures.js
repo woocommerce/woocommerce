@@ -48,7 +48,7 @@ exports.test = base.test.extend( {
 	testPageTitlePrefix: [ '', { option: true } ],
 
 	testPage: async ( { wpApi, testPageTitlePrefix }, use ) => {
-		const pageTitle = `${ testPageTitlePrefix } Page ${ random() }`;
+		const pageTitle = `${ testPageTitlePrefix } Page ${ random() }`.trim();
 		const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
 		await use( { title: pageTitle, slug: pageSlug } );
@@ -77,7 +77,7 @@ exports.test = base.test.extend( {
 	testPostTitlePrefix: [ '', { option: true } ],
 
 	testPost: async ( { wpApi, testPostTitlePrefix }, use ) => {
-		const postTitle = `${ testPostTitlePrefix } Post ${ random() }`;
+		const postTitle = `${ testPostTitlePrefix } Post ${ random() }`.trim();
 		const postSlug = postTitle.replace( / /gi, '-' ).toLowerCase();
 
 		await use( { title: postTitle, slug: postSlug } );

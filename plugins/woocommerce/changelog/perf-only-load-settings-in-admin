@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Only run woocommerce_admin_shared_settings filter on admin requests
