@@ -2,6 +2,9 @@
 export const base_url = __ENV.URL || 'http://localhost:8086';
 export const base_host = __ENV.HOST || 'localhost:8086';
 
+export const STORE_NAME = __ENV.STORE_NAME || 'WooCommerce Core E2E Test Suite';
+export const FOOTER_TEXT = 'Built with WooCommerce';
+
 export const admin_username = __ENV.A_USER || 'admin';
 export const admin_password = __ENV.A_PW || 'password';
 export const admin_acc_login = __ENV.A_ACC_LOGIN || false;
