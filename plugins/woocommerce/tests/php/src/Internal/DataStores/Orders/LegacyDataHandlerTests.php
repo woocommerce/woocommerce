@@ -1,14 +1,17 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 /**
  * Class OrdersTableQueryTests.
  */
-class LegacyDataHandlerTests extends WC_Unit_Test_Case {
+class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
