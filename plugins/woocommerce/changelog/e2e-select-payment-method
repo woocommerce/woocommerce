@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Explicitly select the payment method on the customer payment page e2e test

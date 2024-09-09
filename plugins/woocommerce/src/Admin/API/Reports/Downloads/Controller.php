@@ -219,9 +219,11 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_collection_params() {
 		$params                        = parent::get_collection_params();
-		$params['orderby']['enum']     = array(
-			'date',
-			'product',
+		$params['orderby']['enum']     = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'product',
+			)
 		);
 		$params['match']               = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: products, orders, username, ip_address.', 'woocommerce' ),

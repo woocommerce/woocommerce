@@ -29,9 +29,15 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
-import type { LaunchYourStoreComponentProps } from '..';
+import type {
+	LaunchYourStoreComponentProps,
+	LaunchYourStoreQueryParams,
+} from '..';
 import type { mainContentMachine } from '../main-content/xstate';
-import { updateQueryParams, createQueryParamsListener } from '../common';
+import {
+	updateQueryParams,
+	createQueryParamsListener,
+} from '~/utils/xstate/url-handling';
 import { taskClickedAction, getLysTasklist } from './tasklist';
 import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
 import { getTimeFrame } from '~/utils';
@@ -253,11 +259,8 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
 		),
-		updateQueryParams: (
-			_,
-			params: { sidebar?: string; content?: string }
-		) => {
-			updateQueryParams( params );
+		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
+			updateQueryParams< LaunchYourStoreQueryParams >( params );
 		},
 		taskClicked: ( { event } ) => {
 			if ( event.type === 'TASK_CLICKED' ) {
@@ -293,9 +296,9 @@ export const sidebarMachine = setup( {
 	guards: {
 		hasSidebarLocation: (
 			_,
-			{ sidebarLocation }: { sidebarLocation: string }
+			{ sidebar: sidebarLocation }: LaunchYourStoreQueryParams
 		) => {
-			const { sidebar } = getQuery() as { sidebar?: string };
+			const { sidebar } = getQuery() as LaunchYourStoreQueryParams;
 			return !! sidebar && sidebar === sidebarLocation;
 		},
 		hasWooPayments: ( { context } ) => {
@@ -333,14 +336,14 @@ export const sidebarMachine = setup( {
 				{
 					guard: {
 						type: 'hasSidebarLocation',
-						params: { sidebarLocation: 'hub' },
+						params: { sidebar: 'hub' },
 					},
 					target: 'launchYourStoreHub',
 				},
 				{
 					guard: {
 						type: 'hasSidebarLocation',
-						params: { sidebarLocation: 'launch-success' },
+						params: { sidebar: 'launch-success' },
 					},
 					target: 'storeLaunchSuccessful',
 				},
