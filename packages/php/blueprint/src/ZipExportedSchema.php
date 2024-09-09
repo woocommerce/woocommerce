@@ -11,6 +11,9 @@ use Automattic\WooCommerce\Blueprint\Steps\InstallTheme;
  * Handles the creation of a ZIP archive from a schema.
  */
 class ZipExportedSchema {
+	use UsePluginHelpers;
+	use UseWPFunctions;
+
 	/**
 	 * Exported schema from ExportSchema class.
 	 *
@@ -179,7 +182,7 @@ class ZipExportedSchema {
 
 		foreach ( $steps as $step ) {
 			$resource = $step[ 'plugins' === $type ? 'pluginZipFile' : 'themeZipFile' ];
-			if ( ! Util::is_valid_wp_plugin_slug( $resource['slug'] ) ) {
+			if ( ! $this->is_plugin_dir( $resource['slug'] ) ) {
 				throw new \InvalidArgumentException( 'Invalid plugin slug: ' . $resource['slug'] );
 			}
 
@@ -209,8 +212,7 @@ class ZipExportedSchema {
 	 */
 	private function create_json_schema_file() {
 		$schema_file = $this->get_working_dir_path( 'woo-blueprint.json' );
-		// phpcs:ignore
-		file_put_contents( $schema_file, json_encode( $this->schema, JSON_PRETTY_PRINT ) );
+		$this->wp_filesystem_put_contents( $schema_file, json_encode( $this->schema, JSON_PRETTY_PRINT ) );
 		return $schema_file;
 	}
 

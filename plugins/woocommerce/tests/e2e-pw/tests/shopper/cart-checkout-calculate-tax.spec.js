@@ -24,7 +24,7 @@ let productId,
 
 test.describe.serial(
 	'Tax rates in the cart and checkout',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@hpos', '@could-be-unit-test' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {

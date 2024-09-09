@@ -51,5 +51,7 @@ abstract class AIEndpoint {
 	 *
 	 * @return array
 	 */
-	abstract public function get_schema();
+	public function get_schema() {
+		return array();
+	}
 }

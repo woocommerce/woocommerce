@@ -200,13 +200,11 @@ trait UseWPFunctions {
 	}
 
 	/**
-	 * Unzips a file to a specified location.
+	 * Initializes the WordPress filesystem.
 	 *
-	 * @param string $path Path to the ZIP file.
-	 * @param string $to Destination directory.
-	 * @return bool|WP_Error True on success, WP_Error on failure.
+	 * @return bool
 	 */
-	public function wp_unzip_file( $path, $to ) {
+	public function wp_init_filesystem() {
 		if ( ! $this->filesystem_initialized ) {
 			if ( ! class_exists( 'WP_Filesystem' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -216,6 +214,18 @@ trait UseWPFunctions {
 			$this->filesystem_initialized = true;
 		}
 
+		return true;
+	}
+
+	/**
+	 * Unzips a file to a specified location.
+	 *
+	 * @param string $path Path to the ZIP file.
+	 * @param string $to Destination directory.
+	 * @return bool|WP_Error True on success, WP_Error on failure.
+	 */
+	public function wp_unzip_file( $path, $to ) {
+		$this->wp_init_filesystem();
 		return unzip_file( $path, $to );
 	}
 
@@ -258,5 +268,20 @@ trait UseWPFunctions {
 			include ABSPATH . '/wp-admin/includes/file.php';
 		}
 		return download_url( $url );
+	}
+
+	/**
+	 * Alias for WP_Filesystem::put_contents().
+	 *
+	 * @param string $file_path The path to the file to write.
+	 * @param mixed  $content    The data to write to the file.
+	 *
+	 * @return mixed
+	 */
+	public function wp_filesystem_put_contents( $file_path, $content ) {
+		global $wp_filesystem;
+		$this->wp_init_filesystem();
+
+		return $wp_filesystem->put_contents( $file_path, $content );
 	}
 }

@@ -100,7 +100,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Meta keys that are considered ephemereal and do not trigger a full save (updating modified date) when changed.
+	 * Meta keys that are considered ephemeral and do not trigger a full save (updating modified date) when changed.
 	 *
 	 * @var string[]
 	 */
@@ -2742,7 +2742,7 @@ FROM $order_meta_table
 	}
 
 	/**
-	 * Proxy to udpating order meta. Here for backward compatibility reasons.
+	 * Proxy to updating order meta. Here for backward compatibility reasons.
 	 *
 	 * @param \WC_Order $order Order object.
 	 *

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Clear global_unique_id when restoring a product that doesn't have an unique id

@@ -41,6 +41,7 @@ export const receiveCart =
 			cartItemsPendingDelete: select.getItemsPendingDelete(),
 		} );
 		dispatch.setCartData( newCart );
+		dispatch.setErrorData( null );
 	};
 
 /**
@@ -65,13 +66,13 @@ export const receiveCartContents =
 export const receiveError =
 	( response: ApiErrorResponse | null = null ) =>
 	( { dispatch }: { dispatch: CartDispatchFromMap } ) => {
-		if ( isApiErrorResponse( response ) ) {
-			dispatch.setErrorData( response );
-
-			if ( response.data?.cart ) {
-				dispatch.receiveCart( response?.data?.cart );
-			}
+		if ( ! isApiErrorResponse( response ) ) {
+			return;
 		}
+		if ( response.data?.cart ) {
+			dispatch.receiveCart( response?.data?.cart );
+		}
+		dispatch.setErrorData( response );
 	};
 
 export type Thunks =

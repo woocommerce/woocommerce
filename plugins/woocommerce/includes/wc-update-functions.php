@@ -24,12 +24,14 @@ use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
@@ -416,7 +418,7 @@ function wc_update_209_brazillian_state() {
 
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
-	// Update brazillian state codes.
+	// Update Brazilian state codes.
 	$wpdb->update(
 		$wpdb->postmeta,
 		array(
@@ -2598,7 +2600,7 @@ function wc_update_770_remove_multichannel_marketing_feature_options() {
 /**
  * Migrate transaction data which was being incorrectly stored in the postmeta table to HPOS tables.
  *
- * @return bool Whether there are pending migration recrods.
+ * @return bool Whether there are pending migration records.
  */
 function wc_update_810_migrate_transactional_metadata_for_hpos() {
 	global $wpdb;
@@ -2691,7 +2693,7 @@ function wc_update_890_update_connect_to_woocommerce_note() {
  * Disables the PayPal Standard gateway for stores that aren't using it.
  *
  * PayPal Standard has been deprecated since WooCommerce 5.5, but there are some stores that have it showing up in their
- * list of available Payment methods even if it's not setup. In WooComerce 8.9 we will disable PayPal Standard for those stores
+ * list of available Payment methods even if it's not setup. In WooCommerce 8.9 we will disable PayPal Standard for those stores
  * to reduce the amount of new connections to the legacy gateway.
  *
  * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
@@ -2779,14 +2781,16 @@ function wc_update_920_add_wc_hooked_blocks_version_option() {
 function wc_update_910_remove_obsolete_user_meta() {
 	global $wpdb;
 
-	$deletions = $wpdb->query( "
+	$deletions = $wpdb->query(
+		"
 		DELETE FROM $wpdb->usermeta
 		WHERE meta_key IN (
 			'_last_order',
 			'_order_count',
 			'_money_spent'
 		)
-	" );
+	"
+	);
 
 	$logger = wc_get_logger();
 
@@ -2813,5 +2817,58 @@ function wc_update_910_remove_obsolete_user_meta() {
 				'source' => 'wc-updater',
 			)
 		);
+	}
+}
+
+/**
+ * Add woocommerce_coming_soon option when it is not currently present.
+ */
+function wc_update_930_add_woocommerce_coming_soon_option() {
+	add_option( 'woocommerce_coming_soon', 'no' );
+}
+
+/**
+ * Migrate Launch Your Store tour meta keys to the woocommerce_meta user data fields.
+ */
+function wc_update_930_migrate_user_meta_for_launch_your_store_tour() {
+	// Rename `woocommerce_launch_your_store_tour_hidden` meta key to `woocommerce_admin_launch_your_store_tour_hidden`.
+	global $wpdb;
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_launch_your_store_tour_hidden',
+			'woocommerce_launch_your_store_tour_hidden'
+		)
+	);
+
+	// Rename `woocommerce_coming_soon_banner_dismissed` meta key to `woocommerce_admin_coming_soon_banner_dismissed`.
+	$wpdb->query(
+		$wpdb->prepare(
+			"UPDATE {$wpdb->usermeta}
+			SET meta_key = %s
+			WHERE meta_key = %s",
+			'woocommerce_admin_coming_soon_banner_dismissed',
+			'woocommerce_coming_soon_banner_dismissed'
+		)
+	);
+}
+
+/**
+ * Recreate FTS index if it already exists, so that phone number can be added to the index.
+ */
+function wc_update_940_add_phone_to_order_address_fts_index(): void {
+	$fts_already_exists = get_option( CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION ) === 'yes';
+	if ( ! $fts_already_exists ) {
+		return;
+	}
+
+	$hpos_controller = wc_get_container()->get( CustomOrdersTableController::class );
+	$result          = $hpos_controller->recreate_order_address_fts_index();
+	if ( ! $result['status'] ) {
+		if ( class_exists( 'WC_Admin_Settings ' ) ) {
+			WC_Admin_Settings::add_error( $result['message'] );
+		}
 	}
 }

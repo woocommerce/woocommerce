@@ -9,6 +9,16 @@ import { type AttributeMetadata } from '@woocommerce/types';
  */
 import { WooCommerceBlockLocation } from '../product-template/utils';
 
+export enum ProductCollectionUIStatesInEditor {
+	COLLECTION_PICKER = 'collection_chooser',
+	PRODUCT_REFERENCE_PICKER = 'product_context_picker',
+	VALID_WITH_PREVIEW = 'uses_reference_preview_mode',
+	VALID = 'valid',
+	// Future states
+	// INVALID = 'invalid',
+	// DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',
+}
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -95,6 +105,7 @@ export interface ProductCollectionQuery {
 	woocommerceHandPickedProducts: string[];
 	priceRange: undefined | PriceRange;
 	filterable: boolean;
+	productReference?: number;
 }
 
 export type ProductCollectionEditComponentProps =
@@ -108,6 +119,8 @@ export type ProductCollectionEditComponentProps =
 		context: {
 			templateSlug: string;
 		};
+		isUsingReferencePreviewMode: boolean;
+		location: WooCommerceBlockLocation;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -135,7 +148,6 @@ export type QueryControlProps = {
 
 export enum CoreCollectionNames {
 	PRODUCT_CATALOG = 'woocommerce/product-collection/product-catalog',
-	CUSTOM = 'woocommerce/product-collection/custom',
 	BEST_SELLERS = 'woocommerce/product-collection/best-sellers',
 	FEATURED = 'woocommerce/product-collection/featured',
 	NEW_ARRIVALS = 'woocommerce/product-collection/new-arrivals',

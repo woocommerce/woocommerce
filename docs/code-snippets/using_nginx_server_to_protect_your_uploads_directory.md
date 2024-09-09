@@ -5,8 +5,6 @@ tags: code-snippet
 current wccom url: https://woocommerce.com/document/digital-downloadable-product-handling/#protecting-your-uploads-directory
 ---
 
-## Using NGINX server to protect your upload directory
-
 If you using NGINX server for your site along with **X-Accel-Redirect/X-Sendfile** or **Force Downloads** download method, it is necessary that you add this configuration for better security:
 
 ```php

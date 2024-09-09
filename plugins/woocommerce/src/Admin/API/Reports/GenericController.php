@@ -7,10 +7,45 @@ use WP_REST_Request;
 use WP_REST_Response;
 
 /**
- * WC REST API Reports controller extended
- * to be shared as a generic base for all Analytics controllers.
+ * {@see WC_REST_Reports_Controller WC REST API Reports Controller} extended to be shared as a generic base for all Analytics reports controllers.
  *
- * @internal
+ * Handles pagination HTTP headers and links, basic, conventional params.
+ * Does all the REST API plumbing as `WC_REST_Controller`.
+ *
+ *
+ * Minimalistic example:
+ * <pre><code class="language-php">class MyController extends GenericController {
+ *     /** Route of your new REST endpoint. &ast;/
+ *     protected $rest_base = 'reports/my-thing';
+ *     /**
+ *      * Provide JSON schema for the response item.
+ *      * @override WC_REST_Reports_Controller::get_item_schema()
+ *      &ast;/
+ *     public function get_item_schema() {
+ *         $schema = array(
+ *             '$schema'    => 'http://json-schema.org/draft-04/schema#',
+ *             'title'      => 'report_my_thing',
+ *             'type'       => 'object',
+ *             'properties' => array(
+ *                 'product_id' => array(
+ *                     'type'        => 'integer',
+ *                     'readonly'    => true,
+ *                     'context'     => array( 'view', 'edit' ),
+ *                 'description' => __( 'Product ID.', 'my_extension' ),
+ *                 ),
+ *             ),
+ *         );
+ *         // Add additional fields from `get_additional_fields` method and apply `woocommerce_rest_' . $schema['title'] . '_schema` filter.
+ *         return $this->add_additional_fields_schema( $schema );
+ *     }
+ * }
+ * </code></pre>
+ *
+ * The above Controller will get the data from a {@see DataStore data store} registered as `$rest_base` (`reports/my-thing`).
+ * (To change this behavior, override the `get_datastore_data()` method).
+ *
+ * To use the controller, please register it with the filter `woocommerce_admin_rest_controllers` filter.
+ *
  * @extends WC_REST_Reports_Controller
  */
 abstract class GenericController extends \WC_REST_Reports_Controller {
@@ -26,12 +61,12 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	/**
 	 * Add pagination headers and links.
 	 *
-	 * @param WP_REST_Request        $request   Request data.
-	 * @param WP_REST_Response|array $response  Response data.
-	 * @param int                    $total     Total results.
-	 * @param int                    $page      Current page.
-	 * @param int                    $max_pages Total amount of pages.
-	 * @return WP_REST_Response
+	 * @param \WP_REST_Request        $request   Request data.
+	 * @param \WP_REST_Response|array $response  Response data.
+	 * @param int                     $total     Total results.
+	 * @param int                     $page      Current page.
+	 * @param int                     $max_pages Total amount of pages.
+	 * @return \WP_REST_Response
 	 */
 	public function add_pagination_headers( $request, $response, int $total, int $page, int $max_pages ) {
 		$response = rest_ensure_response( $response );
@@ -62,7 +97,19 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 	}
 
 	/**
-	 * Get the query params for collections.
+	 * Get data from `{$this->rest_base}` store, based on the given query vars.
+	 *
+	 * @throws Exception When the data store is not found {@see WC_Data_Store WC_Data_Store}.
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
+	 */
+	protected function get_datastore_data( $query_args = array() ) {
+		$data_store = \WC_Data_Store::load( $this->rest_base );
+		return $data_store->get_data( $query_args );
+	}
+
+	/**
+	 * Get the query params definition for collections.
 	 *
 	 * @return array
 	 */
@@ -124,15 +171,62 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 		return $params;
 	}
 
+
 	/**
-	 * Prepare a report object for serialization.
+	 * Get the report data.
 	 *
-	 * @param array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * Prepares query params, fetches the report data from the data store,
+	 * prepares it for the response, and packs it into the convention-conforming response object.
+	 *
+	 * @throws \WP_Error When the queried data is invalid.
+	 * @param \WP_REST_Request $request Request data.
+	 * @return \WP_Error|\WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		$query_args  = $this->prepare_reports_query( $request );
+		$report_data = $this->get_datastore_data( $query_args );
+
+		if ( is_wp_error( $report_data ) ) {
+			return $report_data;
+		}
+
+		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
+			return new \WP_Error( 'woocommerce_rest_reports_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$out_data = array();
+
+		foreach ( $report_data->data as $datum ) {
+			$item       = $this->prepare_item_for_response( $datum, $request );
+			$out_data[] = $this->prepare_response_for_collection( $item );
+		}
+
+		return $this->add_pagination_headers(
+			$request,
+			$out_data,
+			(int) $report_data->total,
+			(int) $report_data->page_no,
+			(int) $report_data->pages
+		);
+	}
+
+	/**
+	 * Prepare a report data item for serialization.
+	 *
+	 * This method is called by `get_items` to prepare a single report data item for serialization.
+	 * Calls `add_additional_fields_to_object` and `filter_response_by_context`,
+	 * then wpraps the data with `rest_ensure_response`.
+	 *
+	 * You can extend it to add or filter some fields.
+	 *
+	 * @override WP_REST_Posts_Controller::prepare_item_for_response()
+	 *
+	 * @param mixed           $report_item Report data item as returned from Data Store.
+	 * @param WP_REST_Request $request     Request object.
 	 * @return WP_REST_Response
 	 */
-	public function prepare_item_for_response( $report, $request ) {
-		$data = $report;
+	public function prepare_item_for_response( $report_item, $request ) {
+		$data = $report_item;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -140,5 +234,54 @@ abstract class GenericController extends \WC_REST_Reports_Controller {
 
 		// Wrap the data in a response object.
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Maps query arguments from the REST request, to be used to query the datastore.
+	 *
+	 * `WP_REST_Request` does not expose a method to return all params covering defaults,
+	 * as it does for `$request['param']` accessor.
+	 * Therefore, we re-implement defaults resolution.
+	 *
+	 * @param \WP_REST_Request $request Full request object.
+	 * @return array Simplified array of params.
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args = wp_parse_args(
+			array_intersect_key(
+				$request->get_query_params(),
+				$this->get_collection_params()
+			),
+			$request->get_default_params()
+		);
+
+		return $args;
+	}
+
+	/**
+	 * Apply a filter for custom orderby enum.
+	 *
+	 * @param array $orderby_enum An array of orderby enum options.
+	 *
+	 * @return array An array of filtered orderby enum options.
+	 *
+	 * @since 9.4.0
+	 */
+	protected function apply_custom_orderby_filters( $orderby_enum ) {
+		/**
+		 * Filter orderby query parameter enum.
+		 *
+		 * There was an initial concern about potential SQL injection with the custom orderby.
+		 * However, testing shows it is safely blocked by validation in the controller,
+		 * which results in an "Invalid parameter(s): orderby" error.
+		 *
+		 * Additionally, it's the responsibility of the merchant/developer to ensure the custom orderby is valid,
+		 * or a WordPress database error will occur for unknown columns.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param array $orderby_enum The orderby query parameter enum.
+		 */
+		return apply_filters( "woocommerce_analytics_orderby_enum_{$this->rest_base}", $orderby_enum );
 	}
 }

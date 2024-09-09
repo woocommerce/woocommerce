@@ -26,7 +26,7 @@ const totals = [ '$15.00', '$10.00', '$13.00' ];
 
 test.describe(
 	'Cart & Checkout applying coupons',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@payments', '@services', '@hpos' ] },
 	() => {
 		let firstProductId;
 		const couponBatchId = [];
@@ -306,60 +306,65 @@ test.describe(
 			} );
 		} );
 
-		test( 'restores total when coupons are removed', async ( {
-			page,
-			context,
-		} ) => {
-			await test.step( 'Load cart page and try restoring total when removed coupons', async () => {
-				await addAProductToCart( page, firstProductId );
+		test(
+			'restores total when coupons are removed',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page, context } ) => {
+				await test.step( 'Load cart page and try restoring total when removed coupons', async () => {
+					await addAProductToCart( page, firstProductId );
 
-				await page.goto( '/cart/' );
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page
-					.getByRole( 'button', { name: 'Apply coupon' } )
-					.click();
+					await page.goto( '/cart/' );
+					await page
+						.locator( '#coupon_code' )
+						.fill( coupons[ 0 ].code );
+					await page
+						.getByRole( 'button', { name: 'Apply coupon' } )
+						.click();
 
-				// confirm numbers
-				await expect(
-					page.locator( '.cart-discount .amount' )
-				).toContainText( discounts[ 0 ] );
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( totals[ 0 ] );
+					// confirm numbers
+					await expect(
+						page.locator( '.cart-discount .amount' )
+					).toContainText( discounts[ 0 ] );
+					await expect(
+						page.locator( '.order-total .amount' )
+					).toContainText( totals[ 0 ] );
 
-				await page.locator( 'a.woocommerce-remove-coupon' ).click();
+					await page.locator( 'a.woocommerce-remove-coupon' ).click();
 
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( '$20.00' );
-			} );
+					await expect(
+						page.locator( '.order-total .amount' )
+					).toContainText( '$20.00' );
+				} );
 
-			await context.clearCookies();
+				await context.clearCookies();
 
-			await test.step( 'Load checkout page and try restoring total when removed coupons', async () => {
-				await addAProductToCart( page, firstProductId );
+				await test.step( 'Load checkout page and try restoring total when removed coupons', async () => {
+					await addAProductToCart( page, firstProductId );
 
-				await page.goto( '/checkout/' );
-				await page
-					.locator( 'text=Click here to enter your code' )
-					.click();
-				await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
-				await page.locator( 'text=Apply coupon' ).click();
+					await page.goto( '/checkout/' );
+					await page
+						.locator( 'text=Click here to enter your code' )
+						.click();
+					await page
+						.locator( '#coupon_code' )
+						.fill( coupons[ 0 ].code );
+					await page.locator( 'text=Apply coupon' ).click();
 
-				// confirm numbers
-				await expect(
-					page.locator( '.cart-discount .amount' )
-				).toContainText( discounts[ 0 ] );
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( totals[ 0 ] );
+					// confirm numbers
+					await expect(
+						page.locator( '.cart-discount .amount' )
+					).toContainText( discounts[ 0 ] );
+					await expect(
+						page.locator( '.order-total .amount' )
+					).toContainText( totals[ 0 ] );
 
-				await page.locator( 'a.woocommerce-remove-coupon' ).click();
+					await page.locator( 'a.woocommerce-remove-coupon' ).click();
 
-				await expect(
-					page.locator( '.order-total .amount' )
-				).toContainText( '$20.00' );
-			} );
-		} );
+					await expect(
+						page.locator( '.order-total .amount' )
+					).toContainText( '$20.00' );
+				} );
+			}
+		);
 	}
 );

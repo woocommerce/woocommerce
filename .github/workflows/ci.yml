@@ -162,7 +162,7 @@ jobs:
           else
             MESSAGE="${{ github.event_name }}"
           fi
-          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> "$GITHUB_ENV"
         shell: bash
 
       - name: 'Resolve artifacts path'

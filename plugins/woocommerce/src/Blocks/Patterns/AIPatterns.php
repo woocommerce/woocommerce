@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Blocks\Images\Pexels;
 
 /**
  * AIPatterns class.
+ *
+ * @internal
  */
 class AIPatterns {
 	const PATTERNS_AI_DATA_POST_TYPE = 'patterns_ai_data';

@@ -81,7 +81,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
-		unset( wc()->countries->locale );
+		unset( WC()->countries->locale );
 		remove_all_filters( 'woocommerce_get_country_locale' );
 		global $wp_rest_server;
 		$wp_rest_server = null;

@@ -5,10 +5,15 @@
 	"name": "woocommerce/all-products",
 	"title": "All Products",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"description": "Display products from your store in a grid layout.",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false,
 		"multiple": false
 	},

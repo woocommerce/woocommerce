@@ -46,12 +46,6 @@ function wc_template_redirect() {
 		exit;
 	}
 
-	// Redirect to edit account if trying to recover password whilst logged in.
-	if ( isset( $wp->query_vars['lost-password'] ) && is_user_logged_in() ) {
-		wp_safe_redirect( esc_url_raw( wc_get_endpoint_url( 'edit-account', '', wc_get_page_permalink( 'myaccount' ) ) ) );
-		exit;
-	}
-
 	// Trigger 404 if trying to access an endpoint on wrong page.
 	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() && apply_filters( 'woocommerce_account_endpoint_page_not_found', true ) ) {
 		$wp_query->set_404();
@@ -243,11 +237,11 @@ function wc_set_loop_prop( $prop, $value = '' ) {
 }
 
 /**
- * Set the current visbility for a product in the woocommerce_loop global.
+ * Set the current visibility for a product in the woocommerce_loop global.
  *
  * @since 4.4.0
- * @param int  $product_id Product it to cache visbiility for.
- * @param bool $value The poduct visibility value to cache.
+ * @param int  $product_id Product it to cache visibility for.
+ * @param bool $value The product visibility value to cache.
  */
 function wc_set_loop_product_visibility( $product_id, $value ) {
 	wc_set_loop_prop( "product_visibility_$product_id", $value );
@@ -1486,10 +1480,48 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
-		$args = array(
-			'total'    => wc_get_loop_prop( 'total' ),
-			'per_page' => wc_get_loop_prop( 'per_page' ),
-			'current'  => wc_get_loop_prop( 'current_page' ),
+
+		/**
+		 * Filters the default orderby option.
+		 *
+		 * @since 1.6.4
+		 *
+		 * @param string  $default_orderby The default orderby option.
+		 */
+		$default_orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby;
+
+		// If products follow the default order this doesn't need to be informed.
+		$orderby = 'menu_order' === $orderby ? '' : $orderby;
+
+		$orderby = is_string( $orderby ) ? $orderby : '';
+
+		/**
+		 * Filters ordered by messages.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param array  $orderedby_messages The list of messages per orderby key.
+		 */
+		$catalog_orderedby_options = apply_filters(
+			'woocommerce_catalog_orderedby',
+			array(
+				'menu_order' => __( 'Default sorting', 'woocommerce' ),
+				'popularity' => __( 'Sorted by popularity', 'woocommerce' ),
+				'rating'     => __( 'Sorted by average rating', 'woocommerce' ),
+				'date'       => __( 'Sorted by latest', 'woocommerce' ),
+				'price'      => __( 'Sorted by price: low to high', 'woocommerce' ),
+				'price-desc' => __( 'Sorted by price: high to low', 'woocommerce' ),
+			)
+		);
+		$orderedby                 = isset( $catalog_orderedby_options[ $orderby ] ) ? $catalog_orderedby_options[ $orderby ] : '';
+		$orderedby                 = is_string( $orderedby ) ? $orderedby : '';
+		$args                      = array(
+			'total'     => wc_get_loop_prop( 'total' ),
+			'per_page'  => wc_get_loop_prop( 'per_page' ),
+			'current'   => wc_get_loop_prop( 'current_page' ),
+			'orderedby' => $orderedby,
 		);
 
 		wc_get_template( 'loop/result-count.php', $args );
@@ -1621,25 +1653,39 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
 	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-	$image             = wp_get_attachment_image(
+
+	/**
+	 * Filters the attributes for the image markup.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param array $image_attributes Attributes for the image markup.
+	*/
+	$image_params = apply_filters(
+		'woocommerce_gallery_image_html_attachment_image_params',
+		array(
+			'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+			'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+			'data-src'                => esc_url( $full_src[0] ),
+			'data-large_image'        => esc_url( $full_src[0] ),
+			'data-large_image_width'  => esc_attr( $full_src[1] ),
+			'data-large_image_height' => esc_attr( $full_src[2] ),
+			'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
+		),
+		$attachment_id,
+		$image_size,
+		$main_image
+	);
+
+	if ( isset( $image_params['title'] ) ) {
+		unset( $image_params['title'] );
+	}
+
+	$image = wp_get_attachment_image(
 		$attachment_id,
 		$image_size,
 		false,
-		apply_filters(
-			'woocommerce_gallery_image_html_attachment_image_params',
-			array(
-				'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-				'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
-				'data-src'                => esc_url( $full_src[0] ),
-				'data-large_image'        => esc_url( $full_src[0] ),
-				'data-large_image_width'  => esc_attr( $full_src[1] ),
-				'data-large_image_height' => esc_attr( $full_src[2] ),
-				'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
-			),
-			$attachment_id,
-			$image_size,
-			$main_image
-		)
+		$image_params
 	);
 
 	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" data-thumb-srcset="' . esc_attr( $thumbnail_srcset ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
@@ -3797,7 +3843,7 @@ function wc_empty_cart_message() {
 	// This adds the cart-empty classname to the notice to preserve backwards compatibility (for styling purposes etc).
 	$notice = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
 
-	// Return the notice within a consistent wrapper element. This is targetted by some scripts such as cart.js.
+	// Return the notice within a consistent wrapper element. This is targeted by some scripts such as cart.js.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
 }

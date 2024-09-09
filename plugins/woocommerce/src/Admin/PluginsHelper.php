@@ -365,7 +365,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Callback regsitered by OnboardingPlugins::install_and_activate_async.
+	 * Callback registered by OnboardingPlugins::install_and_activate_async.
 	 *
 	 * It is used to call install_plugins and activate_plugins with a custom logger.
 	 *
@@ -839,7 +839,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
-						&& $sub['active']
+						&& ( $sub['active'] || empty( $sub['connections'] ) ) // Active on current site or not connected to any sites.
 						&& $sub['expiring']
 						&& ! $sub['autorenew'];
 			},
@@ -917,7 +917,7 @@ class PluginsHelper {
 			$subscriptions,
 			function ( $sub ) {
 				return ( ! empty( $sub['local']['installed'] ) && ! empty( $sub['product_key'] ) )
-						&& $sub['active']
+						&& ( $sub['active'] || empty( $sub['connections'] ) ) // Active on current site or not connected to any sites.
 						&& $sub['expired']
 						&& ! $sub['lifetime'];
 			},

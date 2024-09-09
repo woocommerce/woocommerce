@@ -5,4 +5,6 @@ export interface Attributes {
 	isDescendentOfSingleProductBlock: boolean;
 	showProductSelector: boolean;
 	isDescendantOfAllProducts: boolean;
+	prefix: string;
+	suffix: string;
 }

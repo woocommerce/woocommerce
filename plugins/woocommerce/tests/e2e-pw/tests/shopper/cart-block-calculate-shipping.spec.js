@@ -130,157 +130,181 @@ test.describe(
 			} );
 		} );
 
-		test( 'allows customer to calculate Free Shipping in cart block if in Netherlands', async ( {
-			page,
-			context,
-			cartBlockPage,
-		} ) => {
-			await context.clearCookies();
+		test(
+			'allows customer to calculate Free Shipping in cart block if in Netherlands',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page, context, cartBlockPage } ) => {
+				await context.clearCookies();
 
-			await addAProductToCart( page, product1Id );
-			await page.goto( cartBlockPage.slug );
+				await addAProductToCart( page, product1Id );
+				await page.goto( cartBlockPage.slug );
 
-			// Set shipping country to Netherlands
-			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page
-				.getByRole( 'combobox' )
-				.first()
-				.selectOption( 'Netherlands' );
-			await page.getByLabel( 'Postal code' ).fill( '1011AA' );
-			await page.getByLabel( 'City' ).fill( 'Amsterdam' );
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+				// Set shipping country to Netherlands
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
+				await page
+					.getByRole( 'combobox' )
+					.first()
+					.selectOption( 'Netherlands' );
+				await page.getByLabel( 'Postal code' ).fill( '1011AA' );
+				await page.getByLabel( 'City' ).fill( 'Amsterdam' );
+				await page.getByRole( 'button', { name: 'Update' } ).click();
 
-			// Verify shipping costs
-			await expect(
-				page.getByRole( 'group' ).getByText( 'Free shipping' )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'strong' ).getByText( 'Free', { exact: true } )
-			).toBeVisible();
-			await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
-				firstProductPrice
-			);
-		} );
+				// Verify shipping costs
+				await expect(
+					page.getByRole( 'group' ).getByText( 'Free shipping' )
+				).toBeVisible();
+				await expect(
+					page
+						.getByRole( 'strong' )
+						.getByText( 'Free', { exact: true } )
+				).toBeVisible();
+				await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
+					firstProductPrice
+				);
+			}
+		);
 
-		test( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
-			page,
-			context,
-			cartBlockPage,
-		} ) => {
-			await context.clearCookies();
+		test(
+			'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page, context, cartBlockPage } ) => {
+				await context.clearCookies();
 
-			await addAProductToCart( page, product1Id );
-			await page.goto( cartBlockPage.slug );
+				await addAProductToCart( page, product1Id );
+				await page.goto( cartBlockPage.slug );
 
-			// Set shipping country to Portugal
-			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page
-				.getByRole( 'combobox' )
-				.first()
-				.selectOption( 'Portugal' );
-			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
-			await page.getByLabel( 'City' ).fill( 'Lisbon' );
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+				// Set shipping country to Portugal
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
+				await page
+					.getByRole( 'combobox' )
+					.first()
+					.selectOption( 'Portugal' );
+				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
+				await page.getByLabel( 'City' ).fill( 'Lisbon' );
+				await page.getByRole( 'button', { name: 'Update' } ).click();
 
-			// Verify shipping costs
-			await expect(
-				page.getByRole( 'group' ).getByText( 'Flat rate' )
-			).toBeVisible();
-			await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
-			await expect(
-				page.getByText( `$${ firstProductWithFlatRate }` )
-			).toBeVisible();
+				// Verify shipping costs
+				await expect(
+					page.getByRole( 'group' ).getByText( 'Flat rate' )
+				).toBeVisible();
+				await expect(
+					page.getByText( 'Delivery$5.00Flat' )
+				).toBeVisible();
+				await expect(
+					page.getByText( `$${ firstProductWithFlatRate }` )
+				).toBeVisible();
 
-			// Set shipping to local pickup instead of flat rate
-			await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
+				// Set shipping to local pickup instead of flat rate
+				await page
+					.getByRole( 'group' )
+					.getByText( 'Local pickup' )
+					.click();
 
-			// Verify updated shipping costs
-			await expect( page.getByText( 'ShippingFreeLocal' ) ).toBeVisible();
-			await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
-				firstProductPrice
-			);
-		} );
+				// Verify updated shipping costs
+				await expect(
+					page.getByText( 'DeliveryFreeLocal' )
+				).toBeVisible();
+				await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
+					firstProductPrice
+				);
+			}
+		);
 
-		test( 'should show correct total cart block price after updating quantity', async ( {
-			page,
-			context,
-			cartBlockPage,
-		} ) => {
-			await context.clearCookies();
+		test(
+			'should show correct total cart block price after updating quantity',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page, context, cartBlockPage } ) => {
+				await context.clearCookies();
 
-			await addAProductToCart( page, product1Id );
-			await page.goto( cartBlockPage.slug );
+				await addAProductToCart( page, product1Id );
+				await page.goto( cartBlockPage.slug );
 
-			// Set shipping country to Portugal
-			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page
-				.getByRole( 'combobox' )
-				.first()
-				.selectOption( 'Portugal' );
-			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
-			await page.getByLabel( 'City' ).fill( 'Lisbon' );
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+				// Set shipping country to Portugal
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
+				await page
+					.getByRole( 'combobox' )
+					.first()
+					.selectOption( 'Portugal' );
+				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
+				await page.getByLabel( 'City' ).fill( 'Lisbon' );
+				await page.getByRole( 'button', { name: 'Update' } ).click();
 
-			// Increase product quantity and verify the updated price
-			await page.getByLabel( 'Increase quantity of First' ).click();
-			await expect(
-				page.getByText(
-					`$${
-						parseInt( firstProductPrice, 10 ) +
-						parseInt( firstProductPrice, 10 ) +
-						5
-					}`.toString()
-				)
-			).toBeVisible();
-		} );
+				// Increase product quantity and verify the updated price
+				await page.getByLabel( 'Increase quantity of First' ).click();
+				await expect(
+					page.getByText(
+						`$${
+							parseInt( firstProductPrice, 10 ) +
+							parseInt( firstProductPrice, 10 ) +
+							5
+						}`.toString()
+					)
+				).toBeVisible();
+			}
+		);
 
-		test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
-			page,
-			context,
-			cartBlockPage,
-		} ) => {
-			await context.clearCookies();
+		test(
+			'should show correct total cart block price with 2 different products and flat rate/local pickup',
+			{ tag: [ '@could-be-unit-test' ] },
+			async ( { page, context, cartBlockPage } ) => {
+				await context.clearCookies();
 
-			await addAProductToCart( page, product1Id );
-			await addAProductToCart( page, product2Id );
-			await page.goto( cartBlockPage.slug );
+				await addAProductToCart( page, product1Id );
+				await addAProductToCart( page, product2Id );
+				await page.goto( cartBlockPage.slug );
 
-			// Set shipping country to Portugal
-			await page.getByLabel( 'Add an address for shipping' ).click();
-			await page
-				.getByRole( 'combobox' )
-				.first()
-				.selectOption( 'Portugal' );
-			await page.getByLabel( 'Postal code' ).fill( '1000-001' );
-			await page.getByLabel( 'City' ).fill( 'Lisbon' );
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+				// Set shipping country to Portugal
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
+				await page
+					.getByRole( 'combobox' )
+					.first()
+					.selectOption( 'Portugal' );
+				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
+				await page.getByLabel( 'City' ).fill( 'Lisbon' );
+				await page.getByRole( 'button', { name: 'Update' } ).click();
 
-			// Verify shipping costs
-			await expect(
-				page.getByRole( 'group' ).getByText( 'Flat rate' )
-			).toBeVisible();
-			await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
-			await expect(
-				page.getByText(
-					`$${
-						parseInt( firstProductPrice, 10 ) +
-						parseInt( secondProductPrice, 10 ) +
-						5
-					}`.toString()
-				)
-			).toBeVisible();
+				// Verify shipping costs
+				await expect(
+					page.getByRole( 'group' ).getByText( 'Flat rate' )
+				).toBeVisible();
+				await expect(
+					page.getByText( 'Delivery$5.00Flat' )
+				).toBeVisible();
+				await expect(
+					page.getByText(
+						`$${
+							parseInt( firstProductPrice, 10 ) +
+							parseInt( secondProductPrice, 10 ) +
+							5
+						}`.toString()
+					)
+				).toBeVisible();
 
-			// Set shipping to local pickup instead of flat rate
-			await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
+				// Set shipping to local pickup instead of flat rate
+				await page
+					.getByRole( 'group' )
+					.getByText( 'Local pickup' )
+					.click();
 
-			// Verify updated shipping costs
-			await expect( page.getByText( 'ShippingFreeLocal' ) ).toBeVisible();
-			await expect(
-				page
-					.locator( 'div' )
-					.filter( { hasText: /^\$30\.00$/ } )
-					.locator( 'span' )
-			).toBeVisible();
-		} );
+				// Verify updated shipping costs
+				await expect(
+					page.getByText( 'DeliveryFreeLocal' )
+				).toBeVisible();
+				await expect(
+					page
+						.locator( 'div' )
+						.filter( { hasText: /^\$30\.00$/ } )
+						.locator( 'span' )
+				).toBeVisible();
+			}
+		);
 	}
 );
