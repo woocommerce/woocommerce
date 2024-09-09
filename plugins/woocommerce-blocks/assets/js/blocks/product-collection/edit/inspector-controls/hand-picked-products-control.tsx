@@ -81,6 +81,7 @@ function useProducts(
 }
 
 export const HandPickedProductsControlField = ( {
+	label,
 	query,
 	trackInteraction,
 	setQueryAttribute,
@@ -151,7 +152,7 @@ export const HandPickedProductsControlField = ( {
 	return (
 		<FormTokenField
 			displayTransform={ transformTokenIntoProductName }
-			label={ __( 'Select Products', 'woocommerce' ) }
+			label={ label || __( 'Hand-Picked Products', 'woocommerce' ) }
 			onChange={ onTokenChange }
 			onInputChange={ isLargeCatalog ? handleSearch : undefined }
 			suggestions={ suggestions }
