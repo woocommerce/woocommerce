@@ -118,14 +118,14 @@ if ( wc_tax_enabled() ) {
 				<li><strong><?php esc_html_e( 'Coupon(s)', 'woocommerce' ); ?></strong></li>
 				<?php
 				foreach ( $coupons as $item_id => $item ) :
-					$coupon_info = $item->get_meta( 'coupon_info' ) ;
+					$coupon_info = $item->get_meta( 'coupon_info' );
 					if ( $coupon_info ) {
 						$coupon_info = json_decode( $coupon_info, true );
-						$post_id = $coupon_info[0];
+						$post_id     = $coupon_info[0];
 					} else {
-						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", $item->get_code(), $order->get_date_created()->format('Y-m-d H:i:s') ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
+						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", $item->get_code(), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
-					$class   = $order->is_editable() ? 'code editable' : 'code';
+					$class = $order->is_editable() ? 'code editable' : 'code';
 					?>
 					<li class="<?php echo esc_attr( $class ); ?>">
 						<?php if ( $post_id ) : ?>
