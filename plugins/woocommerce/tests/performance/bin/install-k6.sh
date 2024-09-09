@@ -37,3 +37,5 @@ else
     echo "Unsupported operating system. Please check K6 docs and install the right version for your system."
     exit 1
 fi
+
+"$SCRIPT_PATH/k6" version
