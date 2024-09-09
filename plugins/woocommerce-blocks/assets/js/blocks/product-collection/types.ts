@@ -142,6 +142,7 @@ export type DisplayLayoutControlProps = {
 	setAttributes: ProductCollectionSetAttributes;
 };
 export type QueryControlProps = {
+	label?: string;
 	query: ProductCollectionQuery;
 	trackInteraction: TrackInteraction;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
