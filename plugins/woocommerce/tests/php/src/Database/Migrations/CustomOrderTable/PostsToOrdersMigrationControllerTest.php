@@ -1,20 +1,20 @@
 <?php
-/**
- * Tests for PostsToOrdersMigrationController class.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Database\Migrations\CustomOrderTable;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Testing\Tools\DynamicDecorator;
-use Automattic\WooCommerce\Testing\Tools\ReplacementObject;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use WC_DateTime;
 
 /**
  * Class PostsToOrdersMigrationControllerTest.
  */
-class PostsToOrdersMigrationControllerTest extends WC_Unit_Test_Case {
+class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var PostsToOrdersMigrationController
@@ -669,7 +669,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 	/**
 	 * Configure a dynamic decorator for $wpdb that logs (and optionally errors) any db related transaction query.
 	 *
-	 * @param string|\Exception\bool $transaction_fails False if the transaction related queries won't fail, 'error' if they produce a db error, or an Exception object that they will throw.
+	 * @param string|\Exception|bool $transaction_fails False if the transaction related queries won't fail, 'error' if they produce a db error, or an Exception object that they will throw.
 	 * @return DynamicDecorator
 	 */
 	private function use_wpdb_mock( $transaction_fails = false ) {
