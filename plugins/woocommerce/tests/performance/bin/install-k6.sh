@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-K6_VERSION="0.33.0"
+K6_VERSION="0.53.0"
 DOWNLOAD_URL="https://github.com/grafana/k6/releases/download/v$K6_VERSION"
 SCRIPT_PATH=$(cd "$(dirname "${BASH_SOURCE[0]}")" || return; pwd -P)
 
