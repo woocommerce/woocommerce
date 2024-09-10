@@ -44,7 +44,7 @@ export default function Content(): JSX.Element {
 
 		categories.forEach( ( category: keyof SearchResultsCountType, index ) => {
 			const params = new URLSearchParams();
-			if ( 'extensions' !== 'category' ) {
+			if ( 'extensions' !== category ) {
 				params.append( 'category', category );
 			}
 
