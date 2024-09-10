@@ -14,8 +14,14 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { LoadingPage } from './pages/loading';
 import { SitePreviewPage } from './pages/site-preview';
-import type { LaunchYourStoreComponentProps } from '..';
-import { createQueryParamsListener, updateQueryParams } from '../common';
+import type {
+	LaunchYourStoreComponentProps,
+	LaunchYourStoreQueryParams,
+} from '..';
+import {
+	updateQueryParams,
+	createQueryParamsListener,
+} from '~/utils/xstate/url-handling';
 import {
 	services as congratsServices,
 	events as congratsEvents,
@@ -54,11 +60,8 @@ export const mainContentMachine = setup( {
 		events: MainContentMachineEvents;
 	},
 	actions: {
-		updateQueryParams: (
-			_,
-			params: { sidebar?: string; content?: string }
-		) => {
-			updateQueryParams( params );
+		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
+			updateQueryParams< LaunchYourStoreQueryParams >( params );
 		},
 		assignSiteCachedStatus: assign( {
 			siteIsShowingCachedContent: true,
@@ -92,9 +95,9 @@ export const mainContentMachine = setup( {
 	guards: {
 		hasContentLocation: (
 			_,
-			{ contentLocation }: { contentLocation: string }
+			{ content: contentLocation }: LaunchYourStoreQueryParams
 		) => {
-			const { content } = getQuery() as { content?: string };
+			const { content } = getQuery() as LaunchYourStoreQueryParams;
 			return !! content && content === contentLocation;
 		},
 	},
@@ -125,13 +128,13 @@ export const mainContentMachine = setup( {
 				{
 					guard: {
 						type: 'hasContentLocation',
-						params: { contentLocation: 'site-preview' },
+						params: { content: 'site-preview' },
 					},
 				},
 				{
 					guard: {
 						type: 'hasContentLocation',
-						params: { contentLocation: 'launch-store-success' },
+						params: { content: 'launch-store-success' },
 					},
 					target: 'launchStoreSuccess',
 				},

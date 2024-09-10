@@ -12,7 +12,6 @@ import * as actions from './actions';
 import { STORE_NAME } from './constants';
 
 export const store = createReduxStore( STORE_NAME, {
-	// @ts-expect-error reducer has correct format.
 	reducer,
 	selectors,
 	actions,
