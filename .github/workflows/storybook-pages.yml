@@ -1,10 +1,12 @@
 name: Storybook GitHub Pages
 
 on:
+    workflow_dispatch:
     push:
         branches:
             - trunk
-    workflow_dispatch:
+
+permissions: {}
 
 jobs:
     deploy:
