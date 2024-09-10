@@ -21,7 +21,7 @@ class WC_Admin_Tests_RemoteSpecs_Transformers_DotNotation extends WC_Unit_Test_C
 	public function test_validate_returns_false_when_path_argument_is_missing() {
 		$array_column = new DotNotation();
 		$result       = $array_column->validate( (object) array() );
-		$this->assertFalse( false, $result );
+		$this->assertFalse( $result );
 	}
 
 	/**

@@ -19,7 +19,7 @@ class WC_Admin_Tests_RemoteSpecs_Transformers_ArraySearch extends WC_Unit_Test_C
 	public function test_validate_returns_false_when_value_argument_is_missing() {
 		$array_column = new ArraySearch();
 		$result       = $array_column->validate( (object) array() );
-		$this->assertFalse( false, $result );
+		$this->assertFalse( $result );
 	}
 
 	/**

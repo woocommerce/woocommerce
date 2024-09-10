@@ -20,7 +20,7 @@ class WC_Admin_Tests_RemoteSpecs_Transformers_ArrayColumn extends WC_Unit_Test_C
 	public function test_validate_returns_false_when_key_argument_is_missing() {
 		$array_column = new ArrayColumn();
 		$result       = $array_column->validate( (object) array() );
-		$this->assertFalse( false, $result );
+		$this->assertFalse( $result );
 	}
 
 	/**
@@ -33,14 +33,14 @@ class WC_Admin_Tests_RemoteSpecs_Transformers_ArrayColumn extends WC_Unit_Test_C
 				'key' => true,
 			)
 		);
-		$this->assertFalse( false, $result );
+		$this->assertFalse( $result );
 
 		$result = $array_column->validate(
 			(object) array(
 				'key' => array(),
 			)
 		);
-		$this->assertFalse( false, $result );
+		$this->assertFalse( $result );
 	}
 
 	/**
