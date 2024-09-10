@@ -64,16 +64,16 @@ function ProductCardFooter( props: { product: Product } ) {
 		return true;
 	}
 
-	const currencySymbols: { [ key: string ]: string } = {
-		USD: '$',
-		AUD: 'A$',
-		CAD: 'C$',
-		EUR: '€',
-		GBP: '£',
+	const currencyFormats: { [ key: string ]: string } = {
+		USD: '$%s',
+		AUD: 'A$%s',
+		CAD: 'C$%s',
+		EUR: '€%s',
+		GBP: '£%s',
 	};
 
-	const getCurrencySymbol = ( currencyCode: string ) => {
-		return currencySymbols[ currencyCode ] || '';
+	const getCurrencyFormat = ( currencyCode: string ) => {
+		return currencyFormats[ currencyCode ] || '%s';
 	};
 
 	function getPriceLabel(): string {
@@ -85,7 +85,7 @@ function ProductCardFooter( props: { product: Product } ) {
 			return __( 'Free plan available', 'woocommerce' );
 		}
 
-		return getCurrencySymbol( product.currency ) + product.price;
+		return sprintf( getCurrencyFormat( product.currency ), product.price );
 	}
 
 	function getPriceSuffix(): string {
