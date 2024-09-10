@@ -47,7 +47,9 @@ const Form = ( {
 	return (
 		<form
 			className={ 'wc-block-order-confirmation-create-account-form' }
+			id="create-account"
 			method="POST"
+			action="#create-account"
 			onSubmit={ ( event ) => {
 				if ( hasValidationError ) {
 					event.preventDefault();

@@ -157,7 +157,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 * @return string
 	 */
 	protected function render_confirmation() {
-		$content  = '<div class="woocommerce-order-confirmation-create-account-success">';
+		$content  = '<div class="woocommerce-order-confirmation-create-account-success" id="create-account">';
 		$content .= '<h3>' . esc_html__( 'Your account has been successfully created', 'woocommerce' ) . '</h3>';
 		$content .= '<p>' . sprintf(
 			/* translators: 1: link to my account page, 2: link to shipping and billing addresses, 3: link to account details, 4: closing tag */
