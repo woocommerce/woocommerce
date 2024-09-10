@@ -19,7 +19,6 @@ class Drawer {
 	 */
 	public static function render( $props ) {
 		wp_enqueue_script( 'wc-interactivity-drawer' );
-		// wp_enqueue_style( 'wc-interactivity-drawer' );
 
 		$namespace = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-drawer' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 		$context   = array(

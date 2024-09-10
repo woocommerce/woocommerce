@@ -467,6 +467,13 @@ class MiniCartInteractivity extends AbstractBlock {
 		<?php
 	}
 
+	/**
+	 * Get the template part contents container.
+	 *
+	 * @param string $template_contents The template part contents.
+	 *
+	 * @return string
+	 */
 	protected function get_template_part_contents_container( $template_contents ) {
 		ob_start();
 		?>
@@ -520,13 +527,15 @@ class MiniCartInteractivity extends AbstractBlock {
 						echo $this->render_mini_cart_button( $attributes, $cart_item_count, false );
 					?>
 					<?php
+						// Output is already escaped by Drawer::render.
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						echo Drawer::render(
 							array(
 								'is_initially_open'        => false,
+								// Output is already escaped by Drawer::render_close_button.
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 								'children'                 => $close_button . $this->get_template_part_contents_container( $template_part_contents ),
-								// TODO - clean up this concept.
 								'is_open_context_property' => 'woocommerce/mini-cart-interactivity::context.drawerOpen',
-								'on_open'                  => 'woocommerce/mini-cart-interactivity::actions.renderMiniCart',
 							)
 						);
 					?>
