@@ -24,7 +24,6 @@
 					<element key="slowThreshold">
 						<integer>3000</integer>
 					</element>
-
 					<element key="reportLength">
                         <integer>50</integer>
                     </element>
