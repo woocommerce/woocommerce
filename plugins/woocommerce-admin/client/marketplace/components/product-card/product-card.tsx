@@ -6,6 +6,7 @@ import { Card } from '@wordpress/components';
 import clsx from 'clsx';
 import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
 import { useQuery } from '@woocommerce/navigation';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -161,6 +162,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		</a>
 	);
 
+	const decodedDescription = decodeEntities( product.description );
+
 	const BusinessService = () => (
 		<div className="woocommerce-marketplace__business-card">
 			<div
@@ -174,7 +177,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					<h2>
 						<CardLink />
 					</h2>
-					<p>{ product.description }</p>
+					<p className="woocommerce-marketplace__product-card__description">
+						{ decodedDescription }
+					</p>
 				</div>
 				<div className="woocommerce-marketplace__business-card__badge">
 					<span>{ product.productCategory }</span>
@@ -265,7 +270,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					</div>
 					{ ! isTheme && (
 						<p className="woocommerce-marketplace__product-card__description">
-							{ ! isLoading && product.description }
+							{ ! isLoading && decodedDescription }
 						</p>
 					) }
 					<footer className="woocommerce-marketplace__product-card__footer">
