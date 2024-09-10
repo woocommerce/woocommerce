@@ -1,4 +1,9 @@
 /**
+ * Logic in this file is unused and should be moved to product-fitlers block.
+ *
+ * @see https://github.com/woocommerce/woocommerce/issues/50868
+ */
+/**
  * External dependencies
  */
 import { store, getContext } from '@woocommerce/interactivity';

@@ -38,7 +38,7 @@ final class ProductFilterClearButton extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wc-bind--hidden' => '!context.hasSelectedFilter',
+				'data-wc-bind--hidden' => '!context.hasSelectedFilters',
 			)
 		);
 

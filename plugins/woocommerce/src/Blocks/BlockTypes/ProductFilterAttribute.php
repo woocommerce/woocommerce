@@ -237,9 +237,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$context = array(
-			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
-			'queryType'     => $block_attributes['queryType'],
-			'selectType'    => 'multiple',
+			'attributeSlug'      => str_replace( 'pa_', '', $product_attribute->slug ),
+			'queryType'          => $block_attributes['queryType'],
+			'selectType'         => 'multiple',
+			'hasSelectedFilters' => count( $selected_terms ) > 0,
 		);
 
 		return sprintf(
