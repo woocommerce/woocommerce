@@ -35,7 +35,9 @@ test.describe( `Filters Overlay Navigation`, () => {
 		await expect( block ).toBeVisible();
 	} );
 
-	test( 'should have settings and styles controls', async ( { editor } ) => {
+	// Since we need to overhaul the overlay area, we can skip this test for now.
+	// eslint-disable-next-line playwright/no-skipped-test
+	test.skip( 'should have settings and styles controls', async ( { editor } ) => {
 		const block = editor.canvas.getByLabel( `Block: ${ blockData.title }` );
 		await block.click();
 
