@@ -44,7 +44,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in' );
 
 
 	/**
@@ -620,6 +620,7 @@ class ProductCollection extends AbstractBlock {
 			$args,
 			array(
 				'orderby'             => $orderby,
+				'post__in'            => $handpicked_products,
 				'on_sale'             => $on_sale,
 				'stock_status'        => $stock_status,
 				'product_attributes'  => $product_attributes,
@@ -706,7 +707,7 @@ class ProductCollection extends AbstractBlock {
 			'posts_per_page' => $query['perPage'],
 			'order'          => $query['order'],
 			'offset'         => ( $per_page * ( $page - 1 ) ) + $offset,
-			'post__in'       => array(),
+			'post__in'       => $query['woocommerceHandPickedProducts'] ?? array(),
 			'post_status'    => 'publish',
 			'post_type'      => 'product',
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
