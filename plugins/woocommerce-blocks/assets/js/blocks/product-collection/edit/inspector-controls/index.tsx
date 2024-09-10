@@ -292,7 +292,6 @@ const CollectionSpecificControls = (
 						'woocommerce/product-collection/hand-picked' && (
 						<HandPickedProductsControlField
 							{ ...queryControlProps }
-							label={ __( 'Select Products', 'woocommerce' ) }
 						/>
 					)
 				}
