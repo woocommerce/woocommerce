@@ -325,7 +325,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 			isset( $cached->attribute_label ) &&
 			isset( $cached->attribute_type ) &&
 			isset( $cached->attribute_orderby ) &&
-			isset( $cached->attribute_public )
+			isset( $cached->attribute_public ) &&
+			'0' !== $cached->attribute_id
 		) {
 			return $cached;
 		}
@@ -374,9 +375,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( $attribute_id ) {
 			$default_attribute = $attributes[ $attribute_id ];
+			set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute, DAY_IN_SECONDS );
 		}
-
-		set_transient( 'wc_block_product_filter_attribute_default_attribute', $default_attribute, DAY_IN_SECONDS );
 
 		return $default_attribute;
 	}
