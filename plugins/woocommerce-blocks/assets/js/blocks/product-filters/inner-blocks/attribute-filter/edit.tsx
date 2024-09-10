@@ -13,7 +13,7 @@ import {
 } from '@woocommerce/types';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Disabled, Notice, withSpokenMessages } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -27,6 +27,7 @@ import { attributeOptionsPreview } from './constants';
 import './style.scss';
 import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
+import './editor.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -49,22 +50,26 @@ const Edit = ( props: EditProps ) => {
 		AttributeTerm[]
 	>( [] );
 
-	const { results: attributeTerms } = useCollection< AttributeTerm >( {
-		namespace: '/wc/store/v1',
-		resourceName: 'products/attributes/terms',
-		resourceValues: [ attributeObject?.id || 0 ],
-		shouldSelect: !! attributeObject?.id,
-		query: { orderby: 'menu_order', hide_empty: hideEmpty },
-	} );
+	const { results: attributeTerms, isLoading: isTermsLoading } =
+		useCollection< AttributeTerm >( {
+			namespace: '/wc/store/v1',
+			resourceName: 'products/attributes/terms',
+			resourceValues: [ attributeObject?.id || 0 ],
+			shouldSelect: !! attributeObject?.id,
+			query: { orderby: 'menu_order', hide_empty: hideEmpty },
+		} );
 
-	const { results: filteredCounts } = useCollectionData( {
-		queryAttribute: {
-			taxonomy: attributeObject?.taxonomy || '',
-			queryType,
-		},
-		queryState: {},
-		isEditor: true,
-	} );
+	const { results: filteredCounts, isLoading: isCountsLoading } =
+		useCollectionData( {
+			queryAttribute: {
+				taxonomy: attributeObject?.taxonomy || '',
+				queryType,
+			},
+			queryState: {},
+			isEditor: true,
+		} );
+
+	const isLoading = isTermsLoading || isCountsLoading;
 
 	useEffect( () => {
 		const termIdHasProducts =
@@ -106,6 +111,20 @@ const Edit = ( props: EditProps ) => {
 		</div>
 	);
 
+	const loadingState = useMemo( () => {
+		return [ ...Array( 5 ) ].map( ( x, i ) => (
+			<li
+				key={ i }
+				style={ {
+					/* stylelint-disable */
+					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
+				} }
+			>
+				&nbsp;
+			</li>
+		) );
+	}, [] );
+
 	if ( isPreview ) {
 		return (
 			<Wrapper>
@@ -144,7 +163,16 @@ const Edit = ( props: EditProps ) => {
 			</Wrapper>
 		);
 
-	if ( attributeOptions.length === 0 )
+	if ( isLoading )
+		return (
+			<Wrapper>
+				<ul className="is-loading wp-block-woocommerce-product-filter-attribute__loading">
+					{ loadingState }
+				</ul>
+			</Wrapper>
+		);
+
+	if ( attributeTerms.length === 0 )
 		return (
 			<Wrapper>
 				<Notice status="warning" isDismissible={ false }>

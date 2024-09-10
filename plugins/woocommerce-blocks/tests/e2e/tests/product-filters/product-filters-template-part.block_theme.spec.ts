@@ -1,7 +1,19 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BlockData } from '@woocommerce/e2e-utils';
+
+const blockData: BlockData = {
+	name: 'Product Filters (Experimental)',
+	slug: 'woocommerce/product-filters',
+	mainClass: '.wp-block-woocommerce-product-filters',
+	selectors: {
+		editor: {
+			block: '.wp-block-woocommerce-product-filters',
+		},
+		frontend: {},
+	},
+};
 
 test.describe( 'Product Filters Template Part', () => {
 	test.beforeEach( async ( { admin, requestUtils } ) => {
@@ -31,8 +43,50 @@ test.describe( 'Product Filters Template Part', () => {
 
 	test( 'should render the Product Filters block', async ( { editor } ) => {
 		const productFiltersBlock = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+			`Block: ${ blockData.name }`
 		);
 		await expect( productFiltersBlock ).toBeVisible();
+	} );
+
+	test( 'Filters > can be added multiple times', async ( { editor } ) => {
+		const block = editor.canvas.getByLabel( `Block: ${ blockData.name }` );
+		await expect( block ).toBeVisible();
+
+		const searchTerms = [
+			'Status (Experimental)',
+			'Price (Experimental)',
+			'Rating (Experimental)',
+			'Attribute (Experimental)',
+			'Active (Experimental)',
+		];
+
+		for ( const filter of searchTerms ) {
+			await editor.selectBlocks( blockData.selectors.editor.block );
+
+			const addBlock = block.getByRole( 'button', {
+				name: 'Add block',
+			} );
+
+			await addBlock.click();
+
+			await editor.page.getByPlaceholder( 'Search' ).fill( filter );
+
+			const searchResult = editor.page.getByRole( 'option', {
+				name: filter,
+			} );
+			await expect( searchResult ).toBeVisible();
+
+			await searchResult.click();
+
+			let _locator = `[aria-label="Block: ${ filter }"]`;
+
+			// We need to treat the attributes filter different because
+			// the variation of the block label depends on the product attribute.
+			if ( filter === 'Attribute (Experimental)' ) {
+				_locator = '.wp-block-woocommerce-product-filter-attribute';
+			}
+
+			await expect( editor.canvas.locator( _locator ) ).toHaveCount( 2 );
+		}
 	} );
 } );

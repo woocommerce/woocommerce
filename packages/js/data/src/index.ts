@@ -85,6 +85,8 @@ export {
 } from './product-form/types';
 export * from './onboarding/types';
 export * from './plugins/types';
+export { PluginSelectors } from './plugins/selectors';
+export { ActionDispatchers as PluginActions } from './plugins/actions';
 export * from './products/types';
 export type {
 	PartialProductVariation,

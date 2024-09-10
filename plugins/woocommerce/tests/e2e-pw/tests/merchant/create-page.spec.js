@@ -18,9 +18,7 @@ test.describe(
 		// eslint-disable-next-line playwright/expect-expect
 		test( 'can create new page', async ( { page, testPage } ) => {
 			await goToPageEditor( { page } );
-
 			await closeChoosePatternModal( { page } );
-
 			await fillPageTitle( page, testPage.title );
 
 			const canvas = await getCanvas( page );

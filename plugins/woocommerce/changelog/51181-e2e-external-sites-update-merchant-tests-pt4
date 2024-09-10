@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update the rest of /merchant tests so they are passing against Pressable env.

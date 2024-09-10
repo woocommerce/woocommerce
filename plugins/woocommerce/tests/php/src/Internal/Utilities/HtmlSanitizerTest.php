@@ -1,14 +1,14 @@
 <?php
-/**
- * Tests for the HtmlSanitizer utility.
- */
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 /**
  * Tests relating to HtmlSanitizer.
  */
-class HtmlSanitizerTest extends WC_Unit_Test_Case {
+class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @var HtmlSanitizer
 	 */

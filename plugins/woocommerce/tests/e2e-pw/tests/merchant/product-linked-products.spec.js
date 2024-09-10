@@ -54,7 +54,10 @@ test.describe(
 						exact: true,
 					} )
 					.click();
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.locator( '#publishing-action' )
+					.getByRole( 'button', { name: 'Update' } )
+					.click();
 				await expect(
 					page.getByText( 'Product updated.' )
 				).toBeVisible();

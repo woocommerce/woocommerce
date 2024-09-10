@@ -22,7 +22,7 @@ Well-defined schema also provides a layer of security, as it enables us to valid
 When defining schema, take note of the [WordPress REST API handbook](https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/) which documents available properties and types, as well as the [JSON schema standard](http://json-schema.org/). In addition to this:
 
 -   Properties should use snake_case 🐍
--   Ambiguous terms should be avoided, and property names should try to use understandable language, rather than “WooCommerce” terminology or setting names
+-   Ambiguous terms should be avoided, and property names should try to use understandable language, rather than "WooCommerce" terminology or setting names
 -   Properties should be defined using US English, but the descriptions of fields should be localized
 -   Multiple types are permitted, for example, using a `null` type if a value is not applicable
 -   `sanitize_callback` and `validate_callback` are encouraged where possible to ensure data is received in the correct format before processing requests
