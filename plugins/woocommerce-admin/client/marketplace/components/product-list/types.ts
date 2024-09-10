@@ -24,6 +24,9 @@ export type SearchAPIProductType = {
 	featured_image: string;
 	product_category: string;
 	color: string;
+	billing_period: string;
+	billing_period_interval: number;
+	currency: string;
 };
 
 export interface Product {
@@ -52,6 +55,9 @@ export interface Product {
 	featuredImage?: string;
 	productCategory?: string;
 	color?: string;
+	billingPeriod?: string;
+	billingPeriodInterval?: number;
+	currency: string;
 }
 
 export interface ProductTracksData {
