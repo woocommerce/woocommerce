@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Don't update the script data transient for the same data
