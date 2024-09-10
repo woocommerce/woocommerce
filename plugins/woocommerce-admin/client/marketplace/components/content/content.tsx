@@ -39,12 +39,12 @@ export default function Content(): JSX.Element {
 	// On initial load of the in-app marketplace, fetch extensions, themes and business services
 	// and check if there are any business services available on WCCOM
 	useEffect( () => {
-		const categories: Array<keyof SearchResultsCountType> = ['extensions', 'themes', 'business-services'];
+		const categories: Array<keyof SearchResultsCountType> = [ 'extensions', 'themes', 'business-services' ];
 		const abortControllers = categories.map( () => new AbortController() );
 
 		categories.forEach( ( category: keyof SearchResultsCountType, index ) => {
 			const params = new URLSearchParams();
-			if ( category !== 'extensions' ) {
+			if ( 'extensions' !== 'category' ) {
 				params.append( 'category', category );
 			}
 
@@ -86,7 +86,6 @@ export default function Content(): JSX.Element {
 
 		setIsLoading( true );
 		setProducts( [] );
-
 
 		const params = new URLSearchParams();
 
