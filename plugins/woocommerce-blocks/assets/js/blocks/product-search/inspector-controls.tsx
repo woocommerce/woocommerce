@@ -51,7 +51,7 @@ const ProductSearchControls = ( props: ProductSearchBlock ) => {
 
 	return (
 		<>
-			<InspectorControls>
+			<InspectorControls group="styles">
 				<PanelBody title={ __( 'Styles', 'woocommerce' ) }>
 					<RadioControl
 						selected={ getSelectedRadioControlOption() }
