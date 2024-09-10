@@ -603,7 +603,7 @@ class WC_Structured_Data {
 	 * @return string Empty string if not GTIN is provided or the string with the replacements.
 	 */
 	public function prepare_gtin( $gtin ) {
-		if ( ! $gtin || ! is_string( $gtin )) {
+		if ( ! $gtin || ! is_string( $gtin ) ) {
 			return '';
 		}
 

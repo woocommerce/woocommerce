@@ -69,6 +69,6 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $this->structured_data->prepare_gtin( null ), '' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( 'GTIN' ), '' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( 123 ), '' );
-		$this->assertEquals( $this->structured_data->prepare_gtin( [ '123-456-78', '123-456-78' ] ), '' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( array( '123-456-78', '123-456-78' ) ), '' );
 	}
 }
