@@ -96,19 +96,20 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		}
 	} );
 
-	test( 'The list of categories should be displayed', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-		const assembler = await pageObject.getAssembler();
+	test(
+		'The list of categories should be displayed',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { pageObject, baseURL } ) => {
+			await prepareAssembler( pageObject, baseURL );
+			const assembler = await pageObject.getAssembler();
 
-		const categories = assembler.locator(
-			'.woocommerce-customize-store__sidebar-homepage-content .components-item-group'
-		);
+			const categories = assembler.locator(
+				'.woocommerce-customize-store__sidebar-homepage-content .components-item-group'
+			);
 
-		await expect( categories ).toHaveCount( 6 );
-	} );
+			await expect( categories ).toHaveCount( 6 );
+		}
+	);
 
 	test( 'Clicking on "Design your homepage" should open the Intro sidebar by default', async ( {
 		pageObject,
@@ -195,6 +196,34 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( insertedPatternContent ).toContain(
 			sidebarPatternContent
 		);
+	} );
+
+	test( 'Clicking on a pattern should always scroll the page to the inserted pattern', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		const sidebarPattern = assembler.locator(
+			'.block-editor-block-patterns-list__list-item'
+		);
+
+		// add first 3 patterns
+		for ( let i = 0; i < 4; i++ ) {
+			await sidebarPattern.nth( i ).click();
+		}
+
+		const insertedPattern = editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.nth( 3 );
+
+		await expect( insertedPattern ).toBeInViewport();
 	} );
 
 	test( 'Clicking the "Move up/down" buttons should change the pattern order in the preview', async ( {
@@ -315,32 +344,35 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		await expect( defaultPattern ).toBeVisible();
 	} );
 
-	test( 'Clicking opt-in new patterns should be available', async ( {
-		pageObject,
-		baseURL,
-	} ) => {
-		await prepareAssembler( pageObject, baseURL );
-		const assembler = await pageObject.getAssembler();
+	test(
+		'Clicking opt-in new patterns should be available',
+		{ tag: '@skip-on-default-pressable' },
+		async ( { pageObject, baseURL } ) => {
+			await prepareAssembler( pageObject, baseURL );
+			const assembler = await pageObject.getAssembler();
 
-		await assembler.getByText( 'Usage tracking' ).click();
-		await expect(
-			assembler.getByText( 'Access more patterns' )
-		).toBeVisible();
+			await assembler.getByText( 'Usage tracking' ).click();
+			await expect(
+				assembler.getByText( 'Access more patterns' )
+			).toBeVisible();
 
-		await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
+			await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
 
-		await assembler
-			.getByText( 'Access more patterns' )
-			.waitFor( { state: 'hidden' } );
+			await assembler
+				.getByText( 'Access more patterns' )
+				.waitFor( { state: 'hidden' } );
 
-		const sidebarPattern = assembler.locator(
-			'.block-editor-block-patterns-list'
-		);
+			const sidebarPattern = assembler.locator(
+				'.block-editor-block-patterns-list'
+			);
 
-		await sidebarPattern.waitFor( { state: 'visible' } );
+			await sidebarPattern.waitFor( { state: 'visible' } );
 
-		await expect(
-			assembler.locator( '.block-editor-block-patterns-list__list-item' )
-		).toHaveCount( 10 );
-	} );
+			await expect(
+				assembler.locator(
+					'.block-editor-block-patterns-list__list-item'
+				)
+			).toHaveCount( 10 );
+		}
+	);
 } );

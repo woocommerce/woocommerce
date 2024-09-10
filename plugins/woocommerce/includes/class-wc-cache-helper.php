@@ -129,7 +129,18 @@ class WC_Cache_Helper {
 		$location['state']    = $customer->get_billing_state();
 		$location['postcode'] = $customer->get_billing_postcode();
 		$location['city']     = $customer->get_billing_city();
-		return apply_filters( 'woocommerce_geolocation_ajax_get_location_hash', substr( md5( implode( '', $location ) ), 0, 12 ), $location, $customer );
+		$location_hash        = substr( md5( strtolower( implode( '', $location ) ) ), 0, 12 );
+
+		/**
+		 * Controls the location hash used in geolocation-based caching.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string      $location_hash The hash used for geolocation.
+		 * @param array       $location      The location/address data.
+		 * @param WC_Customer $customer      The current customer object.
+		 */
+		return apply_filters( 'woocommerce_geolocation_ajax_get_location_hash', $location_hash, $location, $customer );
 	}
 
 	/**

@@ -19,7 +19,6 @@ import {
 
 const blockConfig: BlockConfiguration = {
 	...sharedConfig,
-	apiVersion: 2,
 	title,
 	description,
 	icon: { src: icon },
@@ -30,6 +29,9 @@ const blockConfig: BlockConfiguration = {
 		'woocommerce/product-meta',
 	],
 	edit,
+	save() {
+		return null;
+	},
 	supports,
 };
 

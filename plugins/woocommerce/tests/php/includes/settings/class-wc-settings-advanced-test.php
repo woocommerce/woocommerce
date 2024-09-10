@@ -33,6 +33,11 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'features',
 		);
 
+		if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'blueprint' ) ) {
+			$position = array_search( 'woocommerce_com', $expected, true ) + 1;
+			array_splice( $expected, $position, 0, 'blueprint' );
+		}
+
 		$this->assertEquals( $expected, $section_names );
 	}
 

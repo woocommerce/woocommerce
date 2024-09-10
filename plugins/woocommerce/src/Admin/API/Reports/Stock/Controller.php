@@ -276,9 +276,9 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param  WC_Product      $product  Report data.
+	 * @param  WC_Product      $product Report data item as returned from Data Store.
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
@@ -443,14 +443,16 @@ class Controller extends GenericController implements ExportableInterface {
 		);
 		$params['order']['default']   = 'asc';
 		$params['orderby']['default'] = 'stock_status';
-		$params['orderby']['enum']    = array(
-			'stock_status',
-			'stock_quantity',
-			'date',
-			'id',
-			'include',
-			'title',
-			'sku',
+		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
+			array(
+				'stock_status',
+				'stock_quantity',
+				'date',
+				'id',
+				'include',
+				'title',
+				'sku',
+			)
 		);
 		$params['parent']             = array(
 			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),

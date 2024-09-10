@@ -106,6 +106,31 @@ describe( 'isAddressComplete', () => {
 		address.state = 'CA';
 		expect( isAddressComplete( address ) ).toBe( true );
 	} );
+
+	it( 'Correctly assesses only fields specified in the keysToCheck arg', () => {
+		const address = {
+			first_name: 'John',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'California',
+			postcode: '90210',
+			country: 'US',
+			state: '',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+		// US address requires state, but if we skip it in keysToCheck it should validate.
+		expect(
+			isAddressComplete( address, [
+				'first_name',
+				'last_name',
+				'city',
+				'postcode',
+			] )
+		).toBe( true );
+	} );
 } );
 
 describe( 'formatShippingAddress', () => {

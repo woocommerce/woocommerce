@@ -166,7 +166,7 @@ export const TaskListCompletedHeader: React.FC<
 
 							<Text size="title" as="h2" lineHeight={ 1.4 }>
 								{ __(
-									"You've completed store setup",
+									'You’ve completed store setup',
 									'woocommerce'
 								) }
 							</Text>

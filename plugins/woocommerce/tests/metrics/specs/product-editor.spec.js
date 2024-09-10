@@ -30,10 +30,6 @@ test.describe( 'Product editor performance', () => {
 		},
 	} );
 
-	test.beforeEach( async ( { page } ) => {
-		await toggleBlockProductEditor( 'enable', page );
-	} );
-
 	test.afterAll( async ( {}, testInfo ) => {
 		const medians = {};
 		Object.keys( results ).forEach( ( metric ) => {
@@ -43,6 +39,10 @@ test.describe( 'Product editor performance', () => {
 			body: JSON.stringify( { 'product-editor': medians }, null, 2 ),
 			contentType: 'application/json',
 		} );
+	} );
+
+	test( 'Enable Product Editor', async ( { page } ) => {
+		await toggleBlockProductEditor( 'enable', page );
 	} );
 
 	test.describe( 'Loading', () => {

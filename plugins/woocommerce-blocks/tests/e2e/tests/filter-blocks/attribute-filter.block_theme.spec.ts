@@ -50,7 +50,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			await page.goto( '/shop' );
 
 			const attributes = page.locator(
-				'.wc-block-components-checkbox__label'
+				'.wc-block-interactivity-components-checkbox-list__label'
 			);
 
 			await expect( attributes ).toHaveCount( 5 );
@@ -156,7 +156,7 @@ test.describe( 'Product Filter: Attribute Block', () => {
 			await page.goto( '/shop' );
 
 			const attributes = page.locator(
-				'.wc-block-components-checkbox__label'
+				'.wc-block-interactivity-components-checkbox-list__label'
 			);
 
 			await expect( attributes ).toHaveCount( 5 );

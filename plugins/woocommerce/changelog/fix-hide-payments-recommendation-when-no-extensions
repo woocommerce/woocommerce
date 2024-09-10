@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide payment recommendations when no extensions are available

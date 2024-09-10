@@ -48,7 +48,7 @@ let simpleProductId,
 
 test.describe(
 	'WooCommerce Orders > Add new order',
-	{ tag: '@services' },
+	{ tag: [ '@services', '@hpos' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -299,10 +299,17 @@ test.describe(
 			await page
 				.getByRole( 'textbox', { name: 'Postcode' } )
 				.fill( '12345' );
-			await page
-				.getByRole( 'textbox', { name: 'Select an option…' } )
-				.click();
-			await page.getByRole( 'option', { name: 'Florida' } ).click();
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if (
+				await page
+					.getByRole( 'textbox', { name: 'Select an option…' } )
+					.isVisible()
+			) {
+				await page
+					.getByRole( 'textbox', { name: 'Select an option…' } )
+					.click();
+				await page.getByRole( 'option', { name: 'Florida' } ).click();
+			}
 			await page
 				.getByRole( 'textbox', { name: 'Email address' } )
 				.fill( 'elbarto@example.com' );

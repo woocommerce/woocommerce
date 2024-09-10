@@ -30,6 +30,7 @@ const config: PlaywrightTestConfig = {
 						outputFolder: `${ __dirname }/artifacts/test-results/allure-results`,
 					},
 				],
+				[ 'buildkite-test-collector/playwright/reporter' ],
 		  ]
 		: 'list',
 	use: {

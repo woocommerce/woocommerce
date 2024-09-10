@@ -1,11 +1,16 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"name": "woocommerce/product-images-field",
 	"title": "Product images",
 	"category": "widgets",
 	"description": "The product images.",
-	"keywords": [ "products", "image", "images", "gallery" ],
+	"keywords": [
+		"products",
+		"image",
+		"images",
+		"gallery"
+	],
 	"textdomain": "default",
 	"attributes": {
 		"mediaId": {
@@ -38,5 +43,7 @@
 		"__experimentalToolbar": false
 	},
 	"editorStyle": "file:./editor.css",
-	"usesContext": [ "postType" ]
+	"usesContext": [
+		"postType"
+	]
 }
