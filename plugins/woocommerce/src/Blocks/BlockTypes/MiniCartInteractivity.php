@@ -508,9 +508,11 @@ class MiniCartInteractivity extends AbstractBlock {
 			'hasHiddenPrice'     => isset( $attributes['hasHiddenPrice'] ) ? $attributes['hasHiddenPrice'] : false,
 			'amount'             => 0,
 		);
-		$wrapper_attributes     = get_block_wrapper_attributes(
+
+		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class' => $wrapper_classes,
+				'style' => $wrapper_styles,
 			)
 		);
 
@@ -519,7 +521,7 @@ class MiniCartInteractivity extends AbstractBlock {
 
 		ob_start();
 		?>
-		<div style="<?php echo esc_attr( $wrapper_styles ); ?>"  class="wp-block-woocommerce-mini-cart-interactivity">
+		<div style="<?php echo esc_attr( $wrapper_attributes ); ?>"  >
 				<div data-wc-interactive='<?php echo esc_attr( $interactivity_namespace ); ?>' data-wc-context='<?php echo esc_attr( wp_json_encode( $cart_context ) ); ?>'>
 					<?php
 						// Output is already escaped in the function call.
