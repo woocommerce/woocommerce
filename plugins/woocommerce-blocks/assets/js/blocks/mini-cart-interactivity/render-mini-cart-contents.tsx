@@ -24,6 +24,7 @@ export const renderMiniCartContents = ( templateElement: HTMLDivElement ) => {
 		true
 	) as HTMLDivElement;
 
+	// Generate a unique ID so that we can give a specific selector to renderParentBlock.
 	const uniqueId = `mini-cart-template-${ generateUniqueId() }`;
 	( clonedTemplateNode as HTMLElement ).id = uniqueId;
 
