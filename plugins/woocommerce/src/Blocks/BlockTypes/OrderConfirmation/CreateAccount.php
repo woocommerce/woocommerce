@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
+
 /**
  * CreateAccount class.
  */
@@ -81,6 +83,10 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		// Associate customer with the order.
 		$order->set_customer_id( $customer_id );
 		$order->save();
+
+		// Associate addresses from the order with the customer.
+		$order_controller = new OrderController();
+		$order_controller->sync_customer_data_with_order( $order );
 
 		// Set the customer auth cookie.
 		wc_set_customer_auth_cookie( $customer_id );
