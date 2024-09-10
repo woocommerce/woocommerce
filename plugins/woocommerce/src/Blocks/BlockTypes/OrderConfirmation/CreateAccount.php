@@ -103,7 +103,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		}
 
 		// Check registration is possible for this order/customer, and if not, return early.
-		if ( email_exists( $order->get_billing_email() ) ) {
+		if ( is_user_logged_in() || email_exists( $order->get_billing_email() ) ) {
 			return '';
 		}
 
