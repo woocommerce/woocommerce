@@ -41,6 +41,8 @@ const ProductButton: React.FC< {
 		return <Spinner />;
 	}
 
+	const showPlaceholder = ! product;
+
 	return (
 		<Button
 			className="wc-block-product-collection-linked-product-control__button"
@@ -62,18 +64,28 @@ const ProductButton: React.FC< {
 					gap={ 1 }
 					className="wc-block-product-collection-linked-product-control__content"
 				>
-					<FlexItem>
-						<Text color="inherit" lineHeight={ 1 }>
-							{ product?.name
-								? decodeEntities( product.name )
-								: '' }
-						</Text>
-					</FlexItem>
-					<FlexItem>
-						<Text color="inherit" lineHeight={ 1 }>
-							{ product?.sku }
-						</Text>
-					</FlexItem>
+					{ showPlaceholder ? (
+						<FlexItem>
+							<Text color="inherit" lineHeight={ 1 }>
+								{ __( 'Select product', 'woocommerce' ) }
+							</Text>
+						</FlexItem>
+					) : (
+						<>
+							<FlexItem>
+								<Text color="inherit" lineHeight={ 1 }>
+									{ product?.name
+										? decodeEntities( product.name )
+										: '' }
+								</Text>
+							</FlexItem>
+							<FlexItem>
+								<Text color="inherit" lineHeight={ 1 }>
+									{ product?.sku }
+								</Text>
+							</FlexItem>
+						</>
+					) }
 				</Flex>
 			</Flex>
 		</Button>
