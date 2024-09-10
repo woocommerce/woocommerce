@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotification
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\ComparisonOperation;
 
 /**

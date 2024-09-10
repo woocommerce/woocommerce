@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Tests\RemoteSpecs
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\PrepareUrl;
 
 /**
