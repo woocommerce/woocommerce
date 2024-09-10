@@ -6,7 +6,7 @@ import { useState, useEffect, createContext } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { MarketplaceContextType } from './types';
+import { SearchResultsCountType, MarketplaceContextType } from './types';
 import { getAdminSetting } from '../../utils/admin-settings';
 
 export const MarketplaceContext = createContext< MarketplaceContextType >( {
@@ -18,6 +18,12 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	addInstalledProduct: () => {},
 	hasBusinessServices: false,
 	setHasBusinessServices: () => {},
+	searchResultsCount: {
+		extensions: 0,
+		themes: 0,
+		'business-services': 0,
+	},
+	setSearchResultsCount: () => {},
 } );
 
 export function MarketplaceContextProvider( props: {
@@ -29,6 +35,11 @@ export function MarketplaceContextProvider( props: {
 		[]
 	);
 	const [ hasBusinessServices, setHasBusinessServices ] = useState( false );
+	const [ searchResultsCount, setSearchResultsCount ] = useState< SearchResultsCountType >( {
+		extensions: 0,
+		themes: 0,
+		'business-services': 0,
+	} );
 
 	/**
 	 * Knowing installed products will help us to determine which products
@@ -59,6 +70,8 @@ export function MarketplaceContextProvider( props: {
 		addInstalledProduct,
 		hasBusinessServices,
 		setHasBusinessServices,
+		searchResultsCount,
+		setSearchResultsCount,
 	};
 
 	return (
