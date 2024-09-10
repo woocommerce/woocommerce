@@ -33,7 +33,9 @@
 	}
 
 	&:disabled {
-		color: rgba($white, 0.5);
+		.wc-block-components-button__text {
+			opacity: 0.5;
+		}
 	}
 
 	&.outlined {
