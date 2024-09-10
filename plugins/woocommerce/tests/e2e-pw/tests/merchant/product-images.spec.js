@@ -286,7 +286,6 @@ test.describe(
 					} )
 					.scrollIntoViewIfNeeded();
 
-				await page.pause();
 				await page.locator( imageSelector ).first().hover();
 				await page.getByRole( 'link', { name: ' Delete' } ).click();
 
