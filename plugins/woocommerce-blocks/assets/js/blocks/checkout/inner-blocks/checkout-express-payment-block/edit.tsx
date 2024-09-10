@@ -14,6 +14,7 @@ import type { BlockAttributes } from '@wordpress/blocks';
  */
 import Block from './block';
 import './editor.scss';
+import '../../../cart-checkout-shared/payment-methods/express-payment/editor-shared.scss';
 import type {
 	ExpressCheckoutAttributes,
 	ExpressPaymentSettings,

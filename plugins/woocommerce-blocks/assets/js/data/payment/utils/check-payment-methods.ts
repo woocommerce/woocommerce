@@ -167,7 +167,6 @@ export const checkPaymentMethodsCanPay = async ( express = false ) => {
 			const { name, title, description, gatewayId, supports } =
 				paymentMethod as ExpressPaymentMethodConfigInstance;
 
-			console.log( 'supports', supports );
 			availablePaymentMethods = {
 				...availablePaymentMethods,
 				[ paymentMethod.name ]: {
