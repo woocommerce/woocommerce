@@ -4,9 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
-import { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useRef } from '@wordpress/element';
 import type { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
-import type { ProductResponseItem } from '@woocommerce/types';
+import { type ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	PanelBody,
@@ -121,30 +121,34 @@ const LinkedProductControl = ( {
 	location: WooCommerceBlockLocation;
 	usesReference: string[] | undefined;
 } ) => {
+	const referenceType = 'product';
+	const { productReference } = query;
+	const isProductReferenceAvailable = location.type === referenceType;
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
-	const [ productReference, setProductReference ] = useState< PRODUCT_REF >(
-		PRODUCT_REF.CURRENT_PRODUCT
+	const [ radioControlState, setRadioControlState ] = useState< PRODUCT_REF >(
+		isProductReferenceAvailable
+			? PRODUCT_REF.CURRENT_PRODUCT
+			: PRODUCT_REF.SPECIFIC_PRODUCT
 	);
-	const { product, isLoading } = useGetProduct( query.productReference );
+	const { product, isLoading } = useGetProduct( productReference );
+	const prevReference = useRef< number | undefined >( undefined );
 
-	const showDropdown = productReference === PRODUCT_REF.SPECIFIC_PRODUCT;
 	const showLinkedProductControl = useMemo( () => {
-		const isInRequiredLocation = usesReference?.includes( location.type );
-		const isProductContextRequired = usesReference?.includes( 'product' );
-		const isProductContextSelected =
-			( query?.productReference ?? null ) !== null;
+		const isProductContextRequired =
+			usesReference?.includes( referenceType );
 
-		return (
-			isProductContextRequired &&
-			! isInRequiredLocation &&
-			isProductContextSelected
-		);
-	}, [ location.type, query?.productReference, usesReference ] );
+		return isProductContextRequired;
+	}, [ usesReference ] );
+
+	const showRadioControl = isProductReferenceAvailable;
+	const showDropdown = showRadioControl
+		? radioControlState === PRODUCT_REF.SPECIFIC_PRODUCT
+		: ! isEmpty( productReference );
 
 	if ( ! showLinkedProductControl ) return null;
 
 	const radioControlHelp =
-		productReference === PRODUCT_REF.CURRENT_PRODUCT
+		radioControlState === PRODUCT_REF.CURRENT_PRODUCT
 			? __(
 					'Related products will be pulled from the product a shopper is currently viewing',
 					'woocommerce'
@@ -154,33 +158,53 @@ const LinkedProductControl = ( {
 					'woocommerce'
 			  );
 
+	const handleRadioControlChange = ( newValue: PRODUCT_REF ) => {
+		if ( newValue === PRODUCT_REF.CURRENT_PRODUCT ) {
+			const { productReference: toSave, ...rest } = query;
+			prevReference.current = toSave;
+			setAttributes( { query: rest } );
+		} else {
+			setAttributes( {
+				query: prevReference.current
+					? {
+							...query,
+							productReference: prevReference.current,
+					  }
+					: query,
+			} );
+		}
+		setRadioControlState( newValue );
+	};
+
 	return (
 		<PanelBody title={ __( 'Linked Product', 'woocommerce' ) }>
-			<PanelRow>
-				<RadioControl
-					className="wc-block-product-collection-product-reference-radio"
-					label={ __( 'Products to show', 'woocommerce' ) }
-					help={ radioControlHelp }
-					selected={ productReference }
-					options={ [
-						{
-							label: __(
-								'From the current product',
-								'woocommerce'
-							),
-							value: PRODUCT_REF.CURRENT_PRODUCT,
-						},
-						{
-							label: __(
-								'From a specific product',
-								'woocommerce'
-							),
-							value: PRODUCT_REF.SPECIFIC_PRODUCT,
-						},
-					] }
-					onChange={ setProductReference }
-				/>
-			</PanelRow>
+			{ showRadioControl && (
+				<PanelRow>
+					<RadioControl
+						className="wc-block-product-collection-product-reference-radio"
+						label={ __( 'Products to show', 'woocommerce' ) }
+						help={ radioControlHelp }
+						selected={ radioControlState }
+						options={ [
+							{
+								label: __(
+									'From the current product',
+									'woocommerce'
+								),
+								value: PRODUCT_REF.CURRENT_PRODUCT,
+							},
+							{
+								label: __(
+									'From a specific product',
+									'woocommerce'
+								),
+								value: PRODUCT_REF.SPECIFIC_PRODUCT,
+							},
+						] }
+						onChange={ handleRadioControlChange }
+					/>
+				</PanelRow>
+			) }
 			{ showDropdown && (
 				<PanelRow>
 					<Dropdown
