@@ -50,6 +50,8 @@ module.exports = ( storybookConfig ) => {
 		__dirname,
 		'./node_modules/react-dom'
 	);
+	storybookConfig.resolve.alias[ '@storybook/react-dom-shim' ] =
+		'@storybook/react-dom-shim/dist/react-18';
 
 	storybookConfig.resolve.modules = [
 		path.join( __dirname, '../../plugins/woocommerce-admin/client' ),

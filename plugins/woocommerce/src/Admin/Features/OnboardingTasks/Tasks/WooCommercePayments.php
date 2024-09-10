@@ -6,7 +6,6 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
-use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 
 /**
@@ -63,6 +62,22 @@ class WooCommercePayments extends Task {
 			"You're only one step away from getting paid. Verify your business details to start managing transactions with WooPayments.",
 			'woocommerce'
 		);
+	}
+
+	/**
+	 * Additional data.
+	 *
+	 * @return mixed
+	 */
+	public function get_additional_data() {
+		/**
+		 * Filter WooPayments onboarding task additional data.
+		 *
+		 * @since 9.4.0
+		 *
+		 * @param ?array $additional_data The task additional data.
+		 */
+		return apply_filters( 'woocommerce_admin_woopayments_onboarding_task_additional_data', null );
 	}
 
 	/**

@@ -115,6 +115,9 @@ export default function ProductListContent( props: {
 								...( product.label && {
 									label: product.label,
 								} ),
+								...( props.productGroup && {
+									group_id: props.productGroup,
+								} ),
 								...( props.group && { group: props.group } ),
 								...( props.searchTerm && {
 									searchTerm: props.searchTerm,
