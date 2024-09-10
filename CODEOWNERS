@@ -11,4 +11,4 @@
 
 # Files in root of repository
 /.* @woocommerce/flux
-/pnpm-.* @woocommerce/flux
+/*.* @woocommerce/flux
