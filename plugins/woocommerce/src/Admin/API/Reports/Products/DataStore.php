@@ -432,30 +432,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$decimals       = wc_get_price_decimals();
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
-		$full_refunded_orders = array();
-		// Orders fully refunded don't have the order line items.
-		if ( 'shop_order_refund' === $order->get_type() && empty( $order_items ) ) {
-			$parent_order_id    = $order->get_parent_id();
-			$parent_order       = wc_get_order( $parent_order_id );
-			$parent_order_items = $parent_order->get_items();
-
-			$full_refunded_orders['order_id'] = $parent_order_id;
-
-			$full_refunded_orders['order_item_ids'] = array_map(
-				function ( $parent_order_item ) {
-					return $parent_order_item->get_id();
-				},
-				$parent_order_items
-			);
-
-			$full_refunded_orders['product_ids'] = array_map(
-				function ( $parent_order_item ) {
-					return wc_get_order_item_meta( $parent_order_item->get_id(), '_product_id' );
-				},
-				$parent_order_items
-			);
-		}
-
 		foreach ( $order_items as $order_item ) {
 			$order_item_id = $order_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
@@ -546,46 +522,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 		}
 
-		if ( ! empty( $full_refunded_orders ) ) {
-			// First, remove the order item from the wc_order_product_lookup table if it was fully refunded.
-			$order_item_ids_format = array_fill( 0, count( $full_refunded_orders['order_item_ids'] ), '%d' );
-			$order_item_ids_format = implode( ',', $order_item_ids_format );
-
-			$product_ids_format = array_fill( 0, count( $full_refunded_orders['product_ids'] ), '%d' );
-			$product_ids_format = implode( ',', $product_ids_format );
-
-			$replacement_params = array(
-				$full_refunded_orders['order_id'],
-				...$full_refunded_orders['order_item_ids'],
-				...$full_refunded_orders['product_ids'],
-			);
-
-			$wpdb->query(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id IN ({$order_item_ids_format}) AND product_id IN ({$product_ids_format})",
-					$replacement_params
-				)
-			);
-
-			// Second, remove the order item with negative net sales recorded earlier due to a partial refund.
-			$delete_query = "
-				DELETE product_lookup
-				FROM {$table_name} AS product_lookup
-				INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
-					ON order_stats.order_id = product_lookup.order_id
-				WHERE 1 = 1
-					AND order_stats.parent_id = %d
-					AND order_stats.total_sales < 0
-			";
-			$wpdb->query(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$delete_query,
-					$full_refunded_orders['order_id']
-				)
-			);
-		}
+		self::maybe_delete_full_refunded_orders( $order, $order_items );
 
 		return ( count( $order_items ) === $num_updated );
 	}
@@ -609,6 +546,101 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		do_action( 'woocommerce_analytics_delete_product', 0, $order_id );
 
 		ReportsCache::invalidate();
+	}
+
+	/**
+	 * Delete the order items from the wc_admin_order_product_lookup table if the order is fully refunded.
+	 *
+	 * Get the parent order if the order is fully refunded and put it in a separate array.
+	 *
+	 * The resulting array will be:
+	 *
+	 * $full_refunded_order = array(
+	 *   'order_id'       => <parent_order_id>,
+	 *   'order_item_ids' => <parent_order_item_ids>,
+	 *   'product_ids'    => <parent_order_product_ids>,
+	 * );
+	 *
+	 * If this array is not empty at the end of this method, we will remove the order item
+	 * from the product lookup table based on the content of this array.
+	 *
+	 * @param WC_Order|WC_Order_Refund $order       Order or refund object.
+	 * @param array                    $order_items Array of order items object.
+	 */
+	private static function maybe_delete_full_refunded_orders( $order, $order_items ) {
+		global $wpdb;
+
+		// Orders fully refunded don't have the order line items.
+		if ( 'shop_order_refund' !== $order->get_type() || ! empty( $order_items ) ) {
+			return;
+		}
+
+		$table_name = self::get_db_table_name();
+
+		$full_refunded_orders = array();
+
+		$parent_order_id    = $order->get_parent_id();
+		$parent_order       = wc_get_order( $parent_order_id );
+		$parent_order_items = $parent_order->get_items();
+
+		$full_refunded_orders['order_id'] = $parent_order_id;
+
+		$full_refunded_orders['order_item_ids'] = array_map(
+			function ( $parent_order_item ) {
+				return $parent_order_item->get_id();
+			},
+			$parent_order_items
+		);
+
+		$full_refunded_orders['product_ids'] = array_map(
+			function ( $parent_order_item ) {
+				return wc_get_order_item_meta( $parent_order_item->get_id(), '_product_id' );
+			},
+			$parent_order_items
+		);
+
+		if ( empty( $full_refunded_orders ) ) {
+			return;
+		}
+
+		// First, remove the order item from the wc_order_product_lookup table if it was fully refunded.
+		$order_item_ids_format = array_fill( 0, count( $full_refunded_orders['order_item_ids'] ), '%d' );
+		$order_item_ids_format = implode( ',', $order_item_ids_format );
+
+		$product_ids_format = array_fill( 0, count( $full_refunded_orders['product_ids'] ), '%d' );
+		$product_ids_format = implode( ',', $product_ids_format );
+
+		$replacement_params = array(
+			$full_refunded_orders['order_id'],
+			...$full_refunded_orders['order_item_ids'],
+			...$full_refunded_orders['product_ids'],
+		);
+
+		$wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id IN ({$order_item_ids_format}) AND product_id IN ({$product_ids_format})",
+				$replacement_params
+			)
+		);
+
+		// Second, remove the order item with negative net sales recorded earlier due to a partial refund.
+		$delete_query = "
+			DELETE product_lookup
+			FROM {$table_name} AS product_lookup
+			INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
+				ON order_stats.order_id = product_lookup.order_id
+			WHERE 1 = 1
+				AND order_stats.parent_id = %d
+				AND order_stats.total_sales < 0
+		";
+		$wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$delete_query,
+				$full_refunded_orders['order_id']
+			)
+		);
 	}
 
 	/**
