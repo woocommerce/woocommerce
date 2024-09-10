@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
-import { applyFilters, addFilter } from '@wordpress/hooks';
+import { applyFilters, addFilter, removeAllFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -79,6 +79,7 @@ export const getRoute = ( section ) => {
 	} );
 
 	const routes = applyFilters( 'woocommerce_admin_settings_pages', [] );
+	removeAllFilters( 'woocommerce_admin_settings_pages' );
 
 	const pageRoute = routes.find( ( route ) => route.page === page );
 
