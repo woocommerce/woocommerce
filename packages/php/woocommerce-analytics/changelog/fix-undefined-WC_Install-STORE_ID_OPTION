@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Check whether `\WC_Install::STORE_ID_OPTION` is defined before attempting to use it, for compatibility with WooCommerce <8.4.0.
