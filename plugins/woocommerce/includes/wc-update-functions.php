@@ -2874,7 +2874,7 @@ function wc_update_940_add_phone_to_order_address_fts_index(): void {
 }
 
 /**
- * Remove user meta associated with the key 'help_panel_highlight_shown'.
+ * Remove user meta associated with the key 'woocommerce_admin_help_panel_highlight_shown'.
  *
  * This key is no longer needed since the help panel spotlight tour has been removed.
  * 
@@ -2883,7 +2883,7 @@ function wc_update_940_add_phone_to_order_address_fts_index(): void {
 function wc_update_940_remove_help_panel_highlight_shown() {
 	global $wpdb;
 
-	$meta_key = 'help_panel_highlight_shown';
+	$meta_key = 'woocommerce_admin_help_panel_highlight_shown';
 
 	$deletions = $wpdb->query(
 		$wpdb->prepare(
@@ -2901,7 +2901,7 @@ function wc_update_940_remove_help_panel_highlight_shown() {
 
 	if ( false === $deletions ) {
 		$logger->notice(
-			'During the update to 9.4.0, WooCommerce attempted to remove user meta with the key "help_panel_highlight_shown", but was unable to do so.',
+			'During the update to 9.4.0, WooCommerce attempted to remove user meta with the key "woocommerce_admin_help_panel_highlight_shown", but was unable to do so.',
 			array(
 				'source' => 'wc-updater',
 			)
@@ -2910,8 +2910,8 @@ function wc_update_940_remove_help_panel_highlight_shown() {
 		$logger->info(
 			sprintf(
 				1 === $deletions
-					? 'During the update to 9.4.0, WooCommerce removed %d user meta row associated with the meta key "help_panel_highlight_shown".'
-					: 'During the update to 9.4.0, WooCommerce removed %d user meta rows associated with the meta key "help_panel_highlight_shown".',
+					? 'During the update to 9.4.0, WooCommerce removed %d user meta row associated with the meta key "woocommerce_admin_help_panel_highlight_shown".'
+					: 'During the update to 9.4.0, WooCommerce removed %d user meta rows associated with the meta key "woocommerce_admin_help_panel_highlight_shown".',
 				number_format_i18n( $deletions )
 			),
 			array(
