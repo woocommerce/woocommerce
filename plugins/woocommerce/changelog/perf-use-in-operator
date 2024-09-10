@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Refactor Country Specs to use 'in' operator

@@ -267,6 +267,7 @@ class WC_Install {
 			'wc_update_930_migrate_user_meta_for_launch_your_store_tour',
 		),
 		'9.4.0' => array(
+			'wc_update_940_add_phone_to_order_address_fts_index',
 			'wc_update_940_add_old_refunded_order_items_to_product_lookup_table',
 		),
 	);
