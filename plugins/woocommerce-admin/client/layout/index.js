@@ -58,12 +58,6 @@ const StoreAlerts = lazy( () =>
 	import( /* webpackChunkName: "store-alerts" */ './store-alerts' )
 );
 
-const WCPayUsageModal = lazy( () =>
-	import(
-		/* webpackChunkName: "wcpay-usage-modal" */ '../task-lists/fills/PaymentGatewaySuggestions/components/WCPay/UsageModal'
-	)
-);
-
 export class PrimaryLayout extends Component {
 	render() {
 		const {
@@ -163,15 +157,6 @@ function _Layout( {
 		}, 0 );
 	}, [ location?.pathname ] );
 
-	function isWCPaySettingsPage() {
-		const { page: queryPage, section, tab } = getQuery();
-		return (
-			queryPage === 'wc-settings' &&
-			tab === 'checkout' &&
-			section === 'woocommerce_payments'
-		);
-	}
-
 	const { breadcrumbs, layout = { header: true, footer: true } } = page;
 	const {
 		header: showHeader = true,
@@ -236,12 +221,6 @@ function _Layout( {
 								/>
 							</div>
 						</PrimaryLayout>
-					) }
-
-					{ isEmbedded && isWCPaySettingsPage() && (
-						<Suspense fallback={ null }>
-							<WCPayUsageModal />
-						</Suspense>
 					) }
 					{ showFooter && <Footer /> }
 					<CustomerEffortScoreModalContainer />
