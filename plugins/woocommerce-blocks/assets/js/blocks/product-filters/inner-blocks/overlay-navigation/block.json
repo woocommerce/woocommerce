@@ -20,7 +20,7 @@
 			"default": "link"
 		},
 		"iconSize": {
-			"type": "string"
+			"type": "number"
 		},
 		"overlayMode": {
 			"type": "string",
