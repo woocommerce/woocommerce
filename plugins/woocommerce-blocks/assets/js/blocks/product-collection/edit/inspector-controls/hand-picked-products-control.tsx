@@ -151,7 +151,7 @@ export const HandPickedProductsControlField = ( {
 	return (
 		<FormTokenField
 			displayTransform={ transformTokenIntoProductName }
-			label={ __( 'Select Products', 'woocommerce' ) }
+			label={ __( 'Hand-Picked Products', 'woocommerce' ) }
 			onChange={ onTokenChange }
 			onInputChange={ isLargeCatalog ? handleSearch : undefined }
 			suggestions={ suggestions }
@@ -186,7 +186,7 @@ const HandPickedProductsControl = ( {
 
 	return (
 		<ToolsPanelItem
-			label={ __( 'Hand-picked Products', 'woocommerce' ) }
+			label={ __( 'Hand-Picked Products', 'woocommerce' ) }
 			hasValue={ () => !! selectedProductIds?.length }
 			onDeselect={ deselectCallback }
 			resetAllFilter={ deselectCallback }
