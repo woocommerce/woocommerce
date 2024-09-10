@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update /shopper tests (first part), so they are passing against Pressable env.

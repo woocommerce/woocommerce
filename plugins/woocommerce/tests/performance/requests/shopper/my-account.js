@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -16,6 +15,8 @@ import {
 	customer_password,
 	think_time_min,
 	think_time_max,
+	FOOTER_TEXT,
+	STORE_NAME,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -25,6 +26,7 @@ import {
 	commonPostRequestHeaders,
 	commonNonStandardHeaders,
 } from '../../headers.js';
+import { checkResponse } from '../../utils.js';
 
 export function myAccount() {
 	let response;
@@ -43,21 +45,11 @@ export function myAccount() {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account Login Page' },
 		} );
-		check( response, {
-			'is status 200': ( r ) => r.status === 200,
-			'title is: "My account – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'My account – WooCommerce Core E2E Test Suite',
-			"body contains: 'My account' title": ( response ) =>
-				response.body.includes( '>My account</h1>' ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+
+		checkResponse( response, 200, {
+			title: `My account – ${ STORE_NAME }`,
+			body: '>My account</h1>',
+			footer: FOOTER_TEXT,
 		} );
 
 		// Correlate nonce value for use in subsequent requests.
@@ -95,10 +87,8 @@ export function myAccount() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: my account welcome message': ( response ) =>
-				response.body.includes(
-					'From your account dashboard you can view'
-				),
+			'body contains: my account welcome message': ( r ) =>
+				r.body.includes( 'From your account dashboard you can view' ),
 		} );
 
 		const requestHeadersPost = Object.assign(

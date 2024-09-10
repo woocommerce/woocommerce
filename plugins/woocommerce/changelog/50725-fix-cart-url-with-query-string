@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Removes querystrings from cart URL introduced in #50524.
-

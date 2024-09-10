@@ -207,7 +207,7 @@ abstract class GenericStatsController extends GenericController {
 	/**
 	 * Get the report data.
 	 *
-	 * Prepares query params, fetches the report data from the Query object,
+	 * Prepares query params, fetches the report data from the data store,
 	 * prepares it for the response, and packs it into the convention-conforming response object.
 	 *
 	 * @override GenericController::get_items()

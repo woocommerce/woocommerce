@@ -84,7 +84,7 @@ class Controller extends GenericStatsController {
 	}
 
 	/**
-	 * Get data from `'taxes-stats'` Query.
+	 * Get data from `'taxes-stats'` GenericQuery.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -186,12 +186,14 @@ class Controller extends GenericStatsController {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array(
-			'date',
-			'items_sold',
-			'total_sales',
-			'orders_count',
-			'products_count',
+		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'items_sold',
+				'total_sales',
+				'orders_count',
+				'products_count',
+			)
 		);
 		$params['taxes']           = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce' ),

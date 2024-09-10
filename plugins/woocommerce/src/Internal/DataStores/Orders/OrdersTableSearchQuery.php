@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Exception;
 
 /**
@@ -238,6 +239,7 @@ class OrdersTableSearchQuery {
 	 */
 	private function get_where_for_products() {
 		global $wpdb;
+		$db_util      = wc_get_container()->get( DatabaseUtil::class );
 		$items_table  = $this->query->get_table_name( 'items' );
 		$orders_table = $this->query->get_table_name( 'orders' );
 		$fts_enabled  = get_option( CustomOrdersTableController::HPOS_FTS_INDEX_OPTION ) === 'yes' && get_option( CustomOrdersTableController::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION ) === 'yes';
@@ -251,7 +253,7 @@ $orders_table.id in (
 	MATCH ( search_query_items.order_item_name ) AGAINST ( %s IN BOOLEAN MODE )
 )
 ",
-				'*' . $wpdb->esc_like( $this->search_term ) . '*'
+				$wpdb->esc_like( $db_util->sanitise_boolean_fts_search_term( $this->search_term ) ),
 			);
 			// phpcs:enable
 		}
@@ -279,18 +281,27 @@ $orders_table.id in (
 		$order_table   = $this->query->get_table_name( 'orders' );
 		$address_table = $this->query->get_table_name( 'addresses' );
 
+		$db_util = wc_get_container()->get( DatabaseUtil::class );
+
 		$fts_enabled = get_option( CustomOrdersTableController::HPOS_FTS_INDEX_OPTION ) === 'yes' && get_option( CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION ) === 'yes';
 
 		if ( $fts_enabled ) {
+			$matchers = "$address_table.first_name, $address_table.last_name, $address_table.company, $address_table.address_1, $address_table.address_2, $address_table.city, $address_table.state, $address_table.postcode, $address_table.country, $address_table.email";
+
+			// Support for phone was added in 9.4.
+			if ( version_compare( get_option( 'woocommerce_db_version' ), '9.4.0', '>=' ) ) {
+				$matchers .= ", $address_table.phone";
+			}
+
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table and $address_table are hardcoded.
 			return $wpdb->prepare(
 				"
 $order_table.id IN (
 	SELECT order_id FROM $address_table WHERE
-	MATCH( $address_table.first_name, $address_table.last_name, $address_table.company, $address_table.address_1, $address_table.address_2, $address_table.city, $address_table.state, $address_table.postcode, $address_table.country, $address_table.email ) AGAINST ( %s IN BOOLEAN MODE )
+	MATCH( $matchers ) AGAINST ( %s IN BOOLEAN MODE )
 )
 ",
-				'*' . $wpdb->esc_like( $this->search_term ) . '*'
+				$wpdb->esc_like( $db_util->sanitise_boolean_fts_search_term( $this->search_term ) )
 			);
 			// phpcs:enable
 		}

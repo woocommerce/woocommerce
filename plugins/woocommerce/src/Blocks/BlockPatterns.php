@@ -141,9 +141,14 @@ class BlockPatterns {
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) ) {
-			wc_get_logger()->warning(
-				__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
-			);
+			// By only logging when patterns are empty and no fetch is scheduled,
+			// we ensure that warnings are only generated in genuinely problematic situations,
+			// such as when the pattern fetching mechanism has failed entirely.
+			if ( ! as_has_scheduled_action( 'fetch_patterns' ) ) {
+				wc_get_logger()->warning(
+					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
+				);
+			}
 			return;
 		}
 
