@@ -256,6 +256,7 @@ class WC_Brands_Admin {
 
 		if ( in_array( $screen->id, array( 'edit-product_brand' ), true ) ) {
 			wp_enqueue_media();
+			wp_enqueue_style( 'woocommerce_admin_styles' );
 		}
 	}
 

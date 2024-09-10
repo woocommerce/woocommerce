@@ -21,6 +21,10 @@ class Brands {
 	 */
 	final public static function init() {
 
+		if ( ! self::is_enabled() ) {
+			return;
+		}
+
 		// If the WooCommerce Brands plugin is activated via the WP CLI using the '--skip-plugins' flag, deactivate it here.
 		if ( function_exists( 'wc_brands_init' ) ) {
 			remove_action( 'plugins_loaded', 'wc_brands_init', 1 );
@@ -39,5 +43,10 @@ class Brands {
 		if ( is_admin() ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-brands.php';
 		}
+	}
+
+	public static function is_enabled() {
+		$assignment = get_option( 'woocommerce_remote_variant_assignment', 0 );
+		return ( $assignment <= 6 ); // Considering 5% of the 0-120 range.
 	}
 }

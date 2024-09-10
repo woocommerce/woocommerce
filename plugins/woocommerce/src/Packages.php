@@ -37,15 +37,26 @@ class Packages {
 	 * initialization for the now-merged feature plugin.
 	 *
 	 * Once a package has been merged into WooCommerce Core it should have its slug added here. This will ensure
-	 * that we deactivate the feature plugin automaticatlly to prevent any problems caused by conflicts between
+	 * that we deactivate the feature plugin automatically to prevent any problems caused by conflicts between
 	 * the two versions caused by them both being active.
+	 *
+	 * The packages included in this array cannot be deactivated and will always load with WooCommerce core.
 	 *
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
-	protected static $merged_plugins = array(
+	protected static $base_packages = array(
 		'woocommerce-admin'                    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
 		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package',
-		'woocommerce-brands'                   => '\\Automattic\\WooCommerce\\Internal\\Brands',
+	);
+
+	/**
+	 * Similar to $base_packages, but
+	 * the packages included in this array can be deactivated via the 'woocommerce_merged_packages' filter.
+	 *
+	 * @var array Key is the package name/directory, value is the main package class which handles init.
+	 */
+	protected static $merged_packages = array(
+		'woocommerce-brands' => '\\Automattic\\WooCommerce\\Internal\\Brands',
 	);
 
 
@@ -55,7 +66,7 @@ class Packages {
 	 * @since 3.7.0
 	 */
 	public static function init() {
-		add_action( 'plugins_loaded', array( __CLASS__, 'on_init' ), -PHP_INT_MAX );
+		add_action( 'plugins_loaded', array( __CLASS__, 'on_init' ), 0 );
 
 		// Prevent plugins already merged into WooCommerce core from getting activated as standalone plugins.
 		add_action( 'activate_plugin', array( __CLASS__, 'deactivate_merged_plugins' ) );
@@ -82,6 +93,58 @@ class Packages {
 	public static function package_exists( $package ) {
 		return file_exists( dirname( __DIR__ ) . '/packages/' . $package );
 	}
+
+	/**
+	 * Checks a package exists by looking for it's directory.
+	 *
+	 * @param string $string Class name.
+	 * @return boolean
+	 */
+	public static function should_load_class( $class ) {
+
+		foreach( self::$merged_packages as $merged_package_name => $merged_package_class ) {
+			if ( $class === str_replace( 'woocommerce-', 'wc_', $merged_package_name ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gets all merged, enabled packages.
+	 *
+	 * @return array
+	 */
+	protected static function get_enabled_packages() {
+		$enabled_packages = array();
+
+		foreach( self::$merged_packages as $merged_package_name => $package_class ) {
+			$experimental_package_enabled = method_exists( $package_class, 'is_enabled' ) ? call_user_func( array( $package_class, 'is_enabled' ) ) : true;
+
+			if ( ! $experimental_package_enabled ) {
+				continue;
+			}
+
+			$option = 'wc_feature_' . str_replace('-', '_', $merged_package_name ) . '_enabled';
+			if ( 'yes' === get_option( $option, 'yes' ) ) {
+				$enabled_packages[ $merged_package_name ] = $package_class;
+			}
+		}
+
+		return array_merge( $enabled_packages, self::$base_packages );
+	}
+
+	/**
+	 * Checks if a package is enabled.
+	 *
+	 * @param string $package Package name.
+	 * @return boolean
+	 */
+	public static function is_package_enabled( $package ) {
+		return array_key_exists( $package, self::get_enabled_packages() );
+	}
+
 	/**
 	 * Deactivates merged feature plugins.
 	 *
@@ -101,7 +164,8 @@ class Packages {
 		// Deactivate the plugin if possible so that there are no conflicts.
 		foreach ( $active_plugins as $active_plugin_path ) {
 			$plugin_file = basename( plugin_basename( $active_plugin_path ), '.php' );
-			if ( ! isset( self::$merged_plugins[ $plugin_file ] ) ) {
+
+			if ( ! self::is_package_enabled($plugin_file ) ) {
 				continue;
 			}
 
@@ -134,7 +198,7 @@ class Packages {
 	public static function deactivate_merged_plugins( $plugin ) {
 		$plugin_dir = basename( dirname( $plugin ) );
 
-		if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
+		if ( self::is_package_enabled( $plugin_dir ) ) {
 			$plugins_url = esc_url( admin_url( 'plugins.php' ) );
 			wp_die(
 				esc_html__( 'This plugin cannot be activated because its functionality is now included in WooCommerce core.', 'woocommerce' ),
@@ -156,7 +220,7 @@ class Packages {
 	public static function mark_merged_plugins_as_pending_update( $plugins ) {
 		foreach ( $plugins as $plugin_name => $plugin_data ) {
 			$plugin_dir = basename( dirname( $plugin_name ) );
-			if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
+			if ( self::is_package_enabled( $plugin_dir ) ) {
 				// Necessary to properly display notice within row.
 				$plugins[ $plugin_name ]['update'] = 1;
 			}
@@ -179,7 +243,7 @@ class Packages {
 		$columns_count = $wp_list_table->get_column_count();
 		$notice        = __( 'This plugin can no longer be activated because its functionality is now included in <strong>WooCommerce</strong>. It is recommended to <strong>delete</strong> it.', 'woocommerce' );
 
-		if ( isset( self::$merged_plugins[ $plugin_dir ] ) ) {
+		if ( self::is_package_enabled( $plugin_dir ) ) {
 			echo '<tr class="plugin-update-tr"><td colspan="' . esc_attr( $columns_count ) . '" class="plugin-update"><div class="update-message notice inline notice-error notice-alt"><p>' . wp_kses_post( $notice ) . '</p></div></td></tr>';
 		}
 	}
@@ -190,7 +254,7 @@ class Packages {
 	 * Each package should include an init file which loads the package so it can be used by core.
 	 */
 	protected static function initialize_packages() {
-		foreach ( self::$merged_plugins as $package_name => $package_class ) {
+		foreach ( self::get_enabled_packages() as $package_name => $package_class ) {
 			call_user_func( array( $package_class, 'init' ) );
 		}
 
