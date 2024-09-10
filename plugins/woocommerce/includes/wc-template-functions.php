@@ -331,17 +331,14 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-page';
 
 		$account_page_id = get_option( 'woocommerce_myaccount_page_id' );
-		$account_page_slug = false;
 
 		if ( !empty( $account_page_id ) ) {
 
-			$account_page_slug = get_post_field( 'post_name', $account_page_id );
+			if ( get_post_field( 'post_name', $account_page_id ) == basename( $wp->request ) && is_user_logged_in() ) {
 
-		}
+				$classes[] = 'woocommerce-dashboard';
 
-		if ( basename( $wp->request ) == $account_page_slug && is_user_logged_in() ) {
-
-			$classes[] = 'woocommerce-dashboard';
+			}
 
 		}
 
