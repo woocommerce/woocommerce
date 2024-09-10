@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove @wooocommerce `Combobox` component that is no longer used.

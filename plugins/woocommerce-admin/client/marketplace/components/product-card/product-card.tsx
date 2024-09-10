@@ -31,6 +31,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const query = useQuery();
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
+		id: null,
 		title: '',
 		description: '',
 		vendorName: '',
@@ -79,6 +80,10 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 
 		if ( tracksData.group ) {
 			data.group = tracksData.group;
+		}
+
+		if ( tracksData.group_id ) {
+			data.group_id = tracksData.group_id;
 		}
 
 		if ( tracksData.searchTerm ) {
@@ -142,7 +147,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			rel="noopener noreferrer"
 			onClick={ () => {
 				recordTracksEvent( 'marketplace_product_card_clicked', {
-					product: product.title,
+					product_id: product.id,
+					product_name: product.title,
 					vendor: product.vendorName,
 					product_type: type,
 				} );
