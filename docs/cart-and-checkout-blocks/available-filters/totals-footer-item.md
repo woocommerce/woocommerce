@@ -71,11 +71,11 @@ The `totalValue` filter allows to format the total price in the footer of the Ca
 -   _extensions_ `object` (default: `{}`) - The extensions object.
 -   _args_ `object` - The arguments object with the following keys:
     -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
--   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
+-   _validation_ `boolean` - Checks if the return value contains the substring `&lt;price/&gt;`.
 
 ### Returns <!-- omit in toc -->
 
--   `string` - The modified format of the total price, which must contain the substring `<price/>`, or the original price format.
+-   `string` - The modified format of the total price, which must contain the substring `&lt;price/&gt;`, or the original price format.
 
 ### Code example <!-- omit in toc -->
 
