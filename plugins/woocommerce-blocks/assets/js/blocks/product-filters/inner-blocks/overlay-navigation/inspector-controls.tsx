@@ -107,6 +107,7 @@ export const Inspector = ( {
 				{ triggerType === 'open-overlay' &&
 					navigationStyle !== 'label-only' && (
 						<ToggleGroupControl
+							label={ __( 'Icon', 'woocommerce' ) }
 							className="wc-block-editor-product-filters__overlay-button-toggle"
 							isBlock={ true }
 							value={ overlayIcon }
