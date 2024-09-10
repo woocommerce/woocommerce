@@ -45,7 +45,11 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false, tabs: Tabs ) => {
+const getVisibleTabs = (
+	selectedTab: string,
+	hasBusinessServices = false,
+	tabs: Tabs
+) => {
 	if ( selectedTab === '' ) {
 		return tabs;
 	}
@@ -104,7 +108,9 @@ const renderTabs = (
 				>
 					{ tabs[ tabKey ]?.title }
 					{ tabs[ tabKey ]?.showUpdateCount && (
-						<span className={`woocommerce-marketplace__update-count woocommerce-marketplace__update-count-${ tabKey }`}>
+						<span
+							className={ `woocommerce-marketplace__update-count woocommerce-marketplace__update-count-${ tabKey }` }
+						>
 							<span> { tabs[ tabKey ]?.updateCount } </span>
 						</span>
 					) }
@@ -151,7 +157,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 			name: 'business-services',
 			title: __( 'Business services', 'woocommerce' ),
 			showUpdateCount: true,
-			updateCount: searchResultsCount['business-services'],
+			updateCount: searchResultsCount[ 'business-services' ],
 		},
 		'my-subscriptions': {
 			name: 'my-subscriptions',
@@ -161,7 +167,9 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		},
 	};
 
-	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '', false, tabs ) );
+	const [ visibleTabs, setVisibleTabs ] = useState(
+		getVisibleTabs( '', false, tabs )
+	);
 
 	const query: Record< string, string > = useQuery();
 
@@ -174,7 +182,9 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	}, [ query, setSelectedTab ] );
 
 	useEffect( () => {
-		setVisibleTabs( getVisibleTabs( selectedTab, hasBusinessServices, tabs ) );
+		setVisibleTabs(
+			getVisibleTabs( selectedTab, hasBusinessServices, tabs )
+		);
 	}, [ selectedTab, hasBusinessServices ] );
 
 	return (

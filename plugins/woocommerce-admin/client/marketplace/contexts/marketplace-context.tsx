@@ -35,11 +35,12 @@ export function MarketplaceContextProvider( props: {
 		[]
 	);
 	const [ hasBusinessServices, setHasBusinessServices ] = useState( false );
-	const [ searchResultsCount, setSearchResultsCount ] = useState< SearchResultsCountType >( {
-		extensions: 0,
-		themes: 0,
-		'business-services': 0,
-	} );
+	const [ searchResultsCount, setSearchResultsCount ] =
+		useState< SearchResultsCountType >( {
+			extensions: 0,
+			themes: 0,
+			'business-services': 0,
+		} );
 
 	/**
 	 * Knowing installed products will help us to determine which products
