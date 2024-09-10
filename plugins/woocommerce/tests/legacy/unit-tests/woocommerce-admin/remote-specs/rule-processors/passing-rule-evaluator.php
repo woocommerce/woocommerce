@@ -18,7 +18,7 @@ class PassingRuleEvaluator {
 	 *
 	 * @return bool The evaluated result.
 	 */
-	public function evaluate( $rules ) {
+	public function evaluate( $rules ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		return true;
 	}
 }
