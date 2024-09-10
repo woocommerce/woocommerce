@@ -7,7 +7,8 @@ on:
             - trunk
             - add/storybook_github_workflow
 
-permissions: {}
+permissions:
+    contents: write
 
 jobs:
     deploy:
