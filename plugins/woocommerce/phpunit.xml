@@ -17,6 +17,21 @@
 			<exclude>./tests/php/helpers</exclude>
 		</testsuite>
 	</testsuites>
+	<extensions>
+		<extension class="JohnKary\PHPUnit\Extension\SpeedTrap">
+			<arguments>
+                <array>
+					<element key="slowThreshold">
+						<integer>3000</integer>
+					</element>
+
+					<element key="reportLength">
+                        <integer>50</integer>
+                    </element>
+                </array>
+            </arguments>
+		</extension>
+	</extensions>
 	<coverage includeUncoveredFiles="true">
 		<include>
 			<directory suffix=".php">./includes</directory>
