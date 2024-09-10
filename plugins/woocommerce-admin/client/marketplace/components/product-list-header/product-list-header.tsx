@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
+import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 import { Link } from '@woocommerce/components';
 import { isRTL, __ } from '@wordpress/i18n';
-import clsx from 'clsx';
 import { recordEvent } from '@woocommerce/tracks';
-import { Icon, chevronLeft, chevronRight } from '@wordpress/icons';
 
 /**
  * Internal dependencies
