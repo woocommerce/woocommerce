@@ -169,7 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.3.0 2024-XX-XX =
+= 9.3.0 2024-09-10 =
 
 * Enhancement - Add query params masking to remote logger [#51108](https://github.com/woocommerce/woocommerce/pull/51108)
 * Update - Added more paths to remote logger query param whitelist [#51108](https://github.com/woocommerce/woocommerce/pull/51108)
