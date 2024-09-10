@@ -2,6 +2,10 @@ body.wc-modal--open {
 	overflow: hidden;
 }
 
+body.wc-block-product-gallery-modal-open {
+	overflow: hidden;
+}
+
 // These styles are for the server side rendered product grid blocks.
 .wc-block-grid__products .wc-block-grid__product-image {
 	text-decoration: none;
