@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the order-items view for coupons, so we show the actually-used coupon info, if it exists.

@@ -1,8 +1,8 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Blocks\Domain\Package;
+namespace Automattic\WooCommerce\Tests\Blocks\Domain;
 
-use \WP_UnitTestCase;
 use Automattic\WooCommerce\Blocks\Domain\Package as TestedPackage;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 
@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
  *
  * @since $VID:$
  */
-class Package extends WP_UnitTestCase {
+class Package extends \WP_UnitTestCase {
 
 	private function get_package() {
 		return new TestedPackage( '1.0.0', __DIR__, new FeatureGating() );

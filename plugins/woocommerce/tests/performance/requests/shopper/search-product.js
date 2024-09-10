@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -15,6 +14,8 @@ import {
 	product_search_term,
 	think_time_min,
 	think_time_max,
+	FOOTER_TEXT,
+	STORE_NAME,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -44,25 +45,18 @@ export function searchProduct() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title matches: Search Results for {product_search_term} – WooCommerce Core E2E Test Suite':
-				( response ) => {
-					const title_actual = response
-						.html()
-						.find( 'head title' )
-						.text();
+			[ `title matches: Search Results for {product_search_term} – ${ STORE_NAME }` ]:
+				( r ) => {
+					const title_actual = r.html().find( 'head title' ).text();
 					const title_expected = new RegExp(
-						`Search Results for .${ product_search_term }. – WooCommerce Core E2E Test Suite`
+						`Search Results for .${ product_search_term }. – ${ STORE_NAME }`
 					);
 					return title_actual.match( title_expected );
 				},
-			"body contains: 'Search results' title": ( response ) =>
-				response.body.includes( 'Search results:' ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+			"body contains: 'Search results' title": ( r ) =>
+				r.body.includes( 'Search results:' ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r.html().find( 'body footer' ).text().includes( FOOTER_TEXT ),
 		} );
 	} );
 

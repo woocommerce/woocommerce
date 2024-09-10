@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Remove relevancy ranking from FTS queries to improve performance.

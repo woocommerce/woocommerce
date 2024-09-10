@@ -283,7 +283,10 @@
               "$ref": "#/definitions/operations"
             },
             "value": {
-              "type": "string"
+              "type": [
+                "string",
+                "array"
+              ]
             }
           }
         },
@@ -305,7 +308,10 @@
               "$ref": "#/definitions/operations"
             },
             "value": {
-              "type": "string"
+              "type": [
+                "string",
+                "array"
+              ]
             }
           }
         },

@@ -58,6 +58,7 @@ export interface ProductTracksData {
 	position?: number;
 	label?: string;
 	group?: string;
+	group_id?: string;
 	searchTerm?: string;
 	category?: string;
 }
