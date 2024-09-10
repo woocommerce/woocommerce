@@ -11,6 +11,7 @@ import {
 } from '@wordpress/block-editor';
 import {
 	BlockEditProps,
+	BlockInstance,
 	InnerBlockTemplate,
 	createBlock,
 } from '@wordpress/blocks';
@@ -132,33 +133,45 @@ export const Edit = ( {
 	);
 
 	useEffect( () => {
-		const overlayClientIds = select( 'core/block-editor' ).getBlocksByName(
-			'woocommerce/product-filters-overlay-navigation'
+		const filtersClientIds = select( 'core/block-editor' ).getBlocksByName(
+			'woocommerce/product-filters'
 		);
 
-		const overlayBlockAttributes = select(
-			'core/block-editor'
-		).getBlockAttributes( overlayClientIds[ 0 ] );
+		let overlayBlock:
+			| BlockInstance< { [ k: string ]: unknown } >
+			| undefined;
 
-		if ( attributes.overlay === 'never' && overlayClientIds.length ) {
+		filtersClientIds.forEach( ( filterClientId: string ) => {
+			const filterBlock =
+				select( 'core/block-editor' ).getBlock( filterClientId );
+
+			filterBlock?.innerBlocks.forEach( ( innerBlock ) => {
+				if (
+					innerBlock.name ===
+						'woocommerce/product-filters-overlay-navigation' &&
+					innerBlock.attributes.triggerType === 'open-overlay'
+				) {
+					overlayBlock = innerBlock;
+				}
+			} );
+		} );
+
+		if ( attributes.overlay === 'never' && overlayBlock ) {
 			setProductFiltersOverlayNavigationAttributes(
-				overlayBlockAttributes
+				overlayBlock.attributes
 			);
 
 			dispatch( 'core/block-editor' ).updateBlockAttributes(
-				overlayClientIds[ 0 ],
+				overlayBlock.clientId,
 				{
 					lock: {},
 				}
 			);
 
 			dispatch( 'core/block-editor' ).removeBlock(
-				overlayClientIds[ 0 ]
+				overlayBlock.clientId
 			);
-		} else if (
-			attributes.overlay !== 'never' &&
-			! overlayClientIds.length
-		) {
+		} else if ( attributes.overlay !== 'never' && ! overlayBlock ) {
 			dispatch( 'core/block-editor' ).insertBlock(
 				createBlock(
 					'woocommerce/product-filters-overlay-navigation',
