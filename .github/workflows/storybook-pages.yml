@@ -5,6 +5,7 @@ on:
     push:
         branches:
             - trunk
+            - add/storybook_github_workflow
 
 permissions: {}
 
