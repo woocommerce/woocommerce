@@ -1,6 +1,7 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\ComingSoon;
+namespace Automattic\WooCommerce\Tests\Internal\ComingSoon;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 
