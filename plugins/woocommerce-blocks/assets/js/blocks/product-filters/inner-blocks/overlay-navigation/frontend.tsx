@@ -1,14 +1,11 @@
 /**
  * External dependencies
  */
-import { getContext as getContextFn, store } from '@woocommerce/interactivity';
+import { store } from '@woocommerce/interactivity';
 
 export interface ProductFiltersContext {
 	isDialogOpen: boolean;
 }
-
-const getContext = ( ns?: string ) =>
-	getContextFn< ProductFiltersContext >( ns );
 
 const productFiltersOverlayNavigation = {
 	state: {},
