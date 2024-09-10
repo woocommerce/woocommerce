@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added doc blocks to conditionally fired hooks to better explain nuanced behavior

@@ -73,116 +73,132 @@ test.describe( 'Cart Block page', { tag: [ '@payments', '@services' ] }, () => {
 		} );
 	} );
 
-	test( 'can see empty cart, add and remove simple & cross sell product, increase to max quantity', async ( {
-		page,
-		testPage,
-	} ) => {
-		await goToPageEditor( { page } );
-		await fillPageTitle( page, testPage.title );
-		await insertBlockByShortcut( page, 'Cart' );
-		await publishPage( page, testPage.title );
+	test(
+		'can see empty cart, add and remove simple & cross sell product, increase to max quantity',
+		{ tag: [ '@could-be-unit-test' ] },
+		async ( { page, testPage } ) => {
+			await goToPageEditor( { page } );
+			await fillPageTitle( page, testPage.title );
+			await insertBlockByShortcut( page, 'Cart' );
+			await publishPage( page, testPage.title );
 
-		// go to the page to test empty cart block
-		await page.goto( testPage.slug );
-		await expect(
-			page.getByRole( 'heading', { name: testPage.title } )
-		).toBeVisible();
-		await expect(
-			await page.getByText( 'Your cart is currently empty!' ).count()
-		).toBeGreaterThan( 0 );
-		await expect(
-			page.getByRole( 'link', { name: 'Browse store' } )
-		).toBeVisible();
-		await page.getByRole( 'link', { name: 'Browse store' } ).click();
-		await expect(
-			page.getByRole( 'heading', { name: 'Shop' } )
-		).toBeVisible();
+			// go to the page to test empty cart block
+			await page.goto( testPage.slug );
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+			await expect(
+				await page.getByText( 'Your cart is currently empty!' ).count()
+			).toBeGreaterThan( 0 );
+			await expect(
+				page.getByRole( 'link', { name: 'Browse store' } )
+			).toBeVisible();
+			await page.getByRole( 'link', { name: 'Browse store' } ).click();
+			await expect(
+				page.getByRole( 'heading', { name: 'Shop' } )
+			).toBeVisible();
 
-		await addAProductToCart( page, product1Id );
-		await page.goto( testPage.slug );
-		await expect(
-			page.getByRole( 'heading', { name: testPage.title } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'link', { name: simpleProductName, exact: true } )
-		).toBeVisible();
-		await expect( page.getByText( simpleProductDesc ) ).toBeVisible();
-		await expect(
-			page.getByText( `Save $${ singleProductSalePrice }` )
-		).toBeVisible();
+			await addAProductToCart( page, product1Id );
+			await page.goto( testPage.slug );
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'link', {
+					name: simpleProductName,
+					exact: true,
+				} )
+			).toBeVisible();
+			await expect( page.getByText( simpleProductDesc ) ).toBeVisible();
+			await expect(
+				page.getByText( `Save $${ singleProductSalePrice }` )
+			).toBeVisible();
 
-		// increase product quantity to its maximum
-		await expect( page.getByText( '2 left in stock' ) ).toBeVisible();
-		await page
-			.getByRole( 'button' )
-			.filter( { hasText: '＋', exact: true } )
-			.click();
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( `$${ doubleProductsPrice.toString() }` );
-		await expect(
-			page.getByRole( 'button' ).filter( { hasText: '＋', exact: true } )
-		).toBeDisabled();
+			// increase product quantity to its maximum
+			await expect( page.getByText( '2 left in stock' ) ).toBeVisible();
+			await page
+				.getByRole( 'button' )
+				.filter( { hasText: '＋', exact: true } )
+				.click();
+			await expect(
+				page.locator(
+					'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+				)
+			).toContainText( `$${ doubleProductsPrice.toString() }` );
+			await expect(
+				page
+					.getByRole( 'button' )
+					.filter( { hasText: '＋', exact: true } )
+			).toBeDisabled();
 
-		// add cross-sell products to cart
-		await expect(
-			page.getByRole( 'heading', { name: 'You may be interested in…' } )
-		).toBeVisible();
-		await page
-			.getByLabel( `Add to cart: “${ simpleProductName } Cross-Sell 1”` )
-			.click();
-		await expect(
-			page
-				.locator( '.wc-block-cart-items' )
-				.getByText( `${ simpleProductName } Cross-Sell 1` )
-		).toBeVisible();
-		await page
-			.getByLabel( `Add to cart: “${ simpleProductName } Cross-Sell 2”` )
-			.click();
-		await expect(
-			page
-				.locator( '.wc-block-cart-items' )
-				.getByText( `${ simpleProductName } Cross-Sell 2` )
-		).toBeVisible();
+			// add cross-sell products to cart
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'You may be interested in…',
+				} )
+			).toBeVisible();
+			await page
+				.getByLabel(
+					`Add to cart: “${ simpleProductName } Cross-Sell 1”`
+				)
+				.click();
+			await expect(
+				page
+					.locator( '.wc-block-cart-items' )
+					.getByText( `${ simpleProductName } Cross-Sell 1` )
+			).toBeVisible();
+			await page
+				.getByLabel(
+					`Add to cart: “${ simpleProductName } Cross-Sell 2”`
+				)
+				.click();
+			await expect(
+				page
+					.locator( '.wc-block-cart-items' )
+					.getByText( `${ simpleProductName } Cross-Sell 2` )
+			).toBeVisible();
 
-		await page.goto( testPage.slug );
-		await expect(
-			page.getByRole( 'heading', { name: testPage.title } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'heading', { name: 'You may be interested in…' } )
-		).toBeHidden();
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText(
-			`$${ singleProductWithCrossSellProducts.toString() }`
-		);
+			await page.goto( testPage.slug );
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'You may be interested in…',
+				} )
+			).toBeHidden();
+			await expect(
+				page.locator(
+					'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+				)
+			).toContainText(
+				`$${ singleProductWithCrossSellProducts.toString() }`
+			);
 
-		// remove cross-sell products from cart
-		await page.locator( ':nth-match(:text("Remove item"), 3)' ).click();
-		await page.locator( ':nth-match(:text("Remove item"), 2)' ).click();
-		await expect(
-			page.getByRole( 'heading', { name: 'You may be interested in…' } )
-		).toBeVisible();
+			// remove cross-sell products from cart
+			await page.locator( ':nth-match(:text("Remove item"), 3)' ).click();
+			await page.locator( ':nth-match(:text("Remove item"), 2)' ).click();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'You may be interested in…',
+				} )
+			).toBeVisible();
 
-		// check if the link to proceed to the checkout exists
-		await expect(
-			page.getByRole( 'link', {
-				name: 'Proceed to Checkout',
-			} )
-		).toBeVisible();
+			// check if the link to proceed to the checkout exists
+			await expect(
+				page.getByRole( 'link', {
+					name: 'Proceed to Checkout',
+				} )
+			).toBeVisible();
 
-		// remove product from cart
-		await page.locator( ':text("Remove item")' ).click();
-		await expect(
-			page.getByText( 'Your cart is currently empty!' )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'link', { name: 'Browse store' } )
-		).toBeVisible();
-	} );
+			// remove product from cart
+			await page.locator( ':text("Remove item")' ).click();
+			await expect(
+				page.getByText( 'Your cart is currently empty!' )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'link', { name: 'Browse store' } )
+			).toBeVisible();
+		}
+	);
 } );

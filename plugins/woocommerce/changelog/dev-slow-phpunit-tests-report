@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add reporting of slow PHPUnit tests.

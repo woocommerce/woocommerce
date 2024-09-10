@@ -1,0 +1,4 @@
+Significance: major
+Type: add
+
+Product Collection - Show product picker in Editor when collection requires a product but not available  <details> A collection can define if it requires a product context. This can be done using `usesReference` argument i.e. ```tsx __experimentalRegisterProductCollection({   ...,   usesReference: ['product'], ) ```  When product context doesn't exist in current template/page/post etc. then we show product picker in Editor. This way, merchant can manually provide a product context to the collection.

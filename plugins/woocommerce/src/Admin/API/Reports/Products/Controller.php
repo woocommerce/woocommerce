@@ -231,14 +231,16 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array(
-			'date',
-			'net_revenue',
-			'orders_count',
-			'items_sold',
-			'product_name',
-			'variations',
-			'sku',
+		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'net_revenue',
+				'orders_count',
+				'items_sold',
+				'product_name',
+				'variations',
+				'sku',
+			)
 		);
 		$params['categories']      = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),
