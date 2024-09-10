@@ -20,7 +20,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId' ];
+		return array( 'postId' );
 	}
 
 	/**
@@ -61,10 +61,10 @@ class ProductFilters extends AbstractBlock {
 	 * @return string The rendered template part.
 	 */
 	protected function render_template_part( $template_part ) {
-		$parsed_blocks                = parse_blocks( $template_part );
-		$wrapper_template_part_block  = $parsed_blocks[0];
-		$html                         = $wrapper_template_part_block['innerHTML'];
-		$target_div                   = '</div>';
+		$parsed_blocks               = parse_blocks( $template_part );
+		$wrapper_template_part_block = $parsed_blocks[0];
+		$html                        = $wrapper_template_part_block['innerHTML'];
+		$target_div                  = '</div>';
 
 		$template_part_content_html = array_reduce(
 			$wrapper_template_part_block['innerBlocks'],
@@ -89,12 +89,11 @@ class ProductFilters extends AbstractBlock {
 	 * Inject dialog into the product filters HTML.
 	 *
 	 * @param string $product_filters_html The Product Filters HTML.
-	 * @param string $dialog_html  The dialog HTML.
+	 * @param string $dialog_html The dialog HTML.
 	 *
 	 * @return string
 	 */
 	protected function inject_dialog( $product_filters_html, $dialog_html ) {
-
 		// Find the position of the last </div>.
 		$pos = strrpos( $product_filters_html, '</div>' );
 
@@ -117,7 +116,6 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-
 		$html = $content;
 		$p    = new \WP_HTML_Tag_Processor( $html );
 
