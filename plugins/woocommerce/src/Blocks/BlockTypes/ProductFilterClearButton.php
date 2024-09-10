@@ -45,7 +45,7 @@ final class ProductFilterClearButton extends AbstractBlock {
 		$p = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $p->next_tag( array( 'class_name' => 'wp-block-button__link' ) ) ) {
-			$p->set_attribute( 'data-wc-on--click', 'actions.clear' );
+			$p->set_attribute( 'data-wc-on--click', 'actions.clearFilters' );
 
 			$style = $p->get_attribute( 'style' );
 			$p->set_attribute( 'style', 'outline:none;' . $style );

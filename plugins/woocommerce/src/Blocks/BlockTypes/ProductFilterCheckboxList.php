@@ -71,7 +71,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<ul class="wc-block-product-filter-checkbox-list__list">
+			<ul class="wc-block-product-filter-checkbox-list__list" aria-label="<?php echo esc_attr( 'Filter Options', 'woocommerce' ); ?>">
 			<?php foreach ( $items as $item ) { ?>
 					<?php
 					$item['id'] = $item['id'] ?? uniqid( 'checkbox-' );

@@ -106,5 +106,12 @@ store( 'woocommerce/product-filter-attribute', {
 
 			navigate( getUrl( selectedTerms, attributeSlug, queryType ) );
 		},
+
+		clearFilters: () => {
+			const { attributeSlug, queryType } =
+				getContext< ActiveAttributeFilterContext >();
+
+			navigate( getUrl( [], attributeSlug, queryType ) );
+		},
 	},
 } );
