@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in' );
 
 
 	/**
@@ -682,6 +682,7 @@ class ProductCollection extends AbstractBlock {
 			$query,
 			array(
 				'orderby'             => $orderby,
+				'post__in'            => $handpicked_products,
 				'on_sale'             => $on_sale,
 				'stock_status'        => $stock_status,
 				'product_attributes'  => $product_attributes,

@@ -61,7 +61,7 @@ const attributes = {
 		shrinkColumns: true,
 	},
 	query: {
-		orderBy: 'date',
+		orderBy: 'post__in',
 		order: 'desc',
 		perPage: 5,
 		pages: 1,
