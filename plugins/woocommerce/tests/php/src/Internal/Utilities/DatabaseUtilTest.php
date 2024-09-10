@@ -131,4 +131,28 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded query.
 		$this->assertEquals( 'Updated Content', $wpdb->get_var( $content_query ) );
 	}
+
+	/**
+	 * @testDox Test that sanitise_boolean_fts_search_term() works as expected.
+	 */
+	public function test_sanitise_boolean_fts_search_term(): void {
+		$terms_sanitized_mapping = array(
+			// Normal terms are suffixed with wildcard.
+			'abc'             => 'abc*',
+			'abc def'         => 'abc* def*',
+			// Terms containing operators are quoted.
+			'+abc -def'       => '"+abc -def"',
+			'++abc-def'       => '"++abc-def"',
+			'abc (>def <fgh)' => '"abc (>def <fgh)"',
+			'"abc" def'       => '"abc def"',
+			'abc*'            => '"abc*"',
+			// Some edge cases.
+			''                => '*',
+			'"'               => '""',
+		);
+
+		foreach ( $terms_sanitized_mapping as $term => $expected ) {
+			$this->assertEquals( $expected, $this->sut->sanitise_boolean_fts_search_term( $term ) );
+		}
+	}
 }
