@@ -147,7 +147,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			rel="noopener noreferrer"
 			onClick={ () => {
 				recordTracksEvent( 'marketplace_product_card_clicked', {
-					product: product.id,
+					product_id: product.id,
 					product_name: product.title,
 					vendor: product.vendorName,
 					product_type: type,
