@@ -120,6 +120,8 @@ class Packages {
 		$enabled_packages = array();
 
 		foreach( self::$merged_packages as $merged_package_name => $package_class ) {
+
+			// For gradual rollouts, ensure that a package is enabled for user's remote variant number.
 			$experimental_package_enabled = method_exists( $package_class, 'is_enabled' ) ? call_user_func( array( $package_class, 'is_enabled' ) ) : true;
 
 			if ( ! $experimental_package_enabled ) {
