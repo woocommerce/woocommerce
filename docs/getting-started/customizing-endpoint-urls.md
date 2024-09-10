@@ -48,7 +48,7 @@ Gateways need to use these methods for full 2.1+ compatibility.
 On Windows servers, the **web.config** file may not be set correctly to allow for the endpoints to work correctly. In this case, clicking on endpoint links (e.g. /edit-account/ or /customer-logout/) may appear to do nothing except refresh the page. In order to resolve this, try simplifying the **web.config** file on your Windows server. Here's a sample file configuration:
 
 ```xml
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+<&lt;>?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;configuration&gt;
   &lt;system.webServer&gt;
     &lt;handlers accessPolicy="Read, Execute, Script" /&gt;

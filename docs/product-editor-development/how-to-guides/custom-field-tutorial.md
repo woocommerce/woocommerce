@@ -75,7 +75,7 @@ registerBlockType( 'tutorial/new-product-form-field', {
 Lastly, in order to make this work the block registration needs to know about the JavaScript dependencies, we can do so by adding a `index.asset.php` file with the below contents:
 
 ```php
-&lt;?php return array('dependencies' => array('react', 'wc-product-editor', 'wp-blocks' ) );
+<?php return array('dependencies' => array('react', 'wc-product-editor', 'wp-blocks' ) );
 ```
 
 Now that we have all the for the field we need to register it and add it to the template.
@@ -217,7 +217,7 @@ function Edit( { attributes } ) {
 
 	const blockProps = useWooBlockProps( attributes );
 	return (
-		&lt;div { ...blockProps }>&gt;
+		&lt;div { ...blockProps }&gt;
 			&lt;ComboboxControl
 				label="Example dropdown"
 				value={ value }
