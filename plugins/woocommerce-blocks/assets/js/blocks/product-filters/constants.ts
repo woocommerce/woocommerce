@@ -4,7 +4,7 @@ export const BlockOverlayAttribute = {
 	ALWAYS: 'always',
 } as const;
 
-export const DISALLOWED_BLOCKS = [
+export const EXCLUDED_BLOCKS = [
 	'woocommerce/product-filter-attribute',
 	'woocommerce/product-collection',
 	'core/query',

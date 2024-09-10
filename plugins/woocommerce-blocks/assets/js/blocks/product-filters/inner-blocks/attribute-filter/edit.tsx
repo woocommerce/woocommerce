@@ -29,7 +29,7 @@ import './style.scss';
 import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils';
-import { DISALLOWED_BLOCKS } from '../../constants';
+import { EXCLUDED_BLOCKS } from '../../constants';
 import { FilterOptionItem } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
@@ -133,7 +133,7 @@ const Edit = ( props: EditProps ) => {
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
 		useBlockProps(),
 		{
-			allowedBlocks: getAllowedBlocks( DISALLOWED_BLOCKS ),
+			allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
 			template: [
 				[
 					'core/group',
