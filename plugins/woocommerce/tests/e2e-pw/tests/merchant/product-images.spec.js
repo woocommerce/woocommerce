@@ -280,6 +280,13 @@ test.describe(
 				const imageSelector = '#product_images_container img';
 				imagesCount = await page.locator( imageSelector ).count();
 
+				await page
+					.getByRole( 'link', {
+						name: 'Add product gallery images',
+					} )
+					.scrollIntoViewIfNeeded();
+
+				await page.pause();
 				await page.locator( imageSelector ).first().hover();
 				await page.getByRole( 'link', { name: ' Delete' } ).click();
 
