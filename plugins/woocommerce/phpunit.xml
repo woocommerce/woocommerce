@@ -17,8 +17,8 @@
 			<exclude>./tests/php/helpers</exclude>
 		</testsuite>
 	</testsuites>
-	<extensions>
-		<extension class="JohnKary\PHPUnit\Extension\SpeedTrap">
+	<listeners>
+		<listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener">
 			<arguments>
                 <array>
 					<element key="slowThreshold">
@@ -30,8 +30,8 @@
                     </element>
                 </array>
             </arguments>
-		</extension>
-	</extensions>
+		</listener>
+	</listeners>
 	<coverage includeUncoveredFiles="true">
 		<include>
 			<directory suffix=".php">./includes</directory>
