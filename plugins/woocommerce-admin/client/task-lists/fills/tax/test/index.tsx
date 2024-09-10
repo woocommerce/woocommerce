@@ -17,7 +17,7 @@ jest.mock( '@wordpress/data', () => ( {
 
 const fakeTask: {
 	additionalData: {
-		[ key: string ]: boolean | string[];
+		[ key: string ]: boolean | string | string[];
 	};
 } = {
 	additionalData: {},
