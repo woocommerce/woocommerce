@@ -17,6 +17,16 @@ const blockData = {
 			settings: {},
 			layoutWrapper:
 				'.wp-block-woocommerce-product-filters-is-layout-flex',
+			blocks: {
+				filters: {
+					title: 'Product Filters (Experimental)',
+					label: 'Block: Product Filters (Experimental)',
+				},
+				overlay: {
+					title: 'Overlay Navigation (Experimental)',
+					label: 'Block: Overlay Navigation (Experimental)',
+				},
+			},
 		},
 	},
 	slug: 'archive-product',
@@ -53,7 +63,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+			blockData.selectors.editor.blocks.filters.label
 		);
 		await expect( block ).toBeVisible();
 
@@ -141,7 +151,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+			blockData.selectors.editor.blocks.filters.label
 		);
 		await expect( block ).toBeVisible();
 
@@ -151,7 +161,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( listView ).toBeVisible();
 
 		const productFiltersBlockListItem = listView.getByRole( 'link', {
-			name: 'Product Filters (Experimental)',
+			name: blockData.selectors.editor.blocks.filters.title,
 		} );
 		await expect( productFiltersBlockListItem ).toBeVisible();
 		const listViewExpander =
@@ -198,7 +208,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+			blockData.selectors.editor.blocks.filters.label
 		);
 		await expect( block ).toBeVisible();
 
@@ -245,10 +255,17 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+		const filtersBlock = editor.canvas.getByLabel(
+			blockData.selectors.editor.blocks.filters.label
 		);
-		await expect( block ).toBeVisible();
+		await expect( filtersBlock ).toBeVisible();
+
+		const overlayBlock = editor.canvas.getByLabel(
+			blockData.selectors.editor.blocks.overlay.label
+		);
+
+		// Overlay mode is set to 'Never' by default so the block should be hidden
+		await expect( overlayBlock ).toBeHidden();
 
 		await editor.openDocumentSettingsSidebar();
 
@@ -270,13 +287,23 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeHidden();
 
+		await expect( overlayBlock ).toBeHidden();
+
 		await editor.page.getByLabel( 'Mobile' ).click();
 
 		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
 
+		await expect( overlayBlock ).toBeVisible();
+
 		await editor.page.getByLabel( 'Always' ).click();
 
 		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
+
+		await expect( overlayBlock ).toBeVisible();
+
+		await editor.page.getByLabel( 'Never' ).click();
+
+		await expect( overlayBlock ).toBeHidden();
 	} );
 
 	test( 'Layout > default to vertical stretch', async ( {
