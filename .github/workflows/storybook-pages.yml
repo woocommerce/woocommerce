@@ -2,10 +2,6 @@ name: Storybook GitHub Pages
 
 on:
     workflow_dispatch:
-    push:
-        branches:
-            - trunk
-            - add/storybook_github_workflow
 
 permissions:
     contents: write
