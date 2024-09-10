@@ -83,7 +83,7 @@ The `totalValue` filter allows to format the total price in the footer of the Ca
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyTotalsPrice = ( defaultValue, extensions, args, validation ) => {
-	return 'Pay <price/> now';
+	return 'Pay &lt;price/&gt; now';
 };
 
 registerCheckoutFilters( 'my-extension', {
