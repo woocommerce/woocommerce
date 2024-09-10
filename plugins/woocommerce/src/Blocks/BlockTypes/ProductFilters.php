@@ -68,7 +68,7 @@ class ProductFilters extends AbstractBlock {
 
 		$template_part_content_html = array_reduce(
 			$wrapper_template_part_block['innerBlocks'],
-			function( $carry, $item ) {
+			function ( $carry, $item ) {
 				if ( 'core/template-part' === $item['blockName'] ) {
 					$inner_template_part              = BlockTemplateUtils::get_template_part( $item['attrs']['slug'] );
 					$inner_template_part_content_html = $this->render_template_part( $inner_template_part );
