@@ -79,8 +79,8 @@ class ProductFilters extends AbstractBlock {
 				}
 				return $carry . render_block( $item );
 			},
-						''
-					);
+			''
+		);
 
 		$html = str_replace( $target_div, $template_part_content_html . $target_div, $html );
 
@@ -129,7 +129,7 @@ class ProductFilters extends AbstractBlock {
 				'data-wc-context',
 				wp_json_encode(
 					array(
-						'isDialogOpen' => false,
+						'isDialogOpen'                 => false,
 						'hasPageWithWordPressAdminBar' => false,
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
