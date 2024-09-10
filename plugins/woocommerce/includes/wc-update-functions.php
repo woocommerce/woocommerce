@@ -2877,7 +2877,7 @@ function wc_update_940_add_phone_to_order_address_fts_index(): void {
  * Remove user meta associated with the key 'woocommerce_admin_help_panel_highlight_shown'.
  *
  * This key is no longer needed since the help panel spotlight tour has been removed.
- * 
+ *
  * @return void
  */
 function wc_update_940_remove_help_panel_highlight_shown() {
