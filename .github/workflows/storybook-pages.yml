@@ -17,7 +17,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
               with:
                   ref: trunk
                   fetch-depth: 0
@@ -28,10 +28,10 @@ jobs:
                   install: true
 
             - name: Build Storybook
-              run: pnpm --filter='@woocommerce/storybook' build-storybook
+              run: pnpm --filter='@woocommerce/storybook' build-storybook --quiet
 
             - name: Deploy
-              uses: peaceiris/actions-gh-pages@v4
+              uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: ./tools/storybook/storybook-static
