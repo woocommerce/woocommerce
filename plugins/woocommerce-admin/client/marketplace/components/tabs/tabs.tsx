@@ -35,45 +35,6 @@ interface Tabs {
 const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
 
-const tabs: Tabs = {
-	search: {
-		name: 'search',
-		title: __( 'Search results', 'woocommerce' ),
-		showUpdateCount: false,
-		updateCount: 0,
-	},
-	discover: {
-		name: 'discover',
-		title: __( 'Discover', 'woocommerce' ),
-		showUpdateCount: false,
-		updateCount: 0,
-	},
-	extensions: {
-		name: 'extensions',
-		title: __( 'Extensions', 'woocommerce' ),
-		showUpdateCount: false,
-		updateCount: 0,
-	},
-	themes: {
-		name: 'themes',
-		title: __( 'Themes', 'woocommerce' ),
-		showUpdateCount: false,
-		updateCount: 0,
-	},
-	'business-services': {
-		name: 'business-services',
-		title: __( 'Business services', 'woocommerce' ),
-		showUpdateCount: false,
-		updateCount: 0,
-	},
-	'my-subscriptions': {
-		name: 'my-subscriptions',
-		title: __( 'My subscriptions', 'woocommerce' ),
-		showUpdateCount: true,
-		updateCount: wooUpdateCount,
-	},
-};
-
 const setUrlTabParam = ( tabKey: string ) => {
 	navigateTo( {
 		url: getNewPath(
@@ -84,7 +45,7 @@ const setUrlTabParam = ( tabKey: string ) => {
 	} );
 };
 
-const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false ) => {
+const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false, tabs: Tabs ) => {
 	if ( selectedTab === '' ) {
 		return tabs;
 	}
@@ -101,7 +62,8 @@ const getVisibleTabs = ( selectedTab: string, hasBusinessServices = false ) => {
 
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
-	visibleTabs: Tabs
+	visibleTabs: Tabs,
+	tabs: Tabs
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
 
@@ -141,12 +103,11 @@ const renderTabs = (
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
-					{ tabs[ tabKey ]?.showUpdateCount &&
-						tabs[ tabKey ]?.updateCount > 0 && (
-							<span className="woocommerce-marketplace__update-count">
-								<span> { tabs[ tabKey ]?.updateCount } </span>
-							</span>
-						) }
+					{ tabs[ tabKey ]?.showUpdateCount && (
+						<span className={`woocommerce-marketplace__update-count woocommerce-marketplace__update-count-${ tabKey }`}>
+							<span> { tabs[ tabKey ]?.updateCount } </span>
+						</span>
+					) }
 				</Button>
 			)
 		);
@@ -159,7 +120,48 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { selectedTab, setSelectedTab, hasBusinessServices } =
 		marketplaceContextValue;
-	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '' ) );
+	const { searchResultsCount } = marketplaceContextValue;
+
+	const tabs: Tabs = {
+		search: {
+			name: 'search',
+			title: __( 'Search results', 'woocommerce' ),
+			showUpdateCount: false,
+			updateCount: 0,
+		},
+		discover: {
+			name: 'discover',
+			title: __( 'Discover', 'woocommerce' ),
+			showUpdateCount: false,
+			updateCount: 0,
+		},
+		extensions: {
+			name: 'extensions',
+			title: __( 'Extensions', 'woocommerce' ),
+			showUpdateCount: true,
+			updateCount: searchResultsCount.extensions,
+		},
+		themes: {
+			name: 'themes',
+			title: __( 'Themes', 'woocommerce' ),
+			showUpdateCount: true,
+			updateCount: searchResultsCount.themes,
+		},
+		'business-services': {
+			name: 'business-services',
+			title: __( 'Business services', 'woocommerce' ),
+			showUpdateCount: true,
+			updateCount: searchResultsCount['business-services'],
+		},
+		'my-subscriptions': {
+			name: 'my-subscriptions',
+			title: __( 'My subscriptions', 'woocommerce' ),
+			showUpdateCount: true,
+			updateCount: wooUpdateCount,
+		},
+	};
+
+	const [ visibleTabs, setVisibleTabs ] = useState( getVisibleTabs( '', false, tabs ) );
 
 	const query: Record< string, string > = useQuery();
 
@@ -172,8 +174,9 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	}, [ query, setSelectedTab ] );
 
 	useEffect( () => {
-		setVisibleTabs( getVisibleTabs( selectedTab, hasBusinessServices ) );
+		setVisibleTabs( getVisibleTabs( selectedTab, hasBusinessServices, tabs ) );
 	}, [ selectedTab, hasBusinessServices ] );
+
 	return (
 		<nav
 			className={ clsx(
@@ -181,7 +184,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( marketplaceContextValue, visibleTabs ) }
+			{ renderTabs( marketplaceContextValue, visibleTabs, tabs ) }
 		</nav>
 	);
 };

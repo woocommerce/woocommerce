@@ -45,6 +45,18 @@
 		text-align: center;
 		z-index: 26;
 	}
+
+	&__update-count-extensions {
+		background-color: #000000;
+	}
+
+	&__update-count-themes {
+		background-color: #000000;
+	}
+
+	&__update-count-business-services {
+		background-color: #000000;
+	}
 }
 
 @media (width <= $breakpoint-medium) {
