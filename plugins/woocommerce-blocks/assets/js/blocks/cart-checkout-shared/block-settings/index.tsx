@@ -7,6 +7,8 @@ import {
 	ToggleControl,
 	RadioControl,
 	TextControl,
+	Disabled,
+	Notice,
 } from '@wordpress/components';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
 import { __ } from '@wordpress/i18n';
@@ -15,6 +17,28 @@ import { select } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
 import { ADMIN_URL } from '@woocommerce/settings';
 import { PlainPaymentMethods } from '@woocommerce/types';
+
+const allExpressPaymentMethodsSupport = ( styleControl: string ) => {
+	const availableExpressMethods =
+		select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods();
+
+	return Object.values( availableExpressMethods ).reduce(
+		( acc, currentValue ) => {
+			return acc && currentValue?.supportsStyle.includes( styleControl );
+		},
+		true
+	);
+};
+
+const getMissingStyleSupport = ( supportsStyle: string[] ) => {
+	const supportedStyles = [ 'borderRadius', 'height' ];
+
+	if ( ! Array.isArray( supportsStyle ) ) {
+		return supportedStyles;
+	}
+
+	return supportedStyles.filter( ( s ) => ! supportsStyle.includes( s ) );
+};
 
 export const BlockSettings = ( {
 	attributes,
@@ -53,32 +77,73 @@ const ExpressPaymentButtonStyleControls = ( {
 	setAttributes: ( attrs: BlockAttributes ) => void;
 } ) => {
 	const { buttonHeight, buttonBorderRadius } = attributes;
-	return (
-		<>
-			<RadioControl
-				label={ __( 'Button size', 'woocommerce' ) }
-				selected={ buttonHeight }
-				options={ [
-					{ label: 'Small (40px)', value: '40' },
-					{ label: 'Medium (48px)', value: '48' },
-					{ label: 'Large (55px)', value: '55' },
-				] }
+
+	let heightInput = (
+		<RadioControl
+			label={ __( 'Button height', 'woocommerce' ) }
+			selected={ buttonHeight }
+			options={ [
+				{ label: 'Small (40px)', value: '40' },
+				{ label: 'Medium (48px)', value: '48' },
+				{ label: 'Large (55px)', value: '55' },
+			] }
+			onChange={ ( newValue: string ) =>
+				setAttributes( { buttonHeight: newValue } )
+			}
+		/>
+	);
+
+	if ( ! allExpressPaymentMethodsSupport( 'height' ) ) {
+		heightInput = (
+			<>
+				<Disabled>{ heightInput }</Disabled>
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="wc-block-checkout__disabled-notice"
+				>
+					Button height is not yet supported by all express payment
+					methods
+				</Notice>
+			</>
+		);
+	}
+
+	let borderRadiusInput = (
+		<div className="border-radius-control-container">
+			<TextControl
+				label={ __( 'Button border radius', 'woocommerce' ) }
+				value={ buttonBorderRadius }
 				onChange={ ( newValue: string ) =>
-					setAttributes( { buttonHeight: newValue } )
+					setAttributes( {
+						buttonBorderRadius: newValue,
+					} )
 				}
 			/>
-			<div className="border-radius-control-container">
-				<TextControl
-					label={ __( 'Button border radius', 'woocommerce' ) }
-					value={ buttonBorderRadius }
-					onChange={ ( newValue: string ) =>
-						setAttributes( {
-							buttonBorderRadius: newValue,
-						} )
-					}
-				/>
-				<span className="border-radius-control-px">px</span>
-			</div>
+			<span className="border-radius-control-px">px</span>
+		</div>
+	);
+
+	if ( ! allExpressPaymentMethodsSupport( 'borderRadius' ) ) {
+		borderRadiusInput = (
+			<>
+				<Disabled>{ borderRadiusInput }</Disabled>
+				<Notice
+					status="warning"
+					isDismissible={ false }
+					className="wc-block-checkout__disabled-notice"
+				>
+					Button border radius is not yet supported by all express
+					payment methods
+				</Notice>
+			</>
+		);
+	}
+
+	return (
+		<>
+			{ heightInput }
+			{ borderRadiusInput }
 		</>
 	);
 };
@@ -99,16 +164,6 @@ const ExpressPaymentToggle = ( {
 		);
 	}
 	return null;
-};
-
-const getMissingStyleSupport = ( supportsStyle: string[] ) => {
-	const supportedStyles = [ 'borderRadius', 'height' ];
-
-	if ( ! Array.isArray( supportsStyle ) ) {
-		return supportedStyles;
-	}
-
-	return supportedStyles.filter( ( s ) => ! supportsStyle.includes( s ) );
 };
 
 export const ExpressPaymentMethods = () => {
@@ -168,7 +223,10 @@ export const ExpressPaymentControls = ( {
 } ) => {
 	return (
 		<InspectorControls>
-			<PanelBody title={ __( 'Button Settings', 'woocommerce' ) }>
+			<PanelBody
+				title={ __( 'Button Settings', 'woocommerce' ) }
+				className="express-payment-button-settings"
+			>
 				<ToggleControl
 					label={ __( 'Apply uniform styles', 'woocommerce' ) }
 					checked={ attributes.showButtonStyles }
