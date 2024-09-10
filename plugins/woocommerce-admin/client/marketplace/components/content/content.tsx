@@ -17,6 +17,8 @@ import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
+import { SearchResultsCountType } from '../../contexts/types';
+
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
@@ -30,19 +32,19 @@ import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subs
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const [ products, setProducts ] = useState< Product[] >( [] );
-	const { setIsLoading, selectedTab, setHasBusinessServices } =
+	const { setIsLoading, selectedTab, setHasBusinessServices, searchResultsCount, setSearchResultsCount } =
 		marketplaceContextValue;
 	const query = useQuery();
 
 	// On initial load of the in-app marketplace, fetch extensions, themes and business services
 	// and check if there are any business services available on WCCOM
 	useEffect( () => {
-		const categories = [ '', 'themes', 'business-services' ];
+		const categories: Array<keyof SearchResultsCountType> = ['extensions', 'themes', 'business-services'];
 		const abortControllers = categories.map( () => new AbortController() );
 
-		categories.forEach( ( category: string, index ) => {
+		categories.forEach( ( category: keyof SearchResultsCountType, index ) => {
 			const params = new URLSearchParams();
-			if ( category !== '' ) {
+			if ( category !== 'extensions' ) {
 				params.append( 'category', category );
 			}
 
@@ -56,6 +58,10 @@ export default function Content(): JSX.Element {
 					if ( category === 'business-services' ) {
 						setHasBusinessServices( productList.length > 0 );
 					}
+					setSearchResultsCount( ( prevResults ) => ( {
+						...prevResults,
+						[category]: productList.length, // updating the appropriate category
+					} ) );
 				}
 			);
 			return () => {
@@ -80,6 +86,7 @@ export default function Content(): JSX.Element {
 
 		setIsLoading( true );
 		setProducts( [] );
+
 
 		const params = new URLSearchParams();
 
@@ -108,6 +115,15 @@ export default function Content(): JSX.Element {
 		fetchSearchResults( params, abortController.signal )
 			.then( ( productList ) => {
 				setProducts( productList );
+
+				if ( query.term ) {
+					setSearchResultsCount( ( prevState ) => ( {
+						...prevState,
+						extensions: productList.filter( ( p ) => p.type === 'extension' ).length,
+						themes: productList.filter( ( p ) => p.type === 'theme' ).length,
+						'business-services': productList.filter( ( p ) => p.type === 'business-service' ).length,
+					} ) );
+				}
 			} )
 			.catch( () => {
 				setProducts( [] );
@@ -142,7 +158,7 @@ export default function Content(): JSX.Element {
 			case 'extensions':
 				return (
 					<Products
-						products={ products }
+						products={ products.filter( p => 'extension' === p.type ) }
 						categorySelector={ true }
 						type={ ProductType.extension }
 					/>
@@ -150,7 +166,7 @@ export default function Content(): JSX.Element {
 			case 'themes':
 				return (
 					<Products
-						products={ products }
+						products={ products.filter( p => 'theme' === p.type ) }
 						categorySelector={ true }
 						type={ ProductType.theme }
 					/>
@@ -158,7 +174,7 @@ export default function Content(): JSX.Element {
 			case 'business-services':
 				return (
 					<Products
-						products={ products }
+						products={ products.filter( p => 'business-service' === p.type ) }
 						categorySelector={ true }
 						type={ ProductType.businessService }
 					/>
