@@ -175,14 +175,14 @@ There are many payment gateways available for merchants to use, and each one wil
 
 An example of the payment data sent to the Checkout endpoint when using the [WooCommerce Stripe Payment Gateway](https://wordpress.org/plugins/woocommerce-gateway-stripe/) is shown below.
 
-For further information on generating a `stripe_source` please check [the Stripe documentation](https://stripe.com/docs).
+For further information on generating a Stripe `payment-method` please check [the Stripe documentation](https://docs.stripe.com/payments/accept-a-payment-deferred).
 
 ```json
 {
 	"payment_data": [
 		{
-			"key": "stripe_source",
-			"value": "src_xxxxxxxxxxxxx"
+			"key": "wc-stripe-payment-method",
+			"value": "pm_xxxxxxxxxxxxx"
 		},
 		{
 			"key": "billing_email",
@@ -197,7 +197,7 @@ For further information on generating a `stripe_source` please check [the Stripe
 			"value": "Doe"
 		},
 		{
-			"key": "paymentMethod",
+			"key": "payment_method",
 			"value": "stripe"
 		},
 		{
@@ -207,7 +207,15 @@ For further information on generating a `stripe_source` please check [the Stripe
 		{
 			"key": "wc-stripe-new-payment-method",
 			"value": true
-		}
+		},
+		{
+			"key": "wc-stripe-is-deferred-intent",
+			"value": true
+		},
+		{
+			"key": "save_payment_method",
+			"value": "yes"
+		},
 	]
 }
 ```
