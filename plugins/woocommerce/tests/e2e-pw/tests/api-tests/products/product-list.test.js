@@ -2570,58 +2570,68 @@ test.describe( 'Products API tests: List All Products', () => {
 				);
 			} );
 
-			test( 'categories', async ( { request } ) => {
-				const accessory = [
-					expect.objectContaining( {
-						name: 'Beanie xxx',
-					} ),
-				];
-				const hoodies = [
-					expect.objectContaining( {
-						name: 'Hoodie with Zipper xxx',
-					} ),
-					expect.objectContaining( {
-						name: 'Hoodie with Pocket xxx',
-					} ),
-					expect.objectContaining( {
-						name: 'Hoodie with Logo xxx',
-					} ),
-					expect.objectContaining( {
-						name: 'Hoodie xxx',
-					} ),
-				];
+			test(
+				'categories',
+				{ tag: '@skip-on-default-wpcom' },
+				async ( { request } ) => {
+					const accessory = [
+						expect.objectContaining( {
+							name: 'Beanie xxx',
+						} ),
+					];
+					const hoodies = [
+						expect.objectContaining( {
+							name: 'Hoodie with Zipper xxx',
+						} ),
+						expect.objectContaining( {
+							name: 'Hoodie with Pocket xxx',
+						} ),
+						expect.objectContaining( {
+							name: 'Hoodie with Logo xxx',
+						} ),
+						expect.objectContaining( {
+							name: 'Hoodie xxx',
+						} ),
+					];
 
-				// Verify that subcategories are included.
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						per_page: 20,
-						category: sampleData.categories.clothingJSON.id,
-					},
-				} );
-				const result1JSON = await result1.json();
-				expect( result1.status() ).toEqual( 200 );
-				expect( result1JSON ).toEqual(
-					expect.arrayContaining( accessory )
-				);
-				expect( result1JSON ).toEqual(
-					expect.arrayContaining( hoodies )
-				);
+					// Verify that subcategories are included.
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								per_page: 20,
+								category: sampleData.categories.clothingJSON.id,
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+					expect( result1.status() ).toEqual( 200 );
+					expect( result1JSON ).toEqual(
+						expect.arrayContaining( accessory )
+					);
+					expect( result1JSON ).toEqual(
+						expect.arrayContaining( hoodies )
+					);
 
-				// Verify sibling categories are not.
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						category: sampleData.categories.hoodiesJSON.id,
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
-				expect( result2JSON ).toEqual(
-					expect.not.arrayContaining( accessory )
-				);
-				expect( result2JSON ).toEqual(
-					expect.arrayContaining( hoodies )
-				);
-			} );
+					// Verify sibling categories are not.
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								category: sampleData.categories.hoodiesJSON.id,
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+					expect( result2JSON ).toEqual(
+						expect.not.arrayContaining( accessory )
+					);
+					expect( result2JSON ).toEqual(
+						expect.arrayContaining( hoodies )
+					);
+				}
+			);
 
 			test( 'on sale', async ( { request } ) => {
 				const onSale = [
