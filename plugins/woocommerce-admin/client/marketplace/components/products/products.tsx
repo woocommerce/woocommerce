@@ -31,7 +31,6 @@ import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals'
 interface ProductsProps {
 	categorySelector?: boolean;
 	products?: Product[];
-	hasMore?: boolean;
 	perPage?: number;
 	type: ProductType;
 	searchTerm?: string;
@@ -244,11 +243,6 @@ export default function Products( props: ProductsProps ) {
 					text={ __( 'View all', 'woocommerce' ) }
 					onClick={ () => showSection( props.type ) }
 				/>
-			) }
-			{ props.hasMore && (
-				<div className="woocommerce-marketplace__product-list-content__load-more">
-					Load more
-				</div>
 			) }
 		</div>
 	);

@@ -143,34 +143,48 @@ export default function Content(): JSX.Element {
 		query?.section,
 	] );
 
+	const LoadMore = () => {
+		return (
+			<div className="woocommerce-marketplace__product-list-content__load-more">
+				Load more
+			</div>
+		);
+	};
+
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
 				return (
-					<Products
-						products={ products }
-						hasMore={ hasMore }
-						categorySelector={ true }
-						type={ ProductType.extension }
-					/>
+					<>
+						<Products
+							products={ products }
+							categorySelector={ true }
+							type={ ProductType.extension }
+						/>
+						{ hasMore && <LoadMore /> }
+					</>
 				);
 			case 'themes':
 				return (
-					<Products
-						products={ products }
-						hasMore={ hasMore }
-						categorySelector={ true }
-						type={ ProductType.theme }
-					/>
+					<>
+						<Products
+							products={ products }
+							categorySelector={ true }
+							type={ ProductType.theme }
+						/>
+						{ hasMore && <LoadMore /> }
+					</>
 				);
 			case 'business-services':
 				return (
-					<Products
-						products={ products }
-						hasMore={ hasMore }
-						categorySelector={ true }
-						type={ ProductType.businessService }
-					/>
+					<>
+						<Products
+							products={ products }
+							categorySelector={ true }
+							type={ ProductType.businessService }
+						/>
+						{ hasMore && <LoadMore /> }
+					</>
 				);
 			case 'search':
 				return (
