@@ -69,9 +69,6 @@ export default function Content(): JSX.Element {
 					if ( category === 'business-services' ) {
 						setHasBusinessServices( productList.length > 0 );
 					}
-					setSearchResultsCount( {
-						[ category ]: productList.length, // updating the appropriate category
-					} );
 				} );
 				return () => {
 					abortControllers.forEach( ( controller ) => {
