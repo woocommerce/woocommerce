@@ -23,6 +23,8 @@ import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
+import { SearchResultsCountType } from '../../contexts/types';
+
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
@@ -39,8 +41,12 @@ export default function Content(): JSX.Element {
 	const [ products, setProducts ] = useState< Product[] >( [] );
 	const [ hasMore, setHasMore ] = useState( false );
 	const [ page, setPage ] = useState( 1 );
-	const { setIsLoading, selectedTab, setHasBusinessServices } =
-		marketplaceContextValue;
+	const {
+		setIsLoading,
+		selectedTab,
+		setHasBusinessServices,
+		setSearchResultsCount,
+	} = marketplaceContextValue;
 	const query = useQuery();
 	const lastProductRef = useRef< HTMLDivElement >( null );
 
@@ -51,35 +57,42 @@ export default function Content(): JSX.Element {
 	// On initial load of the in-app marketplace, fetch extensions, themes and business services
 	// and check if there are any business services available on WCCOM
 	useEffect( () => {
-		const categories = [ '', 'themes', 'business-services' ];
+		const categories: Array< keyof SearchResultsCountType > = [
+			'extensions',
+			'themes',
+			'business-services',
+		];
 		const abortControllers = categories.map( () => new AbortController() );
 
-		categories.forEach( ( category: string, index ) => {
-			const params = new URLSearchParams();
-			if ( category !== '' ) {
-				params.append( 'category', category );
-			}
+		categories.forEach(
+			( category: keyof SearchResultsCountType, index ) => {
+				const params = new URLSearchParams();
+				if ( category !== 'extensions' ) {
+					params.append( 'category', category );
+				}
 
-			const wccomSettings = getAdminSetting( 'wccomHelper', false );
-			if ( wccomSettings.storeCountry ) {
-				params.append( 'country', wccomSettings.storeCountry );
-			}
+				const wccomSettings = getAdminSetting( 'wccomHelper', false );
+				if ( wccomSettings.storeCountry ) {
+					params.append( 'country', wccomSettings.storeCountry );
+				}
 
-			fetchSearchResults( params, abortControllers[ index ].signal ).then(
-				( productList ) => {
+				fetchSearchResults(
+					params,
+					abortControllers[ index ].signal
+				).then( ( productList ) => {
 					if ( category === 'business-services' ) {
 						setHasBusinessServices(
 							productList.products.length > 0
 						);
 					}
-				}
-			);
-			return () => {
-				abortControllers.forEach( ( controller ) => {
-					controller.abort();
 				} );
-			};
-		} );
+				return () => {
+					abortControllers.forEach( ( controller ) => {
+						controller.abort();
+					} );
+				};
+			}
+		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
@@ -144,6 +157,20 @@ export default function Content(): JSX.Element {
 					return newProducts;
 				} );
 				setHasMore( productList.hasMore );
+
+				if ( query.term ) {
+					setSearchResultsCount( {
+						extensions: productList.filter(
+							( p ) => p.type === 'extension'
+						).length,
+						themes: productList.filter(
+							( p ) => p.type === 'theme'
+						).length,
+						'business-services': productList.filter(
+							( p ) => p.type === 'business-service'
+						).length,
+					} );
+				}
 			} )
 			.catch( () => {
 				if ( page === 1 ) {
