@@ -19,7 +19,7 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
-              name: Checkout (current - ${{ github.head_ref }})
+              name: Checkout
               with:
                 fetch-depth: 0
 
