@@ -5,6 +5,7 @@ import preloadScript from '@woocommerce/base-utils/preload-script';
 import lazyLoadScript from '@woocommerce/base-utils/lazy-load-script';
 import getNavigationType from '@woocommerce/base-utils/get-navigation-type';
 import { translateJQueryEventToNative } from '@woocommerce/base-utils/legacy-events';
+import { CHECKOUT_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -140,16 +141,23 @@ window.addEventListener( 'load', () => {
 		};
 
 		const openDrawer = () => {
-			miniCartBlock.dataset.isInitiallyOpen = 'true';
+			const onCartClickBehaviour =
+				miniCartBlock.dataset.onCartClickBehaviour;
+			if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+				// Navigate to checkout
+				window.location.href = CHECKOUT_URL;
+			} else {
+				miniCartBlock.dataset.isInitiallyOpen = 'true';
 
-			miniCartDrawerPlaceholderOverlay.classList.add(
-				'wc-block-components-drawer__screen-overlay--with-slide-in'
-			);
-			miniCartDrawerPlaceholderOverlay.classList.remove(
-				'wc-block-components-drawer__screen-overlay--is-hidden'
-			);
+				miniCartDrawerPlaceholderOverlay.classList.add(
+					'wc-block-components-drawer__screen-overlay--with-slide-in'
+				);
+				miniCartDrawerPlaceholderOverlay.classList.remove(
+					'wc-block-components-drawer__screen-overlay--is-hidden'
+				);
 
-			loadContents();
+				loadContents();
+			}
 		};
 
 		const openDrawerWithRefresh = () => {
