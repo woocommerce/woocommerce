@@ -25,6 +25,8 @@ import {
 	getMiniCartTotalsFromServer,
 } from './utils/data';
 import setStyles from '../mini-cart/utils/set-styles';
+import { getMiniCartContentsBlockMap } from './render-mini-cart-contents';
+import { FilledMiniCartContentsBlock } from './mini-cart-contents/inner-blocks/filled-mini-cart-contents-block/frontend';
 
 interface dependencyData {
 	src: string;
@@ -163,15 +165,12 @@ const { state } = store< Store >( 'woocommerce/mini-cart-interactivity', {
 	components: {
 		BlockComponent: () => {
 			return ( { children, ...props } ) => {
-				const timems = Date.now();
-
-				console.log( props );
-
-				// manually add child text to children
-				const childText = h( 'p', {}, 'MiniCartContents: ' + timems );
-				const newChildren = [ ...children, childText ];
-
-				return h( 'div', { ...props }, newChildren );
+				console.log( 'props', props );
+				return h(
+					FilledMiniCartContentsBlock,
+					{ className: props.class, ...props },
+					children
+				);
 			};
 		},
 	},

@@ -18,6 +18,10 @@ const generateUniqueId = () => {
 	);
 };
 
+export const getMiniCartContentsBlockMap = () => {
+	return getRegisteredBlockComponents( 'woocommerce/mini-cart-contents' );
+};
+
 // We load this async so that we don't have to load the mini-cart block.
 export const renderMiniCartContents = ( templateElement: HTMLDivElement ) => {
 	const clonedTemplateNode = templateElement.cloneNode(
