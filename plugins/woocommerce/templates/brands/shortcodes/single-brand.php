@@ -25,7 +25,7 @@
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @usedby  [product_brand]
- * @version 9.5.0
+ * @version 9.4.0
  */
 
 declare( strict_types = 1);

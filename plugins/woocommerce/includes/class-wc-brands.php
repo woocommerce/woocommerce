@@ -254,7 +254,7 @@ class WC_Brands {
 			/**
 			 * Filter the brand taxonomy.
 			 *
-			 * @since 9.3.0
+			 * @since 9.4.0
 			 *
 			 * @param array $args Args.
 			 */
@@ -587,7 +587,7 @@ class WC_Brands {
 	 * @param string $name
 	 *
 	 * @return string
-	 * @since  1.6.16
+	 * @since  x.x.x
 	 */
 	private function get_brand_name_first_character( $name ) {
 		// Convert to lowercase and remove accents.

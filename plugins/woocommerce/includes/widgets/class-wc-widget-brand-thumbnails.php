@@ -102,7 +102,7 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		/**
 		 * Filter the widget's title.
 		 *
-		 * @since 9.3.0
+		 * @since 9.4.0
 		 *
 		 * @param string $title Widget title
 		 * @param array $instance The settings for the particular instance of the widget.

@@ -198,7 +198,7 @@ class WC_Brands_Admin {
 		/**
 		 * Filter Brands settings.
 		 *
-		 * @since 9.3.0
+		 * @since 9.4.0
 		 *
 		 * @param array $settings Brands settings.
 		 */
@@ -552,7 +552,7 @@ class WC_Brands_Admin {
 		/**
 		 * Filter the brands threshold count.
 		 *
-		 * @since 9.3.0
+		 * @since 9.4.0
 		 *
 		 * @param int $value Threshold.
 		 */

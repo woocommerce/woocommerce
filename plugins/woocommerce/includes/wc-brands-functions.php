@@ -41,7 +41,7 @@ function wc_get_brand_thumbnail_image( $brand, $size = '' ) {
 		/**
 		 * Filter the brand's thumbnail size.
 		 *
-		 * @since 9.3.0
+		 * @since 9.4.0
 		 *
 		 * @param string $size Brand's thumbnail size.
 		 */

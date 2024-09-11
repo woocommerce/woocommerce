@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.5.0
+ * @version 9.4.0
  */
 
 declare( strict_types = 1);
@@ -25,7 +25,7 @@ declare( strict_types = 1);
 		/**
 		 * Filter the brand's thumbnail size.
 		 *
-		 * @since 9.3.0
+		 * @since 9.4.0
 		 * @param string $size Defaults to 'shop_catalog'
 		 */
 		$thumbnail = wc_get_brand_thumbnail_url( $brand->term_id, apply_filters( 'woocommerce_brand_thumbnail_size', 'shop_catalog' ) );
