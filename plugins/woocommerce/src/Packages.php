@@ -97,13 +97,13 @@ class Packages {
 	/**
 	 * Checks a package exists by looking for it's directory.
 	 *
-	 * @param string $class Class name.
+	 * @param string $class_name Class name.
 	 * @return boolean
 	 */
-	public static function should_load_class( $class ) {
+	public static function should_load_class( $class_name ) {
 
 		foreach ( self::$merged_packages as $merged_package_name => $merged_package_class ) {
-			if ( str_replace( 'woocommerce-', 'wc_', $merged_package_name ) === $class ) {
+			if ( str_replace( 'woocommerce-', 'wc_', $merged_package_name ) === $class_name ) {
 				return true;
 			}
 		}
