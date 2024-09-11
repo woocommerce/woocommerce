@@ -39,7 +39,7 @@ class PluginsHelper {
 	 *
 	 * @var bool
 	 */
-	public static $subscription_usage_notices_already_shown = true;
+	public static $subscription_usage_notices_already_shown = false;
 
 	/**
 	 * The URL for the WooCommerce subscription page.
@@ -850,7 +850,7 @@ class PluginsHelper {
 			return array();
 		}
 
-		if ( ! self::$subscription_usage_notices_already_shown ) {
+		if ( self::$subscription_usage_notices_already_shown ) {
 			return array();
 		}
 
@@ -876,7 +876,7 @@ class PluginsHelper {
 		$total_expiring_subscriptions = count( $expiring_subscriptions );
 
 		// Don't show missing notice if there are expiring subscriptions.
-		self::$subscription_usage_notices_already_shown = false;
+		self::$subscription_usage_notices_already_shown = true;
 
 		// When payment method is missing on WooCommerce.com.
 		$helper_notices = WC_Helper::get_notices();
@@ -955,7 +955,7 @@ class PluginsHelper {
 		}
 
 		$total_expired_subscriptions                    = count( $expired_subscriptions );
-		self::$subscription_usage_notices_already_shown = false;
+		self::$subscription_usage_notices_already_shown = true;
 
 		$notice_data = self::get_subscriptions_notice_data(
 			$subscriptions,
@@ -1007,7 +1007,7 @@ class PluginsHelper {
 			return array();
 		}
 
-		if ( ! self::$subscription_usage_notices_already_shown ) {
+		if ( self::$subscription_usage_notices_already_shown ) {
 			return array();
 		}
 
