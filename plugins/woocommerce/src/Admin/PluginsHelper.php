@@ -45,6 +45,11 @@ class PluginsHelper {
 	const WOO_SUBSCRIPTION_PAGE_URL = 'https://woocommerce.com/my-account/my-subscriptions/';
 
 	/**
+	 * The URL for the WooCommerce.com cart page.
+	 */
+	const WOO_CART_PAGE_URL = 'https://woocommerce.com/cart/';
+
+	/**
 	 * The URL for the WooCommerce.com add payment method page.
 	 */
 	const WOO_ADD_PAYMENT_METHOD_URL = 'https://woocommerce.com/my-account/add-payment-method/';
@@ -757,10 +762,18 @@ class PluginsHelper {
 				esc_attr( $total ),
 			);
 
+			// All product ids.
+			$product_ids = array_map(
+				function ( $sub ) {
+					return $sub['product_id'];
+				},
+				$subs_to_show
+			);
+
 			return array(
-				'type'           => 'different_subscriptions',
-				'parsed_message' => $parsed_message,
-				'product_id'     => '',
+				'type'            => 'different_subscriptions',
+				'parsed_message'  => $parsed_message,
+				'product_ids'     => $product_ids,
 			);
 		}
 
@@ -1037,17 +1050,17 @@ class PluginsHelper {
 
 		$button_link = add_query_arg(
 			array(
+				'add-to-cart' => $notice_data['product_ids'],
 				'utm_source'   => 'pu',
 				'utm_campaign' => 'pu_in_apps_screen_purchase',
 			),
-			self::WOO_SUBSCRIPTION_PAGE_URL
+			PluginsHelper::WOO_CART_PAGE_URL
 		);
 
 		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
-					'product_id' => $notice_data['product_id'],
-					'type'       => 'purchase',
+					'add-to-cart'  => $notice_data['product_id'],
 				),
 				$button_link
 			);
