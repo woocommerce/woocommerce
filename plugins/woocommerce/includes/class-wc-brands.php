@@ -369,7 +369,7 @@ class WC_Brands {
 		$thumbnail = '';
 
 		$term      = get_term_by( 'slug', get_query_var( 'term' ), 'product_brand' );
-		$thumbnail = get_brand_thumbnail_url( $term->term_id, 'full' );
+		$thumbnail = wc_get_brand_thumbnail_url( $term->term_id, 'full' );
 
 		wc_get_template(
 			'brand-description.php',
@@ -395,7 +395,7 @@ class WC_Brands {
 			$labels   = $taxonomy->labels;
 
 			/* translators: %s - Label name */
-			echo get_brands( $post->ID, ', ', ' <span class="posted_in">' . sprintf( _n( '%s: ', '%s: ', $brand_count, 'woocommerce' ), $labels->singular_name, $labels->name ), '</span>' ); // phpcs:ignore WordPress.Security.EscapeOutput
+			echo wc_get_brands( $post->ID, ', ', ' <span class="posted_in">' . sprintf( _n( '%s: ', '%s: ', $brand_count, 'woocommerce' ), $labels->singular_name, $labels->name ), '</span>' ); // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 	}
 
@@ -473,7 +473,7 @@ class WC_Brands {
 		ob_start();
 
 		foreach ( $brands as $brand ) {
-			$thumbnail = get_brand_thumbnail_url( $brand );
+			$thumbnail = wc_get_brand_thumbnail_url( $brand );
 			if ( empty( $thumbnail ) ) {
 				continue;
 			}

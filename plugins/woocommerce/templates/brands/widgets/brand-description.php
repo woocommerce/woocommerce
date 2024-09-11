@@ -21,7 +21,7 @@ global $woocommerce;
 
 if ( $thumbnail ) {
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo get_brand_thumbnail_image( $brand );
+	echo wc_get_brand_thumbnail_image( $brand );
 }
 
 echo wp_kses_post( wpautop( wptexturize( term_description() ) ) );

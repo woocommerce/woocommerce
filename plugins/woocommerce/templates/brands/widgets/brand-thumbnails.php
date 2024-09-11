@@ -36,7 +36,7 @@ foreach ( array_values( $brands ) as $index => $brand ) :
 
 	<li class="<?php echo esc_attr( $class ); ?>">
 		<a href="<?php echo esc_url( get_term_link( $brand->slug, 'product_brand' ) ); ?>" title="<?php echo esc_attr( $brand->name ); ?>">
-			<?php echo get_brand_thumbnail_image( $brand ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php echo wc_get_brand_thumbnail_image( $brand ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		</a>
 	</li>
 

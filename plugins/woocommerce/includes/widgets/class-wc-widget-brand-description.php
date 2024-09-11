@@ -82,7 +82,7 @@ class WC_Widget_Brand_Description extends WP_Widget {
 		$thumbnail = '';
 		$term      = get_term_by( 'slug', get_query_var( 'term' ), 'product_brand' );
 
-		$thumbnail = get_brand_thumbnail_url( $term->term_id, 'large' );
+		$thumbnail = wc_get_brand_thumbnail_url( $term->term_id, 'large' );
 
 		echo $before_widget . $before_title . $term->name . $after_title; // phpcs:ignore WordPress.Security.EscapeOutput
 

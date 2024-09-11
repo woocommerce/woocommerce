@@ -9,13 +9,13 @@
 declare( strict_types = 1);
 
 /**
- * Helper function :: get_brand_thumbnail_url function.
+ * Helper function :: wc_get_brand_thumbnail_url function.
  *
  * @param  int    $brand_id Brand ID.
  * @param  string $size     Thumbnail image size.
  * @return string
  */
-function get_brand_thumbnail_url( $brand_id, $size = 'full' ) {
+function wc_get_brand_thumbnail_url( $brand_id, $size = 'full' ) {
 	$thumbnail_id = get_term_meta( $brand_id, 'thumbnail_id', true );
 
 	if ( $thumbnail_id ) {
@@ -26,7 +26,7 @@ function get_brand_thumbnail_url( $brand_id, $size = 'full' ) {
 }
 
 /**
- * Helper function :: get_brand_thumbnail_image function.
+ * Helper function :: wc_get_brand_thumbnail_image function.
  *
  * @since x.x.x
  *
@@ -34,7 +34,7 @@ function get_brand_thumbnail_url( $brand_id, $size = 'full' ) {
  * @param  string $size  Thumbnail image size.
  * @return string
  */
-function get_brand_thumbnail_image( $brand, $size = '' ) {
+function wc_get_brand_thumbnail_image( $brand, $size = '' ) {
 	$thumbnail_id = get_term_meta( $brand->term_id, 'thumbnail_id', true );
 
 	if ( '' === $size || 'brand-thumb' === $size ) {
@@ -72,7 +72,7 @@ function get_brand_thumbnail_image( $brand, $size = '' ) {
 }
 
 /**
- * Get_brands function.
+ * Retrieves product's brands.
  *
  * @param  int    $post_id Post ID (default: 0).
  * @param  string $sep     Seperator (default: ').
@@ -80,7 +80,7 @@ function get_brand_thumbnail_image( $brand, $size = '' ) {
  * @param  string $after   After item (default: '').
  * @return array  List of terms
  */
-function get_brands( $post_id = 0, $sep = ', ', $before = '', $after = '' ) {
+function wc_get_brands( $post_id = 0, $sep = ', ', $before = '', $after = '' ) {
 	global $post;
 
 	if ( ! $post_id ) {
@@ -88,4 +88,52 @@ function get_brands( $post_id = 0, $sep = ', ', $before = '', $after = '' ) {
 	}
 
 	return get_the_term_list( $post_id, 'product_brand', $before, $sep, $after );
+}
+
+/**
+ * Polyfills for backwards compatibility with the WooCommerce Brands plugin.
+ */
+
+if ( ! function_exists( 'get_brand_thumbnail_url' ) ) {
+
+	/**
+	 * Polyfill for get_brand_thumbnail_image.
+	 *
+	 * @param int $brand_id Brand ID.
+	 * @param string $size Thumbnail image size.
+	 * @return string
+	 */
+	function get_brand_thumbnail_url( $brand_id, $size = 'full' ) {
+		wc_get_brand_thumbnail_url($brand_id, $size );
+	}
+}
+
+if ( ! function_exists( 'get_brand_thumbnail_image' ) ) {
+
+	/**
+	 * Polyfill for get_brand_thumbnail_image.
+	 *
+	 * @param object $brand Brand term.
+	 * @param string $size Thumbnail image size.
+	 * @return string
+	 */
+	function get_brand_thumbnail_image( $brand, $size = '' ) {
+		wc_get_brand_thumbnail_image($brand, $size );
+	}
+}
+
+if ( ! function_exists( 'get_brands' ) ) {
+
+	/**
+	 * Polyfill for get_brands.
+	 *
+	 * @param  int    $post_id Post ID (default: 0).
+	 * @param  string $sep     Seperator (default: ').
+	 * @param  string $before  Before item (default: '').
+	 * @param  string $after   After item (default: '').
+	 * @return array  List of terms
+	 */
+	function get_brands( $post_id = 0, $sep = ', ', $before = '', $after = '' ) {
+		wc_get_brands($post_id, $sep, $before, $after );
+	}
 }

@@ -28,7 +28,7 @@ declare( strict_types = 1);
 		 * @since 9.3.0
 		 * @param string $size Defaults to 'shop_catalog'
 		 */
-		$thumbnail = get_brand_thumbnail_url( $brand->term_id, apply_filters( 'woocommerce_brand_thumbnail_size', 'shop_catalog' ) );
+		$thumbnail = wc_get_brand_thumbnail_url( $brand->term_id, apply_filters( 'woocommerce_brand_thumbnail_size', 'shop_catalog' ) );
 
 		if ( ! $thumbnail ) {
 			$thumbnail = wc_placeholder_img_src();
