@@ -958,83 +958,91 @@ test.describe( 'Products API tests: CRUD', () => {
 			);
 		} );
 
-		test( 'can batch update product shipping classes', async ( {
-			request,
-		} ) => {
-			// Batch create product shipping classes.
-			const response = await request.post(
-				`wp-json/wc/v3/products/shipping_classes/batch`,
-				{
-					data: {
-						create: [
-							{
-								name: 'Small Items',
-							},
-							{
-								name: 'Large Items',
-							},
-						],
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.create[ 0 ].name ).toEqual( 'Small Items' );
-			expect( responseJSON.create[ 1 ].name ).toEqual( 'Large Items' );
-			const shippingClass1Id = responseJSON.create[ 0 ].id;
-			const shippingClass2Id = responseJSON.create[ 1 ].id;
+		test(
+			'can batch update product shipping classes',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { request } ) => {
+				// Batch create product shipping classes.
+				const response = await request.post(
+					`wp-json/wc/v3/products/shipping_classes/batch`,
+					{
+						data: {
+							create: [
+								{
+									name: 'Small Items',
+								},
+								{
+									name: 'Large Items',
+								},
+							],
+						},
+					}
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( responseJSON.create[ 0 ].name ).toEqual(
+					'Small Items'
+				);
+				expect( responseJSON.create[ 1 ].name ).toEqual(
+					'Large Items'
+				);
+				const shippingClass1Id = responseJSON.create[ 0 ].id;
+				const shippingClass2Id = responseJSON.create[ 1 ].id;
 
-			// Batch create a new shipping class, update a shipping class and delete another.
-			const responseBatchUpdate = await request.post(
-				`wp-json/wc/v3/products/shipping_classes/batch`,
-				{
-					data: {
-						create: [
-							{
-								name: 'Express',
-							},
-						],
-						update: [
-							{
-								id: shippingClass1Id,
-								description: 'Priority shipping.',
-							},
-						],
-						delete: [ shippingClass2Id ],
-					},
-				}
-			);
-			const responseBatchUpdateJSON = await responseBatchUpdate.json();
-			const shippingClass3Id = responseBatchUpdateJSON.create[ 0 ].id;
-			expect( response.status() ).toEqual( 200 );
+				// Batch create a new shipping class, update a shipping class and delete another.
+				const responseBatchUpdate = await request.post(
+					`wp-json/wc/v3/products/shipping_classes/batch`,
+					{
+						data: {
+							create: [
+								{
+									name: 'Express',
+								},
+							],
+							update: [
+								{
+									id: shippingClass1Id,
+									description: 'Priority shipping.',
+								},
+							],
+							delete: [ shippingClass2Id ],
+						},
+					}
+				);
+				const responseBatchUpdateJSON =
+					await responseBatchUpdate.json();
+				const shippingClass3Id = responseBatchUpdateJSON.create[ 0 ].id;
+				expect( response.status() ).toEqual( 200 );
 
-			const responseUpdatedShippingClass = await request.get(
-				`wp-json/wc/v3/products/shipping_classes/${ shippingClass1Id }`
-			);
-			const responseUpdatedShippingClassJSON =
-				await responseUpdatedShippingClass.json();
-			expect( responseUpdatedShippingClassJSON.description ).toEqual(
-				'Priority shipping.'
-			);
+				const responseUpdatedShippingClass = await request.get(
+					`wp-json/wc/v3/products/shipping_classes/${ shippingClass1Id }`
+				);
+				const responseUpdatedShippingClassJSON =
+					await responseUpdatedShippingClass.json();
+				expect( responseUpdatedShippingClassJSON.description ).toEqual(
+					'Priority shipping.'
+				);
 
-			// Verify that the product tag can no longer be retrieved.
-			const getDeletedProductShippingClassResponse = await request.get(
-				`wp-json/wc/v3/products/shipping_classes/${ shippingClass2Id }`
-			);
-			expect( getDeletedProductShippingClassResponse.status() ).toEqual(
-				404
-			);
+				// Verify that the product tag can no longer be retrieved.
+				const getDeletedProductShippingClassResponse =
+					await request.get(
+						`wp-json/wc/v3/products/shipping_classes/${ shippingClass2Id }`
+					);
+				expect(
+					getDeletedProductShippingClassResponse.status()
+				).toEqual( 404 );
 
-			// Batch delete the created tags
-			await request.post(
-				`wp-json/wc/v3/products/shipping_classes/batch`,
-				{
-					data: {
-						delete: [ shippingClass1Id, shippingClass3Id ],
-					},
-				}
-			);
-		} );
+				// Batch delete the created tags
+				await request.post(
+					`wp-json/wc/v3/products/shipping_classes/batch`,
+					{
+						data: {
+							delete: [ shippingClass1Id, shippingClass3Id ],
+						},
+					}
+				);
+			}
+		);
 	} );
 
 	test.describe( 'Product tags tests: CRUD', () => {

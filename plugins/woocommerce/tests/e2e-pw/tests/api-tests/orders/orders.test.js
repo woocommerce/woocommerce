@@ -34,7 +34,7 @@ const updatedCustomerShipping = {
 	phone: '123456789',
 };
 
-test.describe.serial( 'Orders API tests', () => {
+test.describe.serial( 'Orders API tests', { tag: '@skip-on-default-pressable' }, () => {
 	let orderId, sampleData;
 
 	test.beforeAll( async ( { request } ) => {
