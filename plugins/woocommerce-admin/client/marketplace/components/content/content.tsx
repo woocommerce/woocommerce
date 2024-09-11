@@ -26,6 +26,8 @@ import Promotions from '../promotions/promotions';
 import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
 import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
+import LoadMoreButton from '~/marketplace/components/load-more-button/load-more-button';
+import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -143,14 +145,6 @@ export default function Content(): JSX.Element {
 		query?.section,
 	] );
 
-	const LoadMore = () => {
-		return (
-			<div className="woocommerce-marketplace__product-list-content__load-more">
-				Load more
-			</div>
-		);
-	};
-
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
@@ -161,7 +155,42 @@ export default function Content(): JSX.Element {
 							categorySelector={ true }
 							type={ ProductType.extension }
 						/>
-						{ hasMore && <LoadMore /> }
+						{ hasMore && (
+							<LoadMoreButton
+								onLoadMore={ () => {
+									const params = new URLSearchParams();
+									params.append(
+										'page',
+										String(
+											products.length /
+												MARKETPLACE_ITEMS_PER_PAGE +
+												1
+										)
+									);
+
+									const wccomSettings = getAdminSetting(
+										'wccomHelper',
+										false
+									);
+									if ( wccomSettings.storeCountry ) {
+										params.append(
+											'country',
+											wccomSettings.storeCountry
+										);
+									}
+
+									fetchSearchResults( params ).then(
+										( productList ) => {
+											setProducts( [
+												...products,
+												...productList.products,
+											] );
+											setHasMore( productList.hasMore );
+										}
+									);
+								} }
+							/>
+						) }
 					</>
 				);
 			case 'themes':
@@ -172,7 +201,13 @@ export default function Content(): JSX.Element {
 							categorySelector={ true }
 							type={ ProductType.theme }
 						/>
-						{ hasMore && <LoadMore /> }
+						{ hasMore && (
+							<LoadMoreButton
+								onLoadMore={ () => {
+									console.log( 'load more' );
+								} }
+							/>
+						) }
 					</>
 				);
 			case 'business-services':
@@ -183,7 +218,13 @@ export default function Content(): JSX.Element {
 							categorySelector={ true }
 							type={ ProductType.businessService }
 						/>
-						{ hasMore && <LoadMore /> }
+						{ hasMore && (
+							<LoadMoreButton
+								onLoadMore={ () => {
+									console.log( 'load more' );
+								} }
+							/>
+						) }
 					</>
 				);
 			case 'search':

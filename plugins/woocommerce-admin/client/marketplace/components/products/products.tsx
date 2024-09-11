@@ -24,7 +24,6 @@ import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
-import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 
@@ -59,7 +58,6 @@ export default function Products( props: ProductsProps ) {
 	const singularLabel = LABELS[ props.type ].singularLabel;
 	const query = useQuery();
 	const category = query?.category;
-	const perPage = props.perPage ?? MARKETPLACE_ITEMS_PER_PAGE;
 	interface Theme {
 		stylesheet?: string;
 	}
@@ -95,7 +93,7 @@ export default function Products( props: ProductsProps ) {
 
 	// Store the total number of products before we slice it later.
 	const productTotalCount = props.products?.length ?? 0;
-	const products = props.products?.slice( 0, perPage ) ?? [];
+	const products = props.products ?? [];
 
 	let title = sprintf(
 		// translators: %s: plural item type (e.g. extensions, themes)
