@@ -172,6 +172,11 @@ export const Edit = ( {
 				overlayBlock.clientId
 			);
 		} else if ( attributes.overlay !== 'never' && ! overlayBlock ) {
+			if ( productFiltersOverlayNavigationAttributes ) {
+				productFiltersOverlayNavigationAttributes.triggerType =
+					'open-overlay';
+			}
+
 			dispatch( 'core/block-editor' ).insertBlock(
 				createBlock(
 					'woocommerce/product-filters-overlay-navigation',
