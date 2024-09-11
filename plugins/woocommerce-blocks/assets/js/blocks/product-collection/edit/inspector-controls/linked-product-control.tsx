@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
+import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { useState, useMemo, useRef } from '@wordpress/element';
 import type { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
 import { type ProductResponseItem, isEmpty } from '@woocommerce/types';
@@ -42,6 +43,10 @@ const ProductButton: React.FC< {
 	}
 
 	const showPlaceholder = ! product;
+	const imgSrc = showPlaceholder
+		? `${ WC_BLOCKS_IMAGE_URL }/blocks/product-collection/placeholder.svg`
+		: product?.images?.[ 0 ]?.src;
+	const imgAlt = showPlaceholder ? '' : product?.name;
 
 	return (
 		<Button
@@ -52,10 +57,7 @@ const ProductButton: React.FC< {
 		>
 			<Flex direction="row" expanded justify="flex-start">
 				<FlexItem className="wc-block-product-collection-linked-product-control__image-container">
-					<img
-						src={ product?.images?.[ 0 ]?.src }
-						alt={ product?.name }
-					/>
+					<img src={ imgSrc } alt={ imgAlt } />
 				</FlexItem>
 
 				<Flex
