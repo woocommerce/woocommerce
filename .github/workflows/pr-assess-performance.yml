@@ -49,7 +49,7 @@ jobs:
             - name: Checkout (baseline - 3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
               run: |
                 git reset --hard
-                git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | grep -v .wireit | sed -e 's/Would remove //g' | tr '\n' | xargs -0 rm -r 
+                git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | grep -v .wireit | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
                 git checkout 3d7d7f02017383937f1a4158d433d0e5d44b3dc9
 
             - name: Rebuild
