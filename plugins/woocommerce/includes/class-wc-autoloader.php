@@ -23,6 +23,18 @@ class WC_Autoloader {
 	private static array $known_classes_paths = array(
 		'WC_Product_Usage' => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage.php',
 		'WC_Product_Usage_Rule_Set' => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage-rule-set.php',
+		'WC_WCCOM_Site' => WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php',
+		'WC_Helper' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php',
+		'WC_Helper_Options' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php',
+		'WC_Helper_API' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php',
+		'WC_Woo_Update_Manager_Plugin' => WC_ABSPATH . 'includes/admin/helper/class-wc-woo-update-manager-plugin.php',
+		'WC_Helper_Updater' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-updater.php',
+		'WC_Plugin_Api_Updater' => WC_ABSPATH . 'includes/admin/helper/class-wc-plugin-api-updater.php',
+		'WC_Helper_Compat' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-compat.php',
+		'WC_WCCOM_Site_Installer' => WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer.php',
+		'WC_Helper_Subscriptions_API' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-subscriptions-api.php',
+		'WC_Helper_Orders_API' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-orders-api.php',
+		'WC_Product_Usage_Notice' => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage-notice.php',
 	);
 
 	/**

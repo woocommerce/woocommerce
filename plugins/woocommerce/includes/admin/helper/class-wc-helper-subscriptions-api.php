@@ -23,7 +23,6 @@ class WC_Helper_Subscriptions_API {
 	 * @return void
 	 */
 	public static function load() {
-		add_filter( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 	}
 
 	/**
