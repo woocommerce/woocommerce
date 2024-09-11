@@ -48,19 +48,22 @@ jobs:
               run: |
                 git reset --hard
                 git checkout trunk
+                echo "WC_TRUNK_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
+            # TODO: if baseline measurements exists, skip this step (-3.5 mins of 5 above threshold)
             - name: Rebuild
               run: |
                 git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
                 pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
-            - name: Measure performance (@trunk)
+            # TODO: if baseline measurements exists, skip this step (-2 mins of 5 above threshold)
+            - name: Measure performance (@${{ env.WC_TRUNK_SHA }})
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
               run: |
-                RESULTS_ID="editor_trunk_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-                RESULTS_ID="product-editor_trunk_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+                RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+                RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
             
             # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
