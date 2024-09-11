@@ -37,7 +37,7 @@ jobs:
                 pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
                 pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
-            - name: Measure performance (@${{ github.sha }})
+            - name: Measure performance (@latest)
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
               run: |
@@ -58,7 +58,7 @@ jobs:
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
             # TODO: if baseline measurements exists, skip this step (-2 mins of 5 above threshold)
-            - name: Measure performance (@${{ env.WC_TRUNK_SHA }})
+            - name: Measure performance (@trunk)
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
               run: |
