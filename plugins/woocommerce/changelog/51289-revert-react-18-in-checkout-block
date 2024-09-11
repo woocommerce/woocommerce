@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert update to React 18 in Checkout block.
