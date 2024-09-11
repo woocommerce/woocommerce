@@ -128,6 +128,8 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		marketplaceContextValue;
 	const { searchResultsCount } = marketplaceContextValue;
 
+	const query: Record< string, string > = useQuery();
+
 	const tabs: Tabs = {
 		search: {
 			name: 'search',
@@ -144,19 +146,19 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		extensions: {
 			name: 'extensions',
 			title: __( 'Extensions', 'woocommerce' ),
-			showUpdateCount: true,
+			showUpdateCount: !! query.term,
 			updateCount: searchResultsCount.extensions,
 		},
 		themes: {
 			name: 'themes',
 			title: __( 'Themes', 'woocommerce' ),
-			showUpdateCount: true,
+			showUpdateCount: !! query.term,
 			updateCount: searchResultsCount.themes,
 		},
 		'business-services': {
 			name: 'business-services',
 			title: __( 'Business services', 'woocommerce' ),
-			showUpdateCount: true,
+			showUpdateCount: !! query.term,
 			updateCount: searchResultsCount[ 'business-services' ],
 		},
 		'my-subscriptions': {
@@ -170,8 +172,6 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const [ visibleTabs, setVisibleTabs ] = useState(
 		getVisibleTabs( '', false, tabs )
 	);
-
-	const query: Record< string, string > = useQuery();
 
 	useEffect( () => {
 		if ( query?.tab && tabs[ query.tab ] ) {
