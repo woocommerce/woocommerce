@@ -367,13 +367,9 @@ class WC_Helper_Updater {
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
-		wc_get_logger()->debug( 'Checking if plugin has subscription', array( 'product_id' => $product_id ) );
-
 		if ( WC_Helper::has_product_subscription( $product_id ) ) {
 			return;
 		}
-
-		wc_get_logger()->debug( 'Nope' );
 
 		// Prepare the expiry notice based on subscription status.
 		$purchase_link = add_query_arg(
