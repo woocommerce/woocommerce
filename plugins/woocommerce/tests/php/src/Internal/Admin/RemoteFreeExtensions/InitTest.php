@@ -3,9 +3,8 @@
 namespace Automattic\WooCommerce\Tests\Internal\Admin\RemoteFreeExtensions;
 
 use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
-
-use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFreeExtensions;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\DefaultFreeExtensions;
+use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFreeExtensions;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\RemoteFreeExtensionsDataSourcePoller;
 use WC_Unit_Test_Case;
 
@@ -67,6 +66,9 @@ class InitTest extends WC_Unit_Test_Case {
 				);
 			},
 		);
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**

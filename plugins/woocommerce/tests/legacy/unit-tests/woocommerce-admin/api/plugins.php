@@ -30,6 +30,9 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**
@@ -172,5 +175,4 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	public function set_france_locale() {
 		return 'fr_FR';
 	}
-
 }

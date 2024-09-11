@@ -19,6 +19,9 @@ class PatternsTest extends WC_REST_Unit_Test_Case {
 
 		$user = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user );
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**

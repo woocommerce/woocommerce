@@ -5,10 +5,10 @@
  * @package WooCommerce\Admin\Tests\OnboardingTasks
  */
 
-use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
-use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\Purchase;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingThemes;
 
 /**
  * class WC_Admin_Tests_OnboardingTasks_TaskList
@@ -59,6 +59,9 @@ class WC_Admin_Tests_OnboardingTasks_Task_Purchase extends WC_Unit_Test_Case {
 				),
 			)
 		);
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**

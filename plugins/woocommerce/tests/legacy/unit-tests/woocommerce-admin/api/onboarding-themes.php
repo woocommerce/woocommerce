@@ -5,9 +5,6 @@
  * @package WooCommerce\Admin\Tests\API
  */
 
-use Automattic\WooCommerce\Admin\API\OnboardingThemes;
-use Automattic\WooCommerce\Internal\Admin\Onboarding;
-
 /**
  * WC Tests API Onboarding Themes
  */
@@ -31,6 +28,9 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		// Bypass stubbing network interactions, as the suit needs data from external data sources.
+		$this->mock_network_interactions = false;
 	}
 
 	/**
