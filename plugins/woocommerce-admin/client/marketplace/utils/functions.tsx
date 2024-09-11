@@ -107,7 +107,7 @@ async function fetchJsonWithCache(
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
-): Promise< Product[] > {
+): Promise< { products: Product[]; hasMore: boolean } > {
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
@@ -151,9 +151,10 @@ async function fetchSearchResults(
 						};
 					}
 				);
-				resolve( products );
+				const hasMore = ( json as SearchAPIJSONType ).has_more;
+				resolve( { products, hasMore } );
 			} )
-			.catch( () => reject );
+			.catch( reject );
 	} );
 }
 

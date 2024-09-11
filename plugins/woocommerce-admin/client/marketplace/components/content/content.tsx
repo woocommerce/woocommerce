@@ -30,6 +30,7 @@ import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subs
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const [ products, setProducts ] = useState< Product[] >( [] );
+	const [ hasMore, setHasMore ] = useState( false );
 	const { setIsLoading, selectedTab, setHasBusinessServices } =
 		marketplaceContextValue;
 	const query = useQuery();
@@ -54,7 +55,9 @@ export default function Content(): JSX.Element {
 			fetchSearchResults( params, abortControllers[ index ].signal ).then(
 				( productList ) => {
 					if ( category === 'business-services' ) {
-						setHasBusinessServices( productList.length > 0 );
+						setHasBusinessServices(
+							productList.products.length > 0
+						);
 					}
 				}
 			);
@@ -80,6 +83,7 @@ export default function Content(): JSX.Element {
 
 		setIsLoading( true );
 		setProducts( [] );
+		setHasMore( false );
 
 		const params = new URLSearchParams();
 
@@ -107,10 +111,12 @@ export default function Content(): JSX.Element {
 
 		fetchSearchResults( params, abortController.signal )
 			.then( ( productList ) => {
-				setProducts( productList );
+				setProducts( productList.products );
+				setHasMore( productList.hasMore );
 			} )
 			.catch( () => {
 				setProducts( [] );
+				setHasMore( false );
 			} )
 			.finally( () => {
 				// we are recording both the new and legacy events here for now
@@ -143,6 +149,7 @@ export default function Content(): JSX.Element {
 				return (
 					<Products
 						products={ products }
+						hasMore={ hasMore }
 						categorySelector={ true }
 						type={ ProductType.extension }
 					/>
@@ -151,6 +158,7 @@ export default function Content(): JSX.Element {
 				return (
 					<Products
 						products={ products }
+						hasMore={ hasMore }
 						categorySelector={ true }
 						type={ ProductType.theme }
 					/>
@@ -159,6 +167,7 @@ export default function Content(): JSX.Element {
 				return (
 					<Products
 						products={ products }
+						hasMore={ hasMore }
 						categorySelector={ true }
 						type={ ProductType.businessService }
 					/>

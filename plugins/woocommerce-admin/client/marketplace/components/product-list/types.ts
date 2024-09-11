@@ -1,5 +1,6 @@
 export type SearchAPIJSONType = {
 	products: Array< SearchAPIProductType >;
+	has_more: boolean;
 };
 
 export type SearchAPIProductType = {
