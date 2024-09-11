@@ -51,7 +51,7 @@ class WC_Admin_Tests_API_ProductsLowInStock extends WC_REST_Unit_Test_Case {
 		$order->save();
 
 		// Sync analytics data (used for last order date).
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/products/low-in-stock' );
 		$request->set_param( 'low_in_stock', true );
