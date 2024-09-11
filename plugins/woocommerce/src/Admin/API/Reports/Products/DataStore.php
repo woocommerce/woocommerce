@@ -435,9 +435,28 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$is_full_refund = false;
 		// Order fully refunded won't have the order line items.
 		if ( 'shop_order_refund' === $order->get_type() && empty( $order_items ) ) {
-			$is_full_refund = true;
-			$parent_order   = wc_get_order( $order->get_parent_id() );
-			$order_items    = $parent_order->get_items();
+			$is_full_refund  = true;
+			$parent_order_id = $order->get_parent_id();
+			$parent_order    = wc_get_order( $parent_order_id );
+			$order_items     = $parent_order->get_items();
+
+			// Remove the partial refunded order item if exists.
+			$delete_query = "
+				DELETE product_lookup
+				FROM {$table_name} AS product_lookup
+				INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
+					ON order_stats.order_id = product_lookup.order_id
+				WHERE 1 = 1
+					AND order_stats.parent_id = %d
+					AND order_stats.total_sales < 0
+			";
+			$wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$delete_query,
+					$parent_order_id
+				)
+			);
 		}
 
 		foreach ( $order_items as $order_item ) {
