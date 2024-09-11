@@ -21,6 +21,7 @@ class WC_Admin_Brands_Test extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_product_brand_filter_render_outputs_a_dropdown() {
+		update_option( 'woocommerce_remote_variant_assignment', 2 );
 		$simple_product = WC_Helper_Product::create_simple_product();
 
 		WC_Brands::init_taxonomy();
@@ -70,6 +71,7 @@ class WC_Admin_Brands_Test extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_product_brand_filter_render_outputs_a_select() {
+		update_option( 'woocommerce_remote_variant_assignment', 2 );
 		$simple_product = WC_Helper_Product::create_simple_product();
 
 		WC_Brands::init_taxonomy();
