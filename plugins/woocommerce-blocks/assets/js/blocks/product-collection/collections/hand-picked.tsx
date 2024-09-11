@@ -62,7 +62,6 @@ const attributes = {
 	},
 	query: {
 		orderBy: 'post__in',
-		order: 'desc',
 		perPage: 5,
 		pages: 1,
 	},

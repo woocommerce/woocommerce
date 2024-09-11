@@ -19,7 +19,7 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $block_name = 'product-collection';
 
-		/**
+	/**
 	 * An associative array of collection handlers.
 	 *
 	 * @var array<string, callable> $collection_handler_store
@@ -54,7 +54,6 @@ class ProductCollection extends AbstractBlock {
 	 * @var array
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in' );
-
 
 	/**
 	 * The render state of the product collection block.
@@ -1012,7 +1011,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_custom_orderby_query( $orderby ) {
-		if ( ! in_array( $orderby, $this->custom_order_opts, true ) ) {
+		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
 		}
 
