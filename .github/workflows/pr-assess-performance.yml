@@ -19,6 +19,7 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
+              name: Checkout (current - ${{ github.head_ref }})
               with:
                 fetch-depth: 0
 
@@ -44,8 +45,18 @@ jobs:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
                 RESULTS_ID: 'product-editor__${{ github.sha }}__round-1'
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor'
+              
+            - name: Checkout (baseline - ${{ github.base_ref }})
+              run: |
+                git reset --hard
+                git checkout ${{ github.base_ref }}
+
+            - name: Rebuild
+              run: |
+                pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+                pnpm --filter='@woocommerce/plugin-woocommerce' build
+
             
-            # Install/Build/Measure for github.head_ref || github.sha
             # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
             # TODO: caching and downloading artifacts with already performed measures.
