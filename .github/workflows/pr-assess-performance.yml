@@ -33,7 +33,9 @@ jobs:
                 pull-package-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Start Test Environment
-              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
+              run: |
+                pnpm playwright install chromium &
+                pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
 
             - name: Measure performance (@${{ github.sha }})
               env:
