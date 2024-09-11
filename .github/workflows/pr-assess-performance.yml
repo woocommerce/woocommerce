@@ -19,7 +19,7 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
-              name: Checkout
+              name: Checkout (latest)
               with:
                 fetch-depth: 0
 
@@ -44,7 +44,7 @@ jobs:
                 RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
               
-            - name: Checkout (baseline - 3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
+            - name: Checkout (baseline)
               run: |
                 git reset --hard
                 git checkout 3d7d7f02017383937f1a4158d433d0e5d44b3dc9
