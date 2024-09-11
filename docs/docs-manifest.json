@@ -74,7 +74,7 @@
           "post_title": "Blocks reference",
           "menu_title": "Blocks Reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/block-references.md",
-          "hash": "329f17097ce67074a915d7814b2363e8b9e908910c1f7b196c8f4fd8594cc55c",
+          "hash": "9bbd3555641a70a0d7c24c818323a9270e437a6446998de9a6506e0c2ed6ddf5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/block-references.md",
           "id": "1fbe91d7fa4fafaf35f0297e4cee1e7958756aed"
         },
@@ -83,7 +83,7 @@
           "menu_title": "Add Custom Fields to Products",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "59ef97ed2053dedfa5e7c658d5c7fa470d8110afc9b84584cb32b58389bf5687",
+          "hash": "fe8cf43940f5166bf69f102aa4643cbe32415b1167d6b6d8968d434a4d113879",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -439,7 +439,7 @@
           "post_title": "Add a message above the login / register form",
           "tags": "code-snippet",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/code-snippets/before-login--register-form.md",
-          "hash": "49f0d942364ea6815e799972894406cb0963164adfb6c373222dcf7fb0ee6fb9",
+          "hash": "dd3d61cd1f99d459956167041718e6a25693901a810d4bde47613d5ea2595ca3",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/code-snippets/before-login--register-form.md",
           "id": "26ea2036f16952c8c965f2ab38ab214e421aa615"
         },
@@ -691,7 +691,7 @@
           "post_title": "Integrating with coming soon mode",
           "tags": "how-to, coming-soon",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/integrating-coming-soon-mode.md",
-          "hash": "910dbbab77c6fb4735e7704796242c38d86f3bf3b897de1075338eb47194f8f5",
+          "hash": "8c2087952ae79bb4c3e3977c57d9e933fcfaa418a5bc643b3827059daa5879a7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/integrating-coming-soon-mode.md",
           "id": "787743efb6ef0ad509b17735eaf58b2a9a08afbc"
         },
@@ -727,7 +727,7 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "a34e2c637ac47adb1dd2e7b2510fb3eb7ff517b8f31e9cfa6fe4d3920f2567e7",
+          "hash": "c73e3c5015e6cda3be9ebd2d5fbda590ac9fa599e5fb02163c971c01060970ad",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93"
         },
@@ -1050,7 +1050,7 @@
           "menu_title": "Registering custom collections",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
-          "hash": "e3df65c5eec52e4bb797e34c040dbb8f820ea6571e9ce50b1d518e95ca6cb169",
+          "hash": "27c321bed35524d74019e015f5eed6cdca7e6c2efe0bc89ffdd2b9b5d43c47e8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
           "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
         },
@@ -1059,7 +1059,7 @@
           "menu_title": "DOM Events",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/dom-events.md",
-          "hash": "fbad20bc55cc569161e80478c0789db3c34cf35513e669554af36db1de967a26",
+          "hash": "59a4b49eb146774d33229bc60ab7d8f74381493f6e7089ca8f0e2d0eb433a7a4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/dom-events.md",
           "id": "c8d247b91472740075871e6b57a9583d893ac650"
         }
@@ -1411,7 +1411,7 @@
       "categories": []
     },
     {
-      "content": "\nProperly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woocommerce.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woocommerce.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
+      "content": "\nProperly setting up your test environment and writing tests when contributing to WooCommerce core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woocommerce.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woocommerce.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
       "category_slug": "testing",
       "category_title": "Testing",
       "posts": [
@@ -1451,7 +1451,7 @@
         {
           "post_title": "Template structure & Overriding templates via a theme",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
-          "hash": "0d026ed5e9706b97dd03d6f7dc86aeb580b11549fa99c9d6f906bbca6f136a01",
+          "hash": "a82d885c8395385dc51c976b2b51eec88cdcce72bf905fda78f97d77533ce079",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
           "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "cbe507d24f0d6ae827c01a98fd2d7c6e8db74053a7b3db869c6941dd7442d250"
+  "hash": "8199f0d3c854474839300ed606f03f9f286ace35f65d7c47ffc6477762eaf51e"
 }

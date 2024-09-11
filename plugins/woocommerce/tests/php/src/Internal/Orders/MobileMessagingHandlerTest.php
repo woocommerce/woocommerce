@@ -1,6 +1,11 @@
 <?php
+declare( strict_types = 1);
+
+namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\Orders\MobileMessagingHandler;
+use DateTime;
+use WC_Order;
 
 /**
  * Tests for MobileMessagingHandler.

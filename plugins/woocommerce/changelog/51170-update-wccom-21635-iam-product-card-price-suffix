@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Product cards in the in-app marketplace show currency and billing period data dynamically, based on data received from WooCommerce.com

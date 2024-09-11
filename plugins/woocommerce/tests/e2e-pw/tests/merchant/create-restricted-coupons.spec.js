@@ -79,10 +79,11 @@ const test = baseTest.extend( {
 
 	product: async ( { api }, use ) => {
 		let product = {};
+		const productName = `Product ${ Date.now() }`;
 
 		await api
 			.post( 'products', {
-				name: 'Product',
+				name: productName,
 				regular_price: '100',
 			} )
 			.then( ( response ) => {

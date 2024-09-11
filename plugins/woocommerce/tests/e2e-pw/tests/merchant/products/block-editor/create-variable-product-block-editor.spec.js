@@ -147,9 +147,24 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					);
 
 				for ( const term of sizeAttribute.terms ) {
+					const apiResponsePromise = page.waitForResponse(
+						( response ) => {
+							const urlToMatch = `/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }`;
+
+							return (
+								response
+									.url()
+									.includes( encodeURI( urlToMatch ) ) &&
+								response.status() === 201
+							);
+						}
+					);
+
 					// Fill the input field with the option
 					await FormTokenFieldInputLocator.fill( term.name );
 					await FormTokenFieldInputLocator.press( 'Enter' );
+
+					await apiResponsePromise;
 
 					/*
 					 * Check the new option is added to the list,
@@ -163,21 +178,6 @@ test.describe( 'Variations tab', { tag: '@gutenberg' }, () => {
 					await expect( newAriaHiddenTokenLocator ).toHaveText(
 						term.name
 					);
-
-					/*
-					 * Wait for the async POST request
-					 * that creates the new attribute term to finish.
-					 */
-					await page.waitForResponse( ( response ) => {
-						const urlToMatch = `/wp-json/wc/v3/products/attributes/${ newAttrData.id }/terms?name=${ term.name }&slug=${ term.slug }&_locale=user`;
-
-						return (
-							response
-								.url()
-								.includes( encodeURI( urlToMatch ) ) &&
-							response.status() === 201
-						);
-					} );
 				}
 
 				await page
