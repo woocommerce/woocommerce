@@ -13,6 +13,7 @@ import {
 	translateJQueryEventToNative,
 } from '@woocommerce/base-utils';
 import { _n, sprintf } from '@wordpress/i18n';
+import { h } from 'preact';
 
 /**
  * Internal dependencies
@@ -123,6 +124,7 @@ const renderContents = async ( state: State ) => {
 const { state } = store< Store >( 'woocommerce/mini-cart-interactivity', {
 	state: {
 		existingRoot: null,
+
 		get displayQuantityBadgeStyle() {
 			const context = getContext< Context >();
 			return context.cartItemCount > 0 ? 'flex' : 'none';
@@ -155,6 +157,22 @@ const { state } = store< Store >( 'woocommerce/mini-cart-interactivity', {
 						cartItemCount,
 						amount
 				  );
+		},
+	},
+
+	components: {
+		BlockComponent: () => {
+			return ( { children, ...props } ) => {
+				const timems = Date.now();
+
+				console.log( props );
+
+				// manually add child text to children
+				const childText = h( 'p', {}, 'MiniCartContents: ' + timems );
+				const newChildren = [ ...children, childText ];
+
+				return h( 'div', { ...props }, newChildren );
+			};
 		},
 	},
 

@@ -142,7 +142,9 @@ const renderInnerBlocks = ( {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
+
 	return Array.from( children ).map( ( node: Node, index: number ) => {
+		console.log( 'node', node );
 		/**
 		 * This will grab the blockName from the data- attributes stored in block markup. Without a blockName, we cannot
 		 * convert the HTMLElement to a React component.

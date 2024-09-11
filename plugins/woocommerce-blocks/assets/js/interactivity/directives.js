@@ -471,4 +471,18 @@ export default () => {
 	);
 
 	directive( 'each-child', () => null );
+
+	// data-wp-client-only-component
+	// See https://stackblitz.com/edit/vitejs-vite-d3ngzt?file=data-wp-client-only-component.js
+	directive(
+		'client-only-component',
+		( {
+			directives: { 'client-only-component': comp },
+			element,
+			evaluate,
+		} ) => {
+			const entry = comp.find( ( { suffix } ) => suffix === 'default' );
+			return evaluate( entry )( element.props );
+		}
+	);
 };

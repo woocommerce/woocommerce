@@ -33,25 +33,25 @@ export const renderMiniCartContents = ( templateElement: HTMLDivElement ) => {
 		clonedTemplateNode as HTMLDivElement
 	);
 
-	const root = renderParentBlock( {
-		Block: MiniCartContentsBlock,
-		blockName: 'woocommerce/mini-cart-contents',
-		getProps: ( el: Element ) => {
-			return {
-				attributes: getValidBlockAttributes(
-					miniCartContentsAttributes,
-					/* eslint-disable @typescript-eslint/no-explicit-any */
-					( el instanceof HTMLElement ? el.dataset : {} ) as any
-				),
-			};
-		},
-		selector: `#${ uniqueId } .wp-block-woocommerce-mini-cart-contents`,
-		blockMap: getRegisteredBlockComponents(
-			'woocommerce/mini-cart-contents'
-		),
-	} );
+	// const root = renderParentBlock( {
+	// 	Block: MiniCartContentsBlock,
+	// 	blockName: 'woocommerce/mini-cart-contents',
+	// 	getProps: ( el: Element ) => {
+	// 		return {
+	// 			attributes: getValidBlockAttributes(
+	// 				miniCartContentsAttributes,
+	// 				/* eslint-disable @typescript-eslint/no-explicit-any */
+	// 				( el instanceof HTMLElement ? el.dataset : {} ) as any
+	// 			),
+	// 		};
+	// 	},
+	// 	selector: `#${ uniqueId } .wp-block-woocommerce-mini-cart-contents`,
+	// 	blockMap: getRegisteredBlockComponents(
+	// 		'woocommerce/mini-cart-contents'
+	// 	),
+	// } );
 
-	clonedTemplateNode.style.display = 'block';
+	// clonedTemplateNode.style.display = 'block';
 
-	return root;
+	// return root;
 };
