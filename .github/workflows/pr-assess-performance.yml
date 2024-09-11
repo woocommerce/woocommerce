@@ -34,13 +34,12 @@ jobs:
             - name: Start Test Environment
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
 
-            - name: Measure performance (latest; editor)
+            - name: Measure performance (editor@latest)
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
                 RESULTS_ID: 'editor__current__round-1'
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor'
-
-            - name: Measure performance (latest; product-editor)
+            - name: Measure performance (product-editor@latest)
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
                 RESULTS_ID: 'product-editor__current__round-1'
