@@ -136,17 +136,17 @@ const LinkedProductControl = ( {
 	usesReference: string[] | undefined;
 } ) => {
 	const referenceType = 'product';
-	const { productReference } = query;
 	const isProductReferenceAvailable = location.type === referenceType;
+	const { productReference } = query;
+
+	const { product, isLoading } = useGetProduct( productReference );
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
 	const [ radioControlState, setRadioControlState ] = useState< PRODUCT_REF >(
 		isProductReferenceAvailable
 			? PRODUCT_REF.CURRENT_PRODUCT
 			: PRODUCT_REF.SPECIFIC_PRODUCT
 	);
-	const { product, isLoading } = useGetProduct( productReference );
 	const prevReference = useRef< number | undefined >( undefined );
-
 	const showLinkedProductControl = useMemo( () => {
 		const isProductContextRequired =
 			usesReference?.includes( referenceType );
@@ -154,12 +154,12 @@ const LinkedProductControl = ( {
 		return isProductContextRequired;
 	}, [ usesReference ] );
 
+	if ( ! showLinkedProductControl ) return null;
+
 	const showRadioControl = isProductReferenceAvailable;
 	const showDropdown = showRadioControl
 		? radioControlState === PRODUCT_REF.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
-
-	if ( ! showLinkedProductControl ) return null;
 
 	const radioControlHelp =
 		radioControlState === PRODUCT_REF.CURRENT_PRODUCT
