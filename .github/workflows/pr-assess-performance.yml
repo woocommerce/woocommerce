@@ -55,11 +55,6 @@ jobs:
                 pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
-            # - name: Restart Test Environment
-            #   run: |
-            #     pnpm --filter="@woocommerce/plugin-woocommerce" env:stop && sudo rm -rf ~/wp-env
-            #     pnpm --filter="@woocommerce/plugin-woocommerce" env:test
-
             - name: Measure performance (@trunk)
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
