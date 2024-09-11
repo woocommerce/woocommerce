@@ -34,7 +34,7 @@ const expandCouponForm = async ( page ) => {
 
 test.describe(
 	'Cart & Checkout Restricted Coupons',
-	{ tag: [ '@payments', '@services', '@hpos', '@could-be-unit-test' ] },
+	{ tag: [ '@payments', '@services', '@hpos', '@could-be-lower-level-test' ] },
 	() => {
 		let firstProductId,
 			secondProductId,

@@ -38,7 +38,7 @@ let productId,
 
 test.describe(
 	'Shopper Cart & Checkout Block Tax Display',
-	{ tag: [ '@payments', '@services', '@hpos', '@could-be-unit-test' ] },
+	{ tag: [ '@payments', '@services', '@hpos', '@could-be-lower-level-test' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 		test.beforeAll( async ( { baseURL } ) => {
@@ -240,7 +240,7 @@ test.describe(
 
 test.describe(
 	'Shopper Cart & Checkout Block Tax Rounding',
-	{ tag: [ '@payments', '@services', '@could-be-unit-test' ] },
+	{ tag: [ '@payments', '@services', '@could-be-lower-level-test' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
@@ -484,7 +484,7 @@ test.describe(
 
 test.describe(
 	'Shopper Cart & Checkout Block Tax Levels',
-	{ tag: [ '@payments', '@services', '@could-be-unit-test' ] },
+	{ tag: [ '@payments', '@services', '@could-be-lower-level-test' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
@@ -809,7 +809,7 @@ test.describe(
 
 test.describe(
 	'Shipping Cart & Checkout Block Tax',
-	{ tag: [ '@payments', '@services', '@could-be-unit-test' ] },
+	{ tag: [ '@payments', '@services', '@could-be-lower-level-test' ] },
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			const api = new wcApi( {
