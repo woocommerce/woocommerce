@@ -261,334 +261,329 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 	} );
 
 	test.describe( 'List all settings options', () => {
-		test(
-			'can retrieve all general settings',
-			{ tag: '@skip-on-default-pressable' },
-			async ( { request } ) => {
-				// call API to retrieve all settings options
-				const response = await request.get(
-					'/wp-json/wc/v3/settings/general'
-				);
-				const responseJSON = await response.json();
-				expect( response.status() ).toEqual( 200 );
-				expect( Array.isArray( responseJSON ) ).toBe( true );
-				expect( responseJSON.length ).toBeGreaterThan( 0 );
+		test( 'can retrieve all general settings', async ( { request } ) => {
+			// call API to retrieve all settings options
+			const response = await request.get(
+				'/wp-json/wc/v3/settings/general'
+			);
+			const responseJSON = await response.json();
+			expect( response.status() ).toEqual( 200 );
+			expect( Array.isArray( responseJSON ) ).toBe( true );
+			expect( responseJSON.length ).toBeGreaterThan( 0 );
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_store_address',
+						label: 'Address line 1',
+						description:
+							'The street address for your business location.',
+						type: 'text',
+						default: '',
+						tip: 'The street address for your business location.',
+						value: expect.any( String ),
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_store_address_2',
+						label: 'Address line 2',
+						description:
+							'An additional, optional address line for your business location.',
+						type: 'text',
+						default: '',
+						tip: 'An additional, optional address line for your business location.',
+						value: '',
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_store_city',
+						label: 'City',
+						description:
+							'The city in which your business is located.',
+						type: 'text',
+						default: '',
+						tip: 'The city in which your business is located.',
+						value: expect.any( String ),
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_default_country',
+						label: 'Country / State',
+						description:
+							'The country and state or province, if any, in which your business is located.',
+						type: 'select',
+						default: 'US:CA',
+						tip: 'The country and state or province, if any, in which your business is located.',
+						value: 'US:CA',
+						options: expect.objectContaining( stateOptions ),
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_store_postcode',
+						label: 'Postcode / ZIP',
+						description:
+							'The postal code, if any, in which your business is located.',
+						type: 'text',
+						default: '',
+						tip: 'The postal code, if any, in which your business is located.',
+						value: expect.any( String ),
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_allowed_countries',
+						label: 'Selling location(s)',
+						description:
+							'This option lets you limit which countries you are willing to sell to.',
+						type: 'select',
+						default: 'all',
+						tip: 'This option lets you limit which countries you are willing to sell to.',
+						value: 'all',
+						options: {
+							all: 'Sell to all countries',
+							all_except:
+								'Sell to all countries, except for&hellip;',
+							specific: 'Sell to specific countries',
+						},
+					} ),
+				] )
+			);
+
+			// different on external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
 						expect.objectContaining( {
-							id: 'woocommerce_store_address',
-							label: 'Address line 1',
-							description:
-								'The street address for your business location.',
-							type: 'text',
-							default: '',
-							tip: 'The street address for your business location.',
-							value: '',
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_store_address_2',
-							label: 'Address line 2',
-							description:
-								'An additional, optional address line for your business location.',
-							type: 'text',
-							default: '',
-							tip: 'An additional, optional address line for your business location.',
-							value: '',
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_store_city',
-							label: 'City',
-							description:
-								'The city in which your business is located.',
-							type: 'text',
-							default: '',
-							tip: 'The city in which your business is located.',
-							value: '',
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_default_country',
-							label: 'Country / State',
-							description:
-								'The country and state or province, if any, in which your business is located.',
-							type: 'select',
-							default: 'US:CA',
-							tip: 'The country and state or province, if any, in which your business is located.',
-							value: 'US:CA',
-							options: expect.objectContaining( stateOptions ),
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_store_postcode',
-							label: 'Postcode / ZIP',
-							description:
-								'The postal code, if any, in which your business is located.',
-							type: 'text',
-							default: '',
-							tip: 'The postal code, if any, in which your business is located.',
-							value: '',
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_allowed_countries',
-							label: 'Selling location(s)',
-							description:
-								'This option lets you limit which countries you are willing to sell to.',
-							type: 'select',
-							default: 'all',
-							tip: 'This option lets you limit which countries you are willing to sell to.',
-							value: 'all',
-							options: {
-								all: 'Sell to all countries',
-								all_except:
-									'Sell to all countries, except for&hellip;',
-								specific: 'Sell to specific countries',
-							},
-						} ),
-					] )
-				);
-
-				// different on external host
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( ! shouldSkip ) {
-					expect( responseJSON ).toEqual(
-						expect.arrayContaining( [
-							expect.objectContaining( {
-								id: 'woocommerce_all_except_countries',
-								label: 'Sell to all countries, except for&hellip;',
-								description: '',
-								type: 'multiselect',
-								default: '',
-								value: '',
-								options: expect.objectContaining( countries ),
-							} ),
-						] )
-					);
-				} else {
-					// Test is failing on external hosts
-				}
-
-				// different on external host
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( ! shouldSkip ) {
-					expect( responseJSON ).toEqual(
-						expect.arrayContaining( [
-							expect.objectContaining( {
-								id: 'woocommerce_specific_allowed_countries',
-								label: 'Sell to specific countries',
-								description: '',
-								type: 'multiselect',
-								default: '',
-								value: '',
-								options: expect.objectContaining( countries ),
-							} ),
-						] )
-					);
-				} else {
-					// Test is failing on external hosts
-				}
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_ship_to_countries',
-							label: 'Shipping location(s)',
-							description:
-								'Choose which countries you want to ship to, or choose to ship to all locations you sell to.',
-							type: 'select',
-							default: '',
-							tip: 'Choose which countries you want to ship to, or choose to ship to all locations you sell to.',
-							value: '',
-							options: expect.objectContaining( {
-								'': 'Ship to all countries you sell to',
-								all: 'Ship to all countries',
-								specific: 'Ship to specific countries only',
-								disabled:
-									'Disable shipping &amp; shipping calculations',
-							} ),
-						} ),
-					] )
-				);
-
-				// different on external host
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( ! shouldSkip ) {
-					expect( responseJSON ).toEqual(
-						expect.arrayContaining( [
-							expect.objectContaining( {
-								id: 'woocommerce_specific_ship_to_countries',
-								label: 'Ship to specific countries',
-								description: '',
-								type: 'multiselect',
-								default: '',
-								value: '',
-								options: expect.objectContaining( countries ),
-							} ),
-						] )
-					);
-				} else {
-					// Test is failing on external hosts
-				}
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_default_customer_address',
-							label: 'Default customer location',
+							id: 'woocommerce_all_except_countries',
+							label: 'Sell to all countries, except for&hellip;',
 							description: '',
-							type: 'select',
-							default: 'base',
-							tip: 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.',
-							value: 'base',
-							options: expect.objectContaining( {
-								'': 'No location by default',
-								base: 'Shop country/region',
-								geolocation: 'Geolocate',
-								geolocation_ajax:
-									'Geolocate (with page caching support)',
-							} ),
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
 						} ),
 					] )
 				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_calc_taxes',
-							label: 'Enable taxes',
-							description: 'Enable tax rates and calculations',
-							type: 'checkbox',
-							default: 'no',
-							tip: 'Rates will be configurable and taxes will be calculated during checkout.',
-							value: expect.any( String ),
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_enable_coupons',
-							label: 'Enable coupons',
-							description: 'Enable the use of coupon codes',
-							type: 'checkbox',
-							default: 'yes',
-							tip: 'Coupons can be applied from the cart and checkout pages.',
-							value: 'yes',
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_calc_discounts_sequentially',
-							label: '',
-							description:
-								'Calculate coupon discounts sequentially',
-							type: 'checkbox',
-							default: 'no',
-							tip: 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.',
-							value: 'no',
-						} ),
-					] )
-				);
-
-				// eslint-disable-next-line playwright/no-conditional-in-test
-				if ( ! shouldSkip ) {
-					expect( responseJSON ).toEqual(
-						expect.arrayContaining( [
-							expect.objectContaining( {
-								id: 'woocommerce_currency',
-								label: 'Currency',
-								description:
-									'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
-								type: 'select',
-								default: 'USD',
-								options: expect.objectContaining( currencies ),
-								tip: 'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
-								value: 'USD',
-							} ),
-						] )
-					);
-				} else {
-					// This test is also failing on external hosts
-				}
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_currency_pos',
-							label: 'Currency position',
-							description:
-								'This controls the position of the currency symbol.',
-							type: 'select',
-							default: 'left',
-							options: {
-								left: 'Left',
-								right: 'Right',
-								left_space: 'Left with space',
-								right_space: 'Right with space',
-							},
-							tip: 'This controls the position of the currency symbol.',
-							value: 'left',
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_price_thousand_sep',
-							label: 'Thousand separator',
-							description:
-								'This sets the thousand separator of displayed prices.',
-							type: 'text',
-							default: ',',
-							tip: 'This sets the thousand separator of displayed prices.',
-							value: ',',
-						} ),
-					] )
-				);
-
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_price_decimal_sep',
-							label: 'Decimal separator',
-							description:
-								'This sets the decimal separator of displayed prices.',
-							type: 'text',
-							default: '.',
-							tip: 'This sets the decimal separator of displayed prices.',
-							value: '.',
-						} ),
-					] )
-				);
+			} else {
+				// Test is failing on external hosts
 			}
-		);
+
+			// different on external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_allowed_countries',
+							label: 'Sell to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				// Test is failing on external hosts
+			}
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_ship_to_countries',
+						label: 'Shipping location(s)',
+						description:
+							'Choose which countries you want to ship to, or choose to ship to all locations you sell to.',
+						type: 'select',
+						default: '',
+						tip: 'Choose which countries you want to ship to, or choose to ship to all locations you sell to.',
+						value: '',
+						options: expect.objectContaining( {
+							'': 'Ship to all countries you sell to',
+							all: 'Ship to all countries',
+							specific: 'Ship to specific countries only',
+							disabled:
+								'Disable shipping &amp; shipping calculations',
+						} ),
+					} ),
+				] )
+			);
+
+			// different on external host
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_ship_to_countries',
+							label: 'Ship to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				// Test is failing on external hosts
+			}
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_default_customer_address',
+						label: 'Default customer location',
+						description: '',
+						type: 'select',
+						default: 'base',
+						tip: 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.',
+						value: 'base',
+						options: expect.objectContaining( {
+							'': 'No location by default',
+							base: 'Shop country/region',
+							geolocation: 'Geolocate',
+							geolocation_ajax:
+								'Geolocate (with page caching support)',
+						} ),
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_calc_taxes',
+						label: 'Enable taxes',
+						description: 'Enable tax rates and calculations',
+						type: 'checkbox',
+						default: 'no',
+						tip: 'Rates will be configurable and taxes will be calculated during checkout.',
+						value: expect.any( String ),
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_enable_coupons',
+						label: 'Enable coupons',
+						description: 'Enable the use of coupon codes',
+						type: 'checkbox',
+						default: 'yes',
+						tip: 'Coupons can be applied from the cart and checkout pages.',
+						value: 'yes',
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_calc_discounts_sequentially',
+						label: '',
+						description: 'Calculate coupon discounts sequentially',
+						type: 'checkbox',
+						default: 'no',
+						tip: 'When applying multiple coupons, apply the first coupon to the full price and the second coupon to the discounted price and so on.',
+						value: 'no',
+					} ),
+				] )
+			);
+
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_currency',
+							label: 'Currency',
+							description:
+								'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
+							type: 'select',
+							default: 'USD',
+							options: expect.objectContaining( currencies ),
+							tip: 'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
+							value: 'USD',
+						} ),
+					] )
+				);
+			} else {
+				// This test is also failing on external hosts
+			}
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_currency_pos',
+						label: 'Currency position',
+						description:
+							'This controls the position of the currency symbol.',
+						type: 'select',
+						default: 'left',
+						options: {
+							left: 'Left',
+							right: 'Right',
+							left_space: 'Left with space',
+							right_space: 'Right with space',
+						},
+						tip: 'This controls the position of the currency symbol.',
+						value: 'left',
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_price_thousand_sep',
+						label: 'Thousand separator',
+						description:
+							'This sets the thousand separator of displayed prices.',
+						type: 'text',
+						default: ',',
+						tip: 'This sets the thousand separator of displayed prices.',
+						value: ',',
+					} ),
+				] )
+			);
+
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_price_decimal_sep',
+						label: 'Decimal separator',
+						description:
+							'This sets the decimal separator of displayed prices.',
+						type: 'text',
+						default: '.',
+						tip: 'This sets the decimal separator of displayed prices.',
+						value: '.',
+					} ),
+				] )
+			);
+		} );
 	} );
 
 	test.describe( 'Retrieve a settings option', () => {
@@ -1024,164 +1019,157 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 	} );
 
 	test.describe( 'List all Tax settings options', () => {
-		test(
-			'can retrieve all tax settings',
-			{ tag: '@skip-on-default-pressable' },
-			async ( { request } ) => {
-				// call API to retrieve all settings options
-				const response = await request.get(
-					'/wp-json/wc/v3/settings/tax'
-				);
-				const responseJSON = await response.json();
-				expect( response.status() ).toEqual( 200 );
-				expect( Array.isArray( responseJSON ) ).toBe( true );
-				expect( responseJSON.length ).toBeGreaterThan( 0 );
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_prices_include_tax',
-							label: 'Prices entered with tax',
-							description: '',
-							type: 'radio',
-							default: 'no',
-							options: {
-								yes: 'Yes, I will enter prices inclusive of tax',
-								no: 'No, I will enter prices exclusive of tax',
-							},
-							tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
-							value: 'no',
-						} ),
-					] )
-				);
+		test( 'can retrieve all tax settings', async ( { request } ) => {
+			// call API to retrieve all settings options
+			const response = await request.get( '/wp-json/wc/v3/settings/tax' );
+			const responseJSON = await response.json();
+			expect( response.status() ).toEqual( 200 );
+			expect( Array.isArray( responseJSON ) ).toBe( true );
+			expect( responseJSON.length ).toBeGreaterThan( 0 );
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_prices_include_tax',
+						label: 'Prices entered with tax',
+						description: '',
+						type: 'radio',
+						default: 'no',
+						options: {
+							yes: 'Yes, I will enter prices inclusive of tax',
+							no: 'No, I will enter prices exclusive of tax',
+						},
+						tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
+						value: 'no',
+					} ),
+				] )
+			);
 
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_tax_based_on',
-							label: 'Calculate tax based on',
-							description: '',
-							type: 'select',
-							default: 'shipping',
-							options: {
-								shipping: 'Customer shipping address',
-								billing: 'Customer billing address',
-								base: 'Shop base address',
-							},
-							tip: 'This option determines which address is used to calculate tax.',
-							value: 'shipping',
-						} ),
-					] )
-				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_shipping_tax_class',
-							label: 'Shipping tax class',
-							description:
-								'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
-							type: 'select',
-							default: 'inherit',
-							options: {
-								inherit:
-									'Shipping tax class based on cart items',
-								'': 'Standard',
-								'reduced-rate': 'Reduced rate',
-								'zero-rate': 'Zero rate',
-							},
-							tip: 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
-							value: 'inherit',
-						} ),
-					] )
-				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_tax_round_at_subtotal',
-							label: 'Rounding',
-							description:
-								'Round tax at subtotal level, instead of rounding per line',
-							type: 'checkbox',
-							default: 'no',
-							value: 'no',
-						} ),
-					] )
-				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_tax_classes',
-							label: 'Additional tax classes',
-							description: '',
-							type: 'textarea',
-							default: '',
-							tip: 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.',
-							value: '',
-						} ),
-					] )
-				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_tax_display_shop',
-							label: 'Display prices in the shop',
-							description: '',
-							type: 'select',
-							default: 'excl',
-							options: {
-								incl: 'Including tax',
-								excl: 'Excluding tax',
-							},
-							value: 'excl',
-						} ),
-					] )
-				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_tax_display_cart',
-							label: 'Display prices during cart and checkout',
-							description: '',
-							type: 'select',
-							default: 'excl',
-							options: {
-								incl: 'Including tax',
-								excl: 'Excluding tax',
-							},
-							value: 'excl',
-						} ),
-					] )
-				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_price_display_suffix',
-							label: 'Price display suffix',
-							description: '',
-							type: 'text',
-							default: '',
-							tip: 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: {price_including_tax}, {price_excluding_tax}.',
-							value: '',
-						} ),
-					] )
-				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_tax_total_display',
-							label: 'Display tax totals',
-							description: '',
-							type: 'select',
-							default: 'itemized',
-							options: {
-								single: 'As a single total',
-								itemized: 'Itemized',
-							},
-							value: 'itemized',
-						} ),
-					] )
-				);
-			}
-		);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_tax_based_on',
+						label: 'Calculate tax based on',
+						description: '',
+						type: 'select',
+						default: 'shipping',
+						options: {
+							shipping: 'Customer shipping address',
+							billing: 'Customer billing address',
+							base: 'Shop base address',
+						},
+						tip: 'This option determines which address is used to calculate tax.',
+						value: 'shipping',
+					} ),
+				] )
+			);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_shipping_tax_class',
+						label: 'Shipping tax class',
+						description:
+							'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
+						type: 'select',
+						default: 'inherit',
+						options: {
+							inherit: 'Shipping tax class based on cart items',
+							'': 'Standard',
+							'reduced-rate': 'Reduced rate',
+							'zero-rate': 'Zero rate',
+						},
+						tip: 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
+						value: 'inherit',
+					} ),
+				] )
+			);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_tax_round_at_subtotal',
+						label: 'Rounding',
+						description:
+							'Round tax at subtotal level, instead of rounding per line',
+						type: 'checkbox',
+						default: 'no',
+						value: 'no',
+					} ),
+				] )
+			);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_tax_classes',
+						label: 'Additional tax classes',
+						description: '',
+						type: 'textarea',
+						default: '',
+						tip: 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.',
+						value: '',
+					} ),
+				] )
+			);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_tax_display_shop',
+						label: 'Display prices in the shop',
+						description: '',
+						type: 'select',
+						default: 'excl',
+						options: {
+							incl: 'Including tax',
+							excl: 'Excluding tax',
+						},
+						value: 'excl',
+					} ),
+				] )
+			);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_tax_display_cart',
+						label: 'Display prices during cart and checkout',
+						description: '',
+						type: 'select',
+						default: 'excl',
+						options: {
+							incl: 'Including tax',
+							excl: 'Excluding tax',
+						},
+						value: 'excl',
+					} ),
+				] )
+			);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_price_display_suffix',
+						label: 'Price display suffix',
+						description: '',
+						type: 'text',
+						default: '',
+						tip: 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: {price_including_tax}, {price_excluding_tax}.',
+						value: '',
+					} ),
+				] )
+			);
+			expect( responseJSON ).toEqual(
+				expect.arrayContaining( [
+					expect.objectContaining( {
+						id: 'woocommerce_tax_total_display',
+						label: 'Display tax totals',
+						description: '',
+						type: 'select',
+						default: 'itemized',
+						options: {
+							single: 'As a single total',
+							itemized: 'Itemized',
+						},
+						value: 'itemized',
+					} ),
+				] )
+			);
+		} );
 	} );
 
 	test.describe( 'List all Shipping settings options', () => {
@@ -1942,7 +1930,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						tip: expect.stringContaining(
 							'Enter recipients (comma separated) for this email. Defaults to'
 						),
-						value: '',
+						value: expect.any( String ),
 					} ),
 				] )
 			);
