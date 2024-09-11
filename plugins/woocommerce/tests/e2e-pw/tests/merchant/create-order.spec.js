@@ -43,6 +43,20 @@ async function getOrderIdFromPage( page ) {
 	return parts[ 0 ];
 }
 
+async function addProductToOrder( page, product, quantity ) {
+	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
+	await page.getByText( 'Search for a product…' ).click();
+	await page.locator( 'span > .select2-search__field' ).fill( product.name );
+	await page.getByRole( 'option', { name: product.name } ).first().click();
+	await page
+		.locator( 'tr' )
+		.filter( { hasText: product.name } )
+		.getByPlaceholder( '1' )
+		.fill( quantity.toString() );
+	await page.locator( '#btn-ok' ).click();
+}
+
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	order: async ( { api }, use ) => {
@@ -352,25 +366,7 @@ test.describe(
 				.fill( 'Only asked for a slushie' );
 
 			// Add a product
-			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
-			await page
-				.getByRole( 'button', { name: 'Add product(s)' } )
-				.click();
-
-			await page.getByText( 'Search for a product…' ).click();
-			await page
-				.locator( 'span > .select2-search__field' )
-				.fill( simpleProduct.name );
-			await page
-				.getByRole( 'option', { name: simpleProduct.name } )
-				.click();
-
-			await page
-				.locator( 'tr' )
-				.filter( { hasText: simpleProduct.name } )
-				.getByPlaceholder( '1' )
-				.fill( '2' );
-			await page.locator( '#btn-ok' ).click();
+			await addProductToOrder( page, simpleProduct, 2 );
 
 			// Create the order
 			await page.getByRole( 'button', { name: 'Create' } ).click();
@@ -415,23 +411,7 @@ test.describe(
 				.click();
 
 			// Add a product
-			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
-			await page
-				.getByRole( 'button', { name: 'Add product(s)' } )
-				.click();
-			await page.getByText( 'Search for a product…' ).click();
-			await page
-				.locator( 'span > .select2-search__field' )
-				.fill( simpleProduct.name );
-			await page
-				.getByRole( 'option', { name: simpleProduct.name } )
-				.click();
-			await page
-				.locator( 'tr' )
-				.filter( { hasText: simpleProduct.name } )
-				.getByPlaceholder( '1' )
-				.fill( '2' );
-			await page.locator( '#btn-ok' ).click();
+			await addProductToOrder( page, simpleProduct, 2 );
 
 			// Create the order
 			await page.getByRole( 'button', { name: 'Create' } ).click();
@@ -522,49 +502,21 @@ test.describe(
 			await page.locator( 'button.add-order-item' ).click();
 
 			// search for each product to add
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.pressSequentially( simpleProduct.name );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
-
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.pressSequentially( variableProduct.name );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
-
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.type( groupedProduct.name );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
-
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.type( externalProduct.name );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
+			for ( const product of [
+				simpleProduct,
+				variableProduct,
+				groupedProduct,
+				externalProduct,
+			] ) {
+				await page.getByText( 'Search for a product…' ).click();
+				await page
+					.locator( 'span > .select2-search__field' )
+					.fill( product.name );
+				await page
+					.getByRole( 'option', { name: product.name } )
+					.first()
+					.click();
+			}
 
 			await page.locator( 'button#btn-ok' ).click();
 
