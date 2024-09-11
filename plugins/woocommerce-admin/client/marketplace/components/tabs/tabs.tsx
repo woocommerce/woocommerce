@@ -129,7 +129,7 @@ const renderTabs = (
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { selectedTab, setSelectedTab, hasBusinessServices } =
+	const { selectedTab, isLoading, setSelectedTab, hasBusinessServices } =
 		marketplaceContextValue;
 	const { searchResultsCount } = marketplaceContextValue;
 
@@ -145,19 +145,19 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		extensions: {
 			name: 'extensions',
 			title: __( 'Extensions', 'woocommerce' ),
-			showUpdateCount: !! query.term,
+			showUpdateCount: !! query.term && ! isLoading,
 			updateCount: searchResultsCount.extensions,
 		},
 		themes: {
 			name: 'themes',
 			title: __( 'Themes', 'woocommerce' ),
-			showUpdateCount: !! query.term,
+			showUpdateCount: !! query.term && ! isLoading,
 			updateCount: searchResultsCount.themes,
 		},
 		'business-services': {
 			name: 'business-services',
 			title: __( 'Business services', 'woocommerce' ),
-			showUpdateCount: !! query.term,
+			showUpdateCount: !! query.term && ! isLoading,
 			updateCount: searchResultsCount[ 'business-services' ],
 		},
 		'my-subscriptions': {
