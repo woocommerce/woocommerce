@@ -547,7 +547,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		if ( ! empty( $full_refunded_orders ) ) {
-			// First, remove the order item from the wc_order_product_lookup table if it was fully refunded.
 			$order_item_ids_format = array_fill( 0, count( $full_refunded_orders['order_item_ids'] ), '%d' );
 			$order_item_ids_format = implode( ',', $order_item_ids_format );
 
@@ -565,24 +564,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 					"DELETE FROM {$table_name} WHERE order_id = %d AND order_item_id IN ({$order_item_ids_format}) AND product_id IN ({$product_ids_format})",
 					$replacement_params
-				)
-			);
-
-			// Second, remove the order item with negative net sales recorded earlier due to a partial refund.
-			$delete_query = "
-				DELETE product_lookup
-				FROM {$table_name} AS product_lookup
-				INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
-					ON order_stats.order_id = product_lookup.order_id
-				WHERE 1 = 1
-					AND order_stats.parent_id = %d
-					AND order_stats.total_sales < 0
-			";
-			$wpdb->query(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$delete_query,
-					$full_refunded_orders['order_id']
 				)
 			);
 		}
