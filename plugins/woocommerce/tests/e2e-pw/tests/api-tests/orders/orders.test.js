@@ -36,7 +36,7 @@ const updatedCustomerShipping = {
 
 test.describe.serial(
 	'Orders API tests',
-	{ tag: '@skip-on-default-pressable' },
+	{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 	() => {
 		let orderId, sampleData;
 
