@@ -300,15 +300,28 @@ const exitToWooHome = fromPromise( async () => {
 	window.location.href = getNewPath( {}, '/', {} );
 } );
 
+const getPluginNameParam = (
+	pluginSelected: CoreProfilerStateMachineContext[ 'pluginsSelected' ]
+) => {
+	if ( pluginSelected.includes( 'woocommerce-payments' ) ) {
+		return 'woocommerce-payments';
+	}
+	return 'jetpack-ai';
+};
+
 const redirectToJetpackAuthPage = ( {
 	event,
+	context,
 }: {
 	context: CoreProfilerStateMachineContext;
 	event: { output: { url: string } };
 } ) => {
 	const url = new URL( event.output.url );
 	url.searchParams.set( 'installed_ext_success', '1' );
-	url.searchParams.set( 'plugin_name', 'jetpack-ai' );
+	url.searchParams.set(
+		'plugin_name',
+		getPluginNameParam( context.pluginsSelected )
+	);
 	window.location.href = url.toString();
 };
 
