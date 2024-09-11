@@ -609,7 +609,6 @@ class ProductCollection extends AbstractBlock {
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
 		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
-		$related_to          = $request->get_param( 'woocommerceRelatedTo' );
 		$featured            = $request->get_param( 'featured' );
 		$time_frame          = $request->get_param( 'timeFrame' );
 		$price_range         = $request->get_param( 'priceRange' );
@@ -625,7 +624,6 @@ class ProductCollection extends AbstractBlock {
 				'stock_status'        => $stock_status,
 				'product_attributes'  => $product_attributes,
 				'handpicked_products' => $handpicked_products,
-				'related_to'          => $related_to,
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
@@ -722,7 +720,6 @@ class ProductCollection extends AbstractBlock {
 		$product_attributes  = $query['woocommerceAttributes'] ?? array();
 		$taxonomies_query    = $this->get_filter_by_taxonomies_query( $query['tax_query'] ?? array() );
 		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? array();
-		$related_to          = $query['woocommerceRelatedTo'] ?? array();
 		$time_frame          = $query['timeFrame'] ?? null;
 		$price_range         = $query['priceRange'] ?? null;
 
@@ -735,7 +732,6 @@ class ProductCollection extends AbstractBlock {
 				'product_attributes'  => $product_attributes,
 				'taxonomies_query'    => $taxonomies_query,
 				'handpicked_products' => $handpicked_products,
-				'related_to'          => $related_to,
 				'featured'            => $query['featured'] ?? false,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
@@ -780,9 +776,8 @@ class ProductCollection extends AbstractBlock {
 		);
 
 		$handpicked_products = $query['handpicked_products'] ?? array();
-		$related_products    = $this->get_related_products( $query['related_to'] );
 
-		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products, $related_products );
+		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 
 		return $result;
 	}
