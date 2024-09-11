@@ -25,6 +25,7 @@ export default function ProductListContent( props: {
 	className?: string;
 	searchTerm?: string;
 	category?: string;
+	lastProductRef?: React.RefObject< HTMLDivElement >;
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
@@ -64,6 +65,11 @@ export default function ProductListContent( props: {
 				{ props.products.map( ( product, index ) => (
 					<Fragment key={ product.id }>
 						<ProductCard
+							ref={
+								index === props.products.length - 1
+									? props.lastProductRef
+									: null
+							}
 							key={ product.id }
 							type={ props.type }
 							product={ {
@@ -94,7 +100,10 @@ export default function ProductListContent( props: {
 									Object.entries( {
 										...wccomHelperSettings.inAppPurchaseURLParams,
 										...( props.productGroup !== undefined
-											? { utm_group: props.productGroup }
+											? {
+													utm_group:
+														props.productGroup,
+											  }
 											: {} ),
 									} )
 								),
@@ -118,7 +127,9 @@ export default function ProductListContent( props: {
 								...( props.productGroup && {
 									group_id: props.productGroup,
 								} ),
-								...( props.group && { group: props.group } ),
+								...( props.group && {
+									group: props.group,
+								} ),
 								...( props.searchTerm && {
 									searchTerm: props.searchTerm,
 								} ),

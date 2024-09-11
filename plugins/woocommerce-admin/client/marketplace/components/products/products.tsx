@@ -34,6 +34,7 @@ interface ProductsProps {
 	type: ProductType;
 	searchTerm?: string;
 	showAllButton?: boolean;
+	lastProductRef?: React.RefObject< HTMLDivElement >;
 }
 
 const LABELS = {
@@ -205,6 +206,7 @@ export default function Products( props: ProductsProps ) {
 				className={ productListClass }
 				searchTerm={ props.searchTerm }
 				category={ category }
+				lastProductRef={ props.lastProductRef }
 			/>
 			{ props.type === 'theme' && (
 				<div

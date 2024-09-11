@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import {
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+	useRef,
+} from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 
 /**
@@ -27,15 +33,20 @@ import ConnectNotice from '~/marketplace/components/connect-notice/connect-notic
 import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
 import LoadMoreButton from '~/marketplace/components/load-more-button/load-more-button';
-import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const [ products, setProducts ] = useState< Product[] >( [] );
 	const [ hasMore, setHasMore ] = useState( false );
+	const [ page, setPage ] = useState( 1 );
 	const { setIsLoading, selectedTab, setHasBusinessServices } =
 		marketplaceContextValue;
 	const query = useQuery();
+	const lastProductRef = useRef< HTMLDivElement >( null );
+
+	const loadMore = useCallback( () => {
+		setPage( ( prevPage ) => prevPage + 1 );
+	}, [] );
 
 	// On initial load of the in-app marketplace, fetch extensions, themes and business services
 	// and check if there are any business services available on WCCOM
@@ -84,7 +95,9 @@ export default function Content(): JSX.Element {
 		}
 
 		setIsLoading( true );
-		setProducts( [] );
+		if ( page === 1 ) {
+			setProducts( [] );
+		}
 		setHasMore( false );
 
 		const params = new URLSearchParams();
@@ -111,13 +124,31 @@ export default function Content(): JSX.Element {
 			params.append( 'country', wccomSettings.storeCountry );
 		}
 
+		if ( page > 1 ) {
+			params.append( 'page', String( page ) );
+		}
+
 		fetchSearchResults( params, abortController.signal )
 			.then( ( productList ) => {
-				setProducts( productList.products );
+				setProducts( ( prevProducts ) => {
+					const newProducts = [
+						...prevProducts,
+						...productList.products,
+					];
+					setTimeout( () => {
+						lastProductRef.current?.scrollIntoView( {
+							behavior: 'auto',
+							block: 'start',
+						} );
+					}, 0 );
+					return newProducts;
+				} );
 				setHasMore( productList.hasMore );
 			} )
 			.catch( () => {
-				setProducts( [] );
+				if ( page === 1 ) {
+					setProducts( [] );
+				}
 				setHasMore( false );
 			} )
 			.finally( () => {
@@ -143,96 +174,46 @@ export default function Content(): JSX.Element {
 		query?.tab,
 		setIsLoading,
 		query?.section,
+		page,
 	] );
+
+	const getProductType = ( tab: string ): ProductType => {
+		switch ( tab ) {
+			case 'themes':
+				return ProductType.theme;
+			case 'business-services':
+				return ProductType.businessService;
+			default:
+				return ProductType.extension;
+		}
+	};
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
-				return (
-					<>
-						<Products
-							products={ products }
-							categorySelector={ true }
-							type={ ProductType.extension }
-						/>
-						{ hasMore && (
-							<LoadMoreButton
-								onLoadMore={ () => {
-									const params = new URLSearchParams();
-									params.append(
-										'page',
-										String(
-											products.length /
-												MARKETPLACE_ITEMS_PER_PAGE +
-												1
-										)
-									);
-
-									const wccomSettings = getAdminSetting(
-										'wccomHelper',
-										false
-									);
-									if ( wccomSettings.storeCountry ) {
-										params.append(
-											'country',
-											wccomSettings.storeCountry
-										);
-									}
-
-									fetchSearchResults( params ).then(
-										( productList ) => {
-											setProducts( [
-												...products,
-												...productList.products,
-											] );
-											setHasMore( productList.hasMore );
-										}
-									);
-								} }
-							/>
-						) }
-					</>
-				);
 			case 'themes':
-				return (
-					<>
-						<Products
-							products={ products }
-							categorySelector={ true }
-							type={ ProductType.theme }
-						/>
-						{ hasMore && (
-							<LoadMoreButton
-								onLoadMore={ () => {
-									console.log( 'load more' );
-								} }
-							/>
-						) }
-					</>
-				);
 			case 'business-services':
 				return (
 					<>
 						<Products
 							products={ products }
 							categorySelector={ true }
-							type={ ProductType.businessService }
+							type={ getProductType( selectedTab ) }
+							lastProductRef={ lastProductRef }
 						/>
 						{ hasMore && (
-							<LoadMoreButton
-								onLoadMore={ () => {
-									console.log( 'load more' );
-								} }
-							/>
+							<LoadMoreButton onLoadMore={ loadMore } />
 						) }
 					</>
 				);
 			case 'search':
 				return (
-					<SearchResults
-						products={ products }
-						type={ SearchResultType.all }
-					/>
+					<>
+						<SearchResults
+							products={ products }
+							type={ SearchResultType.all }
+						/>
+					</>
 				);
 			case 'discover':
 				return <Discover />;
