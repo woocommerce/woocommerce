@@ -21,11 +21,16 @@ jest.mock( '@wordpress/element', () => {
 	};
 } );
 
-const renderInCheckoutProvider = ( ui, options = {} ) => {
+const renderInCheckoutProvider = ( ui, options = { legacyRoot: true } ) => {
 	const Wrapper = ( { children } ) => {
 		return <CheckoutProvider>{ children }</CheckoutProvider>;
 	};
 	const result = render( ui, { wrapper: Wrapper, ...options } );
+	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
+	// rendering error will be shown.
+	expect( console ).toHaveErroredWith(
+		`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot`
+	);
 
 	return result;
 };
@@ -124,7 +129,7 @@ describe( 'Form Component', () => {
 		);
 	};
 
-	test( 'updates context value when interacting with form elements', async () => {
+	it( 'updates context value when interacting with form elements', async () => {
 		renderInCheckoutProvider(
 			<>
 				<WrappedAddressForm type="shipping" />
@@ -150,7 +155,7 @@ describe( 'Form Component', () => {
 		);
 	} );
 
-	test( 'input fields update when changing the country', async () => {
+	it( 'input fields update when changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
 		await act( async () => {
@@ -177,7 +182,7 @@ describe( 'Form Component', () => {
 		expect( screen.getByLabelText( /Postal code/ ) ).toBeInTheDocument();
 	} );
 
-	test( 'input values are reset after changing the country', async () => {
+	it( 'input values are reset after changing the country', async () => {
 		renderInCheckoutProvider( <WrappedAddressForm type="shipping" /> );
 
 		// First enter an address with no state, but fill the city.

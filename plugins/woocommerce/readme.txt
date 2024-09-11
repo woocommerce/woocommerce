@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Enhancement - Add query params masking to remote logger [#51108](https://github.com/woocommerce/woocommerce/pull/51108)
 * Update - Added more paths to remote logger query param whitelist [#51108](https://github.com/woocommerce/woocommerce/pull/51108)
+* Fix - Revert update to React 18 in Checkout block. [#51289](https://github.com/woocommerce/woocommerce/pull/51289)
 * Fix - Add check to ensure themes API is safe [#51081](https://github.com/woocommerce/woocommerce/pull/51081)
 * Fix - CYS - Remove usage of `prepare_item_for_response` function in `Images` endpoint. [#50923](https://github.com/woocommerce/woocommerce/pull/50923)
 * Fix - Add ability for a screen reader to announce the current tab on a single product page. [#50373](https://github.com/woocommerce/woocommerce/pull/50373)
