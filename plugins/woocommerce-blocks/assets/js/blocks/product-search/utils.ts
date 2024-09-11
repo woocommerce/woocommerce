@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import {
-	ButtonOptions,
+	PositionOptions,
 	SEARCH_BLOCK_NAME,
 	SEARCH_VARIATION_NAME,
 } from './constants';
@@ -52,7 +52,7 @@ export function getSelectedRadioControlOption(
 	buttonPosition: string
 ): string {
 	if ( isInputAndButtonOption( buttonPosition ) ) {
-		return ButtonOptions.INPUT_AND_BUTTON;
+		return PositionOptions.INPUT_AND_BUTTON;
 	}
 	return buttonPosition;
 }
@@ -71,5 +71,5 @@ export function getInputAndButtonOption( value: ButtonPositionProps ) {
 		return value;
 	}
 	// The default value is 'inside' for input and button.
-	return ButtonOptions.OUTSIDE;
+	return PositionOptions.OUTSIDE;
 }

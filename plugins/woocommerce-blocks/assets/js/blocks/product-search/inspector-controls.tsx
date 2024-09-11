@@ -29,7 +29,7 @@ import {
 	isWooSearchBlockVariation,
 } from './utils';
 import { ButtonPositionProps, ProductSearchBlock } from './types';
-import { ButtonOptions } from './constants';
+import { PositionOptions } from './constants';
 
 const ProductSearchControls = ( props: ProductSearchBlock ) => {
 	const { attributes, setAttributes } = props;
@@ -54,22 +54,22 @@ const ProductSearchControls = ( props: ProductSearchBlock ) => {
 					options={ [
 						{
 							label: __( 'Input and button', 'woocommerce' ),
-							value: ButtonOptions.INPUT_AND_BUTTON,
+							value: PositionOptions.INPUT_AND_BUTTON,
 						},
 						{
 							label: __( 'Input only', 'woocommerce' ),
-							value: ButtonOptions.NO_BUTTON,
+							value: PositionOptions.NO_BUTTON,
 						},
 						{
 							label: __( 'Button only', 'woocommerce' ),
-							value: ButtonOptions.BUTTON_ONLY,
+							value: PositionOptions.BUTTON_ONLY,
 						},
 					] }
 					onChange={ (
 						selected: Partial< ButtonPositionProps > &
 							'input-and-button'
 					) => {
-						if ( selected !== ButtonOptions.INPUT_AND_BUTTON ) {
+						if ( selected !== PositionOptions.INPUT_AND_BUTTON ) {
 							setAttributes( {
 								buttonPosition: selected,
 							} );
@@ -82,9 +82,9 @@ const ProductSearchControls = ( props: ProductSearchBlock ) => {
 						}
 					} }
 				/>
-				{ buttonPosition !== ButtonOptions.NO_BUTTON && (
+				{ buttonPosition !== PositionOptions.NO_BUTTON && (
 					<>
-						{ buttonPosition !== ButtonOptions.BUTTON_ONLY && (
+						{ buttonPosition !== PositionOptions.BUTTON_ONLY && (
 							<ToggleGroupControl
 								label={ __( 'BUTTON POSITION', 'woocommerce' ) }
 								isBlock
@@ -98,11 +98,11 @@ const ProductSearchControls = ( props: ProductSearchBlock ) => {
 								) }
 							>
 								<ToggleGroupControlOption
-									value={ ButtonOptions.INSIDE }
+									value={ PositionOptions.INSIDE }
 									label={ __( 'Inside', 'woocommerce' ) }
 								/>
 								<ToggleGroupControlOption
-									value={ ButtonOptions.OUTSIDE }
+									value={ PositionOptions.OUTSIDE }
 									label={ __( 'Outside', 'woocommerce' ) }
 								/>
 							</ToggleGroupControl>
