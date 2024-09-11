@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Updated webpack build script for wc admin so that the wp-admin-scripts are dynamically fetched from the fs instead of a hard list

@@ -1,0 +1,8 @@
+.wp-block-woocommerce-product-filter-attribute__loading {
+	padding: 0;
+
+	li {
+		@include placeholder();
+		margin: 5px 0;
+	}
+}

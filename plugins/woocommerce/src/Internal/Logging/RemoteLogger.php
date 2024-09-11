@@ -438,7 +438,18 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return string The sanitized request URI.
 	 */
 	private function sanitize_request_uri( $request_uri ) {
-		$default_whitelist = array( 'path', 'page', 'step', 'task', 'tab' );
+		$default_whitelist = array(
+			'path',
+			'page',
+			'step',
+			'task',
+			'tab',
+			'section',
+			'status',
+			'post_type',
+			'taxonomy',
+			'action',
+		);
 
 		/**
 		 * Filter to allow other plugins to whitelist request_uri query parameter values for unmasked remote logging.
