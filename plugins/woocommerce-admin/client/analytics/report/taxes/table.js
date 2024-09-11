@@ -131,7 +131,7 @@ class TaxesReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals, totalResults ) {
+	getSummary( totals, totalResults = 0 ) {
 		const {
 			total_tax: totalTax = 0,
 			order_tax: orderTax = 0,
