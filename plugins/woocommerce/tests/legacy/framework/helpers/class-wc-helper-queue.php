@@ -39,12 +39,12 @@ class WC_Helper_Queue {
 	 */
 	public static function run_all_pending( $group = null ) {
 		$queue_runner = new ActionScheduler_QueueRunner();
-		$jobs         = self::get_all_pending(  $group );
+		$jobs         = self::get_all_pending( $group );
 		while ( $jobs ) {
 			foreach ( $jobs as $job_id => $job ) {
 				$queue_runner->process_action( $job_id );
 			}
-			$jobs = self::get_all_pending(  $group );
+			$jobs = self::get_all_pending( $group );
 		}
 	}
 
