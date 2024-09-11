@@ -18,7 +18,7 @@ config = {
 				// '**/shopper/**/*.spec.js',
 				'**/api-tests/**/*.test.js',
 			],
-			grepInvert: /@skip-on-default-pressable/,
+			grep: /@skip-on-default-pressable/,
 		},
 	],
 };
