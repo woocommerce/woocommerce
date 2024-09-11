@@ -356,18 +356,15 @@ test.describe( 'Product Collection registration', () => {
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 	} );
-} );
 
-test.describe( 'Deleted product reference in Product Collection block', () => {
-	let testProductId: number | null = null;
-
-	test.beforeEach( async ( { requestUtils } ) => {
-		// Activate plugin
-		await requestUtils.activatePlugin(
-			'register-product-collection-tester'
-		);
-
+	test( 'Product picker should be shown when selected product is deleted', async ( {
+		pageObject,
+		admin,
+		editor,
+		requestUtils,
+	} ) => {
 		// Add a new test product to the database
+		let testProductId: number | null = null;
 		const newProduct = await requestUtils.rest( {
 			method: 'POST',
 			path: 'wc/v3/products',
@@ -377,14 +374,7 @@ test.describe( 'Deleted product reference in Product Collection block', () => {
 			},
 		} );
 		testProductId = newProduct.id;
-	} );
 
-	test( 'Product picker should be shown when product reference is deleted', async ( {
-		pageObject,
-		admin,
-		editor,
-		requestUtils,
-	} ) => {
 		await admin.createNewPost();
 		await pageObject.insertProductCollection();
 		await pageObject.chooseCollectionInPost(
