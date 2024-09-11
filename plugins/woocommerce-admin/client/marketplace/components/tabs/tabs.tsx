@@ -41,7 +41,7 @@ const setUrlTabParam = ( tabKey: string, query: Record< string, string > ) => {
 		url: getNewPath(
 			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
 			MARKETPLACE_PATH,
-			term,
+			term
 		),
 	} );
 };
@@ -66,7 +66,7 @@ const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs,
 	tabs: Tabs,
-	query: Record< string, string >,
+	query: Record< string, string >
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
 
