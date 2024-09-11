@@ -47,13 +47,13 @@ function Search(): JSX.Element {
 	}, [ query.term ] );
 
 	const runSearch = () => {
-		const term = searchTerm.trim();
+		const newQuery: { term?: string; tab?: string } = query;
 
-		const newQuery: { term?: string; tab?: string } = {};
-		if ( term !== '' ) {
-			newQuery.term = term;
+		if ( ! newQuery.tab ) {
 			newQuery.tab = 'extensions';
 		}
+
+		newQuery.term = searchTerm.trim();
 
 		// When the search term changes, we reset the query string on purpose.
 		navigateTo( {
