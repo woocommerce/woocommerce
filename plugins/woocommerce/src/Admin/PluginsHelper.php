@@ -33,11 +33,13 @@ if ( ! function_exists( 'get_plugins' ) ) {
 class PluginsHelper {
 
 	/**
-	 * Indicates whether the expiration notice for subscriptions can be displayed.
+	 * Subscription notices in Woo screens are shown in clear priority order, first
+	 * expired, and if those don't exist, expiring, and finally if none of those exist,
+	 * then missing. This keeps track of whether we can show the next set of notices.
 	 *
 	 * @var bool
 	 */
-	public static $can_show_expiring_or_missing_subs_notice = true;
+	public static $subscription_usage_notices_already_shown = true;
 
 	/**
 	 * The URL for the WooCommerce subscription page.
@@ -848,7 +850,7 @@ class PluginsHelper {
 			return array();
 		}
 
-		if ( ! self::$can_show_expiring_or_missing_subs_notice ) {
+		if ( ! self::$subscription_usage_notices_already_shown ) {
 			return array();
 		}
 
@@ -874,7 +876,7 @@ class PluginsHelper {
 		$total_expiring_subscriptions = count( $expiring_subscriptions );
 
 		// Don't show missing notice if there are expiring subscriptions.
-		self::$can_show_expiring_or_missing_subs_notice = false;
+		self::$subscription_usage_notices_already_shown = false;
 
 		// When payment method is missing on WooCommerce.com.
 		$helper_notices = WC_Helper::get_notices();
@@ -953,7 +955,7 @@ class PluginsHelper {
 		}
 
 		$total_expired_subscriptions                    = count( $expired_subscriptions );
-		self::$can_show_expiring_or_missing_subs_notice = false;
+		self::$subscription_usage_notices_already_shown = false;
 
 		$notice_data = self::get_subscriptions_notice_data(
 			$subscriptions,
@@ -1005,7 +1007,7 @@ class PluginsHelper {
 			return array();
 		}
 
-		if ( ! self::$can_show_expiring_or_missing_subs_notice ) {
+		if ( ! self::$subscription_usage_notices_already_shown ) {
 			return array();
 		}
 
