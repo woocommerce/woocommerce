@@ -56,12 +56,12 @@ export default function Content(): JSX.Element {
 	// Fetch all categories when query.term or query.category changes
 	useEffect( () => {
 		const categories: Array< {
-			key: keyof SearchResultsCountType;
+			category: keyof SearchResultsCountType;
 			type: ProductType;
 		} > = [
-			{ key: 'extensions', type: ProductType.extension },
-			{ key: 'themes', type: ProductType.theme },
-			{ key: 'business-services', type: ProductType.businessService },
+			{ category: 'extensions', type: ProductType.extension },
+			{ category: 'themes', type: ProductType.theme },
+			{ category: 'business-services', type: ProductType.businessService },
 		];
 		const abortControllers = categories.map( () => new AbortController() );
 
@@ -69,10 +69,10 @@ export default function Content(): JSX.Element {
 		setAllProducts( [] );
 
 		Promise.all(
-			categories.map( ( { key, type }, index ) => {
+			categories.map( ( { category, type }, index ) => {
 				const params = new URLSearchParams();
-				if ( key !== 'extensions' ) {
-					params.append( 'category', key );
+				if ( category !== 'extensions' ) {
+					params.append( 'category', category );
 				}
 				if ( query.term ) {
 					params.append( 'term', query.term );
@@ -92,7 +92,7 @@ export default function Content(): JSX.Element {
 						productList,
 						type
 					);
-					if ( key === 'business-services' ) {
+					if ( category === 'business-services' ) {
 						setHasBusinessServices( typedProducts.length > 0 );
 					}
 					return typedProducts;
