@@ -12,21 +12,13 @@ import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, LayoutOptions } from '../types';
 
 const collection = {
-	name: CoreCollectionNames.RELATED_TO,
+	name: CoreCollectionNames.RELATED,
 	title: __( 'Related Products', 'woocommerce' ),
 	icon: <Icon icon={ loop } />,
 	description: __( 'Recommend products like this one.', 'woocommerce' ),
 	keywords: [ 'product collection' ],
 	scope: [],
-	preview: {
-		initialPreviewState: {
-			isPreview: true,
-			previewMessage: __(
-				'Actual products will vary depending on the product being viewed.',
-				'woocommerce'
-			),
-		},
-	},
+	usesReference: [ 'product' ],
 };
 
 const attributes = {

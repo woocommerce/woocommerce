@@ -616,7 +616,8 @@ class ProductCollection extends AbstractBlock {
 		// Most likely this argument is being accessed in the test environment image.
 		$args['author'] = '';
 
-		return $this->get_final_query_args(
+		$final_query = $this->get_final_query_args(
+			$product_collection_query_context['collection'] ?? '',
 			$args,
 			array(
 				'orderby'             => $orderby,
@@ -629,6 +630,8 @@ class ProductCollection extends AbstractBlock {
 				'priceRange'          => $price_range,
 			)
 		);
+
+		return $final_query;
 	}
 
 	/**
@@ -724,6 +727,7 @@ class ProductCollection extends AbstractBlock {
 		$price_range         = $query['priceRange'] ?? null;
 
 		$final_query = $this->get_final_query_args(
+			$this->parsed_block['attrs']['collection'] ?? '',
 			$common_query_values,
 			array(
 				'on_sale'             => $is_on_sale,
@@ -745,11 +749,12 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Get final query args based on provided values
 	 *
-	 * @param array $common_query_values Common query values.
-	 * @param array $query               Query from block context.
-	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
+	 * @param string $collection                 The name of the collection.
+	 * @param array  $common_query_values        Common query values.
+	 * @param array  $query                      Query from block context.
+	 * @param bool   $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
-	private function get_final_query_args( $common_query_values, $query, $is_exclude_applied_filters = false ) {
+	private function get_final_query_args( $collection, $common_query_values, $query, $is_exclude_applied_filters = false ) {
 		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
 		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
 		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
@@ -761,6 +766,7 @@ class ProductCollection extends AbstractBlock {
 		$date_query       = $this->get_date_query( $query['timeFrame'] ?? array() );
 		$price_query_args = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
 		$handpicked_query = $this->get_handpicked_query( $query['handpicked_products'] ?? false );
+		$collection_query = $this->get_core_collection_query( $collection, $query );
 
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
@@ -774,8 +780,26 @@ class ProductCollection extends AbstractBlock {
 			$applied_filters_query,
 			$date_query,
 			$price_query_args,
-			$handpicked_query
+			$handpicked_query,
+			$collection_query
 		);
+	}
+
+	/**
+	 * Get any collection-specific query args to merge.
+	 *
+	 * @param string $collection  The name of the collection.
+	 * @param array  $query       Query from block context.
+	 *
+	 * @return array The collection-specific query to merge.
+	 */
+	private function get_core_collection_query( $collection, $query ) {
+		$collection = preg_match( '/^woocommerce\/product-collection\/(.*)/', $collection, $matches ) ? $matches[1] : '';
+		if ( '' === $collection ) {
+			return array();
+		}
+
+		return array();
 	}
 
 	/**
@@ -1120,33 +1144,6 @@ class ProductCollection extends AbstractBlock {
 				),
 			),
 		);
-	}
-
-	/**
-	 * Returns a query for filtering products that are related to the ones given.
-	 *
-	 * @param array $product_ids The IDs pf products that we're looking for a relationship to.
-	 * @return array The IDs of the related products.
-	 */
-	private function get_related_products( $product_ids ) {
-		if ( empty( $product_ids ) ) {
-			return array();
-		}
-
-		$related_product_ids = array();
-		foreach ( $product_ids as $id ) {
-			$related_product_ids = array_merge(
-				$related_product_ids,
-				// Since this is a secondary query we want to make sure to
-				// grab enough products so that filtering in the primary
-				// query will have a subset to work with. We ALSO need
-				// to make sure that we aren't harming performance by
-				// fetching and caching too many related product IDs.
-				wc_get_related_products( $id, 100 )
-			);
-		}
-
-		return $related_product_ids;
 	}
 
 	/**
