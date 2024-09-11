@@ -40,6 +40,7 @@
 		}
 	},
 	"supports": {
+		"interactivity": true,
 		"align": [ "left", "right", "center"],
 		"inserter": false,
 		"color": {

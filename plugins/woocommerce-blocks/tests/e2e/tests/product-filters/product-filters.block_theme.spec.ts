@@ -21,6 +21,7 @@ const blockData = {
 	},
 	slug: 'archive-product',
 	productPage: '/product/hoodie/',
+	shopPage: '/shop/',
 };
 
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
