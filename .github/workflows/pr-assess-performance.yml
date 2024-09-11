@@ -58,7 +58,9 @@ jobs:
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
             - name: Restart Test Environment
-              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
+              run: |
+                pnpm --filter="@woocommerce/plugin-woocommerce" env:stop
+                pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
             - name: Measure performance (editor@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
               env:
