@@ -13,6 +13,7 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
+
 	}
 
 	/**

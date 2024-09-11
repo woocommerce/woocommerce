@@ -1,5 +1,7 @@
 <?php
 
+require_once WC_ABSPATH . '/includes/class-wc-brands.php';
+
 /**
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V2 REST API.
@@ -131,7 +133,6 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
 	 */
 	public function test_product_api_get_all_fields_v2() {
-		update_option( 'woocommerce_remote_variant_assignment', 2 );
 		$expected_response_fields = $this->get_expected_response_fields();
 
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
@@ -165,7 +166,6 @@ class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * Test that all fields are returned when requested one by one.
 	 */
 	public function test_products_get_each_field_one_by_one_v2() {
-		update_option( 'woocommerce_remote_variant_assignment', 2 );
 		$expected_response_fields = $this->get_expected_response_fields();
 		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
