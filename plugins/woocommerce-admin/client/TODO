@@ -1,0 +1,3 @@
+- Change tab, term results are not persisting
+- `!! query.term` makes numbers jump
+- Styling on tabs

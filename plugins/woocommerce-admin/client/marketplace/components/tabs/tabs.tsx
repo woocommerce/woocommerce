@@ -35,12 +35,13 @@ interface Tabs {
 const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
 
-const setUrlTabParam = ( tabKey: string ) => {
+const setUrlTabParam = ( tabKey: string, query: Record< string, string > ) => {
+	const term = query.term ? { term: query.term.trim() } : {};
 	navigateTo( {
 		url: getNewPath(
 			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
 			MARKETPLACE_PATH,
-			{}
+			term,
 		),
 	} );
 };
@@ -64,7 +65,8 @@ const getVisibleTabs = (
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs,
-	tabs: Tabs
+	tabs: Tabs,
+	query: Record< string, string >,
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
 
@@ -73,7 +75,7 @@ const renderTabs = (
 			return;
 		}
 		setSelectedTab( tabKey );
-		setUrlTabParam( tabKey );
+		setUrlTabParam( tabKey, query );
 	};
 
 	const tabContent = [];
@@ -185,7 +187,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( marketplaceContextValue, visibleTabs, tabs ) }
+			{ renderTabs( marketplaceContextValue, visibleTabs, tabs, query ) }
 		</nav>
 	);
 };
