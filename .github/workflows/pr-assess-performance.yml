@@ -47,16 +47,16 @@ jobs:
                 git reset --hard
                 git checkout 3d7d7f02017383937f1a4158d433d0e5d44b3dc9
 
-            - name: Rebuild
-              run: |
-                git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | grep -v .wireit | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
-                pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
-                pnpm --filter='@woocommerce/plugin-woocommerce' build
+              # - name: Rebuild
+              #   run: |
+              #     git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | grep -v .wireit | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
+              #     pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+              #     pnpm --filter='@woocommerce/plugin-woocommerce' build
 
             # - name: Restart Test Environment
             #   run: |
-            #   pnpm --filter="@woocommerce/plugin-woocommerce" env:stop && sudo rm -rf ~/wp-env
-            #   pnpm --filter="@woocommerce/plugin-woocommerce" env:test
+            #     pnpm --filter="@woocommerce/plugin-woocommerce" env:stop && sudo rm -rf ~/wp-env
+            #     pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
             - name: Measure performance (@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
               env:
