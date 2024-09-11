@@ -26,11 +26,14 @@ jobs:
               name: Install Monorepo
               with:
                 install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
+                build-type: 'full'
                 pull-playwright-cache: true
                 pull-package-deps: '@woocommerce/plugin-woocommerce'
 
             - name: Start Test Environment
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
+
             
             # Install/Build/Measure for current
             # Install/Build/Measure for github.head_ref || github.sha
