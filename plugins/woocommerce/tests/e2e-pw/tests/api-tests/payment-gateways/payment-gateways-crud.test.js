@@ -3,7 +3,7 @@ const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 test.describe( 'Payment Gateways API tests', () => {
 	test(
 		'can view all payment gateways',
-		{ tag: '@skip-on-default-pressable' },
+		{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 		async ( { request } ) => {
 			// call API to retrieve the payment gateways
 			const response = await request.get(
