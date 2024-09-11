@@ -12,6 +12,7 @@ if ( class_exists( 'WC_Settings_Accounts', false ) ) {
 }
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * WC_Settings_Accounts.
@@ -262,6 +263,15 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'id'   => 'personal_data_retention',
 			),
 		);
+
+		if ( ! Features::is_enabled( 'experimental-blocks' ) ) {
+			$account_settings = array_filter(
+				$account_settings,
+				function ( $setting ) {
+					return 'woocommerce_enable_delayed_account_creation' !== $setting['id'];
+				},
+			);
+		}
 
 		// Change settings when using the block based checkout.
 		if ( CartCheckoutUtils::is_checkout_block_default() ) {
