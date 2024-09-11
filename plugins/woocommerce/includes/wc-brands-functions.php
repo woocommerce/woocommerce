@@ -99,12 +99,12 @@ if ( ! function_exists( 'get_brand_thumbnail_url' ) ) {
 	/**
 	 * Polyfill for get_brand_thumbnail_image.
 	 *
-	 * @param int $brand_id Brand ID.
+	 * @param int    $brand_id Brand ID.
 	 * @param string $size Thumbnail image size.
 	 * @return string
 	 */
 	function get_brand_thumbnail_url( $brand_id, $size = 'full' ) {
-		wc_get_brand_thumbnail_url($brand_id, $size );
+		return wc_get_brand_thumbnail_url( $brand_id, $size );
 	}
 }
 
@@ -118,7 +118,7 @@ if ( ! function_exists( 'get_brand_thumbnail_image' ) ) {
 	 * @return string
 	 */
 	function get_brand_thumbnail_image( $brand, $size = '' ) {
-		wc_get_brand_thumbnail_image($brand, $size );
+		return wc_get_brand_thumbnail_image( $brand, $size );
 	}
 }
 
@@ -134,6 +134,6 @@ if ( ! function_exists( 'get_brands' ) ) {
 	 * @return array  List of terms
 	 */
 	function get_brands( $post_id = 0, $sep = ', ', $before = '', $after = '' ) {
-		wc_get_brands($post_id, $sep, $before, $after );
+		return wc_get_brands( $post_id, $sep, $before, $after );
 	}
 }

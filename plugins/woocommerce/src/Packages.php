@@ -97,7 +97,7 @@ class Packages {
 	/**
 	 * Checks a package exists by looking for it's directory.
 	 *
-	 * @param string $string Class name.
+	 * @param string $class Class name.
 	 * @return boolean
 	 */
 	public static function should_load_class( $class ) {
