@@ -858,6 +858,8 @@ class ProductCollection extends AbstractBlock {
 
 				$result = $this->array_merge_recursive_replace_non_array_properties( $acc, $query );
 
+				// The post__in query needs special handling, as it should be an
+				// intersection of all post__in queries.
 				if (
 					is_array( $acc['post__in'] ) &&
 					! empty( $acc['post__in'] ) &&
