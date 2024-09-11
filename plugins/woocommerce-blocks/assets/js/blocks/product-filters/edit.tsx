@@ -46,42 +46,8 @@ const TEMPLATE: InnerBlockTemplate[] = [
 			content: __( 'Filters', 'woocommerce' ),
 		},
 	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'active-filters',
-			heading: __( 'Active', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'price-filter',
-			heading: __( 'Price', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'stock-filter',
-			heading: __( 'Status', 'woocommerce' ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'attribute-filter',
-			heading: defaultAttribute.attribute_label,
-			attributeId: parseInt( defaultAttribute.attribute_id, 10 ),
-		},
-	],
-	[
-		'woocommerce/product-filter',
-		{
-			filterType: 'rating-filter',
-			heading: __( 'Rating', 'woocommerce' ),
-		},
-	],
+	[ 'woocommerce/product-filter-active' ],
+	[ 'woocommerce/product-filter-attribute' ],
 	[
 		'core/buttons',
 		{ layout: { type: 'flex' } },

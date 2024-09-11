@@ -36,7 +36,7 @@ if ( isExperimentalBlocksEnabled() ) {
 		variations: ATTRIBUTES.map( ( attribute, index ) => {
 			return {
 				name: `product-filter-attribute-${ attribute.attribute_name }`,
-				title: attribute.attribute_label,
+				title: `${ attribute.attribute_label } (Experimental)`,
 				description: sprintf(
 					// translators: %s is the attribute label.
 					__(

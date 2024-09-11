@@ -48,9 +48,7 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas
-			.getByLabel( 'Block: Color (Experimental)' )
-			.getByLabel( 'Block: Filter Options' );
+		const block = editor.canvas.getByLabel( 'Block: Color (Experimental)' );
 
 		await expect( block ).toBeVisible();
 
@@ -82,9 +80,7 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas
-			.getByLabel( 'Block: Color (Experimental)' )
-			.getByLabel( 'Block: Filter Options' );
+		const block = editor.canvas.getByLabel( 'Block: Color (Experimental)' );
 
 		await expect( block ).toBeVisible();
 
@@ -112,9 +108,7 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas
-			.getByLabel( 'Block: Color (Experimental)' )
-			.getByLabel( 'Block: Filter Options' );
+		const block = editor.canvas.getByLabel( 'Block: Color (Experimental)' );
 
 		await editor.openDocumentSettingsSidebar();
 		await block.click();
