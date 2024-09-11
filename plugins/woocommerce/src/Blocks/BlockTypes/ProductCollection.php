@@ -760,11 +760,12 @@ class ProductCollection extends AbstractBlock {
 		$tax_query        = $this->merge_tax_queries( $visibility_query, $attributes_query, $taxonomies_query, $featured_query );
 		$date_query       = $this->get_date_query( $query['timeFrame'] ?? array() );
 		$price_query_args = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
+		$handpicked_query = $this->get_handpicked_query( $query['handpicked_products'] ?? false );
 
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
 
-		$merged_query = $this->merge_queries(
+		return $this->merge_queries(
 			$common_query_values,
 			$orderby_query,
 			$on_sale_query,
@@ -772,14 +773,9 @@ class ProductCollection extends AbstractBlock {
 			$tax_query,
 			$applied_filters_query,
 			$date_query,
-			$price_query_args
+			$price_query_args,
+			$handpicked_query
 		);
-
-		$handpicked_products = $query['handpicked_products'] ?? array();
-
-		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
-
-		return $result;
 	}
 
 	/**
@@ -828,40 +824,78 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	private function merge_queries( ...$queries ) {
+		// Rather than a simple merge, some query vars should be held aside and merged differently.
+		$special_query_vars = array(
+			'post__in' => array(),
+		);
+		$special_query_keys = array_keys( $special_query_vars );
+
 		$merged_query = array_reduce(
 			$queries,
-			function ( $acc, $query ) {
+			function ( $acc, $query ) use ( $special_query_keys, &$special_query_vars ) {
 				if ( ! is_array( $query ) ) {
 					return $acc;
 				}
+
 				// If the $query doesn't contain any valid query keys, we unpack/spread it then merge.
 				if ( empty( array_intersect( $this->get_valid_query_vars(), array_keys( $query ) ) ) ) {
 					return $this->merge_queries( $acc, ...array_values( $query ) );
 				}
+
+				// Pull out the special query vars so we can merge them separately.
+				foreach ( $special_query_keys as $query_var ) {
+					if ( isset( $query[ $query_var ] ) ) {
+						$special_query_vars[ $query_var ][] = $query[ $query_var ];
+						unset( $query[ $query_var ] );
+					}
+				}
+
 				return $this->array_merge_recursive_replace_non_array_properties( $acc, $query );
 			},
 			array()
 		);
 
-		/**
-		 * If there are duplicated items in post__in, it means that we need to
-		 * use the intersection of the results, which in this case, are the
-		 * duplicated items.
-		 */
-		if (
-			! empty( $merged_query['post__in'] ) &&
-			is_array( $merged_query['post__in'] ) &&
-			count( $merged_query['post__in'] ) > count( array_unique( $merged_query['post__in'] ) )
-		) {
-			$merged_query['post__in'] = array_unique(
-				array_diff(
-					$merged_query['post__in'],
-					array_unique( $merged_query['post__in'] )
-				)
-			);
-		}
+		// Perform any necessary special merges.
+		$merged_query['post__in'] = $this->merge_post__in( ...$special_query_vars['post__in'] );
 
 		return $merged_query;
+	}
+
+	/**
+	 * Merge all of the 'post__in' values and return an array containing only values that are present in all arrays.
+	 *
+	 * @param int[][] ...$post__in The 'post__in' values to be merged.
+	 *
+	 * @return int[] The merged 'post__in' values.
+	 */
+	private function merge_post__in( ...$post__in ) {
+		if ( empty( $post__in ) ) {
+			return array();
+		}
+
+		// Since we're using array_intersect, any array that is empty will result
+		// in an empty output array. To avoid this we need to make sure every
+		// argument is a non-empty array.
+		$post__in = array_filter(
+			$post__in,
+			function ( $val ) {
+				return is_array( $val ) && ! empty( $val );
+			}
+		);
+		if ( empty( $post__in ) ) {
+			return array();
+		}
+
+		// Since the 'post__in' filter is exclusionary we need to use an intersection of
+		// all of the arrays. This ensures one query doesn't add options that another
+		// has otherwise excluded from the results.
+		if ( count( $post__in ) > 1 ) {
+			$post__in = array_intersect( ...$post__in );
+		} else {
+			$post__in = reset( $post__in );
+		}
+
+		return array_values( array_unique( $post__in, SORT_NUMERIC ) );
 	}
 
 	/**
@@ -1143,6 +1177,23 @@ class ProductCollection extends AbstractBlock {
 		);
 	}
 
+	/**
+	 * Generates a post__in query to filter products to the set of provided IDs.
+	 *
+	 * @param int[]|false $handpicked_products The products to filter.
+	 *
+	 * @return array The post__in query.
+	 */
+	private function get_handpicked_query( $handpicked_products ) {
+		if ( false === $handpicked_products ) {
+			return array();
+		}
+
+		return array(
+			'post__in' => $handpicked_products,
+		);
+	}
+
 
 	/**
 	 * Merge tax_queries from various queries.
@@ -1241,50 +1292,6 @@ class ProductCollection extends AbstractBlock {
 
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		return ! empty( $result ) ? array( 'tax_query' => $result ) : array();
-	}
-
-	/**
-	 * Apply the query only to a subset of products
-	 *
-	 * @param array $query  The query.
-	 * @param array ...$ids The product IDs to filter.
-	 *
-	 * @return array
-	 */
-	private function filter_query_to_only_include_ids( $query, ...$ids ) {
-		if ( empty( $ids ) ) {
-			return $query;
-		}
-
-		// Since we're using array_intersect, any array that is empty will result
-		// in an empty array. To avoid this, we need to make sure every
-		// argument is a non-empty array.
-		$i              = 0;
-		$len            = count( $ids );
-		$post_in_filter = null;
-
-		// Make sure to filter any product IDs that have already been set in the query too.
-		if ( ! empty( $query['post__in'] ) ) {
-			$post_in_filter = $query['post__in'];
-		} else {
-			// Find the first non-empty array to serve as the base for the intersection.
-			while ( empty( $post_in_filter ) && $i < $len ) {
-				$post_in_filter = $ids[ $i ];
-				++$i;
-			}
-		}
-
-		for ( ; $i < $len; ++$i ) {
-			$arr = $ids[ $i ];
-			if ( is_array( $arr ) && ! empty( $arr ) ) {
-				$post_in_filter = array_intersect( $arr, $post_in_filter );
-			}
-		}
-
-		// Clean up the output since there will be duplicates and possibly some weird keys.
-		$query['post__in'] = array_values( array_unique( $post_in_filter, SORT_NUMERIC ) );
-
-		return $query;
 	}
 
 	/**
