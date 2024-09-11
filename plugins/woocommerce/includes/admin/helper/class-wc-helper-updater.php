@@ -306,10 +306,11 @@ class WC_Helper_Updater {
 
 			$renew_link = add_query_arg(
 				array(
+					'add-to-cart'  => $product_id,
 					'utm_source'   => 'pu',
 					'utm_campaign' => 'pu_plugin_screen_renew',
 				),
-				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
+				PluginsHelper::WOO_CART_PAGE_URL
 			);
 
 			/* translators: 1: Product regular price */
