@@ -72,11 +72,6 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					/>
 				);
 			case ProductCollectionUIStatesInEditor.VALID:
-				return (
-					<ProductCollectionContent
-						{ ...productCollectionContentProps }
-					/>
-				);
 			case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
 				return (
 					<ProductCollectionContent
