@@ -30,7 +30,8 @@ class HooksRegistry {
 		array( 'themes_api', array( 'WC_Plugin_Api_Updater', 'themes_api' ), 20, 3 ),
 
 		array( 'woocommerce_helper_loaded', array( 'WC_Helper_Compat', 'helper_loaded' ) ),
-
+		array( 'woocommerce_wccom_install_products', array( 'WC_WCCOM_Site_Installer', 'install' ) ),
+		array( 'woocommerce_rest_api_get_rest_namespaces', array( 'WC_WCCOM_Site', 'register_rest_namespace' ) ),
 	);
 
 	/**
@@ -41,7 +42,7 @@ class HooksRegistry {
 	private static array $all_request_filters = array(
 		array( 'rest_api_init', array( 'WC_Helper_Subscriptions_API', 'register_rest_routes' ) ),
 		array( 'rest_api_init', array( 'WC_Helper_Orders_API', 'register_rest_routes' ) ),
-
+		array( 'determine_current_user', array( 'WC_WCCOM_Site', 'authenticate_wccom' ), 14 ),
 	);
 
 	/**

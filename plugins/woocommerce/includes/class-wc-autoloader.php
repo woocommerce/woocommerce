@@ -34,7 +34,7 @@ class WC_Autoloader {
 		'WC_WCCOM_Site_Installer' => WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer.php',
 		'WC_Helper_Subscriptions_API' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-subscriptions-api.php',
 		'WC_Helper_Orders_API' => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-orders-api.php',
-		'WC_Product_Usage_Notice' => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage-notice.php',
+		'WC_Product_Usage_Notice' => WC_ABSPATH . 'includes/admin/helper/class-wc-product-usage-notice.php',
 	);
 
 	/**

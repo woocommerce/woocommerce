@@ -33,7 +33,6 @@ class WC_Product_Usage {
 	 * @since 9.3.0
 	 */
 	protected static function includes() {
-		require_once WC_ABSPATH . 'includes/product-usage/class-wc-product-usage-rule-set.php';
 	}
 
 	/**
