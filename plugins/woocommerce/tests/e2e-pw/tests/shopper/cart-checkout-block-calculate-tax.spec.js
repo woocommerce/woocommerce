@@ -38,7 +38,14 @@ let productId,
 
 test.describe(
 	'Shopper Cart & Checkout Block Tax Display',
-	{ tag: [ '@payments', '@services', '@hpos', '@could-be-lower-level-test' ] },
+	{
+		tag: [
+			'@payments',
+			'@services',
+			'@hpos',
+			'@could-be-lower-level-test',
+		],
+	},
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 		test.beforeAll( async ( { baseURL } ) => {
