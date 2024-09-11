@@ -34,7 +34,18 @@ jobs:
             - name: Start Test Environment
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
 
+            - name: Measure performance (latest; editor)
+              env:
+                WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/',
+                RESULTS_ID: 'editor__current__round-1',
+              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor'
+
+            - name: Measure performance (latest; product-editor)
+              env:
+                WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/',
+                RESULTS_ID: 'product-editor__current__round-1',
+              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor'
             
-            # Install/Build/Measure for current
             # Install/Build/Measure for github.head_ref || github.sha
+            # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
