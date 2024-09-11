@@ -20,6 +20,10 @@ class WC_Autoloader {
 	 */
 	private $include_path = '';
 
+	private static array $known_classes_paths = array(
+
+	);
+
 	/**
 	 * The Constructor.
 	 */
@@ -64,6 +68,11 @@ class WC_Autoloader {
 	 */
 	public function autoload( $class ) {
 		$class = strtolower( $class );
+
+		if ( isset( self::$known_classes_paths[ $class ] ) ) {
+			$this->load_file( self::$known_classes_paths[ $class ] );
+			return;
+		}
 
 		if ( 0 !== strpos( $class, 'wc_' ) ) {
 			return;
