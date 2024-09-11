@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Admin\ShippingPartnerSuggestions;
+namespace Automattic\WooCommerce\Tests\Admin\Features\ShippingPartnerSuggestions;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\DefaultShippingPartners;
@@ -31,6 +31,8 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_store_address', 'foo' );
 
 		update_option( 'active_plugins', array( 'foo/foo.php' ) );
+
+		EvaluateSuggestion::reset_memo();
 	}
 
 	/**
