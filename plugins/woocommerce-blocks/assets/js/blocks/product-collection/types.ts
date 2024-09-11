@@ -110,7 +110,6 @@ export interface ProductCollectionQuery {
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
-		openCollectionSelectionModal: () => void;
 		preview?: {
 			initialPreviewState?: PreviewState;
 			setPreviewState?: SetPreviewState;
@@ -119,9 +118,13 @@ export type ProductCollectionEditComponentProps =
 		context: {
 			templateSlug: string;
 		};
-		isUsingReferencePreviewMode: boolean;
+	};
+
+export type ProductCollectionContentProps =
+	ProductCollectionEditComponentProps & {
 		location: WooCommerceBlockLocation;
-		isDeletedProductReference?: boolean;
+		isUsingReferencePreviewMode: boolean;
+		openCollectionSelectionModal: () => void;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';

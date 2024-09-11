@@ -11,6 +11,7 @@ import { Spinner, Flex } from '@wordpress/components';
  * Internal dependencies
  */
 import {
+	ProductCollectionContentProps,
 	ProductCollectionEditComponentProps,
 	ProductCollectionUIStatesInEditor,
 } from '../types';
@@ -49,46 +50,47 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		);
 	}
 
-	/**
-	 * Component to render based on the UI state.
-	 */
-	let Component,
-		isUsingReferencePreviewMode = false;
-	switch ( productCollectionUIStateInEditor ) {
-		case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
-			Component = ProductCollectionPlaceholder;
-			break;
-		case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
-		case ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE:
-			Component = ProductPicker;
-			break;
-		case ProductCollectionUIStatesInEditor.VALID:
-			Component = ProductCollectionContent;
-			break;
-		case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
-			Component = ProductCollectionContent;
-			isUsingReferencePreviewMode = true;
-			break;
-		default:
-			// By default showing collection chooser.
-			Component = ProductCollectionPlaceholder;
-	}
+	const productCollectionContentProps: ProductCollectionContentProps = {
+		...props,
+		openCollectionSelectionModal: () => setIsSelectionModalOpen( true ),
+		location,
+		isUsingReferencePreviewMode:
+			productCollectionUIStateInEditor ===
+			ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW,
+	};
+
+	const renderComponent = () => {
+		switch ( productCollectionUIStateInEditor ) {
+			case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
+				return <ProductCollectionPlaceholder { ...props } />;
+			case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
+			case ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE:
+				return (
+					<ProductPicker
+						{ ...props }
+						isDeletedProductReference={ true }
+					/>
+				);
+			case ProductCollectionUIStatesInEditor.VALID:
+				return (
+					<ProductCollectionContent
+						{ ...productCollectionContentProps }
+					/>
+				);
+			case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
+				return (
+					<ProductCollectionContent
+						{ ...productCollectionContentProps }
+					/>
+				);
+			default:
+				return <ProductCollectionPlaceholder { ...props } />;
+		}
+	};
 
 	return (
 		<>
-			<Component
-				{ ...props }
-				openCollectionSelectionModal={ () =>
-					setIsSelectionModalOpen( true )
-				}
-				isUsingReferencePreviewMode={ isUsingReferencePreviewMode }
-				location={ location }
-				usesReference={ props.usesReference }
-				isDeletedProductReference={
-					productCollectionUIStateInEditor ===
-					ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE
-				}
-			/>
+			{ renderComponent() }
 			{ isSelectionModalOpen && (
 				<CollectionSelectionModal
 					clientId={ clientId }

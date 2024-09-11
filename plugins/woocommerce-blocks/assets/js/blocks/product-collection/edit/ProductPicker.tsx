@@ -21,7 +21,11 @@ import {
 import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
 
-const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
+const ProductPicker = (
+	props: ProductCollectionEditComponentProps & {
+		isDeletedProductReference: boolean;
+	}
+) => {
 	const blockProps = useBlockProps();
 	const { attributes, isDeletedProductReference } = props;
 
