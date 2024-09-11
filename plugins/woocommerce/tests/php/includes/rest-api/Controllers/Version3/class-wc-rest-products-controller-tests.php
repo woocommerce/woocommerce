@@ -1,7 +1,5 @@
 <?php
 
-require_once WC_ABSPATH . '/includes/class-wc-brands.php';
-
 /**
  * class WC_REST_Products_Controller_Tests.
  * Product Controller tests for V3 REST API.
@@ -153,7 +151,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'menu_order',
 			'meta_data',
 			'post_password',
-			'brands',
 		);
 	}
 
