@@ -12,7 +12,6 @@ import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { getAdminSetting } from '~/utils/admin-settings';
 import Discover from '../discover/discover';
 import Products from '../products/products';
-import SearchResults from '../search-results/search-results';
 import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
@@ -109,8 +108,6 @@ export default function Content(): JSX.Element {
 			params.append( 'category', 'themes' );
 		} else if ( query?.tab === 'business-services' ) {
 			params.append( 'category', 'business-services' );
-		} else if ( query?.tab === 'search' ) {
-			params.append( 'category', 'extensions-themes-business-services' );
 		}
 
 		const wccomSettings = getAdminSetting( 'wccomHelper', false );
@@ -194,13 +191,6 @@ export default function Content(): JSX.Element {
 						) }
 						categorySelector={ true }
 						type={ ProductType.businessService }
-					/>
-				);
-			case 'search':
-				return (
-					<SearchResults
-						products={ products }
-						type={ SearchResultType.all }
 					/>
 				);
 			case 'discover':

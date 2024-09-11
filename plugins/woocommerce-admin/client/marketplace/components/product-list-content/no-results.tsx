@@ -23,7 +23,6 @@ export default function NoResults( props: {
 	const [ productGroups, setProductGroups ] = useState< ProductGroup[] >();
 	const [ isLoading, setIsLoading ] = useState( false );
 	const query = useQuery();
-	const showCategorySelector = query.tab === 'search' && query.section;
 	const productGroupsForSearchType = {
 		[ SearchResultType.all ]: [
 			'most-popular',
@@ -123,7 +122,7 @@ export default function NoResults( props: {
 	}
 
 	function categorySelector() {
-		if ( ! showCategorySelector ) {
+		if ( ! query.section ) {
 			return <></>;
 		}
 

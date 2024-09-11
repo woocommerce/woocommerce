@@ -54,9 +54,6 @@ const getVisibleTabs = (
 		return tabs;
 	}
 	const currentVisibleTabs = { ...tabs };
-	if ( selectedTab !== 'search' ) {
-		delete currentVisibleTabs.search;
-	}
 	if ( ! hasBusinessServices ) {
 		delete currentVisibleTabs[ 'business-services' ];
 	}
@@ -131,12 +128,6 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 	const query: Record< string, string > = useQuery();
 
 	const tabs: Tabs = {
-		search: {
-			name: 'search',
-			title: __( 'Search results', 'woocommerce' ),
-			showUpdateCount: false,
-			updateCount: 0,
-		},
 		discover: {
 			name: 'discover',
 			title: __( 'Discover', 'woocommerce' ),
