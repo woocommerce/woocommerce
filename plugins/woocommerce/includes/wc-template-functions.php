@@ -332,16 +332,9 @@ function wc_body_class( $classes ) {
 
 		$account_page_id = get_option( 'woocommerce_myaccount_page_id' );
 
-		if ( !empty( $account_page_id ) ) {
-
-			if ( get_post_field( 'post_name', $account_page_id ) == basename( $wp->request ) && is_user_logged_in() ) {
-
-				$classes[] = 'woocommerce-dashboard';
-
-			}
-
+		if ( ! empty( $account_page_id ) && ( get_post_field( 'post_name', $account_page_id ) === basename( $wp->request ) && is_user_logged_in() ) ) {
+			$classes[] = 'woocommerce-dashboard';
 		}
-
 	}
 
 	if ( is_store_notice_showing() ) {
