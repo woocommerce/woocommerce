@@ -31,8 +31,6 @@ const {
 	WP_ADMIN_NEW_PRODUCT,
 	WP_ADMIN_PERMALINK_SETTINGS,
 	WP_ADMIN_PLUGINS,
-	WP_ADMIN_SETUP_WIZARD,
-	WP_ADMIN_WC_HOME,
 	WP_ADMIN_WC_SETTINGS,
 	WP_ADMIN_WC_EXTENSIONS,
 	WP_ADMIN_WC_HELPER,
@@ -42,7 +40,6 @@ const {
 	WP_ADMIN_IMPORT_PRODUCTS,
 	WP_ADMIN_PLUGIN_INSTALL,
 	WP_ADMIN_WP_UPDATES,
-	IS_RETEST_MODE,
 } = require( './constants' );
 
 const { getSlug, waitForTimeout } = require( './utils' );
@@ -83,7 +80,6 @@ const merchant = {
 		await Promise.all( [
 			page.click( 'input[type=submit]' ),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
-			merchant.dismissOnboardingWizard(),
 		] );
 	},
 
@@ -169,15 +165,6 @@ const merchant = {
 
 	openHelper: async () => {
 		await page.goto( WP_ADMIN_WC_HELPER, {
-			waitUntil: 'networkidle0',
-		} );
-	},
-
-	runSetupWizard: async () => {
-		const setupWizard = IS_RETEST_MODE
-			? WP_ADMIN_SETUP_WIZARD
-			: WP_ADMIN_WC_HOME;
-		await page.goto( setupWizard, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -290,9 +277,10 @@ const merchant = {
 
 	revokeDownloadableProductPermission: async ( productName ) => {
 		// Revoke downloadable product permission
-		const permission = await expect(
-			page
-		).toMatchElement( 'div.wc-metabox > h3', { text: productName } );
+		const permission = await expect( page ).toMatchElement(
+			'div.wc-metabox > h3',
+			{ text: productName }
+		);
 		await expect( permission ).toClick( 'button.revoke_access' );
 
 		// Wait for auto save
@@ -625,10 +613,10 @@ const merchant = {
 	},
 
 	/* Uploads and activates a plugin located at the provided file path. This will also deactivate and delete the plugin if it exists.
-	*
-	* @param {string} pluginFilePath The location of the plugin zip file to upload.
-	* @param {string} pluginName The name of the plugin. For example, `WooCommerce`.
-	*/
+	 *
+	 * @param {string} pluginFilePath The location of the plugin zip file to upload.
+	 * @param {string} pluginName The name of the plugin. For example, `WooCommerce`.
+	 */
 	uploadAndActivatePlugin: async ( pluginFilePath, pluginName ) => {
 		await merchant.openPlugins();
 
@@ -647,8 +635,7 @@ const merchant = {
 		await page.click( 'a.upload-view-toggle' );
 
 		await expect( page ).toMatchElement( 'p.install-help', {
-			text:
-				'If you have a plugin in a .zip format, you may install or update it by uploading it here.',
+			text: 'If you have a plugin in a .zip format, you may install or update it by uploading it here.',
 		} );
 
 		const uploader = await page.$( 'input[type=file]' );
@@ -750,33 +737,6 @@ const merchant = {
 			await expect( page ).toClick( thanksButtonSelector );
 		} else {
 			await merchant.checkDatabaseUpdateComplete();
-		}
-	},
-
-	/**
-	 * Dismiss the onboarding wizard if it is open.
-	 */
-	dismissOnboardingWizard: async () => {
-		let waitForNav = false;
-		const skipButton = await page.$(
-			'.woocommerce-profile-wizard__footer-link'
-		);
-		if ( skipButton ) {
-			await skipButton.click();
-			waitForNav = true;
-		}
-
-		// Dismiss usage tracking pop-up window if it appears on a new site
-		const usageTrackingHeader = await page.$(
-			'.woocommerce-usage-modal button.is-secondary'
-		);
-		if ( usageTrackingHeader ) {
-			await usageTrackingHeader.click();
-			waitForNav = true;
-		}
-
-		if ( waitForNav ) {
-			await page.waitForNavigation( { waitUntil: 'networkidle0' } );
 		}
 	},
 

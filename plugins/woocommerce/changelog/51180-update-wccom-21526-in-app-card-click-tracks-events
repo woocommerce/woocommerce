@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Include group and product id properties in the `marketplace_product_card_clicked` Tracks event

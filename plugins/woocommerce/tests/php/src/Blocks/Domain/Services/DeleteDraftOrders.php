@@ -1,12 +1,13 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Blocks\Library;
+namespace Automattic\WooCommerce\Tests\Blocks\Domain\Services;
 
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
-use \WC_Order;
+use Automattic\WooCommerce\Blocks\Domain\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
 use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
-use Automattic\WooCommerce\Blocks\Domain\Package;
+use WC_Order;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Tests Delete Draft Orders functionality

@@ -1,6 +1,7 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Admin\Features\ShippingPartnerSuggestions;
+namespace Automattic\WooCommerce\Tests\Admin\ShippingPartnerSuggestions;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions\DefaultShippingPartners;

@@ -1,4 +1,0 @@
-Significance: major
-Type: update
-
-Accept JSON schema string as constructor argument instead of file path -- this is more fleixble.

@@ -22,7 +22,7 @@ Below is video walkthrough showing how one may go about updating the template fi
 
 ## Template list
 
-The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Below are links to the current and earlier versions of the WooCommerce template files on Github, where you can view the code exactly as it appears in those files:
+The various template files on your WooCommerce site can be found via an FTP client or your hosts file manager, in `/wp-content/plugins/woocommerce/templates/`. Below are links to the current and earlier versions of the WooCommerce template files on Github, where you can view the code exactly as it appears in those files:
 
 | Latest Version | Files |
 | -------------- | ----- | 
@@ -96,7 +96,7 @@ Below are the links to the files of all major previous WooCommerce versions:
              
 ## Changing Templates via Hooks
 
-When you open a template file, you will notice they all contain _hooks_ that allow you to add/move content without needing to edit template files themselves. Hooks are a way for one piece of code to interact/modify another piece of code at specific, pre-defined spots. This method allows implementing a code snippet that “hooks” into a particular a theme location. It avoids upgrade issues, as the template files can be left completely untouched and doesn't require a child theme to be configured.
+When you open a template file, you will notice they all contain _hooks_ that allow you to add/move content without needing to edit template files themselves. Hooks are a way for one piece of code to interact/modify another piece of code at specific, pre-defined spots. This method allows implementing a code snippet that "hooks" into a particular a theme location. It avoids upgrade issues, as the template files can be left completely untouched and doesn't require a child theme to be configured.
 
 Let's take a look at [/wp-content/plugins/woocommerce/templates/emails/admin-new-order.php](https://github.com/woocommerce/woocommerce/blob/8.9.0/plugins/woocommerce/templates/emails/admin-new-order.php) and see what a hook looks like. Starting on line 30, we see the following code, which is responsible for producing the order details section of the New Order email.
 
@@ -137,7 +137,7 @@ The copied file will now override the WooCommerce default template file, so you 
 
 ---
 
-**Note** A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occassionally see notices in your System Status report that says, e.g. “version 3.5.0 is out of date. The core version is 3.7.0″. Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
+**Note** A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occassionally see notices in your System Status report that says, e.g. "version 3.5.0 is out of date. The core version is 3.7.0". Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
 
 ---
 
