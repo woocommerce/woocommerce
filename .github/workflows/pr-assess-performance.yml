@@ -35,7 +35,7 @@ jobs:
             - name: Start Test Environment
               run: |
                 pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
-                pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
+                pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
             - name: Measure performance (@${{ github.sha }})
               env:
