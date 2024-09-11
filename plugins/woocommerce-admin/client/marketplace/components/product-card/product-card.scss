@@ -4,6 +4,7 @@
 	&__product-card {
 		padding: $large-gap;
 		border-radius: $grid-unit-05 !important;
+		margin-bottom: 0;
 
 		/* When product card is loading, contents will be empty and we render skeleton loader wireframes: */
 		&.is-loading {
