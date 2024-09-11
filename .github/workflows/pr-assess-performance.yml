@@ -34,7 +34,7 @@ jobs:
 
             - name: Start Test Environment
               run: |
-                pnpm playwright install chromium &
+                pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
                 pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
 
             - name: Measure performance (@${{ github.sha }})
