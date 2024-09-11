@@ -5190,17 +5190,19 @@ img.help_tip {
 			float: none;
 		}
 
-		.disabled {
-			opacity: 0.9;
+		label:has(input:disabled) {
 			cursor: not-allowed;
-			> input {
+			> input:disabled {
+				opacity: 0.7;
 				cursor: not-allowed;
+				pointer-events: none;
 			}
-			&[aria-label] {
+			&[disabled-tooltip] {
 				position: relative;
 			}
-			&[aria-label]::before {
-				content: attr(aria-label);
+			&[disabled-tooltip]::before {
+				pointer-events: none;
+				content: attr(disabled-tooltip);
 				position: absolute;
 				top: -6px;
 				left: 6px;
@@ -5216,7 +5218,8 @@ img.help_tip {
 				pointer-events: none;
 				opacity:0;
 			}
-			&[aria-label]:hover::before {
+			&[disabled-tooltip]:hover::before,
+			&[disabled-tooltip]:focus::before {
 				opacity:1
 			}
 		}
