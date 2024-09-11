@@ -771,9 +771,9 @@ class PluginsHelper {
 			);
 
 			return array(
-				'type'            => 'different_subscriptions',
-				'parsed_message'  => $parsed_message,
-				'product_ids'     => $product_ids,
+				'type'           => 'different_subscriptions',
+				'parsed_message' => $parsed_message,
+				'product_ids'    => $product_ids,
 			);
 		}
 
@@ -1050,17 +1050,17 @@ class PluginsHelper {
 
 		$button_link = add_query_arg(
 			array(
-				'add-to-cart' => $notice_data['product_ids'],
+				'add-to-cart'  => $notice_data['product_ids'],
 				'utm_source'   => 'pu',
 				'utm_campaign' => 'pu_in_apps_screen_purchase',
 			),
-			PluginsHelper::WOO_CART_PAGE_URL
+			self::WOO_CART_PAGE_URL
 		);
 
 		if ( in_array( $notice_data['type'], array( 'single_manage', 'multiple_manage' ), true ) ) {
 			$button_link = add_query_arg(
 				array(
-					'add-to-cart'  => $notice_data['product_id'],
+					'add-to-cart' => $notice_data['product_id'],
 				),
 				$button_link
 			);

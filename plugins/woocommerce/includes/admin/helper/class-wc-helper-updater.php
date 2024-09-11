@@ -374,11 +374,11 @@ class WC_Helper_Updater {
 		// Prepare the expiry notice based on subscription status.
 		$purchase_link = add_query_arg(
 			array(
-				'add-to-cart' => $product_id,
+				'add-to-cart'  => $product_id,
 				'utm_source'   => 'pu',
 				'utm_campaign' => 'pu_plugin_screen_purchase',
 			),
-			PluginsHelper::WOO_CART_PAGE_URL
+			PluginsHelper::WOO_CART_PAGE_URL,
 		);
 
 		$notice = sprintf(
