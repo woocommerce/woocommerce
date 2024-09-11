@@ -53,21 +53,17 @@ jobs:
                 pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
-            - name: Restart Test Environment
-              run: |
-                pnpm --filter="@woocommerce/plugin-woocommerce" env:stop && sudo rm -rf ~/wp-env
-                pnpm --filter="@woocommerce/plugin-woocommerce" env:test
+            # - name: Restart Test Environment
+            #   run: |
+            #   pnpm --filter="@woocommerce/plugin-woocommerce" env:stop && sudo rm -rf ~/wp-env
+            #   pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
-            - name: Measure performance (editor@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
+            - name: Measure performance (@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
-                RESULTS_ID: 'editor_3d7d7f02017383937f1a4158d433d0e5d44b3dc9_round-1'
-              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor'
-            - name: Measure performance (product-editor@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
-              env:
-                WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
-                RESULTS_ID: 'product-editor_3d7d7f02017383937f1a4158d433d0e5d44b3dc9_round-1'
-              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor'
+              run: |
+                RESULTS_ID="editor_3d7d7f02017383937f1a4158d433d0e5d44b3dc9_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+                RESULTS_ID="product-editor_3d7d7f02017383937f1a4158d433d0e5d44b3dc9_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
             
             # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
