@@ -17,6 +17,8 @@ import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
+import { SearchResultsCountType } from '../../contexts/types';
+
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
@@ -30,40 +32,51 @@ import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subs
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const [ products, setProducts ] = useState< Product[] >( [] );
-	const { setIsLoading, selectedTab, setHasBusinessServices } =
-		marketplaceContextValue;
+	const {
+		setIsLoading,
+		selectedTab,
+		setHasBusinessServices,
+		setSearchResultsCount,
+	} = marketplaceContextValue;
 	const query = useQuery();
 
 	// On initial load of the in-app marketplace, fetch extensions, themes and business services
 	// and check if there are any business services available on WCCOM
 	useEffect( () => {
-		const categories = [ '', 'themes', 'business-services' ];
+		const categories: Array< keyof SearchResultsCountType > = [
+			'extensions',
+			'themes',
+			'business-services',
+		];
 		const abortControllers = categories.map( () => new AbortController() );
 
-		categories.forEach( ( category: string, index ) => {
-			const params = new URLSearchParams();
-			if ( category !== '' ) {
-				params.append( 'category', category );
-			}
+		categories.forEach(
+			( category: keyof SearchResultsCountType, index ) => {
+				const params = new URLSearchParams();
+				if ( category !== 'extensions' ) {
+					params.append( 'category', category );
+				}
 
-			const wccomSettings = getAdminSetting( 'wccomHelper', false );
-			if ( wccomSettings.storeCountry ) {
-				params.append( 'country', wccomSettings.storeCountry );
-			}
+				const wccomSettings = getAdminSetting( 'wccomHelper', false );
+				if ( wccomSettings.storeCountry ) {
+					params.append( 'country', wccomSettings.storeCountry );
+				}
 
-			fetchSearchResults( params, abortControllers[ index ].signal ).then(
-				( productList ) => {
+				fetchSearchResults(
+					params,
+					abortControllers[ index ].signal
+				).then( ( productList ) => {
 					if ( category === 'business-services' ) {
 						setHasBusinessServices( productList.length > 0 );
 					}
-				}
-			);
-			return () => {
-				abortControllers.forEach( ( controller ) => {
-					controller.abort();
 				} );
-			};
-		} );
+				return () => {
+					abortControllers.forEach( ( controller ) => {
+						controller.abort();
+					} );
+				};
+			}
+		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
@@ -108,6 +121,20 @@ export default function Content(): JSX.Element {
 		fetchSearchResults( params, abortController.signal )
 			.then( ( productList ) => {
 				setProducts( productList );
+
+				if ( query.term ) {
+					setSearchResultsCount( {
+						extensions: productList.filter(
+							( p ) => p.type === 'extension'
+						).length,
+						themes: productList.filter(
+							( p ) => p.type === 'theme'
+						).length,
+						'business-services': productList.filter(
+							( p ) => p.type === 'business-service'
+						).length,
+					} );
+				}
 			} )
 			.catch( () => {
 				setProducts( [] );
@@ -142,7 +169,9 @@ export default function Content(): JSX.Element {
 			case 'extensions':
 				return (
 					<Products
-						products={ products }
+						products={ products.filter(
+							( p ) => p.type === 'extension'
+						) }
 						categorySelector={ true }
 						type={ ProductType.extension }
 					/>
@@ -150,7 +179,9 @@ export default function Content(): JSX.Element {
 			case 'themes':
 				return (
 					<Products
-						products={ products }
+						products={ products.filter(
+							( p ) => p.type === 'theme'
+						) }
 						categorySelector={ true }
 						type={ ProductType.theme }
 					/>
@@ -158,7 +189,9 @@ export default function Content(): JSX.Element {
 			case 'business-services':
 				return (
 					<Products
-						products={ products }
+						products={ products.filter(
+							( p ) => p.type === 'business-service'
+						) }
 						categorySelector={ true }
 						type={ ProductType.businessService }
 					/>
