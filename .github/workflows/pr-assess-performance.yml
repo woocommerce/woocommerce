@@ -57,6 +57,9 @@ jobs:
                 pnpm run --if-present buildclean
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
+            - name: Restart Test Environment
+              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
+
             - name: Measure performance (editor@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
