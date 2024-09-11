@@ -21,7 +21,8 @@ class WC_Autoloader {
 	private $include_path = '';
 
 	private static array $known_classes_paths = array(
-
+		'WC_Product_Usage' => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage.php',
+		'WC_Product_Usage_Rule_Set' => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage-rule-set.php',
 	);
 
 	/**
@@ -67,12 +68,12 @@ class WC_Autoloader {
 	 * @param string $class Class name.
 	 */
 	public function autoload( $class ) {
-		$class = strtolower( $class );
-
 		if ( isset( self::$known_classes_paths[ $class ] ) ) {
 			$this->load_file( self::$known_classes_paths[ $class ] );
 			return;
 		}
+
+		$class = strtolower( $class );
 
 		if ( 0 !== strpos( $class, 'wc_' ) ) {
 			return;
