@@ -8,27 +8,27 @@ namespace Automattic\WooCommerce;
  */
 class HooksRegistry {
 
-	static array $all_request_actions = array(
+	private static array $all_request_actions = array(
 
 	);
 
-	static array $all_request_filters = array(
+	private static array $all_request_filters = array(
 
 	);
 
-	static array $frontend_actions = array(
+	private static array $frontend_actions = array(
 
 	);
 
-	static array $frontend_filters = array(
+	private static array $frontend_filters = array(
 
 	);
 
-	static array $admin_actions = array(
+	private static array $admin_actions = array(
 
 	);
 
-	static array $admin_filters = array(
+	private static array $admin_filters = array(
 
 	);
 
