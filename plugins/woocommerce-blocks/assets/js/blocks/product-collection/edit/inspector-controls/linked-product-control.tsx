@@ -142,7 +142,7 @@ const LinkedProductControl = ( {
 	const { product, isLoading } = useGetProduct( productReference );
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
 	const [ radioControlState, setRadioControlState ] = useState< PRODUCT_REF >(
-		isProductReferenceAvailable
+		isProductReferenceAvailable && isEmpty( productReference )
 			? PRODUCT_REF.CURRENT_PRODUCT
 			: PRODUCT_REF.SPECIFIC_PRODUCT
 	);
