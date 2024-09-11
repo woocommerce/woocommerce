@@ -141,20 +141,22 @@ export const Edit = ( {
 			| BlockInstance< { [ k: string ]: unknown } >
 			| undefined;
 
-		filtersClientIds.forEach( ( filterClientId: string ) => {
+		for ( const filterClientId of filtersClientIds ) {
 			const filterBlock =
 				select( 'core/block-editor' ).getBlock( filterClientId );
 
-			filterBlock?.innerBlocks.forEach( ( innerBlock ) => {
-				if (
-					innerBlock.name ===
-						'woocommerce/product-filters-overlay-navigation' &&
-					innerBlock.attributes.triggerType === 'open-overlay'
-				) {
-					overlayBlock = innerBlock;
+			if ( filterBlock ) {
+				for ( const innerBlock of filterBlock.innerBlocks ) {
+					if (
+						innerBlock.name ===
+							'woocommerce/product-filters-overlay-navigation' &&
+						innerBlock.attributes.triggerType === 'open-overlay'
+					) {
+						overlayBlock = innerBlock;
+					}
 				}
-			} );
-		} );
+			}
+		}
 
 		if ( attributes.overlay === 'never' && overlayBlock ) {
 			setProductFiltersOverlayNavigationAttributes(
