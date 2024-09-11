@@ -35,16 +35,12 @@ jobs:
             - name: Start Test Environment
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" env:test'
 
-            - name: Measure performance (editor@${{ github.sha }})
+            - name: Measure performance (@${{ github.sha }})
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
-                RESULTS_ID: 'editor_${{ github.sha }}_round-1'
-              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor'
-            - name: Measure performance (product-editor@${{ github.sha }})
-              env:
-                WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
-                RESULTS_ID: 'product-editor_${{ github.sha }}_round-1'
-              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor'
+              run: |
+                RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+                RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
               
             - name: Checkout (baseline - 3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
               run: |
