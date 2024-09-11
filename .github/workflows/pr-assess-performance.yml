@@ -38,24 +38,35 @@ jobs:
             - name: Measure performance (editor@${{ github.sha }})
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
-                RESULTS_ID: 'editor__${{ github.sha }}__round-1'
+                RESULTS_ID: 'editor_${{ github.sha }}_round-1'
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor'
             - name: Measure performance (product-editor@${{ github.sha }})
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
-                RESULTS_ID: 'product-editor__${{ github.sha }}__round-1'
+                RESULTS_ID: 'product-editor_${{ github.sha }}_round-1'
               run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor'
               
-            - name: Checkout (baseline - ${{ github.base_ref }})
+            - name: Checkout (baseline - 3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
               run: |
                 git reset --hard
-                git checkout ${{ github.base_ref }}
+                git checkout 3d7d7f02017383937f1a4158d433d0e5d44b3dc9
 
             - name: Rebuild
               run: |
                 pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+                pnpm run --if-present buildclean
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
+            - name: Measure performance (editor@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
+              env:
+                WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
+                RESULTS_ID: 'editor_3d7d7f02017383937f1a4158d433d0e5d44b3dc9_round-1'
+              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor'
+            - name: Measure performance (product-editor@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
+              env:
+                WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
+                RESULTS_ID: 'product-editor_3d7d7f02017383937f1a4158d433d0e5d44b3dc9_round-1'
+              run: 'pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor'
             
             # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
