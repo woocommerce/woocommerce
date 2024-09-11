@@ -19,6 +19,13 @@ class ProductCollection extends AbstractBlock {
 	protected $block_name = 'product-collection';
 
 	/**
+	 * An array keyed by the name of the collection containing handlers for implementing custom collection behavior.
+	 *
+	 * @var array
+	 */
+	protected $collection_handler_store = array();
+
+	/**
 	 * The Block with its attributes before it gets rendered
 	 *
 	 * @var array
@@ -617,22 +624,32 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Update the query for the product query block in Editor.
 	 *
-	 * @param array           $args    Query args.
+	 * @param array           $query   Query args.
 	 * @param WP_REST_Request $request Request.
 	 */
-	public function update_rest_query_in_editor( $args, $request ): array {
+	public function update_rest_query_in_editor( $query, $request ): array {
 		// Only update the query if this is a product collection block.
 		$is_product_collection_block = $request->get_param( 'isProductCollectionBlock' );
 		if ( ! $is_product_collection_block ) {
-			return $args;
+			return $query;
+		}
+
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$collection_args                  = array(
+			'name' => $product_collection_query_context['collection'] ?? '',
+		);
+
+		// Allow collections to modify the collection arguments passed to the query builder.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['editor_args'] ) ) {
+			$collection_args = call_user_func( $handlers['editor_args'], $collection_args, $query );
 		}
 
 		// Is this a preview mode request?
 		// If yes, short-circuit the query and return the preview query args.
-		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
-		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
+		$is_preview = $product_collection_query_context['previewState']['isPreview'] ?? false;
 		if ( 'true' === $is_preview ) {
-			return $this->get_preview_query_args( $args, $request );
+			return $this->get_preview_query_args( $collection_args, $query, $request );
 		}
 
 		$orderby             = $request->get_param( 'orderBy' );
@@ -645,11 +662,11 @@ class ProductCollection extends AbstractBlock {
 		$price_range         = $request->get_param( 'priceRange' );
 		// This argument is required for the tests to PHP Unit Tests to run correctly.
 		// Most likely this argument is being accessed in the test environment image.
-		$args['author'] = '';
+		$query['author'] = '';
 
 		$final_query = $this->get_final_query_args(
-			$product_collection_query_context['collection'] ?? '',
-			$args,
+			$collection_args,
+			$query,
 			array(
 				'orderby'             => $orderby,
 				'on_sale'             => $on_sale,
@@ -757,8 +774,18 @@ class ProductCollection extends AbstractBlock {
 		$time_frame          = $query['timeFrame'] ?? null;
 		$price_range         = $query['priceRange'] ?? null;
 
+		$collection_args = array(
+			'name' => $this->parsed_block['attrs']['collection'] ?? '',
+		);
+
+		// Allow collections to modify the collection arguments passed to the query builder.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['frontend_args'] ) ) {
+			$collection_args = call_user_func( $handlers['frontend_args'], $collection_args, $query );
+		}
+
 		$final_query = $this->get_final_query_args(
-			$this->parsed_block['attrs']['collection'] ?? '',
+			$collection_args,
 			$common_query_values,
 			array(
 				'on_sale'             => $is_on_sale,
@@ -780,12 +807,17 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Get final query args based on provided values
 	 *
-	 * @param string $collection                 The name of the collection.
-	 * @param array  $common_query_values        Common query values.
-	 * @param array  $query                      Query from block context.
-	 * @param bool   $is_exclude_applied_filters Whether to exclude the applied filters or not.
+	 * @param array $collection_args            Any special arguments that should change the behavior of the query.
+	 * @param array $common_query_values        Common query values.
+	 * @param array $query                      Query from block context.
+	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
-	private function get_final_query_args( $collection, $common_query_values, $query, $is_exclude_applied_filters = false ) {
+	private function get_final_query_args(
+		$collection_args,
+		$common_query_values,
+		$query,
+		$is_exclude_applied_filters = false
+	) {
 		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
 		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
 		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
@@ -797,10 +829,23 @@ class ProductCollection extends AbstractBlock {
 		$date_query       = $this->get_date_query( $query['timeFrame'] ?? array() );
 		$price_query_args = $this->get_price_range_query_args( $query['priceRange'] ?? array() );
 		$handpicked_query = $this->get_handpicked_query( $query['handpicked_products'] ?? false );
-		$collection_query = $this->get_core_collection_query( $collection, $query );
 
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
+
+		// Allow collections to provide their own query parameters.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['build_query'] ) ) {
+			$collection_query = call_user_func(
+				$handlers['build_query'],
+				$collection_args,
+				$common_query_values,
+				$query,
+				$is_exclude_applied_filters
+			);
+		} else {
+			$collection_query = array();
+		}
 
 		return $this->merge_queries(
 			$common_query_values,
@@ -817,40 +862,20 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Get any collection-specific query args to merge.
-	 *
-	 * @param string $collection  The name of the collection.
-	 * @param array  $query       Query from block context.
-	 *
-	 * @return array The collection-specific query to merge.
-	 */
-	private function get_core_collection_query( $collection, $query ) {
-		$collection = preg_match( '/^woocommerce\/product-collection\/(.*)/', $collection, $matches ) ? $matches[1] : '';
-		if ( '' === $collection ) {
-			return array();
-		}
-
-		return array();
-	}
-
-	/**
 	 * Get query args for preview mode. These query args will be used with WP_Query to fetch the products.
 	 *
-	 * @param array           $args    Query args.
-	 * @param WP_REST_Request $request Request.
+	 * @param array           $collection_args Any collection-specific arguments.
+	 * @param array           $args            Query args.
+	 * @param WP_REST_Request $request         Request.
 	 */
-	private function get_preview_query_args( $args, $request ) {
+	private function get_preview_query_args( $collection_args, $args, $request ) {
 		$collection_query = array();
 
-		/**
-		 * In future, Here we will modify the preview query based on the collection name. For example:
-		 *
-		 * $product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
-		 * $collection_name                  = $product_collection_query_context['collection'] ?? '';
-		 * if ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
-		 *      $collection_query = $this->get_on_sale_products_query( true );
-		 * }.
-		 */
+		// Allow collections to override the preview mode behavior.
+		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
+		if ( isset( $handlers['preview_query'] ) ) {
+			$collection_query = call_user_func( $handlers['preview_query'], $collection_args, $args, $request );
+		}
 
 		$args = $this->merge_queries( $args, $collection_query );
 		return $args;
@@ -892,8 +917,8 @@ class ProductCollection extends AbstractBlock {
 					return $acc;
 				}
 
-				// If the $query doesn't contain any valid query keys, we unpack/spread it then merge.
-				if ( empty( array_intersect( $this->get_valid_query_vars(), array_keys( $query ) ) ) ) {
+				// When the $query has keys but doesn't contain any valid query keys, we unpack/spread it then merge.
+				if ( ! empty( $query ) && empty( array_intersect( $this->get_valid_query_vars(), array_keys( $query ) ) ) ) {
 					return $this->merge_queries( $acc, ...array_values( $query ) );
 				}
 
@@ -1749,5 +1774,29 @@ class ProductCollection extends AbstractBlock {
 		$taxes = WC_Tax::calc_tax( $price_filter, $tax_rates, false );
 
 		return $price_filter + array_sum( $taxes );
+	}
+
+	/**
+	 * Registers handlers for a collection.
+	 *
+	 * @param string        $collection_name The name of the custom collection.
+	 * @param callable      $build_query     A hook returning any custom query arguments to merge with the collection's query.
+	 * @param callable|null $frontend_args   An optional hook that returns any frontend collection arguments to pass to the query builder.
+	 * @param callable|null $editor_args     An optional hook that returns any REST collection arguments to pass to the query builder.
+	 * @param callable|null $preview_query   An optional hook that returns a query to use in preview mode.
+	 *
+	 * @throws \InvalidArgumentException If collection handlers are already registered for the given collection name.
+	 */
+	protected function register_collection_handlers( $collection_name, $build_query, $frontend_args = null, $editor_args = null, $preview_query = null ) {
+		if ( isset( $this->collection_handler_store[ $collection_name ] ) ) {
+			throw new \InvalidArgumentException( 'Collection handlers already registered for ' . esc_html( $collection_name ) );
+		}
+
+		$this->collection_handler_store[ $collection_name ] = array(
+			'build_query'   => $build_query,
+			'frontend_args' => $frontend_args,
+			'editor_args'   => $editor_args,
+			'preview_query' => $preview_query,
+		);
 	}
 }

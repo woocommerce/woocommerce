@@ -981,4 +981,138 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$this->assertCount( 1, $merged_query['post__in'] );
 	}
+
+	/**
+	 * Test for frontend collection handlers.
+	 */
+	public function test_frontend_collection_handlers() {
+		$build_query   = $this->getMockBuilder( \stdClass::class )
+			->setMethods( [ '__invoke' ] )
+			->getMock();
+		$frontend_args = $this->getMockBuilder( \stdClass::class )
+			->setMethods( [ '__invoke' ] )
+			->getMock();
+		$this->block_instance->register_collection_handlers( 'test-collection', $build_query, $frontend_args );
+
+		$frontend_args->expects( $this->once() )
+			->method( '__invoke' )
+			->willReturnCallback(
+				function ( $collection_args ) {
+					$collection_args['test'] = 'test-arg';
+					return $collection_args;
+				}
+			);
+		$build_query->expects( $this->once() )
+			->method( '__invoke' )
+			->willReturnCallback(
+				function ( $collection_args ) {
+					$this->assertArrayHasKey( 'test', $collection_args );
+					$this->assertEquals( 'test-arg', $collection_args['test'] );
+					return array(
+						'post__in' => array( 111 ),
+					);
+				}
+			);
+
+		$parsed_block                        = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection'] = 'test-collection';
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->block_instance->unregister_collection_handlers( 'test-collection' );
+
+		$this->assertContains( 111, $merged_query['post__in'] );
+	}
+
+	/**
+	 * Test for editor collection handlers.
+	 */
+	public function test_editor_collection_handlers() {
+		$build_query = $this->getMockBuilder( \stdClass::class )
+			->setMethods( [ '__invoke' ] )
+			->getMock();
+		$editor_args = $this->getMockBuilder( \stdClass::class )
+			->setMethods( [ '__invoke' ] )
+			->getMock();
+		$this->block_instance->register_collection_handlers( 'test-collection', $build_query, null, $editor_args );
+
+		$editor_args->expects( $this->once() )
+			->method( '__invoke' )
+			->willReturnCallback(
+				function ( $collection_args ) {
+					$collection_args['test'] = 'test-arg';
+					return $collection_args;
+				}
+			);
+		$build_query->expects( $this->once() )
+			->method( '__invoke' )
+			->willReturnCallback(
+				function ( $collection_args ) {
+					$this->assertArrayHasKey( 'test', $collection_args );
+					$this->assertEquals( 'test-arg', $collection_args['test'] );
+					return array(
+						'post__in' => array( 111 ),
+					);
+				}
+			);
+
+		$args    = array();
+		$request = $this->build_request();
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'test-collection',
+			)
+		);
+
+		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
+
+		$this->block_instance->unregister_collection_handlers( 'test-collection' );
+
+		$this->assertContains( 111, $updated_query['post__in'] );
+	}
+
+	/**
+	 * Test for the editor preview collection handler.
+	 */
+	public function test_editor_preview_collection_handler() {
+		$preview_query = $this->getMockBuilder( \stdClass::class )
+			->setMethods( [ '__invoke' ] )
+			->getMock();
+		$this->block_instance->register_collection_handlers(
+			'test-collection',
+			function () {
+				return array();
+			},
+			null,
+			null,
+			$preview_query
+		);
+
+		$preview_query->expects( $this->once() )
+			->method( '__invoke' )
+			->willReturn(
+				array(
+					'post__in' => array( 123 ),
+				)
+			);
+
+		$args    = array();
+		$request = $this->build_request();
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection'   => 'test-collection',
+				'previewState' => array(
+					'isPreview' => 'true',
+				),
+			)
+		);
+
+		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
+
+		$this->block_instance->unregister_collection_handlers( 'test-collection' );
+
+		$this->assertContains( 123, $updated_query['post__in'] );
+	}
 }
