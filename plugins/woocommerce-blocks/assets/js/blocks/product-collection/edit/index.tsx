@@ -37,9 +37,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			location,
 			attributes,
 			hasInnerBlocks,
-			...( props.usesReference && {
-				usesReference: props.usesReference,
-			} ),
+			usesReference: props.usesReference,
 		} );
 
 	// Show spinner while calculating Editor UI state.

@@ -206,7 +206,7 @@ export const useProductCollectionUIState = ( {
 	hasInnerBlocks,
 }: {
 	location: WooCommerceBlockLocation;
-	usesReference?: string[];
+	usesReference?: string[] | undefined;
 	attributes: ProductCollectionAttributes;
 	hasInnerBlocks: boolean;
 } ) => {
