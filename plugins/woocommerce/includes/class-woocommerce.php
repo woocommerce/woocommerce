@@ -707,10 +707,13 @@ final class WooCommerce {
 		 */
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
 
+		\Automattic\WooCommerce\HooksRegistry::load_hooks();
+
 		/**
 		 * Libraries and packages.
 		 */
 		include_once WC_ABSPATH . 'packages/action-scheduler/action-scheduler.php';
+
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
