@@ -106,6 +106,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		parent::tearDown();
 
 		remove_filter( 'woocommerce_geolocate_ip', array( $this, 'intercept_woocommerce_geolocate_ip' ), 10, 3 );
+		WC_Helper_Queue::cancel_all_pending();
 	}
 
 	/**
