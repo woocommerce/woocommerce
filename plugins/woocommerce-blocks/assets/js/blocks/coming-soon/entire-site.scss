@@ -73,22 +73,20 @@ body:has(.woocommerce-coming-soon-banner) {
 	}
 
 	.wp-block-loginout {
-		background-color: #000;
-		border-radius: 6px;
 		display: flex;
-		height: 40px;
-		width: 74px;
-		justify-content: center;
-		align-items: center;
-		gap: 10px;
-		box-sizing: border-box;
 
 		a {
+			box-sizing: border-box;
+			background-color: #000;
+			border-radius: 6px;
 			color: #fff;
-			text-decoration: none;
-			line-height: 17px;
+			gap: 10px;
 			font-size: 14px;
-			font-weight: 500;
+			font-style: normal;
+			line-height: normal;
+			text-align: center;
+			text-decoration: none;
+			padding: 17px 16px;
 		}
 	}
 
