@@ -28,10 +28,10 @@ import {
 	isInputAndButtonOption,
 	isWooSearchBlockVariation,
 } from './utils';
-import { ButtonPositionProps, ProductSearchBlock } from './types';
+import { ButtonPositionProps, ProductSearchBlockProps } from './types';
 import { PositionOptions } from './constants';
 
-const ProductSearchControls = ( props: ProductSearchBlock ) => {
+const ProductSearchControls = ( props: ProductSearchBlockProps ) => {
 	const { attributes, setAttributes } = props;
 	const { buttonPosition, buttonUseIcon, showLabel } = attributes;
 	const [ initialPosition, setInitialPosition ] =
@@ -144,7 +144,7 @@ const ProductSearchControls = ( props: ProductSearchBlock ) => {
 
 export const withProductSearchControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-	( props: ProductSearchBlock ) => {
+	( props: ProductSearchBlockProps ) => {
 		return isWooSearchBlockVariation( props ) ? (
 			<>
 				<ProductSearchControls { ...props } />

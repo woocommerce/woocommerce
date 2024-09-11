@@ -20,4 +20,4 @@ export interface SearchBlockAttributes {
 	showLabel: boolean;
 }
 
-export type ProductSearchBlock = EditorBlock< SearchBlockAttributes >;
+export type ProductSearchBlockProps = EditorBlock< SearchBlockAttributes >;

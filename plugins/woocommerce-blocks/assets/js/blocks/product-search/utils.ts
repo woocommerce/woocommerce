@@ -6,7 +6,7 @@ import {
 	SEARCH_BLOCK_NAME,
 	SEARCH_VARIATION_NAME,
 } from './constants';
-import { ButtonPositionProps, ProductSearchBlock } from './types';
+import { ButtonPositionProps, ProductSearchBlockProps } from './types';
 
 /**
  * Identifies if a block is a Search block variation from our conventions
@@ -15,9 +15,9 @@ import { ButtonPositionProps, ProductSearchBlock } from './types';
  * also adding extra namespaced attributes. If those namespaced attributes
  * are present, we can be fairly sure it is our own registered variation.
  *
- * @param {ProductSearchBlock} block - A WooCommerce block.
+ * @param {ProductSearchBlockProps} block - A WooCommerce block.
  */
-export function isWooSearchBlockVariation( block: ProductSearchBlock ) {
+export function isWooSearchBlockVariation( block: ProductSearchBlockProps ) {
 	return (
 		block.name === SEARCH_BLOCK_NAME &&
 		block.attributes?.namespace === SEARCH_VARIATION_NAME
