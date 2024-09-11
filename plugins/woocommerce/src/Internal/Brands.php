@@ -46,7 +46,12 @@ class Brands {
 	}
 
 	public static function is_enabled() {
-		$assignment = get_option( 'woocommerce_remote_variant_assignment', 0 );
+		$assignment = get_option( 'woocommerce_remote_variant_assignment', false );
+
+		if ( false === $assignment ) {
+			return $false;
+		}
+		
 		return ( $assignment <= 6 ); // Considering 5% of the 0-120 range.
 	}
 }
