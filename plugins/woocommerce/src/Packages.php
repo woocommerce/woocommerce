@@ -102,8 +102,8 @@ class Packages {
 	 */
 	public static function should_load_class( $class ) {
 
-		foreach( self::$merged_packages as $merged_package_name => $merged_package_class ) {
-			if ( $class === str_replace( 'woocommerce-', 'wc_', $merged_package_name ) ) {
+		foreach ( self::$merged_packages as $merged_package_name => $merged_package_class ) {
+			if ( str_replace( 'woocommerce-', 'wc_', $merged_package_name ) === $class ) {
 				return true;
 			}
 		}
@@ -119,7 +119,7 @@ class Packages {
 	protected static function get_enabled_packages() {
 		$enabled_packages = array();
 
-		foreach( self::$merged_packages as $merged_package_name => $package_class ) {
+		foreach ( self::$merged_packages as $merged_package_name => $package_class ) {
 
 			// For gradual rollouts, ensure that a package is enabled for user's remote variant number.
 			$experimental_package_enabled = method_exists( $package_class, 'is_enabled' ) ?
@@ -130,7 +130,7 @@ class Packages {
 				continue;
 			}
 
-			$option = 'wc_feature_' . str_replace('-', '_', $merged_package_name ) . '_enabled';
+			$option = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
 			if ( 'yes' === get_option( $option, 'yes' ) ) {
 				$enabled_packages[ $merged_package_name ] = $package_class;
 			}
@@ -169,7 +169,7 @@ class Packages {
 		foreach ( $active_plugins as $active_plugin_path ) {
 			$plugin_file = basename( plugin_basename( $active_plugin_path ), '.php' );
 
-			if ( ! self::is_package_enabled($plugin_file ) ) {
+			if ( ! self::is_package_enabled( $plugin_file ) ) {
 				continue;
 			}
 
