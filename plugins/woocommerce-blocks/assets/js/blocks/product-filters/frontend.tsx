@@ -1,15 +1,40 @@
 /**
  * External dependencies
  */
-import { store } from '@woocommerce/interactivity';
+import { getContext as getContextFn, store } from '@woocommerce/interactivity';
 
 export interface ProductFiltersContext {
-	productId: string;
+	isDialogOpen: boolean;
+	hasPageWithWordPressAdminBar: boolean;
 }
 
+const getContext = ( ns?: string ) =>
+	getContextFn< ProductFiltersContext >( ns );
+
 const productFilters = {
-	state: {},
-	actions: {},
+	state: {
+		isDialogOpen: () => {
+			const context = getContext();
+			return context.isDialogOpen;
+		},
+	},
+	actions: {
+		openDialog: () => {
+			const context = getContext();
+			document.body.classList.add( 'wc-modal--open' );
+			context.hasPageWithWordPressAdminBar = Boolean(
+				document.getElementById( 'wpadminbar' )
+			);
+
+			context.isDialogOpen = true;
+		},
+		closeDialog: () => {
+			const context = getContext();
+			document.body.classList.remove( 'wc-modal--open' );
+
+			context.isDialogOpen = false;
+		},
+	},
 	callbacks: {},
 };
 
