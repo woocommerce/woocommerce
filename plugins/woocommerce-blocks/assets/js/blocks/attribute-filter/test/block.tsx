@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import * as hooks from '@woocommerce/base-context/hooks';
 import userEvent from '@testing-library/user-event';
 
@@ -106,8 +106,14 @@ const setup = ( params: SetupParams ) => {
 		results: stubCollectionData(),
 		isLoading: false,
 	} );
-	const utils = render( <AttributeFilterBlock attributes={ attributes } /> );
-
+	const utils = render( <AttributeFilterBlock attributes={ attributes } />, {
+		legacyRoot: true,
+	} );
+	// We need to switch to React 17 rendering to allow these tests to keep passing, but as a result the React
+	// rendering error will be shown.
+	expect( console ).toHaveErroredWith(
+		`Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot`
+	);
 	const applyButton = screen.getByRole( 'button', { name: /apply/i } );
 	const smallAttributeCheckbox = screen.getByRole( 'checkbox', {
 		name: /small/i,
@@ -158,10 +164,8 @@ describe( 'Filter by Attribute block', () => {
 		test( 'should enable Apply button when filter attributes are changed', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithoutSelectedFilterAttributes();
+			await userEvent.click( smallAttributeCheckbox );
 
-			await act( async () => {
-				await userEvent.click( smallAttributeCheckbox );
-			} );
 			expect( applyButton ).not.toBeDisabled();
 		} );
 	} );
@@ -176,25 +180,18 @@ describe( 'Filter by Attribute block', () => {
 		test( 'should enable Apply button when filter attributes are changed', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithSelectedFilterAttributes();
+			await userEvent.click( smallAttributeCheckbox );
 
-			await act( async () => {
-				await userEvent.click( smallAttributeCheckbox );
-			} );
 			expect( applyButton ).not.toBeDisabled();
 		} );
 
 		test( 'should disable Apply button when deselecting the same previously selected attribute', async () => {
 			const { applyButton, smallAttributeCheckbox } =
 				setupWithSelectedFilterAttributes( { filterSize: 'small' } );
-
-			await act( async () => {
-				await userEvent.click( smallAttributeCheckbox );
-			} );
+			await userEvent.click( smallAttributeCheckbox );
 			expect( applyButton ).not.toBeDisabled();
 
-			await act( async () => {
-				await userEvent.click( smallAttributeCheckbox );
-			} );
+			await userEvent.click( smallAttributeCheckbox );
 			expect( applyButton ).toBeDisabled();
 		} );
 	} );
