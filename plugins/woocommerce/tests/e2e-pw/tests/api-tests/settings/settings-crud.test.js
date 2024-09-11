@@ -1019,157 +1019,164 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 	} );
 
 	test.describe( 'List all Tax settings options', () => {
-		test( 'can retrieve all tax settings', async ( { request } ) => {
-			// call API to retrieve all settings options
-			const response = await request.get( '/wp-json/wc/v3/settings/tax' );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThan( 0 );
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_prices_include_tax',
-						label: 'Prices entered with tax',
-						description: '',
-						type: 'radio',
-						default: 'no',
-						options: {
-							yes: 'Yes, I will enter prices inclusive of tax',
-							no: 'No, I will enter prices exclusive of tax',
-						},
-						tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
-						value: 'no',
-					} ),
-				] )
-			);
+		test(
+			'can retrieve all tax settings',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { request } ) => {
+				// call API to retrieve all settings options
+				const response = await request.get(
+					'/wp-json/wc/v3/settings/tax'
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( Array.isArray( responseJSON ) ).toBe( true );
+				expect( responseJSON.length ).toBeGreaterThan( 0 );
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_prices_include_tax',
+							label: 'Prices entered with tax',
+							description: '',
+							type: 'radio',
+							default: 'no',
+							options: {
+								yes: 'Yes, I will enter prices inclusive of tax',
+								no: 'No, I will enter prices exclusive of tax',
+							},
+							tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
+							value: 'no',
+						} ),
+					] )
+				);
 
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_based_on',
-						label: 'Calculate tax based on',
-						description: '',
-						type: 'select',
-						default: 'shipping',
-						options: {
-							shipping: 'Customer shipping address',
-							billing: 'Customer billing address',
-							base: 'Shop base address',
-						},
-						tip: 'This option determines which address is used to calculate tax.',
-						value: 'shipping',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_shipping_tax_class',
-						label: 'Shipping tax class',
-						description:
-							'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
-						type: 'select',
-						default: 'inherit',
-						options: {
-							inherit: 'Shipping tax class based on cart items',
-							'': 'Standard',
-							'reduced-rate': 'Reduced rate',
-							'zero-rate': 'Zero rate',
-						},
-						tip: 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
-						value: 'inherit',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_round_at_subtotal',
-						label: 'Rounding',
-						description:
-							'Round tax at subtotal level, instead of rounding per line',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_classes',
-						label: 'Additional tax classes',
-						description: '',
-						type: 'textarea',
-						default: '',
-						tip: 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.',
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_display_shop',
-						label: 'Display prices in the shop',
-						description: '',
-						type: 'select',
-						default: 'excl',
-						options: {
-							incl: 'Including tax',
-							excl: 'Excluding tax',
-						},
-						value: 'excl',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_display_cart',
-						label: 'Display prices during cart and checkout',
-						description: '',
-						type: 'select',
-						default: 'excl',
-						options: {
-							incl: 'Including tax',
-							excl: 'Excluding tax',
-						},
-						value: 'excl',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_price_display_suffix',
-						label: 'Price display suffix',
-						description: '',
-						type: 'text',
-						default: '',
-						tip: 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: {price_including_tax}, {price_excluding_tax}.',
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_total_display',
-						label: 'Display tax totals',
-						description: '',
-						type: 'select',
-						default: 'itemized',
-						options: {
-							single: 'As a single total',
-							itemized: 'Itemized',
-						},
-						value: 'itemized',
-					} ),
-				] )
-			);
-		} );
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_based_on',
+							label: 'Calculate tax based on',
+							description: '',
+							type: 'select',
+							default: 'shipping',
+							options: {
+								shipping: 'Customer shipping address',
+								billing: 'Customer billing address',
+								base: 'Shop base address',
+							},
+							tip: 'This option determines which address is used to calculate tax.',
+							value: 'shipping',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_shipping_tax_class',
+							label: 'Shipping tax class',
+							description:
+								'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
+							type: 'select',
+							default: 'inherit',
+							options: {
+								inherit:
+									'Shipping tax class based on cart items',
+								'': 'Standard',
+								'reduced-rate': 'Reduced rate',
+								'zero-rate': 'Zero rate',
+							},
+							tip: 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
+							value: 'inherit',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_round_at_subtotal',
+							label: 'Rounding',
+							description:
+								'Round tax at subtotal level, instead of rounding per line',
+							type: 'checkbox',
+							default: 'no',
+							value: 'no',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_classes',
+							label: 'Additional tax classes',
+							description: '',
+							type: 'textarea',
+							default: '',
+							tip: 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.',
+							value: '',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_display_shop',
+							label: 'Display prices in the shop',
+							description: '',
+							type: 'select',
+							default: 'excl',
+							options: {
+								incl: 'Including tax',
+								excl: 'Excluding tax',
+							},
+							value: 'excl',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_display_cart',
+							label: 'Display prices during cart and checkout',
+							description: '',
+							type: 'select',
+							default: 'excl',
+							options: {
+								incl: 'Including tax',
+								excl: 'Excluding tax',
+							},
+							value: 'excl',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_price_display_suffix',
+							label: 'Price display suffix',
+							description: '',
+							type: 'text',
+							default: '',
+							tip: 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: {price_including_tax}, {price_excluding_tax}.',
+							value: '',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_total_display',
+							label: 'Display tax totals',
+							description: '',
+							type: 'select',
+							default: 'itemized',
+							options: {
+								single: 'As a single total',
+								itemized: 'Itemized',
+							},
+							value: 'itemized',
+						} ),
+					] )
+				);
+			}
+		);
 	} );
 
 	test.describe( 'List all Shipping settings options', () => {
