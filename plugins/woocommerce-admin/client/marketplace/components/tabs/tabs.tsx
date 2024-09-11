@@ -108,7 +108,13 @@ const renderTabs = (
 					{ tabs[ tabKey ]?.title }
 					{ tabs[ tabKey ]?.showUpdateCount && (
 						<span
-							className={ `woocommerce-marketplace__update-count woocommerce-marketplace__update-count-${ tabKey }` }
+							className={ clsx(
+								'woocommerce-marketplace__update-count',
+								`woocommerce-marketplace__update-count-${ tabKey }`,
+								{
+									'is-active': tabKey === selectedTab,
+								}
+							) }
 						>
 							<span> { tabs[ tabKey ]?.updateCount } </span>
 						</span>
