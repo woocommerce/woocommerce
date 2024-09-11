@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -16,6 +15,8 @@ import {
 	product_sku,
 	think_time_min,
 	think_time_max,
+	FOOTER_TEXT,
+	STORE_NAME,
 } from '../../config.js';
 import {
 	htmlRequestHeader,
@@ -42,27 +43,18 @@ export function singleProduct() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: {product_url} – WooCommerce Core E2E Test Suite': (
-				response
-			) => {
-				const title_actual = response
-					.html()
-					.find( 'head title' )
-					.text();
+			[ `title is: ${ product_url } – ${ STORE_NAME }` ]: ( r ) => {
+				const title_actual = r.html().find( 'head title' ).text();
 				const title_expected = new RegExp(
-					`${ product_url } – WooCommerce Core E2E Test Suite`,
+					`${ product_url } – ${ STORE_NAME }`,
 					'i'
 				);
 				return title_actual.match( title_expected );
 			},
-			'body contains: product SKU': ( response ) =>
-				response.body.includes( `class="sku">${ product_sku }` ),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
+			'body contains: product SKU': ( r ) =>
+				r.body.includes( `class="sku">${ product_sku }` ),
+			'footer contains: Built with WooCommerce': ( r ) =>
+				r.html().find( 'body footer' ).text().includes( FOOTER_TEXT ),
 		} );
 	} );
 
