@@ -69,10 +69,9 @@ export default function Content(): JSX.Element {
 					if ( category === 'business-services' ) {
 						setHasBusinessServices( productList.length > 0 );
 					}
-					setSearchResultsCount( ( prevResults ) => ( {
-						...prevResults,
+					setSearchResultsCount( {
 						[ category ]: productList.length, // updating the appropriate category
-					} ) );
+					} );
 				} );
 				return () => {
 					abortControllers.forEach( ( controller ) => {
@@ -127,8 +126,7 @@ export default function Content(): JSX.Element {
 				setProducts( productList );
 
 				if ( query.term ) {
-					setSearchResultsCount( ( prevState ) => ( {
-						...prevState,
+					setSearchResultsCount( {
 						extensions: productList.filter(
 							( p ) => p.type === 'extension'
 						).length,
@@ -138,7 +136,7 @@ export default function Content(): JSX.Element {
 						'business-services': productList.filter(
 							( p ) => p.type === 'business-service'
 						).length,
-					} ) );
+					} );
 				}
 			} )
 			.catch( () => {

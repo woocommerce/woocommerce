@@ -25,7 +25,7 @@ export type MarketplaceContextType = {
 	setHasBusinessServices: ( hasBusinessServices: boolean ) => void;
 	searchResultsCount: SearchResultsCountType;
 	setSearchResultsCount: (
-		setState: ( prevState: SearchResultsCountType ) => SearchResultsCountType
+		updatedCounts: Partial< SearchResultsCountType >
 	) => void;
 };
 

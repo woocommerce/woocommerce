@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { useState, useEffect, createContext } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	useCallback,
+	createContext,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -35,12 +40,22 @@ export function MarketplaceContextProvider( props: {
 		[]
 	);
 	const [ hasBusinessServices, setHasBusinessServices ] = useState( false );
-	const [ searchResultsCount, setSearchResultsCount ] =
+	const [ searchResultsCount, setSearchResultsCountState ] =
 		useState< SearchResultsCountType >( {
 			extensions: 0,
 			themes: 0,
 			'business-services': 0,
 		} );
+
+	const setSearchResultsCount = useCallback(
+		( updatedCounts: Partial< SearchResultsCountType > ) => {
+			setSearchResultsCountState( ( prev ) => ( {
+				...prev,
+				...updatedCounts,
+			} ) );
+		},
+		[]
+	);
 
 	/**
 	 * Knowing installed products will help us to determine which products
