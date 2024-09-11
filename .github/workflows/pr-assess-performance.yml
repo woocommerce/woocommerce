@@ -59,7 +59,7 @@ jobs:
 
             - name: Restart Test Environment
               run: |
-                pnpm --filter="@woocommerce/plugin-woocommerce" env:stop && rm -rf ~/wp-env
+                pnpm --filter="@woocommerce/plugin-woocommerce" env:stop && sudo rm -rf ~/wp-env
                 pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
             - name: Measure performance (editor@3d7d7f02017383937f1a4158d433d0e5d44b3dc9)
