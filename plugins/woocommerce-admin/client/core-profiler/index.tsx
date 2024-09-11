@@ -301,9 +301,9 @@ const exitToWooHome = fromPromise( async () => {
 } );
 
 const getPluginNameParam = (
-	pluginSelected: CoreProfilerStateMachineContext[ 'pluginsSelected' ]
+	pluginsSelected: CoreProfilerStateMachineContext[ 'pluginsSelected' ]
 ) => {
-	if ( pluginSelected.includes( 'woocommerce-payments' ) ) {
+	if ( pluginsSelected.includes( 'woocommerce-payments' ) ) {
 		return 'woocommerce-payments';
 	}
 	return 'jetpack-ai';
