@@ -160,13 +160,13 @@ export default function Content(): JSX.Element {
 
 				if ( query.term ) {
 					setSearchResultsCount( {
-						extensions: productList.filter(
+						extensions: productList.products.filter(
 							( p ) => p.type === 'extension'
 						).length,
-						themes: productList.filter(
+						themes: productList.products.filter(
 							( p ) => p.type === 'theme'
 						).length,
-						'business-services': productList.filter(
+						'business-services': productList.products.filter(
 							( p ) => p.type === 'business-service'
 						).length,
 					} );
@@ -202,6 +202,7 @@ export default function Content(): JSX.Element {
 		setIsLoading,
 		query?.section,
 		page,
+		setSearchResultsCount,
 	] );
 
 	const getProductType = ( tab: string ): ProductType => {
