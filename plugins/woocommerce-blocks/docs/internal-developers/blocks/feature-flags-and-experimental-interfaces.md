@@ -58,6 +58,10 @@ The majority of our feature flagging is blocks, this is a list of them:
     - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L303)
     - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L101)
     - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/stock-filter/index.tsx#L15)
+- Delayed Account Creation (Experimental)
+   	- [PHP flag](https://github.com/woocommerce/woocommerce/blob/9897737880dcbef9831ee41799684dab1960d94f/plugins/woocommerce/src/Blocks/BlockTypesController.php#L417)
+   	- [Webpack flag](https://github.com/woocommerce/woocommerce/blob/9897737880dcbef9831ee41799684dab1960d94f/plugins/woocommerce-blocks/bin/webpack-entries.js#L168)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/9897737880dcbef9831ee41799684dab1960d94f/plugins/woocommerce-blocks/assets/js/blocks/order-confirmation/create-account/index.tsx#L14)
 
 ## Features behind flags
 
