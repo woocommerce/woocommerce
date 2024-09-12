@@ -8,7 +8,7 @@ import { DropdownContext } from '@woocommerce/interactivity-components/dropdown'
 /**
  * Internal dependencies
  */
-import { navigate } from '../product-filters/frontend';
+import { navigate } from '../../frontend';
 
 function getUrl( filters: Array< string | null > ) {
 	filters = filters.filter( Boolean );
