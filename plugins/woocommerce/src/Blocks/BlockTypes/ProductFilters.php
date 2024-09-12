@@ -134,8 +134,8 @@ class ProductFilters extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$tags = new \WP_HTML_Tag_Processor( $content );
-		if ( $tags->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-filters' ) ) ) {
-			$tags->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocmmerce/' . $this->block_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+		if ( $tags->next_tag() ) {
+			$tags->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/' . $this->block_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$tags->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
