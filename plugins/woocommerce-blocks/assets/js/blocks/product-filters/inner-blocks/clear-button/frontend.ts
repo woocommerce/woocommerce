@@ -11,7 +11,7 @@ import { store, getContext } from '@woocommerce/interactivity';
 /**
  * Internal dependencies
  */
-import { navigate } from '../product-filter/frontend';
+import { navigate } from '../product-filters/frontend';
 
 const getQueryParams = ( e: Event ) => {
 	const filterNavContainer = ( e.target as HTMLElement )?.closest(
