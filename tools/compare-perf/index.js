@@ -30,6 +30,10 @@ program
 		"Use this branch's performance test files"
 	)
 	.option(
+		'--skip-benchmarking',
+		'Skips benchmarking and gets straight to reporting phase (tests results already available)'
+	)
+	.option(
 		'--wp-version <version>',
 		'Specify a WordPress version on which to test all branches'
 	)

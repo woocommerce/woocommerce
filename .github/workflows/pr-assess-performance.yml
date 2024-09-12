@@ -81,6 +81,11 @@ jobs:
                 RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
                 ls -la tools/compare-perf/artifacts/
+
+            - name: Analyze results
+              env:
+                WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
+              run: |
+                pnpm --filter="compare-perf" run compare perf ${{ github.sha }} ${{ env.WC_TRUNK_SHA }} --tests-branch ${{ github.sha }} --skip-benchmarking
             
-            # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)

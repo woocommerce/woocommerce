@@ -17,6 +17,10 @@
 		"inquirer": "^7.1.0",
 		"simple-git": "^3.21.0"
 	},
+	"devDependencies": {
+		"ts-node": "^10.9.2",
+		"tslib": "^2.6.2"
+	},
 	"engines": {
 		"node": "^20.11.1",
 		"pnpm": "9.1.3"
