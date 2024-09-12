@@ -60,7 +60,7 @@
 	}
 	.wc-block-components-password-strength__meter[value="2"],
 	.wc-block-components-password-strength__meter[value="2"] + .wc-block-components-password-strength__result {
-		color: #ff6f00;
+		color: $alert-red;
 	}
 	.wc-block-components-password-strength__meter[value="3"],
 	.wc-block-components-password-strength__meter[value="3"] + .wc-block-components-password-strength__result {

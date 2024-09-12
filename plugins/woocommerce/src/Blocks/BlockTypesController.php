@@ -415,6 +415,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterClearButton';
 			$block_types[] = 'ProductFilterCheckboxList';
 			$block_types[] = 'ProductFilterChips';
+			$block_types[] = 'OrderConfirmation\CreateAccount';
 		}
 
 		/**
