@@ -2,7 +2,8 @@
 
 .woocommerce-marketplace__footer {
 	background: $gray-0;
-	border-top: 1px solid $gray-200;
+	border-radius: 4px;
+	max-width: 1600px;
 	margin: auto;
 	padding: $content-spacing-xlarge $content-spacing-small;
 
@@ -32,16 +33,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: $large-gap;
-}
-
-.woocommerce-marketplace__footer-logo {
-	color: $wp-gray-50;
-	display: flex;
-	font-size: 14px;
-	font-weight: 600;
-	line-height: 20px;
-	gap: $small-gap;
-	margin: 48px 0 0;
 }
 
 @media screen and (min-width: $breakpoint-medium) {
