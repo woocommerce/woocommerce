@@ -2,17 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, search } from '@wordpress/icons';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
+import { SearchControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import './search.scss';
 import { MARKETPLACE_PATH } from '../constants';
-
-const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
 
 /**
  * Search component.
@@ -21,6 +19,7 @@ const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
  */
 function Search(): JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
+	const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
 
 	const query = useQuery();
 
@@ -49,12 +48,6 @@ function Search(): JSX.Element {
 		return [];
 	};
 
-	const handleInputChange = (
-		event: React.ChangeEvent< HTMLInputElement >
-	) => {
-		setSearchTerm( event.target.value );
-	};
-
 	const handleKeyUp = ( event: { key: string } ) => {
 		if ( event.key === 'Enter' ) {
 			runSearch();
@@ -66,32 +59,14 @@ function Search(): JSX.Element {
 	};
 
 	return (
-		<div className="woocommerce-marketplace__search">
-			<label
-				className="screen-reader-text"
-				htmlFor="woocommerce-marketplace-search-query"
-			>
-				{ searchPlaceholder }
-			</label>
-			<input
-				id="woocommerce-marketplace-search-query"
-				value={ searchTerm }
-				className="woocommerce-marketplace__search-input"
-				type="search"
-				name="woocommerce-marketplace-search-query"
-				placeholder={ searchPlaceholder }
-				onChange={ handleInputChange }
-				onKeyUp={ handleKeyUp }
-			/>
-			<button
-				id="woocommerce-marketplace-search-button"
-				className="woocommerce-marketplace__search-button"
-				aria-label={ __( 'Search', 'woocommerce' ) }
-				onClick={ runSearch }
-			>
-				<Icon icon={ search } size={ 32 } />
-			</button>
-		</div>
+		<SearchControl
+			label={ searchPlaceholder }
+			placeholder={ searchPlaceholder }
+			value={ searchTerm }
+			onChange={ setSearchTerm }
+			onKeyUp={ handleKeyUp }
+			className="woocommerce-marketplace__search"
+		/>
 	);
 }
 
