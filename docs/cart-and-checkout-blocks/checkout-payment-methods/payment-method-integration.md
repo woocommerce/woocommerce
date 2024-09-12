@@ -43,8 +43,8 @@ The options you feed the configuration instance should be an object in this shap
 ```js
 const options = {
 	name: 'my_payment_method',
-	content: <div>A React node</div>,
-	edit: <div>A React node</div>,
+	content: &lt;div&gt;A React node&lt;/div&gt;,
+	edit: &lt;div&gt;A React node&lt;/div&gt;,
 	canMakePayment: () => true,
 	paymentMethodId: 'new_payment_method',
 	supports: {
