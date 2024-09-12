@@ -66,14 +66,14 @@ jobs:
                 fi
             
             - name: Rebuild
-              if: ${{ env.WC_MEASURE_BASELINE }}
+              if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
               run: |
                 git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
                 pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
             - name: Measure performance (@${{ env.WC_TRUNK_SHA }})
-              if: ${{ env.WC_MEASURE_BASELINE }}
+              if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
               env:
                 WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
               run: |
