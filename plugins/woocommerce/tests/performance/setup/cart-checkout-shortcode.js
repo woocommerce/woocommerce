@@ -13,9 +13,10 @@ import { base_url, admin_username, admin_password } from '../config.js';
 /**
  * Convert Cart & Checkout pages to shortcode.
  */
-export function useCartCheckoutShortcodes() {
+export function setCartCheckoutShortcodes() {
 	/**
 	 * A WordPress page.
+	 *
 	 * @typedef {Object} WPPage
 	 * @property {number} id
 	 * @property {string} slug
