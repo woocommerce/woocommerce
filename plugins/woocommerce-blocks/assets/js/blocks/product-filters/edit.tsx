@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { filter, filterThreeLines } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
 import { AttributeSetting } from '@woocommerce/types';
 import {
@@ -10,14 +9,19 @@ import {
 	useBlockProps,
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import {
+	BlockEditProps,
+	BlockInstance,
+	InnerBlockTemplate,
+	createBlock,
+} from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { Icon, menu, settings } from '@wordpress/icons';
+import { useEffect } from '@wordpress/element';
+import { select, dispatch } from '@wordpress/data';
+import { useLocalStorageState } from '@woocommerce/base-hooks';
 import {
 	ExternalLink,
 	PanelBody,
-	RadioControl,
-	RangeControl,
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -77,6 +81,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 export const Edit = ( {
 	setAttributes,
 	attributes,
+	clientId,
 }: BlockEditProps< BlockAttributes > ) => {
 	const blockProps = useBlockProps();
 
@@ -84,6 +89,84 @@ export const Edit = ( {
 		'templatePartProductFiltersOverlayEditUri',
 		''
 	);
+
+	const [
+		productFiltersOverlayNavigationAttributes,
+		setProductFiltersOverlayNavigationAttributes,
+	] = useLocalStorageState< Record< string, unknown > >(
+		'product-filters-overlay-navigation-attributes',
+		{}
+	);
+
+	useEffect( () => {
+		const filtersClientIds = select( 'core/block-editor' ).getBlocksByName(
+			'woocommerce/product-filters'
+		);
+
+		let overlayBlock:
+			| BlockInstance< { [ k: string ]: unknown } >
+			| undefined;
+
+		for ( const filterClientId of filtersClientIds ) {
+			const filterBlock =
+				select( 'core/block-editor' ).getBlock( filterClientId );
+
+			if ( filterBlock ) {
+				for ( const innerBlock of filterBlock.innerBlocks ) {
+					if (
+						innerBlock.name ===
+							'woocommerce/product-filters-overlay-navigation' &&
+						innerBlock.attributes.triggerType === 'open-overlay'
+					) {
+						overlayBlock = innerBlock;
+					}
+				}
+			}
+		}
+
+		if ( attributes.overlay === 'never' && overlayBlock ) {
+			setProductFiltersOverlayNavigationAttributes(
+				overlayBlock.attributes
+			);
+
+			dispatch( 'core/block-editor' ).updateBlockAttributes(
+				overlayBlock.clientId,
+				{
+					lock: {},
+				}
+			);
+
+			dispatch( 'core/block-editor' ).removeBlock(
+				overlayBlock.clientId
+			);
+		} else if ( attributes.overlay !== 'never' && ! overlayBlock ) {
+			if ( productFiltersOverlayNavigationAttributes ) {
+				productFiltersOverlayNavigationAttributes.triggerType =
+					'open-overlay';
+			}
+
+			dispatch( 'core/block-editor' ).insertBlock(
+				createBlock(
+					'woocommerce/product-filters-overlay-navigation',
+					productFiltersOverlayNavigationAttributes
+						? productFiltersOverlayNavigationAttributes
+						: {
+								align: 'left',
+								triggerType: 'open-overlay',
+								lock: { move: true, remove: true },
+						  }
+				),
+				0,
+				clientId,
+				false
+			);
+		}
+	}, [
+		attributes.overlay,
+		clientId,
+		productFiltersOverlayNavigationAttributes,
+		setProductFiltersOverlayNavigationAttributes,
+	] );
 
 	return (
 		<div { ...blockProps }>
@@ -110,126 +193,6 @@ export const Edit = ( {
 							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
-					{ attributes.overlay === 'mobile' && (
-						<>
-							<RadioControl
-								className="wc-block-editor-product-filters__overlay-button-style-toggle"
-								label={ __( 'Button', 'woocommerce' ) }
-								selected={ attributes.overlayButtonStyle }
-								onChange={ (
-									value: BlockAttributes[ 'overlayButtonStyle' ]
-								) => {
-									setAttributes( {
-										overlayButtonStyle: value,
-									} );
-								} }
-								options={ [
-									{
-										value: 'label-icon',
-										label: __(
-											'Label and icon',
-											'woocommerce'
-										),
-									},
-									{
-										value: 'label',
-										label: __(
-											'Label only',
-											'woocommerce'
-										),
-									},
-									{
-										value: 'icon',
-										label: __( 'Icon only', 'woocommerce' ),
-									},
-								] }
-							/>
-							{ attributes.overlayButtonStyle !== 'label' && (
-								<>
-									<ToggleGroupControl
-										className="wc-block-editor-product-filters__overlay-button-toggle"
-										isBlock={ true }
-										value={ attributes.overlayIcon }
-										onChange={ (
-											value: BlockAttributes[ 'overlayIcon' ]
-										) => {
-											setAttributes( {
-												overlayIcon: value,
-											} );
-										} }
-									>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-1' }
-											aria-label={ __(
-												'Filter icon 1',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ filter }
-												/>
-											}
-										/>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-2' }
-											aria-label={ __(
-												'Filter icon 2',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ filterThreeLines }
-												/>
-											}
-										/>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-3' }
-											aria-label={ __(
-												'Filter icon 3',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ menu }
-												/>
-											}
-										/>
-										<ToggleGroupControlOption
-											value={ 'filter-icon-4' }
-											aria-label={ __(
-												'Filter icon 4',
-												'woocommerce'
-											) }
-											label={
-												<Icon
-													size={ 32 }
-													icon={ settings }
-												/>
-											}
-										/>
-									</ToggleGroupControl>
-									<RangeControl
-										label={ __(
-											'Icon size',
-											'woocommerce'
-										) }
-										className="wc-block-editor-product-filters__overlay-button-size"
-										value={ attributes.overlayIconSize }
-										onChange={ ( value: number ) =>
-											setAttributes( {
-												overlayIconSize: value,
-											} )
-										}
-										min={ 20 }
-										max={ 80 }
-									/>
-								</>
-							) }
-						</>
-					) }
 					{ attributes.overlay !== 'never' && (
 						<ExternalLink
 							href={ templatePartEditUri }

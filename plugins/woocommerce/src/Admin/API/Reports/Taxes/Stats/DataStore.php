@@ -79,28 +79,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Updates the database query with parameters used for Taxes Stats report
 	 *
+	 * @see Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore::add_sql_query_params()
 	 * @param array $query_args       Query arguments supplied by the user.
 	 */
 	protected function update_sql_query_params( $query_args ) {
 		global $wpdb;
 
-		$taxes_where_clause     = '';
 		$order_tax_lookup_table = self::get_db_table_name();
 
+		$this->add_time_period_sql_params( $query_args, $order_tax_lookup_table );
+		$taxes_where_clause  = '';
+		$order_status_filter = $this->get_status_subquery( $query_args );
+
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-			$query_args['taxes'] = (array) $query_args['taxes'];
-			$tax_id_placeholders = implode( ',', array_fill( 0, count( $query_args['taxes'] ), '%d' ) );
-			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-			$taxes_where_clause .= $wpdb->prepare( " AND {$order_tax_lookup_table}.tax_rate_id IN ({$tax_id_placeholders})", $query_args['taxes'] );
+			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- `$allowed_taxes` was prepared by get_filtered_ids above. */
+			$taxes_where_clause .= " AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})";
 			/* phpcs:enable */
 		}
 
-		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
 			$taxes_where_clause .= " AND ( {$order_status_filter} )";
 		}
 
-		$this->add_time_period_sql_params( $query_args, $order_tax_lookup_table );
 		$this->total_query->add_sql_clause( 'where', $taxes_where_clause );
 
 		$this->add_intervals_sql_params( $query_args, $order_tax_lookup_table );
