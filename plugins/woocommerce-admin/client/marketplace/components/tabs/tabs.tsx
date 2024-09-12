@@ -185,7 +185,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 			getVisibleTabs( selectedTab, hasBusinessServices, tabs )
 		);
 
-		if ( 'business-services' == selectedTab && ! hasBusinessServices ) {
+		if ( selectedTab === 'business-services' && ! hasBusinessServices ) {
 			setUrlTabParam( 'extensions', query );
 		}
 	}, [ selectedTab, hasBusinessServices ] );
