@@ -241,9 +241,3 @@ export const Edit = ( {
 		</div>
 	);
 };
-
-export const Save = () => {
-	const blockProps = useBlockProps.save();
-	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
-	return <div { ...innerBlocksProps } />;
-};
