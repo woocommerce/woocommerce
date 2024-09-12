@@ -2,7 +2,7 @@
  * External dependencies
  */
 import {
-	getContext,
+	getContext as getContextFn,
 	store,
 	navigate as navigateFn,
 } from '@woocommerce/interactivity';
@@ -13,10 +13,19 @@ export interface ProductFiltersContext {
 	hasPageWithWordPressAdminBar: boolean;
 }
 
+const getContext = ( ns?: string ) =>
+	getContextFn< ProductFiltersContext >( ns );
+
 store( 'woocommerce/product-filters', {
+	state: {
+		isDialogOpen: () => {
+			const context = getContext();
+			return context.isDialogOpen;
+		},
+	},
 	actions: {
 		openDialog: () => {
-			const context = getContext< ProductFiltersContext >();
+			const context = getContext();
 			document.body.classList.add( 'wc-modal--open' );
 			context.hasPageWithWordPressAdminBar = Boolean(
 				document.getElementById( 'wpadminbar' )
@@ -25,7 +34,7 @@ store( 'woocommerce/product-filters', {
 			context.isDialogOpen = true;
 		},
 		closeDialog: () => {
-			const context = getContext< ProductFiltersContext >();
+			const context = getContext();
 			document.body.classList.remove( 'wc-modal--open' );
 
 			context.isDialogOpen = false;

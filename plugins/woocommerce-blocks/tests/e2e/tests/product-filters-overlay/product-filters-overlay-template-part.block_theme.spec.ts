@@ -105,6 +105,10 @@ test.describe( 'Filters Overlay Template Part', () => {
 					templatePartData.selectors.editor.blocks.activeFilters
 						.blockLabel
 				)
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.filterOptions
+						.blockLabel
+				)
 				.click();
 
 			await editor.openDocumentSettingsSidebar();
@@ -195,6 +199,10 @@ test.describe( 'Filters Overlay Template Part', () => {
 					templatePartData.selectors.editor.blocks.activeFilters
 						.blockLabel
 				)
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.filterOptions
+						.blockLabel
+				)
 				.click();
 
 			await editor.openDocumentSettingsSidebar();
@@ -211,13 +219,12 @@ test.describe( 'Filters Overlay Template Part', () => {
 				'OverlayNeverMobileAlways'
 			);
 			await layoutSettings.getByLabel( 'Never' ).click();
-
-			await expect(
-				editor.page.getByRole( 'link', {
+			await editor.page
+				.getByRole( 'link', {
 					name: templatePartData.selectors.editor.blocks
 						.productFiltersOverlayNavigation.title,
 				} )
-			).toBeHidden();
+				.click();
 
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -260,6 +267,10 @@ test.describe( 'Filters Overlay Template Part', () => {
 			await editor.canvas
 				.getByLabel(
 					templatePartData.selectors.editor.blocks.activeFilters
+						.blockLabel
+				)
+				.getByLabel(
+					templatePartData.selectors.editor.blocks.filterOptions
 						.blockLabel
 				)
 				.click();
