@@ -1144,7 +1144,7 @@ test.describe( 'Product picker', () => {
 				);
 			} );
 
-			test( `For collection "${ collection.name }" - product picker shouldn't be shown in Single Product template`, async ( {
+			test( `For collection "${ collection.name }" - "From current product" is chosen by default`, async ( {
 				pageObject,
 				admin,
 				editor,
@@ -1160,10 +1160,10 @@ test.describe( 'Product picker', () => {
 					key as Collections
 				);
 
-				const editorProductPicker = editor.canvas.locator(
-					SELECTORS.productPicker
+				const productToShowControl = admin.page.getByText(
+					'From the current product'
 				);
-				await expect( editorProductPicker ).toBeHidden();
+				await expect( productToShowControl ).toBeChecked();
 			} );
 		}
 	);
