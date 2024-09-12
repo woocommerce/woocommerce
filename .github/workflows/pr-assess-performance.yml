@@ -37,7 +37,7 @@ jobs:
                 pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
                 pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
-            - name: Measure performance (@latest)
+            - name: Measure performance (@${{ github.sha }})
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
               run: |
@@ -71,7 +71,7 @@ jobs:
                 pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
 
-            - name: Measure performance (@trunk)
+            - name: Measure performance (@${{ env.WC_TRUNK_SHA }})
               if: ${{ env.WC_MEASURE_BASELINE }}
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
