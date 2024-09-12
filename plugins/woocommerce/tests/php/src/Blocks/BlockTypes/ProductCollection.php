@@ -60,8 +60,9 @@ class ProductCollection extends \WP_UnitTestCase {
 	 * Build the merged_query for testing
 	 *
 	 * @param array $parsed_block Parsed block data.
+	 * @param array $query        Query data.
 	 */
-	private function initialize_merged_query( $parsed_block = array() ) {
+	private function initialize_merged_query( $parsed_block = array(), $query = array() ) {
 		if ( empty( $parsed_block ) ) {
 			$parsed_block = $this->get_base_parsed_block();
 		}
@@ -70,8 +71,6 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$block          = new \stdClass();
 		$block->context = $parsed_block['attrs'];
-
-		$query = build_query_vars_from_query_block( $block, 1 );
 
 		return $this->block_instance->build_frontend_query( $query, $block, 1 );
 	}
@@ -598,13 +597,26 @@ class ProductCollection extends \WP_UnitTestCase {
 	 * - Product tags
 	 */
 	public function test_merging_taxonomies_query() {
-		$parsed_block                               = $this->get_base_parsed_block();
-		$parsed_block['attrs']['query']['taxQuery'] = array(
-			'product_cat' => array( 1, 2 ),
-			'product_tag' => array( 3, 4 ),
+		$merged_query = $this->initialize_merged_query(
+			null,
+			// Since we aren't calling the Query Loop build function, we need to provide
+			// a tax_query rather than relying on it generating one from the input.
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_cat',
+						'terms'            => array( 1, 2 ),
+						'include_children' => false,
+					),
+					array(
+						'taxonomy'         => 'product_tag',
+						'terms'            => array( 3, 4 ),
+						'include_children' => false,
+					),
+				),
+			)
 		);
-
-		$merged_query = $this->initialize_merged_query( $parsed_block );
 
 		$this->assertContains(
 			array(
