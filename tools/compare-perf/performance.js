@@ -86,9 +86,6 @@ async function runPerformanceTests( branches, options ) {
 		await askForConfirmation( 'Ready to go? ' );
 	}
 
-	const baseDir = path.join( os.tmpdir(), 'wp-performance-tests' );
-	const testRunnerDir = path.join( baseDir + '/tests' );
-
 	if ( skipBenchmarking ) {
 		const testSuites = getFilesFromDir(
 			path.resolve( __dirname, '../../', config.testsPath )
@@ -111,6 +108,7 @@ async function runPerformanceTests( branches, options ) {
 		throw new Error( `Need at least two git refs to run` );
 	}
 
+	const baseDir = path.join( os.tmpdir(), 'wp-performance-tests' );
 	if ( fs.existsSync( baseDir ) ) {
 		logAtIndent( 1, 'Removing existing files' );
 		fs.rmSync( baseDir, { recursive: true } );
@@ -166,6 +164,8 @@ async function runPerformanceTests( branches, options ) {
 	}
 
 	logAtIndent( 1, 'Setting up test runner' );
+
+	const testRunnerDir = path.join( baseDir + '/tests' );
 
 	logAtIndent( 2, 'Copying source to:', formats.success( testRunnerDir ) );
 	await runShellScript( `cp -R  ${ sourceDir } ${ testRunnerDir }` );
