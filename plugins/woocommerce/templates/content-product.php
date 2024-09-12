@@ -19,8 +19,8 @@ defined( 'ABSPATH' ) || exit;
 
 global $product;
 
-// Ensure visibility.
-if ( empty( $product ) || ! is_a( $product, 'WC_Product' ) || ! $product->is_visible() ) {
+// Check if the product is a valid WooCommerce product and ensure its visibility before proceeding.
+if ( ! is_a( $product, WC_Product::class ) || ! $product->is_visible() ) {
 	return;
 }
 ?>
