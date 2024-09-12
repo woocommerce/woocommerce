@@ -1,9 +1,9 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\ComingSoon;
+namespace Automattic\WooCommerce\Tests\Internal\ComingSoon;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Tests for the coming soon cache invalidator class.

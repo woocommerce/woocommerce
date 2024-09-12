@@ -54,14 +54,18 @@ class WCAdminSharedSettings {
 	 * @return void
 	 */
 	public function on_woocommerce_blocks_loaded() {
+		// Ensure we only add admin settings on the admin.
+		if ( ! is_admin() ) {
+			return;
+		}
+
 		if ( class_exists( '\Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry' ) ) {
 			\Automattic\WooCommerce\Blocks\Package::container()->get( \Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class )->add(
 				$this->settings_prefix,
-				function() {
+				function () {
 					return apply_filters( 'woocommerce_admin_shared_settings', array() );
 				}
 			);
 		}
 	}
 }
-

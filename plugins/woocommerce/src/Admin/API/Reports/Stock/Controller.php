@@ -443,14 +443,16 @@ class Controller extends GenericController implements ExportableInterface {
 		);
 		$params['order']['default']   = 'asc';
 		$params['orderby']['default'] = 'stock_status';
-		$params['orderby']['enum']    = array(
-			'stock_status',
-			'stock_quantity',
-			'date',
-			'id',
-			'include',
-			'title',
-			'sku',
+		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
+			array(
+				'stock_status',
+				'stock_quantity',
+				'date',
+				'id',
+				'include',
+				'title',
+				'sku',
+			)
 		);
 		$params['parent']             = array(
 			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),

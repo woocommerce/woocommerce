@@ -233,10 +233,12 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_collection_params() {
 		$params                        = parent::get_collection_params();
 		$params['per_page']['minimum'] = 0;
-		$params['orderby']['enum']     = array(
-			'date',
-			'num_items_sold',
-			'net_total',
+		$params['orderby']['enum']     = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'num_items_sold',
+				'net_total',
+			)
 		);
 		$params['product_includes']    = array(
 			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce' ),

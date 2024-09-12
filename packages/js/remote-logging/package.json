@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/remote-logging",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "WooCommerce remote logging for Automattic based projects",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",

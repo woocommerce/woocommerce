@@ -167,7 +167,7 @@ export default function Products( props: ProductsProps ) {
 
 	return (
 		<div className={ containerClassName }>
-			{ selectedTab !== 'business-services' && (
+			{ selectedTab === 'search' && (
 				<h2 className={ productListTitleClassName }>
 					{ isLoading ? ' ' : title }
 				</h2>
