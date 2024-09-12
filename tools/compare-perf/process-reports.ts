@@ -1,15 +1,20 @@
 /**
  * External dependencies
  */
-import fs from 'fs';
-import path from 'path';
-import { bold } from 'chalk';
+const bold = require( 'chalk' );
+const fs = require( 'fs' );
+const path = require( 'path' );
 
 /**
  * Internal dependencies
  */
-import { getFilesFromDir, readJSONFile } from './utils';
-import { logAtIndent, median, sanitizeBranchName } from './performance';
+const {
+	getFilesFromDir,
+	readJSONFile,
+	logAtIndent,
+	sanitizeBranchName,
+	median
+} = require( './utils' ) ;
 
 const formats = {
 	success: bold.green,
@@ -46,7 +51,7 @@ async function processPerformanceReports(
 		results[ testSuite ] = {};
 		for ( const branch of branches ) {
 			const sanitizedBranchName = sanitizeBranchName( branch );
-			const resultsRounds = resultFiles
+			const resultsRounds: any[] = resultFiles
 				.filter( ( file: string ) =>
 					file.includes(
 						`/${ testSuite }_${ sanitizedBranchName }_round-`

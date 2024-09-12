@@ -7,7 +7,7 @@
 	"license": "GPLv2",
 	"repository": "woocommerce/woocommerce",
 	"scripts": {
-		"compare": "node index.js",
+		"compare": "node -r ts-node/register index.js",
 		"log": "node log-to-codevitals.js"
 	},
 	"dependencies": {
