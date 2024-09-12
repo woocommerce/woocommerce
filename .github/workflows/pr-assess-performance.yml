@@ -79,6 +79,10 @@ jobs:
               run: |
                 RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+                
+            - name: Debug artifacts produced
+              run: |
+                ls -la tools/compare-perf/artifacts/
             
             # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
