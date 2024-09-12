@@ -17,7 +17,6 @@ const {
 	getFilesFromDir,
 	logAtIndent,
 	sanitizeBranchName,
-	median
 } = require( './utils' );
 const config = require( './config' );
 const { processPerformanceReports } = require( './process-reports.ts' );
@@ -34,8 +33,6 @@ const ARTIFACTS_PATH =
  * @property {boolean=} skipBenchmarking Skip benchmarking and get to report processing (reports supplied from outside).
  * @property {string=}  wpVersion        The WordPress version to be used as the base install for testing.
  */
-
-
 
 /**
  * Runs the performance tests on the current branch.
@@ -94,13 +91,14 @@ async function runPerformanceTests( branches, options ) {
 
 	if ( skipBenchmarking ) {
 		const testSuites = getFilesFromDir(
-			path.join( testRunnerDir, config.testsPath )
+			path.resolve( __dirname, '../../', config.testsPath )
 		).map( ( file ) => {
 			logAtIndent( 1, 'Found:', formats.success( file ) );
 			return path.basename( file, '.spec.js' );
 		} );
 
 		await processPerformanceReports( testSuites, branches );
+		return;
 	}
 
 	logAtIndent( 0, 'Setting up' );
