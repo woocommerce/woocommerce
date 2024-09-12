@@ -59,7 +59,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		$order_2c->calculate_totals();
 		$order_2c->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new CouponsDataStore();
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -375,7 +375,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		// Delete the coupons.
 		$coupon_2->delete( true );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new CouponsDataStore();
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
