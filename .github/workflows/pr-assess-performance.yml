@@ -49,7 +49,7 @@ jobs:
               run: |
                 git reset --hard
                 git checkout 41cf2b285e8ee690b1ea804b6a774345d7144225
-                echo "WC_TRUNK_SHA=$(41cf2b285e8ee690b1ea804b6a774345d7144225)" >> $GITHUB_ENV
+                echo "WC_TRUNK_SHA=41cf2b285e8ee690b1ea804b6a774345d7144225" >> $GITHUB_ENV
 
             - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
               name: Cache measurements (baseline)
