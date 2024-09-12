@@ -1114,10 +1114,13 @@ class ProductCollection extends \WP_UnitTestCase {
 		$request->set_param(
 			'productCollectionQueryContext',
 			array(
-				'collection'   => 'test-collection',
-				'previewState' => array(
-					'isPreview' => 'true',
-				),
+				'collection' => 'test-collection',
+			)
+		);
+		$request->set_param(
+			'previewState',
+			array(
+				'isPreview' => 'true',
 			)
 		);
 
