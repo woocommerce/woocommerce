@@ -10,7 +10,6 @@ import { createInterpolateElement } from '@wordpress/element';
  */
 import './footer.scss';
 import IconWithText from '../icon-with-text/icon-with-text';
-import WooIcon from '../../assets/images/woo-icon.svg';
 import { MARKETPLACE_HOST } from '../constants';
 
 const refundPolicyTitle = createInterpolateElement(
@@ -71,10 +70,6 @@ function FooterContent(): JSX.Element {
 						'woocommerce'
 					) }
 				/>
-			</div>
-			<div className="woocommerce-marketplace__footer-logo">
-				<img src={ WooIcon } alt="Woo Logo" aria-hidden="true" />
-				<span>{ __( 'Woo Marketplace', 'woocommerce' ) }</span>
 			</div>
 		</div>
 	);
