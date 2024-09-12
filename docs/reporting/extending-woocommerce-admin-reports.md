@@ -32,7 +32,7 @@ npm run create-wc-extension
 After choosing a name, move into that folder and start webpack to watch and build files.
 
 ```sh
-cd ../<my-plugin-name>
+cd ../&lt;my-plugin-name&gt;
 npm install
 npm start
 ```
