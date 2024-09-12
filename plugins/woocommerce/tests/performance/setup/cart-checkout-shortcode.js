@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /**
  * k6 dependencies
  */
