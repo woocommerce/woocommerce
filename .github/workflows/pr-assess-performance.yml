@@ -41,6 +41,7 @@ jobs:
               env:
                 WP_ARTIFACTS_PATH: 'tools/compare-perf/artifacts/'
               run: |
+                mkdir -p tools/compare-perf/artifacts/
                 RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
               
