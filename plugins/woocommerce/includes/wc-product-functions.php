@@ -976,15 +976,14 @@ function wc_get_product_backorder_options() {
  *
  * @since  3.0.0
  * @param  int   $product_id  Product ID.
- * @param  int   $limit       Limit of results, -1 for no limit.
+ * @param  int   $limit       Limit of results.
  * @param  array $exclude_ids Exclude IDs from the results.
  * @return array
  */
 function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array() ) {
 
 	$product_id     = absint( $product_id );
-	$limit          = intval( $limit );
-	$limit          = $limit < -1 ? -1 : $limit; // Any negative number will default to no limit.
+	$limit          = $limit >= -1 ? $limit : 5;
 	$exclude_ids    = array_merge( array( 0, $product_id ), $exclude_ids );
 	$transient_name = 'wc_related_' . $product_id;
 	$query_args     = http_build_query(
@@ -998,7 +997,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	$related_posts = $transient && is_array( $transient ) && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
 
 	// We want to query related posts if they are not cached, or we don't have enough.
-	if ( false === $related_posts || ( $limit > 0 && count( $related_posts ) < $limit ) ) {
+	if ( false === $related_posts || count( $related_posts ) < $limit ) {
 
 		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_cat_terms', wc_get_product_term_ids( $product_id, 'product_cat' ), $product_id ) : array();
 		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
@@ -1007,13 +1006,8 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		if ( empty( $cats_array ) && empty( $tags_array ) && ! apply_filters( 'woocommerce_product_related_posts_force_display', false, $product_id ) ) {
 			$related_posts = array();
 		} else {
-			// For backward compatibility we need to grab 10 extra products. This was done so that when we shuffle the
-			// output below it will appear to be random by including different products rather than the same ones
-			// in a different order.
-			$query_limit = $limit > 0 ? $limit + 10 : -1;
-
 			$data_store    = WC_Data_Store::load( 'product' );
-			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $query_limit, $product_id );
+			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
 		if ( $transient && is_array( $transient ) ) {
@@ -1039,11 +1033,7 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		shuffle( $related_posts );
 	}
 
-	if ( $limit > 0 ) {
-		return array_slice( $related_posts, 0, $limit );
-	}
-
-	return $related_posts;
+	return array_slice( $related_posts, 0, $limit );
 }
 
 /**

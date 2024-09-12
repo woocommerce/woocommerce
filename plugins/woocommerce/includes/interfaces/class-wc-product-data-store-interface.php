@@ -86,7 +86,7 @@ interface WC_Product_Data_Store_Interface {
 	 * @param array $cats_array List of categories IDs.
 	 * @param array $tags_array List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
-	 * @param int   $limit Limit of results, -1 for no limit.
+	 * @param int   $limit Limit of results.
 	 * @param int   $product_id Product ID.
 	 * @return array
 	 */
