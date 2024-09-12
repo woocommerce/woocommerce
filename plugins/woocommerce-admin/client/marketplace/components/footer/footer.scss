@@ -2,7 +2,8 @@
 
 .woocommerce-marketplace__footer {
 	background: $gray-0;
-	border-top: 1px solid $gray-200;
+	border-radius: 4px;
+	max-width: 1600px;
 	margin: auto;
 	padding: $content-spacing-xlarge $content-spacing-small;
 
