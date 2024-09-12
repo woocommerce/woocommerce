@@ -73,7 +73,7 @@ test.describe( 'Payment setup task', () => {
 		await page
 			.locator( '//input[@placeholder="BIC / Swift"]' )
 			.fill( 'ABBA' );
-		await page.locator( 'text=Save' ).click();
+		await page.getByRole( 'button', { name: 'Save' } ).click();
 
 		// Check that bank transfers were set up.
 		await expect(
