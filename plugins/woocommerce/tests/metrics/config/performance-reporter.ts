@@ -39,6 +39,14 @@ class PerformanceReporter implements Reporter {
 			const firstKey = Object.keys( resultsObj )[ 0 ];
 			const results = resultsObj[ firstKey ];
 
+			console.log(
+				'Writing test results under: ',
+				path.join(
+					resultsPath,
+					`${ resultsId }.performance-results.json`
+				)
+			);
+
 			// Save curated results to file.
 			writeFileSync(
 				path.join(
