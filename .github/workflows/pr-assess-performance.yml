@@ -47,8 +47,8 @@ jobs:
             - name: Checkout (trunk)
               run: |
                 git reset --hard
-                git checkout trunk
-                echo "WC_TRUNK_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+                git checkout 41cf2b285e8ee690b1ea804b6a774345d7144225
+                echo "WC_TRUNK_SHA=$(41cf2b285e8ee690b1ea804b6a774345d7144225)" >> $GITHUB_ENV
 
             - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
               name: Cache measurements (baseline)
@@ -58,6 +58,7 @@ jobs:
 
             - name: Verify cached measurements (baseline)
               run: |
+                ls -la tools/compare-perf/artifacts/
                 if test -n "$(find tools/compare-perf/artifacts/ -maxdepth 1 -name '*_${{ env.WC_TRUNK_SHA }}_*' -print -quit)"
                 then
                   echo "WC_MEASURE_BASELINE='no'" >> $GITHUB_ENV
