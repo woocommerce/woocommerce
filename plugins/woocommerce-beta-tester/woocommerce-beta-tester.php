@@ -143,10 +143,25 @@ add_action(
 /**
  * Simulate a WooCommerce error for remote logging testing.
  *
- * @throws Exception A simulated WooCommerce error if the option is set.
+ * This function adds a filter to the 'woocommerce_template_path' hook
+ * that throws an exception, then triggers the filter by calling WC()->template_path().
+ *
+ * @throws Exception A simulated WooCommerce error for testing purposes.
  */
 function simulate_woocommerce_error() {
-	throw new Exception( 'Simulated WooCommerce error for remote logging test' );
+	// Return if WooCommerce is not loaded.
+	if ( ! function_exists( 'WC' ) || ! class_exists( 'WooCommerce' ) ) {
+		return;
+	}
+
+	add_filter(
+		'woocommerce_template_path',
+		function() {
+			throw new Exception( 'Simulated WooCommerce error for remote logging test' );
+		}
+	);
+
+	WC()->template_path();
 }
 
 $simulate_error = get_option( 'wc_beta_tester_simulate_woocommerce_php_error', false );
@@ -155,7 +170,8 @@ if ( $simulate_error ) {
 	delete_option( 'wc_beta_tester_simulate_woocommerce_php_error' );
 
 	if ( 'core' === $simulate_error ) {
-		add_action( 'woocommerce_loaded', 'simulate_woocommerce_error' );
+		// Hook into the plugin_loaded action to simulate the error early before WP fully initializes.
+		add_action( 'plugin_loaded', 'simulate_woocommerce_error' );
 	} elseif ( 'beta-tester' === $simulate_error ) {
 		throw new Exception( 'Test PHP exception from WooCommerce Beta Tester' );
 	}
