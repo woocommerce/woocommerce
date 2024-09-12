@@ -52,21 +52,20 @@ jobs:
                 echo "WC_TRUNK_SHA=41cf2b285e8ee690b1ea804b6a774345d7144225" >> $GITHUB_ENV
 
             - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
-              name: Cache measurements (baseline)
+              name: Cache measurements (trunk as baseline)
               with:
                 path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
                 key: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
 
             - name: Verify cached measurements (baseline)
               run: |
-                ls -la tools/compare-perf/artifacts/
                 if test -n "$(find tools/compare-perf/artifacts/ -maxdepth 1 -name '*_${{ env.WC_TRUNK_SHA }}_*' -print -quit)"
                 then
                   echo "WC_MEASURE_BASELINE='no'" >> $GITHUB_ENV
                 else
                   echo "WC_MEASURE_BASELINE='yes'" >> $GITHUB_ENV
                 fi
-            
+
             - name: Rebuild
               if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
               run: |
