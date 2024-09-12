@@ -69,9 +69,48 @@ export function ordersAPI() {
 	const updateData = {
 		status: 'completed',
 	};
+	let customerId;
 	let post_id;
 	let post_ids;
 	let response;
+
+	group( 'API Retrieve Customer', function () {
+		response = http.get( `${ base_url }/wp-json/wc/v3/customers`, {
+			headers: requestHeaders,
+			tags: { name: 'API - Retrieve Customer' },
+		} );
+
+		check( response, {
+			'status is 200': ( r ) => r.status === 200,
+			'body contains customer data': response.body.includes( '"id":' ),
+		} );
+
+		customerId = findBetween( response.body, '"id":', ',' );
+	} );
+
+	const createCustomerOrderData = {
+		customer_id: customerId,
+		status: 'completed',
+	};
+
+	group( 'API Create Customer Order', function () {
+		response = http.post(
+			`${ base_url }/wp-json/wc/v3/orders`,
+			JSON.stringify( createCustomerOrderData ),
+			{
+				headers: requestHeaders,
+				tags: { name: 'API - Create Customer Order' },
+			}
+		);
+		check( response, {
+			'status is 201': ( r ) => r.status === 201,
+			"body contains: 'Completed' Status": response.body.includes(
+				'"status":"completed"'
+			),
+		} );
+
+		post_id = findBetween( response.body, '{"id":', ',' );
+	} );
 
 	group( 'API Create Order', function () {
 		response = http.post(
