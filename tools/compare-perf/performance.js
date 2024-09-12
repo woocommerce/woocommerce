@@ -88,7 +88,7 @@ async function runPerformanceTests( branches, options ) {
 
 	if ( skipBenchmarking ) {
 		const testSuites = getFilesFromDir(
-			path.resolve( __dirname, '../../', config.testsPath )
+			path.resolve( __dirname, '../..' ) + config.testsPath
 		).map( ( file ) => {
 			logAtIndent( 1, 'Found:', formats.success( file ) );
 			return path.basename( file, '.spec.js' );
