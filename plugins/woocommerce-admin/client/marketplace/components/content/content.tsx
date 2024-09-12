@@ -42,18 +42,16 @@ export default function Content(): JSX.Element {
 	} = marketplaceContextValue;
 	const query = useQuery();
 
-	// Function to tag products with their type
 	const tagProductsWithType = (
 		products: Product[],
 		type: ProductType
 	): Product[] => {
 		return products.map( ( product ) => ( {
 			...product,
-			type, // Adding the product type to each product
+			type,
 		} ) );
 	};
 
-	// Fetch all categories when query.term or query.category changes
 	useEffect( () => {
 		const categories: Array< {
 			category: keyof SearchResultsCountType;
@@ -61,67 +59,108 @@ export default function Content(): JSX.Element {
 		} > = [
 			{ category: 'extensions', type: ProductType.extension },
 			{ category: 'themes', type: ProductType.theme },
-			{ category: 'business-services', type: ProductType.businessService },
+			{
+				category: 'business-services',
+				type: ProductType.businessService,
+			},
 		];
 		const abortControllers = categories.map( () => new AbortController() );
 
 		setIsLoading( true );
 		setAllProducts( [] );
 
-		Promise.all(
-			categories.map( ( { category, type }, index ) => {
-				const params = new URLSearchParams();
-				if ( category !== 'extensions' ) {
-					params.append( 'category', category );
-				}
-				if ( query.term ) {
-					params.append( 'term', query.term );
-				}
+		// If query.category is present and not '_all', only fetch that category
+		if ( query.category && query.category !== '_all' ) {
+			const params = new URLSearchParams();
+			params.append( 'category', query.category );
 
-				const wccomSettings = getAdminSetting( 'wccomHelper', false );
-				if ( wccomSettings.storeCountry ) {
-					params.append( 'country', wccomSettings.storeCountry );
-				}
+			if ( query.term ) {
+				params.append( 'term', query.term );
+			}
 
-				return fetchSearchResults(
-					params,
-					abortControllers[ index ].signal
-				).then( ( productList ) => {
-					// Tag the products with their type (extension, theme, or business-service)
-					const typedProducts = tagProductsWithType(
-						productList,
-						type
-					);
-					if ( category === 'business-services' ) {
-						setHasBusinessServices( typedProducts.length > 0 );
+			const wccomSettings = getAdminSetting( 'wccomHelper', false );
+			if ( wccomSettings.storeCountry ) {
+				params.append( 'country', wccomSettings.storeCountry );
+			}
+
+			fetchSearchResults( params, abortControllers[ 0 ].signal )
+				.then( ( productList ) => {
+					setAllProducts( productList );
+					setSearchResultsCount( {
+						extensions: productList.filter(
+							( p ) => p.type === ProductType.extension
+						).length,
+						themes: productList.filter(
+							( p ) => p.type === ProductType.theme
+						).length,
+						'business-services': productList.filter(
+							( p ) => p.type === ProductType.businessService
+						).length,
+					} );
+				} )
+				.catch( () => {
+					setAllProducts( [] );
+				} )
+				.finally( () => {
+					setIsLoading( false );
+				} );
+		} else {
+			// Fetch all categories when query.term or query.category changes
+			Promise.all(
+				categories.map( ( { category, type }, index ) => {
+					const params = new URLSearchParams();
+					if ( category !== 'extensions' ) {
+						params.append( 'category', category );
 					}
-					return typedProducts;
-				} );
-			} )
-		)
-			.then( ( results ) => {
-				const combinedProducts = results.flat();
-				setAllProducts( combinedProducts );
+					if ( query.term ) {
+						params.append( 'term', query.term );
+					}
 
-				// Set the search results count based on product types
-				setSearchResultsCount( {
-					extensions: combinedProducts.filter(
-						( p ) => p.type === ProductType.extension
-					).length,
-					themes: combinedProducts.filter(
-						( p ) => p.type === ProductType.theme
-					).length,
-					'business-services': combinedProducts.filter(
-						( p ) => p.type === ProductType.businessService
-					).length,
+					const wccomSettings = getAdminSetting(
+						'wccomHelper',
+						false
+					);
+					if ( wccomSettings.storeCountry ) {
+						params.append( 'country', wccomSettings.storeCountry );
+					}
+
+					return fetchSearchResults(
+						params,
+						abortControllers[ index ].signal
+					).then( ( productList ) => {
+						const typedProducts = tagProductsWithType(
+							productList,
+							type
+						);
+						if ( category === 'business-services' ) {
+							setHasBusinessServices( typedProducts.length > 0 );
+						}
+						return typedProducts;
+					} );
+				} )
+			)
+				.then( ( results ) => {
+					const combinedProducts = results.flat();
+					setAllProducts( combinedProducts );
+					setSearchResultsCount( {
+						extensions: combinedProducts.filter(
+							( p ) => p.type === ProductType.extension
+						).length,
+						themes: combinedProducts.filter(
+							( p ) => p.type === ProductType.theme
+						).length,
+						'business-services': combinedProducts.filter(
+							( p ) => p.type === ProductType.businessService
+						).length,
+					} );
+				} )
+				.catch( () => {
+					setAllProducts( [] );
+				} )
+				.finally( () => {
+					setIsLoading( false );
 				} );
-			} )
-			.catch( () => {
-				setAllProducts( [] );
-			} )
-			.finally( () => {
-				setIsLoading( false );
-			} );
+		}
 
 		return () => {
 			abortControllers.forEach( ( controller ) => {
