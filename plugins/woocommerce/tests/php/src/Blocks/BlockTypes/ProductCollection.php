@@ -1127,4 +1127,95 @@ class ProductCollection extends \WP_UnitTestCase {
 
 		$this->assertContains( 123, $updated_query['post__in'] );
 	}
+
+	/**
+	 * Provides the test input and expected output for the collection handler tests.
+	 */
+	public function core_collection_handler_test_provider() {
+		$related_filter = $this->getMockBuilder( \stdClass::class )
+			->setMethods( [ '__invoke' ] )
+			->getMock();
+
+		return array(
+			array(
+				'woocommerce/product-collection/related',
+				function () use ( $related_filter ) {
+					// This filter will turn off the data store so we don't need dummy products.
+					add_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+					$related_filter->expects( $this->exactly( 2 ) )
+						->method( '__invoke' )
+						->with( array(), 1 )
+						->willReturn( array( 2, 3, 4 ) );
+					add_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ), 10, 2 );
+				},
+				function () use ( $related_filter ) {
+					remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+					remove_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ) );
+				},
+				array(
+					'productReference' => 1,
+				),
+				array(
+					'productReference' => 1,
+				),
+				array(
+					'post__in' => array( 2, 3, 4 ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Tests that the core collection handlers behave correctly.
+	 *
+	 * @dataProvider core_collection_handler_test_provider
+	 *
+	 * @param string        $collection_name The name of the collection under test.
+	 * @param callable|null $set_up          An optional function to call before the test.
+	 * @param callable|null $tear_down       An optional function to call after the test.
+	 * @param array         $frontend_query  The query arguments to use for the frontend queries.
+	 * @param array         $editor_query    The query arguments to use for the editor queries.
+	 * @param array         $expected_query  Any query arguments we expect to be present.
+	 */
+	public function test_core_collection_handlers(
+		$collection_name,
+		$set_up,
+		$tear_down,
+		$frontend_query,
+		$editor_query,
+		$expected_query
+	) {
+		if ( isset( $set_up ) ) {
+			$set_up();
+		}
+
+		// Frontend.
+		$parsed_block                        = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection'] = $collection_name;
+		foreach ( $frontend_query as $key => $value ) {
+			$parsed_block['attrs']['query'][ $key ] = $value;
+		}
+		$result_frontend = $this->initialize_merged_query( $parsed_block );
+
+		// Editor.
+		$request = $this->build_request( $editor_query );
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => $collection_name,
+			)
+		);
+		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		if ( isset( $tear_down ) ) {
+			$tear_down();
+		}
+
+		foreach ( $expected_query as $key => $value ) {
+			$this->assertEqualsCanonicalizing( $value, $result_frontend[ $key ] );
+		}
+		foreach ( $expected_query as $key => $value ) {
+			$this->assertEqualsCanonicalizing( $value, $result_editor[ $key ] );
+		}
+	}
 }

@@ -28,10 +28,10 @@ class ProductCollectionMock extends ProductCollection {
 	}
 
 	/**
-	 * For now don't need to initialize anything in tests so let's
-	 * just override the default behaviour.
+	 * Override the normal initialization behavior to prevent registering the block with WordPress filters.
 	 */
 	protected function initialize() {
+		$this->register_core_collections();
 	}
 
 	/**

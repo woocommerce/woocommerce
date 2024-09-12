@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use InvalidArgumentException;
 use WP_Query;
 use WC_Tax;
 
@@ -130,6 +131,8 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
+
+		$this->register_core_collections();
 	}
 
 	/**
@@ -636,13 +639,16 @@ class ProductCollection extends AbstractBlock {
 
 		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
 		$collection_args                  = array(
-			'name' => $product_collection_query_context['collection'] ?? '',
+			'name'                      => $product_collection_query_context['collection'] ?? '',
+			// The editor uses a REST query to grab product post types. This means we don't have a block
+			// instance to work with and the client needs to provide the location context.
+			'productCollectionLocation' => $request->get_param( 'productCollectionLocation' ),
 		);
 
 		// Allow collections to modify the collection arguments passed to the query builder.
 		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
 		if ( isset( $handlers['editor_args'] ) ) {
-			$collection_args = call_user_func( $handlers['editor_args'], $collection_args, $query );
+			$collection_args = call_user_func( $handlers['editor_args'], $collection_args, $query, $request );
 		}
 
 		// Is this a preview mode request?
@@ -736,18 +742,29 @@ class ProductCollection extends AbstractBlock {
 
 		$is_exclude_applied_filters = ! ( $inherit || $filterable );
 
-		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
+		$collection_args = array(
+			'name'                      => $block->context['collection'] ?? '',
+			'productCollectionLocation' => $block->context['productCollectionLocation'] ?? null,
+		);
+
+		return $this->get_final_frontend_query(
+			$collection_args,
+			$block_context_query,
+			$page,
+			$is_exclude_applied_filters
+		);
 	}
 
 
 	/**
 	 * Get the final query arguments for the frontend.
 	 *
-	 * @param array $query The query arguments.
-	 * @param int   $page  The page number.
+	 * @param array $collection_args            Any special arguments that should change the behavior of the query.
+	 * @param array $query                      The query arguments.
+	 * @param int   $page                       The page number.
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
-	private function get_final_frontend_query( $query, $page = 1, $is_exclude_applied_filters = false ) {
+	private function get_final_frontend_query( $collection_args, $query, $page = 1, $is_exclude_applied_filters = false ) {
 		$product_ids = $query['post__in'] ?? array();
 		$offset      = $query['offset'] ?? 0;
 		$per_page    = $query['perPage'] ?? 9;
@@ -773,10 +790,6 @@ class ProductCollection extends AbstractBlock {
 		$handpicked_products = $query['woocommerceHandPickedProducts'] ?? array();
 		$time_frame          = $query['timeFrame'] ?? null;
 		$price_range         = $query['priceRange'] ?? null;
-
-		$collection_args = array(
-			'name' => $this->parsed_block['attrs']['collection'] ?? '',
-		);
 
 		// Allow collections to modify the collection arguments passed to the query builder.
 		$handlers = $this->collection_handler_store[ $collection_args['name'] ] ?? null;
@@ -847,7 +860,7 @@ class ProductCollection extends AbstractBlock {
 			$collection_query = array();
 		}
 
-		return $this->merge_queries(
+		$merged = $this->merge_queries(
 			$common_query_values,
 			$orderby_query,
 			$on_sale_query,
@@ -859,6 +872,8 @@ class ProductCollection extends AbstractBlock {
 			$handpicked_query,
 			$collection_query
 		);
+
+		return $merged;
 	}
 
 	/**
@@ -1797,6 +1812,58 @@ class ProductCollection extends AbstractBlock {
 			'frontend_args' => $frontend_args,
 			'editor_args'   => $editor_args,
 			'preview_query' => $preview_query,
+		);
+	}
+
+	/**
+	 * Registers any handlers for the core collections.
+	 */
+	protected function register_core_collections() {
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/related',
+			function ( $collection_args ) {
+				// No products should be shown if no related product reference is set.
+				if ( empty( $collection_args['relatedProductReference'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				// Have it filter the results to products related to the one provided.
+				return array(
+					'post__in' => wc_get_related_products(
+						$collection_args['relatedProductReference'],
+						// Use a higher limit so that the result set contains enough products for the collection to subsequently filter.
+						100
+					),
+				);
+			},
+			function ( $collection_args, $query ) {
+				$product_reference = $query['productReference'] ?? null;
+				// Infer the product reference from the location if an explicit product is not set.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['relatedProductReference'] = $product_reference;
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$product_reference = $request->get_param( 'productReference' );
+				// In some cases the editor will send along block location context that we can infer the product reference from.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['relatedProductReference'] = $product_reference;
+				return $collection_args;
+			}
 		);
 	}
 }
