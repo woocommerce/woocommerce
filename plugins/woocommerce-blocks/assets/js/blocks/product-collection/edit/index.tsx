@@ -68,7 +68,10 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				return (
 					<ProductPicker
 						{ ...props }
-						isDeletedProductReference={ true }
+						isDeletedProductReference={
+							productCollectionUIStateInEditor ===
+							ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE
+						}
 					/>
 				);
 			case ProductCollectionUIStatesInEditor.VALID:
