@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
+import fs from 'fs';
 import path from 'path';
-import * as fs from 'node:fs';
 import { bold } from 'chalk';
 
 /**

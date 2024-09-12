@@ -11,13 +11,13 @@
 		"log": "node log-to-codevitals.js"
 	},
 	"dependencies": {
+		"@types/node": "^16.18.68",
+		"@tsconfig/node16": "^1.0.4",
 		"@wordpress/env": "^10.1.0",
 		"commander": "9.5.0",
 		"chalk": "^4.1.2",
 		"inquirer": "^7.1.0",
-		"simple-git": "^3.21.0"
-	},
-	"devDependencies": {
+		"simple-git": "^3.21.0",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2"
 	},
