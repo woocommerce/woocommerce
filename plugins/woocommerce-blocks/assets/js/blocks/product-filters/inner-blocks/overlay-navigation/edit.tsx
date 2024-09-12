@@ -6,7 +6,8 @@ import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { BlockEditProps, store as blocksStore } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { Icon, close } from '@wordpress/icons';
+import { Icon, close, menu, settings } from '@wordpress/icons';
+import { filter, filterThreeLines } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -16,7 +17,6 @@ import type {
 	BlockContext,
 	BlockVariationTriggerType,
 } from './types';
-import { default as productFiltersIcon } from '../../icon';
 import { BlockOverlayAttribute as ProductFiltersBlockOverlayAttribute } from '../../constants';
 import './editor.scss';
 import { Inspector } from './inspector-controls';
@@ -37,16 +37,33 @@ const OverlayNavigationLabel = ( {
 const OverlayNavigationIcon = ( {
 	variation,
 	iconSize,
+	overlayIcon,
 	style,
 }: {
 	variation: BlockVariationTriggerType;
 	iconSize: number | undefined;
+	overlayIcon: string;
 	style: BlockAttributes[ 'style' ];
 } ) => {
 	let icon = close;
 
 	if ( variation === 'open-overlay' ) {
-		icon = productFiltersIcon();
+		switch ( overlayIcon ) {
+			case 'filter-icon-4':
+				icon = settings;
+				break;
+			case 'filter-icon-3':
+				icon = menu;
+				break;
+			case 'filter-icon-2':
+				icon = filterThreeLines;
+				break;
+			case 'filter-icon-1':
+				icon = filter;
+				break;
+			default:
+				icon = filter;
+		}
 	}
 
 	return (
@@ -65,11 +82,13 @@ const OverlayNavigationContent = ( {
 	variation,
 	iconSize,
 	style,
+	overlayIcon,
 	navigationStyle,
 }: {
 	variation: BlockVariationTriggerType;
 	iconSize: BlockAttributes[ 'iconSize' ];
 	style: BlockAttributes[ 'style' ];
+	overlayIcon: BlockAttributes[ 'overlayIcon' ];
 	navigationStyle: BlockAttributes[ 'navigationStyle' ];
 } ) => {
 	const overlayNavigationLabel = (
@@ -79,6 +98,7 @@ const OverlayNavigationContent = ( {
 		<OverlayNavigationIcon
 			variation={ variation }
 			iconSize={ iconSize }
+			overlayIcon={ overlayIcon }
 			style={ style }
 		/>
 	);
@@ -111,8 +131,14 @@ const OverlayNavigationContent = ( {
 type BlockProps = BlockEditProps< BlockAttributes > & { context: BlockContext };
 
 export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
-	const { navigationStyle, buttonStyle, iconSize, style, triggerType } =
-		attributes;
+	const {
+		navigationStyle,
+		buttonStyle,
+		iconSize,
+		overlayIcon,
+		style,
+		triggerType,
+	} = attributes;
 	const { 'woocommerce/product-filters/overlay': productFiltersOverlayMode } =
 		context;
 	const blockProps = useBlockProps( {
@@ -214,6 +240,7 @@ export const Edit = ( { attributes, setAttributes, context }: BlockProps ) => {
 					variation={ triggerType }
 					iconSize={ iconSize }
 					navigationStyle={ navigationStyle }
+					overlayIcon={ overlayIcon }
 					style={ style }
 				/>
 			</div>

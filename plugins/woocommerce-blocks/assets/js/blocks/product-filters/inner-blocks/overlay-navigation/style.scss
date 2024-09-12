@@ -8,15 +8,18 @@
 	cursor: pointer;
 
 	&.alignright {
-		margin-left: auto;
+		justify-content: right;
 	}
 
 	&.alignleft {
-		margin-left: unset;
+		justify-content: unset;
 	}
 
 	&.aligncenter {
-		margin-left: auto;
-		margin-right: auto;
+		justify-content: center;
+	}
+
+	&.hidden {
+		display: none;
 	}
 }

@@ -124,6 +124,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Updates the database query with parameters used for Taxes report: categories and order status.
 	 *
+	 * @see Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore::update_sql_query_params()
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
 	protected function add_sql_query_params( $query_args ) {
