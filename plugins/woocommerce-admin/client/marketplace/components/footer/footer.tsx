@@ -36,8 +36,6 @@ const paymentTitle = createInterpolateElement(
 	}
 );
 
-const ecosystemTitle = __( 'Support the ecosystem', 'woocommerce' );
-
 function FooterContent(): JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__footer-content">
@@ -74,7 +72,7 @@ function FooterContent(): JSX.Element {
 				/>
 				<IconWithText
 					icon={ people }
-					title={ ecosystemTitle }
+					title={ __( 'Support the ecosystem', 'woocommerce' ) }
 					description={ __(
 						'Our team and partners are continuously improving your extensions, themes, and WooCommerce experience.',
 						'woocommerce'
