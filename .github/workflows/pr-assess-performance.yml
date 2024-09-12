@@ -44,6 +44,7 @@ jobs:
                 mkdir -p tools/compare-perf/artifacts/
                 RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+                ls -la tools/compare-perf/artifacts/
               
             - name: Checkout (baseline)
               run: |
@@ -80,9 +81,6 @@ jobs:
               run: |
                 RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-                
-            - name: Debug artifacts produced
-              run: |
                 ls -la tools/compare-perf/artifacts/
             
             # Calculating/Printing results
