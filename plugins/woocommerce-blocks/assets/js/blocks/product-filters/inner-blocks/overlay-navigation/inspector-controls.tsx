@@ -1,10 +1,11 @@
-/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /**
  * External dependencies
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { filter, filterThreeLines } from '@woocommerce/icons';
+import { Icon, menu, settings } from '@wordpress/icons';
 import {
 	PanelBody,
 	RadioControl,
@@ -35,7 +36,8 @@ export const Inspector = ( {
 	setAttributes,
 	buttonStyles,
 }: InspectorProps ) => {
-	const { navigationStyle, buttonStyle, iconSize } = attributes;
+	const { navigationStyle, buttonStyle, iconSize, overlayIcon, triggerType } =
+		attributes;
 	return (
 		<InspectorControls group="styles">
 			<PanelBody title={ __( 'Style', 'woocommerce' ) }>
@@ -100,6 +102,61 @@ export const Inspector = ( {
 						}
 					/>
 				) }
+
+				{ triggerType === 'open-overlay' &&
+					navigationStyle !== 'label-only' && (
+						<ToggleGroupControl
+							label={ __( 'Icon', 'woocommerce' ) }
+							className="wc-block-editor-product-filters__overlay-button-toggle"
+							isBlock={ true }
+							value={ overlayIcon }
+							onChange={ (
+								value: BlockAttributes[ 'overlayIcon' ]
+							) => {
+								setAttributes( {
+									overlayIcon: value,
+								} );
+							} }
+						>
+							<ToggleGroupControlOption
+								value={ 'filter-icon-1' }
+								aria-label={ __(
+									'Filter icon 1',
+									'woocommerce'
+								) }
+								label={ <Icon size={ 32 } icon={ filter } /> }
+							/>
+							<ToggleGroupControlOption
+								value={ 'filter-icon-2' }
+								aria-label={ __(
+									'Filter icon 2',
+									'woocommerce'
+								) }
+								label={
+									<Icon
+										size={ 32 }
+										icon={ filterThreeLines }
+									/>
+								}
+							/>
+							<ToggleGroupControlOption
+								value={ 'filter-icon-3' }
+								aria-label={ __(
+									'Filter icon 3',
+									'woocommerce'
+								) }
+								label={ <Icon size={ 32 } icon={ menu } /> }
+							/>
+							<ToggleGroupControlOption
+								value={ 'filter-icon-4' }
+								aria-label={ __(
+									'Filter icon 4',
+									'woocommerce'
+								) }
+								label={ <Icon size={ 32 } icon={ settings } /> }
+							/>
+						</ToggleGroupControl>
+					) }
 
 				{ navigationStyle !== 'label-only' && (
 					<RangeControl

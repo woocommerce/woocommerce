@@ -50,6 +50,7 @@ import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
 import PriceRangeControl from './price-range-control';
+import LinkedProductControl from './linked-product-control';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -121,6 +122,13 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
+			<LinkedProductControl
+				query={ props.attributes.query }
+				setAttributes={ props.setAttributes }
+				usesReference={ props.usesReference }
+				location={ props.location }
+			/>
+
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {

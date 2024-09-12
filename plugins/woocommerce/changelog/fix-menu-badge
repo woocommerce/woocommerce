@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix badge number fails to match the number of unfinished tasks
