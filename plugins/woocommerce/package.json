@@ -556,7 +556,7 @@
 						"on-demand"
 					],
 					"report": {
-						"resultsBlobName": "default-pressable-core-e2e",
+						"resultsBlobName": "default-pressable-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -572,7 +572,7 @@
 						"on-demand"
 					],
 					"report": {
-						"resultsBlobName": "default-wpcom-core-e2e",
+						"resultsBlobName": "default-wpcom-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
