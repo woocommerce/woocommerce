@@ -136,7 +136,7 @@
           "menu_title": "Available Slots",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/available-slot-fills.md",
-          "hash": "9d8ea6b700432f37a7cee8bb13591f314a966712dfe96dbd46b61fcba23e33cc",
+          "hash": "444d9892cb6552c8394ecdf81816952987b59bc79fa53f3083c3d14a89d1e961",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/available-slot-fills.md",
           "id": "c7ac16eee5540b06b6db928f5d03282ff177e84e"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "2eeeb505c03db6849102c449e0ced9722d94c5f295f2b269fc3ec73e09b890d3"
+  "hash": "1f651a59399c34644d2f91a0366bbd01da2c7dc677a1c53329b184badd3b8d13"
 }

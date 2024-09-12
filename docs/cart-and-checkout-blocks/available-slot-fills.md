@@ -3,7 +3,7 @@ post_title: Cart and Checkout - Available slots
 menu_title: Available Slots
 tags: reference
 ---
-&lt;!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable MD024 -->
 
 This document presents the list of available Slots that you can use for adding your custom content (Fill).
 
