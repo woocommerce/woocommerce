@@ -49,9 +49,6 @@ export const Inspector = ( {
 	} = attributes;
 	const { updateBlockAttributes, insertBlock, replaceBlock } =
 		dispatch( 'core/block-editor' );
-	const rootBlock = useSelect( ( select ) =>
-		select( 'core/block-editor' ).getBlock( clientId )
-	);
 	const filterBlock = useSelect(
 		( select ) => {
 			return select( 'core/block-editor' ).getBlock( clientId );
@@ -170,9 +167,9 @@ export const Inspector = ( {
 						onChange={ (
 							value: BlockAttributes[ 'displayStyle' ]
 						) => {
-							if ( ! rootBlock ) return;
+							if ( ! filterBlock ) return;
 							const currentStyleBlock = getInnerBlockByName(
-								rootBlock,
+								filterBlock,
 								displayStyle
 							);
 
@@ -193,8 +190,8 @@ export const Inspector = ( {
 							} else {
 								insertBlock(
 									createBlock( value ),
-									rootBlock.innerBlocks.length,
-									rootBlock.clientId,
+									filterBlock.innerBlocks.length,
+									filterBlock.clientId,
 									false
 								);
 							}

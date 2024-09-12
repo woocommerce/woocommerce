@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
-import { AttributeSetting } from '@woocommerce/types';
 import {
 	InnerBlocks,
 	InspectorControls,
@@ -36,10 +35,6 @@ import {
 import './editor.scss';
 import { type BlockAttributes } from './types';
 import { BlockOverlayAttribute } from './constants';
-
-const defaultAttribute = getSetting< AttributeSetting >(
-	'defaultProductFilterAttribute'
-);
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
