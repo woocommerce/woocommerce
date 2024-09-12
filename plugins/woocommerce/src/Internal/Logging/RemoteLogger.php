@@ -233,7 +233,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			}
 
 			return true;
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			// Log the error locally if the remote logging fails.
 			error_log( 'Remote logging failed: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
