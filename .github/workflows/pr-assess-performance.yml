@@ -64,6 +64,7 @@ jobs:
                 then
                   echo "WC_MEASURE_BASELINE='no'" >> $GITHUB_ENV
                 else
+                  echo "Triggering baseline benchmarking"
                   echo "WC_MEASURE_BASELINE='yes'" >> $GITHUB_ENV
                 fi
 
