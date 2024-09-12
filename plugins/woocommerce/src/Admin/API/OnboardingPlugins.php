@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
 use Automattic\Jetpack\Connection\Manager;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -192,7 +193,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 
 		$actions = array_filter(
 			PluginsHelper::get_action_data( $actions ),
-			function( $action ) use ( $job_id ) {
+			function ( $action ) use ( $job_id ) {
 				return $action['job_id'] === $job_id;
 			}
 		);
@@ -235,20 +236,34 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			}
 		}
 
-		$redirect_url = $request->get_param( 'redirect_url' );
-		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+		$redirect_url      = $request->get_param( 'redirect_url' );
+		$calypso_env       = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+		$authorization_url = $manager->get_authorization_url( null, $redirect_url );
+		if ( Features::is_enabled( 'use-wp-horizon-for-jetpack-auth' ) ) {
+			$parsed_url = parse_url( $authorization_url );
+			if ( $parsed_url['host'] === 'wordpress.com' ) {
+				$parsed_url['host'] = 'horizon.wordpress.com';
+				$authorization_url  = $parsed_url['scheme'] . '://' . $parsed_url['host'];
+				if ( isset( $parsed_url['path'] ) ) {
+					$authorization_url .= $parsed_url['path'];
+				}
+				if ( isset( $parsed_url['query'] ) ) {
+					$authorization_url .= '?' . $parsed_url['query'];
+				}
+			}
+		}
 
-		return [
+		return array(
 			'success' => ! $errors->has_errors(),
 			'errors'  => $errors->get_error_messages(),
 			'url'     => add_query_arg(
-				[
+				array(
 					'from'        => $request->get_param( 'from' ),
 					'calypso_env' => $calypso_env,
-				],
-				$manager->get_authorization_url( null, $redirect_url )
+				),
+				$authorization_url
 			),
-		];
+		);
 	}
 
 	/**
@@ -400,7 +415,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				),
 				$slug
 			),
-			'type'				    => 'plugin_info_api_error',
+			'type'                  => 'plugin_info_api_error',
 			'slug'                  => $slug,
 			'api_version'           => $api->version,
 			'api_download_link'     => $api->download_link,
