@@ -20,11 +20,15 @@
 			"default": "link"
 		},
 		"iconSize": {
-			"type": "string"
+			"type": "number"
 		},
 		"overlayMode": {
 			"type": "string",
 			"default": "never"
+		},
+		"overlayIcon": {
+			"type": "string",
+			"default": "filter-icon-1"
 		},
 		"style": {
 			"type": "object",
@@ -40,6 +44,7 @@
 		}
 	},
 	"supports": {
+		"interactivity": true,
 		"align": [ "left", "right", "center"],
 		"inserter": false,
 		"color": {
