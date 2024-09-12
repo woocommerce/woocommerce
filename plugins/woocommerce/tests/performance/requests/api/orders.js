@@ -194,6 +194,7 @@ export function ordersAPI() {
 			updateBatchItem = {
 				id: `${ post_ids[ index ] }`,
 				status: 'completed',
+				customer_id: 1,
 			};
 			updateBatchData.push( updateBatchItem );
 		}

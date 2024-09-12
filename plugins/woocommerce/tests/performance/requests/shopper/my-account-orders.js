@@ -99,7 +99,7 @@ export function myAccountOrders() {
 		);
 
 		checkResponse( response, 200, {
-			title: `My account – ${ STORE_NAME }`,
+			title: `Order #${ my_account_order_id } – ${ STORE_NAME }`,
 			body: my_account_order_id,
 			footer: FOOTER_TEXT,
 		} );
