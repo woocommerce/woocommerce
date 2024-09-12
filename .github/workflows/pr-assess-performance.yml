@@ -43,7 +43,7 @@ jobs:
               run: |
                 RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-            # TODO: if on trunk, cache the result here as well
+            # TODO: if on trunk, cache the result here as well so PRs can pick it up
               
             - name: Checkout (trunk)
               run: |
