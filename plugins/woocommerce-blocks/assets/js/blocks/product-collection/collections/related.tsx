@@ -38,7 +38,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'You may also like', 'woocommerce' ),
+		content: __( 'Related Products', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];
