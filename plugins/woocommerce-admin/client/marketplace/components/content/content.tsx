@@ -167,13 +167,7 @@ export default function Content(): JSX.Element {
 				controller.abort();
 			} );
 		};
-	}, [
-		query.term,
-		query.category,
-		setHasBusinessServices,
-		setIsLoading,
-		setSearchResultsCount,
-	] ); // Depend on term and category
+	}, [ query.term, query.category ] ); // Depend on term and category
 
 	// Filter the products based on the selected tab
 	useEffect( () => {

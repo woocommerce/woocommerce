@@ -67,7 +67,7 @@ export default function NoResults( props: {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [ productGroupsForSearchType, props.type ] );
+	}, [] );
 
 	function productListTitle( groupId: string ) {
 		if ( groupId === 'popular-themes' ) {
