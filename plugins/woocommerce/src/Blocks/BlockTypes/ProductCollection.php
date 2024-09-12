@@ -651,10 +651,9 @@ class ProductCollection extends AbstractBlock {
 			$collection_args = call_user_func( $handlers['editor_args'], $collection_args, $query, $request );
 		}
 
-		// Is this a preview mode request?
-		// If yes, short-circuit the query and return the preview query args.
-		$is_preview = $product_collection_query_context['previewState']['isPreview'] ?? false;
-		if ( 'true' === $is_preview ) {
+		// When requested, short-circuit the query and return the preview query args.
+		$preview_state = $request->get_param( 'previewState' );
+		if ( isset( $preview_state['isPreview'] ) && 'true' === $preview_state['isPreview'] ) {
 			return $this->get_preview_query_args( $collection_args, $query, $request );
 		}
 
@@ -860,7 +859,7 @@ class ProductCollection extends AbstractBlock {
 			$collection_query = array();
 		}
 
-		$merged = $this->merge_queries(
+		return $this->merge_queries(
 			$common_query_values,
 			$orderby_query,
 			$on_sale_query,
@@ -872,8 +871,6 @@ class ProductCollection extends AbstractBlock {
 			$handpicked_query,
 			$collection_query
 		);
-
-		return $merged;
 	}
 
 	/**
