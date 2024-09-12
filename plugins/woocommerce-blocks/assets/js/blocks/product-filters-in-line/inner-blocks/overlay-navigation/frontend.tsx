@@ -13,7 +13,7 @@ const productFiltersOverlayNavigation = {
 	callbacks: {},
 };
 
-store( 'woocommerce/product-filters', productFiltersOverlayNavigation );
+store( 'woocommerce/product-filters-in-line', productFiltersOverlayNavigation );
 
 export type ProductFiltersOverlayNavigation =
 	typeof productFiltersOverlayNavigation;

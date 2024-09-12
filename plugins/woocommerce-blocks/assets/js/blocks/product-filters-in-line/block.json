@@ -1,9 +1,9 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "woocommerce/product-filters",
+	"name": "woocommerce/product-filters-in-line",
 	"version": "1.0.0",
-	"title": "Product Filters (Experimental)",
+	"title": "Product Filters In-line (Experimental)",
 	"description": "Let shoppers filter products displayed on the page.",
 	"category": "woocommerce",
 	"keywords": [
@@ -47,7 +47,7 @@
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],
 	"providesContext": {
-		"woocommerce/product-filters/overlay": "overlay"
+		"woocommerce/product-filters-in-line/overlay": "overlay"
 	},
 	"attributes": {
 		"overlay": {
@@ -55,6 +55,6 @@
 			"default": "never"
 		}
 	},
-	"viewScript": "wc-product-filters-frontend",
+	"viewScript": "wc-product-filters-in-line-frontend",
 	"example": {}
 }

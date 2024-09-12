@@ -4,15 +4,15 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
- * ProductFilters class.
+ * ProductFiltersInLine class.
  */
-class ProductFilters extends AbstractBlock {
+class ProductFiltersInLine extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filters';
+	protected $block_name = 'product-filters-in-line';
 
 	/**
 	 * Register the context.
@@ -44,10 +44,10 @@ class ProductFilters extends AbstractBlock {
 
 		$p = new \WP_HTML_Tag_Processor( $html );
 		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters-in-line' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute( 'data-wc-bind--hidden', '!state.isDialogOpen' );
-			$p->set_attribute( 'data-wc-class--wc-block-product-filters--dialog-open', 'state.isDialogOpen' );
-			$p->set_attribute( 'data-wc-class--wc-block-product-filters--with-admin-bar', 'context.hasPageWithWordPressAdminBar' );
+			$p->set_attribute( 'data-wc-class--wc-block-product-filters-in-line--dialog-open', 'state.isDialogOpen' );
+			$p->set_attribute( 'data-wc-class--wc-block-product-filters-in-line--with-admin-bar', 'context.hasPageWithWordPressAdminBar' );
 			$html = $p->get_updated_html();
 		}
 
@@ -120,7 +120,7 @@ class ProductFilters extends AbstractBlock {
 		$p    = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters-in-line' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(

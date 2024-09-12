@@ -18,7 +18,7 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'woocommerce/product-filters/overlay' ];
+		return [ 'woocommerce/product-filters-in-line/overlay' ];
 	}
 
 	/**
@@ -35,7 +35,7 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 				'class' => 'wc-block-product-filters-overlay-navigation',
 			)
 		);
-		$overlay_mode       = isset( $block->context['woocommerce/product-filters/overlay'] ) ? $block->context['woocommerce/product-filters/overlay'] : 'never';
+		$overlay_mode       = isset( $block->context['woocommerce/product-filters-in-line/overlay'] ) ? $block->context['woocommerce/product-filters-in-line/overlay'] : 'never';
 
 		if ( 'open-overlay' === $attributes['triggerType'] && ( 'never' === $overlay_mode || ( ! wp_is_mobile() && 'mobile' === $overlay_mode ) ) ) {
 			return null;
@@ -56,7 +56,7 @@ class ProductFiltersOverlayNavigation extends AbstractBlock {
 		$p = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters-in-line' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute(
 				'data-wc-on--click',
 				'open-overlay' === $attributes['triggerType'] ? 'actions.openDialog' : 'actions.closeDialog'

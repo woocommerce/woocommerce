@@ -3,15 +3,15 @@
  */
 import { getContext as getContextFn, store } from '@woocommerce/interactivity';
 
-export interface ProductFiltersContext {
+export interface ProductFiltersInLineContext {
 	isDialogOpen: boolean;
 	hasPageWithWordPressAdminBar: boolean;
 }
 
 const getContext = ( ns?: string ) =>
-	getContextFn< ProductFiltersContext >( ns );
+	getContextFn< ProductFiltersInLineContext >( ns );
 
-const productFilters = {
+const productFiltersInLine = {
 	state: {
 		isDialogOpen: () => {
 			const context = getContext();
@@ -38,6 +38,6 @@ const productFilters = {
 	callbacks: {},
 };
 
-store( 'woocommerce/product-filters', productFilters );
+store( 'woocommerce/product-filters-in-line', productFiltersInLine );
 
-export type ProductFilters = typeof productFilters;
+export type ProductFiltersInLine = typeof productFiltersInLine;
