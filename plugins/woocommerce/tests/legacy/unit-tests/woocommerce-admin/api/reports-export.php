@@ -119,7 +119,7 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$order->calculate_totals();
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Initiate an export of the taxes report.
 		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc-analytics/reports/taxes/export' ) );
@@ -143,7 +143,7 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
 
 		// Run the pending export jobs.
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Check that the status shows 100% and includes a download url.
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $status_route ) );
