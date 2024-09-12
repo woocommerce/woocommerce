@@ -506,7 +506,7 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 
 		$deleted = WC_Tax::_delete_tax_rate( $id );
 
-		if ( !$deleted ) {
+		if ( ! $deleted ) {
 			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
