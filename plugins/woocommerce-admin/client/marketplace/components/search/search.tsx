@@ -11,17 +11,8 @@ import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
  */
 import './search.scss';
 import { MARKETPLACE_PATH } from '../constants';
-import { MarketplaceContext } from '../../contexts/marketplace-context';
 
-const searchPlaceholder = __(
-	'Search for extensions, themes, and business services',
-	'woocommerce'
-);
-
-const searchPlaceholderNoBusinessServices = __(
-	'Search for extensions and themes',
-	'woocommerce'
-);
+const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
 
 /**
  * Search component.
@@ -30,13 +21,8 @@ const searchPlaceholderNoBusinessServices = __(
  */
 function Search(): JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
-	const { hasBusinessServices } = useContext( MarketplaceContext );
 
 	const query = useQuery();
-
-	const placeholder = hasBusinessServices
-		? searchPlaceholder
-		: searchPlaceholderNoBusinessServices;
 
 	useEffect( () => {
 		if ( query.term ) {
@@ -85,7 +71,7 @@ function Search(): JSX.Element {
 				className="screen-reader-text"
 				htmlFor="woocommerce-marketplace-search-query"
 			>
-				{ placeholder }
+				{ searchPlaceholder }
 			</label>
 			<input
 				id="woocommerce-marketplace-search-query"
@@ -93,7 +79,7 @@ function Search(): JSX.Element {
 				className="woocommerce-marketplace__search-input"
 				type="search"
 				name="woocommerce-marketplace-search-query"
-				placeholder={ placeholder }
+				placeholder={ searchPlaceholder }
 				onChange={ handleInputChange }
 				onKeyUp={ handleKeyUp }
 			/>
