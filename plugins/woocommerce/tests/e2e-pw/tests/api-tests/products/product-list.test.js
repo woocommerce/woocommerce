@@ -2232,7 +2232,7 @@ test.describe( 'Products API tests: List All Products', () => {
 
 	test.describe(
 		'List all products',
-		{ tag: '@skip-on-default-pressable' },
+		{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 		() => {
 			test( 'defaults', async ( { request } ) => {
 				const result = await request.get( 'wp-json/wc/v3/products', {

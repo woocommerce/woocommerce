@@ -210,7 +210,7 @@ test.describe( 'Orders API test', () => {
 
 	test(
 		'can add complex order',
-		{ tag: '@skip-on-default-pressable' },
+		{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 		async ( { request } ) => {
 			//ensure tax calculations are enabled
 			await request.put(

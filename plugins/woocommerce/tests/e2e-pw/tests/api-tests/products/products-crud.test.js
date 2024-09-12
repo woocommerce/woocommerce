@@ -983,7 +983,7 @@ test.describe( 'Products API tests: CRUD', () => {
 
 		test(
 			'can batch update product shipping classes',
-			{ tag: '@skip-on-default-pressable' },
+			{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 			async ( { request } ) => {
 				// Batch create product shipping classes.
 				const response = await request.post(
