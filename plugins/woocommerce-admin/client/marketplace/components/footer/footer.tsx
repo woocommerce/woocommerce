@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { check, commentContent, shield } from '@wordpress/icons';
+import { check, commentContent, shield, people } from '@wordpress/icons';
 import { createInterpolateElement } from '@wordpress/element';
 
 /**
@@ -36,6 +36,8 @@ const paymentTitle = createInterpolateElement(
 	}
 );
 
+const ecosystemTitle = __( 'Support the ecosystem', 'woocommerce' );
+
 function FooterContent(): JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__footer-content">
@@ -67,6 +69,14 @@ function FooterContent(): JSX.Element {
 					title={ paymentTitle }
 					description={ __(
 						'Everything in the Marketplace has been built by our own team or by our trusted partners, so you can be sure of its quality.',
+						'woocommerce'
+					) }
+				/>
+				<IconWithText
+					icon={ people }
+					title={ ecosystemTitle }
+					description={ __(
+						'Our team and partners are continuously improving your extensions, themes, and WooCommerce experience.',
 						'woocommerce'
 					) }
 				/>
