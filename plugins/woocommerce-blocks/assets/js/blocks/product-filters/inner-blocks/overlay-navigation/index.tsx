@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon } from '@wordpress/icons';
 import { closeSquareShadow } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
 
 /**
