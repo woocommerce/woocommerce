@@ -2,7 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 
 test.use( { storageState: process.env.ADMINSTATE } );
 
-test( 'Merchant can add brands', async ( { page } ) => {
+test.skip( 'Merchant can add brands', async ( { page } ) => {
 	/**
 	 * Go to the Brands page.
 	 *

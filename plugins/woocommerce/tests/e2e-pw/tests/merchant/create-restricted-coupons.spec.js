@@ -216,8 +216,12 @@ test.describe( 'Restricted coupon management', { tag: [ '@services' ] }, () => {
 						.click();
 				} );
 			}
+
+			// Skip Brands tests while behind a feature flag.
+			const skipBrandsTests =  true;
+
 			// set exclude product brands
-			if ( couponType === 'excludeProductBrands' ) {
+			if ( couponType === 'excludeProductBrands' && !skipBrandsTests ) {
 				await test.step( 'set exclude product brands coupon', async () => {
 					await page
 						.getByRole( 'link', {
