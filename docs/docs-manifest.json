@@ -874,7 +874,7 @@
           "menu_title": "Development environment setup",
           "tags": "tutorial, setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "b9f56987247aee67eaa2c74d1059e1cadfd335fa81c77b76c0717648d5631c0f",
+          "hash": "9e471d3f44a882fe61dcad9e5207d51b280a7220aae1bf6e4ae1fbdd68b7e3d4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "8199f0d3c854474839300ed606f03f9f286ace35f65d7c47ffc6477762eaf51e"
+  "hash": "ffae56d5a4993b151a54ec2117be1acf6a02c9fcab5b5662a2a583ea0e743f1d"
 }

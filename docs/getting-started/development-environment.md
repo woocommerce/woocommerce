@@ -14,7 +14,7 @@ If you would like to contribute to the WooCommerce core platform; please read ou
 
 ## Prerequisites
 
-WooCommerce does adhere to WordPress code standards and guidelines, so it’s best to familiarize yourself with [WordPress Development](https://learn.wordpress.org/tutorial/introduction-to-wordpress/) as well as [PHP](https://www.php.net/). 
+WooCommerce does adhere to WordPress code standards and guidelines, so it's best to familiarize yourself with [WordPress Development](https://learn.wordpress.org/tutorial/introduction-to-wordpress/) as well as [PHP](https://www.php.net/). 
 
 Knowledge and understanding of [WooCommerce Hooks and Filters](https://woocommerce.com/document/introduction-to-hooks-actions-and-filters/) will allow you to add and change code without editing core files. You can learn more about WordPress hooks and filters in the [WordPress Plugin Development Handbook](https://developer.wordpress.org/plugins/hooks/).
 
