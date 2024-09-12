@@ -3,14 +3,14 @@ name: Performance metrics
 on:
     pull_request:
         paths:
-            - 'plugins/woocommerce/composer.*',
-            - 'plugins/woocommerce/client/admin/config/**',
-            - 'plugins/woocommerce/includes/**',
-            - 'plugins/woocommerce/lib/**',
-            - 'plugins/woocommerce/patterns/**',
-            - 'plugins/woocommerce/src/**',
-            - 'plugins/woocommerce/templates/**',
-            - 'plugins/woocommerce/tests/metrics/**',
+            - 'plugins/woocommerce/composer.*'
+            - 'plugins/woocommerce/client/admin/config/**'
+            - 'plugins/woocommerce/includes/**'
+            - 'plugins/woocommerce/lib/**'
+            - 'plugins/woocommerce/patterns/**'
+            - 'plugins/woocommerce/src/**'
+            - 'plugins/woocommerce/templates/**'
+            - 'plugins/woocommerce/tests/metrics/**'
             - 'plugins/woocommerce/.wp-env.json'
             - '.github/workflows/pr-assess-performance.yml'
 
