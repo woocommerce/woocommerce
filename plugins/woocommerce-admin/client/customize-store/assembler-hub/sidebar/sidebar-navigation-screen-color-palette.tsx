@@ -28,11 +28,14 @@ const SidebarNavigationScreenColorPaletteContent = () => {
 	const hasCreatedOwnColors = !! (
 		user.settings.color && user.settings.color.palette.hasCreatedOwnColors
 	);
-	function handlePanelBodyToggle() {
+
+	function handlePanelBodyToggle( open?: boolean ) {
 		trackEvent(
-			'customize_your_store_assembler_hub_color_palette_create_toggle'
+			'customize_your_store_assembler_hub_color_palette_create_toggle',
+			{ open }
 		);
 	}
+
 	// Wrap in a BlockEditorProvider to ensure that the Iframe's dependencies are
 	// loaded. This is necessary because the Iframe component waits until
 	// the block editor store's `__internalIsInitialized` is true before
