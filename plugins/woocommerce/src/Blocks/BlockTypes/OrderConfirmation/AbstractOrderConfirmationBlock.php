@@ -186,7 +186,13 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 */
 	protected function is_email_verified( $order ) {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		if ( empty( $_POST ) || ! isset( $_POST['email'] ) || ! wp_verify_nonce( $_POST['check_submission'] ?? '', 'wc_verify_email' ) ) {
+		if ( empty( $_POST ) || ! isset( $_POST['email'], $_POST['_wpnonce'] ) ) {
+			return false;
+		}
+
+		$nonce_value = sanitize_key( wp_unslash( $_POST['_wpnonce'] ?? '' ) );
+
+		if ( ! wp_verify_nonce( $nonce_value, 'wc_verify_email' ) && ! wp_verify_nonce( $nonce_value, 'wc_create_account' ) ) {
 			return false;
 		}
 

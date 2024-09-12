@@ -482,6 +482,8 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 		await frontendUtils.goToCheckout();
 
 		await page.getByLabel( 'Email address' ).clear();
+		// Notices on the email field will move content when the field loses focus. This can cause the click to "miss".
+		await page.getByRole( 'button', { name: 'Place order' } ).focus();
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		// Verify that all required fields show the correct warning.
