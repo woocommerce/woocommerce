@@ -45,7 +45,7 @@ jobs:
                 RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
                 ls -la tools/compare-perf/artifacts/
               
-            - name: Checkout (baseline)
+            - name: Checkout (trunk)
               run: |
                 git reset --hard
                 git checkout trunk
