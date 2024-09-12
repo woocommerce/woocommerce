@@ -119,7 +119,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
@@ -161,7 +161,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
 		$response = $this->server->dispatch( $request );
@@ -247,7 +247,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		}
 
 		// Check that stats exist before deleting.
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$request = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 25 ) );
@@ -273,7 +273,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Check that stats have been deleted.
 		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/orders' );
@@ -375,7 +375,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 0, $report['orders']['imported'] );
 		$this->assertEquals( 4, $report['orders']['total'] );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Test import status after processing.
 		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/status' );

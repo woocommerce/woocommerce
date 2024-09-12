@@ -81,7 +81,7 @@ const modifyCartItemClass = ( defaultValue, extensions, args ) => {
 
 const modifyCartItemPrice = ( defaultValue, extensions, args ) => {
 	if ( isOrderSummaryContext( args ) ) {
-		return '<price/> for all items';
+		return '&lt;price/&gt; for all items';
 	}
 	return defaultValue;
 };
@@ -95,7 +95,7 @@ const modifyItemName = ( defaultValue, extensions, args ) => {
 
 const modifySubtotalPriceFormat = ( defaultValue, extensions, args ) => {
 	if ( isOrderSummaryContext( args ) ) {
-		return '<price/> per item';
+		return '&lt;price/&gt; per item';
 	}
 	return defaultValue;
 };

@@ -4,6 +4,7 @@
 	&__product-card {
 		padding: $large-gap;
 		border-radius: $grid-unit-05 !important;
+		margin-bottom: 0;
 
 		/* When product card is loading, contents will be empty and we render skeleton loader wireframes: */
 		&.is-loading {
@@ -243,7 +244,7 @@
 		}
 
 		&.woocommerce-marketplace__product-card--theme {
-			padding: 0 0 $medium-gap;
+			padding: 0 0 $large-gap;
 			overflow: hidden;
 
 			.woocommerce-marketplace__product-card__content {
@@ -265,10 +266,10 @@
 				right: 0;
 			}
 			.woocommerce-marketplace__product-card__header {
-				padding-left: $medium-gap;
+				padding: 0 $large-gap;
 			}
 			.woocommerce-marketplace__product-card__footer {
-				padding: 0 $medium-gap;
+				padding: 0 $large-gap;
 			}
 			.woocommerce-marketplace__product-card__price {
 				margin-right: $medium-gap;
@@ -313,7 +314,7 @@
 					display: flex;
 					flex-direction: column;
 					gap: $small-gap;
-					padding: 16px 24px;
+					padding: $large-gap;
 					height: 100%;
 				}
 
