@@ -325,7 +325,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						/>
 						<ToggleControl
 							label={ __(
-								'Navigate to checkout when clicking the mini cart icon, instead of opening the drawer.',
+								'Navigate to checkout when clicking the Mini-Cart, instead of opening the drawer.',
 								'woocommerce'
 							) }
 							onChange={ ( value ) => {
