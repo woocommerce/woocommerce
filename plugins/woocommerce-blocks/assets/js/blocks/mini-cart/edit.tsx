@@ -311,25 +311,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 								'woocommerce'
 							) }
 							onChange={ ( value ) => {
-								const newAddToCartBehaviour = value
-									? 'open_drawer'
-									: 'none';
-								const newOnCartClickBehaviour = value
-									? 'open_drawer'
-									: null;
-
-								const newAttributes = newOnCartClickBehaviour
-									? {
-											onCartClickBehaviour:
-												newOnCartClickBehaviour,
-											addToCartBehaviour:
-												newAddToCartBehaviour,
-									  }
-									: {
-											addToCartBehaviour:
-												newAddToCartBehaviour,
-									  };
-								setAttributes( newAttributes );
+								setAttributes( {
+									addToCartBehaviour: value
+										? 'open_drawer'
+										: 'none',
+								} );
 							} }
 							help={ __(
 								'Toggle to open the Mini-Cart drawer when a shopper adds a product to their cart.',
@@ -339,33 +325,18 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						/>
 						<ToggleControl
 							label={ __(
-								'Disable drawer, navigate to checkout on click',
+								'Navigate to checkout when clicking the mini cart icon, instead of opening the drawer.',
 								'woocommerce'
 							) }
 							onChange={ ( value ) => {
-								const newAddToCartBehaviour = value
-									? 'none'
-									: null;
-								const cartClickBehaviour = value
-									? 'navigate_to_checkout'
-									: 'open_drawer';
-
-								const newAttributes = newAddToCartBehaviour
-									? {
-											onCartClickBehaviour:
-												cartClickBehaviour,
-											addToCartBehaviour:
-												newAddToCartBehaviour,
-									  }
-									: {
-											onCartClickBehaviour:
-												cartClickBehaviour,
-									  };
-
-								setAttributes( newAttributes );
+								setAttributes( {
+									onCartClickBehaviour: value
+										? 'navigate_to_checkout'
+										: 'open_drawer',
+								} );
 							} }
 							help={ __(
-								'Toggle to disable the Mini-Cart drawer and navigate to the checkout page when a shopper clicks on the cart.',
+								'Toggle to disable opening the Mini-Cart drawer when clicking the cart icon, and instead navigate to the checkout page.',
 								'woocommerce'
 							) }
 							checked={

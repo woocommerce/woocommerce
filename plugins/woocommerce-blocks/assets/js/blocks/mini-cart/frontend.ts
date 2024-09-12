@@ -141,23 +141,16 @@ window.addEventListener( 'load', () => {
 		};
 
 		const openDrawer = () => {
-			const onCartClickBehaviour =
-				miniCartBlock.dataset.onCartClickBehaviour;
-			if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
-				// Navigate to checkout
-				window.location.href = CHECKOUT_URL;
-			} else {
-				miniCartBlock.dataset.isInitiallyOpen = 'true';
+			miniCartBlock.dataset.isInitiallyOpen = 'true';
 
-				miniCartDrawerPlaceholderOverlay.classList.add(
-					'wc-block-components-drawer__screen-overlay--with-slide-in'
-				);
-				miniCartDrawerPlaceholderOverlay.classList.remove(
-					'wc-block-components-drawer__screen-overlay--is-hidden'
-				);
+			miniCartDrawerPlaceholderOverlay.classList.add(
+				'wc-block-components-drawer__screen-overlay--with-slide-in'
+			);
+			miniCartDrawerPlaceholderOverlay.classList.remove(
+				'wc-block-components-drawer__screen-overlay--is-hidden'
+			);
 
-				loadContents();
-			}
+			loadContents();
 		};
 
 		const openDrawerWithRefresh = () => {
