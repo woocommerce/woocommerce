@@ -59,6 +59,7 @@ jobs:
 
             - name: Verify cached measurements (baseline)
               run: |
+                ls -l tools/compare-perf/artifacts/
                 if test -n "$(find tools/compare-perf/artifacts/ -maxdepth 1 -name '*_${{ env.WC_TRUNK_SHA }}_*' -print -quit)"
                 then
                   echo "WC_MEASURE_BASELINE='no'" >> $GITHUB_ENV
@@ -87,6 +88,6 @@ jobs:
                 WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
               run: |
                 pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
-                pnpm --filter="compare-perf" run compare perf ${{ github.sha }} ${{ env.WC_TRUNK_SHA }} --tests-branch ${{ github.sha }} --skip-benchmarking
+                pnpm --filter="compare-perf" run compare compare-performance ${{ github.sha }} ${{ env.WC_TRUNK_SHA }} --tests-branch ${{ github.sha }} --skip-benchmarking
             
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
