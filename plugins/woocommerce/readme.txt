@@ -368,6 +368,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Update WP version to 6.6 in Blocks wp-env config. [#49704](https://github.com/woocommerce/woocommerce/pull/49704)
 * Dev - Use stricter text selector on test [#50848](https://github.com/woocommerce/woocommerce/pull/50848)
 * Dev - [Filter Products by Price]: Update view when changing the min/max value #50651 [#50651](https://github.com/woocommerce/woocommerce/pull/50651)
+* Tweak - Disable remote logging feature by default [#51312](https://github.com/woocommerce/woocommerce/pull/51312)
 * Tweak - Add GTIN in structured data [#50087](https://github.com/woocommerce/woocommerce/pull/50087)
 * Tweak - Add link to title, remove link from a description, minor copy changes to site visibility settings page [#50781](https://github.com/woocommerce/woocommerce/pull/50781)
 * Tweak - Add the `woocommerce_should_clear_cart_after_payment` filter to influence whether the cart should be cleared after payment. [#44515](https://github.com/woocommerce/woocommerce/pull/44515)
