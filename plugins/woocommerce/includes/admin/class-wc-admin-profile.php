@@ -176,7 +176,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 							</th>
 							<td>
 								<?php if ( ! empty( $field['type'] ) && 'select' === $field['type'] ) : ?>
-									<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo esc_attr( $field['class'] ); ?>" style="width: 25em;">
+									<select name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" class="<?php echo isset( $field['class'] ) ? esc_attr( $field['class'] ) : ''; ?>" style="width: 25em;">
 										<?php
 											$selected = esc_attr( get_user_meta( $user->ID, $key, true ) );
 										foreach ( $field['options'] as $option_key => $option_value ) :

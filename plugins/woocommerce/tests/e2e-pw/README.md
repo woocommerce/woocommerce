@@ -38,7 +38,7 @@ Start in the repository root folder:
 - `pnpm --filter='@woocommerce/plugin-woocommerce' build` (builds WooCommerce locally)
 - `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
 - `pnpm env:start` (starts the `wp-env` based local environment)
-- `pnpm test:e2e-pw` (runs all the tests in headless mode)
+- `pnpm test:e2e` (runs all the tests in headless mode)
 
 To re-create the environment for a fresh state:
 
@@ -49,25 +49,37 @@ for managing the `wp-env` environment.
 
 Other ways of running tests (make sure you are in the `plugins/woocommerce` folder):
 
-- `pnpm test:e2e-pw` (usual, headless run)
-- `pnpm test:e2e-pw --headed` (headed -- displaying browser window and test interactions)
-- `pnpm test:e2e-pw --debug` (runs tests in debug mode)
-- `pnpm test:e2e-pw ./tests/e2e-pw/tests/**/basic.spec.js` (runs a single test file - `basic.spec.js` in this case)
-- `pnpm test:e2e-pw --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)). You may need
+- `pnpm test:e2e` (usual, headless run)
+- `pnpm test:e2e --headed` (headed -- displaying browser window and test interactions)
+- `pnpm test:e2e --debug` (runs tests in debug mode)
+- `pnpm test:e2e basic.spec.js` (runs a single test file - `basic.spec.js` in this case)
+- `pnpm test:e2e ./tests/e2e-pw/tests/merchant` (runs all tests that are found in the `merchant` folder)
+- `pnpm test:e2e ./tests/e2e-pw/tests/api-tests` (runs all tests that are found in the `api-tests` folder)
+- `pnpm test:e2e --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)). You may need
   to increase the [test timeout](https://playwright.dev/docs/api/class-testconfig#test-config-timeout) by setting
   the `DEFAULT_TIMEOUT_OVERRIDE` environment variable like so:
 
     ```bash
     # Increase test timeout to 3 minutes
-    export DEFAULT_TIMEOUT_OVERRIDE=180000 pnpm test:e2e-pw --ui
+    export DEFAULT_TIMEOUT_OVERRIDE=180000 pnpm test:e2e --ui
     ```
 
 To see all the Playwright options, make sure you are in the `plugins/woocommerce` folder and
 run `pnpm playwright test --help`
 
+> [!TIP]
+> 
+> If you're looking on how to run the API tests (which are part of the same project as the classic e2e tests), 
+> they can be run as you would run any other tests folder in the project.
+> 
+> For convenience, a `test:api` command is offered that will run all the tests in the `api-tests` folder against the 
+> default environment, but this may change. 
+>
+> Keep in mind that from a tool point of view they are only a folder in the main e2e tests project as any other folder.
+
 ## Test environment
 
-The find the default environment setup you check the `.wp-env.json` configuration file in the `plugins/woocommerce`
+The default environment configuration can be found in the `.wp-env.json` file in the `plugins/woocommerce`
 folder.
 
 For more information on how to configure the test environment for `wp-env`, please check out
@@ -75,7 +87,8 @@ the official [documentation](https://github.com/WordPress/gutenberg/tree/trunk/p
 
 ### Alternate environments
 
-The default URL and the credentials for the test environment can be set via environment variables.
+The test site URL and the credentials can be set via environment variables. If no variables are set, the defaults will be used,
+as configured in the `test-data/data.js` file.
 
 If you'd like to overwrite the default values to run against a different environment (external host for
 example), you can create a `.env` file in `tests/e2e-pw/`:
@@ -88,9 +101,16 @@ CUSTOMER_USER='customer.username'
 CUSTOMER_PASSWORD='customer.password'
 ```
 
+> [!WARNING]
+> Running the tests using the `test:e2e` command will overwrite the `.env` file! If you want to use your own custom `.env` 
+> file you should read further on how to create an alternative env, or you should run the tests using the raw Playwright 
+> command: `pnpm playwright ...`
+
 There are some pre-defined environments set in the `tests/e2e-pw/envs` path.
 Each folder represents an environment, and contains a setup script, a `playwright.config.js` file and optionally an
 encrypted `.env` file.
+Running the tests with one of these environments will first decrypt the `.env.enc` file if it exists, execute the setup 
+script and then run the tests using the configuration in the `playwright.config.js` file.
 
 To run the tests using one of these environment, you can use the `test:e2e:with-env` script. Some examples:
 
@@ -104,14 +124,12 @@ pnpm test:e2e:with-env gutenberg-stable
 # The envs/default-pressable/.env.enc file will be decrypted into .env and used to set the required environment variables
 pnpm test:e2e:with-env default-pressable
 
-# Runs all the tests with the default environment, similar to running `pnpm test:e2e-pw`
+# Runs all the tests with the default environment. `pnpm test:e2e` already does that, but only runs e2e, ignoring the API tests.
 pnpm test:e2e:with-env default 
 ```
 
-Some of the environments are using encrypted `.env` files.
-To run command includes a decryption step, which requires the `E2E_ENV_KEY` environment variable to be set.
+To decrypt the .env file, the `E2E_ENV_KEY` environment variable must be set.
 If you're an a11n you can find the key in the Secret Store.
-
 Run with the `E2E_ENV_KEY` environment variable set:
 
 ```bash

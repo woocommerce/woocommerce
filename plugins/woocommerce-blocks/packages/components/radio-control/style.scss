@@ -161,7 +161,6 @@
 		background: #fff;
 		border: 1px solid $universal-border-medium;
 		border-radius: 50%;
-		color: currentColor;
 		display: inline-block;
 		height: em(24px); // =1.5rem
 		min-height: 24px;
@@ -175,16 +174,16 @@
 		margin: inherit;
 		cursor: pointer;
 		&:checked {
-			border: 1px solid currentColor;
+			border: 1px solid $universal-border-strong;
 		}
 
 		&:focus {
-			outline: 2px solid currentColor;
+			outline: 1px solid $universal-border-strong;
 			outline-offset: 2px;
 		}
 
 		&:checked::before {
-			background: currentColor;
+			background: #000;
 			border-radius: 50%;
 			content: "";
 			display: block;

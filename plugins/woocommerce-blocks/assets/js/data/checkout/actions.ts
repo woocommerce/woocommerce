@@ -61,9 +61,9 @@ export const __internalSetRedirectUrl = ( redirectUrl: string ) => ( {
 } );
 
 /**
- * Set whether the checkout has an error or not
+ * Set whether the checkout has an error
  *
- * @param hasError Wether the checkout has an error or not
+ * @param hasError Whether the checkout has an error
  */
 export const __internalSetHasError = ( hasError = true ) => ( {
 	type: types.SET_HAS_ERROR,
@@ -94,6 +94,16 @@ export const __internalDecrementCalculating = () => ( {
 export const __internalSetCustomerId = ( customerId: number ) => ( {
 	type: types.SET_CUSTOMER_ID,
 	customerId,
+} );
+
+/**
+ * Set the customer password
+ *
+ * @param customerPassword Account password for the customer when creating accounts
+ */
+export const __internalSetCustomerPassword = ( customerPassword: string ) => ( {
+	type: types.SET_CUSTOMER_PASSWORD,
+	customerPassword,
 } );
 
 /**
@@ -170,6 +180,7 @@ export type CheckoutAction =
 			| typeof __internalIncrementCalculating
 			| typeof __internalDecrementCalculating
 			| typeof __internalSetCustomerId
+			| typeof __internalSetCustomerPassword
 			| typeof __internalSetUseShippingAsBilling
 			| typeof __internalSetShouldCreateAccount
 			| typeof __internalSetOrderNotes

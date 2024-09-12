@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 import { useEffect, useMemo, useState } from '@wordpress/element';
@@ -17,24 +17,29 @@ import { Pattern } from '~/customize-store/types/pattern';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 
 export const usePatterns = () => {
-	const { blockPatterns, isLoading } = useSelect(
+	const { blockPatterns, isLoading, invalidateCache } = useSelect(
 		( select ) => ( {
 			blockPatterns: select(
 				coreStore
-				// @ts-ignore - This is valid.
+				// @ts-expect-error -- No types for this exist yet.
 			).getBlockPatterns() as Pattern[],
 			isLoading:
-				// @ts-ignore - This is valid.
+				// @ts-expect-error -- No types for this exist yet.
 				! select( coreStore ).hasFinishedResolution(
 					'getBlockPatterns'
 				),
-		} ),
-		[]
+			invalidateCache: () =>
+				// @ts-expect-error -- No types for this exist yet.
+				dispatch( coreStore ).invalidateResolutionForStoreSelector(
+					'getBlockPatterns'
+				),
+		} )
 	);
 
 	return {
 		blockPatterns,
 		isLoading,
+		invalidateCache,
 	};
 };
 

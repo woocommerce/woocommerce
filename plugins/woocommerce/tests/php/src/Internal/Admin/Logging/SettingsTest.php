@@ -120,6 +120,15 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$callback = fn() => $path;
 		add_filter( 'woocommerce_log_directory', $callback );
 
+		// First check that the test directory doesn't exist yet.
+		$this->assertFalse( wp_is_writable( $path ) );
+
+		// Then test that the $initialize param works when set to false.
+		$actual_path = Settings::get_log_directory( false );
+		$this->assertEquals( $path, $actual_path );
+		$this->assertFalse( wp_is_writable( $actual_path ) );
+
+		// Finally test directory creation.
 		$actual_path = Settings::get_log_directory();
 		$this->assertEquals( $path, $actual_path );
 		$this->assertTrue( wp_is_writable( $actual_path ) );

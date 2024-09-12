@@ -164,7 +164,8 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address         = (array) $address;
 		$validation_util = new ValidationUtils();
 		$schema          = $this->get_properties();
-		// omit all keys from address that are not in the schema. This should account for email.
+
+		// Omit all keys from address that are not in the schema. This should account for email.
 		$address = array_intersect_key( $address, $schema );
 
 		// The flow is Validate -> Sanitize -> Re-Validate
@@ -172,6 +173,14 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		// correct format, and finally the second validation step is to ensure the correctly-formatted values
 		// match what we expect (postcode etc.).
 		foreach ( $address as $key => $value ) {
+
+			// Only run specific validation on properties that are defined in the schema and present in the address.
+			// This is for partial address pushes when only part of a customer address is sent.
+			// Full schema address validation still happens later, so empty, required values are disallowed.
+			if ( empty( $schema[ $key ] ) || empty( $address[ $key ] ) ) {
+				continue;
+			}
+
 			if ( is_wp_error( rest_validate_value_from_schema( $value, $schema[ $key ], $key ) ) ) {
 				$errors->add(
 					'invalid_' . $key,

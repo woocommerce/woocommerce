@@ -427,7 +427,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		} elseif ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
 				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
 		} else {
-			if ( is_null( wc()->api ) ) {
+			if ( ! WC()->legacy_rest_api_is_available() ) {
 				throw new \Exception( 'The Legacy REST API plugin is not installed on this site. More information: https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/ ' );
 			}
 			$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );

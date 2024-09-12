@@ -79,7 +79,7 @@ class CartCouponsByCode extends AbstractCartRoute {
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
 		if ( ! $this->cart_controller->has_coupon( $request['code'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', esc_html__( 'Coupon does not exist in the cart.', 'woocommerce' ), 404 );
 		}
 
 		return $this->prepare_item_for_response( $request['code'], $request );
@@ -94,13 +94,11 @@ class CartCouponsByCode extends AbstractCartRoute {
 	 */
 	protected function get_route_delete_response( \WP_REST_Request $request ) {
 		if ( ! $this->cart_controller->has_coupon( $request['code'] ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon does not exist in the cart.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', esc_html__( 'Coupon does not exist in the cart.', 'woocommerce' ), 404 );
 		}
 
 		$cart = $this->cart_controller->get_cart_instance();
-
 		$cart->remove_coupon( $request['code'] );
-		$cart->calculate_totals();
 
 		return new \WP_REST_Response( null, 204 );
 	}

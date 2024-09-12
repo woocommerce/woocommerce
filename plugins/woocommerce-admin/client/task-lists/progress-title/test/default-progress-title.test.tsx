@@ -49,7 +49,7 @@ describe( 'default-progress-title', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should render "Let\'s get you started" when has task visited and task completed count <= 3', () => {
+	it( 'should render "Let’s get you started" when has task visited and task completed count <= 3', () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getTaskList: () => ( {
@@ -60,11 +60,11 @@ describe( 'default-progress-title', () => {
 		);
 		render( <DefaultProgressTitle taskListId="1" /> );
 		expect(
-			screen.getByText( "Let's get you started", { exact: false } )
+			screen.getByText( 'Let’s get you started', { exact: false } )
 		).toBeInTheDocument();
 	} );
 
-	it( 'should render "You\'re on the right track" when has task visited and task completed count > 3', () => {
+	it( 'should render "You’re on the right track" when has task visited and task completed count > 3', () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getTaskList: () => ( {
@@ -81,11 +81,11 @@ describe( 'default-progress-title', () => {
 		);
 		render( <DefaultProgressTitle taskListId="1" /> );
 		expect(
-			screen.getByText( "You're on the right track", { exact: false } )
+			screen.getByText( 'You’re on the right track', { exact: false } )
 		).toBeInTheDocument();
 	} );
 
-	it( 'should render "You\'re almost there" when has task visited and task completed count > 5', () => {
+	it( 'should render "You’re almost there" when has task visited and task completed count > 5', () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => ( {
 				getTaskList: () => ( {
@@ -104,7 +104,7 @@ describe( 'default-progress-title', () => {
 		);
 		render( <DefaultProgressTitle taskListId="1" /> );
 		expect(
-			screen.getByText( "You're almost there", { exact: false } )
+			screen.getByText( 'You’re almost there', { exact: false } )
 		).toBeInTheDocument();
 	} );
 } );

@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Return HTTP 404 when accessing non-existent webhooks via REST API.

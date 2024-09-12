@@ -41,6 +41,10 @@ $social_title = $content['titles'][0]['default'] ?? '';
 	</div>
 	<!-- /wp:group -->
 
+	<!-- wp:spacer {"height":"var:preset|spacing|20"} -->
+	<div style="height:var(--wp--preset--spacing--20)" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+
 	<!-- wp:columns {"align":"wide"} -->
 	<div class="wp-block-columns alignwide">
 		<!-- wp:column {"width":"25%"} -->

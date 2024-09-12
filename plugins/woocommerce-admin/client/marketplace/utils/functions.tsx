@@ -17,6 +17,7 @@ import {
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
@@ -143,6 +144,10 @@ async function fetchSearchResults(
 							featuredImage: product.featured_image,
 							productCategory: product.product_category,
 							color: product.color,
+							billingPeriod: product.billing_period,
+							billingPeriodInterval:
+								product.billing_period_interval,
+							currency: product.currency,
 						};
 					}
 				);
@@ -406,6 +411,7 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		averageRating: null,
 		reviewsCount: null,
 		isInstallable: false,
+		currency: '',
 	};
 };
 
@@ -426,6 +432,16 @@ const appendURLParams = (
 		urlObject.searchParams.set( key, value );
 	} );
 	return urlObject.toString();
+};
+
+const enableAutorenewalUrl = ( subscription: Subscription ): string => {
+	if ( ! subscription.product_key ) {
+		// review subscriptions on the Marketplace
+		return MARKETPLACE_RENEW_SUBSCRIPTON_PATH;
+	}
+	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
+		[ 'key', subscription.product_key.toString() ],
+	] );
 };
 
 const renewUrl = ( subscription: Subscription ): string => {
@@ -458,6 +474,7 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,

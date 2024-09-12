@@ -13,13 +13,14 @@ exports[`Filter by Stock block renders the stock filter block 1`] = `
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="instock"
+            for="wc-block-checkbox-list-option-0"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="instock"
+              id="wc-block-checkbox-list-option-0"
               type="checkbox"
+              value="instock"
             />
             <svg
               aria-hidden="true"
@@ -44,13 +45,14 @@ exports[`Filter by Stock block renders the stock filter block 1`] = `
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="onbackorder"
+            for="wc-block-checkbox-list-option-1"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="onbackorder"
+              id="wc-block-checkbox-list-option-1"
               type="checkbox"
+              value="onbackorder"
             />
             <svg
               aria-hidden="true"
@@ -75,13 +77,14 @@ exports[`Filter by Stock block renders the stock filter block 1`] = `
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="outofstock"
+            for="wc-block-checkbox-list-option-2"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="outofstock"
+              id="wc-block-checkbox-list-option-2"
               type="checkbox"
+              value="outofstock"
             />
             <svg
               aria-hidden="true"
@@ -122,13 +125,14 @@ exports[`Filter by Stock block renders the stock filter block with the filter bu
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="instock"
+            for="wc-block-checkbox-list-option-3"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="instock"
+              id="wc-block-checkbox-list-option-3"
               type="checkbox"
+              value="instock"
             />
             <svg
               aria-hidden="true"
@@ -153,13 +157,14 @@ exports[`Filter by Stock block renders the stock filter block with the filter bu
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="onbackorder"
+            for="wc-block-checkbox-list-option-4"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="onbackorder"
+              id="wc-block-checkbox-list-option-4"
               type="checkbox"
+              value="onbackorder"
             />
             <svg
               aria-hidden="true"
@@ -184,13 +189,14 @@ exports[`Filter by Stock block renders the stock filter block with the filter bu
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="outofstock"
+            for="wc-block-checkbox-list-option-5"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="outofstock"
+              id="wc-block-checkbox-list-option-5"
               type="checkbox"
+              value="outofstock"
             />
             <svg
               aria-hidden="true"
@@ -247,13 +253,14 @@ exports[`Filter by Stock block renders the stock filter block with the product c
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="instock"
+            for="wc-block-checkbox-list-option-6"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="instock"
+              id="wc-block-checkbox-list-option-6"
               type="checkbox"
+              value="instock"
             />
             <svg
               aria-hidden="true"
@@ -292,13 +299,14 @@ exports[`Filter by Stock block renders the stock filter block with the product c
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="onbackorder"
+            for="wc-block-checkbox-list-option-7"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="onbackorder"
+              id="wc-block-checkbox-list-option-7"
               type="checkbox"
+              value="onbackorder"
             />
             <svg
               aria-hidden="true"
@@ -337,13 +345,14 @@ exports[`Filter by Stock block renders the stock filter block with the product c
           class="wc-block-components-checkbox wc-block-checkbox-list__checkbox"
         >
           <label
-            for="outofstock"
+            for="wc-block-checkbox-list-option-8"
           >
             <input
               aria-invalid="false"
               class="wc-block-components-checkbox__input"
-              id="outofstock"
+              id="wc-block-checkbox-list-option-8"
               type="checkbox"
+              value="outofstock"
             />
             <svg
               aria-hidden="true"

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Initialize BlockTemplatesController for block themes only.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, chartBar } from '@wordpress/icons';
 
@@ -14,7 +14,7 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 const collection = {
 	name: CoreCollectionNames.BEST_SELLERS,
 	title: __( 'Best Sellers', 'woocommerce' ),
-	icon: ( <Icon icon={ chartBar } /> ) as BlockIcon,
+	icon: <Icon icon={ chartBar } />,
 	description: __( 'Recommend your best-selling products.', 'woocommerce' ),
 	keywords: [ 'best selling', 'product collection' ],
 	scope: [],
@@ -32,7 +32,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.ORDER ],
+	hideControls: [ CoreFilterNames.ORDER, CoreFilterNames.FILTERABLE ],
 };
 
 const heading: InnerBlockTemplate = [

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent an error in the WC_Checkout class when WooCommerce has not been properly initialized yet

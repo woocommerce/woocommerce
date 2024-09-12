@@ -14,6 +14,7 @@ class WC_Helper_Product {
 
 	/**
 	 * Counter to insert unique SKU for concurrent tests.
+	 * The starting value ensures no conflicts between existing generators.
 	 *
 	 * @var int $sku_counter
 	 */

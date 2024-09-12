@@ -83,9 +83,10 @@ const CustomerAddress = ( {
 					setEditing( true );
 				} }
 				fieldConfig={ addressFieldsConfig }
+				isExpanded={ editing }
 			/>
 		),
-		[ billingAddress, addressFieldsConfig ]
+		[ billingAddress, addressFieldsConfig, editing ]
 	);
 
 	const renderAddressFormComponent = useCallback(
@@ -98,10 +99,11 @@ const CustomerAddress = ( {
 					values={ billingAddress }
 					fields={ ADDRESS_FORM_KEYS }
 					fieldConfig={ addressFieldsConfig }
+					isEditing={ editing }
 				/>
 			</>
 		),
-		[ addressFieldsConfig, billingAddress, onChangeAddress ]
+		[ addressFieldsConfig, billingAddress, onChangeAddress, editing ]
 	);
 
 	return (

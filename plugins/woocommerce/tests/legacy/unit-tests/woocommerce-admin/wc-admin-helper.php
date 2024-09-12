@@ -44,7 +44,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
 		wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
-		wp_delete_post( wc_privacy_policy_page_id(), true );
 		wp_delete_post( wc_terms_and_conditions_page_id(), true );
 	}
 
@@ -256,6 +255,19 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 			$result                        = WCAdminHelper::is_store_page( $url );
 			$this->assertEquals( $expected_result, $result );
 		}
+	}
+
+	/**
+	 * Test is_store_page with the defined post_type param.
+	 */
+	public function test_is_store_page_with_post_type() {
+		// Test with post_type=product.
+		$this->assertTrue( WCAdminHelper::is_store_page( 'https://example.com/?post_type=product' ) );
+		// Test with post_type=product and other params.
+		$this->assertTrue( WCAdminHelper::is_store_page( 'https://example.com/test?param1=value1&post_type=product&param2=value2' ) );
+
+		// should return false if post_type is not product.
+		$this->assertFalse( WCAdminHelper::is_store_page( 'https://example.com/test?param1=value1&param2=value2' ) );
 	}
 
 	/** Test product archive link is store page even if shop page not set. */

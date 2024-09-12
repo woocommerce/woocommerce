@@ -636,6 +636,7 @@ jQuery( function ( $ ) {
 					} else {
 						window.alert( response.data.error );
 					}
+					wc_meta_boxes_order.init_tiptip();
 					wc_meta_boxes_order_items.unblock();
 				});
 			}
@@ -664,6 +665,7 @@ jQuery( function ( $ ) {
 				} else {
 					window.alert( response.data.error );
 				}
+				wc_meta_boxes_order.init_tiptip();
 				wc_meta_boxes_order_items.unblock();
 			});
 

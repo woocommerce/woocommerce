@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InnerBlockTemplate, BlockIcon } from '@wordpress/blocks';
+import type { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, percent } from '@wordpress/icons';
 
@@ -14,7 +14,7 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 const collection = {
 	name: CoreCollectionNames.ON_SALE,
 	title: __( 'On Sale', 'woocommerce' ),
-	icon: ( <Icon icon={ percent } /> ) as BlockIcon,
+	icon: <Icon icon={ percent } />,
 	description: __(
 		'Highlight products that are currently on sale.',
 		'woocommerce'
@@ -34,7 +34,7 @@ const attributes = {
 		perPage: 5,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.ON_SALE ],
+	hideControls: [ CoreFilterNames.ON_SALE, CoreFilterNames.FILTERABLE ],
 };
 
 const heading: InnerBlockTemplate = [

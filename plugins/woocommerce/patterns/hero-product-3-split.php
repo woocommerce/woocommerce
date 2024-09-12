@@ -50,7 +50,7 @@ $third_description  = $content['descriptions'][2]['default'] ?? '';
 			<!-- wp:group {"style":{"spacing":{"padding":{"top":"20px","bottom":"20px","left":"50px","right":"50px"},"blockGap":"48px","margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained"}} -->
 			<div class="wp-block-group" style="margin-top:0;margin-bottom:0;padding-top:20px;padding-right:50px;padding-bottom:20px;padding-left:50px">
 				<!-- wp:heading {"level":3} -->
-				<h3 class="wp-block-heading"><strong><?php echo esc_html( $main_title ); ?></strong></h3>
+				<h3 class="wp-block-heading"><?php echo esc_html( $main_title ); ?></h3>
 				<!-- /wp:heading -->
 
 				<!-- wp:group {"style":{"spacing":{"blockGap":"35px"}},"layout":{"type":"constrained"}} -->

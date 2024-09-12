@@ -12,6 +12,7 @@ import edit from './edit';
 import { supports } from './support';
 
 registerBlockType( metadata, {
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon

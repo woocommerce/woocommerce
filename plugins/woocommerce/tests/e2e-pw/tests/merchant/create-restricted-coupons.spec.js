@@ -79,10 +79,11 @@ const test = baseTest.extend( {
 
 	product: async ( { api }, use ) => {
 		let product = {};
+		const productName = `Product ${ Date.now() }`;
 
 		await api
 			.post( 'products', {
-				name: 'Product',
+				name: productName,
 				regular_price: '100',
 			} )
 			.then( ( response ) => {
@@ -96,7 +97,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.describe( 'Restricted coupon management', { tag: '@services' }, () => {
+test.describe( 'Restricted coupon management', { tag: [ '@services' ] }, () => {
 	for ( const couponType of Object.keys( couponData ) ) {
 		test( `can create new ${ couponType } coupon`, async ( {
 			page,

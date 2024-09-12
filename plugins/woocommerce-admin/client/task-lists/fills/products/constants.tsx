@@ -6,8 +6,8 @@ import ProductIcon from 'gridicons/dist/product';
 import CloudOutlineIcon from 'gridicons/dist/cloud-outline';
 import TypesIcon from 'gridicons/dist/types';
 import { Icon, chevronRight } from '@wordpress/icons';
-import { addFilter } from '@wordpress/hooks';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -16,6 +16,7 @@ import Link from './icon/link_24px.js';
 import Widget from './icon/widgets_24px.js';
 import LightBulb from './icon/lightbulb_24px.js';
 import PrintfulIcon from './icon/printful.png';
+import Upload from './icon/upload_40px.js';
 
 export const productTypes = Object.freeze( [
 	{
@@ -81,16 +82,13 @@ export const PrintfulAdvertProductPlacement = {
 	title: (
 		<span className="printful-sponsored__text">
 			{ __( 'Print-on-demand products', 'woocommerce' ) }
-			<div className="woocommerce-label">
-				{ __( 'Promoted', 'woocommerce' ) }
-			</div>
 		</span>
 	),
 	content: __(
 		'Design and easily sell custom print products online with Printful.',
 		'woocommerce'
 	),
-	className: 'woocommerce-products-list__item-printful-advert',
+	className: 'woocommerce-products-list__item-advert',
 	before: (
 		<img
 			className="printful-sponsored__icon"
@@ -98,19 +96,46 @@ export const PrintfulAdvertProductPlacement = {
 			src={ PrintfulIcon }
 		/>
 	),
-	after: <Icon icon={ chevronRight } />,
+	after: (
+		<div className="woocommerce-label">
+			{ __( 'Promoted', 'woocommerce' ) }
+		</div>
+	),
 	onClick: () => {
 		recordEvent( 'tasklist_product_printful_advert_click' );
 		window.open( 'https://woocommerce.com/products/printful', '_blank' );
 	},
 };
 
-export const SponsoredProductPlacementType = PrintfulAdvertProductPlacement;
+export const ImportCSVItem = {
+	key: 'import-csv' as const,
+	title: (
+		<span className="printful-sponsored__text">
+			{ __( 'Are you already selling somewhere else?', 'woocommerce' ) }
+		</span>
+	),
+	content: __( 'Import your products from a CSV file.', 'woocommerce' ),
+	className: 'woocommerce-products-list__item-advert',
+	before: <Upload />,
+	after: null,
+	onClick: () => {
+		recordEvent( 'tasklist_add_product', {
+			method: 'import',
+		} );
+		window.location.href = getAdminLink(
+			'edit.php?post_type=product&page=product_importer&wc_onboarding_active_task=products'
+		);
+	},
+};
+
+export type SponsoredProductPlacementType =
+	| typeof PrintfulAdvertProductPlacement
+	| typeof ImportCSVItem;
 
 export type ProductType =
 	| ( typeof productTypes )[ number ]
 	| typeof LoadSampleProductType
-	| typeof SponsoredProductPlacementType;
+	| SponsoredProductPlacementType;
 export type ProductTypeKey = ProductType[ 'key' ];
 
 export const onboardingProductTypesToSurfaced: Readonly<
@@ -131,13 +156,3 @@ export const SETUP_TASKLIST_PRODUCT_TYPES_FILTER =
 
 export const SETUP_TASKLIST_PRODUCTS_AFTER_FILTER =
 	'woocommerce_admin_task_products_after';
-
-if ( window.wcAdminFeatures && window.wcAdminFeatures.printful === true ) {
-	addFilter(
-		SETUP_TASKLIST_PRODUCTS_AFTER_FILTER,
-		'woocommerce/task-lists/products-sponsored-placement',
-		( products ) => {
-			return [ ...products, PrintfulAdvertProductPlacement ];
-		}
-	);
-}

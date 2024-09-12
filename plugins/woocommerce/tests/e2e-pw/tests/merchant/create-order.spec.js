@@ -1,10 +1,6 @@
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { random } = require( '../../utils/helpers' );
 
-const simpleProductName = 'Add new order simple product';
-const variableProductName = 'Add new order variable product';
-const externalProductName = 'Add new order external product';
-const groupedProductName = 'Add new order grouped product';
 const taxClasses = [
 	{
 		name: 'Tax Class Simple',
@@ -37,28 +33,230 @@ const taxRates = [
 	},
 ];
 const taxTotals = [ '10.00', '20.00', '240.00' ];
-let simpleProductId,
-	variableProductId,
-	externalProductId,
-	subProductAId,
-	subProductBId,
-	groupedProductId,
-	customerId,
-	orderId;
+
+async function getOrderIdFromPage( page ) {
+	// get order ID from the page
+	const orderText = await page
+		.locator( 'h2.woocommerce-order-data__heading' )
+		.textContent();
+	const parts = orderText.match( /([0-9])\w+/ );
+	return parts[ 0 ];
+}
+
+async function addProductToOrder( page, product, quantity ) {
+	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
+	await page.getByText( 'Search for a product…' ).click();
+	await page.locator( 'span > .select2-search__field' ).fill( product.name );
+	await page.getByRole( 'option', { name: product.name } ).first().click();
+	await page
+		.locator( 'tr' )
+		.filter( { hasText: product.name } )
+		.getByPlaceholder( '1' )
+		.fill( quantity.toString() );
+	await page.locator( '#btn-ok' ).click();
+}
+
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	order: async ( { api }, use ) => {
+		const order = {};
+
+		await use( order );
+
+		if ( order.id ) {
+			await api.delete( `orders/${ order.id }`, { force: true } );
+		}
+	},
+
+	customer: async ( { api }, use ) => {
+		let customer = {};
+		const username = `sideshowbob_${ random() }`;
+
+		await api
+			.post( 'customers', {
+				email: `${ username }@example.com`,
+				first_name: 'Sideshow',
+				last_name: 'Bob',
+				username,
+				billing: {
+					first_name: 'Sideshow',
+					last_name: 'Bob',
+					company: 'Die Bart Die',
+					address_1: '123 Fake St',
+					address_2: '',
+					city: 'Springfield',
+					state: 'FL',
+					postcode: '12345',
+					country: 'US',
+					email: `${ username }@example.com`,
+					phone: '555-555-5556',
+				},
+				shipping: {
+					first_name: 'Sideshow',
+					last_name: 'Bob',
+					company: 'Die Bart Die',
+					address_1: '321 Fake St',
+					address_2: '',
+					city: 'Springfield',
+					state: 'FL',
+					postcode: '12345',
+					country: 'US',
+				},
+			} )
+			.then( ( response ) => {
+				customer = response.data;
+			} );
+
+		await use( customer );
+
+		// Cleanup
+		await api.delete( `customers/${ customer.id }`, { force: true } );
+	},
+
+	simpleProduct: async ( { api }, use ) => {
+		let product = {};
+
+		await api
+			.post( 'products', {
+				name: `Product simple ${ random() }`,
+				type: 'simple',
+				regular_price: '100',
+				tax_class: 'Tax Class Simple',
+			} )
+			.then( ( response ) => {
+				product = response.data;
+			} );
+
+		await use( product );
+
+		// Cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+
+	variableProduct: async ( { api }, use ) => {
+		let product = {};
+
+		const variations = [
+			{
+				regular_price: '100',
+				attributes: [
+					{
+						name: 'Size',
+						option: 'Small',
+					},
+					{
+						name: 'Colour',
+						option: 'Yellow',
+					},
+				],
+				tax_class: 'Tax Class Variable',
+			},
+			{
+				regular_price: '100',
+				attributes: [
+					{
+						name: 'Size',
+						option: 'Medium',
+					},
+					{
+						name: 'Colour',
+						option: 'Magenta',
+					},
+				],
+				tax_class: 'Tax Class Variable',
+			},
+		];
+
+		await api
+			.post( 'products', {
+				name: `Product variable ${ random() }`,
+				type: 'variable',
+				tax_class: 'Tax Class Variable',
+			} )
+			.then( ( response ) => {
+				product = response.data;
+			} );
+
+		for ( const key in variations ) {
+			api.post(
+				`products/${ product.id }/variations`,
+				variations[ key ]
+			);
+		}
+
+		await use( product );
+
+		// Cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+
+	externalProduct: async ( { api }, use ) => {
+		let product = {};
+
+		await api
+			.post( 'products', {
+				name: `Product external ${ random() }`,
+				regular_price: '800',
+				tax_class: 'Tax Class External',
+				external_url: 'https://wordpress.org/plugins/woocommerce',
+				type: 'external',
+				button_text: 'Buy now',
+			} )
+			.then( ( response ) => {
+				product = response.data;
+			} );
+
+		await use( product );
+
+		// Cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+
+	groupedProduct: async ( { api }, use ) => {
+		let product = {};
+		let subProductAId;
+		let subProductBId;
+
+		await api
+			.post( 'products', {
+				name: 'Add-on A',
+				regular_price: '11.95',
+			} )
+			.then( ( response ) => {
+				subProductAId = response.data.id;
+			} );
+		await api
+			.post( 'products', {
+				name: 'Add-on B',
+				regular_price: '18.97',
+			} )
+			.then( ( response ) => {
+				subProductBId = response.data.id;
+			} );
+		await api
+			.post( 'products', {
+				name: `Product grouped ${ random() }`,
+				regular_price: '29.99',
+				grouped_products: [ subProductAId, subProductBId ],
+				type: 'grouped',
+			} )
+			.then( ( response ) => {
+				product = response.data;
+			} );
+
+		await use( product );
+
+		// Cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+} );
 
 test.describe(
 	'WooCommerce Orders > Add new order',
-	{ tag: '@services' },
+	{ tag: [ '@services', '@hpos' ] },
 	() => {
-		test.use( { storageState: process.env.ADMINSTATE } );
-
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { api } ) => {
 			// enable taxes on the account
 			await api.put( 'settings/general/woocommerce_calc_taxes', {
 				value: 'yes',
@@ -71,171 +269,9 @@ test.describe(
 			for ( let i = 0; i < taxRates.length; i++ ) {
 				await api.post( 'taxes', taxRates[ i ] );
 			}
-			// create simple product
-			await api
-				.post( 'products', {
-					name: simpleProductName,
-					type: 'simple',
-					regular_price: '100',
-					tax_class: 'Tax Class Simple',
-				} )
-				.then( ( resp ) => {
-					simpleProductId = resp.data.id;
-				} );
-			// create variable product
-			const variations = [
-				{
-					regular_price: '100',
-					attributes: [
-						{
-							name: 'Size',
-							option: 'Small',
-						},
-						{
-							name: 'Colour',
-							option: 'Yellow',
-						},
-					],
-					tax_class: 'Tax Class Variable',
-				},
-				{
-					regular_price: '100',
-					attributes: [
-						{
-							name: 'Size',
-							option: 'Medium',
-						},
-						{
-							name: 'Colour',
-							option: 'Magenta',
-						},
-					],
-					tax_class: 'Tax Class Variable',
-				},
-			];
-			await api
-				.post( 'products', {
-					name: variableProductName,
-					type: 'variable',
-					tax_class: 'Tax Class Variable',
-				} )
-				.then( ( response ) => {
-					variableProductId = response.data.id;
-					for ( const key in variations ) {
-						api.post(
-							`products/${ variableProductId }/variations`,
-							variations[ key ]
-						);
-					}
-				} );
-			// create external product
-			await api
-				.post( 'products', {
-					name: externalProductName,
-					regular_price: '800',
-					tax_class: 'Tax Class External',
-					external_url: 'https://wordpress.org/plugins/woocommerce',
-					type: 'external',
-					button_text: 'Buy now',
-				} )
-				.then( ( response ) => {
-					externalProductId = response.data.id;
-				} );
-			// create grouped product
-			await api
-				.post( 'products', {
-					name: 'Add-on A',
-					regular_price: '11.95',
-				} )
-				.then( ( response ) => {
-					subProductAId = response.data.id;
-				} );
-			await api
-				.post( 'products', {
-					name: 'Add-on B',
-					regular_price: '18.97',
-				} )
-				.then( ( response ) => {
-					subProductBId = response.data.id;
-				} );
-			await api
-				.post( 'products', {
-					name: groupedProductName,
-					regular_price: '29.99',
-					grouped_products: [ subProductAId, subProductBId ],
-					type: 'grouped',
-				} )
-				.then( ( response ) => {
-					groupedProductId = response.data.id;
-				} );
-			// create a customer
-			await api
-				.post( 'customers', {
-					email: 'sideshowbob@example.com',
-					first_name: 'Sideshow',
-					last_name: 'Bob',
-					username: 'sideshowbob',
-					billing: {
-						first_name: 'Sideshow',
-						last_name: 'Bob',
-						company: 'Die Bart Die',
-						address_1: '123 Fake St',
-						address_2: '',
-						city: 'Springfield',
-						state: 'FL',
-						postcode: '12345',
-						country: 'US',
-						email: 'sideshowbob@example.com',
-						phone: '555-555-5556',
-					},
-					shipping: {
-						first_name: 'Sideshow',
-						last_name: 'Bob',
-						company: 'Die Bart Die',
-						address_1: '321 Fake St',
-						address_2: '',
-						city: 'Springfield',
-						state: 'FL',
-						postcode: '12345',
-						country: 'US',
-					},
-				} )
-				.then( ( response ) => {
-					customerId = response.data.id;
-				} );
 		} );
 
-		test.afterEach( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			// clean up order after each test
-			if ( orderId && orderId !== '' ) {
-				await api.delete( `orders/${ orderId }`, { force: true } );
-			}
-		} );
-
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			// cleans up all products after run
-			await api.post( 'products/batch', {
-				delete: [
-					simpleProductId,
-					variableProductId,
-					externalProductId,
-					subProductAId,
-					subProductBId,
-					groupedProductId,
-				],
-			} );
+		test.afterAll( async ( { api } ) => {
 			// clean up tax classes and rates
 			for ( const { slug } of taxClasses ) {
 				await api
@@ -258,19 +294,15 @@ test.describe(
 			await api.put( 'settings/general/woocommerce_calc_taxes', {
 				value: 'no',
 			} );
-			// clean up customer
-			await api.delete( `customers/${ customerId }`, { force: true } );
 		} );
 
-		test( 'can create a simple guest order', async ( { page } ) => {
+		test( 'can create a simple guest order', async ( {
+			page,
+			simpleProduct,
+			order,
+		} ) => {
 			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
-
-			// get order ID from the page
-			const orderText = await page
-				.locator( 'h2.woocommerce-order-data__heading' )
-				.textContent();
-			orderId = orderText.match( /([0-9])\w+/ );
-			orderId = orderId[ 0 ].toString();
+			order.id = await getOrderIdFromPage( page );
 
 			await page
 				.locator( '#order_status' )
@@ -299,10 +331,17 @@ test.describe(
 			await page
 				.getByRole( 'textbox', { name: 'Postcode' } )
 				.fill( '12345' );
-			await page
-				.getByRole( 'textbox', { name: 'Select an option…' } )
-				.click();
-			await page.getByRole( 'option', { name: 'Florida' } ).click();
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if (
+				await page
+					.getByRole( 'textbox', { name: 'Select an option…' } )
+					.isVisible()
+			) {
+				await page
+					.getByRole( 'textbox', { name: 'Select an option…' } )
+					.click();
+				await page.getByRole( 'option', { name: 'Florida' } ).click();
+			}
 			await page
 				.getByRole( 'textbox', { name: 'Email address' } )
 				.fill( 'elbarto@example.com' );
@@ -327,22 +366,7 @@ test.describe(
 				.fill( 'Only asked for a slushie' );
 
 			// Add a product
-			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
-			await page
-				.getByRole( 'button', { name: 'Add product(s)' } )
-				.click();
-			await page.getByText( 'Search for a product…' ).click();
-			await page
-				.locator( 'span > .select2-search__field' )
-				.fill( 'Simple' );
-			await page
-				.getByRole( 'option', { name: simpleProductName } )
-				.click();
-			await page
-				.getByRole( 'row', { name: '×Add new order simple product' } )
-				.getByPlaceholder( '1' )
-				.fill( '2' );
-			await page.locator( '#btn-ok' ).click();
+			await addProductToOrder( page, simpleProduct, 2 );
 
 			// Create the order
 			await page.getByRole( 'button', { name: 'Create' } ).click();
@@ -368,40 +392,26 @@ test.describe(
 
 		test( 'can create an order for an existing customer', async ( {
 			page,
+			simpleProduct,
+			customer,
+			order,
 		} ) => {
 			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
-
-			// get order ID from the page
-			const orderText = await page
-				.locator( 'h2.woocommerce-order-data__heading' )
-				.textContent();
-			orderId = orderText.match( /([0-9])\w+/ );
-			orderId = orderId[ 0 ].toString();
+			order.id = await getOrderIdFromPage( page );
 
 			// Select customer
 			await page.getByText( 'Guest' ).click();
 			await page
 				.locator( 'input[aria-owns="select2-customer_user-results"]' )
-				.fill( 'sideshowbob@' );
-			await page.getByRole( 'option', { name: 'Sideshow Bob' } ).click();
+				.fill( customer.username );
+			await page
+				.getByRole( 'option', {
+					name: `${ customer.first_name } ${ customer.last_name }`,
+				} )
+				.click();
 
 			// Add a product
-			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
-			await page
-				.getByRole( 'button', { name: 'Add product(s)' } )
-				.click();
-			await page.getByText( 'Search for a product…' ).click();
-			await page
-				.locator( 'span > .select2-search__field' )
-				.fill( 'Simple' );
-			await page
-				.getByRole( 'option', { name: simpleProductName } )
-				.click();
-			await page
-				.getByRole( 'row', { name: '×Add new order simple product' } )
-				.getByPlaceholder( '1' )
-				.fill( '2' );
-			await page.locator( '#btn-ok' ).click();
+			await addProductToOrder( page, simpleProduct, 2 );
 
 			// Create the order
 			await page.getByRole( 'button', { name: 'Create' } ).click();
@@ -424,12 +434,14 @@ test.describe(
 			// View customer profile
 			await page.getByRole( 'link', { name: 'Profile →' } ).click();
 			await expect(
-				page.getByRole( 'heading', { name: 'Edit User sideshowbob' } )
+				page.getByRole( 'heading', {
+					name: `Edit User ${ customer.username }`,
+				} )
 			).toBeVisible();
 
 			// Go back to the order
 			await page.goto(
-				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ order.id }`
 			);
 			await page
 				.getByRole( 'link', {
@@ -442,17 +454,12 @@ test.describe(
 			await expect( page.getByRole( 'row' ) ).toHaveCount( 3 ); // 1 order and header and footer rows
 		} );
 
-		test( 'can create new order', async ( { page } ) => {
+		test( 'can create new order', async ( { page, order } ) => {
 			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 			await expect(
 				page.locator( 'h1.wp-heading-inline' )
 			).toContainText( 'Add new order' );
-			// get order ID from the page
-			const orderText = await page
-				.locator( 'h2.woocommerce-order-data__heading' )
-				.textContent();
-			orderId = orderText.match( /([0-9])\w+/ );
-			orderId = orderId[ 0 ].toString();
+			order.id = await getOrderIdFromPage( page );
 
 			await page
 				.locator( '#order_status' )
@@ -481,74 +488,51 @@ test.describe(
 
 		test( 'can create new complex order with multiple product types & tax classes', async ( {
 			page,
+			simpleProduct,
+			variableProduct,
+			externalProduct,
+			groupedProduct,
+			order,
 		} ) => {
-			orderId = '';
 			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
+			order.id = await getOrderIdFromPage( page );
 
 			// open modal for adding line items
 			await page.locator( 'button.add-line-item' ).click();
 			await page.locator( 'button.add-order-item' ).click();
 
 			// search for each product to add
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.pressSequentially( simpleProductName );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
-
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.pressSequentially( variableProductName );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
-
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.type( groupedProductName );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
-
-			await page.locator( 'text=Search for a product…' ).click();
-			await page
-				.locator( '.select2-search--dropdown' )
-				.getByRole( 'combobox' )
-				.type( externalProductName );
-			await page
-				.locator(
-					'li.select2-results__option.select2-results__option--highlighted'
-				)
-				.click();
+			for ( const product of [
+				simpleProduct,
+				variableProduct,
+				groupedProduct,
+				externalProduct,
+			] ) {
+				await page.getByText( 'Search for a product…' ).click();
+				await page
+					.locator( 'span > .select2-search__field' )
+					.fill( product.name );
+				await page
+					.getByRole( 'option', { name: product.name } )
+					.first()
+					.click();
+			}
 
 			await page.locator( 'button#btn-ok' ).click();
 
 			// assert that products added
 			await expect(
 				page.locator( 'td.name > a >> nth=0' )
-			).toContainText( simpleProductName );
+			).toContainText( simpleProduct.name );
 			await expect(
 				page.locator( 'td.name > a >> nth=1' )
-			).toContainText( variableProductName );
+			).toContainText( variableProduct.name );
 			await expect(
 				page.locator( 'td.name > a >> nth=2' )
-			).toContainText( groupedProductName );
+			).toContainText( groupedProduct.name );
 			await expect(
 				page.locator( 'td.name > a >> nth=3' )
-			).toContainText( externalProductName );
+			).toContainText( externalProduct.name );
 
 			// Recalculate taxes
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
