@@ -3,7 +3,7 @@ const { setOption } = require( '../../utils/options' );
 
 test.describe(
 	'Store owner can complete the core profiler',
-	{ tag: '@skip-on-default-pressable' },
+	{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
