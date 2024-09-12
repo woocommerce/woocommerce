@@ -100,7 +100,7 @@ export function myAccountOrders() {
 
 		checkResponse( response, 200, {
 			title: `Order #${ my_account_order_id } – ${ STORE_NAME }`,
-			body: my_account_order_id,
+			body: `Order #${ my_account_order_id } was placed`,
 			footer: FOOTER_TEXT,
 		} );
 	} );
