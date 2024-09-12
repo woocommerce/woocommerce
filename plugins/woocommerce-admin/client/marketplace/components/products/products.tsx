@@ -130,6 +130,17 @@ export default function Products( props: ProductsProps ) {
 		baseContainerClass + 'button-' + labelForClassName
 	);
 
+	if ( isLoading ) {
+		return (
+			<>
+				{ props.categorySelector && (
+					<CategorySelector type={ props.type } />
+				) }
+				<ProductLoader hasTitle={ false } type={ props.type } />
+			</>
+		);
+	}
+
 	if ( products.length === 0 ) {
 		let type = SearchResultType.all;
 
@@ -153,17 +164,6 @@ export default function Products( props: ProductsProps ) {
 			? 'woocommerce-marketplace__product-list-content--collapsed'
 			: ''
 	);
-
-	if ( isLoading ) {
-		return (
-			<>
-				{ props.categorySelector && (
-					<CategorySelector type={ props.type } />
-				) }
-				<ProductLoader hasTitle={ false } type={ props.type } />
-			</>
-		);
-	}
 
 	return (
 		<div className={ containerClassName }>
