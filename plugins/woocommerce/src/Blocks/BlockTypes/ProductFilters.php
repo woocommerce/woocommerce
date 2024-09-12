@@ -148,7 +148,14 @@ class ProductFilters extends AbstractBlock {
 			);
 			$tags->set_attribute( 'data-wc-navigation-id', $this->generate_navigation_id( $block ) );
 
-			return $this->inject_dialog( $tags->get_updated_html(), $this->render_dialog() );
+			if (
+				'always' === $attributes['overlay'] ||
+				( 'mobile' === $attributes['overlay'] && wp_is_mobile() )
+			) {
+				return $this->inject_dialog( $tags->get_updated_html(), $this->render_dialog() );
+			}
+
+			return $tags->get_updated_html();
 		}
 	}
 
