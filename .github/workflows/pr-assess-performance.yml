@@ -50,12 +50,13 @@ jobs:
                 git checkout trunk
                 echo "WC_TRUNK_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-            - uses: actions/download-artifact@v4
-              name: Download measurements artifacts (baseline)
+            - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
+              name: Cache measurements (baseline)
               with:
-                name: woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
+                path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
+                key: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
 
-            - name: Verify measurements artifacts (baseline)
+            - name: Verify cached measurements (baseline)
               run: |
                 if test -n "$(find tools/compare-perf/artifacts/ -maxdepth 1 -name '*_${{ env.WC_TRUNK_SHA }}_*' -print -quit)"
                 then
@@ -78,15 +79,6 @@ jobs:
               run: |
                 RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-
-            - name: Upload measurements artifacts (baseline)
-              if: ${{ env.WC_MEASURE_BASELINE }}
-              uses: actions/upload-artifact@v4
-              with:
-                name: woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
-                path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
-                compression-level: 9
-                retention-days: 7
             
             # Calculating/Printing results
             # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh)
