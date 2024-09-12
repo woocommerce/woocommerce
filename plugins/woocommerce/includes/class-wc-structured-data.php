@@ -588,12 +588,7 @@ class WC_Structured_Data {
 	 * @return bool True if valid. False otherwise.
 	 */
 	public function is_valid_gtin( $gtin ) {
-		if ( $gtin && is_numeric( $gtin ) && $gtin > 0 ) {
-			$gtin_length = strlen( $gtin );
-			return 8 === $gtin_length || 12 === $gtin_length || 13 === $gtin_length || 14 === $gtin_length;
-		}
-
-		return false;
+		return is_string( $gtin ) && preg_match('/^\d{8}$|^\d{12}$|^\d{13}$|^\d{14}$/', $gtin );
 	}
 
 	/**

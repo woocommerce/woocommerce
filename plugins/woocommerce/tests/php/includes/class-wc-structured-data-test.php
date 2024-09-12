@@ -36,6 +36,11 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 
 		$invalid_gtins = array(
 			'',
+			null,
+			false,
+			12345678,
+			123.4e-5,
+			+1234567,
 			'abcdefgh',
 			'-9999999',
 			'12-45-66',
@@ -45,6 +50,8 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			'1234567890',
 			'12 34 56 78',
 			'12 34 56',
+			'+12345678',
+			'123.4e-5',
 		);
 
 		foreach ( $valid_gtins as $valid_gtin ) {
@@ -70,5 +77,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $this->structured_data->prepare_gtin( 'GTIN' ), '' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( 123 ), '' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( array( '123-456-78', '123-456-78' ) ), '' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( '+12345678' ), '12345678' );
+		$this->assertEquals( $this->structured_data->prepare_gtin( '123.4e-5' ), '12345' );
 	}
 }
