@@ -87,6 +87,8 @@ async function runPerformanceTests( branches, options ) {
 	}
 
 	if ( skipBenchmarking ) {
+		// When benchmarking is skipped, it's expected that artifacts folder contains reports for the branches.
+		// If so, we'll process reports and pick test suites as per current state of codebase.
 		const testSuites = getFilesFromDir(
 			path.resolve( __dirname, '../..' ) + config.testsPath
 		).map( ( file ) => {
