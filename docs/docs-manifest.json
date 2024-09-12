@@ -903,7 +903,7 @@
           "menu_title": "Customizing Endpoint URLs",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/customizing-endpoint-urls.md",
-          "hash": "1d095b52354d648e1da4ec59822f6760cd5994642f9dd33d23a765ce6e4c76ec",
+          "hash": "364ed14d70c49498ba5017104b9c83743322d5095c215262d4311866a76181e5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/customizing-endpoint-urls.md",
           "id": "c19e1b1da6543f8a95ee04ba120f4f171f8e6e40",
           "links": {
@@ -1117,7 +1117,7 @@
             {
               "post_title": "Extending the product form with custom fields",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/how-to-guides/custom-field-tutorial.md",
-              "hash": "5e35da2e51a5381048327eea8cb0df34156e7e0b7c6d0130b650ec62670ad190",
+              "hash": "dfa00ed71af6eda1f539684657d5c880850ececea4c07bd11e89a605fab77ec7",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/how-to-guides/custom-field-tutorial.md",
               "id": "fed80efbb225df9054fadd6e1fc45c2cd03e7f99"
             }
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "bcc2516c4d2db3d4eae4338ef2ee283f71bd8c6988a12bbe15a3aed4c58c21c1"
+  "hash": "8f653ed01a4774435de5741e0eb2d4e3c72d7ba1a114366ea5f4da63027aa7dc"
 }
