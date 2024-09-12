@@ -271,8 +271,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			->maybe_schedule_adjust_download_permissions( $product );
 
 		$product->apply_changes();
-
-		do_action( 'woocommerce_update_product', $product->get_id(), $product );
+		// hook with 3 arguments
+		do_action( 'woocommerce_update_product', $product->get_id(), $product, $changes );
 	}
 
 	/**
