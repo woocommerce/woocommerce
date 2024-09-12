@@ -122,10 +122,6 @@ export default function NoResults( props: {
 	}
 
 	function categorySelector() {
-		if ( ! query.section ) {
-			return <></>;
-		}
-
 		if ( props.type === SearchResultType.all ) {
 			return <></>;
 		}
