@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix: "Filter by stock" returns no results when used with MySQL having `ANSI_QUOTES` enabled
