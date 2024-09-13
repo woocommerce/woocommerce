@@ -71,7 +71,7 @@ class ProductFilters extends AbstractBlock {
 				{{html}}
 			</dialog>',
 			array(
-				'{{html}}' => $html,
+				'{{html}}'          => $html,
 				'{{overlay_style}}' => $this->overlay_data_attributes(),
 			)
 		);
@@ -103,7 +103,7 @@ class ProductFilters extends AbstractBlock {
 
 		if ( 'woocommerce/product-filters-overlay' === $wrapper_template_part_block['blockName'] ) {
 			$this->overlay_position = isset( $wrapper_template_part_block['attrs']['overlayPosition'] ) ? $wrapper_template_part_block['attrs']['overlayPosition'] : '';
-			$this->overlay_style = isset( $wrapper_template_part_block['attrs']['overlayStyle'] ) ? $wrapper_template_part_block['attrs']['overlayStyle'] : '';
+			$this->overlay_style    = isset( $wrapper_template_part_block['attrs']['overlayStyle'] ) ? $wrapper_template_part_block['attrs']['overlayStyle'] : '';
 		}
 
 		$html       = $wrapper_template_part_block['innerHTML'];
