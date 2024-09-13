@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use WC_Rate_Limiter;
 use WC_Log_Levels;
+use Jetpack_Options;
 
 /**
  * WooCommerce Remote Logger
@@ -66,13 +67,21 @@ class RemoteLogger extends \WC_Log_Handler {
 			'message'    => $this->sanitize( $message ),
 			'host'       => wp_parse_url( home_url(), PHP_URL_HOST ),
 			'tags'       => array( 'woocommerce', 'php' ),
+			'store_id'   => null,
 			'properties' => array(
 				'wc_version'  => WC()->version,
 				'php_version' => phpversion(),
 				'wp_version'  => get_bloginfo( 'version' ),
 				'request_uri' => $this->sanitize_request_uri( filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL ) ),
+				'store_id'    => get_option( \WC_Install::STORE_ID_OPTION, null ),
 			),
 		);
+
+		$blog_id = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
+
+		if ( $blog_id && is_int( $blog_id ) ) {
+			$log_data['blog_id'] = $blog_id;
+		}
 
 		if ( isset( $context['backtrace'] ) ) {
 			if ( is_array( $context['backtrace'] ) || is_string( $context['backtrace'] ) ) {
@@ -86,19 +95,6 @@ class RemoteLogger extends \WC_Log_Handler {
 		if ( isset( $context['tags'] ) && is_array( $context['tags'] ) ) {
 			$log_data['tags'] = array_merge( $log_data['tags'], $context['tags'] );
 			unset( $context['tags'] );
-		}
-
-		if ( class_exists( '\WC_Tracks' ) && function_exists( 'wp_get_current_user' ) ) {
-			$user         = wp_get_current_user();
-			$blog_details = \WC_Tracks::get_blog_details( $user->ID );
-
-			if ( is_numeric( $blog_details['blog_id'] ) && $blog_details['blog_id'] > 0 ) {
-				$log_data['blog_id'] = $blog_details['blog_id'];
-			}
-
-			if ( ! empty( $blog_details['store_id'] ) ) {
-				$log_data['properties']['store_id'] = $blog_details['store_id'];
-			}
 		}
 
 		if ( isset( $context['error'] ) && is_array( $context['error'] ) && ! empty( $context['error']['file'] ) ) {
