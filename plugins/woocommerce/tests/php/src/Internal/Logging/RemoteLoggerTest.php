@@ -254,6 +254,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
+				'log with error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WC_ABSPATH . 'includes/class-wc-test.php' ) ),
+					array(
+						'file' => '**/woocommerce/includes/class-wc-test.php',
+					),
+				),
 			);
 		}
 
