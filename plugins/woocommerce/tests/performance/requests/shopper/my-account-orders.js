@@ -29,7 +29,6 @@ import { checkResponse } from '../../utils.js';
 
 export function myAccountOrders() {
 	let my_account_order_id;
-	let response;
 
 	group( 'My Account', function () {
 		const requestHeaders = Object.assign(
@@ -40,7 +39,7 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/my-account`, {
+		const response = http.get( `${ base_url }/my-account`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account' },
 		} );
@@ -62,7 +61,7 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/my-account/orders/`, {
+		const response = http.get( `${ base_url }/my-account/orders/`, {
 			headers: requestHeaders,
 			tags: { name: 'Shopper - My Account Orders' },
 		} );
@@ -91,7 +90,7 @@ export function myAccountOrders() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get(
+		const response = http.get(
 			`${ base_url }/my-account/view-order/${ my_account_order_id }`,
 			{
 				headers: requestHeaders,
