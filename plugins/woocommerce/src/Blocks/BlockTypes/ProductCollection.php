@@ -510,7 +510,7 @@ class ProductCollection extends AbstractBlock {
 			'woocommerce/rating-filter',
 		);
 
-		if ( in_array($block_name, $unsupported_blocks) ) {
+		if ( in_array( $block_name, $unsupported_blocks, true ) ) {
 			return false;
 		}
 
