@@ -106,7 +106,6 @@ jobs:
                 path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
                 retention-days: 7
                 compression-level: 9
-                overwrite: true
 
             - name: Analyze results
               run: |
