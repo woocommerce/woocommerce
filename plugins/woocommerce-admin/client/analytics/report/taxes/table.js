@@ -143,7 +143,7 @@ class TaxesReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n( 'tax', 'taxes', taxesCodes, 'woocommerce' ),
+				label: _n( 'tax', 'taxes', totalResults, 'woocommerce' ),
 				value: formatValue( currency, 'number', totalResults ),
 			},
 			{
