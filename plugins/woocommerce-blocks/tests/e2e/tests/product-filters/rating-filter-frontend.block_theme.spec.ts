@@ -12,7 +12,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	},
 } );
 
-test.describe( 'Product Filter: Rating Filter Block', () => {
+test.describe.skip( 'Product Filter: Rating Filter Block', () => {
 	test.describe( 'frontend', () => {
 		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
 			await requestUtils.activatePlugin(

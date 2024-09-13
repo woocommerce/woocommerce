@@ -8,7 +8,7 @@ import { HTMLElementEvent } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { navigate } from '../product-filter/frontend';
+import { navigate } from '../../frontend';
 
 type AttributeFilterContext = {
 	attributeSlug: string;
@@ -105,6 +105,13 @@ store( 'woocommerce/product-filter-attribute', {
 			selectedTerms = selectedTerms.filter( ( item ) => item !== value );
 
 			navigate( getUrl( selectedTerms, attributeSlug, queryType ) );
+		},
+
+		clearFilters: () => {
+			const { attributeSlug, queryType } =
+				getContext< ActiveAttributeFilterContext >();
+
+			navigate( getUrl( [], attributeSlug, queryType ) );
 		},
 	},
 } );

@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { registerBlockType } from '@wordpress/blocks';
 import { isExperimentalBlocksEnabled } from '@woocommerce/block-settings';
-import { productFilterActive } from '@woocommerce/icons';
+import { productFilterOptions } from '@woocommerce/icons';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -14,7 +14,7 @@ import './style.scss';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
-		icon: productFilterActive,
 		edit: Edit,
+		icon: productFilterOptions,
 	} );
 }
