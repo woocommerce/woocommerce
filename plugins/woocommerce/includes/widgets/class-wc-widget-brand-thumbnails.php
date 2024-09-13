@@ -119,7 +119,7 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 			'widgets/brand-thumbnails.php',
 			array(
 				'brands'        => $brands,
-				'columns'       => $instance['columns'],
+				'columns'       => (int) $instance['columns'],
 				'fluid_columns' => ! empty( $instance['fluid_columns'] ) ? true : false,
 			),
 			'woocommerce',
@@ -143,7 +143,7 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		$instance['fluid_columns'] = ! empty( $new_instance['fluid_columns'] ) ? true : false;
 		$instance['orderby']       = wp_strip_all_tags( stripslashes( $new_instance['orderby'] ) );
 		$instance['exclude']       = wp_strip_all_tags( stripslashes( $new_instance['exclude'] ) );
-		$instance['hide_empty']    = wp_strip_all_tags( stripslashes( $new_instance['hide_empty'] ) );
+		$instance['hide_empty']    = wp_strip_all_tags( stripslashes( (string) $new_instance['hide_empty'] ) );
 		$instance['number']        = wp_strip_all_tags( stripslashes( $new_instance['number'] ) );
 
 		if ( ! $instance['columns'] ) {
@@ -190,25 +190,21 @@ class WC_Widget_Brand_Thumbnails extends WP_Widget {
 		?>
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'woocommerce' ); ?></label>
-				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="
-																	<?php
-																	if ( isset( $instance['title'] ) ) {
-																		echo esc_attr( $instance['title'] );}
-																	?>
-				" />
+				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php
+					if ( isset( $instance['title'] ) ) {
+						echo esc_attr( $instance['title'] );}
+					?>" />
 			</p>
 
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'columns' ) ); ?>"><?php esc_html_e( 'Columns:', 'woocommerce' ); ?></label>
-				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'columns' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'columns' ) ); ?>" value="
-																	<?php
-																	if ( isset( $instance['columns'] ) ) {
-																		echo esc_attr( $instance['columns'] );
-																	} else {
-																		echo '1';
-																	}
-																	?>
-				" />
+				<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'columns' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'columns' ) ); ?>" value="<?php
+					if ( isset( $instance['columns'] ) ) {
+						echo esc_attr( $instance['columns'] );
+					} else {
+						echo '1';
+					}
+					?>" />
 			</p>
 
 			<p>

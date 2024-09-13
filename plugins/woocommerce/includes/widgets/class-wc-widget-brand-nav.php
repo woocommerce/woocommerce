@@ -192,12 +192,11 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 		}
 		?>
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'woocommerce' ); ?></label>
-		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="
-															<?php
-															if ( isset( $instance['title'] ) ) {
-																echo esc_attr( $instance['title'] );}
-															?>
-		" /></p>
+		<input type="text" class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" value="<?php
+			if ( isset( $instance['title'] ) ) {
+				echo esc_attr( $instance['title'] );}
+			?>" />
+		</p>
 
 		<p><label for="<?php echo esc_attr( $this->get_field_id( 'display_type' ) ); ?>"><?php esc_html_e( 'Display Type:', 'woocommerce' ); ?></label>
 		<select id="<?php echo esc_attr( $this->get_field_id( 'display_type' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'display_type' ) ); ?>">
