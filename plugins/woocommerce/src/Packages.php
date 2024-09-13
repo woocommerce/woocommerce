@@ -131,7 +131,7 @@ class Packages {
 			}
 
 			$option = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
-			if ( 'yes' === get_option( $option, 'yes' ) ) {
+			if ( 'yes' === get_option( $option, 'no' ) ) {
 				$enabled_packages[ $merged_package_name ] = $package_class;
 			}
 		}
