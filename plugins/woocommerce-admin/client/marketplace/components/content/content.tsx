@@ -85,15 +85,15 @@ export default function Content(): JSX.Element {
 
 			fetchSearchResults( params, abortControllers[ 0 ].signal )
 				.then( ( productList ) => {
-					setAllProducts( productList );
+					setAllProducts( productList.products );
 					setSearchResultsCount( {
-						extensions: productList.filter(
+						extensions: productList.products.filter(
 							( p ) => p.type === ProductType.extension
 						).length,
-						themes: productList.filter(
+						themes: productList.products.filter(
 							( p ) => p.type === ProductType.theme
 						).length,
-						'business-services': productList.filter(
+						'business-services': productList.products.filter(
 							( p ) => p.type === ProductType.businessService
 						).length,
 					} );
@@ -129,7 +129,7 @@ export default function Content(): JSX.Element {
 						abortControllers[ index ].signal
 					).then( ( productList ) => {
 						const typedProducts = tagProductsWithType(
-							productList,
+							productList.products,
 							type
 						);
 						if ( category === 'business-services' ) {

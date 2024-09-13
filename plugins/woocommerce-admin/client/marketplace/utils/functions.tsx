@@ -107,7 +107,10 @@ async function fetchJsonWithCache(
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
-): Promise< Product[] > {
+): Promise< {
+	products: Product[];
+	totalPages: number;
+} > {
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
@@ -151,9 +154,10 @@ async function fetchSearchResults(
 						};
 					}
 				);
-				resolve( products );
+				const totalPages = ( json as SearchAPIJSONType ).total_pages;
+				resolve( { products, totalPages } );
 			} )
-			.catch( () => reject );
+			.catch( reject );
 	} );
 }
 
