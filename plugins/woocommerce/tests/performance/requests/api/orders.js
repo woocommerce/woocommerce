@@ -82,8 +82,7 @@ export function ordersAPI() {
 
 		check( response, {
 			'status is 200': ( r ) => r.status === 200,
-			'body contains customer data': ( response ) =>
-				response.body.includes( '"id":' ),
+			'body contains customer data': ( r ) => r.body.includes( '"id":' ),
 		} );
 
 		customerId = findBetween( response.body, '"id":', ',' );
@@ -105,8 +104,8 @@ export function ordersAPI() {
 		);
 		check( response, {
 			'status is 201': ( r ) => r.status === 201,
-			"body contains: 'Completed' Status": ( response ) =>
-				response.body.includes( '"status":"completed"' ),
+			"body contains: 'Completed' Status": ( r ) =>
+				r.body.includes( '"status":"completed"' ),
 		} );
 
 		post_id = findBetween( response.body, '{"id":', ',' );
@@ -123,8 +122,8 @@ export function ordersAPI() {
 		);
 		check( response, {
 			'status is 201': ( r ) => r.status === 201,
-			"body contains: 'Pending' Status": ( response ) =>
-				response.body.includes( '"status":"pending"' ),
+			"body contains: 'Pending' Status": ( r ) =>
+				r.body.includes( '"status":"pending"' ),
 		} );
 
 		post_id = findBetween( response.body, '{"id":', ',' );
@@ -141,8 +140,8 @@ export function ordersAPI() {
 			);
 			check( response, {
 				'status is 200': ( r ) => r.status === 200,
-				'body contains: Order ID': ( response ) =>
-					response.body.includes( `"id":${ post_id }` ),
+				'body contains: Order ID': ( r ) =>
+					r.body.includes( `"id":${ post_id }` ),
 			} );
 		}
 	} );
@@ -155,8 +154,8 @@ export function ordersAPI() {
 			} );
 			check( response, {
 				'status is 200': ( r ) => r.status === 200,
-				'body contains: Order ID': ( response ) =>
-					response.body.includes( '[{"id":' ),
+				'body contains: Order ID': ( r ) =>
+					r.body.includes( '[{"id":' ),
 			} );
 		}
 	} );
@@ -173,8 +172,8 @@ export function ordersAPI() {
 			);
 			check( response, {
 				'status is 200': ( r ) => r.status === 200,
-				"body contains: 'Completed' Status": ( response ) =>
-					response.body.includes( '"status":"completed"' ),
+				"body contains: 'Completed' Status": ( r ) =>
+					r.body.includes( '"status":"completed"' ),
 			} );
 		}
 	} );
@@ -191,8 +190,8 @@ export function ordersAPI() {
 			);
 			check( response, {
 				'status is 200': ( r ) => r.status === 200,
-				'body contains: Order ID': ( response ) =>
-					response.body.includes( `"id":${ post_id }` ),
+				'body contains: Order ID': ( r ) =>
+					r.body.includes( `"id":${ post_id }` ),
 			} );
 		}
 	} );
@@ -215,8 +214,8 @@ export function ordersAPI() {
 		);
 		check( response, {
 			'status is 200': ( r ) => r.status === 200,
-			'body contains: Create batch prefix': ( response ) =>
-				response.body.includes( 'create":[{"id"' ),
+			'body contains: Create batch prefix': ( r ) =>
+				r.body.includes( 'create":[{"id"' ),
 		} );
 
 		post_ids = findBetween( response.body, '{"id":', ',"parent_id', true );
@@ -253,8 +252,8 @@ export function ordersAPI() {
 		);
 		check( response, {
 			'status is 200': ( r ) => r.status === 200,
-			'body contains: Update batch prefix': ( response ) =>
-				response.body.includes( 'update":[{"id"' ),
+			'body contains: Update batch prefix': ( r ) =>
+				r.body.includes( 'update":[{"id"' ),
 		} );
 	} );
 }
