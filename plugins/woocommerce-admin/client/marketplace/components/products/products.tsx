@@ -143,11 +143,6 @@ export default function Products( props: ProductsProps ) {
 
 	return (
 		<div className={ containerClassName }>
-			{ selectedTab === 'search' && (
-				<h2 className={ productListTitleClassName }>
-					{ isLoading ? ' ' : title }
-				</h2>
-			) }
 			<nav className="woocommerce-marketplace__sub-header">
 				<div className="woocommerce-marketplace__sub-header__categories">
 					{ props.categorySelector && (
