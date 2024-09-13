@@ -594,7 +594,7 @@ class WC_Structured_Data {
 	 * Prepare a GTIN input removing everything except numbers.
 	 *
 	 * @param string $gtin The GTIN to prepare.
-	 * @return string Empty string if not GTIN is provided or the string with the replacements.
+	 * @return string Empty string if no GTIN is provided or the string with the replacements.
 	 */
 	public function prepare_gtin( $gtin ) {
 		if ( ! $gtin || ! is_string( $gtin ) ) {
