@@ -1,5 +1,4 @@
-/* eslint-disable no-shadow */
-/* eslint-disable import/no-unresolved */
+// eslint-disable import/no-unresolved
 /**
  * External dependencies
  */
@@ -30,7 +29,6 @@ import {
 } from '../../headers.js';
 
 export function cartRemoveItem() {
-	let response;
 	let item_to_remove;
 	let wpnonce;
 
@@ -43,7 +41,7 @@ export function cartRemoveItem() {
 			commonNonStandardHeaders
 		);
 
-		response = http.post(
+		const response = http.post(
 			`${ base_url }/?wc-ajax=add_to_cart`,
 			{
 				product_sku: `${ product_sku }`,
@@ -71,15 +69,14 @@ export function cartRemoveItem() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/cart`, {
+		const response = http.get( `${ base_url }/cart`, {
 			headers: requestheaders,
 			tags: { name: 'Shopper - View Cart' },
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body does not contain: 'your cart is currently empty'": (
-				response
-			) => ! response.body.includes( 'Your cart is currently empty.' ),
+			"body does not contain: 'your cart is currently empty'": ( r ) =>
+				! r.body.includes( 'Your cart is currently empty.' ),
 		} );
 
 		// Correlate cart item value for use in subsequent requests.
@@ -98,7 +95,7 @@ export function cartRemoveItem() {
 			commonNonStandardHeaders
 		);
 
-		response = http.get(
+		const response = http.get(
 			`${ base_url }/cart?remove_item=${ item_to_remove }&_wpnonce=${ wpnonce }`,
 			{
 				headers: requestheaders,
@@ -107,8 +104,7 @@ export function cartRemoveItem() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'removed'": ( response ) =>
-				response.body.includes( ' removed.' ),
+			"body contains: 'removed'": ( r ) => r.body.includes( ' removed.' ),
 		} );
 	} );
 

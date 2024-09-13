@@ -11,7 +11,7 @@ import './icon-with-text.scss';
 
 export interface IconWithTextProps {
 	icon: JSX.Element;
-	title: ReactElement;
+	title: ReactElement | string;
 	description: string;
 }
 

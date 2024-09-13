@@ -83,7 +83,7 @@ class SimpleInboxNote {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 
 		// Set the type of layout the note uses. Supported layout types are:
-		// 'banner', 'plain', 'thumbnail'.
+		// 'plain', 'thumbnail'.
 		$note->set_layout( 'plain' );
 
 		// Set the image for the note. This property renders as the src

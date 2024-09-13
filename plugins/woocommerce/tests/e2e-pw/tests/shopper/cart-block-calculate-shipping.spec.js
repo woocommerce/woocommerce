@@ -140,7 +140,9 @@ test.describe(
 				await page.goto( cartBlockPage.slug );
 
 				// Set shipping country to Netherlands
-				await page.getByLabel( 'Add an address for shipping' ).click();
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
 				await page
 					.getByRole( 'combobox' )
 					.first()
@@ -174,7 +176,9 @@ test.describe(
 				await page.goto( cartBlockPage.slug );
 
 				// Set shipping country to Portugal
-				await page.getByLabel( 'Add an address for shipping' ).click();
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
 				await page
 					.getByRole( 'combobox' )
 					.first()
@@ -188,7 +192,7 @@ test.describe(
 					page.getByRole( 'group' ).getByText( 'Flat rate' )
 				).toBeVisible();
 				await expect(
-					page.getByText( 'Shipping$5.00Flat' )
+					page.getByText( 'Delivery$5.00Flat' )
 				).toBeVisible();
 				await expect(
 					page.getByText( `$${ firstProductWithFlatRate }` )
@@ -202,7 +206,7 @@ test.describe(
 
 				// Verify updated shipping costs
 				await expect(
-					page.getByText( 'ShippingFreeLocal' )
+					page.getByText( 'DeliveryFreeLocal' )
 				).toBeVisible();
 				await expect( page.getByText( '$' ).nth( 2 ) ).toContainText(
 					firstProductPrice
@@ -220,7 +224,9 @@ test.describe(
 				await page.goto( cartBlockPage.slug );
 
 				// Set shipping country to Portugal
-				await page.getByLabel( 'Add an address for shipping' ).click();
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
 				await page
 					.getByRole( 'combobox' )
 					.first()
@@ -254,7 +260,9 @@ test.describe(
 				await page.goto( cartBlockPage.slug );
 
 				// Set shipping country to Portugal
-				await page.getByLabel( 'Add an address for shipping' ).click();
+				await page
+					.getByLabel( 'Enter address to check delivery options' )
+					.click();
 				await page
 					.getByRole( 'combobox' )
 					.first()
@@ -268,7 +276,7 @@ test.describe(
 					page.getByRole( 'group' ).getByText( 'Flat rate' )
 				).toBeVisible();
 				await expect(
-					page.getByText( 'Shipping$5.00Flat' )
+					page.getByText( 'Delivery$5.00Flat' )
 				).toBeVisible();
 				await expect(
 					page.getByText(
@@ -288,7 +296,7 @@ test.describe(
 
 				// Verify updated shipping costs
 				await expect(
-					page.getByText( 'ShippingFreeLocal' )
+					page.getByText( 'DeliveryFreeLocal' )
 				).toBeVisible();
 				await expect(
 					page

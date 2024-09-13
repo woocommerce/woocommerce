@@ -1,0 +1,56 @@
+{
+	"name": "woocommerce/order-confirmation-create-account",
+	"version": "1.0.0",
+	"title": "Account Creation",
+	"description": "Allow customers to create an account after their purchase. Configure this feature in your store settings.",
+	"category": "woocommerce",
+	"keywords": [
+		"WooCommerce"
+	],
+	"attributes": {
+		"customerEmail": {
+			"type": "string",
+			"default": ""
+		},
+		"nonceToken": {
+			"type": "string",
+			"default": ""
+		},
+		"align": {
+			"type": "string",
+			"default": "wide"
+		},
+		"className": {
+			"type": "string",
+			"default": ""
+		},
+		"hasDarkControls": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"supports": {
+		"color": {
+			"background": true,
+			"text": true,
+			"button": true
+		},
+		"multiple": false,
+		"align": [
+			"wide",
+			"full"
+		],
+		"html": false,
+		"spacing": {
+			"padding": true,
+			"margin": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false
+			}
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}
