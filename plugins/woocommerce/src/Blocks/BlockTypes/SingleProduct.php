@@ -88,18 +88,18 @@ class SingleProduct extends AbstractBlock {
 			return $pre_render;
 		}
 
-		$selected_product = get_post( $parsed_block['attrs']['productId'] );
-		if ( ! isset( $selected_product ) ) {
-			return $pre_render;
-		}
-
 		// Before rendering our inner blocks we need to set the global post state
 		// to the selected product. This ensures that inner blocks have access
 		// to the correct post data.
+		$selected_product_post = get_post( $parsed_block['attrs']['productId'] );
+		if ( ! ( $selected_product_post instanceof \WP_Post ) ) {
+			return $pre_render;
+		}
+
 		global $post;
 		$this->overridden_post = $post;
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$post = $selected_product;
+		$post = $selected_product_post;
 		setup_postdata( $post );
 
 		return $pre_render;
