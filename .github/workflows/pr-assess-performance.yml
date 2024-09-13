@@ -41,30 +41,29 @@ jobs:
                 pull-playwright-cache: true
                 pull-package-deps: '@woocommerce/plugin-woocommerce'
           
-            #TODO: Inject WordPress version.
+            #TODO: Inject WordPress version as per plugin requirements (relying to defaults currently).
             - name: Start Test Environment
               run: |
                 pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
                 pnpm --filter="@woocommerce/plugin-woocommerce" env:test
-
+                
+            # TODO: cache results if pushed to trunk
             - name: Measure performance (@${{ github.sha }})
               run: |
                 RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-                RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-
-            # TODO: cache results if pushed to trunk
+                RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor           
 
             # In alignment with .github/workflows/scripts/run-metrics.sh, we should checkout 3d7d7f02017383937f1a4158d433d0e5d44b3dc9 
             # as baseline. But to avoid switching branches in 'Analyze results' step, we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df 
             # which introduced reporting mode for the perf utility.
-            - name: Checkout (55f855a2e6d769b5ae44305b2772eb30d3e721df@trunk)
+            - name: Checkout (55f855a2e6d769b5ae44305b2772eb30d3e721df@trunk, further references  AS 'baseline')
               run: |
                 git reset --hard
                 git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
                 echo "WC_TRUNK_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df" >> $GITHUB_ENV
 
             - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
-              name: Cache measurements (trunk as baseline)
+              name: Cache measurements (baseline)
               with:
                 path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
                 key: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
