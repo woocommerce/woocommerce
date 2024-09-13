@@ -62,6 +62,7 @@ function CustomersReportTable( {
 			{
 				label: __( 'Email', 'woocommerce' ),
 				key: 'email',
+				isSortable: true,
 			},
 			{
 				label: __( 'Orders', 'woocommerce' ),
