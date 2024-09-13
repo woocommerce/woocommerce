@@ -8,11 +8,8 @@ import type {
 	AddressFormValues,
 	FormFieldsConfig,
 } from '@woocommerce/settings';
-import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	VALIDATION_STORE_KEY,
-	CHECKOUT_STORE_KEY,
-} from '@woocommerce/block-data';
+import { useSelect } from '@wordpress/data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
@@ -31,14 +28,10 @@ const CustomerAddress = ( {
 		setShippingAddress,
 		setBillingAddress,
 		useBillingAsShipping,
+		editingBillingAddress: editing,
+		setEditingBillingAddress: setEditing,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const editing = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getEditingBillingAddress()
-	);
-
-	const setEditing =
-		useDispatch( CHECKOUT_STORE_KEY ).setEditingBillingAddress;
 
 	// Forces editing state if store has errors.
 	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
