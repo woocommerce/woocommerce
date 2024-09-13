@@ -15,7 +15,6 @@ export type UserPreferences = {
 	dashboard_chart_type?: string;
 	dashboard_leaderboard_rows?: string;
 	dashboard_sections?: string;
-	help_panel_highlight_shown?: string;
 	homepage_layout?: string;
 	homepage_stats?: string;
 	orders_report_columns?: string;

@@ -4658,6 +4658,12 @@ importers:
 
   tools/compare-perf:
     dependencies:
+      '@tsconfig/node16':
+        specifier: ^1.0.4
+        version: 1.0.4
+      '@types/node':
+        specifier: ^16.18.68
+        version: 16.18.68
       '@wordpress/env':
         specifier: ^10.1.0
         version: 10.5.0
@@ -4673,6 +4679,12 @@ importers:
       simple-git:
         specifier: ^3.21.0
         version: 3.21.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.3.100)(@types/node@16.18.68)(typescript@5.3.3)
+      tslib:
+        specifier: ^2.6.2
+        version: 2.6.3
 
   tools/monorepo-merge:
     dependencies:
