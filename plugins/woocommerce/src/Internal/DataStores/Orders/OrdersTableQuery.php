@@ -378,7 +378,7 @@ class OrdersTableQuery {
 	 * @return array Partial date query arg with relevant dates now UTC-based.
 	 *
 	 * @throws \Exception If an invalid date shorthand operator is specified.
-	 * 
+	 *
 	 * @since 8.2.0
 	 */
 	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
