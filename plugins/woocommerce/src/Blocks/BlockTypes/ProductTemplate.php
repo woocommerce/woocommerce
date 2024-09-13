@@ -83,25 +83,29 @@ class ProductTemplate extends AbstractBlock {
 		while ( $query->have_posts() ) {
 			$query->the_post();
 
-			// Get an instance of the current Post Template block.
+			// Get an instance of the current Product Template block.
 			$block_instance = $block->parsed_block;
-			$product_id     = get_the_ID();
 
 			// Set the block name to one that does not correspond to an existing registered block.
-			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
+			// This ensures that for the inner instances of the Product Template block, we do not render any block supports.
 			$block_instance['blockName'] = 'core/null';
 
-			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
+			// The `postId` context is provided by WordPress, however, we're going to be rendering the inner blocks
+			// using a different post ID. To ensure that the inner blocks have the correct ID, we need to register
+			// our own context filter that returns the correct ID.
+			$product_id           = get_the_ID();
+			$post_type            = get_post_type();
+			$filter_block_context = static function ( $context ) use ( $product_id, $post_type ) {
+				$context['postId']   = $product_id;
+				$context['postType'] = $post_type;
+				return $context;
+			};
+			add_filter( 'render_block_context', $filter_block_context, 1 );
+
+			// Render the inner blocks of the Product Template block with `dynamic` set to `false` to prevent calling
 			// `render_callback` and ensure that no wrapper markup is included.
-			$block_content = (
-			new WP_Block(
-				$block_instance,
-				array(
-					'postType' => get_post_type(),
-					'postId'   => $product_id,
-				)
-			)
-			)->render( array( 'dynamic' => false ) );
+			$block_content = ( new WP_Block( $block_instance ) )->render( array( 'dynamic' => false ) );
+			remove_filter( 'render_block_context', $filter_block_context, 1 );
 
 			$interactive = array(
 				'namespace' => 'woocommerce/product-collection',
