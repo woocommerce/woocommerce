@@ -2,46 +2,11 @@
  * External dependencies
  */
 import {
-	getContext as getContextFn,
+	getContext,
 	store,
 	navigate as navigateFn,
 } from '@woocommerce/interactivity';
 import { getSetting } from '@woocommerce/settings';
-
-export interface ProductFiltersContext {
-	isDialogOpen: boolean;
-	hasPageWithWordPressAdminBar: boolean;
-}
-
-const getContext = ( ns?: string ) =>
-	getContextFn< ProductFiltersContext >( ns );
-
-store( 'woocommerce/product-filters', {
-	state: {
-		isDialogOpen: () => {
-			const context = getContext();
-			return context.isDialogOpen;
-		},
-	},
-	actions: {
-		openDialog: () => {
-			const context = getContext();
-			document.body.classList.add( 'wc-modal--open' );
-			context.hasPageWithWordPressAdminBar = Boolean(
-				document.getElementById( 'wpadminbar' )
-			);
-
-			context.isDialogOpen = true;
-		},
-		closeDialog: () => {
-			const context = getContext();
-			document.body.classList.remove( 'wc-modal--open' );
-
-			context.isDialogOpen = false;
-		},
-	},
-	callbacks: {},
-} );
 
 const isBlockTheme = getSetting< boolean >( 'isBlockTheme' );
 const isProductArchive = getSetting< boolean >( 'isProductArchive' );
@@ -50,7 +15,29 @@ const needsRefresh = getSetting< boolean >(
 	false
 );
 
-export function navigate( href: string, options = {} ) {
+function isParamsEqual(
+	obj1: Record< string, string >,
+	obj2: Record< string, string >
+): boolean {
+	const keys1 = Object.keys( obj1 );
+	const keys2 = Object.keys( obj2 );
+
+	// First check if both objects have the same number of keys
+	if ( keys1.length !== keys2.length ) {
+		return false;
+	}
+
+	// Check if all keys and values are the same
+	for ( const key of keys1 ) {
+		if ( obj1[ key ] !== obj2[ key ] ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+function navigate( href: string, options = {} ) {
 	/**
 	 * We may need to reset the current page when changing filters.
 	 * This is because the current page may not exist for this set
@@ -79,3 +66,58 @@ export function navigate( href: string, options = {} ) {
 	}
 	return navigateFn( href, options );
 }
+
+export interface ProductFiltersContext {
+	isDialogOpen: boolean;
+	hasPageWithWordPressAdminBar: boolean;
+	params: Record< string, string >;
+	originalParams: Record< string, string >;
+}
+
+store( 'woocommerce/product-filters', {
+	state: {
+		isDialogOpen: () => {
+			const context = getContext< ProductFiltersContext >();
+			return context.isDialogOpen;
+		},
+	},
+	actions: {
+		openDialog: () => {
+			const context = getContext< ProductFiltersContext >();
+			document.body.classList.add( 'wc-modal--open' );
+			context.hasPageWithWordPressAdminBar = Boolean(
+				document.getElementById( 'wpadminbar' )
+			);
+
+			context.isDialogOpen = true;
+		},
+		closeDialog: () => {
+			const context = getContext< ProductFiltersContext >();
+			document.body.classList.remove( 'wc-modal--open' );
+
+			context.isDialogOpen = false;
+		},
+	},
+	callbacks: {
+		maybeNavigate: () => {
+			const { params, originalParams } =
+				getContext< ProductFiltersContext >();
+
+			if ( isParamsEqual( params, originalParams ) ) {
+				return;
+			}
+
+			const url = new URL( window.location.href );
+			const { searchParams } = url;
+
+			for ( const key in originalParams ) {
+				searchParams.delete( key, originalParams[ key ] );
+			}
+
+			for ( const key in params ) {
+				searchParams.set( key, params[ key ] );
+			}
+			navigate( url.href );
+		},
+	},
+} );
