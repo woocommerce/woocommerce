@@ -78,7 +78,7 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		$blog_id = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
 
-		if ( $blog_id && is_int( $blog_id ) ) {
+		if ( ! empty( $blog_id ) && is_int( $blog_id ) ) {
 			$log_data['blog_id'] = $blog_id;
 		}
 
