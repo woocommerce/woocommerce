@@ -31,6 +31,7 @@ export interface SupportsConfiguration {
 	features?: string[];
 	// Deprecated, in favour of showSavedCards and showSaveOption
 	savePaymentInfo?: boolean;
+	style?: string[];
 }
 
 // we assign a value in the class for supports.features
@@ -156,6 +157,7 @@ export type PlainPaymentMethods = Record<
 		title: string;
 		description: string;
 		gatewayId: string;
+		supportsStyle: string[];
 	}
 >;
 
