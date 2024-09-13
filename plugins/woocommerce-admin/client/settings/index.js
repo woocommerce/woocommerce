@@ -118,7 +118,7 @@ const Settings = ( { params, query } ) => {
 						} }
 					>
 						<div className="woocommerce-settings-layout-title">
-							<h1>{ title }</h1>
+							<h2>{ title }</h2>
 						</div>
 						<SectionNav
 							data={ settingsData[ page ] }
