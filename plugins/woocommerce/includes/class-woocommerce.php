@@ -407,12 +407,6 @@ final class WooCommerce {
 				$context
 			);
 
-			// Record fatal error stats.
-			$container = wc_get_container();
-			$mc_stats  = $container->get( McStats::class );
-			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
-			$mc_stats->do_server_side_stats();
-
 			/**
 			 * Action triggered when there are errors during shutdown.
 			 *

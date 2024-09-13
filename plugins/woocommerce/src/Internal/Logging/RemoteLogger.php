@@ -178,6 +178,15 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
+		try {
+			// Record fatal error stats.
+			$mc_stats = wc_get_container()->get( McStats::class );
+			$mc_stats->add( 'error', 'critical-errors' );
+			$mc_stats->do_server_side_stats();
+		} catch ( \Throwable $e ) {
+			error_log( 'Warning: Failed to record fatal error stats: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		}
+
 		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
 			error_log( 'Remote logging throttled.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
