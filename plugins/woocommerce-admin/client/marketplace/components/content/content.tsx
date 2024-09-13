@@ -73,7 +73,8 @@ export default function Content(): JSX.Element {
 
 		if (
 			query.tab === undefined ||
-			( query.tab && [ '', 'discover' ].includes( query.tab ) )
+			( query.tab &&
+				[ '', 'discover', 'my-subscriptions' ].includes( query.tab ) )
 		) {
 			return;
 		}
@@ -195,6 +196,9 @@ export default function Content(): JSX.Element {
 			) }
 			{ selectedTab !== 'business-services' && (
 				<SubscriptionsExpiredExpiringNotice type="expiring" />
+			) }
+			{ selectedTab !== 'business-services' && (
+				<SubscriptionsExpiredExpiringNotice type="missing" />
 			) }
 
 			{ renderContent() }

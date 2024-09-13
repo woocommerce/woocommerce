@@ -13,6 +13,7 @@ import ProductLoader from '../product-loader/product-loader';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { ProductType } from '../product-list/types';
 import './discover.scss';
+import { recordMarketplaceView } from '~/marketplace/utils/tracking';
 
 export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
@@ -28,9 +29,16 @@ export default function Discover(): JSX.Element | null {
 				return product.id;
 			} );
 
+		// This is a new event specific to the Discover tab, added with Woo 8.4.
 		recordEvent( 'marketplace_discover_viewed', {
 			view: 'discover',
 			product_ids,
+		} );
+
+		// This is the new page view event added with Woo 8.3. It's improved with the marketplace_discover_viewed event
+		// but we'll keep it for a while to keep it compatible.
+		recordMarketplaceView( {
+			view: 'discover',
 		} );
 	}
 
