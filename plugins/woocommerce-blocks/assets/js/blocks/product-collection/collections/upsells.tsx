@@ -12,7 +12,7 @@ import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
-	name: CoreCollectionNames.ON_SALE,
+	name: CoreCollectionNames.UPSELLS,
 	title: __( 'Upsells', 'woocommerce' ),
 	icon: <Icon icon={ trendingUp } />,
 	description: __(
@@ -42,7 +42,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'On sale products', 'woocommerce' ),
+		content: __( 'What about these?', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];
