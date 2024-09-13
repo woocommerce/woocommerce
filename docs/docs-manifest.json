@@ -727,7 +727,7 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "c73e3c5015e6cda3be9ebd2d5fbda590ac9fa599e5fb02163c971c01060970ad",
+          "hash": "85fc7d70f47fdb195ad2c690d3b95565169221f9e4d7afa98e88f3824ad0e267",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "1f651a59399c34644d2f91a0366bbd01da2c7dc677a1c53329b184badd3b8d13"
+  "hash": "77c102c35a45b0681e7b70def9d639d764e4e5068121c2ef4dd23477c0f8784c"
 }
