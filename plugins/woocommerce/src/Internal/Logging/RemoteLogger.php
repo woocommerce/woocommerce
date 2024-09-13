@@ -306,9 +306,9 @@ class RemoteLogger extends \WC_Log_Handler {
 		if ( str_contains( $message, $wc_plugin_dir ) ) {
 			return false;
 		}
+
 		// Check if the backtrace contains the WooCommerce plugin directory.
 		foreach ( $context['backtrace'] as $trace ) {
-			$trace = $context['backtrace'][ $i ];
 			if ( is_string( $trace ) && str_contains( $trace, $wc_plugin_dir ) ) {
 				return false;
 			}
