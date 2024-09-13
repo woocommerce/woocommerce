@@ -450,7 +450,7 @@ test.describe(
 
 test.describe(
 	'Store owner can skip the core profiler',
-	{ tag: '@skip-on-default-pressable' },
+	{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
