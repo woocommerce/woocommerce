@@ -30,10 +30,21 @@ export default class ExpressPaymentMethodConfig
 
 	constructor( config: ExpressPaymentMethodConfiguration ) {
 		// validate config
+
+		const readableName =
+			typeof config.name === 'string'
+				? config.name.replace( /[_-]/g, ' ' )
+				: config.name;
+		const trimedDescription =
+			typeof config?.description === 'string' &&
+			config.description.length > 130
+				? config.description.slice( 0, 130 ) + '...'
+				: config.description;
+
 		ExpressPaymentMethodConfig.assertValidConfig( config );
 		this.name = config.name;
-		this.title = config.title || this.name;
-		this.description = config.description || '';
+		this.title = config.title || readableName;
+		this.description = trimedDescription || '';
 		this.gatewayId = config.gatewayId || '';
 		this.content = config.content;
 		this.edit = config.edit;

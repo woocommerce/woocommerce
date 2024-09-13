@@ -119,19 +119,14 @@ const ExpressPaymentMethods = () => {
 				) }
 			</p>
 			{ Object.values( availableExpressMethods ).map( ( values ) => {
-				const title = values.title.replace( /[_-]/g, ' ' );
-				const description =
-					values.description.length > 130
-						? values.description.slice( 0, 130 ) + '...'
-						: values.description;
 				return (
 					<ExternalLinkCard
 						key={ values.name }
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=checkout&section=${ encodeURIComponent(
 							values.gatewayId
 						) }` }
-						title={ title }
-						description={ description }
+						title={ values.title }
+						description={ values.description }
 					/>
 				);
 			} ) }
