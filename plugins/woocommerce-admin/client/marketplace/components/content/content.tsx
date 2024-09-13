@@ -105,7 +105,7 @@ export default function Content(): JSX.Element {
 					setIsLoading( false );
 				} );
 		} else {
-			// Fetch all categories when query.term or query.category changes
+			// Fetch all tabs when query.term or query.category changes
 			Promise.all(
 				categories.map( ( { category, type }, index ) => {
 					const params = new URLSearchParams();
