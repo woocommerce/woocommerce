@@ -161,17 +161,7 @@ final class BlockTypesController {
 		if ( function_exists( 'wp_register_block_metadata' ) && file_exists( $meta_file_path ) ) {
 			$block_metadata = require $meta_file_path;
 			foreach ( $block_metadata as $full_block_name => $block_data ) {
-				$name_parts = explode( '/', $full_block_name, 2 );
-
-				if ( count( $name_parts ) > 1 ) {
-					$namespace = $name_parts[0];
-					$block_name = $name_parts[1];
-				} else {
-					$namespace = 'woocommerce';  // Fallback, don't expect to hit this
-					$block_name = $full_block_name;
-				}
-
-				wp_register_block_metadata( $namespace, $block_name, $block_data );
+				wp_register_block_metadata( $full_block_name, $block_data );
 			}
 		}
 	}
