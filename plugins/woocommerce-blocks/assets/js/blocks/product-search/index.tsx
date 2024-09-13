@@ -195,7 +195,7 @@ function registerProductSearchNamespace( props: BlockType, blockName: string ) {
 
 addFilter(
 	'blocks.registerBlockType',
-	'core/custom-class-name/attribute',
+	SEARCH_VARIATION_NAME,
 	registerProductSearchNamespace
 );
 
