@@ -13,70 +13,26 @@ const formats = {
 };
 const {
 	runShellScript,
-	readJSONFile,
 	askForConfirmation,
 	getFilesFromDir,
+	logAtIndent,
+	sanitizeBranchName,
 } = require( './utils' );
 const config = require( './config' );
+const { processPerformanceReports } = require( './process-reports.ts' );
 
 const ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH || path.join( process.cwd(), 'artifacts' );
-const RESULTS_FILE_SUFFIX = '.performance-results.json';
 
 /**
  * @typedef WPPerformanceCommandOptions
  *
- * @property {boolean=} ci          Run on CI.
- * @property {number=}  rounds      Run each test suite this many times for each branch.
- * @property {string=}  testsBranch The branch whose performance test files will be used for testing.
- * @property {string=}  wpVersion   The WordPress version to be used as the base install for testing.
+ * @property {boolean=} ci               Run on CI.
+ * @property {number=}  rounds           Run each test suite this many times for each branch.
+ * @property {string=}  testsBranch      The branch whose performance test files will be used for testing.
+ * @property {boolean=} skipBenchmarking Skip benchmarking and get to report processing (reports supplied from outside).
+ * @property {string=}  wpVersion        The WordPress version to be used as the base install for testing.
  */
-
-/**
- * A logging helper for printing steps and their substeps.
- *
- * @param {number} indent Value to indent the log.
- * @param {any}    msg    Message to log.
- * @param {...any} args   Rest of the arguments to pass to console.log.
- */
-function logAtIndent( indent, msg, ...args ) {
-	const prefix = indent === 0 ? '▶ ' : '> ';
-	const newline = indent === 0 ? '\n' : '';
-	return console.log(
-		newline + '    '.repeat( indent ) + prefix + msg,
-		...args
-	);
-}
-
-/**
- * Sanitizes branch name to be used in a path or a filename.
- *
- * @param {string} branch
- *
- * @return {string} Sanitized branch name.
- */
-function sanitizeBranchName( branch ) {
-	return branch.replace( /[^a-zA-Z0-9-]/g, '-' );
-}
-
-/**
- * Computes the median number from an array numbers.
- *
- * @param {number[]} array
- *
- * @return {number|undefined} Median value or undefined if array empty.
- */
-function median( array ) {
-	if ( ! array || ! array.length ) return undefined;
-
-	const numbers = [ ...array ].sort( ( a, b ) => a - b );
-	const middleIndex = Math.floor( numbers.length / 2 );
-
-	if ( numbers.length % 2 === 0 ) {
-		return ( numbers[ middleIndex - 1 ] + numbers[ middleIndex ] ) / 2;
-	}
-	return numbers[ middleIndex ];
-}
 
 /**
  * Runs the performance tests on the current branch.
@@ -106,6 +62,7 @@ async function runTestSuite( testSuite, testRunnerDir, runKey ) {
  */
 async function runPerformanceTests( branches, options ) {
 	const runningInCI = !! process.env.CI || !! options.ci;
+	const skipBenchmarking = !! options.skipBenchmarking;
 	const TEST_ROUNDS = options.rounds || 1;
 
 	// The default value doesn't work because commander provides an array.
@@ -129,6 +86,20 @@ async function runPerformanceTests( branches, options ) {
 		await askForConfirmation( 'Ready to go? ' );
 	}
 
+	if ( skipBenchmarking ) {
+		// When benchmarking is skipped, it's expected that artifacts folder contains reports for the branches.
+		// If so, we'll process reports and pick test suites as per current state of codebase.
+		const testSuites = getFilesFromDir(
+			path.resolve( __dirname, '../..' ) + config.testsPath
+		).map( ( file ) => {
+			logAtIndent( 1, 'Found:', formats.success( file ) );
+			return path.basename( file, '.spec.js' );
+		} );
+
+		await processPerformanceReports( testSuites, branches );
+		return;
+	}
+
 	logAtIndent( 0, 'Setting up' );
 
 	/**
@@ -140,7 +111,6 @@ async function runPerformanceTests( branches, options ) {
 	}
 
 	const baseDir = path.join( os.tmpdir(), 'wp-performance-tests' );
-
 	if ( fs.existsSync( baseDir ) ) {
 		logAtIndent( 1, 'Removing existing files' );
 		fs.rmSync( baseDir, { recursive: true } );
@@ -350,82 +320,7 @@ async function runPerformanceTests( branches, options ) {
 		}
 	}
 
-	logAtIndent( 0, 'Calculating results' );
-
-	const resultFiles = getFilesFromDir( ARTIFACTS_PATH ).filter( ( file ) =>
-		file.endsWith( RESULTS_FILE_SUFFIX )
-	);
-	/** @type {Record<string,Record<string, Record<string, number>>>} */
-	const results = {};
-
-	// Calculate medians from all rounds.
-	for ( const testSuite of testSuites ) {
-		logAtIndent( 1, 'Test suite:', formats.success( testSuite ) );
-
-		results[ testSuite ] = {};
-		for ( const branch of branches ) {
-			const sanitizedBranchName = sanitizeBranchName( branch );
-			const resultsRounds = resultFiles
-				.filter( ( file ) =>
-					file.includes(
-						`/${ testSuite }_${ sanitizedBranchName }_round-`
-					)
-				)
-				.map( ( file ) => {
-					logAtIndent( 2, 'Reading from:', formats.success( file ) );
-					return readJSONFile( file );
-				} );
-
-			const metrics = Object.keys( resultsRounds[ 0 ] );
-			results[ testSuite ][ branch ] = {};
-
-			for ( const metric of metrics ) {
-				const values = resultsRounds
-					.map( ( round ) => round[ metric ] )
-					.filter( ( value ) => typeof value === 'number' );
-
-				const value = median( values );
-				if ( value !== undefined ) {
-					results[ testSuite ][ branch ][ metric ] = value;
-				}
-			}
-		}
-		const calculatedResultsPath = path.join(
-			ARTIFACTS_PATH,
-			testSuite + RESULTS_FILE_SUFFIX
-		);
-
-		logAtIndent(
-			2,
-			'Saving curated results to:',
-			formats.success( calculatedResultsPath )
-		);
-		fs.writeFileSync(
-			calculatedResultsPath,
-			JSON.stringify( results[ testSuite ], null, 2 )
-		);
-	}
-
-	logAtIndent( 0, 'Printing results' );
-
-	for ( const testSuite of testSuites ) {
-		logAtIndent( 0, formats.success( testSuite ) );
-
-		// Invert the results so we can display them in a table.
-		/** @type {Record<string, Record<string, string>>} */
-		const invertedResult = {};
-		for ( const [ branch, metrics ] of Object.entries(
-			results[ testSuite ]
-		) ) {
-			for ( const [ metric, value ] of Object.entries( metrics ) ) {
-				invertedResult[ metric ] = invertedResult[ metric ] || {};
-				invertedResult[ metric ][ branch ] = `${ value } ms`;
-			}
-		}
-
-		// Print the results.
-		console.table( invertedResult );
-	}
+	await processPerformanceReports( testSuites, branches );
 }
 
 module.exports = {
