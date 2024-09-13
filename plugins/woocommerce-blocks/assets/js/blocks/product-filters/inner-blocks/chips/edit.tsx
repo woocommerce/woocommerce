@@ -1,25 +1,31 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useBlockProps } from '@wordpress/block-editor';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
 import { EditProps } from './types';
+import './editor.scss';
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const { context } = props;
 	const { filterData } = context;
 	const { isLoading, items } = filterData;
 
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( {
+		className: clsx( 'wc-block-product-filter-chips', {
+			'is-loading': isLoading,
+		} ),
+	} );
 
 	const loadingState = useMemo( () => {
-		return [ ...Array( 5 ) ].map( ( _, i ) => (
-			<li
+		return [ ...Array( 10 ) ].map( ( _, i ) => (
+			<div
+				className="wc-block-product-filter-chips__item"
 				key={ i }
 				style={ {
 					/* stylelint-disable */
@@ -27,7 +33,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 				} }
 			>
 				&nbsp;
-			</li>
+			</div>
 		) );
 	}, [] );
 
@@ -38,33 +44,21 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	return (
 		<>
 			<div { ...blockProps }>
-				<ul className="wc-block-product-filter-chips__list">
+				<div className="wc-block-product-filter-chips__items">
 					{ isLoading && loadingState }
 					{ ! isLoading &&
 						items.map( ( item, index ) => (
-							<li
+							<div
 								key={ index }
 								className="wc-block-product-filter-chips__item"
+								aria-checked={ !! item.selected }
 							>
-								<label
-									htmlFor={ `interactive-checkbox-${ index }` }
-									className=" wc-block-product-filter-chips__label"
-								>
-									<span className="wc-block-product-filter-chips__input-wrapper">
-										<input
-											name={ `interactive-checkbox-${ index }` }
-											type="checkbox"
-											className="wc-block-product-filter-chips__input"
-											defaultChecked={ !! item.selected }
-										/>
-									</span>
-									<span className="wc-block-product-filter-chips__text">
-										{ item.label }
-									</span>
-								</label>
-							</li>
+								<span className="wc-block-product-filter-chips__label">
+									{ item.label }
+								</span>
+							</div>
 						) ) }
-				</ul>
+				</div>
 			</div>
 		</>
 	);

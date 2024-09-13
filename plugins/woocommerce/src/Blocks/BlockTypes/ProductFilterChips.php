@@ -43,6 +43,7 @@ final class ProductFilterChips extends AbstractBlock {
 		$wrapper_attributes = array(
 			'data-wc-interactive' => esc_attr( $namespace ),
 			'data-wc-context'     => wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'class'               => 'wc-block-product-filter-chips',
 		);
 
 		ob_start();
