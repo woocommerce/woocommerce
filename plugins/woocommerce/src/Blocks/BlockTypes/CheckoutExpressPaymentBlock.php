@@ -28,7 +28,7 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 		parent::initialize();
 
 		$this->default_styles = array(
-			'showButtonStyles'   => true,
+			'showButtonStyles'   => false,
 			'buttonHeight'       => '48',
 			'buttonBorderRadius' => '4',
 		);

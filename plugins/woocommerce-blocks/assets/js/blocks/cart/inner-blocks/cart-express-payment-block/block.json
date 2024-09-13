@@ -15,7 +15,7 @@
 	"attributes": {
 		"showButtonStyles": {
 			"type": "boolean",
-			"default": true
+			"default": false
 		},
 		"buttonHeight": {
 			"type": "string",

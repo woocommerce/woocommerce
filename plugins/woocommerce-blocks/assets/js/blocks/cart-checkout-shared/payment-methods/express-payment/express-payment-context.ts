@@ -11,7 +11,7 @@ type ExpressPaymentContextProps = {
 
 export const ExpressPaymentContext: React.Context< ExpressPaymentContextProps > =
 	createContext< ExpressPaymentContextProps >( {
-		showButtonStyles: true,
+		showButtonStyles: false,
 		buttonHeight: '48',
 		buttonBorderRadius: '4',
 	} );
