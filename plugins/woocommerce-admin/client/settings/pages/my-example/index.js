@@ -23,11 +23,11 @@ export const MyExample = ( { section } ) => {
 
 export const MyExampleEdit = () => {
 	return (
-		<>
+		<div style={ { padding: '16px 48px' } }>
 			<h2>My Example Edit</h2>
 			<Link href={ getNewPath( { quickEdit: false } ) } type="wc-admin">
 				Close
 			</Link>
-		</>
+		</div>
 	);
 };
