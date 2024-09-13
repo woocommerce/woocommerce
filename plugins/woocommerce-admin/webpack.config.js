@@ -27,7 +27,7 @@ const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
 
 const getSubdirectoriesAt = ( searchPath ) => {
-	const dir = path.resolve( searchPath );
+	const dir = path.resolve( __dirname, searchPath );
 	return fs
 		.readdirSync( dir, { withFileTypes: true } )
 		.filter( ( entry ) => entry.isDirectory() )

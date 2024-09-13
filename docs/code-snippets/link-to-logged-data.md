@@ -19,7 +19,7 @@ if ( defined( 'WC_LOG_DIR' ) ) {
   $log_url = add_query_arg( 'log_file', $log_key, $log_url );
 
   // Add a link to the logs to the label
-  $label .= ' | ' . sprintf( \_\_( '%1$sView Log%2$s', 'your-textdomain-here' ), '<a href\="' . esc_url( $log_url ) . '">', '</a\>' );
+  $label .= ' | ' . sprintf( \_\_( '%1$sView Log%2$s', 'your-textdomain-here' ), '&lt;a href\="' . esc_url( $log_url ) . '"&gt;', '&lt;/a\&gt;' );
 }
 
 // Add the logging option to the form fields

@@ -26,7 +26,7 @@ class InitTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		add_filter(
 			'transient_woocommerce_admin_' . WCPayPromotionDataSourcePoller::ID . '_specs',
-			function( $value ) {
+			function ( $value ) {
 				if ( $value ) {
 					return $value;
 				}
@@ -38,6 +38,8 @@ class InitTest extends WC_Unit_Test_Case {
 				);
 			}
 		);
+
+		EvaluateSuggestion::reset_memo();
 	}
 
 	/**
@@ -59,7 +61,7 @@ class InitTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'transient_woocommerce_admin_' . WCPayPromotionDataSourcePoller::ID . '_specs' );
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array();
 			}
 		);
