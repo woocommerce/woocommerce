@@ -62,6 +62,8 @@ jobs:
                 git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
                 echo "WC_TRUNK_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df" >> $GITHUB_ENV
 
+            # TODO: rework in favour of artifact
+
             - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
               name: Cache measurements (baseline)
               with:
@@ -93,7 +95,6 @@ jobs:
               run: |
                 RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-                ls -la tools/compare-perf/artifacts/
 
             - name: Analyze results
               run: |
