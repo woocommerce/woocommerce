@@ -2230,1077 +2230,1170 @@ test.describe( 'Products API tests: List All Products', () => {
 		await deleteSampleData( sampleData );
 	}, 10000 );
 
-	test.describe( 'List all products', () => {
-		test( 'defaults', async ( { request } ) => {
-			const result = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					search: 'xxx',
-				},
+	test.describe(
+		'List all products',
+		{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
+		() => {
+			test( 'defaults', async ( { request } ) => {
+				const result = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						search: 'xxx',
+					},
+				} );
+
+				expect( result.status() ).toEqual( 200 );
+				expect( result.headers()[ 'x-wp-total' ] ).toEqual(
+					PRODUCTS_COUNT.toString()
+				);
+				expect( result.headers()[ 'x-wp-totalpages' ] ).toEqual( '2' );
 			} );
 
-			expect( result.status() ).toEqual( 200 );
-			expect( result.headers()[ 'x-wp-total' ] ).toEqual(
-				PRODUCTS_COUNT.toString()
-			);
-			expect( result.headers()[ 'x-wp-totalpages' ] ).toEqual( '2' );
-		} );
+			test( 'pagination', async ( { request } ) => {
+				const pageSize = 6;
+				const page1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						per_page: pageSize,
+						search: 'xxx',
+					},
+				} );
+				const page1JSON = await page1.json();
+				const page2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						per_page: pageSize,
+						page: 2,
+						search: 'xxx',
+					},
+				} );
+				const page2JSON = await page2.json();
+				expect( page1.status() ).toEqual( 200 );
+				expect( page2.status() ).toEqual( 200 );
 
-		test( 'pagination', async ( { request } ) => {
-			const pageSize = 6;
-			const page1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: pageSize,
-					search: 'xxx',
-				},
-			} );
-			const page1JSON = await page1.json();
-			const page2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: pageSize,
-					page: 2,
-					search: 'xxx',
-				},
-			} );
-			const page2JSON = await page2.json();
-			expect( page1.status() ).toEqual( 200 );
-			expect( page2.status() ).toEqual( 200 );
+				// Verify total page count.
+				expect( page1.headers()[ 'x-wp-total' ] ).toEqual(
+					PRODUCTS_COUNT.toString()
+				);
+				expect( page1.headers()[ 'x-wp-totalpages' ] ).toEqual( '4' );
 
-			// Verify total page count.
-			expect( page1.headers()[ 'x-wp-total' ] ).toEqual(
-				PRODUCTS_COUNT.toString()
-			);
-			expect( page1.headers()[ 'x-wp-totalpages' ] ).toEqual( '4' );
+				// Verify we get pageSize'd arrays.
+				expect( Array.isArray( page1JSON ) ).toBe( true );
+				expect( Array.isArray( page2JSON ) ).toBe( true );
+				expect( page1JSON ).toHaveLength( pageSize );
+				expect( page2JSON ).toHaveLength( pageSize );
 
-			// Verify we get pageSize'd arrays.
-			expect( Array.isArray( page1JSON ) ).toBe( true );
-			expect( Array.isArray( page2JSON ) ).toBe( true );
-			expect( page1JSON ).toHaveLength( pageSize );
-			expect( page2JSON ).toHaveLength( pageSize );
+				// Ensure all of the product IDs are unique (no page overlap).
+				const allProductIds = page1JSON
+					.concat( page2JSON )
+					.reduce( ( acc, product ) => {
+						acc[ product.id ] = 1;
+						return acc;
+					}, {} );
+				expect( Object.keys( allProductIds ) ).toHaveLength(
+					pageSize * 2
+				);
 
-			// Ensure all of the product IDs are unique (no page overlap).
-			const allProductIds = page1JSON
-				.concat( page2JSON )
-				.reduce( ( acc, product ) => {
-					acc[ product.id ] = 1;
-					return acc;
-				}, {} );
-			expect( Object.keys( allProductIds ) ).toHaveLength( pageSize * 2 );
-
-			// Verify that offset takes precedent over page number.
-			const page2Offset = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: pageSize,
-					page: 2,
-					offset: pageSize + 1,
-					search: 'xxx',
-				},
-			} );
-			const page2OffsetJSON = await page2Offset.json();
-			// The offset pushes the result set 1 product past the start of page 2.
-			expect( page2OffsetJSON ).toEqual(
-				expect.not.arrayContaining( [
-					expect.objectContaining( {
-						id: page2JSON[ 0 ].id,
-					} ),
-				] )
-			);
-			expect( page2OffsetJSON[ 0 ].id ).toEqual( page2JSON[ 1 ].id );
-
-			// Verify the last page only has 2 products as we expect.
-			const lastPage = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: pageSize,
-					page: 4,
-					search: 'xxx',
-				},
-			} );
-			const lastPageJSON = await lastPage.json();
-			expect( Array.isArray( lastPageJSON ) ).toBe( true );
-			expect( lastPageJSON ).toHaveLength( 2 );
-
-			// Verify a page outside the total page count is empty.
-			const page6 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: pageSize,
-					page: 6,
-					search: 'xxx',
-				},
-			} );
-			const page6JSON = await page6.json();
-			expect( Array.isArray( page6JSON ) ).toBe( true );
-			expect( page6JSON ).toHaveLength( 0 );
-		} );
-
-		test( 'search', async ( { request } ) => {
-			// Match in the short description.
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					search: 'external',
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON.length ).toBeGreaterThanOrEqual( 1 );
-			expect( result1JSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						name: 'WordPress Pennant xxx',
-					} ),
-				] )
-			);
-
-			// Match in the product name.
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					search: 'pocket xxx',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toHaveLength( 1 );
-			expect( result2JSON[ 0 ].name ).toBe( 'Hoodie with Pocket xxx' );
-		} );
-
-		test( 'inclusion / exclusion', async ( { request } ) => {
-			const allProducts = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: 20,
-					search: 'xxx',
-				},
-			} );
-			const allProductsJSON = await allProducts.json();
-			expect( allProducts.status() ).toEqual( 200 );
-			const allProductIds = allProductsJSON.map(
-				( product ) => product.id
-			);
-			expect( allProductIds ).toHaveLength( PRODUCTS_COUNT );
-
-			const productsToFilter = [
-				allProductIds[ 2 ],
-				allProductIds[ 4 ],
-				allProductIds[ 7 ],
-				allProductIds[ 13 ],
-			];
-
-			const included = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: 20,
-					include: productsToFilter.join( ',' ),
-				},
-			} );
-			const includedJSON = await included.json();
-			expect( included.status() ).toEqual( 200 );
-			expect( includedJSON ).toHaveLength( productsToFilter.length );
-			expect( includedJSON ).toEqual(
-				expect.arrayContaining(
-					productsToFilter.map( ( id ) =>
+				// Verify that offset takes precedent over page number.
+				const page2Offset = await request.get(
+					'wp-json/wc/v3/products',
+					{
+						params: {
+							per_page: pageSize,
+							page: 2,
+							offset: pageSize + 1,
+							search: 'xxx',
+						},
+					}
+				);
+				const page2OffsetJSON = await page2Offset.json();
+				// The offset pushes the result set 1 product past the start of page 2.
+				expect( page2OffsetJSON ).toEqual(
+					expect.not.arrayContaining( [
 						expect.objectContaining( {
-							id,
-						} )
-					)
-				)
-			);
+							id: page2JSON[ 0 ].id,
+						} ),
+					] )
+				);
+				expect( page2OffsetJSON[ 0 ].id ).toEqual( page2JSON[ 1 ].id );
 
-			const excluded = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: 20,
-					exclude: productsToFilter.join( ',' ),
-				},
+				// Verify the last page only has 2 products as we expect.
+				const lastPage = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						per_page: pageSize,
+						page: 4,
+						search: 'xxx',
+					},
+				} );
+				const lastPageJSON = await lastPage.json();
+				expect( Array.isArray( lastPageJSON ) ).toBe( true );
+				expect( lastPageJSON ).toHaveLength( 2 );
+
+				// Verify a page outside the total page count is empty.
+				const page6 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						per_page: pageSize,
+						page: 6,
+						search: 'xxx',
+					},
+				} );
+				const page6JSON = await page6.json();
+				expect( Array.isArray( page6JSON ) ).toBe( true );
+				expect( page6JSON ).toHaveLength( 0 );
 			} );
-			const excludedJSON = await excluded.json();
-			expect( excluded.status() ).toEqual( 200 );
-			expect( excludedJSON.length ).toBeGreaterThanOrEqual(
-				Number( PRODUCTS_COUNT - productsToFilter.length )
-			);
-			expect( excludedJSON ).toEqual(
-				expect.not.arrayContaining(
-					productsToFilter.map( ( id ) =>
+
+			test( 'search', async ( { request } ) => {
+				// Match in the short description.
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						search: 'external',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON.length ).toBeGreaterThanOrEqual( 1 );
+				expect( result1JSON ).toEqual(
+					expect.arrayContaining( [
 						expect.objectContaining( {
-							id,
-						} )
+							name: 'WordPress Pennant xxx',
+						} ),
+					] )
+				);
+
+				// Match in the product name.
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						search: 'pocket xxx',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toHaveLength( 1 );
+				expect( result2JSON[ 0 ].name ).toBe(
+					'Hoodie with Pocket xxx'
+				);
+			} );
+
+			test( 'inclusion / exclusion', async ( { request } ) => {
+				const allProducts = await request.get(
+					'wp-json/wc/v3/products',
+					{
+						params: {
+							per_page: 20,
+							search: 'xxx',
+						},
+					}
+				);
+				const allProductsJSON = await allProducts.json();
+				expect( allProducts.status() ).toEqual( 200 );
+				const allProductIds = allProductsJSON.map(
+					( product ) => product.id
+				);
+				expect( allProductIds ).toHaveLength( PRODUCTS_COUNT );
+
+				const productsToFilter = [
+					allProductIds[ 2 ],
+					allProductIds[ 4 ],
+					allProductIds[ 7 ],
+					allProductIds[ 13 ],
+				];
+
+				const included = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						per_page: 20,
+						include: productsToFilter.join( ',' ),
+					},
+				} );
+				const includedJSON = await included.json();
+				expect( included.status() ).toEqual( 200 );
+				expect( includedJSON ).toHaveLength( productsToFilter.length );
+				expect( includedJSON ).toEqual(
+					expect.arrayContaining(
+						productsToFilter.map( ( id ) =>
+							expect.objectContaining( {
+								id,
+							} )
+						)
 					)
-				)
+				);
+
+				const excluded = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						per_page: 20,
+						exclude: productsToFilter.join( ',' ),
+					},
+				} );
+				const excludedJSON = await excluded.json();
+				expect( excluded.status() ).toEqual( 200 );
+				expect( excludedJSON.length ).toBeGreaterThanOrEqual(
+					Number( PRODUCTS_COUNT - productsToFilter.length )
+				);
+				expect( excludedJSON ).toEqual(
+					expect.not.arrayContaining(
+						productsToFilter.map( ( id ) =>
+							expect.objectContaining( {
+								id,
+							} )
+						)
+					)
+				);
+			} );
+
+			test( 'slug', async ( { request } ) => {
+				// Match by slug.
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						slug: 't-shirt-with-logo-xxx',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( 1 );
+				expect( result1JSON[ 0 ].slug ).toBe( 't-shirt-with-logo-xxx' );
+
+				// No matches
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						slug: 'no-product-with-this-slug',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toHaveLength( 0 );
+			} );
+
+			test( 'sku', async ( { request } ) => {
+				// Match by SKU.
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						sku: 'woo-sunglasses-product',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( 1 );
+				expect( result1JSON[ 0 ].sku ).toBe( 'woo-sunglasses-product' );
+
+				// No matches
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						sku: 'no-product-with-this-sku',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toHaveLength( 0 );
+			} );
+
+			test( 'type', async ( { request } ) => {
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						type: 'simple',
+						search: 'xxx',
+					},
+				} );
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1.headers()[ 'x-wp-total' ] ).toEqual( '16' );
+
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						type: 'external',
+						search: 'xxx',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toHaveLength( 1 );
+				expect( result2JSON[ 0 ].name ).toBe( 'WordPress Pennant xxx' );
+
+				const result3 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						type: 'variable',
+						search: 'xxx',
+					},
+				} );
+				const result3JSON = await result3.json();
+				expect( result3.status() ).toEqual( 200 );
+				expect( result3JSON ).toHaveLength( 2 );
+
+				const result4 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						type: 'grouped',
+						search: 'xxx',
+					},
+				} );
+				const result4JSON = await result4.json();
+				expect( result4.status() ).toEqual( 200 );
+				expect( result4JSON ).toHaveLength( 1 );
+				expect( result4JSON[ 0 ].name ).toBe( 'Logo Collection xxx' );
+			} );
+
+			test( 'featured', async ( { request } ) => {
+				const featured = [
+					expect.objectContaining( {
+						name: 'Hoodie with Zipper xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Hoodie with Pocket xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Sunglasses xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Cap xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'V-Neck T-Shirt xxx',
+					} ),
+				];
+
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						featured: true,
+						search: 'xxx',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( featured.length );
+				expect( result1JSON ).toEqual(
+					expect.arrayContaining( featured )
+				);
+
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						featured: false,
+						search: 'xxx',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toEqual(
+					expect.not.arrayContaining( featured )
+				);
+			} );
+
+			test(
+				'categories',
+				{ tag: '@skip-on-default-wpcom' },
+				async ( { request } ) => {
+					const accessory = [
+						expect.objectContaining( {
+							name: 'Beanie xxx',
+						} ),
+					];
+					const hoodies = [
+						expect.objectContaining( {
+							name: 'Hoodie with Zipper xxx',
+						} ),
+						expect.objectContaining( {
+							name: 'Hoodie with Pocket xxx',
+						} ),
+						expect.objectContaining( {
+							name: 'Hoodie with Logo xxx',
+						} ),
+						expect.objectContaining( {
+							name: 'Hoodie xxx',
+						} ),
+					];
+
+					// Verify that subcategories are included.
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								per_page: 20,
+								category: sampleData.categories.clothingJSON.id,
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+					expect( result1.status() ).toEqual( 200 );
+					expect( result1JSON ).toEqual(
+						expect.arrayContaining( accessory )
+					);
+					expect( result1JSON ).toEqual(
+						expect.arrayContaining( hoodies )
+					);
+
+					// Verify sibling categories are not.
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								category: sampleData.categories.hoodiesJSON.id,
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+					expect( result2JSON ).toEqual(
+						expect.not.arrayContaining( accessory )
+					);
+					expect( result2JSON ).toEqual(
+						expect.arrayContaining( hoodies )
+					);
+				}
 			);
-		} );
 
-		test( 'slug', async ( { request } ) => {
-			// Match by slug.
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					slug: 't-shirt-with-logo-xxx',
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( 1 );
-			expect( result1JSON[ 0 ].slug ).toBe( 't-shirt-with-logo-xxx' );
-
-			// No matches
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					slug: 'no-product-with-this-slug',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toHaveLength( 0 );
-		} );
-
-		test( 'sku', async ( { request } ) => {
-			// Match by SKU.
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					sku: 'woo-sunglasses-product',
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( 1 );
-			expect( result1JSON[ 0 ].sku ).toBe( 'woo-sunglasses-product' );
-
-			// No matches
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					sku: 'no-product-with-this-sku',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toHaveLength( 0 );
-		} );
-
-		test( 'type', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					type: 'simple',
-					search: 'xxx',
-				},
-			} );
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1.headers()[ 'x-wp-total' ] ).toEqual( '16' );
-
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					type: 'external',
-					search: 'xxx',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toHaveLength( 1 );
-			expect( result2JSON[ 0 ].name ).toBe( 'WordPress Pennant xxx' );
-
-			const result3 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					type: 'variable',
-					search: 'xxx',
-				},
-			} );
-			const result3JSON = await result3.json();
-			expect( result3.status() ).toEqual( 200 );
-			expect( result3JSON ).toHaveLength( 2 );
-
-			const result4 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					type: 'grouped',
-					search: 'xxx',
-				},
-			} );
-			const result4JSON = await result4.json();
-			expect( result4.status() ).toEqual( 200 );
-			expect( result4JSON ).toHaveLength( 1 );
-			expect( result4JSON[ 0 ].name ).toBe( 'Logo Collection xxx' );
-		} );
-
-		test( 'featured', async ( { request } ) => {
-			const featured = [
-				expect.objectContaining( {
-					name: 'Hoodie with Zipper xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie with Pocket xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Sunglasses xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Cap xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'V-Neck T-Shirt xxx',
-				} ),
-			];
-
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					featured: true,
-					search: 'xxx',
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( featured.length );
-			expect( result1JSON ).toEqual( expect.arrayContaining( featured ) );
-
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					featured: false,
-					search: 'xxx',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toEqual(
-				expect.not.arrayContaining( featured )
-			);
-		} );
-
-		test( 'categories', async ( { request } ) => {
-			const accessory = [
-				expect.objectContaining( {
-					name: 'Beanie xxx',
-				} ),
-			];
-			const hoodies = [
-				expect.objectContaining( {
-					name: 'Hoodie with Zipper xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie with Pocket xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie with Logo xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie xxx',
-				} ),
-			];
-
-			// Verify that subcategories are included.
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					per_page: 20,
-					category: sampleData.categories.clothingJSON.id,
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toEqual(
-				expect.arrayContaining( accessory )
-			);
-			expect( result1JSON ).toEqual( expect.arrayContaining( hoodies ) );
-
-			// Verify sibling categories are not.
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					category: sampleData.categories.hoodiesJSON.id,
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toEqual(
-				expect.not.arrayContaining( accessory )
-			);
-			expect( result2JSON ).toEqual( expect.arrayContaining( hoodies ) );
-		} );
-
-		test( 'on sale', async ( { request } ) => {
-			const onSale = [
-				expect.objectContaining( {
-					name: 'Beanie with Logo xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie with Pocket xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Single xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Cap xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Belt xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Beanie xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie xxx',
-				} ),
-			];
-
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					on_sale: true,
-					search: 'xxx',
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( onSale.length );
-			expect( result1JSON ).toEqual( expect.arrayContaining( onSale ) );
-
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					on_sale: false,
-					search: 'xxx',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toEqual(
-				expect.not.arrayContaining( onSale )
-			);
-		} );
-
-		test( 'price', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					min_price: 21,
-					max_price: 28,
-					search: 'xxx',
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( 1 );
-			expect( result1JSON[ 0 ].name ).toBe( 'Long Sleeve Tee xxx' );
-			expect( result1JSON[ 0 ].price ).toBe( '25' );
-
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					max_price: 5,
-					search: 'xxx',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toHaveLength( 1 );
-			expect( result2JSON[ 0 ].name ).toBe( 'Single xxx' );
-			expect( result2JSON[ 0 ].price ).toBe( '2' );
-
-			const result3 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					min_price: 5,
-					order: 'asc',
-					orderby: 'price',
-					search: 'xxx',
-				},
-			} );
-			const result3JSON = await result3.json();
-			expect( result3.status() ).toEqual( 200 );
-			expect( result3JSON ).toEqual(
-				expect.not.arrayContaining( [
+			test( 'on sale', async ( { request } ) => {
+				const onSale = [
+					expect.objectContaining( {
+						name: 'Beanie with Logo xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Hoodie with Pocket xxx',
+					} ),
 					expect.objectContaining( {
 						name: 'Single xxx',
 					} ),
-				] )
-			);
-		} );
+					expect.objectContaining( {
+						name: 'Cap xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Belt xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Beanie xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Hoodie xxx',
+					} ),
+				];
 
-		test( 'before / after', async ( { request } ) => {
-			const before = [
-				expect.objectContaining( {
-					name: 'Album xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Single xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'T-Shirt with Logo xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Beanie with Logo xxx',
-				} ),
-			];
-			const after = [
-				expect.objectContaining( {
-					name: 'Hoodie xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'V-Neck T-Shirt xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Parent Product xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Child Product xxx',
-				} ),
-			];
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						on_sale: true,
+						search: 'xxx',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( onSale.length );
+				expect( result1JSON ).toEqual(
+					expect.arrayContaining( onSale )
+				);
 
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					before: '2021-09-05T15:50:19',
-					search: 'xxx',
-				},
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						on_sale: false,
+						search: 'xxx',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toEqual(
+					expect.not.arrayContaining( onSale )
+				);
 			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( before.length );
-			expect( result1JSON ).toEqual( expect.arrayContaining( before ) );
 
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					after: '2021-09-18T15:50:18',
-					search: 'xxx',
-				},
+			test( 'price', async ( { request } ) => {
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						min_price: 21,
+						max_price: 28,
+						search: 'xxx',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( 1 );
+				expect( result1JSON[ 0 ].name ).toBe( 'Long Sleeve Tee xxx' );
+				expect( result1JSON[ 0 ].price ).toBe( '25' );
+
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						max_price: 5,
+						search: 'xxx',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toHaveLength( 1 );
+				expect( result2JSON[ 0 ].name ).toBe( 'Single xxx' );
+				expect( result2JSON[ 0 ].price ).toBe( '2' );
+
+				const result3 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						min_price: 5,
+						order: 'asc',
+						orderby: 'price',
+						search: 'xxx',
+					},
+				} );
+				const result3JSON = await result3.json();
+				expect( result3.status() ).toEqual( 200 );
+				expect( result3JSON ).toEqual(
+					expect.not.arrayContaining( [
+						expect.objectContaining( {
+							name: 'Single xxx',
+						} ),
+					] )
+				);
 			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toEqual(
-				expect.not.arrayContaining( before )
-			);
-			expect( result2JSON ).toHaveLength( after.length );
-			expect( result2JSON ).toEqual( expect.arrayContaining( after ) );
-		} );
 
-		test( 'attributes', async ( { request } ) => {
-			const red = sampleData.attributes.colors.find(
-				( term ) => term.name === 'Red'
-			);
-
-			const redProducts = [
-				expect.objectContaining( {
-					name: 'V-Neck T-Shirt xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Beanie xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Beanie with Logo xxx',
-				} ),
-			];
-
-			const result = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					attribute: 'pa_colorxxx',
-					attribute_term: red.id,
-				},
-			} );
-			const resultJSON = await result.json();
-
-			expect( result.status() ).toEqual( 200 );
-			expect( resultJSON ).toHaveLength( redProducts.length );
-			expect( resultJSON ).toEqual(
-				expect.arrayContaining( redProducts )
-			);
-		} );
-
-		test( 'status', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					status: 'pending',
-					search: 'xxx',
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( 1 );
-			expect( result1JSON[ 0 ].name ).toBe( 'Polo xxx' );
-
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					status: 'draft',
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toHaveLength( 0 );
-		} );
-
-		test( 'shipping class', async ( { request } ) => {
-			const result = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					shipping_class: sampleData.shippingClasses.freightJSON.id,
-				},
-			} );
-			const resultJSON = await result.json();
-			expect( result.status() ).toEqual( 200 );
-			expect( resultJSON ).toHaveLength( 1 );
-			expect( resultJSON[ 0 ].name ).toBe( 'Long Sleeve Tee xxx' );
-		} );
-
-		test( 'tax class', async ( { request } ) => {
-			const result = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					tax_class: 'reduced-rate',
-					search: 'xxx',
-				},
-			} );
-			const resultJSON = await result.json();
-			expect( result.status() ).toEqual( 200 );
-			expect( resultJSON ).toHaveLength( 1 );
-			expect( resultJSON[ 0 ].name ).toBe( 'Sunglasses xxx' );
-		} );
-
-		test( 'stock status', async ( { request } ) => {
-			const result = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					stock_status: 'onbackorder',
-					search: 'xxx',
-				},
-			} );
-			const resultJSON = await result.json();
-			expect( result.status() ).toEqual( 200 );
-			expect( resultJSON ).toHaveLength( 1 );
-			expect( resultJSON[ 0 ].name ).toBe( 'T-Shirt xxx' );
-		} );
-
-		test( 'tags', async ( { request } ) => {
-			const coolProducts = [
-				expect.objectContaining( {
-					name: 'Sunglasses xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Hoodie with Pocket xxx',
-				} ),
-				expect.objectContaining( {
-					name: 'Beanie xxx',
-				} ),
-			];
-
-			const result = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					tag: sampleData.tags.coolJSON.id,
-				},
-			} );
-			const resultJSON = await result.json();
-
-			expect( result.status() ).toEqual( 200 );
-			expect( resultJSON ).toHaveLength( coolProducts.length );
-			expect( resultJSON ).toEqual(
-				expect.arrayContaining( coolProducts )
-			);
-		} );
-
-		test( 'parent', async ( { request } ) => {
-			const result1 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					parent: sampleData.hierarchicalProducts.parentJSON.id,
-				},
-			} );
-			const result1JSON = await result1.json();
-			expect( result1.status() ).toEqual( 200 );
-			expect( result1JSON ).toHaveLength( 1 );
-			expect( result1JSON[ 0 ].name ).toBe( 'Child Product xxx' );
-
-			const result2 = await request.get( 'wp-json/wc/v3/products', {
-				params: {
-					parent_exclude:
-						sampleData.hierarchicalProducts.parentJSON.id,
-				},
-			} );
-			const result2JSON = await result2.json();
-			expect( result2.status() ).toEqual( 200 );
-			expect( result2JSON ).toEqual(
-				expect.not.arrayContaining( [
+			test( 'before / after', async ( { request } ) => {
+				const before = [
+					expect.objectContaining( {
+						name: 'Album xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Single xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'T-Shirt with Logo xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Beanie with Logo xxx',
+					} ),
+				];
+				const after = [
+					expect.objectContaining( {
+						name: 'Hoodie xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'V-Neck T-Shirt xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Parent Product xxx',
+					} ),
 					expect.objectContaining( {
 						name: 'Child Product xxx',
 					} ),
-				] )
-			);
-		} );
-
-		test.describe( 'orderby', () => {
-			const productNamesAsc = [
-				'Album xxx',
-				'Beanie with Logo xxx',
-				'Beanie xxx',
-				'Belt xxx',
-				'Cap xxx',
-				'Child Product xxx',
-				'Hoodie with Logo xxx',
-				'Hoodie with Pocket xxx',
-				'Hoodie with Zipper xxx',
-				'Hoodie xxx',
-				'Logo Collection xxx',
-				'Long Sleeve Tee xxx',
-				'Parent Product xxx',
-				'Polo xxx',
-				'Single xxx',
-				'Sunglasses xxx',
-				'T-Shirt with Logo xxx',
-				'T-Shirt xxx',
-				'V-Neck T-Shirt xxx',
-				'WordPress Pennant xxx',
-			];
-			const productNamesDesc = [ ...productNamesAsc ].reverse();
-			const productNamesByRatingAsc = [
-				'Sunglasses xxx',
-				'Cap xxx',
-				'T-Shirt xxx',
-			];
-			const productNamesByRatingDesc = [
-				...productNamesByRatingAsc,
-			].reverse();
-			const productNamesByPopularityDesc = [
-				'Beanie with Logo xxx',
-				'Single xxx',
-				'T-Shirt xxx',
-			];
-			const productNamesByPopularityAsc = [
-				...productNamesByPopularityDesc,
-			].reverse();
-
-			test( 'default', async ( { request } ) => {
-				// Default = date desc.
-				const result = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						search: 'xxx',
-					},
-				} );
-				const resultJSON = await result.json();
-				expect( result.status() ).toEqual( 200 );
-
-				// Verify all dates are in descending order.
-				let lastDate = Date.now();
-				resultJSON.forEach( ( { date_created_gmt } ) => {
-					const created = Date.parse( date_created_gmt + '.000Z' );
-					expect( lastDate ).toBeGreaterThan( created );
-					lastDate = created;
-				} );
-			} );
-
-			test( 'date', async ( { request } ) => {
-				const result = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'date',
-						search: 'xxx',
-					},
-				} );
-				const resultJSON = await result.json();
-				expect( result.status() ).toEqual( 200 );
-
-				// Verify all dates are in ascending order.
-				let lastDate = 0;
-				resultJSON.forEach( ( { date_created_gmt } ) => {
-					const created = Date.parse( date_created_gmt + '.000Z' );
-					expect( created ).toBeGreaterThan( lastDate );
-					lastDate = created;
-				} );
-			} );
-
-			test( 'id', async ( { request } ) => {
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'id',
-						search: 'xxx',
-					},
-				} );
-				const result1JSON = await result1.json();
-				expect( result1.status() ).toEqual( 200 );
-
-				// Verify all results are in ascending order.
-				let lastId = 0;
-				result1JSON.forEach( ( { id } ) => {
-					expect( id ).toBeGreaterThan( lastId );
-					lastId = id;
-				} );
-
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'desc',
-						orderby: 'id',
-						search: 'xxx',
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
-
-				// Verify all results are in descending order.
-				lastId = Number.MAX_SAFE_INTEGER;
-				result2JSON.forEach( ( { id } ) => {
-					expect( lastId ).toBeGreaterThan( id );
-					lastId = id;
-				} );
-			} );
-
-			test( 'title', async ( { request } ) => {
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'title',
-						per_page: productNamesAsc.length,
-						search: 'xxx',
-					},
-				} );
-				const result1JSON = await result1.json();
-				expect( result1.status() ).toEqual( 200 );
-
-				// Verify all results are in ascending order.
-				result1JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesAsc[ idx ] );
-				} );
-
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'desc',
-						orderby: 'title',
-						per_page: productNamesDesc.length,
-						search: 'xxx',
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
-
-				// Verify all results are in descending order.
-				result2JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesDesc[ idx ] );
-				} );
-			} );
-
-			test( 'slug orderby', async ( { request } ) => {
-				const productNamesBySlugAsc = [
-					'Polo xxx', // The Polo isn't published so it has an empty slug.
-					...productNamesAsc.filter( ( p ) => p !== 'Polo xxx' ),
 				];
-				const productNamesBySlugDesc = [
-					...productNamesBySlugAsc,
+
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						before: '2021-09-05T15:50:19',
+						search: 'xxx',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( before.length );
+				expect( result1JSON ).toEqual(
+					expect.arrayContaining( before )
+				);
+
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						after: '2021-09-18T15:50:18',
+						search: 'xxx',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toEqual(
+					expect.not.arrayContaining( before )
+				);
+				expect( result2JSON ).toHaveLength( after.length );
+				expect( result2JSON ).toEqual(
+					expect.arrayContaining( after )
+				);
+			} );
+
+			test( 'attributes', async ( { request } ) => {
+				const red = sampleData.attributes.colors.find(
+					( term ) => term.name === 'Red'
+				);
+
+				const redProducts = [
+					expect.objectContaining( {
+						name: 'V-Neck T-Shirt xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Hoodie xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Beanie xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Beanie with Logo xxx',
+					} ),
+				];
+
+				const result = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						attribute: 'pa_colorxxx',
+						attribute_term: red.id,
+					},
+				} );
+				const resultJSON = await result.json();
+
+				expect( result.status() ).toEqual( 200 );
+				expect( resultJSON ).toHaveLength( redProducts.length );
+				expect( resultJSON ).toEqual(
+					expect.arrayContaining( redProducts )
+				);
+			} );
+
+			test( 'status', async ( { request } ) => {
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						status: 'pending',
+						search: 'xxx',
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( 1 );
+				expect( result1JSON[ 0 ].name ).toBe( 'Polo xxx' );
+
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						status: 'draft',
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toHaveLength( 0 );
+			} );
+
+			test( 'shipping class', async ( { request } ) => {
+				const result = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						shipping_class:
+							sampleData.shippingClasses.freightJSON.id,
+					},
+				} );
+				const resultJSON = await result.json();
+				expect( result.status() ).toEqual( 200 );
+				expect( resultJSON ).toHaveLength( 1 );
+				expect( resultJSON[ 0 ].name ).toBe( 'Long Sleeve Tee xxx' );
+			} );
+
+			test( 'tax class', async ( { request } ) => {
+				const result = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						tax_class: 'reduced-rate',
+						search: 'xxx',
+					},
+				} );
+				const resultJSON = await result.json();
+				expect( result.status() ).toEqual( 200 );
+				expect( resultJSON ).toHaveLength( 1 );
+				expect( resultJSON[ 0 ].name ).toBe( 'Sunglasses xxx' );
+			} );
+
+			test( 'stock status', async ( { request } ) => {
+				const result = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						stock_status: 'onbackorder',
+						search: 'xxx',
+					},
+				} );
+				const resultJSON = await result.json();
+				expect( result.status() ).toEqual( 200 );
+				expect( resultJSON ).toHaveLength( 1 );
+				expect( resultJSON[ 0 ].name ).toBe( 'T-Shirt xxx' );
+			} );
+
+			test( 'tags', async ( { request } ) => {
+				const coolProducts = [
+					expect.objectContaining( {
+						name: 'Sunglasses xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Hoodie with Pocket xxx',
+					} ),
+					expect.objectContaining( {
+						name: 'Beanie xxx',
+					} ),
+				];
+
+				const result = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						tag: sampleData.tags.coolJSON.id,
+					},
+				} );
+				const resultJSON = await result.json();
+
+				expect( result.status() ).toEqual( 200 );
+				expect( resultJSON ).toHaveLength( coolProducts.length );
+				expect( resultJSON ).toEqual(
+					expect.arrayContaining( coolProducts )
+				);
+			} );
+
+			test( 'parent', async ( { request } ) => {
+				const result1 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						parent: sampleData.hierarchicalProducts.parentJSON.id,
+					},
+				} );
+				const result1JSON = await result1.json();
+				expect( result1.status() ).toEqual( 200 );
+				expect( result1JSON ).toHaveLength( 1 );
+				expect( result1JSON[ 0 ].name ).toBe( 'Child Product xxx' );
+
+				const result2 = await request.get( 'wp-json/wc/v3/products', {
+					params: {
+						parent_exclude:
+							sampleData.hierarchicalProducts.parentJSON.id,
+					},
+				} );
+				const result2JSON = await result2.json();
+				expect( result2.status() ).toEqual( 200 );
+				expect( result2JSON ).toEqual(
+					expect.not.arrayContaining( [
+						expect.objectContaining( {
+							name: 'Child Product xxx',
+						} ),
+					] )
+				);
+			} );
+
+			test.describe( 'orderby', () => {
+				const productNamesAsc = [
+					'Album xxx',
+					'Beanie with Logo xxx',
+					'Beanie xxx',
+					'Belt xxx',
+					'Cap xxx',
+					'Child Product xxx',
+					'Hoodie with Logo xxx',
+					'Hoodie with Pocket xxx',
+					'Hoodie with Zipper xxx',
+					'Hoodie xxx',
+					'Logo Collection xxx',
+					'Long Sleeve Tee xxx',
+					'Parent Product xxx',
+					'Polo xxx',
+					'Single xxx',
+					'Sunglasses xxx',
+					'T-Shirt with Logo xxx',
+					'T-Shirt xxx',
+					'V-Neck T-Shirt xxx',
+					'WordPress Pennant xxx',
+				];
+				const productNamesDesc = [ ...productNamesAsc ].reverse();
+				const productNamesByRatingAsc = [
+					'Sunglasses xxx',
+					'Cap xxx',
+					'T-Shirt xxx',
+				];
+				const productNamesByRatingDesc = [
+					...productNamesByRatingAsc,
+				].reverse();
+				const productNamesByPopularityDesc = [
+					'Beanie with Logo xxx',
+					'Single xxx',
+					'T-Shirt xxx',
+				];
+				const productNamesByPopularityAsc = [
+					...productNamesByPopularityDesc,
 				].reverse();
 
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'slug',
-						per_page: productNamesBySlugAsc.length,
-						search: 'xxx',
-					},
-				} );
-				const result1JSON = await result1.json();
-				expect( result1.status() ).toEqual( 200 );
+				test( 'default', async ( { request } ) => {
+					// Default = date desc.
+					const result = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								search: 'xxx',
+							},
+						}
+					);
+					const resultJSON = await result.json();
+					expect( result.status() ).toEqual( 200 );
 
-				// Verify all results are in ascending order.
-				result1JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesBySlugAsc[ idx ] );
+					// Verify all dates are in descending order.
+					let lastDate = Date.now();
+					resultJSON.forEach( ( { date_created_gmt } ) => {
+						const created = Date.parse(
+							date_created_gmt + '.000Z'
+						);
+						expect( lastDate ).toBeGreaterThan( created );
+						lastDate = created;
+					} );
 				} );
 
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'desc',
-						orderby: 'slug',
-						per_page: productNamesBySlugDesc.length,
-						search: 'xxx',
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
+				test( 'date', async ( { request } ) => {
+					const result = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'date',
+								search: 'xxx',
+							},
+						}
+					);
+					const resultJSON = await result.json();
+					expect( result.status() ).toEqual( 200 );
 
-				// Verify all results are in descending order.
-				result2JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesBySlugDesc[ idx ] );
+					// Verify all dates are in ascending order.
+					let lastDate = 0;
+					resultJSON.forEach( ( { date_created_gmt } ) => {
+						const created = Date.parse(
+							date_created_gmt + '.000Z'
+						);
+						expect( created ).toBeGreaterThan( lastDate );
+						lastDate = created;
+					} );
+				} );
+
+				test( 'id', async ( { request } ) => {
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'id',
+								search: 'xxx',
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+					expect( result1.status() ).toEqual( 200 );
+
+					// Verify all results are in ascending order.
+					let lastId = 0;
+					result1JSON.forEach( ( { id } ) => {
+						expect( id ).toBeGreaterThan( lastId );
+						lastId = id;
+					} );
+
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'desc',
+								orderby: 'id',
+								search: 'xxx',
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+
+					// Verify all results are in descending order.
+					lastId = Number.MAX_SAFE_INTEGER;
+					result2JSON.forEach( ( { id } ) => {
+						expect( lastId ).toBeGreaterThan( id );
+						lastId = id;
+					} );
+				} );
+
+				test( 'title', async ( { request } ) => {
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'title',
+								per_page: productNamesAsc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+					expect( result1.status() ).toEqual( 200 );
+
+					// Verify all results are in ascending order.
+					result1JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesAsc[ idx ] );
+					} );
+
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'desc',
+								orderby: 'title',
+								per_page: productNamesDesc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+
+					// Verify all results are in descending order.
+					result2JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesDesc[ idx ] );
+					} );
+				} );
+
+				test( 'slug orderby', async ( { request } ) => {
+					const productNamesBySlugAsc = [
+						'Polo xxx', // The Polo isn't published so it has an empty slug.
+						...productNamesAsc.filter( ( p ) => p !== 'Polo xxx' ),
+					];
+					const productNamesBySlugDesc = [
+						...productNamesBySlugAsc,
+					].reverse();
+
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'slug',
+								per_page: productNamesBySlugAsc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+					expect( result1.status() ).toEqual( 200 );
+
+					// Verify all results are in ascending order.
+					result1JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesBySlugAsc[ idx ] );
+					} );
+
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'desc',
+								orderby: 'slug',
+								per_page: productNamesBySlugDesc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+
+					// Verify all results are in descending order.
+					result2JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesBySlugDesc[ idx ] );
+					} );
+				} );
+
+				test( 'price orderby', async ( { request } ) => {
+					const productNamesMinPriceAsc = [
+						'Parent Product xxx',
+						'Child Product xxx',
+						'Single xxx',
+						'WordPress Pennant xxx',
+						'Album xxx',
+						'V-Neck T-Shirt xxx',
+						'Cap xxx',
+						'Beanie with Logo xxx',
+						'T-Shirt with Logo xxx',
+						'Beanie xxx',
+						'T-Shirt xxx',
+						'Logo Collection xxx',
+						'Polo xxx',
+						'Long Sleeve Tee xxx',
+						'Hoodie with Pocket xxx',
+						'Hoodie xxx',
+						'Hoodie with Zipper xxx',
+						'Hoodie with Logo xxx',
+						'Belt xxx',
+						'Sunglasses xxx',
+					];
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'price',
+								per_page: productNamesMinPriceAsc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+					expect( result1.status() ).toEqual( 200 );
+					expect( result1JSON ).toHaveLength(
+						productNamesMinPriceAsc.length
+					);
+
+					// Verify all results are in ascending order.
+					// The query uses the min price calculated in the product meta lookup table,
+					// so we can't just check the price property of the response.
+					result1JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesMinPriceAsc[ idx ] );
+					} );
+
+					const productNamesMaxPriceDesc = [
+						'Sunglasses xxx',
+						'Belt xxx',
+						'Hoodie xxx',
+						'Logo Collection xxx',
+						'Hoodie with Logo xxx',
+						'Hoodie with Zipper xxx',
+						'Hoodie with Pocket xxx',
+						'Long Sleeve Tee xxx',
+						'V-Neck T-Shirt xxx',
+						'Polo xxx',
+						'T-Shirt xxx',
+						'Beanie xxx',
+						'T-Shirt with Logo xxx',
+						'Beanie with Logo xxx',
+						'Cap xxx',
+						'Album xxx',
+						'WordPress Pennant xxx',
+						'Single xxx',
+						'Child Product xxx',
+						'Parent Product xxx',
+					];
+
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'desc',
+								orderby: 'price',
+								per_page: productNamesMaxPriceDesc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+					expect( result2JSON ).toHaveLength(
+						productNamesMaxPriceDesc.length
+					);
+
+					// Verify all results are in descending order.
+					// The query uses the max price calculated in the product meta lookup table,
+					// so we can't just check the price property of the response.
+					result2JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesMaxPriceDesc[ idx ] );
+					} );
+				} );
+
+				test( 'include', async ( { request } ) => {
+					const includeIds = [
+						sampleData.groupedProducts[ 0 ].id,
+						sampleData.simpleProducts[ 3 ].id,
+						sampleData.hierarchicalProducts.parentJSON.id,
+					];
+
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'include',
+								include: includeIds.join( ',' ),
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+
+					expect( result1.status() ).toEqual( 200 );
+					expect( result1JSON ).toHaveLength( includeIds.length );
+
+					// Verify all results are in proper order.
+					result1JSON.forEach( ( { id }, idx ) => {
+						expect( id ).toBe( includeIds[ idx ] );
+					} );
+
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'desc',
+								orderby: 'include',
+								include: includeIds.join( ',' ),
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+					expect( result2JSON ).toHaveLength( includeIds.length );
+
+					// Verify all results are in proper order.
+					result2JSON.forEach( ( { id }, idx ) => {
+						expect( id ).toBe( includeIds[ idx ] );
+					} );
+				} );
+
+				test( 'rating (desc)', async ( { request } ) => {
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'desc',
+								orderby: 'rating',
+								per_page: productNamesByRatingDesc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+
+					// Verify all results are in descending order.
+					result2JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesByRatingDesc[ idx ] );
+					} );
+				} );
+
+				// This case will remain skipped until ratings can be sorted ascending.
+				// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
+				test.skip( 'rating (asc)', async ( { request } ) => {
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'rating',
+								per_page: productNamesByRatingAsc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					expect( result1.status() ).toEqual( 200 );
+					const result1JSON = await result1.json();
+
+					// Verify all results are in ascending order.
+					result1JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe( productNamesByRatingAsc[ idx ] );
+					} );
+				} );
+
+				// This case will remain skipped until popularity can be sorted ascending.
+				// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
+				test.skip( 'popularity (asc)', async ( { request } ) => {
+					const result1 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'asc',
+								orderby: 'popularity',
+								per_page: productNamesByPopularityAsc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result1JSON = await result1.json();
+					expect( result1.status() ).toEqual( 200 );
+
+					// Verify all results are in ascending order.
+					result1JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe(
+							productNamesByPopularityAsc[ idx ]
+						);
+					} );
+				} );
+
+				test( 'popularity (desc)', async ( { request } ) => {
+					const result2 = await request.get(
+						'wp-json/wc/v3/products',
+						{
+							params: {
+								order: 'desc',
+								orderby: 'popularity',
+								per_page: productNamesByPopularityDesc.length,
+								search: 'xxx',
+							},
+						}
+					);
+					const result2JSON = await result2.json();
+					expect( result2.status() ).toEqual( 200 );
+
+					// Verify all results are in descending order.
+					result2JSON.forEach( ( { name }, idx ) => {
+						expect( name ).toBe(
+							productNamesByPopularityDesc[ idx ]
+						);
+					} );
 				} );
 			} );
-
-			test( 'price orderby', async ( { request } ) => {
-				const productNamesMinPriceAsc = [
-					'Parent Product xxx',
-					'Child Product xxx',
-					'Single xxx',
-					'WordPress Pennant xxx',
-					'Album xxx',
-					'V-Neck T-Shirt xxx',
-					'Cap xxx',
-					'Beanie with Logo xxx',
-					'T-Shirt with Logo xxx',
-					'Beanie xxx',
-					'T-Shirt xxx',
-					'Logo Collection xxx',
-					'Polo xxx',
-					'Long Sleeve Tee xxx',
-					'Hoodie with Pocket xxx',
-					'Hoodie xxx',
-					'Hoodie with Zipper xxx',
-					'Hoodie with Logo xxx',
-					'Belt xxx',
-					'Sunglasses xxx',
-				];
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'price',
-						per_page: productNamesMinPriceAsc.length,
-						search: 'xxx',
-					},
-				} );
-				const result1JSON = await result1.json();
-				expect( result1.status() ).toEqual( 200 );
-				expect( result1JSON ).toHaveLength(
-					productNamesMinPriceAsc.length
-				);
-
-				// Verify all results are in ascending order.
-				// The query uses the min price calculated in the product meta lookup table,
-				// so we can't just check the price property of the response.
-				result1JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesMinPriceAsc[ idx ] );
-				} );
-
-				const productNamesMaxPriceDesc = [
-					'Sunglasses xxx',
-					'Belt xxx',
-					'Hoodie xxx',
-					'Logo Collection xxx',
-					'Hoodie with Logo xxx',
-					'Hoodie with Zipper xxx',
-					'Hoodie with Pocket xxx',
-					'Long Sleeve Tee xxx',
-					'V-Neck T-Shirt xxx',
-					'Polo xxx',
-					'T-Shirt xxx',
-					'Beanie xxx',
-					'T-Shirt with Logo xxx',
-					'Beanie with Logo xxx',
-					'Cap xxx',
-					'Album xxx',
-					'WordPress Pennant xxx',
-					'Single xxx',
-					'Child Product xxx',
-					'Parent Product xxx',
-				];
-
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'desc',
-						orderby: 'price',
-						per_page: productNamesMaxPriceDesc.length,
-						search: 'xxx',
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
-				expect( result2JSON ).toHaveLength(
-					productNamesMaxPriceDesc.length
-				);
-
-				// Verify all results are in descending order.
-				// The query uses the max price calculated in the product meta lookup table,
-				// so we can't just check the price property of the response.
-				result2JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesMaxPriceDesc[ idx ] );
-				} );
-			} );
-
-			test( 'include', async ( { request } ) => {
-				const includeIds = [
-					sampleData.groupedProducts[ 0 ].id,
-					sampleData.simpleProducts[ 3 ].id,
-					sampleData.hierarchicalProducts.parentJSON.id,
-				];
-
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'include',
-						include: includeIds.join( ',' ),
-					},
-				} );
-				const result1JSON = await result1.json();
-
-				expect( result1.status() ).toEqual( 200 );
-				expect( result1JSON ).toHaveLength( includeIds.length );
-
-				// Verify all results are in proper order.
-				result1JSON.forEach( ( { id }, idx ) => {
-					expect( id ).toBe( includeIds[ idx ] );
-				} );
-
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'desc',
-						orderby: 'include',
-						include: includeIds.join( ',' ),
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
-				expect( result2JSON ).toHaveLength( includeIds.length );
-
-				// Verify all results are in proper order.
-				result2JSON.forEach( ( { id }, idx ) => {
-					expect( id ).toBe( includeIds[ idx ] );
-				} );
-			} );
-
-			test( 'rating (desc)', async ( { request } ) => {
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'desc',
-						orderby: 'rating',
-						per_page: productNamesByRatingDesc.length,
-						search: 'xxx',
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
-
-				// Verify all results are in descending order.
-				result2JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesByRatingDesc[ idx ] );
-				} );
-			} );
-
-			// This case will remain skipped until ratings can be sorted ascending.
-			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
-			test.skip( 'rating (asc)', async ( { request } ) => {
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'rating',
-						per_page: productNamesByRatingAsc.length,
-						search: 'xxx',
-					},
-				} );
-				expect( result1.status() ).toEqual( 200 );
-				const result1JSON = await result1.json();
-
-				// Verify all results are in ascending order.
-				result1JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesByRatingAsc[ idx ] );
-				} );
-			} );
-
-			// This case will remain skipped until popularity can be sorted ascending.
-			// See: https://github.com/woocommerce/woocommerce/issues/30354#issuecomment-925955099.
-			test.skip( 'popularity (asc)', async ( { request } ) => {
-				const result1 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'asc',
-						orderby: 'popularity',
-						per_page: productNamesByPopularityAsc.length,
-						search: 'xxx',
-					},
-				} );
-				const result1JSON = await result1.json();
-				expect( result1.status() ).toEqual( 200 );
-
-				// Verify all results are in ascending order.
-				result1JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesByPopularityAsc[ idx ] );
-				} );
-			} );
-
-			test( 'popularity (desc)', async ( { request } ) => {
-				const result2 = await request.get( 'wp-json/wc/v3/products', {
-					params: {
-						order: 'desc',
-						orderby: 'popularity',
-						per_page: productNamesByPopularityDesc.length,
-						search: 'xxx',
-					},
-				} );
-				const result2JSON = await result2.json();
-				expect( result2.status() ).toEqual( 200 );
-
-				// Verify all results are in descending order.
-				result2JSON.forEach( ( { name }, idx ) => {
-					expect( name ).toBe( productNamesByPopularityDesc[ idx ] );
-				} );
-			} );
-		} );
-	} );
+		}
+	);
 } );
