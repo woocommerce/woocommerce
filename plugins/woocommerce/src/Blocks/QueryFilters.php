@@ -215,9 +215,9 @@ final class QueryFilters {
 
 		if ( ! empty( $valid_statuses ) ) {
 			global $wpdb;
-			$placeholders = array_fill( 0, count( $valid_statuses ), '%s' );
+			$placeholders   = implode( ',', array_fill( 0, count( $valid_statuses ), '%s' ) );
 			$args['where'] .= $wpdb->prepare(
-				" AND wc_product_meta_lookup.stock_status IN (" . implode( ',', $placeholders ) . ")",
+				" AND wc_product_meta_lookup.stock_status IN ($placeholders)",
 				$valid_statuses
 			);
 		}
