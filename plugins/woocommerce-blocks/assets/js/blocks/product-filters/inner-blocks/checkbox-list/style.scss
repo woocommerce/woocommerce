@@ -4,11 +4,6 @@
 	padding: 0;
 }
 
-.wc-block-product-filter-checkbox-list__item.hidden {
-	display: none;
-}
-
-
 :where(.wc-block-product-filter-checkbox-list__label) {
 	align-items: center;
 	display: flex;
@@ -78,9 +73,5 @@
 :where(.wc-block-product-filter-checkbox-list__show-more) {
 	cursor: pointer;
 	text-decoration: underline;
-}
-
-.wc-block-product-filter-checkbox-list__show-more.hidden {
-	display: none;
 }
 
