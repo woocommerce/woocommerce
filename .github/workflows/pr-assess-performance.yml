@@ -22,8 +22,6 @@ jobs:
     build:
         name: Evaluate performance metrics
         runs-on: ubuntu-latest
-        permissions:
-            pull-requests: write
 
         steps:
             - uses: actions/checkout@v4
@@ -39,7 +37,8 @@ jobs:
                 build-type: 'full'
                 pull-playwright-cache: true
                 pull-package-deps: '@woocommerce/plugin-woocommerce'
-
+          
+            #TODO: Inject WordPress version.
             - name: Start Test Environment
               run: |
                 pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
@@ -51,6 +50,7 @@ jobs:
               run: |
                 RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+
             # TODO: cache results if pushed to trunk
               
             - name: Checkout (trunk)
@@ -82,6 +82,8 @@ jobs:
                 git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
                 pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter='@woocommerce/plugin-woocommerce' build
+                
+            #TODO: is baseline Wordpress version changes, restart environment targeting it.
 
             - name: Measure performance (@${{ env.WC_TRUNK_SHA }})
               if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
@@ -101,4 +103,4 @@ jobs:
                 pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter="compare-perf" run compare compare-performance ${{ github.sha }} ${{ env.WC_TRUNK_SHA }} --tests-branch ${{ github.sha }} --skip-benchmarking
             
-            # Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh) if pushed to trunk
+            # TODO: Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh) if pushed to trunk
