@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Dynamically set plugin_name when redirecting to Jetpack Auth from core profiler
