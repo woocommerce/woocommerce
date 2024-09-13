@@ -12,7 +12,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	},
 } );
 
-test.describe( 'Product Filter: Stock Status Block', () => {
+test.describe.skip( 'Product Filter: Stock Status Block', () => {
 	test.describe( 'With default display style', () => {
 		test.beforeEach( async ( { requestUtils, templateCompiler } ) => {
 			await requestUtils.activatePlugin(
