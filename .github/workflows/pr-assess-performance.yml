@@ -79,7 +79,7 @@ jobs:
                   echo "WC_MEASURE_BASELINE=yes" >> $GITHUB_ENV
                 fi
 
-            - name: Rebuild
+            - name: Build (baseline)
               if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
               run: |
                 git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
