@@ -62,13 +62,12 @@ jobs:
                 git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
                 echo "WC_TRUNK_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df" >> $GITHUB_ENV
 
-            # Allow to fail: if artifact not available it'll be created later in the workflow.
-            - name: Fetch baseline performance artifacts
-              uses: actions/download-artifact@v4
-              continue-on-error: true
+            # Artifacts download/upload would be more reliable, but we couldn't make it working...
+            - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
+              name: Cache measurements (baseline)
               with:
-                name: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
-                path: tools/compare-perf/artifacts/
+                path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
+                key: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
 
             - name: Verify cached measurements (baseline)
               run: |
@@ -95,17 +94,6 @@ jobs:
               run: |
                 RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-                
-            # Allow to fail: concurrency or failures are ok for this step.
-            - uses: actions/upload-artifact@v4
-              name: Store baseline performance artifacts
-              continue-on-error: true
-              if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
-              with:
-                name: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
-                path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
-                retention-days: 7
-                compression-level: 9
 
             - name: Analyze results
               run: |
