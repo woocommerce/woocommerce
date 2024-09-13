@@ -364,3 +364,13 @@
 		padding: 0.5rem 0.75rem;
 	}
 }
+
+.woocommerce-marketplace__content .woocommerce-customize-store-banner .woocommerce-customize-store-banner-content {
+	width: 100%;
+}
+
+@media screen and (max-width: $breakpoint-medium) {
+	.woocommerce-marketplace__content .woocommerce-customize-store-banner .woocommerce-customize-store-banner-content {
+		margin-top: 40px;
+	}
+}
