@@ -1028,6 +1028,32 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
+	 * Return query for hand-picked products.
+	 *
+	 * @param int[]  $product_ids Hand-picked products IDs.
+	 * @param string $collection Collection name.
+	 *
+	 * @return array The post__in query.
+	 */
+	private function get_handpicked_query( $product_ids, $collection ) {
+		if ( is_array( $product_ids ) && ! empty( $product_ids ) ) {
+			return array(
+				'post__in' => $product_ids,
+			);
+		}
+
+		$collection_name          = $this->parsed_block['attrs']['collection'];
+		$is_handpicked_collection = 'woocommerce/product-collection/hand-picked' === $collection;
+
+		// For the Hand-Picked collection, we need to always display no results
+		// if no products were picked. To achieve this, we need to set post__in to [-1]
+		// so that there are no IDs to be intersected.
+		return array(
+			'post__in' => $is_handpicked_collection ? array( -1 ) : array(),
+		);
+	}
+
+	/**
 	 * Return a query for on sale products.
 	 *
 	 * @param bool $is_on_sale Whether to query for on sale products.
