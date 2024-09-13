@@ -580,8 +580,7 @@ class WC_Structured_Data {
 
 	/**
 	 * Check if a GTIN is valid.
-	 * A GTIN is valid if:
-	 * Is a positive numeric string with a length of 8,12,13 or 14.
+	 * A valid GTIN is a string containing 8,12,13 or 14 digits.
 	 *
 	 * @see https://schema.org/gtin
 	 * @param string $gtin The GTIN to check.
