@@ -67,7 +67,7 @@ const ProductSearchControls = ( props: ProductSearchBlockProps ) => {
 					] }
 					onChange={ (
 						selected: Partial< ButtonPositionProps > &
-							'input-and-button'
+							PositionOptions.INPUT_AND_BUTTON
 					) => {
 						if ( selected !== PositionOptions.INPUT_AND_BUTTON ) {
 							setAttributes( {
