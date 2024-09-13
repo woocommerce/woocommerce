@@ -208,48 +208,52 @@ test.describe( 'Orders API test', () => {
 		} );
 	} );
 
-	test( 'can add complex order', async ( { request } ) => {
-		//ensure tax calculations are enabled
-		await request.put(
-			'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
-			{
-				data: {
-					value: 'yes',
-				},
+	test(
+		'can add complex order',
+		{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
+		async ( { request } ) => {
+			//ensure tax calculations are enabled
+			await request.put(
+				'/wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
+				{
+					data: {
+						value: 'yes',
+					},
+				}
+			);
+
+			// Create the complex order and save its ID.
+			const response = await request.post( '/wp-json/wc/v3/orders', {
+				data: order,
+			} );
+			const responseJSON = await response.json();
+
+			order.id = responseJSON.id;
+
+			expect( response.status() ).toEqual( 201 );
+
+			// Verify order and tax totals
+			expect( responseJSON.total ).toEqual( expectedOrderTotal );
+			expect( responseJSON.total_tax ).toEqual( expectedTaxTotal );
+
+			// Verify total tax of each product line item
+			const expectedTaxTotalsPerLineItem = [
+				[ simpleProduct, expectedSimpleProductTaxTotal ],
+				[ variableProduct, expectedVariableProductTaxTotal ],
+				[ groupedProduct, expectedSimpleProductTaxTotal ],
+				[ externalProduct, expectedExternalProductTaxTotal ],
+			];
+			for ( const [
+				product,
+				expectedLineTaxTotal,
+			] of expectedTaxTotalsPerLineItem ) {
+				const { total_tax: actualLineTaxTotal } =
+					responseJSON.line_items.find(
+						( { product_id } ) => product_id === product.id
+					);
+
+				expect( actualLineTaxTotal ).toEqual( expectedLineTaxTotal );
 			}
-		);
-
-		// Create the complex order and save its ID.
-		const response = await request.post( '/wp-json/wc/v3/orders', {
-			data: order,
-		} );
-		const responseJSON = await response.json();
-
-		order.id = responseJSON.id;
-
-		expect( response.status() ).toEqual( 201 );
-
-		// Verify order and tax totals
-		expect( responseJSON.total ).toEqual( expectedOrderTotal );
-		expect( responseJSON.total_tax ).toEqual( expectedTaxTotal );
-
-		// Verify total tax of each product line item
-		const expectedTaxTotalsPerLineItem = [
-			[ simpleProduct, expectedSimpleProductTaxTotal ],
-			[ variableProduct, expectedVariableProductTaxTotal ],
-			[ groupedProduct, expectedSimpleProductTaxTotal ],
-			[ externalProduct, expectedExternalProductTaxTotal ],
-		];
-		for ( const [
-			product,
-			expectedLineTaxTotal,
-		] of expectedTaxTotalsPerLineItem ) {
-			const { total_tax: actualLineTaxTotal } =
-				responseJSON.line_items.find(
-					( { product_id } ) => product_id === product.id
-				);
-
-			expect( actualLineTaxTotal ).toEqual( expectedLineTaxTotal );
 		}
-	} );
+	);
 } );

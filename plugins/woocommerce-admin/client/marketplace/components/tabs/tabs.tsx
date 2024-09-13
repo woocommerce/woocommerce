@@ -178,17 +178,18 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		} else if ( Object.keys( query ).length > 0 ) {
 			setSelectedTab( DEFAULT_TAB_KEY );
 		}
-	}, [ query, setSelectedTab ] );
+	}, [ query, setSelectedTab, tabs ] );
 
 	useEffect( () => {
 		setVisibleTabs(
 			getVisibleTabs( selectedTab, hasBusinessServices, tabs )
 		);
 
-		if ( 'business-services' == selectedTab && ! hasBusinessServices ) {
+
+		if ( selectedTab === 'business-services' && ! hasBusinessServices ) {
 			setUrlTabParam( 'extensions', query );
 		}
-	}, [ selectedTab, hasBusinessServices ] );
+	}, [ selectedTab, hasBusinessServices, query, tabs ] );
 
 	return (
 		<nav
