@@ -1042,12 +1042,10 @@ class ProductCollection extends AbstractBlock {
 			);
 		}
 
-		$collection_name          = $this->parsed_block['attrs']['collection'];
-		$is_handpicked_collection = 'woocommerce/product-collection/hand-picked' === $collection;
-
 		// For the Hand-Picked collection, we need to always display no results
 		// if no products were picked. To achieve this, we need to set post__in to [-1]
 		// so that there are no IDs to be intersected.
+		$is_handpicked_collection = 'woocommerce/product-collection/hand-picked' === $collection;
 		return array(
 			'post__in' => $is_handpicked_collection ? array( -1 ) : array(),
 		);
