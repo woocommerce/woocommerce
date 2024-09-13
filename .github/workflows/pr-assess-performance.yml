@@ -64,7 +64,7 @@ jobs:
 
             # Allow to fail: if artifact not available it'll be created later in the workflow.
             - name: Fetch baseline performance artifacts
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v3
               continue-on-error: true
               with:
                 name: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
@@ -97,7 +97,7 @@ jobs:
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
                 
             # Allow to fail: concurrency or failures are ok for this step.
-            - uses: actions/upload-artifact@v4
+            - uses: actions/upload-artifact@v3
               name: Store baseline performance artifacts
               continue-on-error: true
               if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
@@ -106,6 +106,7 @@ jobs:
                 path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
                 retention-days: 7
                 compression-level: 9
+                overwrite: true
 
             - name: Analyze results
               run: |
