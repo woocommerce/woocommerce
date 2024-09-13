@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+. "$(dirname "$0")/_/husky.sh"
+
+# '1' is branch
+CHECKOUT_TYPE=$3
+
+if [ "$CHECKOUT_TYPE" = '1' ]; then
+	if [ -e ~/.nvm/nvm.sh ]; then
+        # Auto-switch node version when switching between branches
+		. ~/.nvm/nvm.sh
+		nvm use --silent || nvm install
+    fi
+
+	# Auto-refresh dependencies when switching between branches
+	changedManifests=$( ( git diff --name-only HEAD ORIG_HEAD  | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
+	if [ -n "$changedManifests" ]; then
+		printf "It was a change in the following file(s) - refreshing dependencies:\n"
+		printf "    %s\n" $changedManifests
+
+		pnpm install --frozen-lockfile
+	fi
+fi
