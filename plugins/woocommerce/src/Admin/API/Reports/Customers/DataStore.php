@@ -616,10 +616,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$customer_user = new \WC_Customer( $user_id );
 			}
 
-			// Set email as customer email instead of Order Billing Email if we have a customer
-			$data['email']           = $customer_user->get_email( 'edit' );
+			// Set email as customer email instead of Order Billing Email if we have a customer.
+			$data['email'] = $customer_user->get_email( 'edit' );
 
-			// Adding other relevant customer data
+			// Adding other relevant customer data.
 			$data['user_id']         = $user_id;
 			$data['username']        = $customer_user->get_username( 'edit' );
 			$data['date_registered'] = $customer_user->get_date_created( 'edit' ) ? $customer_user->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ) : null;
