@@ -70,6 +70,10 @@
 	color: var(--wc-product-filter-checkbox-list-option-element-selected, currentColor);
 }
 
+:where(.wc-block-product-filter-checkbox-list__text) {
+ 	font-size: 0.875em;
+}
+
 :where(.wc-block-product-filter-checkbox-list__show-more) {
 	cursor: pointer;
 	text-decoration: underline;
