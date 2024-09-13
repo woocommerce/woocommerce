@@ -5,6 +5,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import { Icon, chevronLeft } from '@wordpress/icons';
 import { useEffect } from '@wordpress/element';
+import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 
 /**
  * Internal dependencies
@@ -93,11 +94,21 @@ const Settings = ( { params, query } ) => {
 		<>
 			<div className="woocommerce-settings-layout">
 				<div className="woocommerce-settings-layout-navigation">
-					<Button href={ getNewPath( {}, '/', {} ) }>
-						<Icon icon={ chevronLeft } />
-						Settings
-					</Button>
-					<Tabs data={ settingsData } page={ page } />
+					<SiteHub
+						variants={ {
+							view: { x: 0 },
+						} }
+						isTransparent={ false }
+					/>
+					<div className="woocommerce-settings-layout-navigation__content">
+						<div className="woocommerce-settings-layout-navigation__back">
+							<Button href={ getNewPath( {}, '/', {} ) }>
+								<Icon icon={ chevronLeft } />
+							</Button>
+							<h1>Settings</h1>
+						</div>
+						<Tabs data={ settingsData } page={ page } />
+					</div>
 				</div>
 				{ areas.content && (
 					<div
