@@ -404,7 +404,6 @@ final class BlockTypesController {
 		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFiltersOverlay';
 			$block_types[] = 'ProductFiltersOverlayNavigation';
@@ -414,6 +413,9 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterRating';
 			$block_types[] = 'ProductFilterActive';
 			$block_types[] = 'ProductFilterClearButton';
+			$block_types[] = 'ProductFilterCheckboxList';
+			$block_types[] = 'ProductFilterChips';
+			$block_types[] = 'OrderConfirmation\CreateAccount';
 		}
 
 		/**

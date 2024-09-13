@@ -32,6 +32,12 @@
 		}
 	}
 
+	&:disabled {
+		.wc-block-components-button__text {
+			opacity: 0.5;
+		}
+	}
+
 	&.outlined {
 		background: transparent;
 		color: currentColor;
