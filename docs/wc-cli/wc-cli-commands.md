@@ -117,7 +117,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ### wc customer_download
 
-#### wc customer_download list <customer_id>
+#### wc customer_download list &lt;customer_id&gt;
 
 - `--customer_id` - Unique identifier for the resource.
 - `--context` - Scope under which the request is made; determines fields present in response.
@@ -198,7 +198,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ### wc order_note
 
-#### wc order_note list <order_id>
+#### wc order_note list &lt;order_id&gt;
 
 - `--order_id` - The order ID.
 - `--context` - Scope under which the request is made; determines fields present in response.
@@ -211,14 +211,14 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc order_note create <order_id>
+#### wc order_note create &lt;order_id&gt;
 
 - `--order_id` - The order ID.
 - `--note` - Order note content. (*Required*)
 - `--customer_note` - If true, the note will be shown to customers and they will be notified. If false, the note will be for admin reference only.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc order_note get <order_id> [id]
+#### wc order_note get &lt;order_id&gt; [id]
 
 - `--id` - Unique identifier for the resource.
 - `--order_id` - The order ID.
@@ -231,7 +231,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc order_note delete <order_id> [id]
+#### wc order_note delete &lt;order_id&gt; [id]
 
 - `--id` - Unique identifier for the resource.
 - `--order_id` - The order ID.
@@ -240,7 +240,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ### wc shop_order_refund
 
-#### wc shop_order_refund list <order_id>
+#### wc shop_order_refund list &lt;order_id&gt;
 
 - `--order_id` - The order ID.
 - `--context` - Scope under which the request is made; determines fields present in response.
@@ -265,7 +265,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc shop_order_refund create <order_id>
+#### wc shop_order_refund create &lt;order_id&gt;
 
 - `--order_id` - The order ID.
 - `--amount` - Refund amount.
@@ -276,7 +276,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--api_refund` - When true, the payment gateway API is used to generate the refund.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc shop_order_refund get <order_id> [id]
+#### wc shop_order_refund get &lt;order_id&gt; [id]
 
 - `--order_id` - The order ID.
 - `--id` - Unique identifier for the resource.
@@ -289,7 +289,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc shop_order_refund delete <order_id> [id]
+#### wc shop_order_refund delete &lt;order_id&gt; [id]
 
 - `--order_id` - The order ID.
 - `--id` - Unique identifier for the resource.
@@ -386,7 +386,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ### wc product_attribute_term
 
-#### wc product_attribute_term list <attribute_id>
+#### wc product_attribute_term list &lt;attribute_id&gt;
 
 - `--attribute_id` - Unique identifier for the attribute of the terms.
 - `--context` - Scope under which the request is made; determines fields present in response.
@@ -409,7 +409,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc product_attribute_term create <attribute_id>
+#### wc product_attribute_term create &lt;attribute_id&gt;
 
 - `--attribute_id` - Unique identifier for the attribute of the terms.
 - `--name` - Name for the resource. (*Required*)
@@ -418,7 +418,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--menu_order` - Menu order, used to custom sort the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc product_attribute_term get <attribute_id> [id]
+#### wc product_attribute_term get &lt;attribute_id&gt; [id]
 
 - `--id` - Unique identifier for the resource.
 - `--attribute_id` - Unique identifier for the attribute of the terms.
@@ -431,7 +431,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc product_attribute_term update <attribute_id> [id]
+#### wc product_attribute_term update &lt;attribute_id&gt; [id]
 
 - `--id` - Unique identifier for the resource.
 - `--attribute_id` - Unique identifier for the attribute of the terms.
@@ -441,7 +441,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--menu_order` - Menu order, used to custom sort the resource.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc product_attribute_term delete <attribute_id> [id]
+#### wc product_attribute_term delete &lt;attribute_id&gt; [id]
 
 - `--id` - Unique identifier for the resource.
 - `--attribute_id` - Unique identifier for the attribute of the terms.
@@ -565,7 +565,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ### wc product_review
 
-#### wc product_review list <product_id>
+#### wc product_review list &lt;product_id&gt;
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the variation.
@@ -578,7 +578,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc product_review create <product_id>
+#### wc product_review create &lt;product_id&gt;
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the variation.
@@ -590,7 +590,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--email` - Email of the reviewer. (*Required*)
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc product_review get <product_id> [id]
+#### wc product_review get &lt;product_id&gt; [id]
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the resource.
@@ -603,7 +603,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc product_review update <product_id> [id]
+#### wc product_review update &lt;product_id&gt; [id]
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the resource.
@@ -615,7 +615,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--email` - Reviewer email.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc product_review delete <product_id> [id]
+#### wc product_review delete &lt;product_id&gt; [id]
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the resource.
@@ -893,7 +893,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
 ### wc product_variation
 
-#### wc product_variation list <product_id>
+#### wc product_variation list &lt;product_id&gt;
 
 - `--product_id` - Unique identifier for the variable product.
 - `--context` - Scope under which the request is made; determines fields present in response.
@@ -932,7 +932,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc product_variation create <product_id>
+#### wc product_variation create &lt;product_id&gt;
 
 - `--product_id` - Unique identifier for the variable product.
 - `--description` - Variation description.
@@ -964,7 +964,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc product_variation get <product_id> [id]
+#### wc product_variation get &lt;product_id&gt; [id]
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the variation.
@@ -977,7 +977,7 @@ Default: table
 
 Options: table, json, csv, ids, yaml, count, headers, body, envelope
 
-#### wc product_variation update <product_id> [id]
+#### wc product_variation update &lt;product_id&gt; [id]
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the variation.
@@ -1010,7 +1010,7 @@ Options: table, json, csv, ids, yaml, count, headers, body, envelope
 - `--meta_data` - Meta data.
 - `--porcelain` - Output just the id when the operation is successful.
 
-#### wc product_variation delete <product_id> [id]
+#### wc product_variation delete &lt;product_id&gt; [id]
 
 - `--product_id` - Unique identifier for the variable product.
 - `--id` - Unique identifier for the variation.

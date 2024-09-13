@@ -42,7 +42,7 @@ class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$order->set_status( 'completed' );
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new VariationsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -111,7 +111,7 @@ class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$order->set_status( 'completed' );
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new VariationsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -228,7 +228,7 @@ class WC_Admin_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$order_3->set_status( 'completed' );
 		$order_3->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new VariationsDataStore();
 
