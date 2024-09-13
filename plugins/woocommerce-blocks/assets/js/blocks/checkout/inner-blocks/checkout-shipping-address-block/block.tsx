@@ -116,10 +116,6 @@ const Block = ( {
 	const noticeContext = useShippingAsBilling
 		? [ noticeContexts.SHIPPING_ADDRESS, noticeContexts.BILLING_ADDRESS ]
 		: [ noticeContexts.SHIPPING_ADDRESS ];
-	const hasAddress = !! (
-		shippingAddress.address_1 &&
-		( shippingAddress.first_name || shippingAddress.last_name )
-	);
 
 	const { cartDataLoaded } = useSelect( ( select ) => {
 		const store = select( CART_STORE_KEY );
@@ -128,9 +124,6 @@ const Block = ( {
 		};
 	} );
 
-	// Default editing state for CustomerAddress component comes from the current address and whether or not we're in the editor.
-	const defaultEditingAddress = isEditor || ! hasAddress;
-
 	return (
 		<>
 			<StoreNoticesContainer context={ noticeContext } />
@@ -138,7 +131,6 @@ const Block = ( {
 				{ cartDataLoaded ? (
 					<CustomerAddress
 						addressFieldsConfig={ addressFieldsConfig }
-						defaultEditing={ defaultEditingAddress }
 					/>
 				) : null }
 			</WrapperComponent>

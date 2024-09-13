@@ -1,15 +1,18 @@
 /**
  * External dependencies
  */
-import { useState, useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
 import type {
 	AddressFormValues,
 	FormFieldsConfig,
 } from '@woocommerce/settings';
-import { useSelect } from '@wordpress/data';
-import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import {
+	VALIDATION_STORE_KEY,
+	CHECKOUT_STORE_KEY,
+} from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
 
 /**
@@ -20,10 +23,8 @@ import AddressCard from '../../address-card';
 
 const CustomerAddress = ( {
 	addressFieldsConfig,
-	defaultEditing = false,
 }: {
 	addressFieldsConfig: FormFieldsConfig;
-	defaultEditing?: boolean;
 } ) => {
 	const {
 		billingAddress,
@@ -32,7 +33,12 @@ const CustomerAddress = ( {
 		useBillingAsShipping,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
-	const [ editing, setEditing ] = useState( defaultEditing );
+	const editing = useSelect( ( select ) =>
+		select( CHECKOUT_STORE_KEY ).getEditingBillingAddress()
+	);
+
+	const setEditing =
+		useDispatch( CHECKOUT_STORE_KEY ).setEditingBillingAddress;
 
 	// Forces editing state if store has errors.
 	const { hasValidationErrors, invalidProps } = useSelect( ( select ) => {
@@ -55,7 +61,7 @@ const CustomerAddress = ( {
 		if ( invalidProps.length > 0 && editing === false ) {
 			setEditing( true );
 		}
-	}, [ editing, hasValidationErrors, invalidProps.length ] );
+	}, [ editing, hasValidationErrors, invalidProps.length, setEditing ] );
 
 	const onChangeAddress = useCallback(
 		( values: AddressFormValues ) => {
@@ -86,7 +92,7 @@ const CustomerAddress = ( {
 				isExpanded={ editing }
 			/>
 		),
-		[ billingAddress, addressFieldsConfig, editing ]
+		[ billingAddress, addressFieldsConfig, editing, setEditing ]
 	);
 
 	const renderAddressFormComponent = useCallback(
