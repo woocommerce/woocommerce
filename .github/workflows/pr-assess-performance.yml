@@ -18,6 +18,9 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
     cancel-in-progress: true
 
+env:
+    WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
+
 jobs:
     build:
         name: Evaluate performance metrics
@@ -45,19 +48,20 @@ jobs:
                 pnpm --filter="@woocommerce/plugin-woocommerce" env:test
 
             - name: Measure performance (@${{ github.sha }})
-              env:
-                WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
               run: |
                 RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
             # TODO: cache results if pushed to trunk
-              
-            - name: Checkout (trunk)
+
+            # In alignment with .github/workflows/scripts/run-metrics.sh, we should checkout 3d7d7f02017383937f1a4158d433d0e5d44b3dc9 
+            # as baseline. But to avoid switching branches in 'Analyze results' step, we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df 
+            # which introduced reporting mode for the perf utility.
+            - name: Checkout (55f855a2e6d769b5ae44305b2772eb30d3e721df@trunk)
               run: |
                 git reset --hard
-                git checkout 41cf2b285e8ee690b1ea804b6a774345d7144225
-                echo "WC_TRUNK_SHA=41cf2b285e8ee690b1ea804b6a774345d7144225" >> $GITHUB_ENV
+                git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
+                echo "WC_TRUNK_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df" >> $GITHUB_ENV
 
             - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
               name: Cache measurements (trunk as baseline)
@@ -87,19 +91,13 @@ jobs:
 
             - name: Measure performance (@${{ env.WC_TRUNK_SHA }})
               if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
-              env:
-                WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
               run: |
                 RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
                 RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
                 ls -la tools/compare-perf/artifacts/
 
-            # TODO: git reset/checkout to be dropped after we merge into trunk - chicken and egg problem around the new flag introduction.
             - name: Analyze results
-              env:
-                WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
               run: |
-                git reset --hard && git checkout ${{ github.sha }}                
                 pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
                 pnpm --filter="compare-perf" run compare compare-performance ${{ github.sha }} ${{ env.WC_TRUNK_SHA }} --tests-branch ${{ github.sha }} --skip-benchmarking
             
