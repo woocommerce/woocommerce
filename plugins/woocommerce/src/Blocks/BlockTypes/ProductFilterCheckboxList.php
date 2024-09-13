@@ -84,8 +84,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						if ( ! $item['selected'] ) :
 							if ( $count >= $remaining_initial_unchecked ) :
 								?>
-								class="wc-block-product-filter-checkbox-list__item hidden"
-								data-wc-class--hidden="!context.showAll"
+								class="wc-block-product-filter-checkbox-list__item"
+								data-wc-bind--hidden="!context.showAll"
+								hidden
 							<?php else : ?>
 								<?php ++$count; ?>
 							<?php endif; ?>
@@ -123,8 +124,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<span
 					role="button"
 					class="wc-block-product-filter-checkbox-list__show-more"
-					data-wc-class--hidden="context.showAll"
+					data-wc-bind--hidden="context.showAll"
 					data-wc-on--click="actions.showAllItems"
+					hidden
 				>
 					<small role="presentation"><?php echo esc_html__( 'Show more...', 'woocommerce' ); ?></small>
 				</span>
