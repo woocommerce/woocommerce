@@ -60,7 +60,7 @@ class WC_Helper_Admin_Notes {
 		$note_2->set_source( 'PHPUNIT_TEST' );
 		$note_2->set_status( Note::E_WC_ADMIN_NOTE_ACTIONED );
 		$note_2->set_is_snoozable( true );
-		$note_2->set_layout( 'banner' );
+		$note_2->set_layout( 'thumbnail' );
 		$note_2->set_image( 'https://an-image.jpg' );
 		// This note has no actions.
 		$note_2->save();
@@ -100,7 +100,6 @@ class WC_Helper_Admin_Notes {
 			'?s=PHPUNIT_TEST_NOTE_4_ACTION_2_URL'
 		);
 		$note_4->save();
-
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adds a function_exists() check so that we don't add a secondary fatal in remote logging if wp_get_current_user does not exist yet

@@ -16,6 +16,7 @@ config = {
 				'**/customize-store/**/*.spec.js',
 				'**/merchant/**/*.spec.js',
 				'**/shopper/**/*.spec.js',
+				'**/api-tests/**/*.test.js',
 			],
 			grepInvert: /@skip-on-default-pressable/,
 		},

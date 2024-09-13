@@ -1,0 +1,22 @@
+.wc-block-product-filters {
+	dialog {
+		flex-direction: column;
+		position: fixed;
+		border: none;
+		top: 0;
+		z-index: 9999;
+		height: 100vh;
+		width: 100vw;
+
+		&.wc-block-product-filters--dialog-open {
+			display: flex;
+			padding-left: 0;
+			overflow-y: auto;
+		}
+
+		&.wc-block-product-filters--with-admin-bar {
+			margin-top: $gap;
+			height: calc(100vh - 2 * $gap);
+		}
+	}
+}

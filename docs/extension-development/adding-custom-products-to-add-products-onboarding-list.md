@@ -45,8 +45,8 @@ addFilter(
            key: 'custom-product',
            title: __('Custom product', 'custom-product'),
            content: __('Create an awesome custom product.', 'custom-product'),
-           before: <FolderMultipleIcon />,
-           after: <Icon icon={chevronRight} />,
+           before: &lt;FolderMultipleIcon /&gt;,
+           after: &lt;Icon icon={chevronRight} /&gt;,
            onClick: () => {
            }
        },

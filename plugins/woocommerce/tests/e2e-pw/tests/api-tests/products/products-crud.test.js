@@ -589,278 +589,301 @@ test.describe( 'Products API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'Product review tests: CRUD', () => {
-		let productReviewId;
-		let reviewsTestProduct;
+	test.describe(
+		'Product review tests: CRUD',
+		{ tag: '@skip-on-default-wpcom' },
+		() => {
+			let productReviewId;
+			let reviewsTestProduct;
 
-		test.beforeAll( async ( { simpleTestProduct } ) => {
-			reviewsTestProduct = simpleTestProduct;
-		} );
-
-		test( 'can add a product review', async ( { request } ) => {
-			const response = await request.post(
-				'wp-json/wc/v3/products/reviews',
-				{
-					data: {
-						product_id: reviewsTestProduct.id,
-						review: 'Nice simple product!',
-						reviewer: 'John Doe',
-						reviewer_email: 'john.doe@example.com',
-						rating: 5,
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			productReviewId = responseJSON.id;
-
-			expect( response.status() ).toEqual( 201 );
-			expect( typeof productReviewId ).toEqual( 'number' );
-			expect( responseJSON.id ).toEqual( productReviewId );
-			expect( responseJSON.product_name ).toEqual( 'A Simple Product' );
-			expect( responseJSON.status ).toEqual( 'approved' );
-			expect( responseJSON.reviewer ).toEqual( 'John Doe' );
-			expect( responseJSON.reviewer_email ).toEqual(
-				'john.doe@example.com'
-			);
-			expect( responseJSON.review ).toEqual( 'Nice simple product!' );
-			expect( responseJSON.rating ).toEqual( 5 );
-			expect( responseJSON.verified ).toEqual( false );
-		} );
-
-		test( 'cannot add a product review with invalid product_id', async ( {
-			request,
-		} ) => {
-			const response = await request.post(
-				'wp-json/wc/v3/products/reviews',
-				{
-					data: {
-						product_id: 999,
-						review: 'A non existent product!',
-						reviewer: 'John Do Not',
-						reviewer_email: 'john.do.not@example.com',
-						rating: 5,
-					},
-				}
-			);
-			const responseJSON = await response.json();
-
-			expect( response.status() ).toEqual( 404 );
-			expect( responseJSON.code ).toEqual(
-				'woocommerce_rest_product_invalid_id'
-			);
-			expect( responseJSON.message ).toEqual( 'Invalid product ID.' );
-		} );
-
-		test( 'cannot add a duplicate product review', async ( {
-			request,
-		} ) => {
-			const response = await request.post(
-				'wp-json/wc/v3/products/reviews',
-				{
-					data: {
-						product_id: reviewsTestProduct.id,
-						review: 'Nice simple product!',
-						reviewer: 'John Doe',
-						reviewer_email: 'john.doe@example.com',
-						rating: 5,
-					},
-				}
-			);
-			const responseJSON = await response.json();
-
-			expect( response.status() ).toEqual( 409 );
-			expect( responseJSON.code ).toEqual(
-				'woocommerce_rest_comment_duplicate'
-			);
-			expect( responseJSON.message ).toEqual(
-				'Duplicate comment detected; it looks as though you&#8217;ve already said that!'
-			);
-		} );
-
-		test( 'can retrieve a product review', async ( { request } ) => {
-			const response = await request.get(
-				`wp-json/wc/v3/products/reviews/${ productReviewId }`
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.id ).toEqual( productReviewId );
-			expect( responseJSON.product_id ).toEqual( reviewsTestProduct.id );
-			expect( responseJSON.product_name ).toEqual( 'A Simple Product' );
-			expect( responseJSON.status ).toEqual( 'approved' );
-			expect( responseJSON.reviewer ).toEqual( 'John Doe' );
-			expect( responseJSON.reviewer_email ).toEqual(
-				'john.doe@example.com'
-			);
-			expect( responseJSON.review ).toEqual(
-				'<p>Nice simple product!</p>\n'
-			);
-			expect( responseJSON.rating ).toEqual( 5 );
-			expect( responseJSON.verified ).toEqual( false );
-		} );
-
-		test( 'can retrieve all product reviews', async ( { request } ) => {
-			// call API to retrieve all product reviews
-			const response = await request.get(
-				'/wp-json/wc/v3/products/reviews'
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThan( 0 );
-		} );
-
-		test( 'can update a product review', async ( { request } ) => {
-			// call API to retrieve all product reviews
-			const response = await request.put(
-				`wp-json/wc/v3/products/reviews/${ productReviewId }`,
-				{
-					data: {
-						rating: 1,
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.id ).toEqual( productReviewId );
-			expect( responseJSON.product_id ).toEqual( reviewsTestProduct.id );
-			expect( responseJSON.product_name ).toEqual( 'A Simple Product' );
-			expect( responseJSON.status ).toEqual( 'approved' );
-			expect( responseJSON.reviewer ).toEqual( 'John Doe' );
-			expect( responseJSON.reviewer_email ).toEqual(
-				'john.doe@example.com'
-			);
-			expect( responseJSON.review ).toEqual( 'Nice simple product!' );
-			expect( responseJSON.rating ).toEqual( 1 );
-			expect( responseJSON.verified ).toEqual( false );
-		} );
-
-		test( 'can permanently delete a product review', async ( {
-			request,
-		} ) => {
-			// Delete the product review.
-			const response = await request.delete(
-				`wp-json/wc/v3/products/reviews/${ productReviewId }`,
-				{
-					data: {
-						force: true,
-					},
-				}
-			);
-			expect( response.status() ).toEqual( 200 );
-
-			// Verify that the product review can no longer be retrieved.
-			const getDeletedProductReviewResponse = await request.get(
-				`wp-json/wc/v3/products/reviews/${ productReviewId }`
-			);
-			expect( getDeletedProductReviewResponse.status() ).toEqual( 404 );
-		} );
-
-		test( 'can batch update product reviews', async ( { request } ) => {
-			// Batch create product reviews.
-			const response = await request.post(
-				`wp-json/wc/v3/products/reviews/batch`,
-				{
-					data: {
-						create: [
-							{
-								product_id: reviewsTestProduct.id,
-								review: 'Nice product!',
-								reviewer: 'John Doe',
-								reviewer_email: 'john.doe@example.com',
-								rating: 4,
-							},
-							{
-								product_id: reviewsTestProduct.id,
-								review: 'I love this thing!',
-								reviewer: 'Jane Doe',
-								reviewer_email: 'Jane.doe@example.com',
-								rating: 5,
-							},
-						],
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.create[ 0 ].product_id ).toEqual(
-				reviewsTestProduct.id
-			);
-			expect( responseJSON.create[ 0 ].review ).toEqual(
-				'Nice product!'
-			);
-			expect( responseJSON.create[ 0 ].reviewer ).toEqual( 'John Doe' );
-			expect( responseJSON.create[ 0 ].reviewer_email ).toEqual(
-				'john.doe@example.com'
-			);
-			expect( responseJSON.create[ 0 ].rating ).toEqual( 4 );
-
-			expect( responseJSON.create[ 1 ].product_id ).toEqual(
-				reviewsTestProduct.id
-			);
-			expect( responseJSON.create[ 1 ].review ).toEqual(
-				'I love this thing!'
-			);
-			expect( responseJSON.create[ 1 ].reviewer ).toEqual( 'Jane Doe' );
-			expect( responseJSON.create[ 1 ].reviewer_email ).toEqual(
-				'Jane.doe@example.com'
-			);
-			expect( responseJSON.create[ 1 ].rating ).toEqual( 5 );
-			const review1Id = responseJSON.create[ 0 ].id;
-			const review2Id = responseJSON.create[ 1 ].id;
-
-			// Batch create a new review, update a review and delete another.
-			const responseBatchUpdate = await request.post(
-				`wp-json/wc/v3/products/reviews/batch`,
-				{
-					data: {
-						create: [
-							{
-								product_id: reviewsTestProduct.id,
-								review: 'Ok product.',
-								reviewer: 'Jack Doe',
-								reviewer_email: 'jack.doe@example.com',
-								rating: 3,
-							},
-						],
-						update: [
-							{
-								id: review1Id,
-								review: 'On reflection, I hate this thing!',
-								rating: 1,
-							},
-						],
-						delete: [ review2Id ],
-					},
-				}
-			);
-			const responseBatchUpdateJSON = await responseBatchUpdate.json();
-			const review3Id = responseBatchUpdateJSON.create[ 0 ].id;
-			expect( response.status() ).toEqual( 200 );
-
-			const responseUpdatedReview = await request.get(
-				`wp-json/wc/v3/products/reviews/${ review1Id }`
-			);
-			const responseUpdatedReviewJSON =
-				await responseUpdatedReview.json();
-			expect( responseUpdatedReviewJSON.review ).toEqual(
-				'<p>On reflection, I hate this thing!</p>\n'
-			);
-			expect( responseUpdatedReviewJSON.rating ).toEqual( 1 );
-
-			// Verify that the deleted review can no longer be retrieved.
-			const getDeletedProductReviewResponse = await request.get(
-				`wp-json/wc/v3/products/reviews/${ review2Id }`
-			);
-			expect( getDeletedProductReviewResponse.status() ).toEqual( 404 );
-
-			// Batch delete the created tags
-			await request.post( `wp-json/wc/v3/products/reviews/batch`, {
-				data: {
-					delete: [ review1Id, review3Id ],
-				},
+			test.beforeAll( async ( { simpleTestProduct } ) => {
+				reviewsTestProduct = simpleTestProduct;
 			} );
-		} );
-	} );
+
+			test( 'can add a product review', async ( { request } ) => {
+				const response = await request.post(
+					'wp-json/wc/v3/products/reviews',
+					{
+						data: {
+							product_id: reviewsTestProduct.id,
+							review: 'Nice simple product!',
+							reviewer: 'John Doe',
+							reviewer_email: 'john.doe@example.com',
+							rating: 5,
+						},
+					}
+				);
+				const responseJSON = await response.json();
+				productReviewId = responseJSON.id;
+
+				expect( response.status() ).toEqual( 201 );
+				expect( typeof productReviewId ).toEqual( 'number' );
+				expect( responseJSON.id ).toEqual( productReviewId );
+				expect( responseJSON.product_name ).toEqual(
+					'A Simple Product'
+				);
+				expect( responseJSON.status ).toEqual( 'approved' );
+				expect( responseJSON.reviewer ).toEqual( 'John Doe' );
+				expect( responseJSON.reviewer_email ).toEqual(
+					'john.doe@example.com'
+				);
+				expect( responseJSON.review ).toEqual( 'Nice simple product!' );
+				expect( responseJSON.rating ).toEqual( 5 );
+				expect( responseJSON.verified ).toEqual( false );
+			} );
+
+			test( 'cannot add a product review with invalid product_id', async ( {
+				request,
+			} ) => {
+				const response = await request.post(
+					'wp-json/wc/v3/products/reviews',
+					{
+						data: {
+							product_id: 999,
+							review: 'A non existent product!',
+							reviewer: 'John Do Not',
+							reviewer_email: 'john.do.not@example.com',
+							rating: 5,
+						},
+					}
+				);
+				const responseJSON = await response.json();
+
+				expect( response.status() ).toEqual( 404 );
+				expect( responseJSON.code ).toEqual(
+					'woocommerce_rest_product_invalid_id'
+				);
+				expect( responseJSON.message ).toEqual( 'Invalid product ID.' );
+			} );
+
+			test( 'cannot add a duplicate product review', async ( {
+				request,
+			} ) => {
+				const response = await request.post(
+					'wp-json/wc/v3/products/reviews',
+					{
+						data: {
+							product_id: reviewsTestProduct.id,
+							review: 'Nice simple product!',
+							reviewer: 'John Doe',
+							reviewer_email: 'john.doe@example.com',
+							rating: 5,
+						},
+					}
+				);
+				const responseJSON = await response.json();
+
+				expect( response.status() ).toEqual( 409 );
+				expect( responseJSON.code ).toEqual(
+					'woocommerce_rest_comment_duplicate'
+				);
+				expect( responseJSON.message ).toEqual(
+					'Duplicate comment detected; it looks as though you&#8217;ve already said that!'
+				);
+			} );
+
+			test( 'can retrieve a product review', async ( { request } ) => {
+				const response = await request.get(
+					`wp-json/wc/v3/products/reviews/${ productReviewId }`
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( responseJSON.id ).toEqual( productReviewId );
+				expect( responseJSON.product_id ).toEqual(
+					reviewsTestProduct.id
+				);
+				expect( responseJSON.product_name ).toEqual(
+					'A Simple Product'
+				);
+				expect( responseJSON.status ).toEqual( 'approved' );
+				expect( responseJSON.reviewer ).toEqual( 'John Doe' );
+				expect( responseJSON.reviewer_email ).toEqual(
+					'john.doe@example.com'
+				);
+				expect( responseJSON.review ).toEqual(
+					'<p>Nice simple product!</p>\n'
+				);
+				expect( responseJSON.rating ).toEqual( 5 );
+				expect( responseJSON.verified ).toEqual( false );
+			} );
+
+			test( 'can retrieve all product reviews', async ( { request } ) => {
+				// call API to retrieve all product reviews
+				const response = await request.get(
+					'/wp-json/wc/v3/products/reviews'
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( Array.isArray( responseJSON ) ).toBe( true );
+				expect( responseJSON.length ).toBeGreaterThan( 0 );
+			} );
+
+			test( 'can update a product review', async ( { request } ) => {
+				// call API to retrieve all product reviews
+				const response = await request.put(
+					`wp-json/wc/v3/products/reviews/${ productReviewId }`,
+					{
+						data: {
+							rating: 1,
+						},
+					}
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( responseJSON.id ).toEqual( productReviewId );
+				expect( responseJSON.product_id ).toEqual(
+					reviewsTestProduct.id
+				);
+				expect( responseJSON.product_name ).toEqual(
+					'A Simple Product'
+				);
+				expect( responseJSON.status ).toEqual( 'approved' );
+				expect( responseJSON.reviewer ).toEqual( 'John Doe' );
+				expect( responseJSON.reviewer_email ).toEqual(
+					'john.doe@example.com'
+				);
+				expect( responseJSON.review ).toEqual( 'Nice simple product!' );
+				expect( responseJSON.rating ).toEqual( 1 );
+				expect( responseJSON.verified ).toEqual( false );
+			} );
+
+			test( 'can permanently delete a product review', async ( {
+				request,
+			} ) => {
+				// Delete the product review.
+				const response = await request.delete(
+					`wp-json/wc/v3/products/reviews/${ productReviewId }`,
+					{
+						data: {
+							force: true,
+						},
+					}
+				);
+				expect( response.status() ).toEqual( 200 );
+
+				// Verify that the product review can no longer be retrieved.
+				const getDeletedProductReviewResponse = await request.get(
+					`wp-json/wc/v3/products/reviews/${ productReviewId }`
+				);
+				expect( getDeletedProductReviewResponse.status() ).toEqual(
+					404
+				);
+			} );
+
+			test( 'can batch update product reviews', async ( { request } ) => {
+				// Batch create product reviews.
+				const response = await request.post(
+					`wp-json/wc/v3/products/reviews/batch`,
+					{
+						data: {
+							create: [
+								{
+									product_id: reviewsTestProduct.id,
+									review: 'Nice product!',
+									reviewer: 'John Doe',
+									reviewer_email: 'john.doe@example.com',
+									rating: 4,
+								},
+								{
+									product_id: reviewsTestProduct.id,
+									review: 'I love this thing!',
+									reviewer: 'Jane Doe',
+									reviewer_email: 'Jane.doe@example.com',
+									rating: 5,
+								},
+							],
+						},
+					}
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( responseJSON.create[ 0 ].product_id ).toEqual(
+					reviewsTestProduct.id
+				);
+				expect( responseJSON.create[ 0 ].review ).toEqual(
+					'Nice product!'
+				);
+				expect( responseJSON.create[ 0 ].reviewer ).toEqual(
+					'John Doe'
+				);
+				expect( responseJSON.create[ 0 ].reviewer_email ).toEqual(
+					'john.doe@example.com'
+				);
+				expect( responseJSON.create[ 0 ].rating ).toEqual( 4 );
+
+				expect( responseJSON.create[ 1 ].product_id ).toEqual(
+					reviewsTestProduct.id
+				);
+				expect( responseJSON.create[ 1 ].review ).toEqual(
+					'I love this thing!'
+				);
+				expect( responseJSON.create[ 1 ].reviewer ).toEqual(
+					'Jane Doe'
+				);
+				expect( responseJSON.create[ 1 ].reviewer_email ).toEqual(
+					'Jane.doe@example.com'
+				);
+				expect( responseJSON.create[ 1 ].rating ).toEqual( 5 );
+				const review1Id = responseJSON.create[ 0 ].id;
+				const review2Id = responseJSON.create[ 1 ].id;
+
+				// Batch create a new review, update a review and delete another.
+				const responseBatchUpdate = await request.post(
+					`wp-json/wc/v3/products/reviews/batch`,
+					{
+						data: {
+							create: [
+								{
+									product_id: reviewsTestProduct.id,
+									review: 'Ok product.',
+									reviewer: 'Jack Doe',
+									reviewer_email: 'jack.doe@example.com',
+									rating: 3,
+								},
+							],
+							update: [
+								{
+									id: review1Id,
+									review: 'On reflection, I hate this thing!',
+									rating: 1,
+								},
+							],
+							delete: [ review2Id ],
+						},
+					}
+				);
+				const responseBatchUpdateJSON =
+					await responseBatchUpdate.json();
+				const review3Id = responseBatchUpdateJSON.create[ 0 ].id;
+				expect( response.status() ).toEqual( 200 );
+
+				const responseUpdatedReview = await request.get(
+					`wp-json/wc/v3/products/reviews/${ review1Id }`
+				);
+				const responseUpdatedReviewJSON =
+					await responseUpdatedReview.json();
+				expect( responseUpdatedReviewJSON.review ).toEqual(
+					'<p>On reflection, I hate this thing!</p>\n'
+				);
+				expect( responseUpdatedReviewJSON.rating ).toEqual( 1 );
+
+				// Verify that the deleted review can no longer be retrieved.
+				const getDeletedProductReviewResponse = await request.get(
+					`wp-json/wc/v3/products/reviews/${ review2Id }`
+				);
+				expect( getDeletedProductReviewResponse.status() ).toEqual(
+					404
+				);
+
+				// Batch delete the created tags
+				await request.post( `wp-json/wc/v3/products/reviews/batch`, {
+					data: {
+						delete: [ review1Id, review3Id ],
+					},
+				} );
+			} );
+		}
+	);
 
 	test.describe( 'Product shipping classes tests: CRUD', () => {
 		let productShippingClassId;
@@ -958,83 +981,91 @@ test.describe( 'Products API tests: CRUD', () => {
 			);
 		} );
 
-		test( 'can batch update product shipping classes', async ( {
-			request,
-		} ) => {
-			// Batch create product shipping classes.
-			const response = await request.post(
-				`wp-json/wc/v3/products/shipping_classes/batch`,
-				{
-					data: {
-						create: [
-							{
-								name: 'Small Items',
-							},
-							{
-								name: 'Large Items',
-							},
-						],
-					},
-				}
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( responseJSON.create[ 0 ].name ).toEqual( 'Small Items' );
-			expect( responseJSON.create[ 1 ].name ).toEqual( 'Large Items' );
-			const shippingClass1Id = responseJSON.create[ 0 ].id;
-			const shippingClass2Id = responseJSON.create[ 1 ].id;
+		test(
+			'can batch update product shipping classes',
+			{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
+			async ( { request } ) => {
+				// Batch create product shipping classes.
+				const response = await request.post(
+					`wp-json/wc/v3/products/shipping_classes/batch`,
+					{
+						data: {
+							create: [
+								{
+									name: 'Small Items',
+								},
+								{
+									name: 'Large Items',
+								},
+							],
+						},
+					}
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( responseJSON.create[ 0 ].name ).toEqual(
+					'Small Items'
+				);
+				expect( responseJSON.create[ 1 ].name ).toEqual(
+					'Large Items'
+				);
+				const shippingClass1Id = responseJSON.create[ 0 ].id;
+				const shippingClass2Id = responseJSON.create[ 1 ].id;
 
-			// Batch create a new shipping class, update a shipping class and delete another.
-			const responseBatchUpdate = await request.post(
-				`wp-json/wc/v3/products/shipping_classes/batch`,
-				{
-					data: {
-						create: [
-							{
-								name: 'Express',
-							},
-						],
-						update: [
-							{
-								id: shippingClass1Id,
-								description: 'Priority shipping.',
-							},
-						],
-						delete: [ shippingClass2Id ],
-					},
-				}
-			);
-			const responseBatchUpdateJSON = await responseBatchUpdate.json();
-			const shippingClass3Id = responseBatchUpdateJSON.create[ 0 ].id;
-			expect( response.status() ).toEqual( 200 );
+				// Batch create a new shipping class, update a shipping class and delete another.
+				const responseBatchUpdate = await request.post(
+					`wp-json/wc/v3/products/shipping_classes/batch`,
+					{
+						data: {
+							create: [
+								{
+									name: 'Express',
+								},
+							],
+							update: [
+								{
+									id: shippingClass1Id,
+									description: 'Priority shipping.',
+								},
+							],
+							delete: [ shippingClass2Id ],
+						},
+					}
+				);
+				const responseBatchUpdateJSON =
+					await responseBatchUpdate.json();
+				const shippingClass3Id = responseBatchUpdateJSON.create[ 0 ].id;
+				expect( response.status() ).toEqual( 200 );
 
-			const responseUpdatedShippingClass = await request.get(
-				`wp-json/wc/v3/products/shipping_classes/${ shippingClass1Id }`
-			);
-			const responseUpdatedShippingClassJSON =
-				await responseUpdatedShippingClass.json();
-			expect( responseUpdatedShippingClassJSON.description ).toEqual(
-				'Priority shipping.'
-			);
+				const responseUpdatedShippingClass = await request.get(
+					`wp-json/wc/v3/products/shipping_classes/${ shippingClass1Id }`
+				);
+				const responseUpdatedShippingClassJSON =
+					await responseUpdatedShippingClass.json();
+				expect( responseUpdatedShippingClassJSON.description ).toEqual(
+					'Priority shipping.'
+				);
 
-			// Verify that the product tag can no longer be retrieved.
-			const getDeletedProductShippingClassResponse = await request.get(
-				`wp-json/wc/v3/products/shipping_classes/${ shippingClass2Id }`
-			);
-			expect( getDeletedProductShippingClassResponse.status() ).toEqual(
-				404
-			);
+				// Verify that the product tag can no longer be retrieved.
+				const getDeletedProductShippingClassResponse =
+					await request.get(
+						`wp-json/wc/v3/products/shipping_classes/${ shippingClass2Id }`
+					);
+				expect(
+					getDeletedProductShippingClassResponse.status()
+				).toEqual( 404 );
 
-			// Batch delete the created tags
-			await request.post(
-				`wp-json/wc/v3/products/shipping_classes/batch`,
-				{
-					data: {
-						delete: [ shippingClass1Id, shippingClass3Id ],
-					},
-				}
-			);
-		} );
+				// Batch delete the created tags
+				await request.post(
+					`wp-json/wc/v3/products/shipping_classes/batch`,
+					{
+						data: {
+							delete: [ shippingClass1Id, shippingClass3Id ],
+						},
+					}
+				);
+			}
+		);
 	} );
 
 	test.describe( 'Product tags tests: CRUD', () => {

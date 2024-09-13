@@ -2,8 +2,6 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * Status class.
  */
@@ -265,7 +263,7 @@ class Status extends AbstractOrderConfirmationBlock {
 				</p>',
 				esc_attr( 'verify-email-submit' ),
 				esc_html__( 'Confirm email and view order', 'woocommerce' ),
-				wp_nonce_field( 'wc_verify_email', 'check_submission', true, false ),
+				wp_nonce_field( 'wc_verify_email', '_wpnonce', true, false ),
 				esc_attr( wc_wp_theme_get_element_class_name( 'button' ) )
 			) .
 			'</form>';

@@ -152,7 +152,7 @@ class WC_Admin_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case 
 		$order->save();
 		$order_1 = $order->get_id();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$download = new WC_Customer_Download();
 		$download->set_user_id( 1 );
