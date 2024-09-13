@@ -35,12 +35,13 @@ interface Tabs {
 const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
 
-const setUrlTabParam = ( tabKey: string ) => {
+const setUrlTabParam = ( tabKey: string, query: Record< string, string > ) => {
+	const term = query.term ? { term: query.term.trim() } : {};
 	navigateTo( {
 		url: getNewPath(
 			{ tab: tabKey === DEFAULT_TAB_KEY ? undefined : tabKey },
 			MARKETPLACE_PATH,
-			{}
+			term
 		),
 	} );
 };
@@ -54,9 +55,6 @@ const getVisibleTabs = (
 		return tabs;
 	}
 	const currentVisibleTabs = { ...tabs };
-	if ( selectedTab !== 'search' ) {
-		delete currentVisibleTabs.search;
-	}
 	if ( ! hasBusinessServices ) {
 		delete currentVisibleTabs[ 'business-services' ];
 	}
@@ -67,7 +65,8 @@ const getVisibleTabs = (
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs,
-	tabs: Tabs
+	tabs: Tabs,
+	query: Record< string, string >
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
 
@@ -76,7 +75,7 @@ const renderTabs = (
 			return;
 		}
 		setSelectedTab( tabKey );
-		setUrlTabParam( tabKey );
+		setUrlTabParam( tabKey, query );
 	};
 
 	const tabContent = [];
@@ -109,7 +108,13 @@ const renderTabs = (
 					{ tabs[ tabKey ]?.title }
 					{ tabs[ tabKey ]?.showUpdateCount && (
 						<span
-							className={ `woocommerce-marketplace__update-count woocommerce-marketplace__update-count-${ tabKey }` }
+							className={ clsx(
+								'woocommerce-marketplace__update-count',
+								`woocommerce-marketplace__update-count-${ tabKey }`,
+								{
+									'is-active': tabKey === selectedTab,
+								}
+							) }
 						>
 							<span> { tabs[ tabKey ]?.updateCount } </span>
 						</span>
@@ -124,19 +129,13 @@ const renderTabs = (
 const Tabs = ( props: TabsProps ): JSX.Element => {
 	const { additionalClassNames } = props;
 	const marketplaceContextValue = useContext( MarketplaceContext );
-	const { selectedTab, setSelectedTab, hasBusinessServices } =
+	const { selectedTab, isLoading, setSelectedTab, hasBusinessServices } =
 		marketplaceContextValue;
 	const { searchResultsCount } = marketplaceContextValue;
 
 	const query: Record< string, string > = useQuery();
 
 	const tabs: Tabs = {
-		search: {
-			name: 'search',
-			title: __( 'Search results', 'woocommerce' ),
-			showUpdateCount: false,
-			updateCount: 0,
-		},
 		discover: {
 			name: 'discover',
 			title: __( 'Discover', 'woocommerce' ),
@@ -146,19 +145,19 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		extensions: {
 			name: 'extensions',
 			title: __( 'Extensions', 'woocommerce' ),
-			showUpdateCount: !! query.term,
+			showUpdateCount: !! query.term && ! isLoading,
 			updateCount: searchResultsCount.extensions,
 		},
 		themes: {
 			name: 'themes',
 			title: __( 'Themes', 'woocommerce' ),
-			showUpdateCount: !! query.term,
+			showUpdateCount: !! query.term && ! isLoading,
 			updateCount: searchResultsCount.themes,
 		},
 		'business-services': {
 			name: 'business-services',
 			title: __( 'Business services', 'woocommerce' ),
-			showUpdateCount: !! query.term,
+			showUpdateCount: !! query.term && ! isLoading,
 			updateCount: searchResultsCount[ 'business-services' ],
 		},
 		'my-subscriptions': {
@@ -179,13 +178,17 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 		} else if ( Object.keys( query ).length > 0 ) {
 			setSelectedTab( DEFAULT_TAB_KEY );
 		}
-	}, [ query, setSelectedTab ] );
+	}, [ query, setSelectedTab, tabs ] );
 
 	useEffect( () => {
 		setVisibleTabs(
 			getVisibleTabs( selectedTab, hasBusinessServices, tabs )
 		);
-	}, [ selectedTab, hasBusinessServices ] );
+
+		if ( selectedTab === 'business-services' && ! hasBusinessServices ) {
+			setUrlTabParam( 'extensions', query );
+		}
+	}, [ selectedTab, hasBusinessServices, query, tabs ] );
 
 	return (
 		<nav
@@ -194,7 +197,7 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 				additionalClassNames || []
 			) }
 		>
-			{ renderTabs( marketplaceContextValue, visibleTabs, tabs ) }
+			{ renderTabs( marketplaceContextValue, visibleTabs, tabs, query ) }
 		</nav>
 	);
 };

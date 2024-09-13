@@ -46,20 +46,14 @@ function Search(): JSX.Element {
 		}
 	}, [ query.term ] );
 
-	useEffect( () => {
-		if ( query.tab !== 'search' ) {
-			setSearchTerm( '' );
-		}
-	}, [ query.tab ] );
-
 	const runSearch = () => {
-		const term = searchTerm.trim();
+		const newQuery: { term?: string; tab?: string } = query;
 
-		const newQuery: { term?: string; tab?: string } = {};
-		if ( term !== '' ) {
-			newQuery.term = term;
-			newQuery.tab = 'search';
+		if ( ! newQuery.tab ) {
+			newQuery.tab = 'extensions';
 		}
+
+		newQuery.term = searchTerm.trim();
 
 		// When the search term changes, we reset the query string on purpose.
 		navigateTo( {
