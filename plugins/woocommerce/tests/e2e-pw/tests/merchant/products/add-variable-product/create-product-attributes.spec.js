@@ -40,7 +40,7 @@ test.describe( 'Add product attributes', { tag: '@gutenberg' }, () => {
 
 	test( 'can add custom product attributes', async ( { page } ) => {
 		const textbox_attributeName =
-			page.getByPlaceholder( 'f.e. size or color' );
+			page.getByPlaceholder( 'e.g. length or weight' );
 		const textbox_attributeValues = page.getByPlaceholder(
 			'Enter options for customers to choose from'
 		);
