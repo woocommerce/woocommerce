@@ -1862,5 +1862,55 @@ class ProductCollection extends AbstractBlock {
 				return $collection_args;
 			}
 		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/upsells',
+			function ( $collection_args ) {
+				// No products should be shown if no related product reference is set.
+				if ( empty( $collection_args['upsellsProductReference'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
+				$product = wc_get_product( $collection_args['upsellsProductReference'] );
+				$upsells = array_map(
+					function ( $id ) {
+						return strval( $id );
+					},
+					$product->get_upsell_ids()
+				);
+
+				return array(
+					'post__in' => $upsells,
+				);
+			},
+			function ( $collection_args, $query ) {
+				$product_reference = $query['productReference'] ?? null;
+				// Infer the product reference from the location if an explicit product is not set.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['upsellsProductReference'] = $product_reference;
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$product_reference = $request->get_param( 'productReference' );
+				// In some cases the editor will send along block location context that we can infer the product reference from.
+				if ( empty( $product_reference ) ) {
+					$location = $collection_args['productCollectionLocation'];
+					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
+						$product_reference = $location['sourceData']['productId'];
+					}
+				}
+
+				$collection_args['upsellsProductReference'] = $product_reference;
+				return $collection_args;
+			}
+		);
 	}
 }
