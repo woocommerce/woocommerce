@@ -102,8 +102,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		if ( isset( $context['error'] ) && is_array( $context['error'] ) && ! empty( $context['error']['file'] ) ) {
-			$log_data['file'] = $this->sanitize( $context['error']['file'] );
-			unset( $context['error']['file'] );
+			$context['error']['file'] = $this->sanitize( $context['error']['file'] );
 		}
 
 		$extra_attrs = $context['extra'] ?? array();
@@ -307,9 +306,11 @@ class RemoteLogger extends \WC_Log_Handler {
 		if ( str_contains( $message, $wc_plugin_dir ) ) {
 			return false;
 		}
-
-		// Check if the backtrace contains the WooCommerce plugin directory.
-		foreach ( $context['backtrace'] as $trace ) {
+		// Check if any of the first three backtrace entries contain the WooCommerce plugin directory.
+		$backtrace_count = count( $context['backtrace'] );
+		$limit           = min( 3, $backtrace_count );
+		for ( $i = 0; $i < $limit; $i++ ) {
+			$trace = $context['backtrace'][ $i ];
 			if ( is_string( $trace ) && str_contains( $trace, $wc_plugin_dir ) ) {
 				return false;
 			}
