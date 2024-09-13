@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, HeightControl } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	ToggleControl,
 	RadioControl,
-	TextControl,
 	Notice,
 } from '@wordpress/components';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
@@ -62,16 +61,16 @@ const ExpressPaymentButtonStyleControls = ( {
 			) }
 			{ atLeastOnePaymentMethodSupportsOneOf( [ 'borderRadius' ] ) && (
 				<div className="border-radius-control-container">
-					<TextControl
+					<HeightControl
 						label={ __( 'Button border radius', 'woocommerce' ) }
 						value={ buttonBorderRadius }
-						onChange={ ( newValue: string ) =>
+						onChange={ ( newValue: string ) => {
+							const valueOnly = newValue.replace( 'px', '' );
 							setAttributes( {
-								buttonBorderRadius: newValue,
-							} )
-						}
+								buttonBorderRadius: valueOnly,
+							} );
+						} }
 					/>
-					<span className="border-radius-control-px">px</span>
 				</div>
 			) }
 		</>
