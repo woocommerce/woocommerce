@@ -88,7 +88,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			unset( $context['tags'] );
 		}
 
-		if ( class_exists( '\WC_Tracks' ) ) {
+		if ( class_exists( '\WC_Tracks' ) && function_exists( 'wp_get_current_user' ) ) {
 			$user         = wp_get_current_user();
 			$blog_details = \WC_Tracks::get_blog_details( $user->ID );
 
@@ -233,7 +233,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			}
 
 			return true;
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			// Log the error locally if the remote logging fails.
 			error_log( 'Remote logging failed: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return false;
