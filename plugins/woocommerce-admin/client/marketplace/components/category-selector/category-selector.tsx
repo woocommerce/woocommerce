@@ -256,6 +256,7 @@ export default function CategorySelector(
 						className="woocommerce-marketplace__category-navigation-button woocommerce-marketplace__category-navigation-button--prev"
 						hidden={ scrollPosition === 'start' }
 						aria-label="Scroll to previous categories"
+						tabIndex={ -1 }
 					>
 						<Icon icon="arrow-left-alt2" />
 					</button>
@@ -264,6 +265,7 @@ export default function CategorySelector(
 						className="woocommerce-marketplace__category-navigation-button woocommerce-marketplace__category-navigation-button--next"
 						hidden={ scrollPosition === 'end' }
 						aria-label="Scroll to next categories"
+						tabIndex={ -1 }
 					>
 						<Icon icon="arrow-right-alt2" />
 					</button>
