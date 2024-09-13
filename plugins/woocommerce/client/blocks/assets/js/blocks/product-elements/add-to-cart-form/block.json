@@ -8,6 +8,14 @@
 			"type": "string",
 			"enum": [ "input", "stepper" ],
 			"default": "input"
+		},
+		"autoselect": {
+			"type": "boolean",
+			"default": false
+		},
+		"unattachedAction": {
+			"type": "string",
+			"default": "hide"
 		}
 	},
 	"keywords": [ "WooCommerce" ],

@@ -36,6 +36,11 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		? 'wp-block-button__link wc-block-components-button'
 		: '';
 
+	const {
+		autoselect,
+		unattachedAction,
+	} = attributes;
+
 	return (
 		<>
 			{ isBlockTheme && (
@@ -144,6 +149,29 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					</div>
 				</Tooltip>
 			</div>
+			<InspectorControls key="inspector">
+				<PanelBody title={ __( 'Autoselect', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __( 'Auto-select attributes on user selection', 'woocommerce' ) }
+						help={ __( 'This controls which other attributes will be auto-selected when an attribute is changed. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
+						checked={ autoselect }
+						onChange={ () => setAttributes( { autoselect: !autoselect } ) }
+						__nextHasNoMarginBottom
+					/>
+					<SelectControl
+						label={ __( 'Values in conflict with current selection', 'woocommerce' ) }
+						help={ __( 'This controls what to do with attribute values that conflict with the current selection.', 'woocommerce' ) }
+						value={ unattachedAction }
+						options={ [
+							{ label: __( 'Hidden',                                                                  'woocommerce' ), value: 'hide' },
+							{ label: __( 'Grayed-out and disabled',                                                 'woocommerce' ), value: 'disable' },
+							{ label: __( 'Grayed-out but selectable (will clear all other attributes if selected)', 'woocommerce' ), value: 'gray' },
+						] }
+						onChange={ ( value ) => setAttributes( { unattachedAction: value } ) }
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
+			</InspectorControls>
 		</>
 	);
 };

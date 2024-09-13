@@ -189,6 +189,15 @@
 				height: 3em;
 				padding: 0.9em 1.1em;
 				font-size: var(--wp--preset--font-size--small);
+
+				option {
+					&.disabled,
+					&:disabled,
+					&:disabled[disabled] {
+						// Grayed-out & disabled options
+						color: --wc-option-disabled-text;
+					}
+				}
 			}
 		}
 	}
