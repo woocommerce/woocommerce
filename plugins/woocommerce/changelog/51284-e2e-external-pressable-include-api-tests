@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Include API tests into test suites for Pressable and WPCOM.
