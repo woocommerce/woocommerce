@@ -1,3 +1,21 @@
+:root {
+	--drawer-width: 480px;
+}
+
+$drawer-animation-duration: 0.3s;
+
+body.wc-modal--open .wc-block-product-filters__screen-overlay {
+	background-color: rgba(95, 95, 95, 0.35);
+	bottom: 0;
+	left: 0;
+	position: fixed;
+	right: 0;
+	top: 0;
+	transition: opacity $drawer-animation-duration;
+	z-index: 9999;
+	opacity: 1;
+}
+
 .wc-block-product-filters {
 	dialog {
 		flex-direction: column;
@@ -17,6 +35,27 @@
 		&.wc-block-product-filters--with-admin-bar {
 			margin-top: $gap;
 			height: calc(100vh - 2 * $gap);
+		}
+
+		&[data-wc-block-product-filters-overlay-style="left"] {
+			height: 100%;
+			right: 100%;
+			position: fixed;
+			left: 0;
+			top: 0;
+			width: var(--drawer-width);
+			max-width: 100%;
+		}
+
+		&[data-wc-block-product-filters-overlay-style="right"] {
+			height: 100%;
+			left: 100%;
+			position: fixed;
+			right: 0;
+			top: 0;
+			transform: translateX(max(-100%, var(--neg-drawer-width)));
+			width: var(--drawer-width);
+			max-width: 100%;
 		}
 	}
 }

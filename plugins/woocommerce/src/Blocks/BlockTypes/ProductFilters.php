@@ -15,6 +15,39 @@ class ProductFilters extends AbstractBlock {
 	protected $block_name = 'product-filters';
 
 	/**
+	 * Overlay Position.
+	 *
+	 * @var string
+	 */
+	protected $overlay_position = '';
+
+	/**
+	 * Overlay Style.
+	 *
+	 * @var string
+	 */
+	protected $overlay_style = '';
+
+	/**
+	 * Render overlay data attributes.
+	 *
+	 * @return string
+	 */
+	protected function overlay_data_attributes() {
+		if ( 'fullscreen' === $this->overlay_style || wp_is_mobile() ) {
+			return 'data-wc-block-product-filters-overlay-style="fullscreen"';
+		}
+
+		if ( '' === $this->overlay_position || 'left' === $this->overlay_position ) {
+			return 'data-wc-block-product-filters-overlay-style="left"';
+		}
+
+		if ( 'right' === $this->overlay_position ) {
+			return 'data-wc-block-product-filters-overlay-style="right"';
+		}
+	}
+
+	/**
 	 * Register the context.
 	 *
 	 * @return string[]
@@ -34,11 +67,12 @@ class ProductFilters extends AbstractBlock {
 		$html = $this->render_template_part( $template_part );
 
 		$html = strtr(
-			'<dialog hidden role="dialog" aria-modal="true">
+			'<dialog hidden role="dialog" aria-modal="true" {{overlay_style}}>
 				{{html}}
 			</dialog>',
 			array(
 				'{{html}}' => $html,
+				'{{overlay_style}}' => $this->overlay_data_attributes(),
 			)
 		);
 
@@ -50,6 +84,9 @@ class ProductFilters extends AbstractBlock {
 			$p->set_attribute( 'data-wc-class--wc-block-product-filters--with-admin-bar', 'context.hasPageWithWordPressAdminBar' );
 			$html = $p->get_updated_html();
 		}
+
+		// Add screen overlay.
+		$html = sprintf( '<div class="wc-block-product-filters__screen-overlay">%s</div>', $html );
 
 		return $html;
 	}
@@ -63,8 +100,14 @@ class ProductFilters extends AbstractBlock {
 	protected function render_template_part( $template_part ) {
 		$parsed_blocks               = parse_blocks( $template_part );
 		$wrapper_template_part_block = $parsed_blocks[0];
-		$html                        = $wrapper_template_part_block['innerHTML'];
-		$target_div                  = '</div>';
+
+		if ( 'woocommerce/product-filters-overlay' === $wrapper_template_part_block['blockName'] ) {
+			$this->overlay_position = isset( $wrapper_template_part_block['attrs']['overlayPosition'] ) ? $wrapper_template_part_block['attrs']['overlayPosition'] : '';
+			$this->overlay_style = isset( $wrapper_template_part_block['attrs']['overlayStyle'] ) ? $wrapper_template_part_block['attrs']['overlayStyle'] : '';
+		}
+
+		$html       = $wrapper_template_part_block['innerHTML'];
+		$target_div = '</div>';
 
 		$template_part_content_html = array_reduce(
 			$wrapper_template_part_block['innerBlocks'],
