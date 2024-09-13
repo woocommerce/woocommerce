@@ -27,7 +27,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$context               = $block->context['filterData'];
 		$items                 = $context['items'] ?? array();
 		$checkbox_list_context = array( 'items' => $items );
-		$on_change             = $context['on_change'] ?? '';
+		$action                = $context['action'] ?? '';
 		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 		$classes = array(
@@ -104,7 +104,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 									aria-invalid="false"
 									aria-label="<?php echo esc_attr( $i18n_label ); ?>"
 									data-wc-on--change--select-item="actions.selectCheckboxItem"
-									data-wc-on--change--parent-action="<?php echo esc_attr( $on_change ); ?>"
+									data-wc-on--change--parent-action="<?php echo esc_attr( $action ); ?>"
 									value="<?php echo esc_attr( $item['value'] ); ?>"
 									<?php checked( $item['selected'], 1 ); ?>
 								>
