@@ -647,9 +647,10 @@ class ProductCollection extends AbstractBlock {
 		// Most likely this argument is being accessed in the test environment image.
 		$args['author'] = '';
 
-		return $this->get_final_query_args(
+		$final_query_args = $this->get_final_query_args(
 			$args,
 			array(
+				'collection'          => $product_collection_query_context['collection'] ?? '',
 				'orderby'             => $orderby,
 				'on_sale'             => $on_sale,
 				'stock_status'        => $stock_status,
@@ -660,6 +661,8 @@ class ProductCollection extends AbstractBlock {
 				'priceRange'          => $price_range,
 			)
 		);
+
+		return $final_query_args;
 	}
 
 	/**
@@ -737,6 +740,7 @@ class ProductCollection extends AbstractBlock {
 			'posts_per_page' => $query['perPage'],
 			'order'          => $query['order'],
 			'offset'         => ( $per_page * ( $page - 1 ) ) + $offset,
+			'post__in'       => array(),
 			'post_status'    => 'publish',
 			'post_type'      => 'product',
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
@@ -755,6 +759,7 @@ class ProductCollection extends AbstractBlock {
 		$final_query = $this->get_final_query_args(
 			$common_query_values,
 			array(
+				'collection'          => $this->parsed_block['attrs']['collection'] ?? '',
 				'on_sale'             => $is_on_sale,
 				'stock_status'        => $query['woocommerceStockStatus'],
 				'orderby'             => $query['orderBy'],
@@ -779,7 +784,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
 	private function get_final_query_args( $common_query_values, $query, $is_exclude_applied_filters = false ) {
-		$handpicked_query = array( 'post__in' => $query['handpicked_products'] ?? array() );
+		$handpicked_query = $this->get_handpicked_query( $query['handpicked_products'], $query['collection'] );
 		$on_sale_query    = $this->get_on_sale_products_query( $query['on_sale'] );
 		$orderby_query    = $query['orderby'] ? $this->get_custom_orderby_query( $query['orderby'] ) : array();
 		$stock_query      = $this->get_stock_status_query( $query['stock_status'] );
@@ -794,7 +799,17 @@ class ProductCollection extends AbstractBlock {
 		// We exclude applied filters to generate product ids for the filter blocks.
 		$applied_filters_query = $is_exclude_applied_filters ? array() : $this->get_queries_by_applied_filters();
 
-		$merged_query = $this->merge_queries( $common_query_values, $orderby_query, $handpicked_query, $on_sale_query, $stock_query, $tax_query, $applied_filters_query, $date_query, $price_query_args );
+		$merged_query = $this->merge_queries(
+			$common_query_values,
+			$orderby_query,
+			$handpicked_query,
+			$on_sale_query,
+			$stock_query,
+			$tax_query,
+			$applied_filters_query,
+			$date_query,
+			$price_query_args
+		);
 
 		return $merged_query;
 	}
@@ -898,6 +913,32 @@ class ProductCollection extends AbstractBlock {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_key' => $meta_keys[ $orderby ],
 			'orderby'  => 'meta_value_num',
+		);
+	}
+
+	/**
+	 * Return query for hand-picked products.
+	 *
+	 * @param int[]  $product_ids Hand-picked products IDs.
+	 * @param string $collection Collection name.
+	 *
+	 * @return array The post__in query.
+	 */
+	private function get_handpicked_query( $product_ids, $collection ) {
+		if ( is_array( $product_ids ) && ! empty( $product_ids ) ) {
+			return array(
+				'post__in' => $product_ids,
+			);
+		}
+
+		$collection_name          = $this->parsed_block['attrs']['collection'];
+		$is_handpicked_collection = 'woocommerce/product-collection/hand-picked' === $collection;
+
+		// For the Hand-Picked collection, we need to always display no results
+		// if no products were picked. To achieve this, we need to set post__in to [-1]
+		// so that there are no IDs to be intersected.
+		return array(
+			'post__in' => $is_handpicked_collection ? array( -1 ) : array(),
 		);
 	}
 
