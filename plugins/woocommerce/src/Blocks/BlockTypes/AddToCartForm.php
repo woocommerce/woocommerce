@@ -73,6 +73,8 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
+		$is_external_product_with_url = $product instanceof \WC_Product_External && $product->get_product_url();
+
 		ob_start();
 
 		/**
@@ -92,7 +94,10 @@ class AddToCartForm extends AbstractBlock {
 
 		$parsed_attributes                     = $this->parse_attributes( $attributes );
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
-		$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
+
+		if ( ! $is_external_product_with_url ) {
+			$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
+		}
 
 		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
