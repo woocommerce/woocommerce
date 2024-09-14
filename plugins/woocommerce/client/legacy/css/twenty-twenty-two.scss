@@ -524,6 +524,10 @@ $tt2-gray: #f7f7f7;
 			padding: 0.7rem 2rem;
 		}
 	}
+
+	.asterisk {
+		@include asterisk();
+	}
 }
 
 // Description/Additional info/Reviews tabs.
