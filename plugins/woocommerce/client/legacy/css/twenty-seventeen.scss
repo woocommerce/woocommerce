@@ -77,6 +77,10 @@
 			line-height: 3em;
 		}
 	}
+
+	.asterisk {
+		@include asterisk();
+	}
 }
 
 .woocommerce-breadcrumb {
