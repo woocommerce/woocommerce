@@ -4161,11 +4161,10 @@ function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
 		}
 
 		if ( $p->has_class( 'dots' ) ) {
-			// If current page is before the dots.
-			if ( $args['current'] + $args['mid_size'] < $args['total'] - $args['end_size'] ) {
-				$n = $args['total'] - $args['end_size'];
-			} else {
+			if ( $args['current'] - $args['mid_size'] > $n ) {
 				$n = $args['current'] - $args['mid_size'] - 1;
+			} else {
+				$n = $args['total'] - $args['end_size'];
 			}
 			++$n;
 			continue;
