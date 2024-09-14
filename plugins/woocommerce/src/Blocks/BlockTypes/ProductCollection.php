@@ -90,7 +90,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
 		// Provide location context into block's context.
-		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
+		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 2 );
 
 		// Disable block render if the ProductTemplate block is empty.
 		add_filter(
