@@ -811,19 +811,6 @@
         ]
     },
     {
-        "description": "Filter for Onboarding steps configuration.",
-        "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/profile-wizard/index.js#L140-L145",
-        "name": "woocommerce_admin_profile_wizard_steps",
-        "type": "filter",
-        "params": [
-            {
-                "name": "steps",
-                "type": "Array.<Object>",
-                "description": "Array of steps for Onboarding Wizard."
-            }
-        ]
-    },
-    {
         "description": "Store Management extensions links",
         "sourceFile": "https://github.com/woocommerce/woocommerce-admin/blob/46c8304c425749dfc715b38e59f56198b05e7b46/client/store-management-links/index.js#L171-L176",
         "name": "woocommerce_admin_homescreen_quicklinks",

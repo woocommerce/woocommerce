@@ -67,7 +67,10 @@ test(
 		} );
 
 		await test.step( 'publish the updated product', async () => {
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+			await page
+				.locator( '#publishing-action' )
+				.getByRole( 'button', { name: 'Update' } )
+				.click();
 		} );
 
 		await test.step( 'verify the changes', async () => {
@@ -276,7 +279,7 @@ test(
 					.toBe( 0 );
 
 				await expect
-					.soft( await page.locator( 'bdi' ).first() )
+					.soft( page.locator( 'bdi' ).first() )
 					.toContainText( expectedRegularPrice );
 			}
 		} );
@@ -340,7 +343,7 @@ test(
 test(
 	'increasing the sale price from 0 does not change the sale price when bulk editing products',
 	{ tag: [ '@gutenberg', '@services' ] },
-	async ( { page, api } ) => {
+	async ( { page, api, products } ) => {
 		let product;
 		await api
 			.post( 'products', {
@@ -355,6 +358,8 @@ test(
 			} )
 			.then( ( response ) => {
 				product = response.data;
+				// For cleanup: products from this list are deleted in the fixture
+				products.push( product );
 			} );
 
 		const salePriceIncrease = 10;

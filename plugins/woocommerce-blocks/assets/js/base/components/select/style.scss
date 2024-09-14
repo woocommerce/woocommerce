@@ -18,7 +18,7 @@
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				box-shadow: 0 0 0 2px $input-border-gray;
+				box-shadow: 0 0 0 2px $input-border-dark;
 			}
 		}
 
@@ -40,12 +40,16 @@
 		color: $input-text-active;
 
 		&:focus {
-			outline: 0;
-			box-shadow: 0 0 0 1px inherit;
+			outline: none;
+			box-shadow: 0 0 0 2px $input-border-gray;
 		}
 
 		.has-dark-controls & {
 			color: $input-text-dark;
+
+			&:focus {
+				box-shadow: 0 0 0 2px $input-border-dark;
+			}
 		}
 
 		.has-error & {
