@@ -93,7 +93,7 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.locator( 'text=Get paid' ).click();
+		await page.getByRole( 'button', { name: '3 Get paid' } ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
 		).toHaveText( 'Get paid' );
