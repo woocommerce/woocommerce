@@ -58,7 +58,8 @@
 	"usesContext": [
 		"templateSlug",
 		"postId",
-		"singleProduct"
+		"singleProduct",
+		"productCollectionLocation"
 	],
 	"supports": {
 		"align": [
