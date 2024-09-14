@@ -516,6 +516,10 @@
 			}
 		}
 	}
+
+	.asterisk {
+		@include asterisk();
+	}
 }
 
 // Description/Additional info/Reviews tabs.
