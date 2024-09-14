@@ -20,10 +20,15 @@ import {
 	isCartResponseTotals,
 	isNumber,
 } from '@woocommerce/types';
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import {
+	unmountComponentAtNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import clsx from 'clsx';
-import type { ReactRootWithContainer } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -105,8 +110,6 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		setContentsNode( node );
 	}, [] );
 
-	const rootRef = useRef< ReactRootWithContainer[] | null >( null );
-
 	useEffect( () => {
 		const body = document.querySelector( 'body' );
 		if ( body ) {
@@ -131,7 +134,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 				return;
 			}
 			if ( isOpen ) {
-				const renderedBlock = renderParentBlock( {
+				renderParentBlock( {
 					Block: MiniCartContentsBlock,
 					blockName,
 					getProps: ( el: Element ) => {
@@ -148,25 +151,16 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					selector: '.wp-block-woocommerce-mini-cart-contents',
 					blockMap: getRegisteredBlockComponents( blockName ),
 				} );
-				rootRef.current = renderedBlock;
 			}
 		}
 
 		return () => {
 			if ( contentsNode instanceof Element && isOpen ) {
-				const unmountingContainer = contentsNode.querySelector(
+				const container = contentsNode.querySelector(
 					'.wp-block-woocommerce-mini-cart-contents'
 				);
-
-				if ( unmountingContainer ) {
-					const foundRoot = rootRef?.current?.find(
-						( { container } ) => unmountingContainer === container
-					);
-					if ( typeof foundRoot?.root?.unmount === 'function' ) {
-						setTimeout( () => {
-							foundRoot.root.unmount();
-						} );
-					}
+				if ( container ) {
+					unmountComponentAtNode( container );
 				}
 			}
 		};

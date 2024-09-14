@@ -7,7 +7,12 @@ config = {
 		{
 			name: 'default wpcom',
 			use: { ...devices[ 'Desktop Chrome' ] },
-			testMatch: '**basic.spec.js',
+			testMatch: [
+				'**/basic.spec.js',
+				'**/shopper/**/*.spec.js',
+				'**/api-tests/**/*.test.js',
+			],
+			grepInvert: /@skip-on-default-wpcom/,
 		},
 	],
 };

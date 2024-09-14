@@ -10,7 +10,7 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import Modal from '~/profile-wizard/steps/usage-modal';
+import Modal from '~/task-lists/components/usage-modal';
 
 export const UsageModal = () => {
 	const query = getQuery();

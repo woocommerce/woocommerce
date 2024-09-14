@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the correct language in Cart/Checkout when the user language is different from the store.

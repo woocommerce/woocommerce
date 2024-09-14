@@ -240,10 +240,10 @@ test.describe(
 					.click();
 
 				await expect(
-					await page
-						.getByText( 'Password reset email has been sent' )
-						.count()
-				).toBeGreaterThan( 0 );
+					page
+						.getByRole( 'alert' )
+						.getByText( 'Password reset email has been sent.' )
+				).toBeVisible();
 			} );
 
 			await test.step( 'verify that the email was sent', async () => {

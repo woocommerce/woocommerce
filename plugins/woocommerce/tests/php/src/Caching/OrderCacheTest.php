@@ -1,4 +1,7 @@
 <?php
+declare( strict_types = 1);
+
+namespace Automattic\WooCommerce\Tests\Caching;
 
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;

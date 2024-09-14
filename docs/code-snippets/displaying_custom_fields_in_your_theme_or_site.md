@@ -33,7 +33,7 @@ function woocommerce_custom_field_example() {
     $custom_field_value = get_post_meta( $product->get_id(), 'woo_custom_field', true );
     
     if ( ! empty( $custom_field_value ) ) {
-       echo '<div class="custom-field">' . esc_html( $custom_field_value ) . '</div>';
+       echo '&lt;div class="custom-field"&gt;' . esc_html( $custom_field_value ) . '&lt;/div&gt;';
     }
 }
 

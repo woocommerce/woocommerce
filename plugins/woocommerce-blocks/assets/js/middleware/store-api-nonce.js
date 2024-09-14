@@ -23,7 +23,7 @@ try {
  *
  * @return {boolean} Returns true if this is a store request.
  */
-const isStoreApiRequest = ( options ) => {
+export const isStoreApiRequest = ( options ) => {
 	const url = options.url || options.path;
 	if ( ! url || ! options.method || options.method === 'GET' ) {
 		return false;
