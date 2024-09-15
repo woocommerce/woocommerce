@@ -66,33 +66,36 @@ const SiteVisibility = () => {
 		}
 	}, [] );
 
-	useEffect( () => {
-		const initValues = {
-			comingSoon: setting.woocommerce_coming_soon,
-			storePagesOnly: setting.woocommerce_store_pages_only,
-			privateLink: setting.woocommerce_private_link || 'no',
-			hideAdminBarBadge:
-				setting.woocommerce_coming_soon_hide_admin_bar_badge || 'no',
-		};
+	// Using a lazy initializer to store initial values on page render
+	const [ initialSettings ] = useState( () => ( {
+		comingSoon: setting.woocommerce_coming_soon,
+		storePagesOnly: setting.woocommerce_store_pages_only,
+		privateLink: setting.woocommerce_private_link || 'no',
+		hideAdminBarBadge:
+			setting.woocommerce_coming_soon_hide_admin_bar_badge || 'no',
+	} ) );
 
-		const currentValues = {
-			comingSoon,
-			storePagesOnly,
-			privateLink,
-			hideAdminBarBadge,
-		};
+	useEffect( () => {
 		const saveButton = document.getElementsByClassName(
 			'woocommerce-save-button'
 		)[ 0 ];
 		if ( saveButton ) {
 			saveButton.disabled =
-				initValues.comingSoon === currentValues.comingSoon &&
-				initValues.storePagesOnly === currentValues.storePagesOnly &&
-				initValues.privateLink === currentValues.privateLink &&
-				initValues.hideAdminBarBadge ===
-					currentValues.hideAdminBarBadge;
+				initialSettings.comingSoon === comingSoon &&
+				initialSettings.storePagesOnly === storePagesOnly &&
+				initialSettings.privateLink === privateLink &&
+				initialSettings.hideAdminBarBadge === hideAdminBarBadge;
 		}
-	}, [ comingSoon, storePagesOnly, privateLink, hideAdminBarBadge ] );
+	}, [
+		comingSoon,
+		storePagesOnly,
+		privateLink,
+		hideAdminBarBadge,
+		initialSettings.comingSoon,
+		initialSettings.storePagesOnly,
+		initialSettings.privateLink,
+		initialSettings.hideAdminBarBadge,
+	] );
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
