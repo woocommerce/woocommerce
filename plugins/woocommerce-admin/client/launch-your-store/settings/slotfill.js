@@ -307,7 +307,7 @@ const SiteVisibility = () => {
 				</p>
 			</div>
 			<div className="site-visibility-settings-slotfill-section">
-				<h3>{ __( 'Admin bar badge', 'woocommerce' ) }</h3>
+				<h4>{ __( 'Admin bar badge', 'woocommerce' ) }</h4>
 				<ToggleControl
 					label={ __( 'Hide admin bar badge', 'woocommerce' ) }
 					help={ __(
