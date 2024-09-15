@@ -48,7 +48,7 @@ const SiteVisibility = () => {
 		setting?.woocommerce_private_link || 'no'
 	);
 	const [ hideAdminBarBadge, setHideAdminBarBadge ] = useState(
-		setting?.woocommerce_hide_admin_bar_badge || 'no'
+		setting?.woocommerce_coming_soon_hide_admin_bar_badge || 'no'
 	);
 	const formRef = useRef( null );
 	const saveButtonRef = useRef( null );
@@ -71,10 +71,16 @@ const SiteVisibility = () => {
 			comingSoon: setting.woocommerce_coming_soon,
 			storePagesOnly: setting.woocommerce_store_pages_only,
 			privateLink: setting.woocommerce_private_link || 'no',
-			hideAdminBarBadge: setting.woocommerce_hide_admin_bar_badge || 'no',
+			hideAdminBarBadge:
+				setting.woocommerce_coming_soon_hide_admin_bar_badge || 'no',
 		};
 
-		const currentValues = { comingSoon, storePagesOnly, privateLink, hideAdminBarBadge };
+		const currentValues = {
+			comingSoon,
+			storePagesOnly,
+			privateLink,
+			hideAdminBarBadge,
+		};
 		const saveButton = document.getElementsByClassName(
 			'woocommerce-save-button'
 		)[ 0 ];
@@ -83,7 +89,8 @@ const SiteVisibility = () => {
 				initValues.comingSoon === currentValues.comingSoon &&
 				initValues.storePagesOnly === currentValues.storePagesOnly &&
 				initValues.privateLink === currentValues.privateLink &&
-				initValues.hideAdminBarBadge === currentValues.hideAdminBarBadge;
+				initValues.hideAdminBarBadge ===
+					currentValues.hideAdminBarBadge;
 		}
 	}, [ comingSoon, storePagesOnly, privateLink, hideAdminBarBadge ] );
 
@@ -138,7 +145,7 @@ const SiteVisibility = () => {
 			<input
 				type="hidden"
 				value={ hideAdminBarBadge }
-				name="woocommerce_hide_admin_bar_badge"
+				name="woocommerce_coming_soon_hide_admin_bar_badge"
 			/>
 			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
@@ -158,13 +165,19 @@ const SiteVisibility = () => {
 			</p>
 			<ToggleControl
 				label={ __( 'Hide admin bar badge', 'woocommerce' ) }
-				help={ __( 'Hide the site visibility badge from the admin bar.', 'woocommerce' ) }
+				help={ __(
+					'Hide the site visibility badge from the admin bar.',
+					'woocommerce'
+				) }
 				checked={ hideAdminBarBadge === 'yes' }
 				onChange={ ( checked ) => {
 					setHideAdminBarBadge( checked ? 'yes' : 'no' );
-					recordEvent( 'site_visibility_hide_admin_bar_badge_toggle', {
-						enabled: checked,
-					} );
+					recordEvent(
+						'site_visibility_hide_admin_bar_badge_toggle',
+						{
+							enabled: checked,
+						}
+					);
 				} }
 			/>
 			<div className="site-visibility-settings-slotfill-section">

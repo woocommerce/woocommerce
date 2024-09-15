@@ -219,6 +219,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_admin_customize_store_completed_theme_id',
 			'woocommerce_admin_customize_store_survey_completed',
 			'woocommerce_coming_soon',
+			'woocommerce_coming_soon_hide_admin_bar_badge',
 			'woocommerce_store_pages_only',
 			'woocommerce_private_link',
 			'woocommerce_share_key',
