@@ -38,10 +38,10 @@ class LaunchYourStore {
 
 		// options to allowed update and their allowed values.
 		$options = array(
-			'woocommerce_coming_soon'      => array( 'yes', 'no' ),
-			'woocommerce_store_pages_only' => array( 'yes', 'no' ),
-			'woocommerce_private_link'     => array( 'yes', 'no' ),
-			'woocommerce_coming_soon_hide_admin_bar_badge'     => array( 'yes', 'no' ),
+			'woocommerce_coming_soon'                      => array( 'yes', 'no' ),
+			'woocommerce_store_pages_only'                 => array( 'yes', 'no' ),
+			'woocommerce_private_link'                     => array( 'yes', 'no' ),
+			'woocommerce_coming_soon_hide_admin_bar_badge' => array( 'yes', 'no' ),
 		);
 
 		$event_data = array();
@@ -125,7 +125,7 @@ class LaunchYourStore {
 				'woocommerce_store_pages_only' => get_option( 'woocommerce_store_pages_only' ),
 				'woocommerce_private_link'     => get_option( 'woocommerce_private_link' ),
 				'woocommerce_share_key'        => get_option( 'woocommerce_share_key' ),
-				'woocommerce_coming_soon_hide_admin_bar_badge'        => get_option( 'woocommerce_coming_soon_hide_admin_bar_badge' ),
+				'woocommerce_coming_soon_hide_admin_bar_badge' => get_option( 'woocommerce_coming_soon_hide_admin_bar_badge' ),
 			);
 		}
 
