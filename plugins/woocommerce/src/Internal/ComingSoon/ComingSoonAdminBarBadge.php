@@ -23,6 +23,15 @@ class ComingSoonAdminBarBadge {
 	}
 
 	/**
+	 * Check if the admin bar badge should be hidden.
+	 *
+	 * @return bool True if the badge should be hidden, false otherwise.
+	 */
+	private function is_admin_bar_badge_hidden() {
+		return get_option( 'woocommerce_coming_soon_hide_admin_bar_badge' ) === 'yes';
+	}
+
+	/**
 	 * Add site visibility cache badge to WP admin bar.
 	 *
 	 * @internal
@@ -30,7 +39,7 @@ class ComingSoonAdminBarBadge {
 	 */
 	public function site_visibility_badge( $wp_admin_bar ) {
 		// Early exit if LYS feature is disabled or if the badge is hidden.
-		if ( ! Features::is_enabled( 'launch-your-store' ) || get_option( 'woocommerce_coming_soon_hide_admin_bar_badge' ) === 'yes' ) {
+		if ( ! Features::is_enabled( 'launch-your-store' ) || $this->is_admin_bar_badge_hidden() ) {
 			return;
 		}
 
@@ -67,8 +76,8 @@ class ComingSoonAdminBarBadge {
 	 * @internal
 	 */
 	public function output_css() {
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) || get_option( 'woocommerce_coming_soon_hide_admin_bar_badge' ) === 'yes' ) {
+		// Early exit if LYS feature is disabled or if the badge is hidden.
+		if ( ! Features::is_enabled( 'launch-your-store' ) || $this->is_admin_bar_badge_hidden() ) {
 			return;
 		}
 
