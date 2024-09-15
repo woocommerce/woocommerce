@@ -280,7 +280,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						type: 'text',
 						default: '',
 						tip: 'The street address for your business location.',
-						value: '',
+						value: expect.any( String ),
 					} ),
 				] )
 			);
@@ -310,7 +310,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						type: 'text',
 						default: '',
 						tip: 'The city in which your business is located.',
-						value: '',
+						value: expect.any( String ),
 					} ),
 				] )
 			);
@@ -341,7 +341,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						type: 'text',
 						default: '',
 						tip: 'The postal code, if any, in which your business is located.',
-						value: '',
+						value: expect.any( String ),
 					} ),
 				] )
 			);
@@ -1019,157 +1019,164 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 	} );
 
 	test.describe( 'List all Tax settings options', () => {
-		test( 'can retrieve all tax settings', async ( { request } ) => {
-			// call API to retrieve all settings options
-			const response = await request.get( '/wp-json/wc/v3/settings/tax' );
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThan( 0 );
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_prices_include_tax',
-						label: 'Prices entered with tax',
-						description: '',
-						type: 'radio',
-						default: 'no',
-						options: {
-							yes: 'Yes, I will enter prices inclusive of tax',
-							no: 'No, I will enter prices exclusive of tax',
-						},
-						tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
-						value: 'no',
-					} ),
-				] )
-			);
+		test(
+			'can retrieve all tax settings',
+			{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
+			async ( { request } ) => {
+				// call API to retrieve all settings options
+				const response = await request.get(
+					'/wp-json/wc/v3/settings/tax'
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( Array.isArray( responseJSON ) ).toBe( true );
+				expect( responseJSON.length ).toBeGreaterThan( 0 );
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_prices_include_tax',
+							label: 'Prices entered with tax',
+							description: '',
+							type: 'radio',
+							default: 'no',
+							options: {
+								yes: 'Yes, I will enter prices inclusive of tax',
+								no: 'No, I will enter prices exclusive of tax',
+							},
+							tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
+							value: 'no',
+						} ),
+					] )
+				);
 
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_based_on',
-						label: 'Calculate tax based on',
-						description: '',
-						type: 'select',
-						default: 'shipping',
-						options: {
-							shipping: 'Customer shipping address',
-							billing: 'Customer billing address',
-							base: 'Shop base address',
-						},
-						tip: 'This option determines which address is used to calculate tax.',
-						value: 'shipping',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_shipping_tax_class',
-						label: 'Shipping tax class',
-						description:
-							'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
-						type: 'select',
-						default: 'inherit',
-						options: {
-							inherit: 'Shipping tax class based on cart items',
-							'': 'Standard',
-							'reduced-rate': 'Reduced rate',
-							'zero-rate': 'Zero rate',
-						},
-						tip: 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
-						value: 'inherit',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_round_at_subtotal',
-						label: 'Rounding',
-						description:
-							'Round tax at subtotal level, instead of rounding per line',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_classes',
-						label: 'Additional tax classes',
-						description: '',
-						type: 'textarea',
-						default: '',
-						tip: 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.',
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_display_shop',
-						label: 'Display prices in the shop',
-						description: '',
-						type: 'select',
-						default: 'excl',
-						options: {
-							incl: 'Including tax',
-							excl: 'Excluding tax',
-						},
-						value: 'excl',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_display_cart',
-						label: 'Display prices during cart and checkout',
-						description: '',
-						type: 'select',
-						default: 'excl',
-						options: {
-							incl: 'Including tax',
-							excl: 'Excluding tax',
-						},
-						value: 'excl',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_price_display_suffix',
-						label: 'Price display suffix',
-						description: '',
-						type: 'text',
-						default: '',
-						tip: 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: {price_including_tax}, {price_excluding_tax}.',
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_tax_total_display',
-						label: 'Display tax totals',
-						description: '',
-						type: 'select',
-						default: 'itemized',
-						options: {
-							single: 'As a single total',
-							itemized: 'Itemized',
-						},
-						value: 'itemized',
-					} ),
-				] )
-			);
-		} );
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_based_on',
+							label: 'Calculate tax based on',
+							description: '',
+							type: 'select',
+							default: 'shipping',
+							options: {
+								shipping: 'Customer shipping address',
+								billing: 'Customer billing address',
+								base: 'Shop base address',
+							},
+							tip: 'This option determines which address is used to calculate tax.',
+							value: 'shipping',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_shipping_tax_class',
+							label: 'Shipping tax class',
+							description:
+								'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
+							type: 'select',
+							default: 'inherit',
+							options: {
+								inherit:
+									'Shipping tax class based on cart items',
+								'': 'Standard',
+								'reduced-rate': 'Reduced rate',
+								'zero-rate': 'Zero rate',
+							},
+							tip: 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.',
+							value: 'inherit',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_round_at_subtotal',
+							label: 'Rounding',
+							description:
+								'Round tax at subtotal level, instead of rounding per line',
+							type: 'checkbox',
+							default: 'no',
+							value: 'no',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_classes',
+							label: 'Additional tax classes',
+							description: '',
+							type: 'textarea',
+							default: '',
+							tip: 'List additional tax classes you need below (1 per line, e.g. Reduced Rates). These are in addition to "Standard rate" which exists by default.',
+							value: '',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_display_shop',
+							label: 'Display prices in the shop',
+							description: '',
+							type: 'select',
+							default: 'excl',
+							options: {
+								incl: 'Including tax',
+								excl: 'Excluding tax',
+							},
+							value: 'excl',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_display_cart',
+							label: 'Display prices during cart and checkout',
+							description: '',
+							type: 'select',
+							default: 'excl',
+							options: {
+								incl: 'Including tax',
+								excl: 'Excluding tax',
+							},
+							value: 'excl',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_price_display_suffix',
+							label: 'Price display suffix',
+							description: '',
+							type: 'text',
+							default: '',
+							tip: 'Define text to show after your product prices. This could be, for example, "inc. Vat" to explain your pricing. You can also have prices substituted here using one of the following: {price_including_tax}, {price_excluding_tax}.',
+							value: '',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_tax_total_display',
+							label: 'Display tax totals',
+							description: '',
+							type: 'select',
+							default: 'itemized',
+							options: {
+								single: 'As a single total',
+								itemized: 'Itemized',
+							},
+							value: 'itemized',
+						} ),
+					] )
+				);
+			}
+		);
 	} );
 
 	test.describe( 'List all Shipping settings options', () => {
@@ -1613,286 +1620,294 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Advanced settings options', () => {
-		test( 'can retrieve all advanced settings', async ( { request } ) => {
-			// call API to retrieve all settings options
-			const response = await request.get(
-				'/wp-json/wc/v3/settings/advanced'
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
+	test.describe(
+		'List all Advanced settings options',
+		{ tag: '@skip-on-default-wpcom' },
+		() => {
+			test( 'can retrieve all advanced settings', async ( {
+				request,
+			} ) => {
+				// call API to retrieve all settings options
+				const response = await request.get(
+					'/wp-json/wc/v3/settings/advanced'
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( Array.isArray( responseJSON ) ).toBe( true );
 
-			// not present in external host
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( ! shouldSkip ) {
+				// not present in external host
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				if ( ! shouldSkip ) {
+					expect( responseJSON ).toEqual(
+						expect.arrayContaining( [
+							expect.objectContaining( {
+								id: 'woocommerce_cart_page_id',
+								label: 'Cart page',
+								description:
+									'Page where shoppers review their shopping cart',
+								type: 'select',
+								default: '',
+								tip: 'Page where shoppers review their shopping cart',
+								value: expect.any( String ),
+								options: expect.any( Object ),
+							} ),
+						] )
+					);
+				}
+
+				// not present in external host
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				if ( ! shouldSkip ) {
+					expect( responseJSON ).toEqual(
+						expect.arrayContaining( [
+							expect.objectContaining( {
+								id: 'woocommerce_checkout_page_id',
+								label: 'Checkout page',
+								description:
+									'Page where shoppers go to finalize their purchase',
+								type: 'select',
+								default: expect.any( Number ),
+								tip: 'Page where shoppers go to finalize their purchase',
+								value: expect.any( String ),
+								options: expect.any( Object ),
+							} ),
+						] )
+					);
+				}
+
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
 						expect.objectContaining( {
-							id: 'woocommerce_cart_page_id',
-							label: 'Cart page',
+							id: 'woocommerce_myaccount_page_id',
+							label: 'My account page',
 							description:
-								'Page where shoppers review their shopping cart',
+								'Page contents: [woocommerce_my_account]',
 							type: 'select',
 							default: '',
-							tip: 'Page where shoppers review their shopping cart',
+							tip: 'Page contents: [woocommerce_my_account]',
 							value: expect.any( String ),
 							options: expect.any( Object ),
 						} ),
 					] )
 				);
-			}
-
-			// not present in external host
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
 						expect.objectContaining( {
-							id: 'woocommerce_checkout_page_id',
-							label: 'Checkout page',
+							id: 'woocommerce_checkout_pay_endpoint',
+							label: 'Pay',
 							description:
-								'Page where shoppers go to finalize their purchase',
-							type: 'select',
-							default: expect.any( Number ),
-							tip: 'Page where shoppers go to finalize their purchase',
-							value: expect.any( String ),
-							options: expect.any( Object ),
+								'Endpoint for the "Checkout &rarr; Pay" page.',
+							type: 'text',
+							default: 'order-pay',
+							tip: 'Endpoint for the "Checkout &rarr; Pay" page.',
+							value: 'order-pay',
 						} ),
 					] )
 				);
-			}
-
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_page_id',
-						label: 'My account page',
-						description: 'Page contents: [woocommerce_my_account]',
-						type: 'select',
-						default: '',
-						tip: 'Page contents: [woocommerce_my_account]',
-						value: expect.any( String ),
-						options: expect.any( Object ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_checkout_pay_endpoint',
-						label: 'Pay',
-						description:
-							'Endpoint for the "Checkout &rarr; Pay" page.',
-						type: 'text',
-						default: 'order-pay',
-						tip: 'Endpoint for the "Checkout &rarr; Pay" page.',
-						value: 'order-pay',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_checkout_order_received_endpoint',
-						label: 'Order received',
-						description:
-							'Endpoint for the "Checkout &rarr; Order received" page.',
-						type: 'text',
-						default: 'order-received',
-						tip: 'Endpoint for the "Checkout &rarr; Order received" page.',
-						value: 'order-received',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_add_payment_method_endpoint',
-						label: 'Add payment method',
-						description:
-							'Endpoint for the "Checkout &rarr; Add payment method" page.',
-						type: 'text',
-						default: 'add-payment-method',
-						tip: 'Endpoint for the "Checkout &rarr; Add payment method" page.',
-						value: 'add-payment-method',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_delete_payment_method_endpoint',
-						label: 'Delete payment method',
-						description:
-							'Endpoint for the delete payment method page.',
-						type: 'text',
-						default: 'delete-payment-method',
-						tip: 'Endpoint for the delete payment method page.',
-						value: 'delete-payment-method',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_orders_endpoint',
-						label: 'Orders',
-						description:
-							'Endpoint for the "My account &rarr; Orders" page.',
-						type: 'text',
-						default: 'orders',
-						tip: 'Endpoint for the "My account &rarr; Orders" page.',
-						value: 'orders',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_view_order_endpoint',
-						label: 'View order',
-						description:
-							'Endpoint for the "My account &rarr; View order" page.',
-						type: 'text',
-						default: 'view-order',
-						tip: 'Endpoint for the "My account &rarr; View order" page.',
-						value: 'view-order',
-					} ),
-				] )
-			);
-
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_downloads_endpoint',
-						label: 'Downloads',
-						description:
-							'Endpoint for the "My account &rarr; Downloads" page.',
-						type: 'text',
-						default: 'downloads',
-						tip: 'Endpoint for the "My account &rarr; Downloads" page.',
-						value: 'downloads',
-					} ),
-				] )
-			);
-
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_edit_account_endpoint',
-						label: 'Edit account',
-						description:
-							'Endpoint for the "My account &rarr; Edit account" page.',
-						type: 'text',
-						default: 'edit-account',
-						tip: 'Endpoint for the "My account &rarr; Edit account" page.',
-						value: 'edit-account',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_edit_address_endpoint',
-						label: 'Addresses',
-						description:
-							'Endpoint for the "My account &rarr; Addresses" page.',
-						type: 'text',
-						default: 'edit-address',
-						tip: 'Endpoint for the "My account &rarr; Addresses" page.',
-						value: 'edit-address',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_payment_methods_endpoint',
-						label: 'Payment methods',
-						description:
-							'Endpoint for the "My account &rarr; Payment methods" page.',
-						type: 'text',
-						default: 'payment-methods',
-						tip: 'Endpoint for the "My account &rarr; Payment methods" page.',
-						value: 'payment-methods',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_myaccount_lost_password_endpoint',
-						label: 'Lost password',
-						description:
-							'Endpoint for the "My account &rarr; Lost password" page.',
-						type: 'text',
-						default: 'lost-password',
-						tip: 'Endpoint for the "My account &rarr; Lost password" page.',
-						value: 'lost-password',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_logout_endpoint',
-						label: 'Logout',
-						description:
-							'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true',
-						type: 'text',
-						default: 'customer-logout',
-						tip: 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true',
-						value: 'customer-logout',
-					} ),
-				] )
-			);
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
 						expect.objectContaining( {
-							id: 'woocommerce_allow_tracking',
-							label: 'Enable tracking',
+							id: 'woocommerce_checkout_order_received_endpoint',
+							label: 'Order received',
 							description:
-								'Allow usage of WooCommerce to be tracked',
+								'Endpoint for the "Checkout &rarr; Order received" page.',
+							type: 'text',
+							default: 'order-received',
+							tip: 'Endpoint for the "Checkout &rarr; Order received" page.',
+							value: 'order-received',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_add_payment_method_endpoint',
+							label: 'Add payment method',
+							description:
+								'Endpoint for the "Checkout &rarr; Add payment method" page.',
+							type: 'text',
+							default: 'add-payment-method',
+							tip: 'Endpoint for the "Checkout &rarr; Add payment method" page.',
+							value: 'add-payment-method',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_delete_payment_method_endpoint',
+							label: 'Delete payment method',
+							description:
+								'Endpoint for the delete payment method page.',
+							type: 'text',
+							default: 'delete-payment-method',
+							tip: 'Endpoint for the delete payment method page.',
+							value: 'delete-payment-method',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_orders_endpoint',
+							label: 'Orders',
+							description:
+								'Endpoint for the "My account &rarr; Orders" page.',
+							type: 'text',
+							default: 'orders',
+							tip: 'Endpoint for the "My account &rarr; Orders" page.',
+							value: 'orders',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_view_order_endpoint',
+							label: 'View order',
+							description:
+								'Endpoint for the "My account &rarr; View order" page.',
+							type: 'text',
+							default: 'view-order',
+							tip: 'Endpoint for the "My account &rarr; View order" page.',
+							value: 'view-order',
+						} ),
+					] )
+				);
+
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_downloads_endpoint',
+							label: 'Downloads',
+							description:
+								'Endpoint for the "My account &rarr; Downloads" page.',
+							type: 'text',
+							default: 'downloads',
+							tip: 'Endpoint for the "My account &rarr; Downloads" page.',
+							value: 'downloads',
+						} ),
+					] )
+				);
+
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_edit_account_endpoint',
+							label: 'Edit account',
+							description:
+								'Endpoint for the "My account &rarr; Edit account" page.',
+							type: 'text',
+							default: 'edit-account',
+							tip: 'Endpoint for the "My account &rarr; Edit account" page.',
+							value: 'edit-account',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_edit_address_endpoint',
+							label: 'Addresses',
+							description:
+								'Endpoint for the "My account &rarr; Addresses" page.',
+							type: 'text',
+							default: 'edit-address',
+							tip: 'Endpoint for the "My account &rarr; Addresses" page.',
+							value: 'edit-address',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_payment_methods_endpoint',
+							label: 'Payment methods',
+							description:
+								'Endpoint for the "My account &rarr; Payment methods" page.',
+							type: 'text',
+							default: 'payment-methods',
+							tip: 'Endpoint for the "My account &rarr; Payment methods" page.',
+							value: 'payment-methods',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_myaccount_lost_password_endpoint',
+							label: 'Lost password',
+							description:
+								'Endpoint for the "My account &rarr; Lost password" page.',
+							type: 'text',
+							default: 'lost-password',
+							tip: 'Endpoint for the "My account &rarr; Lost password" page.',
+							value: 'lost-password',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_logout_endpoint',
+							label: 'Logout',
+							description:
+								'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true',
+							type: 'text',
+							default: 'customer-logout',
+							tip: 'Endpoint for the triggering logout. You can add this to your menus via a custom link: yoursite.com/?customer-logout=true',
+							value: 'customer-logout',
+						} ),
+					] )
+				);
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				if ( ! shouldSkip ) {
+					expect( responseJSON ).toEqual(
+						expect.arrayContaining( [
+							expect.objectContaining( {
+								id: 'woocommerce_allow_tracking',
+								label: 'Enable tracking',
+								description:
+									'Allow usage of WooCommerce to be tracked',
+								type: 'checkbox',
+								default: 'no',
+								tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woocommerce.com/usage-tracking" target="_blank">WooCommerce.com Usage Tracking Documentation</a>.',
+								value: 'no',
+							} ),
+						] )
+					);
+				} else {
+					// Test is failing on external hosts
+				}
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_show_marketplace_suggestions',
+							label: 'Show Suggestions',
+							description:
+								'Display suggestions within WooCommerce',
 							type: 'checkbox',
-							default: 'no',
-							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woocommerce.com/usage-tracking" target="_blank">WooCommerce.com Usage Tracking Documentation</a>.',
-							value: 'no',
+							default: 'yes',
+							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.',
+							value: 'yes',
 						} ),
 					] )
 				);
-			} else {
-				// Test is failing on external hosts
-			}
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_show_marketplace_suggestions',
-						label: 'Show Suggestions',
-						description: 'Display suggestions within WooCommerce',
-						type: 'checkbox',
-						default: 'yes',
-						tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_analytics_enabled',
-						label: 'Analytics',
-						description: 'Enable WooCommerce Analytics',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-		} );
-	} );
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_analytics_enabled',
+							label: 'Analytics',
+							description: 'Enable WooCommerce Analytics',
+							type: 'checkbox',
+							default: 'yes',
+							value: 'yes',
+						} ),
+					] )
+				);
+			} );
+		}
+	);
 
 	test.describe( 'List all Email New Order settings', () => {
 		test( 'can retrieve all email new order settings', async ( {
@@ -1930,7 +1945,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						tip: expect.stringContaining(
 							'Enter recipients (comma separated) for this email. Defaults to'
 						),
-						value: '',
+						value: expect.any( String ),
 					} ),
 				] )
 			);
@@ -1998,107 +2013,110 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 	} );
 
 	test.describe( 'List all Email Failed Order settings', () => {
-		test( 'can retrieve all email failed order settings', async ( {
-			request,
-		} ) => {
-			// call API to retrieve all settings options
-			const response = await request.get(
-				'/wp-json/wc/v3/settings/email_failed_order'
-			);
-			const responseJSON = await response.json();
-			expect( response.status() ).toEqual( 200 );
-			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'enabled',
-						label: 'Enable/Disable',
-						description: '',
-						type: 'checkbox',
-						default: 'yes',
-						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'recipient',
-						label: 'Recipient(s)',
-						description: expect.stringContaining(
-							'Enter recipients (comma separated) for this email. Defaults to'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter recipients (comma separated) for this email. Defaults to'
-						),
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'subject',
-						label: 'Subject',
-						description:
-							'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						type: 'text',
-						default: '',
-						tip: 'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'heading',
-						label: 'Email heading',
-						description:
-							'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						type: 'text',
-						default: '',
-						tip: 'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						value: '',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'additional_content',
-						label: 'Additional content',
-						description:
-							'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						type: 'textarea',
-						default:
-							'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
-						tip: 'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						value: 'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'email_type',
-						label: 'Email type',
-						description: 'Choose which format of email to send.',
-						type: 'select',
-						default: 'html',
-						options: {
-							plain: 'Plain text',
-							html: 'HTML',
-							multipart: 'Multipart',
-						},
-						tip: 'Choose which format of email to send.',
-						value: 'html',
-					} ),
-				] )
-			);
-		} );
+		test(
+			'can retrieve all email failed order settings',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { request } ) => {
+				// call API to retrieve all settings options
+				const response = await request.get(
+					'/wp-json/wc/v3/settings/email_failed_order'
+				);
+				const responseJSON = await response.json();
+				expect( response.status() ).toEqual( 200 );
+				expect( Array.isArray( responseJSON ) ).toBe( true );
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'enabled',
+							label: 'Enable/Disable',
+							description: '',
+							type: 'checkbox',
+							default: 'yes',
+							value: 'yes',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'recipient',
+							label: 'Recipient(s)',
+							description: expect.stringContaining(
+								'Enter recipients (comma separated) for this email. Defaults to'
+							),
+							type: 'text',
+							default: '',
+							tip: expect.stringContaining(
+								'Enter recipients (comma separated) for this email. Defaults to'
+							),
+							value: '',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'subject',
+							label: 'Subject',
+							description:
+								'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
+							type: 'text',
+							default: '',
+							tip: 'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
+							value: '',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'heading',
+							label: 'Email heading',
+							description:
+								'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
+							type: 'text',
+							default: '',
+							tip: 'Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
+							value: '',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'additional_content',
+							label: 'Additional content',
+							description:
+								'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
+							type: 'textarea',
+							default:
+								'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
+							tip: 'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
+							value: 'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
+						} ),
+					] )
+				);
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'email_type',
+							label: 'Email type',
+							description:
+								'Choose which format of email to send.',
+							type: 'select',
+							default: 'html',
+							options: {
+								plain: 'Plain text',
+								html: 'HTML',
+								multipart: 'Multipart',
+							},
+							tip: 'Choose which format of email to send.',
+							value: 'html',
+						} ),
+					] )
+				);
+			}
+		);
 	} );
 
 	test.describe( 'List all Email Customer On Hold Order settings', () => {

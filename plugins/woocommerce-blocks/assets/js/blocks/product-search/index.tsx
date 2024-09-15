@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { addFilter } from '@wordpress/hooks';
 import { store as blockEditorStore, Warning } from '@wordpress/block-editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -9,6 +10,7 @@ import { Icon, search } from '@wordpress/icons';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 import { Button } from '@wordpress/components';
+import type { Block as BlockType } from '@wordpress/blocks';
 import {
 	// @ts-ignore waiting for @types/wordpress__blocks update
 	registerBlockVariation,
@@ -21,8 +23,10 @@ import {
  */
 import './style.scss';
 import './editor.scss';
+import { withProductSearchControls } from './inspector-controls';
 import Block from './block';
 import Edit from './edit';
+import { SEARCH_BLOCK_NAME, SEARCH_VARIATION_NAME } from './constants';
 
 const isBlockVariationAvailable = getSettingWithCoercion(
 	'isBlockVariationAvailable',
@@ -71,6 +75,7 @@ const PRODUCT_SEARCH_ATTRIBUTES = {
 	query: {
 		post_type: 'product',
 	},
+	namespace: SEARCH_VARIATION_NAME,
 };
 
 const DeprecatedBlockEdit = ( { clientId }: { clientId: string } ) => {
@@ -115,8 +120,9 @@ const DeprecatedBlockEdit = ( { clientId }: { clientId: string } ) => {
 	);
 };
 
-registerBlockType( 'woocommerce/product-search', {
+registerBlockType( SEARCH_VARIATION_NAME, {
 	title: __( 'Product Search', 'woocommerce' ),
+	apiVersion: 3,
 	icon: {
 		src: (
 			<Icon
@@ -145,7 +151,7 @@ registerBlockType( 'woocommerce/product-search', {
 				isMatch: ( { idBase, instance } ) =>
 					idBase === 'woocommerce_product_search' && !! instance?.raw,
 				transform: ( { instance } ) =>
-					createBlock( 'woocommerce/product-search', {
+					createBlock( SEARCH_VARIATION_NAME, {
 						label:
 							instance.raw.title ||
 							PRODUCT_SEARCH_ATTRIBUTES.label,
@@ -171,9 +177,31 @@ registerBlockType( 'woocommerce/product-search', {
 	},
 } );
 
+function registerProductSearchNamespace( props: BlockType, blockName: string ) {
+	if ( blockName === 'core/search' ) {
+		// Gracefully handle if settings.attributes is undefined.
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore -- We need this because `attributes` is marked as `readonly`
+		props.attributes = {
+			...props.attributes,
+			namespace: {
+				type: 'string',
+			},
+		};
+	}
+
+	return props;
+}
+
+addFilter(
+	'blocks.registerBlockType',
+	SEARCH_VARIATION_NAME,
+	registerProductSearchNamespace
+);
+
 if ( isBlockVariationAvailable ) {
 	registerBlockVariation( 'core/search', {
-		name: 'woocommerce/product-search',
+		name: SEARCH_VARIATION_NAME,
 		title: __( 'Product Search', 'woocommerce' ),
 		icon: {
 			src: (
@@ -198,4 +226,9 @@ if ( isBlockVariationAvailable ) {
 		),
 		attributes: PRODUCT_SEARCH_ATTRIBUTES,
 	} );
+	addFilter(
+		'editor.BlockEdit',
+		SEARCH_BLOCK_NAME,
+		withProductSearchControls
+	);
 }

@@ -25,9 +25,43 @@ declare module '@wordpress/core-data' {
 		name: string,
 		id: number | string,
 		options?: { enabled: boolean }
-	): { record: T, editedRecord: T, isResolving: boolean, hasResolved: boolean };
+	): {
+		record: T;
+		editedRecord: T;
+		isResolving: boolean;
+		hasResolved: boolean;
+	};
+	const store: string;
 }
 declare module '@wordpress/keyboard-shortcuts' {
-	function useShortcut(name: string, callback: (event: KeyboardEvent) => void): void;
+	function useShortcut(
+		name: string,
+		callback: ( event: KeyboardEvent ) => void
+	): void;
 	const store;
+}
+
+declare module '@wordpress/router' {
+	const privateApis;
+}
+
+declare module '@wordpress/edit-site/build-module/components/sync-state-with-url/use-init-edited-entity-from-url' {
+	export default function useInitEditedEntityFromURL(): void;
+}
+
+declare module '@wordpress/edit-site/build-module/components/sidebar-navigation-screen' {
+	const SidebarNavigationScreen: React.FunctionComponent< {
+		title: string;
+		isRoot: boolean;
+		content: JSX.Element;
+	} >;
+	export default SidebarNavigationScreen;
+}
+
+declare module '@wordpress/edit-site/build-module/components/site-hub' {
+	const SiteHub: React.FunctionComponent< {
+		ref: React.Ref;
+		isTransparent: boolean;
+	} >;
+	export default SiteHub;
 }

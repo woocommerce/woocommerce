@@ -216,11 +216,11 @@ const resetPatternsAndProducts = () => async () => {
 
 	return Promise.all( [
 		apiFetch( {
-			path: '/wc/private/ai/patterns',
+			path: '/wc-admin/ai/patterns',
 			method: 'DELETE',
 		} ),
 		apiFetch( {
-			path: '/wc/private/ai/products',
+			path: '/wc-admin/ai/products',
 			method: 'DELETE',
 		} ),
 	] );
@@ -278,7 +278,7 @@ export const updateStorePatterns = async (
 			additional_errors?: unknown[];
 		} >( [
 			apiFetch( {
-				path: '/wc/private/ai/products',
+				path: '/wc-admin/ai/products',
 				method: 'POST',
 				data: {
 					business_description:
@@ -287,7 +287,7 @@ export const updateStorePatterns = async (
 				},
 			} ),
 			apiFetch( {
-				path: '/wc/private/ai/patterns',
+				path: '/wc-admin/ai/patterns',
 				method: 'POST',
 				data: {
 					business_description:
@@ -300,7 +300,7 @@ export const updateStorePatterns = async (
 		const productContents = response.product_content.map(
 			( product, index ) => {
 				return apiFetch( {
-					path: '/wc/private/ai/product',
+					path: '/wc-admin/ai/product',
 					method: 'POST',
 					data: {
 						products_information: product,

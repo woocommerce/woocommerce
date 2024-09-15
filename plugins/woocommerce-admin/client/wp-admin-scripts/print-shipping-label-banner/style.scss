@@ -66,6 +66,16 @@
 	.components-external-link__icon {
 		display: none;
 	}
+
+	&.error {
+		min-height: auto;
+		.inside {
+			padding-bottom: 6px;
+			p {
+				font-size: 13px;
+			}
+		}
+	}
 }
 
 .components-modal__frame.wc-admin-shipping-banner__dismiss-modal {

@@ -46,8 +46,8 @@ const options = {
 	title: 'My Mayment Method',
 	description: 'A setence or two about your payment method',
 	gatewayId: 'gateway-id',
-	content: <div>A React node</div>,
-	edit: <div>A React node</div>,
+	content: &lt;div&gt;A React node&lt;/div&gt;,
+	edit: &lt;div&gt;A React node&lt;/div&gt;,
 	canMakePayment: () => true,
 	paymentMethodId: 'new_payment_method',
 	supports: {

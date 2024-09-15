@@ -46,7 +46,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.3.0';
+	public $version = '9.4.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -711,6 +711,11 @@ final class WooCommerce {
 		 * WCCOM Site.
 		 */
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';
+
+		/**
+		 * Product Usage
+		 */
+		include_once WC_ABSPATH . 'includes/product-usage/class-wc-product-usage.php';
 
 		/**
 		 * Libraries and packages.

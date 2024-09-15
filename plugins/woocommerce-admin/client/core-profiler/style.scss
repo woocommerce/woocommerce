@@ -196,9 +196,6 @@
 			margin-left: 10px;
 		}
 
-		a {
-			color: $gray-700;
-		}
 	}
 }
 // Business location page
@@ -346,7 +343,7 @@
 		}
 	}
 
-	$sticky-footer-height: 140px;
+	$sticky-footer-height: 120px;
 
 	.woocommerce-profiler-plugins__list {
 		display: flex;
@@ -356,7 +353,7 @@
 		flex: 50%;
 
 		@mixin sticky-footer-scroll-padding {
-			padding-bottom: $sticky-footer-height;
+			padding-bottom: $sticky-footer-height + 32px;
 		}
 
 		@include breakpoint(">782px") {// sticky footer shouldn't apply to mobile layout
@@ -413,9 +410,6 @@
 	.woocommerce-profiler-plugins-jetpack-agreement {
 		color: $gray-700;
 		font-size: 12px;
-		a {
-			color: inherit;
-		}
 	}
 
 	.woocommerce-profiler-plugins__footer {
@@ -426,7 +420,7 @@
 
 		@mixin plugins-sticky-footer {
 			background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 44.69%);
-			height: 140px;
+			height: $sticky-footer-height;
 			position: fixed;
 			bottom: 0;
 		}

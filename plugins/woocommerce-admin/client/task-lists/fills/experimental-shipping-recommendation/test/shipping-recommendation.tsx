@@ -19,8 +19,25 @@ jest.mock( '../utils', () => ( {
 	redirectToWCSSettings: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/components', () => {
+	const originalModule = jest.requireActual( '@woocommerce/components' );
+
+	return {
+		__esModule: true,
+		...originalModule,
+		Plugins: jest.fn().mockReturnValue( <div>MockedPlugins</div> ),
+		Spinner: jest.fn().mockReturnValue( null ),
+	};
+} );
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn().mockImplementation( () => {
+		return {
+			createNotice: jest.fn(),
+			installAndActivatePlugins: jest.fn(),
+		};
+	} ),
 	useSelect: jest.fn().mockImplementation( ( fn ) =>
 		fn( () => ( {
 			getActivePlugins: jest.fn().mockReturnValue( [] ),
@@ -61,16 +78,14 @@ const ShippingRecommendation = ( props: ShippingRecommendationProps ) => {
 
 describe( 'ShippingRecommendation', () => {
 	test( 'should show plugins step when woocommerce-services is not installed and activated', () => {
-		const { getByRole } = render(
+		const { getByText } = render(
 			<ShippingRecommendation
 				isJetpackConnected={ false }
 				isResolving={ false }
 				activePlugins={ [ 'foo' ] }
 			/>
 		);
-		expect(
-			getByRole( 'button', { name: 'Install & enable' } )
-		).toBeInTheDocument();
+		expect( getByText( 'MockedPlugins' ) ).toBeInTheDocument();
 	} );
 
 	test( 'should show connect step when WCS&T is activated but not yet connected', () => {

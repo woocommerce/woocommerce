@@ -148,6 +148,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_downloads_grant_access_after_payment' => 'checkbox',
 			'woocommerce_downloads_add_hash_to_filename'       => 'checkbox',
 			'woocommerce_downloads_deliver_inline'             => 'checkbox',
+			'woocommerce_downloads_count_partial'        => 'checkbox',
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );
