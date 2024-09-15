@@ -29,8 +29,8 @@ class ComingSoonAdminBarBadge {
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
 	 */
 	public function site_visibility_badge( $wp_admin_bar ) {
-		// Early exit if LYS feature is disabled.
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+		// Early exit if LYS feature is disabled or if the badge is hidden.
+		if ( ! Features::is_enabled( 'launch-your-store' ) || get_option( 'woocommerce_hide_admin_bar_badge' ) === 'yes' ) {
 			return;
 		}
 
