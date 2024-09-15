@@ -164,26 +164,6 @@ const SiteVisibility = () => {
 				) }
 			</p>
 			<div className="site-visibility-settings-slotfill-section">
-				<h3>{ __( 'Admin bar badge', 'woocommerce' ) }</h3>
-				<ToggleControl
-					label={ __( 'Hide admin bar badge', 'woocommerce' ) }
-					help={ __(
-						'Hide the site visibility badge from the admin bar.',
-						'woocommerce'
-					) }
-					checked={ hideAdminBarBadge === 'yes' }
-					onChange={ ( checked ) => {
-						setHideAdminBarBadge( checked ? 'yes' : 'no' );
-						recordEvent(
-							'site_visibility_hide_admin_bar_badge_toggle',
-							{
-								enabled: checked,
-							}
-						);
-					} }
-				/>
-			</div>
-			<div className="site-visibility-settings-slotfill-section">
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'yes' );
@@ -322,6 +302,26 @@ const SiteVisibility = () => {
 						'woocommerce'
 					) }
 				</p>
+			</div>
+			<div className="site-visibility-settings-slotfill-section">
+				<h3>{ __( 'Admin bar badge', 'woocommerce' ) }</h3>
+				<ToggleControl
+					label={ __( 'Hide admin bar badge', 'woocommerce' ) }
+					help={ __(
+						'Hide the site visibility badge from the admin bar.',
+						'woocommerce'
+					) }
+					checked={ hideAdminBarBadge === 'yes' }
+					onChange={ ( checked ) => {
+						setHideAdminBarBadge( checked ? 'yes' : 'no' );
+						recordEvent(
+							'site_visibility_hide_admin_bar_badge_toggle',
+							{
+								enabled: checked,
+							}
+						);
+					} }
+				/>
 			</div>
 			{ formRef.current && saveButtonRef.current ? (
 				<ConfirmationModal
