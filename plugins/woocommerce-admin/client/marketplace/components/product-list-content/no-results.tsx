@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
-import { useQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
