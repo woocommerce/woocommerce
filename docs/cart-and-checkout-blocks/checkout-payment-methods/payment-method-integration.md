@@ -117,7 +117,7 @@ This is an array of payment features supported by the gateway. It is used to cro
 
 This is an array of style variations supported by the express payment method. These are styles that are applied across all the active express payment buttons and can be controlled from the express payment block in the editor. Supported values for these are one of `['height', 'borderRadius']`.
 
-<img width="418" alt="Screenshot 2024-09-16 at 14 18 13" src="https://github.com/user-attachments/assets/f0f99f3f-dca7-42b0-8685-3b098a825020">---
+![Express Checkout Uniform Styles](https://github.com/user-attachments/assets/f0f99f3f-dca7-42b0-8685-3b098a825020)
 
 ### Payment Methods - `registerPaymentMethod( options )`
 
