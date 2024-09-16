@@ -6,9 +6,10 @@ namespace Automattic\WooCommerce\Internal\Logging;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Internal\McStats;
+use Jetpack_Options;
 use WC_Rate_Limiter;
 use WC_Log_Levels;
-use Jetpack_Options;
+use WC_Site_Tracking;
 
 /**
  * WooCommerce Remote Logger
@@ -22,6 +23,8 @@ use Jetpack_Options;
  * @package WooCommerce\Classes
  */
 class RemoteLogger extends \WC_Log_Handler {
+	use UseNonBuiltInFunctions;
+
 	const LOG_ENDPOINT             = 'https://public-api.wordpress.com/rest/v1.1/logstash';
 	const RATE_LIMIT_ID            = 'woocommerce_remote_logging';
 	const RATE_LIMIT_DELAY         = 60; // 1 minute.
@@ -40,11 +43,17 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool False if value was not handled and true if value was handled.
 	 */
 	public function handle( $timestamp, $level, $message, $context ) {
-		if ( ! $this->should_handle( $level, $message, $context ) ) {
+		try {
+			if ( ! $this->should_handle( $level, $message, $context ) ) {
+				return false;
+			}
+
+			return $this->log( $level, $message, $context );
+		} catch ( \Throwable $e ) {
+			// Log the error to the local logger so we can investigate.
+			$this->wc_get_logger()->error( 'Failed to handle the log: ' . $e->getMessage(), array( 'source' => 'remote-logging' ) );
 			return false;
 		}
-
-		return $this->log( $level, $message, $context );
 	}
 
 	/**
@@ -66,14 +75,14 @@ class RemoteLogger extends \WC_Log_Handler {
 			'feature'    => 'woocommerce_core',
 			'severity'   => $level,
 			'message'    => $this->sanitize( $message ),
-			'host'       => wp_parse_url( home_url(), PHP_URL_HOST ),
+			'host'       => $this->wp_parse_url( $this->home_url(), PHP_URL_HOST ),
 			'tags'       => array( 'woocommerce', 'php' ),
 			'properties' => array(
-				'wc_version'  => WC()->version,
+				'wc_version'  => $this->get_wc_version(),
 				'php_version' => phpversion(),
-				'wp_version'  => get_bloginfo( 'version' ),
+				'wp_version'  => $this->get_bloginfo( 'version' ),
 				'request_uri' => $this->sanitize_request_uri( filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL ) ),
-				'store_id'    => get_option( \WC_Install::STORE_ID_OPTION, null ),
+				'store_id'    => $this->get_option( \WC_Install::STORE_ID_OPTION, null ),
 			),
 		);
 
@@ -140,7 +149,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
+		if ( ! WC_Site_Tracking::is_tracking_enabled() ) {
 			return false;
 		}
 
@@ -193,11 +202,12 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
-			error_log( 'Remote logging throttled.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			// Log locally that the remote logging is throttled.
+			$this->wc_get_logger()->warning( 'Remote logging throttled.', array( 'source' => 'remote-logging' ) );
 			return false;
 		}
 
-		return true;
+			return true;
 	}
 
 
@@ -212,46 +222,41 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool
 	 */
 	private function log( $level, $message, $context ) {
-		try {
-			$log_data = $this->get_formatted_log( $level, $message, $context );
+		$log_data = $this->get_formatted_log( $level, $message, $context );
 
 			// Ensure the log data is valid.
-			if ( ! is_array( $log_data ) || empty( $log_data['message'] ) || empty( $log_data['feature'] ) ) {
-				return false;
-			}
-
-			$body = array(
-				'params' => wp_json_encode( $log_data ),
-			);
-
-			WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
-
-			if ( $this->is_dev_or_local_environment() ) {
-				return false;
-			}
-
-			$response = wp_safe_remote_post(
-				self::LOG_ENDPOINT,
-				array(
-					'body'     => wp_json_encode( $body ),
-					'timeout'  => 3,
-					'headers'  => array(
-						'Content-Type' => 'application/json',
-					),
-					'blocking' => false,
-				)
-			);
-
-			if ( is_wp_error( $response ) ) {
-				throw new \Exception( $response->get_error_message() );
-			}
-
-			return true;
-		} catch ( \Throwable $e ) {
-			// Log the error locally if the remote logging fails.
-			error_log( 'Remote logging failed: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		if ( ! is_array( $log_data ) || empty( $log_data['message'] ) || empty( $log_data['feature'] ) ) {
 			return false;
 		}
+
+		$body = array(
+			'params' => $this->wp_json_encode( $log_data ),
+		);
+
+		WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
+
+		if ( $this->is_dev_or_local_environment() ) {
+			return false;
+		}
+
+		$response = $this->wp_safe_remote_post(
+			self::LOG_ENDPOINT,
+			array(
+				'body'     => $this->wp_json_encode( $body ),
+				'timeout'  => 3,
+				'headers'  => array(
+					'Content-Type' => 'application/json',
+				),
+				'blocking' => false,
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			$this->wc_get_logger()->error( 'Failed to send the log to the remote logging service: ' . $response->get_error_message(), array( 'source' => 'remote-logging' ) );
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -260,7 +265,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool
 	 */
 	private function is_variant_assignment_allowed() {
-		$assignment = get_option( 'woocommerce_remote_variant_assignment', 0 );
+		$assignment = $this->get_option( 'woocommerce_remote_variant_assignment', 0 );
 		return ( $assignment <= 12 ); // Considering 10% of the 0-120 range.
 	}
 
@@ -270,12 +275,12 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool
 	 */
 	private function should_current_version_be_logged() {
-		$new_version = get_site_transient( self::WC_NEW_VERSION_TRANSIENT );
+		$new_version = $this->get_site_transient( self::WC_NEW_VERSION_TRANSIENT );
 
 		if ( false === $new_version ) {
 			$new_version = $this->fetch_new_woocommerce_version();
 			// Cache the new version for a week since we want to keep logging in with the same version for a while even if the new version is available.
-			set_site_transient( self::WC_NEW_VERSION_TRANSIENT, $new_version, WEEK_IN_SECONDS );
+			$this->set_site_transient( self::WC_NEW_VERSION_TRANSIENT, $new_version, WEEK_IN_SECONDS );
 		}
 
 		if ( ! is_string( $new_version ) || '' === $new_version ) {
@@ -284,7 +289,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		// If the current version is the latest, we don't want to log errors.
-		return version_compare( WC()->version, $new_version, '>=' );
+		return version_compare( $this->get_wc_version(), $new_version, '>=' );
 	}
 
 	/**
@@ -324,6 +329,9 @@ class RemoteLogger extends \WC_Log_Handler {
 			}
 		}
 
+		if ( ! function_exists( 'apply_filters' ) ) {
+			require_once ABSPATH . WPINC . '/plugin.php';
+		}
 		/**
 		 * Filter to allow other plugins to overwrite the result of the third-party error check for remote logging.
 		 *
@@ -342,14 +350,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return string|null New version if an update is available, null otherwise.
 	 */
 	private function fetch_new_woocommerce_version() {
-		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-		if ( ! function_exists( 'get_plugin_updates' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/update.php';
-		}
-
-		$plugin_updates = get_plugin_updates();
+		$plugin_updates = $this->get_plugin_updates();
 
 		// Check if WooCommerce plugin update information is available.
 		if ( ! is_array( $plugin_updates ) || ! isset( $plugin_updates[ WC_PLUGIN_BASENAME ] ) ) {
@@ -429,7 +430,7 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		$is_array_by_file = isset( $sanitized_trace[0]['file'] );
 		if ( $is_array_by_file ) {
-			return wc_print_r( $sanitized_trace, true );
+			return $this->wc_print_r( $sanitized_trace, true );
 		}
 
 		return implode( "\n", $sanitized_trace );
@@ -443,7 +444,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool
 	 */
 	protected function is_dev_or_local_environment() {
-		return in_array( wp_get_environment_type(), array( 'development', 'local' ), true );
+		return in_array( $this->wp_get_environment_type(), array( 'development', 'local' ), true );
 	}
 	/**
 	 * Sanitize the request URI to only allow certain query parameters.
@@ -474,7 +475,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		 */
 		$whitelist = apply_filters( 'woocommerce_remote_logger_request_uri_whitelist', $default_whitelist );
 
-		$parsed_url = wp_parse_url( $request_uri );
+		$parsed_url = $this->wp_parse_url( $request_uri );
 		if ( ! isset( $parsed_url['query'] ) ) {
 			return $request_uri;
 		}
