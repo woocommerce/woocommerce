@@ -96,7 +96,10 @@ for ( const productType of Object.keys( productData ) ) {
 				await page
 					.getByLabel( 'Regular price ($)' )
 					.fill( productData[ productType ].regularPrice );
-				await page.getByText( 'Inventory' ).click();
+				await page
+					.getByRole( 'link' )
+					.filter( { hasText: 'Inventory' } )
+					.click();
 
 				// Inventory information
 				await page
@@ -130,7 +133,10 @@ for ( const productType of Object.keys( productData ) ) {
 
 			await test.step( 'add product advanced information', async () => {
 				// Advanced information
-				await page.getByText( 'Advanced' ).click();
+				await page
+					.getByRole( 'link' )
+					.filter( { hasText: 'Advanced' } )
+					.click();
 				await page
 					.getByLabel( 'Purchase note' )
 					.fill( productData[ productType ].purchaseNote );
@@ -265,12 +271,16 @@ for ( const productType of Object.keys( productData ) ) {
 
 				// Verify description
 				await expect(
-					page.getByText(
-						productData[ productType ].shortDescription
-					)
+					page
+						.getByText(
+							productData[ productType ].shortDescription
+						)
+						.first()
 				).toBeVisible();
 				await expect(
-					page.getByText( productData[ productType ].description )
+					page
+						.getByText( productData[ productType ].description )
+						.first()
 				).toBeVisible();
 				await expect(
 					page.getByText( `SKU: ${ productData[ productType ].sku }` )
