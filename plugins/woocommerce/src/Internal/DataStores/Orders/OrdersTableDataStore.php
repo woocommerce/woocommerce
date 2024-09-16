@@ -1734,6 +1734,7 @@ WHERE
 			}
 		} else {
 			$uncached_order_ids = $ids;
+			$order_data = array();
 		}
 
 		if ( count( $uncached_order_ids ) > 0 ) {
