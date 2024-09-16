@@ -21,6 +21,7 @@ const collection = {
 	),
 	keywords: [ 'boost', 'promotion' ],
 	scope: [],
+	usesReference: [ 'product' ],
 };
 
 const attributes = {
