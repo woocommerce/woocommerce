@@ -10,6 +10,7 @@ import { CART_STORE_KEY, VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
+import { Button } from '@ariakit/react';
 
 /**
  * Internal dependencies
@@ -18,7 +19,6 @@ import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';
 import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
-import Button from '../../../../base/components/button';
 
 const SHIPPING_RATE_ERROR = {
 	hidden: true,
@@ -44,8 +44,8 @@ const LocalPickupSelector = ( {
 } ) => {
 	return (
 		<Button
+			render={ <div /> }
 			role="radio"
-			removeTextWrap
 			onClick={ onClick }
 			className={ clsx( 'wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
@@ -129,9 +129,9 @@ const ShippingSelector = ( {
 
 	return (
 		<Button
+			render={ <div /> }
 			role="radio"
 			onClick={ onClick }
-			removeTextWrap
 			className={ clsx( 'wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
 					checked === 'shipping',
