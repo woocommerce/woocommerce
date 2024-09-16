@@ -260,26 +260,26 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 * @return string
 	 */
 	private function get_wpcom_locale() {
-		// List of locales that should be used with region code
+		// List of locales that should be used with region code.
 		$locale_to_lang = array(
-			'bre' => 'br',
+			'bre'   => 'br',
 			'de_AT' => 'de-at',
 			'de_CH' => 'de-ch',
-			'de' => 'de_formal',
-			'el' => 'el-po',
+			'de'    => 'de_formal',
+			'el'    => 'el-po',
 			'en_GB' => 'en-gb',
 			'es_CL' => 'es-cl',
 			'es_MX' => 'es-mx',
 			'fr_BE' => 'fr-be',
 			'fr_CA' => 'fr-ca',
 			'nl_BE' => 'nl-be',
-			'nl' => 'nl_formal',
+			'nl'    => 'nl_formal',
 			'pt_BR' => 'pt-br',
-			'sr' => 'sr_latin',
+			'sr'    => 'sr_latin',
 			'zh_CN' => 'zh-cn',
 			'zh_HK' => 'zh-hk',
 			'zh_SG' => 'zh-sg',
-			'zh_TW' => 'zh-tw'
+			'zh_TW' => 'zh-tw',
 		);
 
 		$system_locale = get_locale();
