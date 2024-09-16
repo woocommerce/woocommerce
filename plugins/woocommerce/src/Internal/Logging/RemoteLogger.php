@@ -180,7 +180,8 @@ class RemoteLogger extends \WC_Log_Handler {
 		if ( ! $this->is_remote_logging_allowed() ) {
 			return false;
 		}
-			// Ignore logs that are less severe than critical. This is temporary to prevent sending too many logs to the remote logging service. We can consider remove this if the remote logging service can handle more logs.
+		
+		// Ignore logs that are less severe than critical. This is temporary to prevent sending too many logs to the remote logging service. We can consider remove this if the remote logging service can handle more logs.
 		if ( WC_Log_Levels::get_level_severity( $level ) < WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
 			return false;
 		}
@@ -195,7 +196,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-			return true;
+		return true;
 	}
 
 
