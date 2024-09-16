@@ -1,1 +1,14 @@
-/.github/ @woocommerce/atlas
+# Monorepo CI and package managers manifests.
+/.github/ @woocommerce/flux
+**/composer.json @woocommerce/flux
+**/package.json @woocommerce/flux
+
+# Monorepo tooling folders.
+/bin/ @woocommerce/flux
+/tools/ @woocommerce/flux
+/packages/js/eslint-plugin/ @woocommerce/flux
+/packages/js/dependency-extraction-webpack-plugin/ @woocommerce/flux
+
+# Files in root of repository
+/.* @woocommerce/flux
+/*.* @woocommerce/flux
