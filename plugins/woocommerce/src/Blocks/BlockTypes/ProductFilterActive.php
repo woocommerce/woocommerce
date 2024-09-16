@@ -57,7 +57,6 @@ final class ProductFilterActive extends AbstractBlock {
 			array(
 				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 				'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-				'data-has-filter'     => empty( $active_filters ) ? 'no' : 'yes',
 			)
 		);
 
