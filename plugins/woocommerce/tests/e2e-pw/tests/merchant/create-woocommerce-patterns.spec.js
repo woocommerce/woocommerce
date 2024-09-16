@@ -86,7 +86,9 @@ test.describe(
 			// check some elements from added patterns
 			for ( let i = 1; i < wooPatterns.length; i++ ) {
 				await expect(
-					page.getByText( `${ wooPatterns[ i ].button }` )
+					page.getByRole( 'link', {
+						name: `${ wooPatterns[ i ].button }`,
+					} )
 				).toBeVisible();
 			}
 		} );
