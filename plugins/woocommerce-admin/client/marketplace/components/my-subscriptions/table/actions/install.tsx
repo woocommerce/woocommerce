@@ -51,6 +51,7 @@ export default function Install( props: InstallProps ) {
 		);
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleInstallError = ( error: any ) => {
 		loadSubscriptions( false ).then( () => {
 			let errorMessage = sprintf(
