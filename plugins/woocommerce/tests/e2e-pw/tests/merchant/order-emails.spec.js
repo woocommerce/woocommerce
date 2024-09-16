@@ -73,7 +73,7 @@ test.describe(
 
 		test(
 			'can receive new order email',
-			{ tag: '@skip-on-default-pressable' },
+			{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 			async ( { page, baseURL } ) => {
 				// New order emails are sent automatically when we create a simple order. Verify that we get these.
 				// Need to create a new order for this test because we clear logs before each run.
@@ -226,33 +226,37 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test( 'can resend new order notification', async ( { page } ) => {
-			// resend the new order notification
-			await page.goto(
-				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-			);
-			await page
-				.locator( 'li#actions > select' )
-				.selectOption( 'send_order_details_admin' );
-			await page.locator( 'button.wc-reload' ).click();
+		test(
+			'can resend new order notification',
+			{ tag: '@skip-on-default-wpcom' },
+			async ( { page } ) => {
+				// resend the new order notification
+				await page.goto(
+					`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+				);
+				await page
+					.locator( 'li#actions > select' )
+					.selectOption( 'send_order_details_admin' );
+				await page.locator( 'button.wc-reload' ).click();
 
-			// search to narrow it down to just the messages we want
-			await page.goto(
-				`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					customerBilling.email
-				) }`
-			);
+				// search to narrow it down to just the messages we want
+				await page.goto(
+					`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+						customerBilling.email
+					) }`
+				);
 
-			// Expect row containing the admin email and the correct subject to be listed.
-			await expect(
-				page
-					.getByRole( 'row' )
-					.filter( { hasText: admin.email } )
-					.filter( {
-						hasText: `[${ storeName }]: New order #${ orderId }`,
-					} )
-			).toBeVisible();
-		} );
+				// Expect row containing the admin email and the correct subject to be listed.
+				await expect(
+					page
+						.getByRole( 'row' )
+						.filter( { hasText: admin.email } )
+						.filter( {
+							hasText: `[${ storeName }]: New order #${ orderId }`,
+						} )
+				).toBeVisible();
+			}
+		);
 
 		test( 'can email invoice/order details to customer', async ( {
 			page,
