@@ -38,10 +38,10 @@
 }
 
 :where(
-		.wc-block-product-filter-chips:not(.has-selected-chip-text)
-			.wc-block-product-filter-chips__item[aria-checked="true"]
-			> .wc-block-product-filter-chips__label
-	) {
+.wc-block-product-filter-chips:not(.has-selected-chip-text)
+.wc-block-product-filter-chips__item[aria-checked="true"]
+> .wc-block-product-filter-chips__label
+) {
 	filter: invert(100%);
 }
 

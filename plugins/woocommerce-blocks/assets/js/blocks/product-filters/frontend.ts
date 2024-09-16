@@ -37,7 +37,7 @@ function isParamsEqual(
 	return true;
 }
 
-function navigate( href: string, options = {} ) {
+export function navigate( href: string, options = {} ) {
 	/**
 	 * We may need to reset the current page when changing filters.
 	 * This is because the current page may not exist for this set
