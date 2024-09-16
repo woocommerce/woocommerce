@@ -1,5 +1,7 @@
 # Checkout Store (`wc/store/checkout`) <!-- omit in toc -->
 
+<!-- markdownlint-disable MD024 -->
+
 > 💡 What's the difference between the Cart Store and the Checkout Store?
 >
 > The **Cart Store (`wc/store/cart`)** manages and retrieves data about the shopping cart, including items, customer data, and interactions like coupons.
