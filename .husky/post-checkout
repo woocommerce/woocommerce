@@ -14,7 +14,6 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 			. $location/nvm.sh
 		fi
     done
-
 	# Auto-switch node version when switching between branches
 	command -v nvm > /dev/null && ( nvm use --silent || nvm install )
 
