@@ -1881,15 +1881,14 @@ class ProductCollection extends AbstractBlock {
 				}
 
 				$product = wc_get_product( $collection_args['upsellsProductReference'] );
-				$upsells = array_map(
-					function ( $id ) {
-						return strval( $id );
-					},
-					$product->get_upsell_ids()
-				);
+				if ( ! $product ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
 
 				return array(
-					'post__in' => $upsells,
+					'post__in' => $product->get_upsell_ids(),
 				);
 			},
 			function ( $collection_args, $query ) {
