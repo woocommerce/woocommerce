@@ -23,7 +23,7 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 		targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
 		if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
 			printf "${redColoured}pnpm versions mismatch: in use '$currentPnpmVersion', needed '$targetPnpmVersion'. Here some hints how to solve this:\n"
-			printf "${redColoured}* verify: 'nvm use && pnpm -v'\n"
+			printf "${redColoured}* actualize environment and verify: 'nvm use && pnpm -v'\n"
 			printf "${redColoured}* install: 'npm install -g pnpm@$targetPnpmVersion'\n"
 		else
 			canUpdateDependencies='yes'
