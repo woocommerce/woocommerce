@@ -131,8 +131,8 @@ export default function Install( props: InstallProps ) {
 				{
 					actions: [
 						{
-							label: __( 'Try again', 'woocommerce' ),
-							onClick: install,
+							label: __( 'Download and install manually', 'woocommerce' ),
+							url: 'https://woocommerce.com/my-account/downloads/',
 						},
 					],
 				}
