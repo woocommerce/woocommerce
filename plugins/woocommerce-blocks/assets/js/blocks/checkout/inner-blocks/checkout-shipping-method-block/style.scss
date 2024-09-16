@@ -9,22 +9,23 @@
 // We have avoided nesting all the styles in case specificity changes introduce regressions elsewhere.
 .edit-post-visual-editor {
 	.wc-block-checkout__shipping-method-container {
-		.wc-block-components-button.wc-block-checkout__shipping-method-option {
+		.wc-block-checkout__shipping-method-option {
 			min-height: 80px;
 		}
 	}
 }
 
-.edit-post-visual-editor
-.wc-block-components-button.wc-block-checkout__shipping-method-option,
-.wc-block-components-button.wc-block-checkout__shipping-method-option {
+.edit-post-visual-editor .wc-block-checkout__shipping-method-option,
+.wc-block-checkout__shipping-method-option {
 	flex-grow: 1;
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
+	flex-wrap: wrap;
 	align-items: center;
 	height: 100%;
 	min-height: 80px;
+	box-sizing: border-box;
 	flex-basis: 0;
 	gap: 4px;
 	padding: 16px 12px;
@@ -35,8 +36,8 @@
 	outline: 1px solid $universal-border-light !important; // Overwriting Gutenberg styles
 	border-radius: $universal-border-radius;
 	cursor: pointer;
-	&.components-button:hover:not(:disabled),
-	&.components-button:focus:not(:disabled),
+	&:hover:not(:disabled),
+	&:focus:not(:disabled),
 	&:focus,
 	&:hover {
 		background-color: $universal-background;
@@ -65,6 +66,8 @@
 
 .wc-block-checkout__shipping-method-option-price {
 	@include font-size(small, 1rem);
+	flex-basis: 100%;
+	text-align: center;
 
 	em {
 		text-transform: uppercase;
