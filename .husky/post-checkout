@@ -4,6 +4,7 @@
 # '1' is branch
 CHECKOUT_TYPE=$3
 redColoured='\033[0;31m'
+whiteColoured='\033[0m'
 
 if [ "$CHECKOUT_TYPE" = '1' ]; then
 	if [ -e ~/.nvm/nvm.sh ]; then
@@ -28,8 +29,8 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 	# Auto-refresh dependencies when switching between branches
 	changedManifests=$( ( git diff --name-only HEAD ORIG_HEAD  | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
 	if [ -n "$changedManifests" ]; then
-		printf "It was a change in the following file(s) - refreshing dependencies:\n"
-		printf "    %s\n" $changedManifests
+		printf "${whiteColoured}It was a change in the following file(s) - refreshing dependencies:\n"
+		printf "${whiteColoured}    %s\n" $changedManifests
 
 		if [ "$canUpdateDependencies" = 'yes' ]; then
 			pnpm install --frozen-lockfile
