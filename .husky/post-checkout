@@ -15,9 +15,10 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 	if [ -n "$currentPnpmVersion" ]; then
 		targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
 		if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
-			printf "pnpm version mismatch: in use '$currentPnpmVersion', need '$targetPnpmVersion'. You can run on those commands to install the required one:\n"
-			printf "* via npm: 'npm install -g pnpm@$targetPnpmVersion'\n"
-			printf "* via corepack: picks needed version automatically, see https://nodejs.org/api/corepack.html\n"
+			redColoured='\033[0;31m'
+			printf "$redColouredpnpm version mismatch: in use '$currentPnpmVersion', need '$targetPnpmVersion'. You can run on those commands to install the required one:\n"
+			printf "$redColoured* via npm: 'npm install -g pnpm@$targetPnpmVersion'\n"
+			printf "$redColoured* via corepack: picks needed version automatically, see https://nodejs.org/api/corepack.html\n"
 		fi
 	fi
 
