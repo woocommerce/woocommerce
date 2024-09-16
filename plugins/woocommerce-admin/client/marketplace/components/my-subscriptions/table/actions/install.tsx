@@ -51,45 +51,6 @@ export default function Install( props: InstallProps ) {
 		);
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleInstallError = ( error: any ) => {
-		loadSubscriptions( false ).then( () => {
-			let errorMessage = sprintf(
-				// translators: %s is the product name.
-				__( '%s couldn’t be installed.', 'woocommerce' ),
-				props.subscription.product_name
-			);
-			if ( error?.success === false && error?.data.message ) {
-				errorMessage += ' ' + error.data.message;
-			}
-			addNotice(
-				props.subscription.product_key,
-				errorMessage,
-				NoticeStatus.Error,
-				{
-					actions: [
-						{
-							label: __( 'Try again', 'woocommerce' ),
-							onClick: install,
-						},
-					],
-				}
-			);
-			stopInstall();
-
-			if ( props.onError ) {
-				props.onError();
-			}
-		} );
-
-		recordEvent( 'marketplace_product_install_failed', {
-			product_zip_slug: props.subscription.zip_slug,
-			product_id: props.subscription.product_id,
-			product_current_version: props.subscription.version,
-			error_message: error?.data?.message,
-		} );
-	};
-
 	const install = () => {
 		recordEvent( 'marketplace_product_install_button_clicked', {
 			product_zip_slug: props.subscription.zip_slug,
@@ -150,6 +111,45 @@ export default function Install( props: InstallProps ) {
 				} )
 				.catch( handleInstallError );
 		}
+	};
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const handleInstallError = ( error: any ) => {
+		loadSubscriptions( false ).then( () => {
+			let errorMessage = sprintf(
+				// translators: %s is the product name.
+				__( '%s couldn’t be installed.', 'woocommerce' ),
+				props.subscription.product_name
+			);
+			if ( error?.success === false && error?.data.message ) {
+				errorMessage += ' ' + error.data.message;
+			}
+			addNotice(
+				props.subscription.product_key,
+				errorMessage,
+				NoticeStatus.Error,
+				{
+					actions: [
+						{
+							label: __( 'Try again', 'woocommerce' ),
+							onClick: install,
+						},
+					],
+				}
+			);
+			stopInstall();
+
+			if ( props.onError ) {
+				props.onError();
+			}
+		} );
+
+		recordEvent( 'marketplace_product_install_failed', {
+			product_zip_slug: props.subscription.zip_slug,
+			product_id: props.subscription.product_id,
+			product_current_version: props.subscription.version,
+			error_message: error?.data?.message,
+		} );
 	};
 
 	return (
