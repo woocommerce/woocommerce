@@ -13,12 +13,11 @@ class SingleProduct extends AbstractBlock {
 	protected $block_name = 'single-product';
 
 	/**
-	 * While the block is actively overriding the global post state,
-	 * this will contain the previous post set as the global state.
+	 * A stack of posts that have been overridden by the Single Product block.
 	 *
-	 * @var WP_Post|null
+	 * @var WP_Post[]
 	 */
-	protected $overridden_post = null;
+	protected $overridden_post_stack = array();
 
 	/**
 	 * Initialize the block and Hook into the `render_block_context` filter
@@ -29,7 +28,7 @@ class SingleProduct extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		// Use an early priority to ensure other context hooks have access to the context provided here.
-		add_filter( 'render_block_context', [ $this, 'update_context' ], 0, 2 );
+		add_filter( 'render_block_context', [ $this, 'update_context' ], 1, 2 );
 
 		// In order to ensure that inner blocks have access to the correct post data,
 		// we're going to hook into block rendering to set the global post state.
@@ -88,6 +87,11 @@ class SingleProduct extends AbstractBlock {
 			return $pre_render;
 		}
 
+		// Make sure to push the current global post onto the stack
+		// so it can be restored after the block renders.
+		global $post;
+		$this->overridden_post_stack[] = $post;
+
 		// Before rendering our inner blocks we need to set the global post state
 		// to the selected product. This ensures that inner blocks have access
 		// to the correct post data.
@@ -95,11 +99,7 @@ class SingleProduct extends AbstractBlock {
 		if ( ! ( $selected_product_post instanceof \WP_Post ) ) {
 			return $pre_render;
 		}
-
-		global $post;
-		$this->overridden_post = $post;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$post = $selected_product_post;
+		$post = $selected_product_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		setup_postdata( $post );
 
 		return $pre_render;
@@ -117,17 +117,16 @@ class SingleProduct extends AbstractBlock {
 		}
 
 		// We don't want to reset anything if we didn't set it in the first place.
-		if ( isset( $this->overridden_post ) ) {
+		$id = $parsed_block['attrs']['productId'] ?? null;
+		if ( ! isset( $id ) ) {
 			return $block_content;
 		}
 
 		// Replace the global post with the one that was set prior to us
 		// overriding it with the selected product.
 		global $post;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$post = $this->overridden_post;
+		$post = array_pop( $this->overridden_post_stack ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		setup_postdata( $post );
-		$this->overridden_post = null;
 
 		return $block_content;
 	}
