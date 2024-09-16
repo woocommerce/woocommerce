@@ -9,7 +9,7 @@ whiteColoured='\033[0m'
 if [ "$CHECKOUT_TYPE" = '1' ]; then
 	# Depending on environment/OS, nvm initialization file can be in different locations.
 	brewPrefix=$( command -v brew > /dev/null && brew --prefix )
-	possibleLocations=( '~/.nvm', "$brewPrefix" )
+	declare -a possibleLocations=( '~/.nvm', "$brewPrefix" )
 	for location in "${possibleLocations[@]}"; do
 		echo $location/nvm.sh
 		#if [ -e $location/nvm.sh ]; then
