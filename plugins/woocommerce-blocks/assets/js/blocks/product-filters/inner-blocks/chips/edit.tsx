@@ -81,13 +81,19 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		return <></>;
 	}
 
+	const threshold = 15;
+	const isLongList = items.length > threshold;
+
 	return (
 		<>
 			<div { ...blockProps }>
 				<div className="wc-block-product-filter-chips__items">
 					{ isLoading && loadingState }
 					{ ! isLoading &&
-						items.map( ( item, index ) => (
+						( isLongList
+							? items.slice( 0, threshold )
+							: items
+						).map( ( item, index ) => (
 							<div
 								key={ index }
 								className="wc-block-product-filter-chips__item"
@@ -99,6 +105,11 @@ const Edit = ( props: EditProps ): JSX.Element => {
 							</div>
 						) ) }
 				</div>
+				{ ! isLoading && isLongList && (
+					<button className="wc-block-product-filter-chips__show-more">
+						{ __( 'Show more…', 'woocommerce' ) }
+					</button>
+				) }
 			</div>
 			<InspectorControls group="color">
 				{ colorGradientSettings.hasColorsOrGradients && (

@@ -46,6 +46,9 @@
 }
 
 :where(.wc-block-product-filter-chips__show-more) {
-	cursor: pointer;
 	text-decoration: underline;
+	appearance: none;
+	background: transparent;
+	border: none;
+	padding: 0;
 }

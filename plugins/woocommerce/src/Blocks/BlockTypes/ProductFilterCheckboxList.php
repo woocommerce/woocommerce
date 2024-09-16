@@ -108,15 +108,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<?php } ?>
 			</ul>
 			<?php if ( count( $items ) > $show_initially ) : ?>
-				<span
-					role="button"
+				<button
 					class="wc-block-product-filter-checkbox-list__show-more"
 					data-wc-bind--hidden="context.showAll"
 					data-wc-on--click="actions.showAllItems"
 					hidden
 				>
-					<small role="presentation"><?php echo esc_html__( 'Show more...', 'woocommerce' ); ?></small>
-				</span>
+					<?php echo esc_html__( 'Show more...', 'woocommerce' ); ?>
+				</button>
 			<?php endif; ?>
 		</div>
 		<?php

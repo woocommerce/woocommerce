@@ -120,9 +120,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 						) ) }
 				</ul>
 				{ ! isLoading && isLongList && (
-					<span className="wc-block-product-filter-checkbox-list__show-more">
-						<small>{ __( 'Show more…', 'woocommerce' ) }</small>
-					</span>
+					<button className="wc-block-product-filter-checkbox-list__show-more">
+						{ __( 'Show more…', 'woocommerce' ) }
+					</button>
 				) }
 			</div>
 			<InspectorControls group="color">
