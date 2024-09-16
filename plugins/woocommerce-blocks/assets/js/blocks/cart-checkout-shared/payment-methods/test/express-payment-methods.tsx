@@ -19,6 +19,18 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	useEditorContext: mockEditorContext,
 } ) );
 
+// Button styles are disabled by default. We need to mock the express payment context
+// to enable them.
+jest.mock( '../express-payment/express-payment-context', () => {
+	return {
+		useExpressPaymentContext: jest.fn().mockReturnValue( {
+			showButtonStyles: true,
+			buttonHeight: '48',
+			buttonBorderRadius: '4',
+		} ),
+	};
+} );
+
 const mockExpressPaymentMethodNames = [ 'paypal', 'google pay', 'apple pay' ];
 
 const MockExpressButton = jest.fn( ( { name } ) => (
