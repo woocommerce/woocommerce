@@ -15,8 +15,7 @@
 	],
 	"supports": {},
 	"usesContext": [
-		"filterData",
-		"isParentSelected"
+		"filterData"
 	],
 	"attributes": {
 		"chipText":{
