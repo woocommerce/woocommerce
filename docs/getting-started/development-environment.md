@@ -80,22 +80,16 @@ git clone https://github.com/woocommerce/woocommerce.git
 cd woocommerce
 ```
 
-### Activate the required Node version
+### Install and Activate the required Node version
 
 ```sh
-nvm use
-Found '/path/to/woocommerce/.nvmrc' with version <v12>
-Now using node v12.21.0 (npm v6.14.11)
+nvm install
+Found '/path/to/woocommerce/.nvmrc' with version <v20>
+v20.17.0 is already installed.
+Now using node v20.17.0 (npm v10.8.2)
 ```
 
-Note: if you don't have the required version of Node installed, NVM will alert you so you can install it:
-
-```sh
-Found '/path/to/woocommerce/.nvmrc' with version <v12>
-N/A: version "v12 -> N/A" is not yet installed.
-
-You need to run "nvm install v12" to install it before using it.
-```
+Note: if you don't have the required version of Node installed, NVM will install it.
 
 ### Install dependencies
 
