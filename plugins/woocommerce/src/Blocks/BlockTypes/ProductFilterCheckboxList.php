@@ -29,27 +29,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$checkbox_list_context = array( 'items' => $items );
 		$action                = $context['action'] ?? '';
 		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-checkbox-list' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+		$classes               = '';
+		$style                 = '';
 
-		$classes = array(
-			'has-option-element-border-color'   => $this->get_color_attribute_value( 'optionElementBorder', $attributes ),
-			'has-option-element-selected-color' => $this->get_color_attribute_value( 'optionElementSelected', $attributes ),
-			'has-option-element-color'          => $this->get_color_attribute_value( 'optionElement', $attributes ),
-		);
-		$classes = array_filter( $classes );
-
-		$styles = array(
-			'--wc-product-filter-checkbox-list-option-element-border' => $this->get_color_attribute_value( 'optionElementBorder', $attributes ),
-			'--wc-product-filter-checkbox-list-option-element-selected' => $this->get_color_attribute_value( 'optionElementSelected', $attributes ),
-			'--wc-product-filter-checkbox-list-option-element' => $this->get_color_attribute_value( 'optionElement', $attributes ),
-		);
-		$style  = array_reduce(
-			array_keys( $styles ),
-			function ( $acc, $key ) use ( $styles ) {
-				if ( $styles[ $key ] ) {
-					return $acc . "{$key}:  var( --wp--preset--color--{$styles[$key]} );";
-				}
-			}
-		);
+		$tags = new \WP_HTML_Tag_Processor( $content );
+		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-checkbox-list' ) ) ) {
+			$classes = $tags->get_attribute( 'class' );
+			$style   = $tags->get_attribute( 'style' );
+		}
 
 		$checked_items               = array_filter(
 			$items,
@@ -64,7 +51,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$wrapper_attributes = array(
 			'data-wc-interactive' => esc_attr( $namespace ),
 			'data-wc-context'     => wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'class'               => implode( ' ', array_keys( $classes ) ),
+			'class'               => esc_attr( $classes ),
 			'style'               => esc_attr( $style ),
 		);
 
@@ -134,24 +121,5 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Get the color value from the color attributes.
-	 *
-	 * @param string $key        The key of the color attribute.
-	 * @param array  $attributes The block attributes.
-	 * @return string
-	 */
-	private function get_color_attribute_value( $key, $attributes ) {
-		if ( $attributes[ $key ] ) {
-			return $attributes[ $key ];
-		}
-
-		if ( $attributes[ 'custom' . ucfirst( $key ) ] ) {
-			return $attributes[ 'custom' . ucfirst( $key ) ];
-		}
-
-		return '';
 	}
 }
