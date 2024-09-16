@@ -695,15 +695,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		/**
-		 * Tracks.
-		 */
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
-		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
-
-		/**
 		 * WCCOM Site.
 		 */
 		include_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php';

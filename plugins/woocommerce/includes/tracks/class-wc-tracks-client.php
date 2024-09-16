@@ -36,8 +36,6 @@ class WC_Tracks_Client {
 	 * @return void
 	 */
 	public static function init() {
-		// Use wp hook for setting the identity cookie to avoid headers already sent warnings.
-		add_action( 'admin_init', array( __CLASS__, 'maybe_set_identity_cookie' ) );
 	}
 
 	/**

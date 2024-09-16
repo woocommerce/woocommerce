@@ -38,6 +38,11 @@ class WC_Autoloader {
 		'WC_Helper_Subscriptions_API'  => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-subscriptions-api.php',
 		'WC_Helper_Orders_API'         => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-orders-api.php',
 		'WC_Product_Usage_Notice'      => WC_ABSPATH . 'includes/admin/helper/class-wc-product-usage-notice.php',
+		'WC_Site_Tracking'             => WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php',
+		'WC_Tracks_Footer_Pixel'       => WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php',
+		'WC_Tracks_Client'             => WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php',
+		'WC_Tracks_Event'              => WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php',
+		'WC_Tracks'                    => WC_ABSPATH . 'includes/tracks/class-wc-tracks.php',
 	);
 
 	/**
