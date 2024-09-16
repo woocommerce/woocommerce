@@ -11,9 +11,10 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 	brewPrefix=$( command -v brew > /dev/null && brew --prefix )
 	possibleLocations=( '~/.nvm', "$brewPrefix" )
 	for location in "${possibleLocations[@]}"; do
-		if [ -e $location/nvm.sh ]; then
-			. $location/nvm.sh
-		fi
+		echo $location/nvm.sh
+		#if [ -e $location/nvm.sh ]; then
+		#	. $location/nvm.sh
+		#fi
     done
 
 	# Auto-switch node version when switching between branches
