@@ -27,8 +27,7 @@
 	word-break: break-word;
 
 	&[aria-expanded="true"] {
-		padding-bottom: $gap-smaller;
-		margin-bottom: $gap-smaller;
+		margin-bottom: $gap-smaller * 2;
 	}
 
 	&,

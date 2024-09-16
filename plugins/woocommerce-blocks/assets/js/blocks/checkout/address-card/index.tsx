@@ -84,7 +84,7 @@ const AddressCard = ( {
 			</address>
 			{ onEdit && (
 				<Button
-					render={ <div /> }
+					render={ <span /> }
 					className="wc-block-components-address-card__edit"
 					aria-controls={ target }
 					aria-expanded={ isExpanded }
