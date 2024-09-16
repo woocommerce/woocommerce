@@ -1135,14 +1135,14 @@ class ProductCollection extends \WP_UnitTestCase {
 	 * Provides the test input and expected output for the collection handler tests.
 	 */
 	public function core_collection_handler_test_provider() {
-		$related_filter = $this->getMockBuilder( \stdClass::class )
-			->setMethods( [ '__invoke' ] )
-			->getMock();
-
 		return array(
 			array(
 				'woocommerce/product-collection/related',
-				function () use ( $related_filter ) {
+				function () {
+					$related_filter = $this->getMockBuilder( \stdClass::class )
+					->setMethods( [ '__invoke' ] )
+					->getMock();
+
 					// This filter will turn off the data store so we don't need dummy products.
 					add_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
 					$related_filter->expects( $this->exactly( 2 ) )
@@ -1150,10 +1150,11 @@ class ProductCollection extends \WP_UnitTestCase {
 						->with( array(), 1 )
 						->willReturn( array( 2, 3, 4 ) );
 					add_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ), 10, 2 );
-				},
-				function () use ( $related_filter ) {
-					remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
-					remove_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ) );
+
+					return function () use ( $related_filter ) {
+						remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+						remove_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ) );
+					};
 				},
 				array(
 					'productReference' => 1,
@@ -1174,8 +1175,7 @@ class ProductCollection extends \WP_UnitTestCase {
 	 * @dataProvider core_collection_handler_test_provider
 	 *
 	 * @param string        $collection_name The name of the collection under test.
-	 * @param callable|null $set_up          An optional function to call before the test.
-	 * @param callable|null $tear_down       An optional function to call after the test.
+	 * @param callable|null $set_up          An optional function to call before the test. This function can return a callable to clean up after the test.
 	 * @param array         $frontend_query  The query arguments to use for the frontend queries.
 	 * @param array         $editor_query    The query arguments to use for the editor queries.
 	 * @param array         $expected_query  Any query arguments we expect to be present.
@@ -1183,13 +1183,13 @@ class ProductCollection extends \WP_UnitTestCase {
 	public function test_core_collection_handlers(
 		$collection_name,
 		$set_up,
-		$tear_down,
 		$frontend_query,
 		$editor_query,
 		$expected_query
 	) {
+		$tear_down = null;
 		if ( isset( $set_up ) ) {
-			$set_up();
+			$tear_down = call_user_func( $set_up );
 		}
 
 		// Frontend.
@@ -1210,8 +1210,8 @@ class ProductCollection extends \WP_UnitTestCase {
 		);
 		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
-		if ( isset( $tear_down ) ) {
-			$tear_down();
+		if ( is_callable( $tear_down ) ) {
+			call_user_func( $tear_down );
 		}
 
 		foreach ( $expected_query as $key => $value ) {
