@@ -12,7 +12,7 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 		. ~/.nvm/nvm.sh
 	fi
 	# Auto-switch node version when switching between branches
-	( command -v nvm > /dev/null && nvm use --silent ) || nvm install
+	command -v nvm > /dev/null && ( nvm use --silent || nvm install )
 
 
 	canUpdateDependencies='no'
