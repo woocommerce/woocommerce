@@ -18,7 +18,7 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 	command -v nvm > /dev/null && ( nvm use --silent || nvm install )
 
 	canUpdateDependencies='no'
-	currentPnpmVersion=$( command -v pnpm > /dev/null && pnpm -v )
+	currentPnpmVersion=$( ( command -v pnpm > /dev/null && pnpm -v ) || echo '' )
 	if [ -n "$currentPnpmVersion" ]; then
 		targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
 		if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
