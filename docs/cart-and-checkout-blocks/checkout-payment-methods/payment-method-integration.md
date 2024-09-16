@@ -46,12 +46,13 @@ const options = {
 	title: 'My Mayment Method',
 	description: 'A setence or two about your payment method',
 	gatewayId: 'gateway-id',
-	content: &lt;div&gt;A React node&lt;/div&gt;,
-	edit: &lt;div&gt;A React node&lt;/div&gt;,
+	content: <ReactNode />;,
+	edit: <ReactNode />,
 	canMakePayment: () => true,
 	paymentMethodId: 'new_payment_method',
 	supports: {
 		features: [],
+		style: [],
 	},
 };
 ```
@@ -112,7 +113,11 @@ This is the only optional configuration object. The value of this property is wh
 
 This is an array of payment features supported by the gateway. It is used to crosscheck if the payment method can be used for the content of the cart. By default payment methods should support at least `products` feature. If no value is provided then this assumes that `['products']` are supported.
 
----
+#### `supports:style`
+
+This is an array of style variations supported by the express payment method. These are styles that are applied across all the active express payment buttons and can be controlled from the express payment block in the editor. Supported values for these are one of `['height', 'borderRadius']`.
+
+<img width="418" alt="Screenshot 2024-09-16 at 14 18 13" src="https://github.com/user-attachments/assets/f0f99f3f-dca7-42b0-8685-3b098a825020">---
 
 ### Payment Methods - `registerPaymentMethod( options )`
 
