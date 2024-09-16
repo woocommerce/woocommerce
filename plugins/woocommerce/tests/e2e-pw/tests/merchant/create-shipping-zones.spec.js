@@ -209,7 +209,7 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			input.click();
 			input.fill( 'Canada' );
 
-			await page.getByText( 'Canada' ).last().click();
+			await page.getByLabel( 'Canada', { exact: true } ).click();
 
 			// Close dropdown
 			await page.getByPlaceholder( 'Zone name' ).click();
