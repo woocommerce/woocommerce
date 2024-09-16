@@ -13,7 +13,7 @@ import {
 	useBlockProps,
 	RichText,
 } from '@wordpress/block-editor';
-import Button from '@woocommerce/base-components/button';
+import { Button } from '@ariakit/react';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -53,12 +53,12 @@ const LocalPickupSelector = ( {
 } ) => {
 	return (
 		<Button
+			render={ <div /> }
 			className={ clsx( 'wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
 					checked === 'pickup',
 			} ) }
 			onClick={ onClick }
-			removeTextWrap
 		>
 			{ showIcon === true && (
 				<Icon
@@ -113,12 +113,12 @@ const ShippingSelector = ( {
 
 	return (
 		<Button
+			render={ <div /> }
 			className={ clsx( 'wc-block-checkout__shipping-method-option', {
 				'wc-block-checkout__shipping-method-option--selected':
 					checked === 'shipping',
 			} ) }
 			onClick={ onClick }
-			removeTextWrap
 		>
 			{ showIcon === true && (
 				<Icon

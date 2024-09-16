@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/types';
 import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
 import { formatAddress } from '@woocommerce/blocks/checkout/utils';
+import { Button } from '@ariakit/react';
 
 /**
  * Internal dependencies
@@ -82,7 +83,8 @@ const AddressCard = ( {
 				) }
 			</address>
 			{ onEdit && (
-				<button
+				<Button
+					render={ <span /> }
 					className="wc-block-components-address-card__edit"
 					aria-controls={ target }
 					aria-expanded={ isExpanded }
@@ -94,7 +96,7 @@ const AddressCard = ( {
 					type="button"
 				>
 					{ __( 'Edit', 'woocommerce' ) }
-				</button>
+				</Button>
 			) }
 		</div>
 	);
