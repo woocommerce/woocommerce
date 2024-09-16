@@ -11,6 +11,11 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 		nvm use --silent || nvm install
 	fi
 
+	targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
+	currentPnpmVersion=$( command -v pnpm > /dev/null && pnpm -v )
+	printf "$targetPnpmVersion\n"
+	printf "$currentPnpmVersion\n"
+
 	# Auto-refresh dependencies when switching between branches
 	changedManifests=$( ( git diff --name-only HEAD ORIG_HEAD  | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
 	if [ -n "$changedManifests" ]; then
