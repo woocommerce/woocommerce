@@ -46,7 +46,7 @@ trait UseNonBuiltInFunctions {
 				)
 			);
 
-			return null;
+			return 'Unable to retrieve';
 		}
 	}
 
@@ -134,7 +134,7 @@ trait UseNonBuiltInFunctions {
 					'_default' => $_default,
 				)
 			);
-			return 'Unable to retrieve';
+			return false;
 		}
 	}
 
@@ -160,7 +160,7 @@ trait UseNonBuiltInFunctions {
 					'transient' => $transient,
 				)
 			);
-			return 'Unable to retrieve';
+			return false;
 		}
 	}
 
@@ -344,7 +344,7 @@ trait UseNonBuiltInFunctions {
 	 */
 	private function get_wc_version() {
 		try {
-			return Constants::get_constant( 'WC_VERSION' );
+			return Constants::get_constant( 'WC_VERSION' ) ?? 'unknown';
 		} catch ( \Throwable $e ) {
 			$this->log_wrapper_error(
 				__FUNCTION__,
