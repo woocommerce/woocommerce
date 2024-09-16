@@ -107,7 +107,10 @@
 			gap: 16px;
 			display: flex;
 			flex-direction: column;
-			margin: 16px 0 0 30px;
+
+			&.indent-one-level {
+				margin: 16px 0 0 30px;
+			}
 
 			&.is-hidden {
 				display: none;

@@ -203,7 +203,7 @@ const SiteVisibility = () => {
 				</p>
 				<div
 					className={ clsx(
-						'site-visibility-settings-slotfill-section-content',
+						'site-visibility-settings-slotfill-section-content indent-one-level',
 						{
 							'is-hidden': comingSoon !== 'yes',
 						}
@@ -308,29 +308,35 @@ const SiteVisibility = () => {
 			</div>
 			<div className="site-visibility-settings-slotfill-section">
 				<h4>{ __( 'Admin bar badge', 'woocommerce' ) }</h4>
-				<ToggleControl
-					label={
-						<>
-							{ __( 'Hide admin bar badge', 'woocommerce' ) }
-							<p>
-								{ __(
-									'Hide the site visibility badge from the admin bar.',
-									'woocommerce'
-								) }
-							</p>
-						</>
-					}
-					checked={ hideAdminBarBadge === 'yes' }
-					onChange={ ( checked ) => {
-						setHideAdminBarBadge( checked ? 'yes' : 'no' );
-						recordEvent(
-							'site_visibility_hide_admin_bar_badge_toggle',
-							{
-								enabled: checked,
-							}
-						);
-					} }
-				/>
+				<div
+					className={ clsx(
+						'site-visibility-settings-slotfill-section-content'
+					) }
+				>
+					<ToggleControl
+						label={
+							<>
+								{ __( 'Hide admin bar badge', 'woocommerce' ) }
+								<p>
+									{ __(
+										'Hide the site visibility badge from the admin bar.',
+										'woocommerce'
+									) }
+								</p>
+							</>
+						}
+						checked={ hideAdminBarBadge === 'yes' }
+						onChange={ ( checked ) => {
+							setHideAdminBarBadge( checked ? 'yes' : 'no' );
+							recordEvent(
+								'site_visibility_hide_admin_bar_badge_toggle',
+								{
+									enabled: checked,
+								}
+							);
+						} }
+					/>
+				</div>
 			</div>
 			{ formRef.current && saveButtonRef.current ? (
 				<ConfirmationModal
