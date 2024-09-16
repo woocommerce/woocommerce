@@ -641,58 +641,14 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-integrations.php';
 		include_once WC_ABSPATH . 'includes/class-wc-cache-helper.php';
 		include_once WC_ABSPATH . 'includes/class-wc-https.php';
-		include_once WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php';
-		include_once WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php';
-		include_once WC_ABSPATH . 'includes/class-wc-background-emailer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-discounts.php';
-		include_once WC_ABSPATH . 'includes/class-wc-cart-totals.php';
 		include_once WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
 		include_once WC_ABSPATH . 'includes/class-wc-privacy.php';
-		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
-		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
-		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
-		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
-		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
-		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
-		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
-		include_once WC_ABSPATH . 'includes/blocks/class-wc-blocks-utils.php';
-
-		/**
-		 * Data stores - used to store and retrieve CRUD object data from the database.
-		 */
-		include_once WC_ABSPATH . 'includes/class-wc-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-data-store-wp.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-type-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-coupon-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-fee-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-product-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-shipping-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-item-tax-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-payment-token-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-data-store-session.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-customer-download-log-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-shipping-zone-data-store.php';
-		include_once WC_ABSPATH . 'includes/data-stores/abstract-wc-order-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-order-refund-data-store-cpt.php';
-		include_once WC_ABSPATH . 'includes/data-stores/class-wc-webhook-data-store.php';
 
 		/**
 		 * REST API.
 		 */
 		include_once WC_ABSPATH . 'includes/class-wc-rest-authentication.php';
-		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
-		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		/**
 		 * WCCOM Site.

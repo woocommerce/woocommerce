@@ -28,12 +28,6 @@ class WC_Auth {
 	 * @since 2.4.0
 	 */
 	public function __construct() {
-		// Add query vars.
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
-
-		// Register auth endpoint.
-		add_action( 'init', array( __CLASS__, 'add_endpoint' ), 0 );
-
 		// Handle auth requests.
 		add_action( 'parse_request', array( $this, 'handle_auth_requests' ), 0 );
 	}
@@ -46,6 +40,10 @@ class WC_Auth {
 	 * @return string[]
 	 */
 	public function add_query_vars( $vars ) {
+		return self::add_query_vars_static( $vars );
+	}
+
+	public static function add_query_vars_static( $vars ) {
 		$vars[] = 'wc-auth-version';
 		$vars[] = 'wc-auth-route';
 		return $vars;
