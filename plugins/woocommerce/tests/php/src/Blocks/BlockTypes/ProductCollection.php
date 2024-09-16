@@ -1132,93 +1132,45 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Provides the test input and expected output for the collection handler tests.
+	 * Tests that the related products collection handler works as expected.
 	 */
-	public function core_collection_handler_test_provider() {
-		return array(
-			array(
-				'woocommerce/product-collection/related',
-				function () {
-					$related_filter = $this->getMockBuilder( \stdClass::class )
-					->setMethods( [ '__invoke' ] )
-					->getMock();
+	public function test_collection_related_products() {
+		$related_filter = $this->getMockBuilder( \stdClass::class )
+		->setMethods( [ '__invoke' ] )
+		->getMock();
 
-					// This filter will turn off the data store so we don't need dummy products.
-					add_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
-					$related_filter->expects( $this->exactly( 2 ) )
-						->method( '__invoke' )
-						->with( array(), 1 )
-						->willReturn( array( 2, 3, 4 ) );
-					add_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ), 10, 2 );
+		$expected_product_ids = array( 2, 3, 4 );
 
-					return function () use ( $related_filter ) {
-						remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
-						remove_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ) );
-					};
-				},
-				array(
-					'productReference' => 1,
-				),
-				array(
-					'productReference' => 1,
-				),
-				array(
-					'post__in' => array( 2, 3, 4 ),
-				),
-			),
-		);
-	}
-
-	/**
-	 * Tests that the core collection handlers behave correctly.
-	 *
-	 * @dataProvider core_collection_handler_test_provider
-	 *
-	 * @param string        $collection_name The name of the collection under test.
-	 * @param callable|null $set_up          An optional function to call before the test. This function can return a callable to clean up after the test.
-	 * @param array         $frontend_query  The query arguments to use for the frontend queries.
-	 * @param array         $editor_query    The query arguments to use for the editor queries.
-	 * @param array         $expected_query  Any query arguments we expect to be present.
-	 */
-	public function test_core_collection_handlers(
-		$collection_name,
-		$set_up,
-		$frontend_query,
-		$editor_query,
-		$expected_query
-	) {
-		$tear_down = null;
-		if ( isset( $set_up ) ) {
-			$tear_down = call_user_func( $set_up );
-		}
+		// This filter will turn off the data store so we don't need dummy products.
+		add_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		$related_filter->expects( $this->exactly( 2 ) )
+			->method( '__invoke' )
+			->with( array(), 1 )
+			->willReturn( $expected_product_ids );
+		add_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ), 10, 2 );
 
 		// Frontend.
-		$parsed_block                        = $this->get_base_parsed_block();
-		$parsed_block['attrs']['collection'] = $collection_name;
-		foreach ( $frontend_query as $key => $value ) {
-			$parsed_block['attrs']['query'][ $key ] = $value;
-		}
-		$result_frontend = $this->initialize_merged_query( $parsed_block );
+		$parsed_block                                       = $this->get_base_parsed_block();
+		$parsed_block['attrs']['collection']                = 'woocommerce/product-collection/related';
+		$parsed_block['attrs']['query']['productReference'] = 1;
+		$result_frontend                                    = $this->initialize_merged_query( $parsed_block );
 
 		// Editor.
-		$request = $this->build_request( $editor_query );
+		$request = $this->build_request(
+			array( 'productReference' => 1 )
+		);
 		$request->set_param(
 			'productCollectionQueryContext',
 			array(
-				'collection' => $collection_name,
+				'collection' => 'woocommerce/product-collection/related',
 			)
 		);
 		$result_editor = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
-		if ( is_callable( $tear_down ) ) {
-			call_user_func( $tear_down );
-		}
+		remove_filter( 'woocommerce_product_related_posts_force_display', '__return_true', 0 );
+		remove_filter( 'woocommerce_related_products', array( $related_filter, '__invoke' ) );
 
-		foreach ( $expected_query as $key => $value ) {
-			$this->assertEqualsCanonicalizing( $value, $result_frontend[ $key ] );
-		}
-		foreach ( $expected_query as $key => $value ) {
-			$this->assertEqualsCanonicalizing( $value, $result_editor[ $key ] );
-		}
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_frontend['post__in'] );
+		$this->assertEqualsCanonicalizing( $expected_product_ids, $result_editor['post__in'] );
 	}
 }
