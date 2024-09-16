@@ -380,7 +380,7 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		$sanitized = str_replace(
 			array( $plugin_path, $wp_path ),
-			array( '**/', '**/' ),
+			array( './', './' ),
 			$message
 		);
 
