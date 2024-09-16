@@ -21,6 +21,7 @@ import {
  */
 import { EditProps } from './types';
 import './editor.scss';
+import { getColorClasses, getColorVars } from './utils';
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
@@ -56,29 +57,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
 			'is-loading': isLoading,
-			'has-chip-text': chipText.color || customChipText,
-			'has-chip-background': chipBackground.color || customChipBackground,
-			'has-chip-border': chipBorder.color || customChipBorder,
-			'has-selected-chip-text':
-				selectedChipText.color || customSelectedChipText,
-			'has-selected-chip-background':
-				selectedChipBackground.color || customSelectedChipBackground,
-			'has-selected-chip-border':
-				selectedChipBorder.color || customSelectedChipBorder,
+			...getColorClasses( attributes ),
 		} ),
-		style: {
-			'--wc-product-filter-chips-text': chipText.color || customChipText,
-			'--wc-product-filter-chips-background':
-				chipBackground.color || customChipBackground,
-			'--wc-product-filter-chips-border':
-				chipBorder.color || customChipBorder,
-			'--wc-product-filter-chips-selected-text':
-				selectedChipText.color || customSelectedChipText,
-			'--wc-product-filter-chips-selected-background':
-				selectedChipBackground.color || customSelectedChipBackground,
-			'--wc-product-filter-chips-selected-border':
-				selectedChipBorder.color || customSelectedChipBorder,
-		},
+		style: getColorVars( attributes ),
 	} );
 
 	const loadingState = useMemo( () => {

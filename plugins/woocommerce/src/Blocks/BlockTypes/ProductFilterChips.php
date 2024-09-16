@@ -24,11 +24,19 @@ final class ProductFilterChips extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		$classes               = '';
+		$style                 = '';
 		$context               = $block->context['filterData'];
 		$items                 = $context['items'] ?? array();
 		$checkbox_list_context = array( 'items' => $items );
 		$action                = $context['action'] ?? '';
 		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-chips' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+
+		$tags = new \WP_HTML_Tag_Processor( $content );
+		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-chips' ) ) ) {
+			$classes = $tags->get_attribute( 'class' );
+			$style   = $tags->get_attribute( 'style' );
+		}
 
 		$checked_items               = array_filter(
 			$items,
@@ -43,7 +51,8 @@ final class ProductFilterChips extends AbstractBlock {
 		$wrapper_attributes = array(
 			'data-wc-interactive' => esc_attr( $namespace ),
 			'data-wc-context'     => wp_json_encode( $checkbox_list_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'class'               => 'wc-block-product-filter-chips',
+			'class'               => esc_attr( $classes ),
+			'style'               => esc_attr( $style ),
 		);
 
 		ob_start();

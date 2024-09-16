@@ -17,18 +17,18 @@ export type Color = {
 
 export type BlockAttributes = {
 	className: string;
-	chipText: string;
-	customChipText: string;
-	chipBackground: string;
-	customChipBackground: string;
-	chipBorder: string;
-	customChipBorder: string;
-	selectedChipText: string;
-	customSelectedChipText: string;
-	selectedChipBackground: string;
-	customSelectedChipBackground: string;
-	selectedChipBorder: string;
-	customSelectedChipBorder: string;
+	chipText?: string;
+	customChipText?: string;
+	chipBackground?: string;
+	customChipBackground?: string;
+	chipBorder?: string;
+	customChipBorder?: string;
+	selectedChipText?: string;
+	customSelectedChipText?: string;
+	selectedChipBackground?: string;
+	customSelectedChipBackground?: string;
+	selectedChipBorder?: string;
+	customSelectedChipBorder?: string;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
