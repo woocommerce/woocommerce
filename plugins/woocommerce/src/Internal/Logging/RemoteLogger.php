@@ -207,7 +207,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-			return true;
+		return true;
 	}
 
 
