@@ -29,6 +29,7 @@ export interface ProductCollectionAttributes {
 	];
 	templateSlug: string;
 	displayLayout: ProductCollectionDisplayLayout;
+	dimensions: ProductCollectionDimensions;
 	tagName: string;
 	convertedFromProducts: boolean;
 	collection?: string;
@@ -48,10 +49,22 @@ export enum LayoutOptions {
 	STACK = 'list',
 }
 
+export enum WidthOptions {
+	FIT = 'fit',
+	FILL = 'fill',
+	FIXED = 'fIxed',
+}
+
 export interface ProductCollectionDisplayLayout {
 	type: LayoutOptions;
 	columns: number;
 	shrinkColumns: boolean;
+}
+
+export interface ProductCollectionDimensions {
+	widthType: WidthOptions;
+	fixedWidth?: number;
+	minHeight?: number;
 }
 
 export enum ETimeFrameOperator {
@@ -145,6 +158,12 @@ export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
 	setAttributes: ProductCollectionSetAttributes;
 };
+
+export type DimensionsControlProps = {
+	dimensions: ProductCollectionDimensions;
+	setAttributes: ProductCollectionSetAttributes;
+};
+
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
 	trackInteraction: TrackInteraction;

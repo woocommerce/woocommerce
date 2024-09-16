@@ -21,6 +21,7 @@ import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	LayoutOptions,
+	WidthOptions,
 } from './types';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
@@ -69,6 +70,7 @@ export const DEFAULT_ATTRIBUTES: Pick<
 	ProductCollectionAttributes,
 	| 'query'
 	| 'tagName'
+	| 'dimensions'
 	| 'displayLayout'
 	| 'queryContextIncludes'
 	| 'forcePageReload'
@@ -79,6 +81,9 @@ export const DEFAULT_ATTRIBUTES: Pick<
 		type: LayoutOptions.GRID,
 		columns: 3,
 		shrinkColumns: true,
+	},
+	dimensions: {
+		widthType: WidthOptions.FILL,
 	},
 	queryContextIncludes: [ 'collection' ],
 	forcePageReload: false,
