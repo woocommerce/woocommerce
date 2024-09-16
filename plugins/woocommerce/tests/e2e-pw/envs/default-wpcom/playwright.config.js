@@ -9,6 +9,10 @@ config = {
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testMatch: [
 				'**/basic.spec.js',
+				'**/activate-and-setup/**/*.spec.js',
+				'**/admin-analytics/**/*.spec.js',
+				'**/admin-marketing/**/*.spec.js',
+				'**/admin-tasks/**/*.spec.js',
 				'**/shopper/**/*.spec.js',
 				'**/api-tests/**/*.test.js',
 				'**/merchant/products/add-variable-product/**/*.spec.js',
