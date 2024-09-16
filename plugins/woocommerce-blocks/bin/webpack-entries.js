@@ -88,10 +88,6 @@ const blocks = {
 	'product-filters': {
 		isExperimental: true,
 	},
-	'product-filter': {
-		isExperimental: true,
-		customDir: 'product-filters/inner-blocks/product-filter',
-	},
 	'product-filters-overlay': {
 		isExperimental: true,
 		customDir: 'product-filters/inner-blocks/overlay',
@@ -122,6 +118,14 @@ const blocks = {
 	},
 	'product-filter-clear-button': {
 		customDir: 'product-filters/inner-blocks/clear-button',
+		isExperimental: true,
+	},
+	'product-filter-checkbox-list': {
+		customDir: 'product-filters/inner-blocks/checkbox-list',
+		isExperimental: true,
+	},
+	'product-filter-chips': {
+		customDir: 'product-filters/inner-blocks/chips',
 		isExperimental: true,
 	},
 	'order-confirmation-summary': {
