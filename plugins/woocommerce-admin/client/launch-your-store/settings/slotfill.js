@@ -309,11 +309,17 @@ const SiteVisibility = () => {
 			<div className="site-visibility-settings-slotfill-section">
 				<h4>{ __( 'Admin bar badge', 'woocommerce' ) }</h4>
 				<ToggleControl
-					label={ __( 'Hide admin bar badge', 'woocommerce' ) }
-					help={ __(
-						'Hide the site visibility badge from the admin bar.',
-						'woocommerce'
-					) }
+					label={
+						<>
+							{ __( 'Hide admin bar badge', 'woocommerce' ) }
+							<p>
+								{ __(
+									'Hide the site visibility badge from the admin bar.',
+									'woocommerce'
+								) }
+							</p>
+						</>
+					}
 					checked={ hideAdminBarBadge === 'yes' }
 					onChange={ ( checked ) => {
 						setHideAdminBarBadge( checked ? 'yes' : 'no' );
