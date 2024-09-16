@@ -386,11 +386,16 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.locator( '#btn-ok' ).click();
 			await page.waitForLoadState( 'networkidle' );
 
-			await page.locator( 'text=Delete' ).waitFor();
+			await expect(
+				page.getByRole( 'cell', { name: 'Edit | Delete', exact: true } )
+			).toBeVisible();
 
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-			await page.locator( 'text=Delete' ).click();
+			await page
+				.getByRole( 'cell', { name: 'Edit | Delete', exact: true } )
+				.locator( 'text=Delete' )
+				.click();
 
 			await expect(
 				page.locator( '.wc-shipping-zone-method-blank-state' )
