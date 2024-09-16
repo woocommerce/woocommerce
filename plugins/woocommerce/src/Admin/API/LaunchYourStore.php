@@ -137,7 +137,7 @@ class LaunchYourStore {
 		add_option( 'woocommerce_store_pages_only', $store_pages_only );
 		add_option( 'woocommerce_private_link', $private_link );
 		add_option( 'woocommerce_share_key', $share_key );
-		add_option( 'woocommerce_coming_soon_hide_admin_bar_badge', 'no');
+		add_option( 'woocommerce_coming_soon_hide_admin_bar_badge', 'no' );
 
 		wc_admin_record_tracks_event(
 			'launch_your_store_initialize_coming_soon',
