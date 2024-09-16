@@ -14,9 +14,10 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 	currentPnpmVersion=$( command -v pnpm > /dev/null && pnpm -v )
 	if [ -n "$currentPnpmVersion" ]; then
 		targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
-
-		printf "$targetPnpmVersion\n"
-		printf "$currentPnpmVersion\n"
+		if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
+			printf "$targetPnpmVersion\n"
+			printf "$currentPnpmVersion\n"
+		fi
 	fi
 
 	# Auto-refresh dependencies when switching between branches
