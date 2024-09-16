@@ -7,11 +7,13 @@ redColoured='\033[0;31m'
 whiteColoured='\033[0m'
 
 if [ "$CHECKOUT_TYPE" = '1' ]; then
+	# Depending on environment/OS, nvm might need initialization.
 	if [ -e ~/.nvm/nvm.sh ]; then
-		# Auto-switch node version when switching between branches
 		. ~/.nvm/nvm.sh
-		nvm use --silent || nvm install
 	fi
+	# Auto-switch node version when switching between branches
+	( command -v pnpm > /dev/null && nvm use --silent ) || nvm install
+
 
 	canUpdateDependencies='no'
 	currentPnpmVersion=$( command -v pnpm > /dev/null && pnpm -v )
