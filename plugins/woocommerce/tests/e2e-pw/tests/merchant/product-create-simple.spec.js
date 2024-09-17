@@ -183,7 +183,7 @@ for ( const productType of Object.keys( productData ) ) {
 						.getByPlaceholder( '0' )
 						.fill( productData[ productType ].shipping.weight );
 					await page
-						.getByPlaceholder( 'Length' )
+						.getByPlaceholder( 'Length', { exact: true } )
 						.fill( productData[ productType ].shipping.length );
 					await page
 						.getByPlaceholder( 'Width' )
