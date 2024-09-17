@@ -13,7 +13,7 @@ import http from 'k6/http';
 import { base_url, admin_username, admin_password } from '../config.js';
 
 /**
- * Convert Cart & Checkout pages to shortcode.
+ * Add a customer order specifically for my-account-orders.js test
  */
 export function addCustomerOrder() {
 	let response;
