@@ -130,6 +130,20 @@ const reducer = ( state = defaultState, action: CheckoutAction ) => {
 			}
 			break;
 
+		case types.SET_EDITING_BILLING_ADDRESS:
+			newState = {
+				...state,
+				editingBillingAddress: action.isEditing,
+			};
+			break;
+
+		case types.SET_EDITING_SHIPPING_ADDRESS:
+			newState = {
+				...state,
+				editingShippingAddress: action.isEditing,
+			};
+			break;
+
 		case types.SET_SHOULD_CREATE_ACCOUNT:
 			if (
 				action.shouldCreateAccount !== undefined &&
