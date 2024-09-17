@@ -78,8 +78,8 @@ class HooksRegistry {
 	 * @var array $admin_filters
 	 */
 	private static array $admin_filters = array(
-		array( 'image_get_intermediate_size', array( __CLASS__, 'filter_image_get_intermediate_size' ), 10, 3 ),
-		array( 'wp_get_attachment_image_src', array( __CLASS__, 'maybe_resize_image' ), 10, 4 ),
+		array( 'image_get_intermediate_size', array( 'WC_Regenerate_Images', 'filter_image_get_intermediate_size' ), 10, 3 ),
+		array( 'wp_get_attachment_image_src', array( 'WC_Regenerate_Images', 'maybe_resize_image' ), 10, 4 ),
 	);
 
 	/**
