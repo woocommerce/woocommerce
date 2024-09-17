@@ -10,13 +10,11 @@ import {
 } from '@wordpress/block-editor';
 import {
 	BlockEditProps,
-	BlockInstance,
 	InnerBlockTemplate,
 	createBlock,
 } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
-import { select, dispatch } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
 import {
 	ExternalLink,
@@ -35,41 +33,17 @@ import {
 import './editor.scss';
 import { type BlockAttributes } from './types';
 import { BlockOverlayAttribute } from './constants';
+import { getInnerBlockBy, getInnerBlockByName } from './utils';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
-		'core/heading',
+		'core/template-part',
+
 		{
-			level: 3,
-			style: { typography: { fontSize: '24px' } },
-			content: __( 'Filters', 'woocommerce' ),
+			slug: 'product-filter-blocks',
+			theme: 'woocommerce/woocommerce',
+			lock: { remove: true },
 		},
-	],
-	[ 'woocommerce/product-filter-active' ],
-	[ 'woocommerce/product-filter-attribute' ],
-	[
-		'core/buttons',
-		{ layout: { type: 'flex' } },
-		[
-			[
-				'core/button',
-				{
-					text: __( 'Apply', 'woocommerce' ),
-					className: 'wc-block-product-filters__apply-button',
-					style: {
-						border: {
-							width: '0px',
-							style: 'none',
-						},
-						typography: {
-							textDecoration: 'none',
-						},
-						outline: 'none',
-						fontSize: 'medium',
-					},
-				},
-			],
-		],
 	],
 ];
 
@@ -85,83 +59,18 @@ export const Edit = ( {
 		''
 	);
 
-	const [
-		productFiltersOverlayNavigationAttributes,
-		setProductFiltersOverlayNavigationAttributes,
-	] = useLocalStorageState< Record< string, unknown > >(
-		'product-filters-overlay-navigation-attributes',
-		{}
-	);
-
-	useEffect( () => {
-		const filtersClientIds = select( 'core/block-editor' ).getBlocksByName(
-			'woocommerce/product-filters'
+	const [ overlayNavigationAttributes, setOverlayNavigationAttributes ] =
+		useLocalStorageState< Record< string, unknown > >(
+			'product-filters-overlay-navigation-attributes',
+			{}
 		);
 
-		let overlayBlock:
-			| BlockInstance< { [ k: string ]: unknown } >
-			| undefined;
+	const { updateBlockAttributes, insertBlock, removeBlock } =
+		dispatch( 'core/block-editor' );
 
-		for ( const filterClientId of filtersClientIds ) {
-			const filterBlock =
-				select( 'core/block-editor' ).getBlock( filterClientId );
-
-			if ( filterBlock ) {
-				for ( const innerBlock of filterBlock.innerBlocks ) {
-					if (
-						innerBlock.name ===
-							'woocommerce/product-filters-overlay-navigation' &&
-						innerBlock.attributes.triggerType === 'open-overlay'
-					) {
-						overlayBlock = innerBlock;
-					}
-				}
-			}
-		}
-
-		if ( attributes.overlay === 'never' && overlayBlock ) {
-			setProductFiltersOverlayNavigationAttributes(
-				overlayBlock.attributes
-			);
-
-			dispatch( 'core/block-editor' ).updateBlockAttributes(
-				overlayBlock.clientId,
-				{
-					lock: {},
-				}
-			);
-
-			dispatch( 'core/block-editor' ).removeBlock(
-				overlayBlock.clientId
-			);
-		} else if ( attributes.overlay !== 'never' && ! overlayBlock ) {
-			if ( productFiltersOverlayNavigationAttributes ) {
-				productFiltersOverlayNavigationAttributes.triggerType =
-					'open-overlay';
-			}
-
-			dispatch( 'core/block-editor' ).insertBlock(
-				createBlock(
-					'woocommerce/product-filters-overlay-navigation',
-					productFiltersOverlayNavigationAttributes
-						? productFiltersOverlayNavigationAttributes
-						: {
-								align: 'left',
-								triggerType: 'open-overlay',
-								lock: { move: true, remove: true },
-						  }
-				),
-				0,
-				clientId,
-				false
-			);
-		}
-	}, [
-		attributes.overlay,
-		clientId,
-		productFiltersOverlayNavigationAttributes,
-		setProductFiltersOverlayNavigationAttributes,
-	] );
+	const currentBlock = useSelect( ( select ) => {
+		return select( 'core/block-editor' ).getBlock( clientId );
+	} );
 
 	return (
 		<div { ...blockProps }>
@@ -173,6 +82,69 @@ export const Edit = ( {
 						value={ attributes.overlay }
 						onChange={ ( value: BlockAttributes[ 'overlay' ] ) => {
 							setAttributes( { overlay: value } );
+							const navigationBlock = getInnerBlockByName(
+								currentBlock,
+								'woocommerce/product-filters-overlay-navigation'
+							);
+							const filterBlocksPart = getInnerBlockBy(
+								currentBlock,
+								function ( innerBlock ) {
+									return (
+										innerBlock.name ===
+											'core/template-part' &&
+										innerBlock.attributes.slug ===
+											'product-filter-blocks'
+									);
+								}
+							);
+
+							if ( navigationBlock && value === 'never' ) {
+								setOverlayNavigationAttributes(
+									navigationBlock.attributes
+								);
+								updateBlockAttributes(
+									navigationBlock.clientId,
+									{
+										lock: {},
+									}
+								);
+								removeBlock( navigationBlock.clientId, false );
+							}
+							if ( ! navigationBlock && value !== 'never' ) {
+								insertBlock(
+									createBlock(
+										'woocommerce/product-filters-overlay-navigation',
+										overlayNavigationAttributes || {
+											lock: { remove: true },
+										}
+									),
+									0,
+									currentBlock?.clientId,
+									false
+								);
+							}
+
+							if ( filterBlocksPart && value === 'always' ) {
+								updateBlockAttributes(
+									filterBlocksPart.clientId,
+									{
+										lock: {},
+									}
+								);
+								removeBlock( filterBlocksPart.clientId, false );
+							}
+							if ( ! filterBlocksPart && value !== 'always' ) {
+								insertBlock(
+									createBlock( 'core/template-part', {
+										slug: 'product-filter-blocks',
+										theme: 'woocommerce/woocommerce',
+										lock: { remove: true },
+									} ),
+									currentBlock?.innerBlocks.length,
+									currentBlock?.clientId,
+									false
+								);
+							}
 						} }
 					>
 						<ToggleGroupControlOption

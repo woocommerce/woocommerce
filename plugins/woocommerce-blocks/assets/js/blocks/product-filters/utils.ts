@@ -17,19 +17,28 @@ export const getAllowedBlocks = ( disallowedBlocks: string[] ) => {
 		.filter( ( name ) => ! disallowedBlocks.includes( name ) );
 };
 
-export const getInnerBlockByName = (
+export const getInnerBlockBy = (
 	block: BlockInstance | null,
-	name: string
+	callback: ( innerBlock: BlockInstance ) => boolean
 ): BlockInstance | null => {
 	if ( ! block ) return null;
 
 	if ( block.innerBlocks.length === 0 ) return null;
 
 	for ( const innerBlock of block.innerBlocks ) {
-		if ( innerBlock.name === name ) return innerBlock;
-		const innerInnerBlock = getInnerBlockByName( innerBlock, name );
+		if ( callback( innerBlock ) ) return innerBlock;
+		const innerInnerBlock = getInnerBlockBy( innerBlock, callback );
 		if ( innerInnerBlock ) return innerInnerBlock;
 	}
 
 	return null;
+};
+
+export const getInnerBlockByName = (
+	block: BlockInstance | null,
+	name: string
+): BlockInstance | null => {
+	return getInnerBlockBy( block, function ( innerBlock ) {
+		return innerBlock.name === name;
+	} );
 };

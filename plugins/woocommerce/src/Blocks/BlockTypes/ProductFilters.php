@@ -15,6 +15,17 @@ class ProductFilters extends AbstractBlock {
 	protected $block_name = 'product-filters';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
+		parent::initialize();
+	}
+
+	/**
 	 * Register the context.
 	 *
 	 * @return string[]
@@ -46,82 +57,25 @@ class ProductFilters extends AbstractBlock {
 	 * @return string
 	 */
 	protected function render_dialog() {
-		$template_part = BlockTemplateUtils::get_template_part( 'product-filters-overlay' );
-
-		$html = $this->render_template_part( $template_part );
-
 		$html = strtr(
-			'<dialog hidden role="dialog" aria-modal="true">
+			'<dialog
+				hidden
+				role="dialog"
+				aria-modal="true"
+				data-wc-bind--hidden="!state.isDialogOpen"
+				data-wc-class--wc-block-product-filters--dialog-open="state.isDialogOpen"
+				data-wc-class--wc-block-product-filters--with-admin-bar="context.hasPageWithWordPressAdminBar"
+				data-wc-interactive="{{namespace}}"
+			>
 				{{html}}
 			</dialog>',
 			array(
-				'{{html}}' => $html,
+				'{{html}}'      => do_blocks( BlockTemplateUtils::get_template_part( 'product-filters-overlay' ) ),
+				'{{namespace}}' => wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			)
 		);
 
-		$p = new \WP_HTML_Tag_Processor( $html );
-		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
-			$p->set_attribute( 'data-wc-bind--hidden', '!state.isDialogOpen' );
-			$p->set_attribute( 'data-wc-class--wc-block-product-filters--dialog-open', 'state.isDialogOpen' );
-			$p->set_attribute( 'data-wc-class--wc-block-product-filters--with-admin-bar', 'context.hasPageWithWordPressAdminBar' );
-			$html = $p->get_updated_html();
-		}
-
 		return $html;
-	}
-
-	/**
-	 * This method is used to render the template part. For each template part, we parse the blocks and render them.
-	 *
-	 * @param string $template_part The template part to render.
-	 * @return string The rendered template part.
-	 */
-	protected function render_template_part( $template_part ) {
-		$parsed_blocks               = parse_blocks( $template_part );
-		$wrapper_template_part_block = $parsed_blocks[0];
-		$html                        = $wrapper_template_part_block['innerHTML'];
-		$target_div                  = '</div>';
-
-		$template_part_content_html = array_reduce(
-			$wrapper_template_part_block['innerBlocks'],
-			function ( $carry, $item ) {
-				if ( 'core/template-part' === $item['blockName'] ) {
-					$inner_template_part              = BlockTemplateUtils::get_template_part( $item['attrs']['slug'] );
-					$inner_template_part_content_html = $this->render_template_part( $inner_template_part );
-
-					return $carry . $inner_template_part_content_html;
-				}
-				return $carry . render_block( $item );
-			},
-			''
-		);
-
-		$html = str_replace( $target_div, $template_part_content_html . $target_div, $html );
-
-		return $html;
-	}
-
-	/**
-	 * Inject dialog into the product filters HTML.
-	 *
-	 * @param string $product_filters_html The Product Filters HTML.
-	 * @param string $dialog_html The dialog HTML.
-	 *
-	 * @return string
-	 */
-	protected function inject_dialog( $product_filters_html, $dialog_html ) {
-		// Find the position of the last </div>.
-		$pos = strrpos( $product_filters_html, '</div>' );
-
-		if ( $pos ) {
-			// Inject the dialog_html at the correct position.
-			$html = substr_replace( $product_filters_html, $dialog_html, $pos, 0 );
-
-			return $html;
-		}
-
-		return $product_filters_html;
 	}
 
 	/**
@@ -133,30 +87,39 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$tags = new \WP_HTML_Tag_Processor( $content );
-		if ( $tags->next_tag() ) {
-			$tags->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/' . $this->block_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
-			$tags->set_attribute(
-				'data-wc-context',
-				wp_json_encode(
-					array(
-						'isDialogOpen'                 => false,
-						'hasPageWithWordPressAdminBar' => false,
-					),
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				)
-			);
-			$tags->set_attribute( 'data-wc-navigation-id', $this->generate_navigation_id( $block ) );
-
-			if (
-				'always' === $attributes['overlay'] ||
-				( 'mobile' === $attributes['overlay'] && wp_is_mobile() )
-			) {
-				return $this->inject_dialog( $tags->get_updated_html(), $this->render_dialog() );
+		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
+			if ( 'mobile' === $attributes['overlay'] && wp_is_mobile() && 'core/template-part' === $inner_block['blockName'] && 'product-filter-blocks' === $inner_block['attrs']['slug'] ) {
+				continue;
 			}
 
-			return $tags->get_updated_html();
+			if ( 'mobile' === $attributes['overlay'] && ! wp_is_mobile() && 'woocommerce/product-filters-overlay-navigation' === $inner_block['blockName'] ) {
+				continue;
+			}
+
+			$content .= render_block( $inner_block );// ( new \WP_Block( $inner_block, array() ) )->render();
 		}
+
+		if ( 'always' === $attributes['overlay'] || ( 'mobile' === $attributes['overlay'] && wp_is_mobile() ) ) {
+			$content .= $this->render_dialog();
+		}
+
+		return sprintf(
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes(
+				array(
+					'data-wc-context'       => wp_json_encode(
+						array(
+							'isDialogOpen'                 => false,
+							'hasPageWithWordPressAdminBar' => false,
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+					),
+					'data-wc-interactive'   => wp_json_encode( array( 'namespace' => 'woocommerce/' . $this->block_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+					'data-wc-navigation-id' => $this->generate_navigation_id( $block ),
+				),
+			),
+			$content
+		);
 	}
 
 	/**
@@ -170,5 +133,19 @@ class ProductFilters extends AbstractBlock {
 			'wc-product-filters-%s',
 			md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
 		);
+	}
+
+	/**
+	 * Skip default rendering routine for inner blocks.
+	 *
+	 * @param array $settings Array of determined settings for registering a block type.
+	 * @param array $metadata Metadata provided for registering a block type.
+	 * @return array
+	 */
+	public function add_block_type_metadata_settings( $settings, $metadata ) {
+		if ( ! empty( $metadata['name'] ) && "woocommerce/{$this->block_name}" === $metadata['name'] ) {
+			$settings['skip_inner_blocks'] = true;
+		}
+		return $settings;
 	}
 }
