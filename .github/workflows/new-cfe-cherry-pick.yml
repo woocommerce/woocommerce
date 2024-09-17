@@ -34,6 +34,15 @@ jobs:
                 script: |
                   const pullRequestUrl = context.payload.pull_request.url;
                   const prDetails = await github.request(pullRequestUrl);
+
+                  const labels = prDetails.data.labels.map(label => label.name);
+                  console.log('Labels:', labels);
+
+                  if (!labels.includes('cherry pick to trunk')) {
+                    console.log('Label "cherry pick to trunk" not found. Exiting job.');
+                    process.exit(0);
+                  }
+
                   core.setOutput('base_ref', prDetails.data.base.ref);
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
