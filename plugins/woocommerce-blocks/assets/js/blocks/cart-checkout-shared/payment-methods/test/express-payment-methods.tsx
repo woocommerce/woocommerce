@@ -104,7 +104,9 @@ describe( 'Express payment methods', () => {
 						{}
 					);
 				} );
-				// Expect some deprecation warnings
+				// This is a bit out of place, but the console warning is triggered when the
+				// usePaymentMethodInterface hook is called so we need to expect it here otherwise
+				// the test fails on unexpected console warnings.
 				expect( console ).toHaveWarnedWith(
 					'isPristine is deprecated since version 9.6.0. Please use isIdle instead. See: https://github.com/woocommerce/woocommerce-blocks/pull/8110'
 				);
