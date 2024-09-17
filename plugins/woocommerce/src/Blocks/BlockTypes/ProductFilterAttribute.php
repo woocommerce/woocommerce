@@ -395,22 +395,25 @@ final class ProductFilterAttribute extends AbstractBlock {
 					'
 <!-- wp:woocommerce/product-filter-attribute {"attributeId":{{attribute_id}}} -->
 <div class="wp-block-woocommerce-product-filter-attribute">
-  <!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-  <div class="wp-block-group">
-    <!-- wp:heading {"level":3} -->
-    <h3 class="wp-block-heading">{{attribute_label}}</h3>
-    <!-- /wp:heading -->
+	<!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+	<div class="wp-block-group">
+		<!-- wp:heading {"level":3} -->
+		<h3 class="wp-block-heading">{{attribute_label}}</h3>
+		<!-- /wp:heading -->
 
-    <!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true}} -->
-    <!-- wp:buttons {"layout":{"type":"flex"}} -->
-    <div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
-      <div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
-      <!-- /wp:button --></div>
-    <!-- /wp:buttons -->
-    <!-- /wp:woocommerce/product-filter-clear-button --></div>
-  <!-- /wp:group -->
+		<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true}} -->
+		<!-- wp:buttons {"layout":{"type":"flex"}} -->
+		<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
+			<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
+			<!-- /wp:button --></div>
+		<!-- /wp:buttons -->
+		<!-- /wp:woocommerce/product-filter-clear-button --></div>
+	<!-- /wp:group -->
 
-  <!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true},"className":"wp-block-woocommerce-product-filter-checkbox-list"} /-->
+	<!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true}} -->
+	<div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
+	<!-- /wp:woocommerce/product-filter-checkbox-list -->
+
 </div>
 <!-- /wp:woocommerce/product-filter-attribute -->
 					',
