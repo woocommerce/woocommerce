@@ -327,7 +327,7 @@ class CustomizeStore extends Task {
 	 * @return array An array of post objects, potentially including sample products.
 	 */
 	public function add_sample_products_to_query( $posts, $query ) {
-		if ( 'product' !== $query->query['post_type'] || ! WC()->is_rest_api_request() || ! empty( $posts ) ) {
+		if ( 'product' !== $query->query['post_type'] || ! empty( $posts ) ) {
 			return $posts;
 		}
 
