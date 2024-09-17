@@ -62,7 +62,10 @@ export const Edit = ( {
 	const [ overlayNavigationAttributes, setOverlayNavigationAttributes ] =
 		useLocalStorageState< Record< string, unknown > >(
 			'product-filters-overlay-navigation-attributes',
-			{}
+			{
+				lock: { remove: true },
+				triggerType: 'open-overlay',
+			}
 		);
 
 	const { updateBlockAttributes, insertBlock, removeBlock } =
@@ -114,7 +117,8 @@ export const Edit = ( {
 								insertBlock(
 									createBlock(
 										'woocommerce/product-filters-overlay-navigation',
-										overlayNavigationAttributes || {
+										{
+											...overlayNavigationAttributes,
 											lock: { remove: true },
 											triggerType: 'open-overlay',
 										}
