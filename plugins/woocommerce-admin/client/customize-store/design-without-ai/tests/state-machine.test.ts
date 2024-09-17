@@ -102,18 +102,12 @@ describe( 'Design Without AI state machine', () => {
 				Promise.reject()
 			);
 			const assembleSiteMock = jest.fn( () => Promise.resolve() );
-			const createProductsMock = jest.fn( () =>
-				Promise.resolve( {
-					success: true,
-				} )
-			);
 			const redirectToIntroWithErrorMock = jest.fn();
 
 			const machine = createMockMachine( {
 				services: {
 					installAndActivateTheme: installAndActivateThemeMock,
 					assembleSite: assembleSiteMock,
-					createProducts: createProductsMock,
 				},
 				actions: {
 					redirectToIntroWithError: redirectToIntroWithErrorMock,
@@ -140,17 +134,11 @@ describe( 'Design Without AI state machine', () => {
 				Promise.resolve()
 			);
 			const assembleSiteMock = jest.fn( () => Promise.resolve() );
-			const createProductsMock = jest.fn( () =>
-				Promise.resolve( {
-					success: true,
-				} )
-			);
 
 			const machine = createMockMachine( {
 				services: {
 					installAndActivateTheme: installAndActivateThemeMock,
 					assembleSite: assembleSiteMock,
-					createProducts: createProductsMock,
 				},
 			} );
 
@@ -183,11 +171,6 @@ describe( 'Design Without AI state machine', () => {
 			const initialState = 'preAssembleSite.assembleSite';
 
 			const assembleSiteMock = jest.fn( () => Promise.reject() );
-			const createProductsMock = jest.fn( () => {
-				return Promise.resolve( {
-					success: true,
-				} );
-			} );
 			const installAndActivateThemeMock = jest.fn( () =>
 				Promise.resolve()
 			);
@@ -197,7 +180,6 @@ describe( 'Design Without AI state machine', () => {
 			const machine = createMockMachine( {
 				services: {
 					assembleSite: assembleSiteMock,
-					createProducts: createProductsMock,
 					installAndActivateTheme: installAndActivateThemeMock,
 				},
 				actions: {
@@ -226,16 +208,10 @@ describe( 'Design Without AI state machine', () => {
 			const installAndActivateThemeMock = jest.fn( () =>
 				Promise.resolve()
 			);
-			const createProductsMock = jest.fn( () =>
-				Promise.resolve( {
-					success: true,
-				} )
-			);
 
 			const machine = createMockMachine( {
 				services: {
 					assembleSite: assembleSiteMock,
-					createProducts: createProductsMock,
 					installAndActivateTheme: installAndActivateThemeMock,
 				},
 				actions: {
@@ -254,84 +230,6 @@ describe( 'Design Without AI state machine', () => {
 			expect( assembleSiteMock ).toHaveBeenCalled();
 
 			expect( finalState.matches( 'showAssembleHub' ) ).toBeTruthy();
-		} );
-
-		it( 'should invoke `redirectToIntroWithError` when `createProducts` service fails', async () => {
-			const initialState =
-				'preAssembleSite.preApiCallLoader.createProducts';
-
-			const createProductsMock = jest.fn( () => Promise.reject() );
-			const assembleSiteMock = jest.fn( () => Promise.resolve() );
-			const installAndActivateThemeMock = jest.fn( () =>
-				Promise.resolve()
-			);
-
-			const redirectToIntroWithErrorMock = jest.fn();
-
-			const machine = createMockMachine( {
-				services: {
-					createProducts: createProductsMock,
-					assembleSite: assembleSiteMock,
-					installAndActivateTheme: installAndActivateThemeMock,
-				},
-				actions: {
-					redirectToIntroWithError: redirectToIntroWithErrorMock,
-				},
-			} );
-
-			const state = machine.getInitialState( initialState );
-
-			const actor = interpret( machine ).start( state );
-
-			await waitFor( actor, ( currentState ) => {
-				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.createProducts.pending'
-				);
-			} );
-
-			expect( createProductsMock ).toHaveBeenCalled();
-			expect( redirectToIntroWithErrorMock ).toHaveBeenCalled();
-		} );
-
-		it( 'should invoke `createProducts` service', async () => {
-			const initialState =
-				'preAssembleSite.preApiCallLoader.createProducts';
-
-			const createProductsMock = jest.fn( () =>
-				Promise.resolve( {
-					success: true,
-				} )
-			);
-
-			const machine = createMockMachine( {
-				services: {
-					createProducts: createProductsMock,
-				},
-			} );
-
-			const state = machine.getInitialState( initialState );
-
-			const actor = interpret( machine ).start( state );
-
-			await waitFor( actor, ( currentState ) => {
-				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.createProducts.pending'
-				);
-			} );
-
-			expect( createProductsMock ).toHaveBeenCalled();
-
-			const finalState = await waitFor( actor, ( currentState ) => {
-				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.createProducts.success'
-				);
-			} );
-
-			expect(
-				finalState.matches(
-					'preAssembleSite.preApiCallLoader.createProducts.success'
-				)
-			).toBeTruthy();
 		} );
 	} );
 } );

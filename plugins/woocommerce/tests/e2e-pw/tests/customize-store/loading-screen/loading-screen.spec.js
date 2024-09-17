@@ -82,7 +82,6 @@ test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 		expect( Object.values( requestToSetupStore ) ).toEqual( [
 			true,
 			true,
-			true,
 		] );
 
 		await pageObject.waitForLoadingScreenFinish();
@@ -141,7 +140,6 @@ test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 		}
 
 		expect( Object.values( requestToSetupStore ) ).toEqual( [
-			false,
 			false,
 			false,
 		] );
