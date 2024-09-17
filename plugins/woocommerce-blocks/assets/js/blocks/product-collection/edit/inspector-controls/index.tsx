@@ -27,7 +27,7 @@ import {
 import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
 import {
-	ProductCollectionEditComponentProps,
+	ProductCollectionContentProps,
 	CoreFilterNames,
 	FilterName,
 } from '../../types';
@@ -59,7 +59,7 @@ const prepareShouldShowFilter =
 	};
 
 const ProductCollectionInspectorControls = (
-	props: ProductCollectionEditComponentProps
+	props: ProductCollectionContentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
 	const { query, hideControls, displayLayout } = attributes;
