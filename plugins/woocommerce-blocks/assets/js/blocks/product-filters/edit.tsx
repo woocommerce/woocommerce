@@ -116,6 +116,7 @@ export const Edit = ( {
 										'woocommerce/product-filters-overlay-navigation',
 										overlayNavigationAttributes || {
 											lock: { remove: true },
+											triggerType: 'open-overlay',
 										}
 									),
 									0,
