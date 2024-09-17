@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
 use Automattic\Jetpack\Connection\Manager;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -237,6 +238,10 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 
 		$redirect_url = $request->get_param( 'redirect_url' );
 		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, [ 'development', 'wpcalypso', 'horizon', 'stage' ], true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+
+		if ( Features::is_enabled( 'use-wp-horizon' ) ) {
+			$calypso_env = 'horizon';
+		}
 
 		return [
 			'success' => ! $errors->has_errors(),
