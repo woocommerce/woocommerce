@@ -151,6 +151,7 @@ export default function Content(): JSX.Element {
 		currentPage,
 		query.category,
 		query.term,
+		query.tab,
 		setIsLoadingMore,
 		setSearchResultsCount,
 	] );
@@ -350,17 +351,6 @@ export default function Content(): JSX.Element {
 		setFirstNewProductId( 0 );
 	}, [ selectedTab, query?.category, query?.term ] );
 
-	const getProductType = ( tab: string ): ProductType => {
-		switch ( tab ) {
-			case 'themes':
-				return ProductType.theme;
-			case 'business-services':
-				return ProductType.businessService;
-			default:
-				return ProductType.extension;
-		}
-	};
-
 	// Maintain product focus for accessibility
 	useEffect( () => {
 		if ( firstNewProductId ) {
@@ -374,6 +364,17 @@ export default function Content(): JSX.Element {
 			}, 0 );
 		}
 	}, [ firstNewProductId ] );
+
+	const getProductType = ( tab: string ): ProductType => {
+		switch ( tab ) {
+			case 'themes':
+				return ProductType.theme;
+			case 'business-services':
+				return ProductType.businessService;
+			default:
+				return ProductType.extension;
+		}
+	};
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
