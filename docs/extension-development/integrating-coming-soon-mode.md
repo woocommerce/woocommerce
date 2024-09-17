@@ -160,7 +160,7 @@ Use the following example to exclude a certain page based on the page's ID. Repl
 
 ```php
 add_filter( 'woocommerce_coming_soon_exclude', function( $is_excluded ) {
-    if ( get_the_ID() === <page-id> ) {
+    if ( get_the_ID() === &lt;page-id&gt; ) {
         return true;
     }
     return $is_excluded;
