@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix bug where manually triggering `added_to_cart` event without a button element caused an Exception.
