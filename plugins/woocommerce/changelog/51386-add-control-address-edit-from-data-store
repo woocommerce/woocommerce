@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Move address card state management to data stores in Checkout block.
