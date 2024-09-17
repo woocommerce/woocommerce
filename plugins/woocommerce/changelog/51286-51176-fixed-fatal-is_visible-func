@@ -1,4 +1,5 @@
 Significance: patch
 Type: fix
-Comment: Fixed call to a member function is_visible() on string | content-product.php:23
+
+Fixed call to a member function is_visible() on string, in `content-product.php:23`.
 
