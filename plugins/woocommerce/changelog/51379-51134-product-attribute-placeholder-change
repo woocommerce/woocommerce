@@ -1,4 +1,5 @@
 Significance: patch
 Type: fix
-Comment: Changed Product attributes placeholder to e.g. length or weight
+
+Improve wording used for the attributes placeholder within the product editor.
 
