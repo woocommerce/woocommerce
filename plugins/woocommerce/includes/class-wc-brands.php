@@ -796,12 +796,12 @@ class WC_Brands {
 	 * @return void
 	 */
 	public function rest_api_register_routes() {
-		require_once WC()->plugin_path() . '/includes/rest-api/Controllers/Version1/class-wc-rest-product-brands-v1-controller.php';
 		require_once WC()->plugin_path() . '/includes/rest-api/Controllers/Version2/class-wc-rest-product-brands-v2-controller.php';
+		require_once WC()->plugin_path() . '/includes/rest-api/Controllers/Version3/class-wc-rest-product-brands-controller.php';
 
 		$controllers = array(
-			'WC_REST_Product_Brands_V1_Controller',
 			'WC_REST_Product_Brands_V2_Controller',
+			'WC_REST_Product_Brands_Controller'
 		);
 
 		foreach ( $controllers as $controller ) {
