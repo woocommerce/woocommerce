@@ -7,27 +7,15 @@ redColoured='\033[0;31m'
 whiteColoured='\033[0m'
 
 if [ "$CHECKOUT_TYPE" = '1' ]; then
-	# Depending on environment/OS, nvm initialization file can be in different locations.
-	brewPrefix=$( ( command -v brew > /dev/null && brew --prefix nvm 2>/dev/null ) || echo '' )
-	for location in '~/.nvm', "$brewPrefix"; do
-		if [ -e $location/nvm.sh ]; then
-			. $location/nvm.sh
-		fi
-    done
-	# Auto-switch node version when switching between branches
-	command -v nvm > /dev/null && ( nvm use --silent || nvm install )
-
 	canUpdateDependencies='no'
-	currentPnpmVersion=$( ( command -v pnpm > /dev/null && pnpm -v ) || echo '' )
-	if [ -n "$currentPnpmVersion" ]; then
-		targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
-		if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
-			printf "${redColoured}pnpm versions mismatch: in use '$currentPnpmVersion', needed '$targetPnpmVersion'. Here some hints how to solve this:\n"
-			printf "${redColoured}* actualize environment and verify: 'nvm use && pnpm -v'\n"
-			printf "${redColoured}* install: 'npm install -g pnpm@$targetPnpmVersion'\n"
-		else
-			canUpdateDependencies='yes'
-		fi
+	currentPnpmVersion=$( ( command -v pnpm > /dev/null && pnpm -v ) || echo 'n/a' )
+	targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
+	if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
+		printf "${redColoured}pnpm versions mismatch: in use '$currentPnpmVersion', needed '$targetPnpmVersion'. Here some hints how to solve this:\n"
+		printf "${redColoured}* actualize environment and verify: 'nvm use && pnpm -v'\n"
+		printf "${redColoured}* install: 'npm install -g pnpm@$targetPnpmVersion'\n"
+	else
+		canUpdateDependencies='yes'
 	fi
 
 	# Auto-refresh dependencies when switching between branches
