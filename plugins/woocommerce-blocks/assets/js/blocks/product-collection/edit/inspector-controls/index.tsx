@@ -27,7 +27,7 @@ import {
 import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
 import {
-	ProductCollectionEditComponentProps,
+	ProductCollectionContentProps,
 	ProductCollectionAttributes,
 	CoreFilterNames,
 	FilterName,
@@ -50,6 +50,7 @@ import LayoutOptionsControl from './layout-options-control';
 import FeaturedProductsControl from './featured-products-control';
 import CreatedControl from './created-control';
 import PriceRangeControl from './price-range-control';
+import LinkedProductControl from './linked-product-control';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -57,7 +58,7 @@ const prepareShouldShowFilter =
 	};
 
 const ProductCollectionInspectorControls = (
-	props: ProductCollectionEditComponentProps
+	props: ProductCollectionContentProps
 ) => {
 	const { attributes, context, setAttributes } = props;
 	const { query, hideControls, displayLayout } = attributes;
@@ -121,6 +122,13 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
+			<LinkedProductControl
+				query={ props.attributes.query }
+				setAttributes={ props.setAttributes }
+				usesReference={ props.usesReference }
+				location={ props.location }
+			/>
+
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {

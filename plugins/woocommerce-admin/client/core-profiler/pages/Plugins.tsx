@@ -7,6 +7,7 @@ import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { Extension, ExtensionList } from '@woocommerce/data';
 import { useState } from 'react';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -146,6 +147,10 @@ export const Plugins = ( {
 		].includes( plugin.key )
 	);
 
+	const pluginsCardRowCount = Math.ceil(
+		context.pluginsAvailable.length / 2
+	);
+
 	return (
 		<div
 			className="woocommerce-profiler-plugins"
@@ -170,7 +175,12 @@ export const Plugins = ( {
 				{ errorMessage && (
 					<p className="plugin-error">{ errorMessage }</p>
 				) }
-				<div className="woocommerce-profiler-plugins__list">
+				<div
+					className={ clsx(
+						'woocommerce-profiler-plugins__list',
+						`rows-${ pluginsCardRowCount }`
+					) }
+				>
 					{ context.pluginsAvailable.map( ( plugin ) => {
 						const learnMoreLink = plugin.learn_more_link ? (
 							<Link
@@ -219,7 +229,12 @@ export const Plugins = ( {
 						);
 					} ) }
 				</div>
-				<div className="woocommerce-profiler-plugins__footer">
+				<div
+					className={ clsx(
+						'woocommerce-profiler-plugins__footer',
+						`rows-${ pluginsCardRowCount }`
+					) }
+				>
 					<div className="woocommerce-profiler-plugins-continue-button-container">
 						<Button
 							className="woocommerce-profiler-plugins-continue-button"

@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Only load local pickup methods on cart/checkout pages

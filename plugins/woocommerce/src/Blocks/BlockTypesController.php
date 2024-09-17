@@ -227,20 +227,28 @@ final class BlockTypesController {
 	 * @return string
 	 */
 	public function add_data_attributes( $content, $block ) {
-		$block_name = $block['blockName'];
 
-		if ( ! $this->block_should_have_data_attributes( $block_name ) ) {
+		$content = trim( $content );
+
+		if ( ! $this->block_should_have_data_attributes( $block['blockName'] ) ) {
 			return $content;
 		}
 
-		$attributes              = (array) $block['attrs'];
-		$exclude_attributes      = array( 'className', 'align' );
-		$escaped_data_attributes = array(
-			'data-block-name="' . esc_attr( $block['blockName'] ) . '"',
-		);
+		$attributes         = (array) $block['attrs'];
+		$exclude_attributes = array( 'className', 'align' );
 
-		foreach ( $attributes as $key => $value ) {
-			if ( in_array( $key, $exclude_attributes, true ) ) {
+		$processor = new \WP_HTML_Tag_Processor( $content );
+
+		if (
+			false === $processor->next_token() ||
+			'DIV' !== $processor->get_token_name() ||
+			$processor->is_tag_closer()
+		) {
+			return $content;
+		}
+
+		foreach ( $attributes as $key  => $value ) {
+			if ( ! is_string( $key ) || in_array( $key, $exclude_attributes, true ) ) {
 				continue;
 			}
 			if ( is_bool( $value ) ) {
@@ -249,10 +257,16 @@ final class BlockTypesController {
 			if ( ! is_scalar( $value ) ) {
 				$value = wp_json_encode( $value );
 			}
-			$escaped_data_attributes[] = 'data-' . esc_attr( strtolower( preg_replace( '/(?<!\ )[A-Z]/', '-$0', $key ) ) ) . '="' . esc_attr( $value ) . '"';
+
+			// For output consistency, we convert camelCase to kebab-case and output in lowercase.
+			$key = strtolower( preg_replace( '/(?<!^|\ )[A-Z]/', '-$0', $key ) );
+
+			$processor->set_attribute( "data-{$key}", $value );
 		}
 
-		return preg_replace( '/^<div /', '<div ' . implode( ' ', $escaped_data_attributes ) . ' ', trim( $content ) );
+		// Set this last to prevent user-input from overriding it.
+		$processor->set_attribute( 'data-block-name', $block['blockName'] );
+		return $processor->get_updated_html();
 	}
 
 	/**
@@ -271,7 +285,7 @@ final class BlockTypesController {
 	 * and prevent them from showing as an option in the Legacy Widget block.
 	 *
 	 * @param array $widget_types An array of widgets hidden in core.
-	 * @return array $widget_types An array inluding the WooCommerce widgets to hide.
+	 * @return array $widget_types An array including the WooCommerce widgets to hide.
 	 */
 	public function hide_legacy_widgets_with_block_equivalent( $widget_types ) {
 		array_push(
@@ -336,6 +350,7 @@ final class BlockTypesController {
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
+			'ProductMeta',
 			'ProductNew',
 			'ProductOnSale',
 			'ProductPrice',
@@ -389,7 +404,6 @@ final class BlockTypesController {
 		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFiltersOverlay';
 			$block_types[] = 'ProductFiltersOverlayNavigation';
@@ -399,6 +413,9 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterRating';
 			$block_types[] = 'ProductFilterActive';
 			$block_types[] = 'ProductFilterClearButton';
+			$block_types[] = 'ProductFilterCheckboxList';
+			$block_types[] = 'ProductFilterChips';
+			$block_types[] = 'OrderConfirmation\CreateAccount';
 		}
 
 		/**
@@ -423,7 +440,6 @@ final class BlockTypesController {
 			$block_types = array_diff(
 				$block_types,
 				array(
-					'AddToCartForm',
 					'Breadcrumbs',
 					'CatalogSorting',
 					'ClassicTemplate',

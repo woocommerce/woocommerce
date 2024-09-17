@@ -1,0 +1,10 @@
+.wc-block-product-filter-checkbox-list.is-loading {
+	.wc-block-product-filter-checkbox-list__list {
+		padding: 0;
+
+		li {
+			@include placeholder();
+			margin: 5px 0;
+		}
+	}
+}

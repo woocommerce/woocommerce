@@ -1,10 +1,14 @@
 <?php
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Tests\Database;
+
+use WC_Install;
+
 /**
  * Tests for the block hooks versioning we set in the DB.
  */
-class BlockHooksVersionTests extends WC_Unit_Test_Case {
+class BlockHooksVersionTests extends \WC_Unit_Test_Case {
 	/**
 	 * Option name for storing the block hooks version.
 	 *

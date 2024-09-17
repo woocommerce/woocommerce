@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use WP_HTML_Tag_Processor;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -50,7 +51,30 @@ class ProductDetails extends AbstractBlock {
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		$hide_tab_title = isset( $attributes['hideTabTitle'] ) ? $attributes['hideTabTitle'] : false;
+
+		if ( $hide_tab_title ) {
+			add_filter( 'woocommerce_product_description_heading', '__return_empty_string' );
+			add_filter( 'woocommerce_product_additional_information_heading', '__return_empty_string' );
+			add_filter( 'woocommerce_reviews_title', '__return_empty_string' );
+		}
+
 		$tabs = $this->render_tabs();
+
+		if ( $hide_tab_title ) {
+			remove_filter( 'woocommerce_product_description_heading', '__return_empty_string' );
+			remove_filter( 'woocommerce_product_additional_information_heading', '__return_empty_string' );
+			remove_filter( 'woocommerce_reviews_title', '__return_empty_string' );
+
+			// Remove the first `h2` of every `.wc-tab`. This is required for the Reviews tabs when there are no reviews and for plugin tabs.
+			$tabs_html = new WP_HTML_Tag_Processor( $tabs );
+			while ( $tabs_html->next_tag( array( 'class_name' => 'wc-tab' ) ) ) {
+				if ( $tabs_html->next_tag( 'h2' ) ) {
+					$tabs_html->set_attribute( 'hidden', 'true' );
+				}
+			}
+			$tabs = $tabs_html->get_updated_html();
+		}
 
 		$classname = $attributes['className'] ?? '';
 

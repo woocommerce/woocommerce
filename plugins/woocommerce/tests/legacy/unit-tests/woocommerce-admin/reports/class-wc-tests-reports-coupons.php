@@ -5,9 +5,9 @@
  * @package WooCommerce\Admin\Tests\Coupons
  */
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 use Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore as CouponsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Coupons\Query as CouponsQuery;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 
 /**
@@ -59,7 +59,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		$order_2c->calculate_totals();
 		$order_2c->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new CouponsDataStore();
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -96,8 +96,8 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new CouponsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'coupons' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 
 		// Test order by orders_count DESC.
@@ -375,7 +375,7 @@ class WC_Admin_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		// Delete the coupons.
 		$coupon_2->delete( true );
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new CouponsDataStore();
 		$start_time = gmdate( 'Y-m-d 00:00:00', $order->get_date_created()->getOffsetTimestamp() );

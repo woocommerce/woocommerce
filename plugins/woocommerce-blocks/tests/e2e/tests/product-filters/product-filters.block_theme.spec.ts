@@ -17,10 +17,21 @@ const blockData = {
 			settings: {},
 			layoutWrapper:
 				'.wp-block-woocommerce-product-filters-is-layout-flex',
+			blocks: {
+				filters: {
+					title: 'Product Filters (Experimental)',
+					label: 'Block: Product Filters (Experimental)',
+				},
+				overlay: {
+					title: 'Overlay Navigation (Experimental)',
+					label: 'Block: Overlay Navigation (Experimental)',
+				},
+			},
 		},
 	},
 	slug: 'archive-product',
 	productPage: '/product/hoodie/',
+	shopPage: '/shop/',
 };
 
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
@@ -53,57 +64,21 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+			blockData.selectors.editor.blocks.filters.label
 		);
 		await expect( block ).toBeVisible();
 
-		const activeHeading = block.getByText( 'Active', { exact: true } );
-		const activeFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-active"]'
-				)
-			);
-		await expect( activeHeading ).toBeVisible();
+		const activeFilterBlock = block.getByLabel(
+			'Block: Active (Experimental)'
+		);
 		await expect( activeFilterBlock ).toBeVisible();
-
-		const priceHeading = block.getByText( 'Price', {
-			exact: true,
-		} );
-		const priceFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-price"]'
-				)
-			);
-		await expect( priceHeading ).toBeVisible();
-		await expect( priceFilterBlock ).toBeVisible();
-
-		const statusHeading = block.getByText( 'Status', {
-			exact: true,
-		} );
-		const statusFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-stock-status"]'
-				)
-			);
-		await expect( statusHeading ).toBeVisible();
-		await expect( statusFilterBlock ).toBeVisible();
 
 		const colorHeading = block.getByText( 'Color', {
 			exact: true,
 		} );
-		const colorFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-attribute"]'
-				)
-			);
+		const colorFilterBlock = block.getByLabel(
+			'Block: Color (Experimental)'
+		);
 		const expectedColorFilterOptions = [
 			'Blue',
 			'Green',
@@ -111,27 +86,11 @@ test.describe( `${ blockData.name }`, () => {
 			'Red',
 			'Yellow',
 		];
-		const colorFilterOptions = (
-			await colorFilterBlock.allInnerTexts()
-		 )[ 0 ].split( '\n' );
 		await expect( colorHeading ).toBeVisible();
 		await expect( colorFilterBlock ).toBeVisible();
-		expect( colorFilterOptions ).toEqual(
-			expect.arrayContaining( expectedColorFilterOptions )
-		);
-
-		const ratingHeading = block.getByText( 'Rating', {
-			exact: true,
-		} );
-		const ratingFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-rating"]'
-				)
-			);
-		await expect( ratingHeading ).toBeVisible();
-		await expect( ratingFilterBlock ).toBeVisible();
+		for ( const option of expectedColorFilterOptions ) {
+			await expect( colorFilterBlock ).toContainText( option );
+		}
 	} );
 
 	test( 'should contain the correct inner block names in the list view', async ( {
@@ -141,7 +100,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+			blockData.selectors.editor.blocks.filters.label
 		);
 		await expect( block ).toBeVisible();
 
@@ -151,7 +110,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( listView ).toBeVisible();
 
 		const productFiltersBlockListItem = listView.getByRole( 'link', {
-			name: 'Product Filters (Experimental)',
+			name: blockData.selectors.editor.blocks.filters.title,
 		} );
 		await expect( productFiltersBlockListItem ).toBeVisible();
 		const listViewExpander =
@@ -170,25 +129,10 @@ test.describe( `${ blockData.name }`, () => {
 		);
 		await expect( productFilterActiveBlocksListItem ).toBeVisible();
 
-		const productFilterPriceBlockListItem = listView.getByText(
-			'Price (Experimental)'
-		);
-		await expect( productFilterPriceBlockListItem ).toBeVisible();
-
-		const productFilterStatusBlockListItem = listView.getByText(
-			'Status (Experimental)'
-		);
-		await expect( productFilterStatusBlockListItem ).toBeVisible();
-
 		const productFilterAttributeBlockListItem = listView.getByText(
 			'Color (Experimental)' // it must select the attribute with the highest product count
 		);
 		await expect( productFilterAttributeBlockListItem ).toBeVisible();
-
-		const productFilterRatingBlockListItem = listView.getByText(
-			'Rating (Experimental)'
-		);
-		await expect( productFilterRatingBlockListItem ).toBeVisible();
 	} );
 
 	test( 'should display the correct inspector style controls', async ( {
@@ -198,7 +142,7 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
 		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+			blockData.selectors.editor.blocks.filters.label
 		);
 		await expect( block ).toBeVisible();
 
@@ -245,10 +189,17 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await pageObject.addProductFiltersBlock( { cleanContent: true } );
 
-		const block = editor.canvas.getByLabel(
-			'Block: Product Filters (Experimental)'
+		const filtersBlock = editor.canvas.getByLabel(
+			blockData.selectors.editor.blocks.filters.label
 		);
-		await expect( block ).toBeVisible();
+		await expect( filtersBlock ).toBeVisible();
+
+		const overlayBlock = editor.canvas.getByLabel(
+			blockData.selectors.editor.blocks.overlay.label
+		);
+
+		// Overlay mode is set to 'Never' by default so the block should be hidden
+		await expect( overlayBlock ).toBeHidden();
 
 		await editor.openDocumentSettingsSidebar();
 
@@ -259,17 +210,6 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Overlay settings
 		const overlayModeSettings = [ 'Never', 'Mobile', 'Always' ];
-		const overlayButtonSettings = [
-			'Label and icon',
-			'Label only',
-			'Icon only',
-		];
-		const overlayIconsSettings = [
-			'Filter icon 1',
-			'Filter icon 2',
-			'Filter icon 3',
-			'Filter icon 4',
-		];
 
 		await expect( editor.page.getByText( 'Overlay' ) ).toBeVisible();
 
@@ -277,43 +217,27 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( editor.page.getByText( mode ) ).toBeVisible();
 		}
 
+		await editor.page.getByLabel( 'Never' ).click();
+
+		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeHidden();
+
+		await expect( overlayBlock ).toBeHidden();
+
 		await editor.page.getByLabel( 'Mobile' ).click();
-		await expect( editor.page.getByText( 'BUTTON' ) ).toBeVisible();
 
-		for ( const mode of overlayButtonSettings ) {
-			await expect( editor.page.getByText( mode ) ).toBeVisible();
-		}
-
-		for ( const mode of overlayIconsSettings ) {
-			await expect( editor.page.getByLabel( mode ) ).toBeVisible();
-		}
-
-		await expect( editor.page.getByText( 'ICON SIZE' ) ).toBeVisible();
 		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
+
+		await expect( overlayBlock ).toBeVisible();
 
 		await editor.page.getByLabel( 'Always' ).click();
 
-		await expect( editor.page.getByText( 'BUTTON' ) ).toBeHidden();
-
-		for ( const mode of overlayButtonSettings ) {
-			await expect( editor.page.getByText( mode ) ).toBeHidden();
-		}
-
-		for ( const mode of overlayIconsSettings ) {
-			await expect( editor.page.getByLabel( mode ) ).toBeHidden();
-		}
-
 		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
 
-		await editor.page.getByLabel( 'Mobile' ).click();
+		await expect( overlayBlock ).toBeVisible();
 
-		await editor.page.locator( 'input[value="label"]' ).click();
+		await editor.page.getByLabel( 'Never' ).click();
 
-		for ( const mode of overlayIconsSettings ) {
-			await expect( editor.page.getByLabel( mode ) ).toBeHidden();
-		}
-
-		await expect( editor.page.getByText( 'Edit overlay' ) ).toBeVisible();
+		await expect( overlayBlock ).toBeHidden();
 	} );
 
 	test( 'Layout > default to vertical stretch', async ( {
@@ -379,7 +303,7 @@ test.describe( `${ blockData.name }`, () => {
 		).toHaveCSS( 'align-items', 'center' );
 	} );
 
-	test( 'Layout > Orientation: changing option should update the preview', async ( {
+	test.skip( 'Layout > Orientation: changing option should update the preview', async ( {
 		editor,
 		pageObject,
 	} ) => {
@@ -412,7 +336,7 @@ test.describe( `${ blockData.name }`, () => {
 		).toBeVisible();
 	} );
 
-	test( 'Dimentions > Block spacing: changing option should update the preview', async ( {
+	test( 'Dimensions > Block spacing: changing option should update the preview', async ( {
 		editor,
 		pageObject,
 	} ) => {

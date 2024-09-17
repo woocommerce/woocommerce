@@ -50,7 +50,7 @@ describe( 'usePriceConstraints', () => {
 		expect( container.props[ 'data-minPriceConstraint' ] ).toBe( 2000 );
 	} );
 
-	it( 'previous price constraint should be preserved when new price is not a infinite number', () => {
+	it( 'previous price constraint should be preserved when new price is not an infinite number', () => {
 		const renderer = TestRenderer.create(
 			<TestComponent price={ 1000 } />
 		);

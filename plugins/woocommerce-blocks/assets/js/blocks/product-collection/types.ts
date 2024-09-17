@@ -9,6 +9,16 @@ import { type AttributeMetadata } from '@woocommerce/types';
  */
 import { WooCommerceBlockLocation } from '../product-template/utils';
 
+export enum ProductCollectionUIStatesInEditor {
+	COLLECTION_PICKER = 'collection_chooser',
+	PRODUCT_REFERENCE_PICKER = 'product_context_picker',
+	VALID_WITH_PREVIEW = 'uses_reference_preview_mode',
+	VALID = 'valid',
+	DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',
+	// Future states
+	// INVALID = 'invalid',
+}
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -95,11 +105,11 @@ export interface ProductCollectionQuery {
 	woocommerceHandPickedProducts: string[];
 	priceRange: undefined | PriceRange;
 	filterable: boolean;
+	productReference?: number;
 }
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
-		openCollectionSelectionModal: () => void;
 		preview?: {
 			initialPreviewState?: PreviewState;
 			setPreviewState?: SetPreviewState;
@@ -108,6 +118,13 @@ export type ProductCollectionEditComponentProps =
 		context: {
 			templateSlug: string;
 		};
+	};
+
+export type ProductCollectionContentProps =
+	ProductCollectionEditComponentProps & {
+		location: WooCommerceBlockLocation;
+		isUsingReferencePreviewMode: boolean;
+		openCollectionSelectionModal: () => void;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';

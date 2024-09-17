@@ -6,8 +6,8 @@
  * @todo Finish up unit testing to verify bug-free product reports.
  */
 
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataStore;
-use Automattic\WooCommerce\Admin\API\Reports\Products\Query as ProductsQuery;
 use Automattic\WooCommerce\Admin\ReportCSVExporter;
 
 /**
@@ -42,7 +42,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -70,8 +70,8 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new ProductsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'products' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -119,7 +119,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order_2->set_date_created( $date_created_2 );
 		$order_2->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -186,8 +186,8 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new ProductsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'products' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -220,7 +220,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -301,7 +301,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -383,7 +383,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			break;
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$data_store = new ProductsDataStore();
 		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -411,8 +411,8 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test retrieving the stats through the query class.
-		$query = new ProductsQuery( $args );
+		// Test retrieving the stats through the generic query class.
+		$query = new GenericQuery( $args, 'products' );
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
@@ -441,7 +441,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$term = wp_insert_term( 'Unused Category', 'product_cat' );
 

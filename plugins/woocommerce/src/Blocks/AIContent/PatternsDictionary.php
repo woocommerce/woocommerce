@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\AIContent;
 
 /**
  * Patterns Dictionary class.
+ *
+ * @internal
  */
 class PatternsDictionary {
 	/**

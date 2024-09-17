@@ -11,7 +11,12 @@ import { get, partial, uniq } from 'lodash';
 import { __, sprintf } from '@wordpress/i18n';
 import PropTypes from 'prop-types';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
-import { CompareButton, Search, TableCard } from '@woocommerce/components';
+import {
+	CompareButton,
+	AnalyticsError,
+	Search,
+	TableCard,
+} from '@woocommerce/components';
 import {
 	getIdsFromQuery,
 	getSearchWords,
@@ -38,7 +43,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import DownloadIcon from './download-icon';
-import ReportError from '../report-error';
 import { extendTableData } from './utils';
 import './style.scss';
 
@@ -89,7 +93,7 @@ const ReportTable = ( props ) => {
 	const isError = tableData.isError || primaryData.isError;
 
 	if ( isError ) {
-		return <ReportError />;
+		return <AnalyticsError />;
 	}
 
 	let userPrefColumns = [];
@@ -489,7 +493,7 @@ ReportTable.propTypes = {
 	 * For example, if `taxes` is provided, data will be fetched from the report
 	 * `taxes` endpoint (ie: `/wc-analytics/reports/taxes` and `/wc/v4/reports/taxes/stats`).
 	 * If the provided endpoint doesn't exist, an error will be shown to the user
-	 * with `ReportError`.
+	 * with `AnalyticsError`.
 	 */
 	endpoint: PropTypes.string,
 	/**
@@ -548,7 +552,7 @@ ReportTable.propTypes = {
 	 * Table data of that report. If it's not provided, it will be automatically
 	 * loaded via the provided `endpoint`.
 	 */
-	tableData: PropTypes.object.isRequired,
+	tableData: PropTypes.object,
 	/**
 	 * Properties to be added to the query sent to the report table endpoint.
 	 */

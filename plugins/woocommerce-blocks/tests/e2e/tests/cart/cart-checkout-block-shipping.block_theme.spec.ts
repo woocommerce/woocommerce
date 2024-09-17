@@ -58,7 +58,7 @@ test.describe( 'Shopper → Shipping', () => {
 		await userFrontendUtils.goToCart();
 
 		await expect(
-			userPage.getByLabel( 'Add an address for shipping options' )
+			userPage.getByLabel( 'Enter address to check delivery options' )
 		).toBeVisible();
 	} );
 
@@ -78,7 +78,7 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await expect(
 			userPage.getByText(
-				'Shipping options will be displayed here after entering your full shipping addres'
+				'Shipping options will be displayed here after entering your full shipping address'
 			)
 		).toBeVisible();
 
@@ -86,7 +86,7 @@ test.describe( 'Shopper → Shipping', () => {
 
 		await expect(
 			userPage.getByText(
-				'Shipping options will be displayed here after entering your full shipping addres'
+				'Shipping options will be displayed here after entering your full shipping address'
 			)
 		).toBeHidden();
 	} );
