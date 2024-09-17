@@ -207,7 +207,7 @@ class CustomizeStore extends Task {
 
 		return new WP_Post(
 			(object) array(
-				'ID'                    => time() * 1000 + $index,
+				'ID'                    => $index + 1,
 				'post_author'           => 1,
 				'post_date'             => '',
 				'post_date_gmt'         => '',
@@ -231,6 +231,7 @@ class CustomizeStore extends Task {
 				'post_mime_type'        => '',
 				'comment_count'         => 0,
 				'filter'                => 'raw',
+				'is_sample_product'     => true,
 			)
 		);
 	}
@@ -241,13 +242,12 @@ class CustomizeStore extends Task {
 	 * This method creates an array representing a sample product
 	 * using data from the sample products array.
 	 *
-	 * @param int $product_id The ID of the product to generate. The last digit
-	 *                        of the product ID is used to determine which sample product to use.
+	 * @param int $product_id The ID of the product to generate. It's used to
+	 *                        determine which sample product to use.
 	 * @return array An array representing a sample product.
 	 */
 	public function generate_sample_product_object( $product_id ) {
-		$last_digit          = substr( $product_id, -1 );
-		$sample_product_data = $this->sample_products[ $last_digit ];
+		$sample_product_data = $this->sample_products[ $product_id - 1 ];
 		$image_src           = plugins_url( '/assets/images/pattern-placeholders/' . $sample_product_data['image'], dirname( __DIR__, 4 ) );
 		$currency_decimals   = wc_get_price_decimals();
 		$prices              = ( new CurrencyFormatter() )->format(
@@ -299,8 +299,9 @@ class CustomizeStore extends Task {
 	/**
 	 * Adds the rendered title to the product response.
 	 *
-	 * This method sets the 'rendered' title of a product to be the same as its 'raw' title
-	 * in the REST API response.
+	 * This method sets the 'rendered' title of a product to be the same as the
+	 * one from the `$post` object. This way we short-circuit the `get_the_title`
+	 * function used by WP core that wouldn't return the correct title.
 	 *
 	 * @param WP_REST_Response $response The response object.
 	 * @param WP_Post          $post     The original post object.
@@ -308,11 +309,9 @@ class CustomizeStore extends Task {
 	 * @return WP_REST_Response The modified response object.
 	 */
 	public function add_product_rendered_title( $response, $post, $request ) {
-		if ( ! empty( $response->data['title']['rendered'] ) || 'product' !== $post->post_type ) {
-			return $response;
+		if ( $post->is_sample_product ) {
+			$response->data['title']['rendered'] = $post->post_title;
 		}
-
-		$response->data['title']['rendered'] = $response->data['title']['raw'];
 
 		return $response;
 	}
@@ -345,9 +344,7 @@ class CustomizeStore extends Task {
 	 * Handles requests for nonexistent products by generating sample product data.
 	 *
 	 * This method intercepts REST API requests for product details. If the requested
-	 * product doesn't exist and the product ID suggests it's a sample product
-	 * (ID representing a timestamp within the last 24 hours), it returns a
-	 * sample product object.
+	 * product doesn't exist, it returns a sample product object.
 	 *
 	 * @param mixed           $result  The current result, usually null for not found.
 	 * @param WP_REST_Server  $server  The REST server instance.
@@ -360,9 +357,7 @@ class CustomizeStore extends Task {
 			$product_id = (int) str_replace( '/wc/store/v1/products/', '', $request->get_route() );
 			$product    = wc_get_product( $product_id );
 
-			// Sample products use `time()` as the ID. This way we can detect that
-			// it was a sample product returned 24 hours or less ago.
-			if ( ! $product && $product_id + 86400000 > time() * 1000 ) {
+			if ( ! $product && $product_id <= count( $this->sample_products ) ) {
 				$sample_product = $this->generate_sample_product_object( $product_id );
 
 				return rest_ensure_response( $sample_product );
