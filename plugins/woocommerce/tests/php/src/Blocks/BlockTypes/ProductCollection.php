@@ -975,7 +975,7 @@ class ProductCollection extends \WP_UnitTestCase {
 	/**
 	 * Test merging exclusive id filters.
 	 */
-	public function test_merges_exclusive_id_filters() {
+	public function test_merges_post__in() {
 		$existing_id_filter     = array( 1, 4 );
 		$handpicked_product_ids = array( 3, 4, 5, 6 );
 		// The only ID present in ALL of the exclusive filters is 4.
@@ -992,6 +992,22 @@ class ProductCollection extends \WP_UnitTestCase {
 		}
 
 		$this->assertCount( 1, $merged_query['post__in'] );
+	}
+
+	/**
+	 * Test merging exclusive id filters with no intersection.
+	 */
+	public function test_merges_post__in_empty_result_without_intersection() {
+		$existing_id_filter     = array( 1, 4 );
+		$handpicked_product_ids = array( 2, 3 );
+
+		$parsed_block                               = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['post__in'] = $existing_id_filter;
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = $handpicked_product_ids;
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals( array( -1 ), $merged_query['post__in'] );
 	}
 
 	/**
