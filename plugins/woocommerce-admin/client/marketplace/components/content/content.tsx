@@ -8,7 +8,8 @@ import {
 	useCallback,
 } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
-
+import { speak } from '@wordpress/a11y';
+import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
@@ -22,7 +23,6 @@ import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { fetchSearchResults } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
 import { SearchResultsCountType } from '../../contexts/types';
-
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
@@ -46,9 +46,10 @@ export default function Content(): JSX.Element {
 	const [ totalPagesThemes, setTotalPagesThemes ] = useState( 1 );
 	const [ totalPagesBusinessServices, setTotalPagesBusinessServices ] =
 		useState( 1 );
+	const [ firstNewProductId, setFirstNewProductId ] = useState< number >( 0 );
+	const [ isLoadingMore, setIsLoadingMore ] = useState( false );
 
 	const {
-		isLoading,
 		setIsLoading,
 		selectedTab,
 		setHasBusinessServices,
@@ -67,7 +68,7 @@ export default function Content(): JSX.Element {
 	};
 
 	const loadMoreProducts = useCallback( () => {
-		setIsLoading( true );
+		setIsLoadingMore( true );
 		const params = new URLSearchParams();
 		const abortController = new AbortController();
 
@@ -102,6 +103,11 @@ export default function Content(): JSX.Element {
 									prevProduct.id === newProduct.id
 							)
 					);
+
+					if ( newProducts.length > 0 ) {
+						setFirstNewProductId( newProducts[ 0 ].id ?? 0 );
+					}
+
 					const combinedProducts = [
 						...flattenedPrevProducts,
 						...newProducts,
@@ -122,16 +128,15 @@ export default function Content(): JSX.Element {
 					return combinedProducts;
 				} );
 
+				speak( __( 'More products loaded', 'woocommerce' ) );
 				setCurrentPage( ( prevPage ) => prevPage + 1 );
+				setIsLoadingMore( false );
 			} )
-			.catch( ( error ) => {
-				if ( error.name !== 'AbortError' ) {
-					// eslint-disable-next-line no-console
-					console.error( 'Error loading more products:', error );
-				}
+			.catch( () => {
+				speak( __( 'Error loading more products', 'woocommerce' ) );
 			} )
 			.finally( () => {
-				setIsLoading( false );
+				setIsLoadingMore( false );
 			} );
 
 		return () => {
@@ -141,7 +146,7 @@ export default function Content(): JSX.Element {
 		currentPage,
 		query.category,
 		query.term,
-		setIsLoading,
+		setIsLoadingMore,
 		setSearchResultsCount,
 	] );
 
@@ -337,6 +342,7 @@ export default function Content(): JSX.Element {
 	// Reset current page when tab, term, or category changes
 	useEffect( () => {
 		setCurrentPage( 1 );
+		setFirstNewProductId( 0 );
 	}, [ selectedTab, query?.category, query?.term ] );
 
 	const getProductType = ( tab: string ): ProductType => {
@@ -349,6 +355,19 @@ export default function Content(): JSX.Element {
 				return ProductType.extension;
 		}
 	};
+
+	useEffect( () => {
+		if ( firstNewProductId ) {
+			setTimeout( () => {
+				const firstNewProduct = document.getElementById(
+					`product-${ firstNewProductId }`
+				);
+				if ( firstNewProduct ) {
+					firstNewProduct.focus();
+				}
+			}, 0 );
+		}
+	}, [ firstNewProductId ] );
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
@@ -409,8 +428,12 @@ export default function Content(): JSX.Element {
 			) }
 
 			{ renderContent() }
-			{ shouldShowLoadMoreButton() && ! isLoading && (
-				<LoadMoreButton onLoadMore={ loadMoreProducts } />
+			{ shouldShowLoadMoreButton() && (
+				<LoadMoreButton
+					onLoadMore={ loadMoreProducts }
+					isBusy={ isLoadingMore }
+					disabled={ isLoadingMore }
+				/>
 			) }
 		</div>
 	);
