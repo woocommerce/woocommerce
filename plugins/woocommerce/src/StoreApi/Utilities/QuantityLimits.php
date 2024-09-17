@@ -50,9 +50,9 @@ final class QuantityLimits {
 	 * @return array
 	 */
 	public function get_add_to_cart_limits( \WC_Product $product ) {
-		$multiple_of = $this->filter_value( 1, 'multiple_of', $product );
-		$minimum     = $this->filter_value( 1, 'minimum', $product );
-		$maximum     = $this->filter_value( $this->get_product_quantity_limit( $product ), 'maximum', $product );
+		$multiple_of = (int) $this->filter_value( 1, 'multiple_of', $product );
+		$minimum     = (int) $this->filter_value( 1, 'minimum', $product );
+		$maximum     = (int) $this->filter_value( $this->get_product_quantity_limit( $product ), 'maximum', $product );
 
 		return [
 			'minimum'     => $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ),
@@ -159,7 +159,7 @@ final class QuantityLimits {
 		 * @param \WC_Product $product Product instance.
 		 * @return integer
 		 */
-		return apply_filters( 'woocommerce_store_api_product_quantity_limit', max( min( array_filter( $limits ) ), 1 ), $product );
+		return (int) apply_filters( 'woocommerce_store_api_product_quantity_limit', max( min( array_filter( $limits ) ), 1 ), $product );
 	}
 
 	/**
