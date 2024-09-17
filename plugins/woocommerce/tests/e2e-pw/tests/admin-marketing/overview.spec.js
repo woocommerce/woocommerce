@@ -15,40 +15,44 @@ test.describe( 'Marketing page', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Marketing Overview page have relevant content', async ( {
-		page,
-	} ) => {
-		// Go to the Marketing page.
-		await page.goto( 'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing' );
+	test(
+		'Marketing Overview page have relevant content',
+		{ tag: '@skip-on-default-wpcom' },
+		async ( { page } ) => {
+			// Go to the Marketing page.
+			await page.goto(
+				'wp-admin/admin.php?page=wc-admin&path=%2Fmarketing'
+			);
 
-		// Heading should be overview
-		await expect(
-			page.getByRole( 'heading', { name: 'Overview' } )
-		).toBeVisible();
+			// Heading should be overview
+			await expect(
+				page.getByRole( 'heading', { name: 'Overview' } )
+			).toBeVisible();
 
-		// Sections present
-		await expect(
-			page.getByText( 'Channels', { exact: true } )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Discover more marketing tools' )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'Email' } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'Automations' } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'Conversion' } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'tab', { name: 'CRM', exact: true } )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Learn about marketing a store' )
-		).toBeVisible();
-	} );
+			// Sections present
+			await expect(
+				page.getByText( 'Channels', { exact: true } )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Discover more marketing tools' )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'Email' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'Automations' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'Conversion' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'tab', { name: 'CRM', exact: true } )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Learn about marketing a store' )
+			).toBeVisible();
+		}
+	);
 
 	test(
 		'Introduction can be dismissed',

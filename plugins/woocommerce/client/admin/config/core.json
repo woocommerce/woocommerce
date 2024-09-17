@@ -39,6 +39,7 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"blueprint": false,
-		"reactify-classic-payments-settings": false
+		"reactify-classic-payments-settings": false,
+	  	"use-wp-horizon": false
 	}
 }
