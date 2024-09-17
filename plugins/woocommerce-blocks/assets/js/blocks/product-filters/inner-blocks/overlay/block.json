@@ -3,7 +3,7 @@
 	"apiVersion": 3,
 	"name": "woocommerce/product-filters-overlay",
 	"version": "1.0.0",
-	"title": "Product Filters Overlay (Experimental)",
+	"title": "Product Filters Overlay In-line (Experimental)",
 	"description": "Display product filters in an overlay on top of a page.",
 	"category": "woocommerce",
 	"keywords": [
