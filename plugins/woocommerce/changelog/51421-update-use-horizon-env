@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add use-wp-horizon feature flag to set calpyso_env to horizon

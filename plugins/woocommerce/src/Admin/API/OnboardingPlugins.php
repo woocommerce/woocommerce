@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
 use Automattic\Jetpack\Connection\Manager;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -241,7 +242,11 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		$authorization_url = $manager->get_authorization_url( null, $redirect_url );
 		$authorization_url = add_query_arg( 'locale', $this->get_wpcom_locale(), $authorization_url );
 
-		return array(
+		if ( Features::is_enabled( 'use-wp-horizon' ) ) {
+			$calypso_env = 'horizon';
+		}
+
+		return [
 			'success' => ! $errors->has_errors(),
 			'errors'  => $errors->get_error_messages(),
 			'url'     => add_query_arg(
