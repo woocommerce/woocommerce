@@ -247,6 +247,17 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 		}
 
 		if ( $change['to'] < 0 ) {
+			/**
+			 * Action fires when an item in an order is backordered.
+			 *
+			 * @since 3.0
+			 *
+			 * @param array $args {
+			 *     @type WC_Product $product  The product that is on backorder.
+			 *     @type int        $order_id The ID of the order.
+			 *     @type int|float  $quantity The amount of product on backorder.
+			 * }
+			 */
 			do_action(
 				'woocommerce_product_on_backorder',
 				array(
