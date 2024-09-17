@@ -260,12 +260,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		if ( ! empty( $request['global_unique_id'] ) ) {
-			$global_unique_ids = explode( ',', $request['global_unique_id'] );
-			// Include the current string as a Global Unique ID too.
-			if ( 1 < count( $global_unique_ids ) ) {
-				$global_unique_ids[] = $request['global_unique_id'];
-			}
-
+			$global_unique_ids  = array_map( 'trim', explode( ',', $request['global_unique_id'] ) );
 			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				$args,
 				array(
