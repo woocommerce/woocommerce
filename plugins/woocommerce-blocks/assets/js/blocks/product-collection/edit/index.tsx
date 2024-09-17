@@ -64,14 +64,17 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
 				return <ProductCollectionPlaceholder { ...props } />;
 			case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
+				return (
+					<ProductPicker
+						{ ...props }
+						isDeletedProductReference={ false }
+					/>
+				);
 			case ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE:
 				return (
 					<ProductPicker
 						{ ...props }
-						isDeletedProductReference={
-							productCollectionUIStateInEditor ===
-							ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE
-						}
+						isDeletedProductReference={ true }
 					/>
 				);
 			case ProductCollectionUIStatesInEditor.VALID:
