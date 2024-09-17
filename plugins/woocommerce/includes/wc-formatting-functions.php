@@ -117,7 +117,8 @@ function wc_get_filename_from_url( $file_url ) {
  * @return float
  */
 function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
-	$to_unit = strtolower( $to_unit );
+	$to_unit   = strtolower( $to_unit );
+	$dimension = ! empty( $dimension ) && ! is_float( $dimension ) ? (float) $dimension : $dimension;
 
 	if ( empty( $from_unit ) ) {
 		$from_unit = strtolower( get_option( 'woocommerce_dimension_unit' ) );
