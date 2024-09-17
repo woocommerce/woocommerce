@@ -362,6 +362,7 @@ test.describe( 'Product Collection registration', () => {
 		admin,
 		editor,
 		requestUtils,
+		page,
 	} ) => {
 		// Add a new test product to the database
 		let testProductId: number | null = null;
@@ -419,7 +420,7 @@ test.describe( 'Product Collection registration', () => {
 		} );
 
 		// Product Picker shouldn't be shown as product is available now
-		await admin.page.reload();
+		await page.reload();
 		await expect( editorProductPicker ).toBeHidden();
 
 		// Delete the product from database, instead of trashing it
