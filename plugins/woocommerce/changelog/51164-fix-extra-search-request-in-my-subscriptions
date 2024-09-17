@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent search request in the Extensions > My Subscriptions page

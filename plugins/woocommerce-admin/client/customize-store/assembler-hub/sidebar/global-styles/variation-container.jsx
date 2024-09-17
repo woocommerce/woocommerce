@@ -14,6 +14,11 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { isEqual, noop } from 'lodash';
 
+/**
+ * Internal dependencies
+ */
+import { trackEvent } from '~/customize-store/tracking';
+
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 // Removes the typography settings from the styles when the user is changing
@@ -100,6 +105,24 @@ export const VariationContainer = ( { variation, children } ) => {
 				),
 			};
 		} );
+
+		if ( variation.settings.color?.palette ) {
+			trackEvent(
+				'customize_your_store_assembler_hub_color_palette_item_click',
+				{
+					item: variation.title,
+				}
+			);
+		}
+
+		if ( variation.settings.typography ) {
+			trackEvent(
+				'customize_your_store_assembler_hub_typography_item_click',
+				{
+					item: variation.title,
+				}
+			);
+		}
 	};
 
 	const selectOnEnter = ( event ) => {

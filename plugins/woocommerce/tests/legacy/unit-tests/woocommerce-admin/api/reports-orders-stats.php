@@ -154,7 +154,7 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$global_attribute = new WC_Product_Attribute();
 		$global_attribute->set_id( $size_attr_id );
 		$global_attribute->set_name( 'pa_size' );
-		$global_attribute->set_options( array( $large_term->term_id ) ); // Set to small.
+		$global_attribute->set_options( array( $large_term->term_id ) ); // Set to large.
 		$global_attribute->set_position( 1 );
 		$global_attribute->set_visible( true );
 		$global_attribute->set_variation( false );
@@ -187,7 +187,8 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 			$order->save();
 		}
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+		WC_Helper_Queue::run_all_pending( 'woocommerce-db-updates' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 15 ) );
