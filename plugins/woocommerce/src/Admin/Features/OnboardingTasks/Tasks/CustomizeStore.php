@@ -13,6 +13,15 @@ use WP_Post;
  */
 class CustomizeStore extends Task {
 
+	/**
+	 * Array of sample products for the Customize Your Store task.
+	 *
+	 * This array contains sample product data used to populate the patterns
+	 * with example products when no real products exist. Each product
+	 * includes a title, image filename, description, and price.
+	 *
+	 * @var array
+	 */
 	private $sample_products = array(
 		array(
 			'title'       => 'Vintage Typewriter',
@@ -73,8 +82,8 @@ class CustomizeStore extends Task {
 		add_action( 'customize_save_after', array( $this, 'mark_task_as_complete_classic_theme' ) );
 
 		if ( WC()->is_rest_api_request() ) {
-			$referring_url = $_SERVER['HTTP_REFERER'];
-			$parsed_url    = parse_url( $referring_url );
+			$referring_url = isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+			$parsed_url    = wp_parse_url( $referring_url );
 
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended
 			$is_assembler_hub = (
