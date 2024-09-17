@@ -4,23 +4,25 @@ on:
     - cron: '0 0 * * *' # Run at 12 AM UTC.
   workflow_dispatch:
 
-permissions: {}
+env:
+  SOURCE_REF: trunk
+  TARGET_REF: nightly
+  RELEASE_ID: 25945111
+
+permissions: { }
 
 jobs:
   build:
     if: github.repository_owner == 'woocommerce'
     name: Nightly builds
-    strategy:
-      fail-fast: false
-      matrix:
-        build: [trunk]
+
     runs-on: ubuntu-20.04
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.build }}
+          ref: ${{ env.SOURCE_REF }}
 
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
@@ -31,26 +33,31 @@ jobs:
         working-directory: plugins/woocommerce
         run: bash bin/build-zip.sh
 
-      - name: Deploy nightly build
-        uses: WebFreak001/deploy-nightly@v1.1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload nightly build
+        uses: WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b #v3.2.0
         with:
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/25945111/assets{?name,label}
-          release_id: 25945111
+          token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
+          release_id: ${{ env.RELEASE_ID }}
           asset_path: plugins/woocommerce/woocommerce.zip
-          asset_name: woocommerce-${{ matrix.build }}-nightly.zip
+          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
           asset_content_type: application/zip
           max_releases: 1
-  update:
-    name: Update nightly tag commit ref
-    runs-on: ubuntu-20.04
-    permissions:
-      contents: write
-    steps:
-      - name: Update nightly tag
-        uses: richardsimko/github-tag-action@v1.0.5
+
+      - name: Update nightly tag commit ref
+        uses: actions/github-script@v7
         with:
-          tag_name: nightly
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sourceRef = process.env.SOURCE_REF;
+            const targetRef = process.env.TARGET_REF;
+            const branchData = await github.rest.repos.getBranch({
+              ...context.repo,
+              branch: sourceRef,
+            });
+
+            await github.rest.git.updateRef({
+              ...context.repo,
+              ref: `tags/${ targetRef }`,
+              sha: branchData.data.commit.sha,
+            });
