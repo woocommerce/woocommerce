@@ -11,6 +11,7 @@
 	background: transparent;
 	border-radius: 2px;
 	font-size: 0.875em;
+	cursor: pointer;
 
 	.has-chip-text & {
 		color: var(--wc-product-filter-chips-text);

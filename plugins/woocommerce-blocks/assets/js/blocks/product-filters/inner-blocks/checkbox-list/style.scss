@@ -29,6 +29,7 @@
 	width: 1em;
 	height: 1em;
 	border-radius: 2px;
+	pointer-events: none;
 
 	.has-option-element-color & {
 		display: none;
@@ -46,6 +47,7 @@
 	margin: 0;
 	width: 1em;
 	background: var(--wc-product-filter-checkbox-list-option-element, transparent);
+	cursor: pointer;
 }
 
 .wc-block-product-filter-checkbox-list__input:checked + .wc-block-product-filter-checkbox-list__mark {
