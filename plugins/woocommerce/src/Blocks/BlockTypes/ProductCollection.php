@@ -1897,7 +1897,8 @@ class ProductCollection extends AbstractBlock {
 							$product->get_upsell_ids()
 						);
 					},
-				[] );
+					[]
+				);
 
 				// Remove duplicates and product references. We don't want to display
 				// what's already in cart.
