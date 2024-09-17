@@ -112,7 +112,9 @@ test.describe(
 				await page.getByText( 'Direct bank transfer' ).click();
 
 				// Handle notice if present
-				await page.addLocatorHandler( page.getByRole( 'link', { name: 'Dismiss' } ), async () => {
+				await page.addLocatorHandler(
+					page.getByRole( 'link', { name: 'Dismiss' } ),
+					async () => {
 						await page
 							.getByRole( 'link', { name: 'Dismiss' } )
 							.click();
