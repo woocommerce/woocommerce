@@ -10,6 +10,7 @@ import {
 import { useQuery } from '@woocommerce/navigation';
 import { speak } from '@wordpress/a11y';
 import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
