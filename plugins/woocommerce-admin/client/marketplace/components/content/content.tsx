@@ -21,7 +21,7 @@ import Discover from '../discover/discover';
 import Products from '../products/products';
 import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
-import { fetchSearchResults } from '../../utils/functions';
+import { fetchSearchResults, getProductType } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
 import { SearchResultsCountType } from '../../contexts/types';
 import {
@@ -51,6 +51,7 @@ export default function Content(): JSX.Element {
 	const [ isLoadingMore, setIsLoadingMore ] = useState( false );
 
 	const {
+		isLoading,
 		setIsLoading,
 		selectedTab,
 		setHasBusinessServices,
@@ -365,17 +366,6 @@ export default function Content(): JSX.Element {
 		}
 	}, [ firstNewProductId ] );
 
-	const getProductType = ( tab: string ): ProductType => {
-		switch ( tab ) {
-			case 'themes':
-				return ProductType.theme;
-			case 'business-services':
-				return ProductType.businessService;
-			default:
-				return ProductType.extension;
-		}
-	};
-
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
@@ -435,7 +425,7 @@ export default function Content(): JSX.Element {
 			) }
 
 			{ renderContent() }
-			{ shouldShowLoadMoreButton() && (
+			{ ! isLoading && shouldShowLoadMoreButton() && (
 				<LoadMoreButton
 					onLoadMore={ loadMoreProducts }
 					isBusy={ isLoadingMore }

@@ -178,6 +178,17 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
+function getProductType( tab: string ): ProductType {
+	switch ( tab ) {
+		case 'themes':
+			return ProductType.theme;
+		case 'business-services':
+			return ProductType.businessService;
+		default:
+			return ProductType.extension;
+	}
+}
+
 function fetchCategories( type: ProductType ): Promise< CategoryAPIItem[] > {
 	const url = new URL( MARKETPLACE_HOST + MARKETPLACE_CATEGORY_API_PATH );
 
@@ -482,6 +493,7 @@ export {
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,
 	getInstallUrl,
