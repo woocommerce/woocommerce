@@ -53,6 +53,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'prevent_timeouts' => true, // Check memory and time usage and abort if reaching limit.
 			'enclosure'        => '"', // The character used to wrap text in the CSV.
 			'escape'           => "\0", // PHP uses '\' as the default escape character. This is not RFC-4180 compliant. This disables the escape character.
+			'uploaded_file'    => true,
 		);
 
 		$this->params = wp_parse_args( $params, $default_args );
@@ -83,7 +84,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Read file.
 	 */
 	protected function read_file() {
-		if ( ! WC_Product_CSV_Importer_Controller::is_file_valid_csv( $this->file ) ) {
+		if ( ! WC_Product_CSV_Importer_Controller::is_file_valid_csv( $this->file, $this->params['uploaded_file'] ) ) {
 			wp_die( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 		}
 

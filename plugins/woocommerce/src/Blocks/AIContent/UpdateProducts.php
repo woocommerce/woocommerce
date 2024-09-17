@@ -4,6 +4,10 @@ namespace Automattic\WooCommerce\Blocks\AIContent;
 
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use WP_Error;
+
+require_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
+require_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
+
 /**
  * Pattern Images class.
  *
@@ -101,6 +105,7 @@ class UpdateProducts {
 	 * @return array|WP_Error An array with the dummy products that need to have their content updated by AI.
 	 */
 	public function fetch_dummy_products_to_update() {
+		$use_csv_importer    = false;
 		$real_products       = $this->fetch_product_ids();
 		$real_products_count = count( $real_products );
 
@@ -110,41 +115,61 @@ class UpdateProducts {
 			);
 		}
 
-		$dummy_products       = $this->fetch_product_ids( 'dummy' );
-		$dummy_products_count = count( $dummy_products );
-		$products_to_create   = max( 0, 6 - $real_products_count - $dummy_products_count );
-		while ( $products_to_create > 0 ) {
-			$this->create_new_product( self::DUMMY_PRODUCTS[ $products_to_create - 1 ] );
-			--$products_to_create;
-		}
+		if ( $use_csv_importer ) {
 
-		// Identify dummy products that need to have their content updated.
-		$dummy_products_ids = $this->fetch_product_ids( 'dummy' );
-		if ( ! is_array( $dummy_products_ids ) ) {
-			return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woocommerce' ) );
-		}
+			$params = array(
+				'delimiter'          => ',',
+				'start_pos'          => 0,
+				'mapping'            => array(),
+				'update_existing'    => false,
+				'character_encoding' => '',
+				'lines'              => 6,
+				'parse'              => true,
+				'uploaded_file'      => false,
+			);
 
-		$dummy_products = array_map(
-			function ( $product ) {
-				return wc_get_product( $product->ID );
-			},
-			$dummy_products_ids
-		);
+			include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
 
-		$dummy_products_to_update = [];
-		foreach ( $dummy_products as $dummy_product ) {
-			if ( ! $dummy_product instanceof \WC_Product ) {
-				continue;
+			$file           = plugins_url( '/assets/cys-dummy-products.csv', WC_PLUGIN_FILE );
+			$importer_class = new \WC_Product_CSV_Importer( $file, $params );
+			return $importer_class->import();
+		} else {
+			$dummy_products       = $this->fetch_product_ids( 'dummy' );
+			$dummy_products_count = count( $dummy_products );
+			$products_to_create   = max( 0, 6 - $real_products_count - $dummy_products_count );
+			while ( $products_to_create > 0 ) {
+				$this->create_new_product( self::DUMMY_PRODUCTS[ $products_to_create - 1 ] );
+				--$products_to_create;
 			}
 
-			$should_update_dummy_product = $this->should_update_dummy_product( $dummy_product );
-
-			if ( $should_update_dummy_product ) {
-				$dummy_products_to_update[] = $dummy_product;
+			// Identify dummy products that need to have their content updated.
+			$dummy_products_ids = $this->fetch_product_ids( 'dummy' );
+			if ( ! is_array( $dummy_products_ids ) ) {
+				return new \WP_Error( 'failed_to_fetch_dummy_products', __( 'Failed to fetch dummy products.', 'woocommerce' ) );
 			}
-		}
 
-		return $dummy_products_to_update;
+			$dummy_products = array_map(
+				function ( $product ) {
+					return wc_get_product( $product->ID );
+				},
+				$dummy_products_ids
+			);
+
+			$dummy_products_to_update = [];
+			foreach ( $dummy_products as $dummy_product ) {
+				if ( ! $dummy_product instanceof \WC_Product ) {
+					continue;
+				}
+
+				$should_update_dummy_product = $this->should_update_dummy_product( $dummy_product );
+
+				if ( $should_update_dummy_product ) {
+					$dummy_products_to_update[] = $dummy_product;
+				}
+			}
+
+			return $dummy_products_to_update;
+		}
 	}
 
 	/**
