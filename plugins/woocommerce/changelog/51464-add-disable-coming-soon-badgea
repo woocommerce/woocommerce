@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Adds a woocommerce_disable_coming_soon_admin_bar_badge filter to remove the Coming Soon admin bar badge.
