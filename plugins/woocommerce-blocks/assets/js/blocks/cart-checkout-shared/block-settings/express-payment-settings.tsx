@@ -50,9 +50,18 @@ const ExpressPaymentButtonStyleControls = ( {
 					label={ __( 'Button height', 'woocommerce' ) }
 					selected={ buttonHeight }
 					options={ [
-						{ label: 'Small (40px)', value: '40' },
-						{ label: 'Medium (48px)', value: '48' },
-						{ label: 'Large (55px)', value: '55' },
+						{
+							label: __( 'Small (40px)', 'woocommerce' ),
+							value: '40',
+						},
+						{
+							label: __( 'Medium (48px)', 'woocommerce' ),
+							value: '48',
+						},
+						{
+							label: __( 'Large (55px)', 'woocommerce' ),
+							value: '55',
+						},
 					] }
 					onChange={ ( newValue: string ) =>
 						setAttributes( { buttonHeight: newValue } )
@@ -173,8 +182,11 @@ export const ExpressPaymentControls = ( {
 						isDismissible={ false }
 						className="wc-block-checkout__notice express-payment-styles-notice"
 					>
-						<strong>Note:</strong> Some payment methods might not
-						yet support all style controls.
+						<strong>{ __( 'Note', 'woocommerce' ) }:</strong>{ ' ' }
+						{ __(
+							'Some payment methods might not yet support all style controls',
+							'woocommerce'
+						) }
 					</Notice>
 					<ExpressPaymentToggle
 						attributes={ attributes }
