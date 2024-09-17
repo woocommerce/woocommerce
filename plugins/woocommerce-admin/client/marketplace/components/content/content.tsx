@@ -77,6 +77,10 @@ export default function Content(): JSX.Element {
 			params.append( 'category', query.category );
 		}
 
+		if ( query.tab === 'themes' || query.tab === 'business-services' ) {
+			params.append( 'category', query.tab );
+		}
+
 		if ( query.term ) {
 			params.append( 'term', query.term );
 		}
@@ -357,6 +361,7 @@ export default function Content(): JSX.Element {
 		}
 	};
 
+	// Maintain product focus for accessibility
 	useEffect( () => {
 		if ( firstNewProductId ) {
 			setTimeout( () => {
