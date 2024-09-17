@@ -111,12 +111,13 @@ test.describe(
 				// explicitly select the payment method
 				await page.getByText( 'Direct bank transfer' ).click();
 
-				// Dismiss notice if shown
-				if (
-					page.getByRole( 'link', { name: 'Dismiss' } ).isVisible()
-				) {
-					await page.getByRole( 'link', { name: 'Dismiss' } ).click();
-				}
+				// Handle notice if present
+				await page.addLocatorHandler( page.getByRole( 'link', { name: 'Dismiss' } ), async () => {
+						await page
+							.getByRole( 'link', { name: 'Dismiss' } )
+							.click();
+					}
+				);
 
 				// pay for the order
 				await page
