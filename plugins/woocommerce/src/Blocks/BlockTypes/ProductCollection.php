@@ -1873,37 +1873,48 @@ class ProductCollection extends AbstractBlock {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/upsells',
 			function ( $collection_args ) {
-				// No products should be shown if no related product reference is set.
-				if ( empty( $collection_args['upsellsProductReference'] ) ) {
+				// No products should be shown if no upsells product reference is set.
+				if ( empty( $collection_args['upsellsProductReferences'] ) ) {
 					return array(
 						'post__in' => array( -1 ),
 					);
 				}
 
-				$product = wc_get_product( $collection_args['upsellsProductReference'] );
-				if ( ! $product ) {
+				$products = array_map( 'wc_get_product', $collection_args['upsellsProductReferences'] );
+
+				if ( empty( $products ) ) {
 					return array(
 						'post__in' => array( -1 ),
 					);
 				}
 
-				$upsells = $product->get_upsell_ids();
+				$all_upsells = array_reduce( $products, function( $acc, $product ) {
+					return array_merge( $acc, $product->get_upsell_ids() );
+				}, [] );
+
+				// Remove duplicates and product references. We don't want to display
+				// what's already in cart.
+				$unique_upsells = array_unique( $all_upsells );
+				$upsells        = array_diff( $unique_upsells, $collection_args['upsellsProductReferences'] );
 
 				return array(
 					'post__in' => empty( $upsells ) ? array( -1 ) : $upsells,
 				);
 			},
 			function ( $collection_args, $query ) {
-				$product_reference = $query['productReference'] ?? null;
+				$product_references = isset( $query['productReference'] ) ? array( $query['productReference'] ) : null;
 				// Infer the product reference from the location if an explicit product is not set.
 				if ( empty( $product_reference ) ) {
 					$location = $collection_args['productCollectionLocation'];
 					if ( isset( $location['type'] ) && 'product' === $location['type'] ) {
-						$product_reference = $location['sourceData']['productId'];
+						$product_references = array( $location['sourceData']['productId'] );
+					}
+					if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
+						$product_references = $location['sourceData']['productIds'];
 					}
 				}
 
-				$collection_args['upsellsProductReference'] = $product_reference;
+				$collection_args['upsellsProductReferences'] = $product_references;
 				return $collection_args;
 			},
 			function ( $collection_args, $query, $request ) {
@@ -1916,7 +1927,7 @@ class ProductCollection extends AbstractBlock {
 					}
 				}
 
-				$collection_args['upsellsProductReference'] = $product_reference;
+				$collection_args['upsellsProductReferences'] = array( $product_reference );
 				return $collection_args;
 			}
 		);
