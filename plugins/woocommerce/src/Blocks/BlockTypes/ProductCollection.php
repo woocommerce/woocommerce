@@ -1873,14 +1873,15 @@ class ProductCollection extends AbstractBlock {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/upsells',
 			function ( $collection_args ) {
+				$product_reference = $collection_args['upsellsProductReferences'] ?? null;
 				// No products should be shown if no upsells product reference is set.
-				if ( empty( $collection_args['upsellsProductReferences'] ) ) {
+				if ( empty( $product_reference ) ) {
 					return array(
 						'post__in' => array( -1 ),
 					);
 				}
 
-				$products = array_map( 'wc_get_product', $collection_args['upsellsProductReferences'] );
+				$products = array_map( 'wc_get_product', $product_reference );
 
 				if ( empty( $products ) ) {
 					return array(
@@ -1901,7 +1902,7 @@ class ProductCollection extends AbstractBlock {
 				// Remove duplicates and product references. We don't want to display
 				// what's already in cart.
 				$unique_upsells = array_unique( $all_upsells );
-				$upsells        = array_diff( $unique_upsells, $collection_args['upsellsProductReferences'] );
+				$upsells        = array_diff( $unique_upsells, $product_reference );
 
 				return array(
 					'post__in' => empty( $upsells ) ? array( -1 ) : $upsells,
