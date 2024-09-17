@@ -13,7 +13,7 @@ use WP_Post;
  */
 class CustomizeStore extends Task {
 
-	private $dummy_products = array(
+	private $sample_products = array(
 		array(
 			'title'       => 'Vintage Typewriter',
 			'image'       => 'writing-typing-keyboard-technology-white-vintage.jpg',
@@ -86,8 +86,9 @@ class CustomizeStore extends Task {
 			);
 
 			if ( $is_assembler_hub ) {
-				add_filter( 'the_posts', array( $this, 'add_dummy_products_to_query' ), 10, 2 );
-				add_filter( 'rest_pre_dispatch', array( $this, 'custom_handle_nonexistent_product' ), 10, 3 );
+				add_filter( 'rest_prepare_product', array( $this, 'add_product_rendered_title' ), 10, 3 );
+				add_filter( 'the_posts', array( $this, 'add_sample_products_to_query' ), 10, 2 );
+				add_filter( 'rest_pre_dispatch', array( $this, 'add_sample_product_data_to_query' ), 10, 3 );
 			}
 		}
 	}
@@ -187,13 +188,13 @@ class CustomizeStore extends Task {
 	 * Generate a sample product post object.
 	 *
 	 * This method creates a WP_Post object representing a sample product
-	 * using data from the dummy products array.
+	 * using data from the sample products array.
 	 *
-	 * @param int $index The index of the dummy product to use.
+	 * @param int $index The index of the sample product to use.
 	 * @return WP_Post A WP_Post object representing a sample product.
 	 */
 	public function generate_sample_product_post_object( $index ) {
-		$sample_product_data = $this->dummy_products[ $index ];
+		$sample_product_data = $this->sample_products[ $index ];
 
 		return new WP_Post(
 			(object) array(
@@ -229,15 +230,15 @@ class CustomizeStore extends Task {
 	 * Generate a sample product object.
 	 *
 	 * This method creates an array representing a sample product
-	 * using data from the dummy products array.
+	 * using data from the sample products array.
 	 *
 	 * @param int $product_id The ID of the product to generate. The last digit
-	 *                        of the product ID is used to determine which dummy product to use.
+	 *                        of the product ID is used to determine which sample product to use.
 	 * @return array An array representing a sample product.
 	 */
 	public function generate_sample_product_object( $product_id ) {
 		$last_digit          = substr( $product_id, -1 );
-		$sample_product_data = $this->dummy_products[ $last_digit ];
+		$sample_product_data = $this->sample_products[ $last_digit ];
 		$image_src           = plugins_url( '/assets/images/pattern-placeholders/' . $sample_product_data['image'], dirname( __DIR__, 4 ) );
 		$currency_decimals   = wc_get_price_decimals();
 		$prices              = ( new CurrencyFormatter() )->format(
@@ -287,23 +288,44 @@ class CustomizeStore extends Task {
 	}
 
 	/**
-	 * Adds dummy products to the query result if no products are found.
+	 * Adds the rendered title to the product response.
+	 *
+	 * This method sets the 'rendered' title of a product to be the same as its 'raw' title
+	 * in the REST API response.
+	 *
+	 * @param WP_REST_Response $response The response object.
+	 * @param WP_Post          $post     The original post object.
+	 * @param WP_REST_Request  $request  The request object.
+	 * @return WP_REST_Response The modified response object.
+	 */
+	public function add_product_rendered_title( $response, $post, $request ) {
+		if ( ! empty( $response->data['title']['rendered'] ) || 'product' !== $post->post_type ) {
+			return $response;
+		}
+
+		$response->data['title']['rendered'] = $response->data['title']['raw'];
+
+		return $response;
+	}
+
+	/**
+	 * Adds sample products to the query result if no products are found.
 	 *
 	 * This function is used to populate the product list with sample data when
 	 * the store has no real products and a REST API request is made.
 	 *
 	 * @param array    $posts An array of post objects.
 	 * @param WP_Query $query The WP_Query instance.
-	 * @return array An array of post objects, potentially including dummy products.
+	 * @return array An array of post objects, potentially including sample products.
 	 */
-	public function add_dummy_products_to_query( $posts, $query ) {
+	public function add_sample_products_to_query( $posts, $query ) {
 		if ( 'product' !== $query->query['post_type'] || ! WC()->is_rest_api_request() || ! empty( $posts ) ) {
 			return $posts;
 		}
 
 		$sample_products = array();
 
-		foreach ( $this->dummy_products as $index => $dummy_product ) {
+		foreach ( $this->sample_products as $index => $sample_product ) {
 			$sample_products[] = $this->generate_sample_product_post_object( $index );
 		}
 
@@ -324,7 +346,7 @@ class CustomizeStore extends Task {
 	 *
 	 * @return WP_REST_Response|mixed The sample product response if applicable, otherwise the original result.
 	 */
-	public function custom_handle_nonexistent_product( $result, $server, $request ) {
+	public function add_sample_product_data_to_query( $result, $server, $request ) {
 		if ( false !== strpos( $request->get_route(), '/wc/store/v1/products/' ) ) {
 			$product_id = (int) str_replace( '/wc/store/v1/products/', '', $request->get_route() );
 			$product    = wc_get_product( $product_id );
