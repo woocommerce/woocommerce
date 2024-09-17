@@ -254,7 +254,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 					'from'        => $request->get_param( 'from' ),
 					'calypso_env' => $calypso_env,
 				),
-				$authorization_url
+				$authorization_url,
 			)
 		];
 	}
