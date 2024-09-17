@@ -1887,8 +1887,10 @@ class ProductCollection extends AbstractBlock {
 					);
 				}
 
+				$upsells = $product->get_upsell_ids();
+
 				return array(
-					'post__in' => $product->get_upsell_ids(),
+					'post__in' => empty( $upsells ) ? array( -1 ) : $upsells,
 				);
 			},
 			function ( $collection_args, $query ) {
