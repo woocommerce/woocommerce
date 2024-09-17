@@ -10,7 +10,16 @@ import http from 'k6/http';
 /**
  * Internal dependencies
  */
-import { base_url, admin_username, admin_password } from '../config.js';
+import {
+	base_url,
+	admin_username,
+	admin_password,
+	customer_username,
+	customer_email,
+	customer_password,
+	customer_first_name,
+	customer_last_name,
+} from '../config.js';
 
 /**
  * Add a customer order specifically for my-account-orders.js test
@@ -42,10 +51,25 @@ export function addCustomerOrder() {
 		}
 	}
 
-	// If the customer isn't found, throw an error
+	// If customer doesn't exist, create the customer
 	if ( ! customerId ) {
-		throw new Error(
-			`Customer with username ${ customerUsername } not found`
+		console.log(
+			`Customer with username ${ customer_username } not found. Creating new customer...`
+		);
+		const createCustomerData = {
+			username: customer_username,
+			password: customer_password,
+			email: customer_email,
+			first_name: customer_first_name,
+			last_name: customer_last_name,
+		};
+
+		response = http.post(
+			`${ base_url }/wp-json/wc/v3/customers`,
+			JSON.stringify( createCustomerData ),
+			{
+				headers: requestHeaders,
+			}
 		);
 	}
 
