@@ -1,8 +1,15 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import {
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+} from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
+import { speak } from '@wordpress/a11y';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -14,10 +21,9 @@ import Discover from '../discover/discover';
 import Products from '../products/products';
 import MySubscriptions from '../my-subscriptions/my-subscriptions';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
-import { fetchSearchResults } from '../../utils/functions';
+import { fetchSearchResults, getProductType } from '../../utils/functions';
 import { SubscriptionsContextProvider } from '../../contexts/subscriptions-context';
 import { SearchResultsCountType } from '../../contexts/types';
-
 import {
 	recordMarketplaceView,
 	recordLegacyTabView,
@@ -27,6 +33,7 @@ import Promotions from '../promotions/promotions';
 import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
 import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
+import LoadMoreButton from '../load-more-button/load-more-button';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -34,7 +41,17 @@ export default function Content(): JSX.Element {
 	const [ filteredProducts, setFilteredProducts ] = useState< Product[] >(
 		[]
 	);
+	const [ currentPage, setCurrentPage ] = useState( 1 );
+	const [ totalPagesCategory, setTotalPagesCategory ] = useState( 1 );
+	const [ totalPagesExtensions, setTotalPagesExtensions ] = useState( 1 );
+	const [ totalPagesThemes, setTotalPagesThemes ] = useState( 1 );
+	const [ totalPagesBusinessServices, setTotalPagesBusinessServices ] =
+		useState( 1 );
+	const [ firstNewProductId, setFirstNewProductId ] = useState< number >( 0 );
+	const [ isLoadingMore, setIsLoadingMore ] = useState( false );
+
 	const {
+		isLoading,
 		setIsLoading,
 		selectedTab,
 		setHasBusinessServices,
@@ -52,7 +69,100 @@ export default function Content(): JSX.Element {
 		} ) );
 	};
 
+	const loadMoreProducts = useCallback( () => {
+		setIsLoadingMore( true );
+		const params = new URLSearchParams();
+		const abortController = new AbortController();
+
+		if ( query.category && query.category !== '_all' ) {
+			params.append( 'category', query.category );
+		}
+
+		if ( query.tab === 'themes' || query.tab === 'business-services' ) {
+			params.append( 'category', query.tab );
+		}
+
+		if ( query.term ) {
+			params.append( 'term', query.term );
+		}
+
+		const wccomSettings = getAdminSetting( 'wccomHelper', false );
+		if ( wccomSettings.storeCountry ) {
+			params.append( 'country', wccomSettings.storeCountry );
+		}
+
+		params.append( 'page', ( currentPage + 1 ).toString() );
+
+		fetchSearchResults( params, abortController.signal )
+			.then( ( productList ) => {
+				setAllProducts( ( prevProducts ) => {
+					const flattenedPrevProducts = Array.isArray(
+						prevProducts[ 0 ]
+					)
+						? prevProducts.flat()
+						: prevProducts;
+
+					const newProducts = productList.products.filter(
+						( newProduct ) =>
+							! flattenedPrevProducts.some(
+								( prevProduct ) =>
+									prevProduct.id === newProduct.id
+							)
+					);
+
+					if ( newProducts.length > 0 ) {
+						setFirstNewProductId( newProducts[ 0 ].id ?? 0 );
+					}
+
+					const combinedProducts = [
+						...flattenedPrevProducts,
+						...newProducts,
+					];
+
+					setSearchResultsCount( {
+						extensions: combinedProducts.filter(
+							( p ) => p.type === ProductType.extension
+						).length,
+						themes: combinedProducts.filter(
+							( p ) => p.type === ProductType.theme
+						).length,
+						'business-services': combinedProducts.filter(
+							( p ) => p.type === ProductType.businessService
+						).length,
+					} );
+
+					return combinedProducts;
+				} );
+
+				speak( __( 'More products loaded', 'woocommerce' ) );
+				setCurrentPage( ( prevPage ) => prevPage + 1 );
+				setIsLoadingMore( false );
+			} )
+			.catch( () => {
+				speak( __( 'Error loading more products', 'woocommerce' ) );
+			} )
+			.finally( () => {
+				setIsLoadingMore( false );
+			} );
+
+		return () => {
+			abortController.abort();
+		};
+	}, [
+		currentPage,
+		query.category,
+		query.term,
+		query.tab,
+		setIsLoadingMore,
+		setSearchResultsCount,
+	] );
+
 	useEffect( () => {
+		// if it's a paginated request, don't use this effect
+		if ( currentPage > 1 ) {
+			return;
+		}
+
 		const categories: Array< {
 			category: keyof SearchResultsCountType;
 			type: ProductType;
@@ -72,6 +182,7 @@ export default function Content(): JSX.Element {
 		// If query.category is present and not '_all', only fetch that category
 		if ( query.category && query.category !== '_all' ) {
 			const params = new URLSearchParams();
+
 			params.append( 'category', query.category );
 
 			if ( query.term ) {
@@ -85,15 +196,16 @@ export default function Content(): JSX.Element {
 
 			fetchSearchResults( params, abortControllers[ 0 ].signal )
 				.then( ( productList ) => {
-					setAllProducts( productList );
+					setAllProducts( productList.products );
+					setTotalPagesCategory( productList.totalPages );
 					setSearchResultsCount( {
-						extensions: productList.filter(
+						extensions: productList.products.filter(
 							( p ) => p.type === ProductType.extension
 						).length,
-						themes: productList.filter(
+						themes: productList.products.filter(
 							( p ) => p.type === ProductType.theme
 						).length,
-						'business-services': productList.filter(
+						'business-services': productList.products.filter(
 							( p ) => p.type === ProductType.businessService
 						).length,
 					} );
@@ -129,18 +241,24 @@ export default function Content(): JSX.Element {
 						abortControllers[ index ].signal
 					).then( ( productList ) => {
 						const typedProducts = tagProductsWithType(
-							productList,
+							productList.products,
 							type
 						);
 						if ( category === 'business-services' ) {
 							setHasBusinessServices( typedProducts.length > 0 );
 						}
-						return typedProducts;
+						return {
+							products: typedProducts,
+							totalPages: productList.totalPages,
+							type,
+						};
 					} );
 				} )
 			)
 				.then( ( results ) => {
-					const combinedProducts = results.flat();
+					const combinedProducts = results.flatMap(
+						( result ) => result.products
+					);
 					setAllProducts( combinedProducts );
 					setSearchResultsCount( {
 						extensions: combinedProducts.filter(
@@ -152,6 +270,21 @@ export default function Content(): JSX.Element {
 						'business-services': combinedProducts.filter(
 							( p ) => p.type === ProductType.businessService
 						).length,
+					} );
+					results.forEach( ( result ) => {
+						switch ( result.type ) {
+							case ProductType.extension:
+								setTotalPagesExtensions( result.totalPages );
+								break;
+							case ProductType.theme:
+								setTotalPagesThemes( result.totalPages );
+								break;
+							case ProductType.businessService:
+								setTotalPagesBusinessServices(
+									result.totalPages
+								);
+								break;
+						}
 					} );
 				} )
 				.catch( () => {
@@ -173,7 +306,8 @@ export default function Content(): JSX.Element {
 		setHasBusinessServices,
 		setIsLoading,
 		setSearchResultsCount,
-	] ); // Depend on term and category
+		currentPage,
+	] );
 
 	// Filter the products based on the selected tab
 	useEffect( () => {
@@ -212,30 +346,36 @@ export default function Content(): JSX.Element {
 		recordLegacyTabView( marketplaceViewProps );
 	}, [ query?.tab, query?.term, query?.section, query?.category ] );
 
+	// Reset current page when tab, term, or category changes
+	useEffect( () => {
+		setCurrentPage( 1 );
+		setFirstNewProductId( 0 );
+	}, [ selectedTab, query?.category, query?.term ] );
+
+	// Maintain product focus for accessibility
+	useEffect( () => {
+		if ( firstNewProductId ) {
+			setTimeout( () => {
+				const firstNewProduct = document.getElementById(
+					`product-${ firstNewProductId }`
+				);
+				if ( firstNewProduct ) {
+					firstNewProduct.focus();
+				}
+			}, 0 );
+		}
+	}, [ firstNewProductId ] );
+
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
-				return (
-					<Products
-						products={ filteredProducts }
-						categorySelector={ true }
-						type={ ProductType.extension }
-					/>
-				);
 			case 'themes':
-				return (
-					<Products
-						products={ filteredProducts }
-						categorySelector={ true }
-						type={ ProductType.theme }
-					/>
-				);
 			case 'business-services':
 				return (
 					<Products
 						products={ filteredProducts }
 						categorySelector={ true }
-						type={ ProductType.businessService }
+						type={ getProductType( selectedTab ) }
 					/>
 				);
 			case 'discover':
@@ -248,6 +388,25 @@ export default function Content(): JSX.Element {
 				);
 			default:
 				return <></>;
+		}
+	};
+
+	const shouldShowLoadMoreButton = () => {
+		if ( ! query.category || query.category === '_all' ) {
+			// Check against total pages for the selected tab
+			switch ( selectedTab ) {
+				case 'extensions':
+					return currentPage < totalPagesExtensions;
+				case 'themes':
+					return currentPage < totalPagesThemes;
+				case 'business-services':
+					return currentPage < totalPagesBusinessServices;
+				default:
+					return false;
+			}
+		} else {
+			// Check against totalPagesCategory for specific category
+			return currentPage < totalPagesCategory;
 		}
 	};
 
@@ -266,6 +425,13 @@ export default function Content(): JSX.Element {
 			) }
 
 			{ renderContent() }
+			{ ! isLoading && shouldShowLoadMoreButton() && (
+				<LoadMoreButton
+					onLoadMore={ loadMoreProducts }
+					isBusy={ isLoadingMore }
+					disabled={ isLoadingMore }
+				/>
+			) }
 		</div>
 	);
 }

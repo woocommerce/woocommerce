@@ -107,7 +107,10 @@ async function fetchJsonWithCache(
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
-): Promise< Product[] > {
+): Promise< {
+	products: Product[];
+	totalPages: number;
+} > {
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
@@ -151,9 +154,10 @@ async function fetchSearchResults(
 						};
 					}
 				);
-				resolve( products );
+				const totalPages = ( json as SearchAPIJSONType ).total_pages;
+				resolve( { products, totalPages } );
 			} )
-			.catch( () => reject );
+			.catch( reject );
 	} );
 }
 
@@ -171,6 +175,17 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 		} ) ) as Promise< ProductGroup[] >;
 	} catch ( error ) {
 		return [];
+	}
+}
+
+function getProductType( tab: string ): ProductType {
+	switch ( tab ) {
+		case 'themes':
+			return ProductType.theme;
+		case 'business-services':
+			return ProductType.businessService;
+		default:
+			return ProductType.extension;
 	}
 }
 
@@ -478,6 +493,7 @@ export {
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,
 	getInstallUrl,
