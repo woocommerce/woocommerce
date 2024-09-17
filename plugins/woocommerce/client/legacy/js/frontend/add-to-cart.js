@@ -173,6 +173,8 @@ jQuery( function( $ ) {
 	 * Update cart page elements after add to cart events.
 	 */
 	AddToCartHandler.prototype.updateButton = function( e, fragments, cart_hash, $button ) {
+		// Some themes and plugins manually trigger added_to_cart without passing a button element, which in turn calls this function.
+		// If there is no button we don't want to crash.
 		$button = typeof $button === 'undefined' ? false : $button;
 
 		if ( $button ) {
@@ -222,6 +224,8 @@ jQuery( function( $ ) {
 	 * Update cart live region message after add/remove cart events.
 	 */
 	AddToCartHandler.prototype.alertCartUpdated = function( e, fragments, cart_hash, $button ) {
+		// Some themes and plugins manually trigger added_to_cart without passing a button element, which in turn calls this function.
+		// If there is no button we don't want to crash.
 		$button = typeof $button === 'undefined' ? false : $button;
 
 		if ( $button ) {
