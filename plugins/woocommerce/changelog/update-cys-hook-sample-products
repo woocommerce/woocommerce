@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+During the CYS flow, don't store sample products in the database
