@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Internal\McStats;
 use WC_Rate_Limiter;
 use WC_Log_Levels;
 
@@ -176,6 +177,15 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		if ( $this->is_third_party_error( (string) $message, (array) $context ) ) {
 			return false;
+		}
+
+		try {
+			// Record fatal error stats.
+			$mc_stats = wc_get_container()->get( McStats::class );
+			$mc_stats->add( 'error', 'critical-errors' );
+			$mc_stats->do_server_side_stats();
+		} catch ( \Throwable $e ) {
+			error_log( 'Warning: Failed to record fatal error stats: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
