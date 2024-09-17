@@ -5,6 +5,7 @@ import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { AddressFormValues, ContactFormValues } from '@woocommerce/settings';
 import { useState, Fragment, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { Button } from '@ariakit/react';
 
 /**
  * Internal dependencies
@@ -50,7 +51,8 @@ const AddressLine2Field = < T extends AddressFormValues | ContactFormValues >( {
 				/>
 			) : (
 				<>
-					<button
+					<Button
+						render={ <span /> }
 						className={
 							'wc-block-components-address-form__address_2-toggle'
 						}
@@ -61,7 +63,7 @@ const AddressLine2Field = < T extends AddressFormValues | ContactFormValues >( {
 							__( '+ Add %s', 'woocommerce' ),
 							field.label.toLowerCase()
 						) }
-					</button>
+					</Button>
 					<input
 						type="text"
 						tabIndex={ -1 }
