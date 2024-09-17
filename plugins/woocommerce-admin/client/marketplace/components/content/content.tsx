@@ -65,7 +65,91 @@ export default function Content(): JSX.Element {
 		} ) );
 	};
 
+	const loadMoreProducts = useCallback( () => {
+		setIsLoading( true );
+		const params = new URLSearchParams();
+		const abortController = new AbortController();
+
+		if ( query.category && query.category !== '_all' ) {
+			params.append( 'category', query.category );
+		}
+
+		if ( query.term ) {
+			params.append( 'term', query.term );
+		}
+
+		const wccomSettings = getAdminSetting( 'wccomHelper', false );
+		if ( wccomSettings.storeCountry ) {
+			params.append( 'country', wccomSettings.storeCountry );
+		}
+
+		params.append( 'page', ( currentPage + 1 ).toString() );
+
+		fetchSearchResults( params, abortController.signal )
+			.then( ( productList ) => {
+				setAllProducts( ( prevProducts ) => {
+					const flattenedPrevProducts = Array.isArray(
+						prevProducts[ 0 ]
+					)
+						? prevProducts.flat()
+						: prevProducts;
+
+					const newProducts = productList.products.filter(
+						( newProduct ) =>
+							! flattenedPrevProducts.some(
+								( prevProduct ) =>
+									prevProduct.id === newProduct.id
+							)
+					);
+					const combinedProducts = [
+						...flattenedPrevProducts,
+						...newProducts,
+					];
+
+					setSearchResultsCount( {
+						extensions: combinedProducts.filter(
+							( p ) => p.type === ProductType.extension
+						).length,
+						themes: combinedProducts.filter(
+							( p ) => p.type === ProductType.theme
+						).length,
+						'business-services': combinedProducts.filter(
+							( p ) => p.type === ProductType.businessService
+						).length,
+					} );
+
+					return combinedProducts;
+				} );
+
+				setCurrentPage( ( prevPage ) => prevPage + 1 );
+			} )
+			.catch( ( error ) => {
+				if ( error.name !== 'AbortError' ) {
+					// eslint-disable-next-line no-console
+					console.error( 'Error loading more products:', error );
+				}
+			} )
+			.finally( () => {
+				setIsLoading( false );
+			} );
+
+		return () => {
+			abortController.abort();
+		};
+	}, [
+		currentPage,
+		query.category,
+		query.term,
+		setIsLoading,
+		setSearchResultsCount,
+	] );
+
 	useEffect( () => {
+		// if it's a paginated request, don't use this effect
+		if ( currentPage > 1 ) {
+			return;
+		}
+
 		const categories: Array< {
 			category: keyof SearchResultsCountType;
 			type: ProductType;
@@ -210,7 +294,7 @@ export default function Content(): JSX.Element {
 		setIsLoading,
 		setSearchResultsCount,
 		currentPage,
-	] ); // Depend on term and category
+	] );
 
 	// Filter the products based on the selected tab
 	useEffect( () => {
@@ -249,11 +333,10 @@ export default function Content(): JSX.Element {
 		recordLegacyTabView( marketplaceViewProps );
 	}, [ query?.tab, query?.term, query?.section, query?.category ] );
 
-	// Reset current page when tab or category changes
-	// TODO: Might need to reset it when query.term changes as well?
+	// Reset current page when tab, term, or category changes
 	useEffect( () => {
 		setCurrentPage( 1 );
-	}, [ selectedTab, query?.category ] );
+	}, [ selectedTab, query?.category, query?.term ] );
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
@@ -293,10 +376,6 @@ export default function Content(): JSX.Element {
 				return <></>;
 		}
 	};
-
-	const loadMoreProducts = useCallback( () => {
-		setCurrentPage( ( prevPage ) => prevPage + 1 );
-	}, [] );
 
 	const shouldShowLoadMoreButton = () => {
 		if ( ! query.category || query.category === '_all' ) {
