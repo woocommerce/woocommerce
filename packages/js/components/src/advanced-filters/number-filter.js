@@ -3,7 +3,6 @@
  */
 import { createElement, Component, Fragment } from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
-import { decodeEntities } from '@wordpress/html-entities';
 import { get, find, isArray } from 'lodash';
 import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
@@ -73,7 +72,6 @@ class NumberFilter extends Component {
 		currencySymbol,
 		symbolPosition,
 	} ) {
-		currencySymbol = decodeEntities( currencySymbol );
 		if ( type === 'currency' ) {
 			return symbolPosition.indexOf( 'right' ) === 0 ? (
 				<TextControlWithAffixes
