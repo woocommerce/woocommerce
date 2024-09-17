@@ -990,6 +990,11 @@ class ProductCollection extends AbstractBlock {
 		// has otherwise excluded from the results.
 		if ( count( $post__in ) > 1 ) {
 			$post__in = array_intersect( ...$post__in );
+			// An empty array means that there was no overlap between the filters and so
+			// the query should return no results.
+			if ( empty( $post__in ) ) {
+				return array( -1 );
+			}
 		} else {
 			$post__in = reset( $post__in );
 		}
