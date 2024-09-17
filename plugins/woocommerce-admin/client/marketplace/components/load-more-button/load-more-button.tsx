@@ -19,6 +19,10 @@ export default function LoadMoreButton( props: LoadMoreProps ) {
 		onLoadMore();
 	}
 
+	if ( isBusy ) {
+		speak( __( 'Loading more products', 'woocommerce' ) );
+	}
+
 	return (
 		<Button
 			className="woocommerce-marketplace__load-more"
@@ -27,7 +31,6 @@ export default function LoadMoreButton( props: LoadMoreProps ) {
 			isBusy={ isBusy }
 			disabled={ disabled }
 		>
-			{ isBusy && speak( __( 'Loading more products', 'woocommerce' ) ) }
 			{ __( 'Load more', 'woocommerce' ) }
 		</Button>
 	);
