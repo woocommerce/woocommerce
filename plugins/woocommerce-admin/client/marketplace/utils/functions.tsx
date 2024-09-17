@@ -110,6 +110,7 @@ async function fetchSearchResults(
 ): Promise< {
 	products: Product[];
 	totalPages: number;
+	totalProducts: number;
 } > {
 	const url =
 		MARKETPLACE_HOST +
@@ -155,7 +156,9 @@ async function fetchSearchResults(
 					}
 				);
 				const totalPages = ( json as SearchAPIJSONType ).total_pages;
-				resolve( { products, totalPages } );
+				const totalProducts = ( json as SearchAPIJSONType )
+					.total_products;
+				resolve( { products, totalPages, totalProducts } );
 			} )
 			.catch( reject );
 	} );

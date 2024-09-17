@@ -119,18 +119,6 @@ export default function Content(): JSX.Element {
 						...newProducts,
 					];
 
-					setSearchResultsCount( {
-						extensions: combinedProducts.filter(
-							( p ) => p.type === ProductType.extension
-						).length,
-						themes: combinedProducts.filter(
-							( p ) => p.type === ProductType.theme
-						).length,
-						'business-services': combinedProducts.filter(
-							( p ) => p.type === ProductType.businessService
-						).length,
-					} );
-
 					return combinedProducts;
 				} );
 
@@ -154,7 +142,6 @@ export default function Content(): JSX.Element {
 		query.term,
 		query.tab,
 		setIsLoadingMore,
-		setSearchResultsCount,
 	] );
 
 	useEffect( () => {
@@ -199,15 +186,7 @@ export default function Content(): JSX.Element {
 					setAllProducts( productList.products );
 					setTotalPagesCategory( productList.totalPages );
 					setSearchResultsCount( {
-						extensions: productList.products.filter(
-							( p ) => p.type === ProductType.extension
-						).length,
-						themes: productList.products.filter(
-							( p ) => p.type === ProductType.theme
-						).length,
-						'business-services': productList.products.filter(
-							( p ) => p.type === ProductType.businessService
-						).length,
+						[ query.tab ]: productList.totalProducts,
 					} );
 				} )
 				.catch( () => {
@@ -250,6 +229,7 @@ export default function Content(): JSX.Element {
 						return {
 							products: typedProducts,
 							totalPages: productList.totalPages,
+							totalProducts: productList.totalProducts,
 							type,
 						};
 					} );
@@ -259,18 +239,20 @@ export default function Content(): JSX.Element {
 					const combinedProducts = results.flatMap(
 						( result ) => result.products
 					);
+
 					setAllProducts( combinedProducts );
+
 					setSearchResultsCount( {
-						extensions: combinedProducts.filter(
-							( p ) => p.type === ProductType.extension
-						).length,
-						themes: combinedProducts.filter(
-							( p ) => p.type === ProductType.theme
-						).length,
-						'business-services': combinedProducts.filter(
-							( p ) => p.type === ProductType.businessService
-						).length,
+						extensions: results.find(
+							( i ) => i.type === 'extension'
+						)?.totalProducts,
+						themes: results.find( ( i ) => i.type === 'theme' )
+							?.totalProducts,
+						'business-services': results.find(
+							( i ) => i.type === 'business-service'
+						)?.totalProducts,
 					} );
+
 					results.forEach( ( result ) => {
 						switch ( result.type ) {
 							case ProductType.extension:
@@ -301,6 +283,7 @@ export default function Content(): JSX.Element {
 			} );
 		};
 	}, [
+		query.tab,
 		query.term,
 		query.category,
 		setHasBusinessServices,
