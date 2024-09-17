@@ -149,10 +149,8 @@ class WC_Brands_Admin {
 					}
 				}
 				?>
-			</select> <img class="help_tip" data-tip='<?php echo wc_sanitize_tooltip( __( 'A product must be associated with this brand for the coupon to remain valid or, for "Product Discounts", products with these brands will be discounted.', 'woocommerce' ) ); ?>' src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" /></p>
-		<?php
-
-		// Exclude Brands.
+			</select><?php echo wc_help_tip( esc_html__( 'A product must be associated with this brand for the coupon to remain valid or, for "Product Discounts", products with these brands will be discounted.', 'woocommerce' ) );
+			// Exclude Brands.
 		?>
 		<p class="form-field"><label for="exclude_product_brands"><?php esc_html_e( 'Exclude brands', 'woocommerce' ); ?></label>
 			<select id="exclude_product_brands" name="exclude_product_brands[]" style="width: 50%;"  class="wc-enhanced-select" multiple="multiple" data-placeholder="<?php esc_attr_e( 'No brands', 'woocommerce' ); ?>">
@@ -172,8 +170,7 @@ class WC_Brands_Admin {
 					}
 				}
 				?>
-			</select> <img class="help_tip" data-tip='<?php echo wc_sanitize_tooltip( __( 'Product must not be associated with these brands for the coupon to remain valid or, for "Product Discounts", products associated with these brands will not be discounted.', 'woocommerce' ) ); ?>' src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/help.png" height="16" width="16" /></p>
-		<?php
+			</select><?php echo wc_help_tip( esc_html__( 'Product must not be associated with these brands for the coupon to remain valid or, for "Product Discounts", products associated with these brands will not be discounted.', 'woocommerce' ) );
 	}
 
 	/**
