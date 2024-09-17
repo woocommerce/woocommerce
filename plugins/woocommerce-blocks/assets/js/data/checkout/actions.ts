@@ -119,6 +119,30 @@ export const __internalSetUseShippingAsBilling = (
 } );
 
 /**
+ * Set whether the billing address is being edited
+ *
+ * @param isEditing True if the billing address is being edited, false otherwise
+ */
+export const setEditingBillingAddress = ( isEditing: boolean ) => {
+	return {
+		type: types.SET_EDITING_BILLING_ADDRESS,
+		isEditing,
+	};
+};
+
+/**
+ * Set whether the shipping address is being edited
+ *
+ * @param isEditing True if the shipping address is being edited, false otherwise
+ */
+export const setEditingShippingAddress = ( isEditing: boolean ) => {
+	return {
+		type: types.SET_EDITING_SHIPPING_ADDRESS,
+		isEditing,
+	};
+};
+
+/**
  * Whether an account should be created for the user while checking out
  *
  * @param shouldCreateAccount True if an account should be created, false otherwise
@@ -182,6 +206,8 @@ export type CheckoutAction =
 			| typeof __internalSetCustomerId
 			| typeof __internalSetCustomerPassword
 			| typeof __internalSetUseShippingAsBilling
+			| typeof setEditingBillingAddress
+			| typeof setEditingShippingAddress
 			| typeof __internalSetShouldCreateAccount
 			| typeof __internalSetOrderNotes
 			| typeof setPrefersCollection

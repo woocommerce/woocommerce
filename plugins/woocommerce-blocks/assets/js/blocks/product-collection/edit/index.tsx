@@ -5,11 +5,13 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
+import { Spinner, Flex } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import {
+	ProductCollectionContentProps,
 	ProductCollectionEditComponentProps,
 	ProductCollectionUIStatesInEditor,
 } from '../types';
@@ -17,7 +19,7 @@ import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
-import { getProductCollectionUIStateInEditor } from '../utils';
+import { useProductCollectionUIState } from '../utils';
 import ProductPicker from './ProductPicker';
 
 const Edit = ( props: ProductCollectionEditComponentProps ) => {
@@ -31,49 +33,65 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		[ clientId ]
 	);
 
-	const productCollectionUIStateInEditor =
-		getProductCollectionUIStateInEditor( {
-			hasInnerBlocks,
+	const { productCollectionUIStateInEditor, isLoading } =
+		useProductCollectionUIState( {
 			location,
-			attributes: props.attributes,
+			attributes,
+			hasInnerBlocks,
 			usesReference: props.usesReference,
 		} );
 
-	/**
-	 * Component to render based on the UI state.
-	 */
-	let Component,
-		isUsingReferencePreviewMode = false;
-	switch ( productCollectionUIStateInEditor ) {
-		case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
-			Component = ProductCollectionPlaceholder;
-			break;
-		case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
-			Component = ProductPicker;
-			break;
-		case ProductCollectionUIStatesInEditor.VALID:
-			Component = ProductCollectionContent;
-			break;
-		case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
-			Component = ProductCollectionContent;
-			isUsingReferencePreviewMode = true;
-			break;
-		default:
-			// By default showing collection chooser.
-			Component = ProductCollectionPlaceholder;
+	// Show spinner while calculating Editor UI state.
+	if ( isLoading ) {
+		return (
+			<Flex justify="center" align="center">
+				<Spinner />
+			</Flex>
+		);
 	}
+
+	const productCollectionContentProps: ProductCollectionContentProps = {
+		...props,
+		openCollectionSelectionModal: () => setIsSelectionModalOpen( true ),
+		location,
+		isUsingReferencePreviewMode:
+			productCollectionUIStateInEditor ===
+			ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW,
+	};
+
+	const renderComponent = () => {
+		switch ( productCollectionUIStateInEditor ) {
+			case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
+				return <ProductCollectionPlaceholder { ...props } />;
+			case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
+				return (
+					<ProductPicker
+						{ ...props }
+						isDeletedProductReference={ false }
+					/>
+				);
+			case ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE:
+				return (
+					<ProductPicker
+						{ ...props }
+						isDeletedProductReference={ true }
+					/>
+				);
+			case ProductCollectionUIStatesInEditor.VALID:
+			case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
+				return (
+					<ProductCollectionContent
+						{ ...productCollectionContentProps }
+					/>
+				);
+			default:
+				return <ProductCollectionPlaceholder { ...props } />;
+		}
+	};
 
 	return (
 		<>
-			<Component
-				{ ...props }
-				openCollectionSelectionModal={ () =>
-					setIsSelectionModalOpen( true )
-				}
-				isUsingReferencePreviewMode={ isUsingReferencePreviewMode }
-				location={ location }
-				usesReference={ props.usesReference }
-			/>
+			{ renderComponent() }
 			{ isSelectionModalOpen && (
 				<CollectionSelectionModal
 					clientId={ clientId }

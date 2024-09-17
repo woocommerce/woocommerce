@@ -21,14 +21,35 @@ import {
 import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
 
-const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
+const ProductPicker = (
+	props: ProductCollectionEditComponentProps & {
+		isDeletedProductReference: boolean;
+	}
+) => {
 	const blockProps = useBlockProps();
-	const attributes = props.attributes;
+	const { attributes, isDeletedProductReference } = props;
 
 	const collection = getCollectionByName( attributes.collection );
 	if ( ! collection ) {
-		return;
+		return null;
 	}
+
+	const infoText = isDeletedProductReference
+		? __(
+				'Previously selected product is no longer available.',
+				'woocommerce'
+		  )
+		: createInterpolateElement(
+				sprintf(
+					/* translators: %s: collection title */
+					__(
+						'<strong>%s</strong> requires a product to be selected in order to display associated items.',
+						'woocommerce'
+					),
+					collection.title
+				),
+				{ strong: <strong /> }
+		  );
 
 	return (
 		<div { ...blockProps }>
@@ -38,21 +59,7 @@ const ProductPicker = ( props: ProductCollectionEditComponentProps ) => {
 						icon={ info }
 						className="wc-blocks-product-collection__info-icon"
 					/>
-					<Text>
-						{ createInterpolateElement(
-							sprintf(
-								/* translators: %s: collection title */
-								__(
-									'<strong>%s</strong> requires a product to be selected in order to display associated items.',
-									'woocommerce'
-								),
-								collection.title
-							),
-							{
-								strong: <strong />,
-							}
-						) }
-					</Text>
+					<Text>{ infoText }</Text>
 				</HStack>
 				<ProductControl
 					selected={
