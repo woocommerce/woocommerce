@@ -39,102 +39,110 @@ const test = baseTest.extend( {
 	},
 } );
 
-test.describe( 'Coupon management', { tag: '@services' }, () => {
-	for ( const couponType of Object.keys( couponData ) ) {
-		test( `can create new ${ couponType } coupon`, async ( {
-			page,
-			coupon,
-		} ) => {
-			await test.step( 'add new coupon', async () => {
-				await page.goto(
-					'wp-admin/post-new.php?post_type=shop_coupon'
-				);
-				await page
-					.getByLabel( 'Coupon code' )
-					.fill( couponData[ couponType ].code );
-				await page
-					.getByPlaceholder( 'Description (optional)' )
-					.fill( couponData[ couponType ].description );
-				await page
-					.getByPlaceholder( '0' )
-					.fill( couponData[ couponType ].amount );
+test.describe(
+	'Coupon management',
+	{ tag: [ '@services', '@skip-on-default-wpcom' ] },
+	() => {
+		for ( const couponType of Object.keys( couponData ) ) {
+			test( `can create new ${ couponType } coupon`, async ( {
+				page,
+				coupon,
+			} ) => {
+				await test.step( 'add new coupon', async () => {
+					await page.goto(
+						'wp-admin/post-new.php?post_type=shop_coupon'
+					);
+					await page
+						.getByLabel( 'Coupon code' )
+						.fill( couponData[ couponType ].code );
+					await page
+						.getByPlaceholder( 'Description (optional)' )
+						.fill( couponData[ couponType ].description );
+					await page
+						.getByPlaceholder( '0' )
+						.fill( couponData[ couponType ].amount );
 
-				// set expiry date if it was provided
+					// set expiry date if it was provided
+					if ( couponData[ couponType ].expiryDate ) {
+						await page
+							.getByPlaceholder( 'yyyy-mm-dd' )
+							.fill( couponData[ couponType ].expiryDate );
+					}
+
+					// be explicit about whether free shipping is allowed
+					if ( couponData[ couponType ].freeShipping ) {
+						await page.getByLabel( 'Allow free shipping' ).check();
+					} else {
+						await page
+							.getByLabel( 'Allow free shipping' )
+							.uncheck();
+					}
+				} );
+
+				// publish the coupon and retrieve the id
+				await test.step( 'publish the coupon', async () => {
+					await expect(
+						page.getByRole( 'link', { name: 'Move to Trash' } )
+					).toBeVisible();
+					await page
+						.getByRole( 'button', { name: 'Publish', exact: true } )
+						.click();
+					await expect(
+						page.getByText( 'Coupon updated.' )
+					).toBeVisible();
+					coupon.id = page.url().match( /(?<=post=)\d+/ )[ 0 ];
+					expect( coupon.id ).toBeDefined();
+				} );
+
+				// verify the creation of the coupon and details
+				await test.step( 'verify coupon creation', async () => {
+					await page.goto(
+						'wp-admin/edit.php?post_type=shop_coupon'
+					);
+					await expect(
+						page.getByRole( 'cell', {
+							name: couponData[ couponType ].code,
+						} )
+					).toBeVisible();
+					await expect(
+						page.getByRole( 'cell', {
+							name: couponData[ couponType ].description,
+						} )
+					).toBeVisible();
+					await expect(
+						page.getByRole( 'cell', {
+							name: couponData[ couponType ].amount,
+							exact: true,
+						} )
+					).toBeVisible();
+				} );
+
+				// check expiry date if it was set
 				if ( couponData[ couponType ].expiryDate ) {
-					await page
-						.getByPlaceholder( 'yyyy-mm-dd' )
-						.fill( couponData[ couponType ].expiryDate );
+					await test.step( 'verify coupon expiry date', async () => {
+						await page
+							.getByText( couponData[ couponType ].code )
+							.last()
+							.click();
+						await expect(
+							page.getByPlaceholder( 'yyyy-mm-dd' )
+						).toHaveValue( couponData[ couponType ].expiryDate );
+					} );
 				}
 
-				// be explicit about whether free shipping is allowed
+				// if it was a free shipping coupon check that
 				if ( couponData[ couponType ].freeShipping ) {
-					await page.getByLabel( 'Allow free shipping' ).check();
-				} else {
-					await page.getByLabel( 'Allow free shipping' ).uncheck();
+					await test.step( 'verify free shipping', async () => {
+						await page
+							.getByText( couponData[ couponType ].code )
+							.last()
+							.click();
+						await expect(
+							page.getByLabel( 'Allow free shipping' )
+						).toBeChecked();
+					} );
 				}
 			} );
-
-			// publish the coupon and retrieve the id
-			await test.step( 'publish the coupon', async () => {
-				await expect(
-					page.getByRole( 'link', { name: 'Move to Trash' } )
-				).toBeVisible();
-				await page
-					.getByRole( 'button', { name: 'Publish', exact: true } )
-					.click();
-				await expect(
-					page.getByText( 'Coupon updated.' )
-				).toBeVisible();
-				coupon.id = page.url().match( /(?<=post=)\d+/ )[ 0 ];
-				expect( coupon.id ).toBeDefined();
-			} );
-
-			// verify the creation of the coupon and details
-			await test.step( 'verify coupon creation', async () => {
-				await page.goto( 'wp-admin/edit.php?post_type=shop_coupon' );
-				await expect(
-					page.getByRole( 'cell', {
-						name: couponData[ couponType ].code,
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'cell', {
-						name: couponData[ couponType ].description,
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'cell', {
-						name: couponData[ couponType ].amount,
-						exact: true,
-					} )
-				).toBeVisible();
-			} );
-
-			// check expiry date if it was set
-			if ( couponData[ couponType ].expiryDate ) {
-				await test.step( 'verify coupon expiry date', async () => {
-					await page
-						.getByText( couponData[ couponType ].code )
-						.last()
-						.click();
-					await expect(
-						page.getByPlaceholder( 'yyyy-mm-dd' )
-					).toHaveValue( couponData[ couponType ].expiryDate );
-				} );
-			}
-
-			// if it was a free shipping coupon check that
-			if ( couponData[ couponType ].freeShipping ) {
-				await test.step( 'verify free shipping', async () => {
-					await page
-						.getByText( couponData[ couponType ].code )
-						.last()
-						.click();
-					await expect(
-						page.getByLabel( 'Allow free shipping' )
-					).toBeChecked();
-				} );
-			}
-		} );
+		}
 	}
-} );
+);
