@@ -48,6 +48,7 @@ export default function Content(): JSX.Element {
 		useState( 1 );
 
 	const {
+		isLoading,
 		setIsLoading,
 		selectedTab,
 		setHasBusinessServices,
@@ -338,30 +339,27 @@ export default function Content(): JSX.Element {
 		setCurrentPage( 1 );
 	}, [ selectedTab, query?.category, query?.term ] );
 
+	const getProductType = ( tab: string ): ProductType => {
+		switch ( tab ) {
+			case 'themes':
+				return ProductType.theme;
+			case 'business-services':
+				return ProductType.businessService;
+			default:
+				return ProductType.extension;
+		}
+	};
+
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
 			case 'extensions':
-				return (
-					<Products
-						products={ filteredProducts }
-						categorySelector={ true }
-						type={ ProductType.extension }
-					/>
-				);
 			case 'themes':
-				return (
-					<Products
-						products={ filteredProducts }
-						categorySelector={ true }
-						type={ ProductType.theme }
-					/>
-				);
 			case 'business-services':
 				return (
 					<Products
 						products={ filteredProducts }
 						categorySelector={ true }
-						type={ ProductType.businessService }
+						type={ getProductType( selectedTab ) }
 					/>
 				);
 			case 'discover':
@@ -411,7 +409,7 @@ export default function Content(): JSX.Element {
 			) }
 
 			{ renderContent() }
-			{ shouldShowLoadMoreButton() && (
+			{ shouldShowLoadMoreButton() && ! isLoading && (
 				<LoadMoreButton onLoadMore={ loadMoreProducts } />
 			) }
 		</div>
