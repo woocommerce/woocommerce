@@ -29,6 +29,13 @@ class ComingSoonAdminBarBadge {
 	 * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance.
 	 */
 	public function site_visibility_badge( $wp_admin_bar ) {
+		/**
+		 * Allows removal of Coming Soon admin bar badge.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param boolean
+		 */
 		if ( apply_filters( 'woocommerce_disable_coming_soon_admin_bar_badge', false ) ) {
 			return;
 		}
