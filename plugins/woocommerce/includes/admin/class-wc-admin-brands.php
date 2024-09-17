@@ -149,7 +149,8 @@ class WC_Brands_Admin {
 					}
 				}
 				?>
-			</select><?php
+			</select>
+			<?php
 				echo wc_help_tip( esc_html__( 'A product must be associated with this brand for the coupon to remain valid or, for "Product Discounts", products with these brands will be discounted.', 'woocommerce' ) );
 				// Exclude Brands.
 			?>
@@ -171,7 +172,8 @@ class WC_Brands_Admin {
 					}
 				}
 				?>
-			</select><?php
+			</select>
+			<?php
 				echo wc_help_tip( esc_html__( 'Product must not be associated with these brands for the coupon to remain valid or, for "Product Discounts", products associated with these brands will not be discounted.', 'woocommerce' ) );
 	}
 
