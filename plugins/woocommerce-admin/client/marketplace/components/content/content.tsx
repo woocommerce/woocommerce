@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import {
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+} from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 
 /**
@@ -27,6 +32,7 @@ import Promotions from '../promotions/promotions';
 import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
 import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 import SubscriptionsExpiredExpiringNotice from '~/marketplace/components/my-subscriptions/subscriptions-expired-expiring-notice';
+import LoadMoreButton from '../load-more-button/load-more-button';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -34,6 +40,13 @@ export default function Content(): JSX.Element {
 	const [ filteredProducts, setFilteredProducts ] = useState< Product[] >(
 		[]
 	);
+	const [ currentPage, setCurrentPage ] = useState( 1 );
+	const [ totalPagesCategory, setTotalPagesCategory ] = useState( 1 );
+	const [ totalPagesExtensions, setTotalPagesExtensions ] = useState( 1 );
+	const [ totalPagesThemes, setTotalPagesThemes ] = useState( 1 );
+	const [ totalPagesBusinessServices, setTotalPagesBusinessServices ] =
+		useState( 1 );
+
 	const {
 		setIsLoading,
 		selectedTab,
@@ -72,6 +85,7 @@ export default function Content(): JSX.Element {
 		// If query.category is present and not '_all', only fetch that category
 		if ( query.category && query.category !== '_all' ) {
 			const params = new URLSearchParams();
+
 			params.append( 'category', query.category );
 
 			if ( query.term ) {
@@ -86,6 +100,7 @@ export default function Content(): JSX.Element {
 			fetchSearchResults( params, abortControllers[ 0 ].signal )
 				.then( ( productList ) => {
 					setAllProducts( productList.products );
+					setTotalPagesCategory( productList.totalPages );
 					setSearchResultsCount( {
 						extensions: productList.products.filter(
 							( p ) => p.type === ProductType.extension
@@ -135,12 +150,18 @@ export default function Content(): JSX.Element {
 						if ( category === 'business-services' ) {
 							setHasBusinessServices( typedProducts.length > 0 );
 						}
-						return typedProducts;
+						return {
+							products: typedProducts,
+							totalPages: productList.totalPages,
+							type,
+						};
 					} );
 				} )
 			)
 				.then( ( results ) => {
-					const combinedProducts = results.flat();
+					const combinedProducts = results.flatMap(
+						( result ) => result.products
+					);
 					setAllProducts( combinedProducts );
 					setSearchResultsCount( {
 						extensions: combinedProducts.filter(
@@ -152,6 +173,21 @@ export default function Content(): JSX.Element {
 						'business-services': combinedProducts.filter(
 							( p ) => p.type === ProductType.businessService
 						).length,
+					} );
+					results.forEach( ( result ) => {
+						switch ( result.type ) {
+							case ProductType.extension:
+								setTotalPagesExtensions( result.totalPages );
+								break;
+							case ProductType.theme:
+								setTotalPagesThemes( result.totalPages );
+								break;
+							case ProductType.businessService:
+								setTotalPagesBusinessServices(
+									result.totalPages
+								);
+								break;
+						}
 					} );
 				} )
 				.catch( () => {
@@ -173,6 +209,7 @@ export default function Content(): JSX.Element {
 		setHasBusinessServices,
 		setIsLoading,
 		setSearchResultsCount,
+		currentPage,
 	] ); // Depend on term and category
 
 	// Filter the products based on the selected tab
@@ -211,6 +248,12 @@ export default function Content(): JSX.Element {
 		recordMarketplaceView( marketplaceViewProps );
 		recordLegacyTabView( marketplaceViewProps );
 	}, [ query?.tab, query?.term, query?.section, query?.category ] );
+
+	// Reset current page when tab or category changes
+	// TODO: Might need to reset it when query.term changes as well?
+	useEffect( () => {
+		setCurrentPage( 1 );
+	}, [ selectedTab, query?.category ] );
 
 	const renderContent = (): JSX.Element => {
 		switch ( selectedTab ) {
@@ -251,6 +294,29 @@ export default function Content(): JSX.Element {
 		}
 	};
 
+	const loadMoreProducts = useCallback( () => {
+		setCurrentPage( ( prevPage ) => prevPage + 1 );
+	}, [] );
+
+	const shouldShowLoadMoreButton = () => {
+		if ( ! query.category || query.category === '_all' ) {
+			// Check against total pages for the selected tab
+			switch ( selectedTab ) {
+				case 'extensions':
+					return currentPage < totalPagesExtensions;
+				case 'themes':
+					return currentPage < totalPagesThemes;
+				case 'business-services':
+					return currentPage < totalPagesBusinessServices;
+				default:
+					return false;
+			}
+		} else {
+			// Check against totalPagesCategory for specific category
+			return currentPage < totalPagesCategory;
+		}
+	};
+
 	return (
 		<div className="woocommerce-marketplace__content">
 			<Promotions />
@@ -266,6 +332,9 @@ export default function Content(): JSX.Element {
 			) }
 
 			{ renderContent() }
+			{ shouldShowLoadMoreButton() && (
+				<LoadMoreButton onLoadMore={ loadMoreProducts } />
+			) }
 		</div>
 	);
 }

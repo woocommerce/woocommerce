@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
 import { queueRecordEvent } from '@woocommerce/tracks';
 
 interface LoadMoreProps {
-	variant?: Button.ButtonVariant;
 	onLoadMore: () => void;
 }
 
@@ -19,7 +18,7 @@ export default function LoadMoreButton( props: LoadMoreProps ) {
 	return (
 		<Button
 			className="woocommerce-marketplace__load-more"
-			variant={ props.variant ?? 'secondary' }
+			variant={ 'secondary' }
 			onClick={ handleClick }
 		>
 			{ __( 'Load more', 'woocommerce' ) }
