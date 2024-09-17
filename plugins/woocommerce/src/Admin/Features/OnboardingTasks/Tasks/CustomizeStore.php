@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use WP_Post;
 
 /**
@@ -11,6 +12,46 @@ use WP_Post;
  * @internal
  */
 class CustomizeStore extends Task {
+
+	private $dummy_products = array(
+		array(
+			'title'       => 'Vintage Typewriter',
+			'image'       => 'writing-typing-keyboard-technology-white-vintage.jpg',
+			'description' => 'A hit spy novel or a love letter? Anything you type using this vintage typewriter from the 20s is bound to make a mark.',
+			'price'       => 90,
+		),
+		array(
+			'title'       => 'Leather-Clad Leisure Chair',
+			'image'       => 'table-wood-house-chair-floor-window.jpg',
+			'description' => 'Sit back and relax in this comfy designer chair. High-grain leather and steel frame add luxury to your your leisure.',
+			'price'       => 249,
+		),
+		array(
+			'title'       => 'Black and White',
+			'image'       => 'white-black-black-and-white-photograph-monochrome-photography.jpg',
+			'description' => 'This 24" x 30" high-quality print just exudes summer. Hang it on the wall and forget about the world outside.',
+			'price'       => 115,
+		),
+		array(
+			'title'       => '3-Speed Bike',
+			'image'       => 'road-sport-vintage-wheel-retro-old.jpg',
+			'description' => 'Zoom through the streets on this premium 3-speed bike. Manufactured and assembled in Germany in the 80s.',
+			'price'       => 115,
+		),
+		array(
+			'title'       => 'Hi-Fi Headphones',
+			'image'       => 'man-person-music-black-and-white-white-photography.jpg',
+			'description' => 'Experience your favorite songs in a new way with these premium hi-fi headphones.',
+			'price'       => 125,
+		),
+		array(
+			'title'       => 'Retro Glass Jug (330 ml)',
+			'image'       => 'drinkware-liquid-tableware-dishware-bottle-fluid.jpg',
+			'description' => 'Thick glass and a classic silhouette make this jug a must-have for any retro-inspired kitchen.',
+			'price'       => 115,
+		),
+	);
+
 	/**
 	 * Constructor
 	 *
@@ -30,6 +71,25 @@ class CustomizeStore extends Task {
 		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
 		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
 		add_action( 'customize_save_after', array( $this, 'mark_task_as_complete_classic_theme' ) );
+
+		if ( WC()->is_rest_api_request() ) {
+			$referring_url = $_SERVER['HTTP_REFERER'];
+			$parsed_url    = parse_url( $referring_url );
+
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended
+			$is_assembler_hub = (
+				isset( $parsed_url['query'] ) &&
+				str_starts_with( $parsed_url['query'], 'page=wc-admin' ) &&
+				str_contains( $parsed_url['query'], 'path=%2Fcustomize-store%2Fassembler-hub' ) &&
+				isset( $parsed_url['path'] ) &&
+				str_contains( $parsed_url['path'], '/wp-admin/admin.php' )
+			);
+
+			if ( $is_assembler_hub ) {
+				add_filter( 'the_posts', array( $this, 'add_dummy_products_to_query' ), 10, 2 );
+				add_filter( 'rest_pre_dispatch', array( $this, 'custom_handle_nonexistent_product' ), 10, 3 );
+			}
+		}
 	}
 
 	/**
@@ -123,6 +183,163 @@ class CustomizeStore extends Task {
 		return admin_url( 'admin.php?page=wc-admin&path=%2Fcustomize-store' );
 	}
 
+	/**
+	 * Generate a sample product post object.
+	 *
+	 * This method creates a WP_Post object representing a sample product
+	 * using data from the dummy products array.
+	 *
+	 * @param int $index The index of the dummy product to use.
+	 * @return WP_Post A WP_Post object representing a sample product.
+	 */
+	public function generate_sample_product_post_object( $index ) {
+		$sample_product_data = $this->dummy_products[ $index ];
+
+		return new WP_Post(
+			(object) array(
+				'ID'                    => time() * 1000 + $index,
+				'post_author'           => 1,
+				'post_date'             => '',
+				'post_date_gmt'         => '',
+				'post_content'          => $sample_product_data['description'],
+				'post_title'            => $sample_product_data['title'],
+				'post_excerpt'          => $sample_product_data['description'],
+				'post_status'           => 'publish',
+				'comment_status'        => 'open',
+				'ping_status'           => 'closed',
+				'post_password'         => '',
+				'post_name'             => sanitize_title( $sample_product_data['title'] ),
+				'to_ping'               => '',
+				'pinged'                => '',
+				'post_modified'         => '',
+				'post_modified_gmt'     => '',
+				'post_content_filtered' => '',
+				'post_parent'           => 0,
+				'guid'                  => '',
+				'menu_order'            => 0,
+				'post_type'             => 'product',
+				'post_mime_type'        => '',
+				'comment_count'         => 0,
+				'filter'                => 'raw',
+			)
+		);
+	}
+
+	/**
+	 * Generate a sample product object.
+	 *
+	 * This method creates an array representing a sample product
+	 * using data from the dummy products array.
+	 *
+	 * @param int $product_id The ID of the product to generate. The last digit
+	 *                        of the product ID is used to determine which dummy product to use.
+	 * @return array An array representing a sample product.
+	 */
+	public function generate_sample_product_object( $product_id ) {
+		$last_digit          = substr( $product_id, -1 );
+		$sample_product_data = $this->dummy_products[ $last_digit ];
+		$image_src           = plugins_url( '/assets/images/pattern-placeholders/' . $sample_product_data['image'], dirname( __DIR__, 4 ) );
+		$currency_decimals   = wc_get_price_decimals();
+		$prices              = ( new CurrencyFormatter() )->format(
+			array(
+				'price'         => $sample_product_data['price'] * 10 ** $currency_decimals,
+				'regular_price' => $sample_product_data['price'] * 10 ** $currency_decimals,
+				'sale_price'    => null,
+				'price_range'   => null,
+			)
+		);
+
+		return array(
+			'id'                  => $product_id,
+			'name'                => sanitize_text_field( $sample_product_data['title'] ),
+			'slug'                => sanitize_title( $sample_product_data['title'] ),
+			'parent'              => 0,
+			'type'                => 'simple',
+			'variation'           => '',
+			'permalink'           => '',
+			'sku'                 => '',
+			'short_description'   => '',
+			'description'         => $sample_product_data['description'],
+			'on_sale'             => false,
+			'prices'              => $prices,
+			'price_html'          => '',
+			'average_rating'      => '0',
+			'review_count'        => 0,
+			'images'              => array(
+				(object) array(
+					'src'       => $image_src,
+					'thumbnail' => $image_src,
+					'alt'       => '',
+				),
+			),
+			'categories'          => array(),
+			'tags'                => array(),
+			'attributes'          => array(),
+			'variations'          => array(),
+			'has_options'         => false,
+			'is_purchasable'      => true,
+			'is_in_stock'         => true,
+			'is_on_backorder'     => false,
+			'low_stock_remaining' => null,
+			'sold_individually'   => false,
+			'extensions'          => array(),
+		);
+	}
+
+	/**
+	 * Adds dummy products to the query result if no products are found.
+	 *
+	 * This function is used to populate the product list with sample data when
+	 * the store has no real products and a REST API request is made.
+	 *
+	 * @param array    $posts An array of post objects.
+	 * @param WP_Query $query The WP_Query instance.
+	 * @return array An array of post objects, potentially including dummy products.
+	 */
+	public function add_dummy_products_to_query( $posts, $query ) {
+		if ( 'product' !== $query->query['post_type'] || ! WC()->is_rest_api_request() || ! empty( $posts ) ) {
+			return $posts;
+		}
+
+		$sample_products = array();
+
+		foreach ( $this->dummy_products as $index => $dummy_product ) {
+			$sample_products[] = $this->generate_sample_product_post_object( $index );
+		}
+
+		return $sample_products;
+	}
+
+	/**
+	 * Handles requests for nonexistent products by generating sample product data.
+	 *
+	 * This method intercepts REST API requests for product details. If the requested
+	 * product doesn't exist and the product ID suggests it's a sample product
+	 * (ID representing a timestamp within the last 24 hours), it returns a
+	 * sample product object.
+	 *
+	 * @param mixed           $result  The current result, usually null for not found.
+	 * @param WP_REST_Server  $server  The REST server instance.
+	 * @param WP_REST_Request $request The current REST request.
+	 *
+	 * @return WP_REST_Response|mixed The sample product response if applicable, otherwise the original result.
+	 */
+	public function custom_handle_nonexistent_product( $result, $server, $request ) {
+		if ( false !== strpos( $request->get_route(), '/wc/store/v1/products/' ) ) {
+			$product_id = (int) str_replace( '/wc/store/v1/products/', '', $request->get_route() );
+			$product    = wc_get_product( $product_id );
+
+			// Sample products use `time()` as the ID. This way we can detect that
+			// it was a sample product returned 24 hours or less ago.
+			if ( ! $product && $product_id + 86400000 > time() * 1000 ) {
+				$sample_product = $this->generate_sample_product_object( $product_id );
+
+				return rest_ensure_response( $sample_product );
+			}
+		}
+
+		return $result;
+	}
 
 	/**
 	 * Possibly add site editor scripts.

@@ -245,26 +245,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
-							createProducts: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'createProducts',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
-									success: {
-										type: 'final',
-									},
-								},
-							},
 							installFontFamilies: {
 								initial: installFontFamiliesState.initial,
 								states: {

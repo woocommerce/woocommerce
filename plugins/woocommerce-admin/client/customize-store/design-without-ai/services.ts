@@ -193,23 +193,6 @@ const installFontFamilies = async () => {
 	}
 };
 
-const createProducts = async () => {
-	try {
-		const { success } = await apiFetch< {
-			success: boolean;
-		} >( {
-			path: `/wc-admin/onboarding/products`,
-			method: 'POST',
-		} );
-
-		if ( ! success ) {
-			throw new Error( 'Product creation failed' );
-		}
-	} catch ( error ) {
-		throw error;
-	}
-};
-
 export const enableTracking = async () => {
 	try {
 		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
@@ -225,7 +208,6 @@ export const services = {
 	assembleSite,
 	browserPopstateHandler,
 	installAndActivateTheme,
-	createProducts,
 	installFontFamilies,
 	installPatterns,
 	updateGlobalStylesWithDefaultValues,
