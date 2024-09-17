@@ -5,8 +5,10 @@ declare( strict_types = 1);
 /**
  * Layered Navigation Widget for brands WC 2.6 version
  *
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
  * @package WooCommerce\Widgets
- * @version x.x.x
+ * @version 9.4.0
  * @extends WP_Widget
  */
 class WC_Widget_Brand_Nav extends WC_Widget {

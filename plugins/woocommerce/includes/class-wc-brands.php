@@ -7,7 +7,9 @@ use Automattic\Jetpack\Constants;
 /**
  * WC_Brands class.
  *
- * @version x.x.x
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
+ * @version 9.4.0
  */
 class WC_Brands {
 
@@ -587,7 +589,7 @@ class WC_Brands {
 	 * @param string $name
 	 *
 	 * @return string
-	 * @since  x.x.x
+	 * @since  9.4.0
 	 */
 	private function get_brand_name_first_character( $name ) {
 		// Convert to lowercase and remove accents.
@@ -789,7 +791,7 @@ class WC_Brands {
 	/**
 	 * Register REST API route for /products/brands.
 	 *
-	 * @since x.x.x
+	 * @since 9.4.0
 	 *
 	 * @return void
 	 */
@@ -810,7 +812,7 @@ class WC_Brands {
 	/**
 	 * Maybe set brands when requesting PUT /products/<id>.
 	 *
-	 * @since x.x.x
+	 * @since 9.4.0
 	 *
 	 * @param WP_Post         $post    Post object
 	 * @param WP_REST_Request $request Request object
@@ -829,7 +831,7 @@ class WC_Brands {
 	 *
 	 * @param WP_REST_Response $response   The response object.
 	 * @param WP_Post|WC_Data  $post       Post object or WC object.
-	 * @version x.x.x
+	 * @version 9.4.0
 	 * @return WP_REST_Response
 	 */
 	public function rest_api_prepare_brands_to_product( $response, $post ) {
@@ -858,7 +860,7 @@ class WC_Brands {
 	 * @param WC_Data         $product   Inserted product object.
 	 * @param WP_REST_Request $request   Request object.
 	 * @param boolean         $creating  True when creating object, false when updating.
-	 * @version x.x.x
+	 * @version 9.4.0
 	 */
 	public function rest_api_add_brands_to_product( $product, $request, $creating = true ) {
 		$product_id = is_callable( array( $product, 'get_id' ) ) ? $product->get_id() : ( ! empty( $product->ID ) ? $product->ID : null );
@@ -886,7 +888,7 @@ class WC_Brands {
 	 * @param array           $args    Request args.
 	 * @param WP_REST_Request $request Request data.
 	 * @return array Request args.
-	 * @version x.x.x
+	 * @version 9.4.0
 	 */
 	public function rest_api_filter_products_by_brand( $args, $request ) {
 		if ( ! empty( $request['brand'] ) ) {
@@ -906,7 +908,7 @@ class WC_Brands {
 	 * @param array        $params JSON Schema-formatted collection parameters.
 	 * @param WP_Post_Type $post_type   Post type object.
 	 * @return array JSON Schema-formatted collection parameters.
-	 * @version x.x.x
+	 * @version 9.4.0
 	 */
 	public function rest_api_product_collection_params( $params, $post_type ) {
 		$params['brand'] = array(
@@ -927,7 +929,7 @@ class WC_Brands {
 	 * @param  string $link      Original layered nav item link.
 	 * @param  number $count     Number of items in that filter.
 	 * @return string            Term html.
-	 * @version x.x.x
+	 * @version 9.4.0
 	 */
 	public function woocommerce_brands_update_layered_nav_link( $term_html, $term, $link, $count ) {
 		if ( empty( $_GET['filter_product_brand'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -975,7 +977,7 @@ class WC_Brands {
 	 * After product was added check if there are temporary brands and
 	 * add them officially and remove the temporary brands.
 	 *
-	 * @since x.x.x
+	 * @since 9.4.0
 	 *
 	 * @param int $product_id
 	 */

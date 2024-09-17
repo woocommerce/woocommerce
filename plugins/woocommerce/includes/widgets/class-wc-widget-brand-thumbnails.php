@@ -7,8 +7,10 @@ declare( strict_types = 1);
  *
  * Show brand images as thumbnails
  *
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
  * @package WooCommerce\Widgets
- * @version x.x.x
+ * @version 9.4.0
  */
 class WC_Widget_Brand_Thumbnails extends WP_Widget {
 

@@ -5,7 +5,9 @@ declare( strict_types = 1);
 /**
  * WC_Brands_Coupons class.
  *
- * @version x.x.x
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
+ * @version 9.4.0
  */
 class WC_Brands_Coupons {
 

@@ -2,8 +2,10 @@
 /**
  * Brands Admin Page
  *
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
  * @package WooCommerce\Admin
- * @version x.x.x
+ * @version 9.4.0
  */
 
 declare( strict_types = 1);
@@ -96,7 +98,7 @@ class WC_Brands_Admin {
 	/**
 	 * Add the settings for the new "Brands" subtab.
 	 *
-	 * @since  x.x.x
+	 * @since  9.4.0
 	 *
 	 * @param array $settings Settings.
 	 * @param array $current_section Current section.
@@ -111,7 +113,7 @@ class WC_Brands_Admin {
 	/**
 	 * Add a new "Brands" subtab to the "Products" tab.
 	 *
-	 * @since  x.x.x
+	 * @since  9.4.0
 	 * @param array $sections Sections.
 	 */
 	public function add_settings_tab( $sections ) {
@@ -122,7 +124,7 @@ class WC_Brands_Admin {
 	/**
 	 * Display coupon filter fields relating to brands.
 	 *
-	 * @since  x.x.x
+	 * @since  9.4.0
 	 * @return  void
 	 */
 	public function add_coupon_brands_fields() {
@@ -177,7 +179,7 @@ class WC_Brands_Admin {
 	/**
 	 * Save coupon filter fields relating to brands.
 	 *
-	 * @since  x.x.x
+	 * @since  9.4.0
 	 * @param int $post_id Post ID.
 	 * @return  void
 	 */
@@ -475,7 +477,7 @@ class WC_Brands_Admin {
 	/**
 	 * Add brands column in second-to-last position.
 	 *
-	 * @since x.x.x
+	 * @since 9.4.0
 	 * @param mixed $columns Columns.
 	 * @return array
 	 */

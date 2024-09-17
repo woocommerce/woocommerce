@@ -7,8 +7,10 @@ declare( strict_types = 1);
  *
  * When viewing a brand archive, show the current brands description + image
  *
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
  * @package WooCommerce\Widgets
- * @version x.x.x
+ * @version 9.4.0
  */
 class WC_Widget_Brand_Description extends WP_Widget {
 

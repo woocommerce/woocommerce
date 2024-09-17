@@ -2,8 +2,10 @@
 /**
  * Brands Helper Functions
  *
- * @version x.x.x
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
  * @package WooCommerce
+ * @version 9.4.0
  */
 
 declare( strict_types = 1);
@@ -28,7 +30,7 @@ function wc_get_brand_thumbnail_url( $brand_id, $size = 'full' ) {
 /**
  * Helper function :: wc_get_brand_thumbnail_image function.
  *
- * @since x.x.x
+ * @since 9.4.0
  *
  * @param  object $brand Brand term.
  * @param  string $size  Thumbnail image size.

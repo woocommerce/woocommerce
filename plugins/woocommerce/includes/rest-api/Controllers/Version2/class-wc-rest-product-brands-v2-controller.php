@@ -4,8 +4,10 @@
  *
  * Handles requests to /products/brands endpoint.
  *
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
  * @package WooCommerce\RestApi
- * @since   x.x.x
+ * @since   9.4.0
  */
 
 declare( strict_types = 1);

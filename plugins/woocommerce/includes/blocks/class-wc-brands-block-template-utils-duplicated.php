@@ -10,7 +10,9 @@ use Automattic\WooCommerce\Blocks\Options;
  * BlockTemplateUtils class used for serving block templates from Woo Blocks.
  * IMPORTANT: These methods have been duplicated from Gutenberg/lib/full-site-editing/block-templates.php as those functions are not for public usage.
  *
- * @version x.x.x
+ * For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
+ * @version 9.4.0
  */
 class BlockTemplateUtilsDuplicated {
 

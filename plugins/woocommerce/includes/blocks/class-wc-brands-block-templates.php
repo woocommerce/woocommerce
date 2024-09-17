@@ -6,7 +6,9 @@ declare( strict_types = 1);
 /**
  * Utils for compatibility with WooCommerce Full Site Editor Blocks
  *
- * @version 5.0.0
+ * Important: For internal use only by the Automattic\WooCommerce\Internal\Brands package.
+ *
+ * @version 9.4.0
  */
 class WC_Brands_Block_Templates {
 
