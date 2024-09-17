@@ -25,7 +25,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		add_filter(
 			'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
-			function( $value ) {
+			function ( $value ) {
 				if ( $value ) {
 					return $value;
 				}
@@ -37,6 +37,8 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 				);
 			}
 		);
+
+		EvaluateSuggestion::reset_memo();
 	}
 
 	/**
@@ -57,7 +59,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		remove_all_filters( 'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array();
 			}
 		);
@@ -242,7 +244,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 
 		add_filter(
 			'locale',
-			function( $_locale ) {
+			function () {
 				return 'zh_TW';
 			}
 		);
@@ -364,5 +366,4 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		// Clean up.
 		delete_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION );
 	}
-
 }

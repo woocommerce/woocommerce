@@ -66,7 +66,7 @@ class WC_Admin_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$uncategorized_term = get_term_by( 'slug', 'uncategorized', 'product_cat' );
 
@@ -114,7 +114,7 @@ class WC_Admin_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$product->set_category_ids( array( $second_category_id ) );
 		$product->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$uncategorized_term = get_term_by( 'slug', 'uncategorized', 'product_cat' );
 
@@ -170,7 +170,7 @@ class WC_Admin_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Populate all of the data.
 		$product = new WC_Product_Simple();
@@ -186,7 +186,7 @@ class WC_Admin_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$order->set_total( 400 ); // $100 x 4.
 		$order->save();
 
-		WC_Helper_Queue::run_all_pending();
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		$uncategorized_term = get_term_by( 'slug', 'uncategorized', 'product_cat' );
 		$params             = array(
