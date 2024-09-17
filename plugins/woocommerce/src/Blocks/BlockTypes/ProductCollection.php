@@ -1888,9 +1888,15 @@ class ProductCollection extends AbstractBlock {
 					);
 				}
 
-				$all_upsells = array_reduce( $products, function( $acc, $product ) {
-					return array_merge( $acc, $product->get_upsell_ids() );
-				}, [] );
+				$all_upsells = array_reduce(
+					$products,
+					function ( $acc, $product ) {
+						return array_merge(
+							$acc,
+							$product->get_upsell_ids()
+						);
+					},
+				[] );
 
 				// Remove duplicates and product references. We don't want to display
 				// what's already in cart.
