@@ -112,7 +112,7 @@ for ( const productType of Object.keys( productData ) ) {
 					.getByRole( 'link', { name: 'Attributes' } )
 					.click();
 				await page
-					.getByPlaceholder( 'f.e. size or color' )
+					.getByPlaceholder( 'e.g. length or weight' )
 					.fill( attributeName );
 				await page
 					.getByPlaceholder( 'Enter some descriptive text.' )
@@ -183,7 +183,7 @@ for ( const productType of Object.keys( productData ) ) {
 						.getByPlaceholder( '0' )
 						.fill( productData[ productType ].shipping.weight );
 					await page
-						.getByPlaceholder( 'Length' )
+						.getByPlaceholder( 'Length', { exact: true } )
 						.fill( productData[ productType ].shipping.length );
 					await page
 						.getByPlaceholder( 'Width' )
