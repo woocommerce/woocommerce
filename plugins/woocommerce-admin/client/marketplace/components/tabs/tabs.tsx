@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useState, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import clsx from 'clsx';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
@@ -135,38 +135,41 @@ const Tabs = ( props: TabsProps ): JSX.Element => {
 
 	const query: Record< string, string > = useQuery();
 
-	const tabs: Tabs = {
-		discover: {
-			name: 'discover',
-			title: __( 'Discover', 'woocommerce' ),
-			showUpdateCount: false,
-			updateCount: 0,
-		},
-		extensions: {
-			name: 'extensions',
-			title: __( 'Extensions', 'woocommerce' ),
-			showUpdateCount: !! query.term && ! isLoading,
-			updateCount: searchResultsCount.extensions,
-		},
-		themes: {
-			name: 'themes',
-			title: __( 'Themes', 'woocommerce' ),
-			showUpdateCount: !! query.term && ! isLoading,
-			updateCount: searchResultsCount.themes,
-		},
-		'business-services': {
-			name: 'business-services',
-			title: __( 'Business services', 'woocommerce' ),
-			showUpdateCount: !! query.term && ! isLoading,
-			updateCount: searchResultsCount[ 'business-services' ],
-		},
-		'my-subscriptions': {
-			name: 'my-subscriptions',
-			title: __( 'My subscriptions', 'woocommerce' ),
-			showUpdateCount: true,
-			updateCount: wooUpdateCount,
-		},
-	};
+	const tabs: Tabs = useMemo(
+		() => ( {
+			discover: {
+				name: 'discover',
+				title: __( 'Discover', 'woocommerce' ),
+				showUpdateCount: false,
+				updateCount: 0,
+			},
+			extensions: {
+				name: 'extensions',
+				title: __( 'Extensions', 'woocommerce' ),
+				showUpdateCount: !! query.term && ! isLoading,
+				updateCount: searchResultsCount.extensions,
+			},
+			themes: {
+				name: 'themes',
+				title: __( 'Themes', 'woocommerce' ),
+				showUpdateCount: !! query.term && ! isLoading,
+				updateCount: searchResultsCount.themes,
+			},
+			'business-services': {
+				name: 'business-services',
+				title: __( 'Business services', 'woocommerce' ),
+				showUpdateCount: !! query.term && ! isLoading,
+				updateCount: searchResultsCount[ 'business-services' ],
+			},
+			'my-subscriptions': {
+				name: 'my-subscriptions',
+				title: __( 'My subscriptions', 'woocommerce' ),
+				showUpdateCount: true,
+				updateCount: wooUpdateCount,
+			},
+		} ),
+		[ query, isLoading, searchResultsCount ]
+	);
 
 	const [ visibleTabs, setVisibleTabs ] = useState(
 		getVisibleTabs( '', false, tabs )
