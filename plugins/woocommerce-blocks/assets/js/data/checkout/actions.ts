@@ -2,13 +2,12 @@
  * External dependencies
  */
 import { AdditionalValues } from '@woocommerce/settings';
-import { select } from '@wordpress/data';
+
 /**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
-import { CART_STORE_KEY } from '../cart';
 
 // `Thunks are functions that can be dispatched, similar to actions creators
 export * from './thunks';
