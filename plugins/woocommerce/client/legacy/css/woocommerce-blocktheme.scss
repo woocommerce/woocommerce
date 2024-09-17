@@ -153,6 +153,15 @@
 		text-decoration: none;
 	}
 
+	.woocommerce-grouped-product-list-item__price ins,
+	bdi {
+		text-decoration: none;
+	}
+
+	.wc-block-components-product-price ins {
+		text-decoration: none;
+	}
+
 	span.onsale {
 		// Style "On Sale" badge in theme colors by default.
 		background-color: var(--wp--preset--color--foreground, $highlight);
