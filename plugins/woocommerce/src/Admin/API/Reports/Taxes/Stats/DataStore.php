@@ -68,7 +68,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function assign_report_columns() {
 		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
-			'tax_codes'    => 'COUNT(DISTINCT tax_rate_id) as tax_codes',
+			'tax_codes'    => 'COUNT( DISTINCT CONCAT( tax_rate_id, "-", tax_rate_name ) ) as tax_codes',
 			'total_tax'    => 'SUM(total_tax) AS total_tax',
 			'order_tax'    => 'SUM(order_tax) as order_tax',
 			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
