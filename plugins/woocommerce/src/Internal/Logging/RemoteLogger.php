@@ -97,8 +97,9 @@ class RemoteLogger extends \WC_Log_Handler {
 			unset( $context['tags'] );
 		}
 
-		if ( isset( $context['error'] ) && is_array( $context['error'] ) && ! empty( $context['error']['file'] ) ) {
-			$context['error']['file'] = $this->sanitize( $context['error']['file'] );
+		if ( isset( $context['error']['file'] ) && is_string( $context['error']['file'] ) && '' !== $context['error']['file'] ) {
+			$log_data['file'] = $this->sanitize( $context['error']['file'] );
+			unset( $context['error']['file'] );
 		}
 
 		$extra_attrs = $context['extra'] ?? array();
@@ -371,7 +372,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 *
 	 * The trace is sanitized by:
 	 *
-	 * 1. Remove the absolute path to the WooCommerce plugin directory.
+	 * 1. Remove the absolute path to the plugin directory based on WC_ABSPATH. This is more accurate than using WP_PLUGIN_DIR when the plugin is symlinked.
 	 * 2. Remove the absolute path to the WordPress root directory.
 	 *
 	 * For example, the trace:
@@ -387,12 +388,12 @@ class RemoteLogger extends \WC_Log_Handler {
 			return $message;
 		}
 
-		$wc_path = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
-		$wp_path = StringUtil::normalize_local_path_slashes( ABSPATH );
+		$plugin_path = StringUtil::normalize_local_path_slashes( trailingslashit( dirname( WC_ABSPATH ) ) );
+		$wp_path     = StringUtil::normalize_local_path_slashes( trailingslashit( ABSPATH ) );
 
 		$sanitized = str_replace(
-			array( $wc_path, $wp_path ),
-			array( '**/' . dirname( WC_PLUGIN_BASENAME ) . '/', '**/' ),
+			array( $plugin_path, $wp_path ),
+			array( './', './' ),
 			$message
 		);
 

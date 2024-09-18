@@ -228,7 +228,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					array(
 						'feature'  => 'woocommerce_core',
 						'severity' => 'error',
-						'message'  => 'Fatal error occurred at line 123 in **/wp-content/file.php',
+						'message'  => 'Fatal error occurred at line 123 in ./wp-content/file.php',
 						'tags'     => array( 'woocommerce', 'php', 'tag1', 'tag2' ),
 					),
 				),
@@ -236,7 +236,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					'error',
 					'Test error message',
 					array( 'backtrace' => ABSPATH . 'wp-content/plugins/woocommerce/file.php' ),
-					array( 'trace' => '**/woocommerce/file.php' ),
+					array( 'trace' => './woocommerce/file.php' ),
 				),
 				'log with extra attributes' => array(
 					'error',
@@ -252,6 +252,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 							'key1' => 'value1',
 							'key2' => 'value2',
 						),
+					),
+				),
+				'log with error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WC_ABSPATH . 'includes/class-wc-test.php' ) ),
+					array(
+						'file' => './woocommerce/includes/class-wc-test.php',
 					),
 				),
 			);
@@ -536,7 +544,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function test_sanitize() {
 			$message  = WC_ABSPATH . 'includes/class-wc-test.php on line 123';
-			$expected = '**/woocommerce/includes/class-wc-test.php on line 123';
+			$expected = './woocommerce/includes/class-wc-test.php on line 123';
 			$result   = $this->invoke_private_method( $this->sut, 'sanitize', array( $message ) );
 			$this->assertEquals( $expected, $result );
 		}
@@ -549,7 +557,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				WC_ABSPATH . 'includes/class-wc-test.php:123',
 				ABSPATH . 'wp-includes/plugin.php:456',
 			);
-			$expected = "**/woocommerce/includes/class-wc-test.php:123\n**/wp-includes/plugin.php:456";
+			$expected = "./woocommerce/includes/class-wc-test.php:123\n./wp-includes/plugin.php:456";
 			$result   = $this->invoke_private_method( $this->sut, 'sanitize_trace', array( $trace ) );
 			$this->assertEquals( $expected, $result );
 		}
