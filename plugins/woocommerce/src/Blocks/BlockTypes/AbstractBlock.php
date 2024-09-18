@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Admin\Features\Features;
 
+$t = 0;
+
 /**
  * AbstractBlock class.
  */
@@ -92,7 +94,11 @@ abstract class AbstractBlock {
 	public function render_callback( $attributes = [], $content = '', $block = null ) {
 		$render_callback_attributes = $this->parse_render_callback_attributes( $attributes );
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
+			global $t;
+			$s = microtime(true);
 			$this->register_block_type_assets();
+			$t += microtime(true) - $s;
+			error_log('register_block_type_assets ms: ' . $t);
 			$this->enqueue_assets( $render_callback_attributes, $content, $block );
 		}
 		return $this->render( $render_callback_attributes, $content, $block );
