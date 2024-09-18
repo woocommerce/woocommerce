@@ -40,7 +40,7 @@ function Search(): JSX.Element {
 		const newQuery: { term?: string; tab?: string } = query;
 
 		// If we're on 'Discover' or 'My subscriptions' when a search is initiated, move to the extensions tab
-		if ( ! newQuery.tab || 'my-subscriptions' === newQuery.tab ) {
+		if ( ! newQuery.tab || newQuery.tab === 'my-subscriptions' ) {
 			newQuery.tab = 'extensions';
 		}
 
