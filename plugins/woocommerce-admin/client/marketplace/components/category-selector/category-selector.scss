@@ -6,6 +6,7 @@
 	align-items: stretch;
 	margin: 0;
 	overflow-x: auto;
+	scrollbar-width: none;
 }
 
 .woocommerce-marketplace__category-item {
@@ -132,15 +133,17 @@
 	top: 0;
 	bottom: 0;
 	height: 100%;
-	width: 50px;
+	width: 100px;
 }
 
 .woocommerce-marketplace__category-navigation-button--prev {
 	background: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 	left: 0;
+	text-align: left;
 }
 
 .woocommerce-marketplace__category-navigation-button--next {
 	background: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 	right: 0;
+	text-align: right;
 }
