@@ -24,7 +24,7 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 	changedManifests=$( ( git diff --name-only $HEAD_NEW $HEAD_PREVIOUS  | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
 	if [ -n "$changedManifests" ]; then
 		# TODO: warning instead of active installation
-		printf "${whiteColoured}It was a change in the following file(s), refreshing dependencies is advised:\n"
+		printf "${whiteColoured}Refreshing dependencies is advised, as it was a change in the following file(s):\n"
 		printf "${whiteColoured}    %s\n" $changedManifests
 		printf "${orangeColoured}If you are working on something in this branch, ensure to refresh dependencies with 'pnpm install --frozen-lockfile'\n"
 	fi
