@@ -5,11 +5,6 @@ import { getContext, store } from '@woocommerce/interactivity';
 import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
 import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
 
-/**
- * Internal dependencies
- */
-import { navigate } from '../../frontend';
-
 function getUrl( filters: Array< string | null > ) {
 	filters = filters.filter( Boolean );
 	const url = new URL( window.location.href );

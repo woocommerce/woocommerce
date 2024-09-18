@@ -8,11 +8,6 @@
  */
 import { store, getContext } from '@woocommerce/interactivity';
 
-/**
- * Internal dependencies
- */
-import { navigate } from '../../frontend';
-
 const getQueryParams = ( e: Event ) => {
 	const filterNavContainer = ( e.target as HTMLElement )?.closest(
 		'nav.wp-block-woocommerce-product-filter'
