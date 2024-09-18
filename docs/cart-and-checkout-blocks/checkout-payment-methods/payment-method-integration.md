@@ -46,8 +46,8 @@ const options = {
 	title: 'My Mayment Method',
 	description: 'A setence or two about your payment method',
 	gatewayId: 'gateway-id',
-	content: <ReactNode />;,
-	edit: <ReactNode />,
+	content: &lt;ReactNode /&gt;,
+	edit: &lt;ReactNode /&gt;,
 	canMakePayment: () => true,
 	paymentMethodId: 'new_payment_method',
 	supports: {
@@ -208,7 +208,7 @@ if ( typeof buttonAttributes !== 'undefined' ) {
 }
 ...
 
-return <button style={height: `${height}px`, borderRadius: `${borderRadius}px`} />
+return &lt;button style={height: `${height}px`, borderRadius: `${borderRadius}px`} /&gt;
 ```
 
 ## Server Side Integration
