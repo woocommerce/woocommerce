@@ -73,8 +73,9 @@ class SafeGlobalFunctionProxy {
 					$file  = $trace[2]['file'] ?? $file;
 					$line  = $trace[2]['line'] ?? $line;
 				}
-                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Exception is thrown here but handled securely elsewhere
-				throw new \ErrorException( $message, 0, $type, $file, $line );
+				$sanitized_message = filter_var( $message, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- $message sanitised above. we don't want to rely on esc_html since it's not a PHP built-in
+				throw new \ErrorException( $sanitized_message, 0, $type, $file, $line );
 			}
 		);
 
