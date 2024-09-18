@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Admin\Features\Features;
 
+$t = 0;
+
 /**
  * AbstractBlock class.
  */
@@ -122,7 +124,11 @@ abstract class AbstractBlock {
 			return false;
 		}
 		$this->integration_registry->initialize( $this->block_name . '_block' );
+		global $t;
+		$s = microtime(true);
 		$this->register_block_type_assets();
+		$t += microtime(true) - $s;
+		error_log('register_block_type_assets ms: ' . $t);
 		$this->register_block_type();
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
