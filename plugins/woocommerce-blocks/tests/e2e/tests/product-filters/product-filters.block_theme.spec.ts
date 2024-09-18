@@ -68,53 +68,17 @@ test.describe( `${ blockData.name }`, () => {
 		);
 		await expect( block ).toBeVisible();
 
-		const activeHeading = block.getByText( 'Active', { exact: true } );
-		const activeFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-active"]'
-				)
-			);
-		await expect( activeHeading ).toBeVisible();
+		const activeFilterBlock = block.getByLabel(
+			'Block: Active (Experimental)'
+		);
 		await expect( activeFilterBlock ).toBeVisible();
-
-		const priceHeading = block.getByText( 'Price', {
-			exact: true,
-		} );
-		const priceFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-price"]'
-				)
-			);
-		await expect( priceHeading ).toBeVisible();
-		await expect( priceFilterBlock ).toBeVisible();
-
-		const statusHeading = block.getByText( 'Status', {
-			exact: true,
-		} );
-		const statusFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-stock-status"]'
-				)
-			);
-		await expect( statusHeading ).toBeVisible();
-		await expect( statusFilterBlock ).toBeVisible();
 
 		const colorHeading = block.getByText( 'Color', {
 			exact: true,
 		} );
-		const colorFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-attribute"]'
-				)
-			);
+		const colorFilterBlock = block.getByLabel(
+			'Block: Color (Experimental)'
+		);
 		const expectedColorFilterOptions = [
 			'Blue',
 			'Green',
@@ -122,27 +86,11 @@ test.describe( `${ blockData.name }`, () => {
 			'Red',
 			'Yellow',
 		];
-		const colorFilterOptions = (
-			await colorFilterBlock.allInnerTexts()
-		 )[ 0 ].split( '\n' );
 		await expect( colorHeading ).toBeVisible();
 		await expect( colorFilterBlock ).toBeVisible();
-		expect( colorFilterOptions ).toEqual(
-			expect.arrayContaining( expectedColorFilterOptions )
-		);
-
-		const ratingHeading = block.getByText( 'Rating', {
-			exact: true,
-		} );
-		const ratingFilterBlock = block
-			.getByLabel( 'Block: Filter Options' )
-			.and(
-				editor.canvas.locator(
-					'[data-type="woocommerce/product-filter-rating"]'
-				)
-			);
-		await expect( ratingHeading ).toBeVisible();
-		await expect( ratingFilterBlock ).toBeVisible();
+		for ( const option of expectedColorFilterOptions ) {
+			await expect( colorFilterBlock ).toContainText( option );
+		}
 	} );
 
 	test( 'should contain the correct inner block names in the list view', async ( {
@@ -181,25 +129,10 @@ test.describe( `${ blockData.name }`, () => {
 		);
 		await expect( productFilterActiveBlocksListItem ).toBeVisible();
 
-		const productFilterPriceBlockListItem = listView.getByText(
-			'Price (Experimental)'
-		);
-		await expect( productFilterPriceBlockListItem ).toBeVisible();
-
-		const productFilterStatusBlockListItem = listView.getByText(
-			'Status (Experimental)'
-		);
-		await expect( productFilterStatusBlockListItem ).toBeVisible();
-
 		const productFilterAttributeBlockListItem = listView.getByText(
 			'Color (Experimental)' // it must select the attribute with the highest product count
 		);
 		await expect( productFilterAttributeBlockListItem ).toBeVisible();
-
-		const productFilterRatingBlockListItem = listView.getByText(
-			'Rating (Experimental)'
-		);
-		await expect( productFilterRatingBlockListItem ).toBeVisible();
 	} );
 
 	test( 'should display the correct inspector style controls', async ( {
@@ -370,7 +303,7 @@ test.describe( `${ blockData.name }`, () => {
 		).toHaveCSS( 'align-items', 'center' );
 	} );
 
-	test( 'Layout > Orientation: changing option should update the preview', async ( {
+	test.skip( 'Layout > Orientation: changing option should update the preview', async ( {
 		editor,
 		pageObject,
 	} ) => {

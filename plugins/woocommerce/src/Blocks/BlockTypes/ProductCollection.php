@@ -499,11 +499,18 @@ class ProductCollection extends AbstractBlock {
 	 */
 	private function is_block_compatible( $block_name ) {
 		// Check for explicitly unsupported blocks.
-		if (
-			'core/post-content' === $block_name ||
-			'woocommerce/mini-cart' === $block_name ||
-			'woocommerce/featured-product' === $block_name
-		) {
+		$unsupported_blocks = array(
+			'core/post-content',
+			'woocommerce/mini-cart',
+			'woocommerce/featured-product',
+			'woocommerce/active-filters',
+			'woocommerce/price-filter',
+			'woocommerce/stock-filter',
+			'woocommerce/attribute-filter',
+			'woocommerce/rating-filter',
+		);
+
+		if ( in_array( $block_name, $unsupported_blocks, true ) ) {
 			return false;
 		}
 

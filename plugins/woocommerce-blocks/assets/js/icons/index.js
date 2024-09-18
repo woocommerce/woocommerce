@@ -4,6 +4,7 @@ export { default as bagAlt } from './library/bag-alt';
 export { default as barcode } from './library/barcode';
 export { default as cart } from './library/cart';
 export { default as cartOutline } from './library/cart-outline';
+export { default as checkMark } from './library/check-mark';
 export { default as checkPayment } from './library/check-payment';
 export { default as closeSquareShadow } from './library/close-square-shadow';
 export { default as customerAccount } from './library/customer-account';
