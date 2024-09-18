@@ -103,6 +103,8 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		$extra_attrs = $context['extra'] ?? array();
 		unset( $context['extra'] );
+		unset( $context['remote-logging'] );
+
 		// Merge the extra attributes with the remaining context since we can't send arbitrary fields to Logstash.
 		$log_data['extra'] = array_merge( $extra_attrs, $context );
 
@@ -162,9 +164,15 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level, $message, $context ) {
+		// Ignore logs that are not opted in for remote logging.
+		if ( ! isset( $context['remote-logging'] ) || false === $context['remote-logging'] ) {
+			return false;
+		}
+
 		if ( ! $this->is_remote_logging_allowed() ) {
 			return false;
 		}
+
 		// Ignore logs that are less severe than critical. This is temporary to prevent sending too many logs to the remote logging service. We can consider remove this if the remote logging service can handle more logs.
 		if ( WC_Log_Levels::get_level_severity( $level ) < WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
 			return false;
