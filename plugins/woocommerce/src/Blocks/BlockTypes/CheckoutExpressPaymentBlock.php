@@ -41,8 +41,6 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 			'buttonBorderRadius' => '4',
 		);
 
-		$this->current_styles = $this->default_styles;
-
 		add_action( 'save_post', array( $this, 'sync_express_payment_attrs' ), 10, 2 );
 	}
 
@@ -85,6 +83,7 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 			return;
 		}
 
+		error_log('sync_express_payment_attrs');
 		try {
 			// Parse the post content to get the express payment attributes of the current page
 			$blocks = parse_blocks( $post->post_content );
@@ -94,12 +93,6 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 				return;
 			}
 			$updated_attrs = array_merge( $this->default_styles, $attrs );
-
-			if ( $updated_attrs === $this->current_styles ) {
-				return;
-			}
-
-			$this->current_styles = $updated_attrs;
 
 			// We need to sync the attributes between the Cart and Checkout pages.
 			$other_page = $cart_or_checkout === 'cart' ? 'checkout' : 'cart';
