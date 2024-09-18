@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use WC_Tax;
 
 /**
  * API\Reports\Taxes\DataStore.
@@ -273,15 +274,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$num_updated = 0;
 
 		foreach ( $tax_items as $tax_item ) {
-			$result = $wpdb->replace(
+			$tax_rate = WC_Tax::_get_tax_rate( $tax_item->get_rate_id(), OBJECT );
+			$result   = $wpdb->replace(
 				self::get_db_table_name(),
 				array(
-					'order_id'     => $order->get_id(),
-					'date_created' => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
-					'tax_rate_id'  => $tax_item->get_rate_id(),
-					'shipping_tax' => $tax_item->get_shipping_tax_total(),
-					'order_tax'    => $tax_item->get_tax_total(),
-					'total_tax'    => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
+					'order_id'          => $order->get_id(),
+					'date_created'      => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
+					'tax_rate_id'       => $tax_item->get_rate_id(),
+					'shipping_tax'      => $tax_item->get_shipping_tax_total(),
+					'order_tax'         => $tax_item->get_tax_total(),
+					'total_tax'         => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
+					'tax_rate_name'     => $tax_item->get_name(),
+					'tax_rate'		    => $tax_item->get_rate_percent(),
+					'tax_rate_priority' => $tax_rate->tax_rate_priority,
 				),
 				array(
 					'%d',
@@ -290,6 +295,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'%f',
 					'%f',
 					'%f',
+					'%s',
+					'%s',
+					'%s',
 				)
 			);
 
