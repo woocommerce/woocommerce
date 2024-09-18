@@ -18,7 +18,6 @@ import { getNamespace } from './namespaces';
 import { parseServerData, populateServerData } from './store';
 import { proxifyState } from './proxies';
 
-export { navigate } from './router';
 export { store, getConfig } from './store';
 export { getContext, getElement } from './scopes';
 export {

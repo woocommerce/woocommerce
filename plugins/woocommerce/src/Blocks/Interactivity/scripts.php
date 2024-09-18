@@ -30,24 +30,29 @@ function woocommerce_interactivity_register_runtime() {
 	$plugin_path = \Automattic\WooCommerce\Blocks\Package::get_path();
 	$plugin_url  = plugin_dir_url( $plugin_path . '/index.php' );
 
-	$file = 'assets/client/blocks/wc-interactivity.js';
-
-	$file_path = $plugin_path . $file;
-	$file_url  = $plugin_url . $file;
-
-	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $file_path ) ) {
-		$version = filemtime( $file_path );
-	} else {
-		// Use wc- prefix here to prevent collisions when WC Core version catches up to a version previously used by the WC Blocks feature plugin.
-		$version = 'wc-' . Constants::get_constant( 'WC_VERSION' );
-	}
-
-	wp_register_script(
-		'wc-interactivity',
-		$file_url,
-		array(),
-		$version,
-		true
+	$files = array(
+		'wc-interactivity'        => 'assets/client/blocks/wc-interactivity.js',
+		'wc-interactivity-router' => 'assets/client/blocks/wc-interactivity-router.js',
 	);
+
+	foreach ( $files as $handle => $file ) {
+		$file_path = $plugin_path . $file;
+		$file_url  = $plugin_url . $file;
+
+		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $file_path ) ) {
+			$version = filemtime( $file_path );
+		} else {
+			// Use wc- prefix here to prevent collisions when WC Core version catches up to a version previously used by the WC Blocks feature plugin.
+			$version = 'wc-' . Constants::get_constant( 'WC_VERSION' );
+		}
+
+		wp_register_script(
+			$handle,
+			$file_url,
+			array(),
+			$version,
+			true
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'woocommerce_interactivity_register_runtime' );
