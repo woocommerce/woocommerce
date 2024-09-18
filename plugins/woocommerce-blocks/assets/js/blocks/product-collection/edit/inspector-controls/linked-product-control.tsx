@@ -43,10 +43,11 @@ const ProductButton: React.FC< {
 	}
 
 	const showPlaceholder = ! product;
-	const imgSrc = showPlaceholder
+	const showPlacholderImg = showPlaceholder || ! product?.images?.[ 0 ]?.src;
+	const imgSrc = showPlacholderImg
 		? `${ WC_BLOCKS_IMAGE_URL }/blocks/product-collection/placeholder.svg`
-		: product?.images?.[ 0 ]?.src;
-	const imgAlt = showPlaceholder ? '' : product?.name;
+		: product.images[ 0 ].src;
+	const imgAlt = showPlacholderImg ? '' : product?.name;
 
 	return (
 		<Button
