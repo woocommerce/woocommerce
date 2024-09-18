@@ -9,7 +9,6 @@ import { debounce } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import { navigate } from '../product-filter/frontend';
 import type { PriceFilterContext, PriceFilterStore } from './types';
 
 const getUrl = ( context: PriceFilterContext ) => {
@@ -36,7 +35,7 @@ const getUrl = ( context: PriceFilterContext ) => {
 	return url.href;
 };
 
-const debounceUpdate = debounce( ( context, element, event ) => {
+const debounceUpdate = debounce( function* ( context, element, event ) {
 	const { decimalSeparator } = getCurrency();
 	const { minRange, minPrice, maxPrice, maxRange } = context;
 	const type = event.target.name;
@@ -66,7 +65,9 @@ const debounceUpdate = debounce( ( context, element, event ) => {
 	context.minPrice = currentMinPrice;
 	context.maxPrice = currentMaxPrice;
 
-	navigate(
+	const { navigate } = yield import( '../product-filter/frontend' );
+
+	yield navigate(
 		getUrl( {
 			minRange,
 			maxRange,
@@ -184,8 +185,10 @@ store< PriceFilterStore >( 'woocommerce/product-filter-price', {
 				element.ref.select();
 			}
 		},
-		reset: () => {
-			navigate(
+		*reset() {
+			const { navigate } = yield import( '../product-filter/frontend' );
+
+			yield navigate(
 				getUrl( {
 					minRange: 0,
 					maxRange: 0,

@@ -1,13 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	store,
-	navigate,
-	prefetch,
-	getElement,
-	getContext,
-} from '@woocommerce/interactivity';
+import { store, getElement, getContext } from '@woocommerce/interactivity';
 import { triggerProductListRenderedEvent } from '@woocommerce/base-utils';
 
 /**
@@ -120,7 +114,10 @@ const productCollectionStore = {
 					ctx.animation = 'start';
 				}, 400 );
 
-				yield navigate( ref.href );
+				const { actions } = yield import(
+					'@woocommerce/interactivity-router'
+				);
+				yield actions.navigate( ref.href );
 
 				// Clear the timeout if the navigation is fast.
 				clearTimeout( timeout );
@@ -161,7 +158,10 @@ const productCollectionStore = {
 			}
 
 			if ( isValidLink( ref ) ) {
-				yield prefetch( ref.href );
+				const { actions } = yield import(
+					'@woocommerce/interactivity-router'
+				);
+				yield actions.prefetch( ref.href );
 			}
 		},
 	},
@@ -183,7 +183,10 @@ const productCollectionStore = {
 			const context = getContext< ProductCollectionStoreContext >();
 
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
-				yield prefetch( ref.href );
+				const { actions } = yield import(
+					'@woocommerce/interactivity-router'
+				);
+				yield actions.prefetch( ref.href );
 			}
 		},
 		*onRender() {
