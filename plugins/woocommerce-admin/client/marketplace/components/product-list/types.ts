@@ -27,6 +27,8 @@ export type SearchAPIProductType = {
 	billing_period: string;
 	billing_period_interval: number;
 	currency: string;
+	is_on_Sale: boolean;
+	regular_price: number;
 };
 
 export interface Product {
@@ -58,6 +60,8 @@ export interface Product {
 	billingPeriod?: string;
 	billingPeriodInterval?: number;
 	currency: string;
+	isOnSale: boolean;
+	regularPrice: number;
 }
 
 export interface ProductTracksData {
