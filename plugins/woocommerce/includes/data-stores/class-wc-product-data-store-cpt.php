@@ -753,7 +753,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 *
 				 * @param WC_Product $product The variation whose stock has changed.
 				 */
-				do_action( 'woocommerce_variation_set_stock', $product );
+				// Get the parent product
+				$parent_product = wc_get_product( $product->get_parent_id() );
+				// If parent product is not published then do not signal the stock update
+				if ('publish' === $parent_product->get_status() ) {
+					do_action( 'woocommerce_variation_set_stock', $product );
+				}
 			} else {
 				/**
 				 * Action to signal that the value of 'stock_quantity' for a product has changed.
@@ -762,7 +767,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 *
 				 * @param WC_Product $product The variation whose stock has changed.
 				 */
-				do_action( 'woocommerce_product_set_stock', $product );
+				// If product is not published then do not signal the stock update
+				if ( 'publish' === $product->get_status( 'edit' ) ) {
+					do_action( 'woocommerce_product_set_stock', $product );
+				}
 			}
 		}
 
@@ -777,7 +785,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 * @param string     $stock_status The new stock status of the variation.
 				 * @param WC_Product $product      The product object.
 				 */
-				do_action( 'woocommerce_variation_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
+				// Get the parent product
+				$parent_product = wc_get_product( $product->get_parent_id() );
+				// If parent product is not published then do not signal the stock update
+				if ('publish' === $parent_product->get_status() ) {
+					do_action( 'woocommerce_variation_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
+				}
 			} else {
 				/**
 				 * Action to signal that the `stock_status` for a product has changed.
@@ -788,7 +801,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				 * @param string     $stock_status The new stock status of the product.
 				 * @param WC_Product $product      The product object.
 				 */
-				do_action( 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
+				// If product is not published then do not signal the stock update
+				if ( 'publish' === $product->get_status( 'edit' ) ) {
+					do_action( 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
+				}
 			}
 		}
 
