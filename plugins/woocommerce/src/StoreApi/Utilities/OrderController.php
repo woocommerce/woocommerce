@@ -171,6 +171,29 @@ class OrderController {
 		$this->validate_email( $order );
 		$this->validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods );
 		$this->validate_addresses( $order );
+
+
+    // Create a WP_Error object for custom validation
+    $validation_errors = new \WP_Error();
+
+    /**
+     * Allow plugins to perform custom validation before payment.
+     *
+     * @param \WC_Order $order             The order object.
+     * @param \WP_Error $validation_errors WP_Error object to add custom errors to.
+     */
+    do_action( 'woocommerce_checkout_validate_order_before_payment', $order, $validation_errors );
+
+    // Check if there are any errors after custom validation
+    if ( $validation_errors->has_errors() ) {
+        $error_messages = $validation_errors->get_error_messages();
+        $error_message = implode( ' ', $error_messages );
+        throw new RouteException(
+            'woocommerce_rest_checkout_custom_validation_error',
+            $error_message,
+            400
+        );
+    }
 	}
 
 	/**
