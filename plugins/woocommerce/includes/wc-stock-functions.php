@@ -249,8 +249,22 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 		$order_notes[]    = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];
 		$low_stock_amount = absint( wc_get_low_stock_amount( wc_get_product( $change['product']->get_id() ) ) );
 		if ( $change['to'] <= $no_stock_amount ) {
+			/**
+			 * Action to signal that the value of 'stock_quantity' for a variation is about to change.
+			 *
+			 * @since 4.9
+			 *
+			 * @param int $product The variation whose stock is about to change.
+			 */
 			do_action( 'woocommerce_no_stock', wc_get_product( $change['product']->get_id() ) );
 		} elseif ( $change['to'] <= $low_stock_amount ) {
+			/**
+			 * Action to signal that the value of 'stock_quantity' for a product is about to change.
+			 *
+			 * @since 4.9
+			 *
+			 * @param int $product The product whose stock is about to change.
+			 */
 			do_action( 'woocommerce_low_stock', wc_get_product( $change['product']->get_id() ) );
 		}
 
