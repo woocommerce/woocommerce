@@ -50,9 +50,8 @@ export enum LayoutOptions {
 }
 
 export enum WidthOptions {
-	FIT = 'fit',
 	FILL = 'fill',
-	FIXED = 'fIxed',
+	FIXED = 'fixed',
 }
 
 export interface ProductCollectionDisplayLayout {
