@@ -17,14 +17,14 @@ const FrontendBlock = ( attributes: ExpressCheckoutAttributes ) => {
 		attributes
 	);
 
-	const { showButtonStyles, buttonHeight, buttonBorderRadius, className } =
+	const { showButtonStyles, buttonHeight, buttonBorderRadius } =
 		validAttributes;
 
 	return (
 		<ExpressPaymentContext.Provider
 			value={ { showButtonStyles, buttonHeight, buttonBorderRadius } }
 		>
-			<Block className={ className } />
+			<Block />
 		</ExpressPaymentContext.Provider>
 	);
 };
