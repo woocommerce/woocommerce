@@ -24,6 +24,7 @@ import {
 import './style.scss';
 import './editor.scss';
 import { EditProps } from './types';
+import { getColorClasses, getColorVars } from './utils';
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const {
@@ -51,21 +52,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-checkbox-list', {
 			'is-loading': isLoading,
-			'has-option-element-border-color':
-				optionElementBorder.color || customOptionElementBorder,
-			'has-option-element-selected-color':
-				optionElementSelected.color || customOptionElementSelected,
-			'has-option-element-color':
-				optionElement.color || customOptionElement,
+			...getColorClasses( attributes ),
 		} ),
-		style: {
-			'--wc-product-filter-checkbox-list-option-element-border':
-				optionElementBorder.color || customOptionElementBorder,
-			'--wc-product-filter-checkbox-list-option-element-selected':
-				optionElementSelected.color || customOptionElementSelected,
-			'--wc-product-filter-checkbox-list-option-element':
-				optionElement.color || customOptionElement,
-		},
+		style: getColorVars( attributes ),
 	} );
 
 	const loadingState = useMemo( () => {
@@ -131,9 +120,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 						) ) }
 				</ul>
 				{ ! isLoading && isLongList && (
-					<span className="wc-block-product-filter-checkbox-list__show-more">
-						<small>{ __( 'Show more…', 'woocommerce' ) }</small>
-					</span>
+					<button className="wc-block-product-filter-checkbox-list__show-more">
+						{ __( 'Show more…', 'woocommerce' ) }
+					</button>
 				) }
 			</div>
 			<InspectorControls group="color">
