@@ -128,23 +128,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Get sales report data.
-		 *
-		 * @return object
-		 */
-		private function get_sales_report_data() {
-			include_once dirname( __FILE__ ) . '/reports/class-wc-report-sales-by-date.php';
-
-			$sales_by_date                 = new WC_Report_Sales_By_Date();
-			$sales_by_date->start_date     = strtotime( gmdate( 'Y-m-01', current_time( 'timestamp' ) ) );
-			$sales_by_date->end_date       = strtotime( gmdate( 'Y-m-d', current_time( 'timestamp' ) ) );
-			$sales_by_date->chart_groupby  = 'day';
-			$sales_by_date->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
-
-			return $sales_by_date->get_report_data();
-		}
-
-		/**
 		 * Show status widget.
 		 */
 		public function status_widget() {
@@ -153,30 +136,48 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			wp_enqueue_script( 'wc-status-widget', WC()->plugin_url() . '/assets/js/admin/wc-status-widget' . $suffix . '.js', array( 'jquery', 'flot' ), $version, true );
 
-			include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
-
 			//phpcs:ignore
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! Features::is_enabled( 'analytics' );
 
-			$reports = new WC_Admin_Report();
+			$status_widget_reports = array(
+				'net_sales_link'      => 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period',
+				'top_seller_link'     => 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=',
+				'lowstock_link'       => 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock',
+				'outofstock_link'     => 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock',
+				'report_data'         => null,
+				'get_sales_sparkline' => array( $this, 'sales_sparkline' ),
+				'legacy_report'       => null,
+			);
 
-			$net_sales_link  = 'admin.php?page=wc-reports&tab=orders&range=month';
-			$top_seller_link = 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=';
-			$report_data     = $is_wc_admin_disabled ? $this->get_sales_report_data() : $this->get_wc_admin_performance_data();
-			if ( ! $is_wc_admin_disabled ) {
-				$net_sales_link  = 'admin.php?page=wc-admin&path=%2Fanalytics%2Frevenue&chart=net_revenue&orderby=net_revenue&period=month&compare=previous_period';
-				$top_seller_link = 'admin.php?page=wc-admin&filter=single_product&path=%2Fanalytics%2Fproducts&products=';
+			if ( $is_wc_admin_disabled ) {
+				/**
+				 * Filter to change the reports of the status widget on the Dashboard page.
+				 *
+				 * Please note that this filter is mainly for backward compatibility with the legacy reports.
+				 * It's not recommended to use this filter to change the data of this widget.
+				 *
+				 * @since 9.5.0
+				 */
+				$status_widget_reports = apply_filters( 'woocommerce_dashboard_status_widget_reports', $status_widget_reports );
+			} else {
+				$status_widget_reports['report_data'] = $this->get_wc_admin_performance_data();
 			}
 
 			echo '<ul class="wc_status_list">';
 
 			if ( current_user_can( 'view_woocommerce_reports' ) ) {
+				$report_data         = $status_widget_reports['report_data'];
+				$get_sales_sparkline = $status_widget_reports['get_sales_sparkline'];
+				$net_sales_link      = $status_widget_reports['net_sales_link'];
+				$top_seller_link     = $status_widget_reports['top_seller_link'];
 
-				if ( $report_data ) {
+				$days = max( 7, (int) gmdate( 'd', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+
+				if ( $report_data && is_callable( $get_sales_sparkline ) ) {
 					?>
 				<li class="sales-this-month">
 				<a href="<?php echo esc_url( admin_url( $net_sales_link ) ); ?>">
-					<?php echo $this->sales_sparkline( $reports, $is_wc_admin_disabled, '' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo call_user_func_array( $get_sales_sparkline, array( '', $days ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 					<?php
 						printf(
 							/* translators: %s: net sales */
@@ -190,11 +191,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				}
 
 				$top_seller = $this->get_top_seller();
-				if ( $top_seller && $top_seller->qty ) {
+				if ( $top_seller && $top_seller->qty && is_callable( $get_sales_sparkline ) ) {
 					?>
 				<li class="best-seller-this-month">
 				<a href="<?php echo esc_url( admin_url( $top_seller_link . $top_seller->product_id ) ); ?>">
-					<?php echo $this->sales_sparkline( $reports, $is_wc_admin_disabled, $top_seller->product_id, 'count' ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo call_user_func_array( $get_sales_sparkline, array( $top_seller->product_id, $days, 'count' ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 					<?php
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity */
@@ -211,9 +212,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$this->status_widget_order_rows();
 			if ( get_option( 'woocommerce_manage_stock' ) === 'yes' ) {
-				$this->status_widget_stock_rows( $is_wc_admin_disabled );
+				$this->status_widget_stock_rows( $status_widget_reports['lowstock_link'], $status_widget_reports['outofstock_link'] );
 			}
 
+			$reports = $status_widget_reports['legacy_report'];
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
 			echo '</ul>';
 		}
@@ -262,9 +264,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		/**
 		 * Show stock data is status widget.
 		 *
-		 * @param bool $is_wc_admin_disabled if woocommerce admin is disabled.
+		 * @param string $lowstock_link Low stock link.
+		 * @param string $outofstock_link Out of stock link.
 		 */
-		private function status_widget_stock_rows( $is_wc_admin_disabled ) {
+		private function status_widget_stock_rows( $lowstock_link, $outofstock_link ) {
 			global $wpdb;
 
 			// Requires lookup table added in 3.6.
@@ -309,13 +312,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$transient_name   = 'wc_outofstock_count';
 			$outofstock_count = get_transient( $transient_name );
-			$lowstock_link    = 'admin.php?page=wc-reports&tab=stock&report=low_in_stock';
-			$outofstock_link  = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
-
-			if ( false === $is_wc_admin_disabled ) {
-				$lowstock_link   = 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock';
-				$outofstock_link = 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock';
-			}
+			$lowstock_url     = $lowstock_link ? admin_url( $lowstock_link ) : '#';
+			$outofstock_url   = $outofstock_link ? admin_url( $outofstock_link ) : '#';
 
 			if ( false === $outofstock_count ) {
 				/**
@@ -344,7 +342,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 			?>
 			<li class="low-in-stock">
-			<a href="<?php echo esc_url( admin_url( $lowstock_link ) ); ?>">
+			<a href="<?php echo esc_url( $lowstock_url ); ?>">
 				<?php
 					printf(
 						/* translators: %s: order count */
@@ -355,7 +353,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				</a>
 			</li>
 			<li class="out-of-stock">
-				<a href="<?php echo esc_url( admin_url( $outofstock_link ) ); ?>">
+				<a href="<?php echo esc_url( $outofstock_url ); ?>">
 				<?php
 					printf(
 						/* translators: %s: order count */
@@ -526,20 +524,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Overwrites the original sparkline to use the new reports data if WooAdmin is enabled.
 		 * Prepares a sparkline to show sales in the last X days.
 		 *
-		 * @param  WC_Admin_Report $reports old class for getting reports.
-		 * @param  bool            $is_wc_admin_disabled If WC Admin is disabled or not.
-		 * @param  int             $id ID of the product to show. Blank to get all orders.
-		 * @param  string          $type Type of sparkline to get. Ignored if ID is not set.
+		 * @param  int    $id ID of the product to show. Blank to get all orders.
+		 * @param  int    $days Days of stats to get.
+		 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
 		 * @return string
 		 */
-		private function sales_sparkline( $reports, $is_wc_admin_disabled = false, $id = '', $type = 'sales' ) {
-			$days = max( 7, gmdate( 'd', current_time( 'timestamp' ) ) );
-			if ( $is_wc_admin_disabled ) {
-				return $reports->sales_sparkline( $id, $days, $type );
-			}
+		private function sales_sparkline( $id = '', $days, $type = 'sales' ) {
 			$sales_endpoint = '/wc-analytics/reports/revenue/stats';
 			$start_date     = gmdate( 'Y-m-d 00:00:00', current_time( 'timestamp' ) - ( ( $days - 1 ) * DAY_IN_SECONDS ) );
 			$end_date       = gmdate( 'Y-m-d 23:59:59', current_time( 'timestamp' ) );
