@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Set remote-logging context to true in log remote event method

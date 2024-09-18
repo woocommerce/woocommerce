@@ -348,7 +348,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 			$setup( $this );
 
-			$result = $this->invoke_private_method( $this->sut, 'should_handle', array( $level, 'Test message', array() ) );
+			$result = $this->invoke_private_method( $this->sut, 'should_handle', array( $level, 'Test message', array( 'remote-logging' => true ) ) );
 			$this->assertEquals( $expected, $result );
 		}
 
@@ -378,6 +378,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
+		 * @testdox Test should_handle returns false without remote-logging context
+		 */
+		public function test_should_handle_no_remote_logging_context() {
+			$result = $this->invoke_private_method( $this->sut, 'should_handle', array( 'error', 'Test message', array() ) );
+			$this->assertFalse( $result, 'should_handle should return false without remote-logging context' );
+		}
+
+		/**
 		 * @testdox handle method applies filter and doesn't send logs when filtered to null
 		 */
 		public function test_handle_filtered_log_null() {
@@ -390,7 +398,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			add_filter( 'woocommerce_remote_logger_formatted_log_data', fn() => null, 10, 4 );
 			add_filter( 'pre_http_request', fn() => $this->fail( 'wp_safe_remote_post should not be called' ), 10, 3 );
 
-			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
 		}
 
 		/**
@@ -404,7 +412,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$this->sut->set_is_dev_or_local( true );
 			$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
-			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
 		}
 
 		/**
@@ -435,7 +443,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				3
 			);
 
-			$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array() ) );
+			$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array( 'remote-logging' => true ) ) );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 		}
 
@@ -462,7 +470,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				3
 			);
 
-			$this->assertFalse( $this->sut->handle( time(), 'critical', 'Test message', array() ) );
+			$this->assertFalse( $this->sut->handle( time(), 'critical', 'Test message', array( 'remote-logging' => true ) ) );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 		}
 

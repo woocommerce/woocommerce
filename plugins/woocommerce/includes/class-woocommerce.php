@@ -383,8 +383,10 @@ final class WooCommerce {
 			unset( $error_copy['message'] );
 
 			$context = array(
-				'source' => 'fatal-errors',
-				'error'  => $error_copy,
+				'source'         => 'fatal-errors',
+				'error'          => $error_copy,
+				// Indicate that this error should be logged remotely if remote logging is enabled.
+				'remote-logging' => true,
 			);
 
 			if ( false !== strpos( $message, 'Stack trace:' ) ) {
