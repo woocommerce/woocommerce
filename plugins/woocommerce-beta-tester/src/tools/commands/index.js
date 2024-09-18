@@ -15,6 +15,15 @@ import {
 	SetComingSoonMode,
 	UPDATE_COMING_SOON_MODE_ACTION_NAME,
 } from './set-coming-soon-mode';
+import {
+	FakeWooPayments,
+	FAKE_WOO_PAYMENTS_ACTION_NAME,
+} from './fake-woo-payments';
+
+import {
+	UPDATE_WCCOM_REQUEST_ERRORS_MODE,
+	SetWccomRequestErrros,
+} from './set-wccom-request-errors';
 
 export default [
 	{
@@ -86,5 +95,15 @@ export default [
 		command: 'Force coming soon page to show',
 		description: <SetComingSoonMode />,
 		action: UPDATE_COMING_SOON_MODE_ACTION_NAME,
+	},
+	{
+		command: 'Force errors on woocommerce.com requests',
+		description: <SetWccomRequestErrros />,
+		action: UPDATE_WCCOM_REQUEST_ERRORS_MODE,
+	},
+	{
+		command: 'Toggle Fake WooPayments Completion Status',
+		description: <FakeWooPayments />,
+		action: FAKE_WOO_PAYMENTS_ACTION_NAME,
 	},
 ];

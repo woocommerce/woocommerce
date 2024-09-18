@@ -1,9 +1,29 @@
+@import "~/wp-admin-scripts/payment-method-promotions/payment-promotion-row.scss";
+
 .settings-payments-main__container {
-	h1 {
-		color: #fff;
+	.settings-payments-main__spinner {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: absolute;
+		width: 100%;
 	}
-	background: #000;
-	text-align: center;
-	padding: 50px 0;
-	width: 100%;
+
+
+	table.wc_gateways {
+		.other-payment-methods__button-text {
+			margin-right: 4px;
+		}
+
+		td.other-payment-methods-row {
+			border-top: 1px solid #c3c4c7;
+			background-color: #fff;
+
+		}
+
+		.other-payment-methods__image {
+			vertical-align: middle;
+			margin-right: 8px;
+		}
+	}
 }

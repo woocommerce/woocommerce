@@ -57,6 +57,7 @@ import {
 	POSSIBLY_DEFAULT_STORE_NAMES,
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
+import { BuilderIntro } from './pages/BuilderIntro';
 import { getCountryStateOptions } from './services/country';
 import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins';
@@ -299,25 +300,28 @@ const exitToWooHome = fromPromise( async () => {
 	window.location.href = getNewPath( {}, '/', {} );
 } );
 
+const getPluginNameParam = (
+	pluginsSelected: CoreProfilerStateMachineContext[ 'pluginsSelected' ]
+) => {
+	if ( pluginsSelected.includes( 'woocommerce-payments' ) ) {
+		return 'woocommerce-payments';
+	}
+	return 'jetpack-ai';
+};
+
 const redirectToJetpackAuthPage = ( {
-	context,
 	event,
+	context,
 }: {
 	context: CoreProfilerStateMachineContext;
 	event: { output: { url: string } };
 } ) => {
 	const url = new URL( event.output.url );
 	url.searchParams.set( 'installed_ext_success', '1' );
-	const selectedPlugin = context.pluginsSelected.find(
-		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
+	url.searchParams.set(
+		'plugin_name',
+		getPluginNameParam( context.pluginsSelected )
 	);
-
-	if ( selectedPlugin ) {
-		const pluginName =
-			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
-		url.searchParams.set( 'plugin_name', pluginName );
-	}
-
 	window.location.href = url.toString();
 };
 
@@ -749,6 +753,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					},
 				},
 				{
+					target: '#introBuilder',
+					guard: {
+						type: 'hasStepInUrl',
+						params: { step: 'intro-builder' },
+					},
+				},
+				{
 					target: 'introOptIn',
 				},
 			],
@@ -829,6 +840,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 										return event.payload;
 									},
 								} ),
+							],
+						},
+						INTRO_BUILDER: {
+							target: '#introBuilder',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
 							],
 						},
 					},
@@ -1138,6 +1156,30 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						onError: {
 							target: '#plugins',
+						},
+					},
+				},
+			},
+		},
+		introBuilder: {
+			id: 'introBuilder',
+			initial: 'uploadConfig',
+			entry: [
+				{ type: 'updateQueryStep', params: { step: 'intro-builder' } },
+			],
+			states: {
+				uploadConfig: {
+					meta: {
+						component: BuilderIntro,
+					},
+					on: {
+						INTRO_SKIPPED: {
+							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
+							target: '#skipGuidedSetup',
+							actions: [
+								'assignOptInDataSharing',
+								'updateTrackingOption',
+							],
 						},
 					},
 				},
@@ -1560,9 +1602,7 @@ export const CoreProfilerController = ( {
 				hasJetpackSelectedForInstallation: ( { context } ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) =>
-								plugin === 'jetpack' ||
-								plugin === 'jetpack-boost'
+							( plugin ) => plugin === 'jetpack'
 						) !== undefined
 					);
 				},
@@ -1570,9 +1610,7 @@ export const CoreProfilerController = ( {
 					return (
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								( plugin.key === 'jetpack' ||
-									plugin.key === 'jetpack-boost' ) &&
-								plugin.is_activated
+								plugin.key === 'jetpack' && plugin.is_activated
 						) !== undefined
 					);
 				},

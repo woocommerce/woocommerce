@@ -5,13 +5,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
-	createInterpolateElement,
 	useCallback,
 	useContext,
 	useEffect,
 	useMemo,
 } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
@@ -20,7 +18,6 @@ import { store as coreStore } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from '../sidebar-navigation-screen';
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { useEditorBlocks } from '../../hooks/use-editor-blocks';
 import { usePatternsByCategory } from '../../hooks/use-patterns';
 import { HighlightedBlockContext } from '../../context/highlighted-block-context';
@@ -35,7 +32,6 @@ import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { useSelect } from '@wordpress/data';
-import { trackEvent } from '~/customize-store/tracking';
 
 import './style.scss';
 
@@ -140,11 +136,11 @@ export const SidebarNavigationScreenFooter = ( {
 
 	const description = aiOnline
 		? __(
-				"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
+				"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the Editor.",
 				'woocommerce'
 		  )
 		: __(
-				"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink> later.",
+				"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the Editor later.",
 				'woocommerce'
 		  );
 
@@ -155,26 +151,7 @@ export const SidebarNavigationScreenFooter = ( {
 				resetHighlightedBlockClientId();
 				onNavigateBackClick();
 			} }
-			description={ createInterpolateElement( description, {
-				EditorLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_editor_link_click',
-								{
-									source: 'footer',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
-				),
-			} ) }
+			description={ description }
 			content={
 				<>
 					<div className="woocommerce-customize-store__sidebar-footer-content">

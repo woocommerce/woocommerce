@@ -20,8 +20,10 @@
 			}
 		}
 	},
-	"parent": [ "woocommerce/cart-totals-block" ],
+	"parent": [
+		"woocommerce/cart-totals-block"
+	],
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"apiVersion": 2
+	"apiVersion": 3
 }

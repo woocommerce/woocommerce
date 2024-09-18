@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Repository } from '@octokit/graphql-schema';
+import { Endpoints } from '@octokit/types';
 
 /**
  * Internal dependencies
@@ -37,6 +38,100 @@ export const getLatestGithubReleaseVersion = async ( options: {
 	return data.repository.releases.nodes.find(
 		( tagName ) => tagName.isLatest
 	).tagName;
+};
+
+export const getRepositoryLabel = async (
+	options: {
+		owner?: string;
+		name?: string;
+	},
+	label: string
+): Promise<
+	Endpoints[ 'GET /repos/{owner}/{repo}/labels/{name}' ][ 'response' ][ 'data' ]
+> => {
+	const { owner, name } = options;
+	try {
+		const { data } = await octokitWithAuth().request(
+			'GET /repos/{owner}/{repo}/labels/{label}',
+			{
+				owner,
+				repo: name,
+				label,
+			}
+		);
+		return data;
+	} catch ( e ) {
+		throw new Error( e );
+	}
+};
+
+export const getIssuesByLabel = async (
+	options: {
+		owner?: string;
+		name?: string;
+		pageSize?: number;
+	},
+	label: string,
+	state: 'open' | 'closed' | 'all' = 'open'
+): Promise< {
+	results: Endpoints[ 'GET /repos/{owner}/{repo}/issues' ][ 'response' ][ 'data' ];
+} > => {
+	const { owner, name, pageSize } = options;
+
+	try {
+		const { data } = await octokitWithAuth().request(
+			'GET /repos/{owner}/{repo}/issues{?labels,state}',
+			{
+				owner,
+				repo: name,
+				labels: label,
+				per_page: pageSize || 100,
+				state,
+			}
+		);
+		return {
+			results: data,
+		};
+	} catch ( e ) {
+		throw new Error( e );
+	}
+};
+
+export const updateIssue = async (
+	options: {
+		owner?: string;
+		name?: string;
+	},
+	issueNumber: number,
+	updates: {
+		labels?: string[];
+	}
+): Promise<
+	| Endpoints[ 'PATCH /repos/{owner}/{repo}/issues/{issue_number}' ][ 'response' ]
+	| false
+> => {
+	const { owner, name } = options;
+
+	try {
+		const branchOnGithub = await octokitWithAuth().request(
+			'PATCH /repos/{owner}/{repo}/issues/{issue_number}',
+			{
+				owner,
+				repo: name,
+				issue_number: issueNumber,
+				...updates,
+			}
+		);
+		return branchOnGithub;
+	} catch ( e ) {
+		if (
+			e.status === 404 &&
+			e.response.data.message === 'Issue not found'
+		) {
+			return false;
+		}
+		throw new Error( e );
+	}
 };
 
 export const doesGithubBranchExist = async (

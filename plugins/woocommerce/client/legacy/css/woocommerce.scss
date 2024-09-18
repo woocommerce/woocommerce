@@ -445,6 +445,18 @@ p.demo_store,
 					min-width: 75%;
 					display: inline-block;
 					margin-right: 1em;
+
+					/* We hide the default chevron because it cannot be directly modified. Instead, we add a custom chevron using a background image. */
+					appearance: none;
+					-webkit-appearance: none;
+					-moz-appearance: none;
+					padding-right: 2em;
+					background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=)
+						no-repeat;
+					background-size: 16px;
+					-webkit-background-size: 16px;
+					background-position: calc(100% - 12px) 50%;
+					-webkit-background-position: calc(100% - 12px) 50%;
 				}
 
 				td.label {
@@ -1306,6 +1318,16 @@ p.demo_store,
 		border-radius: 5px;
 	}
 
+	form.checkout_coupon {
+		.coupon-error-notice {
+			@include coupon-error-notice-checkout();
+		}
+
+		.input-text.has-error:focus {
+			border-color: var(--wc-red);
+		}
+	}
+
 	ul#shipping_method {
 		list-style: none outside;
 		margin: 0;
@@ -1677,7 +1699,10 @@ p.demo_store,
  * Buttons
  */
 .woocommerce:where(body:not(.woocommerce-block-theme-has-button-styles)),
-:where(body:not(.woocommerce-block-theme-has-button-styles)) .woocommerce {
+:where(body:not(.woocommerce-block-theme-has-button-styles)):where(
+		:not(.edit-post-visual-editor *)
+	)
+	.woocommerce {
 	a.button,
 	button.button,
 	input.button,
@@ -1838,6 +1863,7 @@ p.demo_store,
 	&::before {
 		font-family: "WooCommerce";
 		content: "\e028";
+		content: "\e028" / ""; // Add an empty alternative text so screen readers ignore it
 		display: inline-block;
 		position: absolute;
 		top: 1em;
@@ -1970,6 +1996,14 @@ p.demo_store,
 			padding: 6px 6px 5px;
 			margin: 0 4px 0 0;
 			outline: 0;
+
+			&.has-error:focus {
+				border-color: var(--wc-red);
+			}
+		}
+
+		td.actions .coupon .coupon-error-notice {
+			@include coupon-error-notice-cart();
 		}
 
 		input {

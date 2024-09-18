@@ -11,12 +11,39 @@
 class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 
 	/**
-	 * Test wc_lostpassword_url().
+	 * Test wc_lostpassword_url() from admin screen.
 	 *
 	 * @since 3.3.0
 	 */
 	public function test_wc_lostpassword_url() {
-		$this->assertEquals( 'http://' . WP_TESTS_DOMAIN . '?lost-password', wc_lostpassword_url() );
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'login_form_login' ); // Simulate admin login screen.
+
+		// Admin URL is expected.
+		$expected_url = admin_url( '/wp-login.php?action=lostpassword' );
+
+		$this->assertEquals( $expected_url, wc_lostpassword_url( $expected_url ) );
+	}
+
+	/**
+	 * Test wc_lostpassword_url() from my account page.
+	 */
+	public function test_wc_lostpassword_url_from_account_page() {
+		// Create the account page, since other tests may delete it.
+		$page = wc_create_page(
+			'myaccount',
+			'woocommerce_myaccount_page_id',
+			'My Account',
+			'',
+			'',
+			'publish'
+		);
+		$this->go_to( wc_get_page_permalink( 'myaccount' ) );
+
+		// Front-end URL is expected.
+		$expected_url = wc_get_endpoint_url( 'lost-password', '', get_the_permalink( 'myaccount' ) );
+
+		$this->assertEquals( $expected_url, wc_lostpassword_url() );
 	}
 
 	/**

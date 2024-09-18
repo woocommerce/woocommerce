@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.3.0",
+	"version": "9.4.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -30,8 +30,7 @@
 		"env:start:blocks": "pnpm --filter='@woocommerce/block-library' env:start && pnpm playwright install chromium --with-deps",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev",
-		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
-		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
+		"env:perf": "pnpm env:dev && pnpm env:performance-init",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
@@ -57,8 +56,10 @@
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
-		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
+		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/gh-action-pr-requests.js",
+		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
+		"test:perf:install-k6": "bash ./tests/performance/bin/install-k6.sh",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
@@ -92,14 +93,8 @@
 				"command": "lint:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
-					"includes/**/*.php",
-					"patterns/**/*.php",
-					"src/**/*.php",
-					"templates/**/*.php",
-					"tests/php/**/*.php",
-					"tests/legacy/unit-tests/**/*.php",
-					"tests/unit-tests/**/*.php",
-					"tests/**/*.js"
+					"**/*.php",
+					"**/*.js"
 				]
 			},
 			"tests": [
@@ -115,14 +110,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -148,14 +138,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -181,14 +166,9 @@
 						"client/admin/config/*.json",
 						"composer.json",
 						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/legacy/unit-tests/**/*.php",
-						"tests/unit-tests/**/*.php",
-						".wp-env.json"
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -222,7 +202,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/e2e-pw/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -348,14 +330,8 @@
 				{
 					"name": "Core e2e tests - HPOS disabled",
 					"testType": "e2e",
-					"command": "test:e2e",
-					"shardingArguments": [
-						"--shard=1/5",
-						"--shard=2/5",
-						"--shard=3/5",
-						"--shard=4/5",
-						"--shard=5/5"
-					],
+					"command": "test:e2e:with-env default-hpos-disabled --project=ui",
+					"shardingArguments": [],
 					"events": [
 						"daily-checks",
 						"release-checks"
@@ -368,7 +344,7 @@
 						}
 					},
 					"report": {
-						"resultsBlobName": "core-e2e-reports-non-hpos",
+						"resultsBlobName": "core-e2e-reports-hpos-disabled",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -442,7 +418,10 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
-						".wp-env.json"
+						"tests/e2e-pw/tests/api-tests/**",
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"testEnv": {
 						"start": "env:test"
@@ -460,7 +439,7 @@
 				{
 					"name": "Core API tests - HPOS disabled",
 					"testType": "api",
-					"command": "test:api",
+					"command": "test:e2e:with-env default-hpos-disabled --project=api",
 					"optional": false,
 					"changes": [
 						"client/admin/config/*.json",
@@ -471,7 +450,9 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/e2e-pw/bin/**",
-						".wp-env.json"
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
 					],
 					"events": [
 						"push"
@@ -494,20 +475,13 @@
 					"command": "test:perf",
 					"optional": true,
 					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/performance/**",
-						".wp-env.json"
+						"tests/performance/**"
 					],
 					"testEnv": {
-						"start": "env:perf"
+						"start": "test:perf:ci-setup"
 					},
 					"events": [
+						"pull_request",
 						"push"
 					]
 				},
@@ -529,8 +503,12 @@
 						".wp-env.json"
 					],
 					"events": [
-						"disabled"
-					]
+						"push"
+					],
+					"report": {
+						"resultsBlobName": "core-metrics-report",
+						"resultsPath": "../../tools/compare-perf/artifacts/"
+					}
 				},
 				{
 					"name": "Blocks e2e tests",
@@ -574,11 +552,11 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"release-checks",
 						"on-demand"
 					],
 					"report": {
-						"resultsBlobName": "default-pressable-core-e2e",
+						"resultsBlobName": "default-pressable-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -590,11 +568,11 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"release-checks",
 						"on-demand"
 					],
 					"report": {
-						"resultsBlobName": "default-wpcom-core-e2e",
+						"resultsBlobName": "default-wpcom-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -607,7 +585,7 @@
 		"@babel/core": "7.12.9",
 		"@babel/preset-env": "7.12.7",
 		"@babel/register": "7.12.1",
-		"@playwright/test": "^1.45.1",
+		"@playwright/test": "^1.46.1",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
@@ -621,8 +599,8 @@
 		"@woocommerce/woocommerce-rest-api": "^1.0.1",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",
 		"@wordpress/babel-preset-default": "3.0.2",
-		"@wordpress/e2e-test-utils-playwright": "wp-6.4",
-		"@wordpress/env": "^9.7.0",
+		"@wordpress/e2e-test-utils-playwright": "wp-6.6",
+		"@wordpress/env": "^10.1.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.25.0",
 		"allure-playwright": "^2.9.2",
@@ -654,7 +632,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"pnpm": "9.1.3"
 	},
 	"browserslist": [
 		"> 0.1%",
@@ -703,7 +681,6 @@
 				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
 				"node_modules/@woocommerce/api/dist/",
 				"node_modules/@woocommerce/admin-e2e-tests/build",
-				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/admin-library/build",

@@ -339,11 +339,11 @@ This results in the following address form (the billing form will be the same):
 The rendered markup looks like this:
 
 ```html
-<input type="text" id="shipping-namespace-gov-id" autocapitalize="off"
+	&lt;input type="text" id="shipping-namespace-gov-id" autocapitalize="off"
        autocomplete="government-id" aria-label="custom aria label"
        aria-describedby="some-element" required="" aria-invalid="true"
        title="Title to show on hover" pattern="[A-Z0-9]{5}"
-       data-custom="custom data" value="" >
+       data-custom="custom data" value="" &gt;
 ```
 
 ### Rendering a checkbox field
@@ -617,7 +617,7 @@ You can use the `woocommerce_get_default_value_for_{$key}` filters to provide a 
 
 ```php
 add_filter(
-	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/address-field",
+	"woocommerce_get_default_value_for_my-plugin-namespace/address-field",
 	function ( $value, $group, $wc_object ) {
 
 		if ( 'billing' === $group ) {
@@ -633,7 +633,7 @@ add_filter(
 );
 
 add_filter(
-	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/my-other-field",
+	"woocommerce_get_default_value_for_my-plugin-namespace/my-other-field",
 	function ( $value, $group, $wc_object ) {
 
 		$my_plugin_key = 'existing_order_field_key';

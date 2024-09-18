@@ -63,7 +63,7 @@ describe( 'Testing Query State Hooks', () => {
 	 * arguments.
 	 *
 	 * @param {Function} hookTested      The hook being tested to use in the
-	 *                                   test comopnent.
+	 *                                   test component.
 	 * @param {Array}    propKeysForArgs An array of keys for the props that
 	 *                                   will be used on the test component that
 	 *                                   will have values fed to the tested

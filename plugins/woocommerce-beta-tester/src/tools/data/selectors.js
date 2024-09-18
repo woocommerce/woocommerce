@@ -37,3 +37,11 @@ export function getBlockTemplateLoggingThreshold( state ) {
 export function getComingSoonMode( state ) {
 	return state.params.updateComingSoonMode.mode;
 }
+
+export function getWccomRequestErrorsMode( state ) {
+	return state.params.updateWccomRequestErrorsMode.mode;
+}
+
+export function getIsFakeWooPaymentsEnabled( state ) {
+	return state.params.fakeWooPayments.enabled;
+}

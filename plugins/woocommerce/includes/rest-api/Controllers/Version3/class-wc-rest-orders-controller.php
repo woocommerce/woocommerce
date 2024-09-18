@@ -131,7 +131,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
 									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$order->remove_item( $item['id'] );
+										$this->remove_item( $order, $key, $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
 									}
@@ -168,6 +168,46 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
+	}
+
+	/**
+	 * Wrapper method to remove order items.
+	 * When updating, the item ID provided is checked to ensure it is associated
+	 * with the order.
+	 *
+	 * @param WC_Order $order     The order to remove the item from.
+	 * @param string   $item_type The item type (from the request, not from the item, e.g. 'line_items' rather than 'line_item').
+	 * @param int      $item_id   The ID of the item to remove.
+	 *
+	 * @return void
+	 * @throws WC_REST_Exception If item ID is not associated with order.
+	 */
+	protected function remove_item( WC_Order $order, string $item_type, int $item_id ): void {
+		$item = $order->get_item( $item_id );
+
+		if ( ! $item ) {
+			throw new WC_REST_Exception(
+				'woocommerce_rest_invalid_item_id',
+				esc_html__( 'Order item ID provided is not associated with order.', 'woocommerce' ),
+				400
+			);
+		}
+
+		if ( 'line_items' === $item_type ) {
+			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+			wc_maybe_adjust_line_item_product_stock( $item, 0 );
+		}
+
+		/**
+		 * Allow extensions be notified before the item is removed.
+		 *
+		 * @param WC_Order_Item $item The item object.
+		 *
+		 * @since 9.3.0.
+		 */
+		do_action( 'woocommerce_rest_remove_order_item', $item );
+
+		$order->remove_item( $item_id );
 	}
 
 	/**

@@ -17,6 +17,7 @@ import {
 	useEffect,
 	useState,
 	createElement,
+	useMemo,
 } from '@wordpress/element';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
 
@@ -25,6 +26,7 @@ import { WooOnboardingTask } from '@woocommerce/onboarding';
  */
 import { redirectToTaxSettings } from './utils';
 import { Card as WooCommerceTaxCard } from './woocommerce-tax/card';
+import { Card as StripeTaxCard } from './stripe-tax/card';
 import { createNoticesFromResponse } from '../../../lib/notices';
 import { getCountryCode } from '~/dashboard/utils';
 import { ManualConfiguration } from './manual-configuration';
@@ -122,7 +124,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		createNotice(
 			'success',
 			__(
-				"You're awesome! One less item on your to-do list ✅",
+				'You’re awesome! One less item on your to-do list ✅',
 				'woocommerce'
 			)
 		);
@@ -150,20 +152,21 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		} );
 	}, [ updateOptions ] );
 
-	const getVisiblePartners = () => {
+	const partners = useMemo( () => {
 		const countryCode =
 			getCountryCode( generalSettings?.woocommerce_default_country ) ||
 			'';
 		const {
 			additionalData: {
 				woocommerceTaxCountries = [],
+				stripeTaxCountries = [],
 				taxJarActivated,
 				woocommerceTaxActivated,
 				woocommerceShippingActivated,
 			} = {},
 		} = task;
 
-		const partners = [
+		const allPartners = [
 			{
 				id: 'woocommerce-tax',
 				card: WooCommerceTaxCard,
@@ -174,31 +177,35 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 					! woocommerceShippingActivated &&
 					woocommerceTaxCountries.includes( countryCode ),
 			},
+			{
+				id: 'stripe-tax',
+				card: StripeTaxCard,
+
+				isVisible: stripeTaxCountries.includes( countryCode ),
+			},
 		];
 
-		return partners.filter( ( partner ) => partner.isVisible );
-	};
+		return allPartners.filter( ( partner ) => partner.isVisible );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- the partner list shouldn't be changing in the middle of interaction. for some reason the country is becoming null in a re-render and causing unexpected behaviour
+	}, [] );
 
-	const partners = getVisiblePartners();
-
+	const { auto } = query;
 	useEffect( () => {
-		const { auto } = query;
-
 		if ( auto === 'true' ) {
 			onAutomate();
-			return;
 		}
+	}, [ auto, onAutomate ] );
 
+	useEffect( () => {
 		if ( query.partner ) {
 			return;
 		}
-
 		recordEvent( 'tasklist_tax_view_options', {
 			options: partners.map( ( partner ) => partner.id ),
 		} );
-	}, [ onAutomate, partners, query ] );
+	}, [ partners, query.partner ] );
 
-	const getCurrentPartner = () => {
+	const currentPartner = useMemo( () => {
 		if ( ! query.partner ) {
 			return null;
 		}
@@ -206,7 +213,7 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 		return (
 			partners.find( ( partner ) => partner.id === query.partner ) || null
 		);
-	};
+	}, [ partners, query.partner ] );
 
 	const childProps = {
 		isPending,
@@ -219,8 +226,6 @@ export const Tax: React.FC< TaxProps > = ( { onComplete, query, task } ) => {
 	if ( isResolving ) {
 		return <Spinner />;
 	}
-
-	const currentPartner = getCurrentPartner();
 
 	if ( ! partners.length ) {
 		return (

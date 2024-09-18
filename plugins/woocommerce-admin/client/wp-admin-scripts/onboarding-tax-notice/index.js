@@ -41,7 +41,7 @@ const showTaxCompletionNotice = () => {
 
 		saveButton.classList.add( 'has-tax' );
 		dispatch( 'core/notices' ).createSuccessNotice(
-			__( "You've added your first tax rate!", 'woocommerce' ),
+			__( 'You’ve added your first tax rate!', 'woocommerce' ),
 			{
 				id: 'WOOCOMMERCE_ONBOARDING_TAX_NOTICE',
 				actions: [

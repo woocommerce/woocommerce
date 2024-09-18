@@ -15,7 +15,6 @@ export type UserPreferences = {
 	dashboard_chart_type?: string;
 	dashboard_leaderboard_rows?: string;
 	dashboard_sections?: string;
-	help_panel_highlight_shown?: string;
 	homepage_layout?: string;
 	homepage_stats?: string;
 	orders_report_columns?: string;
@@ -33,13 +32,12 @@ export type UserPreferences = {
 	product_advice_card_dismissed?: {
 		[ key: string ]: 'yes' | 'no';
 	};
+	launch_your_store_tour_hidden?: 'yes' | 'no' | '';
+	coming_soon_banner_dismissed?: 'yes' | 'no' | '';
 };
 
-export type WoocommerceMeta = UserPreferences & {
-	task_list_tracked_started_tasks?: string;
-	variable_items_without_price_notice_dismissed?: string;
-	local_attributes_notice_dismissed_ids?: string;
-	product_advice_card_dismissed?: string;
+export type WoocommerceMeta = {
+	[ key in keyof UserPreferences ]: string;
 };
 
 export type WCUser<

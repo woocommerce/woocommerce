@@ -136,10 +136,10 @@ export const moveInnerBlocksToPosition = (
 ): void => {
 	const { getBlock, getBlockRootClientId, getBlockIndex } =
 		select( 'core/block-editor' );
-	const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 	const productGalleryBlock = getBlock( clientId );
 
-	if ( productGalleryBlock ) {
+	if ( productGalleryBlock?.name === 'woocommerce/product-gallery' ) {
+		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		const previousLayout = productGalleryBlock.innerBlocks.length
 			? productGalleryBlock.innerBlocks[ 0 ].attributes.layout
 			: null;

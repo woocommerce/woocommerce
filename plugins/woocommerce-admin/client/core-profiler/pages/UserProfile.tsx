@@ -20,32 +20,32 @@ import { MultipleSelector } from '../components/multiple-selector/multiple-selec
 
 const businessOptions = [
 	{
-		title: __( "I'm just starting my business", 'woocommerce' ),
+		title: __( 'I’m just starting my business', 'woocommerce' ),
 		value: 'im_just_starting_my_business' as const,
 	},
 	{
-		title: __( "I'm already selling", 'woocommerce' ),
+		title: __( 'I’m already selling', 'woocommerce' ),
 		value: 'im_already_selling' as const,
 	},
 	{
-		title: __( "I'm setting up a store for a client", 'woocommerce' ),
+		title: __( 'I’m setting up a store for a client', 'woocommerce' ),
 		value: 'im_setting_up_a_store_for_a_client' as const,
 	},
 ];
 
 const sellingOnlineOptions = [
 	{
-		label: __( "Yes, I'm selling online", 'woocommerce' ),
+		label: __( 'Yes, I’m selling online', 'woocommerce' ),
 		value: 'yes_im_selling_online' as const,
 		key: 'yes_im_selling_online' as const,
 	},
 	{
-		label: __( "No, I'm selling offline", 'woocommerce' ),
+		label: __( 'No, I’m selling offline', 'woocommerce' ),
 		value: 'no_im_selling_offline' as const,
 		key: 'no_im_selling_offline' as const,
 	},
 	{
-		label: __( "I'm selling both online and offline", 'woocommerce' ),
+		label: __( 'I’m selling both online and offline', 'woocommerce' ),
 		value: 'im_selling_both_online_and_offline' as const,
 		key: 'im_selling_both_online_and_offline' as const,
 	},

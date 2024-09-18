@@ -131,6 +131,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$sku,
 			$sku
 		);
+
+		/**
+		 * Filter to bail early on the SKU lock query.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param bool|null  $locked  Set to a boolean value to short-circuit the SKU lock query.
+		 * @param WC_Product $product The product being created.
+		 */
+		$locked = apply_filters( 'wc_product_pre_lock_on_sku', null, $product );
+		if ( ! is_null( $locked ) ) {
+			return boolval( $locked );
+		}
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->query( $query );
 
@@ -732,16 +746,48 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( in_array( 'stock_quantity', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Action to signal that the value of 'stock_quantity' for a variation has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param WC_Product $product The variation whose stock has changed.
+				 */
 				do_action( 'woocommerce_variation_set_stock', $product );
 			} else {
+				/**
+				 * Action to signal that the value of 'stock_quantity' for a product has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param WC_Product $product The variation whose stock has changed.
+				 */
 				do_action( 'woocommerce_product_set_stock', $product );
 			}
 		}
 
 		if ( in_array( 'stock_status', $this->updated_props, true ) ) {
 			if ( $product->is_type( 'variation' ) ) {
+				/**
+				 * Action to signal that the `stock_status` for a variation has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param int        $product_id   The ID of the variation.
+				 * @param string     $stock_status The new stock status of the variation.
+				 * @param WC_Product $product      The product object.
+				 */
 				do_action( 'woocommerce_variation_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			} else {
+				/**
+				 * Action to signal that the `stock_status` for a product has changed.
+				 *
+				 * @since 3.0
+				 *
+				 * @param int        $product_id   The ID of the product.
+				 * @param string     $stock_status The new stock status of the product.
+				 * @param WC_Product $product      The product object.
+				 */
 				do_action( 'woocommerce_product_set_stock_status', $product->get_id(), $product->get_stock_status(), $product );
 			}
 		}

@@ -262,6 +262,14 @@ class WC_Install {
 		'9.2.0' => array(
 			'wc_update_920_add_wc_hooked_blocks_version_option',
 		),
+		'9.3.0' => array(
+			'wc_update_930_add_woocommerce_coming_soon_option',
+			'wc_update_930_migrate_user_meta_for_launch_your_store_tour',
+		),
+		'9.4.0' => array(
+			'wc_update_940_add_phone_to_order_address_fts_index',
+			'wc_update_940_remove_help_panel_highlight_shown',
+		),
 	);
 
 	/**
@@ -292,6 +300,7 @@ class WC_Install {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
@@ -984,6 +993,17 @@ class WC_Install {
 			$feature_controller = wc_get_container()->get( FeaturesController::class );
 			$feature_controller->change_feature_enable( 'custom_order_tables', true );
 		}
+	}
+
+	/**
+	 * Add the woocommerce_coming_soon option for new shops.
+	 *
+	 * Ensure that the option is set for all shops, even if core profiler is disabled on the host.
+	 *
+	 * @since 9.3.0
+	 */
+	public static function add_coming_soon_option() {
+		add_option( 'woocommerce_coming_soon', 'no' );
 	}
 
 	/**

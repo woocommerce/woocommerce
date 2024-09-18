@@ -2,10 +2,10 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
 
-test.describe( 'Edit order', { tag: '@services' }, () => {
+test.describe( 'Edit order', { tag: [ '@services', '@hpos' ] }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	let orderId, orderToCancel;
+	let orderId, secondOrderId, orderToCancel, customerId;
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -26,7 +26,48 @@ test.describe( 'Edit order', { tag: '@services' }, () => {
 				status: 'processing',
 			} )
 			.then( ( response ) => {
+				secondOrderId = response.data.id;
+			} );
+		await api
+			.post( 'orders', {
+				status: 'processing',
+			} )
+			.then( ( response ) => {
 				orderToCancel = response.data.id;
+			} );
+		await api
+			.post( 'customers', {
+				email: 'archie123@email.addr',
+				first_name: 'Archie',
+				last_name: 'Greenback',
+				username: 'big.archie',
+				billing: {
+					first_name: 'Archibald',
+					last_name: 'Greenback',
+					company: 'Automattic',
+					country: 'US',
+					address_1: 'Billing Address 1',
+					address_2: 'Billing Address 2',
+					city: 'San Francisco',
+					state: 'CA',
+					postcode: '94107',
+					phone: '123456789',
+					email: 'archie123@email.addr',
+				},
+				shipping: {
+					first_name: 'Shipping First',
+					last_name: 'Shipping Last',
+					company: 'Automattic',
+					country: 'US',
+					address_1: 'Shipping Address 1',
+					address_2: 'Shipping Address 2',
+					city: 'San Francisco',
+					state: 'CA',
+					postcode: '94107',
+				},
+			} )
+			.then( ( response ) => {
+				customerId = response.data.id;
 			} );
 	} );
 
@@ -38,7 +79,9 @@ test.describe( 'Edit order', { tag: '@services' }, () => {
 			version: 'wc/v3',
 		} );
 		await api.delete( `orders/${ orderId }`, { force: true } );
+		await api.delete( `orders/${ secondOrderId }`, { force: true } );
 		await api.delete( `orders/${ orderToCancel }`, { force: true } );
+		await api.delete( `customers/${ customerId }`, { force: true } );
 	} );
 
 	test( 'can view single order', async ( { page } ) => {
@@ -210,83 +253,121 @@ test.describe( 'Edit order', { tag: '@services' }, () => {
 		).toBeHidden();
 	} );
 
-	test( 'can load billing details', async ( { page, baseURL } ) => {
-		let customerId;
+	test( 'can load billing and shipping details', async ( { page } ) => {
+		// Open our test order and select the customer we just created.
+		await test.step( 'Open our test order and select the customer we just created.', async () => {
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
 
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
+			// Assign customer
+			await page.locator( '#select2-customer_user-container' ).click();
+			await page
+				.getByRole( 'combobox' )
+				.nth( 4 )
+				.pressSequentially( 'big.archie' );
+			await page.waitForSelector( 'li.select2-results__option' );
+			await page.locator( 'li.select2-results__option' ).click();
 		} );
 
-		await api
-			.post( 'customers', {
-				email: 'archie123@email.addr',
-				first_name: 'Archie',
-				last_name: 'Greenback',
-				username: 'big.archie',
-				billing: {
-					first_name: 'Archibald',
-					last_name: 'Greenback',
-					company: 'Automattic',
-					country: 'US',
-					address_1: 'address1',
-					address_2: 'address2',
-					city: 'San Francisco',
-					state: 'CA',
-					postcode: '94107',
-					phone: '123456789',
-					email: 'archie123@email.addr',
-				},
-			} )
-			.then( ( response ) => {
-				customerId = response.data.id;
-			} );
+		await test.step( 'Load the billing and shipping addresses', async () => {
+			// Click the load billing address button
+			await page
+				.getByRole( 'link', { name: 'Load billing address' } )
+				.click();
+			await expect(
+				page.locator( '[id="_billing_first_name"]' )
+			).toHaveValue( 'Archibald' );
 
-		// Open our test order and select the customer we just created.
-		await page.goto(
-			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
-		);
+			// Click the load shipping address button
+			await page
+				.getByRole( 'link', { name: 'Load shipping address' } )
+				.click();
+			await expect(
+				page.locator( '[id="_shipping_first_name"]' )
+			).toHaveValue( 'Shipping First' );
+		} );
 
-		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
-		const response = await page.evaluate( async ( custId ) => {
-			const simulateCustomerDetailsCall = new Promise( ( resolve ) => {
-				// eslint-disable-next-line no-undef
-				jQuery.ajax( {
-					// eslint-disable-next-line no-undef
-					url: woocommerce_admin_meta_boxes.ajax_url,
-					data: {
-						user_id: custId,
-						action: 'woocommerce_get_customer_details',
-						security:
-							// eslint-disable-next-line no-undef
-							woocommerce_admin_meta_boxes.get_customer_details_nonce,
-					},
-					type: 'POST',
-					// eslint-disable-next-line no-shadow
-					success( resp ) {
-						resolve( resp );
-					},
-				} );
-			} );
+		await test.step( 'Save the order and confirm addresses saved', async () => {
+			// Save the order
+			await page.locator( 'button.save_order' ).click();
 
-			return await simulateCustomerDetailsCall;
-		}, customerId );
+			// Verify both addresses are saved
+			await expect(
+				page.getByText(
+					'Billing Edit Load billing address Archibald GreenbackAutomatticBilling Address'
+				)
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					'Shipping Edit Load shipping address Copy billing address Shipping First'
+				)
+			).toBeVisible();
+		} );
+	} );
 
-		// Response should contain billing address info, but should not contain user meta data.
-		expect( 'billing' in response ).toBeTruthy();
-		expect( response.billing.first_name ).toContain( 'Archibald' );
-		expect( response.meta_data ).toBeUndefined();
+	test( 'can copy billing address to shipping address', async ( {
+		page,
+	} ) => {
+		// click ok on the dialog that pops up
+		page.on( 'dialog', ( dialog ) => dialog.accept() );
 
-		// Clean-up.
-		await api.delete( `customers/${ customerId }`, { force: true } );
+		await test.step( 'Open our second test order and select the customer we just created.', async () => {
+			// Open our second test order
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ secondOrderId }`
+			);
+
+			// Assign customer
+			await page.locator( '#select2-customer_user-container' ).click();
+			await page
+				.getByRole( 'combobox' )
+				.nth( 4 )
+				.pressSequentially( 'big.archie' );
+			await page.waitForSelector( 'li.select2-results__option' );
+			await page.locator( 'li.select2-results__option' ).click();
+		} );
+
+		await test.step( 'Load the billing address and then copy it to the shipping address', async () => {
+			// Click the load billing address button
+			await page
+				.getByRole( 'link', { name: 'Load billing address' } )
+				.click();
+			await expect(
+				page.locator( '[id="_billing_first_name"]' )
+			).toHaveValue( 'Archibald' );
+
+			// Click the copy billing address to shipping address button
+			await page
+				.getByRole( 'link', { name: 'Copy billing address' } )
+				.click();
+			await expect(
+				page.locator( '[id="_shipping_first_name"]' )
+			).toHaveValue( 'Archibald' );
+		} );
+
+		await test.step( 'Save the order and confirm addresses saved', async () => {
+			// Save the order
+			await page.locator( 'button.save_order' ).click();
+
+			// Verify both addresses are saved
+			await expect(
+				page.getByText(
+					'Billing Edit Load billing address Archibald GreenbackAutomatticBilling Address'
+				)
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					'Shipping Edit Load shipping address Copy billing address Archibald'
+				)
+			).toBeVisible();
+		} );
 	} );
 } );
 
 test.describe(
 	'Edit order > Downloadable product permissions',
-	{ tag: '@services' },
+	{ tag: [ '@services', '@hpos' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -410,7 +491,7 @@ test.describe(
 			await revertGrantAccessAfterPaymentSetting( api );
 		} );
 
-		// these tests aren't completely independent.  Needs some refactoring.
+		// these tests aren't completely independent. Needs some refactoring.
 
 		test( 'can add downloadable product permissions to order without product', async ( {
 			page,

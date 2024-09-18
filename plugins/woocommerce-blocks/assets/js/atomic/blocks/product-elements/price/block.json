@@ -1,0 +1,34 @@
+{
+	"name": "woocommerce/product-price",
+	"version": "1.0.0",
+	"title": "Product Price",
+	"description": "Display the price of a product.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"productId": { "type": "number", "default": 0 },
+		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
+		"textAlign": { "type": "string", "default": "" },
+		"isDescendentOfSingleProductTemplate": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"usesContext": [ "query", "queryId", "postId" ],
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"supports": {
+		"html": false
+	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

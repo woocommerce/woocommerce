@@ -5,7 +5,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 test.describe(
 	'Merchant > Order Action emails received',
-	{ tag: '@services' },
+	{ tag: [ '@services', '@hpos' ] },
 	() => {
 		test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -71,53 +71,63 @@ test.describe(
 			} );
 		} );
 
-		test( 'can receive new order email', async ( { page, baseURL } ) => {
-			// New order emails are sent automatically when we create a simple order. Verify that we get these.
-			// Need to create a new order for this test because we clear logs before each run.
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api
-				.post( 'orders', {
-					status: 'processing',
-					billing: customerBilling,
-				} )
-				.then( ( response ) => {
-					newOrderId = response.data.id;
+		test(
+			'can receive new order email',
+			{ tag: '@skip-on-default-pressable' },
+			async ( { page, baseURL } ) => {
+				// New order emails are sent automatically when we create a simple order. Verify that we get these.
+				// Need to create a new order for this test because we clear logs before each run.
+				const api = new wcApi( {
+					url: baseURL,
+					consumerKey: process.env.CONSUMER_KEY,
+					consumerSecret: process.env.CONSUMER_SECRET,
+					version: 'wc/v3',
 				} );
-			// search to narrow it down to just the messages we want
-			await page.goto(
-				`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-					customerBilling.email
-				) }`
-			);
-			await expect(
-				page.locator( 'td.column-receiver >> nth=1' )
-			).toContainText( admin.email );
-			await expect(
-				page.locator( 'td.column-subject >> nth=1' )
-			).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+				await api
+					.post( 'orders', {
+						status: 'processing',
+						billing: customerBilling,
+					} )
+					.then( ( response ) => {
+						newOrderId = response.data.id;
+					} );
+				// search to narrow it down to just the messages we want
+				await page.goto(
+					`/wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
+						customerBilling.email
+					) }`
+				);
+				await expect(
+					page.locator( 'td.column-receiver >> nth=1' )
+				).toContainText( admin.email );
+				await expect(
+					page.locator( 'td.column-subject >> nth=1' )
+				).toContainText(
+					`[${ storeName }]: New order #${ newOrderId }`
+				);
 
-			// look at order email contents
-			await page
-				.getByRole( 'button', { name: 'View log' } )
-				.last()
-				.click();
+				// look at order email contents
+				await page
+					.getByRole( 'button', { name: 'View log' } )
+					.last()
+					.click();
 
-			await expect(
-				page.getByText( 'Receiver wordpress@example.com' )
-			).toBeVisible();
-			await expect(
-				page.getByText( 'Subject [WooCommerce Core E2E' )
-			).toBeVisible();
-			await page.getByRole( 'link', { name: 'json' } ).click();
-			await expect(
-				page.locator( '#wp-mail-logging-modal-content-body-content' )
-			).toContainText( 'You’ve received the following order from  :' );
-		} );
+				await expect(
+					page.getByText( 'Receiver wordpress@example.com' )
+				).toBeVisible();
+				await expect(
+					page.getByText( 'Subject [WooCommerce Core E2E' )
+				).toBeVisible();
+				await page.getByRole( 'link', { name: 'json' } ).click();
+				await expect(
+					page.locator(
+						'#wp-mail-logging-modal-content-body-content'
+					)
+				).toContainText(
+					'You’ve received the following order from  :'
+				);
+			}
+		);
 
 		test( 'can receive completed email', async ( { page, baseURL } ) => {
 			// Completed order emails are sent automatically when an order's payment is completed.

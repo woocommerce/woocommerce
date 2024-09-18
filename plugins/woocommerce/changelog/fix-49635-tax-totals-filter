@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use `get_filtered_ids` consistently in `reports/taxes` and `reports/taxes/stats` datastores

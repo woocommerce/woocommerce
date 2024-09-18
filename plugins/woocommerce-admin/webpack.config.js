@@ -3,6 +3,7 @@
  */
 const { get } = require( 'lodash' );
 const path = require( 'path' );
+const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
 const BundleAnalyzerPlugin =
@@ -25,7 +26,22 @@ const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
 
+const getSubdirectoriesAt = ( searchPath ) => {
+	const dir = path.resolve( __dirname, searchPath );
+	return fs
+		.readdirSync( dir, { withFileTypes: true } )
+		.filter( ( entry ) => entry.isDirectory() )
+		.map( ( entry ) => entry.name );
+};
+
+const WC_ADMIN_PACKAGES_DIR = '../../packages/js';
+const WP_ADMIN_SCRIPTS_DIR = './client/wp-admin-scripts';
+
+// wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
+// See ./client/wp-admin-scripts/README.md for more details
+const wpAdminScripts = getSubdirectoriesAt( WP_ADMIN_SCRIPTS_DIR ); // automatically include all subdirs
 const wcAdminPackages = [
+	// we use a whitelist for this instead of dynamically generating it because not all folders are packages meant for consumption
 	'admin-layout',
 	'components',
 	'csv-export',
@@ -44,50 +60,16 @@ const wcAdminPackages = [
 	'product-editor',
 	'remote-logging',
 ];
-// wpAdminScripts are loaded on wp-admin pages outside the context of WooCommerce Admin
-// See ./client/wp-admin-scripts/README.md for more details
-const wpAdminScripts = [
-	'marketing-coupons',
-	'navigation-opt-out',
-	'onboarding-homepage-notice',
-	'onboarding-product-notice',
-	'onboarding-product-import-notice',
-	'onboarding-tax-notice',
-	'print-shipping-label-banner',
-	'beta-features-tracking-modal',
-	'payment-method-promotions',
-	'onboarding-load-sample-products-notice',
-	'product-tracking',
-	'add-term-tracking',
-	'attributes-tracking',
-	'category-tracking',
-	'tags-tracking',
-	'product-tour',
-	'wc-addons-tour',
-	'settings-tracking',
-	'order-tracking',
-	'product-import-tracking',
-	'variable-product-tour',
-	'product-category-metabox',
-	'shipping-settings-region-picker',
-	'command-palette',
-	'command-palette-analytics',
-	'woo-connect-notice',
-	'woo-plugin-update-connect-notice',
-	'woo-enable-autorenew',
-	'woo-renew-subscription',
-	'woo-subscriptions-notice',
-	'woo-product-usage-notice',
-];
+
 const getEntryPoints = () => {
 	const entryPoints = {
 		app: './client/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
-		entryPoints[ name ] = `../../packages/js/${ name }`;
+		entryPoints[ name ] = `${ WC_ADMIN_PACKAGES_DIR }/${ name }`;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
-		entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
+		entryPoints[ name ] = `${ WP_ADMIN_SCRIPTS_DIR }/${ name }`;
 	} );
 	return entryPoints;
 };
@@ -187,6 +169,8 @@ const webpackConfig = {
 		extensions: [ '.json', '.js', '.jsx', '.ts', '.tsx' ],
 		alias: {
 			'~': path.resolve( __dirname + '/client' ),
+			'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
+			'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
 		},
 	},
 	plugins: [
@@ -238,6 +222,10 @@ const webpackConfig = {
 				requestToExternal( request ) {
 					if ( request === '@wordpress/components/build/ui' ) {
 						// The external wp.components does not include ui components, so we need to skip requesting to external here.
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/dataviews' ) ) {
 						return null;
 					}
 

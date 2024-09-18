@@ -212,7 +212,7 @@ const ActiveFiltersBlock = ( {
 	] );
 
 	/**
-	 * Parse the filter URL to set the active rating fitlers.
+	 * Parse the filter URL to set the active rating filters.
 	 * This code should be moved to Rating Filter block once it's implemented.
 	 */
 	useEffect( () => {
