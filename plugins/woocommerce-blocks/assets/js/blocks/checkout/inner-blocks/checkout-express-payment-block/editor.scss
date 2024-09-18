@@ -49,6 +49,10 @@
 	pointer-events: none;
 }
 
+.button-height-control + .border-radius-control-container {
+	margin-top: $grid-unit-30;
+}
+
 // Center images rendered in place of buttons in the editor
 .wc-block-components-express-payment {
 	.wc-block-components-express-payment__event-buttons {
