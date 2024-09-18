@@ -164,11 +164,11 @@ const LinkedProductControl = ( {
 	const radioControlHelp =
 		radioControlState === PRODUCT_REF.CURRENT_PRODUCT
 			? __(
-					'Related products will be pulled from the product a shopper is currently viewing',
+					'Linked products will be pulled from the product a shopper is currently viewing',
 					'woocommerce'
 			  )
 			: __(
-					'Select a product to pull the related products from',
+					'Select a product to pull the linked products from',
 					'woocommerce'
 			  );
 
