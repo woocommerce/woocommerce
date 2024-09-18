@@ -86,10 +86,7 @@ const ProductCollectionInspectorControls = (
 	const showFilterableControl =
 		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
 	const showOrderControl =
-		showQueryControls &&
-		shouldShowFilter( CoreFilterNames.ORDER ) &&
-		// See https://github.com/woocommerce/woocommerce/issues/50862
-		attributes.collection !== 'woocommerce/product-collection/hand-picked';
+		showQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
 	const showStockStatusControl = shouldShowFilter(
 		CoreFilterNames.STOCK_STATUS
