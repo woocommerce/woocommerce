@@ -98,8 +98,7 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 
 			$this->update_other_page_with_express_payment_attrs( $other_page, $updated_attrs );
 		} catch ( Exception $e ) {
-			error_log( 'Error updating express payment attributes: ' . $e->getMessage() );
-
+			wc_get_logger()->log( 'error', 'Error updating express payment attributes: ' . $e->getMessage() );
 		}
 	}
 
