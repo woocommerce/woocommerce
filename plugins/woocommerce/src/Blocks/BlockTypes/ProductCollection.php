@@ -876,9 +876,9 @@ class ProductCollection extends AbstractBlock {
 				// The post__in query needs special handling, as it should be an
 				// intersection of all post__in queries.
 				if (
-					is_array( $acc['post__in'] ) &&
+					is_array( $acc['post__in'] ?? null ) &&
 					! empty( $acc['post__in'] ) &&
-					is_array( $query['post__in'] ) &&
+					is_array( $query['post__in'] ?? null ) &&
 					! empty( $query['post__in'] )
 				) {
 					$result['post__in'] = array_intersect( $acc['post__in'], $query['post__in'] );
