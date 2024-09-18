@@ -681,7 +681,6 @@ class ProductCollection extends AbstractBlock {
 			$collection_args,
 			$query,
 			array(
-				'collection'          => $product_collection_query_context['collection'] ?? '',
 				'orderby'             => $orderby,
 				'on_sale'             => $on_sale,
 				'stock_status'        => $stock_status,
@@ -809,7 +808,6 @@ class ProductCollection extends AbstractBlock {
 			$collection_args,
 			$common_query_values,
 			array(
-				'collection'          => $this->parsed_block['attrs']['collection'] ?? '',
 				'on_sale'             => $is_on_sale,
 				'stock_status'        => $query['woocommerceStockStatus'],
 				'orderby'             => $query['orderBy'],
@@ -1026,30 +1024,6 @@ class ProductCollection extends AbstractBlock {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_key' => $meta_keys[ $orderby ],
 			'orderby'  => 'meta_value_num',
-		);
-	}
-
-	/**
-	 * Return query for hand-picked products.
-	 *
-	 * @param int[]  $product_ids Hand-picked products IDs.
-	 * @param string $collection Collection name.
-	 *
-	 * @return array The post__in query.
-	 */
-	private function get_handpicked_query( $product_ids, $collection ) {
-		if ( is_array( $product_ids ) && ! empty( $product_ids ) ) {
-			return array(
-				'post__in' => $product_ids,
-			);
-		}
-
-		// For the Hand-Picked collection, we need to always display no results
-		// if no products were picked. To achieve this, we need to set post__in to [-1]
-		// so that there are no IDs to be intersected.
-		$is_handpicked_collection = 'woocommerce/product-collection/hand-picked' === $collection;
-		return array(
-			'post__in' => $is_handpicked_collection ? array( -1 ) : array(),
 		);
 	}
 
