@@ -1839,13 +1839,20 @@ class ProductCollection extends AbstractBlock {
 					);
 				}
 
+				$related_products = wc_get_related_products(
+					$collection_args['relatedProductReference'],
+					// Use a higher limit so that the result set contains enough products for the collection to subsequently filter.
+					100
+				);
+				if ( empty( $related_products ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+
 				// Have it filter the results to products related to the one provided.
 				return array(
-					'post__in' => wc_get_related_products(
-						$collection_args['relatedProductReference'],
-						// Use a higher limit so that the result set contains enough products for the collection to subsequently filter.
-						100
-					),
+					'post__in' => $related_products,
 				);
 			},
 			function ( $collection_args, $query ) {
