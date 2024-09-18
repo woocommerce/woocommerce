@@ -27,7 +27,7 @@ export type SearchAPIProductType = {
 	billing_period: string;
 	billing_period_interval: number;
 	currency: string;
-	is_on_Sale: boolean;
+	is_on_sale: boolean;
 	regular_price: number;
 };
 
