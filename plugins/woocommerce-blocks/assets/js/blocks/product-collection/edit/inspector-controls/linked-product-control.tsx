@@ -119,7 +119,7 @@ const LinkedProductPopoverContent: React.FC< {
 	/>
 );
 
-const enum PRODUCT_REF {
+const enum PRODUCT_REFERENCE_TYPE {
 	CURRENT_PRODUCT = 'CURRENT_PRODUCT',
 	SPECIFIC_PRODUCT = 'SPECIFIC_PRODUCT',
 }
@@ -135,21 +135,24 @@ const LinkedProductControl = ( {
 	location: WooCommerceBlockLocation;
 	usesReference: string[] | undefined;
 } ) => {
-	const referenceType = 'product';
-	const isProductReferenceAvailable = location.type === referenceType;
+	const REFERENCE_TYPE_PRODUCT = 'product';
+	const isProductReferenceAvailable =
+		location.type === REFERENCE_TYPE_PRODUCT;
 	const { productReference } = query;
 
 	const { product, isLoading } = useGetProduct( productReference );
 	const [ isDropdownOpen, setIsDropdownOpen ] = useState< boolean >( false );
-	const [ radioControlState, setRadioControlState ] = useState< PRODUCT_REF >(
-		isProductReferenceAvailable && isEmpty( productReference )
-			? PRODUCT_REF.CURRENT_PRODUCT
-			: PRODUCT_REF.SPECIFIC_PRODUCT
-	);
+	const [ radioControlState, setRadioControlState ] =
+		useState< PRODUCT_REFERENCE_TYPE >(
+			isProductReferenceAvailable && isEmpty( productReference )
+				? PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
+				: PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
+		);
 	const prevReference = useRef< number | undefined >( undefined );
 	const showLinkedProductControl = useMemo( () => {
-		const isProductContextRequired =
-			usesReference?.includes( referenceType );
+		const isProductContextRequired = usesReference?.includes(
+			REFERENCE_TYPE_PRODUCT
+		);
 
 		return isProductContextRequired;
 	}, [ usesReference ] );
@@ -157,12 +160,12 @@ const LinkedProductControl = ( {
 	if ( ! showLinkedProductControl ) return null;
 
 	const showRadioControl = isProductReferenceAvailable;
-	const showDropdown = showRadioControl
-		? radioControlState === PRODUCT_REF.SPECIFIC_PRODUCT
+	const showSpecificProductSelector = showRadioControl
+		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
 
 	const radioControlHelp =
-		radioControlState === PRODUCT_REF.CURRENT_PRODUCT
+		radioControlState === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT
 			? __(
 					'Linked products will be pulled from the product a shopper is currently viewing',
 					'woocommerce'
@@ -172,8 +175,8 @@ const LinkedProductControl = ( {
 					'woocommerce'
 			  );
 
-	const handleRadioControlChange = ( newValue: PRODUCT_REF ) => {
-		if ( newValue === PRODUCT_REF.CURRENT_PRODUCT ) {
+	const handleRadioControlChange = ( newValue: PRODUCT_REFERENCE_TYPE ) => {
+		if ( newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ) {
 			const { productReference: toSave, ...rest } = query;
 			prevReference.current = toSave;
 			setAttributes( { query: rest } );
@@ -205,21 +208,21 @@ const LinkedProductControl = ( {
 									'From the current product',
 									'woocommerce'
 								),
-								value: PRODUCT_REF.CURRENT_PRODUCT,
+								value: PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT,
 							},
 							{
 								label: __(
 									'From a specific product',
 									'woocommerce'
 								),
-								value: PRODUCT_REF.SPECIFIC_PRODUCT,
+								value: PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT,
 							},
 						] }
 						onChange={ handleRadioControlChange }
 					/>
 				</PanelRow>
 			) }
-			{ showDropdown && (
+			{ showSpecificProductSelector && (
 				<PanelRow>
 					<Dropdown
 						className="wc-block-product-collection-linked-product-control"
