@@ -17,8 +17,8 @@ import { directive } from './hooks';
 import { getNamespace } from './namespaces';
 import { parseServerData, populateServerData } from './store';
 import { proxifyState } from './proxies';
-import { actions } from './router';
 
+export { navigate } from './router';
 export { store, getConfig } from './store';
 export { getContext, getElement } from './scopes';
 export {
@@ -33,8 +33,6 @@ export {
 } from './utils';
 
 export { useState, useRef } from 'preact/hooks';
-
-export const { navigate, prefetch } = actions;
 
 const requiredConsent =
 	'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WordPress.';

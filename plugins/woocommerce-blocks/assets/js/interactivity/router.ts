@@ -2,14 +2,20 @@
  * Internal dependencies
  */
 import { fetchHeadAssets, updateHead } from './head';
+import { store, privateApis, getConfig } from './index';
 
-import { render } from 'preact';
-import { batch } from '@preact/signals';
-import { getRegionRootFragment, initialVdom } from './init';
-import { directivePrefix } from './constants';
-import { toVdom } from './vdom';
-import { parseServerData, populateServerData } from './store';
-import { store, getConfig } from './store';
+const {
+	directivePrefix,
+	getRegionRootFragment,
+	initialVdom,
+	toVdom,
+	render,
+	parseServerData,
+	populateServerData,
+	batch,
+} = privateApis(
+	'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WordPress.'
+);
 
 interface NavigateOptions {
 	force?: boolean;
@@ -160,18 +166,13 @@ window.addEventListener( 'popstate', async () => {
 if ( globalThis.IS_GUTENBERG_PLUGIN ) {
 	if ( navigationMode === 'fullPage' ) {
 		// Cache the scripts. Has to be called before fetching the assets.
-		document.addEventListener( 'DOMContentLoaded', async function () {
-			[].map.call(
-				document.querySelectorAll( 'script[src]' ),
-				( script ) => {
-					headElements.set( script.getAttribute( 'src' ), {
-						tag: script,
-						text: script.textContent,
-					} );
-				}
-			);
-			await fetchHeadAssets( document, headElements );
+		[].map.call( document.querySelectorAll( 'script[src]' ), ( script ) => {
+			headElements.set( script.getAttribute( 'src' ), {
+				tag: script,
+				text: script.textContent,
+			} );
 		} );
+		await fetchHeadAssets( document, headElements );
 	}
 }
 pages.set(
@@ -204,7 +205,7 @@ const isValidEvent = ( event: MouseEvent ) =>
 // Variable to store the current navigation.
 let navigatingTo = '';
 
-export const { state, actions } = store( 'woocommerce/router', {
+export const { state, actions } = store( 'core/router', {
 	state: {
 		url: window.location.href,
 		navigation: {
