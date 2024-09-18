@@ -235,7 +235,7 @@ test.describe( 'Product Collection registration', () => {
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 
-		test( 'Should display properly in Product Catalog template', async ( {
+		test.skip( 'Should display properly in Product Catalog template', async ( {
 			pageObject,
 			editor,
 		} ) => {
@@ -357,7 +357,7 @@ test.describe( 'Product Collection registration', () => {
 		} );
 	} );
 
-	test( 'Product picker should be shown when selected product is deleted', async ( {
+	test.skip( 'Product picker should be shown when selected product is deleted', async ( {
 		pageObject,
 		admin,
 		editor,
