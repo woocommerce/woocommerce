@@ -10,13 +10,13 @@ tags: how-to
 
 This event is triggered when Product Collection block was rendered or re-rendered (e.g. due to page change).
 
-### `wc-blocks_product_list_rendered` - `detail` parameters
+### `detail` parameters
 
 | Parameter          | Type    | Default value | Description                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | ------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `collection` | string | `undefined`       | Collection type. It's `undefined` for "create your own" collections as the type is not specified. For other Core collections it can be one of type: `woocommerce/product-collection/best-sellers`, `woocommerce/product-collection/featured`, `woocommerce/product-collection/new-arrivals`, `woocommerce/product-collection/on-sale`, `woocommerce/product-collection/top-rated`. For custom collections it will hold their name. |
 
-### `wc-blocks_product_list_rendered` - Example usage
+### Example usage
 
 ```javascript
 window.document.addEventListener(
@@ -32,14 +32,14 @@ window.document.addEventListener(
 
 This event is triggered when some blocks are clicked in order to view product (redirect to product page).
 
-### `wc-blocks_viewed_product` - `detail` parameters
+### `detail` parameters
 
 | Parameter          | Type    | Default value | Description                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | ------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `collection` | string | `undefined`       | Collection type. It's `undefined` for "create your own" collections as the type is not specified. For other Core collections it can be one of type: `woocommerce/product-collection/best-sellers`, `woocommerce/product-collection/featured`, `woocommerce/product-collection/new-arrivals`, `woocommerce/product-collection/on-sale`, `woocommerce/product-collection/top-rated`. For custom collections it will hold their name. |
 | `productId` | number |        | Product ID |
 
-### `wc-blocks_viewed_product` Example usage
+### Example usage
 
 ```javascript
 window.document.addEventListener(
