@@ -62,8 +62,8 @@ const attributes = {
 	},
 	query: {
 		orderBy: 'post__in',
-		perPage: 5,
-		pages: 1,
+		perPage: 0,
+		pages: 0,
 	},
 	hideControls: [ CoreFilterNames.HAND_PICKED ],
 };
@@ -78,9 +78,20 @@ const heading: InnerBlockTemplate = [
 	},
 ];
 
+const pagination: InnerBlockTemplate = [
+	'core/query-pagination',
+	{
+		layout: {
+			type: 'flex',
+			justifyContent: 'center',
+		},
+	},
+];
+
 const innerBlocks: InnerBlockTemplate[] = [
 	heading,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
+	pagination,
 ];
 
 export default {
