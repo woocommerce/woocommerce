@@ -3,21 +3,18 @@
  */
 import { store, getContext } from '@woocommerce/interactivity';
 
-type ActiveFiltersContext = {
-	queryId: number;
-	params: string[];
-};
+/**
+ * Internal dependencies
+ */
+import { ProductFiltersContext } from '../../frontend';
 
 store( 'woocommerce/product-filter-active', {
 	actions: {
-		*clearAll() {
-			const { params } = getContext< ActiveFiltersContext >();
-			const url = new URL( window.location.href );
-			const { searchParams } = url;
-
-			params.forEach( ( param ) => searchParams.delete( param ) );
-			const { navigate } = yield import( '../product-filter/frontend' );
-			yield navigate( url.href );
+		clearAll: () => {
+			const productFiltersContext = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
+			);
+			productFiltersContext.params = {};
 		},
 	},
 } );

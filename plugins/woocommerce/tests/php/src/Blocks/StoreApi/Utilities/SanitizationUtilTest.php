@@ -1,6 +1,7 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Utilities;
+namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils;
 

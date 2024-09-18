@@ -266,7 +266,7 @@ const ProductTemplateEdit = (
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
-					location,
+					productCollectionLocation: location,
 					productCollectionQueryContext,
 					previewState: __privateProductCollectionPreviewState,
 					/**

@@ -6,6 +6,7 @@ import { Card } from '@wordpress/components';
 import clsx from 'clsx';
 import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
 import { useQuery } from '@woocommerce/navigation';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -31,6 +32,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const query = useQuery();
 	// Get the product if provided; if not provided, render a skeleton loader
 	const product = props.product ?? {
+		id: null,
 		title: '',
 		description: '',
 		vendorName: '',
@@ -46,6 +48,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		featuredImage: '',
 		color: '',
 		productCategory: '',
+		billingPeriod: '',
+		billingPeriodInterval: 0,
+		currency: '',
 	};
 
 	function isSponsored(): boolean {
@@ -79,6 +84,10 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 
 		if ( tracksData.group ) {
 			data.group = tracksData.group;
+		}
+
+		if ( tracksData.group_id ) {
+			data.group_id = tracksData.group_id;
 		}
 
 		if ( tracksData.searchTerm ) {
@@ -142,7 +151,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			rel="noopener noreferrer"
 			onClick={ () => {
 				recordTracksEvent( 'marketplace_product_card_clicked', {
-					product: product.title,
+					product_id: product.id,
+					product_name: product.title,
 					vendor: product.vendorName,
 					product_type: type,
 				} );
@@ -151,6 +161,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			{ isLoading ? ' ' : product.title }
 		</a>
 	);
+
+	const decodedDescription = decodeEntities( product.description );
 
 	const BusinessService = () => (
 		<div className="woocommerce-marketplace__business-card">
@@ -165,7 +177,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					<h2>
 						<CardLink />
 					</h2>
-					<p>{ product.description }</p>
+					<p className="woocommerce-marketplace__product-card__description">
+						{ decodedDescription }
+					</p>
 				</div>
 				<div className="woocommerce-marketplace__business-card__badge">
 					<span>{ product.productCategory }</span>
@@ -177,6 +191,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	return (
 		<Card
 			className={ classNames }
+			id={ `product-${ product.id }` }
+			tabIndex={ -1 }
 			aria-hidden={ isLoading }
 			style={ inlineCss() }
 		>
@@ -256,7 +272,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 					</div>
 					{ ! isTheme && (
 						<p className="woocommerce-marketplace__product-card__description">
-							{ ! isLoading && product.description }
+							{ ! isLoading && decodedDescription }
 						</p>
 					) }
 					<footer className="woocommerce-marketplace__product-card__footer">

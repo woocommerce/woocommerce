@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { store, getElement, getContext } from '@woocommerce/interactivity';
-import { triggerProductListRenderedEvent } from '@woocommerce/base-utils';
+import {
+	triggerProductListRenderedEvent,
+	triggerViewedProductEvent,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -11,6 +14,8 @@ import { CoreCollectionNames } from './types';
 import './style.scss';
 
 export type ProductCollectionStoreContext = {
+	// Available on the <li/> product element and deeper
+	productId?: number;
 	isPrefetchNextOrPreviousLink: boolean;
 	animation: 'start' | 'finish';
 	accessibilityMessage: string;
@@ -162,6 +167,14 @@ const productCollectionStore = {
 					'@woocommerce/interactivity-router'
 				);
 				yield actions.prefetch( ref.href );
+			}
+		},
+		*viewProduct() {
+			const { collection, productId } =
+				getContext< ProductCollectionStoreContext >();
+
+			if ( productId ) {
+				triggerViewedProductEvent( { collection, productId } );
 			}
 		},
 	},

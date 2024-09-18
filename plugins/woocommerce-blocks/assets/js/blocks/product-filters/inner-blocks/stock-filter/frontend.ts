@@ -6,6 +6,11 @@ import { DropdownContext } from '@woocommerce/interactivity-components/dropdown'
 import { HTMLElementEvent } from '@woocommerce/types';
 import { CheckboxListContext } from '@woocommerce/interactivity-components/checkbox-list';
 
+/**
+ * Internal dependencies
+ */
+import { navigate } from '../../frontend';
+
 const getUrl = ( activeFilters: string ) => {
 	const url = new URL( window.location.href );
 	const { searchParams } = url;

@@ -74,7 +74,7 @@ async function runComingSoonTests( themeContext = '' ) {
 
 test.describe(
 	'Launch Your Store front end - logged out',
-	{ tag: [ '@payments', '@services' ] },
+	{ tag: [ '@skip-on-default-wpcom', '@skip-on-default-pressable' ] },
 	() => {
 		test.afterAll( async ( { baseURL } ) => {
 			try {

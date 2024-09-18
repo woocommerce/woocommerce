@@ -197,16 +197,18 @@ class Controller extends GenericStatsController {
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array(
-			'date',
-			'net_revenue',
-			'coupons',
-			'refunds',
-			'shipping',
-			'taxes',
-			'net_revenue',
-			'orders_count',
-			'items_sold',
+		$params['orderby']['enum'] = $this->apply_custom_orderby_filters(
+			array(
+				'date',
+				'net_revenue',
+				'coupons',
+				'refunds',
+				'shipping',
+				'taxes',
+				'net_revenue',
+				'orders_count',
+				'items_sold',
+			)
 		);
 		$params['categories']      = array(
 			'description'       => __( 'Limit result to items from the specified categories.', 'woocommerce' ),

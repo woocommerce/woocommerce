@@ -35,6 +35,7 @@ export type TaskType = {
 		stripeTaxActivated?: boolean;
 		woocommerceTaxActivated?: boolean;
 		woocommerceShippingActivated?: boolean;
+		wooPaymentsIncentiveId?: string;
 	};
 	// Possibly added in DeprecatedTasks.mergeDeprecatedCallbackFunctions
 	isDeprecated?: boolean;

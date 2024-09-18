@@ -9,6 +9,7 @@ import { debounce } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
+import { navigate } from '../../frontend';
 import type { PriceFilterContext, PriceFilterStore } from './types';
 
 const getUrl = ( context: PriceFilterContext ) => {

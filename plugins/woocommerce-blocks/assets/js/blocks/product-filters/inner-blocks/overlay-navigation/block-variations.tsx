@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockVariation } from '@wordpress/blocks';
+import { Icon, button } from '@wordpress/icons';
 
 const variations: BlockVariation[] = [
 	{
@@ -12,6 +13,8 @@ const variations: BlockVariation[] = [
 			triggerType: 'open-overlay',
 		},
 		isDefault: false,
+		icon: <Icon icon={ button } />,
+		isActive: [ 'triggerType' ],
 	},
 ];
 
