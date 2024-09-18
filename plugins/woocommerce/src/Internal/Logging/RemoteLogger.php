@@ -77,7 +77,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			'host'       => SafeGlobalFunctionProxy::wp_parse_url( SafeGlobalFunctionProxy::home_url(), PHP_URL_HOST ) ?? 'Unable to retrieve host',
 			'tags'       => array( 'woocommerce', 'php' ),
 			'properties' => array(
-				'wc_version'  => $this->get_wc_version(), // TODO check this
+				'wc_version'  => $this->get_wc_version(),
 				'php_version' => phpversion(),
 				'wp_version'  => SafeGlobalFunctionProxy::get_bloginfo( 'version' ) ?? 'Unable to retrieve wp version',
 				'request_uri' => $this->sanitize_request_uri( filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL ) ),
@@ -250,7 +250,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			)
 		);
 
-		if ( SafeGlobalFunctionProxy::is_wp_error( $response ) ) { // TODO: check this because the proxy doesn't return a WP_Error
+		if ( SafeGlobalFunctionProxy::is_wp_error( $response ) ) {
 			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to send the log to the remote logging service: ' . $response->get_error_message(), array( 'source' => 'remote-logging' ) );
 			return false;
 		}
@@ -288,7 +288,16 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		// If the current version is the latest, we don't want to log errors.
-		return version_compare( $this->get_wc_version(), $new_version, '>=' ); // TODO check this
+		return version_compare( $this->get_wc_version(), $new_version, '>=' );
+	}
+
+	/**
+	 * Get the current WooCommerce version.
+	 *
+	 * @return string The current WooCommerce version.
+	 */
+	private function get_wc_version() {
+		return WC()->version;
 	}
 
 	/**
@@ -475,7 +484,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		$whitelist = apply_filters( 'woocommerce_remote_logger_request_uri_whitelist', $default_whitelist );
 
 		$parsed_url = SafeGlobalFunctionProxy::wp_parse_url( $request_uri );
-		if ( ! isset( $parsed_url['query'] ) ) { // TODO: make sure this is failsafe
+		if ( ! is_array( $parsed_url ) || ! isset( $parsed_url['query'] ) ) {
 			return $request_uri;
 		}
 
