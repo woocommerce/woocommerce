@@ -24,6 +24,11 @@ if ( class_exists( 'WC_Admin_Reports', false ) ) {
 class WC_Admin_Reports {
 
 	/**
+	 * Register the proper hook handlers.
+	 */
+	public static function register_hook_handlers() {}
+
+	/**
 	 * Handles output of the reports page in admin.
 	 */
 	public static function output() {
