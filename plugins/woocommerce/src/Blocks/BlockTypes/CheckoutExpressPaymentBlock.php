@@ -51,9 +51,9 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 	 * @param WP_Post $post Post object.
 	 */
 	public function sync_express_payment_attrs( $post_id, $post ) {
-		if ( $post_id === wc_get_page_id( 'cart' ) ) {
+		if ( wc_get_page_id( 'cart' ) === $post_id ) {
 			$cart_or_checkout = 'cart';
-		} elseif ( $post_id === wc_get_page_id( 'checkout' ) ) {
+		} elseif ( wc_get_page_id( 'checkout' ) === $post_id ) {
 			$cart_or_checkout = 'checkout';
 		} else {
 			return;
@@ -83,9 +83,8 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 			return;
 		}
 
-		error_log('sync_express_payment_attrs');
 		try {
-			// Parse the post content to get the express payment attributes of the current page
+			// Parse the post content to get the express payment attributes of the current page.
 			$blocks = parse_blocks( $post->post_content );
 			$attrs  = CartCheckoutUtils::find_express_checkout_attributes( $blocks, $cart_or_checkout );
 
@@ -95,8 +94,8 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 			$updated_attrs = array_merge( $this->default_styles, $attrs );
 
 			// We need to sync the attributes between the Cart and Checkout pages.
-			$other_page = $cart_or_checkout === 'cart' ? 'checkout' : 'cart';
-			
+			$other_page = 'cart' === $cart_or_checkout ? 'checkout' : 'cart';
+
 			$this->update_other_page_with_express_payment_attrs( $other_page, $updated_attrs );
 		} catch ( Exception $e ) {
 			error_log( 'Error updating express payment attributes: ' . $e->getMessage() );
@@ -106,30 +105,31 @@ class CheckoutExpressPaymentBlock extends AbstractInnerBlock {
 
 	/**
 	 * Update the express payment attributes in the other page (Cart or Checkout).
-	 * 
+	 *
 	 * @param string $cart_or_checkout The page to update.
 	 * @param array  $updated_attrs     The updated attributes.
 	 */
 	private function update_other_page_with_express_payment_attrs( $cart_or_checkout, $updated_attrs ) {
-		$page_id = $cart_or_checkout === 'cart' ? wc_get_page_id( 'cart' ) : wc_get_page_id( 'checkout' );
+		$page_id = 'cart' === $cart_or_checkout ? wc_get_page_id( 'cart' ) : wc_get_page_id( 'checkout' );
 
-		if( -1 === $page_id ) {
+		if ( -1 === $page_id ) {
 			return;
 		}
 
-		$post    = get_post( $page_id );
-		
+		$post = get_post( $page_id );
+
 		if ( empty( $post->post_content ) ) {
 			return;
 		}
 
-		$blocks  = parse_blocks( $post->post_content );
+		$blocks = parse_blocks( $post->post_content );
 		CartCheckoutUtils::update_blocks_with_new_attrs( $blocks, $cart_or_checkout, $updated_attrs );
 
 		$updated_content = serialize_blocks( $blocks );
 		remove_action( 'save_post', array( $this, 'sync_express_payment_attrs' ), 10, 2 );
 
-		wp_update_post( array(
+		wp_update_post(
+			array(
 				'ID'           => $page_id,
 				'post_content' => $updated_content,
 			),
