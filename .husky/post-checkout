@@ -23,7 +23,6 @@ if [ "$CHECKOUT_TYPE" = '1' ]; then
 	# Auto-refresh dependencies when switching between branches.
 	changedManifests=$( ( git diff --name-only $HEAD_NEW $HEAD_PREVIOUS | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
 	if [ -n "$changedManifests" ]; then
-		# TODO: warning instead of active installation
 		printf "${whiteColoured}The following file(s) in the new branch differs from the original one, dependencies might need to be refreshed:\n"
 		printf "${whiteColoured}    %s\n" $changedManifests
 		printf "${orangeColoured}If you are working on something in this branch, ensure to refresh dependencies with 'pnpm install --frozen-lockfile'\n"
