@@ -57,7 +57,7 @@ function scrollToFirstProductIfNotVisible( wcNavigationId?: string ) {
 		return;
 	}
 
-	const productSelector = `[data-wc-navigation-id=${ wcNavigationId }] .wc-block-product-template .wc-block-product`;
+	const productSelector = `[data-wc-router-region=${ wcNavigationId }] .wc-block-product-template .wc-block-product`;
 	const product = document.querySelector( productSelector );
 	if ( product ) {
 		const rect = product.getBoundingClientRect();
@@ -100,10 +100,10 @@ const productCollectionStore = {
 			const ctx = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
 			const wcNavigationId = (
-				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+				ref?.closest( '[data-wc-router-region]' ) as HTMLDivElement
 			 )?.dataset?.wcNavigationId;
 			const isDisabled = (
-				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+				ref?.closest( '[data-wc-router-region]' ) as HTMLDivElement
 			 )?.dataset.wcNavigationDisabled;
 
 			if ( isDisabled ) {
@@ -155,7 +155,7 @@ const productCollectionStore = {
 			const { ref } = getElement();
 
 			const isDisabled = (
-				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+				ref?.closest( '[data-wc-router-region]' ) as HTMLDivElement
 			 )?.dataset.wcNavigationDisabled;
 
 			if ( isDisabled ) {
@@ -186,7 +186,7 @@ const productCollectionStore = {
 		*prefetch() {
 			const { ref } = getElement();
 			const isDisabled = (
-				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+				ref?.closest( '[data-wc-router-region]' ) as HTMLDivElement
 			 )?.dataset.wcNavigationDisabled;
 
 			if ( isDisabled ) {
