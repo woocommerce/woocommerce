@@ -149,9 +149,11 @@ test.describe(
 						.locator( 'legend' )
 				).toBeVisible();
 				await expect(
-					page.locator(
-						'.wp-block-woocommerce-checkout-order-summary-block'
-					)
+					page
+						.locator(
+							'.wp-block-woocommerce-checkout-order-summary-block'
+						)
+						.first()
 				).toBeVisible();
 				await expect(
 					page.locator( '.wc-block-components-address-form' ).first()

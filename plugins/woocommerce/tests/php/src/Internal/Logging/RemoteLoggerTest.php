@@ -228,7 +228,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					array(
 						'feature'  => 'woocommerce_core',
 						'severity' => 'error',
-						'message'  => 'Fatal error occurred at line 123 in **/wp-content/file.php',
+						'message'  => 'Fatal error occurred at line 123 in ./wp-content/file.php',
 						'tags'     => array( 'woocommerce', 'php', 'tag1', 'tag2' ),
 					),
 				),
@@ -236,7 +236,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					'error',
 					'Test error message',
 					array( 'backtrace' => ABSPATH . 'wp-content/plugins/woocommerce/file.php' ),
-					array( 'trace' => '**/woocommerce/file.php' ),
+					array( 'trace' => './woocommerce/file.php' ),
 				),
 				'log with extra attributes' => array(
 					'error',
@@ -252,6 +252,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 							'key1' => 'value1',
 							'key2' => 'value2',
 						),
+					),
+				),
+				'log with error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WC_ABSPATH . 'includes/class-wc-test.php' ) ),
+					array(
+						'file' => './woocommerce/includes/class-wc-test.php',
 					),
 				),
 			);
@@ -348,7 +356,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 			$setup( $this );
 
-			$result = $this->invoke_private_method( $this->sut, 'should_handle', array( $level, 'Test message', array() ) );
+			$result = $this->invoke_private_method( $this->sut, 'should_handle', array( $level, 'Test message', array( 'remote-logging' => true ) ) );
 			$this->assertEquals( $expected, $result );
 		}
 
@@ -378,6 +386,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
+		 * @testdox Test should_handle returns false without remote-logging context
+		 */
+		public function test_should_handle_no_remote_logging_context() {
+			$result = $this->invoke_private_method( $this->sut, 'should_handle', array( 'error', 'Test message', array() ) );
+			$this->assertFalse( $result, 'should_handle should return false without remote-logging context' );
+		}
+
+		/**
 		 * @testdox handle method applies filter and doesn't send logs when filtered to null
 		 */
 		public function test_handle_filtered_log_null() {
@@ -390,7 +406,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			add_filter( 'woocommerce_remote_logger_formatted_log_data', fn() => null, 10, 4 );
 			add_filter( 'pre_http_request', fn() => $this->fail( 'wp_safe_remote_post should not be called' ), 10, 3 );
 
-			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
 		}
 
 		/**
@@ -404,7 +420,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$this->sut->set_is_dev_or_local( true );
 			$this->sut->method( 'is_remote_logging_allowed' )->willReturn( true );
 
-			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array() ) );
+			$this->assertFalse( $this->sut->handle( time(), 'error', 'Test message', array( 'remote-logging' => true ) ) );
 		}
 
 		/**
@@ -435,7 +451,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				3
 			);
 
-			$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array() ) );
+			$this->assertTrue( $this->sut->handle( time(), 'critical', 'Test message', array( 'remote-logging' => true ) ) );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 		}
 
@@ -462,7 +478,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				3
 			);
 
-			$this->assertFalse( $this->sut->handle( time(), 'critical', 'Test message', array() ) );
+			$this->assertFalse( $this->sut->handle( time(), 'critical', 'Test message', array( 'remote-logging' => true ) ) );
 			$this->assertTrue( WC_Rate_Limiter::retried_too_soon( RemoteLogger::RATE_LIMIT_ID ) );
 		}
 
@@ -528,7 +544,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function test_sanitize() {
 			$message  = WC_ABSPATH . 'includes/class-wc-test.php on line 123';
-			$expected = '**/woocommerce/includes/class-wc-test.php on line 123';
+			$expected = './woocommerce/includes/class-wc-test.php on line 123';
 			$result   = $this->invoke_private_method( $this->sut, 'sanitize', array( $message ) );
 			$this->assertEquals( $expected, $result );
 		}
@@ -541,7 +557,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				WC_ABSPATH . 'includes/class-wc-test.php:123',
 				ABSPATH . 'wp-includes/plugin.php:456',
 			);
-			$expected = "**/woocommerce/includes/class-wc-test.php:123\n**/wp-includes/plugin.php:456";
+			$expected = "./woocommerce/includes/class-wc-test.php:123\n./wp-includes/plugin.php:456";
 			$result   = $this->invoke_private_method( $this->sut, 'sanitize_trace', array( $trace ) );
 			$this->assertEquals( $expected, $result );
 		}

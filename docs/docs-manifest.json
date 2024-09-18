@@ -874,7 +874,7 @@
           "menu_title": "Development environment setup",
           "tags": "tutorial, setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "9e471d3f44a882fe61dcad9e5207d51b280a7220aae1bf6e4ae1fbdd68b7e3d4",
+          "hash": "bf5d77349ea64d1b8e19fe6b7472be35ed92406c5aafe677ce92363fb13f94d4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
@@ -1059,7 +1059,7 @@
           "menu_title": "DOM Events",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/dom-events.md",
-          "hash": "59a4b49eb146774d33229bc60ab7d8f74381493f6e7089ca8f0e2d0eb433a7a4",
+          "hash": "85cffe1cc273621f16f7362b5efe28ede9689cee0a6e87d0d426014bacc24b05",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/dom-events.md",
           "id": "c8d247b91472740075871e6b57a9583d893ac650"
         }
@@ -1229,7 +1229,7 @@
           "menu_title": "Core critical flows",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "472f5a240abe907fec83a8a9f88af6699f2d994aa7ae87faa1716a087baa66db",
+          "hash": "34109195216ebcb5b23e741391b9f355ba861777a5533d4ef1e341472cb5209e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "77c102c35a45b0681e7b70def9d639d764e4e5068121c2ef4dd23477c0f8784c"
+  "hash": "47dc2a7e213e1e9d83e93a85dafdf8c7b539cc5474b4166eb6398b734d150ff3"
 }
