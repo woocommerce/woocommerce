@@ -9,7 +9,7 @@ import {
 } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
 import { speak } from '@wordpress/a11y';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -58,6 +58,16 @@ export default function Content(): JSX.Element {
 		setSearchResultsCount,
 	} = marketplaceContextValue;
 	const query = useQuery();
+
+	const searchCompleteAnnouncement = ( count: number ): void => {
+		speak(
+			sprintf(
+				// translators: %d is the number of products found.
+				__( '%d products found', 'woocommerce' ),
+				count
+			)
+		);
+	};
 
 	const tagProductsWithType = (
 		products: Product[],
@@ -188,6 +198,8 @@ export default function Content(): JSX.Element {
 					setSearchResultsCount( {
 						[ query.tab ]: productList.totalProducts,
 					} );
+
+					searchCompleteAnnouncement( productList.totalProducts );
 				} )
 				.catch( () => {
 					setAllProducts( [] );
@@ -268,6 +280,12 @@ export default function Content(): JSX.Element {
 								break;
 						}
 					} );
+
+					searchCompleteAnnouncement(
+						results.reduce( ( acc, curr ) => {
+							return acc + curr.totalProducts;
+						}, 0 )
+					);
 				} )
 				.catch( () => {
 					setAllProducts( [] );
