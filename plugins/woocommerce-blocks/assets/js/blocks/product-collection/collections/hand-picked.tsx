@@ -50,7 +50,7 @@ const collection = {
 		'Select specific products to recommend to customers.',
 		'woocommerce'
 	),
-	keywords: [ 'hand-picked products', 'product collection' ],
+	keywords: [ 'specific', 'choose' ],
 	scope: [],
 };
 
@@ -65,7 +65,11 @@ const attributes = {
 		perPage: 0,
 		pages: 0,
 	},
-	hideControls: [ CoreFilterNames.HAND_PICKED ],
+	hideControls: [
+		CoreFilterNames.HAND_PICKED,
+		CoreFilterNames.FILTERABLE,
+		CoreFilterNames.ORDER,
+	],
 };
 
 const heading: InnerBlockTemplate = [
