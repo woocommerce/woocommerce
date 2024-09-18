@@ -2929,7 +2929,7 @@ function wc_update_940_remove_help_panel_highlight_shown() {
  */
 function wc_update_940_update_analytics_tax_lookup_db() {
 	global $wpdb;
-	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup ADD COLUMN tax_rate_name VARCHAR(200), ADD COLUMN tax_rate VARCHAR(8), ADD COLUMN tax_rate_priority BIGINT" );
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup ADD COLUMN tax_rate_name VARCHAR(200), ADD COLUMN tax_rate VARCHAR(8), ADD COLUMN tax_rate_priority BIGINT, ADD COLUMN order_status VARCHAR(20)" );
 
 	$import = ReportsSync::regenerate_report_data( false, false );
 
