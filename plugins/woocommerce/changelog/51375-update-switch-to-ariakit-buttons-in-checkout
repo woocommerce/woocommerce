@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Harden styles for interactive elements in Checkout block to prevent style leakage.

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+. "$(dirname "$0")/_/husky.sh"
+
+# '1' is branch
+CHECKOUT_TYPE=$3
+redColoured='\033[0;31m'
+whiteColoured='\033[0m'
+
+if [ "$CHECKOUT_TYPE" = '1' ]; then
+	canUpdateDependencies='no'
+
+	# Prompt about pnpm versions mismatch when switching between branches.
+	currentPnpmVersion=$( ( command -v pnpm > /dev/null && pnpm -v ) || echo 'n/a' )
+	targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
+	if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
+		printf "${redColoured}pnpm versions mismatch: in use '$currentPnpmVersion', needed '$targetPnpmVersion'. Here some hints how to solve this:\n"
+		printf "${redColoured}* actualize environment: 'nvm use && pnpm -v' (the most common case)\n"
+		printf "${redColoured}* install: 'npm install -g pnpm@$targetPnpmVersion'\n"
+	else
+		canUpdateDependencies='yes'
+	fi
+
+	# Auto-refresh dependencies when switching between branches.
+	changedManifests=$( ( git diff --name-only HEAD ORIG_HEAD  | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
+	if [ -n "$changedManifests" ]; then
+		printf "${whiteColoured}It was a change in the following file(s) - refreshing dependencies:\n"
+		printf "${whiteColoured}    %s\n" $changedManifests
+
+		if [ "$canUpdateDependencies" = 'yes' ]; then
+			pnpm install --frozen-lockfile
+		else
+			printf "${redColoured}Skipping dependencies refresh. Please actualize pnpm version and execute 'pnpm install --frozen-lockfile' manually.\n"
+		fi
+	fi
+fi

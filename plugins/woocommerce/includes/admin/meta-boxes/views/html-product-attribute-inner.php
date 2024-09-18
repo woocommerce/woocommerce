@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<strong><?php echo esc_html( wc_attribute_label( $attribute->get_name() ) ); ?></strong>
 				<input type="hidden" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" />
 			<?php else : ?>
-				<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'f.e. size or color', 'woocommerce' ); ?>" />
+				<input type="text" class="attribute_name" name="attribute_names[<?php echo esc_attr( $i ); ?>]" value="<?php echo esc_attr( $attribute->get_name() ); ?>" placeholder="<?php esc_attr_e( 'e.g. length or weight', 'woocommerce' ); ?>" />
 			<?php endif; ?>
 			<input type="hidden" name="attribute_position[<?php echo esc_attr( $i ); ?>]" class="attribute_position" value="<?php echo esc_attr( $attribute->get_position() ); ?>" />
 		</td>
