@@ -327,9 +327,7 @@ const ProductTemplateEdit = (
 		customClassName = shrinkColumns ? dynamicGrid : staticGrid;
 	}
 
-	customClassName = `${ customClassName } is-${ widthType }-width`;
 	let style = {};
-
 	if (
 		WidthOptions.FIXED === widthType &&
 		fixedWidth &&
