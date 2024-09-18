@@ -9,13 +9,6 @@ namespace Automattic\WooCommerce;
 class HooksRegistry {
 
 	/**
-	 * Whether the hooks are already loaded or not.
-	 *
-	 * @var bool $hooks_loaded
-	 */
-	public static bool $hooks_loaded = false;
-
-	/**
 	 * List of all actions that should be registered for all requests.
 	 *
 	 * @var array[] $all_request_actions
@@ -107,18 +100,12 @@ class HooksRegistry {
 		foreach ( self::$frontend_filters as $filter ) {
 			call_user_func_array( 'add_filter', $filter );
 		}
-
-		self::$hooks_loaded = true;
 	}
 
 	/**
 	 * DANGEROUS: This method is used for testing and benchmarking. Do not call, unless you really know what you are doing.
 	 */
 	public static function unload_hooks() {
-		if ( ! self::$hooks_loaded ) {
-			return;
-		}
-
 		if ( is_admin() ) {
 			foreach ( self::$admin_actions as $action ) {
 				call_user_func_array( 'remove_action', $action );
@@ -146,7 +133,5 @@ class HooksRegistry {
 		foreach ( self::$all_request_filters as $filter ) {
 			call_user_func_array( 'remove_filter', $filter );
 		}
-
-		self::$hooks_loaded = false;
 	}
 }
