@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Added missing wp-block- classes to order confirmation, store notices, and breadcrumb blocks.

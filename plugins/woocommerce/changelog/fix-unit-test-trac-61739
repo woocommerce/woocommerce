@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Update unit test to account for WordPress nightly change. See core trac ticket 61739
+
+

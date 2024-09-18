@@ -1,14 +1,12 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@woocommerce/interactivity';
-import { DropdownContext } from '@woocommerce/interactivity-components/dropdown';
-import { HTMLElementEvent } from '@woocommerce/types';
+import { store, getContext, getElement } from '@woocommerce/interactivity';
 
 /**
  * Internal dependencies
  */
-import { navigate } from '../../frontend';
+import { ProductFiltersContext } from '../../frontend';
 
 type AttributeFilterContext = {
 	attributeSlug: string;
@@ -16,102 +14,72 @@ type AttributeFilterContext = {
 	selectType: 'single' | 'multiple';
 };
 
-interface ActiveAttributeFilterContext extends AttributeFilterContext {
-	value: string;
-}
-
-function nonNullable< T >( value: T ): value is NonNullable< T > {
-	return value !== null && value !== undefined;
-}
-
-function getUrl(
-	selectedTerms: string[],
-	slug: string,
-	queryType: 'or' | 'and'
-) {
-	const url = new URL( window.location.href );
-	const { searchParams } = url;
-
-	if ( selectedTerms.length > 0 ) {
-		searchParams.set( `filter_${ slug }`, selectedTerms.join( ',' ) );
-		searchParams.set( `query_type_${ slug }`, queryType );
-	} else {
-		searchParams.delete( `filter_${ slug }` );
-		searchParams.delete( `query_type_${ slug }` );
-	}
-
-	return url.href;
-}
-
-function getSelectedTermsFromUrl( slug: string ) {
-	const url = new URL( window.location.href );
-	return ( url.searchParams.get( `filter_${ slug }` ) || '' )
-		.split( ',' )
-		.filter( Boolean );
-}
-
 store( 'woocommerce/product-filter-attribute', {
 	actions: {
-		navigate: () => {
-			const dropdownContext = getContext< DropdownContext >(
-				'woocommerce/interactivity-dropdown'
-			);
-			const context = getContext< AttributeFilterContext >();
-			const filters = dropdownContext.selectedItems
-				.map( ( item ) => item.value )
-				.filter( nonNullable );
+		toggleFilter: () => {
+			const { ref } = getElement();
+			const targetAttribute =
+				ref.getAttribute( 'data-attribute-value' ) ?? 'value';
+			const termSlug = ref.getAttribute( targetAttribute );
 
-			navigate(
-				getUrl( filters, context.attributeSlug, context.queryType )
-			);
-		},
-		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
-			if ( ! event.target.value ) return;
+			if ( ! termSlug ) return;
 
-			const context = getContext< AttributeFilterContext >();
-
-			let selectedTerms = getSelectedTermsFromUrl(
-				context.attributeSlug
+			const { attributeSlug, queryType } =
+				getContext< AttributeFilterContext >();
+			const productFiltersContext = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
 			);
 
 			if (
-				event.target.checked &&
-				! selectedTerms.includes( event.target.value )
+				! (
+					`filter_${ attributeSlug }` in productFiltersContext.params
+				)
 			) {
-				if ( context.selectType === 'multiple' )
-					selectedTerms.push( event.target.value );
-				if ( context.selectType === 'single' )
-					selectedTerms = [ event.target.value ];
-			} else {
-				selectedTerms = selectedTerms.filter(
-					( value ) => value !== event.target.value
-				);
+				productFiltersContext.params = {
+					...productFiltersContext.params,
+					[ `filter_${ attributeSlug }` ]: termSlug,
+					[ `query_type_${ attributeSlug }` ]: queryType,
+				};
+				return;
 			}
 
-			navigate(
-				getUrl(
-					selectedTerms,
-					context.attributeSlug,
-					context.queryType
-				)
-			);
-		},
-		removeFilter: () => {
-			const { attributeSlug, queryType, value } =
-				getContext< ActiveAttributeFilterContext >();
+			const selectedTerms =
+				productFiltersContext.params[
+					`filter_${ attributeSlug }`
+				].split( ',' );
+			if ( selectedTerms.includes( termSlug ) ) {
+				const remainingSelectedTerms = selectedTerms.filter(
+					( term ) => term !== termSlug
+				);
+				if ( remainingSelectedTerms.length > 0 ) {
+					productFiltersContext.params[
+						`filter_${ attributeSlug }`
+					] = remainingSelectedTerms.join( ',' );
+				} else {
+					const updatedParams = productFiltersContext.params;
 
-			let selectedTerms = getSelectedTermsFromUrl( attributeSlug );
+					delete updatedParams[ `filter_${ attributeSlug }` ];
+					delete updatedParams[ `query_type_${ attributeSlug }` ];
 
-			selectedTerms = selectedTerms.filter( ( item ) => item !== value );
-
-			navigate( getUrl( selectedTerms, attributeSlug, queryType ) );
+					productFiltersContext.params = updatedParams;
+				}
+			} else {
+				productFiltersContext.params[ `filter_${ attributeSlug }` ] =
+					selectedTerms.concat( termSlug ).join( ',' );
+			}
 		},
 
 		clearFilters: () => {
-			const { attributeSlug, queryType } =
-				getContext< ActiveAttributeFilterContext >();
+			const { attributeSlug } = getContext< AttributeFilterContext >();
+			const productFiltersContext = getContext< ProductFiltersContext >(
+				'woocommerce/product-filters'
+			);
+			const updatedParams = productFiltersContext.params;
 
-			navigate( getUrl( [], attributeSlug, queryType ) );
+			delete updatedParams[ `filter_${ attributeSlug }` ];
+			delete updatedParams[ `query_type_${ attributeSlug }` ];
+
+			productFiltersContext.params = updatedParams;
 		},
 	},
 } );
