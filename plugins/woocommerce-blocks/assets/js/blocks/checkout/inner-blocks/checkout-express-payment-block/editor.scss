@@ -33,11 +33,15 @@
 }
 
 .express-payment-styles-beta-badge {
-	background: $gray-700;
-	color: #fff;
-	padding: 2px 6px;
-	border-radius: 15px;
-	margin-left: 2px;
+	margin-left: $grid-unit-10;
+	padding: 2px $grid-unit-10;
+	height: $grid-unit-30;
+	border-radius: $radius-block-ui;
+	background-color: $gray-900;
+	color: $white;
+	align-items: center;
+	font-size: $helptext-font-size;
+	line-height: 1;
 }
 
 // Disabled changing units from px for border radius control
