@@ -63,7 +63,6 @@ export interface ProductCollectionDisplayLayout {
 export interface ProductCollectionDimensions {
 	widthType: WidthOptions;
 	fixedWidth?: number;
-	minHeight?: number;
 }
 
 export enum ETimeFrameOperator {
