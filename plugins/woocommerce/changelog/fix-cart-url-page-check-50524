@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+wc_get_cart_url should only return current URL if on the cart page. This excludes the usage of WOOCOMMERCE_CART.

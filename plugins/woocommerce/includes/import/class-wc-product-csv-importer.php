@@ -198,7 +198,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				return absint( $original_id );
 			}
 
-			// See if the given ID maps to a valid product allready.
+			// See if the given ID maps to a valid product already.
 			$existing_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND ID = %d;", $id ) ); // WPCS: db call ok, cache ok.
 
 			if ( $existing_id ) {

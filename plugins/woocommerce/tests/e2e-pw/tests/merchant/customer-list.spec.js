@@ -83,138 +83,157 @@ test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 		await context.route( '**/users/**', ( route ) => route.abort() );
 	} );
 
-	test( 'Merchant can view a list of all customers, filter and download', async ( {
-		page,
-		customers,
-	} ) => {
-		await test.step( 'Go to the customers reports page', async () => {
-			const responsePromise = page.waitForResponse(
-				'**/wp-json/wc-analytics/reports/customers?orderby**'
-			);
-			await page.goto(
-				'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
-			);
-			await responsePromise;
-		} );
+	test(
+		'Merchant can view a list of all customers, filter and download',
+		{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
+		async ( { page, customers } ) => {
+			await test.step( 'Go to the customers reports page', async () => {
+				const responsePromise = page.waitForResponse(
+					'**/wp-json/wc-analytics/reports/customers?orderby**'
+				);
+				await page.goto(
+					'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
+				);
+				await responsePromise;
+			} );
 
-		// may have more than 3 customers due to guest orders
-		// await test.step( 'Check that 3 customers are displayed', async () => {
-		// 	await expect(
-		// 		page.getByText( '3customers0Average orders$0.' )
-		// 	).toBeVisible();
-		// } );
+			// may have more than 3 customers due to guest orders
+			// await test.step( 'Check that 3 customers are displayed', async () => {
+			// 	await expect(
+			// 		page.getByText( '3customers0Average orders$0.' )
+			// 	).toBeVisible();
+			// } );
 
-		await test.step( 'Check that the customers are displayed in the list', async () => {
-			for ( const customer of customers ) {
-				await expect(
-					page.getByRole( 'link', { name: customer.email } )
-				).toBeVisible();
-			}
-		} );
+			await test.step( 'Check that the customers are displayed in the list', async () => {
+				for ( const customer of customers ) {
+					await expect(
+						page.getByRole( 'link', { name: customer.email } )
+					).toBeVisible();
+				}
+			} );
 
-		await test.step( 'Check that the customer list can be filtered by first name', async () => {
-			let x = 1;
-			for ( const customer of customers ) {
+			await test.step( 'Check that the customer list can be filtered by first name', async () => {
+				let x = 1;
+				for ( const customer of customers ) {
+					await page
+						.getByRole( 'combobox', {
+							expanded: false,
+							disabled: false,
+						} )
+						.click();
+					await page
+						.getByRole( 'combobox', {
+							expanded: false,
+							disabled: false,
+						} )
+						.pressSequentially(
+							`${ customer.first_name } ${ customer.last_name }`
+						);
+					await page
+						.getByRole( 'option', {
+							name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+							exact: true,
+						} )
+						.waitFor();
+					await page
+						.getByRole( 'option', {
+							name: `${ customer.first_name } ${ customer.last_name }`,
+							exact: true,
+						} )
+						.waitFor();
+					await page
+						.getByRole( 'option', {
+							name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
+							exact: true,
+						} )
+						.click( { delay: 300 } );
+					await expect(
+						page.getByRole( 'link', { name: customer.email } )
+					).toBeVisible();
+					await expect(
+						page.getByText( `${ x }customer` )
+					).toBeVisible();
+					x++;
+				}
+				await page.getByRole( 'button', { name: 'Clear all' } ).click();
+			} );
+
+			await test.step( 'Hide and display columns', async () => {
 				await page
-					.locator( '#woocommerce-select-control-0__control-input' )
+					.getByRole( 'button', {
+						name: 'Choose which values to display',
+					} )
+					.click();
+				// hide a few columns
+				await page.getByRole( 'menu' ).getByText( 'Username' ).click();
+				await page
+					.getByRole( 'menu' )
+					.getByText( 'Last active' )
 					.click();
 				await page
-					.locator( '#woocommerce-select-control-0__control-input' )
-					.pressSequentially(
-						`${ customer.first_name } ${ customer.last_name }`
-					);
-				await page
-					.getByRole( 'option', {
-						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
-						exact: true,
-					} )
-					.waitFor();
-				await page
-					.getByRole( 'option', {
-						name: `${ customer.first_name } ${ customer.last_name }`,
-						exact: true,
-					} )
-					.waitFor();
-				await page
-					.getByRole( 'option', {
-						name: `All customers with names that include ${ customer.first_name } ${ customer.last_name }`,
-						exact: true,
-					} )
-					.click( { delay: 300 } );
+					.getByRole( 'menu' )
+					.getByText( 'Total spend' )
+					.click();
+
+				// click to close the menu
+				await page.getByText( 'Show:' ).click();
+
 				await expect(
-					page.getByRole( 'link', { name: customer.email } )
+					page.getByRole( 'columnheader', { name: 'Username' } )
+				).toBeHidden();
+				await expect(
+					page.getByRole( 'columnheader', { name: 'Last active' } )
+				).toBeHidden();
+				await expect(
+					page.getByRole( 'columnheader', { name: 'Total spend' } )
+				).toBeHidden();
+
+				// show the columns again
+				await page
+					.getByRole( 'button', {
+						name: 'Choose which values to display',
+					} )
+					.click();
+				await page.getByRole( 'menu' ).getByText( 'Username' ).click();
+				await page
+					.getByRole( 'menu' )
+					.getByText( 'Last active' )
+					.click();
+				await page
+					.getByRole( 'menu' )
+					.getByText( 'Total spend' )
+					.click();
+
+				// click to close the menu
+				await page.getByText( 'Show:' ).click();
+
+				await expect(
+					page.getByRole( 'columnheader', { name: 'Username' } )
 				).toBeVisible();
 				await expect(
-					page.getByText( `${ x }customer` )
+					page.getByRole( 'columnheader', { name: 'Last active' } )
 				).toBeVisible();
-				x++;
-			}
-			await page.getByRole( 'button', { name: 'Clear all' } ).click();
-		} );
+				await expect(
+					page.getByRole( 'columnheader', { name: 'Total spend' } )
+				).toBeVisible();
+			} );
 
-		await test.step( 'Hide and display columns', async () => {
-			await page
-				.getByRole( 'button', {
-					name: 'Choose which values to display',
-				} )
-				.click();
-			// hide a few columns
-			await page.getByRole( 'menu' ).getByText( 'Username' ).click();
-			await page.getByRole( 'menu' ).getByText( 'Last active' ).click();
-			await page.getByRole( 'menu' ).getByText( 'Total spend' ).click();
+			await test.step( 'Download the customer list', async () => {
+				const downloadPromise = page.waitForEvent( 'download' );
+				await page.getByRole( 'button', { name: 'Download' } ).click();
+				const download = await downloadPromise;
 
-			// click to close the menu
-			await page.getByText( 'Show:' ).click();
+				const today = new Date();
+				const year = today.getFullYear();
+				const month = String( today.getMonth() + 1 ).padStart( 2, '0' );
+				const day = String( today.getDate() ).padStart( 2, '0' );
 
-			await expect(
-				page.getByRole( 'columnheader', { name: 'Username' } )
-			).toBeHidden();
-			await expect(
-				page.getByRole( 'columnheader', { name: 'Last active' } )
-			).toBeHidden();
-			await expect(
-				page.getByRole( 'columnheader', { name: 'Total spend' } )
-			).toBeHidden();
+				const filename = `customers_${ year }-${ month }-${ day }_orderby-date-last-active_order-desc_page-wc-admin_path--customers.csv`;
 
-			// show the columns again
-			await page
-				.getByRole( 'button', {
-					name: 'Choose which values to display',
-				} )
-				.click();
-			await page.getByRole( 'menu' ).getByText( 'Username' ).click();
-			await page.getByRole( 'menu' ).getByText( 'Last active' ).click();
-			await page.getByRole( 'menu' ).getByText( 'Total spend' ).click();
-
-			// click to close the menu
-			await page.getByText( 'Show:' ).click();
-
-			await expect(
-				page.getByRole( 'columnheader', { name: 'Username' } )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'columnheader', { name: 'Last active' } )
-			).toBeVisible();
-			await expect(
-				page.getByRole( 'columnheader', { name: 'Total spend' } )
-			).toBeVisible();
-		} );
-
-		await test.step( 'Download the customer list', async () => {
-			const downloadPromise = page.waitForEvent( 'download' );
-			await page.getByRole( 'button', { name: 'Download' } ).click();
-			const download = await downloadPromise;
-
-			const today = new Date();
-			const year = today.getFullYear();
-			const month = String( today.getMonth() + 1 ).padStart( 2, '0' );
-			const day = String( today.getDate() ).padStart( 2, '0' );
-
-			const filename = `customers_${ year }-${ month }-${ day }_orderby-date-last-active_order-desc_page-wc-admin_path--customers.csv`;
-
-			await expect( download.suggestedFilename() ).toBe( filename );
-		} );
-	} );
+				await expect( download.suggestedFilename() ).toBe( filename );
+			} );
+		}
+	);
 
 	test( 'Merchant can view a single customer', async ( {
 		page,
@@ -282,7 +301,8 @@ test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 				.getByRole( 'button' )
 				.click();
 			await page
-				.locator( '#woocommerce-select-control-1__control-input' )
+				.getByRole( 'group', { name: 'Email' } )
+				.getByRole( 'combobox', { expanded: false } )
 				.fill( customers[ 1 ].email );
 			await page
 				.getByRole( 'option', {
@@ -299,7 +319,8 @@ test.describe( 'Merchant > Customer List', { tag: '@services' }, () => {
 				.getByRole( 'button' )
 				.click();
 			await page
-				.locator( '#woocommerce-select-control-2__control-input' )
+				.getByRole( 'group', { name: 'Country / Region' } )
+				.getByRole( 'combobox', { expanded: false } )
 				.fill( 'US' );
 			await page
 				.getByRole( 'option', { name: 'United States (US)' } )

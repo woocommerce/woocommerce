@@ -40,15 +40,27 @@ class WC_Helper_Updater {
 		}
 		if ( WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_expired_and_expiring_subscriptions' ), 11 );
+			add_action( 'load-plugins.php', array( __CLASS__, 'setup_message_for_plugins_without_subscription' ), 11 );
 		}
 	}
 
 	/**
 	 * Add the hook for modifying default WPCore update notices on the plugins management page.
+	 * This is for plugins with expired or expiring subscriptions.
 	 */
 	public static function setup_message_for_expired_and_expiring_subscriptions() {
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_notice_for_expired_and_expiring_subscriptions' ), 10, 2 );
+		}
+	}
+
+	/**
+	 * Add the hook for modifying default WPCore update notices on the plugins management page.
+	 * This is for plugins without a subscription.
+	 */
+	public static function setup_message_for_plugins_without_subscription() {
+		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
+			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_notice_for_plugins_without_subscription' ), 10, 2 );
 		}
 	}
 
@@ -188,9 +200,11 @@ class WC_Helper_Updater {
 	public static function add_connect_woocom_plugin_message() {
 		$connect_page_url = add_query_arg(
 			array(
-				'page' => 'wc-admin',
-				'tab'  => 'my-subscriptions',
-				'path' => rawurlencode( '/extensions' ),
+				'page'         => 'wc-admin',
+				'tab'          => 'my-subscriptions',
+				'path'         => rawurlencode( '/extensions' ),
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_plugin_screen_connect',
 			),
 			admin_url( 'admin.php' )
 		);
@@ -257,8 +271,13 @@ class WC_Helper_Updater {
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
+		$installed_or_unconnected = array_merge(
+			WC_Helper::get_installed_subscriptions(),
+			WC_Helper::get_unconnected_subscriptions()
+		);
+
 		// Product subscriptions.
-		$subscriptions = wp_list_filter( WC_Helper::get_installed_subscriptions(), array( 'product_id' => $product_id ) );
+		$subscriptions = wp_list_filter( $installed_or_unconnected, array( 'product_id' => $product_id ) );
 		if ( empty( $subscriptions ) ) {
 			return;
 		}
@@ -287,10 +306,11 @@ class WC_Helper_Updater {
 
 			$renew_link = add_query_arg(
 				array(
+					'add-to-cart'  => $product_id,
 					'utm_source'   => 'pu',
 					'utm_campaign' => 'pu_plugin_screen_renew',
 				),
-				PluginsHelper::WOO_SUBSCRIPTION_PAGE_URL
+				PluginsHelper::WOO_CART_PAGE_URL
 			);
 
 			/* translators: 1: Product regular price */
@@ -331,6 +351,52 @@ class WC_Helper_Updater {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, show a message if plugin is without a subscription.
+	 * Only Woo local plugins are passed to this function.
+	 *
+	 * @see setup_message_for_plugins_without_subscription
+	 * @param object $plugin_data An array of plugin metadata.
+	 * @param object $response  An object of metadata about the available plugin update.
+	 *
+	 * @return void.
+	 */
+	public static function display_notice_for_plugins_without_subscription( $plugin_data, $response ) {
+		// Extract product ID from the response.
+		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
+
+		if ( WC_Helper::has_product_subscription( $product_id ) ) {
+			return;
+		}
+
+		// Prepare the expiry notice based on subscription status.
+		$purchase_link = add_query_arg(
+			array(
+				'add-to-cart'  => $product_id,
+				'utm_source'   => 'pu',
+				'utm_campaign' => 'pu_plugin_screen_purchase',
+			),
+			PluginsHelper::WOO_CART_PAGE_URL,
+		);
+
+		$notice = sprintf(
+			/* translators: 1: URL to My Subscriptions page */
+			__( ' You don\'t have a subscription, <a href="%1$s" class="woocommerce-purchase-subscription">subscribe</a> to update.', 'woocommerce' ),
+			esc_url( $purchase_link ),
+		);
+
+		// Display the expiry notice.
+		echo wp_kses(
+			$notice,
+			array(
+				'a' => array(
+					'href'  => array(),
+					'class' => array(),
+				),
+			)
+		);
 	}
 
 	/**

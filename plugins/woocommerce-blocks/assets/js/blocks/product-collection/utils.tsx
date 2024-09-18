@@ -3,11 +3,19 @@
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
-import { select } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
+import { store as coreDataStore } from '@wordpress/core-data';
 import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
-import { useLayoutEffect } from '@wordpress/element';
+import {
+	useEffect,
+	useLayoutEffect,
+	useState,
+	useMemo,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type { ProductResponseItem } from '@woocommerce/types';
+import { getProduct } from '@woocommerce/editor-components/utils';
 import {
 	createBlock,
 	// @ts-expect-error Type definitions for this function are missing in Guteberg
@@ -25,6 +33,7 @@ import {
 	ProductCollectionDisplayLayout,
 	PreviewState,
 	SetPreviewState,
+	ProductCollectionUIStatesInEditor,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -165,11 +174,154 @@ export const addProductCollectionToQueryPaginationParentOrAncestor = () => {
 	}
 };
 
+/**
+ * Get the message to show in the preview label when the block is in preview mode based
+ * on the `usesReference` value.
+ */
+export const getUsesReferencePreviewMessage = (
+	location: WooCommerceBlockLocation,
+	isUsingReferencePreviewMode: boolean
+) => {
+	if ( isUsingReferencePreviewMode ) {
+		if ( location.type === LocationType.Product ) {
+			return __(
+				'Actual products will vary depending on the product being viewed.',
+				'woocommerce'
+			);
+		}
+
+		return __(
+			'Actual products will vary depending on the page being viewed.',
+			'woocommerce'
+		);
+	}
+
+	return '';
+};
+
+export const useProductCollectionUIState = ( {
+	location,
+	usesReference,
+	attributes,
+	hasInnerBlocks,
+}: {
+	location: WooCommerceBlockLocation;
+	usesReference?: string[] | undefined;
+	attributes: ProductCollectionAttributes;
+	hasInnerBlocks: boolean;
+} ) => {
+	// Fetch product to check if it's deleted.
+	// `product` will be undefined if it doesn't exist.
+	const productId = attributes.query?.productReference;
+	const { product, hasResolved } = useSelect(
+		( selectFunc ) => {
+			if ( ! productId ) {
+				return { product: null, hasResolved: true };
+			}
+
+			const { getEntityRecord, hasFinishedResolution } =
+				selectFunc( coreDataStore );
+			const selectorArgs = [ 'postType', 'product', productId ];
+			return {
+				product: getEntityRecord( ...selectorArgs ),
+				hasResolved: hasFinishedResolution(
+					'getEntityRecord',
+					selectorArgs
+				),
+			};
+		},
+		[ productId ]
+	);
+
+	const productCollectionUIStateInEditor = useMemo( () => {
+		const isInRequiredLocation = usesReference?.includes( location.type );
+		const isCollectionSelected = !! attributes.collection;
+
+		/**
+		 * Case 1: Product context picker
+		 */
+		const isProductContextRequired = usesReference?.includes( 'product' );
+		const isProductContextSelected =
+			( attributes.query?.productReference ?? null ) !== null;
+		if (
+			isCollectionSelected &&
+			isProductContextRequired &&
+			! isInRequiredLocation &&
+			! isProductContextSelected
+		) {
+			return ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER;
+		}
+
+		// Case 2: Deleted product reference
+		if (
+			isCollectionSelected &&
+			isProductContextRequired &&
+			! isInRequiredLocation &&
+			isProductContextSelected
+		) {
+			const isProductDeleted =
+				productId &&
+				( product === undefined || product?.status === 'trash' );
+			if ( isProductDeleted ) {
+				return ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE;
+			}
+		}
+
+		/**
+		 * Case 3: Preview mode - based on `usesReference` value
+		 */
+		if ( isInRequiredLocation ) {
+			/**
+			 * Block shouldn't be in preview mode when:
+			 * 1. Current location is archive and termId is available.
+			 * 2. Current location is product and productId is available.
+			 *
+			 * Because in these cases, we have required context on the editor side.
+			 */
+			const isArchiveLocationWithTermId =
+				location.type === LocationType.Archive &&
+				( location.sourceData?.termId ?? null ) !== null;
+			const isProductLocationWithProductId =
+				location.type === LocationType.Product &&
+				( location.sourceData?.productId ?? null ) !== null;
+
+			if (
+				! isArchiveLocationWithTermId &&
+				! isProductLocationWithProductId
+			) {
+				return ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW;
+			}
+		}
+
+		/**
+		 * Case 4: Collection chooser
+		 */
+		if ( ! hasInnerBlocks && ! isCollectionSelected ) {
+			return ProductCollectionUIStatesInEditor.COLLECTION_PICKER;
+		}
+
+		return ProductCollectionUIStatesInEditor.VALID;
+	}, [
+		location.type,
+		location.sourceData?.termId,
+		location.sourceData?.productId,
+		usesReference,
+		attributes.collection,
+		productId,
+		product,
+		hasInnerBlocks,
+		attributes.query?.productReference,
+	] );
+
+	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };
+};
+
 export const useSetPreviewState = ( {
 	setPreviewState,
 	location,
 	attributes,
 	setAttributes,
+	isUsingReferencePreviewMode,
 }: {
 	setPreviewState?: SetPreviewState | undefined;
 	location: WooCommerceBlockLocation;
@@ -177,6 +329,8 @@ export const useSetPreviewState = ( {
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
+	usesReference?: string[] | undefined;
+	isUsingReferencePreviewMode: boolean;
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
@@ -187,9 +341,32 @@ export const useSetPreviewState = ( {
 		} );
 	};
 
+	/**
+	 * When usesReference is available on Frontend but not on Editor side,
+	 * we want to show a preview label to indicate that the block is in preview mode.
+	 */
+	const usesReferencePreviewMessage = getUsesReferencePreviewMessage(
+		location,
+		isUsingReferencePreviewMode
+	);
+	useLayoutEffect( () => {
+		if ( isUsingReferencePreviewMode ) {
+			setAttributes( {
+				__privatePreviewState: {
+					isPreview: usesReferencePreviewMessage.length > 0,
+					previewMessage: usesReferencePreviewMessage,
+				},
+			} );
+		}
+	}, [
+		setAttributes,
+		usesReferencePreviewMessage,
+		isUsingReferencePreviewMode,
+	] );
+
 	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
+		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
 			return;
 		}
 
@@ -215,11 +392,14 @@ export const useSetPreviewState = ( {
 	 * - Products by tag
 	 * - Products by attribute
 	 */
+	const termId =
+		location.type === LocationType.Archive
+			? location.sourceData?.termId
+			: null;
 	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
+		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
 			const isGenericArchiveTemplate =
-				location.type === LocationType.Archive &&
-				location.sourceData?.termId === null;
+				location.type === LocationType.Archive && termId === null;
 
 			setAttributes( {
 				__privatePreviewState: {
@@ -235,10 +415,12 @@ export const useSetPreviewState = ( {
 		}
 	}, [
 		attributes?.query?.inherit,
-		location.sourceData?.termId,
+		usesReferencePreviewMessage,
+		termId,
 		location.type,
 		setAttributes,
 		setPreviewState,
+		isUsingReferencePreviewMode,
 	] );
 };
 
@@ -275,3 +457,35 @@ export const getDefaultProductCollection = () =>
 		},
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )
 	);
+
+export const useGetProduct = ( productId: number | undefined ) => {
+	const [ product, setProduct ] = useState< ProductResponseItem | null >(
+		null
+	);
+	const [ isLoading, setIsLoading ] = useState< boolean >( false );
+
+	useEffect( () => {
+		const fetchProduct = async () => {
+			if ( productId ) {
+				setIsLoading( true );
+				try {
+					const fetchedProduct = ( await getProduct(
+						productId
+					) ) as ProductResponseItem;
+					setProduct( fetchedProduct );
+				} catch ( error ) {
+					setProduct( null );
+				} finally {
+					setIsLoading( false );
+				}
+			} else {
+				setProduct( null );
+				setIsLoading( false );
+			}
+		};
+
+		fetchProduct();
+	}, [ productId ] );
+
+	return { product, isLoading };
+};

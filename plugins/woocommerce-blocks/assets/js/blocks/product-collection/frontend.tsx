@@ -8,18 +8,26 @@ import {
 	getElement,
 	getContext,
 } from '@woocommerce/interactivity';
+import {
+	triggerProductListRenderedEvent,
+	triggerViewedProductEvent,
+} from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
  */
+import { CoreCollectionNames } from './types';
 import './style.scss';
 
 export type ProductCollectionStoreContext = {
+	// Available on the <li/> product element and deeper
+	productId?: number;
 	isPrefetchNextOrPreviousLink: boolean;
 	animation: 'start' | 'finish';
 	accessibilityMessage: string;
 	accessibilityLoadingMessage: string;
 	accessibilityLoadedMessage: string;
+	collection: CoreCollectionNames;
 };
 
 const isValidLink = ( ref: HTMLAnchorElement ) =>
@@ -136,6 +144,10 @@ const productCollectionStore = {
 				ctx.isPrefetchNextOrPreviousLink = !! ref.href;
 
 				scrollToFirstProductIfNotVisible( wcNavigationId );
+
+				triggerProductListRenderedEvent( {
+					collection: ctx.collection,
+				} );
 			}
 		},
 		/**
@@ -155,6 +167,14 @@ const productCollectionStore = {
 
 			if ( isValidLink( ref ) ) {
 				yield prefetch( ref.href );
+			}
+		},
+		*viewProduct() {
+			const { collection, productId } =
+				getContext< ProductCollectionStoreContext >();
+
+			if ( productId ) {
+				triggerViewedProductEvent( { collection, productId } );
 			}
 		},
 	},
@@ -178,6 +198,12 @@ const productCollectionStore = {
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
+		},
+		*onRender() {
+			const { collection } =
+				getContext< ProductCollectionStoreContext >();
+
+			triggerProductListRenderedEvent( { collection } );
 		},
 	},
 };

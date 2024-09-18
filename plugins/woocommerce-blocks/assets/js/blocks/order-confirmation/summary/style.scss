@@ -26,13 +26,14 @@
 		}
 
 		@media only screen and (max-width: 480px) {
-			flex-direction: column;
-		}
-	}
-	.woocommerce-verify-email {
-		margin-top: $gap-larger;
-		#verify-email {
-			width: 50%;
+			li {
+				width: 100%;
+
+				> .wc-block-order-confirmation-summary-list-item__key,
+				> .wc-block-order-confirmation-summary-list-item__value {
+					display: inline;
+				}
+			}
 		}
 	}
 

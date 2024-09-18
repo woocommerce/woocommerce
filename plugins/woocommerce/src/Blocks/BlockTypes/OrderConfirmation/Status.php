@@ -2,8 +2,6 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-
 /**
  * Status class.
  */
@@ -40,14 +38,24 @@ class Status extends AbstractOrderConfirmationBlock {
 			return '';
 		}
 
-		$additional_content = $this->render_account_notice( $order ) . $this->render_confirmation_notice( $order );
+		$account_notice = $this->render_account_notice( $order );
+
+		if ( $account_notice ) {
+			$block = sprintf(
+				'<div class="wc-block-order-confirmation-status-notices %1$s">%2$s</div>',
+				esc_attr( trim( $classname ) ),
+				$account_notice
+			) . $block;
+		}
+
+		$additional_content = $this->render_confirmation_notice( $order );
 
 		if ( $additional_content ) {
-			return sprintf(
+			$block = $block . sprintf(
 				'<div class="wc-block-order-confirmation-status-description %1$s">%2$s</div>',
 				esc_attr( trim( $classname ) ),
 				$additional_content
-			) . $block;
+			);
 		}
 
 		return $block;
@@ -155,9 +163,9 @@ class Status extends AbstractOrderConfirmationBlock {
 	protected function render_account_notice( $order = null ) {
 		if ( $order && $order->get_customer_id() && 'store-api' === $order->get_created_via() ) {
 			$nag      = get_user_option( 'default_password_nag', $order->get_customer_id() );
-			$generate = get_option( 'woocommerce_registration_generate_password', false );
+			$generate = filter_var( get_option( 'woocommerce_registration_generate_password', false ), FILTER_VALIDATE_BOOLEAN );
 
-			if ( $nag && ! $generate ) {
+			if ( $nag && $generate ) {
 				return wc_print_notice(
 					sprintf(
 						// translators: %s: site name.
@@ -255,7 +263,7 @@ class Status extends AbstractOrderConfirmationBlock {
 				</p>',
 				esc_attr( 'verify-email-submit' ),
 				esc_html__( 'Confirm email and view order', 'woocommerce' ),
-				wp_nonce_field( 'wc_verify_email', 'check_submission', true, false ),
+				wp_nonce_field( 'wc_verify_email', '_wpnonce', true, false ),
 				esc_attr( wc_wp_theme_get_element_class_name( 'button' ) )
 			) .
 			'</form>';

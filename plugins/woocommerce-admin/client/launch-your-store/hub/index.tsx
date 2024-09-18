@@ -32,6 +32,11 @@ export type LaunchYourStoreComponentProps = {
 	className?: string;
 };
 
+export type LaunchYourStoreQueryParams = {
+	sidebar?: 'hub' | 'launch-success';
+	content?: 'site-preview' | 'launch-store-success';
+};
+
 const LaunchStoreController = () => {
 	useFullScreen( [ 'woocommerce-launch-your-store' ] );
 	useEffect( () => {

@@ -3,7 +3,7 @@ post_title: Integrating with coming soon mode
 tags: how-to, coming-soon
 ---
 
-This guide provides examples for third-party developers and hosting providers on how to integrate their systems with WooCommerce's coming soon mode. For more details, please read the [developer blog post](https://developer.woocommerce.com/2024/06/18/introducing-coming-soon-mode/).
+This guide provides examples for third-party developers and hosting providers on how to integrate their systems with WooCommerce's coming soon mode. For more details, please read the [developer blog post](https://developer.woocommerce.com/2024/06/18/introducing-coming-soon-mode/). For site visibility settings, please refer to the [admin documentation](https://woocommerce.com/document/configuring-woocommerce-settings/coming-soon-mode/).
 
 ## Introduction
 
@@ -49,15 +49,15 @@ function sync_coming_soon_to_other_plugins( $old_value, $new_value, $option ) {
     $is_enabled = $new_value === 'yes';
 
     // Implement your logic to sync coming soon status.
-    if ( function_exists( 'set_your_plugin_status' ) ) {
-        set_your_plugin_status( $is_enabled );
+    if ( function_exists( 'your_plugin_set_coming_soon' ) ) {
+        your_plugin_set_coming_soon( $is_enabled );
     }
 }
 ```
 
 #### Trigger from other plugins
 
-You can use the following example to enable or disable WooCommerce coming soon mode from another plugin by directy updating `woocommerce_coming_soon` option:
+You can use the following example to enable or disable WooCommerce coming soon mode from another plugin by directly updating `woocommerce_coming_soon` option:
 
 ```php
 function sync_coming_soon_from_other_plugins( $is_enabled ) {
@@ -84,8 +84,8 @@ function sync_coming_soon_to_other_plugins( $old_value, $new_value, $option ) {
     $is_enabled = $new_value === 'yes';
 
     // Implement your logic to sync coming soon status.
-    if ( function_exists( 'set_your_plugin_status' ) ) {
-        set_your_plugin_status( $is_enabled );
+    if ( function_exists( 'your_plugin_set_coming_soon' ) ) {
+        your_plugin_set_coming_soon( $is_enabled );
     }
 }
 
@@ -104,6 +104,38 @@ function sync_coming_soon_from_other_plugins( $is_enabled ) {
 
         // Re-add the action.
         add_action( 'update_option_woocommerce_coming_soon', 'sync_coming_soon_to_other_plugins', 10, 3 );
+    }
+}
+```
+
+#### One-way binding with option override
+
+We could also programmatically bind the coming soon option from another plugin by overriding the `woocommerce_coming_soon` option. This is advantageous since it simplifies state management and prevents possible out-of-sync issues.
+
+In the following example, we're binding the coming soon option from another plugin by overriding the `woocommerce_coming_soon` option.
+
+```php
+add_filter( 'pre_option_woocommerce_coming_soon', 'override_option_woocommerce_coming_soon' );
+
+function override_option_woocommerce_coming_soon( $current_value ) {
+    // Implement your logic to sync coming soon status.
+    if ( function_exists( 'your_plugin_is_coming_soon' ) ) {
+        return your_plugin_is_coming_soon() ? 'yes' : 'no';
+    }
+    return $current_value;
+}
+
+add_filter( 'pre_update_option_woocommerce_coming_soon', 'override_update_woocommerce_coming_soon', 10, 2 );
+
+function override_update_woocommerce_coming_soon( $new_value, $old_value ) {
+    // Check user capability.
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( 'You do not have sufficient permissions to access this page.' );
+    }
+
+    // Implement your logic to sync coming soon status.
+    if ( function_exists( 'your_plugin_set_coming_soon' ) ) {
+        your_plugin_set_coming_soon( $new_value === 'yes' );
     }
 }
 ```
@@ -128,9 +160,41 @@ Use the following example to exclude a certain page based on the page's ID. Repl
 
 ```php
 add_filter( 'woocommerce_coming_soon_exclude', function( $is_excluded ) {
-    if ( get_the_ID() === <page-id> ) {
+    if ( get_the_ID() === &lt;page-id&gt; ) {
         return true;
     }
     return $is_excluded;
 }, 10 );
+```
+
+#### Custom share links
+
+The following example shows how to integrate with a custom share code. We recommend using cookies or other storage to persist the access when users navigate across the site:
+
+```php
+add_filter( 'woocommerce_coming_soon_exclude', function( $exclude ) {
+    // Implement your logic to get and validate share code.
+    if ( function_exists( 'your_plugin_get_share_code' ) && function_exists( 'your_plugin_is_valid_share_code' ) ) {
+        $share_code = your_plugin_get_share_code();
+        if ( your_plugin_is_valid_share_code( $share_code ) ) {
+            return true;
+        }
+    }
+
+    return $exclude;
+} );
+```
+
+### Extend "Apply to store pages only" setting
+
+When using the `Apply to store pages only` setting, you may want to add a custom page to the list of store pages which will be restricted by coming soon mode. You can use the following example to add a custom page:
+
+```php
+add_filter( 'woocommerce_store_pages', function( $pages ) {
+    $page = get_page_by_path( 'your-page-slug' );
+    if ( $page ) {
+        $pages[] = $page->ID;
+    }
+    return $pages;
+} );
 ```

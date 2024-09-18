@@ -2,21 +2,16 @@
  * External dependencies
  */
 import { createBlock, BlockInstance } from '@wordpress/blocks';
-import { select, dispatch, subscribe } from '@wordpress/data';
-import { isWpVersion } from '@woocommerce/settings';
+import { select, dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import {
-	AUTO_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
-	getInitialStatusLSValue,
-} from './constants';
+import { getInitialStatusLSValue } from './constants';
 import {
 	getProductsBlockClientIds,
 	checkIfBlockCanBeInserted,
 	postTemplateHasSupportForGridView,
-	getUpgradeStatus,
 	setUpgradeStatus,
 } from './migration-utils';
 import type {
@@ -228,26 +223,4 @@ export const replaceProductsWithProductCollection = () => {
 export const manualUpdate = () => {
 	setUpgradeStatus( getInitialStatusLSValue() );
 	replaceProductsWithProductCollection();
-};
-
-let unsubscribe: ( () => void ) | undefined;
-export const disableAutoUpdate = () => {
-	if ( unsubscribe ) {
-		unsubscribe();
-	}
-};
-export const enableAutoUpdate = () => {
-	if ( isWpVersion( '6.1', '>=' ) ) {
-		const { status } = getUpgradeStatus();
-
-		if (
-			AUTO_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION &&
-			status !== 'reverted' &&
-			! unsubscribe
-		) {
-			unsubscribe = subscribe( () => {
-				replaceProductsWithProductCollection();
-			}, 'core/block-editor' );
-		}
-	}
 };

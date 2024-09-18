@@ -10,7 +10,6 @@ import { useInstanceId } from '@wordpress/compose';
 import { useEffect, useRef, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
@@ -19,7 +18,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
-	ProductCollectionEditComponentProps,
+	ProductCollectionContentProps,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
@@ -69,16 +68,22 @@ const useQueryId = (
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
 	...props
-}: ProductCollectionEditComponentProps ) => {
+}: ProductCollectionContentProps ) => {
 	const isInitialAttributesSet = useRef( false );
-	const { clientId, attributes, setAttributes } = props;
-	const location = useGetLocation( props.context, props.clientId );
+	const {
+		clientId,
+		attributes,
+		setAttributes,
+		location,
+		isUsingReferencePreviewMode,
+	} = props;
 
 	useSetPreviewState( {
 		setPreviewState,
 		setAttributes,
 		location,
 		attributes,
+		isUsingReferencePreviewMode,
 	} );
 
 	const blockProps = useBlockProps();

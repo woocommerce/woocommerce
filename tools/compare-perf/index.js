@@ -15,12 +15,17 @@ const catchException = ( command ) => {
 	};
 };
 
-const ciOption = [ '-c, --ci', 'Run in CI (non interactive)' ];
-
 program
 	.command( 'compare-performance [branches...]' )
 	.alias( 'perf' )
-	.option( ...ciOption )
+	.option(
+		'-c, --ci',
+		'Run in CI (non interactive)'
+	)
+	.option(
+		'--skip-benchmarking',
+		'Skips benchmarking and gets straight to reporting phase (tests results already available)'
+	)
 	.option(
 		'--rounds <count>',
 		'Run each test suite this many times for each branch; results are summarized, default = 1'

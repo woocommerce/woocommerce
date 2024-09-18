@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards">
+	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
+
+	<file>.</file>
+
+	<!-- Exclude paths -->
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+
+	<!-- Show progress, show the error codes for each message (source). -->
+	<arg value="ps" />
+
+	<!-- Strip the filepaths in reports down to the relevant bit. -->
+	<arg name="basepath" value="./" />
+
+	<!-- Check up to 8 files simultaneously. -->
+	<arg name="parallel" value="8" />
+
+	<!-- Configs -->
+	<config name="minimum_supported_wp_version" value="5.2" />
+	<config name="testVersion" value="7.4-" />
+
+	<!-- Rules -->
+	<rule ref="WooCommerce-Core" />
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.MissingPackageTag">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>.</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+		<exclude-pattern>src/</exclude-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_print_r">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+</ruleset>

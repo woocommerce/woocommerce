@@ -89,8 +89,7 @@ const productCategories = [
 ];
 const productAttributes = [ 'Color', 'Size' ];
 
-const errorMessage =
-	'Invalid file type. The importer supports CSV and TXT file formats.';
+const errorMessage = 'File is empty. Please upload something more substantial.';
 
 test.describe.serial(
 	'Import Products from a CSV file',

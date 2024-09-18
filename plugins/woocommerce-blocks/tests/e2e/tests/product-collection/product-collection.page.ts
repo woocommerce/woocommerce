@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Locator, Page } from '@playwright/test';
+import { FrameLocator, Locator, Page } from '@playwright/test';
 import { Editor, Admin } from '@woocommerce/e2e-utils';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
@@ -62,6 +62,12 @@ export const SELECTORS = {
 	previewButtonTestID: 'product-collection-preview-button',
 	collectionPlaceholder:
 		'[data-type="woocommerce/product-collection"] .components-placeholder',
+	productPicker: '.wc-blocks-product-collection__editor-product-picker',
+	linkedProductControl: {
+		button: '.wc-block-product-collection-linked-product-control__button',
+		popoverContent:
+			'.wc-block-product-collection-linked-product__popover-content',
+	},
 };
 
 export type Collections =
@@ -73,7 +79,12 @@ export type Collections =
 	| 'productCatalog'
 	| 'myCustomCollection'
 	| 'myCustomCollectionWithPreview'
-	| 'myCustomCollectionWithAdvancedPreview';
+	| 'myCustomCollectionWithAdvancedPreview'
+	| 'myCustomCollectionWithProductContext'
+	| 'myCustomCollectionWithOrderContext'
+	| 'myCustomCollectionWithCartContext'
+	| 'myCustomCollectionWithArchiveContext'
+	| 'myCustomCollectionMultipleContexts';
 
 const collectionToButtonNameMap = {
 	newArrivals: 'New Arrivals',
@@ -86,6 +97,14 @@ const collectionToButtonNameMap = {
 	myCustomCollectionWithPreview: 'My Custom Collection with Preview',
 	myCustomCollectionWithAdvancedPreview:
 		'My Custom Collection with Advanced Preview',
+	myCustomCollectionWithProductContext:
+		'My Custom Collection - Product Context',
+	myCustomCollectionWithOrderContext: 'My Custom Collection - Order Context',
+	myCustomCollectionWithCartContext: 'My Custom Collection - Cart Context',
+	myCustomCollectionWithArchiveContext:
+		'My Custom Collection - Archive Context',
+	myCustomCollectionMultipleContexts:
+		'My Custom Collection - Multiple Contexts',
 };
 
 class ProductCollectionPage {
@@ -121,7 +140,7 @@ class ProductCollectionPage {
 			? collectionToButtonNameMap[ collection ]
 			: collectionToButtonNameMap.productCatalog;
 
-		const placeholderSelector = this.admin.page.locator(
+		const placeholderSelector = this.editor.canvas.locator(
 			SELECTORS.collectionPlaceholder
 		);
 
@@ -187,10 +206,32 @@ class ProductCollectionPage {
 		}
 	}
 
+	async chooseProductInEditorProductPickerIfAvailable(
+		pageReference: Page | FrameLocator,
+		productName = 'Album'
+	) {
+		const editorProductPicker = pageReference.locator(
+			SELECTORS.productPicker
+		);
+
+		if ( await editorProductPicker.isVisible() ) {
+			await editorProductPicker
+				.locator( 'label' )
+				.filter( {
+					hasText: productName,
+				} )
+				.click();
+		}
+	}
+
 	async createNewPostAndInsertBlock( collection?: Collections ) {
 		await this.admin.createNewPost();
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
+		// If product picker is available, choose a product.
+		await this.chooseProductInEditorProductPickerIfAvailable(
+			this.admin.page
+		);
 		await this.refreshLocators( 'editor' );
 		await this.editor.openDocumentSettingsSidebar();
 	}
@@ -332,6 +373,10 @@ class ProductCollectionPage {
 		await this.editor.canvas.locator( 'body' ).click();
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
+		// If product picker is available, choose a product.
+		await this.chooseProductInEditorProductPickerIfAvailable(
+			this.editor.canvas
+		);
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -395,7 +440,7 @@ class ProductCollectionPage {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
-		await this.page.locator( SELECTORS.product ).first().waitFor();
+		await this.editor.canvas.locator( SELECTORS.product ).first().waitFor();
 		await this.refreshLocators( 'editor' );
 	}
 
@@ -555,6 +600,30 @@ class ProductCollectionPage {
 		// Open the display settings.
 		await this.page
 			.getByRole( 'button', { name: 'Display settings' } )
+			.click();
+	}
+
+	async changeCollectionUsingToolbar( collection: Collections ) {
+		// Click "Choose collection" button in the toolbar.
+		await this.admin.page
+			.getByRole( 'toolbar', { name: 'Block Tools' } )
+			.getByRole( 'button', { name: 'Choose collection' } )
+			.click();
+
+		// Select the collection from the modal.
+		const collectionChooserModal = this.admin.page.locator(
+			'.wc-blocks-product-collection__modal'
+		);
+		await collectionChooserModal
+			.getByRole( 'button', {
+				name: collectionToButtonNameMap[ collection ],
+			} )
+			.click();
+
+		await collectionChooserModal
+			.getByRole( 'button', {
+				name: 'Continue',
+			} )
 			.click();
 	}
 
@@ -730,11 +799,13 @@ class ProductCollectionPage {
 	}
 
 	private async initializeLocatorsForEditor() {
-		this.productTemplate = this.page.locator( SELECTORS.productTemplate );
-		this.products = this.page
+		this.productTemplate = this.editor.canvas.locator(
+			SELECTORS.productTemplate
+		);
+		this.products = this.editor.canvas
 			.locator( SELECTORS.product )
 			.locator( 'visible=true' );
-		this.productImages = this.page
+		this.productImages = this.editor.canvas
 			.locator( SELECTORS.productImage.inEditor )
 			.locator( 'visible=true' );
 		this.productTitles = this.productTemplate
@@ -743,10 +814,10 @@ class ProductCollectionPage {
 		this.productPrices = this.productTemplate
 			.locator( SELECTORS.productPrice.inEditor )
 			.locator( 'visible=true' );
-		this.addToCartButtons = this.page
+		this.addToCartButtons = this.editor.canvas
 			.locator( SELECTORS.addToCartButton.inEditor )
 			.locator( 'visible=true' );
-		this.pagination = this.page.getByRole( 'document', {
+		this.pagination = this.editor.canvas.getByRole( 'document', {
 			name: 'Block: Pagination',
 		} );
 	}

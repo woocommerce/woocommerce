@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
@@ -64,8 +64,17 @@ function ProductCardFooter( props: { product: Product } ) {
 		return true;
 	}
 
-	// We hardcode this for now while we only display prices in USD.
-	const currencySymbol = '$';
+	const currencyFormats: { [ key: string ]: string } = {
+		USD: '$%s',
+		AUD: 'A$%s',
+		CAD: 'C$%s',
+		EUR: '€%s',
+		GBP: '£%s',
+	};
+
+	const getCurrencyFormat = ( currencyCode: string ) => {
+		return currencyFormats[ currencyCode ] || '%s';
+	};
 
 	function getPriceLabel(): string {
 		if ( product.price === 0 ) {
@@ -76,7 +85,51 @@ function ProductCardFooter( props: { product: Product } ) {
 			return __( 'Free plan available', 'woocommerce' );
 		}
 
-		return currencySymbol + product.price;
+		return sprintf( getCurrencyFormat( product.currency ), product.price );
+	}
+
+	function getPriceSuffix(): string {
+		// Paid simple products have a billing period of ''.
+		if (
+			product.billingPeriodInterval === 1 ||
+			product.billingPeriod === ''
+		) {
+			switch ( product.billingPeriod ) {
+				case 'day':
+					return __( 'daily', 'woocommerce' );
+				case 'week':
+					return __( 'weekly', 'woocommerce' );
+				case 'month':
+					return __( 'monthly', 'woocommerce' );
+				case 'year':
+				case '':
+					return __( 'annually', 'woocommerce' );
+				default:
+					return '';
+			}
+		}
+
+		let period;
+		switch ( product.billingPeriod ) {
+			case 'day':
+				period = __( 'days', 'woocommerce' );
+				break;
+			case 'week':
+				period = __( 'weeks', 'woocommerce' );
+				break;
+			case 'month':
+				period = __( 'months', 'woocommerce' );
+				break;
+			default:
+				period = __( 'years', 'woocommerce' );
+		}
+
+		return sprintf(
+			// translators: %1$d: billing period interval, %2$s: billing period (e.g. days, weeks, months, years)
+			__( 'every %1$d %2$s', 'woocommerce' ),
+			product.billingPeriodInterval,
+			period
+		);
 	}
 
 	function getBillingText(): string {
@@ -85,7 +138,7 @@ function ProductCardFooter( props: { product: Product } ) {
 		}
 
 		if ( product.price !== 0 ) {
-			return __( ' annually', 'woocommerce' );
+			return getPriceSuffix();
 		}
 
 		return '';

@@ -7,10 +7,10 @@ import { InspectorAdvancedControls } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import ForcePageReloadControl from './force-page-reload-control';
-import type { ProductCollectionEditComponentProps } from '../../types';
+import type { ProductCollectionContentProps } from '../../types';
 
 export default function ProductCollectionAdvancedInspectorControls(
-	props: Omit< ProductCollectionEditComponentProps, 'preview' >
+	props: ProductCollectionContentProps
 ) {
 	const { clientId, attributes, setAttributes } = props;
 	const { forcePageReload } = attributes;

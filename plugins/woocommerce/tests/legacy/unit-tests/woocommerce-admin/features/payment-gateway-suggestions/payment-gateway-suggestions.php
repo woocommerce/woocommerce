@@ -5,6 +5,7 @@
  * @package WooCommerce\Admin\Tests\PaymentGatewaySuggestions
  */
 
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
 use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as PaymentGatewaySuggestions;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
@@ -21,15 +22,10 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		add_filter(
 			'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
-			function( $value ) {
+			function ( $value ) {
 				if ( $value ) {
 					return $value;
 				}
@@ -41,57 +37,56 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 				);
 			}
 		);
+
+		EvaluateSuggestion::reset_memo();
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		PaymentGatewaySuggestions::delete_specs_transient();
 		remove_all_filters( 'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+
+		parent::tearDown();
 	}
 
 	/**
-	 * Add test specs.
+	 * Test that default specs are used when remote specs are empty.
 	 */
-	public function get_mock_specs() {
-		return array(
-			'en_US' => array(
-				array(
-					'id'         => 'mock-gateway-1',
-					'is_visible' => (object) array(
-						'type'      => 'base_location_country',
-						'value'     => 'ZA',
-						'operation' => '=',
-					),
-				),
-				array(
-					'id'         => 'mock-gateway-2',
-					'is_visible' => (object) array(
-						'type'      => 'base_location_country',
-						'value'     => 'US',
-						'operation' => '=',
-					),
-				),
-			),
+	public function test_use_default_specs_when_remote_specs_empty() {
+		// Arrange.
+		remove_all_filters( 'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
+		add_filter(
+			DataSourcePoller::FILTER_NAME,
+			function () {
+				return array();
+			}
 		);
+
+		// Act.
+		$specs = PaymentGatewaySuggestions::get_specs();
+
+		// Assert.
+		$defaults = DefaultPaymentGateways::get_all();
+		$this->assertEquals( $defaults, $specs );
+
+		// Clean up.
+		remove_all_filters( DataSourcePoller::FILTER_NAME );
 	}
 
 	/**
 	 * Test that default gateways are provided when remote sources don't exist.
 	 */
-	public function test_get_default_specs() {
-		remove_all_filters( 'transient_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
-		add_filter(
-			DataSourcePoller::FILTER_NAME,
-			function() {
-				return array();
-			}
-		);
+	public function test_use_default_specs_when_marketplace_suggestions_off() {
+		// Arrange.
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+
+		// Act.
 		$specs    = PaymentGatewaySuggestions::get_specs();
 		$defaults = DefaultPaymentGateways::get_all();
-		remove_all_filters( DataSourcePoller::FILTER_NAME );
+
+		// Assert.
 		$this->assertEquals( $defaults, $specs );
 	}
 
@@ -99,33 +94,129 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 * Test that specs are read from cache when they exist.
 	 */
 	public function test_specs_transient() {
+		// Arrange.
+		$expected_suggestions = array(
+			array(
+				'id' => 'mock-gateway1',
+			),
+			array(
+				'id' => 'mock-gateway2',
+			),
+		);
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
 			array(
-				'en_US' => array(
-					array(
-						'id' => 'mock-gateway1',
-					),
-					array(
-						'id' => 'mock-gateway2',
-					),
-				),
+				'en_US' => $expected_suggestions,
 			)
 		);
+
+		// Act.
 		$suggestions = PaymentGatewaySuggestions::get_suggestions();
-		$this->assertCount( 2, $suggestions );
+
+		// Assert.
+		$this->assertCount( count( $expected_suggestions ), $suggestions );
+		$this->assertEquals( $expected_suggestions[0]['id'], $suggestions[0]->id );
+		$this->assertEquals( $expected_suggestions[1]['id'], $suggestions[1]->id );
 	}
+
+	/**
+	 * Test that specs are read from cache when they exist.
+	 */
+	public function test_cached_or_default_suggestions_when_cache_exist() {
+		// Arrange.
+		$expected_suggestions = array(
+			array(
+				'id' => 'mock-gateway1',
+			),
+			array(
+				'id' => 'mock-gateway2',
+			),
+		);
+		set_transient(
+			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
+			array(
+				'en_US' => $expected_suggestions,
+			)
+		);
+
+		// Act.
+		$suggestions = PaymentGatewaySuggestions::get_cached_or_default_suggestions();
+
+		// Assert.
+		$this->assertCount( count( $expected_suggestions ), $suggestions );
+		$this->assertEquals( $expected_suggestions[0]['id'], $suggestions[0]->id );
+		$this->assertEquals( $expected_suggestions[1]['id'], $suggestions[1]->id );
+	}
+
+	/**
+	 * Test that specs are read from default when cache is empty.
+	 */
+	public function test_cached_or_default_suggestions_when_cache_empty() {
+		// Arrange.
+		PaymentGatewaySuggestionsDataSourcePoller::get_instance()->delete_specs_transient();
+
+		// Act.
+		$suggestions = PaymentGatewaySuggestions::get_cached_or_default_suggestions();
+
+		// Assert.
+		$default_suggestions = EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
+
+		$this->assertEquals( $default_suggestions, $suggestions );
+	}
+
+
+	/**
+	 * Test that default gateways are provided when remote sources don't exist.
+	 */
+	public function test_cached_or_default_suggestions_when_marketplace_suggestions_off() {
+		// Arrange.
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+		PaymentGatewaySuggestionsDataSourcePoller::get_instance()->delete_specs_transient();
+
+		// Act.
+		$suggestions         = PaymentGatewaySuggestions::get_cached_or_default_suggestions();
+		$default_suggestions = EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
+
+		// Assert.
+		$this->assertEquals( $suggestions, $default_suggestions );
+	}
+
 
 	/**
 	 * Test that non-matched suggestions are not shown.
 	 */
 	public function test_matching_suggestions() {
+		// Arrange.
 		update_option( 'woocommerce_default_country', 'US' );
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
-			$this->get_mock_specs()
+			array(
+				'en_US' => array(
+					array(
+						'id'         => 'mock-gateway-1',
+						'is_visible' => (object) array(
+							'type'      => 'base_location_country',
+							'value'     => 'ZA',
+							'operation' => '=',
+						),
+					),
+					array(
+						'id'         => 'mock-gateway-2',
+						'is_visible' => (object) array(
+							'type'      => 'base_location_country',
+							'value'     => 'US',
+							'operation' => '=',
+						),
+					),
+				),
+			)
 		);
+
+		// Act.
 		$suggestions = PaymentGatewaySuggestions::get_suggestions();
+
+		// Assert.
+		// Only the second suggestion should be returned since it matches the store base country.
 		$this->assertCount( 1, $suggestions );
 		$this->assertEquals( 'mock-gateway-2', $suggestions[0]->id );
 	}
@@ -134,17 +225,18 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 * Test that matched locale specs are read from cache.
 	 */
 	public function test_specs_locale_transient() {
+		// Arrange.
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
 			array(
 				'en_US' => array(
 					array(
-						'id' => 'mock-gateway',
+						'id' => 'us-gateway',
 					),
 				),
 				'zh_TW' => array(
 					array(
-						'id' => 'default-gateway',
+						'id' => 'tw-gateway',
 					),
 				),
 			)
@@ -152,20 +244,24 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 
 		add_filter(
 			'locale',
-			function( $_locale ) {
+			function () {
 				return 'zh_TW';
 			}
 		);
 
+		// Act.
 		$suggestions = PaymentGatewaySuggestions::get_suggestions();
-		$this->assertEquals( 'default-gateway', $suggestions[0]->id );
+
+		// Assert.
+		$this->assertEquals( 'tw-gateway', $suggestions[0]->id );
 	}
 
 	/**
-	 * Test that empty suggestions are replaced with defaults.
+	 * Test that empty remote suggestions fallback to defaults.
 	 */
-	public function test_empty_suggestions() {
+	public function test_empty_remote_suggestions_fallback_to_defaults() {
 		// Arrange.
+		update_option( 'woocommerce_default_country', 'US' );
 		// Make sure there are no specs in the transient.
 		set_transient(
 			'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs',
@@ -179,7 +275,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 			PaymentGatewaySuggestionsDataSourcePoller::FILTER_NAME,
 			function () {
 				return array(
-					'payment-gateway-suggestions-data-source.json',
+					'mock-payment-gateway-suggestions-data-source.json',
 				);
 			}
 		);
@@ -189,9 +285,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		add_filter(
 			'pre_http_request',
 			function ( $pre, $parsed_args, $url ) {
-				$locale = get_locale();
-
-				if ( 'payment-gateway-suggestions-data-source.json?locale=' . $locale === $url ) {
+				if ( false !== strpos( $url, 'mock-payment-gateway-suggestions-data-source.json' ) ) {
 					return array(
 						'body' => wp_json_encode(
 							array(
@@ -225,9 +319,12 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		$stored_specs_in_transient = get_transient( 'woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
 
 		// Assert.
-		$this->assertEquals( 'bacs', $suggestions[0]->id );
-		$this->assertEquals( count( $stored_specs_in_transient['en_US'] ), count( DefaultPaymentGateways::get_all() ) );
+		$default_specs       = DefaultPaymentGateways::get_all();
+		$default_suggestions = EvaluateSuggestion::evaluate_specs( $default_specs )['suggestions'];
 
+		$this->assertEquals( $default_suggestions, $suggestions );
+
+		$this->assertEquals( $stored_specs_in_transient['en_US'], $default_specs );
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
 		$this->assertTrue( ( $expires - time() ) <= 3 * HOUR_IN_SECONDS );
 
@@ -238,8 +335,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the suggestions can be displayed when a user has marketplace
-	 * suggestions enabled and is a user capable of installing plugins.
+	 * Test that the suggestions can be displayed when a user has marketplace suggestions enabled.
 	 */
 	public function test_should_display() {
 		update_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
@@ -250,7 +346,6 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 * Test that suggestions are not shown when the marketplace suggestions are off.
 	 */
 	public function test_should_not_display_when_marketplace_suggestions_off() {
-		wp_set_current_user( $this->user );
 		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
 		$this->assertFalse( PaymentGatewaySuggestions::should_display() );
 	}
@@ -259,13 +354,16 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 	 * Test dismissing suggestions.
 	 */
 	public function test_dismiss() {
-		$this->assertEquals( 'no', get_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION, 'no' ) );
-		wp_set_current_user( $this->user );
+		// Arrange.
+		delete_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION );
 
+		// Act.
 		PaymentGatewaySuggestions::dismiss();
 
+		// Assert.
 		$this->assertEquals( 'yes', get_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION ) );
+
+		// Clean up.
 		delete_option( PaymentGatewaySuggestions::RECOMMENDED_PAYMENT_PLUGINS_DISMISS_OPTION );
 	}
-
 }

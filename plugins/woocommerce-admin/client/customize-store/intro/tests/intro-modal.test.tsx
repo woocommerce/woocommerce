@@ -36,6 +36,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -93,6 +94,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
@@ -148,6 +150,7 @@ describe( 'Intro Modals', () => {
 				context={ {
 					intro: {
 						hasErrors: false,
+						errorStatus: undefined,
 						activeTheme: '',
 						themeData: {
 							themes: [],
