@@ -1,5 +1,7 @@
 export type SearchAPIJSONType = {
 	products: Array< SearchAPIProductType >;
+	total_pages: number;
+	total_products: number;
 };
 
 export type SearchAPIProductType = {
