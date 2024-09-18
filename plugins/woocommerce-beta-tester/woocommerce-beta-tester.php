@@ -154,6 +154,11 @@ function simulate_woocommerce_error() {
 		return;
 	}
 
+	// Define a constant to prevent the error from being caught by the WP Error Handler.
+	if ( ! defined( 'WP_SANDBOX_SCRAPING' ) ) {
+		define( 'WP_SANDBOX_SCRAPING', true );
+	}
+
 	add_filter(
 		'woocommerce_template_path',
 		function() {
