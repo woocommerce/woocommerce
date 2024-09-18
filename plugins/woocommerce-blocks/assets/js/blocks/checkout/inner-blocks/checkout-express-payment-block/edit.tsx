@@ -1,11 +1,9 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/settings';
 import { useBlockProps } from '@wordpress/block-editor';
 import { useExpressPaymentMethods } from '@woocommerce/base-context/hooks';
 import clsx from 'clsx';
-import { useEffect } from '@wordpress/element';
 import { ExpressPaymentControls } from '@woocommerce/blocks/cart-checkout-shared';
 import type { BlockAttributes } from '@wordpress/blocks';
 
@@ -14,10 +12,7 @@ import type { BlockAttributes } from '@wordpress/blocks';
  */
 import Block from './block';
 import './editor.scss';
-import type {
-	ExpressCheckoutAttributes,
-	ExpressPaymentSettings,
-} from '../../../cart-checkout-shared/types';
+import type { ExpressCheckoutAttributes } from '../../../cart-checkout-shared/types';
 import { ExpressPaymentContext } from '../../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
 
 export const Edit = ( {
@@ -39,16 +34,6 @@ export const Edit = ( {
 		),
 		attributes,
 	} );
-
-	useEffect( () => {
-		const { showButtonStyles, buttonHeight, buttonBorderRadius } =
-			getSetting< ExpressPaymentSettings >( 'expressCheckout' );
-		setAttributes( {
-			showButtonStyles,
-			buttonHeight,
-			buttonBorderRadius,
-		} );
-	}, [ setAttributes ] );
 
 	if ( ! isInitialized || ! hasExpressPaymentMethods ) {
 		return null;
