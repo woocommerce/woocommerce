@@ -5,14 +5,13 @@
 	"title": "Product Template",
 	"category": "woocommerce",
 	"description": "Contains the block elements used to render a product.",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"usesContext": [
 		"queryId",
 		"query",
 		"queryContext",
+		"dimensions",
 		"displayLayout",
 		"templateSlug",
 		"postId",
@@ -24,10 +23,7 @@
 		"inserter": false,
 		"reusable": false,
 		"html": false,
-		"align": [
-			"wide",
-			"full"
-		],
+		"align": [ "wide", "full" ],
 		"anchor": true,
 		"color": {
 			"gradients": true,
