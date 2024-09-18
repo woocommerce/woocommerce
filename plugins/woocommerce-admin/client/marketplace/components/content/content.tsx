@@ -197,6 +197,9 @@ export default function Content(): JSX.Element {
 			{ selectedTab !== 'business-services' && (
 				<SubscriptionsExpiredExpiringNotice type="expiring" />
 			) }
+			{ selectedTab !== 'business-services' && (
+				<SubscriptionsExpiredExpiringNotice type="missing" />
+			) }
 
 			{ renderContent() }
 		</div>

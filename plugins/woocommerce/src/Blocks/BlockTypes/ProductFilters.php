@@ -24,6 +24,23 @@ class ProductFilters extends AbstractBlock {
 	}
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = array() ) {
+		global $pagenow;
+		parent::enqueue_data( $attributes );
+
+		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
+		$this->asset_data_registry->add( 'isProductArchive', is_shop() || is_product_taxonomy() );
+		$this->asset_data_registry->add( 'isSiteEditor', 'site-editor.php' === $pagenow );
+		$this->asset_data_registry->add( 'isWidgetEditor', 'widgets.php' === $pagenow || 'customize.php' === $pagenow );
+	}
+
+	/**
 	 * Return the dialog content.
 	 *
 	 * @return string
@@ -116,12 +133,10 @@ class ProductFilters extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$html = $content;
-		$p    = new \WP_HTML_Tag_Processor( $html );
-
-		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-filters' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
-			$p->set_attribute(
+		$tags = new \WP_HTML_Tag_Processor( $content );
+		if ( $tags->next_tag() ) {
+			$tags->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/' . $this->block_name ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$tags->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
 					array(
@@ -131,13 +146,29 @@ class ProductFilters extends AbstractBlock {
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			);
-			$html = $p->get_updated_html();
+			$tags->set_attribute( 'data-wc-navigation-id', $this->generate_navigation_id( $block ) );
+
+			if (
+				'always' === $attributes['overlay'] ||
+				( 'mobile' === $attributes['overlay'] && wp_is_mobile() )
+			) {
+				return $this->inject_dialog( $tags->get_updated_html(), $this->render_dialog() );
+			}
+
+			return $tags->get_updated_html();
 		}
+	}
 
-		$dialog_html = $this->render_dialog();
-
-		$html = $this->inject_dialog( $html, $dialog_html );
-
-		return $html;
+	/**
+	 * Generate a unique navigation ID for the block.
+	 *
+	 * @param mixed $block - Block instance.
+	 * @return string - Unique navigation ID.
+	 */
+	private function generate_navigation_id( $block ) {
+		return sprintf(
+			'wc-product-filters-%s',
+			md5( wp_json_encode( $block->parsed_block['innerBlocks'] ) )
+		);
 	}
 }

@@ -55,11 +55,12 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		}
 
 		return $block_content ? sprintf(
-			'<div class="wc-block-%4$s %1$s" style="%2$s">%3$s</div>',
+			'<div class="wp-block-%5$s-%4$s wc-block-%4$s %1$s" style="%2$s">%3$s</div>',
 			esc_attr( trim( $classname ) ),
 			esc_attr( $classes_and_styles['styles'] ),
 			$block_content,
-			esc_attr( $this->block_name )
+			esc_attr( $this->block_name ),
+			esc_attr( $this->namespace )
 		) : '';
 	}
 

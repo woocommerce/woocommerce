@@ -39,6 +39,12 @@ export default function SubscriptionsExpiredExpiringNotice(
 			dismissed:
 				'woo_subscription_expiring_notice_in_marketplace_dismissed',
 		},
+		'woo-subscription-missing-notice': {
+			shown: 'woo_subscription_missing_notice_in_marketplace_shown',
+			clicked: 'woo_subscription_missing_notice_in_marketplace_clicked',
+			dismissed:
+				'woo_subscription_missing_notice_in_marketplace_dismissed',
+		},
 	};
 
 	let notice = null;
@@ -51,6 +57,9 @@ export default function SubscriptionsExpiredExpiringNotice(
 	} else if ( type === 'expiring' ) {
 		notice = wccomSettings?.subscription_expiring_notice || {};
 		notice_id = 'woo-subscription-expiring-notice';
+	} else if ( type === 'missing' ) {
+		notice = wccomSettings?.subscription_missing_notice || {};
+		notice_id = 'woo-subscription-missing-notice';
 	} else {
 		return null;
 	}
