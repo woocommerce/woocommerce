@@ -19,10 +19,11 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $block_name = 'product-collection';
 
-	/**
-	 * An array keyed by the name of the collection containing handlers for implementing custom collection behavior.
+		/**
+	 * An associative array of collection handlers.
 	 *
-	 * @var array
+	 * @var array<string, callable> $collection_handler_store
+	 * Keys are collection names, values are callable handlers for custom collection behavior.
 	 */
 	protected $collection_handler_store = array();
 
