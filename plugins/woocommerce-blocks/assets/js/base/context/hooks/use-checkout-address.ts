@@ -25,7 +25,11 @@ interface CheckoutAddress {
 	setBillingAddress: ( data: Partial< BillingAddress > ) => void;
 	setEmail: ( value: string ) => void;
 	useShippingAsBilling: boolean;
+	editingBillingAddress: boolean;
+	editingShippingAddress: boolean;
 	setUseShippingAsBilling: ( useShippingAsBilling: boolean ) => void;
+	setEditingBillingAddress: ( isEditing: boolean ) => void;
+	setEditingShippingAddress: ( isEditing: boolean ) => void;
 	defaultFields: AddressFields;
 	showShippingFields: boolean;
 	showBillingFields: boolean;
@@ -40,15 +44,25 @@ interface CheckoutAddress {
  */
 export const useCheckoutAddress = (): CheckoutAddress => {
 	const { needsShipping } = useShippingData();
-	const { useShippingAsBilling, prefersCollection } = useSelect(
-		( select ) => ( {
-			useShippingAsBilling:
-				select( CHECKOUT_STORE_KEY ).getUseShippingAsBilling(),
-			prefersCollection: select( CHECKOUT_STORE_KEY ).prefersCollection(),
-		} )
-	);
-	const { __internalSetUseShippingAsBilling } =
-		useDispatch( CHECKOUT_STORE_KEY );
+	const {
+		useShippingAsBilling,
+		prefersCollection,
+		editingBillingAddress,
+		editingShippingAddress,
+	} = useSelect( ( select ) => ( {
+		useShippingAsBilling:
+			select( CHECKOUT_STORE_KEY ).getUseShippingAsBilling(),
+		prefersCollection: select( CHECKOUT_STORE_KEY ).prefersCollection(),
+		editingBillingAddress:
+			select( CHECKOUT_STORE_KEY ).getEditingBillingAddress(),
+		editingShippingAddress:
+			select( CHECKOUT_STORE_KEY ).getEditingShippingAddress(),
+	} ) );
+	const {
+		__internalSetUseShippingAsBilling,
+		setEditingBillingAddress,
+		setEditingShippingAddress,
+	} = useDispatch( CHECKOUT_STORE_KEY );
 	const {
 		billingAddress,
 		setBillingAddress,
@@ -77,6 +91,10 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		defaultFields,
 		useShippingAsBilling,
 		setUseShippingAsBilling: __internalSetUseShippingAsBilling,
+		editingBillingAddress,
+		editingShippingAddress,
+		setEditingBillingAddress,
+		setEditingShippingAddress,
 		needsShipping,
 		showShippingFields:
 			! forcedBillingAddress && needsShipping && ! prefersCollection,
