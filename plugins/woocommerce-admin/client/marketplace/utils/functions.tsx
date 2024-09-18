@@ -143,7 +143,7 @@ async function fetchSearchResults(
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
 							regularPrice: product.regular_price,
-							isOnSale: product.is_on_Sale,
+							isOnSale: product.is_on_sale,
 							averageRating: product.rating ?? null,
 							reviewsCount: product.reviews_count ?? null,
 							isInstallable: product.is_installable,
