@@ -191,6 +191,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	return (
 		<Card
 			className={ classNames }
+			id={ `product-${ product.id }` }
+			tabIndex={ -1 }
 			aria-hidden={ isLoading }
 			style={ inlineCss() }
 		>
