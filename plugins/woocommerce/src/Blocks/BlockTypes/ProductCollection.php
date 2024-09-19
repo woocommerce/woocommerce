@@ -19,7 +19,7 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $block_name = 'product-collection';
 
-		/**
+	/**
 	 * An associative array of collection handlers.
 	 *
 	 * @var array<string, callable> $collection_handler_store
