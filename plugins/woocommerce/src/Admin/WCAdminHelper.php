@@ -154,11 +154,13 @@ class WCAdminHelper {
 			'post_type' => 'product',
 		);
 
-		parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $url_params );
-
-		foreach ( $params as $key => $param ) {
-			if ( isset( $url_params[ $key ] ) && $url_params[ $key ] === $param ) {
-				return true;
+		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
+		if ( $query_string ) {
+			parse_str( $query_string, $url_params );
+			foreach ( $params as $key => $param ) {
+				if ( isset( $url_params[ $key ] ) && $url_params[ $key ] === $param ) {
+					return true;
+				}
 			}
 		}
 

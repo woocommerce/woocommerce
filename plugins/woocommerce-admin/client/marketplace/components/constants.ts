@@ -10,7 +10,7 @@ export const MARKETPLACE_SEARCH_API_PATH =
 	'/wp-json/wccom-extensions/1.0/search';
 export const MARKETPLACE_CATEGORY_API_PATH =
 	'/wp-json/wccom-extensions/1.0/categories';
-export const MARKETPLACE_ITEMS_PER_PAGE = 60;
+export const MARKETPLACE_ITEMS_PER_PAGE = 60; // This should match the number of results returned by the API
 export const MARKETPLACE_SEARCH_RESULTS_PER_PAGE = 8;
 export const MARKETPLACE_CART_PATH = MARKETPLACE_HOST + '/cart/';
 export const MARKETPLACE_RENEW_SUBSCRIPTON_PATH =
