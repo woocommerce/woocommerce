@@ -625,18 +625,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-comments.php';
 		include_once WC_ABSPATH . 'includes/class-wc-post-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-ajax.php';
-		include_once WC_ABSPATH . 'includes/class-wc-emails.php';
-		include_once WC_ABSPATH . 'includes/class-wc-data-exception.php';
-		include_once WC_ABSPATH . 'includes/class-wc-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-meta-data.php';
-		include_once WC_ABSPATH . 'includes/class-wc-order-factory.php';
-		include_once WC_ABSPATH . 'includes/class-wc-order-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-product-factory.php';
-		include_once WC_ABSPATH . 'includes/class-wc-product-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-payment-tokens.php';
-		include_once WC_ABSPATH . 'includes/class-wc-shipping-zone.php';
-		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php';
-		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php';
+
 		include_once WC_ABSPATH . 'includes/class-wc-countries.php';
 		include_once WC_ABSPATH . 'includes/class-wc-integrations.php';
 		include_once WC_ABSPATH . 'includes/class-wc-cache-helper.php';

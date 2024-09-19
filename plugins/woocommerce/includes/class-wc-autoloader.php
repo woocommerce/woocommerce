@@ -84,7 +84,18 @@ class WC_Autoloader {
 		'WC_Background_Process' => WC_ABSPATH . 'includes/abstracts/class-wc-background-process.php',
 		'WC_Deprecated_Filter_Hooks' => WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php',
 		'WC_Deprecated_Action_Hooks' => WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php',
-
+		'WC_Payment_Gateway_ECheck' => WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php',
+		'WC_Payment_Gateway_CC' => WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php',
+		'WC_Shipping_Zones' => WC_ABSPATH . 'includes/class-wc-shipping-zones.php',
+		'WC_Payment_Tokens' => WC_ABSPATH . 'includes/class-wc-payment-tokens.php',
+		'WC_Product_Query' => WC_ABSPATH . 'includes/class-wc-product-query.php',
+		'WC_Product_Factory' => WC_ABSPATH . 'includes/class-wc-product-factory.php',
+		'WC_Order_Query' => WC_ABSPATH . 'includes/class-wc-order-query.php',
+		'WC_Order_Factory' => WC_ABSPATH . 'includes/class-wc-order-factory.php',
+		'WC_Meta_Data' => WC_ABSPATH . 'includes/class-wc-meta-data.php',
+		'WC_Query' => WC_ABSPATH . 'includes/class-wc-query.php',
+		'WC_Data_Exception' => WC_ABSPATH . 'includes/class-wc-data-exception.php',
+		'WC_Emails' => WC_ABSPATH . 'includes/class-wc-emails.php',
 	);
 
 	/**
