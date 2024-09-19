@@ -3,11 +3,6 @@
  */
 import { test, expect } from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
-
 test.describe( 'Merchant → Local Pickup Settings', () => {
 	test.beforeEach( async ( { localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickupCosts();
