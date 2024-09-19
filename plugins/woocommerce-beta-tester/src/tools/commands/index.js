@@ -24,6 +24,10 @@ import {
 	UPDATE_WCCOM_REQUEST_ERRORS_MODE,
 	SetWccomRequestErrros,
 } from './set-wccom-request-errors';
+import {
+	SetWoocomBaseUrl,
+	UPDATE_WOOCOM_BASE_URL_ACTION_NAME,
+} from './set-woocom-base-url';
 
 export default [
 	{
@@ -105,5 +109,10 @@ export default [
 		command: 'Toggle Fake WooPayments Completion Status',
 		description: <FakeWooPayments />,
 		action: FAKE_WOO_PAYMENTS_ACTION_NAME,
+	},
+	{
+		command: 'Set WooCommerce.com Base URL',
+		description: <SetWoocomBaseUrl />,
+		action: UPDATE_WOOCOM_BASE_URL_ACTION_NAME,
 	},
 ];
