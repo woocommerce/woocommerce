@@ -1,7 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Assets\Api;
+use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 
 /**
  * Tests for the Checkout block type
@@ -9,6 +13,33 @@ use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
  * @since $VID:$
  */
 class Checkout extends \WP_UnitTestCase {
+	/**
+	 * @var AssetDataRegistryMock The asset data registry mock.
+	 */
+	private $registry;
+
+	/**
+	 * @var IntegrationRegistry The integration registry, not used, but required to set up a Checkout block.
+	 */
+	private $integration_registry;
+
+	/**
+	 * @var Api The asset API, not used, but required to set up a Checkout block.
+	 */
+	private $asset_api;
+
+	/**
+	 * Set up the test. Creates a AssetDataRegistryMock.
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	protected function setUp(): void {
+		$this->asset_api            = Package::container()->get( API::class );
+		$this->registry             = new AssetDataRegistryMock( $this->asset_api );
+		$this->integration_registry = new IntegrationRegistry();
+	}
+
 	/**
 	 * Checks the local pickup title is updated when the Checkout block is saved.
 	 * @return void
