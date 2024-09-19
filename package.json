@@ -26,7 +26,7 @@
 		"clean": "rimraf -g '**/node_modules' '**/.wireit' && pnpm store prune",
 		"buildclean": "git clean --force -d -X ./packages ./plugins ./tools",
 		"preinstall": "npx only-allow pnpm",
-		"postinstall": "pnpm exec husky",
+		"postinstall": "husky",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
 		"utils": "./tools/monorepo-utils/bin/run"
 	},
