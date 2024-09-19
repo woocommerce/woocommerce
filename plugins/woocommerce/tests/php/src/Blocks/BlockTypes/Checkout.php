@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
@@ -32,7 +33,7 @@ class Checkout extends \WP_UnitTestCase {
 	 * Set up the test. Creates a AssetDataRegistryMock.
 	 *
 	 * @return void
-	 * @throws \Exception
+	 * @throws \Exception If the API class is not registered with container.
 	 */
 	protected function setUp(): void {
 		$this->asset_api            = Package::container()->get( API::class );
@@ -54,7 +55,12 @@ class Checkout extends \WP_UnitTestCase {
 		// Sets the page as the checkout page so the code to update the setting correctly processes it.
 		$page_id         = wc_create_page( $page['name'], 'woocommerce_checkout_page_id', $page['title'], $page['content'] );
 		$updated_content = '<!-- wp:woocommerce/checkout {"showOrderNotes":false} --> <div class="wp-block-woocommerce-checkout is-loading"> <!-- wp:woocommerce/checkout-shipping-method-block {"localPickupText":"Changed pickup"} --> <div class="wp-block-woocommerce-checkout-shipping-method-block"></div> <!-- /wp:woocommerce/checkout-shipping-method-block --></div> <!-- /wp:woocommerce/checkout -->';
-		wp_update_post( [ 'ID' => $page_id, 'post_content' => $updated_content ] );
+		wp_update_post(
+			[
+				'ID'           => $page_id,
+				'post_content' => $updated_content,
+			]
+		);
 
 		// Now the post was saved with an updated localPickupText attribute, the title on Local Pickup settings should be updated.
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
