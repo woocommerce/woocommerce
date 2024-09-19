@@ -105,7 +105,9 @@ class WooCommercePayments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::is_connected() && ! self::is_account_partially_onboarded();
+			// This task is complete if there are other ecommerce gateways enabled (offline payment methods are excluded),
+			// or if WooPayments is active and has a connected, fully onboarded account.
+			$this->is_complete_result = self::has_other_ecommerce_gateways() || ( self::is_connected() && ! self::is_account_partially_onboarded() );
 		}
 
 		return $this->is_complete_result;
@@ -215,5 +217,27 @@ class WooCommercePayments extends Task {
 			return $payment_gateways['woocommerce_payments'];
 		}
 		return null;
+	}
+
+	/**
+	 * Check if the store has any enabled ecommerce gateways, other than WooPayments.
+	 *
+	 * We exclude offline payment methods from this check.
+	 *
+	 * @return bool
+	 */
+	public static function has_other_ecommerce_gateways(): bool {
+		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
+		$enabled_gateways = array_filter(
+			$gateways,
+			function( $gateway ) {
+				// Filter out any WooPayments-related or offline gateways.
+				return 'yes' === $gateway->enabled
+					&& 0 !== strpos( $gateway->id, 'woocommerce_payments' )
+					&& ! in_array( $gateway->id, array( 'bacs', 'cheque', 'cod' ), true );
+			}
+		);
+
+		return ! empty( $enabled_gateways );
 	}
 }
