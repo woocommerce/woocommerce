@@ -124,7 +124,7 @@ class WcPayWelcomePage {
 				'path'       => '/wc-pay-welcome-page',
 				'position'   => '56',
 				'nav_args'   => array(
-					'title'        => 'WooPayments',
+					'title'        => 'WooPayments', // Do not translate the brand name.
 					'is_category'  => false,
 					'menuId'       => 'plugins',
 					'is_top_level' => true,
@@ -149,6 +149,8 @@ class WcPayWelcomePage {
 		}
 
 		// Maybe add a badge to the menu.
+		// If the main Payments task is not complete, we add a badge to the Payments menu item.
+		// We use the complete logic of the main Payments task because it is the most general one.
 		if ( ! empty( $this->get_payments_task() ) && ! $this->is_payments_task_complete() ) {
 			$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
 			foreach ( $menu as $index => $menu_item ) {
