@@ -59,7 +59,7 @@ class WcPayWelcomePage {
 	 *
 	 * @return boolean
 	 */
-	public function is_incentive_visible( $skip_wcpay_active = false ): bool {
+	public function is_incentive_visible( bool $skip_wcpay_active = false ): bool {
 		// The WooPayments plugin must not be active.
 		if ( ! $skip_wcpay_active && $this->is_wcpay_active() ) {
 			return false;
