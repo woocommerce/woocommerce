@@ -117,7 +117,7 @@ class Payments extends Task {
 		}
 
 		// Check if there is an active WooPayments incentive via the welcome page.
-		if ( WcPayWelcomePage::instance()->must_be_visible() ) {
+		if ( WcPayWelcomePage::instance()->is_incentive_visible() ) {
 			// Point to the WooPayments welcome page.
 			return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' ) );
 		}

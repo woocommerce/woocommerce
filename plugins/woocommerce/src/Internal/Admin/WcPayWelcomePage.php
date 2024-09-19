@@ -51,13 +51,13 @@ class WcPayWelcomePage {
 	}
 
 	/**
-	 * Whether the WooPayments welcome page should be visible.
+	 * Whether the WooPayments incentive should be visible.
 	 *
 	 * @param bool $skip_wcpay_active Whether to skip the check for the WooPayments plugin being active.
 	 *
 	 * @return boolean
 	 */
-	public function must_be_visible( $skip_wcpay_active = false ): bool {
+	public function is_incentive_visible( $skip_wcpay_active = false ): bool {
 		// The WooPayments plugin must not be active.
 		if ( ! $skip_wcpay_active && $this->is_wcpay_active() ) {
 			return false;
@@ -167,7 +167,7 @@ class WcPayWelcomePage {
 		}
 
 		// Return early if the incentive must not be visible.
-		if ( ! $this->must_be_visible() ) {
+		if ( ! $this->is_incentive_visible() ) {
 			return $settings;
 		}
 
@@ -186,7 +186,7 @@ class WcPayWelcomePage {
 		// Note: We need to disregard if WooPayments is active when adding the promo note to the list of
 		// allowed promo notes. The AJAX call that adds the promo note happens after WooPayments is installed and activated.
 		// Return early if the incentive page must not be visible, without checking if WooPayments is active.
-		if ( ! $this->must_be_visible( true ) ) {
+		if ( ! $this->is_incentive_visible( true ) ) {
 			return $promo_notes;
 		}
 
@@ -205,7 +205,7 @@ class WcPayWelcomePage {
 	 */
 	public function onboarding_task_badge( string $badge ): string {
 		// Return early if the incentive must not be visible.
-		if ( ! $this->must_be_visible() ) {
+		if ( ! $this->is_incentive_visible() ) {
 			return $badge;
 		}
 
@@ -221,7 +221,7 @@ class WcPayWelcomePage {
 	 */
 	public function onboarding_task_additional_data( ?array $additional_data ): ?array {
 		// Return early if the incentive must not be visible.
-		if ( ! $this->must_be_visible() ) {
+		if ( ! $this->is_incentive_visible() ) {
 			return $additional_data;
 		}
 
