@@ -53,7 +53,7 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 					",
 					$stock,
 					$nostock
-				)
+				),
 			),
 			'9.5.0',
 			null,

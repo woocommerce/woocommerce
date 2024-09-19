@@ -50,7 +50,7 @@ class WC_Report_Out_Of_Stock extends WC_Report_Stock {
 					AND lookup.stock_quantity <= %d
 					",
 					$stock
-				)
+				),
 			),
 			'9.5.0',
 			null,

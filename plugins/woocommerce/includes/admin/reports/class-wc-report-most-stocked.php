@@ -43,7 +43,7 @@ class WC_Report_Most_Stocked extends WC_Report_Stock {
 					AND lookup.stock_quantity > %d
 					",
 					$stock
-				)
+				),
 			),
 			'9.5.0',
 			null,

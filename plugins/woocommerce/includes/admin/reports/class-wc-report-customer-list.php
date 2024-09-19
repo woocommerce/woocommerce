@@ -306,7 +306,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 						'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
 						'number'  => $per_page,
 						'offset'  => ( $current_page - 1 ) * $per_page,
-					)
+					),
 				),
 				'9.5.0',
 				null,

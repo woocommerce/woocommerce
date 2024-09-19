@@ -150,7 +150,7 @@ class WC_Report_Stock extends WP_List_Table {
 						'9.5.0',
 						null,
 						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
-					 );
+					);
 
 					foreach ( $actions as $action ) {
 						printf(
