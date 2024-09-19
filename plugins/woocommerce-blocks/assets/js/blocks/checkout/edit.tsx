@@ -86,9 +86,11 @@ export const Edit = ( {
 		} );
 		// Hack to get it update in editor
 		wcSettings.defaultFields.phone.hidden = ! showField;
-		wcSettings.defaultFields.phone.required = showField;
+		if ( showField ) {
+			wcSettings.defaultFields.phone.required = true;
+		}
 	};
-
+	console.log( { requirePhoneField, showPhoneField } );
 	const setRequirePhoneFieldEntity = ( value: string ) => {
 		dispatch( coreStore ).editEntityRecord( 'root', 'site', undefined, {
 			woocommerce_checkout_phone_field:
@@ -245,10 +247,8 @@ export const Edit = ( {
 									value={ {
 										showApartmentField,
 										showCompanyField,
-										showPhoneField,
 										requireApartmentField,
 										requireCompanyField,
-										requirePhoneField,
 										showOrderNotes,
 										showPolicyLinks,
 										showReturnToCart,
