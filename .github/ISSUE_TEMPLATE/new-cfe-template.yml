@@ -54,7 +54,8 @@ body:
   - type: textarea
     id: how-to-communicate
     attributes:
-      label: "How should this change be communicated in the release post on the [public developer blog](https://href.li/?https://developer.woo.com/blog/)?"
+      label: "How should this change be communicated in the release post on the public developer blog:"
+      description: "See the blog at [https://developer.woo.com/blog/](https://developer.woo.com/blog/)"
       placeholder: "There is no need to add new communication to the already planned one."
     validations:
       required: true
