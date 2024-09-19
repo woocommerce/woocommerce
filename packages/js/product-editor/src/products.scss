@@ -8,6 +8,12 @@ body.product_page_woocommerce-products-dashboard #woocommerce-products-dashboard
 	@include reset;
 	display: flex !important;
 	min-height: 100vh;
+
+	.edit-site-layout {
+		flex: 1 1 0;
+		min-height: 100%;
+		height: auto;
+	}
 }
 
 body.js:not(.is-fullscreen-mode) {
@@ -30,11 +36,7 @@ body.js:not(.is-fullscreen-mode) {
 		min-height: calc(100vh - #{$admin-bar-height});
 
 		.edit-site-layout {
-			flex: 1 1 0;
-			min-height: 100%;
-			height: auto;
 			background: #1d2327;
-			;
 		}
 	}
 
