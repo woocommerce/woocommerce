@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\PageController;
 use WC_Abstract_Order;
@@ -103,58 +105,63 @@ class WcPayWelcomePage {
 	public function register_menu_and_page() {
 		global $menu;
 
-		if ( ! $this->must_be_visible() ) {
+		// The WooPayments plugin must not be active.
+		if ( $this->is_wcpay_active() ) {
 			return;
 		}
 
+		$menu_title = esc_html__( 'Payments', 'woocommerce' );
 		$menu_icon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=';
 
-		$menu_data = [
-			'id'       => 'wc-calypso-bridge-payments-welcome-page',
-			'title'    => esc_html__( 'Payments', 'woocommerce' ),
-			'path'     => '/wc-pay-welcome-page',
-			'position' => '56',
-			'nav_args' => [
-				'title'        => esc_html__( 'WooPayments', 'woocommerce' ),
-				'is_category'  => false,
-				'menuId'       => 'plugins',
-				'is_top_level' => true,
-			],
-			'icon'     => $menu_icon,
-		];
+		// If an incentive is visible, we register the WooPayments welcome/incentives page.
+		// Otherwise, we register a menu item that links to the Payments task page.
+		if ( $this->is_incentive_visible() ) {
+			$page_id = 'wc-calypso-bridge-payments-welcome-page';
+			$page_options = [
+				'id'         => $page_id,
+				'title'      => $menu_title,
+				'capability' => 'manage_woocommerce',
+				'path'       => '/wc-pay-welcome-page',
+				'position'   => '56',
+				'nav_args'   => [
+					'title'        => 'WooPayments',
+					'is_category'  => false,
+					'menuId'       => 'plugins',
+					'is_top_level' => true,
+				],
+				'icon'       => $menu_icon,
+			];
 
-		wc_admin_register_page( $menu_data );
+			wc_admin_register_page( $page_options );
 
-		// Registering a top level menu via wc_admin_register_page doesn't work when the new
-		// nav is enabled. The new nav disabled everything, except the 'WooCommerce' menu.
-		// We need to register this menu via add_menu_page so that it doesn't become a child of
-		// WooCommerce menu.
-		if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
-			$menu_with_nav_data = [
-				esc_html__( 'Payments', 'woocommerce' ),
-				esc_html__( 'Payments', 'woocommerce' ),
-				'view_woocommerce_reports',
-				'admin.php?page=wc-admin&path=/wc-pay-welcome-page',
+			$menu_path = PageController::get_instance()->get_path_from_id( $page_id );
+		} else {
+			$menu_path = 'admin.php?page=wc-admin&task=' . $this->get_active_payments_task_slug();
+			add_menu_page(
+				$menu_title,
+				$menu_title,
+				'manage_woocommerce',
+				$menu_path,
 				null,
 				$menu_icon,
 				56,
-			];
-
-			call_user_func_array( 'add_menu_page', $menu_with_nav_data );
+			);
 		}
 
-		// Add badge.
-		$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
-		foreach ( $menu as $index => $menu_item ) {
-			// Only add the badge markup if not already present and the menu item is the WooPayments menu item.
-			if ( false === strpos( $menu_item[0], $badge )
-				&& ( 'wc-admin&path=/wc-pay-welcome-page' === $menu_item[2]
-					|| 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' === $menu_item[2] )
-			) {
-				$menu[ $index ][0] .= $badge; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// Maybe add a badge to the menu.
+		if ( ! empty( $this->get_payments_task() ) && ! $this->is_payments_task_complete() ) {
+			$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
+			foreach ( $menu as $index => $menu_item ) {
+				// Only add the badge markup if not already present and the menu item is the Payments menu item.
+				if ( 0 === strpos( $menu_item[0], $menu_title )
+					 && $menu_path === $menu_item[2]
+					 && false === strpos( $menu_item[0], $badge ) ) {
 
-				// One menu item with a badge is more than enough.
-				break;
+					$menu[ $index ][0] .= $badge; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+					// One menu item with a badge is more than enough.
+					break;
+				}
 			}
 		}
 	}
@@ -541,5 +548,56 @@ class WcPayWelcomePage {
 				]
 			)
 		);
+	}
+
+	/**
+	 * Get the slug of the active payments task.
+	 *
+	 * It can be either 'woocommerce-payments' or 'payments'.
+	 *
+	 * @return string Either 'woocommerce-payments' or 'payments'. Empty string if no task is found.
+	 */
+	private function get_active_payments_task_slug(): string {
+		$task_list = TaskLists::get_list( 'setup' );
+		if ( empty( $task_list ) ) {
+			return '';
+		}
+
+		$woopayments_task = $task_list->get_task( 'woocommerce-payments' );
+		if ( ! empty( $woopayments_task ) && $woopayments_task->can_view() ) {
+			return 'woocommerce-payments';
+		}
+
+		return 'payments';
+	}
+
+	/**
+	 * Get the WooCommerce setup task list Payments task instance.
+	 *
+	 * @return Task|null The Payments task instance. null if the task is not found.
+	 */
+	private function get_payments_task(): ?Task {
+		$task_list = TaskLists::get_list( 'setup' );
+		if ( empty( $task_list ) ) {
+			return null;
+		}
+
+		$payments_task = $task_list->get_task( 'payments' );
+		if ( empty( $payments_task ) ) {
+			return null;
+		}
+
+		return $payments_task;
+	}
+
+	/**
+	 * Determine if the WooCommerce setup task list Payments task is complete.
+	 *
+	 * @return bool True if the Payments task is complete, false otherwise.
+	 */
+	private function is_payments_task_complete(): bool {
+		$payments_task = $this->get_payments_task();
+
+		return ! empty( $payments_task ) && $payments_task->is_complete();
 	}
 }
