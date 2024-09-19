@@ -217,7 +217,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @param string $message Log message to be recorded.
 	 * @param array  $context Optional. Additional information for log handlers, such as 'backtrace', 'tags', 'extra', and 'error'.
 	 *
-	 * @throws \Exception If the remote logging fails. The error is caught and logged locally.
+	 * @throws \Exception|\Error If the remote logging fails. The error is caught and logged locally.
 	 * @return bool
 	 */
 	private function log( $level, $message, $context ) {
@@ -228,9 +228,10 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		$body = array(
-			'params' => SafeGlobalFunctionProxy::wp_json_encode( $log_data ) ?? 'Error occurred while encoding the log data',
-		);
+		$body = SafeGlobalFunctionProxy::wp_json_encode( array( 'params' => SafeGlobalFunctionProxy::wp_json_encode( $log_data ) ) );
+		if ( is_null( $log_data_json ) ) { // if the json encoding fails the API will reject the API call so let's not bother.
+			throw new Error( 'Remote Logger encountered error while attempting to JSON encode $log_data' );
+		}
 
 		WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
 
@@ -238,10 +239,10 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		$response = SafeGlobalFunctionProxy::wp_safe_remote_post(
+		$response          = SafeGlobalFunctionProxy::wp_safe_remote_post(
 			self::LOG_ENDPOINT,
 			array(
-				'body'     => SafeGlobalFunctionProxy::wp_json_encode( $body ) ?? 'Error occurred while encoding the log data',
+				'body'     => $body,
 				'timeout'  => 3,
 				'headers'  => array(
 					'Content-Type' => 'application/json',
@@ -249,12 +250,14 @@ class RemoteLogger extends \WC_Log_Handler {
 				'blocking' => false,
 			)
 		);
-
-		if ( SafeGlobalFunctionProxy::is_wp_error( $response ) ) {
+		$is_api_call_error = SafeGlobalFunctionProxy::is_wp_error( $response );
+		if ( $is_api_call_error ) {
 			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to send the log to the remote logging service: ' . $response->get_error_message(), array( 'source' => 'remote-logging' ) );
 			return false;
+		} elseif ( is_null( $is_api_call_error ) ) {
+			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to parse the response after sending log to the remote logging service: ', array( 'source' => 'remote-logging' ) );
+			return false;
 		}
-
 		return true;
 	}
 
@@ -292,12 +295,28 @@ class RemoteLogger extends \WC_Log_Handler {
 	}
 
 	/**
-	 * Get the current WooCommerce version.
+	 * Get the current WooCommerce version reliably through a series of fallbacks
 	 *
 	 * @return string The current WooCommerce version.
 	 */
 	private function get_wc_version() {
-		return WC()->version;
+		if ( class_exists( '\Automattic\Jetpack\Constants' ) && method_exists( '\Automattic\Jetpack\Constants', 'get_constant' ) ) {
+			$wc_version = \Automattic\Jetpack\Constants::get_constant( 'WC_VERSION' );
+			if ( $wc_version ) {
+				return $wc_version;
+			}
+		}
+
+		if ( function_exists( 'WC' ) && method_exists( WC(), 'version' ) ) {
+			return WC()->version();
+		}
+
+		if ( defined( 'WC_VERSION' ) ) {
+			return WC_VERSION;
+		}
+
+		// Return null since none of the above worked.
+		return null;
 	}
 
 	/**
