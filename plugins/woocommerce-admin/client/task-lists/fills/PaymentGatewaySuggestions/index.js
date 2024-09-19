@@ -266,7 +266,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const offlineSection = !! offlineGateways.length && (
 		<List
 			heading={ __( 'Offline payment methods', 'woocommerce' ) }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ offlineGateways }
 			markConfigured={ markConfigured }
 		/>
