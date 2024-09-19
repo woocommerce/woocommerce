@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\CheckoutMock;
 
 /**
  * Tests for the Checkout block type
@@ -67,11 +68,11 @@ class Checkout extends \WP_UnitTestCase {
 		$this->assertEquals( 'Changed pickup', $pickup_location_settings['title'] );
 
 		// Create a new Checkout block class with the mocked AssetDataRegistry. This is so we can inspect it after the change.
-		$checkout = new \Automattic\WooCommerce\Blocks\BlockTypes\Checkout( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-under-test' );
-		$checkout->render_callback( [], $page_id );
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+		$checkout->mock_enqueue_data();
 
 		$data_from_registry = $this->registry->get();
-		$this->assertEquals( $data_from_registry['localPickupText'], 'Changed pickup' );
+		$this->assertEquals( 'Changed pickup', $data_from_registry['localPickupText'] );
 		wp_delete_post( $page_id );
 	}
 }
