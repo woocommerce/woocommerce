@@ -558,17 +558,28 @@ class WcPayWelcomePage {
 	 * @return string Either 'woocommerce-payments' or 'payments'. Empty string if no task is found.
 	 */
 	private function get_active_payments_task_slug(): string {
-		$task_list = TaskLists::get_list( 'setup' );
-		if ( empty( $task_list ) ) {
+		$setup_task_list    = TaskLists::get_list( 'setup' );
+		$extended_task_list = TaskLists::get_list( 'extended' );
+		if ( empty( $setup_task_list ) && empty( $extended_task_list ) ) {
 			return '';
 		}
 
-		$woopayments_task = $task_list->get_task( 'woocommerce-payments' );
+		$payments_task = $setup_task_list->get_task( 'payments' );
+		if ( ! empty( $payments_task ) && $payments_task->can_view() ) {
+			return 'payments';
+		}
+
+		$payments_task = $extended_task_list->get_task( 'payments' );
+		if ( ! empty( $payments_task ) && $payments_task->can_view() ) {
+			return 'payments';
+		}
+
+		$woopayments_task = $setup_task_list->get_task( 'woocommerce-payments' );
 		if ( ! empty( $woopayments_task ) && $woopayments_task->can_view() ) {
 			return 'woocommerce-payments';
 		}
 
-		return 'payments';
+		return '';
 	}
 
 	/**
