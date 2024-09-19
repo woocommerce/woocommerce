@@ -59,6 +59,13 @@ class Checkout extends \WP_UnitTestCase {
 		// Now the post was saved with an updated localPickupText attribute, the title on Local Pickup settings should be updated.
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
 		$this->assertEquals( 'Changed pickup', $pickup_location_settings['title'] );
+
+		// Create a new Checkout block class with the mocked AssetDataRegistry. This is so we can inspect it after the change.
+		$checkout = new \Automattic\WooCommerce\Blocks\BlockTypes\Checkout( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-under-test' );
+		$checkout->render_callback( [], $page_id );
+
+		$data_from_registry = $this->registry->get();
+		$this->assertEquals( $data_from_registry['localPickupText'], 'Changed pickup' );
 		wp_delete_post( $page_id );
 	}
 }
