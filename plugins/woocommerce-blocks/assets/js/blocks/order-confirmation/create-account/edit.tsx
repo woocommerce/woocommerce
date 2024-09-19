@@ -32,7 +32,9 @@ const defaultTemplate = [
 	],
 	[
 		'core/list',
-		{},
+		{
+			className: 'is-style-checkmark-list',
+		},
 		[
 			[
 				'core/list-item',
