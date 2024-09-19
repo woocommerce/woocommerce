@@ -117,7 +117,7 @@ class WcPayWelcomePage {
 		// Otherwise, we register a menu item that links to the Payments task page.
 		if ( $this->is_incentive_visible() ) {
 			$page_id = 'wc-calypso-bridge-payments-welcome-page';
-			$page_options = [
+			$page_options = array(
 				'id'         => $page_id,
 				'title'      => $menu_title,
 				'capability' => 'manage_woocommerce',
@@ -130,7 +130,7 @@ class WcPayWelcomePage {
 					'is_top_level' => true,
 				],
 				'icon'       => $menu_icon,
-			];
+			);
 
 			wc_admin_register_page( $page_options );
 
@@ -194,7 +194,7 @@ class WcPayWelcomePage {
 	 * @param array $promo_notes Allowed promo notes.
 	 * @return array
 	 */
-	public function allowed_promo_notes( $promo_notes = [] ): array {
+	public function allowed_promo_notes( $promo_notes = array() ): array {
 		// Note: We need to disregard if WooPayments is active when adding the promo note to the list of
 		// allowed promo notes. The AJAX call that adds the promo note happens after WooPayments is installed and activated.
 		// Return early if the incentive page must not be visible, without checking if WooPayments is active.
@@ -278,11 +278,11 @@ class WcPayWelcomePage {
 		// If there is at least one order processed with WooPayments, we consider the store to have WooPayments.
 		if ( false === $had_wcpay && ! empty(
 			wc_get_orders(
-				[
+				array(
 					'payment_method' => 'woocommerce_payments',
 					'return'         => 'ids',
 					'limit'          => 1,
-				]
+				)
 			)
 		) ) {
 			$had_wcpay = true;
@@ -414,13 +414,13 @@ class WcPayWelcomePage {
 		// it means there was an API error previously and we should not retry just yet.
 		if ( is_wp_error( $cache ) ) {
 			// Initialize the in-memory cache and return it.
-			$this->incentive = [];
+			$this->incentive = array();
 
 			return $this->incentive;
 		}
 
 		// Gather the store context data.
-		$store_context = [
+		$store_context = array(
 			// Store ISO-2 country code, e.g. `US`.
 			'country'      => WC()->countries->get_base_country(),
 			// Store locale, e.g. `en_US`.
@@ -431,7 +431,7 @@ class WcPayWelcomePage {
 			// Whether the store has at least one payment gateway enabled.
 			'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
 			'has_wcpay'    => $this->has_wcpay(),
-		];
+		);
 
 		// Fingerprint the store context through a hash of certain entries.
 		$store_context_hash = $this->generate_context_hash( $store_context );
@@ -459,9 +459,9 @@ class WcPayWelcomePage {
 
 		$response = wp_remote_get(
 			$url,
-			[
+			array(
 				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-			]
+			)
 		);
 
 		// Return early if there is an error, waiting 6 hours before the next attempt.
@@ -482,11 +482,11 @@ class WcPayWelcomePage {
 
 		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
 		// Initialize the in-memory cache.
-		$this->incentive = [];
+		$this->incentive = array();
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			// Decode the results, falling back to an empty array.
-			$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? [];
+			$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? array();
 
 			// Find all `welcome_page` incentives.
 			$incentives = array_filter(
@@ -498,7 +498,7 @@ class WcPayWelcomePage {
 
 			// Use the first found matching incentive or empty array if none was found.
 			// Store incentive in the in-memory cache.
-			$this->incentive = empty( $incentives ) ? [] : reset( $incentives );
+			$this->incentive = empty( $incentives ) ? array() : reset( $incentives );
 		}
 
 		// Skip transient cache if `cache-for` header equals zero.
@@ -515,11 +515,11 @@ class WcPayWelcomePage {
 		// or 1 day in seconds. Also attach a timestamp to the transient data so we know when we last fetched.
 		set_transient(
 			self::CACHE_TRANSIENT_NAME,
-			[
+			array(
 				'incentive'    => $this->incentive,
 				'context_hash' => $store_context_hash,
 				'timestamp'    => time(),
-			],
+			),
 			! empty( $cache_for ) ? (int) $cache_for : DAY_IN_SECONDS
 		);
 
@@ -539,13 +539,13 @@ class WcPayWelcomePage {
 		// Entries like `active_for` have no place in the hash generation since they change automatically.
 		return md5(
 			wp_json_encode(
-				[
+				array(
 					'country'      => $context['country'] ?? '',
 					'locale'       => $context['locale'] ?? '',
 					'has_orders'   => $context['has_orders'] ?? false,
 					'has_payments' => $context['has_payments'] ?? false,
 					'has_wcpay'    => $context['has_wcpay'] ?? false,
-				]
+				)
 			)
 		);
 	}
