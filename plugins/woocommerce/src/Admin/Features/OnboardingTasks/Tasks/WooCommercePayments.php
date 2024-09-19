@@ -238,7 +238,7 @@ class WooCommercePayments extends Task {
 		$gateways         = WC()->payment_gateways->get_available_payment_gateways();
 		$enabled_gateways = array_filter(
 			$gateways,
-			function( $gateway ) {
+			function ( $gateway ) {
 				// Filter out any WooPayments-related or offline gateways.
 				return 'yes' === $gateway->enabled
 					&& 0 !== strpos( $gateway->id, 'woocommerce_payments' )
