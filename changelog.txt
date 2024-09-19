@@ -1,9 +1,5 @@
 == Changelog ==
 
-= 9.3.2 2024-09-18 =
-
-* Update - Add hook for custom checkout validation [#51513](https://github.com/woocommerce/woocommerce/pull/51513)
-
 = 9.3.1 2024-09-12 =
 
 * Tweak - Disable remote logging feature by default [#51312](https://github.com/woocommerce/woocommerce/pull/51312)
