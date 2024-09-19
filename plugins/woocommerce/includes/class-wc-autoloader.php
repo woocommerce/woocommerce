@@ -28,8 +28,6 @@ class WC_Autoloader {
 	private static array $known_classes_paths = array(
 		'WC_Product_Usage'             => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage.php',
 		'WC_Product_Usage_Rule_Set'    => WC_ABSPATH . 'includes/product-usage/class-wc-product-usage-rule-set.php',
-		'WC_WCCOM_Site'                => WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site.php',
-		'WC_Helper'                    => WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php',
 		'WC_Helper_Options'            => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php',
 		'WC_Helper_API'                => WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php',
 		'WC_Woo_Update_Manager_Plugin' => WC_ABSPATH . 'includes/admin/helper/class-wc-woo-update-manager-plugin.php',
