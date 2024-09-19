@@ -1830,6 +1830,18 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected function register_core_collections() {
 		$this->register_collection_handlers(
+			'woocommerce/product-collection/hand-picked',
+			function ( $collection_args, $common_query_values, $query ) {
+				// Hand-picked product collections should hide the results if no products are selected.
+				if ( empty( $query['handpicked_products'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+			}
+		);
+
+		$this->register_collection_handlers(
 			'woocommerce/product-collection/related',
 			function ( $collection_args ) {
 				// No products should be shown if no related product reference is set.
