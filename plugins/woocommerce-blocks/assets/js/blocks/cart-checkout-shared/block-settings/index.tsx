@@ -34,3 +34,5 @@ export const BlockSettings = ( {
 		</InspectorControls>
 	);
 };
+
+export { ExpressPaymentControls } from './express-payment-settings';

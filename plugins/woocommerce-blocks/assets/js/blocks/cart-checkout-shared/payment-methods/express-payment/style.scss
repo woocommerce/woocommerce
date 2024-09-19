@@ -14,6 +14,7 @@ $border-width: 1px;
 		> li {
 			margin: 0;
 			width: 100%;
+			overflow: hidden;
 
 			> img {
 				width: 100%;
@@ -95,7 +96,7 @@ $border-width: 1px;
 .wc-block-components-express-payment--cart {
 	.wc-block-components-express-payment__event-buttons {
 		> li {
-			padding-bottom: $gap;
+			padding-bottom: $gap-small;
 			text-align: center;
 			width: 100%;
 
