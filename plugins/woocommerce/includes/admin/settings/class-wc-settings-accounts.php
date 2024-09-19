@@ -365,7 +365,11 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				if ( guestCheckout ) {
 					guestCheckout.addEventListener('change', function() {
 						const isChecked = this.checked;
-						document.getElementById("woocommerce_enable_delayed_account_creation").disabled = !isChecked;
+						const input = document.getElementById("woocommerce_enable_delayed_account_creation");
+						if ( ! input ) {
+							return;
+						}
+						input.disabled = !isChecked;
 					});
 					guestCheckout.dispatchEvent(new Event('change')); // Initial state
 				}
