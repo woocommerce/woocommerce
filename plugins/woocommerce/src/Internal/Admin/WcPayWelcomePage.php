@@ -63,6 +63,11 @@ class WcPayWelcomePage {
 			return false;
 		}
 
+		// The current WP user must have the capabilities required to set up WooPayments.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return false;
+		}
+
 		// Suggestions not disabled via a setting.
 		if ( get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) === 'no' ) {
 			return false;
