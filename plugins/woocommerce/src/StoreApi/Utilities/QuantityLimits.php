@@ -39,7 +39,7 @@ final class QuantityLimits {
 		$minimum = max( $minimum, 1 );
 
 		// Maximum must be at least minimum.
-		$maximum = max( $maximum, 1 );
+		$maximum = max( $maximum, $minimum );
 
 		return [
 			'minimum'     => $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ),
@@ -64,7 +64,7 @@ final class QuantityLimits {
 		$minimum = max( $minimum, 1 );
 
 		// Maximum must be at least minimum.
-		$maximum = max( $maximum, 1 );
+		$maximum = max( $maximum, $minimum );
 
 		return [
 			'minimum'     => $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ),
