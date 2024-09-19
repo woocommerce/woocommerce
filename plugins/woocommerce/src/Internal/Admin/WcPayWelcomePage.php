@@ -111,24 +111,24 @@ class WcPayWelcomePage {
 		}
 
 		$menu_title = esc_html__( 'Payments', 'woocommerce' );
-		$menu_icon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=';
+		$menu_icon  = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=';
 
 		// If an incentive is visible, we register the WooPayments welcome/incentives page.
 		// Otherwise, we register a menu item that links to the Payments task page.
 		if ( $this->is_incentive_visible() ) {
-			$page_id = 'wc-calypso-bridge-payments-welcome-page';
+			$page_id      = 'wc-calypso-bridge-payments-welcome-page';
 			$page_options = array(
 				'id'         => $page_id,
 				'title'      => $menu_title,
 				'capability' => 'manage_woocommerce',
 				'path'       => '/wc-pay-welcome-page',
 				'position'   => '56',
-				'nav_args'   => [
+				'nav_args'   => array(
 					'title'        => 'WooPayments',
 					'is_category'  => false,
 					'menuId'       => 'plugins',
 					'is_top_level' => true,
-				],
+				),
 				'icon'       => $menu_icon,
 			);
 
@@ -154,8 +154,8 @@ class WcPayWelcomePage {
 			foreach ( $menu as $index => $menu_item ) {
 				// Only add the badge markup if not already present and the menu item is the Payments menu item.
 				if ( 0 === strpos( $menu_item[0], $menu_title )
-					 && $menu_path === $menu_item[2]
-					 && false === strpos( $menu_item[0], $badge ) ) {
+					&& $menu_path === $menu_item[2]
+					&& false === strpos( $menu_item[0], $badge ) ) {
 
 					$menu[ $index ][0] .= $badge; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
