@@ -117,10 +117,7 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function can_view() {
-		$payments = $this->task_list->get_task( 'payments' );
-
-		return ! $payments->is_complete() && // Do not re-display the task if the general "Payments" task has already been completed.
-			self::is_supported();
+		return self::is_supported();
 	}
 
 	/**
