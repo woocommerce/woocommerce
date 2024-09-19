@@ -2,26 +2,20 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, search } from '@wordpress/icons';
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { navigateTo, getNewPath, useQuery } from '@woocommerce/navigation';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @woocommerce/dependency-group
+import { SearchControl } from '@wordpress/components';
+// The @ts-ignore is needed because the SearchControl types are not exported from the @wordpress/components package,
+// even though the component itself is. This is likely due to an older version of the package being used.
 
 /**
  * Internal dependencies
  */
 import './search.scss';
 import { MARKETPLACE_PATH } from '../constants';
-import { MarketplaceContext } from '../../contexts/marketplace-context';
-
-const searchPlaceholder = __(
-	'Search for extensions, themes, and business services',
-	'woocommerce'
-);
-
-const searchPlaceholderNoBusinessServices = __(
-	'Search for extensions and themes',
-	'woocommerce'
-);
 
 /**
  * Search component.
@@ -30,13 +24,9 @@ const searchPlaceholderNoBusinessServices = __(
  */
 function Search(): JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
-	const { hasBusinessServices } = useContext( MarketplaceContext );
+	const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
 
 	const query = useQuery();
-
-	const placeholder = hasBusinessServices
-		? searchPlaceholder
-		: searchPlaceholderNoBusinessServices;
 
 	useEffect( () => {
 		if ( query.term ) {
@@ -46,20 +36,15 @@ function Search(): JSX.Element {
 		}
 	}, [ query.term ] );
 
-	useEffect( () => {
-		if ( query.tab !== 'search' ) {
-			setSearchTerm( '' );
-		}
-	}, [ query.tab ] );
-
 	const runSearch = () => {
-		const term = searchTerm.trim();
+		const newQuery: { term?: string; tab?: string } = query;
 
-		const newQuery: { term?: string; tab?: string } = {};
-		if ( term !== '' ) {
-			newQuery.term = term;
-			newQuery.tab = 'search';
+		// If we're on 'Discover' or 'My subscriptions' when a search is initiated, move to the extensions tab
+		if ( ! newQuery.tab || newQuery.tab === 'my-subscriptions' ) {
+			newQuery.tab = 'extensions';
 		}
+
+		newQuery.term = searchTerm.trim();
 
 		// When the search term changes, we reset the query string on purpose.
 		navigateTo( {
@@ -67,12 +52,6 @@ function Search(): JSX.Element {
 		} );
 
 		return [];
-	};
-
-	const handleInputChange = (
-		event: React.ChangeEvent< HTMLInputElement >
-	) => {
-		setSearchTerm( event.target.value );
 	};
 
 	const handleKeyUp = ( event: { key: string } ) => {
@@ -86,32 +65,14 @@ function Search(): JSX.Element {
 	};
 
 	return (
-		<div className="woocommerce-marketplace__search">
-			<label
-				className="screen-reader-text"
-				htmlFor="woocommerce-marketplace-search-query"
-			>
-				{ placeholder }
-			</label>
-			<input
-				id="woocommerce-marketplace-search-query"
-				value={ searchTerm }
-				className="woocommerce-marketplace__search-input"
-				type="search"
-				name="woocommerce-marketplace-search-query"
-				placeholder={ placeholder }
-				onChange={ handleInputChange }
-				onKeyUp={ handleKeyUp }
-			/>
-			<button
-				id="woocommerce-marketplace-search-button"
-				className="woocommerce-marketplace__search-button"
-				aria-label={ __( 'Search', 'woocommerce' ) }
-				onClick={ runSearch }
-			>
-				<Icon icon={ search } size={ 32 } />
-			</button>
-		</div>
+		<SearchControl
+			label={ searchPlaceholder }
+			placeholder={ searchPlaceholder }
+			value={ searchTerm }
+			onChange={ setSearchTerm }
+			onKeyUp={ handleKeyUp }
+			className="woocommerce-marketplace__search"
+		/>
 	);
 }
 
