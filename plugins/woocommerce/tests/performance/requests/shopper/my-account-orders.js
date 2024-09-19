@@ -100,7 +100,6 @@ export function myAccountOrders() {
 
 		check( my_account_order_id, {
 			'order ID is not undefined': () => {
-				console.log( `order id: ${ my_account_order_id }` );
 				return !! my_account_order_id;
 			},
 		} );
