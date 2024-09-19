@@ -162,6 +162,10 @@ class WooCommercePayments extends Task {
 	 */
 	public static function is_connected() {
 		$wc_payments_gateway = self::get_woo_payments_gateway();
+		if ( ! self::is_wcpay_active() ) {
+			return false;
+		}
+
 		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_connected' ) ) {
 			return $wc_payments_gateway->is_connected();
 		}
@@ -177,6 +181,10 @@ class WooCommercePayments extends Task {
 	 */
 	public static function is_account_partially_onboarded() {
 		$wc_payments_gateway = self::get_woo_payments_gateway();
+		if ( ! self::is_wcpay_active() ) {
+			return false;
+		}
+
 		if ( $wc_payments_gateway && method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' ) ) {
 			return $wc_payments_gateway->is_account_partially_onboarded();
 		}
