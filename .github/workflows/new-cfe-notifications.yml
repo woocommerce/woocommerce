@@ -13,10 +13,6 @@ jobs:
     if: github.event.label.name == 'code freeze exception'
     runs-on: ubuntu-20.04
     steps:
-      - name: Debug GitHub Context
-        run: |
-          echo "${{ toJson(github) }}"
-
       - name: Notify Slack
         uses: archive/github-actions-slack@v2.0.0
         id: notify
