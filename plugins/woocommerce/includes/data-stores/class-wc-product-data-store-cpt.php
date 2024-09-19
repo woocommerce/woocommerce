@@ -656,21 +656,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					// Fire actions to let 3rd parties know the stock is about to be changed.
 					if ( $product->is_type( 'variation' ) ) {
 						/**
-						 * Action to signal that the value of 'stock_quantity' for a variation is about to change.
-						 *
-						 * @param WC_Product $product The variation whose stock is about to change.
-						 *
-						 * @since 4.9
-						 */
+						* Action to signal that the value of 'stock_quantity' for a variation is about to change.
+						*
+						* @since 4.9
+						*
+						* @param int $product The variation whose stock is about to change.
+						*/
 						do_action( 'woocommerce_variation_before_set_stock', $product );
 					} else {
 						/**
-						 * Action to signal that the value of 'stock_quantity' for a product is about to change.
-						 *
-						 * @param WC_Product $product The product whose stock is about to change.
-						 *
-						 * @since 4.9
-						 */
+						* Action to signal that the value of 'stock_quantity' for a product is about to change.
+						*
+						* @since 4.9
+						*
+						* @param int $product The product whose stock is about to change.
+						*/
 						do_action( 'woocommerce_product_before_set_stock', $product );
 					}
 					break;

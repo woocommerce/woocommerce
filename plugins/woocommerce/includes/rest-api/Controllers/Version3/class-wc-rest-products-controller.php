@@ -259,6 +259,18 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			}
 		}
 
+		if ( ! empty( $request['global_unique_id'] ) ) {
+			$global_unique_ids  = array_map( 'trim', explode( ',', $request['global_unique_id'] ) );
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				$args,
+				array(
+					'key'     => '_global_unique_id',
+					'value'   => $global_unique_ids,
+					'compare' => 'IN',
+				)
+			);
+		}
+
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
