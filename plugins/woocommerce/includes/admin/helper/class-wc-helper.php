@@ -55,6 +55,7 @@ class WC_Helper {
 	 */
 	protected static function includes() {
 		include_once __DIR__ . '/class-wc-helper-admin.php';
+		include_once __DIR__ . '/class-wc-helper-api.php';
 	}
 
 	/**
