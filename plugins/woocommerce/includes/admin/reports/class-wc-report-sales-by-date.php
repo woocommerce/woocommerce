@@ -441,7 +441,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_items = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
 
 		// 3rd party filtering of report data
-		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
+		$this->report_data = apply_filters_deprecated(
+			'woocommerce_admin_report_data',
+			array( $this->report_data ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 	}
 
 	/**
@@ -674,7 +680,13 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		}
 
 		// 3rd party filtering of report data.
-		$data = apply_filters( 'woocommerce_admin_report_chart_data', $data );
+		$data = apply_filters_deprecated(
+			'woocommerce_admin_report_chart_data',
+			array( $data ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 
 		// Encode in json format.
 		$chart_data = wp_json_encode(
