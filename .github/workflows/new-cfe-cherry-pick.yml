@@ -29,7 +29,7 @@ jobs:
             - name: Fetch Pull Request Details
               if: github.event.pull_request
               id: fetch_pr_details
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                 script: |
                   const pullRequestUrl = context.payload.pull_request.url;
@@ -49,7 +49,7 @@ jobs:
         
             - name: check
               id: check
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const baseRef = process.env.BASE_REF;
@@ -81,7 +81,7 @@ jobs:
         steps:
             - name: Prep inputs
               id: prep-inputs
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const event = ${{ toJSON( github.event ) }}
@@ -106,7 +106,7 @@ jobs:
         steps:
             - name: Check for release branch
               id: release-breanch-check
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       // This will throw an error for non-200 responses, which prevents subsequent jobs from completing, as desired.
@@ -141,7 +141,7 @@ jobs:
 
             - name: Get commit sha from PR
               id: commit-sha
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const pr = await github.rest.pulls.get({
@@ -161,7 +161,7 @@ jobs:
 
             - name: Create the PR for cherry pick branch
               id: cherry-pick-pr
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       let cherryPickPRBody = "This PR cherry-picks the following PRs into the trunk branch:\n";
@@ -194,7 +194,7 @@ jobs:
               uses: archive/github-actions-slack@v2.0.0
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+                  slack-channel: ${{ secrets.WOO_CORE_RELESES_DAILY_SLACK_CHANNEL }}
                   slack-text: |
                       :warning-8c: CFE cherry pick failed for '${{ needs.prep.outputs.release }}'
 
@@ -205,7 +205,7 @@ jobs:
               uses: archive/github-actions-slack@v2.0.0
               with:
                   slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-                  slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+                  slack-channel: ${{ secrets.WOO_CORE_RELESES_DAILY_SLACK_CHANNEL }}
                   slack-text: |
                       :info: CFE cherry pick succeeded for '${{ needs.prep.outputs.release }}'
 
