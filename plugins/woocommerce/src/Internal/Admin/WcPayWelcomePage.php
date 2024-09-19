@@ -43,7 +43,7 @@ class WcPayWelcomePage {
 	 * WCPayWelcomePage constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'register_payments_welcome_page' ) );
+		add_action( 'admin_menu', array( $this, 'register_menu_and_page' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'shared_settings' ) );
 		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'allowed_promo_notes' ) );
 		add_filter( 'woocommerce_admin_woopayments_onboarding_task_badge', array( $this, 'onboarding_task_badge' ) );
@@ -95,7 +95,7 @@ class WcPayWelcomePage {
 	/**
 	 * Registers the WooPayments welcome page.
 	 */
-	public function register_payments_welcome_page() {
+	public function register_menu_and_page() {
 		global $menu;
 
 		if ( ! $this->must_be_visible() ) {
