@@ -106,24 +106,19 @@ class HooksRegistry {
 	 * DANGEROUS: This method is used for testing and benchmarking. Do not call, unless you really know what you are doing.
 	 */
 	public static function unload_hooks() {
-		if ( is_admin() ) {
-			foreach ( self::$admin_actions as $action ) {
-				call_user_func_array( 'remove_action', $action );
-			}
-
-			foreach ( self::$admin_filters as $filter ) {
-				call_user_func_array( 'remove_filter', $filter );
-			}
+		foreach ( self::$admin_actions as $action ) {
+			call_user_func_array( 'remove_action', $action );
 		}
 
-		if ( ! is_admin() && ! defined( 'DOING_CRON' ) ) {
-			foreach ( self::$frontend_actions as $action ) {
-				call_user_func_array( 'remove_action', $action );
-			}
+		foreach ( self::$admin_filters as $filter ) {
+			call_user_func_array( 'remove_filter', $filter );
+		}
+		foreach ( self::$frontend_actions as $action ) {
+			call_user_func_array( 'remove_action', $action );
+		}
 
-			foreach ( self::$frontend_filters as $filter ) {
-				call_user_func_array( 'remove_filter', $filter );
-			}
+		foreach ( self::$frontend_filters as $filter ) {
+			call_user_func_array( 'remove_filter', $filter );
 		}
 
 		foreach ( self::$all_request_actions as $action ) {
