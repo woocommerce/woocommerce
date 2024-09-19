@@ -6,5 +6,5 @@ if [ -n "$changedManifests" ]; then
 	printf "It was a change in the following file(s) - refreshing dependencies:\n"
 	printf "    %s\n" $changedManifests
 
-	pnpm install --frozen-lockfile --prefer-offline
+	pnpm install --frozen-lockfile
 fi

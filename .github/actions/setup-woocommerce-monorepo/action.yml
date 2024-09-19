@@ -91,9 +91,9 @@ runs:
               # PHPUnit/REST testing optimized installation of the deps: minimalistic and parallellized between PHP/JS.
               # JS deps installation is abit hard-core, but all we need actually is wp-env and playwright - we are good at that regard.
               composer install --working-dir=./plugins/woocommerce --quiet &
-              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --prefer-offline --config.dedupe-peer-dependents=false --ignore-scripts
+              pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
             else
-              pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile --prefer-offline ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
+              pnpm install ${{ steps.project-filters.outputs.install }} --frozen-lockfile ${{ steps.project-filters.outputs.install != '' && '--config.dedupe-peer-dependents=false' || '' }}
             fi
         # We want to include an option to build projects using this action so that we can make
         # sure that the build cache is always used when building projects.
