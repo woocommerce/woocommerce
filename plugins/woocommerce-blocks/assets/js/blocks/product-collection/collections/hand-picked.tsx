@@ -62,8 +62,6 @@ const attributes = {
 	},
 	query: {
 		orderBy: 'post__in',
-		perPage: 0,
-		pages: 0,
 	},
 	hideControls: [
 		CoreFilterNames.HAND_PICKED,
