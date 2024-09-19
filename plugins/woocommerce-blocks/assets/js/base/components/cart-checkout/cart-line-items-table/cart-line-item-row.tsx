@@ -286,27 +286,27 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						/>
 
 						<div className="wc-block-cart-item__quantity">
-							{ ! soldIndividually &&
-								!! quantityLimits.editable && (
-									<QuantitySelector
-										disabled={ isPendingDelete }
-										quantity={ quantity }
-										minimum={ quantityLimits.minimum }
-										maximum={ quantityLimits.maximum }
-										step={ quantityLimits.multiple_of }
-										onChange={ ( newQuantity ) => {
-											setItemQuantity( newQuantity );
-											dispatchStoreEvent(
-												'cart-set-item-quantity',
-												{
-													product: lineItem,
-													quantity: newQuantity,
-												}
-											);
-										} }
-										itemName={ name }
-									/>
-								) }
+							{ ! soldIndividually && (
+								<QuantitySelector
+									disabled={ isPendingDelete }
+									editable={ quantityLimits.editable }
+									quantity={ quantity }
+									minimum={ quantityLimits.minimum }
+									maximum={ quantityLimits.maximum }
+									step={ quantityLimits.multiple_of }
+									onChange={ ( newQuantity ) => {
+										setItemQuantity( newQuantity );
+										dispatchStoreEvent(
+											'cart-set-item-quantity',
+											{
+												product: lineItem,
+												quantity: newQuantity,
+											}
+										);
+									} }
+									itemName={ name }
+								/>
+							) }
 							{ showRemoveItemLink && (
 								<button
 									className="wc-block-cart-item__remove-link"

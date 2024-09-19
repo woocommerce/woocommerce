@@ -32,20 +32,33 @@ class Packages {
 	/**
 	 * Array of package names and their main package classes.
 	 *
-	 * One a package has been merged into WooCommerce Core it should be moved fron the package list and placed in
+	 * One a package has been merged into WooCommerce Core it should be moved from the package list and placed in
 	 * this list. This will ensure that the feature plugin is disabled as well as provide the class to handle
 	 * initialization for the now-merged feature plugin.
 	 *
 	 * Once a package has been merged into WooCommerce Core it should have its slug added here. This will ensure
-	 * that we deactivate the feature plugin automaticatlly to prevent any problems caused by conflicts between
+	 * that we deactivate the feature plugin automatically to prevent any problems caused by conflicts between
 	 * the two versions caused by them both being active.
+	 *
+	 * The packages included in this array cannot be deactivated and will always load with WooCommerce core.
+	 *
+	 * @var array Key is the package name/directory, value is the main package class which handles init.
+	 */
+	protected static $base_packages = array(
+		'woocommerce-admin'                    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
+		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package',
+	);
+
+	/**
+	 * Similar to $base_packages, but
+	 * the packages included in this array can be deactivated via the 'woocommerce_merged_packages' filter.
 	 *
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $merged_packages = array(
-		'woocommerce-admin'                    => '\\Automattic\\WooCommerce\\Admin\\Composer\\Package',
-		'woocommerce-gutenberg-products-block' => '\\Automattic\\WooCommerce\\Blocks\\Package',
+		'woocommerce-brands' => '\\Automattic\\WooCommerce\\Internal\\Brands',
 	);
+
 
 	/**
 	 * Init the package loader.
@@ -53,7 +66,14 @@ class Packages {
 	 * @since 3.7.0
 	 */
 	public static function init() {
-		add_action( 'plugins_loaded', array( __CLASS__, 'on_init' ) );
+		add_action( 'plugins_loaded', array( __CLASS__, 'on_init' ), 0 );
+
+		// Prevent plugins already merged into WooCommerce core from getting activated as standalone plugins.
+		add_action( 'activate_plugin', array( __CLASS__, 'deactivate_merged_plugins' ) );
+
+		// Display a notice in the Plugins tab next to plugins already merged into WooCommerce core.
+		add_filter( 'all_plugins', array( __CLASS__, 'mark_merged_plugins_as_pending_update' ), 10, 1 );
+		add_action( 'after_plugin_row', array( __CLASS__, 'display_notice_for_merged_plugins' ), 10, 1 );
 	}
 
 	/**
@@ -75,6 +95,61 @@ class Packages {
 	}
 
 	/**
+	 * Checks a package exists by looking for it's directory.
+	 *
+	 * @param string $class_name Class name.
+	 * @return boolean
+	 */
+	public static function should_load_class( $class_name ) {
+
+		foreach ( self::$merged_packages as $merged_package_name => $merged_package_class ) {
+			if ( str_replace( 'woocommerce-', 'wc_', $merged_package_name ) === $class_name ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gets all merged, enabled packages.
+	 *
+	 * @return array
+	 */
+	protected static function get_enabled_packages() {
+		$enabled_packages = array();
+
+		foreach ( self::$merged_packages as $merged_package_name => $package_class ) {
+
+			// For gradual rollouts, ensure that a package is enabled for user's remote variant number.
+			$experimental_package_enabled = method_exists( $package_class, 'is_enabled' ) ?
+				call_user_func( array( $package_class, 'is_enabled' ) ) :
+				false;
+
+			if ( ! $experimental_package_enabled ) {
+				continue;
+			}
+
+			$option = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
+			if ( 'yes' === get_option( $option, 'no' ) ) {
+				$enabled_packages[ $merged_package_name ] = $package_class;
+			}
+		}
+
+		return array_merge( $enabled_packages, self::$base_packages );
+	}
+
+	/**
+	 * Checks if a package is enabled.
+	 *
+	 * @param string $package Package name.
+	 * @return boolean
+	 */
+	public static function is_package_enabled( $package ) {
+		return array_key_exists( $package, self::get_enabled_packages() );
+	}
+
+	/**
 	 * Deactivates merged feature plugins.
 	 *
 	 * Once a feature plugin is merged into WooCommerce Core it should be deactivated. This method will
@@ -93,7 +168,8 @@ class Packages {
 		// Deactivate the plugin if possible so that there are no conflicts.
 		foreach ( $active_plugins as $active_plugin_path ) {
 			$plugin_file = basename( plugin_basename( $active_plugin_path ), '.php' );
-			if ( ! isset( self::$merged_packages[ $plugin_file ] ) ) {
+
+			if ( ! self::is_package_enabled( $plugin_file ) ) {
 				continue;
 			}
 
@@ -107,7 +183,7 @@ class Packages {
 				function() use ( $plugin_data ) {
 					echo '<div class="error"><p>';
 					printf(
-						/* translators: %s: is referring to the plugin's name. */
+					/* translators: %s: is referring to the plugin's name. */
 						esc_html__( 'The %1$s plugin has been deactivated as the latest improvements are now included with the %2$s plugin.', 'woocommerce' ),
 						'<code>' . esc_html( $plugin_data['Name'] ) . '</code>',
 						'<code>WooCommerce</code>'
@@ -119,12 +195,70 @@ class Packages {
 	}
 
 	/**
+	 * Prevent plugins already merged into WooCommerce core from getting activated as standalone plugins.
+	 *
+	 * @param string $plugin Plugin name.
+	 */
+	public static function deactivate_merged_plugins( $plugin ) {
+		$plugin_dir = basename( dirname( $plugin ) );
+
+		if ( self::is_package_enabled( $plugin_dir ) ) {
+			$plugins_url = esc_url( admin_url( 'plugins.php' ) );
+			wp_die(
+				esc_html__( 'This plugin cannot be activated because its functionality is now included in WooCommerce core.', 'woocommerce' ),
+				esc_html__( 'Plugin Activation Error', 'woocommerce' ),
+				array(
+					'link_url'  => esc_url( $plugins_url ),
+					'link_text' => esc_html__( 'Return to the Plugins page', 'woocommerce' ),
+				),
+			);
+		}
+	}
+
+	/**
+	 * Mark merged plugins as pending update.
+	 * This is required for correctly displaying maintenance notices.
+	 *
+	 * @param array $plugins Plugins list.
+	 */
+	public static function mark_merged_plugins_as_pending_update( $plugins ) {
+		foreach ( $plugins as $plugin_name => $plugin_data ) {
+			$plugin_dir = basename( dirname( $plugin_name ) );
+			if ( self::is_package_enabled( $plugin_dir ) ) {
+				// Necessary to properly display notice within row.
+				$plugins[ $plugin_name ]['update'] = 1;
+			}
+		}
+		return $plugins;
+	}
+
+	/**
+	 * Displays a maintenance notice next to merged plugins, to inform users
+	 * that the plugin functionality is now offered by WooCommerce core.
+	 *
+	 * Requires 'mark_merged_plugins_as_pending_update' to properly display this notice.
+	 *
+	 * @param string $plugin_file Plugin file.
+	 */
+	public static function display_notice_for_merged_plugins( $plugin_file ) {
+		global $wp_list_table;
+
+		$plugin_dir    = basename( dirname( $plugin_file ) );
+		$columns_count = $wp_list_table->get_column_count();
+		$notice        = __( 'This plugin can no longer be activated because its functionality is now included in <strong>WooCommerce</strong>. It is recommended to <strong>delete</strong> it.', 'woocommerce' );
+
+		if ( self::is_package_enabled( $plugin_dir ) ) {
+			echo '<tr class="plugin-update-tr"><td colspan="' . esc_attr( $columns_count ) . '" class="plugin-update"><div class="update-message notice inline notice-error notice-alt"><p>' . wp_kses_post( $notice ) . '</p></div></td></tr>';
+		}
+	}
+
+	/**
 	 * Loads packages after plugins_loaded hook.
 	 *
 	 * Each package should include an init file which loads the package so it can be used by core.
 	 */
 	protected static function initialize_packages() {
-		foreach ( self::$merged_packages as $package_name => $package_class ) {
+		foreach ( self::get_enabled_packages() as $package_name => $package_class ) {
 			call_user_func( array( $package_class, 'init' ) );
 		}
 
@@ -172,7 +306,7 @@ class Packages {
 		}
 		add_action(
 			'admin_notices',
-			function() use ( $package ) {
+			function () use ( $package ) {
 				?>
 				<div class="notice notice-error">
 					<p>

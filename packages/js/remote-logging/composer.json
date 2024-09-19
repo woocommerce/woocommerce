@@ -1,0 +1,32 @@
+{
+	"name": "woocommerce/remote-logging",
+	"description": "WooCommerce remote logger",
+	"type": "library",
+	"license": "GPL-3.0-or-later",
+	"minimum-stability": "dev",
+	"require-dev": {
+		"automattic/jetpack-changelogger": "3.3.0"
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		}
+	},
+	"extra": {
+		"changelogger": {
+			"formatter": {
+				"filename": "../../../tools/changelogger/class-package-formatter.php"
+			},
+			"types": {
+				"fix": "Fixes an existing bug",
+				"add": "Adds functionality",
+				"update": "Update existing functionality",
+				"dev": "Development related task",
+				"tweak": "A minor adjustment to the codebase",
+				"performance": "Address performance issues",
+				"enhancement": "Improve existing functionality"
+			},
+			"changelog": "CHANGELOG.md"
+		}
+	}
+}

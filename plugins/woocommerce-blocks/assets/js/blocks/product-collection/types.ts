@@ -9,6 +9,16 @@ import { type AttributeMetadata } from '@woocommerce/types';
  */
 import { WooCommerceBlockLocation } from '../product-template/utils';
 
+export enum ProductCollectionUIStatesInEditor {
+	COLLECTION_PICKER = 'collection_chooser',
+	PRODUCT_REFERENCE_PICKER = 'product_context_picker',
+	VALID_WITH_PREVIEW = 'uses_reference_preview_mode',
+	VALID = 'valid',
+	DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',
+	// Future states
+	// INVALID = 'invalid',
+}
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -28,6 +38,7 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
+	filterable: boolean;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	__privatePreviewState?: PreviewState;
 }
@@ -60,7 +71,7 @@ export interface PriceRange {
 
 export interface ProductCollectionQuery {
 	exclude: string[];
-	inherit: boolean | null;
+	inherit: boolean;
 	offset: number;
 	order: TProductCollectionOrder;
 	orderBy: TProductCollectionOrderBy;
@@ -93,18 +104,27 @@ export interface ProductCollectionQuery {
 	isProductCollectionBlock: boolean;
 	woocommerceHandPickedProducts: string[];
 	priceRange: undefined | PriceRange;
+	filterable: boolean;
+	productReference?: number;
 }
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
-		openCollectionSelectionModal: () => void;
-		preview: {
+		preview?: {
 			initialPreviewState?: PreviewState;
 			setPreviewState?: SetPreviewState;
 		};
+		usesReference?: string[];
 		context: {
 			templateSlug: string;
 		};
+	};
+
+export type ProductCollectionContentProps =
+	ProductCollectionEditComponentProps & {
+		location: WooCommerceBlockLocation;
+		isUsingReferencePreviewMode: boolean;
+		openCollectionSelectionModal: () => void;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -118,19 +138,20 @@ export type ProductCollectionSetAttributes = (
 	attrs: Partial< ProductCollectionAttributes >
 ) => void;
 
+export type TrackInteraction = ( filter: CoreFilterNames | string ) => void;
+
 export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
 	setAttributes: ProductCollectionSetAttributes;
 };
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
-	trackInteraction: ( filter: CoreFilterNames | string ) => void;
+	trackInteraction: TrackInteraction;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
 };
 
 export enum CoreCollectionNames {
 	PRODUCT_CATALOG = 'woocommerce/product-collection/product-catalog',
-	CUSTOM = 'woocommerce/product-collection/custom',
 	BEST_SELLERS = 'woocommerce/product-collection/best-sellers',
 	FEATURED = 'woocommerce/product-collection/featured',
 	NEW_ARRIVALS = 'woocommerce/product-collection/new-arrivals',
@@ -150,6 +171,7 @@ export enum CoreFilterNames {
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
 	PRICE_RANGE = 'price-range',
+	FILTERABLE = 'filterable',
 }
 
 export type CollectionName = CoreCollectionNames | string;

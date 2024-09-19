@@ -17,6 +17,7 @@ import {
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
@@ -106,7 +107,11 @@ async function fetchJsonWithCache(
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
-): Promise< Product[] > {
+): Promise< {
+	products: Product[];
+	totalPages: number;
+	totalProducts: number;
+} > {
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
@@ -143,12 +148,19 @@ async function fetchSearchResults(
 							featuredImage: product.featured_image,
 							productCategory: product.product_category,
 							color: product.color,
+							billingPeriod: product.billing_period,
+							billingPeriodInterval:
+								product.billing_period_interval,
+							currency: product.currency,
 						};
 					}
 				);
-				resolve( products );
+				const totalPages = ( json as SearchAPIJSONType ).total_pages;
+				const totalProducts = ( json as SearchAPIJSONType )
+					.total_products;
+				resolve( { products, totalPages, totalProducts } );
 			} )
-			.catch( () => reject );
+			.catch( reject );
 	} );
 }
 
@@ -166,6 +178,17 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 		} ) ) as Promise< ProductGroup[] >;
 	} catch ( error ) {
 		return [];
+	}
+}
+
+function getProductType( tab: string ): ProductType {
+	switch ( tab ) {
+		case 'themes':
+			return ProductType.theme;
+		case 'business-services':
+			return ProductType.businessService;
+		default:
+			return ProductType.extension;
 	}
 }
 
@@ -406,6 +429,7 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		averageRating: null,
 		reviewsCount: null,
 		isInstallable: false,
+		currency: '',
 	};
 };
 
@@ -426,6 +450,16 @@ const appendURLParams = (
 		urlObject.searchParams.set( key, value );
 	} );
 	return urlObject.toString();
+};
+
+const enableAutorenewalUrl = ( subscription: Subscription ): string => {
+	if ( ! subscription.product_key ) {
+		// review subscriptions on the Marketplace
+		return MARKETPLACE_RENEW_SUBSCRIPTON_PATH;
+	}
+	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
+		[ 'key', subscription.product_key.toString() ],
+	] );
 };
 
 const renewUrl = ( subscription: Subscription ): string => {
@@ -458,9 +492,11 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,
 	getInstallUrl,

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Collection: prevent throwing warnings in some circumstances when rendering block

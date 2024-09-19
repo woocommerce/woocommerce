@@ -21,6 +21,7 @@ export interface FieldProps {
 	autoComplete: string | undefined;
 	errorMessage: string | undefined;
 	required: boolean | undefined;
+	placeholder: string | undefined;
 	className: string;
 }
 
@@ -36,6 +37,7 @@ export const createFieldProps = (
 	autoComplete: field?.autocomplete,
 	errorMessage: field?.errorMessage,
 	required: field?.required,
+	placeholder: field?.placeholder,
 	className: `wc-block-components-address-form__${ field?.key }`.replaceAll(
 		'/',
 		'-'
@@ -43,6 +45,17 @@ export const createFieldProps = (
 	...field?.attributes,
 } );
 
+export const createCheckboxFieldProps = ( fieldProps: FieldProps ) => {
+	const {
+		errorId,
+		errorMessage,
+		autoCapitalize,
+		autoComplete,
+		placeholder,
+		...rest
+	} = fieldProps;
+	return rest;
+};
 export const getFieldData = < T extends AddressFormValues | ContactFormValues >(
 	key: 'address_1' | 'address_2',
 	fields: AddressFormFields[ 'fields' ],

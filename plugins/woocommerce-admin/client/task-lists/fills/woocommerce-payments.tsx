@@ -30,7 +30,7 @@ const WoocommercePaymentsTaskItem = () => {
 				} ) => JSX.Element;
 			} ) => (
 				<DefaultTaskItem
-					// intercept the click on the task list item so that we don't have to see a intermediate page before installing woocommerce payments
+					// Intercept the click on the task list item so that we don't have to see an intermediate page before installing WooPayments.
 					onClick={ () => {
 						return new Promise( ( resolve, reject ) => {
 							return installActivateAndConnectWcpay(

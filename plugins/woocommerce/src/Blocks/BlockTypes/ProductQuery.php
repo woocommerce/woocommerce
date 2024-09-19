@@ -619,7 +619,7 @@ class ProductQuery extends AbstractBlock {
 		$max_price_query = empty( $max_price ) ? array() : [
 			'key'     => '_price',
 			'value'   => $max_price,
-			'compare' => '<',
+			'compare' => '<=',
 			'type'    => 'numeric',
 		];
 
@@ -778,7 +778,7 @@ class ProductQuery extends AbstractBlock {
 	 * - For array items with numeric keys, we merge them as normal.
 	 * - For array items with string keys:
 	 *
-	 *   - If the value isn't array, we'll use the value comming from the merge array.
+	 *   - If the value isn't array, we'll use the value coming from the merge array.
 	 *     $base = ['orderby' => 'date']
 	 *     $new  = ['orderby' => 'meta_value_num']
 	 *     Result: ['orderby' => 'meta_value_num']

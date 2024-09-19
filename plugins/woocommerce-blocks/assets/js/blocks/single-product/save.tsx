@@ -4,7 +4,10 @@
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 
 const Save = () => {
-	const blockProps = useBlockProps.save();
+	// We add the `woocommerce` class to the wrapper to apply WooCommerce styles to the block.
+	const blockProps = useBlockProps.save( {
+		className: 'woocommerce',
+	} );
 
 	return (
 		<div { ...blockProps }>

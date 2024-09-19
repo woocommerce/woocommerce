@@ -1,4 +1,5 @@
 const { encodeCredentials } = require( '../../../../utils/plugin-utils' );
+const { admin } = require( '../../../../test-data/data' );
 
 export class LogoPickerPage {
 	page;
@@ -39,12 +40,18 @@ export class LogoPickerPage {
 	}
 
 	async pickImage( assemblerLocator ) {
-		await assemblerLocator.getByText( 'Media Library' ).click();
+		await assemblerLocator
+			.getByRole( 'tab', { name: 'Media Library' } )
+			.click();
 
-		await assemblerLocator.getByLabel( 'image-03' ).click();
+		await assemblerLocator.getByLabel( 'image-03' ).first().click();
 		await assemblerLocator
 			.getByRole( 'button', { name: 'Select', exact: true } )
 			.click();
+	}
+
+	getPlaceholderPreview( assemblerLocator ) {
+		return assemblerLocator.locator( '.components-placeholder__preview' );
 	}
 
 	async resetLogo( baseURL ) {
@@ -52,8 +59,8 @@ export class LogoPickerPage {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
@@ -67,21 +74,19 @@ export class LogoPickerPage {
 	}
 
 	async saveLogoSettings( assemblerLocator ) {
-		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
 		const waitForLogoResponse = this.page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/settings' ) &&
 				response.status() === 200
 		);
-		const waitForHeaderResponse = this.page.waitForResponse(
-			( response ) =>
-				response
-					.url()
-					.includes(
-						'wp-json/wp/v2/template-parts/twentytwentyfour//header'
-					) && response.status() === 200
-		);
-		await assemblerLocator.getByText( 'Save' ).click();
-		await Promise.all( [ waitForLogoResponse, waitForHeaderResponse ] );
+		await assemblerLocator.locator( '[aria-label="Back"]' ).click();
+		await assemblerLocator
+			.getByRole( 'button', { name: 'Finish customizing', exact: true } )
+			.waitFor();
+		await Promise.all( [
+			waitForLogoResponse,
+			assemblerLocator.getByText( 'Finish customizing' ).click(),
+		] );
+		await assemblerLocator.getByText( 'Your store looks great!' ).waitFor();
 	}
 }

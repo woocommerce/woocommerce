@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Do not dismiss the error snackbar automatically, fix E2E test #48192

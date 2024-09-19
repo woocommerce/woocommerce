@@ -65,6 +65,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'description'        => '',
 		'short_description'  => '',
 		'sku'                => '',
+		'global_unique_id'   => '',
 		'price'              => '',
 		'regular_price'      => '',
 		'sale_price'         => '',
@@ -74,7 +75,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'tax_status'         => 'taxable',
 		'tax_class'          => '',
 		'manage_stock'       => false,
-		'stock_quantity'     => 0,
+		'stock_quantity'     => null,
 		'stock_status'       => 'instock',
 		'backorders'         => 'no',
 		'low_stock_amount'   => '',
@@ -251,13 +252,24 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get SKU (Stock-keeping unit) - product unique ID.
+	 * Get SKU (Stock-keeping unit).
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_sku( $context = 'view' ) {
 		return $this->get_prop( 'sku', $context );
+	}
+
+	/**
+	 * Get Unique ID.
+	 *
+	 * @since 9.1.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return string
+	 */
+	public function get_global_unique_id( $context = 'view' ) {
+		return $this->get_prop( 'global_unique_id', $context );
 	}
 
 	/**
@@ -358,10 +370,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Returns number of items available for sale.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return int
+	 * @return int|null
 	 */
 	public function get_stock_quantity( $context = 'view' ) {
-		return $this->get_prop( 'stock_quantity', $context ) ?? 0;
+		return $this->get_prop( 'stock_quantity', $context );
 	}
 
 	/**
@@ -836,6 +848,29 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Set global_unique_id
+	 *
+	 * @since 9.1.0
+	 * @param string $global_unique_id Unique ID.
+	 */
+	public function set_global_unique_id( $global_unique_id ) {
+		$global_unique_id = preg_replace( '/[^0-9\-]/', '', (string) $global_unique_id );
+		if ( $this->get_object_read() && ! empty( $global_unique_id ) && ! wc_product_has_global_unique_id( $this->get_id(), $global_unique_id ) ) {
+			$global_unique_id_found = wc_get_product_id_by_global_unique_id( $global_unique_id );
+
+			$this->error(
+				'product_invalid_global_unique_id',
+				__( 'Invalid or duplicated GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
+				400,
+				array(
+					'resource_id' => $global_unique_id_found,
+				)
+			);
+		}
+		$this->set_prop( 'global_unique_id', $global_unique_id );
+	}
+
+	/**
 	 * Set the product's active price.
 	 *
 	 * @param string $price Price.
@@ -966,7 +1001,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param float|null $quantity Stock quantity.
 	 */
 	public function set_stock_quantity( $quantity ) {
-		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : 0 );
+		$this->set_prop( 'stock_quantity', '' !== $quantity ? wc_stock_amount( $quantity ) : null );
 	}
 
 	/**

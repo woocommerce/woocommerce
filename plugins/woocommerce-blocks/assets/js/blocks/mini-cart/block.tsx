@@ -62,6 +62,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		priceColor = defaultColorItem,
 		iconColor = defaultColorItem,
 		productCountColor = defaultColorItem,
+		productCountVisibility = 'greater_than_zero',
 	} = attributes;
 
 	const {
@@ -281,6 +282,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					icon={ miniCartIcon }
 					iconColor={ iconColor }
 					productCountColor={ productCountColor }
+					productCountVisibility={ productCountVisibility }
 				/>
 			</button>
 			<Drawer

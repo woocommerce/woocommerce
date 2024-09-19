@@ -123,6 +123,9 @@ const registerMockPaymentMethods = ( savedCards = true ) => {
 		};
 		registerExpressPaymentMethod( {
 			name,
+			title: `${ name } express payment method`,
+			description: `${ name } express payment method description`,
+			gatewayId: 'woo',
 			content: <Content />,
 			edit: <div>An express payment method</div>,
 			canMakePayment: () => true,

@@ -100,7 +100,6 @@ class OrderController {
 
 		// Ensure cart is current.
 		if ( $update_totals ) {
-			wc()->cart->calculate_shipping();
 			wc()->cart->calculate_totals();
 		}
 
@@ -382,30 +381,16 @@ class OrderController {
 		$address        = $order->get_address( $address_type );
 		$current_locale = isset( $all_locales[ $address['country'] ] ) ? $all_locales[ $address['country'] ] : array();
 
+		foreach ( $all_locales['default'] as $key => $value ) {
+			$default_value          = empty( $current_locale[ $key ] ) ? [] : $current_locale[ $key ];
+			$current_locale[ $key ] = wp_parse_args( $default_value, $value );
+		}
+
 		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $order, $address_type );
 
 		$address = array_merge( $address, $additional_fields );
 
-		$fields              = $this->additional_fields_controller->get_additional_fields();
-		$address_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
-		$address_fields      = array_filter(
-			$fields,
-			function ( $key ) use ( $address_fields_keys ) {
-				return in_array( $key, $address_fields_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
-
-		if ( $current_locale ) {
-			foreach ( $current_locale as $key => $field ) {
-				if ( isset( $address_fields[ $key ] ) ) {
-					$address_fields[ $key ]['label']    = isset( $field['label'] ) ? $field['label'] : $address_fields[ $key ]['label'];
-					$address_fields[ $key ]['required'] = isset( $field['required'] ) ? $field['required'] : $address_fields[ $key ]['required'];
-				}
-			}
-		}
-
-		foreach ( $address_fields as $address_field_key => $address_field ) {
+		foreach ( $current_locale as $address_field_key => $address_field ) {
 			if ( empty( $address[ $address_field_key ] ) && $address_field['required'] ) {
 				/* translators: %s Field label. */
 				$errors->add( $address_type, sprintf( __( '%s is required', 'woocommerce' ), $address_field['label'] ), $address_field_key );

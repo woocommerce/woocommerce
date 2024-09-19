@@ -1,0 +1,47 @@
+$blue: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+
+.wc-block-editor-product-filters__overlay-link {
+	border-style: solid;
+	border-color: $blue;
+	border-width: 1px;
+	border-radius: 2px;
+	padding: 10px 20px;
+	text-align: center;
+	display: block;
+	.components-external-link__contents {
+		text-decoration: none;
+	}
+}
+
+.wc-block-editor-product-filters__overlay-button-size {
+	.components-range-control__wrapper {
+		order: 1;
+	}
+
+	.components-range-control__number {
+		order: 0;
+		margin-left: 0 !important;
+		margin-right: 20px;
+
+		.components-input-control__input::-webkit-outer-spin-button,
+		.components-input-control__input::-webkit-inner-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+
+		/* Remove stepper arrows in Firefox */
+		.components-input-control__input {
+			appearance: textfield;
+			width: 40px !important;
+		}
+
+		.components-input-control__container::after {
+			content: "px";
+			position: absolute;
+			top: 6px;
+			right: 7px;
+			font-size: 12px;
+			color: $blue;
+		}
+	}
+}

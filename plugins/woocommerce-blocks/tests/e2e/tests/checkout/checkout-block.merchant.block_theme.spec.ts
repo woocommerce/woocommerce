@@ -487,7 +487,7 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( shippingApartmentLink ).toBeVisible();
 
 				// Verify that the apartment field is hidden by default and the field is optional.
-				await expect( shippingApartmentInput ).toBeHidden();
+				await expect( shippingApartmentInput ).not.toBeInViewport();
 				await expect( shippingApartmentOptionalToggle ).toBeChecked();
 
 				// Make the apartment number required.
@@ -504,7 +504,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 				// Verify that the apartment link and the apartment field are hidden.
 				await expect( shippingApartmentLink ).toBeHidden();
-				await expect( shippingApartmentInput ).toBeHidden();
+				await expect( shippingApartmentInput ).not.toBeInViewport();
 
 				// Display the billing address form.
 				await editor.canvas
@@ -568,7 +568,7 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( billingApartmentLink ).toBeVisible();
 
 				// Verify that the apartment field is hidden and optional.
-				await expect( billingApartmentInput ).toBeHidden();
+				await expect( billingApartmentInput ).not.toBeInViewport();
 				await expect( billingApartmentOptionalToggle ).toBeChecked();
 
 				// Disable the apartment field.
@@ -576,7 +576,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 				// Verify that the apartment link and the apartment field are hidden.
 				await expect( billingApartmentLink ).toBeHidden();
-				await expect( billingApartmentInput ).toBeHidden();
+				await expect( billingApartmentInput ).not.toBeInViewport();
 			} );
 
 			test( 'Phone input visibility and optional and required can be toggled', async ( {

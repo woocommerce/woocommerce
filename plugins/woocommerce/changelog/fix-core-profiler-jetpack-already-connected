@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix bug where Core Profiler initiates a Jetpack connection even if it was already connected before

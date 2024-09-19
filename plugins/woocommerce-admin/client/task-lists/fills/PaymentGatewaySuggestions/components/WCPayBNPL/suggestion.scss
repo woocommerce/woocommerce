@@ -1,0 +1,51 @@
+.woocommerce-wcpay-bnpl-suggestion {
+
+	.woocommerce-wcpay-bnpl-suggestion__body {
+		padding: 0;
+		justify-content: space-between;
+	}
+
+	.woocommerce-wcpay-bnpl-suggestion__contents-container {
+		padding: calc($gap-larger - $gap-smallest) $gap-large;
+		position: relative;
+		flex: 1;
+		overflow: hidden;
+		width: 100%;
+	}
+
+	.svg-background {
+		@include breakpoint("<600px") {
+			display: none;
+		}
+
+		position: absolute;
+		z-index: 0;
+		right: 0;
+		top: 0;
+		width: auto;
+		height: 100%;
+	}
+
+	.woocommerce-wcpay-bnpl-suggestion__contents {
+		@include breakpoint( "<600px") {
+			max-width: 100%;
+		}
+
+		max-width: 71%;
+
+		p {
+			color: $studio-gray-50;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 400;
+		}
+
+		p:first-of-type {
+			margin-top: $gap-smaller;
+		}
+
+		// This is required in order to have svg image as background.
+		position: relative;
+		z-index: 1;
+	}
+}

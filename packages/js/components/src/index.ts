@@ -1,5 +1,6 @@
 export { default as AbbreviatedCard } from './abbreviated-card';
 export { default as AdvancedFilters } from './advanced-filters';
+export * from './analytics';
 export { default as AnimationSlider } from './animation-slider';
 export { default as Chart } from './chart';
 export { default as ChartPlaceholder } from './chart/placeholder';
@@ -99,10 +100,7 @@ export {
 	TreeControl as __experimentalTreeControl,
 	Item as TreeItemType,
 } from './experimental-tree-control';
-export {
-	SelectTree as __experimentalSelectTreeControl,
-	SelectTreeMenuSlot as __experimentalSelectTreeMenuSlot,
-} from './experimental-select-tree-control';
+export { SelectTree as __experimentalSelectTreeControl } from './experimental-select-tree-control';
 export { default as TreeSelectControl } from './tree-select-control';
 export { default as PhoneNumberInput } from './phone-number-input';
 

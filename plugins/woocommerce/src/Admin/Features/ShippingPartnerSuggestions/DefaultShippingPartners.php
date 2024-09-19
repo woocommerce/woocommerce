@@ -285,6 +285,24 @@ class DefaultShippingPartners {
 				'learn_more_link'   => 'https://woocommerce.com/products/shipping/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'US' ) ),
+					(object) array(
+						'type'    => 'not',
+						'operand' => array(
+							(object) array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-shipping' ),
+							),
+						),
+					),
+					(object) array(
+						'type'    => 'not',
+						'operand' => array(
+							(object) array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'woocommerce-tax' ),
+							),
+						),
+					),
 				),
 				'available_layouts' => array( 'column' ),
 			),
@@ -298,19 +316,10 @@ class DefaultShippingPartners {
 	 * @return object Rules to match.
 	 */
 	public static function get_rules_for_countries( $countries ) {
-		$rules = array();
-
-		foreach ( $countries as $country ) {
-			$rules[] = (object) array(
-				'type'      => 'base_location_country',
-				'value'     => $country,
-				'operation' => '=',
-			);
-		}
-
 		return (object) array(
-			'type'     => 'or',
-			'operands' => $rules,
+			'type'      => 'base_location_country',
+			'operation' => 'in',
+			'value'     => $countries,
 		);
 	}
 }

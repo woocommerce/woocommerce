@@ -17,7 +17,6 @@ import { STATUS as PAYMENT_STATUS } from './constants';
 export interface PaymentState {
 	status: string;
 	activePaymentMethod: string;
-	activeSavedToken: string;
 	// Available payment methods are payment methods which have been validated and can make payment.
 	availablePaymentMethods: PlainPaymentMethods;
 	availableExpressPaymentMethods: PlainExpressPaymentMethods;
@@ -34,7 +33,6 @@ export interface PaymentState {
 export const defaultPaymentState: PaymentState = {
 	status: PAYMENT_STATUS.IDLE,
 	activePaymentMethod: '',
-	activeSavedToken: '',
 	availablePaymentMethods: {},
 	availableExpressPaymentMethods: {},
 	savedPaymentMethods: getSetting<

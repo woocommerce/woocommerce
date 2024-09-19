@@ -1,6 +1,8 @@
 .woocommerce-create-new-tag-modal {
-	min-width: 650px;
-	overflow: visible;
+	&__wrapper {
+		min-width: 590px;
+		overflow: visible;
+	}
 
 	&__buttons {
 		margin-top: $gap-larger;

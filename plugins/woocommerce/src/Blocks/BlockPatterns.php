@@ -34,6 +34,8 @@ use WP_Error;
  * @internal
  */
 class BlockPatterns {
+	const CATEGORIES_PREFIXES = [ '_woo_', '_dotcom_imported_' ];
+
 	/**
 	 * Path to the patterns' directory.
 	 *
@@ -139,11 +141,18 @@ class BlockPatterns {
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) ) {
-			wc_get_logger()->warning(
-				__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
-			);
+			// By only logging when patterns are empty and no fetch is scheduled,
+			// we ensure that warnings are only generated in genuinely problematic situations,
+			// such as when the pattern fetching mechanism has failed entirely.
+			if ( ! as_has_scheduled_action( 'fetch_patterns' ) ) {
+				wc_get_logger()->warning(
+					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
+				);
+			}
 			return;
 		}
+
+		$patterns = $this->parse_categories( $patterns );
 
 		foreach ( $patterns as $pattern ) {
 			$pattern['slug']    = $pattern['name'];
@@ -151,5 +160,34 @@ class BlockPatterns {
 
 			$this->pattern_registry->register_block_pattern( $pattern['ID'], $pattern, $this->dictionary );
 		}
+	}
+
+	/**
+	 * Parse prefixed categories from the PTK patterns into the actual WooCommerce categories.
+	 *
+	 * @param array $patterns The patterns to parse.
+	 * @return array The parsed patterns.
+	 */
+	private function parse_categories( array $patterns ) {
+		return array_map(
+			function ( $pattern ) {
+				$pattern['categories'] = array_map(
+					function ( $category ) {
+						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
+							if ( strpos( $category['title'], $prefix ) !== false ) {
+								$parsed_category   = str_replace( $prefix, '', $category['title'] );
+								$parsed_category   = str_replace( '_', ' ', $parsed_category );
+								$category['title'] = ucfirst( $parsed_category );
+							}
+						}
+
+						return $category;
+					},
+					$pattern['categories']
+				);
+				return $pattern;
+			},
+			$patterns
+		);
 	}
 }

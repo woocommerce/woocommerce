@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { ComboboxControlOption } from '@woocommerce/base-components/combobox';
 import type { AllHTMLAttributes, AriaAttributes } from 'react';
 
 /**
  * Internal dependencies
  */
 import { getSetting } from './utils';
+import { SelectOption } from '../../base/components';
 
 // A list of attributes that can be added to a custom field when registering it.
 type CustomFieldAttributes = Pick<
@@ -39,7 +39,9 @@ export interface FormField {
 	// The type of input to render. Defaults to text.
 	type?: string;
 	// The options if this is a select field
-	options?: ComboboxControlOption[];
+	options?: SelectOption[];
+	// The placeholder for the field, only applicable for select fields.
+	placeholder?: string;
 	// Additional attributes added when registering a field. String in key is required for data attributes.
 	attributes?: Record< keyof CustomFieldAttributes, string >;
 }

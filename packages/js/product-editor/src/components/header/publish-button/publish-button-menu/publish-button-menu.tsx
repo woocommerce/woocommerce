@@ -17,7 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useProductManager } from '../../../../hooks/use-product-manager';
 import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 import { recordProductEvent } from '../../../../utils/record-product-event';
-import { getProductErrorMessageAndProps } from '../../../../utils/get-product-error-message-and-props';
+import { useErrorHandler } from '../../../../hooks/use-error-handler';
 import { ButtonWithDropdownMenu } from '../../../button-with-dropdown-menu';
 import { SchedulePublishModal } from '../../../schedule-publish-modal';
 import { showSuccessNotice } from '../utils';
@@ -42,6 +42,7 @@ export function PublishButtonMenu( {
 		postType,
 		'status'
 	);
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	function scheduleProduct( dateString?: string ) {
 		schedule( dateString )
@@ -50,11 +51,9 @@ export function PublishButtonMenu( {
 
 				showSuccessNotice( scheduledProduct );
 			} )
-			.catch( ( error ) => {
-				const { message, errorProps } = getProductErrorMessageAndProps(
-					error,
-					visibleTab
-				);
+			.catch( async ( error ) => {
+				const { message, errorProps } =
+					await getProductErrorMessageAndProps( error, visibleTab );
 				createErrorNotice( message, errorProps );
 			} )
 			.finally( () => {
@@ -137,9 +136,9 @@ export function PublishButtonMenu( {
 										);
 										navigateTo( { url } );
 									} )
-									.catch( ( error ) => {
+									.catch( async ( error ) => {
 										const { message, errorProps } =
-											getProductErrorMessageAndProps(
+											await getProductErrorMessageAndProps(
 												error,
 												visibleTab
 											);
@@ -175,9 +174,9 @@ export function PublishButtonMenu( {
 											url: productListUrl,
 										} );
 									} )
-									.catch( ( error ) => {
+									.catch( async ( error ) => {
 										const { message, errorProps } =
-											getProductErrorMessageAndProps(
+											await getProductErrorMessageAndProps(
 												error,
 												visibleTab
 											);

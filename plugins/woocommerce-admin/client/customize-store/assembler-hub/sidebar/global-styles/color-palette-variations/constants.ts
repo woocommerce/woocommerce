@@ -32,6 +32,12 @@ export const COLOR_PALETTES = [
 							name: 'Tertiary',
 							slug: 'tertiary',
 						},
+						{ color: '#FFFFFF', name: 'Color 1', slug: 'theme-1' },
+						{
+							color: '#1a0c00',
+							name: 'Color 5',
+							slug: 'theme-5',
+						},
 					],
 				},
 			},

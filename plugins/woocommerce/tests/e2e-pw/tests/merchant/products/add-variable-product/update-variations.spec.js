@@ -27,7 +27,7 @@ let productId_indivEdit,
 	defaultVariation,
 	variationIds_indivEdit;
 
-test.describe( 'Update variations', () => {
+test.describe( 'Update variations', { tag: '@gutenberg' }, () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { browser } ) => {

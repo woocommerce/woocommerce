@@ -3,7 +3,6 @@
  */
 
 import { SelectControl } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore no types
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -35,7 +34,6 @@ export const UpdateBlockTemplateLoggingThreshold = () => {
 
 			const retrievedLoggingLevels = getLoggingLevels();
 			const retrievedThreshold = getBlockTemplateLoggingThreshold();
-
 			return {
 				loggingLevels: retrievedLoggingLevels,
 				threshold: retrievedThreshold,
@@ -44,12 +42,9 @@ export const UpdateBlockTemplateLoggingThreshold = () => {
 		}
 	);
 
-	const [ newThreshold, setNewThreshold ] = useState( threshold );
-
 	const { updateCommandParams } = useDispatch( STORE_KEY );
 
 	function onThresholdChange( selectedThreshold: string ) {
-		setNewThreshold( selectedThreshold );
 		updateCommandParams(
 			UPDATE_BLOCK_TEMPLATE_LOGGING_THRESHOLD_ACTION_NAME,
 			{
@@ -67,10 +62,6 @@ export const UpdateBlockTemplateLoggingThreshold = () => {
 		} );
 	}
 
-	useEffect( () => {
-		setNewThreshold( threshold );
-	}, [ threshold ] );
-
 	return (
 		<div className="select-description">
 			{ isLoading ? (
@@ -83,7 +74,7 @@ export const UpdateBlockTemplateLoggingThreshold = () => {
 					// @ts-ignore labelPosition prop exists
 					labelPosition="side"
 					options={ getOptions() }
-					value={ newThreshold }
+					value={ threshold }
 				/>
 			) }
 		</div>

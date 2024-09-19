@@ -18,31 +18,34 @@ trait BlockHooksTrait {
 	 * @return array An array of block slugs hooked into a given context.
 	 */
 	public function register_hooked_block( $hooked_blocks, $position, $anchor_block, $context ) {
-
-		/**
-		 * If the block has no hook placements, return early.
-		 */
+		// If the block has no hook placements, return early.
 		if ( ! isset( $this->hooked_block_placements ) || empty( $this->hooked_block_placements ) ) {
 			return $hooked_blocks;
 		}
 
-		// Cache for active theme.
-		static $active_theme_name = null;
-		if ( is_null( $active_theme_name ) ) {
-			$active_theme_name = wp_get_theme()->get( 'Name' );
+		// Cache the block hooks version.
+		static $block_hooks_version = null;
+		if ( defined( 'WP_RUN_CORE_TESTS' ) || is_null( $block_hooks_version ) ) {
+			$block_hooks_version = get_option( 'woocommerce_hooked_blocks_version' );
 		}
 
-		/**
-		 * A list of theme slugs to execute this with. This is a temporary
-		 * measure until improvements to the Block Hooks API allow for exposing
-		 * to all block themes.
-		 *
-		 * @since 8.4.0
-		 */
-		$theme_include_list = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+		// If block hooks are disabled or the version is not set, return early.
+		if ( 'no' === $block_hooks_version || false === $block_hooks_version ) {
+			return $hooked_blocks;
+		}
 
-		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
-			foreach ( $this->hooked_block_placements as $placement ) {
+		// Valid placements are those that have no version specified,
+		// or have a version that is less than or equal to version specified in the woocommerce_hooked_blocks_version option.
+		$valid_placements = array_filter(
+			$this->hooked_block_placements,
+			function ( $placement ) use ( $block_hooks_version ) {
+				$placement_version = isset( $placement['version'] ) ? $placement['version'] : null;
+				return is_null( $placement_version ) || ! is_null( $placement_version ) && version_compare( $block_hooks_version, $placement_version, '>=' );
+			}
+		);
+
+		if ( $context && ! empty( $valid_placements ) ) {
+			foreach ( $valid_placements as $placement ) {
 
 				if ( $placement['position'] === $position && $placement['anchor'] === $anchor_block ) {
 					// If an area has been specified for this placement.

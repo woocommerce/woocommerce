@@ -1,12 +1,12 @@
 {
 	"name": "@woocommerce/onboarding",
-	"version": "3.5.0",
+	"version": "3.6.0",
 	"description": "Onboarding utilities.",
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^9.1.0"
+		"pnpm": "9.1.3"
 	},
 	"keywords": [
 		"wordpress",
@@ -71,7 +71,6 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",
-		"@storybook/addon-knobs": "^7.0.2",
 		"@testing-library/react": "12.1.3",
 		"@types/jest": "^27.5.2",
 		"@types/react": "^17.0.71",

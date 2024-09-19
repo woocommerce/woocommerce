@@ -17,7 +17,7 @@ type TemplateCustomizationTest = {
 	} ) => Promise< void | Response | null >;
 	templateName: string;
 	templatePath: string;
-	templateType: string;
+	templateType: 'wp_template' | 'wp_template_part';
 	fallbackTemplate?: {
 		templateName: string;
 		templatePath: string;

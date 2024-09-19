@@ -105,6 +105,9 @@ export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
 		options,
 	} as const );
 
+// List of paths which should not be batched.
+const preventBatching = [ '/wc/store/v1/cart/select-shipping-rate' ];
+
 /**
  * The underlying function that actually does the fetch. This is used by both the generator (control) version of
  * apiFetchWithHeadersControl and the async function apiFetchWithHeaders.
@@ -112,7 +115,11 @@ export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
 const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
 	new Promise( ( resolve, reject ) => {
 		// GET Requests cannot be batched.
-		if ( ! options.method || options.method === 'GET' ) {
+		if (
+			! options.method ||
+			options.method === 'GET' ||
+			preventBatching.includes( options.path || '' )
+		) {
 			// Parse is disabled here to avoid returning just the body--we also need headers.
 			triggerFetch( {
 				...options,
@@ -133,7 +140,9 @@ const doApiFetchWithHeaders = ( options: APIFetchOptions ) =>
 						} );
 				} )
 				.catch( ( errorResponse ) => {
-					setNonceOnFetch( errorResponse.headers );
+					if ( errorResponse.name !== 'AbortError' ) {
+						setNonceOnFetch( errorResponse.headers );
+					}
 					if ( typeof errorResponse.json === 'function' ) {
 						// Parse error response before rejecting it.
 						errorResponse

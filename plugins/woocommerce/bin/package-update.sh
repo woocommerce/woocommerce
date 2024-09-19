@@ -20,9 +20,11 @@ if [ ! -d "packages/" ]; then
 	output 1 "run \"composer install\" before proceed."
 fi
 
-# Autoloader
+# Autoloader optimization is forced to prevent OOM fatal errors in JetPack Autoloader.
+# We running the optimization in background to speedup build process, with dev-environments in mind.
+# Building zips enforcing the optimization during the install process, so we are good around building releases as well.
 output 3 "Updating autoloader classmaps..."
-composer dump-autoload
+composer dump-autoload --optimize  --quiet &
 output 2 "Done"
 
 if [ -z "$SKIP_UPDATE_TEXTDOMAINS" ]; then

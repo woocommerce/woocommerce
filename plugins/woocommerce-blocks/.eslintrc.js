@@ -159,6 +159,7 @@ module.exports = {
 			'@woocommerce/settings',
 			'@woocommerce/shared-context',
 			'@woocommerce/shared-hocs',
+			'@woocommerce/tracks',
 			'@woocommerce/data',
 			'@wordpress/a11y',
 			'@wordpress/api-fetch',

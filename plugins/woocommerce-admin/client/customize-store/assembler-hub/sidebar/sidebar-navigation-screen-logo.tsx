@@ -49,6 +49,7 @@ import {
 	MAX_LOGO_WIDTH,
 	ALLOWED_MEDIA_TYPES,
 } from './constants';
+import { trackEvent } from '~/customize-store/tracking';
 
 const useLogoEdit = ( {
 	shouldSyncIcon,
@@ -296,16 +297,26 @@ const LogoEdit = ( {
 		);
 	}
 
+	function handleMediaUploadSelect( media: { id: string; url: string } ) {
+		onInitialSelectLogo( media );
+		trackEvent( 'customize_your_store_assembler_hub_logo_select' );
+	}
+
 	if ( ! logoUrl ) {
 		return (
 			<MediaUploadCheck>
 				<MediaUpload
-					onSelect={ onInitialSelectLogo }
+					onSelect={ handleMediaUploadSelect }
 					allowedTypes={ ALLOWED_MEDIA_TYPES }
 					render={ ( { open }: { open: () => void } ) => (
 						<Button
 							variant="link"
-							onClick={ open }
+							onClick={ () => {
+								open();
+								trackEvent(
+									'customize_your_store_assembler_hub_logo_add_click'
+								);
+							} }
 							className="block-library-site-logo__inspector-upload-container"
 						>
 							<span>
@@ -350,10 +361,17 @@ const LogoEdit = ( {
 		<>
 			<MediaUploadCheck>
 				<MediaUpload
-					onSelect={ onInitialSelectLogo }
+					onSelect={ handleMediaUploadSelect }
 					allowedTypes={ ALLOWED_MEDIA_TYPES }
 					render={ ( { open }: { open: () => void } ) =>
-						cloneElement( logoImg, { onClick: open } )
+						cloneElement( logoImg, {
+							onClick() {
+								open();
+								trackEvent(
+									'customize_your_store_assembler_hub_logo_edit_click'
+								);
+							},
+						} )
 					}
 				/>
 			</MediaUploadCheck>
@@ -477,6 +495,9 @@ export const SidebarNavigationScreenLogo = ( {
 															media
 														);
 														onClose();
+														trackEvent(
+															'customize_your_store_assembler_hub_logo_select'
+														);
 													} }
 													allowedTypes={
 														ALLOWED_MEDIA_TYPES
@@ -489,6 +510,9 @@ export const SidebarNavigationScreenLogo = ( {
 														<MenuItem
 															onClick={ () => {
 																open();
+																trackEvent(
+																	'customize_your_store_assembler_hub_logo_replace_click'
+																);
 															} }
 														>
 															{ __(
@@ -507,6 +531,9 @@ export const SidebarNavigationScreenLogo = ( {
 												onClick={ () => {
 													onClose();
 													onRemoveLogo();
+													trackEvent(
+														'customize_your_store_assembler_hub_logo_remove_click'
+													);
 												} }
 											>
 												{ __(
@@ -535,15 +562,21 @@ export const SidebarNavigationScreenLogo = ( {
 						<p>
 							{ interpolateComponents( {
 								mixedString: __(
-									'Get a custom logo designed by a professional on {{link}}Fiverr{{/link}}.',
+									'Build your brand by creating a memorable logo using {{link}}Fiverr{{/link}}.',
 									'woocommerce'
 								),
 								components: {
 									link: (
 										<Link
-											href="https://www.fiverr.com/logo-maker/woo?afp=&cxd_token=917527_33214203&show_join=true"
+											href="https://go.fiverr.com/visit/?bta=917527&brand=logomaker&landingPage=https%253A%252F%252Fwww.fiverr.com%252Flogo-maker%252Fwoo"
 											target="_blank"
 											type="external"
+											rel="noreferrer"
+											onClick={ () => {
+												trackEvent(
+													'customize_your_store_fiverr_logo_maker_cta_click'
+												);
+											} }
 										/>
 									),
 								},

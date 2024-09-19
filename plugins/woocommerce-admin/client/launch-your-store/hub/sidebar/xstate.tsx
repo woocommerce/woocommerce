@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import {
 	OPTIONS_STORE_NAME,
+	PAYMENT_GATEWAYS_STORE_NAME,
 	SETTINGS_STORE_NAME,
 	TaskListType,
 	TaskType,
@@ -28,9 +29,15 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
-import type { LaunchYourStoreComponentProps } from '..';
+import type {
+	LaunchYourStoreComponentProps,
+	LaunchYourStoreQueryParams,
+} from '..';
 import type { mainContentMachine } from '../main-content/xstate';
-import { updateQueryParams, createQueryParamsListener } from '../common';
+import {
+	updateQueryParams,
+	createQueryParamsListener,
+} from '~/utils/xstate/url-handling';
 import { taskClickedAction, getLysTasklist } from './tasklist';
 import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
 import { getTimeFrame } from '~/utils';
@@ -44,6 +51,7 @@ export type SidebarMachineContext = {
 	externalUrl: string | null;
 	mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
 	tasklist?: LYSAugmentedTaskListType;
+	hasWooPayments?: boolean;
 	testOrderCount: number;
 	removeTestOrders?: boolean;
 	launchStoreAttemptTimestamp?: number;
@@ -118,7 +126,31 @@ export const pageHasComingSoonMetaTag = async ( {
 	}
 };
 
-const getSiteCachedStatus = async () => {
+export const getWooPaymentsStatus = async () => {
+	// Quick (performant) check for the plugin.
+	if (
+		window?.wcSettings?.admin?.plugins?.activePlugins.includes(
+			'woocommerce-payments'
+		) === false
+	) {
+		return false;
+	}
+
+	// Check the gateway is installed
+	const paymentGateways = await resolveSelect(
+		PAYMENT_GATEWAYS_STORE_NAME
+	).getPaymentGateways();
+	const enabledPaymentGateways = paymentGateways.filter(
+		( gateway ) => gateway.enabled
+	);
+	// Return true when WooPayments is the only enabled gateway.
+	return (
+		enabledPaymentGateways.length === 1 &&
+		enabledPaymentGateways[ 0 ].id === 'woocommerce_payments'
+	);
+};
+
+export const getSiteCachedStatus = async () => {
 	const settings = await resolveSelect( SETTINGS_STORE_NAME ).getSettings(
 		'wc_admin'
 	);
@@ -227,11 +259,8 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
 		),
-		updateQueryParams: (
-			_,
-			params: { sidebar?: string; content?: string }
-		) => {
-			updateQueryParams( params );
+		updateQueryParams: ( _, params: LaunchYourStoreQueryParams ) => {
+			updateQueryParams< LaunchYourStoreQueryParams >( params );
 		},
 		taskClicked: ( { event } ) => {
 			if ( event.type === 'TASK_CLICKED' ) {
@@ -267,15 +296,13 @@ export const sidebarMachine = setup( {
 	guards: {
 		hasSidebarLocation: (
 			_,
-			{ sidebarLocation }: { sidebarLocation: string }
+			{ sidebar: sidebarLocation }: LaunchYourStoreQueryParams
 		) => {
-			const { sidebar } = getQuery() as { sidebar?: string };
+			const { sidebar } = getQuery() as LaunchYourStoreQueryParams;
 			return !! sidebar && sidebar === sidebarLocation;
 		},
-		hasWooPayments: () => {
-			return window?.wcSettings?.admin?.plugins?.activePlugins.includes(
-				'woocommerce-payments'
-			);
+		hasWooPayments: ( { context } ) => {
+			return !! context.hasWooPayments;
 		},
 		siteIsShowingCachedContent: ( { context } ) => {
 			return !! context.siteIsShowingCachedContent;
@@ -289,6 +316,7 @@ export const sidebarMachine = setup( {
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
 		deleteTestOrders: fromPromise( deleteTestOrders ),
 		fetchCongratsData,
+		getWooPaymentsStatus: fromPromise( getWooPaymentsStatus ),
 	},
 } ).createMachine( {
 	id: 'sidebar',
@@ -308,14 +336,14 @@ export const sidebarMachine = setup( {
 				{
 					guard: {
 						type: 'hasSidebarLocation',
-						params: { sidebarLocation: 'hub' },
+						params: { sidebar: 'hub' },
 					},
 					target: 'launchYourStoreHub',
 				},
 				{
 					guard: {
 						type: 'hasSidebarLocation',
-						params: { sidebarLocation: 'launch-success' },
+						params: { sidebar: 'launch-success' },
 					},
 					target: 'storeLaunchSuccessful',
 				},
@@ -339,6 +367,20 @@ export const sidebarMachine = setup( {
 							actions: assign( {
 								tasklist: ( { event } ) => event.output,
 							} ),
+							target: 'checkWooPayments',
+						},
+					},
+				},
+				checkWooPayments: {
+					invoke: {
+						src: 'getWooPaymentsStatus',
+						onDone: {
+							actions: assign( {
+								hasWooPayments: ( { event } ) => event.output,
+							} ),
+							target: 'maybeCountTestOrders',
+						},
+						onError: {
 							target: 'maybeCountTestOrders',
 						},
 					},

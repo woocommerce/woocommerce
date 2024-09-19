@@ -28,8 +28,10 @@
 			}
 		}
 	},
-	"parent": [ "woocommerce/filled-mini-cart-contents-block" ],
+	"parent": [
+		"woocommerce/filled-mini-cart-contents-block"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

@@ -279,6 +279,7 @@ class WCAdminAssets {
 			'wc-navigation',
 			'wc-block-templates',
 			'wc-product-editor',
+			'wc-remote-logging',
 		);
 
 		$scripts_map = array(
@@ -373,7 +374,7 @@ class WCAdminAssets {
 			),
 			array(
 				'handle'       => WC_ADMIN_APP,
-				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
+				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
 			),
 			array(
 				'handle' => 'wc-onboarding',

@@ -4,7 +4,9 @@
 	"title": "Product Results Count",
 	"description": "Display the number of products on the archive page or search result page.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [
+		"WooCommerce"
+	],
 	"supports": {
 		"color": {
 			"text": true,
@@ -15,8 +17,10 @@
 		}
 	},
 	"attributes": {},
-	"usesContext": [ "queryId" ],
+	"usesContext": [
+		"queryId"
+	],
 	"textdomain": "woocommerce",
-	"apiVersion": 2,
+	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

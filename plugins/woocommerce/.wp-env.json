@@ -1,8 +1,7 @@
 {
+	"core": "https://wordpress.org/wordpress-latest.zip",
 	"phpVersion": "7.4",
-	"plugins": [
-		"."
-	],
+	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
@@ -21,9 +20,12 @@
 		"afterClean": "./tests/e2e-pw/bin/test-env-setup.sh"
 	},
 	"env": {
-		"development": {},
+		"development": {
+			"mysqlPort": 58888
+		},
 		"tests": {
 			"port": 8086,
+			"mysqlPort": 58086,
 			"plugins": [
 				".",
 				"https://downloads.wordpress.org/plugin/akismet.zip",

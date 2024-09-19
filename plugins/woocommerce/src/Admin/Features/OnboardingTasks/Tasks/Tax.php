@@ -15,6 +15,7 @@ class Tax extends Task {
 
 	/**
 	 * Used to cache is_complete() method result.
+	 *
 	 * @var null
 	 */
 	private $is_complete_result = null;
@@ -109,27 +110,35 @@ class Tax extends Task {
 	 */
 	public function is_complete() {
 		if ( $this->is_complete_result === null ) {
-			$wc_connect_taxes_enabled = get_option( 'wc_connect_taxes_enabled' );
+			$wc_connect_taxes_enabled    = get_option( 'wc_connect_taxes_enabled' );
 			$is_wc_connect_taxes_enabled = ( $wc_connect_taxes_enabled === 'yes' ) || ( $wc_connect_taxes_enabled === true ); // seems that in some places boolean is used, and other places 'yes' | 'no' is used
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- We will replace this with a formal system by WC 9.6 so lets not advertise it yet.
+			$third_party_complete = apply_filters( 'woocommerce_admin_third_party_tax_setup_complete', false );
 
 			$this->is_complete_result = $is_wc_connect_taxes_enabled ||
 				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
-				get_option( 'woocommerce_no_sales_tax' ) !== false;
+				get_option( 'woocommerce_no_sales_tax' ) !== false ||
+				$third_party_complete;
 		}
 
 		return $this->is_complete_result;
 	}
 
 	/**
-	 * Addtional data.
+	 * Additional data.
 	 *
 	 * @return array
 	 */
 	public function get_additional_data() {
 		return array(
-			'avalara_activated'         => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
-			'tax_jar_activated'         => class_exists( 'WC_Taxjar' ),
-			'woocommerce_tax_countries' => self::get_automated_support_countries(),
+			'avalara_activated'              => PluginsHelper::is_plugin_active( 'woocommerce-avatax' ),
+			'tax_jar_activated'              => class_exists( 'WC_Taxjar' ),
+			'stripe_tax_activated'           => PluginsHelper::is_plugin_active( 'stripe-tax-for-woocommerce' ),
+			'woocommerce_tax_activated'      => PluginsHelper::is_plugin_active( 'woocommerce-tax' ),
+			'woocommerce_shipping_activated' => PluginsHelper::is_plugin_active( 'woocommerce-shipping' ),
+			'woocommerce_tax_countries'      => self::get_automated_support_countries(),
+			'stripe_tax_countries'           => self::get_stripe_tax_support_countries(),
 		);
 	}
 
@@ -159,5 +168,55 @@ class Tax extends Task {
 		);
 
 		return $tax_supported_countries;
+	}
+
+	/**
+	 * Get an array of countries that support Stripe tax.
+	 *
+	 * @return array
+	 */
+	private static function get_stripe_tax_support_countries() {
+		// https://docs.stripe.com/tax/supported-countries#supported-countries accurate as of 2024-08-26.
+		// countries with remote sales not included.
+		return array(
+			'AU',
+			'AT',
+			'BE',
+			'BG',
+			'CA',
+			'HR',
+			'CY',
+			'CZ',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HK',
+			'HU',
+			'IE',
+			'IT',
+			'JP',
+			'LV',
+			'LT',
+			'LU',
+			'MT',
+			'NL',
+			'NZ',
+			'NO',
+			'PL',
+			'PT',
+			'RO',
+			'SG',
+			'SK',
+			'SI',
+			'ES',
+			'SE',
+			'CH',
+			'AE',
+			'GB',
+			'US',
+		);
 	}
 }

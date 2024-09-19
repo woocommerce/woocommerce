@@ -20,7 +20,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<form name="checkout" method="post" class="woocommerce-form woocommerce-verify-email" action="<?php echo esc_url( $verify_url ); ?>" enctype="multipart/form-data">
+<form name="checkout" method="post" class="woocommerce-form woocommerce-verify-email" action="<?php echo esc_url( $verify_url ); ?>">
 
 	<?php
 	wp_nonce_field( 'wc_verify_email', 'check_submission' );

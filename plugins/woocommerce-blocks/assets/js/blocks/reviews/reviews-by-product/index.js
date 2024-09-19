@@ -17,7 +17,7 @@ import { example } from '../example';
  * Register and run the "Reviews by Product" block.
  */
 registerBlockType( 'woocommerce/reviews-by-product', {
-	apiVersion: 2,
+	apiVersion: 3,
 	title: __( 'Reviews by Product', 'woocommerce' ),
 	icon: {
 		src: (

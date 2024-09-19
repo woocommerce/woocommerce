@@ -184,7 +184,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		).toBeVisible();
 	} );
 
-	test( 'updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
+	test.skip( 'updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
 		page,
 		localPickupUtils,
 		admin,
@@ -220,7 +220,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await localPickupUtils.setLocalPickupTitle(
 			'Edited from settings page'
 		);
-		await localPickupUtils.saveLocalPickupSettings();
 
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',

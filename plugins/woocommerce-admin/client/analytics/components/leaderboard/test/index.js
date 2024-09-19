@@ -1,18 +1,14 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
-import { numberFormat } from '@woocommerce/number';
-import { CurrencyFactory } from '@woocommerce/currency';
+import { render, screen } from '@testing-library/react';
+import { CurrencyFactory, CurrencyContext } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
 import { Leaderboard } from '../';
 import mockData from '../data/top-selling-products-mock-data';
-import { CURRENCY } from '~/utils/admin-settings';
-
-const { formatAmount, formatDecimal } = CurrencyFactory( CURRENCY );
 
 const headers = [
 	{
@@ -42,23 +38,26 @@ const rows = mockData.map( ( row ) => {
 			value: name,
 		},
 		{
-			display: numberFormat( CURRENCY, itemsSold ),
+			display: itemsSold.toString(),
 			value: itemsSold,
+			format: 'number',
 		},
 		{
-			display: numberFormat( CURRENCY, ordersCount ),
-			value: ordersCount,
+			display: ordersCount.toString(),
+			value: ordersCount.toString(),
+			format: 'number',
 		},
 		{
-			display: formatAmount( netRevenue ),
-			value: formatDecimal( netRevenue ),
+			display: `<span class="woocommerce-Price-currencySymbol">${ netRevenue }</span>`,
+			value: netRevenue,
+			format: 'currency',
 		},
 	];
 } );
 
 describe( 'Leaderboard', () => {
 	test( 'should render empty message when there are no rows', () => {
-		const { queryByText } = render(
+		render(
 			<Leaderboard
 				id="products"
 				title={ '' }
@@ -69,29 +68,12 @@ describe( 'Leaderboard', () => {
 		);
 
 		expect(
-			queryByText( 'No data recorded for the selected time period.' )
+			screen.getByText( 'No data recorded for the selected time period.' )
 		).toBeInTheDocument();
 	} );
 
 	test( 'should render the headers', () => {
-		const { queryByText } = render(
-			<Leaderboard
-				id="products"
-				title={ '' }
-				headers={ headers }
-				rows={ rows }
-				totalRows={ 0 }
-			/>
-		);
-
-		expect( queryByText( 'Name' ) ).toBeInTheDocument();
-		expect( queryByText( 'Items sold' ) ).toBeInTheDocument();
-		expect( queryByText( 'Orders' ) ).toBeInTheDocument();
-		expect( queryByText( 'Net sales' ) ).toBeInTheDocument();
-	} );
-
-	test( 'should render formatted data in the table', () => {
-		const { container, queryByText } = render(
+		render(
 			<Leaderboard
 				id="products"
 				title={ '' }
@@ -101,12 +83,105 @@ describe( 'Leaderboard', () => {
 			/>
 		);
 
-		const tableRows = container.querySelectorAll( 'tr' );
+		expect( screen.getByText( 'Name' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Items sold' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Orders' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Net sales' ) ).toBeInTheDocument();
+	} );
 
-		expect( tableRows.length ).toBe( 6 );
-		expect( queryByText( 'awesome shirt' ) ).toBeInTheDocument();
-		expect( queryByText( '1,000.00' ) ).toBeInTheDocument();
-		expect( queryByText( '54.00' ) ).toBeInTheDocument();
-		expect( queryByText( '$999.99' ) ).toBeInTheDocument();
+	test( 'should render formatted data in the table', () => {
+		render(
+			<Leaderboard
+				id="products"
+				title={ '' }
+				headers={ headers }
+				rows={ rows }
+				totalRows={ 5 }
+			/>
+		);
+
+		expect( screen.getAllByRole( 'row' ) ).toHaveLength( 6 );
+		expect( screen.getByText( 'awesome shirt' ) ).toBeInTheDocument();
+		expect( screen.getByText( '123,456,789' ) ).toBeInTheDocument();
+		expect( screen.getByText( '54' ) ).toBeInTheDocument();
+		expect( screen.getByText( '$9,876,543.22' ) ).toBeInTheDocument();
+	} );
+
+	test( 'should format data according to the currency context', () => {
+		const currencySetting = {
+			code: 'PLN',
+			decimalSeparator: ',',
+			precision: 3,
+			priceFormat: '%1$s %2$s',
+			symbol: 'zł',
+			thousandSeparator: '.',
+		};
+
+		render(
+			<CurrencyContext.Provider
+				value={ new CurrencyFactory( currencySetting ) }
+			>
+				<Leaderboard
+					id="products"
+					title={ '' }
+					headers={ headers }
+					rows={ rows }
+					totalRows={ 5 }
+				/>
+			</CurrencyContext.Provider>
+		);
+
+		expect( screen.getByText( 'awesome shirt' ) ).toBeInTheDocument();
+		expect( screen.getByText( '123.456.789' ) ).toBeInTheDocument();
+		expect( screen.getByText( '54' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'zł 9.876.543,215' ) ).toBeInTheDocument();
+	} );
+
+	test( `should not format data that is not specified in a format or doesn't conform to a number value`, () => {
+		const columns = [
+			{
+				display: 'awesome shirt',
+				value: '$123.456', // Not a pure numeric string
+				format: 'currency',
+			},
+			{
+				display: 'awesome pants',
+				value: '123,456', // Not a pure numeric string
+				format: 'number',
+			},
+			{
+				display: 'awesome hat',
+				value: '', // Not a number
+				format: 'number',
+			},
+			{
+				display: 'awesome sticker',
+				value: 123,
+				format: 'product', // Invalid format
+			},
+			{
+				// Not specified format
+				display: 'awesome button',
+				value: 123,
+			},
+		];
+
+		render(
+			<Leaderboard
+				id="products"
+				title={ '' }
+				headers={ columns.map( ( _, i ) => ( {
+					label: i.toString(),
+				} ) ) }
+				rows={ [ columns ] }
+				totalRows={ 5 }
+			/>
+		);
+
+		expect( screen.getByText( 'awesome shirt' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'awesome pants' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'awesome hat' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'awesome sticker' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'awesome button' ) ).toBeInTheDocument();
 	} );
 } );

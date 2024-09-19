@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Admin\PageController;
 class WooSubscriptionsNotes {
 	const LAST_REFRESH_OPTION_KEY = 'woocommerce_admin-wc-helper-last-refresh';
 	const NOTE_NAME               = 'wc-admin-wc-helper-connection';
-	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection';
+	const CONNECTION_NOTE_NAME    = 'wc-admin-wc-helper-connection'; // deprecated.
 	const SUBSCRIPTION_NOTE_NAME  = 'wc-admin-wc-helper-subscription';
 	const NOTIFY_WHEN_DAYS_LEFT   = 60;
 
@@ -63,7 +63,6 @@ class WooSubscriptionsNotes {
 		// The site just disconnected.
 		if ( ! empty( $old_token ) && empty( $new_token ) ) {
 			$this->remove_notes();
-			$this->add_no_connection_note();
 			return;
 		}
 
@@ -124,7 +123,6 @@ class WooSubscriptionsNotes {
 			}
 
 			$this->remove_notes();
-			$this->add_no_connection_note();
 		}
 	}
 
@@ -184,34 +182,6 @@ class WooSubscriptionsNotes {
 	public function remove_notes() {
 		Notes::delete_notes_with_name( self::CONNECTION_NOTE_NAME );
 		Notes::delete_notes_with_name( self::SUBSCRIPTION_NOTE_NAME );
-	}
-
-	/**
-	 * Adds a note prompting to connect to WooCommerce.com.
-	 */
-	public function add_no_connection_note() {
-		$note = self::get_note();
-		$note->save();
-	}
-
-	/**
-	 * Get the WooCommerce.com connection note
-	 */
-	public static function get_note() {
-		$note = new Note();
-		$note->set_title( __( 'Connect to WooCommerce.com', 'woocommerce' ) );
-		$note->set_content( __( 'Connect to get important product notifications and updates.', 'woocommerce' ) );
-		$note->set_content_data( (object) array() );
-		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_name( self::CONNECTION_NOTE_NAME );
-		$note->set_source( 'woocommerce-admin' );
-		$note->add_action(
-			'connect',
-			__( 'Connect', 'woocommerce' ),
-			'?page=wc-addons&section=helper',
-			Note::E_WC_ADMIN_NOTE_UNACTIONED
-		);
-		return $note;
 	}
 
 	/**

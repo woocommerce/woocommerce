@@ -48,25 +48,40 @@ export class LocalPickupUtils {
 	async enableLocalPickup() {
 		await this.openLocalPickupSettings();
 
-		await this.page.getByLabel( 'Enable local pickup' ).check();
+		// Since we can only save if the form is changed, check first if a change is needed.
+		if (
+			! ( await this.page
+				.getByLabel( 'Enable local pickup' )
+				.isChecked() )
+		) {
+			await this.page.getByLabel( 'Enable local pickup' ).check();
 
-		await this.saveLocalPickupSettings();
+			await this.saveLocalPickupSettings();
+		}
 	}
 
 	async disableLocalPickup() {
 		await this.openLocalPickupSettings();
 
-		await this.page.getByLabel( 'Enable local pickup' ).uncheck();
+		// Since we can only save if the form is changed, check first if a change is needed.
+		const enabled = this.page.getByLabel( 'Enable local pickup' );
+		if ( await enabled.isChecked() ) {
+			await enabled.uncheck();
 
-		await this.saveLocalPickupSettings();
+			await this.saveLocalPickupSettings();
+		}
 	}
 
 	async enableLocalPickupCosts() {
 		await this.openLocalPickupSettings();
 
-		await this.page
-			.getByLabel( 'Add a price for customers who choose local pickup' )
-			.check();
+		const addAPrice = this.page.getByLabel(
+			'Add a price for customers who choose local pickup'
+		);
+
+		if ( ! ( await addAPrice.isChecked() ) ) {
+			await addAPrice.check();
+		}
 
 		await this.saveLocalPickupSettings();
 	}
@@ -74,11 +89,16 @@ export class LocalPickupUtils {
 	async disableLocalPickupCosts() {
 		await this.openLocalPickupSettings();
 
-		await this.page
-			.getByLabel( 'Add a price for customers who choose local pickup' )
-			.uncheck();
+		// Since we can only save if the form is changed, check first if a change is needed.
+		const addAPrice = this.page.getByLabel(
+			'Add a price for customers who choose local pickup'
+		);
 
-		await this.saveLocalPickupSettings();
+		if ( await addAPrice.isChecked() ) {
+			await addAPrice.uncheck();
+
+			await this.saveLocalPickupSettings();
+		}
 	}
 
 	async setLocalPickupTitle( title: string ) {

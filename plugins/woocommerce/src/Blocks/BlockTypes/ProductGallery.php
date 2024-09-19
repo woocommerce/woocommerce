@@ -59,7 +59,7 @@ class ProductGallery extends AbstractBlock {
 
 		$html = array_reduce(
 			$parsed_template,
-			function( $carry, $item ) {
+			function ( $carry, $item ) {
 				return $carry . render_block( $item );
 			},
 			''
@@ -110,11 +110,14 @@ class ProductGallery extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$post_id                = $block->context['postId'] ?? '';
+		$post_id = $block->context['postId'] ?? '';
+		$product = wc_get_product( $post_id );
+		if ( ! $product instanceof \WC_Product ) {
+			return '';
+		}
+
 		$product_gallery_images = ProductGalleryUtils::get_product_gallery_images( $post_id, 'thumbnail', array() );
 		$classname_single_image = '';
-		// This is a temporary solution. We have to refactor this code when the block will have to be addable on every page/post https://github.com/woocommerce/woocommerce-blocks/issues/10882.
-		global $product;
 
 		if ( count( $product_gallery_images ) < 2 ) {
 			// The gallery consists of a single image.
@@ -124,8 +127,6 @@ class ProductGallery extends AbstractBlock {
 		$number_of_thumbnails           = $block->attributes['thumbnailsNumberOfThumbnails'] ?? 0;
 		$classname                      = $attributes['className'] ?? '';
 		$dialog                         = isset( $attributes['mode'] ) && 'full' !== $attributes['mode'] ? $this->render_dialog() : '';
-		$post_id                        = $block->context['postId'] ?? '';
-		$product                        = wc_get_product( $post_id );
 		$product_gallery_first_image    = ProductGalleryUtils::get_product_gallery_image_ids( $product, 1 );
 		$product_gallery_first_image_id = reset( $product_gallery_first_image );
 		$product_id                     = strval( $product->get_id() );
@@ -134,7 +135,7 @@ class ProductGallery extends AbstractBlock {
 		$p    = new \WP_HTML_Tag_Processor( $html );
 
 		if ( $p->next_tag() ) {
-			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ) ) );
+			$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-gallery' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 			$p->set_attribute(
 				'data-wc-context',
 				wp_json_encode(
@@ -147,7 +148,8 @@ class ProductGallery extends AbstractBlock {
 						'mouseIsOverPreviousOrNextButton' => false,
 						'productId'                       => $product_id,
 						'elementThatTriggeredDialogOpening' => null,
-					)
+					),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			);
 

@@ -1,18 +1,10 @@
-// This logic is copied from: https://github.com/WordPress/gutenberg/blob/29c620c79a4c3cfa4c1300cd3c9eeeb06709d3e0/packages/block-editor/src/components/block-toolbar/shuffle.js
-
 /**
  * External dependencies
  */
 import { capitalize } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Path, SVG, ToolbarButton, ToolbarGroup } from '@wordpress/components';
-import {
-	unlock,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/edit-site/build-module/lock-unlock';
-// eslint-disable-next-line @woocommerce/dependency-group
+import { Button, Path, SVG, ToolbarGroup } from '@wordpress/components';
 import {
 	store as blockEditorStore,
 	// @ts-expect-error missing type
@@ -23,6 +15,8 @@ import {
  */
 import { PatternWithBlocks } from '~/customize-store/types/pattern';
 import { PATTERN_CATEGORIES } from '../sidebar/pattern-screen/categories';
+import { usePatternsByCategory } from '../hooks/use-patterns';
+import { trackEvent } from '~/customize-store/tracking';
 
 // This is the icon that is used in the Shuffle button. Currently we are using an outdated version of @wordpress/icons.
 // import { shuffle } from '@wordpress/icons';
@@ -44,94 +38,108 @@ const getCategoryLabelFromCategories = ( categories: string[] ) => {
 	}
 };
 
+/**
+ * Selects a random pattern from the provided array that is not the current pattern.
+ * If the randomly selected pattern is the same as the current, it attempts to select the next pattern in the array.
+ * If the current pattern is the last in the array, it selects the first pattern.
+ * If there's only one pattern in the array, it will return that pattern.
+ */
+const getNextPattern = (
+	patterns: PatternWithBlocks[],
+	patternName: string
+) => {
+	const numberOfPatterns = patterns.length;
+	const currentPatternIndex = patterns.findIndex(
+		( { name } ) => name === patternName
+	);
+	const nextPatternIndex = Math.floor( Math.random() * numberOfPatterns );
+
+	if ( nextPatternIndex !== currentPatternIndex ) {
+		return patterns[ nextPatternIndex ];
+	}
+
+	if ( currentPatternIndex === nextPatternIndex ) {
+		if ( nextPatternIndex === 0 ) {
+			return patterns[ 1 ];
+		}
+
+		if ( nextPatternIndex === numberOfPatterns ) {
+			return patterns[ 0 ];
+		}
+
+		return patterns[ nextPatternIndex - 1 ];
+	}
+
+	return patterns[ 0 ];
+};
+
 export default function Shuffle( { clientId }: { clientId: string } ) {
 	const {
-		categories,
-		patterns,
+		category,
 		patternName,
 	}: {
-		categories: string[];
-		patterns: PatternWithBlocks[];
+		category: string;
 		patternName: string;
 	} = useSelect(
 		( select ) => {
 			// @ts-expect-error missing type
-			const { getBlockAttributes, getBlockRootClientId } =
-				select( blockEditorStore );
+			const { getBlockAttributes } = select( blockEditorStore );
 			const attributes = getBlockAttributes( clientId );
-			const _categories = attributes?.metadata?.categories || [];
+			const categories = attributes?.metadata?.categories;
+			// We know that the category is one of the keys of PATTERN_CATEGORIES.
+			const _category = Object.keys( PATTERN_CATEGORIES ).find( ( cat ) =>
+				categories?.includes( cat )
+			) as string;
+
 			const _patternName = attributes?.metadata?.patternName;
-			const rootBlock = getBlockRootClientId( clientId );
-			const _patterns = unlock(
-				select( blockEditorStore )
-			).__experimentalGetAllowedPatterns( rootBlock );
 
 			return {
-				categories: _categories,
-				patterns: _patterns,
+				category: _category,
 				patternName: _patternName,
 			};
 		},
 		[ clientId ]
 	);
+
+	const { patterns } = usePatternsByCategory( category );
+
 	// @ts-expect-error missing type
 	const { replaceBlocks } = useDispatch( blockEditorStore );
-	const sameCategoryPatternsWithSingleWrapper = useMemo( () => {
-		if (
-			! categories ||
-			categories.length === 0 ||
-			! patterns ||
-			patterns.length === 0
-		) {
-			return [];
-		}
-		return patterns.filter( ( pattern ) => {
-			return (
-				// Check if the pattern has only one top level block,
-				// otherwise we may shuffle to pattern that will not allow to continue shuffling.
-				pattern.blocks.length === 1 &&
-				pattern.categories?.some( ( category ) => {
-					return categories.includes( category );
-				} )
-			);
-		} );
-	}, [ categories, patterns ] );
 
-	if ( sameCategoryPatternsWithSingleWrapper.length === 0 ) {
+	// We need at least two patterns to shuffle.
+	if ( patterns.length < 2 ) {
 		return null;
 	}
 
-	function getNextPattern() {
-		const numberOfPatterns = sameCategoryPatternsWithSingleWrapper.length;
-		const patternIndex = sameCategoryPatternsWithSingleWrapper.findIndex(
-			( { name } ) => name === patternName
-		);
-		const nextPatternIndex =
-			patternIndex + 1 < numberOfPatterns ? patternIndex + 1 : 0;
-		return sameCategoryPatternsWithSingleWrapper[ nextPatternIndex ];
-	}
-
-	const categoryLabel = getCategoryLabelFromCategories( categories );
+	const categoryLabel = getCategoryLabelFromCategories( [ category ] );
 
 	return (
 		<ToolbarGroup className="woocommerce-customize-your-store-toolbar-shuffle-container">
-			<ToolbarButton
-				label={ __( 'Shuffle', 'woocommerce' ) }
+			<Button
 				icon={ shuffleIcon }
+				label={ __( 'Shuffle', 'woocommerce' ) }
 				onClick={ () => {
-					const nextPattern = getNextPattern();
+					const nextPattern = getNextPattern( patterns, patternName );
 					// @ts-expect-error - attributes is marked as readonly.
 					nextPattern.blocks[ 0 ].attributes = {
 						...nextPattern.blocks[ 0 ].attributes,
 						metadata: {
 							...nextPattern.blocks[ 0 ].attributes.metadata,
-							categories,
+							categories: [ category ],
+							patternName: nextPattern.name,
 						},
 					};
 					replaceBlocks( clientId, nextPattern.blocks );
+					trackEvent(
+						'customize_your_store_assembler_pattern_shuffle_click',
+						{ category, pattern: nextPattern.name }
+					);
 				} }
-			/>
-			{ categoryLabel && <span>{ capitalize( categoryLabel ) }</span> }
+			>
+				{ categoryLabel && (
+					<span>{ capitalize( categoryLabel ) }</span>
+				) }
+			</Button>
 		</ToolbarGroup>
 	);
 }

@@ -44,14 +44,14 @@ class WPConsentAPITest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get a closure for the on_plugins_loaded method of the WPConsentAPI class.
+	 * Get a closure for the on_init method of the WPConsentAPI class.
 	 *
 	 * @return Closure
 	 */
-	private function get_closure_for_on_plugins_loaded_method() {
+	private function get_closure_for_on_init_method() {
 		return Closure::bind(
 			function() {
-				$this->on_plugins_loaded();
+				$this->on_init();
 			},
 			$this->wp_consent_api_integration,
 			$this->wp_consent_api_integration
@@ -63,7 +63,7 @@ class WPConsentAPITest extends WP_UnitTestCase {
 	 */
 	public function test_wp_consent_api_not_available(): void {
 		$this->wp_consent_api_integration->method( 'is_wp_consent_api_active' )->willReturn( false );
-		$this->get_closure_for_on_plugins_loaded_method()();
+		$this->get_closure_for_on_init_method()();
 		$this->assertFalse( has_filter( "wp_consent_api_registered_{$this->plugin}" ) );
 	}
 
@@ -72,7 +72,7 @@ class WPConsentAPITest extends WP_UnitTestCase {
 	 */
 	public function test_wp_consent_api_available(): void {
 		$this->wp_consent_api_integration->method( 'is_wp_consent_api_active' )->willReturn( true );
-		$this->get_closure_for_on_plugins_loaded_method()();
+		$this->get_closure_for_on_init_method()();
 		$this->assertTrue( has_filter( "wp_consent_api_registered_{$this->plugin}" ) );
 	}
 }

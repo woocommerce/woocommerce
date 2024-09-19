@@ -70,13 +70,13 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 				name: 'Shipping address',
 			} )
 			.getByLabel( 'How wide is your road?' )
-			.fill( 'wide' );
+			.selectOption( 'wide' );
 		await checkoutPageObject.page
 			.getByRole( 'group', {
 				name: 'Billing address',
 			} )
 			.getByLabel( 'How wide is your road?' )
-			.fill( 'narrow' );
+			.selectOption( 'narrow' );
 
 		await checkoutPageObject.page.evaluate(
 			'document.activeElement.blur()'
@@ -206,13 +206,13 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 				name: 'Shipping address',
 			} )
 			.getByLabel( 'How wide is your road?' )
-			.fill( 'wide' );
+			.selectOption( 'wide' );
 		await checkoutPageObject.page
 			.getByRole( 'group', {
 				name: 'Billing address',
 			} )
 			.getByLabel( 'How wide is your road?' )
-			.fill( 'narrow' );
+			.selectOption( 'narrow' );
 
 		await checkoutPageObject.page.evaluate(
 			'document.activeElement.blur()'

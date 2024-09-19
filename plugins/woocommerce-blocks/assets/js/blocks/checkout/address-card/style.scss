@@ -35,7 +35,15 @@
 	}
 }
 .wc-block-components-address-card__edit {
+	background-color: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	font-family: inherit;
 	margin: 0 0 0 auto;
-	text-decoration: none;
 	@include font-size(small);
+
+	&:hover {
+		text-decoration: underline;
+	}
 }

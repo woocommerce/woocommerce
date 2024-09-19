@@ -35,7 +35,7 @@ const google = {
 		'Boost your product listings with a campaign that is automatically optimized to meet your goals.',
 	createUrl:
 		'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/create',
-	channelName: 'Google Listings and Ads',
+	channelName: 'Google for WooCommerce',
 	channelSlug: 'google-listings-and-ads',
 };
 
