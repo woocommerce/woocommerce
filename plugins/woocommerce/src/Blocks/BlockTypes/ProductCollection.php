@@ -1832,7 +1832,8 @@ class ProductCollection extends AbstractBlock {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/hand-picked',
 			function ( $collection_args, $common_query_values, $query ) {
-				// Hand-picked product collections should hide the results if no products are selected.
+				// For Hand-Picked collection, if no products are selected, we should return an empty result set.
+				// This ensures that the collection doesn't display any products until the user explicitly chooses them.
 				if ( empty( $query['handpicked_products'] ) ) {
 					return array(
 						'post__in' => array( -1 ),
