@@ -246,7 +246,7 @@ class RemoteLogger extends \WC_Log_Handler {
 				'headers'  => array(
 					'Content-Type' => 'application/json',
 				),
-				'blocking' => true,
+				'blocking' => false,
 			)
 		);
 
