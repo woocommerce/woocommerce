@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Product bulk edit: fix increasing & decreasing sale price when there was no previous sale.
