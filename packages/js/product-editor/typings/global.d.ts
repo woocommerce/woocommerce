@@ -1,5 +1,6 @@
 declare global {
 	interface Window {
+		__productNewNavigation: boolean;
 		productBlockEditorSettings: {
 			productTemplates: ProductTemplate[];
 			maxUploadFileSize: number;
@@ -7,14 +8,8 @@ declare global {
 		wcAdminFeatures: Record< string, boolean >;
 		wcTracks: {
 			isEnabled: boolean;
-			validateEvent: (
-				name: string,
-				properties: unknown,
-			) => void;
-			recordEvent: (
-				name: string,
-				properties: unknown,
-			) => void;
+			validateEvent: ( name: string, properties: unknown ) => void;
+			recordEvent: ( name: string, properties: unknown ) => void;
 		};
 	}
 }
