@@ -245,7 +245,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		<List
 			heading={ additionalSectionHeading }
 			headingDescription={ additionalSectionHeadingDescription }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
