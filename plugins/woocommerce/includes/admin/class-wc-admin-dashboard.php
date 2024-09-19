@@ -145,7 +145,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				'lowstock_link'       => 'admin.php?page=wc-admin&type=lowstock&path=%2Fanalytics%2Fstock',
 				'outofstock_link'     => 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock',
 				'report_data'         => null,
-				'get_sales_sparkline' => array( $this, 'sales_sparkline' ),
+				'get_sales_sparkline' => array( $this, 'get_sales_sparkline' ),
 				'legacy_report'       => null,
 			);
 
@@ -173,11 +173,23 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 				$days = max( 7, (int) gmdate( 'd', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
 
+				$sparkline_allowed_html = array(
+					'span' => array(
+						'class'          => array(),
+						'data-color'     => array(),
+						'data-tip'       => array(),
+						'data-barwidth'  => array(),
+						'data-sparkline' => array(),
+					),
+				);
+
 				if ( $report_data && is_callable( $get_sales_sparkline ) ) {
+					$sparkline = call_user_func_array( $get_sales_sparkline, array( '', $days ) );
+					$sparkline = $this->sales_sparkline_markup( 'sales', $days, $sparkline['total'], $sparkline['data'] );
 					?>
 				<li class="sales-this-month">
 				<a href="<?php echo esc_url( admin_url( $net_sales_link ) ); ?>">
-					<?php echo call_user_func_array( $get_sales_sparkline, array( '', $days ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( $sparkline, $sparkline_allowed_html ); ?>
 					<?php
 						printf(
 							/* translators: %s: net sales */
@@ -192,10 +204,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 				$top_seller = $this->get_top_seller();
 				if ( $top_seller && $top_seller->qty && is_callable( $get_sales_sparkline ) ) {
+					$sparkline = call_user_func_array( $get_sales_sparkline, array( $top_seller->product_id, $days, 'count' ) );
+					$sparkline = $this->sales_sparkline_markup( 'count', $days, $sparkline['total'], $sparkline['data'] );
 					?>
 				<li class="best-seller-this-month">
 				<a href="<?php echo esc_url( admin_url( $top_seller_link . $top_seller->product_id ) ); ?>">
-					<?php echo call_user_func_array( $get_sales_sparkline, array( $top_seller->product_id, $days, 'count' ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wp_kses( $sparkline, $sparkline_allowed_html ); ?>
 					<?php
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity */
@@ -524,14 +538,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Prepares a sparkline to show sales in the last X days.
+		 * Prepares the data for a sparkline to show sales in the last X days.
 		 *
 		 * @param  int    $id ID of the product to show. Blank to get all orders.
 		 * @param  int    $days Days of stats to get.
 		 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
-		 * @return string
+		 * @return array
 		 */
-		private function sales_sparkline( $id = '', $days, $type = 'sales' ) {
+		private function get_sales_sparkline( $id = '', $days, $type = 'sales' ) {
 			$sales_endpoint = '/wc-analytics/reports/revenue/stats';
 			$start_date     = gmdate( 'Y-m-d 00:00:00', current_time( 'timestamp' ) - ( ( $days - 1 ) * DAY_IN_SECONDS ) );
 			$end_date       = gmdate( 'Y-m-d 23:59:59', current_time( 'timestamp' ) );
@@ -568,6 +582,22 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				array_push( $sparkline_data, array( strval( strtotime( $d['interval'] ) * 1000 ), $d['subtotals']->$meta_key ) );
 			}
 
+			return array(
+				'total' => $total,
+				'data'  => $sparkline_data,
+			);
+		}
+
+		/**
+		 * Prepares the markup for a sparkline to show sales in the last X days with the given data.
+		 *
+		 * @param  string $type Type of sparkline to form the markup.
+		 * @param  int    $days Days of stats to form the markup.
+		 * @param  int    $total Total income or items sold to form the markup.
+		 * @param  array  $sparkline_data Sparkline data to form the markup.
+		 * @return string
+		 */
+		private function sales_sparkline_markup( $type, $days, $total, $sparkline_data ) {
 			if ( 'sales' === $type ) {
 				/* translators: 1: total income 2: days */
 				$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );

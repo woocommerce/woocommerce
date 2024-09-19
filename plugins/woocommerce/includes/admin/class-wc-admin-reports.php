@@ -51,7 +51,7 @@ class WC_Admin_Reports {
 		$status_widget_reports['lowstock_link']       = 'admin.php?page=wc-reports&tab=stock&report=low_in_stock';
 		$status_widget_reports['outofstock_link']     = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
 		$status_widget_reports['report_data']         = $sales_by_date->get_report_data();
-		$status_widget_reports['get_sales_sparkline'] = array( $report, 'sales_sparkline' );
+		$status_widget_reports['get_sales_sparkline'] = array( $report, 'get_sales_sparkline' );
 		$status_widget_reports['legacy_report']       = $report;
 
 		return $status_widget_reports;
