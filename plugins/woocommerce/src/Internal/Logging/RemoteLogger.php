@@ -229,8 +229,8 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		$body = SafeGlobalFunctionProxy::wp_json_encode( array( 'params' => SafeGlobalFunctionProxy::wp_json_encode( $log_data ) ) );
-		if ( is_null( $log_data_json ) ) { // if the json encoding fails the API will reject the API call so let's not bother.
-			throw new Error( 'Remote Logger encountered error while attempting to JSON encode $log_data' );
+		if ( is_null( $body ) ) { // if the json encoding fails the API will reject the API call so let's not bother.
+			throw new \Error( 'Remote Logger encountered error while attempting to JSON encode $log_data' );
 		}
 
 		WC_Rate_Limiter::set_rate_limit( self::RATE_LIMIT_ID, self::RATE_LIMIT_DELAY );
@@ -239,7 +239,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			return false;
 		}
 
-		$response          = SafeGlobalFunctionProxy::wp_safe_remote_post(
+		$response = SafeGlobalFunctionProxy::wp_safe_remote_post(
 			self::LOG_ENDPOINT,
 			array(
 				'body'     => $body,
@@ -250,12 +250,19 @@ class RemoteLogger extends \WC_Log_Handler {
 				'blocking' => false,
 			)
 		);
+
+		if ( is_null( $response ) ) { // SafeGlobalFunctionProxy will return a null if an error occurs within, so there will be a separate log entry with the details.
+			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to call wp_safe_remote_post while sending the log to the remote logging service.', array( 'source' => 'remote-logging' ) );
+			return false;
+		}
+
 		$is_api_call_error = SafeGlobalFunctionProxy::is_wp_error( $response );
+
 		if ( $is_api_call_error ) {
 			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to send the log to the remote logging service: ' . $response->get_error_message(), array( 'source' => 'remote-logging' ) );
 			return false;
 		} elseif ( is_null( $is_api_call_error ) ) {
-			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to parse the response after sending log to the remote logging service: ', array( 'source' => 'remote-logging' ) );
+			SafeGlobalFunctionProxy::wc_get_logger()->error( 'Failed to parse the response after sending log to the remote logging service. ', array( 'source' => 'remote-logging' ) );
 			return false;
 		}
 		return true;
