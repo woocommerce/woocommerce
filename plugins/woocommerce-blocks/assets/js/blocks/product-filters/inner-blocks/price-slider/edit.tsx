@@ -5,30 +5,38 @@ import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, Disabled } from '@wordpress/components';
-import { formatPrice } from '@woocommerce/price-format';
+import { formatPrice, getCurrency } from '@woocommerce/price-format';
 
 /**
  * Internal dependencies
  */
-import { BlockAttributes } from './types';
+import { EditProps } from './types';
 
-const Edit = ( {
-	attributes,
-	setAttributes,
-}: {
-	attributes: BlockAttributes;
-	setAttributes: ( attrs: Partial< BlockAttributes > ) => void;
-} ) => {
+const Edit = ( { attributes, setAttributes, context }: EditProps ) => {
 	const { showInputFields, inlineInput } = attributes;
 	const blockProps = useBlockProps( {
 		className: 'wc-block-product-filter-price-slider',
 	} );
 
-	// Mock data for preview
-	const minPrice = 0;
-	const maxPrice = 1000;
-	const formattedMinPrice = formatPrice( minPrice );
-	const formattedMaxPrice = formatPrice( maxPrice );
+	const { isLoading, price } = context.filterData;
+
+	if ( isLoading ) {
+		return 'Loading...';
+	}
+
+	if ( ! price ) {
+		return null;
+	}
+
+	const { minPrice, maxPrice, minRange, maxRange } = price;
+	const formattedMinPrice = formatPrice(
+		minPrice,
+		getCurrency( { minorUnit: 0 } )
+	);
+	const formattedMaxPrice = formatPrice(
+		maxPrice,
+		getCurrency( { minorUnit: 0 } )
+	);
 
 	const priceMin = showInputFields ? (
 		<input className="min" type="text" defaultValue={ formattedMinPrice } />
@@ -85,15 +93,15 @@ const Edit = ( {
 							<input
 								type="range"
 								className="min"
-								min={ minPrice }
-								max={ maxPrice }
+								min={ minRange }
+								max={ maxRange }
 								defaultValue={ minPrice }
 							/>
 							<input
 								type="range"
 								className="max"
-								min={ minPrice }
-								max={ maxPrice }
+								min={ minRange }
+								max={ maxRange }
 								defaultValue={ maxPrice }
 							/>
 						</div>

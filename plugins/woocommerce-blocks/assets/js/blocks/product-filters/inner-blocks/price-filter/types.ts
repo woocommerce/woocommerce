@@ -1,15 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockEditProps } from '@wordpress/blocks';
 import { HTMLElementEvent } from '@woocommerce/types';
-
-export type BlockAttributes = {
-	showInputFields: boolean;
-	inlineInput: boolean;
-};
-
-export type EditProps = BlockEditProps< BlockAttributes >;
 
 export type PriceFilterState = {
 	rangeStyle: () => string;
@@ -22,10 +14,6 @@ export type PriceFilterContext = {
 	maxPrice: number;
 	minRange: number;
 	maxRange: number;
-};
-
-export type FilterComponentProps = BlockEditProps< BlockAttributes > & {
-	collectionData: Partial< PriceFilterState >;
 };
 
 export type PriceFilterStore = {
