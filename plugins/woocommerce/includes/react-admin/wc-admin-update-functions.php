@@ -274,6 +274,12 @@ function wc_admin_update_300_update_is_read_from_last_read() {
  */
 function wc_admin_update_340_remove_is_primary_from_note_action() {
 	global $wpdb;
+
+	// The column might not exist, since this update function was moved from 340 to 640.
+	if ( ! $wpdb->query( "SHOW COLUMNS FROM {$wpdb->prefix}wc_admin_note_actions LIKE 'is_primary'" ) ) {
+		return;
+	}
+
 	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_admin_note_actions DROP COLUMN `is_primary`" );
 }
 
