@@ -13,7 +13,14 @@ module.exports = {
 	},
 	module: {
 		parser: webpackConfig.parser,
-		rules: webpackConfig.rules,
+		rules: [
+			...webpackConfig.rules, {
+				test: /\.svg$/,
+				issuer: /\.(j|t)sx?$/,
+				use: ['@svgr/webpack', 'url-loader'],
+				type: 'javascript/auto',
+			},
+		],
 	},
 	plugins: webpackConfig.plugins,
 };

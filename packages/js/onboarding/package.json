@@ -57,6 +57,7 @@
 		]
 	},
 	"dependencies": {
+		"@svgr/webpack": "^8.1.0",
 		"@woocommerce/components": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/explat": "workspace:*",
