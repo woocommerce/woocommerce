@@ -544,7 +544,7 @@ class WC_Download_Handler {
 
 		if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
 			if ( false === $download_range['is_range_valid'] ) {
-				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				http_response_code( 416 );
 				header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
 				exit;
 			}
@@ -553,7 +553,7 @@ class WC_Download_Handler {
 			$end    = $download_range['start'] + $download_range['length'] - 1;
 			$length = $download_range['length'];
 
-			header( 'HTTP/1.1 206 Partial Content' );
+			http_response_code( 206 );
 			header( "Accept-Ranges: 0-$file_size" );
 			header( "Content-Range: bytes $start-$end/$file_size" );
 			header( "Content-Length: $length" );
@@ -571,7 +571,10 @@ class WC_Download_Handler {
 			@apache_setenv( 'no-gzip', 1 ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_apache_setenv
 		}
 		@ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_ini_set
-		@session_write_close(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.SessionFunctionsUsage.session_session_write_close
+
+		if ( session_status() === PHP_SESSION_ACTIVE ) {
+			@session_write_close(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.VIP.SessionFunctionsUsage.session_session_write_close
+		}
 	}
 
 	/**
