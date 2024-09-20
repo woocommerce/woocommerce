@@ -269,6 +269,7 @@ class WC_Install {
 		'9.4.0' => array(
 			'wc_update_940_add_phone_to_order_address_fts_index',
 			'wc_update_940_remove_help_panel_highlight_shown',
+			'wc_update_940_update_analytics_tax_lookup_db',
 		),
 	);
 

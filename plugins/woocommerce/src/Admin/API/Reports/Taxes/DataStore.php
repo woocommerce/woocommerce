@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use WC_Tax;
 
 /**
  * API\Reports\Taxes\DataStore.
@@ -47,8 +48,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'tax_rate_id'  => 'intval',
 		'name'         => 'strval',
 		'tax_rate'     => 'floatval',
-		'country'      => 'strval',
-		'state'        => 'strval',
 		'priority'     => 'intval',
 		'total_tax'    => 'floatval',
 		'order_tax'    => 'floatval',
@@ -84,15 +83,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// improvements here.
 		$this->report_columns = array(
 			'tax_rate_id'  => "{$table_name}.tax_rate_id",
-			'name'         => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
-			'tax_rate'     => "CAST({$wpdb->prefix}woocommerce_order_itemmeta.meta_value AS DECIMAL(7,4)) as tax_rate",
-			'country'      => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
-			'state'        => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
-			'priority'     => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
-			'total_tax'    => 'SUM(total_tax) as total_tax',
-			'order_tax'    => 'SUM(order_tax) as order_tax',
-			'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
-			'orders_count' => "COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN {$table_name}.order_id END ) ) as orders_count",
+			'name'         => "{$table_name}.tax_rate_name as name",
+			'tax_rate'     => "{$table_name}.tax_rate",
+			'priority'     => "{$table_name}.tax_rate_priority as priority",
+			'total_tax'    => "SUM({$table_name}.total_tax) as total_tax",
+			'order_tax'    => "SUM({$table_name}.order_tax) as order_tax",
+			'shipping_tax' => "SUM({$table_name}.shipping_tax) as shipping_tax",
+			'orders_count' => "COUNT( DISTINCT {$table_name}.order_id ) as orders_count",
 		);
 	}
 
@@ -104,39 +101,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Fills FROM clause of SQL request based on user supplied parameters.
-	 *
-	 * @param array  $query_args          Query arguments supplied by the user.
-	 * @param string $order_status_filter Order status subquery.
-	 */
-	protected function add_from_sql_params( $query_args, $order_status_filter ) {
-		global $wpdb;
-		$table_name = self::get_db_table_name();
-
-		if ( $order_status_filter ) {
-			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
-		}
-
-		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
-		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND {$wpdb->prefix}woocommerce_order_itemmeta.meta_key = 'rate_percent'" );
-	}
-
-	/**
 	 * Updates the database query with parameters used for Taxes report: categories and order status.
 	 *
 	 * @see Automattic\WooCommerce\Admin\API\Reports\Taxes\Stats\DataStore::update_sql_query_params()
 	 * @param array $query_args Query arguments supplied by the user.
 	 */
 	protected function add_sql_query_params( $query_args ) {
-		global $wpdb;
-
 		$order_tax_lookup_table = self::get_db_table_name();
 
 		$this->add_time_period_sql_params( $query_args, $order_tax_lookup_table );
 		$this->get_limit_sql_params( $query_args );
 		$this->add_order_by_sql_params( $query_args );
+
 		$order_status_filter = $this->get_status_subquery( $query_args );
-		$this->add_from_sql_params( $query_args, $order_status_filter );
 
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );
@@ -146,6 +123,43 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $order_status_filter ) {
 			$this->subquery->add_sql_clause( 'where', "AND ( {$order_status_filter} )" );
 		}
+	}
+
+	/**
+	 * Returns order status subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $operator   AND or OR, based on match query argument.
+	 * @return string
+	 */
+	protected function get_status_subquery( $query_args, $operator = 'AND' ) {
+		$order_tax_lookup_table = self::get_db_table_name();
+
+		$subqueries        = array();
+		$excluded_statuses = array();
+
+		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
+			$allowed_statuses = esc_sql( $query_args['status_is'] );
+			if ( $allowed_statuses ) {
+				$subqueries[] = "{$order_tax_lookup_table}.order_status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
+			}
+		}
+
+		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
+			$excluded_statuses = esc_sql( $query_args['status_is_not'] );
+		}
+
+		if ( ( ! isset( $query_args['status_is'] ) || empty( $query_args['status_is'] ) )
+			&& ( ! isset( $query_args['status_is_not'] ) || empty( $query_args['status_is_not'] ) )
+		) {
+			$excluded_statuses = $this->get_excluded_report_order_statuses();
+		}
+
+		if ( $excluded_statuses ) {
+			$subqueries[] = "{$order_tax_lookup_table}.order_status NOT IN ( '" . implode( "','", $excluded_statuses ) . "' )";
+		}
+
+		return implode( " $operator ", $subqueries );
 	}
 
 	/**
@@ -179,7 +193,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->initialize_queries();
 
-		$data = (object) array(
+		$table_name = self::get_db_table_name();
+		$data 		= (object) array(
 			'data'    => array(),
 			'total'   => 0,
 			'pages'   => 0,
@@ -208,7 +223,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->subquery->clear_sql_clause( 'select' );
 		$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
-		$this->subquery->add_sql_clause( 'group_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name, {$wpdb->prefix}woocommerce_order_itemmeta.meta_value" );
 		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 
@@ -244,10 +258,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
-		global $wpdb;
-
 		if ( 'tax_code' === $order_by ) {
-			return "{$wpdb->prefix}woocommerce_order_items.order_item_name";
+			return "tax_rate_name";
 		} elseif ( 'rate' === $order_by ) {
 			return 'tax_rate';
 		}
@@ -273,15 +285,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$num_updated = 0;
 
 		foreach ( $tax_items as $tax_item ) {
-			$result = $wpdb->replace(
+			$tax_rate = WC_Tax::_get_tax_rate( $tax_item->get_rate_id(), OBJECT );
+			$result   = $wpdb->replace(
 				self::get_db_table_name(),
 				array(
-					'order_id'     => $order->get_id(),
-					'date_created' => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
-					'tax_rate_id'  => $tax_item->get_rate_id(),
-					'shipping_tax' => $tax_item->get_shipping_tax_total(),
-					'order_tax'    => $tax_item->get_tax_total(),
-					'total_tax'    => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
+					'order_id'          => $order->get_id(),
+					'date_created'      => $order->get_date_created( 'edit' )->date( TimeInterval::$sql_datetime_format ),
+					'tax_rate_id'       => $tax_item->get_rate_id(),
+					'shipping_tax'      => $tax_item->get_shipping_tax_total(),
+					'order_tax'         => $tax_item->get_tax_total(),
+					'total_tax'         => (float) $tax_item->get_tax_total() + (float) $tax_item->get_shipping_tax_total(),
+					'tax_rate_name'     => $tax_item->get_name(),
+					'tax_rate'		    => $tax_item->get_rate_percent(),
+					'tax_rate_priority' => $tax_rate->tax_rate_priority,
+					'order_status' 		=> $order->get_status(),
 				),
 				array(
 					'%d',
@@ -290,6 +307,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					'%f',
 					'%f',
 					'%f',
+					'%s',
+					'%s',
+					'%s',
+					'%s',
 				)
 			);
 
@@ -334,9 +355,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function initialize_queries() {
 		$this->clear_all_clauses();
+
+		$table_name     = self::get_db_table_name();
 		$this->subquery = new SqlQuery( $this->context . '_subquery' );
-		$this->subquery->add_sql_clause( 'select', self::get_db_table_name() . '.tax_rate_id' );
-		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
-		$this->subquery->add_sql_clause( 'group_by', self::get_db_table_name() . '.tax_rate_id' );
+
+		$this->subquery->add_sql_clause( 'select', "{$table_name}.tax_rate_id" );
+		$this->subquery->add_sql_clause( 'from', $table_name );
+		$this->subquery->add_sql_clause( 'group_by', "{$table_name}.tax_rate_name, {$table_name}.tax_rate, {$table_name}.tax_rate_id" );
 	}
 }

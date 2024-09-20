@@ -20,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
@@ -2914,6 +2915,28 @@ function wc_update_940_remove_help_panel_highlight_shown() {
 					: 'During the update to 9.4.0, WooCommerce removed %d user meta rows associated with the meta key "woocommerce_admin_help_panel_highlight_shown".',
 				number_format_i18n( $deletions )
 			),
+			array(
+				'source' => 'wc-updater',
+			)
+		);
+	}
+}
+
+/**
+ * Add new columns to the tax lookup table and regenerate reports data
+ *
+ * @return void
+ */
+function wc_update_940_update_analytics_tax_lookup_db() {
+	global $wpdb;
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_tax_lookup ADD COLUMN tax_rate_name VARCHAR(200), ADD COLUMN tax_rate VARCHAR(8), ADD COLUMN tax_rate_priority BIGINT, ADD COLUMN order_status VARCHAR(20)" );
+
+	$import = ReportsSync::regenerate_report_data( false, false );
+
+	if ( is_wp_error( $import ) ) {
+		$logger = wc_get_logger();
+		$logger->notice(
+			'Failed to regenerate Analytics report data: ' . $import->get_error_message(),
 			array(
 				'source' => 'wc-updater',
 			)
