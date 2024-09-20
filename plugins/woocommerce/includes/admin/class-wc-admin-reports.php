@@ -143,14 +143,19 @@ class WC_Admin_Reports {
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
 		$reports = apply_filters( 'woocommerce_reports_charts', $reports ); // Backwards compatibility.
 
-		foreach ( $reports as $key => $report_group ) {
-			if ( isset( $reports[ $key ]['charts'] ) ) {
-				$reports[ $key ]['reports'] = $reports[ $key ]['charts'];
+		foreach ( $reports as $key => &$report_group ) {
+			// Silently ignore reports given for the filter in Automattic\WooCommerce\Admin\API\Reports\Controller.
+			if( ! isset( $report_group['reports'] ) ) {
+				unset( $reports[ $key ] );
+				continue;
+			}
+			if ( isset( $report_group['charts'] ) ) {
+				$report_group['reports'] = $report_group['charts'];
 			}
 
-			foreach ( $reports[ $key ]['reports'] as $report_key => $report ) {
-				if ( isset( $reports[ $key ]['reports'][ $report_key ]['function'] ) ) {
-					$reports[ $key ]['reports'][ $report_key ]['callback'] = $reports[ $key ]['reports'][ $report_key ]['function'];
+			foreach ( $report_group['reports'] as &$report ) {
+				if ( isset( $report['function'] ) ) {
+					$report['callback'] = $report['function'];
 				}
 			}
 		}
