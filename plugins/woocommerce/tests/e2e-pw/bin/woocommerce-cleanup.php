@@ -1,14 +1,17 @@
 <?php declare(strict_types=1);
 
-/*
-Plugin Name: WooCommerce Cleanup
-Description: Resets WooCommerce site to testing start state.
-Version: 1.0
-Author: Solaris Team
-*/
+/**
+ * Plugin Name: WooCommerce Cleanup
+ * Description: Resets WooCommerce site to testing start state.
+ * Version: 1.0
+ * Author: Solaris Team
+ *
+ * This file contains the main functionality for the WooCommerce Cleanup plugin.
+ * It provides functions to reset the WooCommerce site to a clean testing state.
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
