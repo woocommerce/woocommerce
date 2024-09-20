@@ -198,6 +198,36 @@ test.describe( 'Assembler -> Full composability', { tag: '@gutenberg' }, () => {
 		);
 	} );
 
+	test( 'Product patterns display products', async ( {
+		pageObject,
+		baseURL,
+	} ) => {
+		await prepareAssembler( pageObject, baseURL );
+		const assembler = await pageObject.getAssembler();
+		const editor = await pageObject.getEditor();
+
+		await deleteAllPatterns( editor, assembler );
+
+		await assembler.getByText( 'Featured selling' ).click();
+
+		const productCollectionPattern = assembler
+			.locator( '.block-editor-block-patterns-list__item[aria-label="Product Collection 4 Columns"]' )
+			.first();
+
+		await productCollectionPattern.click();
+
+		const insertedPatternContent = await editor
+			.locator(
+				'[data-is-parent-block="true"]:not([data-type="core/template-part"])'
+			)
+			.first()
+			.textContent();
+
+		await expect( insertedPatternContent ).toContain(
+			'3-Speed Bike'
+		);
+	} );
+
 	test( 'Clicking on a pattern should always scroll the page to the inserted pattern', async ( {
 		pageObject,
 		baseURL,
