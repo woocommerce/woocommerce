@@ -150,7 +150,7 @@ function add_extension_register_page() {
 add_action( 'admin_menu', 'add_extension_register_page' );
 ```
 
-Supply a React component on the client side. Be sure to use the same id supplied in PHP in `navArgs`.
+Supply a React component on the client side.
 
 ```javascript
 import { addFilter } from '@wordpress/hooks';
