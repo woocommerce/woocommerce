@@ -234,7 +234,7 @@ function ProductCardFooter( props: { product: Product } ) {
 							<span aria-hidden>({ product.reviewsCount })</span>
 							<span className="screen-reader-text">
 								{ sprintf(
-									// translators: %d: average rating
+									// translators: %d: rating count
 									__( 'from %d reviews', 'woocommerce' ),
 									product.reviewsCount
 								) }
