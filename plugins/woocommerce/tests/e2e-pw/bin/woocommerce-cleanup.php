@@ -1,14 +1,16 @@
-<?php declare(strict_types=1);
-
+<?php
 /**
  * Plugin Name: WooCommerce Cleanup
  * Description: Resets WooCommerce site to testing start state.
  * Version: 1.0
  * Author: Solaris Team
+ * @package WooCommerceCleanup
  *
  * This file contains the main functionality for the WooCommerce Cleanup plugin.
  * It provides functions to reset the WooCommerce site to a clean testing state.
  */
+
+declare(strict_types=1);
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -54,25 +56,25 @@ function wc_cleanup_reset_site() {
 	// Delete all product categories.
 	$product_categories = get_terms( 'product_cat' );
 	foreach ( $product_categories as $product_category ) {
-			wp_delete_term( $product_category->term_id, 'product_cat' );
+		wp_delete_term( $product_category->term_id, 'product_cat' );
 	}
 
 	// Delete all product tags.
 	$product_tags = get_terms( 'product_tag' );
 	foreach ( $product_tags as $product_tag ) {
-			wp_delete_term( $product_tag->term_id, 'product_tag' );
+		wp_delete_term( $product_tag->term_id, 'product_tag' );
 	}
 
 	// Delete all product attributes.
 	$product_attributes = wc_get_attribute_taxonomies();
 	foreach ( $product_attributes as $attribute ) {
-			wp_delete_term( $attribute->attribute_id, 'pa_' . $attribute->attribute_name );
+		wp_delete_term( $attribute->attribute_id, 'pa_' . $attribute->attribute_name );
 	}
 
 	// Delete all product reviews.
 	$comments = get_comments( array( 'post_type' => 'product' ) );
 	foreach ( $comments as $comment ) {
-			wp_delete_comment( $comment->comment_ID, true );
+		wp_delete_comment( $comment->comment_ID, true );
 	}
 
 	// Remove all non-WooCommerce pages.
@@ -85,7 +87,7 @@ function wc_cleanup_reset_site() {
 	$ignore_titles = array( 'Cart', 'Checkout', 'My account', 'Shop', 'Refund and Returns Policy', 'Privacy Policy', 'Sample Page' );
 
 	foreach ( $pages as $page ) {
-		if ( ! has_shortcode( $page->post_content, 'woocommerce' ) && ! in_array( $page->post_title, $ignore_titles ) ) {
+		if ( ! has_shortcode( $page->post_content, 'woocommerce' ) && ! in_array( $page->post_title, $ignore_titles, true ) ) {
 			wp_delete_post( $page->ID, true );
 		}
 
@@ -108,7 +110,7 @@ function wc_cleanup_reset_site() {
 	// Set the WooCommerce shipping locations to "Ship to all countries you sell to".
 	update_option( 'woocommerce_ship_to_countries', 'all' );
 
-		// Disable taxes.
+	// Disable taxes.
 	update_option( 'woocommerce_calc_taxes', 'no' );
 
 	// Enable coupons.
@@ -117,10 +119,10 @@ function wc_cleanup_reset_site() {
 	// Disable sequential coupon discounts.
 	update_option( 'woocommerce_calc_discounts_sequentially', 'no' );
 
-		// Set the WooCommerce currency to "United States (US) dollar".
+	// Set the WooCommerce currency to "United States (US) dollar".
 	update_option( 'woocommerce_currency', 'USD' );
 
-		// Set the WooCommerce currency position to "left".
+	// Set the WooCommerce currency position to "left".
 	update_option( 'woocommerce_currency_pos', 'left' );
 
 	// Set the WooCommerce thousand separator to a comma.
@@ -132,7 +134,7 @@ function wc_cleanup_reset_site() {
 	// Set the WooCommerce number of decimals to 2.
 	update_option( 'woocommerce_price_num_decimals', '2' );
 
-		// Delete all shipping zones.
+	// Delete all shipping zones.
 	$shipping_zones = WC_Shipping_Zones::get_zones();
 	foreach ( $shipping_zones as $zone ) {
 		$zone_instance = new WC_Shipping_Zone( $zone['zone_id'] );
@@ -143,22 +145,22 @@ function wc_cleanup_reset_site() {
 	$default_zone = new WC_Shipping_Zone( 0 );
 	$default_zone->delete();
 
-		// Delete all shipping classes.
-	$shipping_classes = get_terms( 'product_shipping_class', array( 'hide_empty' => false ) );
+	// Delete all shipping classes.
+	$shipping_classes = get_terms( 'product_shipping_class' );
 	foreach ( $shipping_classes as $shipping_class ) {
 		wp_delete_term( $shipping_class->term_id, 'product_shipping_class' );
 	}
 
-		// Disable all payment methods.
+	// Disable all payment methods.
 	$payment_gateways = WC()->payment_gateways->payment_gateways();
 	foreach ( $payment_gateways as $gateway ) {
 		update_option( 'woocommerce_' . $gateway->id . '_settings', array_merge( get_option( 'woocommerce_' . $gateway->id . '_settings', array() ), array( 'enabled' => 'no' ) ) );
 	}
 
-		// Enable guest checkout.
+	// Enable guest checkout.
 	update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 
-		// Set the WooCommerce "From" email name.
+	// Set the WooCommerce "From" email name.
 	update_option( 'woocommerce_email_from_name', 'woocommerce' );
 
 	// Set the WooCommerce "From" email address.
@@ -227,4 +229,3 @@ function wc_cleanup_reset_site_via_api() {
 	wc_cleanup_reset_site();
 	return new WP_REST_Response( 'WooCommerce site has been reset.', 200 );
 }
-?>
