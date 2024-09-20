@@ -211,8 +211,13 @@ add_action(
 				'methods'             => 'POST',
 				'callback'            => 'wc_cleanup_reset_site_via_api',
 				'permission_callback' => function () {
+					// Verify the nonce before processing the request.
+					if ( ! isset( $_POST['wc_cleanup_reset_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wc_cleanup_reset_nonce'] ) ), 'wc_cleanup_reset_action' ) ) {
+						return new WP_Error( 'rest_forbidden', esc_html__( 'Nonce verification failed', 'woocommerce' ), array( 'status' => 403 ) );
+					}
+
 					$provided_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
-					$valid_key = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
+					$valid_key    = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
 					return $provided_key === $valid_key;
 				},
 			)
