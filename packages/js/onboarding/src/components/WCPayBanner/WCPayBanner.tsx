@@ -35,7 +35,7 @@ export const WCPayBannerFooter: React.VFC< {
 	</CardFooter>
 );
 
-export const WCPayBannerText: React.VFC< {
+const WCPayBannerText: React.VFC< {
 	actionButton: React.ReactNode;
 	isWooPayEligible: boolean;
 } > = ( { actionButton } ) => {
