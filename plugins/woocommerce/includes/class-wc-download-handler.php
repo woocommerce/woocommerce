@@ -726,7 +726,7 @@ class WC_Download_Handler {
 	 * @param string  $title   Error title.
 	 * @param integer $status  Error status.
 	 */
-	private static function download_error( $message, $title = '', $status = 404 ) {
+	private static function download_error( $message, $title = '', $status = 403 ) {
 		/*
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.
