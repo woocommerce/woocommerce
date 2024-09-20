@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 /*
 Plugin Name: WooCommerce Cleanup
 Description: Resets WooCommerce site to testing start state.
@@ -14,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Reset the WooCommerce site.
  */
 function wc_cleanup_reset_site() {
-	// Remove all coupons
+	// Remove all coupons.
 	$coupons = get_posts(
 		array(
 			'post_type'   => 'shop_coupon',
@@ -25,7 +26,7 @@ function wc_cleanup_reset_site() {
 		wp_delete_post( $coupon->ID, true );
 	}
 
-	// Remove all orders
+	// Remove all orders.
 	$orders = get_posts(
 		array(
 			'post_type'   => 'shop_order',
@@ -36,7 +37,7 @@ function wc_cleanup_reset_site() {
 		wp_delete_post( $order->ID, true );
 	}
 
-	// Remove all products
+	// Remove all products.
 	$products = get_posts(
 		array(
 			'post_type'   => 'product',
@@ -47,31 +48,31 @@ function wc_cleanup_reset_site() {
 		wp_delete_post( $product->ID, true );
 	}
 
-	// Delete all product categories
-	$product_categories = get_terms( 'product_cat', array( 'hide_empty' => false ) );
+	// Delete all product categories.
+	$product_categories = get_terms( 'product_cat' );
 	foreach ( $product_categories as $product_category ) {
 			wp_delete_term( $product_category->term_id, 'product_cat' );
 	}
 
-	// Delete all product tags
-	$product_tags = get_terms( 'product_tag', array( 'hide_empty' => false ) );
+	// Delete all product tags.
+	$product_tags = get_terms( 'product_tag' );
 	foreach ( $product_tags as $product_tag ) {
 			wp_delete_term( $product_tag->term_id, 'product_tag' );
 	}
 
-	// Delete all product attributes
+	// Delete all product attributes.
 	$product_attributes = wc_get_attribute_taxonomies();
 	foreach ( $product_attributes as $attribute ) {
 			wp_delete_term( $attribute->attribute_id, 'pa_' . $attribute->attribute_name );
 	}
 
-	// Delete all product reviews
+	// Delete all product reviews.
 	$comments = get_comments( array( 'post_type' => 'product' ) );
 	foreach ( $comments as $comment ) {
 			wp_delete_comment( $comment->comment_ID, true );
 	}
 
-	// Remove all non-WooCommerce pages
+	// Remove all non-WooCommerce pages.
 	$pages         = get_posts(
 		array(
 			'post_type'   => 'page',
@@ -85,109 +86,116 @@ function wc_cleanup_reset_site() {
 			wp_delete_post( $page->ID, true );
 		}
 
-		// Set the active theme to Twenty Twenty-Three
+		// Set the active theme to Twenty Twenty-Three.
 		switch_theme( 'twentytwentythree' );
 	}
 
-	// Optionally, you can also clear WooCommerce transients
+	// Optionally, you can also clear WooCommerce transients.
 	wc_delete_product_transients();
 
-	// Set the site title
+	// Set the site title.
 	update_option( 'blogname', 'WooCommerce Core E2E Test Suite' );
 
-	// Set the WooCommerce default country/state
+	// Set the WooCommerce default country/state.
 	update_option( 'woocommerce_default_country', 'US:CA' );
 
-	// Set the WooCommerce selling locations to "Sell to all countries"
+	// Set the WooCommerce selling locations to "Sell to all countries".
 	update_option( 'woocommerce_allowed_countries', 'all' );
 
-	// Set the WooCommerce shipping locations to "Ship to all countries you sell to"
+	// Set the WooCommerce shipping locations to "Ship to all countries you sell to".
 	update_option( 'woocommerce_ship_to_countries', 'all' );
 
-		// Disable taxes
+		// Disable taxes.
 	update_option( 'woocommerce_calc_taxes', 'no' );
 
-	// Enable coupons
+	// Enable coupons.
 	update_option( 'woocommerce_enable_coupons', 'yes' );
 
-	// Disable sequential coupon discounts
+	// Disable sequential coupon discounts.
 	update_option( 'woocommerce_calc_discounts_sequentially', 'no' );
 
-		// Set the WooCommerce currency to "United States (US) dollar"
+		// Set the WooCommerce currency to "United States (US) dollar".
 	update_option( 'woocommerce_currency', 'USD' );
 
-		// Set the WooCommerce currency position to "left"
+		// Set the WooCommerce currency position to "left".
 	update_option( 'woocommerce_currency_pos', 'left' );
 
-	// Set the WooCommerce thousand separator to a comma
+	// Set the WooCommerce thousand separator to a comma.
 	update_option( 'woocommerce_price_thousand_sep', ',' );
 
-	// Set the WooCommerce decimal separator to a period
+	// Set the WooCommerce decimal separator to a period.
 	update_option( 'woocommerce_price_decimal_sep', '.' );
 
-	// Set the WooCommerce number of decimals to 2
+	// Set the WooCommerce number of decimals to 2.
 	update_option( 'woocommerce_price_num_decimals', '2' );
 
-		// Delete all shipping zones
+		// Delete all shipping zones.
 	$shipping_zones = WC_Shipping_Zones::get_zones();
 	foreach ( $shipping_zones as $zone ) {
 		$zone_instance = new WC_Shipping_Zone( $zone['zone_id'] );
 		$zone_instance->delete();
 	}
 
-	// Delete the default shipping zone
+	// Delete the default shipping zone.
 	$default_zone = new WC_Shipping_Zone( 0 );
 	$default_zone->delete();
 
-		// Delete all shipping classes
+		// Delete all shipping classes.
 	$shipping_classes = get_terms( 'product_shipping_class', array( 'hide_empty' => false ) );
 	foreach ( $shipping_classes as $shipping_class ) {
 		wp_delete_term( $shipping_class->term_id, 'product_shipping_class' );
 	}
 
-		// Disable all payment methods
+		// Disable all payment methods.
 	$payment_gateways = WC()->payment_gateways->payment_gateways();
 	foreach ( $payment_gateways as $gateway ) {
 		update_option( 'woocommerce_' . $gateway->id . '_settings', array_merge( get_option( 'woocommerce_' . $gateway->id . '_settings', array() ), array( 'enabled' => 'no' ) ) );
 	}
 
-		// Enable guest checkout
+		// Enable guest checkout.
 	update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 
-		// Set the WooCommerce "From" email name
+		// Set the WooCommerce "From" email name.
 	update_option( 'woocommerce_email_from_name', 'woocommerce' );
 
-	// Set the WooCommerce "From" email address
+	// Set the WooCommerce "From" email address.
 	update_option( 'woocommerce_email_from_address', 'wordpress@example.com' );
 }
 
 add_action(
-	'admin_menu',
-	function () {
-		add_submenu_page(
-			'woocommerce',
-			'WooCommerce Cleanup',
-			'WooCommerce Cleanup',
-			'manage_options',
-			'woocommerce-cleanup',
-			function () {
-				if ( isset( $_POST['wc_cleanup_reset'] ) ) {
-					wc_cleanup_reset_site();
-					echo '<div class="updated"><p>WooCommerce site has been reset.</p></div>';
-				}
-				?>
-			<div class="wrap">
-				<h1>WooCommerce Cleanup</h1>
-				<form method="post">
-					<p>Click the button below to reset the WooCommerce site to a clean testing state.</p>
-					<p><input type="submit" name="wc_cleanup_reset" class="button button-primary" value="Reset WooCommerce Site"></p>
-				</form>
-			</div>
-				<?php
-			}
-		);
-	}
+    'admin_menu',
+    function () {
+        add_submenu_page(
+            'woocommerce',
+            'WooCommerce Cleanup',
+            'WooCommerce Cleanup',
+            'manage_options',
+            'woocommerce-cleanup',
+            function () {
+                if ( isset( $_POST['wc_cleanup_reset'] ) ) {
+                    // Verify the nonce before processing the form data.
+                    if ( check_admin_referer( 'wc_cleanup_reset_action', 'wc_cleanup_reset_nonce' ) ) {
+                        wc_cleanup_reset_site();
+                        echo '<div class="updated"><p>WooCommerce site has been reset.</p></div>';
+                    } else {
+                        echo '<div class="error"><p>Nonce verification failed. Please try again.</p></div>';
+                    }
+                }
+                ?>
+                <div class="wrap">
+                    <h1>WooCommerce Cleanup</h1>
+                    <form method="post">
+                        <?php wp_nonce_field( 'wc_cleanup_reset_action', 'wc_cleanup_reset_nonce' ); ?>
+                        <p>Click the button below to reset the WooCommerce site to a clean testing state.</p>
+                        <p><input type="submit" name="wc_cleanup_reset" class="button button-primary" value="Reset WooCommerce Site"></p>
+                    </form>
+                </div>
+                <?php
+            }
+        );
+    }
 );
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -199,7 +207,7 @@ add_action(
 				'callback'            => 'wc_cleanup_reset_site_via_api',
 				'permission_callback' => function () {
 					$provided_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
-					$valid_key = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key
+					$valid_key = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
 					return $provided_key === $valid_key;
 				},
 			)
