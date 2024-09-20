@@ -16,7 +16,6 @@
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				box-shadow: 0 0 0 2px $input-border-dark;
 			}
 		}
 
@@ -36,18 +35,19 @@
 		background: none;
 		padding: em($gap) em($gap-smaller) 0;
 		color: $input-text-active;
-		box-shadow: 0 0 0 1px $universal-border-strong;
+		border: 1px solid $universal-border-strong;
 
 		&:focus {
 			outline: none;
-			box-shadow: 0 0 0 2px $input-border-gray;
+			border-color: currentColor;
+			border-width: 1.5px;
 		}
 
 		.has-dark-controls & {
+			border-color: $input-border-dark;
 			color: $input-text-dark;
-			box-shadow: 0 0 0 1px $input-border-dark;
 			&:focus {
-				box-shadow: 0 0 0 2px $input-border-dark;
+				border-color: currentColor;
 			}
 		}
 

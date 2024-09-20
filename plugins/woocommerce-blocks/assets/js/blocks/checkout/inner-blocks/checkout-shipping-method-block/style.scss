@@ -47,25 +47,21 @@
 	}
 
 	&:focus-within {
-		outline: 1px solid currentColor;
+		outline: 1.5px solid currentColor;
 		&::after {
-			outline: 2px solid currentColor;
+			outline: 1px solid currentColor;
 		}
 	}
 
 	&:hover {
 		background-color: $universal-background;
-		//outline: 1px solid currentColor;
 	}
 
 	&.wc-block-checkout__shipping-method-option--selected {
-		outline: 2px solid currentColor;
+		outline: 1.5px solid currentColor;
 		background-color: $universal-background;
-		&:focus-within {
+		&:focus-within::after {
 			outline: 1px solid currentColor;
-			&::after {
-				outline: 2px solid currentColor;
-			}
 		}
 	}
 }

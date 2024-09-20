@@ -64,7 +64,7 @@
 			background-color: #fff;
 			color: $input-text-active;
 			outline: 0;
-			box-shadow: 0 0 0 1px $input-border-gray;
+			border: 1.5px solid currentColor;
 		}
 
 		.has-dark-controls & {
@@ -75,7 +75,7 @@
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				box-shadow: 0 0 0 1px $input-border-dark;
+				border: 1.5px solid currentColor;
 			}
 		}
 	}
@@ -103,7 +103,7 @@
 			border-color: $alert-red;
 		}
 		&:focus {
-			box-shadow: 0 0 0 1px $alert-red;
+			box-shadow: 0 0 0 0.5px $alert-red;
 		}
 
 		.has-dark-controls &,
@@ -114,7 +114,7 @@
 		}
 
 		.has-dark-controls &:focus {
-			box-shadow: 0 0 0 1px color.adjust($alert-red, $lightness: 30%);
+			box-shadow: 0 0 0 0.5px color.adjust($alert-red, $lightness: 30%);
 		}
 	}
 

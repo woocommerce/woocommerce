@@ -26,7 +26,8 @@
 		}
 
 		// This rule removes the fake border-top from the selected element to prevent a double border.
-		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted + div.wc-block-components-radio-control-accordion-option::after {
+		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted
+			+ div.wc-block-components-radio-control-accordion-option::after {
 			display: none;
 		}
 	}
@@ -35,7 +36,7 @@
 	// and right of the selected element, and top and bottom of the first/last elements.
 	label.wc-block-components-radio-control__option--checked-option-highlighted,
 	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
-		box-shadow: 0 0 0 2px currentColor inset;
+		box-shadow: 0 0 0 1.5px currentColor inset;
 		border-radius: 4px;
 	}
 
@@ -72,12 +73,12 @@
 
 	// Remove the fake border-top from the item after the selected element, this is to prevent a double border with the
 	// selected element's box-shadow.
-	.wc-block-components-radio-control__option--checked-option-highlighted + .wc-block-components-radio-control__option::after {
+	.wc-block-components-radio-control__option--checked-option-highlighted
+		+ .wc-block-components-radio-control__option::after {
 		display: none;
 	}
 
 	.wc-block-components-radio-control__option {
-
 		// Add a fake border to the top of each radio option. This is because using CSS borders would result in an
 		// overlap and two transparent borders combining to make a darker pixel. This fake border allows us to bring the
 		// border in by one pixel on each side to avoid the overlap.
@@ -119,7 +120,7 @@
 }
 
 .wc-block-components-radio-control__option
-.wc-block-components-radio-control__option-layout {
+	.wc-block-components-radio-control__option-layout {
 	&::after {
 		display: none;
 	}
@@ -218,7 +219,7 @@
 
 .theme-twentytwentyone {
 	.wc-block-components-radio-control
-	.wc-block-components-radio-control__input {
+		.wc-block-components-radio-control__input {
 		&:checked {
 			border-width: 2px;
 
