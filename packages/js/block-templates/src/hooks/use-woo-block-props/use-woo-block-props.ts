@@ -3,7 +3,7 @@
  */
 import { useBlockProps } from '@wordpress/block-editor';
 
-interface TemplateBlockAttributes {
+export interface TemplateBlockAttributes {
 	_templateBlockId?: string;
 	_templateBlockOrder?: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

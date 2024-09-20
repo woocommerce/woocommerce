@@ -12,6 +12,7 @@
         height: 100%;
         position: relative;
         z-index: 1;
+        overflow: auto;
     }
 
     &.is-empty .edit-product-content {
