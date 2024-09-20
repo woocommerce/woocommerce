@@ -10,7 +10,6 @@
 	}
 }
 
-
 .wc-block-checkout__add-note .wc-block-components-textarea {
 	margin-top: $gap;
 
@@ -20,10 +19,18 @@
 		outline: 0;
 		box-shadow: 0 0 0 1px $input-border-gray;
 	}
+
+	.has-dark-controls & {
+		&:focus {
+			color: $input-text-dark;
+			box-shadow: 0 0 0 1px currentColor;
+			background-color: $input-background-dark;
+		}
+	}
 }
 
 .wc-block-components-form
-.wc-block-checkout__order-notes.wc-block-components-checkout-step {
+	.wc-block-checkout__order-notes.wc-block-components-checkout-step {
 	padding-left: 0;
 	margin-bottom: $gap-largest;
 
