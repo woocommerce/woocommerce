@@ -128,6 +128,10 @@ const blocks = {
 		customDir: 'product-filters/inner-blocks/chips',
 		isExperimental: true,
 	},
+	'product-filter-price-slider': {
+		customDir: 'product-filters/inner-blocks/price-slider',
+		isExperimental: true,
+	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
 	},

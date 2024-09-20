@@ -409,6 +409,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFiltersOverlayNavigation';
 			$block_types[] = 'ProductFilterStockStatus';
 			$block_types[] = 'ProductFilterPrice';
+			$block_types[] = 'ProductFilterPriceSlider'; // Add this line
 			$block_types[] = 'ProductFilterAttribute';
 			$block_types[] = 'ProductFilterRating';
 			$block_types[] = 'ProductFilterActive';
