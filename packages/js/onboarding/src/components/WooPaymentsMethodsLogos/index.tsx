@@ -162,29 +162,27 @@ export const WooPaymentMethodsLogos: React.VFC< {
 	}, [ maxElements ] );
 
 	return (
-		<>
-			<div className="woocommerce-woopayments-payment-methods-logos">
-				{ paymentMethods
-					.slice(
-						0,
-						getMaxShownElements(
-							maxShownElements,
-							isWooPayEligible
-						)
+		<div className="woocommerce-woopayments-payment-methods-logos">
+			{ paymentMethods
+				.slice(
+					0,
+					getMaxShownElements(
+						maxShownElements,
+						isWooPayEligible
 					)
-					.map( ( { name, Component } ) => {
-						if ( ! isWooPayEligible && name === 'woopay' ) {
-							return null;
-						}
+				)
+				.map( ( { name, Component } ) => {
+					if ( ! isWooPayEligible && name === 'woopay' ) {
+						return null;
+					}
 
-						return <Component key={ name } />;
-					} ) }
-				{ maxShownElements < totalPaymentMethods && (
-					<div className="woocommerce-woopayments-payment-methods-logos-count">
-						+ { totalPaymentMethods - maxShownElements }
-					</div>
-				) }
-			</div>
-		</>
+					return <Component key={ name } />;
+				} ) }
+			{ maxShownElements < totalPaymentMethods && (
+				<div className="woocommerce-woopayments-payment-methods-logos-count">
+					+ { totalPaymentMethods - maxShownElements }
+				</div>
+			) }
+		</div>
 	);
 };
