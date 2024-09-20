@@ -1,6 +1,5 @@
 declare global {
 	interface Window {
-		__productNewNavigation: boolean;
 		productBlockEditorSettings: {
 			productTemplates: ProductTemplate[];
 			maxUploadFileSize: number;
