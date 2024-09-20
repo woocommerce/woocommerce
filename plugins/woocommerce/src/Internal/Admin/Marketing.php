@@ -103,7 +103,13 @@ class Marketing {
 			'parent'        => 'woocommerce-marketing',
 			'existing_page' => false,
 		);
-
+		
+		/**
+		 * Filters marketing menu items.
+		 *
+		 * @param array $items Marketing pages.
+		 *
+		 */
 		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', array() );
 		foreach ( $marketing_pages as $marketing_page ) {
 			if ( ! is_array( $marketing_page ) ) {
