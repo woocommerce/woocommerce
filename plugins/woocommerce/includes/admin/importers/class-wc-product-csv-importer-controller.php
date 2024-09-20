@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Internal\Utilities\URL;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -145,6 +146,8 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return bool True if the file is inside the directory.
 	 */
 	private static function file_is_in_directory( string $file_path, string $directory ): bool {
+		$file_path = (string) new URL( $file_path ); // This resolves '/../' sequences.
+		$file_path = preg_replace( '/^file:\\/\\//', '', $file_path );
 		return 0 === stripos( wp_normalize_path( $file_path ), trailingslashit( wp_normalize_path( $directory ) ) );
 	}
 
