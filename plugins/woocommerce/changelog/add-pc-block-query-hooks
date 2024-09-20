@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduced the 'product_collection_block_query_args' and the 'rest_product_collection_block_query_args' query filters.

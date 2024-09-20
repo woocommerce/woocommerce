@@ -654,18 +654,33 @@ class ProductCollection extends AbstractBlock {
 		// Most likely this argument is being accessed in the test environment image.
 		$args['author'] = '';
 
-		return $this->get_final_query_args(
-			$args,
-			array(
-				'orderby'             => $orderby,
-				'on_sale'             => $on_sale,
-				'stock_status'        => $stock_status,
-				'product_attributes'  => $product_attributes,
-				'handpicked_products' => $handpicked_products,
-				'featured'            => $featured,
-				'timeFrame'           => $time_frame,
-				'priceRange'          => $price_range,
-			)
+		/**
+		 * Filter the editor's query args for the product collection block.
+		 * This filter allows developers to modify the query args for the product collection block in the editor.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param array $args The query args.
+		 * @param WP_Request $request The request object.
+		 *
+		 * @return array
+		 */
+		return (array) apply_filters(
+			'rest_product_collection_block_query_args',
+			$this->get_final_query_args(
+				$args,
+				array(
+					'orderby'             => $orderby,
+					'on_sale'             => $on_sale,
+					'stock_status'        => $stock_status,
+					'product_attributes'  => $product_attributes,
+					'handpicked_products' => $handpicked_products,
+					'featured'            => $featured,
+					'timeFrame'           => $time_frame,
+					'priceRange'          => $price_range,
+				)
+			),
+			$request
 		);
 	}
 
@@ -723,7 +738,24 @@ class ProductCollection extends AbstractBlock {
 
 		$is_exclude_applied_filters = ! ( $inherit || $filterable );
 
-		return $this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters );
+		/**
+		 * Filter the frontend query args for the product collection block.
+		 * This filter allows developers to modify the query args for the product collection block in the frontend.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param array $query The query args.
+		 * @param WP_Block $block The block being rendered.
+		 * @param int $page The page number.
+		 *
+		 * @return array
+		 */
+		return (array) apply_filters(
+			'product_collection_block_query_args',
+			$this->get_final_frontend_query( $block_context_query, $page, $is_exclude_applied_filters ),
+			$block,
+			$page
+		);
 	}
 
 
