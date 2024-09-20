@@ -221,10 +221,24 @@ function ProductCardFooter( props: { product: Product } ) {
 							<Icon icon={ 'star-filled' } size={ 16 } />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							{ product.averageRating }
+							<span aria-hidden>{ product.averageRating }</span>
+							<span className="screen-reader-text">
+								{ sprintf(
+									// translators: %.1f: average rating
+									__( '%.1f stars', 'woocommerce' ),
+									product.averageRating
+								) }
+							</span>
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-count">
-							({ product.reviewsCount })
+							<span aria-hidden>({ product.reviewsCount })</span>
+							<span className="screen-reader-text">
+								{ sprintf(
+									// translators: %d: rating count
+									__( 'from %d reviews', 'woocommerce' ),
+									product.reviewsCount
+								) }
+							</span>
 						</span>
 					</>
 				) }
