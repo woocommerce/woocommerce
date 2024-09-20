@@ -53,13 +53,15 @@
 			padding: 1em;
 		}
 
-		.wc-block-order-confirmation-create-account-terms {
-			@include font-size(small);
-			text-align: center;
+		.wc-block-order-confirmation-create-account-description {
+			p {
+				@include font-size(small);
+				text-align: center;
 
-			a,
-			span {
-				white-space: nowrap;
+				a,
+				span {
+					white-space: nowrap;
+				}
 			}
 		}
 
