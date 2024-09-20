@@ -29,7 +29,7 @@ final class ProductFilterChips extends AbstractBlock {
 		$context               = $block->context['filterData'];
 		$items                 = $context['items'] ?? array();
 		$checkbox_list_context = array( 'items' => $items );
-		$action                = $context['action'] ?? '';
+		$action                = $context['actions']['toggleFilter'] ?? '';
 		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/product-filter-chips' ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 		$tags = new \WP_HTML_Tag_Processor( $content );
