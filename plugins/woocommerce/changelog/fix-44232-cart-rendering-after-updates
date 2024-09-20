@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix cart shortcode updates when not used on the main cart page.

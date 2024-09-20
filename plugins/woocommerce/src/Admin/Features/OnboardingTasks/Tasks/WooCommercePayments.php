@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as Suggestions;
 use Automattic\WooCommerce\Internal\Admin\WCPayPromotion\Init as WCPayPromotionInit;
+use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 
 /**
  * WooCommercePayments Task
@@ -179,11 +180,11 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public static function is_supported() {
-		$suggestions              = Suggestions::get_suggestions();
+		$suggestions              = Suggestions::get_suggestions( DefaultPaymentGateways::get_all() );
 		$suggestion_plugins       = array_merge(
 			...array_filter(
 				array_column( $suggestions, 'plugins' ),
-				function( $plugins ) {
+				function ( $plugins ) {
 					return is_array( $plugins );
 				}
 			)

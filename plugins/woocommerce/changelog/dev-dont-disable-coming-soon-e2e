@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Removed directive to disable woocommerce_coming_soon in e2e tests so that we get better test coverage

@@ -123,9 +123,9 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( $return_to ), esc_attr( $wp_button_class ), esc_html__( 'Continue shopping', 'woocommerce' ) );
 	} else {
-		$message = sprintf( '<a href="%s" tabindex="1" class="button wc-forward%s">%s</a> %s', esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', esc_html( $added_text ), esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), esc_html__( 'View cart', 'woocommerce' ) );
 	}
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
@@ -170,6 +170,10 @@ function wc_format_list_of_items( $items ) {
 function wc_clear_cart_after_payment() {
 	global $wp;
 
+	$should_clear_cart_after_payment = false;
+	$after_payment                   = false;
+
+	// If the order has been received, clear the cart.
 	if ( ! empty( $wp->query_vars['order-received'] ) ) {
 
 		$order_id  = absint( $wp->query_vars['order-received'] );
@@ -179,20 +183,38 @@ function wc_clear_cart_after_payment() {
 			$order = wc_get_order( $order_id );
 
 			if ( $order instanceof WC_Order && hash_equals( $order->get_order_key(), $order_key ) ) {
-				WC()->cart->empty_cart();
+				$should_clear_cart_after_payment = true;
+				$after_payment                   = true;
 			}
 		}
 	}
 
-	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 ) {
+	// If the order is awaiting payment, and we haven't already decided to clear the cart, check the order status.
+	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 && ! $should_clear_cart_after_payment ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
-			// If the order has not failed, or is not pending, the order must have gone through.
-			if ( ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) ) ) {
-				WC()->cart->empty_cart();
-			}
+			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
+			$should_clear_cart_after_payment = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
+			$after_payment                   = true;
 		}
+	}
+
+	// If it doesn't look like a payment happened, bail early.
+	if ( ! $after_payment ) {
+		return;
+	}
+
+	/**
+	 * Determine whether the cart should be cleared after payment.
+	 *
+	 * @since 9.3.0
+	 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
+	 */
+	$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $should_clear_cart_after_payment );
+
+	if ( $should_clear_cart_after_payment ) {
+		WC()->cart->empty_cart();
 	}
 }
 add_action( 'template_redirect', 'wc_clear_cart_after_payment', 20 );
@@ -391,7 +413,12 @@ function wc_cart_round_discount( $value, $precision ) {
  */
 function wc_get_chosen_shipping_method_ids() {
 	$method_ids     = array();
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$chosen_methods = array();
+
+	if ( is_callable( array( WC()->session, 'get' ) ) ) {
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	}
+
 	foreach ( $chosen_methods as $chosen_method ) {
 		if ( ! is_string( $chosen_method ) ) {
 			continue;
@@ -399,6 +426,7 @@ function wc_get_chosen_shipping_method_ids() {
 		$chosen_method = explode( ':', $chosen_method );
 		$method_ids[]  = current( $chosen_method );
 	}
+
 	return $method_ids;
 }
 

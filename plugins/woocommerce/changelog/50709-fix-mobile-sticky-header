@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an admin bar CSS positioning bug in WordPress.com on mobile

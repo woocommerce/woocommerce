@@ -2,18 +2,15 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Fragment, useMemo, useState } from '@wordpress/element';
+import { useMemo, useState } from '@wordpress/element';
 import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
+import { CheckboxListOptionControl } from './checkbox-list-option-control';
+import type { CheckboxListOptions } from './types';
 import './style.scss';
-import { CheckboxControl } from '../checkbox-control';
-interface CheckboxListOptions {
-	label: React.ReactNode;
-	value: string;
-}
 
 export interface CheckboxListProps {
 	className?: string | undefined;
@@ -126,27 +123,18 @@ const CheckboxList = ( {
 		return (
 			<>
 				{ options.map( ( option, index ) => (
-					<Fragment key={ option.value }>
-						<li
-							{ ...( shouldTruncateOptions &&
-								! showExpanded &&
-								index >= limit && { hidden: true } ) }
-						>
-							<CheckboxControl
-								id={ option.value }
-								className="wc-block-checkbox-list__checkbox"
-								label={ option.label }
-								checked={ checked.includes( option.value ) }
-								onChange={ () => {
-									onChange( option.value );
-								} }
-								disabled={ isDisabled }
-							/>
-						</li>
-						{ shouldTruncateOptions &&
-							index === limit - 1 &&
-							renderedShowMore }
-					</Fragment>
+					<CheckboxListOptionControl
+						key={ option.value }
+						option={ option }
+						shouldTruncateOptions={ shouldTruncateOptions }
+						showExpanded={ showExpanded }
+						index={ index }
+						limit={ limit }
+						checked={ checked.includes( option.value ) }
+						disabled={ isDisabled }
+						renderedShowMore={ renderedShowMore }
+						onChange={ onChange }
+					/>
 				) ) }
 				{ shouldTruncateOptions && renderedShowLess }
 			</>

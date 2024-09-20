@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Treat post_type=product as a shop page.

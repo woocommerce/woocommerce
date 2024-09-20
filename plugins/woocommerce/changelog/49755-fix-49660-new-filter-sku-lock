@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add a filter to override the SKU database lock.

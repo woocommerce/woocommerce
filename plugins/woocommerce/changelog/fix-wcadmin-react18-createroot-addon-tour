@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Changed from using React.render to React.createRoot for wc addon tour as it has been deprecated since React 18

@@ -4,6 +4,7 @@ const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
 const { encodeCredentials } = require( '../../../utils/plugin-utils' );
+const { admin } = require( '../../../test-data/data' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -157,7 +158,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 
 		await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const saveButton = assembler.getByText( 'Save' );
+		const saveButton = assembler.getByText( 'Finish customizing' );
 
 		const waitResponse = page.waitForResponse(
 			( response ) =>
@@ -179,8 +180,8 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},
@@ -253,7 +254,7 @@ test.describe( 'Homepage tracking banner', () => {
 	} ) => {
 		await setOption( request, baseURL, 'woocommerce_allow_tracking', 'no' );
 
-		await page.route( '**/wp-json/wc/private/patterns*', ( route ) => {
+		await page.route( '**/wp-json/wc-admin/patterns*', ( route ) => {
 			route.fulfill( {
 				status: 500,
 			} );

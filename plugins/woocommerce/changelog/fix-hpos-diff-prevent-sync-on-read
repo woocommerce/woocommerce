@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent sync-on-read from affecting results of HPOS diff CLI tool.

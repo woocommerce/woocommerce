@@ -37,6 +37,7 @@
 		"async-product-editor-category-field": true,
 		"launch-your-store": true,
 		"product-editor-template-system": false,
+		"blueprint": true,
 		"reactify-classic-payments-settings": false
 	}
 }

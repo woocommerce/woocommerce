@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure session object is initialized before attempting to get chosen shipping methods

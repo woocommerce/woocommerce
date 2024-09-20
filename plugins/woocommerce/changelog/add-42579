@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Extract the checkbox list option logic into its own component

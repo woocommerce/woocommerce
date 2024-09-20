@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use stricter text selector on test

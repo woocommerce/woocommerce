@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Ensure low and no stock email notification routine is triggered whenever product stock changes

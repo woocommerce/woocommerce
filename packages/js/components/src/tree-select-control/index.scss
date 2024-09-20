@@ -1,3 +1,5 @@
+@import "node_modules/@wordpress/base-styles/mixins";
+
 $gap-largest: 40px;
 $gap-larger: 36px;
 $gap-large: 24px;
@@ -198,14 +200,87 @@ $muriel-box-shadow-8dp: 0 5px 5px -3px rgb(0 0 0 / 20%),
 		}
 
 		&.is-partially-checked {
+			.components-checkbox-control__input-container {
+				.components-checkbox-control__input[type="checkbox"] {
+					background: var(--wp-admin-theme-color);
+					border: $gap-smallest solid $white;
+					box-shadow: 0 0 0 1px #1e1e1e;
+					
+					&:focus {
+						border-color: $white;
+						box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--wp-admin-theme-color);
+					}
+				}
+			}
+		}
 
-			.components-checkbox-control__input {
-				background: var(--wp-admin-theme-color);
-				border: $gap-smallest solid $white;
-				box-shadow: 0 0 0 1px #1e1e1e;
+		// At the time of this comment, it was discovered that this component has
+		// the same classnames as the WP Components Checkbox, without it being a code depedency.
+		// This caused some visual breakages when changes happened in WP 6.6, and
+		// the rules have been copied over from WP Components styles of 6.5.1.
+		// https://github.com/WordPress/gutenberg/blob/403b4b8d014ef7f6edc15c822e455e109bf49c6d/packages/components/src/checkbox-control/style.scss#L4
+		// mixins were imported from @wordpress/base-styles as there's a significant amount of rules if
+		// it were to be copied. I think the risk of them changing is lower than the chance we decide to upstream this component.
+		.components-checkbox-control__input-container {
+			$checkbox-input-size: 20px;
+			$checkbox-input-size-sm: 24px; // Width & height for small viewports.
 
-				&:focus {
-					box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--wp-admin-theme-color);
+			height: $checkbox-input-size-sm;
+			width: $checkbox-input-size-sm;
+			display: inline-block;
+			margin-right: 12px;
+			position: relative;
+			vertical-align: middle;
+
+			@include break-small() {
+				height: $checkbox-input-size;
+				width: $checkbox-input-size;
+			}
+
+			.components-checkbox-control__input[type="checkbox"] {
+				@include checkbox-control;
+				background: $white;
+				color: $gray-900;
+				clear: none;
+				cursor: pointer;
+				display: inline-block;
+				line-height: 0;
+				margin: 0 $grid-unit-05 0 0;
+				outline: 0;
+				padding: 0 !important;
+				text-align: center;
+				vertical-align: top;
+				width: $checkbox-input-size-sm;
+				height: $checkbox-input-size-sm;
+			
+				@include break-small() {
+					height: $checkbox-input-size;
+					width: $checkbox-input-size;
+				}
+			
+				appearance: none;
+				@include reduce-motion("transition");
+			
+				&:checked,
+				&:indeterminate {
+					$components-color-accent: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+					background: $components-color-accent;
+					border-color: $components-color-accent;
+			
+					// Hide default checkbox styles in IE.
+					&::-ms-check {
+						opacity: 0;
+					}
+				}
+			
+				&:checked::before {
+					content: none;
+				}
+
+				
+				@include break-small {
+					height: $checkbox-input-size;
+					width: $checkbox-input-size;
 				}
 			}
 		}

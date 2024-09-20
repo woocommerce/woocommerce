@@ -6,6 +6,7 @@ const { encodeCredentials } = require( '../../../utils/plugin-utils' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { getInstalledWordPressVersion } = require( '../../../utils/wordpress' );
 const { setOption } = require( '../../../utils/options' );
+const { admin } = require( '../../../test-data/data' );
 
 const test = base.extend( {
 	assemblerPageObject: async ( { page }, use ) => {
@@ -302,7 +303,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 			await assembler.locator( '[aria-label="Back"]' ).click();
 
-			const saveButton = assembler.getByText( 'Save' );
+			const saveButton = assembler.getByText( 'Finish customizing' );
 
 			const waitResponse = page.waitForResponse(
 				( response ) =>
@@ -427,7 +428,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 
 		await assembler.locator( '[aria-label="Back"]' ).click();
 
-		const saveButton = assembler.getByText( 'Save' );
+		const saveButton = assembler.getByText( 'Finish customizing' );
 
 		const waitResponseGlobalStyles = page.waitForResponse(
 			( response ) =>
@@ -528,8 +529,8 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 			baseURL,
 			extraHTTPHeaders: {
 				Authorization: `Basic ${ encodeCredentials(
-					'admin',
-					'password'
+					admin.username,
+					admin.password
 				) }`,
 				cookie: '',
 			},

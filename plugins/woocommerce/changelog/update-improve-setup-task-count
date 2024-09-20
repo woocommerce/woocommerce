@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve setup_tasks_remaining performance

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure coupon errors are visible on block checkout when invalid coupons are removed.

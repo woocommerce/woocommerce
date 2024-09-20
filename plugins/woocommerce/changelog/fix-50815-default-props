@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Mark ReportTable tableData prop as not required

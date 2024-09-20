@@ -452,10 +452,10 @@ class Controller extends GenericController {
 	}
 
 	/**
-	 * Prepare a report object for serialization.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param array           $stat_data    Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param array           $stat_data Report data item as returned from Data Store.
+	 * @param WP_REST_Request $request   Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $stat_data, $request ) {
@@ -527,8 +527,13 @@ class Controller extends GenericController {
 	 */
 	public function format_data_value( $data, $stat, $report, $chart, $query_args ) {
 		if ( 'jetpack/stats' === $report ) {
+			$index = false;
+
 			// Get the index of the field to tally.
-			$index = array_search( $chart, $data['general']->visits->fields, true );
+			if ( isset( $data['general']->visits->fields ) && is_array( $data['general']->visits->fields ) ) {
+				$index = array_search( $chart, $data['general']->visits->fields, true );
+			}
+
 			if ( ! $index ) {
 				return null;
 			}

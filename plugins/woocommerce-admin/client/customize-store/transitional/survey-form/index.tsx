@@ -98,12 +98,12 @@ export const SurveyForm = ( {
 		} else {
 			trackEvent( 'ces_feedback', {
 				action: 'customize_your_store_on_core_transitional_survey_complete',
-				rating,
+				score: rating,
 				choose_design_my_own_theme: isStreamlineChecked,
 				choose_dislike_themes: isDislikeThemesChecked,
 				choose_themes_not_match: isThemeNoMatchChecked,
 				choose_other: isOtherChecked,
-				feedback: feedbackText,
+				comments: feedbackText,
 				spill_beans: spillBeansText,
 			} );
 		}

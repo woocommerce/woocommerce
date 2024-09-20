@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add confirmation prompt for site visibility settings when changing from live to coming soon mode

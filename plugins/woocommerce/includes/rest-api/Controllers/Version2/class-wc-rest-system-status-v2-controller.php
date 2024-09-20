@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
-use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil };
 
 /**
  * System status controller class.
@@ -1044,11 +1044,16 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				return array();
 			}
 
-			$active_valid_plugins = wc_get_container()->get( PluginUtil::class )->get_all_active_valid_plugins();
-			$active_plugins_data  = array();
+			$active_plugins = (array) get_option( 'active_plugins', array() );
+			if ( is_multisite() ) {
+				$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+				$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
+			}
 
-			foreach ( $active_valid_plugins as $plugin ) {
-				$data                  = get_plugin_data( $plugin );
+			$active_plugins_data = array();
+
+			foreach ( $active_plugins as $plugin ) {
+				$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
 				$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 			}
 

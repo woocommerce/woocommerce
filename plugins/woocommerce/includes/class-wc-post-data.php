@@ -405,10 +405,24 @@ class WC_Post_Data {
 			$data_store->untrash_variations( $id );
 
 			wc_product_force_unique_sku( $id );
+			self::clear_global_unique_id_if_necessary( $id );
 
 			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_changed( $id );
 		} elseif ( 'product_variation' === $post_type ) {
 			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_changed( $id );
+		}
+	}
+
+	/**
+	 * Clear global unique id if it's not unique.
+	 *
+	 * @param mixed $id Post ID.
+	 */
+	private static function clear_global_unique_id_if_necessary( $id ) {
+		$product = wc_get_product( $id );
+		if ( $product && ! wc_product_has_global_unique_id( $id, $product->get_global_unique_id() ) ) {
+			$product->set_global_unique_id( '' );
+			$product->save();
 		}
 	}
 

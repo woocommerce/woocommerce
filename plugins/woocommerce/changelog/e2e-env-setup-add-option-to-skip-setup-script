@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: add an option to skip the env setup script running before test execution

@@ -457,6 +457,15 @@ function wc_clear_template_cache() {
 }
 
 /**
+ * Clear the system status theme info cache.
+ *
+ * @since 9.4.0
+ */
+function wc_clear_system_status_theme_info_cache() {
+	delete_transient( 'wc_system_status_theme_info' );
+}
+
+/**
  * Get Base Currency Code.
  *
  * @return string
@@ -1469,12 +1478,27 @@ function wc_transaction_query( $type = 'start', $force = false ) {
 /**
  * Gets the url to the cart page.
  *
- * @since  2.5.0
+ * @since 2.5.0
+ * @since 9.3.0 To support shortcodes on other pages besides the main cart page, this returns the current URL if it is the cart page.
  *
  * @return string Url to cart page
  */
 function wc_get_cart_url() {
-	return apply_filters( 'woocommerce_get_cart_url', wc_get_page_permalink( 'cart' ) );
+	if ( is_cart() && isset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] ) ) {
+		$protocol    = is_ssl() ? 'https' : 'http';
+		$current_url = esc_url_raw( $protocol . '://' . wp_unslash( $_SERVER['HTTP_HOST'] ) . wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		$cart_url    = remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), $current_url );
+	} else {
+		$cart_url = wc_get_page_permalink( 'cart' );
+	}
+
+	/**
+	 * Filter the cart URL.
+	 *
+	 * @since 2.5.0
+	 * @param string $cart_url Cart URL.
+	 */
+	return apply_filters( 'woocommerce_get_cart_url', $cart_url );
 }
 
 /**
@@ -1614,7 +1638,7 @@ function wc_get_wildcard_postcodes( $postcode, $country = '' ) {
 		$formatted_postcode . '*',
 	);
 
-	for ( $i = 0; $i < $length; $i ++ ) {
+	for ( $i = 0; $i < $length; $i++ ) {
 		$postcodes[] = ( function_exists( 'mb_substr' ) ? mb_substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) : substr( $formatted_postcode, 0, ( $i + 1 ) * -1 ) ) . '*';
 	}
 
@@ -1709,7 +1733,7 @@ function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = 
 
 		foreach ( $methods as $method ) {
 			if ( isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {
-				$method_count++;
+				++$method_count;
 			}
 		}
 	}
@@ -2266,7 +2290,7 @@ function wc_get_var( &$var, $default = null ) {
  */
 function wc_enable_wc_plugin_headers( $headers ) {
 	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
+		include_once __DIR__ . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
 	// WC requires at least - allows developers to define which version of WooCommerce the plugin requires to run.
@@ -2301,7 +2325,7 @@ function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
 	}
 
 	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
+		include_once __DIR__ . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
 	$new_version    = wc_clean( $plugin->new_version );

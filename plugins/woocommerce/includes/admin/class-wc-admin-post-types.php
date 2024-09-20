@@ -906,13 +906,17 @@ class WC_Admin_Post_Types {
 
 		switch ( $change_price ) {
 			case 1:
-				$new_price = $price;
+				if ( empty( $price ) ) {
+					$new_price = $product->get_regular_price();
+				} else {
+					$new_price = $price;
+				}
 				break;
 			case 2:
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = $old_price + ( $old_price * $percent );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = $old_price + $price;
 				}
 				break;
@@ -920,7 +924,7 @@ class WC_Admin_Post_Types {
 				if ( $is_percentage ) {
 					$percent   = $price / 100;
 					$new_price = max( 0, $old_price - ( $old_price * $percent ) );
-				} else {
+				} elseif ( ! empty( $price ) ) {
 					$new_price = max( 0, $old_price - $price );
 				}
 				break;

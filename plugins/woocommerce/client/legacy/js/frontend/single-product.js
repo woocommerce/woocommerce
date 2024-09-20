@@ -31,9 +31,11 @@ jQuery( function( $ ) {
 			var $tabs_wrapper = $tab.closest( '.wc-tabs-wrapper, .woocommerce-tabs' );
 			var $tabs         = $tabs_wrapper.find( '.wc-tabs, ul.tabs' );
 
+			$tabs.find( 'li' ).attr( 'aria-selected', 'false' );
 			$tabs.find( 'li' ).removeClass( 'active' );
 			$tabs_wrapper.find( '.wc-tab, .panel:not(.panel .panel)' ).hide();
 
+			$tab.closest( 'li' ).attr( 'aria-selected', 'true' );
 			$tab.closest( 'li' ).addClass( 'active' );
 			$tabs_wrapper.find( '#' + $tab.attr( 'href' ).split( '#' )[1] ).show();
 		} )
@@ -213,7 +215,16 @@ jQuery( function( $ ) {
 		// But only zoom if the img is larger than its container.
 		if ( zoomEnabled ) {
 			var zoom_options = $.extend( {
-				touch: false
+				touch: false,
+				callback: function() {
+					var zoomImg = this;
+					
+					setTimeout( function() {
+						zoomImg.removeAttribute( 'role' );
+						zoomImg.setAttribute( 'alt', '' );
+						zoomImg.setAttribute( 'aria-hidden', 'true' );
+					}, 100 );
+				}
 			}, wc_single_product_params.zoom_options );
 
 			if ( 'ontouchstart' in document.documentElement ) {

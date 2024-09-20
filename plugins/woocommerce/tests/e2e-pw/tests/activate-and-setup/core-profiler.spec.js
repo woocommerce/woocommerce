@@ -1,7 +1,21 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect, request } = require( '@playwright/test' );
+const { setOption } = require( '../../utils/options' );
 
 test.describe( 'Store owner can complete the core profiler', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { baseURL } ) => {
+		try {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_coming_soon',
+				'no'
+			);
+		} catch ( error ) {
+			console.log( error );
+		}
+	} );
 
 	test( 'Can complete the core profiler skipping extension install', async ( {
 		page,
@@ -29,7 +43,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: "I'm just starting my business" } )
+				.getByRole( 'radio', { name: 'I’m just starting my business' } )
 				.first()
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
@@ -175,12 +189,12 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await page
-				.getByRole( 'radio', { name: "I'm already selling" } )
+				.getByRole( 'radio', { name: 'I’m already selling' } )
 				.first()
 				.click();
 			await page.getByLabel( 'Select an option' ).click();
 			await page
-				.getByRole( 'option', { name: "No, I'm selling offline" } )
+				.getByRole( 'option', { name: 'No, I’m selling offline' } )
 				.click();
 			await page.getByRole( 'button', { name: 'Continue' } ).click();
 		} );
@@ -282,14 +296,14 @@ test.describe( 'Store owner can complete the core profiler', () => {
 			await expect
 				.soft(
 					page.getByRole( 'heading', {
-						name: "Woo! Let's get your features ready",
+						name: 'Woo! Let’s get your features ready',
 					} )
 				)
 				.toBeVisible( { timeout: 30000 } );
 			await expect
 				.soft(
 					page.getByRole( 'heading', {
-						name: "Extending your store's capabilities",
+						name: 'Extending your store’s capabilities',
 					} )
 				)
 				.toBeVisible( { timeout: 30000 } );
@@ -393,11 +407,31 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				page.getByLabel( 'Delete Pinterest for' )
 			).toBeHidden();
 		} );
+
+		await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Store coming soon' } )
+			).toBeVisible();
+		} );
 	} );
 } );
 
 test.describe( 'Store owner can skip the core profiler', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { baseURL } ) => {
+		try {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_coming_soon',
+				'no'
+			);
+		} catch ( error ) {
+			console.log( error );
+		}
+	} );
 
 	test( 'Can click skip guided setup', async ( { page } ) => {
 		await page.goto(
@@ -426,6 +460,13 @@ test.describe( 'Store owner can skip the core profiler', () => {
 				name: 'Welcome to WooCommerce Core E2E Test Suite',
 			} )
 		).toBeVisible();
+
+		await test.step( 'Confirm that the store is in coming soon mode after skipping the core profiler', async () => {
+			await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Store coming soon' } )
+			).toBeVisible();
+		} );
 	} );
 
 	test( 'Can connect to WooCommerce.com', async ( { page } ) => {

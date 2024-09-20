@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update AdditionalPayments task to use default payment gateways

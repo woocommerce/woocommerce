@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Clear product unique ID (`global_unique_id`) when duplicating products.

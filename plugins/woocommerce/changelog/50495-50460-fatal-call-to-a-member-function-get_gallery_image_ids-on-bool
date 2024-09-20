@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Product Gallery: add defensive check to avoid fatal errors.
+
