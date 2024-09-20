@@ -2,23 +2,23 @@
  * External dependencies
  */
 import React, { useState, useEffect } from 'react';
-import { Fragment, createElement } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import visaAsset from '../../images/cards/visa.svg';
-import masterCardAsset from '../../images/cards/mastercard.svg';
-import amexAsset from '../../images/cards/amex.svg';
+import visaLogoAsset from '../../images/cards/visa.svg';
+import masterCardLogoAsset from '../../images/cards/mastercard.svg';
+import amexLogoAsset from '../../images/cards/amex.svg';
 import Discover from '../../images/cards/discover';
-import applePayAsset from '../../images/cards/applepay.svg';
-import googlePayAsset from '../../images/cards/googlepay.svg';
-import jcbAsset from '../../images/cards/jcb.svg';
-import wooPayAsset from '../../images/payment-methods/woopay.svg';
-import afterPayAsset from '../../images/payment-methods/afterpay.svg';
-import affirmAsset from '../../images/payment-methods/affirm.svg';
-import klarnaAsset from '../../images/payment-methods/klarna.svg';
+import applePayLogoAsset from '../../images/cards/applepay.svg';
+import googlePayLogoAsset from '../../images/cards/googlepay.svg';
+import jcbLogoAsset from '../../images/cards/jcb.svg';
+import wooPayLogoAsset from '../../images/payment-methods/woopay.svg';
+import afterPayLogoAsset from '../../images/payment-methods/afterpay.svg';
+import affirmLogoAsset from '../../images/payment-methods/affirm.svg';
+import klarnaLogoAsset from '../../images/payment-methods/klarna.svg';
 
 /**
  * Payment methods logos
@@ -27,14 +27,17 @@ const paymentMethods = [
 	{
 		name: 'visa',
 		Component: () => (
-			<img src={ visaAsset } alt={ __( 'Visa logo', 'woocommerce' ) } />
+			<img
+				src={ visaLogoAsset }
+				alt={ __( 'Visa logo', 'woocommerce' ) }
+			/>
 		),
 	},
 	{
 		name: 'mastercard',
 		Component: () => (
 			<img
-				src={ masterCardAsset }
+				src={ masterCardLogoAsset }
 				alt={ __( 'MasterCard logo', 'woocommerce' ) }
 			/>
 		),
@@ -43,7 +46,7 @@ const paymentMethods = [
 		name: 'amex',
 		Component: () => (
 			<img
-				src={ amexAsset }
+				src={ amexLogoAsset }
 				alt={ __( 'American Express logo', 'woocommerce' ) }
 			/>
 		),
@@ -54,62 +57,62 @@ const paymentMethods = [
 	},
 	{
 		name: 'woopay',
-		Component: (
+		Component: () => (
 			<img
-				src={ wooPayAsset }
+				src={ wooPayLogoAsset }
 				alt={ __( 'WooPay logo', 'woocommerce' ) }
 			/>
 		),
 	},
 	{
 		name: 'applepay',
-		Component: (
+		Component: () => (
 			<img
-				src={ applePayAsset }
+				src={ applePayLogoAsset }
 				alt={ __( 'ApplePay logo', 'woocommerce' ) }
 			/>
 		),
 	},
 	{
 		name: 'googlepay',
-		Component: (
+		Component: () => (
 			<img
-				src={ googlePayAsset }
+				src={ googlePayLogoAsset }
 				alt={ __( 'GooglePay logo', 'woocommerce' ) }
 			/>
 		),
 	},
 	{
 		name: 'afterpay',
-		Component: (
+		Component: () => (
 			<img
-				src={ afterPayAsset }
+				src={ afterPayLogoAsset }
 				alt={ __( 'Afterpay logo', 'woocommerce' ) }
 			/>
 		),
 	},
 	{
 		name: 'affirm',
-		Component: (
+		Component: () => (
 			<img
-				src={ affirmAsset }
+				src={ affirmLogoAsset }
 				alt={ __( 'Affirm logo', 'woocommerce' ) }
 			/>
 		),
 	},
 	{
 		name: 'klarna',
-		Component: (
+		Component: () => (
 			<img
-				src={ klarnaAsset }
+				src={ klarnaLogoAsset }
 				alt={ __( 'Klarna logo', 'woocommerce' ) }
 			/>
 		),
 	},
 	{
 		name: 'jcb',
-		Component: (
-			<img src={ jcbAsset } alt={ __( 'JCB logo', 'woocommerce' ) } />
+		Component: () => (
+			<img src={ jcbLogoAsset } alt={ __( 'JCB logo', 'woocommerce' ) } />
 		),
 	},
 ];
@@ -128,18 +131,6 @@ export const WooPaymentMethodsLogos: React.VFC< {
 	maxElements: number;
 } > = ( { isWooPayEligible = false, maxElements = maxElementsDesktop } ) => {
 	const [ maxShownElements, setMaxShownElements ] = useState( maxElements );
-
-	// Determine the maximum number of logos to display, taking into account WooPay’s eligibility.
-	const getMaxShownElements = (
-		maxElementsNumber: number,
-		isWooPayAvailable: boolean
-	) => {
-		if ( ! isWooPayAvailable ) {
-			return maxElementsNumber + 1;
-		}
-
-		return maxElementsNumber;
-	};
 
 	useEffect( () => {
 		const updateMaxElements = () => {
@@ -164,13 +155,10 @@ export const WooPaymentMethodsLogos: React.VFC< {
 	return (
 		<div className="woocommerce-woopayments-payment-methods-logos">
 			{ paymentMethods
-				.slice(
-					0,
-					getMaxShownElements(
-						maxShownElements,
-						isWooPayEligible
-					)
+				.filter(
+					( icon ) => icon.name === 'woopay' && isWooPayEligible
 				)
+				.slice( 0, maxShownElements )
 				.map( ( { name, Component } ) => {
 					if ( ! isWooPayEligible && name === 'woopay' ) {
 						return null;
