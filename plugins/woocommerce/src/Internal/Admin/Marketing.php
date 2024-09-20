@@ -83,12 +83,12 @@ class Marketing {
 		}
 
 		PageController::get_instance()->connect_page(
-			[
+			array(
 				'id'         => 'woocommerce-marketing',
 				'title'      => 'Marketing',
 				'capability' => 'manage_woocommerce',
 				'path'       => 'wc-admin&path=/marketing',
-			]
+			)
 		);
 	}
 
@@ -99,12 +99,12 @@ class Marketing {
 		$this->register_overview_page();
 
 		$controller = PageController::get_instance();
-		$defaults   = [
+		$defaults   = array(
 			'parent'        => 'woocommerce-marketing',
 			'existing_page' => false,
-		];
+		);
 
-		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', [] );
+		$marketing_pages = apply_filters( 'woocommerce_marketing_menu_items', array() );
 		foreach ( $marketing_pages as $marketing_page ) {
 			if ( ! is_array( $marketing_page ) ) {
 				continue;
@@ -132,12 +132,12 @@ class Marketing {
 
 		// First register the page.
 		PageController::get_instance()->register_page(
-			[
-				'id'       => 'woocommerce-marketing-overview',
-				'title'    => __( 'Overview', 'woocommerce' ),
-				'path'     => 'wc-admin&path=/marketing',
-				'parent'   => 'woocommerce-marketing',
-			]
+			array(
+				'id'     => 'woocommerce-marketing-overview',
+				'title'  => __( 'Overview', 'woocommerce' ),
+				'path'   => 'wc-admin&path=/marketing',
+				'parent' => 'woocommerce-marketing',
+			)
 		);
 
 		// Now fix the path, since register_page() gets it wrong.
@@ -204,7 +204,7 @@ class Marketing {
 		// Sort the rest of the items alphabetically.
 		usort(
 			$marketing_submenu,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return strcmp( $a[0], $b[0] );
 			}
 		);

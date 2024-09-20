@@ -80,10 +80,10 @@ class Settings {
 		foreach ( $settings as $key => $setting ) {
 			$order        += 10;
 			$settings_page = array(
-				'parent'   => 'woocommerce-settings',
-				'title'    => $setting,
-				'id'       => 'settings-' . $key,
-				'path'     => "/settings/$key",
+				'parent' => 'woocommerce-settings',
+				'title'  => $setting,
+				'id'     => 'settings-' . $key,
+				'path'   => "/settings/$key",
 			);
 
 			// Replace the old menu with the first settings item.
