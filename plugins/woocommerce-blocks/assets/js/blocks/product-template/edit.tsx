@@ -16,10 +16,7 @@ import {
 } from '@wordpress/block-editor';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import {
-	ProductCollectionAttributes,
-	CoreCollectionNames,
-} from '@woocommerce/blocks/product-collection/types';
+import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
@@ -38,16 +35,6 @@ import './editor.scss';
 import { getDefaultStockStatuses } from '../product-collection/constants';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
-const getNoResultsText = ( collection?: CoreCollectionNames | string ) => {
-	if ( collection === CoreCollectionNames.HAND_PICKED ) {
-		return __(
-			'No products chosen yet. Use "Hand-Picked Products" in Inspector Controls to choose products to display',
-			'woocommerce'
-		);
-	}
-
-	return __( 'No results found.', 'woocommerce' );
-};
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -174,7 +161,6 @@ const ProductTemplateEdit = (
 				columns: 3,
 				shrinkColumns: false,
 			},
-			collection,
 			queryContextIncludes = [],
 			__privateProductCollectionPreviewState,
 		},
@@ -326,8 +312,7 @@ const ProductTemplateEdit = (
 
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
 	let customClassName = '';
-	// We don't want to apply layout styles if there's no products.
-	if ( products && products.length && hasLayoutFlex ) {
+	if ( hasLayoutFlex ) {
 		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
 		const staticGrid = `is-flex-container columns-${ columns }`;
 
@@ -352,7 +337,12 @@ const ProductTemplateEdit = (
 	}
 
 	if ( ! products.length ) {
-		return <p { ...blockProps }> { getNoResultsText( collection ) }</p>;
+		return (
+			<p { ...blockProps }>
+				{ ' ' }
+				{ __( 'No results found.', 'woocommerce' ) }
+			</p>
+		);
 	}
 
 	// To avoid flicker when switching active block contexts, a preview is rendered
