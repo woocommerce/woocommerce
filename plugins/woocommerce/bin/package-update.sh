@@ -23,17 +23,14 @@ fi
 # Autoloader optimization is forced to prevent OOM fatal errors in JetPack Autoloader.
 # We running the optimization in background to speedup build process, with dev-environments in mind.
 # Building zips enforcing the optimization during the install process, so we are good around building releases as well.
-output 3 "Updating autoloader classmaps..."
+output 3 "Generating optimized autoloaders"
 composer dump-autoload --optimize --quiet &
 
-if [ -z "$SKIP_UPDATE_TEXTDOMAINS" ]; then
-	# Convert textdomains
-	output 3 "Updating package PHP textdomains..."
+# Replace translation domains within 'packages' directory.
+# Cleanup leftover backup files (e.g. sed used to update translation domains).
+output 3 "Updating translation domains in 'packages' directory"
+node ./bin/package-update-textdomain.js &
 
-	# Replace text domains within packages with woocommerce
-	node ./bin/package-update-textdomain.js
-fi
+# find ./packages -name "*.bak" -type f -delete &
 
-# Cleanup backup files
-find ./packages -name "*.bak" -type f -delete &
 output 2 "Done!"
