@@ -21,9 +21,21 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
+import { useExpressPaymentContext } from '../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
+
+	const { showButtonStyles, buttonHeight, buttonBorderRadius } =
+		useExpressPaymentContext();
+
+	// API for passing styles to express payment buttons
+	const buttonAttributes = showButtonStyles
+		? {
+				height: buttonHeight,
+				borderRadius: buttonBorderRadius,
+		  }
+		: undefined;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
@@ -150,6 +162,7 @@ const ExpressPaymentMethods = () => {
 							onError: onExpressPaymentError,
 							setExpressPaymentError:
 								deprecatedSetExpressPaymentError,
+							buttonAttributes,
 						} ) }
 					</li>
 				) : null;

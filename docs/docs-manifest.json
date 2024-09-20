@@ -223,7 +223,7 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "138ffbf27e79ec8b35d2c46e87e3663c203d91fc9ba3f76c43f3cbe76258e5bf",
+              "hash": "015aae25bb331364c224fe8eb2b7675e4cbed0a9e6bee0dde5f5311388161b0a",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "c87e291eccf8d60a25de63e6ffcf7777bc9ff32a530a835112c86abf6de71f66"
+  "hash": "a88d9ea54465c8bbd820042a92df79cbd48943e785b418fcaa04d0c0e66116c0"
 }
