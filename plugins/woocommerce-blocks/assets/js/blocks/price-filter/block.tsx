@@ -120,8 +120,10 @@ const PriceFilterBlock = ( {
 	);
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
-		...( queryCategory && { queryCategory } ),
-		queryState,
+		queryState: {
+			...queryState,
+			category: queryCategory,
+		},
 		isEditor,
 	} );
 
