@@ -9,8 +9,8 @@
 		@include reset-typography();
 		@include font-size(regular);
 		position: absolute;
-		transform: translateY(em($gap));
-		line-height: 1;
+		transform: translateY(50%);
+		line-height: 1.5;
 		left: em($gap-smaller + 1px);
 		top: 0;
 		transform-origin: top left;
@@ -92,7 +92,7 @@
 
 	&.is-active label,
 	input:-webkit-autofill + label {
-		transform: translateY(#{$gap-smaller}) scale(0.75);
+		transform: translateY(#{$gap-smallest}) scale(0.75);
 	}
 
 	&.has-error input {
