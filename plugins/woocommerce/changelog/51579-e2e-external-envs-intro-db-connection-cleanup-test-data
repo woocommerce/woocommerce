@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+E2E tests: Add db cleanup before test to fix compatibility issue and introduce db cleanup method
