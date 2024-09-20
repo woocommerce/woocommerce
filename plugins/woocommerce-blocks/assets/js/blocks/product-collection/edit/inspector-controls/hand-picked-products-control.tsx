@@ -200,6 +200,4 @@ const HandPickedProductsControl = ( {
 	);
 };
 
-HandPickedProductsControl.collectionSpecific = true;
-
 export default HandPickedProductsControl;
