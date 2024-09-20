@@ -4,7 +4,7 @@ Pages rendered with React and pages that include the WooCommerce Admin header (c
 
 This is the API you will use to add your own React-powered page, or to include the WooCommerce Admin header on your plugin pages.
 
-### Connecting a PHP-powered Page
+## Connecting a PHP-powered Page
 
 To show the WooCommerce Admin header on existing PHP-powered admin pages (most plugin pages), use the `wc_admin_connect_page()` function.
 
@@ -16,7 +16,7 @@ Connecting pages uses five parameters to `wc_admin_connect_page()`:
 -   `title` - Page title. Used to build breadcrumbs. String or array of breadcrumb pieces. Required.
 -   `path` - Page path (relative). Used for linking breadcrumb pieces when this page is a `parent`. Optional.
 
-#### Examples
+### Examples
 
 ```php
 // WooCommerce > Settings > General (default tab).
@@ -64,7 +64,7 @@ wc_admin_connect_page(
 );
 ```
 
-### Determining Screen ID
+## Determining Screen ID
 
 WooCommerce Admin implements it's own version of `get_current_screen()` to allow for more precise identification of admin pages.
 
@@ -95,7 +95,7 @@ Register pages with `wc_admin_register_page()` using these parameters:
 -   `icon` - Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. This is optional and won't be included in WC Navigation.
 -   `position` - Menu item position for parent pages. Optional. See: `add_menu_page()`.
 
-#### Example - Adding a New Analytics Report
+### Example - Adding a New Analytics Report
 
 Add our new report using the appropriate filter:
 
@@ -129,7 +129,7 @@ function add_report_menu_item( $report_pages ) {
 add_filter( 'woocommerce_admin_report_menu_items', 'add_report_menu_item' );
 ```
 
-#### Example - Adding a New WooCommerce Admin Page
+### Example - Adding a New WooCommerce Admin Page
 
 Alternatively, register a regular page with the controller.
 
@@ -172,7 +172,7 @@ addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
 } );
 ```
 
-### Further Reading
+## Further Reading
 
 -   Check out the [`PageController`](../woocommerce/src/Admin/PageController.php) class.
 -   See how we're [connecting existing WooCommerce pages](../woocommerce/includes/react-admin/page-controller-functions.php).
