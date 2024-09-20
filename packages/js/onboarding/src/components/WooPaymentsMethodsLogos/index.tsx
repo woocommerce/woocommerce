@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 import visaLogoAsset from '../../images/cards/visa.svg';
 import masterCardLogoAsset from '../../images/cards/mastercard.svg';
 import amexLogoAsset from '../../images/cards/amex.svg';
-import Discover from '../../images/cards/discover';
+import discoverLogoAsset from '../../images/cards/discover.svg';
 import applePayLogoAsset from '../../images/cards/applepay.svg';
 import googlePayLogoAsset from '../../images/cards/googlepay.svg';
 import jcbLogoAsset from '../../images/cards/jcb.svg';
@@ -53,7 +53,12 @@ const paymentMethods = [
 	},
 	{
 		name: 'discover',
-		Component: () => <Discover key="discover" />,
+		Component: () => (
+			<img
+				src={ discoverLogoAsset }
+				alt={ __( 'Discover logo', 'woocommerce' ) }
+			/>
+		),
 	},
 	{
 		name: 'woopay',
