@@ -10,13 +10,59 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * CreateAccount class.
  */
 class CreateAccount extends AbstractOrderConfirmationBlock {
-
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
 	protected $block_name = 'order-confirmation-create-account';
+
+	/**
+	 * Initialize this block type.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_filter( 'hooked_block_woocommerce/order-confirmation-create-account', array( $this, 'hooked_block_content' ), 10, 3 );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param array  $parsed_hooked_block Parsed hooked block.
+	 * @param array  $hooked_block_type Hooked block type.
+	 * @param string $relative_position Relative position.
+	 * @return array
+	 */
+	public function hooked_block_content( $parsed_hooked_block, $hooked_block_type, $relative_position ) {
+		if ( get_option( 'woocommerce_enable_delayed_account_creation', 'yes' ) === 'no' ) {
+			return null;
+		}
+
+		if ( 'after' !== $relative_position || is_null( $parsed_hooked_block ) ) {
+			return $parsed_hooked_block;
+		}
+
+		$parsed_hooked_block['innerContent'] = array(
+			'<div class="wp-block-woocommerce-order-confirmation-create-account alignwide">
+			<!-- wp:heading {"level":3} -->
+			<h3 class="wp-block-heading">' . __( 'Create an account with Test Store', 'woocommerce' ) . '</h3>
+			<!-- /wp:heading -->
+			<!-- wp:list {"className":"is-style-checkmark-list"} -->
+			<ul class="wp-block-list is-style-checkmark-list"><!-- wp:list-item -->
+			<li>' . __( 'Faster future purchases', 'woocommerce' ) . '</li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li>' . __( 'Securely save payment info', 'woocommerce' ) . '</li>
+			<!-- /wp:list-item -->
+			<!-- wp:list-item -->
+			<li>' . __( 'Track orders &amp; view shopping history', 'woocommerce' ) . '</li>
+			<!-- /wp:list-item --></ul>
+			<!-- /wp:list -->
+			</div>',
+		);
+
+		return $parsed_hooked_block;
+	}
 
 	/**
 	 * Get the frontend script handle for this block type.
