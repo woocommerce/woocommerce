@@ -35,6 +35,10 @@
 	cursor: pointer;
 	position: relative; // Add this for pseudo-element positioning
 
+	.has-dark-controls & {
+		outline: 1px solid $input-border-dark;
+	}
+
 	&::after {
 		content: "";
 		position: absolute;
