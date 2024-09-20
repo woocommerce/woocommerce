@@ -26,17 +26,25 @@ const test = baseTest.extend( {
 test.describe(
 	'Analytics-related tests',
 	{
-		tag: [
-			'@payments',
-			'@services',
-			'@skip-on-default-pressable',
-			'@skip-on-default-wpcom',
-		],
+		tag: [ '@payments', '@services' ],
 	},
 	() => {
 		let categoryIds, productIds, orderIds, setupPage;
 
-		test.beforeAll( async ( { browser, api } ) => {
+		test.beforeAll( async ( { browser, api, dbConfig } ) => {
+			const { connection, tablePrefix } = dbConfig;
+
+			// clean up the wc_order_stats & wc_orders tables
+			await connection.query( `DELETE FROM ${ tablePrefix }wc_orders` );
+			await connection.query(
+				`DELETE FROM ${ tablePrefix }wc_order_stats`
+			);
+
+			// make sure the currency is USD
+			await api.put( 'settings/general/woocommerce_currency', {
+				value: 'USD',
+			} );
+
 			// create a couple of product categories
 			await api
 				.post( 'products/categories/batch', {

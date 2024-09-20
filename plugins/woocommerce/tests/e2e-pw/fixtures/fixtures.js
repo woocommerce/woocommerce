@@ -1,7 +1,8 @@
 const base = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin } = require( '../test-data/data' );
+const { admin, dbConfig } = require( '../test-data/data' );
 const { random } = require( '../utils/helpers' );
+const mysql = require( 'mysql2/promise' );
 
 exports.test = base.test.extend( {
 	api: async ( { baseURL }, use ) => {
@@ -43,6 +44,34 @@ exports.test = base.test.extend( {
 		} );
 
 		await use( wpApi );
+	},
+
+	// Fixture for handling DB config and connection
+	dbConfig: async ( {}, use ) => {
+		const connection = await mysql.createConnection( {
+			host: dbConfig.host,
+			user: dbConfig.user,
+			password: dbConfig.password,
+			database: dbConfig.database,
+			port: dbConfig.port,
+		} );
+
+		// Query to get the table prefix
+		const [ rows ] = await connection.query(
+			`SELECT table_name 
+			FROM information_schema.tables 
+			WHERE table_schema = ? 
+			AND table_name LIKE '%_options'`,
+			[ dbConfig.database ]
+		);
+
+		const tablePrefix = rows[ 0 ].table_name.split( '_options' )[ 0 ] + '_';
+
+		// Pass connection and tablePrefix to the test
+		await use( { connection, tablePrefix } );
+
+		// Ensure the connection is closed after use
+		await connection.end();
 	},
 
 	testPageTitlePrefix: [ '', { option: true } ],

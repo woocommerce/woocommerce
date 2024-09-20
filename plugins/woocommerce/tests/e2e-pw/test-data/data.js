@@ -8,6 +8,11 @@ const {
 	CUSTOMER_FIRST_NAME,
 	CUSTOMER_LAST_NAME,
 	USE_WP_ENV,
+	DB_HOST,
+	DB_USER,
+	DB_PASSWORD,
+	DB_DATABASE,
+	DB_PORT,
 } = process.env;
 
 const admin = {
@@ -115,8 +120,17 @@ const storeDetails = {
 	},
 };
 
+const dbConfig = {
+	host: DB_HOST ?? 'localhost',
+	user: DB_USER ?? 'root',
+	password: DB_PASSWORD ?? 'password',
+	database: DB_DATABASE ?? 'tests-wordpress',
+	port: DB_PORT ?? '58086',
+};
+
 module.exports = {
 	storeDetails,
 	admin,
 	customer,
+	dbConfig,
 };
