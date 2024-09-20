@@ -163,37 +163,37 @@ function wc_cleanup_reset_site() {
 }
 
 add_action(
-    'admin_menu',
-    function () {
-        add_submenu_page(
-            'woocommerce',
-            'WooCommerce Cleanup',
-            'WooCommerce Cleanup',
-            'manage_options',
-            'woocommerce-cleanup',
-            function () {
-                if ( isset( $_POST['wc_cleanup_reset'] ) ) {
-                    // Verify the nonce before processing the form data.
-                    if ( check_admin_referer( 'wc_cleanup_reset_action', 'wc_cleanup_reset_nonce' ) ) {
-                        wc_cleanup_reset_site();
-                        echo '<div class="updated"><p>WooCommerce site has been reset.</p></div>';
-                    } else {
-                        echo '<div class="error"><p>Nonce verification failed. Please try again.</p></div>';
-                    }
-                }
-                ?>
-                <div class="wrap">
-                    <h1>WooCommerce Cleanup</h1>
-                    <form method="post">
-                        <?php wp_nonce_field( 'wc_cleanup_reset_action', 'wc_cleanup_reset_nonce' ); ?>
-                        <p>Click the button below to reset the WooCommerce site to a clean testing state.</p>
-                        <p><input type="submit" name="wc_cleanup_reset" class="button button-primary" value="Reset WooCommerce Site"></p>
-                    </form>
-                </div>
-                <?php
-            }
-        );
-    }
+	'admin_menu',
+	function () {
+		add_submenu_page(
+			'woocommerce',
+			'WooCommerce Cleanup',
+			'WooCommerce Cleanup',
+			'manage_options',
+			'woocommerce-cleanup',
+			function () {
+				if ( isset( $_POST['wc_cleanup_reset'] ) ) {
+					// Verify the nonce before processing the form data.
+					if ( check_admin_referer( 'wc_cleanup_reset_action', 'wc_cleanup_reset_nonce' ) ) {
+						wc_cleanup_reset_site();
+						echo '<div class="updated"><p>WooCommerce site has been reset.</p></div>';
+					} else {
+						echo '<div class="error"><p>Nonce verification failed. Please try again.</p></div>';
+					}
+				}
+				?>
+				<div class="wrap">
+					<h1>WooCommerce Cleanup</h1>
+					<form method="post">
+						<?php wp_nonce_field( 'wc_cleanup_reset_action', 'wc_cleanup_reset_nonce' ); ?>
+						<p>Click the button below to reset the WooCommerce site to a clean testing state.</p>
+						<p><input type="submit" name="wc_cleanup_reset" class="button button-primary" value="Reset WooCommerce Site"></p>
+					</form>
+				</div>
+				<?php
+			}
+		);
+	}
 );
 
 add_action(
