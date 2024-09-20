@@ -199,100 +199,60 @@ class Analytics {
 				'title'    => __( 'Overview', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/overview',
-				'nav_args' => array(
-					'order'  => 10,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-products',
 				'title'    => __( 'Products', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/products',
-				'nav_args' => array(
-					'order'  => 20,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-revenue',
 				'title'    => __( 'Revenue', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/revenue',
-				'nav_args' => array(
-					'order'  => 30,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-orders',
 				'title'    => __( 'Orders', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/orders',
-				'nav_args' => array(
-					'order'  => 40,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-variations',
 				'title'    => __( 'Variations', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/variations',
-				'nav_args' => array(
-					'order'  => 50,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-categories',
 				'title'    => __( 'Categories', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/categories',
-				'nav_args' => array(
-					'order'  => 60,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-coupons',
 				'title'    => __( 'Coupons', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/coupons',
-				'nav_args' => array(
-					'order'  => 70,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-taxes',
 				'title'    => __( 'Taxes', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/taxes',
-				'nav_args' => array(
-					'order'  => 80,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			array(
 				'id'       => 'woocommerce-analytics-downloads',
 				'title'    => __( 'Downloads', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/downloads',
-				'nav_args' => array(
-					'order'  => 90,
-					'parent' => 'woocommerce-analytics',
-				),
 			),
 			'yes' === get_option( 'woocommerce_manage_stock' ) ? array(
 				'id'       => 'woocommerce-analytics-stock',
 				'title'    => __( 'Stock', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/stock',
-				'nav_args' => array(
-					'order'  => 100,
-					'parent' => 'woocommerce-analytics',
-				),
 			) : null,
 			array(
 				'id'     => 'woocommerce-analytics-customers',
@@ -305,10 +265,6 @@ class Analytics {
 				'title'    => __( 'Settings', 'woocommerce' ),
 				'parent'   => 'woocommerce-analytics',
 				'path'     => '/analytics/settings',
-				'nav_args' => array(
-					'title'  => __( 'Analytics', 'woocommerce' ),
-					'parent' => 'woocommerce-settings',
-				),
 			),
 		);
 

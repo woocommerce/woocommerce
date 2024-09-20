@@ -137,10 +137,6 @@ class Marketing {
 				'title'    => __( 'Overview', 'woocommerce' ),
 				'path'     => 'wc-admin&path=/marketing',
 				'parent'   => 'woocommerce-marketing',
-				'nav_args' => array(
-					'parent' => 'woocommerce-marketing',
-					'order'  => 10,
-				),
 			]
 		);
 
