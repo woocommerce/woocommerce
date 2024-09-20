@@ -135,8 +135,29 @@ class WcPayWelcomePage {
 			wc_admin_register_page( $page_options );
 
 			$menu_path = PageController::get_instance()->get_path_from_id( $page_id );
+
+			// Registering a top level menu via wc_admin_register_page doesn't work when the new
+			// nav is enabled. The new nav disabled everything, except the 'WooCommerce' menu.
+			// We need to register this menu via add_menu_page so that it doesn't become a child of
+			// WooCommerce menu.
+			if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
+				$menu_path          = 'admin.php?page=wc-admin&path=/wc-pay-welcome-page';
+				$menu_with_nav_data = array(
+					$menu_title,
+					$menu_title,
+					'manage_woocommerce',
+					$menu_path,
+					null,
+					$menu_icon,
+					56,
+				);
+
+				call_user_func_array( 'add_menu_page', $menu_with_nav_data );
+			}
 		} else {
+			// Determine the path to the active Payments task page.
 			$menu_path = 'admin.php?page=wc-admin&task=' . $this->get_active_payments_task_slug();
+
 			add_menu_page(
 				$menu_title,
 				$menu_title,
