@@ -148,7 +148,10 @@ function ProductCardFooter( props: { product: Product } ) {
 		if ( product.isOnSale ) {
 			return sprintf(
 				//translators: %1$s is the sale price of the product, %2$s is the regular price of the product, %3$s is the billing period
-				__( 'Sale Price %1$s, %2$s %3$s', 'woocommerce' ),
+				__(
+					'Sale Price %1$s %3$s, regular price %2$s %3$s',
+					'woocommerce'
+				),
 				getPriceLabel(),
 				sprintf(
 					getCurrencyFormat( product.currency ),
