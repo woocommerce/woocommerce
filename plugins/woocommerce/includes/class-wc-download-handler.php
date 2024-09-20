@@ -583,13 +583,54 @@ class WC_Download_Handler {
 	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read.
 	 */
 	private static function clean_buffers() {
-		if ( ob_get_level() ) {
-			$levels = ob_get_level();
-			for ( $i = 0; $i < $levels; $i++ ) {
-				@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		$levels = ob_get_level();
+		for ( $i = 0; $i < $levels; $i++ ) {
+			$ob_status = ob_get_status();
+
+			// can be not set in some installations
+			if ( ! isset( $ob_status['flags'] ) ) {
+				return;
 			}
-		} else {
-			@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+
+			if ( ( $ob_status['flags'] & PHP_OUTPUT_HANDLER_REMOVABLE ) === PHP_OUTPUT_HANDLER_REMOVABLE ) {
+				ob_end_clean();
+				continue;
+			}
+
+			if ( ( $ob_status['flags'] & PHP_OUTPUT_HANDLER_CLEANABLE ) === PHP_OUTPUT_HANDLER_CLEANABLE ) {
+				// we can't end it, but at least clean it
+				ob_clean();
+			}
+
+			// can't end any parents either
+			return;
+		}
+	}
+
+	/**
+	 * Flush the active output buffer (if any) and the PHP system buffer
+	 * If a reverse-proxy is used, that will most likely also use a buffer, that is not flushed here
+	 * but could be disabled with X-Accel-Buffering: yes header in case of nginx
+	 *
+	 * @return void
+	 */
+	private static function flush() {
+		$ob_flushed = false;
+		$ob_status = ob_get_status();
+		if (
+			isset( $ob_status['flags'] ) &&
+			( $ob_status['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE ) === PHP_OUTPUT_HANDLER_FLUSHABLE &&
+			$ob_status['buffer_used'] > 0
+		) {
+			$ob_flushed = true;
+			ob_flush();
+		}
+
+		if (
+			!isset( $ob_status['level'] ) ||
+			( $ob_status['level'] === 0 && $ob_flushed )
+		) {
+			flush();
 		}
 	}
 
@@ -650,18 +691,12 @@ class WC_Download_Handler {
 				echo @fread( $handle, $read_length ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.XSS.EscapeOutput.OutputNotEscaped, WordPress.WP.AlternativeFunctions.file_system_read_fread
 				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
 
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
-				}
+				self::flush();
 			}
 		} else {
 			while ( ! @feof( $handle ) ) { // @codingStandardsIgnoreLine.
 				echo @fread( $handle, $read_length ); // @codingStandardsIgnoreLine.
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
-				}
+				self::flush();
 			}
 		}
 
