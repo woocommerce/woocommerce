@@ -342,7 +342,10 @@ const ProductTemplateEdit = (
 		return (
 			<p { ...blockProps }>
 				{ ' ' }
-				{ __( 'No results found.', 'woocommerce' ) }
+				{ __(
+					'No products to display. Try adjusting the filters in the block settings panel.',
+					'woocommerce'
+				) }
 			</p>
 		);
 	}
