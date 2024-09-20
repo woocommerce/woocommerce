@@ -47,7 +47,7 @@
 	}
 
 	&:focus-within {
-		outline: 2px solid currentColor;
+		outline: 1px solid currentColor;
 		&::after {
 			outline: 2px solid currentColor;
 		}
@@ -61,6 +61,12 @@
 	&.wc-block-checkout__shipping-method-option--selected {
 		outline: 2px solid currentColor;
 		background-color: $universal-background;
+		&:focus-within {
+			outline: 1px solid currentColor;
+			&::after {
+				outline: 2px solid currentColor;
+			}
+		}
 	}
 }
 
