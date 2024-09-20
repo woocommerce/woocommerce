@@ -75,6 +75,7 @@ admin_username | username for admin user | yes `__ENV.A_USER`
 admin_password | password for admin user | yes `__ENV.A_PW`
 admin_acc_login | set to true if site needs to use my account for admin login | yes `__ENV.A_ACC_LOGIN`
 customer_username | username for customer user | yes `__ENV.C_USER`
+customer_email | email for customer user | yes `__ENV.C_EMAIL`
 customer_password | password for customer user | yes `__ENV.C_PW`
 customer_user_id | user id for customer user | yes `__ENV.C_UID`
 hpos_status | set to true if site is using order tables | yes `__ENV.HPOS`
