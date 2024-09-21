@@ -30,10 +30,16 @@ final class QuantityLimits {
 			];
 		}
 
-		$multiple_of = (int) $this->filter_value( 1, 'multiple_of', $cart_item );
-		$minimum     = (int) $this->filter_value( 1, 'minimum', $cart_item );
-		$maximum     = (int) $this->filter_value( $this->get_product_quantity_limit( $product ), 'maximum', $cart_item );
-		$editable    = (bool) $this->filter_value( ! $product->is_sold_individually(), 'editable', $cart_item );
+		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $cart_item );
+		$minimum     = $this->filter_numeric_value( 1, 'minimum', $cart_item );
+		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $cart_item );
+		$editable    = $this->filter_boolean_value( ! $product->is_sold_individually(), 'editable', $cart_item );
+
+		// Minimum must be at least 1.
+		$minimum = max( $minimum, 1 );
+
+		// Maximum must be at least minimum.
+		$maximum = max( $maximum, $minimum );
 
 		return [
 			'minimum'     => $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ),
@@ -50,9 +56,15 @@ final class QuantityLimits {
 	 * @return array
 	 */
 	public function get_add_to_cart_limits( \WC_Product $product ) {
-		$multiple_of = $this->filter_value( 1, 'multiple_of', $product );
-		$minimum     = $this->filter_value( 1, 'minimum', $product );
-		$maximum     = $this->filter_value( $this->get_product_quantity_limit( $product ), 'maximum', $product );
+		$multiple_of = $this->filter_numeric_value( 1, 'multiple_of', $product );
+		$minimum     = $this->filter_numeric_value( 1, 'minimum', $product );
+		$maximum     = $this->filter_numeric_value( $this->get_product_quantity_limit( $product ), 'maximum', $product );
+
+		// Minimum must be at least 1.
+		$minimum = max( $minimum, 1 );
+
+		// Maximum must be at least minimum.
+		$maximum = max( $maximum, $minimum );
 
 		return [
 			'minimum'     => $this->limit_to_multiple( $minimum, $multiple_of, 'ceil' ),
@@ -148,6 +160,8 @@ final class QuantityLimits {
 			$limits[] = $this->get_remaining_stock( $product );
 		}
 
+		$limit = max( min( array_filter( $limits ) ), 1 );
+
 		/**
 		 * Filters the quantity limit for a product being added to the cart via the Store API.
 		 *
@@ -159,7 +173,10 @@ final class QuantityLimits {
 		 * @param \WC_Product $product Product instance.
 		 * @return integer
 		 */
-		return apply_filters( 'woocommerce_store_api_product_quantity_limit', max( min( array_filter( $limits ) ), 1 ), $product );
+		$filtered_limit = apply_filters( 'woocommerce_store_api_product_quantity_limit', $limit, $product );
+
+		// Only return the filtered limit if it's numeric, otherwise return the original limit.
+		return is_numeric( $filtered_limit ) ? (int) $filtered_limit : $limit;
 	}
 
 	/**
@@ -184,15 +201,16 @@ final class QuantityLimits {
 	/**
 	 * Get a quantity for a product or cart item by running it through a filter hook.
 	 *
-	 * @param int|null          $value Value to filter.
+	 * @param int               $value Value to filter.
 	 * @param string            $value_type Type of value. Used for filter suffix.
 	 * @param \WC_Product|array $cart_item_or_product Either a cart item or a product instance.
-	 * @return mixed
+	 * @return int
 	 */
-	protected function filter_value( $value, string $value_type, $cart_item_or_product ) {
+	protected function filter_numeric_value( int $value, string $value_type, $cart_item_or_product ) {
 		$is_product = $cart_item_or_product instanceof \WC_Product;
 		$product    = $is_product ? $cart_item_or_product : $cart_item_or_product['data'];
 		$cart_item  = $is_product ? null : $cart_item_or_product;
+
 		/**
 		 * Filters the quantity minimum for a cart item in Store API. This allows extensions to control the minimum qty
 		 * of items already within the cart.
@@ -207,6 +225,40 @@ final class QuantityLimits {
 		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
 		 * @return mixed
 		 */
-		return apply_filters( "woocommerce_store_api_product_quantity_{$value_type}", $value, $product, $cart_item );
+		$filtered_value = apply_filters( "woocommerce_store_api_product_quantity_{$value_type}", $value, $product, $cart_item );
+
+		return is_numeric( $filtered_value ) ? (int) $filtered_value : $value;
+	}
+
+	/**
+	 * Get a quantity for a product or cart item by running it through a filter hook.
+	 *
+	 * @param bool              $value Value to filter.
+	 * @param string            $value_type Type of value. Used for filter suffix.
+	 * @param \WC_Product|array $cart_item_or_product Either a cart item or a product instance.
+	 * @return bool
+	 */
+	protected function filter_boolean_value( $value, string $value_type, $cart_item_or_product ) {
+		$is_product = $cart_item_or_product instanceof \WC_Product;
+		$product    = $is_product ? $cart_item_or_product : $cart_item_or_product['data'];
+		$cart_item  = $is_product ? null : $cart_item_or_product;
+
+		/**
+		 * Filters the quantity minimum for a cart item in Store API. This allows extensions to control the minimum qty
+		 * of items already within the cart.
+		 *
+		 * The suffix of the hook will vary depending on the value being filtered.
+		 * For example, minimum, maximum, multiple_of, editable.
+		 *
+		 * @since 6.8.0
+		 *
+		 * @param mixed $value The value being filtered.
+		 * @param \WC_Product $product The product object.
+		 * @param array|null $cart_item The cart item if the product exists in the cart, or null.
+		 * @return mixed
+		 */
+		$filtered_value = apply_filters( "woocommerce_store_api_product_quantity_{$value_type}", $value, $product, $cart_item );
+
+		return is_bool( $filtered_value ) ? (bool) $filtered_value : $value;
 	}
 }

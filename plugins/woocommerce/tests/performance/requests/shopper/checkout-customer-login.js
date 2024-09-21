@@ -14,7 +14,7 @@ import {
  */
 import {
 	base_url,
-	customer_username,
+	customer_email,
 	customer_password,
 	addresses_customer_billing_first_name,
 	addresses_customer_billing_last_name,
@@ -139,7 +139,7 @@ export function checkoutCustomerLogin() {
 		const response = http.post(
 			`${ base_url }/checkout`,
 			{
-				username: `${ customer_username }`,
+				username: `${ customer_email }`,
 				password: `${ customer_password }`,
 				'woocommerce-login-nonce': `${ woocommerce_login_nonce }`,
 				_wp_http_referer: '%2Fcheckout',

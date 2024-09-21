@@ -160,6 +160,7 @@ export enum CoreCollectionNames {
 	TOP_RATED = 'woocommerce/product-collection/top-rated',
 	HAND_PICKED = 'woocommerce/product-collection/hand-picked',
 	RELATED = 'woocommerce/product-collection/related',
+	UPSELLS = 'woocommerce/product-collection/upsells',
 }
 
 export enum CoreFilterNames {

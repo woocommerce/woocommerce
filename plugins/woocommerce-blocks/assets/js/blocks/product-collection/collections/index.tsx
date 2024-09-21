@@ -22,6 +22,7 @@ import onSale from './on-sale';
 import featured from './featured';
 import handPicked from './hand-picked';
 import related from './related';
+import upsells from './upsells';
 
 const collections: BlockVariation[] = [
 	productCollection,
@@ -32,6 +33,7 @@ const collections: BlockVariation[] = [
 	newArrivals,
 	handPicked,
 	related,
+	upsells,
 ];
 
 export const registerCollections = () => {
