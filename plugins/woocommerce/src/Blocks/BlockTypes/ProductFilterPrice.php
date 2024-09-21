@@ -134,6 +134,9 @@ final class ProductFilterPrice extends AbstractBlock {
 				'minRange' => $min_range,
 				'maxRange' => $max_range,
 			),
+			'actions' => array(
+				'setPrices' => "{$this->get_full_block_name()}::actions.setPrices",
+			),
 		);
 
 		$wrapper_attributes = array(
