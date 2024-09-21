@@ -25,6 +25,7 @@ import {
 	isNumber,
 	isString,
 	objectHasProp,
+	isObject,
 } from '@woocommerce/types';
 import { Icon, chevronDown } from '@wordpress/icons';
 import {
@@ -134,12 +135,11 @@ const AttributeFilterBlock = ( {
 			query: { orderby: attributeObject?.orderby || 'menu_order' },
 		} );
 
-	const category = getSettingWithCoercion(
-		'categoryId',
-		undefined,
-		isNumber
+	const backendQueryState = getSettingWithCoercion(
+		'queryState',
+		{},
+		isObject
 	);
-	const tag = getSettingWithCoercion( 'tagId', undefined, isNumber );
 	const { results: filteredCounts, isLoading: filteredCountsLoading } =
 		useCollectionData( {
 			queryAttribute: {
@@ -147,9 +147,8 @@ const AttributeFilterBlock = ( {
 				queryType: blockAttributes.queryType,
 			},
 			queryState: {
+				...backendQueryState,
 				...queryState,
-				category,
-				tag,
 			},
 			isEditor,
 		} );

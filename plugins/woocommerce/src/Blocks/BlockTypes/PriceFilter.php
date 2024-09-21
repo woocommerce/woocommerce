@@ -1,10 +1,11 @@
 <?php
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
  * PriceFilter class.
  */
-class PriceFilter extends AbstractBlock {
+class PriceFilter extends AbstractFilterBlock {
 
 	/**
 	 * Block name.
@@ -17,11 +18,5 @@ class PriceFilter extends AbstractBlock {
 
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		if (is_product_category()) {
-			$this->asset_data_registry->add( 'categoryId', get_queried_object_id() );
-		}
-		if (is_product_tag()) {
-			$this->asset_data_registry->add( 'tagId', get_queried_object()->term_id );
-		}
 	}
 }
