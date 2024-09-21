@@ -20,5 +20,8 @@ class PriceFilter extends AbstractBlock {
 		if (is_product_category()) {
 			$this->asset_data_registry->add( 'categoryId', get_queried_object_id() );
 		}
+		if (is_product_tag()) {
+			$this->asset_data_registry->add( 'tagId', get_queried_object()->term_id );
+		}
 	}
 }

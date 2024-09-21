@@ -24,6 +24,12 @@ class AttributeFilter extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'attributes', array_values( wc_get_attribute_taxonomies() ) );
+		if (is_product_category()) {
+			$this->asset_data_registry->add( 'categoryId', get_queried_object_id() );
+		}
+		if (is_product_tag()) {
+			$this->asset_data_registry->add( 'tagId', get_queried_object()->term_id );
+		}
 	}
 
 	/**

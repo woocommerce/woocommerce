@@ -113,16 +113,18 @@ const PriceFilterBlock = ( {
 	const minPriceParam = getUrlParameter( 'min_price' );
 	const maxPriceParam = getUrlParameter( 'max_price' );
 	const [ queryState ] = useQueryStateByContext();
-	const queryCategory = getSettingWithCoercion(
+	const category = getSettingWithCoercion(
 		'categoryId',
 		undefined,
 		isNumber
 	);
+	const tag = getSettingWithCoercion( 'tagId', undefined, isNumber );
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
 		queryState: {
 			...queryState,
-			category: queryCategory,
+			category,
+			tag,
 		},
 		isEditor,
 	} );

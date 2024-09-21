@@ -22,6 +22,7 @@ import {
 	AttributeTerm,
 	isAttributeQueryCollection,
 	isBoolean,
+	isNumber,
 	isString,
 	objectHasProp,
 } from '@woocommerce/types';
@@ -133,13 +134,23 @@ const AttributeFilterBlock = ( {
 			query: { orderby: attributeObject?.orderby || 'menu_order' },
 		} );
 
+	const category = getSettingWithCoercion(
+		'categoryId',
+		undefined,
+		isNumber
+	);
+	const tag = getSettingWithCoercion( 'tagId', undefined, isNumber );
 	const { results: filteredCounts, isLoading: filteredCountsLoading } =
 		useCollectionData( {
 			queryAttribute: {
 				taxonomy: attributeObject?.taxonomy || '',
 				queryType: blockAttributes.queryType,
 			},
-			queryState,
+			queryState: {
+				...queryState,
+				category,
+				tag,
+			},
 			isEditor,
 		} );
 
