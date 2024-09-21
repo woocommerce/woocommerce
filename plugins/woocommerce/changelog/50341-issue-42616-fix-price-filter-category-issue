@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fixed price filter and attribute filter blocks when in a Category or Tag Template
+Fixed price filter when in a Category Template
