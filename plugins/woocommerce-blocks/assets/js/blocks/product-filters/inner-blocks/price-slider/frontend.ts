@@ -164,9 +164,42 @@ store( 'woocommerce/product-filter-price-slider', {
 
 			// In some occasions the input element is updated with the incorrect value.
 			// By using the element that triggered the event, we can ensure the correct value is used for the input.
-			const element = getElement();
+			const { ref } = getElement();
 
-			debounceUpdate( context, element, event );
+			const { decimalSeparator } = getCurrency();
+			const { minRange, minPrice, maxPrice, maxRange } = context;
+			const type = ref.dataset.type;
+			const value = parseInt(
+				event.target.value
+					.replace(
+						new RegExp( `[^0-9\\${ decimalSeparator }]+`, 'g' ),
+						''
+					)
+					.replace(
+						new RegExp( `\\${ decimalSeparator }`, 'g' ),
+						'.'
+					),
+				10
+			);
+
+			const { actions } = store( 'woocommerce/product-filter-price' );
+			console.log( type );
+
+			if ( type === 'min' ) {
+				const currentMinPrice = Math.min(
+					Number.isNaN( value ) ? minRange : value,
+					maxPrice
+				);
+				ref.value = currentMinPrice;
+				actions.setMinPrice( currentMinPrice );
+			} else if ( type === 'max' ) {
+				const currentMaxPrice = Math.max(
+					Number.isNaN( value ) ? maxRange : value,
+					minPrice
+				);
+				ref.value = currentMaxPrice;
+				actions.setMaxPrice( currentMaxPrice );
+			}
 		},
 		selectInputContent: () => {
 			const element = getElement();

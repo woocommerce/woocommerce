@@ -38,8 +38,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		$min_range  = $price_data['minRange'];
 		$max_range  = $price_data['maxRange'];
 
-		$actions = $block->context['filterData']['actions'];
-
 		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
 		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
 
@@ -81,7 +79,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 							data-type="min"
 							value="<?php echo esc_attr( $min_price ); ?>"
 							data-wc-bind--value="state.formattedMinPrice"
-							data-wc-on--input="actions.setMinPrice"
+							data-wc-on--input="actions.setPrice"
 							data-wc-on--focus="actions.selectInputContent"
 						/>
 					<?php else : ?>
@@ -118,6 +116,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						data-wc-bind--min="context.minRange"
 						data-wc-bind--max="context.maxRange"
 						data-wc-on--input="actions.updateRange"
+						data-wc-on--change="actions.setPrice"
 					/>
 				</div>
 				<div class="wc-block-product-filter-price-slider__right text">

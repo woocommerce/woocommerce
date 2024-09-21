@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use AutomateWoo\Entity\Action;
 use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
@@ -129,15 +128,11 @@ final class ProductFilterPrice extends AbstractBlock {
 		$max_price           = intval( get_query_var( self::MAX_PRICE_QUERY_VAR ) ) ?: $max_range;
 
 		$filter_context = array(
-				'price' => array(
-					'minPrice' => $min_price,
-					'maxPrice' => $max_price,
-					'minRange' => $min_range,
-					'maxRange' => $max_range,
-				),
-			'actions' => array(
-				'setMinPrice' => "{$this->get_full_block_name()}::actions.setMinPrice",
-				'setMaxPrice' => "{$this->get_full_block_name()}::actions.setMaxPrice",
+			'price' => array(
+				'minPrice' => $min_price,
+				'maxPrice' => $max_price,
+				'minRange' => $min_range,
+				'maxRange' => $max_range,
 			),
 		);
 
@@ -146,6 +141,10 @@ final class ProductFilterPrice extends AbstractBlock {
 				array(
 					'namespace' => $this->get_full_block_name(),
 				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
+			),
+			'data-wc-context' => wp_json_encode(
+				$filter_context['price'],
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
 		);
