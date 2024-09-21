@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added a Load More button to product lists on the Extensions page, to request additional search results from WooCommerce.com.

@@ -83,7 +83,7 @@
           "menu_title": "Add Custom Fields to Products",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "fe8cf43940f5166bf69f102aa4643cbe32415b1167d6b6d8968d434a4d113879",
+          "hash": "df61c93febc234fe0dbb4826a20ae120b153ab6f6c92d8778177fcac8d6696fe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -223,7 +223,7 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "138ffbf27e79ec8b35d2c46e87e3663c203d91fc9ba3f76c43f3cbe76258e5bf",
+              "hash": "015aae25bb331364c224fe8eb2b7675e4cbed0a9e6bee0dde5f5311388161b0a",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
@@ -1229,7 +1229,7 @@
           "menu_title": "Core critical flows",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "472f5a240abe907fec83a8a9f88af6699f2d994aa7ae87faa1716a087baa66db",
+          "hash": "c7122979df14f46646b3f1472ba071bc560b99e6462c5790a9aeaa3b4238ce15",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "3cad7f812ae15abd4936a536cf56db63b0f1b549e26eeb3427fe45989647d58c"
+  "hash": "a88d9ea54465c8bbd820042a92df79cbd48943e785b418fcaa04d0c0e66116c0"
 }

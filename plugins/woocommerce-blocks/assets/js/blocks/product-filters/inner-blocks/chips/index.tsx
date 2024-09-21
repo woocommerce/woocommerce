@@ -10,11 +10,13 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import metadata from './block.json';
 import Edit from './edit';
+import Save from './save';
 import './style.scss';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		edit: Edit,
 		icon: productFilterOptions,
+		save: Save,
 	} );
 }
