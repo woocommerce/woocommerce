@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in' );
 
 
 	/**
@@ -1011,7 +1011,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	private function get_custom_orderby_query( $orderby ) {
-		if ( ! in_array( $orderby, $this->custom_order_opts, true ) ) {
+		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
 		}
 
@@ -1829,6 +1829,19 @@ class ProductCollection extends AbstractBlock {
 	 * Registers any handlers for the core collections.
 	 */
 	protected function register_core_collections() {
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/hand-picked',
+			function ( $collection_args, $common_query_values, $query ) {
+				// For Hand-Picked collection, if no products are selected, we should return an empty result set.
+				// This ensures that the collection doesn't display any products until the user explicitly chooses them.
+				if ( empty( $query['handpicked_products'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+			}
+		);
+
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/related',
 			function ( $collection_args ) {
