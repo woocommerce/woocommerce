@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
+use WP_Post;
 
 /**
  * Class Edit.
@@ -155,24 +156,28 @@ class Edit {
 		$this->add_order_specific_meta_box();
 		$this->add_order_taxonomies_meta_box();
 
-		/**
-		 * From wp-admin/includes/meta-boxes.php.
-		 *
-		 * Fires after all built-in meta boxes have been added. Custom metaboxes may be enqueued here.
-		 *
-		 * @since 3.8.0.
-		 */
-		do_action( 'add_meta_boxes', $this->screen_id, $this->order );
+		$order_post = get_post( $this->order->get_id() );
 
-		/**
-		 * Provides an opportunity to inject custom meta boxes into the order editor screen. This
-		 * hook is an analog of `add_meta_boxes_<POST_TYPE>` as provided by WordPress core.
-		 *
-		 * @since 7.4.0
-		 *
-		 * @param WC_Order $order The order being edited.
-		 */
-		do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
+		if ( $order_post instanceof WP_Post ) {
+			/**
+			 * From wp-admin/includes/meta-boxes.php.
+			 *
+			 * Fires after all built-in meta boxes have been added. Custom metaboxes may be enqueued here.
+			 *
+			 * @since 3.8.0.
+			 */
+			do_action( 'add_meta_boxes', $this->screen_id, $order_post );
+
+			/**
+			 * Provides an opportunity to inject custom meta boxes into the order editor screen. This
+			 * hook is an analog of `add_meta_boxes_<POST_TYPE>` as provided by WordPress core.
+			 *
+			 * @since 7.4.0
+			 *
+			 * @param WP_Post $order_post The order being edited.
+			 */
+			do_action( 'add_meta_boxes_' . $this->screen_id, $order_post );
+		}
 
 		$this->enqueue_scripts();
 	}
@@ -492,14 +497,17 @@ class Edit {
 	 * Helper function to render meta boxes.
 	 */
 	private function render_meta_boxes() {
+		$order_post = get_post( $this->order->get_id() );
 		?>
 		<div id="postbox-container-1" class="postbox-container">
 			<?php do_meta_boxes( $this->screen_id, 'side', $this->order ); ?>
 		</div>
 		<div id="postbox-container-2" class="postbox-container">
 			<?php
-			do_meta_boxes( $this->screen_id, 'normal', $this->order );
-			do_meta_boxes( $this->screen_id, 'advanced', $this->order );
+			if ( $order_post instanceof WP_Post ) {
+				do_meta_boxes( $this->screen_id, 'normal', $order_post );
+				do_meta_boxes( $this->screen_id, 'advanced', $order_post );
+			}
 			?>
 		</div>
 		<?php
