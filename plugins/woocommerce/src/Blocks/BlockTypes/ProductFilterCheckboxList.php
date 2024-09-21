@@ -24,6 +24,10 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		if( empty( $block->context['filterData'] ) || empty( $block->context['filterData']['items'] ) ) {
+			return '';
+		}
+
 		$context               = $block->context['filterData'];
 		$items                 = $context['items'] ?? array();
 		$checkbox_list_context = array( 'items' => $items );

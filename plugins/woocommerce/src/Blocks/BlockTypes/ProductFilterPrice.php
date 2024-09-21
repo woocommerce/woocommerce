@@ -27,7 +27,6 @@ final class ProductFilterPrice extends AbstractBlock {
 	 * - Register the block with WordPress.
 	 */
 	protected function initialize() {
-		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
 		parent::initialize();
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
@@ -147,9 +146,16 @@ final class ProductFilterPrice extends AbstractBlock {
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
 			'data-wc-context' => wp_json_encode(
-				$filter_context['price'],
+				array(
+					'minPrice' => $min_price,
+					'maxPrice' => $max_price,
+					'minRange' => $min_range,
+					'maxRange' => $max_range,
+					'hasSelectedFilters' => ! ( $min_price === $min_range && $max_price === $max_range ),
+				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
+			'data-wc-key' => 'product-filter-price-' . md5( wp_json_encode( $attributes ) ),
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
@@ -159,14 +165,16 @@ final class ProductFilterPrice extends AbstractBlock {
 			);
 		}
 
+		$output = '';
+
 		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
-			$content .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
+			$output .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
 		}
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
-			$content
+			$output
 		);
 	}
 
@@ -192,19 +200,5 @@ final class ProductFilterPrice extends AbstractBlock {
 			'min_price' => intval( floor( $price_results->min_price ?? 0 ) ),
 			'max_price' => intval( ceil( $price_results->max_price ?? 0 ) ),
 		);
-	}
-
-	/**
-	 * Skip default rendering routine for inner blocks.
-	 *
-	 * @param array $settings Array of determined settings for registering a block type.
-	 * @param array $metadata Metadata provided for registering a block type.
-	 * @return array
-	 */
-	public function add_block_type_metadata_settings( $settings, $metadata ) {
-		if ( ! empty( $metadata['name'] ) && "woocommerce/{$this->block_name}" === $metadata['name'] ) {
-			$settings['skip_inner_blocks'] = true;
-		}
-		return $settings;
 	}
 }

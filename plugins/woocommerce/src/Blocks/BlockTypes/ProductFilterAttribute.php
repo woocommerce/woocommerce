@@ -26,7 +26,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * - Register the block with WordPress.
 	 */
 	protected function initialize() {
-		add_filter( 'block_type_metadata_settings', array( $this, 'add_block_type_metadata_settings' ), 10, 2 );
 		parent::initialize();
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
@@ -182,8 +181,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 				get_block_wrapper_attributes(
 					array(
 						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+						'data-wc-key' => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
 					)
-				),
+				)
 			);
 		}
 
@@ -234,8 +234,11 @@ final class ProductFilterAttribute extends AbstractBlock {
 			),
 		);
 
+
+		$output = '';
+
 		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
-			$content .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
+			$output .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
 		}
 
 		$context = array(
@@ -251,9 +254,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 				array(
 					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+					'data-wc-key' => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
 				)
 			),
-			$content
+			$output
 		);
 	}
 
@@ -426,19 +430,5 @@ final class ProductFilterAttribute extends AbstractBlock {
 				),
 			)
 		);
-	}
-
-	/**
-	 * Skip default rendering routine for inner blocks.
-	 *
-	 * @param array $settings Array of determined settings for registering a block type.
-	 * @param array $metadata Metadata provided for registering a block type.
-	 * @return array
-	 */
-	public function add_block_type_metadata_settings( $settings, $metadata ) {
-		if ( ! empty( $metadata['name'] ) && "woocommerce/{$this->block_name}" === $metadata['name'] ) {
-			$settings['skip_inner_blocks'] = true;
-		}
-		return $settings;
 	}
 }
