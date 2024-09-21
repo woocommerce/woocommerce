@@ -116,10 +116,6 @@ class ProductCategories extends AbstractDynamicBlock {
 			$classes[] = "align{$attributes['align']}";
 		}
 
-		if ( ! empty( $attributes['className'] ) ) {
-			$classes[] = $attributes['className'];
-		}
-
 		if ( $attributes['isDropdown'] ) {
 			$classes[] = 'is-dropdown';
 		} else {

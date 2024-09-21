@@ -47,16 +47,11 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		$order              = $this->get_order();
 		$permission         = $this->get_view_order_permissions( $order );
 		$block_content      = $order ? $this->render_content( $order, $permission, $attributes, $content ) : $this->render_content_fallback();
-		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-
-		if ( ! empty( $classes_and_styles['classes'] ) ) {
-			$classname .= ' ' . $classes_and_styles['classes'];
-		}
 
 		return $block_content ? sprintf(
 			'<div class="wc-block-%4$s %1$s" style="%2$s">%3$s</div>',
-			esc_attr( trim( $classname ) ),
+			esc_attr( $classes_and_styles['classes'] ),
 			esc_attr( $classes_and_styles['styles'] ),
 			$block_content,
 			esc_attr( $this->block_name )

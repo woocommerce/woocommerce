@@ -40,13 +40,10 @@ class ProductReviews extends AbstractBlock {
 
 		$reviews = ob_get_clean();
 
-		$classname = $attributes['className'] ?? '';
-
 		return sprintf(
-			'<div class="wp-block-woocommerce-product-reviews %1$s">
-				%2$s
+			'<div class="wp-block-woocommerce-product-reviews">
+				%s
 			</div>',
-			esc_attr( $classname ),
 			$reviews
 		);
 	}

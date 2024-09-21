@@ -34,13 +34,11 @@ class CatalogSorting extends AbstractBlock {
 			return;
 		}
 
-		$classname          = isset( $attributes['className'] ) ? $attributes['className'] : '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 		return sprintf(
-			'<div class="woocommerce wc-block-catalog-sorting %1$s %2$s" style="%3$s">%4$s</div>',
+			'<div class="woocommerce wc-block-catalog-sorting %1$s" style="%2$s">%3$s</div>',
 			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $classname ),
 			esc_attr( $classes_and_styles['styles'] ),
 			$catalog_sorting
 		);

@@ -272,10 +272,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			$classes[] = "has-{$attributes['contentAlign']}-content";
 		}
 
-		if ( isset( $attributes['className'] ) ) {
-			$classes[] = $attributes['className'];
-		}
-
 		$global_style_classes = StyleAttributesUtils::get_classes_by_attributes( $attributes, $this->global_style_wrapper );
 
 		$classes[] = $global_style_classes;

@@ -99,7 +99,6 @@ class ProductButton extends AbstractBlock {
 			$is_ajax_button           = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock();
 			$html_element             = $is_ajax_button ? 'button' : 'a';
 			$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$classname                = $attributes['className'] ?? '';
 			$custom_width_classes     = isset( $attributes['width'] ) ? 'has-custom-width wp-block-button__width-' . $attributes['width'] : '';
 			$custom_align_classes     = isset( $attributes['textAlign'] ) ? 'align-' . $attributes['textAlign'] : '';
 			$html_classes             = implode(
@@ -215,7 +214,7 @@ class ProductButton extends AbstractBlock {
 					</div>',
 					array(
 						'{classes}'                => esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-						'{custom_classes}'         => esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
+						'{custom_classes}'         => esc_attr( $custom_width_classes . ' ' . $custom_align_classes ),
 						'{html_element}'           => $html_element,
 						'{add_to_cart_url}'        => esc_url( $product->add_to_cart_url() ),
 						'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive',
