@@ -15,8 +15,4 @@ class PriceFilter extends AbstractFilterBlock {
 	protected $block_name     = 'price-filter';
 	const MIN_PRICE_QUERY_VAR = 'min_price';
 	const MAX_PRICE_QUERY_VAR = 'max_price';
-
-	protected function enqueue_data( array $attributes = [] ) {
-		parent::enqueue_data( $attributes );
-	}
 }

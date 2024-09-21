@@ -18,7 +18,6 @@ import { changeUrl, getUrlParameter } from '@woocommerce/utils';
 import {
 	CurrencyResponse,
 	isBoolean,
-	isNumber,
 	isObject,
 	isString,
 	objectHasProp,

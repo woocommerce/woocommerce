@@ -22,7 +22,6 @@ import {
 	AttributeTerm,
 	isAttributeQueryCollection,
 	isBoolean,
-	isNumber,
 	isString,
 	objectHasProp,
 	isObject,
