@@ -7,6 +7,7 @@ import {
 	InnerBlocks,
 } from '@wordpress/block-editor';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -38,7 +39,44 @@ const Edit = () => {
 					<InnerBlocks
 						allowedBlocks={ getAllowedBlocks() }
 						template={ [
-							[ 'core/heading', { content: 'Price', level: 3 } ],
+							[
+								'core/group',
+								{
+									layout: {
+										type: 'flex',
+										flexWrap: 'nowrap',
+									},
+									metadata: {
+										name: __( 'Header', 'woocommerce' ),
+									},
+									style: {
+										spacing: {
+											blockGap: '0',
+										},
+									},
+								},
+								[
+									[
+										'core/heading',
+										{
+											level: 3,
+											content: __(
+												'Price',
+												'woocommerce'
+											),
+										},
+									],
+									[
+										'woocommerce/product-filter-clear-button',
+										{
+											lock: {
+												remove: true,
+												move: false,
+											},
+										},
+									],
+								],
+							],
 							[ 'woocommerce/product-filter-price-slider', {} ],
 						] }
 					/>
