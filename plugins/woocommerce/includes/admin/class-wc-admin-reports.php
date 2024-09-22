@@ -145,7 +145,7 @@ class WC_Admin_Reports {
 
 		foreach ( $reports as $key => &$report_group ) {
 			// Silently ignore reports given for the filter in Automattic\WooCommerce\Admin\API\Reports\Controller.
-			if( ! isset( $report_group['reports'] ) ) {
+			if ( ! isset( $report_group['reports'] ) ) {
 				unset( $reports[ $key ] );
 				continue;
 			}
