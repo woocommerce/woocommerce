@@ -113,7 +113,7 @@ class CoreMenu {
 				) : null,
 			$analytics_enabled ?
 				array(
-					'title'  => __( 'Reports', 'woocommerce' ),
+					'title'  => __( 'Reports (deprecated)', 'woocommerce' ),
 					'id'     => 'woocommerce-reports',
 					'parent' => 'woocommerce-analytics',
 					'order'  => 200,

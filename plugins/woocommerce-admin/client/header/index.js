@@ -31,7 +31,7 @@ export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
 export const getPageTitle = ( sections ) => {
 	let pageTitle;
-	const pagesWithTabs = [ 'Settings', 'Reports', 'Status' ];
+	const pagesWithTabs = [ 'Settings', 'Reports (deprecated)', 'Status' ];
 
 	if (
 		sections.length > 2 &&
