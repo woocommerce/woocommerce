@@ -126,7 +126,7 @@ class Loader {
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 
 		$page_title      = '';
-		$pages_with_tabs = array( 'Settings', 'Reports', 'Status' );
+		$pages_with_tabs = array( 'Settings', 'Reports (deprecated)', 'Status' );
 
 		if (
 			count( $sections ) > 2 &&
