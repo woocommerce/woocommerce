@@ -144,6 +144,7 @@ class WC_Admin_Reports {
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- We're deprecating this usage of filter. The proper one is described in `plugins/woocommerce/src/Admin/API/Reports/Controller.php`.
 		$filtered_reports = apply_filters( 'woocommerce_admin_reports', $reports );
+
 		/*
 		 * Check if there is any use of the legacy `woocommerce_admin_reports` filter to send a deprecation warning.
 		 * We will remove non-compliant entries twice.
