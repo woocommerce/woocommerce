@@ -142,6 +142,7 @@ class WC_Admin_Reports {
 			);
 		}
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- We're deprecating this usage of filter. The proper one is described in `plugins/woocommerce/src/Admin/API/Reports/Controller.php`.
 		$filtered_reports = apply_filters( 'woocommerce_admin_reports', $reports );
 		/*
 		 * Check if there is any use of the legacy `woocommerce_admin_reports` filter to send a deprecation warning.
@@ -153,7 +154,7 @@ class WC_Admin_Reports {
 		$filtered_legacy_reports = $filtered_reports;
 		foreach ( $filtered_legacy_reports as $key => &$report_group ) {
 			// Remove entries not related to reports.
-			if( ! isset( $report_group['reports'] ) ) {
+			if ( ! isset( $report_group['reports'] ) ) {
 				unset( $filtered_legacy_reports[ $key ] );
 				continue;
 			}
@@ -162,10 +163,10 @@ class WC_Admin_Reports {
 		$changed = ArrayUtil::deep_compare_array_diff( $reports, $filtered_legacy_reports, true ) ||
 					ArrayUtil::deep_compare_array_diff( $filtered_legacy_reports, $reports, true );
 		if ( $changed ) {
-			if ( WP_DEBUG && apply_filters( 'deprecated_hook_trigger_error', true ) ) {
+			if ( WP_DEBUG && apply_filters( 'deprecated_hook_trigger_error', true ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This is the use of the filter spefied in WP.
 				$message = sprintf(
 					/* translators: 1: WordPress hook name, 2: Version number. */
-					__( 'The use of %1$s hook for "Reports" pages is <strong>deprecated</strong> since version %2$s. The entire Reports are deprecated and will be removed in future versions. Use Analytics instead.' ),
+					__( 'The use of %1$s hook for "Reports" pages is <strong>deprecated</strong> since version %2$s. The entire Reports are deprecated and will be removed in future versions. Use Analytics instead.', 'woocommerce' ),
 					'woocommerce_admin_reports',
 					'9.5.0'
 				);
@@ -173,7 +174,6 @@ class WC_Admin_Reports {
 				wp_trigger_error( '', $message, E_USER_DEPRECATED );
 			}
 		}
-
 
 		$filtered_reports = apply_filters_deprecated(
 			'woocommerce_reports_charts',
@@ -185,7 +185,7 @@ class WC_Admin_Reports {
 
 		foreach ( $filtered_reports as $key => &$report_group ) {
 			// Silently ignore unrelated entries.
-			if( ! isset( $report_group['reports'] ) ) {
+			if ( ! isset( $report_group['reports'] ) ) {
 				unset( $filtered_reports[ $key ] );
 				continue;
 			}
@@ -199,7 +199,6 @@ class WC_Admin_Reports {
 				}
 			}
 		}
-
 
 		return $filtered_reports;
 	}
