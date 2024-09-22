@@ -119,6 +119,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
 		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND {$wpdb->prefix}woocommerce_order_itemmeta.meta_key = 'rate_percent'" );
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_tax_rates ON {$wpdb->prefix}wc_order_tax_lookup.tax_rate_id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id AND CONVERT({$wpdb->prefix}woocommerce_tax_rates.tax_rate, FLOAT) = CONVERT({$wpdb->prefix}woocommerce_order_itemmeta.meta_value, FLOAT)" );
 	}
 
 	/**
