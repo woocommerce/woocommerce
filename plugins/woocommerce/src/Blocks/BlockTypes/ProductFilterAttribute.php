@@ -175,18 +175,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$product_attribute = wc_get_attribute( $block_attributes['attributeId'] );
 		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $block_attributes['queryType'] );
 
-		if ( empty( $attribute_counts ) ) {
-			return sprintf(
-				'<div %s></div>',
-				get_block_wrapper_attributes(
-					array(
-						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-						'data-wc-key' => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
-					)
-				)
-			);
-		}
-
 		$attribute_terms = get_terms(
 			array(
 				'taxonomy' => $product_attribute->slug,
@@ -201,31 +189,65 @@ final class ProductFilterAttribute extends AbstractBlock {
 			)
 		);
 
-		$attribute_options = array_map(
-			function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
-				$term             = (array) $term;
-				$term['count']    = $attribute_counts[ $term['term_id'] ];
-				$term['selected'] = in_array( $term['slug'], $selected_terms, true );
-				return array(
-					'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
-					'value'    => $term['slug'],
-					'selected' => $term['selected'],
-					'rawData'  => $term,
-				);
-			},
-			$attribute_terms
+		$filtered_options = array();
+
+		if ( ! empty( $attribute_counts ) ) {
+			$attribute_options = array_map(
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
+					$term             = (array) $term;
+					$term['count']    = $attribute_counts[ $term['term_id'] ];
+					$term['selected'] = in_array( $term['slug'], $selected_terms, true );
+					return array(
+						'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
+						'value'    => $term['slug'],
+						'selected' => $term['selected'],
+						'rawData'  => $term,
+					);
+				},
+				$attribute_terms
+			);
+
+			$filtered_options = array_filter(
+				$attribute_options,
+				function ( $option ) use ( $block_attributes ) {
+					$hide_empty = $block_attributes['hideEmpty'] ?? true;
+					if ( $hide_empty ) {
+						return $option['rawData']['count'] > 0;
+					}
+					return true;
+				}
+			);
+		}
+
+		$context = array(
+			'attributeSlug'      => str_replace( 'pa_', '', $product_attribute->slug ),
+			'queryType'          => $block_attributes['queryType'],
+			'selectType'         => 'multiple',
+			'hasSelectedFilters' => count( $selected_terms ) > 0,
+			'hasFilterOptions'   => count( $filtered_options ) > 0,
 		);
 
-		$filtered_options = array_filter(
-			$attribute_options,
-			function ( $option ) use ( $block_attributes ) {
-				$hide_empty = $block_attributes['hideEmpty'] ?? true;
-				if ( $hide_empty ) {
-					return $option['rawData']['count'] > 0;
-				}
-				return true;
-			}
+		$wrapper_attributes = array(
+			'data-wc-interactive'  => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-key'          => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
+			'data-wc-context'      => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
+
+		if ( empty( $filtered_options ) ) {
+			return sprintf(
+				'<div %1$s hidden>%2$s</div>',
+				get_block_wrapper_attributes( $wrapper_attributes ),
+				array_reduce(
+					$block->parsed_block['innerBlocks'],
+					function ( $carry, $parsed_block ) {
+						$carry .= render_block( $parsed_block );
+						return $carry;
+					},
+					''
+				)
+			);
+		}
 
 		$filter_context = array(
 			'items'   => $filtered_options,
@@ -234,30 +256,17 @@ final class ProductFilterAttribute extends AbstractBlock {
 			),
 		);
 
-
-		$output = '';
-
-		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
-			$output .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
-		}
-
-		$context = array(
-			'attributeSlug'      => str_replace( 'pa_', '', $product_attribute->slug ),
-			'queryType'          => $block_attributes['queryType'],
-			'selectType'         => 'multiple',
-			'hasSelectedFilters' => count( $selected_terms ) > 0,
-		);
-
 		return sprintf(
 			'<div %1$s>%2$s</div>',
-			get_block_wrapper_attributes(
-				array(
-					'data-wc-context'     => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-					'data-wc-key' => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
-				)
-			),
-			$output
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
 	}
 

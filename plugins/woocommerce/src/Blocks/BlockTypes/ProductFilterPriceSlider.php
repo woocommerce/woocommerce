@@ -39,6 +39,10 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		$min_range  = $price_data['minRange'];
 		$max_range  = $price_data['maxRange'];
 
+		if ( $min_range === $max_range ) {
+			return;
+		}
+
 		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
 		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
 

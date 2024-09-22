@@ -120,14 +120,14 @@ final class ProductFilterPrice extends AbstractBlock {
 			return '';
 		}
 
-		$price_range         = $this->get_filtered_price( $block );
-		$min_range           = $price_range['min_price'] ?? 0;
-		$max_range           = $price_range['max_price'] ?? 0;
-		$min_price           = intval( get_query_var( self::MIN_PRICE_QUERY_VAR ) ) ?: $min_range;
-		$max_price           = intval( get_query_var( self::MAX_PRICE_QUERY_VAR ) ) ?: $max_range;
+		$price_range = $this->get_filtered_price( $block );
+		$min_range   = $price_range['min_price'] ?? 0;
+		$max_range   = $price_range['max_price'] ?? 0;
+		$min_price   = intval( get_query_var( self::MIN_PRICE_QUERY_VAR ) ) ?: $min_range;
+		$max_price   = intval( get_query_var( self::MAX_PRICE_QUERY_VAR ) ) ?: $max_range;
 
 		$filter_context = array(
-			'price' => array(
+			'price'   => array(
 				'minPrice' => $min_price,
 				'maxPrice' => $max_price,
 				'minRange' => $min_range,
@@ -139,42 +139,52 @@ final class ProductFilterPrice extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wc-interactive' => wp_json_encode(
+			'data-wc-interactive'  => wp_json_encode(
 				array(
 					'namespace' => $this->get_full_block_name(),
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
-			'data-wc-context' => wp_json_encode(
+			'data-wc-context'      => wp_json_encode(
 				array(
-					'minPrice' => $min_price,
-					'maxPrice' => $max_price,
-					'minRange' => $min_range,
-					'maxRange' => $max_range,
-					'hasSelectedFilters' => ! ( $min_price === $min_range && $max_price === $max_range ),
+					'minPrice'         => $min_price,
+					'maxPrice'         => $max_price,
+					'minRange'         => $min_range,
+					'maxRange'         => $max_range,
+					'hasFilterOptions' => $min_range !== $max_range,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
-			'data-wc-key' => 'product-filter-price-' . md5( wp_json_encode( $attributes ) ),
+			'data-wc-key'          => 'product-filter-price-' . md5( wp_json_encode( $attributes ) ),
+			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
 			return sprintf(
-				'<div %s></div>',
-				get_block_wrapper_attributes( $wrapper_attributes )
+				'<div %1$s hidden>%2$s</div>',
+				get_block_wrapper_attributes( $wrapper_attributes ),
+				array_reduce(
+					$block->parsed_block['innerBlocks'],
+					function ( $carry, $parsed_block ) {
+						$carry .= render_block( $parsed_block );
+						return $carry;
+					},
+					''
+				)
 			);
-		}
-
-		$output = '';
-
-		foreach ( $block->parsed_block['innerBlocks'] as $inner_block ) {
-			$output .= ( new \WP_Block( $inner_block, array( 'filterData' => $filter_context ) ) )->render();
 		}
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
-			$output
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
 	}
 
