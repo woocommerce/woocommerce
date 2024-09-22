@@ -13,6 +13,7 @@ const CUSTOM_REGEXES = new Map< string, RegExp >( [
 	[ 'JP', /^([0-9]{3})([-]?)([0-9]{4})$/ ],
 	[ 'KH', /^[0-9]{6}$/ ], // Cambodia (6-digit postal code).
 	[ 'LI', /^(94[8-9][0-9])$/ ],
+	[ 'MN', /^[0-9]{5}(-[0-9]{4})?$/ ], // Mongolia (5-digit postal code or 5-digit postal code followed by a hyphen and 4-digit postal code).
 	[ 'NI', /^[1-9]{1}[0-9]{4}$/ ], // Nicaragua (5-digit postal code)
 	[ 'NL', /^([1-9][0-9]{3})(\s?)(?!SA|SD|SS)[A-Z]{2}$/i ],
 	[ 'SI', /^([1-9][0-9]{3})$/ ],

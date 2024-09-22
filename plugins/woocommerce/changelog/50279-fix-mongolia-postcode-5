@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adjust Mongolia postcode validation to be 5 digits or 5 digits followed by 4 digits.

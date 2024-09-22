@@ -33,7 +33,7 @@ registerCheckoutBlock( {
 	component: lazy(
 		() =>
 			import(
-				/* webpackChunkName: "checkout-blocks/express-payment" */ './checkout-express-payment-block/block'
+				/* webpackChunkName: "checkout-blocks/express-payment" */ './checkout-express-payment-block/frontend'
 			)
 	),
 } );

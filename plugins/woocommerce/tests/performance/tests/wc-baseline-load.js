@@ -26,6 +26,7 @@ import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant
 import { wpLogin } from '../requests/merchant/wp-login.js';
 import { ordersAPI } from '../requests/api/orders.js';
 import { admin_acc_login } from '../config.js';
+import { addCustomerOrder } from '../setup/add-customer-order.js';
 
 const shopper_request_threshold = 'p(95)<100000';
 const merchant_request_threshold = 'p(95)<100000';
@@ -281,6 +282,10 @@ export const options = {
 		],
 	},
 };
+
+export function setup() {
+	addCustomerOrder();
+}
 
 // Use myAccountMerchantLogin() instead of wpLogin() if having issues with login.
 export function merchantOrderFlows() {

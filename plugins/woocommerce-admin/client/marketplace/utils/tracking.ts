@@ -42,11 +42,6 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
 		eventProps.category = '_all';
 	}
 
-	// User clicks the `View All` button on search results
-	if ( view && view === 'search' && product_type && ! category ) {
-		eventProps.category = '_all';
-	}
-
 	recordEvent( 'marketplace_view', eventProps );
 }
 
@@ -79,11 +74,6 @@ function recordLegacyTabView( props: MarketplaceViewProps ) {
 			break;
 		case 'themes':
 			oldEventProps.section = 'themes';
-			break;
-		case 'search':
-			oldEventName = 'extensions_view_search';
-			oldEventProps.section = view;
-			oldEventProps.search_term = search_term || '';
 			break;
 		case 'my-subscriptions':
 			oldEventName = 'subscriptions_view';

@@ -83,7 +83,7 @@
           "menu_title": "Add Custom Fields to Products",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "fe8cf43940f5166bf69f102aa4643cbe32415b1167d6b6d8968d434a4d113879",
+          "hash": "df61c93febc234fe0dbb4826a20ae120b153ab6f6c92d8778177fcac8d6696fe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -223,7 +223,7 @@
               "menu_title": "Payment Method Integration",
               "tags": "reference",
               "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
-              "hash": "138ffbf27e79ec8b35d2c46e87e3663c203d91fc9ba3f76c43f3cbe76258e5bf",
+              "hash": "015aae25bb331364c224fe8eb2b7675e4cbed0a9e6bee0dde5f5311388161b0a",
               "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration.md",
               "id": "c9a763b6976ecf03aeb961577c17c31f1ac7c420",
               "links": {
@@ -1059,7 +1059,7 @@
           "menu_title": "DOM Events",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/dom-events.md",
-          "hash": "59a4b49eb146774d33229bc60ab7d8f74381493f6e7089ca8f0e2d0eb433a7a4",
+          "hash": "85cffe1cc273621f16f7362b5efe28ede9689cee0a6e87d0d426014bacc24b05",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/dom-events.md",
           "id": "c8d247b91472740075871e6b57a9583d893ac650"
         }
@@ -1229,7 +1229,7 @@
           "menu_title": "Core critical flows",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/core-critical-flows.md",
-          "hash": "472f5a240abe907fec83a8a9f88af6699f2d994aa7ae87faa1716a087baa66db",
+          "hash": "c7122979df14f46646b3f1472ba071bc560b99e6462c5790a9aeaa3b4238ce15",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/core-critical-flows.md",
           "id": "e561b46694dba223c38b87613ce4907e4e14333a"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "dfe48a2a48d383c1f4e5b5bb4258d369dd4e80ac8582462b16bbfedd879cb0bf"
+  "hash": "a88d9ea54465c8bbd820042a92df79cbd48943e785b418fcaa04d0c0e66116c0"
 }

@@ -147,13 +147,14 @@ These flows will continually evolve as the platform evolves with flows updated, 
 ### Merchant - Settings
 
 | User Type | Flow Area | Flow Name                              | Test File                                |
-| --------- | --------- | -------------------------------------- | ---------------------------------------- |
+| --------- | --------- |----------------------------------------|------------------------------------------|
 | Merchant  | Settings  | Update General Settings                | merchant/settings-general.spec.js        |
 | Merchant  | Settings  | Add Tax Rates                          | merchant/settings-tax.spec.js            |
 | Merchant  | Settings  | Add Shipping Zones                     | merchant/create-shipping-zones.spec.js   |
 | Merchant  | Settings  | Add Shipping Classes                   | merchant/create-shipping-classes.spec.js |
 | Merchant  | Settings  | Enable local pickup for checkout block | merchant/settings-shipping.spec.js       |
 | Merchant  | Settings  | Update payment settings                | admin-tasks/payment.spec.js              |
+| Merchant  | Settings  | Handle Product Brands                  | merchant/create-product-brand.spec.js    |
 
 ### Merchant - Coupons
 
