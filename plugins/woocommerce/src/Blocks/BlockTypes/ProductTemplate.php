@@ -93,14 +93,12 @@ class ProductTemplate extends AbstractBlock {
 		$classnames .= ' wc-block-product-template';
 
 		$is_fixed_width = false;
-
-		if ( isset( $block->context['dimensions'] ) && isset( $block->context['dimensions']['widthType'] ) ) {
-			$is_fixed_width = 'fixed' === $block->context['dimensions']['widthType'];
-		}
 		$attributes_for_wrapper = array( 'class' => trim( $classnames ) );
 
-		if ( $is_fixed_width ) {
-			$attributes_for_wrapper['style'] = $this->get_list_styles( $block->context['dimensions']['fixedWidth'] );
+		if ( isset( $block->context['dimensions'] ) && isset( $block->context['dimensions']['widthType'] ) ) {
+			if ( 'fixed' === $block->context['dimensions']['widthType'] ) {
+				$attributes_for_wrapper['style'] = $this->get_list_styles( $block->context['dimensions']['fixedWidth'] );
+			}
 		}
 
 		$wrapper_attributes = get_block_wrapper_attributes( $attributes_for_wrapper );
