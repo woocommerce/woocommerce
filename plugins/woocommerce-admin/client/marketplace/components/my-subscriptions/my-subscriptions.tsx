@@ -3,7 +3,11 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useEffect,
+} from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 
 /**
@@ -16,10 +20,7 @@ import {
 	AvailableSubscriptionsTable,
 	InstalledSubscriptionsTable,
 } from './table/table';
-import {
-	availableSubscriptionRow,
-	installedSubscriptionRow,
-} from './table/table-rows';
+import { subscriptionRow } from './table/table-rows';
 import { Subscription } from './types';
 import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
@@ -108,7 +109,7 @@ export default function MySubscriptions(): JSX.Element {
 					<InstalledSubscriptionsTable
 						isLoading={ isLoading }
 						rows={ subscriptionsInstalled.map( ( item ) => {
-							return installedSubscriptionRow( item );
+							return subscriptionRow( item, 'installed' );
 						} ) }
 					/>
 				</div>
@@ -128,7 +129,7 @@ export default function MySubscriptions(): JSX.Element {
 						<AvailableSubscriptionsTable
 							isLoading={ isLoading }
 							rows={ subscriptionsAvailable.map( ( item ) => {
-								return availableSubscriptionRow( item );
+								return subscriptionRow( item, 'available' );
 							} ) }
 						/>
 					</div>
