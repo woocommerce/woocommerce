@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
@@ -37,12 +38,15 @@ class CatalogSorting extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => implode( ' ', array_filter(
-					[ 
-						'woocommerce wc-block-catalog-sorting',
-						esc_attr( $classes_and_styles['classes'] ),
-					]
-				) ),
+				'class' => implode(
+					' ',
+					array_filter(
+						[
+							'woocommerce wc-block-catalog-sorting',
+							esc_attr( $classes_and_styles['classes'] ),
+						]
+					)
+				),
 				'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
 			)
 		);
