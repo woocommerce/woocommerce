@@ -147,11 +147,12 @@ final class ProductFilterPrice extends AbstractBlock {
 			),
 			'data-wc-context'      => wp_json_encode(
 				array(
-					'minPrice'         => $min_price,
-					'maxPrice'         => $max_price,
-					'minRange'         => $min_range,
-					'maxRange'         => $max_range,
-					'hasFilterOptions' => $min_range !== $max_range,
+					'minPrice'           => $min_price,
+					'maxPrice'           => $max_price,
+					'minRange'           => $min_range,
+					'maxRange'           => $max_range,
+					'hasFilterOptions'   => $min_range !== $max_range,
+					'hasSelectedFilters' => $min_price !== $min_range || $max_price !== $max_range,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
