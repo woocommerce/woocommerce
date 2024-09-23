@@ -46,7 +46,7 @@
 	},
 	"wireit": {
 		"build:project:assets": {
-			"command": "grunt assets && rsync -avhW --no-compress --quiet --delete build/ ../../assets",
+			"command": "grunt assets && rsync -avhW --no-compress --quiet --delete build/css/ ../../assets/css && rsync -avhW --no-compress --quiet --delete build/js/ ../../assets/js",
 			"clean": "if-file-deleted",
 			"files": [
 				"Gruntfile.js",
