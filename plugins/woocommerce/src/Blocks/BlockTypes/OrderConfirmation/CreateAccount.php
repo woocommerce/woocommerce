@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * CreateAccount class.
@@ -31,6 +32,15 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 			'dependencies' => [],
 		];
 		return $key ? $script[ $key ] : $script;
+	}
+
+	/**
+	 * Returns if delayed account creation is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_feature_enabled() {
+		return Features::is_enabled( 'experimental-blocks' ) && get_option( 'woocommerce_enable_delayed_account_creation', 'yes' ) === 'yes';
 	}
 
 	/**
@@ -111,7 +121,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 * @return string
 	 */
 	protected function render_content( $order, $permission = false, $attributes = [], $content = '' ) {
-		if ( ! $permission ) {
+		if ( ! $permission || ! $this->is_feature_enabled() ) {
 			return '';
 		}
 
@@ -189,6 +199,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
+		$this->asset_data_registry->add( 'delayedAccountCreationEnabled', $this->is_feature_enabled() );
 		$this->asset_data_registry->add( 'registrationGeneratePassword', filter_var( get_option( 'woocommerce_registration_generate_password' ), FILTER_VALIDATE_BOOLEAN ) );
 	}
 }
