@@ -254,15 +254,14 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 			<button
 				className={ `wc-block-mini-cart__button ${ colorClassNames }` }
 				onClick={ () => {
-					if ( onCartClickBehaviour === 'open_drawer' ) {
-						if ( ! isOpen ) {
-							setIsOpen( true );
-							setSkipSlideIn( false );
-						}
-					} else if (
-						onCartClickBehaviour === 'navigate_to_checkout'
-					) {
+					if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
 						window.location.href = CHECKOUT_URL;
+						return;
+					}
+
+					if ( ! isOpen ) {
+						setIsOpen( true );
+						setSkipSlideIn( false );
 					}
 				} }
 				aria-label={ ariaLabel }
