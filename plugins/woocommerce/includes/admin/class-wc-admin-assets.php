@@ -472,7 +472,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 			// Reports Pages.
 			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
-			if ( in_array( $screen_id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports', 'dashboard' ) ) ) ) {
+			if ( in_array( $screen_id, apply_filters( 'woocommerce_reports_screen_ids', array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports' ) ) ) ) {
 				wp_register_script( 'wc-reports', WC()->plugin_url() . '/assets/js/admin/reports' . $suffix . '.js', array( 'jquery', 'jquery-ui-datepicker' ), $version );
 
 				wp_enqueue_script( 'wc-reports' );
