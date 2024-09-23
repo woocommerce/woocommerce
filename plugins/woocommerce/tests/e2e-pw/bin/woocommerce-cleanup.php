@@ -17,9 +17,122 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Remove all media files and their database entries.
+ */
+function wc_cleanup_media() {
+	$args = array(
+		'post_type'   => 'attachment',
+		'numberposts' => -1,
+		'post_status' => null,
+		'post_parent' => null,
+	);
+
+	$attachments = get_posts( $args );
+
+	if ( $attachments ) {
+		foreach ( $attachments as $attachment ) {
+			wp_delete_attachment( $attachment->ID, true );
+		}
+	}
+
+	// Clean up the uploads directory.
+	$upload_dir = wp_upload_dir();
+	wc_cleanup_directory( $upload_dir['basedir'] );
+}
+
+/**
+ * Recursively remove all files and subdirectories from a directory.
+ *
+ * @param string $dir The directory to clean.
+ */
+function wc_cleanup_directory( $dir ) {
+	if ( ! is_dir( $dir ) ) {
+		return;
+	}
+
+	$files = array_diff( scandir( $dir ), array( '.', '..' ) );
+
+	foreach ( $files as $file ) {
+		$path = $dir . DIRECTORY_SEPARATOR . $file;
+
+		if ( is_dir( $path ) ) {
+			wc_cleanup_directory( $path );
+		} else {
+			wp_delete_file( $path );
+		}
+	}
+
+	// Remove the empty directory.
+	if ( function_exists( 'wp_delete_directory' ) ) {
+		wp_delete_directory( $dir );
+	} elseif ( function_exists( 'WP_Filesystem' ) ) {
+		WP_Filesystem();
+		global $wp_filesystem;
+		$wp_filesystem->rmdir( $dir );
+	} else {
+		// Fallback for WordPress versions that don't have wp_delete_directory or WP_Filesystem.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		rmdir( $dir );
+	}
+}
+
+/**
+ * Remove all WooCommerce taxes and tax classes.
+ */
+function wc_cleanup_taxes() {
+	global $wpdb;
+
+	// Remove all tax rates.
+	$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates" );
+	$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations" );
+
+	// Remove all tax classes except the default ones.
+	$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_classes WHERE slug NOT IN ('standard', 'reduced-rate', 'zero-rate')" );
+
+	// Reset tax options.
+	update_option( 'woocommerce_tax_classes', 'Standard\nReduced rate\nZero rate' );
+	update_option( 'woocommerce_tax_display_shop', 'excl' );
+	update_option( 'woocommerce_tax_display_cart', 'excl' );
+	update_option( 'woocommerce_tax_total_display', 'itemized' );
+
+	// Disable taxes.
+	update_option( 'woocommerce_calc_taxes', 'no' );
+
+	// Clear the tax transients.
+	WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+}
+
+/**
+ * Truncate a WooCommerce analytics table.
+ *
+ * @param string $table_name The name of the table to truncate, without the prefix.
+ */
+function wc_cleanup_analytics_table( $table_name ) {
+	global $wpdb;
+	$full_table_name = $wpdb->prefix . $table_name;
+
+	// Check if the table exists before attempting to truncate.
+	$table_exists = $wpdb->get_var(
+		$wpdb->prepare(
+			'SHOW TABLES LIKE %s',
+			$full_table_name
+		)
+	) === $full_table_name;
+
+	if ( $table_exists ) {
+		$wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $full_table_name ) );
+	} elseif ( defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+		// Use WP_DEBUG_LOG instead of error_log.
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( "Table $full_table_name does not exist." );
+	}
+}
+
+/**
  * Reset the WooCommerce site.
  */
 function wc_cleanup_reset_site() {
+
 	// Remove all coupons.
 	$coupons = get_posts(
 		array(
@@ -94,6 +207,16 @@ function wc_cleanup_reset_site() {
 		// Set the active theme to Twenty Twenty-Three.
 		switch_theme( 'twentytwentythree' );
 	}
+
+	// Clean up the WooCommerce analytics tables.
+	wc_cleanup_analytics_table( 'wc_order_stats' );
+	wc_cleanup_analytics_table( 'wc_customer_lookup' );
+
+	// Remove all taxes.
+	wc_cleanup_taxes();
+
+	// Remove all media files.
+	wc_cleanup_media();
 
 	// Optionally, you can also clear WooCommerce transients.
 	wc_delete_product_transients();
