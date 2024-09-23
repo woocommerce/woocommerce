@@ -26,7 +26,7 @@ export const activateTheme = ( themeName ) => {
 			const options = {
 				hostname: url.hostname,
 				port: url.port || 443,
-				path: '/wp-json/custom/v1/activate-theme',
+				path: '/wp-json/e2e-theme/activate',
 				method: 'POST',
 				headers: {
 					Authorization: `Basic ${ encodeCredentials(
