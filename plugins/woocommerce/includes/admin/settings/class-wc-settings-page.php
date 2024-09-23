@@ -153,7 +153,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				$html = ob_get_contents();
 				ob_end_clean();
 
-				$should_render_section_from_config = 'THIS IS THE PARENT OUTPUT' === $html;
+				$should_render_section_from_config = strpos( $html, 'THIS IS THE PARENT OUTPUT') !== false;
 
 				// We only want to loop through the settings object if the parent class's output method is being rendered.
 				if ( $should_render_section_from_config ) {
@@ -175,25 +175,25 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 	
 						$section_settings_data[] = $section_setting;
 					}
+				} 
+				
 				// Otherwise, render the page's output method.
-				} else {
-					$tags = new WP_HTML_Tag_Processor( $html );
-					while( $tags->next_tag( array( 'tag_name' => 'script' ) ) ) {
-						$script_type = $tags->get_attribute( 'type' );
-						if ( 'text/javascript' === $script_type ) {
-							$script_contents = $tags->get_modifiable_text();
-							$section_settings_data[] = array(
-								'type' => 'script',
-								'content' => $script_contents,
-							);
-						}
+				$tags = new WP_HTML_Tag_Processor( $html );
+				while( $tags->next_tag( array( 'tag_name' => 'script' ) ) ) {
+					$script_type = $tags->get_attribute( 'type' );
+					if ( 'text/javascript' === $script_type ) {
+						$script_contents = $tags->get_modifiable_text();
+						$section_settings_data[] = array(
+							'type' => 'script',
+							'content' => $script_contents,
+						);
 					}
-					
-					$section_settings_data[] = array(
-						'type' => 'custom',
-						'content' => trim( $html ),
-					);
 				}
+				
+				$section_settings_data[] = array(
+					'type' => 'custom',
+					'content' => trim( $html ),
+				);
 
 				$sections_data[ $section_id ] = array(
 					'label'   => html_entity_decode( $section_label ),
