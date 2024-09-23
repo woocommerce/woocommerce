@@ -27,6 +27,7 @@ import {
 	RecommendedTypes,
 	JetpackConnectionDataResponse,
 } from './types';
+import { checkUserCapability } from '../utils';
 
 // Can be removed in WP 5.9, wp.data is supported in >5.7.
 const resolveSelect =
@@ -61,6 +62,8 @@ type ConnectJetpackResponse = {
 export function* getActivePlugins() {
 	yield setIsRequesting( 'getActivePlugins', true );
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = WC_ADMIN_NAMESPACE + '/plugins/active';
 		const results: PluginGetResponse = yield apiFetch( {
 			path: url,
@@ -77,6 +80,8 @@ export function* getInstalledPlugins() {
 	yield setIsRequesting( 'getInstalledPlugins', true );
 
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = WC_ADMIN_NAMESPACE + '/plugins/installed';
 		const results: PluginGetResponse = yield apiFetch( {
 			path: url,
@@ -111,6 +116,8 @@ export function* getJetpackConnectionData() {
 	yield setIsRequesting( 'getJetpackConnectionData', true );
 
 	try {
+		yield checkUserCapability( 'manage_woocommerce' );
+
 		const url = JETPACK_NAMESPACE + '/connection/data';
 
 		const results: JetpackConnectionDataResponse = yield apiFetch( {

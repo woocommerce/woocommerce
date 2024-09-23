@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+. "$(dirname "$0")/_/husky.sh"
+
+# The hook documentation: https://git-scm.com/docs/githooks.html#_post_checkout
+CHECKOUT_TYPE=$3
+HEAD_NEW=$2
+HEAD_PREVIOUS=$1
+
+whiteColoured='\033[0m'
+orangeColoured='\033[1;33m'
+
+# '1' is a branch checkout
+if [ "$CHECKOUT_TYPE" = '1' ]; then
+	# Prompt about pnpm versions mismatch when switching between branches.
+	currentPnpmVersion=$( ( command -v pnpm > /dev/null && pnpm -v 2>/dev/null ) || echo 'n/a' )
+	targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
+	if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
+		printf "${orangeColoured}pnpm versions mismatch: in use '$currentPnpmVersion', needed '$targetPnpmVersion'. If you are working on something in this branch, here are some hints on how to solve this:\n"
+		printf "${orangeColoured}* actualize environment: 'nvm use && pnpm -v' (the most common case)\n"
+		printf "${orangeColoured}* install: 'npm install -g pnpm@$targetPnpmVersion'\n"
+	fi
+
+	# Auto-refresh dependencies when switching between branches.
+	changedManifests=$( ( git diff --name-only $HEAD_NEW $HEAD_PREVIOUS | grep -E '(package.json|pnpm-lock.yaml|pnpm-workspace.yaml|composer.json|composer.lock)$' ) || echo '' )
+	if [ -n "$changedManifests" ]; then
+		printf "${whiteColoured}The following file(s) in the new branch differs from the original one, dependencies might need to be refreshed:\n"
+		printf "${whiteColoured}    %s\n" $changedManifests
+		printf "${orangeColoured}If you are working on something in this branch, ensure to refresh dependencies with 'pnpm install --frozen-lockfile'\n"
+	fi
+fi

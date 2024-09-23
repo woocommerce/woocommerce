@@ -312,7 +312,9 @@ const ProductTemplateEdit = (
 
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
 	let customClassName = '';
-	if ( hasLayoutFlex ) {
+
+	// We don't want to apply layout styles if there's no products.
+	if ( products && products.length && hasLayoutFlex ) {
 		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
 		const staticGrid = `is-flex-container columns-${ columns }`;
 
@@ -340,7 +342,10 @@ const ProductTemplateEdit = (
 		return (
 			<p { ...blockProps }>
 				{ ' ' }
-				{ __( 'No results found.', 'woocommerce' ) }
+				{ __(
+					'No products to display. Try adjusting the filters in the block settings panel.',
+					'woocommerce'
+				) }
 			</p>
 		);
 	}

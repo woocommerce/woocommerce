@@ -24,6 +24,50 @@ if ( class_exists( 'WC_Admin_Reports', false ) ) {
 class WC_Admin_Reports {
 
 	/**
+	 * Register the proper hook handlers.
+	 */
+	public static function register_hook_handlers() {
+		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_report_instance' ) );
+		add_filter( 'woocommerce_dashboard_status_widget_reports', array( __CLASS__, 'replace_dashboard_status_widget_reports' ) );
+	}
+
+	/**
+	 * Get an instance of WC_Admin_Report.
+	 *
+	 * @return WC_Admin_Report
+	 */
+	public static function get_report_instance() {
+		include_once __DIR__ . '/reports/class-wc-admin-report.php';
+		return new WC_Admin_Report();
+	}
+
+	/**
+	 * Filter handler for replacing the data of the status widget on the Dashboard page.
+	 *
+	 * @param array $status_widget_reports The data to display in the status widget.
+	 */
+	public static function replace_dashboard_status_widget_reports( $status_widget_reports ) {
+		$report = self::get_report_instance();
+
+		include_once __DIR__ . '/reports/class-wc-report-sales-by-date.php';
+
+		$sales_by_date                 = new WC_Report_Sales_By_Date();
+		$sales_by_date->start_date     = strtotime( gmdate( 'Y-m-01', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		$sales_by_date->end_date       = strtotime( gmdate( 'Y-m-d', current_time( 'timestamp' ) ) ); // phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
+		$sales_by_date->chart_groupby  = 'day';
+		$sales_by_date->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
+
+		$status_widget_reports['net_sales_link']      = 'admin.php?page=wc-reports&tab=orders&range=month';
+		$status_widget_reports['top_seller_link']     = 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=';
+		$status_widget_reports['lowstock_link']       = 'admin.php?page=wc-reports&tab=stock&report=low_in_stock';
+		$status_widget_reports['outofstock_link']     = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
+		$status_widget_reports['report_data']         = $sales_by_date->get_report_data();
+		$status_widget_reports['get_sales_sparkline'] = array( $report, 'get_sales_sparkline' );
+
+		return $status_widget_reports;
+	}
+
+	/**
 	 * Handles output of the reports page in admin.
 	 */
 	public static function output() {

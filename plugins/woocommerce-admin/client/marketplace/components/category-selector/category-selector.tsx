@@ -1,20 +1,21 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
-import clsx from 'clsx';
+import { Icon } from '@wordpress/components';
+import { useDebounce } from '@wordpress/compose';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import CategoryLink from './category-link';
-import CategoryDropdown from './category-dropdown';
 import { Category, CategoryAPIItem } from './types';
 import { fetchCategories } from '../../utils/functions';
-import './category-selector.scss';
 import { ProductType } from '../product-list/types';
+import CategoryDropdown from './category-dropdown';
+import './category-selector.scss';
 
 const ALL_CATEGORIES_SLUGS = {
 	[ ProductType.extension ]: '_all',
@@ -29,31 +30,20 @@ interface CategorySelectorProps {
 export default function CategorySelector(
 	props: CategorySelectorProps
 ): JSX.Element {
-	const [ visibleItems, setVisibleItems ] = useState< Category[] >( [] );
-	const [ dropdownItems, setDropdownItems ] = useState< Category[] >( [] );
 	const [ selected, setSelected ] = useState< Category >();
 	const [ isLoading, setIsLoading ] = useState( false );
+	const [ categoriesToShow, setCategoriesToShow ] = useState< Category[] >(
+		[]
+	);
+	const [ isOverflowing, setIsOverflowing ] = useState( false );
+	const [ scrollPosition, setScrollPosition ] = useState<
+		'start' | 'middle' | 'end'
+	>( 'start' );
+
+	const categorySelectorRef = useRef< HTMLUListElement >( null );
+	const selectedCategoryRef = useRef< HTMLLIElement >( null );
 
 	const query = useQuery();
-
-	useEffect( () => {
-		// If no category is selected, show All as selected
-		let categoryToSearch = ALL_CATEGORIES_SLUGS[ props.type ];
-
-		if ( query.category ) {
-			categoryToSearch = query.category;
-		}
-
-		const allCategories = visibleItems.concat( dropdownItems );
-
-		const selectedCategory = allCategories.find(
-			( category ) => category.slug === categoryToSearch
-		);
-
-		if ( selectedCategory ) {
-			setSelected( selectedCategory );
-		}
-	}, [ query.category, props.type, visibleItems, dropdownItems ] );
 
 	useEffect( () => {
 		setIsLoading( true );
@@ -72,21 +62,125 @@ export default function CategorySelector(
 						return category.slug !== '_featured';
 					} );
 
-				// Split array into two from 7th item
-				const visibleCategoryItems = categories.slice( 0, 7 );
-				const dropdownCategoryItems = categories.slice( 7 );
-
-				setVisibleItems( visibleCategoryItems );
-				setDropdownItems( dropdownCategoryItems );
+				setCategoriesToShow( categories );
 			} )
 			.catch( () => {
-				setVisibleItems( [] );
-				setDropdownItems( [] );
+				setCategoriesToShow( [] );
 			} )
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [ props.type ] );
+	}, [ props.type, setCategoriesToShow ] );
+
+	useEffect( () => {
+		// If no category is selected, show All as selected
+		let categoryToSearch = ALL_CATEGORIES_SLUGS[ props.type ];
+
+		if ( query.category ) {
+			categoryToSearch = query.category;
+		}
+
+		const selectedCategory = categoriesToShow.find(
+			( category ) => category.slug === categoryToSearch
+		);
+
+		if ( selectedCategory ) {
+			setSelected( selectedCategory );
+		}
+	}, [ query.category, props.type, categoriesToShow ] );
+
+	useEffect( () => {
+		if ( selectedCategoryRef.current ) {
+			selectedCategoryRef.current.scrollIntoView( {
+				block: 'nearest',
+				inline: 'center',
+			} );
+		}
+	}, [ selected ] );
+
+	function checkOverflow() {
+		if (
+			categorySelectorRef.current &&
+			categorySelectorRef.current.parentElement?.scrollWidth
+		) {
+			const isContentOverflowing =
+				categorySelectorRef.current.scrollWidth >
+				categorySelectorRef.current.parentElement.scrollWidth;
+
+			setIsOverflowing( isContentOverflowing );
+		}
+	}
+
+	function checkScrollPosition() {
+		const ulElement = categorySelectorRef.current;
+
+		if ( ! ulElement ) {
+			return;
+		}
+
+		const { scrollLeft, scrollWidth, clientWidth } = ulElement;
+
+		if ( scrollLeft < 10 ) {
+			setScrollPosition( 'start' );
+
+			return;
+		}
+
+		if ( scrollLeft + clientWidth < scrollWidth ) {
+			setScrollPosition( 'middle' );
+
+			return;
+		}
+
+		if ( scrollLeft + clientWidth === scrollWidth ) {
+			setScrollPosition( 'end' );
+		}
+	}
+
+	const debouncedCheckOverflow = useDebounce( checkOverflow, 300 );
+	const debouncedScrollPosition = useDebounce( checkScrollPosition, 100 );
+
+	function scrollCategories( scrollAmount: number ) {
+		if ( categorySelectorRef.current ) {
+			categorySelectorRef.current.scrollTo( {
+				left: categorySelectorRef.current.scrollLeft + scrollAmount,
+				behavior: 'smooth',
+			} );
+		}
+	}
+
+	function scrollToNextCategories() {
+		scrollCategories( 200 );
+	}
+
+	function scrollToPrevCategories() {
+		scrollCategories( -200 );
+	}
+
+	useEffect( () => {
+		window.addEventListener( 'resize', debouncedCheckOverflow );
+
+		const ulElement = categorySelectorRef.current;
+
+		if ( ulElement ) {
+			ulElement.addEventListener( 'scroll', debouncedScrollPosition );
+		}
+
+		return () => {
+			window.removeEventListener( 'resize', debouncedCheckOverflow );
+
+			if ( ulElement ) {
+				ulElement.removeEventListener(
+					'scroll',
+					debouncedScrollPosition
+				);
+			}
+		};
+	}, [ debouncedCheckOverflow, debouncedScrollPosition ] );
+
+	useEffect( () => {
+		checkOverflow();
+	}, [ categoriesToShow ] );
 
 	function mobileCategoryDropdownLabel() {
 		const allCategoriesText = __( 'All Categories', 'woocommerce' );
@@ -100,16 +194,6 @@ export default function CategorySelector(
 		}
 
 		return selected.label;
-	}
-
-	function isSelectedInDropdown() {
-		if ( ! selected ) {
-			return false;
-		}
-
-		return dropdownItems.find(
-			( category ) => category.slug === selected.slug
-		);
 	}
 
 	if ( isLoading ) {
@@ -131,50 +215,62 @@ export default function CategorySelector(
 
 	return (
 		<>
-			<ul className="woocommerce-marketplace__category-selector">
-				{ visibleItems.map( ( category ) => (
+			<ul
+				className="woocommerce-marketplace__category-selector"
+				aria-label="Categories"
+				ref={ categorySelectorRef }
+			>
+				{ categoriesToShow.map( ( category ) => (
 					<li
 						className="woocommerce-marketplace__category-item"
 						key={ category.slug }
+						ref={
+							category.slug === selected?.slug
+								? selectedCategoryRef
+								: null
+						}
 					>
 						<CategoryLink
 							{ ...category }
 							selected={ category.slug === selected?.slug }
+							aria-current={ category.slug === selected?.slug }
 						/>
 					</li>
 				) ) }
-				<li className="woocommerce-marketplace__category-item">
-					{ dropdownItems.length > 0 && (
-						<CategoryDropdown
-							type={ props.type }
-							label={ __( 'More', 'woocommerce' ) }
-							categories={ dropdownItems }
-							buttonClassName={ clsx(
-								'woocommerce-marketplace__category-item-button',
-								{
-									'woocommerce-marketplace__category-item-button--selected':
-										isSelectedInDropdown(),
-								}
-							) }
-							contentClassName="woocommerce-marketplace__category-item-content"
-							arrowIconSize={ 20 }
-							selected={ selected }
-						/>
-					) }
-				</li>
 			</ul>
-
 			<div className="woocommerce-marketplace__category-selector--full-width">
 				<CategoryDropdown
 					type={ props.type }
 					label={ mobileCategoryDropdownLabel() }
-					categories={ visibleItems.concat( dropdownItems ) }
+					categories={ categoriesToShow }
 					buttonClassName="woocommerce-marketplace__category-dropdown-button"
 					className="woocommerce-marketplace__category-dropdown"
 					contentClassName="woocommerce-marketplace__category-dropdown-content"
 					selected={ selected }
 				/>
 			</div>
+			{ isOverflowing && (
+				<>
+					<button
+						onClick={ scrollToPrevCategories }
+						className="woocommerce-marketplace__category-navigation-button woocommerce-marketplace__category-navigation-button--prev"
+						hidden={ scrollPosition === 'start' }
+						aria-label="Scroll to previous categories"
+						tabIndex={ -1 }
+					>
+						<Icon icon="arrow-left-alt2" />
+					</button>
+					<button
+						onClick={ scrollToNextCategories }
+						className="woocommerce-marketplace__category-navigation-button woocommerce-marketplace__category-navigation-button--next"
+						hidden={ scrollPosition === 'end' }
+						aria-label="Scroll to next categories"
+						tabIndex={ -1 }
+					>
+						<Icon icon="arrow-right-alt2" />
+					</button>
+				</>
+			) }
 		</>
 	);
 }

@@ -5,8 +5,10 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Internal\McStats;
 use WC_Rate_Limiter;
 use WC_Log_Levels;
+use Jetpack_Options;
 
 /**
  * WooCommerce Remote Logger
@@ -71,8 +73,15 @@ class RemoteLogger extends \WC_Log_Handler {
 				'php_version' => phpversion(),
 				'wp_version'  => get_bloginfo( 'version' ),
 				'request_uri' => $this->sanitize_request_uri( filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL ) ),
+				'store_id'    => get_option( \WC_Install::STORE_ID_OPTION, null ),
 			),
 		);
+
+		$blog_id = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
+
+		if ( ! empty( $blog_id ) && is_int( $blog_id ) ) {
+			$log_data['blog_id'] = $blog_id;
+		}
 
 		if ( isset( $context['backtrace'] ) ) {
 			if ( is_array( $context['backtrace'] ) || is_string( $context['backtrace'] ) ) {
@@ -88,25 +97,15 @@ class RemoteLogger extends \WC_Log_Handler {
 			unset( $context['tags'] );
 		}
 
-		if ( class_exists( '\WC_Tracks' ) && function_exists( 'wp_get_current_user' ) ) {
-			$user         = wp_get_current_user();
-			$blog_details = \WC_Tracks::get_blog_details( $user->ID );
-
-			if ( is_numeric( $blog_details['blog_id'] ) && $blog_details['blog_id'] > 0 ) {
-				$log_data['blog_id'] = $blog_details['blog_id'];
-			}
-
-			if ( ! empty( $blog_details['store_id'] ) ) {
-				$log_data['properties']['store_id'] = $blog_details['store_id'];
-			}
-		}
-
-		if ( isset( $context['error'] ) && is_array( $context['error'] ) && ! empty( $context['error']['file'] ) ) {
-			$context['error']['file'] = $this->sanitize( $context['error']['file'] );
+		if ( isset( $context['error']['file'] ) && is_string( $context['error']['file'] ) && '' !== $context['error']['file'] ) {
+			$log_data['file'] = $this->sanitize( $context['error']['file'] );
+			unset( $context['error']['file'] );
 		}
 
 		$extra_attrs = $context['extra'] ?? array();
 		unset( $context['extra'] );
+		unset( $context['remote-logging'] );
+
 		// Merge the extra attributes with the remaining context since we can't send arbitrary fields to Logstash.
 		$log_data['extra'] = array_merge( $extra_attrs, $context );
 
@@ -166,9 +165,15 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @return bool True if the log should be handled.
 	 */
 	protected function should_handle( $level, $message, $context ) {
+		// Ignore logs that are not opted in for remote logging.
+		if ( ! isset( $context['remote-logging'] ) || false === $context['remote-logging'] ) {
+			return false;
+		}
+
 		if ( ! $this->is_remote_logging_allowed() ) {
 			return false;
 		}
+
 		// Ignore logs that are less severe than critical. This is temporary to prevent sending too many logs to the remote logging service. We can consider remove this if the remote logging service can handle more logs.
 		if ( WC_Log_Levels::get_level_severity( $level ) < WC_Log_Levels::get_level_severity( WC_Log_Levels::CRITICAL ) ) {
 			return false;
@@ -176,6 +181,15 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		if ( $this->is_third_party_error( (string) $message, (array) $context ) ) {
 			return false;
+		}
+
+		try {
+			// Record fatal error stats.
+			$mc_stats = wc_get_container()->get( McStats::class );
+			$mc_stats->add( 'error', 'critical-errors' );
+			$mc_stats->do_server_side_stats();
+		} catch ( \Throwable $e ) {
+			error_log( 'Warning: Failed to record fatal error stats: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 
 		if ( WC_Rate_Limiter::retried_too_soon( self::RATE_LIMIT_ID ) ) {
@@ -358,7 +372,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 *
 	 * The trace is sanitized by:
 	 *
-	 * 1. Remove the absolute path to the WooCommerce plugin directory.
+	 * 1. Remove the absolute path to the plugin directory based on WC_ABSPATH. This is more accurate than using WP_PLUGIN_DIR when the plugin is symlinked.
 	 * 2. Remove the absolute path to the WordPress root directory.
 	 *
 	 * For example, the trace:
@@ -374,12 +388,12 @@ class RemoteLogger extends \WC_Log_Handler {
 			return $message;
 		}
 
-		$wc_path = StringUtil::normalize_local_path_slashes( WC_ABSPATH );
-		$wp_path = StringUtil::normalize_local_path_slashes( ABSPATH );
+		$plugin_path = StringUtil::normalize_local_path_slashes( trailingslashit( dirname( WC_ABSPATH ) ) );
+		$wp_path     = StringUtil::normalize_local_path_slashes( trailingslashit( ABSPATH ) );
 
 		$sanitized = str_replace(
-			array( $wc_path, $wp_path ),
-			array( '**/' . dirname( WC_PLUGIN_BASENAME ) . '/', '**/' ),
+			array( $plugin_path, $wp_path ),
+			array( './', './' ),
 			$message
 		);
 
