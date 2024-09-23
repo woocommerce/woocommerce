@@ -4,6 +4,9 @@
 	display: flex;
 	flex-direction: column;
 	width: 400px;
+	.components-disabled {
+		display: flex;
+	}
 }
 
 .wc-block-editor-quantity-selector-style {
@@ -32,8 +35,8 @@ input {
 
 .wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
 	.wc-block-components-quantity-selector {
-		height: 100%;
 		margin: 0 4px 0 0;
 		background: #fff;
+		width: unset !important;
 	}
 }
