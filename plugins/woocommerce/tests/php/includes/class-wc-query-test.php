@@ -6,6 +6,15 @@
 class WC_Query_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Get a sample page ID for testing purposes.
+	 *
+	 * @return int The shop page ID.
+	 */
+	public function get_shop_page_id() {
+		return 123;
+	}
+
+	/**
 	 * @testdox 'price_filter_post_clauses' generates the proper 'where' clause when there are 'max_price' and 'min_price' arguments in the query.
 	 */
 	public function test_price_filter_post_clauses_creates_the_proper_where_clause() {
@@ -40,7 +49,8 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		switch_theme( 'twentytwentyfour' );
 
 		// Set the shop page as the homepage.
-		$shop_page_id          = wc_get_page_id( 'shop' );
+		add_filter( 'woocommerce_get_shop_page_id', array( $this, 'get_shop_page_id' ) );
+		$shop_page_id          = 123;
 		$default_show_on_front = get_option( 'show_on_front' );
 		$default_page_on_front = get_option( 'page_on_front' );
 		update_option( 'show_on_front', 'page' );
@@ -64,5 +74,6 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		update_option( 'show_on_front', $default_show_on_front );
 		update_option( 'page_on_front', $default_page_on_front );
+		remove_filter( 'woocommerce_get_shop_page_id', array( $this, 'get_shop_page_id' ) );
 	}
 }
