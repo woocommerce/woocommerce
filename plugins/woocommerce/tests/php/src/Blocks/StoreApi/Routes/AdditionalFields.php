@@ -81,6 +81,15 @@ class AdditionalFields extends MockeryTestCase {
 					'virtual'       => true,
 				)
 			),
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Downloadable Test Product 4',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+					'downloadable'  => true,
+				)
+			),
 		);
 		$this->reset_session();
 	}
@@ -1692,9 +1701,10 @@ class AdditionalFields extends MockeryTestCase {
 	}
 
 	/**
-	 * Ensures an order for a virtual product can be placed without a shipping address.
+	 * Ensures an order for a virtual product can be placed without a shipping address, but an order for a downloadable
+	 * non-virtual cannot.
 	 */
-	public function test_place_virtual_product_order() {
+	public function test_place_virtual_downloadable_product_order() {
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $this->products[2]->get_id(), 2 );
 		$id    = 'plugin-namespace/my-required-field';
@@ -1737,6 +1747,42 @@ class AdditionalFields extends MockeryTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		// Test with downloadable, but not virtual product.
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $this->products[3]->get_id(), 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'                         => 'test',
+					'last_name'                          => 'test',
+					'company'                            => '',
+					'address_1'                          => 'test',
+					'address_2'                          => '',
+					'city'                               => 'test',
+					'state'                              => '',
+					'postcode'                           => 'cb241ab',
+					'country'                            => 'GB',
+					'phone'                              => '',
+					'email'                              => 'testaccount@test.com',
+					'plugin-namespace/gov-id'            => 'gov id',
+					'plugin-namespace/my-required-field' => 'req. field',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		// The product is downloadable, but not virtual, so should still require a shipping address.
+		$this->assertEquals( 400, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'There was a problem with the provided shipping address: Government ID is required', $data['message'], print_r( $data, true ) );
 	}
 
 	/**
