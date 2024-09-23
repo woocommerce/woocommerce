@@ -81,14 +81,12 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						<input
 							class="min"
 							type="text"
-							data-type="min"
 							value="<?php echo esc_attr( $min_price ); ?>"
 							data-wc-bind--value="context.minPrice"
 							data-wc-on--focus="actions.selectInputContent"
-							data-min-price="<?php echo esc_attr( $min_price ); ?>"
 							data-wc-on--change--parent-action="<?php echo esc_attr( $actions['setPrices'] ); ?>"
+							data-min-price="<?php echo esc_attr( $min_price ); ?>"
 							data-wc-bind--data-min-price="context.minPrice"
-							data-target-attribute="data-min-price"
 						/>
 					<?php else : ?>
 						<span><?php echo wp_kses_post( $formatted_min_price ); ?></span>
@@ -103,7 +101,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 					<input
 						type="range"
 						class="min"
-						data-type="min"
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						value="<?php echo esc_attr( $min_price ); ?>"
@@ -116,12 +113,10 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						data-wc-on--touchend--parent-action="<?php echo esc_attr( $actions['setPrices'] ); ?>"
 						data-min-price="<?php echo esc_attr( $min_price ); ?>"
 						data-wc-bind--data-min-price="context.minPrice"
-						data-target-attribute="data-min-price"
 					/>
 					<input
 						type="range"
 						class="max"
-						data-type="max"
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
 						value="<?php echo esc_attr( $max_price ); ?>"
@@ -134,7 +129,6 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						data-wc-on--touchend--parent-action="<?php echo esc_attr( $actions['setPrices'] ); ?>"
 						data-max-price="<?php echo esc_attr( $max_price ); ?>"
 						data-wc-bind--data-max-price="context.maxPrice"
-						data-target-attribute="data-max-price"
 					/>
 				</div>
 				<div class="wc-block-product-filter-price-slider__right text">
@@ -142,14 +136,12 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						<input
 							class="max"
 							type="text"
-							data-type="max"
 							value="<?php echo esc_attr( $max_price ); ?>"
 							data-wc-bind--value="state.formattedMaxPrice"
 							data-wc-on--focus="actions.selectInputContent"
-							data-max-price="<?php echo esc_attr( $max_price ); ?>"
 							data-wc-on--change--parent-action="<?php echo esc_attr( $actions['setPrices'] ); ?>"
+							data-max-price="<?php echo esc_attr( $max_price ); ?>"
 							data-wc-bind--data-max-price="context.maxPrice"
-							data-target-attribute="data-max-price"
 						/>
 					<?php else : ?>
 						<span><?php echo wp_kses_post( $formatted_max_price ); ?></span>
