@@ -105,6 +105,8 @@ const TEMPLATE: InnerBlockTemplate[] = [
 	],
 ];
 
+const CUSTOM_PRODUCT_TEMPLATE_ID = 'woocommerce/custom-product-template';
+
 const getMode = ( currentTemplateId: string, templateType: string ) => {
 	if (
 		templateType === 'wp_template_part' &&
@@ -128,8 +130,11 @@ export const Edit = ( {
 
 	const { currentTemplateId, templateType } = useSelect(
 		( select ) => ( {
-			currentTemplateId: select( 'core/edit-site' ).getEditedPostId(),
-			templateType: select( 'core/edit-site' ).getEditedPostType(),
+			currentTemplateId:
+				select( 'core/edit-site' )?.getEditedPostId() ??
+				CUSTOM_PRODUCT_TEMPLATE_ID,
+			templateType:
+				select( 'core/edit-site' )?.getEditedPostType() ?? 'wp_block',
 		} ),
 		[]
 	);
@@ -154,7 +159,13 @@ export const Edit = ( {
 		templateType,
 	] );
 
-	if ( attributes.productGalleryClientId !== clientId ) {
+	const isUsingCustomProductTemplate =
+		CUSTOM_PRODUCT_TEMPLATE_ID === currentTemplateId;
+
+	if (
+		attributes.productGalleryClientId !== clientId &&
+		! isUsingCustomProductTemplate
+	) {
 		const error = {
 			message: __(
 				'productGalleryClientId and clientId codes mismatch.',

@@ -458,7 +458,6 @@ final class BlockTypesController {
 					'OrderConfirmation\AdditionalInformation',
 					'OrderConfirmation\AdditionalFieldsWrapper',
 					'OrderConfirmation\AdditionalFields',
-					'ProductGallery',
 				)
 			);
 		}
