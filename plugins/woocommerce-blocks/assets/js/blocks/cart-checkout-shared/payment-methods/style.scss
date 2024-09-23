@@ -246,12 +246,12 @@
 		padding-top: 14px;
 		height: 28px;
 	}
-
 }
 .wc-block-components-radio-control-accordion-content {
 	padding: $gap-smaller $gap;
 
-	&:empty {
+	&:empty,
+	&:has(> *:only-child:empty) {
 		display: none;
 	}
 }
