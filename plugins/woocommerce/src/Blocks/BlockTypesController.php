@@ -157,12 +157,12 @@ final class BlockTypesController {
 	}
 
 	public function register_block_metadata() {
-		$meta_file_path = WC_ABSPATH . '/assets/client/blocks/blocks-json.php';
-		if ( function_exists( 'wp_register_block_metadata' ) && file_exists( $meta_file_path ) ) {
-			$block_metadata = require $meta_file_path;
-			foreach ( $block_metadata as $full_block_name => $block_data ) {
-				wp_register_block_metadata( $full_block_name, $block_data );
-			}
+		$meta_file_path = WC_ABSPATH . 'assets/client/blocks/blocks-json.php';
+		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $meta_file_path ) ) {
+			wp_register_block_metadata_collection(
+				WC_ABSPATH . 'assets/client/blocks/',
+				$meta_file_path
+			);
 		}
 	}
 
