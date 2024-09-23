@@ -41,14 +41,14 @@ class ProductTemplate extends AbstractBlock {
 	/**
 	 * Get the styles for the list element (fixed width).
 	 *
-	 * @param string $fixedWidth Fixed width value.
+	 * @param string $fixed_width Fixed width value.
 	 * @return string
 	 */
-	protected function get_list_styles( $fixedWidth ) {
+	protected function get_list_styles( $fixed_width ) {
 		$style = '';
 
-		if ( isset( $fixedWidth ) ) {
-			$style .= sprintf( 'width:%dpx;', intval( $fixedWidth ) );
+		if ( isset( $fixed_width ) ) {
+			$style .= sprintf( 'width:%dpx;', intval( $fixed_width ) );
 		}
 		return $style;
 	}
