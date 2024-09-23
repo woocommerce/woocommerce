@@ -36,9 +36,10 @@ const ANIMATION_DURATION = 0.3;
 
 type LayoutProps = {
 	route: Route;
+	showNewNavigation: boolean;
 };
 
-export function Layout( { route }: LayoutProps ) {
+export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 	const [ fullResizer ] = useResizeObserver();
 	const toggleRef = useRef< HTMLAnchorElement >( null );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
@@ -55,38 +56,40 @@ export function Layout( { route }: LayoutProps ) {
 						The NavigableRegion must always be rendered and not use
 						`inert` otherwise `useNavigateRegions` will fail.
 					*/ }
-					{ ( ! isMobileViewport || ! areas.mobile ) && (
-						<NavigableRegion
-							ariaLabel={ __( 'Navigation', 'woocommerce' ) }
-							className="edit-site-layout__sidebar-region"
-						>
-							<AnimatePresence>
-								<motion.div
-									initial={ { opacity: 0 } }
-									animate={ { opacity: 1 } }
-									exit={ { opacity: 0 } }
-									transition={ {
-										type: 'tween',
-										duration:
-											// Disable transition in mobile to emulate a full page transition.
-											disableMotion || isMobileViewport
-												? 0
-												: ANIMATION_DURATION,
-										ease: 'easeOut',
-									} }
-									className="edit-site-layout__sidebar"
-								>
-									<SiteHub
-										ref={ toggleRef }
-										isTransparent={ false }
-									/>
-									<SidebarContent routeKey={ routeKey }>
-										{ areas.sidebar }
-									</SidebarContent>
-								</motion.div>
-							</AnimatePresence>
-						</NavigableRegion>
-					) }
+					{ ( ! isMobileViewport || ! areas.mobile ) &&
+						showNewNavigation && (
+							<NavigableRegion
+								ariaLabel={ __( 'Navigation', 'woocommerce' ) }
+								className="edit-site-layout__sidebar-region"
+							>
+								<AnimatePresence>
+									<motion.div
+										initial={ { opacity: 0 } }
+										animate={ { opacity: 1 } }
+										exit={ { opacity: 0 } }
+										transition={ {
+											type: 'tween',
+											duration:
+												// Disable transition in mobile to emulate a full page transition.
+												disableMotion ||
+												isMobileViewport
+													? 0
+													: ANIMATION_DURATION,
+											ease: 'easeOut',
+										} }
+										className="edit-site-layout__sidebar"
+									>
+										<SiteHub
+											ref={ toggleRef }
+											isTransparent={ false }
+										/>
+										<SidebarContent routeKey={ routeKey }>
+											{ areas.sidebar }
+										</SidebarContent>
+									</motion.div>
+								</AnimatePresence>
+							</NavigableRegion>
+						) }
 
 					<EditorSnackbars />
 
