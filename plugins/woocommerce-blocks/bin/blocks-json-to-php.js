@@ -30,12 +30,14 @@ const blockMetadataFiles = [
 
 blockMetadataFiles.forEach( ( file ) => {
 	const blockJson = JSON.parse( fs.readFileSync( file, 'utf8' ) );
-	blocks[ blockJson.name ] = blockJson;
+	const directoryName = path.basename( path.dirname( file ) );
+	blocks[ directoryName ] = blockJson;
 } );
 
+const printer = json2php.make({linebreak:'\n', indent:'\t', shortArraySyntax: true});
 const phpContent = `<?php
 // This file is generated. Do not modify it manually.
-return ${ json2php( blocks ) };
+return ${ printer(  blocks ) };
 `;
 
 fs.writeFileSync( outputFile, phpContent );
