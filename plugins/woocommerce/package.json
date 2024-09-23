@@ -12,7 +12,6 @@
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
@@ -657,12 +656,6 @@
 		"ignoreRoot": []
 	},
 	"wireit": {
-		"build:project:copy-assets": {
-			"command": "rm -rf assets/client/blocks && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
 		"watch:build:project:copy-assets": {
 			"command": "nodemon --exec \"pnpm run\" build:project",
 			"service": true
