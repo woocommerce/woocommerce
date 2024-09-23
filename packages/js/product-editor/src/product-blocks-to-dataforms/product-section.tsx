@@ -12,6 +12,7 @@ import { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import {
+	BLOCK_TO_FIELD_MAP,
 	TemplateBlockAttributes,
 	transpileBlockToDataformField,
 } from './transpile-block-to-dataform-fields';
@@ -57,6 +58,9 @@ export function ProductSection( {
 		return {
 			type: 'regular',
 			fields: ( sectionTemplate[ 2 ] || [] ).map( ( field ) => {
+				if ( BLOCK_TO_FIELD_MAP[ field[ 0 ] ] ) {
+					return BLOCK_TO_FIELD_MAP[ field[ 0 ] ].id;
+				}
 				if ( field[ 1 ] && field[ 1 ].property ) {
 					return field[ 1 ].property;
 				}

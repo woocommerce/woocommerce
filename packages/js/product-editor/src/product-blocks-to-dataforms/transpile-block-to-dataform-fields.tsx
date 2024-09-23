@@ -17,6 +17,7 @@ import {
  */
 import { ErrorBoundary } from './error-boundary';
 import { ProductColumnWrapper } from './product-column-wrapper';
+import productDescriptionField from '../dataviews/fields/product-description';
 
 export type TemplateBlockAttributes = {
 	_templateBlockId: string;
@@ -31,12 +32,23 @@ const BLOCKS_THAT_REQUIRE_BLOCKTOOLS = [
 	'woocommerce/product-summary-field',
 ];
 
+export const BLOCK_TO_FIELD_MAP: Record< string, Field< Product > > = {
+	'woocommerce/product-description-field': productDescriptionField,
+	'woocommerce/product-summary-field': {
+		...productDescriptionField,
+		id: 'summary',
+	},
+};
+
 export function transpileBlockToDataformField(
 	blockName: string,
 	blockAttributes?: TemplateBlockAttributes,
 	children?: TemplateArray,
 	context?: { postType: string }
 ): Field< Product > | null {
+	if ( BLOCK_TO_FIELD_MAP[ blockName ] ) {
+		return BLOCK_TO_FIELD_MAP[ blockName ];
+	}
 	const block = getBlockType( blockName );
 	if (
 		! block ||
