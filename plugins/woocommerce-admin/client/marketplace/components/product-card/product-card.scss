@@ -217,6 +217,12 @@
 			line-height: $medium-gap;
 		}
 
+		&__on-sale {
+			color: $gray-600;
+			font-weight: 400;
+			text-decoration: line-through;
+		}
+
 		&__price-billing {
 			color: $gray-600;
 			font-size: $default-font-size;
