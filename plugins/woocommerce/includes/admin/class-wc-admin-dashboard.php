@@ -146,7 +146,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				'outofstock_link'     => 'admin.php?page=wc-admin&type=outofstock&path=%2Fanalytics%2Fstock',
 				'report_data'         => null,
 				'get_sales_sparkline' => array( $this, 'get_sales_sparkline' ),
-				'legacy_report'       => null,
 			);
 
 			if ( $is_wc_admin_disabled ) {
@@ -229,7 +228,15 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				$this->status_widget_stock_rows( $status_widget_reports['lowstock_link'], $status_widget_reports['outofstock_link'] );
 			}
 
-			$reports = $status_widget_reports['legacy_report'];
+			/**
+			 * Filter to change the first argument passed to the `woocommerce_after_dashboard_status_widget` action.
+			 *
+			 * Please note that this filter is mainly for backward compatibility with the legacy reports.
+			 * It's not recommended to use this filter as it will soon be deprecated along with the retiring of the legacy reports.
+			 *
+			 * @since 9.5.0
+			 */
+			$reports = apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null );
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
 			echo '</ul>';
 		}
