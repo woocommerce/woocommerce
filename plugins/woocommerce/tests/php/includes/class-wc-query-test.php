@@ -39,32 +39,30 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	public function test_shop_page_in_home_displays_correctly() {
 		switch_theme( 'twentytwentyfour' );
 
-		// Create a page.
-		$shop_page_id = wp_insert_post(
+		// Create a page and use it as the Shop page.
+		$shop_page_id                     = wp_insert_post(
 			array(
 				'post_type'   => 'page',
 				'post_status' => 'publish',
 				'post_title'  => 'Shop',
 			)
 		);
-
-		// Use the new page as the shop page.
 		$default_woocommerce_shop_page_id = get_option( 'woocommerce_shop_page_id' );
 		update_option( 'woocommerce_shop_page_id', $shop_page_id );
 
-		// Set the shop page as the homepage.
+		// Set the Shop page as the homepage.
 		$default_show_on_front = get_option( 'show_on_front' );
 		$default_page_on_front = get_option( 'page_on_front' );
 		update_option( 'show_on_front', 'page' );
 		update_option( 'page_on_front', $shop_page_id );
 
+		// Simulate the main query.
 		$query = new WP_Query(
 			array(
 				'post_type' => 'page',
 				'page_id'   => $shop_page_id,
 			)
 		);
-		// Make it so it's the main query.
 		global $wp_the_query;
 		$previous_wp_the_query = $wp_the_query;
 		$wp_the_query          = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
