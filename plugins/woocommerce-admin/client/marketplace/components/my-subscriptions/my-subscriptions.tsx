@@ -57,7 +57,8 @@ export default function MySubscriptions(): JSX.Element {
 		( subscription: Subscription ) =>
 			! subscription.subscription_installed &&
 			wccomSettings?.wooUpdateManagerPluginSlug !==
-				subscription.product_slug
+				subscription.product_slug &&
+			! subscription.maxed // no more connections allowed for the subscription so it's no longer "available to use"
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
