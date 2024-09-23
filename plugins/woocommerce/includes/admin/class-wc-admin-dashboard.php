@@ -363,7 +363,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 			?>
 			<li class="low-in-stock">
-			<a href="<?php echo esc_url( $lowstock_url ); ?>">
+				<a href="<?php echo esc_url( $lowstock_url ); ?>">
 				<?php
 					printf(
 						/* translators: %s: order count */
