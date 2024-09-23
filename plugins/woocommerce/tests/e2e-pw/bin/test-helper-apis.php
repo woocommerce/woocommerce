@@ -154,7 +154,7 @@ function get_environment_info() {
  */
 function activate_theme_via_api( WP_REST_Request $request ) {
 	$theme_name = sanitize_text_field( $request['theme_name'] );
-	
+
 	if ( wp_get_theme( $theme_name )->exists() ) {
 		switch_theme( $theme_name );
 		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' activated successfully." ), 200 );
