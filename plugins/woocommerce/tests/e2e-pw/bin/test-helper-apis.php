@@ -50,7 +50,7 @@ function register_helper_api() {
 		'/activate',
 		array(
 			'methods'             => 'POST',
-			'callback'            => 'activate_theme_via_api',
+			'callback'            => 'activate_theme',
 			'permission_callback' => 'is_allowed',
 		)
 	);
@@ -152,7 +152,7 @@ function get_environment_info() {
  * @param WP_REST_Request $request Request object.
  * @return WP_REST_Response
  */
-function activate_theme_via_api( WP_REST_Request $request ) {
+function activate_theme( WP_REST_Request $request ) {
 	$theme_name = sanitize_text_field( $request['theme_name'] );
 
 	if ( wp_get_theme( $theme_name )->exists() ) {
