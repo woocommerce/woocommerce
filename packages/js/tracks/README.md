@@ -27,8 +27,8 @@ recordEvent( 'page_view', { path } )
 
 | Param | Type | Description |
 | --- | --- | --- |
-| eventName | <code>String</code> | The name of the event to record, don't include the `wcadmin_` prefix |
-| eventProperties | <code>Object</code> | Event properties to include in the event |
+| eventName | `String` | The name of the event to record, don't include the `wcadmin_` prefix |
+| eventProperties | `Object` | Event properties to include in the event |
 
 ### queueRecordEvent( eventName, eventProperties )
 
@@ -38,22 +38,45 @@ This allows you to delay tracks events that would otherwise cause a race conditi
 For example, when we trigger `wcadmin_tasklist_appearance_continue_setup` we're simultaneously moving the user to a new page via
 `window.location`. This is an example of a race condition that should be avoided by enqueueing the event,
 and therefore running it on the next pageview.
-
 | Param | Type | Description |
 | --- | --- | --- |
-| eventName | <code>String</code> | The name of the event to record, don't include the `wcadmin_` prefix |
-| eventProperties | <code>Object</code> | Event properties to include in the event |
+| eventName | `String` | The name of the event to record, don't include the `wcadmin_` prefix |
+| eventProperties | `Object` | Event properties to include in the event |
 
-### recordPageView( eventName, eventProperties )
+### recordPageView( path, extraProperties )
 
 Record a page view to Tracks.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| path | <code>String</code> | Path the page/path to record a page view for |
-| extraProperties | <code>Object</code> | Extra event properties to include in the event |
+| path | `String` | Path the page/path to record a page view for |
+| extraProperties | `Object` | Extra event properties to include in the event |
 
-# Debugging
+### bumpStat( statName, statValue )
+
+Bump a stat or group of stats.
+
+```typescript
+import { bumpStat } from '@woocommerce/tracks';
+
+// Bump a single stat
+bumpStat( 'stat_name', 'stat_value' );
+
+// Bump multiple stats
+bumpStat( {
+  stat1: 'value1',
+  stat2: 'value2'
+} );
+```
+
+| Param | Type | Description |
+| --- | --- | --- |
+| statName | `String` or `Object` | The name of the stat to bump, or an object of stat names and values |
+| statValue | `String` | The value for the stat (only used when statName is a string) |
+
+Note: Stat names are automatically prefixed with `x_woocommerce-`. Stat tracking is disabled in development mode.
+
+## Debugging
 
 When debugging is activated info for each recorded Tracks event is logged to the browser console.
 

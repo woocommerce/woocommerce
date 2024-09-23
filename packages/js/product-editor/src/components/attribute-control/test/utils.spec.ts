@@ -1,15 +1,21 @@
 /**
  * External dependencies
  */
-import { ProductProductAttribute } from '@woocommerce/data';
+import {
+	ProductAttributeTerm,
+	ProductProductAttribute,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import {
 	getAttributeKey,
+	hasTermsOrOptions,
+	isAttributeFilledOut,
 	reorderSortableProductAttributePositions,
 } from '../utils';
+import { EnhancedProductAttribute } from '../../../hooks/use-product-attributes';
 
 const attributeList: Record< number | string, ProductProductAttribute > = {
 	15: {
@@ -72,5 +78,172 @@ describe( 'getAttributeKey', () => {
 	it( 'should return the attribute key', () => {
 		expect( getAttributeKey( attributeList[ '15' ] ) ).toEqual( 15 );
 		expect( getAttributeKey( attributeList.Quality ) ).toEqual( 'Quality' );
+	} );
+} );
+
+describe( 'hasTermsOrOptions', () => {
+	it( 'should return true if the attribute has local terms (options)', () => {
+		const attribute: EnhancedProductAttribute = {
+			name: 'Color',
+			id: 0,
+			slug: 'color',
+			position: 0,
+			visible: true,
+			variation: true,
+			options: [ 'Beige', 'black', 'Blue' ],
+		};
+
+		expect( hasTermsOrOptions( attribute ) ).toBe( true );
+	} );
+
+	it( 'should return true if the attribute has global terms', () => {
+		const terms: ProductAttributeTerm[] = [
+			{
+				id: 1,
+				name: 'red',
+				slug: 'red',
+				description: 'red color',
+				count: 1,
+				menu_order: 0,
+			},
+			{
+				id: 2,
+				name: 'blue',
+				slug: 'blue',
+				description: 'blue color',
+				count: 1,
+				menu_order: 1,
+			},
+			{
+				id: 3,
+				name: 'green',
+				slug: 'green',
+				description: 'green color',
+				count: 1,
+				menu_order: 2,
+			},
+		];
+
+		const attribute: EnhancedProductAttribute = {
+			name: 'Color',
+			id: 123,
+			slug: 'color',
+			position: 0,
+			visible: true,
+			variation: true,
+			terms,
+			options: [],
+		};
+
+		expect( hasTermsOrOptions( attribute ) ).toBe( true );
+	} );
+
+	it( 'should return false if the attribute has neither terms nor options', () => {
+		const attribute: EnhancedProductAttribute = {
+			name: 'Empty',
+			id: 999,
+			slug: 'empty',
+			position: 0,
+			visible: true,
+			variation: true,
+			options: [],
+		};
+		expect( hasTermsOrOptions( attribute ) ).toBe( false );
+	} );
+
+	it( 'should return false if the attribute is null', () => {
+		const attribute = null;
+		expect( hasTermsOrOptions( attribute ) ).toBe( false );
+	} );
+} );
+
+describe( 'isAttributeFilledOut', () => {
+	it( 'should return true if the attribute has a name and local terms (options)', () => {
+		const attribute: EnhancedProductAttribute = {
+			name: 'Color',
+			id: 0,
+			slug: 'color',
+			position: 0,
+			visible: true,
+			variation: true,
+			options: [ 'Beige', 'black', 'Blue' ],
+		};
+
+		expect( isAttributeFilledOut( attribute ) ).toBe( true );
+	} );
+
+	it( 'should return true if the attribute has a name and global terms', () => {
+		const terms: ProductAttributeTerm[] = [
+			{
+				id: 1,
+				name: 'red',
+				slug: 'red',
+				description: 'red color',
+				count: 1,
+				menu_order: 0,
+			},
+			{
+				id: 2,
+				name: 'blue',
+				slug: 'blue',
+				description: 'blue color',
+				count: 1,
+				menu_order: 1,
+			},
+			{
+				id: 3,
+				name: 'green',
+				slug: 'green',
+				description: 'green color',
+				count: 1,
+				menu_order: 2,
+			},
+		];
+
+		const attribute: EnhancedProductAttribute = {
+			name: 'Color',
+			id: 123,
+			slug: 'color',
+			position: 0,
+			visible: true,
+			variation: true,
+			terms,
+			options: [],
+		};
+
+		expect( isAttributeFilledOut( attribute ) ).toBe( true );
+	} );
+
+	it( 'should return false if the attribute has a name but no terms or options', () => {
+		const attribute: EnhancedProductAttribute = {
+			name: 'Empty',
+			id: 999,
+			slug: 'empty',
+			position: 0,
+			visible: true,
+			variation: true,
+			options: [],
+		};
+
+		expect( isAttributeFilledOut( attribute ) ).toBe( false );
+	} );
+
+	it( 'should return false if the attribute is null', () => {
+		const attribute = null;
+		expect( isAttributeFilledOut( attribute ) ).toBe( false );
+	} );
+
+	it( 'should return false if the attribute has no name', () => {
+		const attribute: EnhancedProductAttribute = {
+			name: '',
+			id: 0,
+			slug: 'color',
+			position: 0,
+			visible: true,
+			variation: true,
+			options: [ 'Beige', 'black', 'Blue' ],
+		};
+
+		expect( isAttributeFilledOut( attribute ) ).toBe( false );
 	} );
 } );

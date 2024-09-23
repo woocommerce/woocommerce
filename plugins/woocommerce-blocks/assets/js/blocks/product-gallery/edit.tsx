@@ -10,6 +10,10 @@ import {
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import ErrorPlaceholder, {
+	ErrorObject,
+} from '@woocommerce/editor-components/error-placeholder';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -132,14 +136,16 @@ export const Edit = ( {
 
 	useEffect( () => {
 		const mode = getMode( currentTemplateId, templateType );
+		const newProductGalleryClientId =
+			attributes.productGalleryClientId || clientId;
 
 		setAttributes( {
 			...attributes,
 			mode,
-			productGalleryClientId: clientId,
+			productGalleryClientId: newProductGalleryClientId,
 		} );
 		// Move the Thumbnails block to the correct above or below the Large Image based on the thumbnailsPosition attribute.
-		moveInnerBlocksToPosition( attributes, clientId );
+		moveInnerBlocksToPosition( attributes, newProductGalleryClientId );
 	}, [
 		setAttributes,
 		attributes,
@@ -147,6 +153,18 @@ export const Edit = ( {
 		currentTemplateId,
 		templateType,
 	] );
+
+	if ( attributes.productGalleryClientId !== clientId ) {
+		const error = {
+			message: __(
+				'productGalleryClientId and clientId codes mismatch.',
+				'woocommerce'
+			),
+			type: 'general',
+		} as ErrorObject;
+
+		return <ErrorPlaceholder error={ error } isLoading={ false } />;
+	}
 
 	return (
 		<div { ...blockProps }>

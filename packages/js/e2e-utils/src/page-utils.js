@@ -267,7 +267,7 @@ export const selectOptionInSelect2 = async (
 	await page.waitForSelector( selector );
 	await page.click( selector );
 	await page.type( selector, value );
-	await waitForTimeout( 2000 ); // to avoid flakyness, must wait before pressing Enter
+	await waitForTimeout( 2000 ); // to avoid flakiness, must wait before pressing Enter
 	await page.keyboard.press( 'Enter' );
 };
 

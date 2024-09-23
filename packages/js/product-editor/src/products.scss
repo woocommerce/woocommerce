@@ -1,0 +1,46 @@
+@include wordpress-admin-schemes();
+
+.product_page_woocommerce-products-dashboard #wpadminbar,
+.product_page_woocommerce-products-dashboard #adminmenumain {
+	display: none;
+}
+
+.product_page_woocommerce-products-dashboard #wpcontent {
+	margin-left: 0;
+}
+
+body.product_page_woocommerce-products-dashboard #woocommerce-products-dashboard {
+	@include wp-admin-reset("#woocommerce-products-dashboard");
+	@include reset;
+	display: block !important;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	min-height: 100vh;
+}
+
+body.js.is-fullscreen-mode {
+	@include break-medium {
+		// Reset the html.wp-topbar padding.
+		// Because this uses negative margins, we have to compensate for the height.
+		margin-top: -$admin-bar-height;
+		height: calc(100% + #{$admin-bar-height});
+
+		#adminmenumain,
+		#wpadminbar {
+			display: none;
+		}
+
+		#wpcontent,
+		#wpfooter {
+			margin-left: 0;
+		}
+	}
+}
+
+.product_page_woocommerce-products-dashboard {
+	@import "products-app/sidebar-dataviews/style.scss";
+	@import "products-app/product-edit/style.scss";
+}

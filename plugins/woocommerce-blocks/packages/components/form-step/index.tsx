@@ -17,7 +17,6 @@ interface StepHeadingProps {
 const StepHeading = ( { title, stepHeadingContent }: StepHeadingProps ) => (
 	<div className="wc-block-components-checkout-step__heading">
 		<Title
-			aria-hidden="true"
 			className="wc-block-components-checkout-step__title"
 			headingLevel="2"
 		>

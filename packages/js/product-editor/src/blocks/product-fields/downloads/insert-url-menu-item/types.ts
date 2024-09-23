@@ -3,7 +3,9 @@
  */
 import { MediaItem } from '@wordpress/media-utils';
 
+export type InsertUrlLinkErrorCallback = ( error: string ) => void;
+
 export type InsertUrlMenuItemProps = {
-	onUploadSuccess( files: MediaItem[] ): void;
-	onUploadError( error: unknown ): void;
+	onLinkSuccess( files: MediaItem[] ): void;
+	onLinkError: InsertUrlLinkErrorCallback;
 };

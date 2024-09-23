@@ -1,12 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 
 /**
- * BlockTypesController class.
+ * BlockTemplatesController class.
  *
  * @internal
  */
@@ -27,78 +26,10 @@ class BlockTemplatesController {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
-		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
-		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
-		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
-
-		if ( wc_current_theme_is_fse_theme() ) {
-			// By default, the Template Part Block only supports template parts that are in the current theme directory.
-			// This render_callback wrapper allows us to add support for plugin-housed template parts.
-			add_filter(
-				'block_type_metadata_settings',
-				function ( $settings, $metadata ) {
-					if (
-						isset( $metadata['name'], $settings['render_callback'] ) &&
-						'core/template-part' === $metadata['name'] &&
-						in_array( $settings['render_callback'], array( 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ), true )
-					) {
-						$settings['render_callback'] = array( $this, 'render_woocommerce_template_part' );
-					}
-					return $settings;
-				},
-				10,
-				2
-			);
-
-			// Prevents shortcodes in templates having their HTML content broken by wpautop.
-			// @see https://core.trac.wordpress.org/ticket/58366 for more info.
-			add_filter(
-				'block_type_metadata_settings',
-				function ( $settings, $metadata ) {
-					if (
-						isset( $metadata['name'], $settings['render_callback'] ) &&
-						'core/shortcode' === $metadata['name']
-					) {
-						$settings['original_render_callback'] = $settings['render_callback'];
-						$settings['render_callback']          = function ( $attributes, $content ) use ( $settings ) {
-							// The shortcode has already been rendered, so look for the cart/checkout HTML.
-							if ( strstr( $content, 'woocommerce-cart-form' ) || strstr( $content, 'wc-empty-cart-message' ) || strstr( $content, 'woocommerce-checkout-form' ) ) {
-								// Return early before wpautop runs again.
-								return $content;
-							}
-
-							$render_callback = $settings['original_render_callback'];
-
-							return $render_callback( $attributes, $content );
-						};
-					}
-					return $settings;
-				},
-				10,
-				2
-			);
-
-			/**
-			 * Prevents the pages that are assigned as cart/checkout from showing the "template" selector in the page-editor.
-			 * We want to avoid this flow and point users towards the site editor instead.
-			 */
-			add_action(
-				'current_screen',
-				function () {
-					if ( ! is_admin() ) {
-						return;
-					}
-
-					$current_screen = get_current_screen();
-
-					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					if ( $current_screen && 'page' === $current_screen->id && ! empty( $_GET['post'] ) && in_array( absint( $_GET['post'] ), array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ), true ) ) {
-						wp_add_inline_style( 'wc-blocks-editor-style', '.edit-post-post-template { display: none; }' );
-					}
-				},
-				10
-			);
-		}
+		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_fallback_template_to_hierarchy' ), 10, 1 );
+		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
+		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
+		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
 	}
 
 	/**
@@ -122,6 +53,10 @@ class BlockTemplatesController {
 	 * This function is used on the `pre_get_block_template` hook to return the fallback template from the db in case
 	 * the template is eligible for it.
 	 *
+	 * Currently, the Products by Category, Products by Tag and Products by Attribute templates fall back to the
+	 * Product Catalog template. That means that if there are customizations in the Product Catalog template,
+	 * they are also reflected in the other templates as long as they haven't been customized as well.
+	 *
 	 * @param \WP_Block_Template|null $template Block template object to short-circuit the default query,
 	 *                                          or null to allow WP to run its normal queries.
 	 * @param string                  $id Template unique identifier (example: theme_slug//template_slug).
@@ -144,13 +79,14 @@ class BlockTemplatesController {
 		$template_name_parts = explode( '//', $id );
 		$theme               = $template_name_parts[0] ?? '';
 		$slug                = $template_name_parts[1] ?? '';
+		$registered_template = BlockTemplateUtils::get_template( $slug );
 
-		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $slug ) ) {
+		if ( empty( $theme ) || empty( $slug ) || ! $registered_template || ! isset( $registered_template->fallback_template ) ) {
 			return null;
 		}
 
 		$wp_query_args  = array(
-			'post_name__in' => array( ProductCatalogTemplate::SLUG, $slug ),
+			'post_name__in' => array( $registered_template->fallback_template, $slug ),
 			'post_type'     => $template_type,
 			'post_status'   => array( 'auto-draft', 'draft', 'publish', 'trash' ),
 			'no_found_rows' => true,
@@ -166,12 +102,12 @@ class BlockTemplatesController {
 		$posts          = $template_query->posts;
 
 		// If we have more than one result from the query, it means that the current template is present in the db (has
-		// been customized by the user) and we should not return the `archive-product` template.
+		// been customized by the user) and we should not return the fallback template.
 		if ( count( $posts ) > 1 ) {
 			return null;
 		}
 
-		if ( count( $posts ) > 0 && ProductCatalogTemplate::SLUG === $posts[0]->post_name ) {
+		if ( count( $posts ) > 0 && $registered_template->fallback_template === $posts[0]->post_name ) {
 			$template = _build_block_template_result_from_post( $posts[0] );
 
 			if ( ! is_wp_error( $template ) ) {
@@ -189,48 +125,90 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Adds the `archive-product` template to the `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute`
-	 * templates to be able to fall back to it.
+	 * Adds the fallback template to the template hierarchy.
 	 *
 	 * @param array $template_hierarchy A list of template candidates, in descending order of priority.
 	 */
-	public function add_archive_product_to_eligible_for_fallback_templates( $template_hierarchy ) {
+	public function add_fallback_template_to_hierarchy( $template_hierarchy ) {
 		$template_slugs = array_map(
 			'_strip_template_file_suffix',
 			$template_hierarchy
 		);
 
-		$templates_eligible_for_fallback = array_filter(
-			$template_slugs,
-			function ( $template_slug ) {
-				return BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug );
+		foreach ( $template_slugs as $template_slug ) {
+			$template = BlockTemplateUtils::get_template( $template_slug );
+			if ( $template && isset( $template->fallback_template ) ) {
+				$template_hierarchy[] = $template->fallback_template;
 			}
-		);
-
-		if ( count( $templates_eligible_for_fallback ) > 0 ) {
-			$template_hierarchy[] = ProductCatalogTemplate::SLUG;
 		}
 
 		return $template_hierarchy;
 	}
 
 	/**
-	 * Checks the old and current themes and determines if the "wc_blocks_use_blockified_product_grid_block_as_template"
-	 * option need to be updated accordingly.
+	 * By default, the Template Part Block only supports template parts that are in the current theme directory.
+	 * This render_callback wrapper allows us to add support for plugin-housed template parts.
 	 *
-	 * @param string    $old_name Old theme name.
-	 * @param \WP_Theme $old_theme Instance of the old theme.
+	 * @param array $settings Array of determined settings for registering a block type.
+	 * @param array $metadata     Metadata provided for registering a block type.
+	 */
+	public function add_plugin_templates_parts_support( $settings, $metadata ) {
+		if (
+			isset( $metadata['name'], $settings['render_callback'] ) &&
+			'core/template-part' === $metadata['name'] &&
+			in_array( $settings['render_callback'], array( 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ), true )
+		) {
+			$settings['render_callback'] = array( $this, 'render_woocommerce_template_part' );
+		}
+		return $settings;
+	}
+
+
+	/**
+	 * Prevents shortcodes in templates having their HTML content broken by wpautop.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/58366 for more info.
+	 *
+	 * @param array $settings Array of determined settings for registering a block type.
+	 * @param array $metadata     Metadata provided for registering a block type.
+	 */
+	public function prevent_shortcodes_html_breakage( $settings, $metadata ) {
+		if (
+				isset( $metadata['name'], $settings['render_callback'] ) &&
+				'core/shortcode' === $metadata['name']
+			) {
+			$settings['original_render_callback'] = $settings['render_callback'];
+			$settings['render_callback']          = function ( $attributes, $content ) use ( $settings ) {
+				// The shortcode has already been rendered, so look for the cart/checkout HTML.
+				if ( strstr( $content, 'woocommerce-cart-form' ) || strstr( $content, 'wc-empty-cart-message' ) || strstr( $content, 'woocommerce-checkout-form' ) ) {
+					// Return early before wpautop runs again.
+					return $content;
+				}
+
+				$render_callback = $settings['original_render_callback'];
+
+				return $render_callback( $attributes, $content );
+			};
+		}
+		return $settings;
+	}
+
+	/**
+	 * Prevents the pages that are assigned as Cart/Checkout from showing the "template" selector in the page-editor.
+	 * We want to avoid this flow and point users towards the Site Editor instead.
+	 *
 	 * @return void
 	 */
-	public function check_should_use_blockified_product_grid_templates( $old_name, $old_theme ) {
-		if ( ! wc_current_theme_is_fse_theme() ) {
-			update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( false ) );
+	public function hide_template_selector_in_cart_checkout_pages() {
+		if ( ! is_admin() ) {
 			return;
 		}
 
-		if ( ! $old_theme->is_block_theme() && wc_current_theme_is_fse_theme() ) {
-			update_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE, wc_bool_to_string( true ) );
-			return;
+		$current_screen = get_current_screen();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $current_screen && 'page' === $current_screen->id && ! empty( $_GET['post'] ) && in_array( absint( $_GET['post'] ), array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ), true ) ) {
+			wp_add_inline_style( 'wc-blocks-editor-style', '.edit-post-post-template { display: none; }' );
 		}
 	}
 
@@ -254,10 +232,12 @@ class BlockTemplatesController {
 
 		list( $template_id, $template_slug ) = $template_name_parts;
 
-		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-			$template_path   = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
+		// If the template is not present in the theme but its fallback template is,
+		// let's use the theme's fallback template.
+		if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
+			$registered_template = BlockTemplateUtils::get_template( $template_slug );
+			$template_path       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
+			$template_object     = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
 			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 		}
 
@@ -356,16 +336,26 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			$is_not_custom   = false === array_search(
+			$possible_template_ids = [
 				$theme_slug . '//' . $template_file->slug,
-				array_column( $query_result, 'id' ),
-				true
-			);
+				$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_file->slug,
+				$theme_slug . '//' . BlockTemplateUtils::DIRECTORY_NAMES['DEPRECATED_TEMPLATE_PARTS'] . '/' . $template_file->slug,
+			];
+
+			$is_custom                 = false;
+			$query_result_template_ids = array_column( $query_result, 'id' );
+
+			foreach ( $possible_template_ids as $template_id ) {
+				if ( in_array( $template_id, $query_result_template_ids, true ) ) {
+					$is_custom = true;
+					break;
+				}
+			}
 			$fits_slug_query =
 				! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
 			$fits_area_query =
 				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
-			$should_include  = $is_not_custom && $fits_slug_query && $fits_area_query;
+			$should_include  = ! $is_custom && $fits_slug_query && $fits_area_query;
 			if ( $should_include ) {
 				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 				$query_result[] = $template;
@@ -452,7 +442,7 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $already_found_templates ) ) {
+			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_db( $template_slug, $already_found_templates ) ) {
 				$template              = clone BlockTemplateUtils::get_fallback_template_from_db( $template_slug, $already_found_templates );
 				$template_id           = explode( '//', $template->id );
 				$template->id          = $template_id[0] . '//' . $template_slug;
@@ -463,18 +453,12 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-				$template_file = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
-				continue;
-			}
-
-			// At this point the template only exists in the Blocks filesystem, if is a taxonomy-product_cat/tag/attribute.html template
-			// let's use the archive-product.html template from Blocks.
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
-				$template_file = $this->get_template_path_from_woocommerce( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, false );
+			// If the template is not present in the theme but its fallback template is,
+			// let's use the theme's fallback template.
+			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
+				$registered_template = BlockTemplateUtils::get_template( $template_slug );
+				$template_file       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
+				$templates[]         = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
 				continue;
 			}
 
@@ -502,18 +486,6 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Returns the path of a template on the Blocks template folder.
-	 *
-	 * @param string $template_slug Block template slug e.g. single-product.
-	 * @param string $template_type wp_template or wp_template_part.
-	 *
-	 * @return string
-	 */
-	public function get_template_path_from_woocommerce( $template_slug, $template_type = 'wp_template' ) {
-		return BlockTemplateUtils::get_templates_directory( $template_type ) . '/' . $template_slug . '.html';
-	}
-
-	/**
 	 * Checks whether a block template with that name exists in Woo Blocks
 	 *
 	 * @param string $template_name Template to check.
@@ -530,29 +502,5 @@ class BlockTemplatesController {
 		return is_readable(
 			$directory
 		) || $this->get_block_templates( array( $template_name ), $template_type );
-	}
-
-	/**
-	 * Update the product archive title to "Shop".
-	 *
-	 * Attention: this method is run in classic themes as well, so it
-	 * can't be moved to the ProductCatalogTemplate class. See:
-	 * https://github.com/woocommerce/woocommerce/pull/46429
-	 *
-	 * @param string $post_type_name Post type 'name' label.
-	 * @param string $post_type      Post type.
-	 *
-	 * @return string
-	 */
-	public function update_product_archive_title( $post_type_name, $post_type ) {
-		if (
-			function_exists( 'is_shop' ) &&
-			is_shop() &&
-			'product' === $post_type
-		) {
-			return __( 'Shop', 'woocommerce' );
-		}
-
-		return $post_type_name;
 	}
 }

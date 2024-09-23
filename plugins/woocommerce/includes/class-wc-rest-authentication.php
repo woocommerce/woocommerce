@@ -35,6 +35,22 @@ class WC_REST_Authentication {
 	protected $auth_method = '';
 
 	/**
+	 * Provides access to the global WC_REST_Authentication instance.
+	 *
+	 * @internal
+	 * @return self
+	 */
+	public static function instance(): self {
+		static $instance;
+
+		if ( ! isset( $instance ) ) {
+			$instance = new self();
+		}
+
+		return $instance;
+	}
+
+	/**
 	 * Initialize authentication actions.
 	 */
 	public function __construct() {
@@ -582,11 +598,39 @@ class WC_REST_Authentication {
 	}
 
 	/**
-	 * Updated API Key last access datetime.
+	 * Updates the `last_access` field for the API key associated with the current request.
+	 *
+	 * This method tries to disambiguate 'primary' API requests from any programmatic REST
+	 * API requests made internally.
+	 *
+	 * @param WP_REST_Request $request The request currently being processed.
+	 *
+	 * @return void
 	 */
-	private function update_last_access() {
+	private function update_last_access( $request ) {
+		global $wp;
 		global $wpdb;
 
+		// Lots of (programmatically) created REST API requests may be handled within the same process.
+		// In most cases, however, we do not want to record the last access time for each of these.
+		$do_not_record = true;
+
+		// Try to detect if the REST API request actively being processed matches the current WP request.
+		if ( is_a( $wp, WP::class ) && is_a( $request, WP_REST_Request::class ) ) {
+			$actual_http_request     = trim( $wp->request, '/' );
+			$api_request_in_progress = trim( $request->get_route(), '/' );
+
+			// Remove the REST API route prefix (normally 'wp-json') for easier comparison.
+			$rest_prefix = trailingslashit( rest_get_url_prefix() );
+
+			if ( str_starts_with( $actual_http_request, $rest_prefix ) ) {
+				$actual_http_request = substr( $actual_http_request, strlen( $rest_prefix ) );
+			}
+
+			// Recommend recording the last access time only if the actual WP request and the current
+			// API request being processed are a match.
+			$do_not_record = $actual_http_request !== $api_request_in_progress;
+		}
 		/**
 		 * This filter enables the exclusion of the most recent access time from being logged for REST API calls.
 		 *
@@ -596,7 +640,7 @@ class WC_REST_Authentication {
 		 *
 		 * @since 7.7.0
 		 */
-		if ( apply_filters( 'woocommerce_disable_rest_api_access_log', false, $this->user->key_id, $this->user->user_id ) ) {
+		if ( apply_filters( 'woocommerce_disable_rest_api_access_log', $do_not_record, $this->user->key_id, $this->user->user_id ) ) {
 			return;
 		}
 
@@ -643,11 +687,11 @@ class WC_REST_Authentication {
 			}
 
 			// Register last access.
-			$this->update_last_access();
+			$this->update_last_access( $request );
 		}
 
 		return $result;
 	}
 }
 
-new WC_REST_Authentication();
+WC_REST_Authentication::instance();

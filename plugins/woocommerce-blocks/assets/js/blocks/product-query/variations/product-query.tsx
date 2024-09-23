@@ -63,7 +63,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		// @ts-ignore
 		allowedControls: DEFAULT_ALLOWED_CONTROLS,
 		innerBlocks: INNER_BLOCKS_TEMPLATE,
-		scope: [ 'inserter' ],
+		scope: [],
 	} );
 };
 

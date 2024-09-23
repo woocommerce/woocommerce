@@ -4,7 +4,6 @@
 import {
 	CommandVarOptions,
 	JobType,
-	testTypes,
 	LintJobConfig,
 	TestJobConfig,
 } from './config';
@@ -32,6 +31,15 @@ interface TestJobEnv {
 }
 
 /**
+ * A testing job report.
+ */
+interface TestJobReport {
+	resultsBlobName: string;
+	resultsPath: string;
+	allure: boolean;
+}
+
+/**
  * A testing job.
  */
 interface TestJob {
@@ -42,6 +50,8 @@ interface TestJob {
 	testEnv: TestJobEnv;
 	shardNumber: number;
 	optional: boolean;
+	testType: string;
+	report: TestJobReport;
 }
 
 /**
@@ -230,8 +240,10 @@ async function createTestJob(
 			shouldCreate: false,
 			envVars: {},
 		},
+		report: config.report,
 		shardNumber,
 		optional: config.optional,
+		testType: config.testType,
 	};
 
 	// We want to make sure that we're including the configuration for
@@ -268,10 +280,6 @@ async function createJobsForProject(
 		test: [],
 	};
 
-	testTypes.forEach( ( type ) => {
-		newJobs[ `${ type }Test` ] = [];
-	} );
-
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
 	// for jobs before ourselves. This lets any cascade keys created in dependencies cascade to dependents.
 	const newCascadeKeys = [];
@@ -294,22 +302,18 @@ async function createJobsForProject(
 			dependencyCascade
 		);
 
-		if (
-			dependencyChanges === false &&
-			Object.values( dependencyJobs ).some(
-				( array ) => array.length > 0
-			)
-		) {
-			dependencyChanges = true;
+		if ( dependencyChanges === false ) {
+			// First line of detection: implicit changes list points to the dependency.
+			dependencyChanges = ( changes[ dependency.name ] || [] ).length > 0;
+			if ( dependencyChanges === false ) {
+				// Second line of detection: the dependency spawns jobs.
+				dependencyChanges =
+					dependencyJobs.test.length + dependencyJobs.lint.length > 0;
+			}
 		}
 
 		newJobs.lint.push( ...dependencyJobs.lint );
-
-		testTypes.forEach( ( type ) => {
-			newJobs[ `${ type }Test` ].push(
-				...dependencyJobs[ `${ type }Test` ]
-			);
-		} );
+		newJobs.test.push( ...dependencyJobs.test );
 
 		// Track any new cascade keys added by the dependency.
 		// Since we're filtering out duplicates after the
@@ -402,9 +406,7 @@ async function createJobsForProject(
 
 				jobConfig.jobCreated = true;
 
-				newJobs[ `${ jobConfig.testType }Test` ].push(
-					...getShardedJobs( created, jobConfig )
-				);
+				newJobs.test.push( ...getShardedJobs( created, jobConfig ) );
 
 				// We need to track any cascade keys that this job is associated with so that
 				// dependent projects can trigger jobs with matching keys. We are expecting

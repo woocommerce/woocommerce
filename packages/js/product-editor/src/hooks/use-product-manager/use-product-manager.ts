@@ -10,39 +10,9 @@ import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
  * Internal dependencies
  */
 import { useValidations } from '../../contexts/validation-context';
-import type { WPError } from '../../utils/get-product-error-message';
+import type { WPError } from '../../hooks/use-error-handler';
 import { AUTO_DRAFT_NAME } from '../../utils/constants';
-
-function errorHandler( error: WPError, productStatus: ProductStatus ) {
-	if ( error.code ) {
-		return error;
-	}
-
-	if ( 'variations' in error && error.variations ) {
-		return {
-			code: 'variable_product_no_variation_prices',
-			message: error.variations,
-		};
-	}
-
-	const errorMessage = Object.values( error ).find(
-		( value ) => value !== undefined
-	) as string | undefined;
-
-	if ( errorMessage !== undefined ) {
-		return {
-			code: 'product_form_field_error',
-			message: errorMessage,
-		};
-	}
-
-	return {
-		code:
-			productStatus === 'publish' || productStatus === 'future'
-				? 'product_publish_error'
-				: 'product_create_error',
-	};
-}
+import { formatProductError } from '../../utils/format-product-error';
 
 export function useProductManager< T = Product >( postType: string ) {
 	const [ id ] = useEntityProp< number >( 'postType', postType, 'id' );
@@ -107,7 +77,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return savedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw formatProductError( error as WPError, status );
 		} finally {
 			setIsSaving( false );
 		}
@@ -128,7 +98,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return duplicatedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw formatProductError( error as WPError, status );
 		} finally {
 			setIsSaving( false );
 		}
@@ -174,7 +144,7 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			return deletedProduct as T;
 		} catch ( error ) {
-			throw errorHandler( error as WPError, status );
+			throw formatProductError( error as WPError, status );
 		} finally {
 			setTrashing( false );
 		}

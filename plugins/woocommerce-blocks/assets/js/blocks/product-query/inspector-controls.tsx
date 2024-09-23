@@ -35,6 +35,7 @@ import {
 import {
 	isCustomInheritGlobalQueryImplementationEnabled,
 	isWooQueryBlockVariation,
+	isRelatedProducts,
 	setQueryAttribute,
 	useAllowedControls,
 } from './utils';
@@ -225,35 +226,40 @@ const ProductQueryControls = ( props: ProductQueryBlock ) => {
 		props.attributes.namespace
 	);
 
+	const isProductsBlock = ! isRelatedProducts( props );
+
 	return (
 		<>
 			<InspectorControls>
-				{ MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION && (
-					<UpgradeNotice upgradeBlock={ manualUpdate } />
-				) }
+				{ isProductsBlock &&
+					MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION && (
+						<UpgradeNotice upgradeBlock={ manualUpdate } />
+					) }
 				{ allowedControls?.includes( 'presets' ) && (
 					<PopularPresets { ...props } />
 				) }
-				<ToolsPanel
-					className="woocommerce-product-query-toolspanel"
-					label={ __( 'Advanced Filters', 'woocommerce' ) }
-					resetAll={ () => {
-						setQueryAttribute( props, defaultWooQueryParams );
-					} }
-				>
-					{ Object.entries( TOOLS_PANEL_CONTROLS ).map(
-						( [ key, Control ] ) =>
-							allowedControls?.includes( key ) ? (
-								<Control
-									{ ...props }
-									defaultWooQueryParams={
-										defaultWooQueryParams
-									}
-									key={ key }
-								/>
-							) : null
-					) }
-				</ToolsPanel>
+				{ isProductsBlock && (
+					<ToolsPanel
+						className="woocommerce-product-query-toolspanel"
+						label={ __( 'Advanced Filters', 'woocommerce' ) }
+						resetAll={ () => {
+							setQueryAttribute( props, defaultWooQueryParams );
+						} }
+					>
+						{ Object.entries( TOOLS_PANEL_CONTROLS ).map(
+							( [ key, Control ] ) =>
+								allowedControls?.includes( key ) ? (
+									<Control
+										{ ...props }
+										defaultWooQueryParams={
+											defaultWooQueryParams
+										}
+										key={ key }
+									/>
+								) : null
+						) }
+					</ToolsPanel>
+				) }
 			</InspectorControls>
 		</>
 	);

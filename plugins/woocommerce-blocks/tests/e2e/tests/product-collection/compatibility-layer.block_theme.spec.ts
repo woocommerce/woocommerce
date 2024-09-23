@@ -92,10 +92,6 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 			await requestUtils.activatePlugin(
 				'woocommerce-blocks-test-product-collection-compatibility-layer'
 			);
-
-			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
-			);
 			await pageObject.goToProductCatalogFrontend();
 		} );
 

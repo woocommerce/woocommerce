@@ -73,7 +73,13 @@ const ShippingCalculatorAddress = ( {
 					const isAddressValid = validateSubmit();
 
 					if ( isAddressValid ) {
-						return onUpdate( address );
+						const addressToSubmit = {};
+						addressFields.forEach( ( key ) => {
+							if ( typeof address[ key ] !== 'undefined' ) {
+								addressToSubmit[ key ] = address[ key ];
+							}
+						} );
+						return onUpdate( addressToSubmit );
 					}
 				} }
 				type="submit"

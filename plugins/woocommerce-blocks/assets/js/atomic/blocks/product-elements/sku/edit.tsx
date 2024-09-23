@@ -10,6 +10,7 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import './editor.scss';
 import Block from './block';
 import type { Attributes } from './types';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
@@ -60,15 +61,15 @@ const Edit = ( {
 			<div
 				{ ...blockProps }
 				/**
-				 * If block is decendant of the All Products block, we don't want to
-				 * apply style here because it will be applied inside Block using
-				 * useColors, useTypography, and useSpacing hooks.
+				 * If block is a descendant of the All Products block, we don't
+				 * want to apply style here because it will be applied inside
+				 * Block using useColors, useTypography, and useSpacing hooks.
 				 */
 				style={
 					attributes.isDescendantOfAllProducts ? undefined : style
 				}
 			>
-				<Block { ...blockAttrs } />
+				<Block { ...blockAttrs } setAttributes={ setAttributes } />
 			</div>
 		</>
 	);

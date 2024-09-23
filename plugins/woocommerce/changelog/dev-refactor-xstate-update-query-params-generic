@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Made XState utils updateQueryParam generic so that it can be reused in other XState machines

@@ -37,10 +37,22 @@ test.describe( 'Single Product template', () => {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 
 		// Verify edits are visible.
 		await page.goto( testData.permalink );
 		await expect( page.getByText( userText ).first() ).toBeVisible();
+
+		// Revert edition.
+		await admin.visitSiteEditor( {
+			postType: testData.templateType,
+		} );
+		await editor.revertTemplate( { templateName: testData.templateName } );
+		await page.goto( testData.permalink );
+
+		// Verify the edits are no longer visible.
+		await expect( page.getByText( userText ) ).toHaveCount( 0 );
 	} );
 } );

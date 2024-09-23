@@ -2,6 +2,7 @@
  * External dependencies
  */
 import compareVersions from 'compare-versions';
+import type { SymbolPosition } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -137,4 +138,36 @@ export const getPaymentMethodData = (
 		unknown
 	>;
 	return paymentMethodData[ paymentMethodId ] ?? defaultValue;
+};
+
+/**
+ * Get currency prefix.
+ */
+export const getCurrencyPrefix = (
+	symbol: string,
+	symbolPosition: SymbolPosition
+): string => {
+	const prefixes = {
+		left: symbol,
+		left_space: symbol + ' ',
+		right: '',
+		right_space: '',
+	};
+	return prefixes[ symbolPosition ] || '';
+};
+
+/**
+ * Get currency suffix.
+ */
+export const getCurrencySuffix = (
+	symbol: string,
+	symbolPosition: SymbolPosition
+): string => {
+	const suffixes = {
+		left: '',
+		left_space: '',
+		right: symbol,
+		right_space: ' ' + symbol,
+	};
+	return suffixes[ symbolPosition ] || '';
 };

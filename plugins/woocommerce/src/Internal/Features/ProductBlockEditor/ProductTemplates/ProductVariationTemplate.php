@@ -35,7 +35,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	public function __construct() {
 		$this->add_group_blocks();
 		$this->add_general_group_blocks();
-		$this->add_pricing_group_blocks();
 		$this->add_inventory_group_blocks();
 		$this->add_shipping_group_blocks();
 	}
@@ -76,15 +75,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		);
 		$this->add_group(
 			array(
-				'id'         => $this::GROUP_IDS['PRICING'],
-				'order'      => 20,
-				'attributes' => array(
-					'title' => __( 'Pricing', 'woocommerce' ),
-				),
-			)
-		);
-		$this->add_group(
-			array(
 				'id'         => $this::GROUP_IDS['INVENTORY'],
 				'order'      => 30,
 				'attributes' => array(
@@ -107,6 +97,8 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 * Adds the general group blocks to the template.
 	 */
 	protected function add_general_group_blocks() {
+		$is_calc_taxes_enabled = wc_tax_enabled();
+
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
 		$general_group->add_block(
 			array(
@@ -132,6 +124,92 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				),
 			)
 		);
+
+		// Product Pricing columns.
+		$pricing_columns  = $basic_details->add_block(
+			array(
+				'id'        => 'product-pricing-group-pricing-columns',
+				'blockName' => 'core/columns',
+				'order'     => 10,
+			)
+		);
+		$pricing_column_1 = $pricing_columns->add_block(
+			array(
+				'id'         => 'product-pricing-group-pricing-column-1',
+				'blockName'  => 'core/column',
+				'order'      => 10,
+				'attributes' => array(
+					'templateLock' => 'all',
+				),
+			)
+		);
+		$pricing_column_1->add_block(
+			array(
+				'id'         => 'product-pricing-regular-price',
+				'blockName'  => 'woocommerce/product-regular-price-field',
+				'order'      => 10,
+				'attributes' => array(
+					'name'       => 'regular_price',
+					'label'      => __( 'Regular price', 'woocommerce' ),
+					'isRequired' => true,
+					'help'       => $is_calc_taxes_enabled ? null : sprintf(
+					/* translators: %1$s: store settings link opening tag. %2$s: store settings link closing tag.*/
+						__( 'Per your %1$sstore settings%2$s, taxes are not enabled.', 'woocommerce' ),
+						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=general' ) . '" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
+				),
+			)
+		);
+		$pricing_column_2 = $pricing_columns->add_block(
+			array(
+				'id'         => 'product-pricing-group-pricing-column-2',
+				'blockName'  => 'core/column',
+				'order'      => 20,
+				'attributes' => array(
+					'templateLock' => 'all',
+				),
+			)
+		);
+		$pricing_column_2->add_block(
+			array(
+				'id'         => 'product-pricing-sale-price',
+				'blockName'  => 'woocommerce/product-sale-price-field',
+				'order'      => 10,
+				'attributes' => array(
+					'label' => __( 'Sale price', 'woocommerce' ),
+				),
+			)
+		);
+		$basic_details->add_block(
+			array(
+				'id'        => 'product-pricing-schedule-sale-fields',
+				'blockName' => 'woocommerce/product-schedule-sale-fields',
+				'order'     => 20,
+			)
+		);
+
+		if ( $is_calc_taxes_enabled ) {
+			$basic_details->add_block(
+				array(
+					'id'         => 'product-tax-class',
+					'blockName'  => 'woocommerce/product-select-field',
+					'order'      => 40,
+					'attributes' => array(
+						'label'    => __( 'Tax class', 'woocommerce' ),
+						'help'     => sprintf(
+						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+							__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s', 'woocommerce' ),
+							'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
+						'property' => 'tax_class',
+						'options'  => SimpleProductTemplate::get_tax_classes( 'product_variation' ),
+					),
+				)
+			);
+		}
+
 		$basic_details->add_block(
 			array(
 				'id'         => 'product-variation-note',
@@ -191,128 +269,6 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	}
 
 	/**
-	 * Adds the pricing group blocks to the template.
-	 */
-	protected function add_pricing_group_blocks() {
-		$is_calc_taxes_enabled = wc_tax_enabled();
-
-		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
-		$pricing_group->add_block(
-			array(
-				'id'         => 'pricing-single-variation-notice',
-				'blockName'  => 'woocommerce/product-single-variation-notice',
-				'order'      => 10,
-				'attributes' => array(
-					'content'       => __( '<strong>You’re editing details specific to this variation.</strong> Some information, like description and images, will be inherited from the main product, <noticeLink><parentProductName/></noticeLink>.', 'woocommerce' ),
-					'type'          => 'info',
-					'isDismissible' => true,
-					'name'          => $this::SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
-				),
-			)
-		);
-		// Product Pricing Section.
-		$product_pricing_section = $pricing_group->add_section(
-			array(
-				'id'         => 'product-pricing-section',
-				'order'      => 20,
-				'attributes' => array(
-					'title'       => __( 'Pricing', 'woocommerce' ),
-					'description' => sprintf(
-					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
-						__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
-						'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
-						'</a>'
-					),
-					'blockGap'    => 'unit-40',
-				),
-			)
-		);
-		$pricing_columns         = $product_pricing_section->add_block(
-			array(
-				'id'        => 'product-pricing-group-pricing-columns',
-				'blockName' => 'core/columns',
-				'order'     => 10,
-			)
-		);
-		$pricing_column_1        = $pricing_columns->add_block(
-			array(
-				'id'         => 'product-pricing-group-pricing-column-1',
-				'blockName'  => 'core/column',
-				'order'      => 10,
-				'attributes' => array(
-					'templateLock' => 'all',
-				),
-			)
-		);
-		$pricing_column_1->add_block(
-			array(
-				'id'         => 'product-pricing-regular-price',
-				'blockName'  => 'woocommerce/product-regular-price-field',
-				'order'      => 10,
-				'attributes' => array(
-					'name'       => 'regular_price',
-					'label'      => __( 'Regular price', 'woocommerce' ),
-					'isRequired' => true,
-					'help'       => $is_calc_taxes_enabled ? null : sprintf(
-					/* translators: %1$s: store settings link opening tag. %2$s: store settings link closing tag.*/
-						__( 'Per your %1$sstore settings%2$s, taxes are not enabled.', 'woocommerce' ),
-						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=general' ) . '" target="_blank" rel="noreferrer">',
-						'</a>'
-					),
-				),
-			)
-		);
-		$pricing_column_2 = $pricing_columns->add_block(
-			array(
-				'id'         => 'product-pricing-group-pricing-column-2',
-				'blockName'  => 'core/column',
-				'order'      => 20,
-				'attributes' => array(
-					'templateLock' => 'all',
-				),
-			)
-		);
-		$pricing_column_2->add_block(
-			array(
-				'id'         => 'product-pricing-sale-price',
-				'blockName'  => 'woocommerce/product-sale-price-field',
-				'order'      => 10,
-				'attributes' => array(
-					'label' => __( 'Sale price', 'woocommerce' ),
-				),
-			)
-		);
-		$product_pricing_section->add_block(
-			array(
-				'id'        => 'product-pricing-schedule-sale-fields',
-				'blockName' => 'woocommerce/product-schedule-sale-fields',
-				'order'     => 20,
-			)
-		);
-
-		if ( $is_calc_taxes_enabled ) {
-			$product_pricing_section->add_block(
-				array(
-					'id'         => 'product-tax-class',
-					'blockName'  => 'woocommerce/product-select-field',
-					'order'      => 40,
-					'attributes' => array(
-						'label'    => __( 'Tax class', 'woocommerce' ),
-						'help'     => sprintf(
-						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-							__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s', 'woocommerce' ),
-							'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
-							'</a>'
-						),
-						'property' => 'tax_class',
-						'options'  => SimpleProductTemplate::get_tax_classes( 'product_variation' ),
-					),
-				)
-			);
-		}
-	}
-
-	/**
 	 * Adds the inventory group blocks to the template.
 	 */
 	protected function add_inventory_group_blocks() {
@@ -353,11 +309,44 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'order' => 10,
 			)
 		);
-		$product_inventory_inner_section->add_block(
+		$inventory_columns               = $product_inventory_inner_section->add_block(
+			array(
+				'id'        => 'product-inventory-inner-columns',
+				'blockName' => 'core/columns',
+			)
+		);
+		$inventory_columns->add_block(
+			array(
+				'id'        => 'product-inventory-inner-column1',
+				'blockName' => 'core/column',
+			)
+		)->add_block(
 			array(
 				'id'        => 'product-variation-sku-field',
 				'blockName' => 'woocommerce/product-sku-field',
 				'order'     => 10,
+			)
+		);
+		$inventory_columns->add_block(
+			array(
+				'id'        => 'product-inventory-inner-column2',
+				'blockName' => 'core/column',
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-unique-id-field',
+				'blockName'  => 'woocommerce/product-text-field',
+				'order'      => 20,
+				'attributes' => array(
+					'property' => 'global_unique_id',
+					// translators: %1$s GTIN %2$s UPC %3$s EAN %4$s ISBN.
+					'label'    => sprintf( __( '%1$s, %2$s, %3$s, or %4$s', 'woocommerce' ), '<abbr title="' . esc_attr__( 'Global Trade Item Number', 'woocommerce' ) . '">' . esc_html__( 'GTIN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'Universal Product Code', 'woocommerce' ) . '">' . esc_html__( 'UPC', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'European Article Number', 'woocommerce' ) . '">' . esc_html__( 'EAN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'International Standard Book Number', 'woocommerce' ) . '">' . esc_html__( 'ISBN', 'woocommerce' ) . '</abbr>' ),
+					'tooltip'  => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+					'pattern'  => array(
+						'value'   => '[0-9\-]*',
+						'message' => __( 'Please enter only numbers and hyphens (-).', 'woocommerce' ),
+					),
+				),
 			)
 		);
 		$product_inventory_inner_section->add_block(

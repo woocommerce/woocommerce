@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { __experimentalErrorBoundary as ErrorBoundary } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -33,10 +34,23 @@ export function getAllPanels( {
 			id: 'orders-panel',
 			initialOpen: false,
 			panel: (
-				<OrdersPanel
-					unreadOrdersCount={ unreadOrdersCount }
-					orderStatuses={ orderStatuses }
-				/>
+				<ErrorBoundary
+					errorMessage={
+						<>
+							{ __(
+								'There was an error getting your orders.',
+								'woocommerce'
+							) }
+							<br />
+							{ __( 'Please try again.', 'woocommerce' ) }
+						</>
+					}
+				>
+					<OrdersPanel
+						unreadOrdersCount={ unreadOrdersCount }
+						orderStatuses={ orderStatuses }
+					/>
+				</ErrorBoundary>
 			),
 			title: __( 'Orders', 'woocommerce' ),
 		},
@@ -49,9 +63,22 @@ export function getAllPanels( {
 				initialOpen: false,
 				collapsible: lowStockProductsCount !== 0,
 				panel: (
-					<StockPanel
-						lowStockProductsCount={ lowStockProductsCount }
-					/>
+					<ErrorBoundary
+						errorMessage={
+							<>
+								{ __(
+									'There was an error getting your low stock products.',
+									'woocommerce'
+								) }
+								<br />
+								{ __( 'Please try again.', 'woocommerce' ) }
+							</>
+						}
+					>
+						<StockPanel
+							lowStockProductsCount={ lowStockProductsCount }
+						/>
+					</ErrorBoundary>
 				),
 				title: __( 'Stock', 'woocommerce' ),
 			},
@@ -64,9 +91,22 @@ export function getAllPanels( {
 				initialOpen: false,
 				collapsible: unapprovedReviewsCount !== 0,
 				panel: (
-					<ReviewsPanel
-						hasUnapprovedReviews={ unapprovedReviewsCount > 0 }
-					/>
+					<ErrorBoundary
+						errorMessage={
+							<>
+								{ __(
+									'There was an error getting your reviews.',
+									'woocommerce'
+								) }
+								<br />
+								{ __( 'Please try again.', 'woocommerce' ) }
+							</>
+						}
+					>
+						<ReviewsPanel
+							hasUnapprovedReviews={ unapprovedReviewsCount > 0 }
+						/>
+					</ErrorBoundary>
 				),
 				title: __( 'Reviews', 'woocommerce' ),
 			},

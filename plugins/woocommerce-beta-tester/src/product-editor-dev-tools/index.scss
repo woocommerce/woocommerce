@@ -108,19 +108,10 @@
 	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
 }
 
-.woocommerce-product-editor-dev-tools-expressions {
-	flex: 1;
-
-	display: flex;
-	flex-direction: column;
-
-	height: 100%;
-
-	overflow: auto;
-}
-
 .woocommerce-product-editor-dev-tools-expressions-list {
 	flex: 1;
+
+	height: 100%;
 
 	margin: 0;
 	padding: var(--woocommerce-product-editor-dev-tools-gap);
@@ -131,18 +122,101 @@
 		padding-bottom: var(--woocommerce-product-editor-dev-tools-gap);
 
 		font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
-	}
 
-	&.empty {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		&:last-child {
+			padding-bottom: 0;
+		}
 	}
 }
 
 .woocommerce-product-editor-dev-tools-expressions-list-prompt {
 	color: var(--woocommerce-product-editor-dev-tools-border-color);
 }
+
+.woocommerce-product-editor-dev-tools-expression-field {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-areas:
+		"expression actions"
+		"result     actions";
+
+	gap: var(--woocommerce-product-editor-dev-tools-gap-small);
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__expression {
+	grid-area: expression;
+
+	overflow-y: hidden;
+	resize: none;
+
+	border: none;
+	border-radius: 0;
+
+	padding: var(--woocommerce-product-editor-dev-tools-gap-small);
+
+	background-color: var(--woocommerce-product-editor-dev-tools-border-color);
+	color: white;
+
+	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+
+	&[readonly] {
+		background-color: transparent;
+		color: var(--woocommerce-product-editor-dev-tools-text-color);
+	}
+}
+
+.woocommerce-product-editor-dev-tools-expression-field[data-mode='view']:hover
+.woocommerce-product-editor-dev-tools-expression-field__expression {
+	outline: 1px solid var(--woocommerce-product-editor-dev-tools-border-color);
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__result {
+	grid-area: result;
+
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+
+	gap: var(--woocommerce-product-editor-dev-tools-gap-small);
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__result-type {
+	border: 1px solid var(--woocommerce-product-editor-dev-tools-border-color);
+	border-radius: 5px;
+
+	padding: 0px 5px;
+
+	font-size: .75em;
+
+	text-transform: uppercase;
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__result-value {
+	flex: 1;
+
+	font-family: var(--woocommerce-product-editor-dev-tools-code-font-family);
+
+	white-space: pre-wrap;
+
+	overflow-y: scroll;
+	height: 100%;
+}
+
+.woocommerce-product-editor-dev-tools-expression-field__actions {
+	grid-area: actions;
+
+	button {
+		color: var(--woocommerce-product-editor-dev-tools-text-color);
+	}
+}
+
+.woocommerce-product-editor-dev-tools-expression-field[data-mode='view']:not(:hover)
+.woocommerce-product-editor-dev-tools-expression-field__actions {
+	button {
+		color: var(--woocommerce-product-editor-dev-tools-border-color);
+	}
+}
+
 
 .woocommerce-product-editor-dev-tools-expression-editor {
 	display: flex;

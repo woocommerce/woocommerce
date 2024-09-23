@@ -44,7 +44,7 @@ const getLabels = ( flowType: FlowType.AIOnline | FlowType.noAI ) => {
 				),
 				descriptions: {
 					desktop: __(
-						"Start designing your store, including adding your logo, changing color schemes, and choosing layouts. To help you get started, we've added some layouts for you to customize. Take a quick tour to discover what's possible.",
+						"Start designing your store, including adding your logo, changing color schemes, and building your own layouts. Take a quick tour to discover what's possible.",
 						'woocommerce'
 					),
 				},

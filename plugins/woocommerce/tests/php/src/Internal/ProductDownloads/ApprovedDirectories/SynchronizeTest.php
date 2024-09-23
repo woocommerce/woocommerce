@@ -1,12 +1,10 @@
 <?php
+declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\ProductDownloads;
+namespace Automattic\WooCommerce\Tests\Internal\ProductDownloads\ApprovedDirectories;
 
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize;
-use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
-use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use WC_Queue_Interface;
 use WC_Unit_Test_Case;
 

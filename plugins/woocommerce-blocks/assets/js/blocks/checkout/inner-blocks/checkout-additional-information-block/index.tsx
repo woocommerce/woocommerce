@@ -8,7 +8,6 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import './style.scss';
 import attributes from './attributes';
 
 registerBlockType( 'woocommerce/checkout-additional-information-block', {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: This updates the configuration for the local wp-env development environment so that the mysql database ports remain consistent between sessions.
+

@@ -2,6 +2,10 @@
 	&:not(.is-selected) {
 		display: none;
 	}
+
+	.woocommerce-error-boundary {
+		margin-top: $gap-largest;
+	}
 }
 
 // Remove the Gutenberg selected outline.

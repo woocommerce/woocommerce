@@ -20,6 +20,7 @@ import {
 	type ValidationErrors,
 } from '../utils/validations';
 import type { Metadata } from '../../../types';
+import { CustomFieldNameControl } from '../custom-field-name-control';
 import type { CreateModalProps } from './types';
 
 const DEFAULT_CUSTOM_FIELD = {
@@ -37,6 +38,7 @@ export function CreateModal( {
 	const [ customFields, setCustomFields ] = useState< Metadata< string >[] >(
 		[ DEFAULT_CUSTOM_FIELD ]
 	);
+
 	const [ validationError, setValidationError ] =
 		useState< ValidationErrors >( {} );
 	const inputRefs = useRef<
@@ -75,7 +77,7 @@ export function CreateModal( {
 		customField: Metadata< string >,
 		prop: keyof Metadata< string >
 	) {
-		return function handleChange( value: string ) {
+		return function handleChange( value: string | null ) {
 			setCustomFields( ( current ) =>
 				current.map( ( field ) =>
 					field.id === customField.id
@@ -224,11 +226,12 @@ export function CreateModal( {
 					{ customFields.map( ( customField ) => (
 						<div key={ customField.id } role="row">
 							<div role="cell">
-								<TextControl
+								<CustomFieldNameControl
 									ref={ getRef( customField, 'key' ) }
-									label={ '' }
-									aria-label={ __( 'Name', 'woocommerce' ) }
-									error={ getValidationError(
+									label={ __( 'Name', 'woocommerce' ) }
+									hideLabelFromVision
+									allowReset={ false }
+									help={ getValidationError(
 										customField,
 										'key'
 									) }
@@ -238,6 +241,12 @@ export function CreateModal( {
 										'key'
 									) }
 									onBlur={ blurHandler( customField, 'key' ) }
+									className={ classNames( {
+										'has-error': getValidationError(
+											customField,
+											'key'
+										),
+									} ) }
 								/>
 							</div>
 							<div role="cell">

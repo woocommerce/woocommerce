@@ -14,13 +14,6 @@ use WP_Error;
 class CheckoutFields {
 
 	/**
-	 * Core checkout fields.
-	 *
-	 * @var array
-	 */
-	private $core_fields;
-
-	/**
 	 * Additional checkout fields.
 	 *
 	 * @var array
@@ -91,144 +84,10 @@ class CheckoutFields {
 	 */
 	public function __construct( AssetDataRegistry $asset_data_registry ) {
 		$this->asset_data_registry = $asset_data_registry;
-		$this->core_fields         = [
-			'email'      => [
-				'label'          => __( 'Email address', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Email address (optional)',
-					'woocommerce'
-				),
-				'required'       => true,
-				'hidden'         => false,
-				'autocomplete'   => 'email',
-				'autocapitalize' => 'none',
-				'index'          => 0,
-			],
-			'country'    => [
-				'label'         => __( 'Country/Region', 'woocommerce' ),
-				'optionalLabel' => __(
-					'Country/Region (optional)',
-					'woocommerce'
-				),
-				'required'      => true,
-				'hidden'        => false,
-				'autocomplete'  => 'country',
-				'index'         => 1,
-			],
-			'first_name' => [
-				'label'          => __( 'First name', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'First name (optional)',
-					'woocommerce'
-				),
-				'required'       => true,
-				'hidden'         => false,
-				'autocomplete'   => 'given-name',
-				'autocapitalize' => 'sentences',
-				'index'          => 10,
-			],
-			'last_name'  => [
-				'label'          => __( 'Last name', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Last name (optional)',
-					'woocommerce'
-				),
-				'required'       => true,
-				'hidden'         => false,
-				'autocomplete'   => 'family-name',
-				'autocapitalize' => 'sentences',
-				'index'          => 20,
-			],
-			'company'    => [
-				'label'          => __( 'Company', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Company (optional)',
-					'woocommerce'
-				),
-				'required'       => false,
-				'hidden'         => false,
-				'autocomplete'   => 'organization',
-				'autocapitalize' => 'sentences',
-				'index'          => 30,
-			],
-			'address_1'  => [
-				'label'          => __( 'Address', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Address (optional)',
-					'woocommerce'
-				),
-				'required'       => true,
-				'hidden'         => false,
-				'autocomplete'   => 'address-line1',
-				'autocapitalize' => 'sentences',
-				'index'          => 40,
-			],
-			'address_2'  => [
-				'label'          => __( 'Apartment, suite, etc.', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Apartment, suite, etc. (optional)',
-					'woocommerce'
-				),
-				'required'       => false,
-				'hidden'         => false,
-				'autocomplete'   => 'address-line2',
-				'autocapitalize' => 'sentences',
-				'index'          => 50,
-			],
-			'city'       => [
-				'label'          => __( 'City', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'City (optional)',
-					'woocommerce'
-				),
-				'required'       => true,
-				'hidden'         => false,
-				'autocomplete'   => 'address-level2',
-				'autocapitalize' => 'sentences',
-				'index'          => 70,
-			],
-			'state'      => [
-				'label'          => __( 'State/County', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'State/County (optional)',
-					'woocommerce'
-				),
-				'required'       => true,
-				'hidden'         => false,
-				'autocomplete'   => 'address-level1',
-				'autocapitalize' => 'sentences',
-				'index'          => 80,
-			],
-			'postcode'   => [
-				'label'          => __( 'Postal code', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Postal code (optional)',
-					'woocommerce'
-				),
-				'required'       => true,
-				'hidden'         => false,
-				'autocomplete'   => 'postal-code',
-				'autocapitalize' => 'characters',
-				'index'          => 90,
-			],
-			'phone'      => [
-				'label'          => __( 'Phone', 'woocommerce' ),
-				'optionalLabel'  => __(
-					'Phone (optional)',
-					'woocommerce'
-				),
-				'required'       => false,
-				'hidden'         => false,
-				'type'           => 'tel',
-				'autocomplete'   => 'tel',
-				'autocapitalize' => 'characters',
-				'index'          => 100,
-			],
-		];
 
 		$this->fields_locations = [
 			// omit email from shipping and billing fields.
-			'address' => array_merge( \array_diff_key( array_keys( $this->core_fields ), array( 'email' ) ) ),
+			'address' => array_merge( \array_diff_key( $this->get_core_fields_keys(), array( 'email' ) ) ),
 			'contact' => array( 'email' ),
 			'order'   => [],
 		];
@@ -527,17 +386,8 @@ class CheckoutFields {
 
 		$field_data['options'] = $cleaned_options;
 
-		// If the field is not required, inject an empty option at the start.
-		if ( isset( $field_data['required'] ) && false === $field_data['required'] && ! in_array( '', $added_values, true ) ) {
-			$field_data['options'] = array_merge(
-				[
-					[
-						'value' => '',
-						'label' => '',
-					],
-				],
-				$field_data['options']
-			);
+		if ( isset( $field_data['placeholder'] ) ) {
+			$field_data['placeholder'] = sanitize_text_field( $field_data['placeholder'] );
 		}
 
 		return $field_data;
@@ -621,12 +471,167 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Returns the keys of all core fields.
+	 *
+	 * @return array An array of field keys.
+	 */
+	public function get_core_fields_keys() {
+		return [
+			'email',
+			'country',
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'phone',
+		];
+	}
+
+	/**
 	 * Returns an array of all core fields.
 	 *
 	 * @return array An array of fields.
 	 */
 	public function get_core_fields() {
-		return $this->core_fields;
+		return [
+			'email'      => [
+				'label'          => __( 'Email address', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'Email address (optional)',
+					'woocommerce'
+				),
+				'required'       => true,
+				'hidden'         => false,
+				'autocomplete'   => 'email',
+				'autocapitalize' => 'none',
+				'type'           => 'email',
+				'index'          => 0,
+			],
+			'country'    => [
+				'label'         => __( 'Country/Region', 'woocommerce' ),
+				'optionalLabel' => __(
+					'Country/Region (optional)',
+					'woocommerce'
+				),
+				'required'      => true,
+				'hidden'        => false,
+				'autocomplete'  => 'country',
+				'index'         => 1,
+			],
+			'first_name' => [
+				'label'          => __( 'First name', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'First name (optional)',
+					'woocommerce'
+				),
+				'required'       => true,
+				'hidden'         => false,
+				'autocomplete'   => 'given-name',
+				'autocapitalize' => 'sentences',
+				'index'          => 10,
+			],
+			'last_name'  => [
+				'label'          => __( 'Last name', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'Last name (optional)',
+					'woocommerce'
+				),
+				'required'       => true,
+				'hidden'         => false,
+				'autocomplete'   => 'family-name',
+				'autocapitalize' => 'sentences',
+				'index'          => 20,
+			],
+			'company'    => [
+				'label'          => __( 'Company', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'Company (optional)',
+					'woocommerce'
+				),
+				'required'       => false,
+				'hidden'         => false,
+				'autocomplete'   => 'organization',
+				'autocapitalize' => 'sentences',
+				'index'          => 30,
+			],
+			'address_1'  => [
+				'label'          => __( 'Address', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'Address (optional)',
+					'woocommerce'
+				),
+				'required'       => true,
+				'hidden'         => false,
+				'autocomplete'   => 'address-line1',
+				'autocapitalize' => 'sentences',
+				'index'          => 40,
+			],
+			'address_2'  => [
+				'label'          => __( 'Apartment, suite, etc.', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'Apartment, suite, etc. (optional)',
+					'woocommerce'
+				),
+				'required'       => false,
+				'hidden'         => false,
+				'autocomplete'   => 'address-line2',
+				'autocapitalize' => 'sentences',
+				'index'          => 50,
+			],
+			'city'       => [
+				'label'          => __( 'City', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'City (optional)',
+					'woocommerce'
+				),
+				'required'       => true,
+				'hidden'         => false,
+				'autocomplete'   => 'address-level2',
+				'autocapitalize' => 'sentences',
+				'index'          => 70,
+			],
+			'state'      => [
+				'label'          => __( 'State/County', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'State/County (optional)',
+					'woocommerce'
+				),
+				'required'       => true,
+				'hidden'         => false,
+				'autocomplete'   => 'address-level1',
+				'autocapitalize' => 'sentences',
+				'index'          => 80,
+			],
+			'postcode'   => [
+				'label'          => __( 'Postal code', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'Postal code (optional)',
+					'woocommerce'
+				),
+				'required'       => true,
+				'hidden'         => false,
+				'autocomplete'   => 'postal-code',
+				'autocapitalize' => 'characters',
+				'index'          => 90,
+			],
+			'phone'      => [
+				'label'          => __( 'Phone', 'woocommerce' ),
+				'optionalLabel'  => __(
+					'Phone (optional)',
+					'woocommerce'
+				),
+				'required'       => false,
+				'hidden'         => false,
+				'type'           => 'tel',
+				'autocomplete'   => 'tel',
+				'autocapitalize' => 'characters',
+				'index'          => 100,
+			],
+		];
 	}
 
 	/**
@@ -776,7 +781,7 @@ class CheckoutFields {
 	 * @return mixed
 	 */
 	public function update_default_locale_with_fields( $locale ) {
-		foreach ( $this->fields_locations['address'] as $field_id => $additional_field ) {
+		foreach ( $this->get_fields_for_location( 'address' ) as $field_id => $additional_field ) {
 			if ( empty( $locale[ $field_id ] ) ) {
 				$locale[ $field_id ] = $additional_field;
 			}
@@ -1187,7 +1192,7 @@ class CheckoutFields {
 				 */
 				$value = apply_filters( "woocommerce_get_default_value_for_{$missing_field}", null, $group, $wc_object );
 
-			if ( $value ) {
+			if ( isset( $value ) ) {
 				$meta_data[ $missing_field ] = $value;
 			}
 		}

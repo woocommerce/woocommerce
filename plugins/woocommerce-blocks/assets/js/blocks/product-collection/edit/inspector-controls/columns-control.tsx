@@ -14,7 +14,7 @@ import {
  * Internal dependencies
  */
 import { DisplayLayoutControlProps } from '../../types';
-import { getDefaultDisplayLayout } from '../../constants';
+import { getDefaultDisplayLayout } from '../../utils';
 
 const columnsLabel = __( 'Columns', 'woocommerce' );
 const toggleLabel = __( 'Responsive', 'woocommerce' );

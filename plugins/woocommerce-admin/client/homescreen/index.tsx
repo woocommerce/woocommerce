@@ -39,7 +39,7 @@ const Homescreen = ( {
 	}, [ hasFinishedResolution, profilerCompleted, profilerSkipped ] );
 
 	const query = useQuery();
-	// @ts-expect-error Layout is a pure JS component
+
 	return <Layout query={ query } />;
 };
 

@@ -87,8 +87,8 @@ export const ApiCallLoader = () => {
 					}, 0 );
 				} }
 			>
-				{ augmentedSteps.map( ( step, index ) => (
-					<Loader.Layout key={ index }>
+				{ augmentedSteps.map( ( step ) => (
+					<Loader.Layout key={ step.title }>
 						<Loader.Illustration>
 							{ step.image }
 						</Loader.Illustration>

@@ -48,6 +48,7 @@ export type customizeStoreStateMachineContext = {
 	themeConfiguration: Record< string, unknown >; // placeholder for theme configuration until we know what it looks like
 	intro: {
 		hasErrors: boolean;
+		errorStatus: number | undefined;
 		themeData: RecommendThemesAPIResponse;
 		activeTheme: string;
 		customizeStoreTaskCompleted: boolean;
@@ -58,5 +59,6 @@ export type customizeStoreStateMachineContext = {
 	};
 	flowType: FlowType;
 	isFontLibraryAvailable: boolean | null;
+	isPTKPatternsAPIAvailable: boolean | null;
 	activeThemeHasMods: boolean | undefined;
 };

@@ -7,10 +7,10 @@ import {
 	createElement,
 	useEffect,
 	useRef,
-	createPortal,
 	useLayoutEffect,
 	useState,
 } from '@wordpress/element';
+import { escapeRegExp } from 'lodash';
 
 /**
  * Internal dependencies
@@ -27,6 +27,7 @@ type MenuProps = {
 	isLoading?: boolean;
 	position?: Popover.Position;
 	scrollIntoViewOnOpen?: boolean;
+	highlightedIndex?: number;
 	items: LinkedTree[];
 	treeRef?: React.ForwardedRef< HTMLOListElement >;
 	onClose?: () => void;
@@ -42,7 +43,10 @@ export const SelectTreeMenu = ( {
 	items,
 	treeRef: ref,
 	onClose = () => {},
+	onEscape,
 	shouldShowCreateButton,
+	onFirstItemLoop,
+	onExpand,
 	...props
 }: MenuProps ) => {
 	const [ boundingRect, setBoundingRect ] = useState< DOMRect >();
@@ -65,7 +69,7 @@ export const SelectTreeMenu = ( {
 	// Scroll the selected item into view when the menu opens.
 	useEffect( () => {
 		if ( isOpen && scrollIntoViewOnOpen ) {
-			selectControlMenuRef.current?.scrollIntoView();
+			selectControlMenuRef.current?.scrollIntoView?.();
 		}
 	}, [ isOpen, scrollIntoViewOnOpen ] );
 
@@ -73,9 +77,10 @@ export const SelectTreeMenu = ( {
 		if ( ! props.createValue || ! item.children?.length ) return false;
 		return item.children.some( ( child ) => {
 			if (
-				new RegExp( props.createValue || '', 'ig' ).test(
-					child.data.label
-				)
+				new RegExp(
+					escapeRegExp( props.createValue || '' ),
+					'ig'
+				).test( child.data.label )
 			) {
 				return true;
 			}
@@ -92,9 +97,9 @@ export const SelectTreeMenu = ( {
 		>
 			<div>
 				<Popover
-					// @ts-expect-error this prop does exist, see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L180.
-					__unstableSlotName="woocommerce-select-tree-control-menu"
 					focusOnMount={ false }
+					// @ts-expect-error this prop does exist
+					inline
 					className={ classnames(
 						'woocommerce-experimental-select-tree-control__popover-menu',
 						className,
@@ -129,12 +134,15 @@ export const SelectTreeMenu = ( {
 									ref={ ref }
 									items={ items }
 									onTreeBlur={ onClose }
+									onExpand={ onExpand }
 									shouldItemBeExpanded={
 										shouldItemBeExpanded
 									}
 									shouldShowCreateButton={
 										shouldShowCreateButton
 									}
+									onFirstItemLoop={ onFirstItemLoop }
+									onEscape={ onEscape }
 									style={ {
 										width: boundingRect?.width,
 									} }
@@ -148,12 +156,3 @@ export const SelectTreeMenu = ( {
 	);
 	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };
-
-export const SelectTreeMenuSlot: React.FC = () =>
-	createPortal(
-		<div aria-live="off">
-			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
-			<Popover.Slot name="woocommerce-select-tree-control-menu" />
-		</div>,
-		document.body
-	);

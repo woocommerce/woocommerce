@@ -34,14 +34,16 @@ class Breadcrumbs extends AbstractBlock {
 			return;
 		}
 
-		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 		return sprintf(
-			'<div class="woocommerce wc-block-breadcrumbs %1$s %2$s" style="%3$s">%4$s</div>',
-			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $classname ),
-			esc_attr( $classes_and_styles['styles'] ),
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes(
+				array(
+					'class' => 'wc-block-breadcrumbs woocommerce ' . esc_attr( $classes_and_styles['classes'] ),
+					'style' => $classes_and_styles['styles'],
+				)
+			),
 			$breadcrumb
 		);
 	}

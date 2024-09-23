@@ -5,6 +5,8 @@ use WP_Error;
 
 /**
  * PatternsToolkit class.
+ *
+ * @internal
  */
 class PTKClient {
 	/**
@@ -30,6 +32,10 @@ class PTKClient {
 
 		if ( isset( $options['categories'] ) ) {
 			$ptk_url = add_query_arg( 'categories', implode( ',', $options['categories'] ), $ptk_url );
+		}
+
+		if ( isset( $options['per_page'] ) ) {
+			$ptk_url = add_query_arg( 'per_page', $options['per_page'], $ptk_url );
 		}
 
 		$patterns = wp_safe_remote_get( $ptk_url );

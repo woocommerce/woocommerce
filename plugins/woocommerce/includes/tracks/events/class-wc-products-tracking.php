@@ -346,6 +346,7 @@ class WC_Products_Tracking {
 			'tags'                 => count( $product->get_tag_ids() ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',
 			'weight'               => $product->get_weight() ? 'yes' : 'no',
+			'global_unique_id'     => $product->get_global_unique_id() ? 'yes' : 'no',
 		);
 
 		WC_Tracks::record_event( 'product_add_publish', $properties );

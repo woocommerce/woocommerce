@@ -209,6 +209,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		flowType: FlowType.noAI,
 		isFontLibraryAvailable: null,
+		isPTKPatternsAPIAvailable: null,
 		activeThemeHasMods: undefined,
 	} as customizeStoreStateMachineContext,
 	invoke: {
@@ -382,6 +383,18 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						component: DesignWithoutAi,
 					},
 				},
+				// This state is used to install patterns and then redirect to the assembler hub.
+				installPatterns: {
+					entry: [
+						{
+							type: 'updateQueryStep',
+							step: 'design/install-patterns',
+						},
+					],
+					meta: {
+						component: DesignWithoutAi,
+					},
+				},
 			},
 		},
 		designWithAi: {
@@ -408,22 +421,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'fetchActiveThemeHasMods',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
-				fetchActiveThemeHasMods: {
+				fetchCustomizeStoreCompleted: {
 					invoke: {
-						src: 'fetchActiveThemeHasMods',
+						src: 'fetchCustomizeStoreCompleted',
 						onDone: {
-							actions: 'assignActiveThemeHasMods',
-							target: 'checkActiveThemeHasMods',
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
 						},
 					},
 				},
-				checkActiveThemeHasMods: {
+				checkCustomizeStoreCompleted: {
 					always: [
 						{
 							// Redirect to the "intro step" if the active theme has no modifications.
-							cond: 'activeThemeHasNoMods',
+							cond: 'customizeTaskIsNotCompleted',
 							actions: [
 								{ type: 'updateQueryStep', step: 'intro' },
 							],
@@ -431,7 +444,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						},
 						{
 							// Otherwise, proceed to the next step.
-							cond: 'activeThemeHasMods',
+							cond: 'customizeTaskIsCompleted',
 							target: 'assemblerHub',
 						},
 					],
@@ -448,7 +461,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: [
 						{
 							src: 'markTaskComplete',
-							// eslint-disable-next-line xstate/no-ondone-outside-compound-state
 							onDone: {
 								target: '#customizeStore.transitionalScreen',
 							},
@@ -543,6 +555,7 @@ declare global {
 	interface Window {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
+			isPTKPatternsAPIAvailable: boolean | null;
 			activeThemeHasMods: boolean | undefined;
 			sendEventToIntroMachine: (
 				typeEvent: customizeStoreStateMachineEvents

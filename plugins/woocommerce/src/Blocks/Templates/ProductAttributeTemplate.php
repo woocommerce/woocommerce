@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -61,6 +62,9 @@ class ProductAttributeTemplate extends AbstractTemplate {
 		}
 
 		if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
+			$compatibility_layer = new ArchiveProductTemplatesCompatibility();
+			$compatibility_layer->init();
+
 			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
 
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {

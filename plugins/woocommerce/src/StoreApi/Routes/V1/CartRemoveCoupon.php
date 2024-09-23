@@ -64,24 +64,24 @@ class CartRemoveCoupon extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		if ( ! wc_coupons_enabled() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', esc_html__( 'Coupons are disabled.', 'woocommerce' ), 404 );
 		}
 
 		$cart        = $this->cart_controller->get_cart_instance();
 		$coupon_code = wc_format_coupon_code( $request['code'] );
 		$coupon      = new \WC_Coupon( $coupon_code );
+		$discounts   = new \WC_Discounts( $cart );
 
-		if ( $coupon->get_code() !== $coupon_code || ! $coupon->is_valid() ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_error', __( 'Invalid coupon code.', 'woocommerce' ), 400 );
+		if ( $coupon->get_code() !== $coupon_code || is_wp_error( $discounts->is_coupon_valid( $coupon ) ) ) {
+			throw new RouteException( 'woocommerce_rest_cart_coupon_error', esc_html__( 'Invalid coupon code.', 'woocommerce' ), 400 );
 		}
 
 		if ( ! $this->cart_controller->has_coupon( $coupon_code ) ) {
-			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', __( 'Coupon cannot be removed because it is not already applied to the cart.', 'woocommerce' ), 409 );
+			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', esc_html__( 'Coupon cannot be removed because it is not already applied to the cart.', 'woocommerce' ), 409 );
 		}
 
 		$cart = $this->cart_controller->get_cart_instance();
 		$cart->remove_coupon( $coupon_code );
-		$cart->calculate_totals();
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
 	}

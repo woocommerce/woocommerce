@@ -65,8 +65,8 @@
 
     var namespace = slider.vars.namespace,
         touch = (( "ontouchstart" in window ) || window.DocumentTouch && document instanceof DocumentTouch) && slider.vars.touch,
-        // deprecating this idea, as devices are being released with both of these events
-        eventType = "click touchend keyup",
+        // we add a custom event so we can differentiate manually triggering events when needed.
+        eventType = "click touchend keyup flexslider-click",
         watchedEvent = "",
         watchedEventClearTimer,
         easing = easings[slider.vars.easing] || "ease",
@@ -255,6 +255,7 @@
                 item = $('<img/>', {
                   onload: 'this.width = this.naturalWidth; this.height = this.naturalHeight',
                   src: slide.attr('data-thumb'),
+                  srcset: slide.attr('data-thumb-srcset'),
                   alt: slide.attr('alt')
                 })
               }
@@ -301,7 +302,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -326,7 +327,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -379,7 +380,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -433,7 +434,7 @@
             }
 
             // setup flags to prevent event duplication
-            if (watchedEvent === "") {
+            if (watchedEvent === "" && event.type !== "flexslider-click") {
               watchedEvent = event.type;
             }
             methods.setToClearWatchedEvent();
@@ -994,7 +995,7 @@
 
       // update slider.slides
       slider.slides = $(slider.vars.selector + ':not(.clone)', slider);
-      // re-setup the slider to accomdate new slide
+      // re-setup the slider to accommodate new slide
       slider.setup();
 
       //FlexSlider: added() Callback
@@ -1020,7 +1021,7 @@
 
       // update slider.slides
       slider.slides = $(slider.vars.selector + ':not(.clone)', slider);
-      // re-setup the slider to accomdate new slide
+      // re-setup the slider to accommodate new slide
       slider.setup();
 
       // FlexSlider: removed() Callback
@@ -1090,7 +1091,7 @@
     itemWidth: 0,                   //{NEW} Integer: Box-model width of individual carousel items, including horizontal borders and padding.
     itemMargin: 0,                  //{NEW} Integer: Margin between carousel items.
     minItems: 1,                    //{NEW} Integer: Minimum number of carousel items that should be visible. Items will resize fluidly when below this.
-    maxItems: 0,                    //{NEW} Integer: Maxmimum number of carousel items that should be visible. Items will resize fluidly when above this limit.
+    maxItems: 0,                    //{NEW} Integer: Maximum number of carousel items that should be visible. Items will resize fluidly when above this limit.
     move: 0,                        //{NEW} Integer: Number of carousel items that should move on animation. If 0, slider will move all visible items.
     allowOneSlide: true,           //{NEW} Boolean: Whether or not to allow a slider comprised of a single slide
 

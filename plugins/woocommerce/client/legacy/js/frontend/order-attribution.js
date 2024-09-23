@@ -57,7 +57,7 @@
 	}
 
 	/**
-	 * Determin whether sourcebuster.js is available.
+	 * Determine whether sourcebuster.js is available.
 	 *
 	 * @returns {boolean} Whether sourcebuster.js is available.
 	 */
@@ -166,12 +166,16 @@
 		 * but it's not yet supported in Safari.
 		 */
 		connectedCallback() {
-			let inputs = '';
+			this.innerHTML = '';
+			const inputs = new DocumentFragment();
 			for( const fieldName of this._fieldNames ) {
-				const value = stringifyFalsyInputValue( ( this.values && this.values[ fieldName ] ) || '' );
-				inputs += `<input type="hidden" name="${params.prefix}${fieldName}" value="${value}"/>`;
+				const input = document.createElement( 'input' );
+				input.type = 'hidden';
+				input.name = `${params.prefix}${fieldName}`;
+				input.value = stringifyFalsyInputValue( ( this.values && this.values[ fieldName ] ) || '' );
+				inputs.appendChild( input );
 			}
-			this.innerHTML = inputs;
+			this.appendChild( inputs );
 		}
 
 		/**

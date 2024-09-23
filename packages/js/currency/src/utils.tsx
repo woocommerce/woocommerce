@@ -13,7 +13,7 @@ import deprecated from '@wordpress/deprecated';
 /**
  * @typedef {Object} CurrencyProps
  * @property {string} code           Currency ISO code.
- * @property {string} symbol         Symbol, can be multi-character.
+ * @property {string} symbol         Symbol, can be multi-character. Should be in plain text, w/o HTML markup. HTML entities will be decoded.
  * @property {string} symbolPosition Where the symbol should be relative to the amount. One of `'left' | 'right' | 'left_space | 'right_space'`.
  * @typedef {NumberConfig & CurrencyProps} CurrencyConfig
  */
@@ -66,9 +66,17 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 	let currency: Currency;
 
 	function stripTags( str: string ) {
-		const tmp = document.createElement( 'DIV' );
-		tmp.innerHTML = str;
-		return tmp.textContent || tmp.innerText || '';
+		// sanitize Polyfill - see https://github.com/WordPress/WordPress/blob/master/wp-includes/js/wp-sanitize.js
+		const strippedStr = str
+			.replace( /<!--[\s\S]*?(-->|$)/g, '' )
+			.replace( /<(script|style)[^>]*>[\s\S]*?(<\/\1>|$)/gi, '' )
+			.replace( /<\/?[a-z][\s\S]*?(>|$)/gi, '' );
+
+		if ( strippedStr !== str ) {
+			return stripTags( strippedStr );
+		}
+
+		return strippedStr;
 	}
 
 	/**
@@ -120,7 +128,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 
 		currency = {
 			code: config.code.toString(),
-			symbol: config.symbol.toString(),
+			symbol: decodeEntities( config.symbol.toString() ),
 			symbolPosition: config.symbolPosition.toString(),
 			decimalSeparator: config.decimalSeparator.toString(),
 			priceFormat: getPriceFormat( config ),
@@ -171,7 +179,7 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 	 *
 	 * @param {string} countryCode     Country code.
 	 * @param {Object} localeInfo      Locale info by country code.
-	 * @param {Object} currencySymbols Currency symbols by symbol code.
+	 * @param {Object} currencySymbols Currency symbols by symbol code. HTML entities will be decoded.
 	 * @return {CurrencyConfig | {}} Formatted currency data for country.
 	 */
 	function getDataForCountry(
@@ -280,7 +288,7 @@ export const CurrencyFactory = CurrencyFactoryBase;
  * Dev Note: When adding new currencies below, the exchange rate array should also be updated in WooCommerce Admin's `business-details.js`.
  *
  * @deprecated
- * @return {Object} Curreny data.
+ * @return {Object} Currency data.
  */
 export function getCurrencyData() {
 	deprecated( 'getCurrencyData', {

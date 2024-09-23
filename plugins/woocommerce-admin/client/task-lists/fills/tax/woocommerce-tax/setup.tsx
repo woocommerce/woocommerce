@@ -75,7 +75,7 @@ export const Setup: React.FC< SetupProps > = ( {
 			return;
 		}
 		setPluginsToActivate( remainingPlugins );
-	}, [ activePlugins ] );
+	}, [ activePlugins, pluginsToActivate.length ] );
 
 	const nextStep = () => {
 		setStepIndex( stepIndex + 1 );

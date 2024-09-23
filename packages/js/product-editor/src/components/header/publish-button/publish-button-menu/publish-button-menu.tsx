@@ -17,7 +17,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useProductManager } from '../../../../hooks/use-product-manager';
 import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 import { recordProductEvent } from '../../../../utils/record-product-event';
-import { getProductErrorMessage } from '../../../../utils/get-product-error-message';
+import { useErrorHandler } from '../../../../hooks/use-error-handler';
 import { ButtonWithDropdownMenu } from '../../../button-with-dropdown-menu';
 import { SchedulePublishModal } from '../../../schedule-publish-modal';
 import { showSuccessNotice } from '../utils';
@@ -26,6 +26,7 @@ import { TRACKS_SOURCE } from '../../../../constants';
 
 export function PublishButtonMenu( {
 	postType,
+	visibleTab = 'general',
 	...props
 }: PublishButtonMenuProps ) {
 	const { isScheduling, isScheduled, schedule, date, formattedDate } =
@@ -41,6 +42,7 @@ export function PublishButtonMenu( {
 		postType,
 		'status'
 	);
+	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	function scheduleProduct( dateString?: string ) {
 		schedule( dateString )
@@ -49,9 +51,10 @@ export function PublishButtonMenu( {
 
 				showSuccessNotice( scheduledProduct );
 			} )
-			.catch( ( error ) => {
-				const message = getProductErrorMessage( error );
-				createErrorNotice( message );
+			.catch( async ( error ) => {
+				const { message, errorProps } =
+					await getProductErrorMessageAndProps( error, visibleTab );
+				createErrorNotice( message, errorProps );
 			} )
 			.finally( () => {
 				setShowScheduleModal( undefined );
@@ -133,10 +136,16 @@ export function PublishButtonMenu( {
 										);
 										navigateTo( { url } );
 									} )
-									.catch( ( error ) => {
-										const message =
-											getProductErrorMessage( error );
-										createErrorNotice( message );
+									.catch( async ( error ) => {
+										const { message, errorProps } =
+											await getProductErrorMessageAndProps(
+												error,
+												visibleTab
+											);
+										createErrorNotice(
+											message,
+											errorProps
+										);
 									} );
 								onClose();
 							} }
@@ -165,10 +174,16 @@ export function PublishButtonMenu( {
 											url: productListUrl,
 										} );
 									} )
-									.catch( ( error ) => {
-										const message =
-											getProductErrorMessage( error );
-										createErrorNotice( message );
+									.catch( async ( error ) => {
+										const { message, errorProps } =
+											await getProductErrorMessageAndProps(
+												error,
+												visibleTab
+											);
+										createErrorNotice(
+											message,
+											errorProps
+										);
 									} );
 								onClose();
 							} }

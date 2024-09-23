@@ -48,7 +48,7 @@ exports.test = base.test.extend( {
 	testPageTitlePrefix: [ '', { option: true } ],
 
 	testPage: async ( { wpApi, testPageTitlePrefix }, use ) => {
-		const pageTitle = `${ testPageTitlePrefix } Page ${ random() }`;
+		const pageTitle = `${ testPageTitlePrefix } Page ${ random() }`.trim();
 		const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
 		await use( { title: pageTitle, slug: pageSlug } );
@@ -67,6 +67,35 @@ exports.test = base.test.extend( {
 		for ( const page of await pages.json() ) {
 			console.log( `Deleting page ${ page.id }` );
 			await wpApi.delete( `/wp-json/wp/v2/pages/${ page.id }`, {
+				data: {
+					force: true,
+				},
+			} );
+		}
+	},
+
+	testPostTitlePrefix: [ '', { option: true } ],
+
+	testPost: async ( { wpApi, testPostTitlePrefix }, use ) => {
+		const postTitle = `${ testPostTitlePrefix } Post ${ random() }`.trim();
+		const postSlug = postTitle.replace( / /gi, '-' ).toLowerCase();
+
+		await use( { title: postTitle, slug: postSlug } );
+
+		// Cleanup
+		const posts = await wpApi.get(
+			`/wp-json/wp/v2/posts?slug=${ postSlug }`,
+			{
+				data: {
+					_fields: [ 'id' ],
+				},
+				failOnStatusCode: false,
+			}
+		);
+
+		for ( const post of await posts.json() ) {
+			console.log( `Deleting post ${ post.id }` );
+			await wpApi.delete( `/wp-json/wp/v2/posts/${ post.id }`, {
 				data: {
 					force: true,
 				},

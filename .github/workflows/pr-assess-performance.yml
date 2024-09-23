@@ -1,0 +1,102 @@
+name: Performance metrics
+
+on:
+    pull_request:
+        paths:
+            - 'plugins/woocommerce/composer.*'
+            - 'plugins/woocommerce/client/admin/config/**'
+            - 'plugins/woocommerce/includes/**'
+            - 'plugins/woocommerce/lib/**'
+            - 'plugins/woocommerce/patterns/**'
+            - 'plugins/woocommerce/src/**'
+            - 'plugins/woocommerce/templates/**'
+            - 'plugins/woocommerce/tests/metrics/**'
+            - 'plugins/woocommerce/.wp-env.json'
+            - '.github/workflows/pr-assess-performance.yml'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
+    cancel-in-progress: true
+
+env:
+    WP_ARTIFACTS_PATH: ${{ github.workspace }}/tools/compare-perf/artifacts/
+
+jobs:
+    benchmark:
+        name: Evaluate performance metrics
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              name: Checkout (${{ github.event_name == 'pull_request' && github.head_ref || github.sha }})
+              with:
+                fetch-depth: 0
+
+            - uses: ./.github/actions/setup-woocommerce-monorepo
+              name: Install Monorepo
+              with:
+                install: '@woocommerce/plugin-woocommerce...'
+                build: '@woocommerce/plugin-woocommerce'
+                build-type: 'full'
+                pull-playwright-cache: true
+                pull-package-deps: '@woocommerce/plugin-woocommerce'
+          
+            #TODO: Inject WordPress version as per plugin requirements (relying to defaults currently).
+            - name: Start Test Environment
+              run: |
+                pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
+                pnpm --filter="@woocommerce/plugin-woocommerce" env:test
+                
+            # TODO: cache results if pushed to trunk
+            - name: Measure performance (@${{ github.sha }})
+              run: |
+                RESULTS_ID="editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+                RESULTS_ID="product-editor_${{ github.sha }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor           
+
+            # In alignment with .github/workflows/scripts/run-metrics.sh, we should checkout 3d7d7f02017383937f1a4158d433d0e5d44b3dc9 
+            # as baseline. But to avoid switching branches in 'Analyze results' step, we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df 
+            # which introduced reporting mode for the perf utility.
+            - name: Checkout (55f855a2e6d769b5ae44305b2772eb30d3e721df@trunk, further references as 'baseline')
+              run: |
+                git reset --hard && git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df                
+                echo "WC_TRUNK_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df" >> $GITHUB_ENV
+
+            # Artifacts download/upload would be more reliable, but we couldn't make it working...
+            - uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
+              name: Cache measurements (baseline)
+              with:
+                path: tools/compare-perf/artifacts/*_${{ env.WC_TRUNK_SHA }}_*
+                key: ${{ runner.os }}-woocommerce-performance-measures-${{ env.WC_TRUNK_SHA }}
+
+            - name: Verify cached measurements (baseline)
+              run: |
+                if test -n "$(find tools/compare-perf/artifacts/ -maxdepth 1 -name '*_${{ env.WC_TRUNK_SHA }}_*' -print -quit)"
+                then
+                  echo "WC_MEASURE_BASELINE=no" >> $GITHUB_ENV
+                else
+                  ls -l tools/compare-perf/artifacts/
+                  echo "Triggering baseline benchmarking"
+                  echo "WC_MEASURE_BASELINE=yes" >> $GITHUB_ENV
+                fi
+
+            - name: Build (baseline)
+              if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
+              run: |
+                git clean -n -d -X ./packages ./plugins | grep -v vendor | grep -v node_modules | sed -e 's/Would remove //g' | tr '\n' '\0' | xargs -0 rm -r 
+                pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+                pnpm --filter='@woocommerce/plugin-woocommerce' build
+                
+            #TODO: is baseline Wordpress version changes, restart environment targeting it.
+
+            - name: Measure performance (@${{ env.WC_TRUNK_SHA }})
+              if: ${{ env.WC_MEASURE_BASELINE == 'yes' }}
+              run: |
+                RESULTS_ID="editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+                RESULTS_ID="product-editor_${{ env.WC_TRUNK_SHA }}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+
+            - name: Analyze results
+              run: |
+                pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
+                pnpm --filter="compare-perf" run compare compare-performance ${{ github.sha }} ${{ env.WC_TRUNK_SHA }} --tests-branch ${{ github.sha }} --skip-benchmarking
+            
+            # TODO: Publish to CodeVitals (see .github/workflows/scripts/run-metrics.sh) if pushed to trunk

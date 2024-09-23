@@ -1,7 +1,7 @@
 @import "./shared.scss";
 
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		padding-top: 0 !important;
 	}
 }
@@ -26,14 +26,14 @@
 
 	--color-error: #cc1818; // used by some @automattic/components
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		padding: 0 20px;
 	}
 
 	.woocommerce-profiler-button-container {
 		width: 100%;
 		max-width: 404px;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			position: absolute;
 			bottom: 20px;
 			padding: 0 20px;
@@ -133,7 +133,7 @@
 	padding-top: 110px;
 	flex: 1;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint("<782px") {
 		padding-top: 70px;
 	}
 
@@ -148,10 +148,10 @@
 		background: url(./assets/images/welcome-desktop.svg) no-repeat center
 			center;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			margin-bottom: 40px;
-			background: url(./assets/images/welcome-mobile.svg) no-repeat
-				center center;
+			background: url(./assets/images/welcome-mobile.svg) no-repeat center
+				center;
 			width: 222px;
 			height: 144px;
 		}
@@ -166,8 +166,9 @@
 		align-items: center;
 		font-size: 14px;
 		font-weight: normal;
+		margin-bottom: 16px;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			width: 100%;
 			margin-top: auto;
 		}
@@ -178,8 +179,8 @@
 		display: flex;
 		justify-content: center;
 
-		@include breakpoint( "<782px" ) {
-			margin: 16px auto 20px;
+		@include breakpoint("<782px") {
+			margin: 0 auto 20px;
 		}
 
 		.components-checkbox-control__input-container {
@@ -195,9 +196,6 @@
 			margin-left: 10px;
 		}
 
-		a {
-			color: $gray-700;
-		}
 	}
 }
 // Business location page
@@ -229,9 +227,7 @@
 	#woocommerce-select-control__listbox-0 {
 		top: 40px !important;
 	}
-
 }
-
 
 .woocommerce-profiler-business-location {
 	display: flex;
@@ -285,7 +281,11 @@
 		}
 	}
 
-	.woocommerce-experimental-select-control .components-popover .components-popover__content ul li:hover {
+	.woocommerce-experimental-select-control
+	.components-popover
+	.components-popover__content
+	ul
+	li:hover {
 		background-color: #f6f7f7 !important; // Gray-0
 		color: $gray-900;
 	}
@@ -338,16 +338,48 @@
 	}
 	.woocommerce-profiler-heading__subtitle {
 		margin: 12px 0 48px 0 !important;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			margin-top: 12px !important;
 		}
 	}
+
+	$sticky-footer-height: 120px;
+
 	.woocommerce-profiler-plugins__list {
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
 		gap: 16px;
 		flex: 50%;
+
+		@mixin sticky-footer-scroll-padding {
+			padding-bottom: $sticky-footer-height + 32px;
+		}
+
+		@include breakpoint(">782px") {// sticky footer shouldn't apply to mobile layout
+			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
+			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
+			&.rows-1 {
+				@media screen and ( max-height: 520px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-2 {
+				@media screen and ( max-height: 650px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-3 {
+				@media screen and ( max-height: 780px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+			&.rows-4 {
+				@media screen and ( max-height: 910px ) {
+					@include sticky-footer-scroll-padding;
+				}
+			}
+		}
 	}
 
 	.woocommerce-profiler-plugins-continue-button {
@@ -378,18 +410,55 @@
 	.woocommerce-profiler-plugins-jetpack-agreement {
 		color: $gray-700;
 		font-size: 12px;
-		a {
-			color: inherit;
+	}
+
+	.woocommerce-profiler-plugins__footer {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		@mixin plugins-sticky-footer {
+			background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 44.69%);
+			height: $sticky-footer-height;
+			position: fixed;
+			bottom: 0;
 		}
+
+		@include breakpoint(">782px") { // sticky footer shouldn't apply to mobile layout
+			// since the height of each card is more or less fixed (actually its variable but we limit text to 2 lines),
+			// we can estimate the visual breakpoints that are required to "unstick" the footer from the bottom of the page.
+			&.rows-1 {
+				@media screen and ( max-height: 520px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-2 {
+				@media screen and ( max-height: 650px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-3 {
+				@media screen and ( max-height: 780px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+			&.rows-4 {
+				@media screen and ( max-height: 910px ) {
+					@include plugins-sticky-footer;
+				}
+			}
+		}
+
 	}
 
 	.woocommerce-profiler-plugins-continue-button-container {
-		@include breakpoint( "<782px" ) {
+		@include breakpoint("<782px") {
 			width: 100%;
 		}
 
 		.woocommerce-profiler-plugins-continue-button {
-			@include breakpoint( "<782px" ) {
+			@include breakpoint("<782px") {
 				width: 100%;
 			}
 		}
@@ -419,7 +488,7 @@
 			width: 100%;
 
 			&:has(.woocommerce-profiler-geolocation-notice) {
-				@include breakpoint( "<782px" ) {
+				@include breakpoint("<782px") {
 					margin-bottom: 82px;
 				}
 			}
@@ -513,6 +582,33 @@
 			margin: 0;
 		}
 
+		.woocommerce-profiler-select-control__country-error {
+			background: #fce2e4;
+			padding: $gap-small;
+			font-size: 13px;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 24px;
+			color: $gray-900;
+			margin: 12px 0;
+
+			.components-notice__content {
+				margin: 0;
+			}
+
+			.components-button {
+				padding: 0;
+				height: initial;
+				min-width: 24px;
+				min-height: 24px;
+
+				svg {
+					width: 16px;
+					fill: $gray-900;
+				}
+			}
+		}
+
 		.woocommerce-profiler-select-control__country-spacer {
 			margin: auto auto 12px auto;
 		}
@@ -602,4 +698,16 @@
 	html.wp-toolbar {
 		padding-top: 32px !important;
 	}
+}
+
+.woocommerce-profiler-builder-intro {
+	display: flex;
+	flex-direction: column;
+	padding: 30px;
+	gap: 20px;
+	align-items: center;
+}
+
+.woocommerce-profiler-builder-intro-file-input {
+	margin-left: 100px;
 }

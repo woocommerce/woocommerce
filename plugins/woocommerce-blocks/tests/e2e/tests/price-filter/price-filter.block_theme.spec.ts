@@ -44,15 +44,17 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( "should allow changing the block's title", async ( { page } ) => {
+	test( "should allow changing the block's title", async ( { editor } ) => {
 		const textSelector =
 			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
 
 		const title = 'New Title';
 
-		await page.locator( textSelector ).fill( title );
+		await editor.canvas.locator( textSelector ).fill( title );
 
-		await expect( page.locator( textSelector ) ).toHaveText( title );
+		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
+			title
+		);
 	} );
 
 	test( 'should allow changing the display style', async ( {
@@ -233,9 +235,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-
-		await editor.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -244,7 +245,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 				heading: 'Filter By Price',
 			},
 		} );
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 		await page.goto( '/shop' );
 	} );
 
@@ -336,9 +339,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await admin.visitSiteEditor( {
 			postId: template.id,
 			postType: template.type,
+			canvas: 'edit',
 		} );
-
-		await editor.enterEditMode();
 
 		const priceFilterControls = await editor.getBlockByName(
 			blockData.slug
@@ -348,7 +350,9 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await editor.openDocumentSettingsSidebar();
 		await page.getByText( "Show 'Apply filters' button" ).click();
 
-		await editor.saveSiteEditorEntities();
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
 		await page.goto( '/shop' );
 
 		const maxPriceInput = page.getByRole( 'textbox', {
@@ -357,6 +361,12 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 
 		await maxPriceInput.dblclick();
 		await maxPriceInput.fill( '$5' );
+
+		const resetPriceFilterButton = page.getByRole( 'button', {
+			name: 'Reset price filter',
+		} );
+		await expect( resetPriceFilterButton ).toBeVisible();
+
 		await page
 			.getByRole( 'button', { name: 'Apply price filter' } )
 			.click();

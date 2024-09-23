@@ -54,7 +54,7 @@ export const Plugins: React.FC< SetupStepProps > = ( {
 		}
 
 		nextStep();
-	}, [ isResolving ] );
+	}, [ isResolving, nextStep, pluginsToActivate.length, tosAccepted ] );
 
 	if ( isResolving ) {
 		return null;

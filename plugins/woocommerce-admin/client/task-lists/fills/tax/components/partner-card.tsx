@@ -15,7 +15,8 @@ export const PartnerCard: React.FC< {
 	description: string;
 	benefits: ( string | JSX.Element )[];
 	terms: string | JSX.Element;
-	actionText: string;
+	children?: React.ReactNode;
+	actionText?: string;
 	onClick: () => void;
 	isBusy?: boolean;
 } > = ( {
@@ -27,6 +28,7 @@ export const PartnerCard: React.FC< {
 	actionText,
 	onClick,
 	isBusy,
+	children,
 } ) => {
 	return (
 		<div className="woocommerce-tax-partner-card">
@@ -59,14 +61,18 @@ export const PartnerCard: React.FC< {
 				<div className="woocommerce-tax-partner-card__terms">
 					{ terms }
 				</div>
-				<Button
-					isSecondary
-					onClick={ onClick }
-					isBusy={ isBusy }
-					disabled={ isBusy }
-				>
-					{ actionText }
-				</Button>
+				{ children ? (
+					children
+				) : (
+					<Button
+						isSecondary
+						onClick={ onClick }
+						isBusy={ isBusy }
+						disabled={ isBusy }
+					>
+						{ actionText }
+					</Button>
+				) }
 			</div>
 		</div>
 	);

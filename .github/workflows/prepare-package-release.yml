@@ -26,6 +26,7 @@ jobs:
               with:
                 install: true
                 build: './tools/package-release'
+                pull-package-deps: 'tools/package-release'
 
             - name: Execute script
               run: ./tools/package-release/bin/dev prepare ${{ github.event.inputs.packages }}

@@ -11,7 +11,12 @@ import {
 } from '@wordpress/element';
 import { SyntheticEvent, useCallback } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { PLUGINS_STORE_NAME, InstallPluginsResponse } from '@woocommerce/data';
+import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import type {
+	InstallPluginsResponse,
+	PluginSelectors,
+	PluginActions,
+} from '@woocommerce/data';
 
 type PluginsProps = {
 	onComplete: (
@@ -19,6 +24,7 @@ type PluginsProps = {
 		response: InstallPluginsResponse
 	) => void;
 	onError: ( errors: unknown, response: InstallPluginsResponse ) => void;
+	onClick?: () => void;
 	onSkip?: () => void;
 	skipText?: string;
 	autoInstall?: boolean;
@@ -37,6 +43,7 @@ export const Plugins = ( {
 	onAbort,
 	onComplete,
 	onError = () => null,
+	onClick = () => null,
 	pluginSlugs = [ 'woocommerce-services' ],
 	onSkip,
 	installText = __( 'Install & enable', 'woocommerce' ),
@@ -50,10 +57,14 @@ export const Plugins = ( {
 	const [ hasErrors, setHasErrors ] = useState( false );
 	// Tracks action so that multiple instances of this button don't all light up when one is clicked
 	const [ hasBeenClicked, setHasBeenClicked ] = useState( false );
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { installAndActivatePlugins }: PluginActions =
+		useDispatch( PLUGINS_STORE_NAME );
 	const { isRequesting } = useSelect( ( select ) => {
-		const { getActivePlugins, getInstalledPlugins, isPluginsRequesting } =
-			select( PLUGINS_STORE_NAME );
+		const {
+			getActivePlugins,
+			getInstalledPlugins,
+			isPluginsRequesting,
+		}: PluginSelectors = select( PLUGINS_STORE_NAME );
 
 		return {
 			isRequesting:
@@ -62,7 +73,7 @@ export const Plugins = ( {
 			activePlugins: getActivePlugins(),
 			installedPlugins: getInstalledPlugins(),
 		};
-	} );
+	}, [] );
 
 	const handleErrors = useCallback(
 		( errors: unknown, response: InstallPluginsResponse ) => {
@@ -159,6 +170,7 @@ export const Plugins = ( {
 				}
 				disabled={ isRequesting && hasBeenClicked }
 				onClick={ () => {
+					onClick();
 					setHasBeenClicked( true );
 					installAndActivate();
 				} }

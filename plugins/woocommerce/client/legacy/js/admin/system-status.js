@@ -94,7 +94,30 @@ jQuery( function ( $ ) {
 			wcSetClipboard( $( '#debug-report' ).find( 'textarea' ).val(), $( this ) );
 			evt.preventDefault();
 		},
+		/**
+		 * Apply redactions
+		 */
+		applyRedactions( report ) {
+			var redactions = [
+				{
+					regex: /(WordPress address \(URL\):)[^\n]*/,
+					replacement: "$1 [Redacted]"
+				},
+				{
+					regex: /(Site address \(URL\):)[^\n]*/,
+					replacement: "$1 [Redacted]"
+				},
+				{
+					regex: /(### Database ###\n)([\s\S]*?)(\n### Post Type Counts ###)/,
+					replacement: "$1\n[REDACTED]\n$3"
+				}
+			];
 
+			redactions.forEach( function( redaction ) {
+				report = report.replace( redaction.regex, redaction.replacement );
+			});
+			return report;
+		},
 		/**
 		 * Copy for GitHub report.
 		 *
@@ -103,7 +126,10 @@ jQuery( function ( $ ) {
 		copyGithubReport: function( event ) {
 			wcClearClipboard();
 			var reportValue = $( '#debug-report' ).find( 'textarea' ).val();
-			var reportForGithub = '<details><summary>System Status Report</summary>\n\n``' + reportValue + '``\n</details>';
+			var redactedReport = wcSystemStatus.applyRedactions( reportValue );
+
+			var reportForGithub = '<details><summary>System Status Report</summary>\n\n``' + redactedReport + '``\n</details>';
+
 			wcSetClipboard( reportForGithub, $( this ) );
 			event.preventDefault();
 		},

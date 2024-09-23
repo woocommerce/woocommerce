@@ -37,6 +37,8 @@ export interface AddressFormProps< T > {
 	values: T;
 	// support inserting children at end of form
 	children?: React.ReactNode;
+	// Is the form in editing mode.
+	isEditing?: boolean;
 }
 
 interface AddressFieldData {

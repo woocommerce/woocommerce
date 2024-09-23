@@ -1,0 +1,49 @@
+@import "../_mixins.scss";
+
+.woocommerce-customize-store-edit-site-sidebar__screen-wrapper {
+	height: 100%;
+	overflow-x: auto;
+	@include custom-scrollbars-on-hover(transparent, $gray-700);
+
+	// This matches the logo padding
+	padding: 0 6px 0 12px;
+
+	// Animation
+	animation-duration: 0.14s;
+	animation-timing-function: ease-in-out;
+	will-change: transform, opacity;
+
+	@media (prefers-reduced-motion: reduce) {
+		animation-duration: 0s;
+	}
+
+	&.slide-from-left {
+		animation-name: slide-from-left;
+	}
+
+	&.slide-from-right {
+		animation-name: slide-from-right;
+	}
+}
+
+@keyframes slide-from-right {
+	from {
+		transform: translateX(50px);
+		opacity: 0;
+	}
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}
+
+@keyframes slide-from-left {
+	from {
+		transform: translateX(-50px);
+		opacity: 0;
+	}
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}

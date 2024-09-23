@@ -49,23 +49,30 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 				steps: [
 					{
 						referenceElements: {
-							desktop: '.woocommerce-lys-status-pill',
+							desktop:
+								'#wp-admin-bar-woocommerce-site-visibility-badge',
 						},
 						meta: {
 							name: 'set-your-store-visibility',
 							heading: __(
-								"Set your store's visibility",
+								'Set your store’s visibility',
 								'woocommerce'
 							),
 							descriptions: {
 								desktop: createInterpolateElement(
 									__(
-										'Launch your store only when you\'re ready to by switching between "Coming soon" and "Live" modes. Build excitement by creating a custom page visitors will see before you\'re ready to go live. <link>Discover more</link>',
+										'Launch your store only when you’re ready to by switching between "Coming soon" and "Live" modes. Build excitement by creating a custom page visitors will see before you’re ready to go live. <link>Discover more</link>',
 										'woocommerce'
 									),
 									{
-										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
-										link: <a href="#" target="_blank" />,
+										link: (
+											// eslint-disable-next-line jsx-a11y/anchor-has-content
+											<a
+												href="https://woocommerce.com/document/configuring-woocommerce-settings/coming-soon-mode/"
+												target="_blank"
+												rel="noreferrer"
+											/>
+										),
 									}
 								),
 							},

@@ -136,7 +136,7 @@ describe( 'Config', () => {
 				jobs: [
 					{
 						type: JobType.Test,
-						testType: 'default',
+						testType: 'unit',
 						shardingArguments: [],
 						name: 'default',
 						changes: [
@@ -186,6 +186,47 @@ describe( 'Config', () => {
 							config: {
 								wpVersion: 'latest',
 							},
+						},
+					},
+				],
+			} );
+		} );
+
+		it( 'should parse test config with report', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						tests: [
+							{
+								name: 'default',
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
+								command: 'foo',
+								report: {
+									resultsBlobName: 'foo-blob-report',
+									resultsPath: '/test-results',
+									allure: true,
+								},
+							},
+						],
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Test,
+						name: 'default',
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
+						command: 'foo',
+						report: {
+							resultsBlobName: 'foo-blob-report',
+							resultsPath: '/test-results',
+							allure: true,
 						},
 					},
 				],
@@ -263,10 +304,10 @@ describe( 'Config', () => {
 		);
 
 		it.each( [
-			[ '', 'default' ],
-			[ 'bad', 'default' ],
-			[ 1, 'default' ],
-			[ undefined, 'default' ],
+			[ '', 'unit' ],
+			[ 'bad', 'unit' ],
+			[ 1, 'unit' ],
+			[ undefined, 'unit' ],
 		] )(
 			'should parse test config with unexpected testType',
 			( input, result ) => {

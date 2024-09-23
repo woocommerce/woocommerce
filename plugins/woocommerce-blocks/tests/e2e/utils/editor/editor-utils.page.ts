@@ -45,70 +45,6 @@ export class Editor extends CoreEditor {
 		}
 	}
 
-	async enterEditMode() {
-		await this.page
-			.getByRole( 'button', {
-				name: 'Edit',
-				exact: true,
-			} )
-			.dispatchEvent( 'click' );
-
-		const sidebar = this.page.locator( '.edit-site-layout__sidebar' );
-		const canvasLoader = this.page.locator( '.edit-site-canvas-loader' );
-
-		await sidebar.waitFor( {
-			state: 'hidden',
-		} );
-
-		await canvasLoader.waitFor( {
-			state: 'hidden',
-		} );
-	}
-
-	async isBlockEarlierThan< T >(
-		containerBlock: T,
-		firstBlock: string,
-		secondBlock: string
-	) {
-		const container =
-			containerBlock instanceof Function
-				? await containerBlock()
-				: containerBlock;
-
-		if ( ! container ) {
-			throw new Error( 'Container block not found.' );
-		}
-
-		const childBlocks = container.locator( ':scope > .wp-block' );
-
-		let firstBlockIndex = -1;
-		let secondBlockIndex = -1;
-
-		for ( let i = 0; i < ( await childBlocks.count() ); i++ ) {
-			const blockName = await childBlocks
-				.nth( i )
-				.getAttribute( 'data-type' );
-
-			if ( blockName === firstBlock ) {
-				firstBlockIndex = i;
-			}
-
-			if ( blockName === secondBlock ) {
-				secondBlockIndex = i;
-			}
-
-			if ( firstBlockIndex !== -1 && secondBlockIndex !== -1 ) {
-				break;
-			}
-		}
-
-		if ( firstBlockIndex === -1 || secondBlockIndex === -1 ) {
-			throw new Error( 'Both blocks must exist within the editor' );
-		}
-
-		return firstBlockIndex < secondBlockIndex;
-	}
-
 	async transformIntoBlocks() {
 		// Select the block, so the button is visible.
 		const block = this.canvas
@@ -129,8 +65,26 @@ export class Editor extends CoreEditor {
 			await transformButton.click();
 
 			// save changes
-			await this.saveSiteEditorEntities();
+			await this.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 		}
+	}
+
+	async revertTemplate( { templateName }: { templateName: string } ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+		await this.page.getByLabel( templateName, { exact: true } ).click();
+
+		await this.page.getByLabel( 'Actions' ).click();
+		await this.page
+			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
+			.click();
+		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await this.page
+			.getByLabel( 'Dismiss this notice' )
+			.getByText( /reset|deleted/ )
+			.waitFor();
 	}
 
 	async publishAndVisitPost() {
