@@ -13,7 +13,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useMemo, useCallback, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTask } from '@woocommerce/onboarding';
-import { getNewPath } from '@woocommerce/navigation';
+import { getNewPath, getQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import ExternalIcon from 'gridicons/dist/external';
 
@@ -91,11 +91,15 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				// gateway variable doesn't have hasPlugins property.
 				! paymentGateways.get( id )?.hasPlugins
 					? {
-							redirectPath: getNewPath(
-								{ task: 'payments' },
-								{},
-								'/'
-							),
+							// If we are already on a task page, don't redirect.
+							// Otherwise, redirect to Payments task page.
+							redirectPath: getQuery()?.task
+								? getNewPath(
+										{ task: getQuery().task },
+										{},
+										'/'
+								  )
+								: getNewPath( { task: 'payments' }, {}, '/' ),
 					  }
 					: {}
 			);
@@ -245,7 +249,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 		<List
 			heading={ additionalSectionHeading }
 			headingDescription={ additionalSectionHeadingDescription }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ additionalGateways }
 			markConfigured={ markConfigured }
 			footerLink={
@@ -265,7 +270,8 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 	const offlineSection = !! offlineGateways.length && (
 		<List
 			heading={ __( 'Offline payment methods', 'woocommerce' ) }
-			recommendation={ recommendation }
+			// No recommendation if WooPayments is supported (and displayed).
+			recommendation={ isWCPaySupported ? false : recommendation }
 			paymentGateways={ offlineGateways }
 			markConfigured={ markConfigured }
 		/>

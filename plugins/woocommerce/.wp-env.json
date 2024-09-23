@@ -1,5 +1,5 @@
 {
-	"core": null,
+	"core": "https://wordpress.org/wordpress-latest.zip",
 	"phpVersion": "7.4",
 	"plugins": [ "." ],
 	"config": {

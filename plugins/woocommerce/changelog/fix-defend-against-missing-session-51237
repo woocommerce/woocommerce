@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure session is loaded in cart functions to prevent fatal errors.
