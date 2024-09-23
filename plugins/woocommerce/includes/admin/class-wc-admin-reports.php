@@ -213,6 +213,8 @@ class WC_Admin_Reports {
 		 *         if ( is_admin() ) {
 		 *             // ...
 		 *
+		 * @since 2.1.0
+		 *
 		 * @param array $reports The associative array of reports.
 		 */
 		$filtered_reports = apply_filters( 'woocommerce_admin_reports', $reports );
