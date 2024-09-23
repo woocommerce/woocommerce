@@ -626,7 +626,7 @@ class WC_Admin_Report {
 	 *
 	 * @param  int    $id ID of the product to show. Blank to get all orders.
 	 * @param  int    $days Days of stats to get. Default to 7 days.
-	 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
+	 * @param  string $type Type of sparkline to get.
 	 * @return string
 	 */
 	public function sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
