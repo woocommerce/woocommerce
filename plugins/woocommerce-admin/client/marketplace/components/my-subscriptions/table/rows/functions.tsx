@@ -337,9 +337,11 @@ export function subscriptionStatus( subscription: Subscription ): TableRow {
 			);
 		}
 
-		return subscription.autorenew
-			? __( 'Active', 'woocommerce' )
-			: __( 'Cancelled', 'woocommerce' );
+	return subscription.lifetime
+		? __( 'Lifetime', 'woocommerce' )
+		: subscription.autorenew
+		? __( 'Active', 'woocommerce' )
+		: __( 'Cancelled', 'woocommerce' );
 	}
 	return {
 		display: getStatus(),
@@ -356,7 +358,7 @@ export function actions( subscription: Subscription ): TableRow {
 	let actionButton = null;
 	if ( subscription.product_key === '' ) {
 		actionButton = <SubscribeButton subscription={ subscription } />;
-	} else if ( subscription.expired ) {
+	} else if ( subscription.expired && ! subscription.lifetime ) {
 		actionButton = <RenewButton subscription={ subscription } />;
 	} else if (
 		subscription.local.installed === false &&
@@ -370,7 +372,7 @@ export function actions( subscription: Subscription ): TableRow {
 		actionButton = (
 			<ConnectButton subscription={ subscription } variant="link" />
 		);
-	} else if ( ! subscription.autorenew ) {
+	} else if ( ! subscription.autorenew && ! subscription.lifetime ) {
 		actionButton = <AutoRenewButton subscription={ subscription } />;
 	}
 
