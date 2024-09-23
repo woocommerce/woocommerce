@@ -90,9 +90,9 @@ abstract class AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	public function render_callback( $attributes = [], $content = '', $block = null ) {
-
 		$render_callback_attributes = $this->parse_render_callback_attributes( $attributes );
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
+			$this->register_block_type_assets();
 			$this->enqueue_assets( $render_callback_attributes, $content, $block );
 		}
 		return $this->render( $render_callback_attributes, $content, $block );
@@ -107,6 +107,7 @@ abstract class AbstractBlock {
 		if ( $this->enqueued_assets ) {
 			return;
 		}
+		$this->register_block_type_assets();
 		$this->enqueue_data();
 	}
 
@@ -122,7 +123,6 @@ abstract class AbstractBlock {
 			return false;
 		}
 		$this->integration_registry->initialize( $this->block_name . '_block' );
-		$this->register_block_type_assets();
 		$this->register_block_type();
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
