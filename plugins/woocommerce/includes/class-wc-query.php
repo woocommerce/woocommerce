@@ -300,7 +300,7 @@ class WC_Query {
 	private function filter_out_valid_front_page_query_vars( $query ) {
 		return array_filter(
 			$query,
-			function( $key ) {
+			function ( $key ) {
 				return ! $this->is_query_var_valid_on_front_page( $key );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -815,7 +815,7 @@ class WC_Query {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$rating_filter = array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) );
 			$rating_terms  = array();
-			for ( $i = 1; $i <= 5; $i ++ ) {
+			for ( $i = 1; $i <= 5; $i++ ) {
 				if ( in_array( $i, $rating_filter, true ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
 					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
 				}
