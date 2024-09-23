@@ -96,7 +96,7 @@ class AddToCartForm extends AbstractBlock {
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
 
 		if ( ! $is_external_product_with_url ) {
-			$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
+			$product = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 		}
 
 		$classname          = $attributes['className'] ?? '';
