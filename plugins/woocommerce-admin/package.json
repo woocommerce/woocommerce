@@ -272,7 +272,7 @@
 	},
 	"wireit": {
 		"build:project:bundle": {
-			"command": "webpack",
+			"command": "webpack && rsync -avhW --no-compress --delete --quiet build/ ../woocommerce/assets/client/admin",
 			"clean": "if-file-deleted",
 			"env": {
 				"NODE_ENV": {
