@@ -4,17 +4,25 @@
 import { BlockInstance, getBlockTypes } from '@wordpress/blocks';
 
 /**
+ * Internal dependencies
+ */
+import { EXCLUDED_BLOCKS } from './constants';
+
+/**
  * Returns an array of allowed block names excluding the disallowedBlocks array.
  *
- * @param disallowedBlocks Array of block names to disallow.
+ * @param excludedBlocks Array of block names to exclude from the list.
  * @return Array of allowed block names.
  */
-export const getAllowedBlocks = ( disallowedBlocks: string[] ) => {
+export const getAllowedBlocks = ( excludedBlocks: string[] = [] ) => {
 	const allBlocks = getBlockTypes();
 
 	return allBlocks
 		.map( ( block ) => block.name )
-		.filter( ( name ) => ! disallowedBlocks.includes( name ) );
+		.filter(
+			( name ) =>
+				! [ ...EXCLUDED_BLOCKS, ...excludedBlocks ].includes( name )
+		);
 };
 
 export const getInnerBlockByName = (
