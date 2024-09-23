@@ -6,15 +6,6 @@
 class WC_Query_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * Get a sample page ID for testing purposes.
-	 *
-	 * @return int The shop page ID.
-	 */
-	public function get_shop_page_id() {
-		return 123;
-	}
-
-	/**
 	 * @testdox 'price_filter_post_clauses' generates the proper 'where' clause when there are 'max_price' and 'min_price' arguments in the query.
 	 */
 	public function test_price_filter_post_clauses_creates_the_proper_where_clause() {
@@ -48,9 +39,20 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	public function test_shop_page_in_home_displays_correctly() {
 		switch_theme( 'twentytwentyfour' );
 
+		// Create a page.
+		$shop_page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+
+		// Use the new page as the shop page.
+		$default_woocommerce_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+
 		// Set the shop page as the homepage.
-		add_filter( 'woocommerce_get_shop_page_id', array( $this, 'get_shop_page_id' ) );
-		$shop_page_id          = 123;
 		$default_show_on_front = get_option( 'show_on_front' );
 		$default_page_on_front = get_option( 'page_on_front' );
 		update_option( 'show_on_front', 'page' );
@@ -66,23 +68,15 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		global $wp_the_query;
 		$previous_wp_the_query = $wp_the_query;
 		$wp_the_query          = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$GLOBALS['post']       = new WP_Post(
-			(object) array(
-				'ID'           => $shop_page_id,
-				'post_title'   => '',
-				'post_content' => '',
-				'post_status'  => 'publish',
-				'post_type'    => 'page',
-			)
-		); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$query->get_posts();
 
 		$this->assertTrue( defined( 'SHOP_IS_ON_FRONT' ) && SHOP_IS_ON_FRONT );
 
-		// Reset main query and options.
+		// Reset main query, options and delete the page we created.
 		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		update_option( 'woocommerce_shop_page_id', $default_woocommerce_shop_page_id );
 		update_option( 'show_on_front', $default_show_on_front );
 		update_option( 'page_on_front', $default_page_on_front );
-		remove_filter( 'woocommerce_get_shop_page_id', array( $this, 'get_shop_page_id' ) );
+		wp_delete_post( $shop_page_id, true );
 	}
 }
