@@ -432,15 +432,47 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$decimals       = wc_get_price_decimals();
 		$round_tax      = 'no' === get_option( 'woocommerce_tax_round_at_subtotal' );
 
+		$is_full_refund = false;
+		// Order fully refunded won't have the order line items.
+		if ( 'shop_order_refund' === $order->get_type() && empty( $order_items ) ) {
+			$is_full_refund  = true;
+			$parent_order_id = $order->get_parent_id();
+			$parent_order    = wc_get_order( $parent_order_id );
+			$order_items     = $parent_order->get_items();
+
+			// Remove the partial refunded order item if exists.
+			$delete_query = "
+				DELETE product_lookup
+				FROM {$table_name} AS product_lookup
+				INNER JOIN {$wpdb->prefix}wc_order_stats AS order_stats
+					ON order_stats.order_id = product_lookup.order_id
+				WHERE 1 = 1
+					AND order_stats.parent_id = %d
+					AND order_stats.total_sales < 0
+			";
+			$wpdb->query(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$delete_query,
+					$parent_order_id
+				)
+			);
+		}
+
 		foreach ( $order_items as $order_item ) {
 			$order_item_id = $order_item->get_id();
 			unset( $existing_items[ $order_item_id ] );
-			$product_qty         = $order_item->get_quantity( 'edit' );
+			$product_qty         = $is_full_refund ? 0 : $order_item->get_quantity( 'edit' );
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
 			$net_revenue         = round( $order_item->get_total( 'edit' ), $decimals );
-			$is_refund           = $net_revenue < 0;
+
+			if ( $is_full_refund ) {
+				$net_revenue = -abs( $net_revenue );
+			}
+
+			$is_refund = $net_revenue < 0;
 
 			// Skip line items without changes to product quantity.
 			if ( ! $product_qty && ! $is_refund ) {

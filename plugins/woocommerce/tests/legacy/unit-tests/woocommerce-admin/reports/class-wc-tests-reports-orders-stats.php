@@ -406,7 +406,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -60,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -520,7 +520,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -10,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -577,7 +577,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -50,       // @todo - does this value make sense?
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
