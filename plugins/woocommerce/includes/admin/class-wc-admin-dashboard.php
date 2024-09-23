@@ -548,11 +548,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Prepares the data for a sparkline to show sales in the last X days.
 		 *
 		 * @param  int    $id ID of the product to show. Blank to get all orders.
-		 * @param  int    $days Days of stats to get.
+		 * @param  int    $days Days of stats to get. Default to 7 days.
 		 * @param  string $type Type of sparkline to get. Ignored if ID is not set.
 		 * @return array
 		 */
-		private function get_sales_sparkline( $id = '', $days, $type = 'sales' ) {
+		private function get_sales_sparkline( $id = '', $days = 7, $type = 'sales' ) {
 			$sales_endpoint = '/wc-analytics/reports/revenue/stats';
 			$start_date     = gmdate( 'Y-m-d 00:00:00', current_time( 'timestamp' ) - ( ( $days - 1 ) * DAY_IN_SECONDS ) );
 			$end_date       = gmdate( 'Y-m-d 23:59:59', current_time( 'timestamp' ) );
