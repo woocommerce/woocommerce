@@ -66,6 +66,15 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		global $wp_the_query;
 		$previous_wp_the_query = $wp_the_query;
 		$wp_the_query          = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['post']       = new WP_Post(
+			(object) array(
+				'ID'           => $shop_page_id,
+				'post_title'   => '',
+				'post_content' => '',
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+			)
+		); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$query->get_posts();
 
 		$this->assertTrue( defined( 'SHOP_IS_ON_FRONT' ) && SHOP_IS_ON_FRONT );
