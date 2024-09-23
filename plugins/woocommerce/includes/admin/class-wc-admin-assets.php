@@ -474,7 +474,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			$report_screen_ids = apply_filters_deprecated(
 				'woocommerce_reports_screen_ids',
-				array( array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports', 'dashboard' ) ),
+				array( array( $wc_screen_id . '_page_wc-reports', 'toplevel_page_wc-reports' ) ),
 				'9.5.0',
 				null,
 				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',

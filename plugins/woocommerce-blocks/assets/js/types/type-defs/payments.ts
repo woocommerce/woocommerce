@@ -31,6 +31,7 @@ export interface SupportsConfiguration {
 	features?: string[];
 	// Deprecated, in favour of showSavedCards and showSaveOption
 	savePaymentInfo?: boolean;
+	style?: string[];
 }
 
 // we assign a value in the class for supports.features
@@ -119,10 +120,28 @@ export interface PaymentMethodConfiguration {
 	savedTokenComponent?: ReactNode | null;
 }
 
-export type ExpressPaymentMethodConfiguration = Omit<
-	PaymentMethodConfiguration,
-	'icons' | 'label' | 'ariaLabel' | 'placeOrderButtonLabel'
->;
+export interface ExpressPaymentMethodConfiguration {
+	// A unique string to identify the payment method client side.
+	name: string;
+	// A human readable title for the payment method.
+	title?: string;
+	// A human readable description for the payment method.
+	description?: string;
+	// The gateway ID for the payment method.
+	gatewayId?: string;
+	// A react node for your payment method UI.
+	content: ReactNode;
+	// A react node to display a preview of your payment method in the editor.
+	edit: ReactNode;
+	// A callback to determine whether the payment method should be shown in the checkout.
+	canMakePayment: CanMakePaymentCallback;
+	// A unique string to represent the payment method server side. If not provided, defaults to name.
+	paymentMethodId?: string;
+	// Object that describes various features provided by the payment method.
+	supports: SupportsConfiguration;
+	// A React node that contains logic handling any processing your payment method has to do with saved payment methods if your payment method supports them
+	savedTokenComponent?: ReactNode | null;
+}
 
 export type PaymentMethods =
 	| Record< string, PaymentMethodConfigInstance >
@@ -131,7 +150,16 @@ export type PaymentMethods =
 /**
  * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
  */
-export type PlainPaymentMethods = Record< string, { name: string } >;
+export type PlainPaymentMethods = Record<
+	string,
+	{
+		name: string;
+		title: string;
+		description: string;
+		gatewayId: string;
+		supportsStyle: string[];
+	}
+>;
 
 /**
  * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
@@ -159,6 +187,9 @@ export interface PaymentMethodConfigInstance {
 
 export interface ExpressPaymentMethodConfigInstance {
 	name: string;
+	title: string;
+	description: string;
+	gatewayId: string;
 	content: ReactNode;
 	edit: ReactNode;
 	paymentMethodId?: string;

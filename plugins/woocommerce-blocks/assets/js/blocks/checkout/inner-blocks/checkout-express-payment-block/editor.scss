@@ -27,3 +27,38 @@
 		margin: 0 0 1em;
 	}
 }
+
+.express-payment-styles-notice {
+	margin-bottom: $gap;
+}
+
+.express-payment-styles-beta-badge {
+	margin-left: $grid-unit-10;
+	padding: 3px $grid-unit-10;
+	height: $grid-unit-30;
+	border-radius: $radius-block-ui;
+	background-color: $gray-900;
+	color: $white;
+	align-items: center;
+	font-size: $helptext-font-size;
+	line-height: 1;
+}
+
+// Disabled changing units from px for border radius control
+.border-radius-control-container select {
+	pointer-events: none;
+}
+
+.button-height-control + .border-radius-control-container {
+	margin-top: $grid-unit-30;
+}
+
+// Center images rendered in place of buttons in the editor
+.wc-block-components-express-payment {
+	.wc-block-components-express-payment__event-buttons {
+		> li {
+			pointer-events: none;
+			user-select: none;
+		}
+	}
+}

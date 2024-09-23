@@ -109,6 +109,8 @@ export default function ProductListContent( props: {
 								billingPeriodInterval:
 									product.billingPeriodInterval,
 								currency: product.currency,
+								isOnSale: product.isOnSale,
+								regularPrice: product.regularPrice,
 							} }
 							tracksData={ {
 								position: index + 1,

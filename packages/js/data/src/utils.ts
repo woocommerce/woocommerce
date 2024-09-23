@@ -2,14 +2,15 @@
  * External dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, select } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
 import { BaseQueryParams } from './types/query-params';
 import { fetchWithHeaders } from './controls';
-
+import { USER_STORE_NAME } from './user';
+import { WCUser } from './user/types';
 function replacer( _: string, value: unknown ) {
 	if ( value ) {
 		if ( Array.isArray( value ) ) {
@@ -98,5 +99,22 @@ export function* request< Query extends BaseQueryParams, DataType >(
 		);
 
 		return { items: response.data, totalCount };
+	}
+}
+
+/**
+ * Utility function to check if the current user has a specific capability.
+ *
+ * @param {string} capability - The capability to check (e.g. 'manage_woocommerce').
+ * @throws {Error} If the user does not have the required capability.
+ */
+export function* checkUserCapability( capability: string ) {
+	const currentUser: WCUser< 'capabilities' > = yield select(
+		USER_STORE_NAME,
+		'getCurrentUser'
+	);
+
+	if ( ! currentUser.capabilities[ capability ] ) {
+		throw new Error( `User does not have ${ capability } capability.` );
 	}
 }

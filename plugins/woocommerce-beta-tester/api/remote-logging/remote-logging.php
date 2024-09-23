@@ -100,7 +100,10 @@ function log_remote_event() {
 		time(),
 		'critical',
 		'Test PHP event from WC Beta Tester',
-		array( 'source' => 'wc-beta-tester' )
+		array(
+			'source'         => 'wc-beta-tester',
+			'remote-logging' => true,
+		)
 	);
 
 	if ( $result ) {
