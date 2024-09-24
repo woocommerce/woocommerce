@@ -184,7 +184,7 @@ class AddToCartForm extends AbstractBlock {
 				array(
 					'namespace' => 'woocommerce/add-to-cart-form',
 				),
-				JSON_NUMERIC_CHECK
+				JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			) . '\'' : '',
 			esc_attr( $classes_and_styles['styles'] ),
 			$product
