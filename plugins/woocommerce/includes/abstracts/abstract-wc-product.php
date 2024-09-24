@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
@@ -106,6 +107,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'rating_counts'      => array(),
 		'average_rating'     => 0,
 		'review_count'       => 0,
+		'cogs_value'         => 0,
 	);
 
 	/**
@@ -2197,5 +2199,53 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$class = 'in-stock';
 		}
 		return apply_filters( 'woocommerce_get_availability_class', $class, $this );
+	}
+
+	/**
+	 * Set the defined value of the Cost of Goods Sold for this product.
+	 *
+	 * WARNING! If the Cost of Goods Sold feature is disabled this value will NOT be persisted when the product is saved.
+	 *
+	 * @param float $value The value to set for this product.
+	 */
+	public function set_cogs_value( float $value ): void {
+		$this->set_prop( 'cogs_value', $value );
+	}
+
+	/**
+	 * Get the defined value of the Cost of Goods Sold for this product.
+	 *
+	 * @return float The current value for this product.
+	 */
+	public function get_cogs_value(): float {
+		return (float) $this->get_prop( 'cogs_value' );
+	}
+
+	/**
+	 * Get the effective value of the Cost of Goods Sold for this product.
+	 * (the final, actual monetary value).
+	 *
+	 * Derived classes can override this method to provide an alternative way
+	 * of calculating the effective value from the defined value,
+	 * see for example the WC_Product_Variation class.
+	 *
+	 * @return float The effective value for this product.
+	 */
+	public function get_cogs_effective_value(): float {
+		return $this->get_cogs_value();
+	}
+
+	/**
+	 * Get the effective total value of the Cost of Goods Sold for this product.
+	 * (the monetary value that will be applied to orders and used for analytics purposes).
+	 *
+	 * Derived classes can override this method to provide an alternative way
+	 * of calculating the total effective value from the single effective value
+	 * and/or the defined value.
+	 *
+	 * @return float The effective value for this product.
+	 */
+	public function get_cogs_total_value(): float {
+		return $this->get_cogs_effective_value();
 	}
 }

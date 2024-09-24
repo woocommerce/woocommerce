@@ -25,7 +25,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * @return bool false if excluded.
 	 */
 	protected function exclude_internal_meta_keys( $meta ) {
-		return ! in_array( $meta->meta_key, $this->internal_meta_keys, true ) && 0 !== stripos( $meta->meta_key, 'attribute_' ) && 0 !== stripos( $meta->meta_key, 'wp_' );
+		$internal_meta_keys   = $this->internal_meta_keys;
+		$internal_meta_keys[] = '_cogs_value_overrides_parent';
+
+		return ! in_array( $meta->meta_key, $internal_meta_keys, true ) && 0 !== stripos( $meta->meta_key, 'attribute_' ) && 0 !== stripos( $meta->meta_key, 'wp_' );
 	}
 
 	/*
@@ -377,6 +380,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			)
 		);
 
+		if ( $this->cogs_feature_is_enabled() ) {
+			$product->set_props(
+				array(
+					'cogs_value'                  => (float) get_post_meta( $id, '_cogs_total_value', true ),
+					'cogs_value_overrides_parent' => 'yes' === get_post_meta( $id, '_cogs_value_overrides_parent', true ),
+				)
+			);
+		}
+
 		if ( $product->is_on_sale( 'edit' ) ) {
 			$product->set_price( $product->get_sale_price( 'edit' ) );
 		} else {
@@ -501,7 +513,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	}
 
 	/**
-	 * Helper method that updates all the post meta for a product based on it's settings in the WC_Product class.
+	 * Helper method that updates all the post meta for a product based on its settings in the WC_Product class.
 	 *
 	 * @since 3.0.0
 	 * @param WC_Product $product Product object.
@@ -519,6 +531,13 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$updated = update_post_meta( $product->get_id(), $meta_key, $value );
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
+			}
+		}
+
+		if ( $this->cogs_feature_is_enabled() ) {
+			$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_overrides_parent', $product->get_cogs_value_overrides_parent() ? 'yes' : '' );
+			if ( $updated ) {
+				$this->updated_props[] = 'cogs_value_overrides_parent';
 			}
 		}
 

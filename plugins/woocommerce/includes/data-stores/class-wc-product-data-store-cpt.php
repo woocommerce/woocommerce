@@ -70,6 +70,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_wp_old_slug',
 		'_edit_last',
 		'_edit_lock',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -435,6 +436,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_product_image_gallery' => 'gallery_image_ids',
 		);
 
+		if ( $this->cogs_feature_is_enabled() ) {
+			$meta_key_to_props['_cogs_total_value'] = 'cogs_value';
+		}
+
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
@@ -680,6 +685,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
+			}
+		}
+
+		if ( $this->cogs_feature_is_enabled() ) {
+			$cogs_value = $product->get_cogs_value();
+			$updated    = $this->update_or_delete_post_meta( $product, '_cogs_total_value', 0.0 === $cogs_value ? '' : $cogs_value );
+			if ( $updated ) {
+				$this->updated_props[] = 'cogs_value';
 			}
 		}
 
@@ -2338,5 +2351,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			",
 			$product_id
 		);
+	}
+
+	/**
+	 * Check if the Cost of Goods Sold feature is enabled.
+	 *
+	 * @return bool True if the feature is enabled.
+	 */
+	protected function cogs_feature_is_enabled(): bool {
+		return wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->feature_is_enabled( 'cost_of_goods_sold' );
 	}
 }
