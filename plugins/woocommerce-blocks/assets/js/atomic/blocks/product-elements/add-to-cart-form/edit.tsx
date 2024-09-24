@@ -45,6 +45,17 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 					<Disabled>
 						<div className="quantity">
 							<input
+								style={
+									isDescendentOfSingleProductBlock
+										? {
+												backgroundColor: 'unset',
+												lineHeight: 'unset',
+												minHeight: 'unset',
+												boxSizing: 'unset',
+												borderRadius: 'unset',
+										  }
+										: {}
+								}
 								type={ 'number' }
 								value={ '1' }
 								className={ 'input-text qty text' }
@@ -52,7 +63,7 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 							/>
 						</div>
 						<button
-							className={ `single_add_to_cart_button button alt wp-element-button` }
+							className={ `single_add_to_cart_button alt wp-element-button` }
 						>
 							{ __( 'Add to cart', 'woocommerce' ) }
 						</button>
