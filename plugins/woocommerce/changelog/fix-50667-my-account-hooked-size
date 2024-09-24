@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix My Account block icon being too small when inserted via block hooks
