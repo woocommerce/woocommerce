@@ -224,6 +224,18 @@ class FeaturesController {
 					'is_legacy'          => true,
 					'is_experimental'    => false,
 				),
+				'site_visibility_badge' => array(
+					'name'               => __( 'Site visibility badge', 'woocommerce' ),
+					'description'        => __(
+						'Enable the site visibility badge in the WordPress admin bar',
+						'woocommerce'
+					),
+					'enabled_by_default' => true,
+					'disable_ui'         => false,
+					'is_legacy'          => true,
+					'is_experimental'    => false,
+					'disabled'           => false,
+				),
 				'hpos_fts_indexes'     => array(
 					'name'               => __( 'HPOS Full text search indexes', 'woocommerce' ),
 					'description'        => __(
