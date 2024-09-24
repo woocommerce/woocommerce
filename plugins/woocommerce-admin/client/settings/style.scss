@@ -187,10 +187,6 @@
 	justify-content: space-between;
 	margin: 16px 0px;
 
-	&:first-of-type {
-		margin: 0;
-	}
-
 	h4 {
 		margin: 0;
 		min-width: 200px;
@@ -203,5 +199,15 @@
 
 	.components-input-control__container {
 		max-width: 420px;
+	}
+}
+
+.woocommerce-settings-title {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 30px;
+
+	h3 {
+		margin: 10px 0 0 0;
 	}
 }

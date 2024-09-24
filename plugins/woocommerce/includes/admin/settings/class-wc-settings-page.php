@@ -178,6 +178,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				} 
 				
 				// Otherwise, render the page's output method.
+				$html = str_replace('THIS IS THE PARENT OUTPUT', '', $html);
 				$tags = new WP_HTML_Tag_Processor( $html );
 				while( $tags->next_tag( array( 'tag_name' => 'script' ) ) ) {
 					$script_type = $tags->get_attribute( 'type' );

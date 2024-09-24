@@ -103,9 +103,10 @@ export const Content = ( { data } ) => {
 						return (
 							<div
 								key={ key }
-								className="woocommerce-settings-element"
+								className="woocommerce-settings-element woocommerce-settings-title"
 							>
 								<h3>{ setting.title }</h3>
+								<p>{ setting.desc }</p>
 							</div>
 						);
 					case 'checkbox':
