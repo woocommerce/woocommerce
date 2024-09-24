@@ -195,7 +195,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$attribute_options = array_map(
 				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms ) {
 					$term             = (array) $term;
-					$term['count']    = $attribute_counts[ $term['term_id'] ];
+					$term['count']    = $attribute_counts[ $term['term_id'] ] ?? 0;
 					$term['selected'] = in_array( $term['slug'], $selected_terms, true );
 					return array(
 						'label'    => $block_attributes['showCounts'] ? sprintf( '%1$s (%2$d)', $term['name'], $term['count'] ) : $term['name'],
