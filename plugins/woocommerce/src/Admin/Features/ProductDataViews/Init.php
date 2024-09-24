@@ -28,7 +28,7 @@ class Init {
 				add_filter(
 					'admin_body_class',
 					static function ( $classes ) {
-						return "$classes is-fullscreen-mode";
+						return "$classes";
 					}
 				);
 			}
@@ -109,9 +109,9 @@ class Init {
 		}
 		$ptype_obj = get_post_type_object( 'product' );
 		add_submenu_page(
-			'woocommerce',
+			'edit.php?post_type=product',
 			$ptype_obj->labels->name,
-			esc_html__( 'All Products', 'woocommerce' ),
+			esc_html__( 'All Products ( new )', 'woocommerce' ),
 			'manage_woocommerce',
 			'woocommerce-products-dashboard',
 			array( $this, 'woocommerce_products_dashboard' ),

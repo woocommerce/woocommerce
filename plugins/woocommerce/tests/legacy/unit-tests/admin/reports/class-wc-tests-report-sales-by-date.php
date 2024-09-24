@@ -83,7 +83,7 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Parameters borrowed from WC_Admin_Dashboard::get_sales_report_data().
+		// Parameters borrowed from WC_Admin_Reports::replace_dashboard_status_widget_reports().
 		$report                 = new WC_Report_Sales_By_Date();
 		$report->start_date     = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
 		$report->end_date       = current_time( 'timestamp' );
