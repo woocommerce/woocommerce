@@ -307,3 +307,13 @@ export function* fakeWooPayments( params ) {
 		);
 	} );
 }
+
+export function* updateWccomBaseUrl( { url } ) {
+	yield runCommand( 'Set WooCommerce.com Base URL', function* () {
+		yield apiFetch( {
+			path: '/wc-admin-test-helper/tools/set-wccom-base-url/v1',
+			method: 'POST',
+			data: { url },
+		} );
+	} );
+}

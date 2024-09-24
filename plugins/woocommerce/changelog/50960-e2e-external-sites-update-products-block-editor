@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update `products/block-editor` e2e tests, so they are passing against Pressable env.

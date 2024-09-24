@@ -31,12 +31,16 @@ export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
 export const getPageTitle = ( sections ) => {
 	let pageTitle;
-	const pagesWithTabs = [ 'Settings', 'Reports', 'Status' ];
+	const pagesWithTabs = [
+		'admin.php?page=wc-settings',
+		'admin.php?page=wc-reports',
+		'admin.php?page=wc-status',
+	];
 
 	if (
 		sections.length > 2 &&
 		Array.isArray( sections[ 1 ] ) &&
-		pagesWithTabs.includes( sections[ 1 ][ 1 ] )
+		pagesWithTabs.includes( sections[ 1 ][ 0 ] )
 	) {
 		pageTitle = sections[ 1 ][ 1 ];
 	} else {
