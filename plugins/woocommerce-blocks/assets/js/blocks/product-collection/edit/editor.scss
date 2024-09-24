@@ -174,6 +174,20 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	.wc-blocks-product-collection__info-icon {
 		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
 	}
+
+	.woocommerce-search-list__search {
+		margin: 0;
+	}
+}
+
+// Product to Show Radio Control
+.wc-block-product-collection-product-reference-radio {
+	width: 100%;
+
+	// Current gap is really small so we increase it
+	.components-flex {
+		gap: 8px;
+	}
 }
 
 // Linked Product Control

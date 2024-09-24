@@ -11,7 +11,7 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
-	customer_username,
+	customer_email,
 	customer_password,
 	think_time_min,
 	think_time_max,
@@ -74,7 +74,7 @@ export function myAccount() {
 		response = http.post(
 			`${ base_url }/my-account`,
 			{
-				username: `${ customer_username }`,
+				username: `${ customer_email }`,
 				password: `${ customer_password }`,
 				'woocommerce-login-nonce': `${ woocommerce_login_nonce }`,
 				_wp_http_referer: '/my-account',
