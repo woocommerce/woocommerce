@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+get_checkout_fields() should return empty array if requested fieldset is not defined
