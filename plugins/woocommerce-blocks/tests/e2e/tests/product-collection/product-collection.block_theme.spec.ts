@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Request } from '@playwright/test';
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -84,10 +84,12 @@ test.describe( 'Product Collection', () => {
 
 	test.describe( 'when no results are found', () => {
 		test.beforeEach( async ( { admin } ) => {
+			// eslint-disable-next-line no-console
+			console.log( await wpCLI( 'db check' ) );
 			await admin.createNewPost();
 		} );
 
-		test.skip( 'does not render', async ( {
+		test.only( 'does not render', async ( {
 			page,
 			editor,
 			pageObject,
