@@ -436,6 +436,37 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_sold_individually( get_post_meta( $product->get_parent_id(), '_sold_individually', true ) );
 		$product->set_tax_status( get_post_meta( $product->get_parent_id(), '_tax_status', true ) );
 		$product->set_cross_sell_ids( get_post_meta( $product->get_parent_id(), '_crosssell_ids', true ) );
+
+		if ( $this->cogs_feature_is_enabled() ) {
+			$this->load_cogs_data( $product );
+		}
+	}
+
+	/**
+	 * Load the Cost of Goods Sold related data for a given product.
+	 *
+	 * @param WC_Product $product The product to apply the loaded data to.
+	 */
+	protected function load_cogs_data( $product ) {
+		parent::load_cogs_data( $product );
+
+		$cogs_value_overrides_parent = 'yes' === get_post_meta( $product->get_id(), '_cogs_value_overrides_parent', true );
+
+		/**
+		 * Filter to customize the "Cost of Goods Sold value overrides the parent value" flag that gets loaded for a given variable product.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param bool $cogs_value_overrides_parent The flag as read from the database.
+		 * @param WC_Product $product The product for which the flag is being loaded.
+		 */
+		$cogs_value_overrides_parent = apply_filters( 'woocommerce_load_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
+
+		$product->set_props(
+			array(
+				'cogs_value_overrides_parent' => $cogs_value_overrides_parent,
+			)
+		);
 	}
 
 	/**
@@ -535,9 +566,25 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		if ( $this->cogs_feature_is_enabled() ) {
-			$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_overrides_parent', $product->get_cogs_value_overrides_parent() ? 'yes' : '' );
-			if ( $updated ) {
-				$this->updated_props[] = 'cogs_value_overrides_parent';
+			$cogs_value_overrides_parent = $product->get_cogs_value_overrides_parent();
+
+			/**
+			 * Filter to customize the "Cost of Goods Sold value overrides the parent value" flag that gets saved for a given variable product,
+			 * or to suppress the saving of the flag (so that custom storage can be used) if null is returned.
+			 * Note that returning null will suppress any database access (for either saving the flag or deleting it).
+			 *
+			 * @since x.x.x
+			 *
+			 * @param bool|null $cogs_value_overrides_parent The flag to be written to the database. If null is returned nothing will be written or deleted.
+			 * @param WC_Product $product The product for which the flag is being saved.
+			 */
+			$cogs_value_overrides_parent = apply_filters( 'woocommerce_save_cogs_overrides_parent_value_flag', $cogs_value_overrides_parent, $product );
+
+			if ( ! is_null( $cogs_value_overrides_parent ) ) {
+				$updated = $this->update_or_delete_post_meta( $product, '_cogs_value_overrides_parent', $cogs_value_overrides_parent ? 'yes' : '' );
+				if ( $updated ) {
+					$this->updated_props[] = 'cogs_value_overrides_parent';
+				}
 			}
 		}
 
