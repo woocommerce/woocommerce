@@ -9,11 +9,11 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import { STORE_KEY } from '../data/constants';
 
-export const UPDATE_WOOCOM_BASE_URL_ACTION_NAME = 'updateWoocomBaseUrl';
+export const UPDATE_WOOCOM_BASE_URL_ACTION_NAME = 'updateWccomBaseUrl';
 
-export const SetWoocomBaseUrl = () => {
+export const SetWccomBaseUrl = () => {
 	const url = useSelect(
-		( select ) => select( STORE_KEY ).getWoocomBaseUrl(),
+		( select ) => select( STORE_KEY ).getWccomBaseUrl(),
 		[]
 	);
 	const { updateCommandParams } = useDispatch( STORE_KEY );
@@ -25,7 +25,7 @@ export const SetWoocomBaseUrl = () => {
 	}
 
 	return (
-		<div className="woocom-base-url-control">
+		<div className="wccom-base-url-control">
 			{ url === undefined ? (
 				<p>Loading...</p>
 			) : (

@@ -25,9 +25,9 @@ import {
 	SetWccomRequestErrros,
 } from './set-wccom-request-errors';
 import {
-	SetWoocomBaseUrl,
+	SetWccomBaseUrl,
 	UPDATE_WOOCOM_BASE_URL_ACTION_NAME,
-} from './set-woocom-base-url';
+} from './set-wccom-base-url';
 
 export default [
 	{
@@ -112,7 +112,7 @@ export default [
 	},
 	{
 		command: 'Set WooCommerce.com Base URL',
-		description: <SetWoocomBaseUrl />,
+		description: <SetWccomBaseUrl />,
 		action: UPDATE_WOOCOM_BASE_URL_ACTION_NAME,
 	},
 ];

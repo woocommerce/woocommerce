@@ -46,6 +46,6 @@ export function getIsFakeWooPaymentsEnabled( state ) {
 	return state.params.fakeWooPayments.enabled;
 }
 
-export function getWoocomBaseUrl( state ) {
-	return state.params.updateWoocomBaseUrl.url;
+export function getWccomBaseUrl( state ) {
+	return state.params.updateWccomBaseUrl.url;
 }
