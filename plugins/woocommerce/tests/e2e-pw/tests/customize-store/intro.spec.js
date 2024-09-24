@@ -131,7 +131,7 @@ test.describe(
 			).toBeVisible();
 		} );
 
-		test.only( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer', async ( {
+		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer', async ( {
 			page,
 			baseURL,
 		} ) => {
