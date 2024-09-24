@@ -203,12 +203,17 @@ class WC_Report_Customers extends WC_Admin_Report {
 		);
 
 		$users_query = new WP_User_Query(
-			apply_filters(
+			apply_filters_deprecated(
 				'woocommerce_admin_report_customers_user_query_args',
 				array(
-					'fields'  => array( 'user_registered' ),
-					'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
-				)
+					array(
+						'fields'  => array( 'user_registered' ),
+						'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+					),
+				),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
 			)
 		);
 

@@ -38,21 +38,26 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 		$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
 
-		$query_from = apply_filters(
+		$query_from = apply_filters_deprecated(
 			'woocommerce_report_low_in_stock_query_from',
-			$wpdb->prepare(
-				"
-				FROM {$wpdb->posts} as posts
-				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
-				WHERE 1=1
-				AND posts.post_type IN ( 'product', 'product_variation' )
-				AND posts.post_status = 'publish'
-				AND lookup.stock_quantity <= %d
-				AND lookup.stock_quantity > %d
-				",
-				$stock,
-				$nostock
-			)
+			array(
+				$wpdb->prepare(
+					"
+					FROM {$wpdb->posts} as posts
+					INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+					WHERE 1=1
+					AND posts.post_type IN ( 'product', 'product_variation' )
+					AND posts.post_status = 'publish'
+					AND lookup.stock_quantity <= %d
+					AND lookup.stock_quantity > %d
+					",
+					$stock,
+					$nostock
+				),
+			),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
 		);
 
 		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT SQL_CALC_FOUND_ROWS posts.ID as id, posts.post_parent as parent {$query_from} ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

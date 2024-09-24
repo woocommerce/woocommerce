@@ -148,7 +148,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 				ob_start();
 				?><p>
 					<?php
-					do_action( 'woocommerce_admin_user_actions_start', $user );
+					wc_do_deprecated_action(
+						'woocommerce_admin_user_actions_start',
+						array( $user ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 
 					$actions = array();
 
@@ -186,13 +192,25 @@ class WC_Report_Customer_List extends WP_List_Table {
 						);
 					}
 
-					$actions = apply_filters( 'woocommerce_admin_user_actions', $actions, $user );
+					$actions = apply_filters_deprecated(
+						'woocommerce_admin_user_actions',
+						array( $actions, $user ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 
 					foreach ( $actions as $action ) {
 						printf( '<a class="button tips %s" href="%s" data-tip="%s">%s</a>', esc_attr( $action['action'] ), esc_url( $action['url'] ), esc_attr( $action['name'] ), esc_attr( $action['name'] ) );
 					}
 
-					do_action( 'woocommerce_admin_user_actions_end', $user );
+					wc_do_deprecated_action(
+						'woocommerce_admin_user_actions_end',
+						array( $user ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 					?>
 				</p>
 				<?php
@@ -281,13 +299,18 @@ class WC_Report_Customer_List extends WP_List_Table {
 		);
 
 		$query = new WP_User_Query(
-			apply_filters(
+			apply_filters_deprecated(
 				'woocommerce_admin_report_customer_list_user_query_args',
 				array(
-					'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
-					'number'  => $per_page,
-					'offset'  => ( $current_page - 1 ) * $per_page,
-				)
+					array(
+						'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+						'number'  => $per_page,
+						'offset'  => ( $current_page - 1 ) * $per_page,
+					),
+				),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.'
 			)
 		);
 

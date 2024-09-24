@@ -234,7 +234,16 @@ class WC_Report_Downloads extends WP_List_Table {
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$current_page          = absint( $this->get_pagenum() );
 		// Allow filtering per_page value, but ensure it's at least 1.
-		$per_page = max( 1, apply_filters( 'woocommerce_admin_downloads_report_downloads_per_page', 20 ) );
+		$per_page = max(
+			1,
+			apply_filters_deprecated(
+				'woocommerce_admin_downloads_report_downloads_per_page',
+				array( 20 ),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+			),
+		);
 
 		$this->get_items( $current_page, $per_page );
 
@@ -327,7 +336,13 @@ class WC_Report_Downloads extends WP_List_Table {
 			$query_from .= $wpdb->prepare( ' AND user_ip_address = %s ', $filters->user_ip_address );
 		}
 
-		$query_from  = apply_filters( 'woocommerce_report_downloads_query_from', $query_from );
+		$query_from  = apply_filters_deprecated(
+			'woocommerce_report_downloads_query_from',
+			array( $query_from ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 		$query_order = $wpdb->prepare( 'ORDER BY timestamp DESC LIMIT %d, %d;', ( $current_page - 1 ) * $per_page, $per_page );
 
 		$this->items     = $wpdb->get_results( "SELECT * {$query_from} {$query_order}" ); // WPCS: cache ok, db call ok, unprepared SQL ok.

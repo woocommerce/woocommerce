@@ -65,6 +65,8 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 
 	/**
 	 * Test: get_order_report_data
+	 *
+	 * @expectedDeprecated woocommerce_reports_get_order_report_data_args
 	 */
 	public function test_get_order_report_data_returns_empty_string_if_data_is_empty() {
 		$report = new WC_Admin_Report();

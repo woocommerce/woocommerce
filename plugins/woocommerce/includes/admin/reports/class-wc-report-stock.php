@@ -144,7 +144,13 @@ class WC_Report_Stock extends WP_List_Table {
 						);
 					}
 
-					$actions = apply_filters( 'woocommerce_admin_stock_report_product_actions', $actions, $product );
+					$actions = apply_filters_deprecated(
+						'woocommerce_admin_stock_report_product_actions',
+						array( $actions, $product ),
+						'9.5.0',
+						null,
+						'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+					);
 
 					foreach ( $actions as $action ) {
 						printf(
@@ -187,7 +193,13 @@ class WC_Report_Stock extends WP_List_Table {
 
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 		$current_page          = absint( $this->get_pagenum() );
-		$per_page              = apply_filters( 'woocommerce_admin_stock_report_products_per_page', 20 );
+		$per_page              = apply_filters_deprecated(
+			'woocommerce_admin_stock_report_products_per_page',
+			array( 20 ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 
 		$this->get_items( $current_page, $per_page );
 

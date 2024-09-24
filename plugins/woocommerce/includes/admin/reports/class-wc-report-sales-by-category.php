@@ -65,7 +65,15 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 		$term_ids[]  = $category_id;
 		$product_ids = get_objects_in_term( $term_ids, 'product_cat' );
 
-		return array_unique( apply_filters( 'woocommerce_report_sales_by_category_get_products_in_category', $product_ids, $category_id ) );
+		return array_unique(
+			apply_filters_deprecated(
+				'woocommerce_report_sales_by_category_get_products_in_category',
+				array( $product_ids, $category_id ),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+			)
+		);
 	}
 
 	/**

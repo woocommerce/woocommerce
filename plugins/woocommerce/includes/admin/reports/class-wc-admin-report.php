@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @package     WooCommerce\Admin\Reports
  * @version     2.1.0
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 class WC_Admin_Report {
 
@@ -109,7 +110,13 @@ class WC_Admin_Report {
 			'order_status'        => array( 'completed', 'processing', 'on-hold' ),
 			'parent_order_status' => false,
 		);
-		$args         = apply_filters( 'woocommerce_reports_get_order_report_data_args', $args );
+		$args         = apply_filters_deprecated(
+			'woocommerce_reports_get_order_report_data_args',
+			array( $args ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 		$args         = wp_parse_args( $args, $default_args );
 
 		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract
@@ -119,7 +126,13 @@ class WC_Admin_Report {
 			return '';
 		}
 
-		$order_status = apply_filters( 'woocommerce_reports_order_statuses', $order_status );
+		$order_status = apply_filters_deprecated(
+			'woocommerce_reports_order_statuses',
+			array( $order_status ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 
 		$query  = array();
 		$select = array();
@@ -346,7 +359,13 @@ class WC_Admin_Report {
 			$query['limit'] = "LIMIT {$limit}";
 		}
 
-		$query = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
+		$query = apply_filters_deprecated(
+			'woocommerce_reports_get_order_report_query',
+			array( $query ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 		$query = implode( ' ', $query );
 
 		if ( $debug ) {
@@ -358,14 +377,26 @@ class WC_Admin_Report {
 		if ( $debug || $nocache ) {
 			self::enable_big_selects();
 
-			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			$result = apply_filters_deprecated(
+				'woocommerce_reports_get_order_report_data',
+				array( $wpdb->$query_type( $query ), $data ),
+				'9.5.0',
+				null,
+				'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+			);
 		} else {
 			$query_hash = md5( $query_type . $query );
 			$result     = $this->get_cached_query( $query_hash );
 			if ( null === $result ) {
 				self::enable_big_selects();
 
-				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+				$result = apply_filters_deprecated(
+					'woocommerce_reports_get_order_report_data',
+					array( $wpdb->$query_type( $query ), $data ),
+					'9.5.0',
+					null,
+					'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+				);
 			}
 			$this->set_cached_query( $query_hash, $result );
 		}
