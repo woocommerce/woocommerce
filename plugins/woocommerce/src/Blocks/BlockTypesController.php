@@ -57,19 +57,20 @@ final class BlockTypesController {
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
+		add_filter( 'render_block', array( $this, 'add_block_class_name_for_block_variations' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
 		add_filter(
 			'woocommerce_is_checkout',
 			function ( $ret ) {
-				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout' );
+				return $ret || $this->has_block_variation_in_post( 'woocommerce/classic-shortcode', 'shortcode', 'checkout' );
 			}
 		);
 		add_filter(
 			'woocommerce_is_cart',
 			function ( $ret ) {
-				return $ret || $this->has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
+				return $ret || $this->has_block_variation_in_post( 'woocommerce/classic-shortcode', 'shortcode', 'cart' );
 			}
 		);
 	}
@@ -114,6 +115,26 @@ final class BlockTypesController {
 	}
 
 	/**
+	 * Check if block has a specific attribute value.
+	 *
+	 * @param string $block The block data.
+	 * @param string $attribute The attribute to check.
+	 * @param string $value The value to check for.
+	 * @return boolean
+	 */
+	private function has_block_variation( $block, $attribute, $value ) {
+		if ( ! array_key_exists( $attribute, $block['attrs'] ) ) {
+			return false;
+		}
+		$attribute_value = $block['attrs'][$attribute];
+		if ( is_array( $value ) && is_array( $attribute_value ) ) {
+			$diff = array_diff_assoc( $value, $attribute_value );
+			return empty( $diff );
+		}
+		return $value === $attribute_value;
+	}
+
+	/**
 	 * Check if the current post has a block with a specific attribute value.
 	 *
 	 * @param string $block_id The block ID to check for.
@@ -121,7 +142,7 @@ final class BlockTypesController {
 	 * @param string $value The value to check for.
 	 * @return boolean
 	 */
-	private function has_block_variation( $block_id, $attribute, $value ) {
+	private function has_block_variation_in_post( $block_id, $attribute, $value ) {
 		$post = get_post();
 
 		if ( ! $post ) {
@@ -132,7 +153,7 @@ final class BlockTypesController {
 			$blocks = (array) parse_blocks( $post->post_content );
 
 			foreach ( $blocks as $block ) {
-				if ( isset( $block['attrs'][ $attribute ] ) && $value === $block['attrs'][ $attribute ] ) {
+				if ( $this->has_block_variation( $block, $attribute, $value ) ) {
 					return true;
 				}
 			}
@@ -267,6 +288,37 @@ final class BlockTypesController {
 		// Set this last to prevent user-input from overriding it.
 		$processor->set_attribute( 'data-block-name', $block['blockName'] );
 		return $processor->get_updated_html();
+	}
+
+	/**
+	 * Add wp-block class name to block variations when rendered if the block is under the woocommerce/ namespace.
+	 *
+	 * @param string $content Block content.
+	 * @param array  $block Parsed block data.
+	 * @return string
+	 */
+	function add_block_class_name_for_block_variations( $content, $block ) {
+		$content = trim( $content );
+		$variation_block_types = $this->get_variation_block_types();
+		$variation_key = array_search( $block['blockName'], array_column( $variation_block_types, 'block_name' ), true );
+
+		if ( false !== $variation_key ) {
+			$variation_block = $variation_block_types[ $variation_key ];
+			$matching_attribute = array_key_first( $variation_block['attributes'] );
+			if ( $this->has_block_variation( $block, $matching_attribute, $variation_block['attributes'][ $matching_attribute ] ) ) {
+				$processor = new \WP_HTML_Tag_Processor( $content );
+				if (
+					false === $processor->next_token() ||
+					$processor->is_tag_closer()
+				) {
+					return $content;
+				}
+				$key = str_replace( '/', '-', str_replace( 'core/', '', $variation_block['variation_name'] ) );
+				$processor->add_class( "wp-block-{$key}" );
+				return $processor->get_updated_html();
+			}
+		}
+		return $content;
 	}
 
 	/**
@@ -471,5 +523,24 @@ final class BlockTypesController {
 		 * @param array $block_types List of block types.
 		 */
 		return apply_filters( 'woocommerce_get_block_types', $block_types );
+	}
+
+	/**
+	 * Get list of variation block types.
+	 *
+	 * @return array
+	 */
+	protected function get_variation_block_types() {
+		return array(
+			array(
+				'block_name' => 'core/search',
+				'variation_name' => 'woocommerce/product-search',
+				'attributes' => array(
+					'query' => array(
+						'post_type' => 'product'
+					)
+				),
+			)
+		);
 	}
 }
