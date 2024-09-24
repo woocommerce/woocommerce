@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Remove all media files and their database entries.
+ * Remove all media files and their database entries, except for specified files.
  */
 function wc_cleanup_media() {
 	$args = array(
@@ -27,25 +27,30 @@ function wc_cleanup_media() {
 		'post_parent' => null,
 	);
 
-	$attachments = get_posts( $args );
+	$attachments    = get_posts( $args );
+	$excluded_files = array( 'image-01.jpg', 'image-02.png', 'image-03.png' );
 
 	if ( $attachments ) {
 		foreach ( $attachments as $attachment ) {
-			wp_delete_attachment( $attachment->ID, true );
+			$file_name = basename( get_attached_file( $attachment->ID ) );
+			if ( ! in_array( $file_name, $excluded_files, true ) ) {
+				wp_delete_attachment( $attachment->ID, true );
+			}
 		}
 	}
 
 	// Clean up the uploads directory.
 	$upload_dir = wp_upload_dir();
-	wc_cleanup_directory( $upload_dir['basedir'] );
+	wc_cleanup_directory( $upload_dir['basedir'], $excluded_files );
 }
 
 /**
- * Recursively remove all files and subdirectories from a directory.
+ * Recursively remove all files and subdirectories from a directory, except for specified files.
  *
  * @param string $dir The directory to clean.
+ * @param array  $excluded_files Array of filenames to exclude from deletion.
  */
-function wc_cleanup_directory( $dir ) {
+function wc_cleanup_directory( $dir, $excluded_files = array() ) {
 	if ( ! is_dir( $dir ) ) {
 		return;
 	}
@@ -56,23 +61,25 @@ function wc_cleanup_directory( $dir ) {
 		$path = $dir . DIRECTORY_SEPARATOR . $file;
 
 		if ( is_dir( $path ) ) {
-			wc_cleanup_directory( $path );
-		} else {
+			wc_cleanup_directory( $path, $excluded_files );
+		} elseif ( ! in_array( $file, $excluded_files, true ) ) {
 			wp_delete_file( $path );
 		}
 	}
 
-	// Remove the empty directory.
-	if ( function_exists( 'wp_delete_directory' ) ) {
-		wp_delete_directory( $dir );
-	} elseif ( function_exists( 'WP_Filesystem' ) ) {
-		WP_Filesystem();
-		global $wp_filesystem;
-		$wp_filesystem->rmdir( $dir );
-	} else {
-		// Fallback for WordPress versions that don't have wp_delete_directory or WP_Filesystem.
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
-		rmdir( $dir );
+	// Remove the empty directory if it's not the base upload directory.
+	if ( wp_upload_dir()['basedir'] !== $dir ) {
+		if ( function_exists( 'wp_delete_directory' ) ) {
+			wp_delete_directory( $dir );
+		} elseif ( function_exists( 'WP_Filesystem' ) ) {
+			WP_Filesystem();
+			global $wp_filesystem;
+			$wp_filesystem->rmdir( $dir );
+		} else {
+			// Fallback for WordPress versions that don't have wp_delete_directory or WP_Filesystem.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			rmdir( $dir );
+		}
 	}
 }
 
