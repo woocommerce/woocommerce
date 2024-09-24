@@ -39,12 +39,6 @@ Edit `composer.json` in the root directory and add the package and package versi
   ...
 ```
 
-Next, if your package contains user translatable strings you'll need to edit `bin/package-update.sh` and instruct it to change your package textdomain to the `woocommerce` textdomain. For example:
-
-```shell
-find ./packages/woocommerce-example-package -iname '*.php' -exec sed -i.bak -e "s/, 'woocommerce-example-package'/, 'woocommerce'/g" {} \;
-```
-
 Finally, you will need to tell core to load your package. Edit `src/Packages.php` and add your package to the list of packages there:
 
 ```php
