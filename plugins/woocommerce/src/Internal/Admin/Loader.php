@@ -126,12 +126,16 @@ class Loader {
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 
 		$page_title      = '';
-		$pages_with_tabs = array( 'Settings', 'Reports', 'Status' );
+		$pages_with_tabs = array(
+			'admin.php?page=wc-settings',
+			'admin.php?page=wc-reports',
+			'admin.php?page=wc-status',
+		);
 
 		if (
 			count( $sections ) > 2 &&
 			is_array( $sections[1] ) &&
-			in_array( $sections[1][1], $pages_with_tabs, true )
+			in_array( $sections[1][0], $pages_with_tabs, true )
 		) {
 			$page_title = $sections[1][1];
 		} else {
