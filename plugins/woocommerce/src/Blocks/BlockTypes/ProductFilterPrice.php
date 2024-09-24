@@ -120,144 +120,73 @@ final class ProductFilterPrice extends AbstractBlock {
 			return '';
 		}
 
-		$price_range         = $this->get_filtered_price( $block );
-		$min_range           = $price_range['min_price'] ?? 0;
-		$max_range           = $price_range['max_price'] ?? 0;
-		$min_price           = intval( get_query_var( self::MIN_PRICE_QUERY_VAR, $min_range ) );
-		$max_price           = intval( get_query_var( self::MAX_PRICE_QUERY_VAR, $max_range ) );
-		$formatted_min_price = wc_price( $min_price, array( 'decimals' => 0 ) );
-		$formatted_max_price = wc_price( $max_price, array( 'decimals' => 0 ) );
+		$price_range = $this->get_filtered_price( $block );
+		$min_range   = $price_range['min_price'] ?? 0;
+		$max_range   = $price_range['max_price'] ?? 0;
+		$min_price   = intval( get_query_var( self::MIN_PRICE_QUERY_VAR ) ) ?: $min_range;
+		$max_price   = intval( get_query_var( self::MAX_PRICE_QUERY_VAR ) ) ?: $max_range;
 
-		$data = array(
-			'minPrice' => $min_price,
-			'maxPrice' => $max_price,
-			'minRange' => $min_range,
-			'maxRange' => $max_range,
+		$filter_context = array(
+			'price'   => array(
+				'minPrice' => $min_price,
+				'maxPrice' => $max_price,
+				'minRange' => $min_range,
+				'maxRange' => $max_range,
+			),
+			'actions' => array(
+				'setPrices' => "{$this->get_full_block_name()}::actions.setPrices",
+			),
 		);
 
-		list (
-			'showInputFields' => $show_input_fields,
-			'inlineInput' => $inline_input
-		) = $attributes;
-
 		$wrapper_attributes = array(
-			'data-wc-interactive' => wp_json_encode(
+			'data-wc-interactive'  => wp_json_encode(
 				array(
 					'namespace' => $this->get_full_block_name(),
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
-			'data-wc-context'     => wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'data-has-filter'     => 'no',
+			'data-wc-context'      => wp_json_encode(
+				array(
+					'minPrice'           => $min_price,
+					'maxPrice'           => $max_price,
+					'minRange'           => $min_range,
+					'maxRange'           => $max_range,
+					'hasFilterOptions'   => $min_range !== $max_range,
+					'hasSelectedFilters' => $min_price !== $min_range || $max_price !== $max_range,
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
+			),
+			'data-wc-key'          => 'product-filter-price-' . md5( wp_json_encode( $attributes ) ),
+			'data-wc-bind--hidden' => '!context.hasFilterOptions',
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
 			return sprintf(
-				'<div %s></div>',
-				get_block_wrapper_attributes( $wrapper_attributes )
+				'<div %1$s hidden>%2$s</div>',
+				get_block_wrapper_attributes( $wrapper_attributes ),
+				array_reduce(
+					$block->parsed_block['innerBlocks'],
+					function ( $carry, $parsed_block ) {
+						$carry .= render_block( $parsed_block );
+						return $carry;
+					},
+					''
+				)
 			);
 		}
 
-		// CSS variables for the range bar style.
-		$__low       = 100 * ( $min_price - $min_range ) / ( $max_range - $min_range );
-		$__high      = 100 * ( $max_price - $min_range ) / ( $max_range - $min_range );
-		$range_style = "--low: $__low%; --high: $__high%";
-
-		$price_min = $show_input_fields ?
-			sprintf(
-				'<input
-					class="min"
-					name="min"
-					type="text"
-					value="%s"
-					data-wc-bind--value="state.formattedMinPrice"
-					data-wc-on--input="actions.updateProducts"
-					data-wc-on--focus="actions.selectInputContent"
-					pattern=""
-				/>',
-				wp_strip_all_tags( $formatted_min_price )
-			) : sprintf(
-				'<span data-wc-text="state.formattedMinPrice">%s</span>',
-				// Not escaped, as this is HTML.
-				$formatted_min_price
-			);
-
-		$price_max = $show_input_fields ?
-			sprintf(
-				'<input
-					class="max"
-					name="max"
-					type="text"
-					value="%s"
-					data-wc-bind--value="state.formattedMaxPrice"
-					data-wc-on--input="actions.updateProducts"
-					data-wc-on--focus="actions.selectInputContent"
-				/>',
-				wp_strip_all_tags( $formatted_max_price )
-			) : sprintf(
-				'<span data-wc-text="state.formattedMaxPrice">%s</span>',
-				// Not escaped, as this is HTML.
-				$formatted_max_price
-			);
-
-		$wrapper_attributes['data-has-filter'] = 'yes';
-
-		$filter_price_content_classes = array(
-			'wp-block-woocommerce-product-filter-price-content',
-			$show_input_fields && $inline_input ? 'wp-block-woocommerce-product-filter-price-content--inline' : '',
+		return sprintf(
+			'<div %1$s>%2$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
+				},
+				''
+			)
 		);
-
-		ob_start();
-		?>
-			<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<div
-					class="<?php echo esc_attr( implode( ' ', $filter_price_content_classes ) ); ?>"
-				>
-					<div class="wp-block-woocommerce-product-filter-price-content-left-input text">
-						<?php echo $price_min; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-					<div
-						class="wp-block-woocommerce-product-filter-price-content-price-range-slider range"
-						style="<?php echo esc_attr( $range_style ); ?>"
-						data-wc-bind--style="state.rangeStyle"
-					>
-						<div class="range-bar"></div>
-						<input
-							type="range"
-							class="min"
-							name="min"
-							min="<?php echo esc_attr( $min_range ); ?>"
-							max="<?php echo esc_attr( $max_range ); ?>"
-							value="<?php echo esc_attr( $min_price ); ?>"
-							data-wc-bind--min="context.minRange"
-							data-wc-bind--max="context.maxRange"
-							data-wc-bind--value="context.minPrice"
-							data-wc-on--change="actions.updateProducts"
-							data-wc-on--input="actions.updateRange"
-						>
-						<input
-							type="range"
-							class="max"
-							name="max"
-							min="<?php echo esc_attr( $min_range ); ?>"
-							max="<?php echo esc_attr( $max_range ); ?>"
-							value="<?php echo esc_attr( $max_price ); ?>"
-							data-wc-bind--min="context.minRange"
-							data-wc-bind--max="context.maxRange"
-							data-wc-bind--value="context.maxPrice"
-							data-wc-on--change="actions.updateProducts"
-							data-wc-on--input="actions.updateRange"
-						>
-					</div>
-					<div class="wp-block-woocommerce-product-filter-price-content-right-input text">
-						<?php // $price_min and $price_max are escaped in the sprintf() calls above. ?>
-						<?php echo $price_max; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-				</div>
-			</div>
-		<?php
-		return ob_get_clean();
 	}
 
 	/**
