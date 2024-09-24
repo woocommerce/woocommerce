@@ -53,6 +53,10 @@
 	.wc-block-components-shipping-placeholder__value {
 		font-size: calc(var(--wp--preset--font-size--medium) * 0.8);
 		color: $universal-body-low-emphasis;
+
+		.has-dark-controls & {
+			color: currentColor;
+		}
 	}
 }
 
