@@ -3,6 +3,7 @@
  */
 import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { listItem } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -15,8 +16,5 @@ import './style.scss';
 registerBlockType( metadata, {
 	edit,
 	save,
-	description: __(
-		'Allow customers to filter the product list by choosing a price range.',
-		'woocommerce'
-	),
+	icon: listItem,
 } );
