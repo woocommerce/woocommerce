@@ -660,11 +660,11 @@
 		"build:project:copy-assets": {
 			"command": "rsync $RSYNC_LEGACY_CSS && rsync $RSYNC_LEGACY_JS && rsync $RSYNC_WCADMIN_ASSETS && rsync $RSYNC_WCBLOCKS_ASSETS && rsync $RSYNC_WCBLOCKS_INI",
 			"env": {
-				"RSYNC_LEGACY_CSS":      "-avhW --checksum --no-compress --delete --quiet client/legacy/build/css/ assets/css",
-				"RSYNC_LEGACY_JS":       "-avhW --checksum --no-compress --delete --quiet client/legacy/build/js/ assets/js",
-				"RSYNC_WCADMIN_ASSETS":  "-avhW --checksum --no-compress --delete --quiet ../woocommerce-admin/build/ assets/client/admin",
+				"RSYNC_LEGACY_CSS": "-avhW --checksum --no-compress --delete --quiet client/legacy/build/css/ assets/css",
+				"RSYNC_LEGACY_JS": "-avhW --checksum --no-compress --delete --quiet client/legacy/build/js/ assets/js",
+				"RSYNC_WCADMIN_ASSETS": "-avhW --checksum --no-compress --delete --quiet ../woocommerce-admin/build/ assets/client/admin",
 				"RSYNC_WCBLOCKS_ASSETS": "-avhW --checksum --no-compress --delete --quiet ../woocommerce-blocks/build/ assets/client/blocks",
-				"RSYNC_WCBLOCKS_INI":    "-avhW --checksum --no-compress --delete --quiet ../woocommerce-blocks/blocks.ini blocks.ini"
+				"RSYNC_WCBLOCKS_INI": "-avhW --checksum --no-compress --delete --quiet ../woocommerce-blocks/blocks.ini blocks.ini"
 			},
 			"dependencies": [
 				"dependencyOutputs"
@@ -672,7 +672,9 @@
 		},
 		"build:project:actualize-translation-domains": {
 			"command": "node ./bin/package-update-textdomain.js",
-			"files": ["packages/**/*.php"],
+			"files": [
+				"packages/**/*.php"
+			],
 			"output": []
 		},
 		"watch:build:project:copy-assets": {
