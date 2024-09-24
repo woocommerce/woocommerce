@@ -87,11 +87,7 @@ test.describe( 'Product Collection', () => {
 			await admin.createNewPost();
 		} );
 
-		test.skip( 'does not render', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
+		test( 'does not render', async ( { page, editor, pageObject } ) => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'featured' );
 			await pageObject.addFilter( 'Price Range' );
