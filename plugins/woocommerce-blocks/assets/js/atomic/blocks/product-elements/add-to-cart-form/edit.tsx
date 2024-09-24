@@ -7,12 +7,15 @@ import { __ } from '@wordpress/i18n';
 import { Disabled, Tooltip } from '@wordpress/components';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import { BlockEditProps } from '@wordpress/blocks';
+import { isSiteEditorPage } from '@woocommerce/utils';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import './editor.scss';
 import { useIsDescendentOfSingleProductBlock } from '../shared/use-is-descendent-of-single-product-block';
+
 export interface Attributes {
 	className?: string;
 	isDescendentOfSingleProductBlock: boolean;
@@ -34,6 +37,11 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 		} );
 	}, [ setAttributes, isDescendentOfSingleProductBlock ] );
 
+	const isSiteEditor = useSelect(
+		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
+		[]
+	);
+
 	return (
 		<div { ...blockProps }>
 			<Tooltip
@@ -46,9 +54,10 @@ const Edit = ( props: BlockEditProps< Attributes > ) => {
 						<div className="quantity">
 							<input
 								style={
-									isDescendentOfSingleProductBlock
+									// In the post editor, the editor isn't in an iframe, so WordPress styles are applied. We need to remove them.
+									! isSiteEditor
 										? {
-												backgroundColor: 'unset',
+												backgroundColor: '#ffffff',
 												lineHeight: 'unset',
 												minHeight: 'unset',
 												boxSizing: 'unset',
