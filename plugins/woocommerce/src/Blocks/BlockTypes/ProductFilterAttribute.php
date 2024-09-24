@@ -189,7 +189,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			)
 		);
 
-		$filtered_options = array();
+		$filter_context = array();
 
 		if ( ! empty( $attribute_counts ) ) {
 			$attribute_options = array_map(
@@ -217,6 +217,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 					return true;
 				}
 			);
+
+			$filter_context = array(
+				'items'   => $filtered_options,
+				'actions' => array(
+					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+				),
+			);
 		}
 
 		$context = array(
@@ -224,7 +231,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'queryType'          => $block_attributes['queryType'],
 			'selectType'         => 'multiple',
 			'hasSelectedFilters' => count( $selected_terms ) > 0,
-			'hasFilterOptions'   => count( $filtered_options ) > 0,
+			'hasFilterOptions'   => ! empty( $filter_context ),
 		);
 
 		$wrapper_attributes = array(
@@ -232,28 +239,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			'data-wc-key'          => 'product-filter-attribute-' . md5( wp_json_encode( $block_attributes ) ),
 			'data-wc-context'      => wp_json_encode( $context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wc-bind--hidden' => '!context.hasFilterOptions',
-		);
-
-		if ( empty( $filtered_options ) ) {
-			return sprintf(
-				'<div %1$s hidden>%2$s</div>',
-				get_block_wrapper_attributes( $wrapper_attributes ),
-				array_reduce(
-					$block->parsed_block['innerBlocks'],
-					function ( $carry, $parsed_block ) {
-						$carry .= render_block( $parsed_block );
-						return $carry;
-					},
-					''
-				)
-			);
-		}
-
-		$filter_context = array(
-			'items'   => $filtered_options,
-			'actions' => array(
-				'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
-			),
 		);
 
 		return sprintf(
