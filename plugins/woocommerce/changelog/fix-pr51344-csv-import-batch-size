@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore the previous default for `woocommerce_product_import_batch_size` (process 30 lines per batch when importing product CSV data).
