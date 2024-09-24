@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -126,7 +128,7 @@ final class BlockTypesController {
 		if ( ! array_key_exists( $attribute, $block['attrs'] ) ) {
 			return false;
 		}
-		$attribute_value = $block['attrs'][$attribute];
+		$attribute_value = $block['attrs'][ $attribute ];
 		if ( is_array( $value ) && is_array( $attribute_value ) ) {
 			$diff = array_diff_assoc( $value, $attribute_value );
 			return empty( $diff );
@@ -297,13 +299,13 @@ final class BlockTypesController {
 	 * @param array  $block Parsed block data.
 	 * @return string
 	 */
-	function add_block_class_name_for_block_variations( $content, $block ) {
-		$content = trim( $content );
+	public function add_block_class_name_for_block_variations( $content, $block ) {
+		$content               = trim( $content );
 		$variation_block_types = $this->get_variation_block_types();
-		$variation_key = array_search( $block['blockName'], array_column( $variation_block_types, 'block_name' ), true );
+		$variation_key         = array_search( $block['blockName'], array_column( $variation_block_types, 'block_name' ), true );
 
 		if ( false !== $variation_key ) {
-			$variation_block = $variation_block_types[ $variation_key ];
+			$variation_block    = $variation_block_types[ $variation_key ];
 			$matching_attribute = array_key_first( $variation_block['attributes'] );
 			if ( $this->has_block_variation( $block, $matching_attribute, $variation_block['attributes'][ $matching_attribute ] ) ) {
 				$processor = new \WP_HTML_Tag_Processor( $content );
@@ -533,14 +535,14 @@ final class BlockTypesController {
 	protected function get_variation_block_types() {
 		return array(
 			array(
-				'block_name' => 'core/search',
+				'block_name'     => 'core/search',
 				'variation_name' => 'woocommerce/product-search',
-				'attributes' => array(
+				'attributes'     => array(
 					'query' => array(
-						'post_type' => 'product'
-					)
+						'post_type' => 'product',
+					),
 				),
-			)
+			),
 		);
 	}
 }
