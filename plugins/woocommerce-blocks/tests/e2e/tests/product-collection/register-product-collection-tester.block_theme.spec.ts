@@ -235,7 +235,7 @@ test.describe( 'Product Collection registration', () => {
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 
-		test.skip( 'Should display properly in Product Catalog template', async ( {
+		test( 'Should display properly in Product Catalog template', async ( {
 			pageObject,
 			editor,
 		} ) => {
@@ -260,7 +260,8 @@ test.describe( 'Product Collection registration', () => {
 				.locator( 'visible=true' );
 			await expect( products ).toHaveCount( 9 );
 
-			// The preview button should be hidden after 1 second
+			await pageObject.removeAdvancedPreview();
+
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 	} );

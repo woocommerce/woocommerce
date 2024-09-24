@@ -107,6 +107,12 @@ const collectionToButtonNameMap = {
 		'My Custom Collection - Multiple Contexts',
 };
 
+declare global {
+	interface Window {
+		__removePreview?: () => void;
+	}
+}
+
 class ProductCollectionPage {
 	private BLOCK_SLUG = 'woocommerce/product-collection';
 	private page: Page;
@@ -796,6 +802,14 @@ class ProductCollectionPage {
 		} else {
 			await this.initializeLocatorsForFrontend();
 		}
+	}
+
+	async removeAdvancedPreview() {
+		await this.page.evaluate( () => {
+			if ( window.__removePreview ) {
+				window.__removePreview();
+			}
+		} );
 	}
 
 	private async initializeLocatorsForEditor() {
