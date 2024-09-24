@@ -315,6 +315,7 @@ function wc_product_canonical_redirect(): void {
 		return;
 	}
 
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$query_vars = isset( $_GET ) && is_array( $_GET ) ? $_GET : array();
 
 	wp_safe_redirect( add_query_arg( $query_vars, wc_get_product( get_the_ID() )->get_permalink() ), 301 );
