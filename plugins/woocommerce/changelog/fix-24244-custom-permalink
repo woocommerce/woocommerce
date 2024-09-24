@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Redirect arbitrary term values wto the canonical value when product_cat is part of the product permalink structure
