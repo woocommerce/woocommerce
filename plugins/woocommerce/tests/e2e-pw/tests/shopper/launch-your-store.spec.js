@@ -90,11 +90,11 @@ test.describe(
 		} );
 
 		test.describe( 'Block Theme (Twenty Twenty Four)', () => {
-			test.beforeAll( async ( baseURL ) => {
+			test.beforeAll( async ( { baseURL } ) => {
 				await activateTheme( baseURL, 'twentytwentyfour' );
 			} );
 
-			test.afterAll( async ( baseURL ) => {
+			test.afterAll( async ( { baseURL } ) => {
 				// Reset theme to the default.
 				await activateTheme( baseURL, DEFAULT_THEME );
 			} );
@@ -103,11 +103,11 @@ test.describe(
 		} );
 
 		test.describe( 'Classic Theme (Storefront)', () => {
-			test.beforeAll( async ( baseURL ) => {
+			test.beforeAll( async ( { baseURL } ) => {
 				await activateTheme( baseURL, 'storefront' );
 			} );
 
-			test.afterAll( async ( baseURL ) => {
+			test.afterAll( async ( { baseURL } ) => {
 				// Reset theme to the default.
 				await activateTheme( baseURL, DEFAULT_THEME );
 			} );
