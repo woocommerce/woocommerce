@@ -203,6 +203,7 @@ class Checkout extends AbstractCartRoute {
 
 		$address_fields = $this->additional_fields_controller->get_fields_for_location( 'address' );
 		if ( ! empty( $address_fields ) ) {
+			$needs_shipping = WC()->cart->needs_shipping();
 			foreach ( $address_fields as $field_key => $address_field ) {
 				if ( $address_field['required'] && ! isset( $request['billing_address'][ $field_key ] ) ) {
 					throw new RouteException(
@@ -212,7 +213,7 @@ class Checkout extends AbstractCartRoute {
 						400
 					);
 				}
-				if ( $address_field['required'] && ! isset( $request['shipping_address'][ $field_key ] ) ) {
+				if ( $needs_shipping && $address_field['required'] && ! isset( $request['shipping_address'][ $field_key ] ) ) {
 					throw new RouteException(
 						'woocommerce_rest_checkout_missing_required_field',
 						/* translators: %s: is the field label */
