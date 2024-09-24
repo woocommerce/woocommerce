@@ -13,7 +13,7 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets": "wireit",
-		"build:project:actualize-translation-domains": "node ./bin/package-update-textdomain.js",
+		"build:project:actualize-translation-domains": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
@@ -669,6 +669,11 @@
 			"dependencies": [
 				"dependencyOutputs"
 			]
+		},
+		"build:project:actualize-translation-domains": {
+			"command": "node ./bin/package-update-textdomain.js",
+			"files": ["packages/**/*.php"],
+			"output": []
 		},
 		"watch:build:project:copy-assets": {
 			"command": "nodemon --exec \"pnpm run\" build:project",
