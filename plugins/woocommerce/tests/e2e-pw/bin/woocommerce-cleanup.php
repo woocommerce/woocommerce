@@ -27,13 +27,13 @@ function wc_cleanup_media() {
 		'post_parent' => null,
 	);
 
-	$attachments    = get_posts( $args );
-	$excluded_files = array( 'image-01.jpg', 'image-02.png', 'image-03.png' );
+	$attachments         = get_posts( $args );
+	$excluded_file_names = array( 'image-01', 'image-02', 'image-03' );
 
 	if ( $attachments ) {
 		foreach ( $attachments as $attachment ) {
-			$file_name = basename( get_attached_file( $attachment->ID ) );
-			if ( ! in_array( $file_name, $excluded_files, true ) ) {
+			$file_name = pathinfo( get_attached_file( $attachment->ID ), PATHINFO_FILENAME );
+			if ( ! in_array( $file_name, $excluded_file_names, true ) ) {
 				wp_delete_attachment( $attachment->ID, true );
 			}
 		}
@@ -41,16 +41,16 @@ function wc_cleanup_media() {
 
 	// Clean up the uploads directory.
 	$upload_dir = wp_upload_dir();
-	wc_cleanup_directory( $upload_dir['basedir'], $excluded_files );
+	wc_cleanup_directory( $upload_dir['basedir'], $excluded_file_names );
 }
 
 /**
  * Recursively remove all files and subdirectories from a directory, except for specified files.
  *
  * @param string $dir The directory to clean.
- * @param array  $excluded_files Array of filenames to exclude from deletion.
+ * @param array  $excluded_file_names Array of filenames (without extensions) to exclude from deletion.
  */
-function wc_cleanup_directory( $dir, $excluded_files = array() ) {
+function wc_cleanup_directory( $dir, $excluded_file_names = array() ) {
 	if ( ! is_dir( $dir ) ) {
 		return;
 	}
@@ -61,9 +61,12 @@ function wc_cleanup_directory( $dir, $excluded_files = array() ) {
 		$path = $dir . DIRECTORY_SEPARATOR . $file;
 
 		if ( is_dir( $path ) ) {
-			wc_cleanup_directory( $path, $excluded_files );
-		} elseif ( ! in_array( $file, $excluded_files, true ) ) {
-			wp_delete_file( $path );
+			wc_cleanup_directory( $path, $excluded_file_names );
+		} else {
+			$file_name = pathinfo( $file, PATHINFO_FILENAME );
+			if ( ! in_array( $file_name, $excluded_file_names, true ) ) {
+				wp_delete_file( $path );
+			}
 		}
 	}
 
