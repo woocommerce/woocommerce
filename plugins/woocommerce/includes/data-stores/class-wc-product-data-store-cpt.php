@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -2394,6 +2395,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return bool True if the feature is enabled.
 	 */
 	protected function cogs_feature_is_enabled(): bool {
-		return wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->feature_is_enabled( 'cost_of_goods_sold' );
+		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 	}
 }
