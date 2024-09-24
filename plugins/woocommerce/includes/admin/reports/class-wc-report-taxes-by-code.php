@@ -230,7 +230,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 											'9.5.0',
 											null,
 											'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
-										)
+										) ?? ''
 									);
 								// phpcs:ignore?>%</td>
 							<td class="total_row"><?php echo esc_html( $tax_row->total_orders ); ?></td>
