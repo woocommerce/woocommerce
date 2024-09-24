@@ -12,6 +12,7 @@
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:copy-assets": "wireit",
 		"build:project:actualize-translation-domains": "node ./bin/package-update-textdomain.js",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
@@ -656,6 +657,15 @@
 		"ignoreRoot": []
 	},
 	"wireit": {
+		"build:project:copy-assets": {
+			"command": "rsync $RSYNC_FLAGS client/legacy/build/css/ assets/css && rsync $RSYNC_FLAGS client/legacy/build/js/ assets/js && rsync $RSYNC_FLAGS ../woocommerce-admin/build/ assets/client/admin && rsync $RSYNC_FLAGS ../woocommerce-blocks/build/ assets/client/blocks && rsync $RSYNC_FLAGS ../woocommerce-blocks/blocks.ini blocks.ini",
+			"env": {
+				"RSYNC_FLAGS": "-avhW --no-compress --delete --quiet"
+			},
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
 		"watch:build:project:copy-assets": {
 			"command": "nodemon --exec \"pnpm run\" build:project",
 			"service": true
@@ -674,6 +684,7 @@
 				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
 				"node_modules/@woocommerce/api/dist/",
 				"node_modules/@woocommerce/admin-e2e-tests/build",
+				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/admin-library/build",
