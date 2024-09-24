@@ -19,7 +19,7 @@ import { UPDATE_COMING_SOON_MODE_ACTION_NAME } from '../commands/set-coming-soon
 import { TRIGGER_UPDATE_CALLBACKS_ACTION_NAME } from '../commands/trigger-update-callbacks';
 import { UPDATE_WCCOM_REQUEST_ERRORS_MODE } from '../commands/set-wccom-request-errors';
 import { FAKE_WOO_PAYMENTS_ACTION_NAME } from '../commands/fake-woo-payments';
-import { UPDATE_WOOCOM_BASE_URL_ACTION_NAME } from '../commands/set-wccom-base-url';
+import { UPDATE_WCCOM_BASE_URL_ACTION_NAME } from '../commands/set-wccom-base-url';
 
 export function* getCronJobs() {
 	const path = `${ API_NAMESPACE }/tools/get-cron-list/v1`;
@@ -160,7 +160,7 @@ export function* getWccomBaseUrl() {
 			path,
 			method: 'GET',
 		} );
-		yield updateCommandParams( UPDATE_WOOCOM_BASE_URL_ACTION_NAME, {
+		yield updateCommandParams( UPDATE_WCCOM_BASE_URL_ACTION_NAME, {
 			url: url || '',
 		} );
 	} catch ( error ) {

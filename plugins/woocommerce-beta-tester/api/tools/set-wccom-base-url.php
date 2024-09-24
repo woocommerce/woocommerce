@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 register_woocommerce_admin_test_helper_rest_route(
 	'/tools/set-wccom-base-url/v1',
-	'tools_set_woocom_base_url',
+	'tools_set_wccom_base_url',
 	array(
 		'methods' => 'POST',
 		'args'    => array(
@@ -28,7 +28,7 @@ register_woocommerce_admin_test_helper_rest_route(
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/tools/get-wccom-base-url/v1',
-	'tools_get_woocom_base_url',
+	'tools_get_wccom_base_url',
 	array(
 		'methods' => 'GET',
 	)
@@ -40,7 +40,7 @@ register_woocommerce_admin_test_helper_rest_route(
  * @param WP_REST_Request $request Full details about the request.
  * @return WP_REST_Response
  */
-function tools_set_woocom_base_url( $request ) {
+function tools_set_wccom_base_url( $request ) {
 	$url = $request->get_param( 'url' );
 
 	if ( empty( $url ) ) {
@@ -61,7 +61,7 @@ function tools_set_woocom_base_url( $request ) {
  *
  * @return WP_REST_Response
  */
-function tools_get_woocom_base_url() {
+function tools_get_wccom_base_url() {
 	if ( class_exists( 'WC_Helper' ) && method_exists( 'WC_Helper', 'get_woocommerce_com_base_url' ) ) {
 		$url = WC_Helper::get_woocommerce_com_base_url();
 	} else {
