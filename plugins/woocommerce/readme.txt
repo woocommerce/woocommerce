@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 6.5
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 9.3.1
+Stable tag: 9.3.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -169,11 +169,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.3.2 2024-09-18 =
+= 9.3.3 2024-09-24 =
 
-- Fix - Improve the product importer's handling of filepaths under Windows [#51456](https://github.com/woocommerce/woocommerce/pull/51456)
-- Fix - Revert changes related to low stock product notifications [#51441](https://github.com/woocommerce/woocommerce/pull/51441)
-- Fix - Resolve a bug where manually triggering `added_to_cart` event without a button element caused an Exception [#51449](https://github.com/woocommerce/woocommerce/pull/51449)
+- Fix - An issue where virtual products could not be purchased when using the Additional Fields API [#51630](https://github.com/woocommerce/woocommerce/pull/51630)
+- Fix - Restore the previous default for `woocommerce_product_import_batch_size` (process 30 lines per batch when importing product CSV data) [#51631] (https://github.com/woocommerce/woocommerce/pull/51631)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
