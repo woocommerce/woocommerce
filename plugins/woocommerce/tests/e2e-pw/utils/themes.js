@@ -16,13 +16,27 @@ export const activateTheme = async ( baseURL, theme ) => {
 		},
 	} );
 
-	return await requestContext
-		.post( '/wp-json/e2e-theme/activate', {
-			data: {
-				theme_name: theme,
-			},
-		} )
-		.then( ( response ) => {
-			return response.json();
-		} );
+	try {
+		const response = await requestContext.post(
+			'/wp-json/e2e-theme/activate',
+			{
+				data: {
+					theme_name: theme,
+				},
+			}
+		);
+
+		const result = await response.json();
+
+		if ( ! response.ok() ) {
+			throw new Error( `Failed to activate theme: ${ result.message }` );
+		}
+
+		return result;
+	} catch ( error ) {
+		console.error( 'Error activating theme:', error );
+		throw error;
+	} finally {
+		await requestContext.dispose(); // Clean up
+	}
 };
