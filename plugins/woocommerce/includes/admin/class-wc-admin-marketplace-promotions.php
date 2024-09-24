@@ -89,7 +89,7 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * @return void
 	 */
-	private static function update_promotions() {
+	public static function update_promotions() {
 		// Fetch promotions from the API.
 		$promotions = self::fetch_marketplace_promotions();
 		set_transient( self::TRANSIENT_NAME, $promotions, self::TRANSIENT_LIFE_SPAN );
