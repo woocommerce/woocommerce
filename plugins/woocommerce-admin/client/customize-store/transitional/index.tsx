@@ -178,23 +178,19 @@ export const Transitional = ( {
 											'woocommerce'
 										) }
 									</p>
-									<Button
-										variant="link"
+									<a
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_product_list_click'
 											);
-											navigateOrParent(
-												window,
-												`${ ADMIN_URL }edit.php?post_type=product`
-											);
 										} }
+										href={ `${ ADMIN_URL }edit.php?post_type=product` }
 									>
 										{ __(
 											'Go to Products',
 											'woocommerce'
 										) }
-									</Button>
+									</a>
 								</div>
 							</div>
 
@@ -218,23 +214,19 @@ export const Transitional = ( {
 											'woocommerce'
 										) }
 									</p>
-									<Button
-										variant="link"
+									<a
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_editor_click'
 											);
-											navigateOrParent(
-												window,
-												`${ ADMIN_URL }site-editor.php`
-											);
 										} }
+										href={ `${ ADMIN_URL }site-editor.php` }
 									>
 										{ __(
 											'Go to the Editor',
 											'woocommerce'
 										) }
-									</Button>
+									</a>
 								</div>
 							</div>
 
@@ -258,8 +250,7 @@ export const Transitional = ( {
 											'woocommerce'
 										) }
 									</p>
-									<Button
-										variant="link"
+									<a
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_home_click'
@@ -268,9 +259,10 @@ export const Transitional = ( {
 												type: 'GO_BACK_TO_HOME',
 											} );
 										} }
+										href={ `${ ADMIN_URL }admin.php?page=wc-admin` }
 									>
 										{ __( 'Back to Home', 'woocommerce' ) }
-									</Button>
+									</a>
 								</div>
 							</div>
 						</div>
