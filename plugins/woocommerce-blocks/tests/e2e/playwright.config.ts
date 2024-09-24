@@ -19,7 +19,7 @@ const config: PlaywrightTestConfig = {
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	fullyParallel: false,
-	// forbidOnly: !! CI,
+	forbidOnly: !! CI,
 	reporter: process.env.CI
 		? [
 				[ 'list' ],
