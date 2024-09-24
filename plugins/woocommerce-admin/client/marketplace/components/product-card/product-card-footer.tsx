@@ -144,6 +144,35 @@ function ProductCardFooter( props: { product: Product } ) {
 		return '';
 	}
 
+	const getReaderPriceLabel = () => {
+		if ( product.isOnSale ) {
+			return sprintf(
+				//translators: %1$s is the sale price of the product, %2$s is the regular price of the product, %3$s is the billing period
+				__(
+					'Sale Price %1$s %3$s, regular price %2$s %3$s',
+					'woocommerce'
+				),
+				getPriceLabel(),
+				sprintf(
+					getCurrencyFormat( product.currency ),
+					product.regularPrice
+				),
+				getBillingText()
+			);
+		}
+
+		if ( product.price !== 0 && product.freemium_type !== 'primary' ) {
+			return sprintf(
+				//translators: %1$s is the price of the product, %2$s is the billing period
+				__( ' %1$s, %2$s ', 'woocommerce' ),
+				getPriceLabel(),
+				getBillingText()
+			);
+		}
+
+		return getPriceLabel();
+	};
+
 	if ( shouldShowAddToStore( product ) ) {
 		return (
 			<>
@@ -160,9 +189,28 @@ function ProductCardFooter( props: { product: Product } ) {
 		<>
 			<div className="woocommerce-marketplace__product-card__price">
 				<span className="woocommerce-marketplace__product-card__price-label">
-					{ getPriceLabel() }
+					<span className="screen-reader-text">
+						{ getReaderPriceLabel() }
+					</span>
+					<span aria-hidden>{ getPriceLabel() }</span>
 				</span>
-				<span className="woocommerce-marketplace__product-card__price-billing">
+
+				{ product.isOnSale && (
+					<span
+						className="woocommerce-marketplace__product-card__on-sale"
+						aria-hidden
+					>
+						{ sprintf(
+							getCurrencyFormat( product.currency ),
+							product.regularPrice
+						) }
+					</span>
+				) }
+
+				<span
+					className="woocommerce-marketplace__product-card__price-billing"
+					aria-hidden
+				>
 					{ getBillingText() }
 				</span>
 			</div>
@@ -173,10 +221,24 @@ function ProductCardFooter( props: { product: Product } ) {
 							<Icon icon={ 'star-filled' } size={ 16 } />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							{ product.averageRating }
+							<span aria-hidden>{ product.averageRating }</span>
+							<span className="screen-reader-text">
+								{ sprintf(
+									// translators: %.1f: average rating
+									__( '%.1f stars', 'woocommerce' ),
+									product.averageRating
+								) }
+							</span>
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-count">
-							({ product.reviewsCount })
+							<span aria-hidden>({ product.reviewsCount })</span>
+							<span className="screen-reader-text">
+								{ sprintf(
+									// translators: %d: rating count
+									__( 'from %d reviews', 'woocommerce' ),
+									product.reviewsCount
+								) }
+							</span>
 						</span>
 					</>
 				) }
