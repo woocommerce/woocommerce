@@ -108,7 +108,7 @@ test.describe( 'Product Collection', () => {
 			).toBeVisible();
 			// The "No results found" info is rendered in editor for all collections.
 			await expect(
-				featuredBlock.getByText( 'No results found' )
+				featuredBlock.getByText( 'No products to display' )
 			).toBeVisible();
 
 			await pageObject.publishAndGoToFrontend();
@@ -116,7 +116,9 @@ test.describe( 'Product Collection', () => {
 			const content = page.locator( 'main' );
 
 			await expect( content ).not.toContainText( 'Featured products' );
-			await expect( content ).not.toContainText( 'No results found' );
+			await expect( content ).not.toContainText(
+				'No products to display'
+			);
 		} );
 
 		// This test ensures the runtime render state is correctly reset for
