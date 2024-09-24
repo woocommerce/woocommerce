@@ -26,7 +26,7 @@ export const SetWccomBaseUrl = () => {
 
 	return (
 		<div className="wccom-base-url-control">
-			{ ! url ? (
+			{ url === undefined ? (
 				<p>Loading...</p>
 			) : (
 				<TextControl value={ url } onChange={ onUpdate } />
