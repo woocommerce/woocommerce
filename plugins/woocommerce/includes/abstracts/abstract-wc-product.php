@@ -2236,16 +2236,32 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Get the effective total value of the Cost of Goods Sold for this product.
+	 * Get the effective total value of the Cost of Goods Sold for this product
 	 * (the monetary value that will be applied to orders and used for analytics purposes).
 	 *
+	 * @return float The effective total value for this product.
+	 */
+	public function get_cogs_total_value(): float {
+		/**
+		 * Filter to customize the total Cost of Goods Sold value that get_cogs_total_value returns for a given product.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param float $total_value The effective total value of the product.
+		 * @param WC_Product $product The product for which the total value is being retrieved.
+		 */
+		return apply_filters( 'woocommerce_get_cogs_total_value', $this->get_cogs_total_value_core(), $this );
+	}
+
+	/**
+	 * Core function to get the effective total value of the Cost of Goods Sold for this product.
 	 * Derived classes can override this method to provide an alternative way
 	 * of calculating the total effective value from the single effective value
 	 * and/or the defined value.
 	 *
-	 * @return float The effective value for this product.
+	 * @return float The effective total value for this product.
 	 */
-	public function get_cogs_total_value(): float {
+	protected function get_cogs_total_value_core(): float {
 		return $this->get_cogs_effective_value();
 	}
 }
