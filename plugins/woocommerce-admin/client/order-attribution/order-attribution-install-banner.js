@@ -10,14 +10,19 @@ import { Text } from '@woocommerce/experimental';
  * Internal dependencies
  */
 import OrderAttributionInstallBannerImage from './order-attribution-install-banner-image';
+import useOrderAttributionInstallBanner from './use-order-attribution-install-banner';
 import './style.scss';
 
 export const OrderAttributionInstallBanner = ( {
 	bannerImage = <OrderAttributionInstallBannerImage />,
 } ) => {
-	const [ shouldShowBanner, setShouldShowBanner ] = useState( true );
+	const {
+		loading,
+		isOrderAttributionInstallBannerDismissed,
+		dismissOrderAttributionInstallBanner,
+	} = useOrderAttributionInstallBanner();
 
-	if ( ! shouldShowBanner ) {
+	if ( loading || isOrderAttributionInstallBannerDismissed ) {
 		return null;
 	}
 
@@ -73,7 +78,7 @@ export const OrderAttributionInstallBanner = ( {
 						</Button>
 						<Button
 							variant="tertiary"
-							onClick={ () => setShouldShowBanner( false ) }
+							onClick={ dismissOrderAttributionInstallBanner }
 						>
 							{ __( 'Dismiss', 'woocommerce' ) }
 						</Button>
