@@ -30,6 +30,7 @@ module.exports = {
 		}
 		return {
 			'woocommerce-blocks': {
+				expanded: false,
 				title: 'WooCommerce Blocks',
 				url: '/assets/woocommerce-blocks',
 			},
