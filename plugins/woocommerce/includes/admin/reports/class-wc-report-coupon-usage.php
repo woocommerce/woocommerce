@@ -41,7 +41,7 @@ class WC_Report_Coupon_Usage extends WC_Admin_Report {
 	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
-		wc_deprecated_function( __CLASS__  , '9.5.0' );
+		wc_deprecated_function( __CLASS__, '9.5.0' );
 
 		if ( isset( $_GET['coupon_codes'] ) && is_array( $_GET['coupon_codes'] ) ) {
 			$this->coupon_codes = array_filter( array_map( 'sanitize_text_field', wp_unslash( $_GET['coupon_codes'] ) ) );

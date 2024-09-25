@@ -29,7 +29,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
-		wc_deprecated_function( __CLASS__  , '9.5.0' );
+		wc_deprecated_function( __CLASS__, '9.5.0' );
 
 		parent::__construct(
 			array(

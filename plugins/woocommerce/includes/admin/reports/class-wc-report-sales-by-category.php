@@ -57,7 +57,7 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
-		wc_deprecated_function( __CLASS__  , '9.5.0' );
+		wc_deprecated_function( __CLASS__, '9.5.0' );
 
 		if ( isset( $_GET['show_categories'] ) ) {
 			$this->show_categories = is_array( $_GET['show_categories'] ) ? array_map( 'absint', $_GET['show_categories'] ) : array( absint( $_GET['show_categories'] ) );
