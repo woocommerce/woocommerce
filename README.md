@@ -37,6 +37,8 @@ Each plugin, package, and tool has its own `package.json` file containing projec
 -   [**Packages**](packages): Contained within the packages directory are all of the [PHP](packages/php) and [JavaScript](packages/js) provided for the community. Some of these are internal dependencies and are marked with an `internal-` prefix.
 -   [**Tools**](tools): We also have a growing number of tools within our repository. Many of these are intended to be utilities and scripts for use in the monorepo, but, this directory may also contain external tools.
 
+If you'd like to learn more about how our monorepo works, [please check out this guide here](tools/README.md).
+
 ## Reporting Security Issues
 
 To disclose a security issue to our team, [please submit a report via HackerOne here](https://hackerone.com/automattic/).

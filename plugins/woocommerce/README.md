@@ -12,22 +12,27 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 
 ## Getting Started
 
-Please make sure you follow the [repository's getting started guide](../../README.md#getting-started) first!
+### Prerequisites
+
+-   [Repository "Getting Started" Guide](../../README.md#getting-started)
+-   [Docker](https://docs.docker.com/get-docker/)
+
+Once you have completed the prerequisites, you can start the development environment:
 
 ```bash
-# Make sure that WooCommerce Core and all of its dependencies are built
-pnpm --filter=@woocommerce/plugin-woocommerce build 
-# Make sure you're in the WooCommerce Core directory
-cd plugins/woocommerce
+## Watch for changes in WooCommerce and all of its dependencies.
+pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 # Start the development environment
-pnpm -- wp-env start
+pnpm --filter='@woocommerce/plugin-woocommerce' env:dev
 ```
 
-You should now be able to visit `http://localhost:8888/` and access WooCommerce environment.
+If desired, you can also run commands without `--filter='@woocommrece/plugin-woocommerce'` by running `pnpm <command>` from within the `plugins/woocommerce` directory.
+
+You should now be able to visit `http://localhost:8888/` and access a WooCommerce development environment.
 
 ## Building Components
 
-There are two major client-side components included in WooCommerce Core that can be built, linted, and tested independently. We've organized these components
+There are three major client-side components included in WooCommerce Core that can be built, linted, and tested independently. We've organized these components
 in this way to take advantage of caching to prevent unnecessarily performing expensive rebuilds when only working in one of them.
 
 ### `plugins/woocommerce/client/legacy`
@@ -36,9 +41,9 @@ This directory contains the Classic CSS and jQuery code for WooCommerce.
 
 ```bash
 # Build the assets.
-pnpm --filter=@woocommerce/classic-assets build 
+pnpm --filter='@woocommerce/plugin-woocommerce' build:classic-assets 
 # Lint the assets.
-pnpm --filter=@woocommerce/classic-assets lint 
+pnpm --filter='@woocommerce/classic-assets' lint 
 ```
 
 ### `plugins/woocommerce-admin`
@@ -47,11 +52,15 @@ This directory contains the React-based admin interface.
 
 ```bash
 # Build the React-based admin client.
-pnpm --filter=@woocommerce/admin-library build 
+pnpm --filter='@woocommerce/plugin-woocommerce' build:admin
 # Lint the React-based admin client.
-pnpm --filter=@woocommerce/admin-library lint 
+pnpm --filter='@woocommerce/admin-library' lint 
 # Test the React-based admin client.
-pnpm --filter=@woocommerce/admin-library test 
+pnpm --filter='@woocommerce/admin-library' test
+# Watch the tests of the React-based admin client.
+pnpm --filter=@woocommerce/admin-library test:watch 
+# Run a type check over the React-based admin client's TypeScript files.
+pnpm --filter=@woocommerce/admin-library ts:check 
 ```
 
 ### `plugins/woocommerce-blocks`
@@ -60,26 +69,11 @@ This directory contains the client for WooCommerce + Gutenberg.
 
 ```bash
 # Build the Blocks client.
-pnpm run --filter=@woocommerce/block-library build 
+pnpm --filter='@woocommerce/plugin-woocommerce' build:blocks
 # Lint the Blocks client.
-pnpm run --filter=@woocommerce/block-library lint 
+pnpm run --filter='@woocommerce/block-library' lint 
 # Test the Blocks client.
-pnpm run --filter=@woocommerce/block-library test 
-```
-
-#### Helper Scripts
-
-Here is a collection of scripts that can help when developing the React-based admin interface.
-
-```bash
-# Create a development build of the React-based admin client.
-pnpm --filter=@woocommerce/admin-library dev 
-# Create and watch a development build of the React-based admin client.
-pnpm --filter=@woocommerce/admin-library start 
-# Watch the tests of the React-based admin client.
-pnpm --filter=@woocommerce/admin-library test:watch 
-# Run a type check over the React-based admin client's TypeScript files.
-pnpm --filter=@woocommerce/admin-library ts:check 
+pnpm run --filter='@woocommerce/block-library' test 
 ```
 
 ## Documentation
