@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Reduce dependency of remote logging on WC_Tracks

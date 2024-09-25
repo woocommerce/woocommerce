@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add `locale` param when redirecting to the Jetpack auth page.
