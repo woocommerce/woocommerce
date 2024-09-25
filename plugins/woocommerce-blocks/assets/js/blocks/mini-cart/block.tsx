@@ -29,7 +29,6 @@ import {
 } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import clsx from 'clsx';
-import type { ReactRootWithContainer } from '@woocommerce/base-utils';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 
 /**

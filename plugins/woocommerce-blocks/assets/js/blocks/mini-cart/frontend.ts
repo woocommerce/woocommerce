@@ -5,7 +5,6 @@ import preloadScript from '@woocommerce/base-utils/preload-script';
 import lazyLoadScript from '@woocommerce/base-utils/lazy-load-script';
 import getNavigationType from '@woocommerce/base-utils/get-navigation-type';
 import { translateJQueryEventToNative } from '@woocommerce/base-utils/legacy-events';
-import { CHECKOUT_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
