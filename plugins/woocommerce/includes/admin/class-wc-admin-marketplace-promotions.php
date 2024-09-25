@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Marketplace_Promotions {
 
-	const CRON_NAME		   	  = 'woocommerce_marketplace_cron_fetch_promotions';
+	const CRON_NAME           = 'woocommerce_marketplace_cron_fetch_promotions';
 	const TRANSIENT_NAME      = 'woocommerce_marketplace_promotions_v2';
 	const TRANSIENT_LIFE_SPAN = DAY_IN_SECONDS;
 	const PROMOTIONS_API_URL  = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
@@ -74,7 +74,7 @@ class WC_Admin_Marketplace_Promotions {
 	/**
 	 * Schedule a daily cron event to fetch promotions.
 	 *
-	 * @version	9.5.0
+	 * @version 9.5.0
 	 *
 	 * @return void
 	 */
