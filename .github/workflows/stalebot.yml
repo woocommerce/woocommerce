@@ -1,4 +1,4 @@
-name: 'Process stale needs-feedback issues'
+name: 'Process stale issues'
 on:
     schedule:
         - cron: '21 0 * * *'
@@ -14,7 +14,7 @@ jobs:
             issues: write
             pull-requests: write
         steps:
-            - name: Scan issues
+            - name: Process stale issues
               uses: actions/stale@v9.0.0
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -31,12 +31,12 @@ jobs:
                   only-issue-labels: 'needs: author feedback'
                   close-issue-label: "status: can't reproduce"
                   ascending: true
-            - name: Process Stale Flaky Test Issues
+            - name: Process stale flaky tests issues
               uses: actions/stale@v9.0.0
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
                   only-issue-labels: 'metric: flaky e2e test'
-                  exempt-issue-labels: 'metric: skipped test'
+                  exempt-issue-labels: 'type: skipped test'
                   days-before-stale: -1
                   days-before-close: -1
                   days-before-issue-stale: 5
