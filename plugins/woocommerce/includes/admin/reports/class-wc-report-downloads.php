@@ -2,6 +2,7 @@
 /**
  * Download report.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce\Admin\Reports
@@ -18,18 +19,23 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 
 /**
  * WC_Report_Downloads.
+ *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * Max items.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int
 	 */
 	protected $max_items;
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
 
@@ -45,6 +51,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Don't need this.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param string $position Top or bottom.
 	 */
 	public function display_tablenav( $position ) {
@@ -55,6 +62,8 @@ class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -132,6 +141,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param mixed  $item Item being displayed.
 	 * @param string $column_name Column name.
 	 */
@@ -211,6 +221,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get columns.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_columns() {
@@ -228,6 +239,8 @@ class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * Prepare download list items.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function prepare_items() {
 
@@ -261,6 +274,8 @@ class WC_Report_Downloads extends WP_List_Table {
 
 	/**
 	 * No items found text.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function no_items() {
 		esc_html_e( 'No customer downloads found.', 'woocommerce' );
@@ -269,6 +284,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get filters from querystring.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return object
 	 */
 	protected function get_filter_vars() {
@@ -292,6 +308,7 @@ class WC_Report_Downloads extends WP_List_Table {
 	/**
 	 * Get downloads matching criteria.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param int $current_page Current viewed page.
 	 * @param int $per_page How many results to show per page.
 	 */

@@ -1,6 +1,8 @@
 <?php
 /**
  * Admin View: Page - Reports
+ *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -2,6 +2,7 @@
 /**
  * WC_Report_Most_Stocked.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Admin\Reports
  */
 
@@ -13,12 +14,15 @@ if ( ! class_exists( 'WC_Report_Stock' ) ) {
 
 /**
  * WC_Report_Most_Stocked.
+ *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 class WC_Report_Most_Stocked extends WC_Report_Stock {
 
 	/**
 	 * Get Products matching stock criteria.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param int $current_page Current page number.
 	 * @param int $per_page How many results to show per page.
 	 */

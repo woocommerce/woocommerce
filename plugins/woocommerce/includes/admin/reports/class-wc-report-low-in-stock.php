@@ -2,6 +2,7 @@
 /**
  * WC_Report_Low_In_Stock.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @package WooCommerce\Admin\Reports
  */
 
@@ -13,11 +14,15 @@ if ( ! class_exists( 'WC_Report_Stock' ) ) {
 
 /**
  * Low stock report class.
+ *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  */
 class WC_Report_Low_In_Stock extends WC_Report_Stock {
 
 	/**
 	 * No items found text.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function no_items() {
 		esc_html_e( 'No low in stock products found.', 'woocommerce' );
@@ -26,6 +31,7 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 	/**
 	 * Get Products matching stock criteria.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param int $current_page Current page number.
 	 * @param int $per_page How many results to show per page.
 	 */

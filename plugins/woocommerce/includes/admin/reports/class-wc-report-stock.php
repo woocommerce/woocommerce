@@ -11,6 +11,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * WC_Report_Stock.
  *
+ * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
  * @author      WooThemes
  * @category    Admin
  * @package     WooCommerce\Admin\Reports
@@ -21,12 +22,15 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Max items.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @var int
 	 */
 	protected $max_items;
 
 	/**
 	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function __construct() {
 
@@ -41,6 +45,8 @@ class WC_Report_Stock extends WP_List_Table {
 
 	/**
 	 * No items found text.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function no_items() {
 		_e( 'No products found.', 'woocommerce' );
@@ -49,6 +55,7 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Don't need this.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param string $position
 	 */
 	public function display_tablenav( $position ) {
@@ -60,6 +67,8 @@ class WC_Report_Stock extends WP_List_Table {
 
 	/**
 	 * Output the report.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function output_report() {
 
@@ -72,6 +81,7 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @param mixed  $item
 	 * @param string $column_name
 	 */
@@ -171,6 +181,7 @@ class WC_Report_Stock extends WP_List_Table {
 	/**
 	 * Get columns.
 	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 * @return array
 	 */
 	public function get_columns() {
@@ -188,6 +199,8 @@ class WC_Report_Stock extends WP_List_Table {
 
 	/**
 	 * Prepare customer list items.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
 	 */
 	public function prepare_items() {
 
