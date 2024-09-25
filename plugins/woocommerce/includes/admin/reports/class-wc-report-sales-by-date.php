@@ -19,6 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 	/**
+	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
+	 * @override WC_Admin_Report::__construct not to throw deprecated notice, as this class is still used by non-deprecated REST API endpoints.
+	 */
+	public function __construct() {
+	}
+
+	/**
 	 * Chart colors.
 	 *
 	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.

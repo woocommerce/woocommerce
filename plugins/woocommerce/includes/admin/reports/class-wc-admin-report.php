@@ -86,6 +86,15 @@ class WC_Admin_Report {
 	public $end_date;
 
 	/**
+	 * Constructor.
+	 *
+	 * @deprecated 9.5.0 Reports are deprecated and will be removed in future versions. Use Analytics instead.
+	 */
+	public function __construct() {
+		wc_deprecated_function( __CLASS__  , '9.5.0' );
+	}
+
+	/**
 	 * Get report totals such as order totals and discount amounts.
 	 *
 	 * Data example:
