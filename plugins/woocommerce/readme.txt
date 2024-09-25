@@ -169,7 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 9.3.3 2024-09-24 =
+= 9.3.3 2024-09-25 =
 
 - Fix - An issue where virtual products could not be purchased when using the Additional Fields API [#51630](https://github.com/woocommerce/woocommerce/pull/51630)
 - Fix - Restore the previous default for `woocommerce_product_import_batch_size` (process 30 lines per batch when importing product CSV data) [#51631] (https://github.com/woocommerce/woocommerce/pull/51631)
