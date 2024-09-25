@@ -154,8 +154,8 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Set the style attribute for fixed width.
 	 *
-	 * @param \WP_HTML_Tag_Processor $p          The HTML tag processor.
-	 * @param int                    $fixed_width The fixed width value.
+	 * @param WP_HTML_Tag_Processor $p          The HTML tag processor.
+	 * @param string                $fixed_width The fixed width value.
 	 */
 	private function set_fixed_width_style( $p, $fixed_width ) {
 		$p->set_attribute( 'style', $this->get_list_styles( $fixed_width ) );
@@ -164,8 +164,8 @@ class ProductCollection extends AbstractBlock {
 	/**
 	 * Handle block dimensions if width type is set to 'fixed'.
 	 *
-	 * @param \WP_HTML_Tag_Processor $p     The HTML tag processor.
-	 * @param array                  $block The block details.
+	 * @param WP_HTML_Tag_Processor $p     The HTML tag processor.
+	 * @param array                 $block The block details.
 	 */
 	private function handle_block_dimensions( $p, $block ) {
 		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
