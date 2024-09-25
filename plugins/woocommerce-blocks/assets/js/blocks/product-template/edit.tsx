@@ -16,10 +16,6 @@ import {
 } from '@wordpress/block-editor';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import {
-	ProductCollectionAttributes,
-	WidthOptions,
-} from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
@@ -159,9 +155,6 @@ const ProductTemplateEdit = (
 			},
 			queryContext = [ { page: 1 } ],
 			templateSlug,
-			dimensions: { widthType, fixedWidth } = {
-				widthType: WidthOptions.FILL,
-			},
 			displayLayout: { type: layoutType, columns, shrinkColumns } = {
 				type: 'flex',
 				columns: 3,
@@ -327,18 +320,6 @@ const ProductTemplateEdit = (
 		customClassName = shrinkColumns ? dynamicGrid : staticGrid;
 	}
 
-	let style = {};
-	if (
-		WidthOptions.FIXED === widthType &&
-		fixedWidth &&
-		products &&
-		products.length
-	) {
-		style = {
-			width: fixedWidth,
-		};
-	}
-
 	const blockProps = useBlockProps( {
 		className: clsx(
 			__unstableLayoutClassNames,
@@ -346,7 +327,6 @@ const ProductTemplateEdit = (
 			customClassName,
 			{ [ `is-product-collection-layout-${ layoutType }` ]: layoutType }
 		),
-		style,
 	} );
 
 	if ( ! products ) {

@@ -39,21 +39,6 @@ class ProductTemplate extends AbstractBlock {
 	}
 
 	/**
-	 * Get the styles for the list element (fixed width).
-	 *
-	 * @param string $fixed_width Fixed width value.
-	 * @return string
-	 */
-	protected function get_list_styles( $fixed_width ) {
-		$style = '';
-
-		if ( isset( $fixed_width ) ) {
-			$style .= sprintf( 'width:%dpx;', intval( $fixed_width ) );
-		}
-		return $style;
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -92,15 +77,7 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames .= ' wc-block-product-template';
 
-		$attributes_for_wrapper = array( 'class' => trim( $classnames ) );
-
-		if ( isset( $block->context['dimensions'] ) && isset( $block->context['dimensions']['widthType'] ) ) {
-			if ( 'fixed' === $block->context['dimensions']['widthType'] ) {
-				$attributes_for_wrapper['style'] = $this->get_list_styles( $block->context['dimensions']['fixedWidth'] );
-			}
-		}
-
-		$wrapper_attributes = get_block_wrapper_attributes( $attributes_for_wrapper );
+		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( $classnames ) ) );
 
 		$content = '';
 		while ( $query->have_posts() ) {
