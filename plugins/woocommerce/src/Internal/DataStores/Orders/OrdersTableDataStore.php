@@ -1213,18 +1213,14 @@ WHERE
 		$order_types = array();
 
 		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
-			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-			$orders_data  = $cache_engine->get_cached_objects( $order_ids, $this->get_cache_group() );
+			$orders_data = $this->get_order_data_for_ids( $order_ids );
 			foreach ( $orders_data as $order_id => $order_data ) {
 				if ( ! empty( $order_data->type ) ) {
 					$order_types[ $order_id ] = $order_data->type;
 				}
 			}
 
-			$order_ids = array_diff( $order_ids, array_keys( $order_types ) );
-			if ( empty( $order_ids ) ) {
-				return $order_types;
-			}
+			return $order_types;
 		}
 
 		$orders_table          = self::get_orders_table_name();
