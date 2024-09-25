@@ -149,7 +149,9 @@ test.describe(
 					.selectOption( 'Netherlands' );
 				await page.getByLabel( 'Postal code' ).fill( '1011AA' );
 				await page.getByLabel( 'City' ).fill( 'Amsterdam' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.getByRole( 'button', { name: 'Check delivery options' } )
+					.click();
 
 				// Verify shipping costs
 				await expect(
@@ -185,7 +187,9 @@ test.describe(
 					.selectOption( 'Portugal' );
 				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.getByRole( 'button', { name: 'Check delivery options' } )
+					.click();
 
 				// Verify shipping costs
 				await expect(
@@ -233,7 +237,9 @@ test.describe(
 					.selectOption( 'Portugal' );
 				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.getByRole( 'button', { name: 'Check delivery options' } )
+					.click();
 
 				// Increase product quantity and verify the updated price
 				await page.getByLabel( 'Increase quantity of First' ).click();
@@ -269,7 +275,9 @@ test.describe(
 					.selectOption( 'Portugal' );
 				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
-				await page.getByRole( 'button', { name: 'Update' } ).click();
+				await page
+					.getByRole( 'button', { name: 'Check delivery options' } )
+					.click();
 
 				// Verify shipping costs
 				await expect(
