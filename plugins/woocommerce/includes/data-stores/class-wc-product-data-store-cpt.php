@@ -719,12 +719,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 *
 			 * @since x.x.x
 			 *
-			 * @param float $cogs_value The value to be written to the database. If returned as -1, nothing will be written.
+			 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
 			 * @param WC_Product $product The product for which the value is being saved.
 			 */
 			$cogs_value = apply_filters( 'woocommerce_save_cogs_value', $cogs_value, $product );
 
-			if ( -1 !== $cogs_value ) {
+			if ( ! is_null( $cogs_value ) ) {
 				$updated = $this->update_or_delete_post_meta( $product, '_cogs_total_value', 0.0 === $cogs_value ? '' : $cogs_value );
 				if ( $updated ) {
 					$this->updated_props[] = 'cogs_value';
