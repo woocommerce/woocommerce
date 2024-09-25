@@ -133,6 +133,7 @@ export type TProductCollectionOrderBy =
 	| 'date'
 	| 'title'
 	| 'popularity'
+	| 'price'
 	| 'rating';
 
 export type ProductCollectionSetAttributes = (

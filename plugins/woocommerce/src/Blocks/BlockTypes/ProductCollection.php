@@ -53,7 +53,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @var array
 	 */
-	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in' );
+	protected $custom_order_opts = array( 'popularity', 'rating', 'post__in', 'price' );
 
 
 	/**
@@ -665,7 +665,7 @@ class ProductCollection extends AbstractBlock {
 			return $this->get_preview_query_args( $collection_args, $query, $request );
 		}
 
-		$orderby             = $request->get_param( 'orderBy' );
+		$orderby             = $request->get_param( 'orderby' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
 		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
@@ -1013,6 +1013,15 @@ class ProductCollection extends AbstractBlock {
 	private function get_custom_orderby_query( $orderby ) {
 		if ( ! in_array( $orderby, $this->custom_order_opts, true ) || 'post__in' === $orderby ) {
 			return array( 'orderby' => $orderby );
+		}
+
+		if ( 'price' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_price_sorting_posts_clauses' ), 10, 2 );
+			return array(
+				'isProductCollection' => true,
+				'orderby'             => 'price',
+				'meta_key'            => '',
+			);
 		}
 
 		$meta_keys = array(
@@ -1689,6 +1698,38 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
+	 * Add the `posts_clauses` filter to the main query.
+	 *
+	 * @param array    $clauses The query clauses.
+	 * @param WP_Query $query   The WP_Query instance.
+	 */
+	public function add_price_sorting_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+
+		if ( 'price' !== $orderby ) {
+			return $clauses;
+		}
+
+		$clauses['join'] = $this->append_product_sorting_table_join( $clauses['join'] );
+		$order           = $query_vars['order'] ?? 'desc';
+
+		if ( 'asc' === strtolower( $order ) ) {
+			$clauses['orderby'] = ' wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC ';
+		} else {
+			$clauses['orderby'] = ' wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC ';
+		}
+
+		return $clauses;
+	}
+
+	/**
 	 * Determines if price filters need adjustment based on the tax display settings.
 	 *
 	 * This function checks if there's a discrepancy between how prices are stored in the database
@@ -1923,7 +1964,7 @@ class ProductCollection extends AbstractBlock {
 							$product->get_upsell_ids()
 						);
 					},
-					[]
+					array()
 				);
 
 				// Remove duplicates and product references. We don't want to display
