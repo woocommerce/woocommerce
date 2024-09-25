@@ -29,28 +29,43 @@
 	flex-basis: 0;
 	gap: 4px;
 	padding: 16px 12px;
-	color: inherit !important; // Overwriting Gutenberg styles
 	background-color: transparent;
-	border: none;
-	box-shadow: none !important;
-	outline: 1px solid $universal-border-light !important; // Overwriting Gutenberg styles
+	outline: 1px solid $universal-border-light;
 	border-radius: $universal-border-radius;
 	cursor: pointer;
-	&:hover:not(:disabled),
-	&:focus:not(:disabled),
-	&:focus,
+	position: relative; // Add this for pseudo-element positioning
+
+	.has-dark-controls & {
+		outline: 1px solid $input-border-dark;
+	}
+
+	&::after {
+		content: "";
+		position: absolute;
+		top: -3px;
+		right: -3px;
+		bottom: -3px;
+		left: -3px;
+		border-radius: calc(#{$universal-border-radius} + 2px);
+		pointer-events: none;
+	}
+
+	&:focus-within {
+		outline: 1.5px solid currentColor;
+		&::after {
+			outline: 1px solid currentColor;
+		}
+	}
+
 	&:hover {
 		background-color: $universal-background;
-		border-color: #d5d5d5;
-		color: #333;
 	}
-	&.wc-block-checkout__shipping-method-option--selected {
-		outline: 1px solid $universal-border-strong;
-		background-color: $universal-background;
 
-		&:focus {
-			outline: 1px solid $universal-border-strong;
-			background-color: $universal-background;
+	&.wc-block-checkout__shipping-method-option--selected {
+		outline: 1.5px solid currentColor;
+		background-color: $universal-background;
+		&:focus-within::after {
+			outline: 1px solid currentColor;
 		}
 	}
 }

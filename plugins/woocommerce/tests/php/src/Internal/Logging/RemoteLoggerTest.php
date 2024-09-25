@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 // phpcs:disable Universal.Namespaces.OneDeclarationPerFile.MultipleFound -- same
 namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
+	use Automattic\Jetpack\Constants;
 	use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 	use WC_Rate_Limiter;
 	use WC_Cache_Helper;
@@ -43,6 +44,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			global $wpdb;
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_rate_limits" );
 			WC_Cache_Helper::invalidate_cache_group( WC_Rate_Limiter::CACHE_GROUP );
+			Constants::clear_constants();
 		}
 
 		/**
@@ -139,8 +141,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 * @param bool   $expected The expected result.
 		 */
 		public function test_should_current_version_be_logged( $current_version, $new_version, $transient_value, $expected ) {
-			$wc_version   = WC()->version;
-			WC()->version = $current_version;
+			Constants::set_constant( 'WC_VERSION', $current_version );
 
 			// Set up the transient.
 			if ( null !== $transient_value ) {
@@ -156,8 +157,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 			// Clean up.
 			delete_site_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT );
-
-			WC()->version = $wc_version;
 		}
 
 		/**

@@ -300,7 +300,7 @@ class WC_Query {
 	private function filter_out_valid_front_page_query_vars( $query ) {
 		return array_filter(
 			$query,
-			function( $key ) {
+			function ( $key ) {
 				return ! $this->is_query_var_valid_on_front_page( $key );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -356,7 +356,7 @@ class WC_Query {
 					$q->is_home = false;
 
 					// WP supporting themes show post type archive.
-					if ( current_theme_supports( 'woocommerce' ) ) {
+					if ( wc_current_theme_supports_woocommerce_or_fse() ) {
 						$q->set( 'post_type', 'product' );
 					} else {
 						$q->is_singular = true;
@@ -376,7 +376,7 @@ class WC_Query {
 		}
 
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( current_theme_supports( 'woocommerce' ) && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
@@ -815,7 +815,7 @@ class WC_Query {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$rating_filter = array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) );
 			$rating_terms  = array();
-			for ( $i = 1; $i <= 5; $i ++ ) {
+			for ( $i = 1; $i <= 5; $i++ ) {
 				if ( in_array( $i, $rating_filter, true ) && isset( $product_visibility_terms[ 'rated-' . $i ] ) ) {
 					$rating_terms[] = $product_visibility_terms[ 'rated-' . $i ];
 				}

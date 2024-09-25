@@ -23,6 +23,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 
 		// Mock http request to performance endpoint.
 		add_filter( 'rest_pre_dispatch', array( $this, 'mock_rest_responses' ), 10, 3 );
+		add_filter( 'woocommerce_dashboard_status_widget_reports', array( $this, 'mock_replace_dashboard_status_widget_reports' ) );
 	}
 
 	/**
@@ -31,6 +32,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		remove_filter( 'rest_pre_dispatch', array( $this, 'mock_rest_responses' ), 10 );
+		remove_filter( 'woocommerce_dashboard_status_widget_reports', array( $this, 'mock_replace_dashboard_status_widget_reports' ) );
 	}
 
 	/**
@@ -118,5 +120,29 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Helper method to replace the data to to display in the status widget.
+	 *
+	 * @param array $status_widget_reports The data to display in the status widget.
+	 */
+	public function mock_replace_dashboard_status_widget_reports( $status_widget_reports ) {
+		$report_data            = new stdClass();
+		$report_data->net_sales = 123;
+
+		$status_widget_reports['net_sales_link']      = 'admin.php?page=wc-reports&tab=orders&range=month';
+		$status_widget_reports['top_seller_link']     = 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=';
+		$status_widget_reports['lowstock_link']       = 'admin.php?page=wc-reports&tab=stock&report=low_in_stock';
+		$status_widget_reports['outofstock_link']     = 'admin.php?page=wc-reports&tab=stock&report=out_of_stock';
+		$status_widget_reports['report_data']         = $report_data;
+		$status_widget_reports['get_sales_sparkline'] = function () {
+			return array(
+				'total' => 50,
+				'data'  => array(),
+			);
+		};
+
+		return $status_widget_reports;
 	}
 }
