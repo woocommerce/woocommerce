@@ -8,6 +8,10 @@
 	justify-content: flex-start;
 	align-items: flex-start;
 
+	.has-dark-controls & {
+		border-color: $input-border-dark;
+	}
+
 	address {
 		margin: 0;
 		font-style: normal;

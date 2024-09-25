@@ -125,6 +125,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		// Check that file is within an allowed location.
 		if ( $is_valid_file ) {
+			$normalized_path   = wp_normalize_path( $path );
 			$in_valid_location = false;
 			$valid_locations   = array();
 			$valid_locations[] = ABSPATH;
@@ -135,7 +136,8 @@ class WC_Product_CSV_Importer_Controller {
 			}
 
 			foreach ( $valid_locations as $valid_location ) {
-				if ( 0 === stripos( $path, trailingslashit( realpath( $valid_location ) ) ) ) {
+				$normalized_location = wp_normalize_path( realpath( $valid_location ) );
+				if ( 0 === stripos( $normalized_path, trailingslashit( $normalized_location ) ) ) {
 					$in_valid_location = true;
 					break;
 				}
@@ -369,7 +371,7 @@ class WC_Product_CSV_Importer_Controller {
 				 *
 				 * @since 3.1.0
 				 */
-				'lines'              => apply_filters( 'woocommerce_product_import_batch_size', 1 ),
+				'lines'              => apply_filters( 'woocommerce_product_import_batch_size', 30 ),
 				'parse'              => true,
 			);
 

@@ -27,6 +27,20 @@ The `__experimentalRegisterProductCollection` function is part of the `@woocomme
 	});
 	```
 
+Be sure to add `wc-blocks-registry` as a dependency to your script if you opt to use the `wc` global.
+
+  ```php
+  function enqueue_my_custom_product_collection_script() {
+      wp_enqueue_script(
+          'my-custom-product-collection',
+          plugins_url( '/dist/my-custom-product-collection.js', __FILE__ ),
+          array( 'wc-blocks-registry' ),
+          10
+      );
+  }
+  add_action( 'enqueue_block_editor_assets', 'enqueue_my_custom_product_collection_script' );
+  ```
+
 > [!TIP]
 > The first method is recommended if you are using Webpack.
 

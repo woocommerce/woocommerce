@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { sleep, group } from 'k6';
+import { sleep, group, check } from 'k6';
 import http from 'k6/http';
 import {
 	randomIntBetween,
@@ -98,9 +98,15 @@ export function myAccountOrders() {
 			}
 		);
 
+		check( my_account_order_id, {
+			'order ID is not undefined': () => {
+				return !! my_account_order_id;
+			},
+		} );
+
 		checkResponse( response, 200, {
-			title: `My account – ${ STORE_NAME }`,
-			body: my_account_order_id,
+			title: `Order #${ my_account_order_id } – ${ STORE_NAME }`,
+			body: `Order #<mark class="order-number">${ my_account_order_id }</mark> was placed`,
 			footer: FOOTER_TEXT,
 		} );
 	} );

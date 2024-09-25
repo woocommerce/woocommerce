@@ -51,6 +51,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		billingPeriod: '',
 		billingPeriodInterval: 0,
 		currency: '',
+		isOnSale: false,
+		regularPrice: 0,
 	};
 
 	function isSponsored(): boolean {
@@ -191,6 +193,8 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	return (
 		<Card
 			className={ classNames }
+			id={ `product-${ product.id }` }
+			tabIndex={ -1 }
 			aria-hidden={ isLoading }
 			style={ inlineCss() }
 		>

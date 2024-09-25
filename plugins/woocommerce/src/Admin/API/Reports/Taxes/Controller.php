@@ -244,7 +244,15 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		return array(
-			'tax_code'     => \WC_Tax::get_rate_code( $item['tax_rate_id'] ),
+			'tax_code'     => \WC_Tax::get_rate_code(
+				(object) array(
+					'tax_rate_id'       => $item['tax_rate_id'],
+					'tax_rate_country'  => $item['country'],
+					'tax_rate_state'    => $item['state'],
+					'tax_rate_name'     => $item['name'],
+					'tax_rate_priority' => $item['priority'],
+				)
+			),
 			'rate'         => $item['tax_rate'],
 			'total_tax'    => self::csv_number_format( $item['total_tax'] ),
 			'order_tax'    => self::csv_number_format( $item['order_tax'] ),
