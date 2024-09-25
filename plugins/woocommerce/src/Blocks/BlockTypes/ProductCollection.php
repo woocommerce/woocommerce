@@ -137,6 +137,45 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
+	 * Get the styles for the list element (fixed width).
+	 *
+	 * @param string $fixed_width Fixed width value.
+	 * @return string
+	 */
+	protected function get_list_styles( $fixed_width ) {
+		$style = '';
+
+		if ( isset( $fixed_width ) ) {
+			$style .= sprintf( 'width:%dpx;', intval( $fixed_width ) );
+		}
+		return $style;
+	}
+
+	/**
+	 * Set the style attribute for fixed width.
+	 *
+	 * @param \WP_HTML_Tag_Processor $p          The HTML tag processor.
+	 * @param int                    $fixed_width The fixed width value.
+	 */
+	private function set_fixed_width_style( $p, $fixed_width ) {
+		$p->set_attribute( 'style', $this->get_list_styles( $fixed_width ) );
+	}
+
+	/**
+	 * Handle block dimensions if width type is set to 'fixed'.
+	 *
+	 * @param \WP_HTML_Tag_Processor $p     The HTML tag processor.
+	 * @param array                  $block The block details.
+	 */
+	private function handle_block_dimensions( $p, $block ) {
+		if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
+			if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
+				$this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
+			}
+		}
+	}
+
+	/**
 	 * Handle the rendering of the block.
 	 *
 	 * @param string $block_content The block content about to be rendered.
@@ -382,6 +421,8 @@ class ProductCollection extends AbstractBlock {
 			if ( $this->is_next_tag_product_collection( $p ) ) {
 				$this->set_product_collection_namespace( $p );
 			}
+			// Check if dimensions need to be set and handle accordingly.
+			$this->handle_block_dimensions( $p, $block );
 			$block_content = $p->get_updated_html();
 
 			$collection    = $block['attrs']['collection'] ?? '';

@@ -15,10 +15,11 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 /**
  * Internal dependencies
  */
-import type {
+import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	ProductCollectionContentProps,
+	WidthOptions,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
@@ -113,6 +114,18 @@ const ProductCollectionContent = ( {
 			} ),
 	};
 
+	let style = {};
+
+	/**
+	 * Set max-width if fixed width is set.
+	 */
+	const { widthType, fixedWidth } = attributes?.dimensions;
+	if ( WidthOptions.FIXED === widthType && fixedWidth ) {
+		style = {
+			maxWidth: fixedWidth,
+		};
+	}
+
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
 	 * We are using this workaround to set default attributes.
@@ -159,7 +172,7 @@ const ProductCollectionContent = ( {
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
-			<div { ...innerBlocksProps } />
+			<div { ...innerBlocksProps } style={ style } />
 		</div>
 	);
 };
