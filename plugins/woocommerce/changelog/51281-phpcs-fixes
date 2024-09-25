@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Fix PHPCS warnings in OrdersTableQuery.php and ProductQuery.php
