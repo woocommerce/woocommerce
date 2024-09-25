@@ -1020,7 +1020,6 @@ class ProductCollection extends AbstractBlock {
 			return array(
 				'isProductCollection' => true,
 				'orderby'             => 'price',
-				'meta_key'            => '',
 			);
 		}
 
