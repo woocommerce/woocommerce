@@ -1,18 +1,16 @@
-const path = require("path");
 module.exports = function ( grunt ) {
 	'use strict';
-	const sass = require( 'sass' );
-	const path = require( 'path' );
+	var sass = require( 'sass' );
 
 	grunt.initConfig( {
 		// Setting folder templates.
 		dirs: {
 			css: 'css',
-			cssDest: path.resolve( __dirname, '../../assets/css' ),
+			cssDest: 'build/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
 			js: 'js',
-			jsDest: path.resolve( __dirname, '../../assets/js' ),
+			jsDest: 'build/js',
 			php: 'includes',
 		},
 
