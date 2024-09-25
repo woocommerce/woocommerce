@@ -150,7 +150,10 @@ test.describe(
 				await page.getByLabel( 'Postal code' ).fill( '1011AA' );
 				await page.getByLabel( 'City' ).fill( 'Amsterdam' );
 				await page
-					.getByRole( 'button', { name: 'Check delivery options' } )
+					.getByRole( 'button', {
+						name: 'Check delivery options',
+						exact: true,
+					} )
 					.click();
 
 				// Verify shipping costs
@@ -188,7 +191,10 @@ test.describe(
 				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
 				await page
-					.getByRole( 'button', { name: 'Check delivery options' } )
+					.getByRole( 'button', {
+						name: 'Check delivery options',
+						exact: true,
+					} )
 					.click();
 
 				// Verify shipping costs
@@ -238,7 +244,10 @@ test.describe(
 				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
 				await page
-					.getByRole( 'button', { name: 'Check delivery options' } )
+					.getByRole( 'button', {
+						name: 'Check delivery options',
+						exact: true,
+					} )
 					.click();
 
 				// Increase product quantity and verify the updated price
@@ -276,7 +285,10 @@ test.describe(
 				await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 				await page.getByLabel( 'City' ).fill( 'Lisbon' );
 				await page
-					.getByRole( 'button', { name: 'Check delivery options' } )
+					.getByRole( 'button', {
+						name: 'Check delivery options',
+						exact: true,
+					} )
 					.click();
 
 				// Verify shipping costs
