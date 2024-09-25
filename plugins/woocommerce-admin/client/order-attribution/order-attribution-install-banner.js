@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement } from '@wordpress/element';
 import { Button, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
@@ -17,12 +17,12 @@ export const OrderAttributionInstallBanner = ( {
 	bannerImage = <OrderAttributionInstallBannerImage />,
 } ) => {
 	const {
-		loading,
 		isOrderAttributionInstallBannerDismissed,
 		dismissOrderAttributionInstallBanner,
+		shouldShowBanner,
 	} = useOrderAttributionInstallBanner();
 
-	if ( loading || isOrderAttributionInstallBannerDismissed ) {
+	if ( ! shouldShowBanner || isOrderAttributionInstallBannerDismissed ) {
 		return null;
 	}
 
