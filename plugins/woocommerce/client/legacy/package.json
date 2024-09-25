@@ -5,9 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"main": "Gruntfile.js",
-	"files": [
-		"build"
-	],
+	"files": [],
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
@@ -54,7 +52,8 @@
 				"css/**/*.scss"
 			],
 			"output": [
-				"build"
+				"../../assets/css",
+				"../../assets/js"
 			],
 			"dependencies": [
 				"dependencyOutputs"
