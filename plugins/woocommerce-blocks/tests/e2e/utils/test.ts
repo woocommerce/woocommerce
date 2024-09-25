@@ -16,7 +16,6 @@ import {
 	PerformanceUtils,
 	RequestUtils,
 	ShippingUtils,
-	StoreApiUtils,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -108,7 +107,6 @@ const test = base.extend<
 		editor: Editor;
 		pageUtils: PageUtils;
 		frontendUtils: FrontendUtils;
-		storeApiUtils: StoreApiUtils;
 		performanceUtils: PerformanceUtils;
 		snapshotConfig: void;
 		shippingUtils: ShippingUtils;
@@ -134,7 +132,7 @@ const test = base.extend<
 		await page.evaluate( () => {
 			window.localStorage.clear();
 		} );
-
+		console.log( 'Cleared db' );
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
 	},
 	pageUtils: async ( { page }, use ) => {
@@ -145,9 +143,6 @@ const test = base.extend<
 	},
 	performanceUtils: async ( { page }, use ) => {
 		await use( new PerformanceUtils( page ) );
-	},
-	storeApiUtils: async ( { requestUtils }, use ) => {
-		await use( new StoreApiUtils( requestUtils ) );
 	},
 	shippingUtils: async ( { page, admin }, use ) => {
 		await use( new ShippingUtils( page, admin ) );
@@ -164,8 +159,8 @@ const test = base.extend<
 				baseURL: workerInfo.project.use.baseURL as string,
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
-
-			await use( requestUtils );
+			console.log( 'RequestUtils setup' );
+			await use( requestUtils as RequestUtils );
 		},
 		{ scope: 'worker', auto: true },
 	],
