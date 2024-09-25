@@ -536,7 +536,7 @@ SELECT(
 		WHERE
 		  posts.post_type IN ($order_post_type_placeholder)
 		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
-	) x)
+	) )
 ) count",
 			$order_post_types
 		);
