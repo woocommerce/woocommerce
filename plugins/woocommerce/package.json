@@ -650,9 +650,7 @@
 		"watch": [
 			"node_modules/@woocommerce/block-library/build",
 			"node_modules/@woocommerce/block-library/blocks.ini",
-			"node_modules/@woocommerce/admin-library/build",
-			"assets/css",
-			"assets/js"
+			"node_modules/@woocommerce/admin-library/build"
 		],
 		"ext": "js,css,php,json",
 		"ignoreRoot": []
