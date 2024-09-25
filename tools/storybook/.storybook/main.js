@@ -11,6 +11,12 @@ module.exports = {
 		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
 		'../../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)',
 	],
+	refs: {
+		'woocommerce-blocks': {
+			title: 'WooCommerce Blocks',
+			url: '/assets/woocommerce-blocks',
+		},
+	},
 
 	addons: [
 		'@storybook/addon-docs',
@@ -31,6 +37,10 @@ module.exports = {
 		{
 			from: '../../../plugins/woocommerce-admin/client',
 			to: 'main/plugins/woocommerce-admin/client',
+		},
+		{
+			from: '../../../plugins/woocommerce-blocks/storybook/dist',
+			to: '/assets/woocommerce-blocks',
 		},
 	],
 
