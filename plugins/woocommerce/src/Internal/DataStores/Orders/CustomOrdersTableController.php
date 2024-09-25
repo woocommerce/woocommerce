@@ -784,12 +784,14 @@ class CustomOrdersTableController {
 	}
 
 	/**
-	 * Set the `orders` cache group as non-persistent if Custom Order data caching is enabled.
+	 * Set the `order_objects` cache group as non-persistent if Custom Order data caching is enabled.
+	 *
+	 * With order datastore cache enabled, caching of raw data is now handled by the datastore, rather than full object
+	 * being stored in persistent cache.
 	 *
 	 * @return void
 	 */
 	private function maybe_set_order_cache_group_as_non_persistent() {
-		global $wp_object_cache;
 		if ( OrderUtil::custom_orders_table_datastore_cache_enabled() ) {
 			// If we're using datastore cache, we don't want to persist the order objects in cache. It should be in-memory only.
 			wp_cache_add_non_persistent_groups( array( $this->order_cache->get_object_type() ) );
