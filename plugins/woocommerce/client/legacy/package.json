@@ -51,10 +51,7 @@
 				"js/**/*.js",
 				"css/**/*.scss"
 			],
-			"output": [
-				"../../assets/css",
-				"../../assets/js"
-			],
+			"output": [],
 			"dependencies": [
 				"dependencyOutputs"
 			]
