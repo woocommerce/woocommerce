@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove is-fullscreen-mode class from Product DataViews page, under feature flag.

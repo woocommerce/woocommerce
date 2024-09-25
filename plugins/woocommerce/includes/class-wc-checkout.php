@@ -220,16 +220,9 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Get an array of checkout fields.
-	 *
-	 * @param  string $fieldset to get.
-	 * @return array
+	 * Initialize the checkout fields.
 	 */
-	public function get_checkout_fields( $fieldset = '' ) {
-		if ( ! is_null( $this->fields ) ) {
-			return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
-		}
-
+	protected function initialize_checkout_fields() {
 		// Fields are based on billing/shipping country. Grab those values but ensure they are valid for the store before using.
 		$billing_country   = $this->get_value( 'billing_country' );
 		$billing_country   = empty( $billing_country ) ? WC()->countries->get_base_country() : $billing_country;
@@ -311,8 +304,25 @@ class WC_Checkout {
 				}
 			}
 		}
+	}
 
-		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
+	/**
+	 * Get an array of checkout fields.
+	 *
+	 * @param  string $fieldset to get.
+	 * @return array
+	 */
+	public function get_checkout_fields( $fieldset = '' ) {
+		if ( is_null( $this->fields ) ) {
+			$this->initialize_checkout_fields();
+		}
+
+		// If a fieldset is specified, return only the fields for that fieldset, or array if the field set does not exist.
+		if ( $fieldset ) {
+			return $this->fields[ $fieldset ] ?? array();
+		}
+
+		return $this->fields;
 	}
 
 	/**

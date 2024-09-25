@@ -39,8 +39,8 @@
 		}
 
 		&:focus {
-			outline: 1px solid $universal-border-strong;
-			outline-offset: 2px;
+			outline: 1.5px solid $universal-border-strong;
+			outline-offset: 1.5px;
 		}
 
 		&::before,
@@ -55,15 +55,16 @@
 		.has-dark-controls & {
 			border-color: $controls-border-dark;
 			background-color: $input-background-dark;
+			color: $input-text-dark;
 
 			&:checked {
 				background: $input-background-dark;
-				border-color: $controls-border-dark;
+				border-color: currentColor;
 			}
 
 			&:focus {
-				outline: 2px solid $controls-border-dark;
-				outline-offset: 2px;
+				outline: 1.5px solid currentColor;
+				outline-offset: 1.5px;
 			}
 		}
 	}
@@ -118,8 +119,7 @@
 	}
 
 	.wc-block-components-checkbox__input[type="checkbox"]:checked,
-	.has-dark-controls
-	.wc-block-components-checkbox__input[type="checkbox"]:checked {
+	.has-dark-controls .wc-block-components-checkbox__input[type="checkbox"]:checked {
 		background-color: #fff;
 		border-color: var(--form--border-color);
 	}
