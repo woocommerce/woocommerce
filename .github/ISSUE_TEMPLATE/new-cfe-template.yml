@@ -9,8 +9,8 @@ body:
         Use this template to request changes to be included in a version of WooCommerce that is past its code freeze date.
         **The request will be reviewed** and accepted or denied:
         
-        * If accepted, a pull request targeting the appropriate release branch will be created.
-        * If rejected, a pull request targeting `trunk` will be created.
+        * If accepted, please test your changes in against the release branch and merge.
+        * If rejected, please change the base against `trunk` and merge it.
         
         In either case you are responsible for managing the pull request as usual (provide a description, assign reviewers, ensure that CI jobs pass...)
   - type: input
@@ -25,7 +25,7 @@ body:
     id: pr-urls
     attributes:
       label: "What PR implement the changes for which the exception is requested? (please do not enter multiple PRs)"
-      description: "Pull request URL"
+      description: "Pull request URL against the release branch"
       placeholder: |
         https://github.com/woocommerce/woocommerce/pull/1234
     validations:
@@ -55,7 +55,7 @@ body:
     id: how-to-communicate
     attributes:
       label: "How should this change be communicated in the release post on the public developer blog:"
-      description: "See the blog at [https://developer.woo.com/blog/](https://developer.woo.com/blog/)"
+      description: "See the blog at [https://developer.woo.com/blog/](https://developer.woo.com/blog/) cc @woocommerce/developer-advocacy"
       placeholder: "There is no need to add new communication to the already planned one."
     validations:
       required: true
