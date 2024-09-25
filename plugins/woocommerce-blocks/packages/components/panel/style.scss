@@ -14,31 +14,27 @@
 }
 
 .wc-block-components-panel__button {
-	@include reset-box();
+	box-sizing: border-box;
 	height: auto;
-	line-height: 1;
 	margin-top: em(6px);
 	padding-right: #{24px + $gap-smaller};
 	padding-top: em($gap-small - 6px);
+	padding-left: 0 !important;
 	position: relative;
 	text-align: left;
 	width: 100%;
 	word-break: break-word;
 
 	&[aria-expanded="true"] {
-		padding-bottom: $gap-smaller;
-		margin-bottom: $gap-smaller;
+		margin-bottom: $gap-smaller * 2;
 	}
 
 	&,
 	&:hover,
 	&:focus,
 	&:active {
-		@include reset-color();
-		@include reset-typography();
-		background: transparent;
-		box-shadow: none;
 		cursor: pointer;
+		padding-left: 0 !important;
 	}
 
 	> .wc-block-components-panel__button-icon {
@@ -56,23 +52,5 @@
 	// `display` property of div elements.
 	&[hidden] {
 		display: none;
-	}
-}
-
-// Extra classes for specificity.
-.theme-twentytwentyone.theme-twentytwentyone.theme-twentytwentyone
-.wc-block-components-panel__button {
-	background-color: inherit;
-	color: inherit;
-}
-
-.theme-twentytwenty .wc-block-components-panel__button,
-.theme-twentyseventeen .wc-block-components-panel__button {
-	background: none transparent;
-	color: inherit;
-
-	&.wc-block-components-panel__button:hover,
-	&.wc-block-components-panel__button:focus {
-		background: none transparent;
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update @wordpress/dataviews package and fix class names for products dataviews app.

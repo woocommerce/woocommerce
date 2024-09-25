@@ -324,6 +324,31 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 	}
 
 	/**
+	 * Test that the memo is set correctly.
+	 */
+	public function test_memo_set_correctly() {
+		$specs = array(
+			array(
+				'id'         => 'test-gateway-1',
+				'is_visible' => true,
+			),
+			array(
+				'id'         => 'test-gateway-2',
+				'is_visible' => false,
+			),
+		);
+
+		$result = TestableEvaluateSuggestion::evaluate_specs( $specs );
+		$memo   = TestableEvaluateSuggestion::get_memo_for_tests();
+
+		$this->assertCount( 1, $memo );
+		$memo_key = array_keys( $memo )[0];
+		$this->assertEquals( $result, $memo[ $memo_key ] );
+		$this->assertCount( 1, $result['suggestions'] );
+		$this->assertEquals( 'test-gateway-1', $result['suggestions'][0]->id );
+	}
+
+	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed
@@ -359,3 +384,19 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_EvaluateSuggestion extends WC_Uni
 			);
 	}
 }
+
+//phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
+/**
+ * TestableEvaluateSuggestion class.
+ */
+class TestableEvaluateSuggestion extends EvaluateSuggestion {
+	/**
+	 * Get the memo for testing.
+	 *
+	 * @return array
+	 */
+	public static function get_memo_for_tests() {
+		return self::$memo;
+	}
+}
+//phpcs:enable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName

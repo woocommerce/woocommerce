@@ -18,7 +18,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
-	ProductCollectionEditComponentProps,
+	ProductCollectionContentProps,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
@@ -68,7 +68,7 @@ const useQueryId = (
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
 	...props
-}: ProductCollectionEditComponentProps ) => {
+}: ProductCollectionContentProps ) => {
 	const isInitialAttributesSet = useRef( false );
 	const {
 		clientId,

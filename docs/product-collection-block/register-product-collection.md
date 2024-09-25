@@ -27,6 +27,20 @@ The `__experimentalRegisterProductCollection` function is part of the `@woocomme
 	});
 	```
 
+Be sure to add `wc-blocks-registry` as a dependency to your script if you opt to use the `wc` global.
+
+  ```php
+  function enqueue_my_custom_product_collection_script() {
+      wp_enqueue_script(
+          'my-custom-product-collection',
+          plugins_url( '/dist/my-custom-product-collection.js', __FILE__ ),
+          array( 'wc-blocks-registry' ),
+          10
+      );
+  }
+  add_action( 'enqueue_block_editor_assets', 'enqueue_my_custom_product_collection_script' );
+  ```
+
 > [!TIP]
 > The first method is recommended if you are using Webpack.
 
@@ -36,7 +50,7 @@ We will explain important arguments that can be passed to `__experimentalRegiste
 
 A Collection is defined by an object that can contain the following fields:
 
-- `name` (type `string`): A unique and machine-readable collection name. We recommend using the format `<plugin-name>/product-collection/<collection-name>`. Both `<plugin-name>` and `<collection-name>` should consist only of alphanumeric characters and hyphens (e.g., `my-plugin/product-collection/my-collection`).
+- `name` (type `string`): A unique and machine-readable collection name. We recommend using the format `&lt;plugin-name&gt;/product-collection/&lt;collection-name&gt;`. Both `&lt;plugin-name&gt;` and `&lt;collection-name&gt;` should consist only of alphanumeric characters and hyphens (e.g., `my-plugin/product-collection/my-collection`).
 - `title` (type `string`): The title of the collection, which will be displayed in various places including the block inserter and collection chooser.
 - `description` (optional, type `string`): A human-readable description of the collection.
 - `innerBlocks` (optional, type `Array[]`): An array of inner blocks that will be added to the collection. If not provided, the default inner blocks will be used.
