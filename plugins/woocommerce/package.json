@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "9.4.0",
+	"version": "9.5.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -12,7 +12,10 @@
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:copy-assets": "wireit",
+		"build:project:copy-assets:legacy": "wireit",
+		"build:project:copy-assets:admin": "wireit",
+		"build:project:copy-assets:blocks": "wireit",
+		"build:project:actualize-translation-domains": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
@@ -30,8 +33,7 @@
 		"env:start:blocks": "pnpm --filter='@woocommerce/block-library' env:start && pnpm playwright install chromium --with-deps",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev",
-		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
-		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
+		"env:perf": "pnpm env:dev && pnpm env:performance-init",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "XDEBUG_MODE=off composer install --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
@@ -49,7 +51,6 @@
 		"lint:php:fix": "composer run-script phpcbf",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"makepot": "composer run-script makepot",
-		"packages:fix:textdomain": "node ./bin/package-update-textdomain.js",
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api --workers 4",
 		"test:e2e": "pnpm test:e2e:default --project=ui",
@@ -57,8 +58,10 @@
 		"test:e2e:install": "pnpm playwright install chromium",
 		"test:e2e:blocks": "pnpm --filter='@woocommerce/block-library' test:e2e",
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
-		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
+		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/gh-action-pr-requests.js",
+		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
+		"test:perf:install-k6": "bash ./tests/performance/bin/install-k6.sh",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
@@ -417,6 +420,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
+						"tests/e2e-pw/tests/api-tests/**",
 						".wp-env.json",
 						"woocommerce.php",
 						"uninstall.php"
@@ -473,22 +477,13 @@
 					"command": "test:perf",
 					"optional": true,
 					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/performance/**",
-						".wp-env.json",
-						"woocommerce.php",
-						"uninstall.php"
+						"tests/performance/**"
 					],
 					"testEnv": {
-						"start": "env:perf"
+						"start": "test:perf:ci-setup"
 					},
 					"events": [
+						"pull_request",
 						"push"
 					]
 				},
@@ -559,11 +554,11 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"release-checks",
 						"on-demand"
 					],
 					"report": {
-						"resultsBlobName": "default-pressable-core-e2e",
+						"resultsBlobName": "default-pressable-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -575,11 +570,11 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
-						"daily-checks",
+						"release-checks",
 						"on-demand"
 					],
 					"report": {
-						"resultsBlobName": "default-wpcom-core-e2e",
+						"resultsBlobName": "default-wpcom-core-e2e-and-api",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -664,11 +659,40 @@
 		"ignoreRoot": []
 	},
 	"wireit": {
-		"build:project:copy-assets": {
-			"command": "rm -rf assets/client/blocks assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
-			"dependencies": [
-				"dependencyOutputs"
+		"build:project:copy-assets:legacy": {
+			"command": "rsync -avhW --checksum --no-compress --delete --quiet client/legacy/build/css/ assets/css && rsync -avhW --checksum --no-compress --delete --quiet client/legacy/build/js/ assets/js",
+			"files": [
+				"client/legacy/build/**/*.*"
+			],
+			"output": [
+				"assets/css",
+				"assets/js"
 			]
+		},
+		"build:project:copy-assets:admin": {
+			"command": "rsync -avhW --checksum --no-compress --delete --quiet ../woocommerce-admin/build/ assets/client/admin",
+			"files": [
+				"../woocommerce-admin/build/**/*.*"
+			],
+			"output": [
+				"assets/client/admin"
+			]
+		},
+		"build:project:copy-assets:blocks": {
+			"command": "rsync -avhW --checksum --no-compress --delete --quiet ../woocommerce-blocks/build/ assets/client/blocks && rsync -avhW --checksum --no-compress --quiet ../woocommerce-blocks/blocks.ini blocks.ini",
+			"files": [
+				"../woocommerce-blocks/build/**/*.*"
+			],
+			"output": [
+				"assets/client/blocks"
+			]
+		},
+		"build:project:actualize-translation-domains": {
+			"command": "node ./bin/package-update-textdomain.js",
+			"files": [
+				"packages/**/*.php"
+			],
+			"output": []
 		},
 		"watch:build:project:copy-assets": {
 			"command": "nodemon --exec \"pnpm run\" build:project",
@@ -688,7 +712,6 @@
 				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
 				"node_modules/@woocommerce/api/dist/",
 				"node_modules/@woocommerce/admin-e2e-tests/build",
-				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/admin-library/build",

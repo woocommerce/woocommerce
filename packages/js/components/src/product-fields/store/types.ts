@@ -8,6 +8,7 @@ export type ProductFieldDefinition = {
 	type?: HTMLInputTypeAttribute;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	render?: ComponentType;
+	attributes?: Record< string, string >;
 };
 
 export type ProductFieldState = {

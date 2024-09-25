@@ -55,11 +55,12 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 		}
 
 		return $block_content ? sprintf(
-			'<div class="wc-block-%4$s %1$s" style="%2$s">%3$s</div>',
+			'<div class="wp-block-%5$s-%4$s wc-block-%4$s %1$s" style="%2$s">%3$s</div>',
 			esc_attr( trim( $classname ) ),
 			esc_attr( $classes_and_styles['styles'] ),
 			$block_content,
-			esc_attr( $this->block_name )
+			esc_attr( $this->block_name ),
+			esc_attr( $this->namespace )
 		) : '';
 	}
 
@@ -186,7 +187,13 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 	 */
 	protected function is_email_verified( $order ) {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		if ( empty( $_POST ) || ! isset( $_POST['email'] ) || ! wp_verify_nonce( $_POST['check_submission'] ?? '', 'wc_verify_email' ) ) {
+		if ( empty( $_POST ) || ! isset( $_POST['email'], $_POST['_wpnonce'] ) ) {
+			return false;
+		}
+
+		$nonce_value = sanitize_key( wp_unslash( $_POST['_wpnonce'] ?? '' ) );
+
+		if ( ! wp_verify_nonce( $nonce_value, 'wc_verify_email' ) && ! wp_verify_nonce( $nonce_value, 'wc_create_account' ) ) {
 			return false;
 		}
 

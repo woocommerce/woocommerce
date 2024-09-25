@@ -20,7 +20,7 @@ For WooCommerce extensions, performance optimization means ensuring that your co
 
 ## Benchmarking Performance
 
-Setting clear performance benchmarks is essential for development and continuous improvement of WooCommerce extensions. A recommended performance standard is achieving a Chrome Core Web Vitals "Performance" score of 90 or above on Woo Express, using tools like the [Chrome Lighthouse](https://developer.chrome.com/docs/lighthouse/overview/).
+Setting clear performance benchmarks is essential for development and continuous improvement of WooCommerce extensions. A recommended performance standard is achieving a Chrome Core Web Vitals "Performance" score of 90 or above on a simple Woo site, using tools like the [Chrome Lighthouse](https://developer.chrome.com/docs/lighthouse/overview/).
 
 ### Using Accessible Tools for Benchmarking
 

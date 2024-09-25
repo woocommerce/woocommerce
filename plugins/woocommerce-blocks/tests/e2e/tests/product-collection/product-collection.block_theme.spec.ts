@@ -87,7 +87,11 @@ test.describe( 'Product Collection', () => {
 			await admin.createNewPost();
 		} );
 
-		test( 'does not render', async ( { page, editor, pageObject } ) => {
+		test.skip( 'does not render', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'featured' );
 			await pageObject.addFilter( 'Price Range' );
@@ -901,72 +905,6 @@ test.describe( 'Product Collection', () => {
 			await expect( products ).toHaveText( expectedProducts );
 		} );
 	} );
-
-	test.describe( 'Extensibility - JS events', () => {
-		test( 'emits wc-blocks_product_list_rendered event on init and on page change', async ( {
-			pageObject,
-			page,
-		} ) => {
-			await pageObject.createNewPostAndInsertBlock();
-
-			await page.addInitScript( () => {
-				let eventFired = 0;
-				window.document.addEventListener(
-					'wc-blocks_product_list_rendered',
-					( e ) => {
-						const { collection } = e.detail;
-						window.eventPayload = collection;
-						window.eventFired = ++eventFired;
-					}
-				);
-			} );
-
-			await pageObject.publishAndGoToFrontend();
-
-			await expect
-				.poll(
-					async () => await page.evaluate( 'window.eventPayload' )
-				)
-				.toBe( undefined );
-			await expect
-				.poll( async () => await page.evaluate( 'window.eventFired' ) )
-				.toBe( 1 );
-
-			await page.getByRole( 'link', { name: 'Next Page' } ).click();
-
-			await expect
-				.poll( async () => await page.evaluate( 'window.eventFired' ) )
-				.toBe( 2 );
-		} );
-
-		test( 'emits one wc-blocks_product_list_rendered event per block', async ( {
-			pageObject,
-			page,
-		} ) => {
-			// Adding three blocks in total
-			await pageObject.createNewPostAndInsertBlock();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost();
-
-			await page.addInitScript( () => {
-				let eventFired = 0;
-				window.document.addEventListener(
-					'wc-blocks_product_list_rendered',
-					() => {
-						window.eventFired = ++eventFired;
-					}
-				);
-			} );
-
-			await pageObject.publishAndGoToFrontend();
-
-			await expect
-				.poll( async () => await page.evaluate( 'window.eventFired' ) )
-				.toBe( 3 );
-		} );
-	} );
 } );
 
 test.describe( 'Testing "usesReference" argument in "registerProductCollection"', () => {
@@ -1210,7 +1148,7 @@ test.describe( 'Product picker', () => {
 				);
 			} );
 
-			test( `For collection "${ collection.name }" - product picker shouldn't be shown in Single Product template`, async ( {
+			test( `For collection "${ collection.name }" - "From current product" is chosen by default`, async ( {
 				pageObject,
 				admin,
 				editor,
@@ -1226,10 +1164,10 @@ test.describe( 'Product picker', () => {
 					key as Collections
 				);
 
-				const editorProductPicker = editor.canvas.locator(
-					SELECTORS.productPicker
+				const productToShowControl = admin.page.getByText(
+					'From the current product'
 				);
-				await expect( editorProductPicker ).toBeHidden();
+				await expect( productToShowControl ).toBeChecked();
 			} );
 		}
 	);

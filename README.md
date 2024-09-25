@@ -20,8 +20,8 @@ To get up and running within the WooCommerce Monorepo, you will need to make sur
 Once you've installed all of the prerequisites, you can run the following commands to get everything working.
 
 ```bash
-# Ensure that you're using the correct version of Node
-nvm use
+# Ensure that correct version of Node is installed and being used
+nvm install
 # Install the PHP and Composer dependencies for all of the plugins, packages, and tools
 pnpm install
 # Build all of the plugins, packages, and tools in the monorepo

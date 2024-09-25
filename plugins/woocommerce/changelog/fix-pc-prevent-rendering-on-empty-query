@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Product Collection: Don't render when empty unless the no results block is present.

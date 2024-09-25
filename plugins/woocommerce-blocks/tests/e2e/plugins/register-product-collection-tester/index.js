@@ -49,14 +49,12 @@ __experimentalRegisterProductCollection( {
 			// console.log( 'Current attributes:', currentAttributes );
 			// console.log( 'Location:', location );
 
-			const timeoutID = setTimeout( () => {
+			window.__removePreview = () => {
 				setState( {
 					isPreview: false,
 					previewMessage: '',
 				} );
-			}, 1000 );
-
-			return () => clearTimeout( timeoutID );
+			};
 		},
 		initialPreviewState: {
 			isPreview: true,

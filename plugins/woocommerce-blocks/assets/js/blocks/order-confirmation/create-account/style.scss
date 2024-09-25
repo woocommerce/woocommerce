@@ -1,0 +1,84 @@
+.wc-block-order-confirmation-create-account {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: $gap;
+	padding: $gap-larger;
+	margin-top: $gap-larger !important;
+	margin-bottom: $gap-larger !important;
+	background: rgba(0, 0, 0, 0.04);
+	box-sizing: border-box;
+
+	> div {
+		flex: 1;
+	}
+
+	p {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+
+	.woocommerce-order-confirmation-create-account-content,
+	.block-editor-block-list__layout {
+		> :first-child {
+			margin-top: 0 !important;
+		}
+		> :last-child {
+			margin-bottom: 0 !important;
+		}
+		ul {
+			li {
+				margin-bottom: $gap;
+			}
+		}
+		* {
+			color: inherit;
+		}
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: $gap;
+
+		p,
+		.wc-block-components-text-input {
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+
+		.wc-block-components-button {
+			width: 100%;
+			padding: 1em;
+		}
+
+		.wc-block-order-confirmation-create-account-description {
+			p {
+				@include font-size(small);
+				text-align: center;
+
+				a,
+				span {
+					white-space: nowrap;
+				}
+			}
+		}
+
+		.wc-block-components-password-strength.hidden {
+			display: none;
+		}
+	}
+
+	.woocommerce-order-confirmation-create-account-success {
+		text-align: center;
+		padding: $gap-larger 0;
+
+		> :first-child {
+			margin-top: 0 !important;
+		}
+		> :last-child {
+			margin-bottom: 0 !important;
+		}
+	}
+}
