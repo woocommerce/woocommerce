@@ -184,17 +184,51 @@ class WC_Admin_Reports {
 			);
 		}
 
+		/**
+		 * Filter the list and add reports to the legacy _WooCommerce > Reports_.
+		 *
+		 * Array items should be in the format of
+		 *
+		 * $reports['automatewoo'] = array(
+		 *     'title'   => 'AutomateWoo',
+		 *     'reports' => array(
+		 *         'runs_by_date' => array(
+		 *             'title'       => __( 'Workflow Runs', 'automatewoo' ),
+		 *             'description' => '',
+		 *             'hide_title'  => false,
+		 *             'callback'    => array( $this, 'get_runs_by_date' ),
+		 *         ),
+		 *         // ...
+		 *     ),
+		 * );
+		 *
+		 * This filter has a colliding name with the one in Automattic\WooCommerce\Admin\API\Reports\Controller.
+		 * To make sure your code runs in the context of the legacy _WooCommerce > Reports_ screen, and not the REST endpoint,
+		 * use the following:
+		 *
+		 * add_filter( 'woocommerce_admin_reports',
+		 *     function( $reports ) {
+		 *         if ( is_admin() ) {
+		 *             // ...
+		 *
+		 * @param array $reports The associative array of reports.
+		 */
 		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
 		$reports = apply_filters( 'woocommerce_reports_charts', $reports ); // Backwards compatibility.
 
-		foreach ( $reports as $key => $report_group ) {
-			if ( isset( $reports[ $key ]['charts'] ) ) {
-				$reports[ $key ]['reports'] = $reports[ $key ]['charts'];
+		foreach ( $reports as $key => &$report_group ) {
+			// Silently ignore reports given for the filter in Automattic\WooCommerce\Admin\API\Reports\Controller.
+			if ( ! isset( $report_group['reports'] ) ) {
+				unset( $reports[ $key ] );
+				continue;
+			}
+			if ( isset( $report_group['charts'] ) ) {
+				$report_group['reports'] = $report_group['charts'];
 			}
 
-			foreach ( $reports[ $key ]['reports'] as $report_key => $report ) {
-				if ( isset( $reports[ $key ]['reports'][ $report_key ]['function'] ) ) {
-					$reports[ $key ]['reports'][ $report_key ]['callback'] = $reports[ $key ]['reports'][ $report_key ]['function'];
+			foreach ( $report_group['reports'] as &$report ) {
+				if ( isset( $report['function'] ) ) {
+					$report['callback'] = $report['function'];
 				}
 			}
 		}

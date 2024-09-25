@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Wrap parse_str under a check to resolve deprecation notice
