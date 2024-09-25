@@ -305,7 +305,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$matching_tool_data = current(
 			array_filter(
 				$data,
-				function( $tool ) {
+				function ( $tool ) {
 					return 'regenerate_thumbnails' === $tool['id'];
 				}
 			)
@@ -344,7 +344,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$matching_tool_data = current(
 			array_filter(
 				$data,
-				function( $tool ) {
+				function ( $tool ) {
 					return 'regenerate_thumbnails' === $tool['id'];
 				}
 			)
