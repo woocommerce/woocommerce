@@ -282,6 +282,10 @@
 				"WC_ADMIN_PHASE": {
 					"external": true,
 					"default": "core"
+				},
+				"BABEL_ENV": {
+					"external": true,
+					"default": "default"
 				}
 			},
 			"files": [
