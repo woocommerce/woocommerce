@@ -252,7 +252,13 @@ class WC_Admin_Reports {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
 		$class = 'WC_Report_' . str_replace( '-', '_', $name );
 
-		include_once apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class );
+		include_once apply_filters_deprecated(
+			'wc_admin_reports_path',
+			array( 'reports/class-wc-report-' . $name . '.php', $name, $class ),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 
 		if ( ! class_exists( $class ) ) {
 			return;

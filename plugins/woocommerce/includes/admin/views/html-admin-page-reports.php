@@ -30,8 +30,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 			echo '">' . esc_html( $report_group['title'] ) . '</a>';
 		}
-
-		do_action( 'wc_reports_tabs' );
+		wc_do_deprecated_action(
+			'wc_reports_tabs',
+			array(),
+			'9.5.0',
+			null,
+			'Reports are deprecated and will be removed in future versions. Use Analytics instead.',
+		);
 		?>
 	</nav>
 	<?php
