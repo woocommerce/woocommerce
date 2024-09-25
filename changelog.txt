@@ -1,5 +1,7 @@
 == Changelog ==
 
+= 9.5.0 2024-XX-XX =
+
 = 9.3.2 2024-09-18 =
 
 - Fix - Improve the product importer's handling of filepaths under Windows [#51456](https://github.com/woocommerce/woocommerce/pull/51456)
