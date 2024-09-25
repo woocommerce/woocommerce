@@ -37,7 +37,7 @@ describe( 'ShippingPlaceholder', () => {
 	} );
 
 	it( 'should show correct text if showCalculator is false and addressProvided is true', () => {
-		const { rerender } = render(
+		render(
 			<ShippingPlaceholder
 				showCalculator={ false }
 				addressProvided={ true }
