@@ -444,6 +444,7 @@ test.describe( 'System Status API tests', () => {
 						version_latest: expect.any( String ),
 						author_url: expect.any( String ),
 						is_child_theme: expect.any( Boolean ),
+						is_block_theme: expect.any( Boolean ),
 						has_woocommerce_support: expect.any( Boolean ),
 						has_woocommerce_file: expect.any( Boolean ),
 						has_outdated_templates: expect.any( Boolean ),
