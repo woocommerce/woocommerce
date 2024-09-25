@@ -30,11 +30,11 @@ export type FilterBlockContext = {
 	filterData: {
 		isLoading: boolean;
 		items?: FilterOptionItem[];
-		range?: {
-			min: number;
-			max: number;
-			step: number;
+		price?: {
+			minPrice: number;
+			minRange: number;
+			maxPrice: number;
+			maxRange: number;
 		};
 	};
-	isParentSelected: boolean;
 };
