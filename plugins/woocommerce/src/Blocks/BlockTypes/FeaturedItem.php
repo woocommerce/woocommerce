@@ -37,6 +37,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		'font_size',
 		'padding',
 		'text_color',
+		'extra_classes',
 	);
 
 	/**

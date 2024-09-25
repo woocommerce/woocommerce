@@ -69,7 +69,7 @@ class ProductImageGallery extends AbstractBlock {
 		$product_image_gallery_html = ob_get_clean();
 
 		$product   = $previous_product;
-		$classname = StyleAttributesUtils::get_classes_by_attributes( $attributes );
+		$classname = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 		return sprintf(
 			'<div class="wp-block-woocommerce-product-image-gallery %1$s">%2$s %3$s</div>',
 			esc_attr( $classname ),
