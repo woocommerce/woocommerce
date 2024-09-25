@@ -416,10 +416,7 @@ test.describe( 'Product Collection registration', () => {
 			'A Test Product'
 		);
 		await expect(
-			block
-				.getByLabel( BLOCK_LABELS.productImage )
-				.locator( 'visible=true' )
-				.first()
+			block.getByLabel( BLOCK_LABELS.productImage ).first()
 		).toBeVisible();
 		await expect( editorProductPicker ).toBeHidden();
 
@@ -450,10 +447,7 @@ test.describe( 'Product Collection registration', () => {
 		// Product Picker shouldn't be shown as product is available now
 		await page.reload();
 		await expect(
-			block
-				.getByLabel( BLOCK_LABELS.productImage )
-				.locator( 'visible=true' )
-				.first()
+			block.getByLabel( BLOCK_LABELS.productImage ).first()
 		).toBeVisible();
 		await expect( editorProductPicker ).toBeHidden();
 
