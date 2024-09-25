@@ -41,7 +41,6 @@ jobs:
         with:
           # If 'base_ref' is available, the 'Build Matrix' step requires non-shallow git-history to identify changed files.
           fetch-depth: ${{ ( ( github.base_ref && '0' ) || '1' ) }}
-          show-progress: false
           clean: false
       - name: 'Setup PNPM'
         uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
@@ -102,6 +101,7 @@ jobs:
         with:
           # the WooCommerce plugin package uses phpcs-changed for linting, which requires non-shallow git-history.
           fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
+          clean: false
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'

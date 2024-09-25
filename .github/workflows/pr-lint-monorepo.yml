@@ -21,6 +21,7 @@ jobs:
               with:
                   ref: ${{ github.event.pull_request.head.sha }}
                   fetch-depth: 0
+                  clean: false
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
