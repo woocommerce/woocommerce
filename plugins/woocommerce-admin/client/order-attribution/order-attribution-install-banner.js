@@ -5,6 +5,7 @@ import { createInterpolateElement } from '@wordpress/element';
 import { Button, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Text } from '@woocommerce/experimental';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -25,6 +26,8 @@ export const OrderAttributionInstallBanner = ( {
 	if ( ! shouldShowBanner || isOrderAttributionInstallBannerDismissed ) {
 		return null;
 	}
+
+	recordEvent( 'order_attribution_install_banner_viewed' );
 
 	return (
 		<Card
@@ -73,6 +76,11 @@ export const OrderAttributionInstallBanner = ( {
 						<Button
 							href="https://woocommerce.com/products/woocommerce-analytics"
 							variant="primary"
+							onClick={ () =>
+								recordEvent(
+									'order_attribution_install_banner_clicked'
+								)
+							}
 						>
 							{ __( 'Try it now', 'woocommerce' ) }
 						</Button>

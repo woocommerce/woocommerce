@@ -21,7 +21,7 @@ const useOrderAttributionInstallBanner = () => {
 		updateOptions( {
 			[ OPTION_NAME_BANNER_DISMISSED ]: OPTION_VALUE_YES,
 		} );
-		recordEvent( 'order_attribution_install_banner_dismissed', {} );
+		recordEvent( 'order_attribution_install_banner_dismissed' );
 	};
 
 	const { canUserInstallPlugins, orderAttributionInstallState } = useSelect(
