@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix wc_admin_unsnooze_admin_notes events are being needlessly created

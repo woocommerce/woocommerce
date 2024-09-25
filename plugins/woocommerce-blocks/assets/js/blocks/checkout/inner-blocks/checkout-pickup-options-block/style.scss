@@ -8,7 +8,8 @@
 		.wc-block-components-shipping-rates-control__no-results-notice {
 			margin: em($gap-small) 0;
 		}
-		.wc-block-components-radio-control .wc-block-components-radio-control__input {
+		.wc-block-components-radio-control
+		.wc-block-components-radio-control__input {
 			top: auto;
 			transform: none;
 			margin-top: 1px;
@@ -69,6 +70,10 @@
 		}
 		.wc-block-components-radio-control__description {
 			color: $gray-700;
+
+			.has-dark-controls & {
+				color: $gray-300;
+			}
 
 			> svg {
 				vertical-align: middle;

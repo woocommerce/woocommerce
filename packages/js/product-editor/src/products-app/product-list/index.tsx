@@ -11,7 +11,7 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import { Product, ProductQuery } from '@woocommerce/data';
-import { drawerRight } from '@wordpress/icons';
+import { drawerRight, seen, unseen } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
@@ -44,6 +44,7 @@ import {
 import { LAYOUT_LIST } from '../constants';
 import { productFields } from './fields';
 import { useEditProductAction } from '../dataviews-actions';
+import { useNewNavigation } from '../utilites/new-navigation';
 
 const { NavigableRegion, usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -149,6 +150,7 @@ export default function ProductList( {
 	className,
 	hideTitleFromUI = false,
 }: ProductListProps ) {
+	const [ showNewNavigation, setNewNavigation ] = useNewNavigation();
 	const history = useHistory();
 	const location = useLocation();
 	const {
@@ -307,22 +309,36 @@ export default function ProductList( {
 					selection={ selection }
 					defaultLayouts={ defaultLayouts }
 					header={
-						<Button
-							// @ts-expect-error outdated type.
-							size="compact"
-							isPressed={ quickEdit }
-							icon={ drawerRight }
-							label={ __(
-								'Toggle details panel',
-								'woocommerce'
-							) }
-							onClick={ () => {
-								history.push( {
-									...location.params,
-									quickEdit: quickEdit ? undefined : true,
-								} );
-							} }
-						/>
+						<>
+							<Button
+								// @ts-expect-error outdated type.
+								size="compact"
+								icon={ showNewNavigation ? seen : unseen }
+								label={ __(
+									'Toggle navigation',
+									'woocommerce'
+								) }
+								onClick={ () => {
+									setNewNavigation( ! showNewNavigation );
+								} }
+							/>
+							<Button
+								// @ts-expect-error outdated type.
+								size="compact"
+								isPressed={ quickEdit }
+								icon={ drawerRight }
+								label={ __(
+									'Toggle details panel',
+									'woocommerce'
+								) }
+								onClick={ () => {
+									history.push( {
+										...location.params,
+										quickEdit: quickEdit ? undefined : true,
+									} );
+								} }
+							/>
+						</>
 					}
 				/>
 			</div>

@@ -12,6 +12,12 @@ import ProductCollectionPage, {
 	SELECTORS,
 } from './product-collection.page';
 
+declare global {
+	interface Window {
+		__removePreview: () => void;
+	}
+}
+
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
@@ -220,6 +226,7 @@ test.describe( 'Product Collection registration', () => {
 		test( 'Clicking "My Custom Collection with Advanced Preview" should show preview and then replace it by the actual content', async ( {
 			pageObject,
 			editor,
+			page,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock(
 				'myCustomCollectionWithAdvancedPreview'
@@ -231,13 +238,18 @@ test.describe( 'Product Collection registration', () => {
 			// The preview button should be visible
 			await expect( previewButtonLocator ).toBeVisible();
 
+			await page.evaluate( () => {
+				window.__removePreview();
+			} );
+
 			// The preview button should be hidden
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 
-		test.skip( 'Should display properly in Product Catalog template', async ( {
+		test( 'Should display properly in Product Catalog template', async ( {
 			pageObject,
 			editor,
+			page,
 		} ) => {
 			await pageObject.goToProductCatalogAndInsertCollection(
 				'myCustomCollectionWithAdvancedPreview'
@@ -260,7 +272,10 @@ test.describe( 'Product Collection registration', () => {
 				.locator( 'visible=true' );
 			await expect( products ).toHaveCount( 9 );
 
-			// The preview button should be hidden after 1 second
+			await page.evaluate( () => {
+				window.__removePreview();
+			} );
+
 			await expect( previewButtonLocator ).toBeHidden();
 		} );
 	} );
