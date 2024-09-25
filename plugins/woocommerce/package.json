@@ -663,28 +663,21 @@
 			"files": [
 				"client/legacy/build/**/*.*"
 			],
-			"output": [
-				"assets/css",
-				"assets/js"
-			]
+			"output": []
 		},
 		"build:project:copy-assets:admin": {
 			"command": "rsync -avhW --checksum --no-compress --delete --quiet ../woocommerce-admin/build/ assets/client/admin",
 			"files": [
 				"../woocommerce-admin/build/**/*.*"
 			],
-			"output": [
-				"assets/client/admin"
-			]
+			"output": []
 		},
 		"build:project:copy-assets:blocks": {
 			"command": "rsync -avhW --checksum --no-compress --delete --quiet ../woocommerce-blocks/build/ assets/client/blocks && rsync -avhW --checksum --no-compress --quiet ../woocommerce-blocks/blocks.ini blocks.ini",
 			"files": [
 				"../woocommerce-blocks/build/**/*.*"
 			],
-			"output": [
-				"assets/client/blocks"
-			]
+			"output": []
 		},
 		"build:project:actualize-translation-domains": {
 			"command": "node ./bin/package-update-textdomain.js",
