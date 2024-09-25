@@ -27,11 +27,8 @@ import {
  */
 import Block from './block';
 import withProductSelector from '../shared/with-product-selector';
-import {
-	BLOCK_TITLE as label,
-	BLOCK_ICON as icon,
-	BLOCK_DESCRIPTION as description,
-} from './constants';
+import { BLOCK_ICON as icon } from './constants';
+import { title, description } from './block.json';
 import { BlockAttributes, ImageSizing } from './types';
 import { ImageSizeSettings } from './image-size-settings';
 
@@ -172,4 +169,4 @@ const Edit = ( {
 	);
 };
 
-export default withProductSelector( { icon, label, description } )( Edit );
+export default withProductSelector( { icon, title, description } )( Edit );

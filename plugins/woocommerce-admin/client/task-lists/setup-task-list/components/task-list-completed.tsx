@@ -29,7 +29,7 @@ export const TaskListCompleted = ( {
 					className="woocommerce-task-card woocommerce-homescreen-card completed"
 				>
 					<CardHeader size="medium">
-						<div className="wooocommerce-task-card__header">
+						<div className="woocommerce-task-card__header">
 							<img src={ HeaderImage } alt="Completed" />
 							<h2>
 								{ __(

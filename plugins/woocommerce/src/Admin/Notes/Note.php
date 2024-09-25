@@ -534,7 +534,7 @@ class Note extends \WC_Data {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note date prop cannot be empty.', 'woocommerce' ) );
 		}
 
-		if ( is_string( $date ) ) {
+		if ( is_string( $date ) && ! is_numeric( $date ) ) {
 			$date = wc_string_to_timestamp( $date );
 		}
 		$this->set_date_prop( 'date_created', $date );
@@ -546,7 +546,7 @@ class Note extends \WC_Data {
 	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
 	 */
 	public function set_date_reminder( $date ) {
-		if ( is_string( $date ) ) {
+		if ( is_string( $date ) && ! is_numeric( $date ) ) {
 			$date = wc_string_to_timestamp( $date );
 		}
 		$this->set_date_prop( 'date_reminder', $date );
@@ -579,6 +579,11 @@ class Note extends \WC_Data {
 			$layout = 'plain';
 		}
 		$valid_layouts = array( 'banner', 'plain', 'thumbnail' );
+
+		if ( 'banner' === $layout ) {
+			wc_deprecated_argument( 'Note::set_layout', '9.4.0', 'The "banner" layout is deprecated. Please use "thumbnail" instead to display a image.' );
+		}
+
 		if ( in_array( $layout, $valid_layouts, true ) ) {
 			$this->set_prop( 'layout', $layout );
 		} else {
@@ -676,7 +681,7 @@ class Note extends \WC_Data {
 	 *
 	 * @param string $note_action_name Name of action to add a nonce to.
 	 * @param string $nonce_action The nonce action.
-	 * @param string $nonce_name The nonce Name. This is used as the paramater name in the resulting URL for the action.
+	 * @param string $nonce_name The nonce Name. This is used as the parameter name in the resulting URL for the action.
 	 * @return void
 	 * @throws \Exception If note name cannot be found.
 	 */

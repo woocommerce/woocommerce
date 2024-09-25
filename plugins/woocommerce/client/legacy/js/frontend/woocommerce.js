@@ -146,4 +146,57 @@ jQuery( function ( $ ) {
 			},
 		} );
 	} );
-} );
+});
+
+/**
+ * Focus on the first notice element on the page.
+ * 
+ * Populated live regions don't always are announced by screen readers.
+ * This function focus on the first notice message with the role="alert"
+ * attribute to make sure it's announced.
+ */
+function focus_populate_live_region() {
+	var noticeClasses = [ 'woocommerce-message', 'woocommerce-error', 'wc-block-components-notice-banner' ];
+	var noticeSelectors = noticeClasses.map( function( className ) {
+		return '.' + className + '[role="alert"]';
+	} ).join( ', ' );
+	var noticeElements = document.querySelectorAll( noticeSelectors );
+
+	if ( noticeElements.length === 0 ) {
+		return;
+	}
+
+	var firstNotice = noticeElements[0];
+
+	firstNotice.setAttribute( 'tabindex', '-1' );
+
+	// Wait for the element to get the tabindex attribute so it can be focused.
+	var delayFocusNoticeId = setTimeout( function() {
+		firstNotice.focus();
+		clearTimeout( delayFocusNoticeId );
+	}, 500 );
+}
+
+/**
+ * Refresh the sorted by live region.
+ */
+function refresh_sorted_by_live_region () {
+	var sorted_by_live_region = document.querySelector( '.woocommerce-result-count[data-is-sorted-by="true"]' );
+
+	if ( sorted_by_live_region ) {
+		var text = sorted_by_live_region.innerHTML;
+
+		var sorted_by_live_region_id = setTimeout( function() {
+			sorted_by_live_region.innerHTML = '';
+			sorted_by_live_region.innerHTML = text;
+			clearTimeout( sorted_by_live_region_id );
+		}, 1000 );
+	}
+}
+
+function on_document_ready() {
+	focus_populate_live_region();
+	refresh_sorted_by_live_region();
+}
+
+document.addEventListener( 'DOMContentLoaded' , on_document_ready );

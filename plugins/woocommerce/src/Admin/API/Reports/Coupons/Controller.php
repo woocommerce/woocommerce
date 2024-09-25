@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\GenericController;
 use Automattic\WooCommerce\Admin\API\Reports\ExportableInterface;
+use Automattic\WooCommerce\Admin\API\Reports\GenericQuery;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -28,6 +29,19 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @var string
 	 */
 	protected $rest_base = 'reports/coupons';
+
+	/**
+	 * Get data from `'coupons'` GenericQuery.
+	 *
+	 * @override GenericController::get_datastore_data()
+	 *
+	 * @param array $query_args Query arguments.
+	 * @return mixed Results from the data store.
+	 */
+	protected function get_datastore_data( $query_args = array() ) {
+		$query = new GenericQuery( $query_args, 'coupons' );
+		return $query->get_data();
+	}
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -50,38 +64,11 @@ class Controller extends GenericController implements ExportableInterface {
 	}
 
 	/**
-	 * Get all reports.
+	 * Prepare a report data item for serialization.
 	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		$query_args    = $this->prepare_reports_query( $request );
-		$coupons_query = new Query( $query_args );
-		$report_data   = $coupons_query->get_data();
-
-		$data = array();
-
-		foreach ( $report_data->data as $coupons_data ) {
-			$item   = $this->prepare_item_for_response( $coupons_data, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		return $this->add_pagination_headers(
-			$request,
-			$data,
-			(int) $report_data->total,
-			(int) $report_data->page_no,
-			(int) $report_data->pages
-		);
-	}
-
-	/**
-	 * Prepare a report object for serialization.
-	 *
-	 * @param array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @param array            $report  Report data item as returned from Data Store.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		$response = parent::prepare_item_for_response( $report, $request );
@@ -197,11 +184,13 @@ class Controller extends GenericController implements ExportableInterface {
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['default'] = 'coupon_id';
-		$params['orderby']['enum']    = array(
-			'coupon_id',
-			'code',
-			'amount',
-			'orders_count',
+		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
+			array(
+				'coupon_id',
+				'code',
+				'amount',
+				'orders_count',
+			)
 		);
 		$params['coupons']            = array(
 			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),

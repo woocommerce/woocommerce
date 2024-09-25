@@ -630,7 +630,6 @@ ul.wc-tabs {
 
 					#coupon_code {
 						float: left;
-						margin-bottom: 1rem;
 					}
 				}
 			}
@@ -1151,4 +1150,24 @@ Notice messages (like 'Added to cart', 'Billing address needs to be filled in', 
   &[role='alert']::before {
     content: '\2713';
   }
+}
+
+/**
+ * Coupon error notice
+ */
+ .woocommerce-cart {
+	td.actions .coupon .coupon-error-notice {
+		@include coupon-error-notice-cart();
+		margin-top: 0;
+ 	}
+}
+
+form.checkout_coupon {
+	.coupon-error-notice {
+		@include coupon-error-notice-checkout();
+	}
+
+	.input-text.has-error:focus {
+		border-color: var(--wc-red);
+	}
 }

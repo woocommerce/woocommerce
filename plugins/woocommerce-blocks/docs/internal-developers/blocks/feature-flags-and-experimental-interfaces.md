@@ -58,6 +58,10 @@ The majority of our feature flagging is blocks, this is a list of them:
     - [PHP flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce/src/Blocks/BlockTypesController.php#L303)
     - [Webpack flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/bin/webpack-entries.js#L101)
     - [JS flag](https://github.com/woocommerce/woocommerce/blob/a0f9d159e5196983d93064762fd20a510de57d55/plugins/woocommerce-blocks/assets/js/blocks/product-filter/inner-blocks/stock-filter/index.tsx#L15)
+- Delayed Account Creation (Experimental)
+   	- [PHP flag](https://github.com/woocommerce/woocommerce/blob/9897737880dcbef9831ee41799684dab1960d94f/plugins/woocommerce/src/Blocks/BlockTypesController.php#L417)
+   	- [Webpack flag](https://github.com/woocommerce/woocommerce/blob/9897737880dcbef9831ee41799684dab1960d94f/plugins/woocommerce-blocks/bin/webpack-entries.js#L168)
+    - [JS flag](https://github.com/woocommerce/woocommerce/blob/9897737880dcbef9831ee41799684dab1960d94f/plugins/woocommerce-blocks/assets/js/blocks/order-confirmation/create-account/index.tsx#L14)
 
 ## Features behind flags
 
@@ -85,7 +89,7 @@ We also have individual features or code blocks behind a feature flag, this is a
 -   **Deprecated** - `__experimental_woocommerce_blocks_checkout_update_order_from_request` hook gives extensions the chance to update orders based on the data in the request ([deprecated experimental hook](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/d469a45d572f2c52d7917707c492dfb905ddfac0/src/StoreApi/Routes/Checkout.php#L466-L477)). [Deprecated in PR 5015](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5015).
 -   **Deprecated** - `__experimental_woocommerce_blocks_checkout_order_processed` hook when order has completed processing and is ready for payment ([deprecated experimental hook](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/accd1bbf402e043b9fc322f118ab614ba7437c92/src/StoreApi/Routes/Checkout.php#L237)). [Deprecated in PR 5014](https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/5014).
 -   `__experimental_woocommerce_blocks_add_data_attributes_to_namespace` hook that allows 3PD to add a namespace of blocks to receive block attributes as `data-` attributes ([experimental property](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/4a1ee97eb97011458174e93e44a9b7ad2f10ca36/src/BlockTypesController.php#L88)).
--   `__experimental_woocommerce_blocks_add_data_attributes_to_block` hook that allows 3PD to add a block to recieve block attributes as `data-` attributes ([experimental property](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/4a1ee97eb97011458174e93e44a9b7ad2f10ca36/src/BlockTypesController.php#L97)).
+-   `__experimental_woocommerce_blocks_add_data_attributes_to_block` hook that allows 3PD to add a block to receive block attributes as `data-` attributes ([experimental property](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/4a1ee97eb97011458174e93e44a9b7ad2f10ca36/src/BlockTypesController.php#L97)).
 
 ### JS methods
 

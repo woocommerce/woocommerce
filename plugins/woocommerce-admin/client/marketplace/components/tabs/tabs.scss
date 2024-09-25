@@ -45,6 +45,18 @@
 		text-align: center;
 		z-index: 26;
 	}
+
+	&__update-count-extensions,
+	&__update-count-themes,
+	&__update-count-business-services {
+		background-color: $gutenberg-gray-300;
+		color: $gutenberg-gray-700;
+
+		&.is-active {
+			background-color: #000;
+			color: #fff;
+		}
+	}
 }
 
 @media (width <= $breakpoint-medium) {

@@ -1,0 +1,25 @@
+.wc-block-product-filters-overlay-navigation__wrapper {
+	display: flex;
+}
+
+.wc-block-product-filters-overlay-navigation {
+	display: flex;
+	flex-direction: row;
+	cursor: pointer;
+
+	&.alignright {
+		justify-content: right;
+	}
+
+	&.alignleft {
+		justify-content: unset;
+	}
+
+	&.aligncenter {
+		justify-content: center;
+	}
+
+	&.hidden {
+		display: none;
+	}
+}

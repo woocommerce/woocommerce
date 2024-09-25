@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix `store-title` endpoint - Pass default value to `get_option`.
