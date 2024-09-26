@@ -1,5 +1,18 @@
 const webpackOverride = require( '../webpack.config' );
 
+const staticDirs = [
+	{
+		from: '../../../plugins/woocommerce-admin/client',
+		to: 'main/plugins/woocommerce-admin/client',
+	},
+];
+if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
+	// Add WooCommerce Blocks Storybook for build process.
+	staticDirs.push( {
+		from: '../../../plugins/woocommerce-blocks/storybook/dist',
+		to: '/assets/woocommerce-blocks',
+	} );
+}
 module.exports = {
 	stories: [
 		// WooCommerce Admin / @woocommerce/components components
@@ -11,7 +24,18 @@ module.exports = {
 		'../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)',
 		'../../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)',
 	],
-
+	refs: ( config, { configType } ) => {
+		if ( configType === 'DEVELOPMENT' ) {
+			return {};
+		}
+		return {
+			'woocommerce-blocks': {
+				expanded: false,
+				title: 'WooCommerce Blocks',
+				url: '/assets/woocommerce-blocks',
+			},
+		};
+	},
 	addons: [
 		'@storybook/addon-docs',
 		'@storybook/addon-controls',
@@ -27,12 +51,7 @@ module.exports = {
 		reactDocgen: 'react-docgen-typescript',
 	},
 
-	staticDirs: [
-		{
-			from: '../../../plugins/woocommerce-admin/client',
-			to: 'main/plugins/woocommerce-admin/client',
-		},
-	],
+	staticDirs,
 
 	webpackFinal: webpackOverride,
 

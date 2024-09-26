@@ -37,6 +37,7 @@ import './editor.scss';
 export interface Attributes {
 	miniCartIcon: 'cart' | 'bag' | 'bag-alt';
 	addToCartBehaviour: string;
+	onCartClickBehaviour: 'navigate_to_checkout' | 'open_drawer';
 	hasHiddenPrice: boolean;
 	cartAndCheckoutRenderStyle: boolean;
 	priceColor: ColorPaletteOption;
@@ -58,6 +59,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	const {
 		cartAndCheckoutRenderStyle,
 		addToCartBehaviour,
+		onCartClickBehaviour,
 		hasHiddenPrice,
 		priceColor = defaultColorItem,
 		iconColor = defaultColorItem,
@@ -320,6 +322,26 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 								'woocommerce'
 							) }
 							checked={ addToCartBehaviour === 'open_drawer' }
+						/>
+						<ToggleControl
+							label={ __(
+								'Navigate to checkout when clicking the Mini-Cart, instead of opening the drawer.',
+								'woocommerce'
+							) }
+							onChange={ ( value ) => {
+								setAttributes( {
+									onCartClickBehaviour: value
+										? 'navigate_to_checkout'
+										: 'open_drawer',
+								} );
+							} }
+							help={ __(
+								'Toggle to disable opening the Mini-Cart drawer when clicking the cart icon, and instead navigate to the checkout page.',
+								'woocommerce'
+							) }
+							checked={
+								onCartClickBehaviour === 'navigate_to_checkout'
+							}
 						/>
 					</BaseControl>
 				</PanelBody>
