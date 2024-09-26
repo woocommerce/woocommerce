@@ -13,35 +13,41 @@
 class WC_Helper_Queue {
 	/**
 	 * Get all pending queued actions.
-	 *
+	 * @param string|null $group Optionally. Filter the actions by group.
 	 * @return array Pending jobs.
 	 */
-	public static function get_all_pending() {
-		$jobs = WC()->queue()->search(
-			array(
-				'per_page' => -1,
-				'status'   => 'pending',
-				'claimed'  => false,
-			)
+	public static function get_all_pending( $group = null ) {
+		$args = array(
+			'per_page' => -1,
+			'status'   => 'pending',
+			'claimed'  => false,
 		);
 
-		return $jobs;
+		if ( $group ) {
+			$args['group'] = $group;
+		}
+
+		return WC()->queue()->search( $args );
 	}
+
+
 
 	/**
 	 * Run all pending queued actions.
-	 *
+	 * @param string|null $group Optionally. Filter the actions by group.
 	 * @return void
 	 */
-	public static function run_all_pending() {
+	public static function run_all_pending( $group = null ) {
 		$queue_runner = new ActionScheduler_QueueRunner();
-
-		while ( $jobs = self::get_all_pending() ) {
+		$jobs         = self::get_all_pending( $group );
+		while ( $jobs ) {
 			foreach ( $jobs as $job_id => $job ) {
 				$queue_runner->process_action( $job_id );
 			}
+			$jobs = self::get_all_pending( $group );
 		}
 	}
+
 
 	/**
 	 * Cancel all pending actions.

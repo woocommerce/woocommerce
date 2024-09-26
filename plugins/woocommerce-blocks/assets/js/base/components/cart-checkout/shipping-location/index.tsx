@@ -19,7 +19,7 @@ const ShippingLocation = ( {
 		<span className="wc-block-components-shipping-address">
 			{ sprintf(
 				/* translators: %s location. */
-				__( 'Shipping to %s', 'woocommerce' ),
+				__( 'Delivers to %s', 'woocommerce' ),
 				formattedLocation
 			) + ' ' }
 		</span>

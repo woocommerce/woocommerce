@@ -59,7 +59,6 @@ const VariationsReport = ( props ) => {
 				mode={ mode }
 				charts={ charts }
 				endpoint="variations"
-				isRequesting={ isRequesting }
 				query={ chartQuery }
 				selectedChart={ getSelectedChart( query.chart, charts ) }
 				filters={ filters }

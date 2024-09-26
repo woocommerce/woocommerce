@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+
 /**
  * SingleProductTemplateCompatibility class.
  *
@@ -11,7 +13,6 @@ namespace Automattic\WooCommerce\Blocks\Templates;
 class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	const IS_FIRST_BLOCK = '__wooCommerceIsFirstBlock';
 	const IS_LAST_BLOCK  = '__wooCommerceIsLastBlock';
-
 
 	/**
 	 * Inject hooks to rendered content of corresponding blocks.
@@ -257,15 +258,11 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	 * @return string
 	 */
 	public static function add_compatibility_layer( $template_content ) {
-		$parsed_blocks = parse_blocks( $template_content );
-
-		if ( ! self::has_single_product_template_blocks( $parsed_blocks ) ) {
-			$template = self::inject_custom_attributes_to_first_and_last_block_single_product_template( $parsed_blocks );
-			return self::serialize_blocks( $template );
+		$blocks = parse_blocks( $template_content );
+		if ( self::has_single_product_template_blocks( $blocks ) ) {
+			$blocks = self::wrap_single_product_template( $template_content );
 		}
-
-		$wrapped_blocks = self::wrap_single_product_template( $template_content );
-		$template       = self::inject_custom_attributes_to_first_and_last_block_single_product_template( $wrapped_blocks );
+		$template = self::inject_custom_attributes_to_first_and_last_block_single_product_template( $blocks );
 		return self::serialize_blocks( $template );
 	}
 
@@ -385,7 +382,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 
 	/**
 	 * Check if the Single Product template has a single product template block:
-	 * woocommerce/product-gallery-image, woocommerce/product-details, woocommerce/add-to-cart-form]
+	 * woocommerce/product-gallery-image, woocommerce/product-details, woocommerce/add-to-cart-form, etc.
 	 *
 	 * @param array $parsed_blocks Array of parsed block objects.
 	 * @return bool True if the template has a single product template block, false otherwise.
@@ -393,19 +390,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	private static function has_single_product_template_blocks( $parsed_blocks ) {
 		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-price', 'woocommerce/breadcrumbs' );
 
-		$found = false;
-
-		foreach ( $parsed_blocks as $block ) {
-			if ( isset( $block['blockName'] ) && in_array( $block['blockName'], $single_product_template_blocks, true ) ) {
-				$found = true;
-				break;
-			}
-			$found = self::has_single_product_template_blocks( $block['innerBlocks'], $single_product_template_blocks );
-			if ( $found ) {
-				break;
-			}
-		}
-		return $found;
+		return BlockTemplateUtils::has_block_including_patterns( $single_product_template_blocks, $parsed_blocks );
 	}
 
 

@@ -30,6 +30,10 @@
 		position: absolute;
 		right: 0;
 		top: 0;
+
+		.has-dark-controls & {
+			border-color: $input-border-dark;
+		}
 	}
 
 	// Extra label for specificity needed in the editor.
@@ -99,7 +103,8 @@
 }
 
 .theme-twentyseventeen {
-	.wc-block-components-quantity-selector .wc-block-components-quantity-selector__button {
+	.wc-block-components-quantity-selector
+	.wc-block-components-quantity-selector__button {
 		&:hover,
 		&:focus {
 			background: none transparent;

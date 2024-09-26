@@ -6,7 +6,17 @@
 
 	> p {
 		margin: 0;
-		padding: $gap-smallest 0 0 0;
+		padding: $gap-smaller 0 0 0;
+		display: flex;
+		align-items: center;
+		gap: 2px;
+	}
+
+	svg {
+		fill: currentColor;
+		width: 1.5em;
+		height: 1.5em;
+		margin-top: -1px;
 	}
 }
 

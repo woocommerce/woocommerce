@@ -78,7 +78,12 @@ export const TotalsShipping = ( {
 				.flatMap( ( rate ) => rate.name );
 		}
 	);
-	const addressComplete = isAddressComplete( shippingAddress );
+	const addressComplete = isAddressComplete( shippingAddress, [
+		'state',
+		'country',
+		'postcode',
+		'city',
+	] );
 	const shippingMethodsMissing = areShippingMethodsMissing(
 		hasRates,
 		prefersCollection,
@@ -100,7 +105,7 @@ export const TotalsShipping = ( {
 			) }
 		>
 			<TotalsItem
-				label={ __( 'Shipping', 'woocommerce' ) }
+				label={ __( 'Delivery', 'woocommerce' ) }
 				value={
 					! shippingMethodsMissing && cartHasCalculatedShipping
 						? // if address is not complete, display the link to add an address.

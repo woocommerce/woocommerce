@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\WCAdminHelper;
 use Automattic\WooCommerce\Admin\PageController;
 use WC_Abstract_Order;
@@ -43,22 +45,28 @@ class WcPayWelcomePage {
 	 * WCPayWelcomePage constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', [ $this, 'register_payments_welcome_page' ] );
-		add_filter( 'woocommerce_admin_shared_settings', [ $this, 'shared_settings' ] );
-		add_filter( 'woocommerce_admin_allowed_promo_notes', [ $this, 'allowed_promo_notes' ] );
-		add_filter( 'woocommerce_admin_woopayments_onboarding_task_badge', [ $this, 'onboarding_task_badge' ] );
+		add_action( 'admin_menu', array( $this, 'register_menu_and_page' ) );
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'shared_settings' ) );
+		add_filter( 'woocommerce_admin_allowed_promo_notes', array( $this, 'allowed_promo_notes' ) );
+		add_filter( 'woocommerce_admin_woopayments_onboarding_task_badge', array( $this, 'onboarding_task_badge' ) );
+		add_filter( 'woocommerce_admin_woopayments_onboarding_task_additional_data', array( $this, 'onboarding_task_additional_data' ) );
 	}
 
 	/**
-	 * Whether the WooPayments welcome page should be visible.
+	 * Whether the WooPayments incentive should be visible.
 	 *
 	 * @param bool $skip_wcpay_active Whether to skip the check for the WooPayments plugin being active.
 	 *
 	 * @return boolean
 	 */
-	public function must_be_visible( $skip_wcpay_active = false ): bool {
+	public function is_incentive_visible( bool $skip_wcpay_active = false ): bool {
 		// The WooPayments plugin must not be active.
 		if ( ! $skip_wcpay_active && $this->is_wcpay_active() ) {
+			return false;
+		}
+
+		// The current WP user must have the capabilities required to set up WooPayments.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return false;
 		}
 
@@ -94,61 +102,89 @@ class WcPayWelcomePage {
 	/**
 	 * Registers the WooPayments welcome page.
 	 */
-	public function register_payments_welcome_page() {
+	public function register_menu_and_page() {
 		global $menu;
 
-		if ( ! $this->must_be_visible() ) {
+		// The WooPayments plugin must not be active.
+		if ( $this->is_wcpay_active() ) {
 			return;
 		}
 
-		$menu_icon = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=';
+		$menu_title = esc_html__( 'Payments', 'woocommerce' );
+		$menu_icon  = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=';
 
-		$menu_data = [
-			'id'       => 'wc-calypso-bridge-payments-welcome-page',
-			'title'    => esc_html__( 'Payments', 'woocommerce' ),
-			'path'     => '/wc-pay-welcome-page',
-			'position' => '56',
-			'nav_args' => [
-				'title'        => esc_html__( 'WooPayments', 'woocommerce' ),
-				'is_category'  => false,
-				'menuId'       => 'plugins',
-				'is_top_level' => true,
-			],
-			'icon'     => $menu_icon,
-		];
+		// If an incentive is visible, we register the WooPayments welcome/incentives page.
+		// Otherwise, we register a menu item that links to the Payments task page.
+		if ( $this->is_incentive_visible() ) {
+			$page_id      = 'wc-calypso-bridge-payments-welcome-page';
+			$page_options = array(
+				'id'         => $page_id,
+				'title'      => $menu_title,
+				'capability' => 'manage_woocommerce',
+				'path'       => '/wc-pay-welcome-page',
+				'position'   => '56',
+				'nav_args'   => array(
+					'title'        => 'WooPayments', // Do not translate the brand name.
+					'is_category'  => false,
+					'menuId'       => 'plugins',
+					'is_top_level' => true,
+				),
+				'icon'       => $menu_icon,
+			);
 
-		wc_admin_register_page( $menu_data );
+			wc_admin_register_page( $page_options );
 
-		// Registering a top level menu via wc_admin_register_page doesn't work when the new
-		// nav is enabled. The new nav disabled everything, except the 'WooCommerce' menu.
-		// We need to register this menu via add_menu_page so that it doesn't become a child of
-		// WooCommerce menu.
-		if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
-			$menu_with_nav_data = [
-				esc_html__( 'Payments', 'woocommerce' ),
-				esc_html__( 'Payments', 'woocommerce' ),
-				'view_woocommerce_reports',
-				'admin.php?page=wc-admin&path=/wc-pay-welcome-page',
+			$menu_path = PageController::get_instance()->get_path_from_id( $page_id );
+
+			// Registering a top level menu via wc_admin_register_page doesn't work when the new
+			// nav is enabled. The new nav disabled everything, except the 'WooCommerce' menu.
+			// We need to register this menu via add_menu_page so that it doesn't become a child of
+			// WooCommerce menu.
+			if ( get_option( 'woocommerce_navigation_enabled', 'no' ) === 'yes' ) {
+				$menu_path          = 'admin.php?page=wc-admin&path=/wc-pay-welcome-page';
+				$menu_with_nav_data = array(
+					$menu_title,
+					$menu_title,
+					'manage_woocommerce',
+					$menu_path,
+					null,
+					$menu_icon,
+					56,
+				);
+
+				call_user_func_array( 'add_menu_page', $menu_with_nav_data );
+			}
+		} else {
+			// Determine the path to the active Payments task page.
+			$menu_path = 'admin.php?page=wc-admin&task=' . $this->get_active_payments_task_slug();
+
+			add_menu_page(
+				$menu_title,
+				$menu_title,
+				'manage_woocommerce',
+				$menu_path,
 				null,
 				$menu_icon,
 				56,
-			];
-
-			call_user_func_array( 'add_menu_page', $menu_with_nav_data );
+			);
 		}
 
-		// Add badge.
-		$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
-		foreach ( $menu as $index => $menu_item ) {
-			// Only add the badge markup if not already present and the menu item is the WooPayments menu item.
-			if ( false === strpos( $menu_item[0], $badge )
-				&& ( 'wc-admin&path=/wc-pay-welcome-page' === $menu_item[2]
-					|| 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' === $menu_item[2] )
-			) {
-				$menu[ $index ][0] .= $badge; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// Maybe add a badge to the menu.
+		// If the main Payments task is not complete, we add a badge to the Payments menu item.
+		// We use the complete logic of the main Payments task because it is the most general one.
+		if ( ! empty( $this->get_payments_task() ) && ! $this->is_payments_task_complete() ) {
+			$badge = ' <span class="wcpay-menu-badge awaiting-mod count-1"><span class="plugin-count">1</span></span>';
+			foreach ( $menu as $index => $menu_item ) {
+				// Only add the badge markup if not already present and the menu item is the Payments menu item.
+				if ( 0 === strpos( $menu_item[0], $menu_title )
+					&& $menu_path === $menu_item[2]
+					&& false === strpos( $menu_item[0], $badge ) ) {
 
-				// One menu item with a badge is more than enough.
-				break;
+					$menu[ $index ][0] .= $badge; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+					// One menu item with a badge is more than enough.
+					break;
+				}
 			}
 		}
 	}
@@ -166,7 +202,7 @@ class WcPayWelcomePage {
 		}
 
 		// Return early if the incentive must not be visible.
-		if ( ! $this->must_be_visible() ) {
+		if ( ! $this->is_incentive_visible() ) {
 			return $settings;
 		}
 
@@ -181,11 +217,11 @@ class WcPayWelcomePage {
 	 * @param array $promo_notes Allowed promo notes.
 	 * @return array
 	 */
-	public function allowed_promo_notes( $promo_notes = [] ): array {
+	public function allowed_promo_notes( $promo_notes = array() ): array {
 		// Note: We need to disregard if WooPayments is active when adding the promo note to the list of
 		// allowed promo notes. The AJAX call that adds the promo note happens after WooPayments is installed and activated.
 		// Return early if the incentive page must not be visible, without checking if WooPayments is active.
-		if ( ! $this->must_be_visible( true ) ) {
+		if ( ! $this->is_incentive_visible( true ) ) {
 			return $promo_notes;
 		}
 
@@ -204,11 +240,35 @@ class WcPayWelcomePage {
 	 */
 	public function onboarding_task_badge( string $badge ): string {
 		// Return early if the incentive must not be visible.
-		if ( ! $this->must_be_visible() ) {
+		if ( ! $this->is_incentive_visible() ) {
 			return $badge;
 		}
 
 		return $this->get_incentive()['task_badge'] ?? $badge;
+	}
+
+	/**
+	 * Filter the onboarding task additional data to add the WooPayments incentive data to it.
+	 *
+	 * @param ?array $additional_data The current task additional data.
+	 *
+	 * @return ?array The filtered task additional data.
+	 */
+	public function onboarding_task_additional_data( ?array $additional_data ): ?array {
+		// Return early if the incentive must not be visible.
+		if ( ! $this->is_incentive_visible() ) {
+			return $additional_data;
+		}
+
+		// If we have an incentive, add the incentive ID to the additional data.
+		if ( $this->get_incentive()['id'] ) {
+			if ( empty( $additional_data ) ) {
+				$additional_data = array();
+			}
+			$additional_data['wooPaymentsIncentiveId'] = $this->get_incentive()['id'];
+		}
+
+		return $additional_data;
 	}
 
 	/**
@@ -241,11 +301,11 @@ class WcPayWelcomePage {
 		// If there is at least one order processed with WooPayments, we consider the store to have WooPayments.
 		if ( false === $had_wcpay && ! empty(
 			wc_get_orders(
-				[
+				array(
 					'payment_method' => 'woocommerce_payments',
 					'return'         => 'ids',
 					'limit'          => 1,
-				]
+				)
 			)
 		) ) {
 			$had_wcpay = true;
@@ -377,13 +437,13 @@ class WcPayWelcomePage {
 		// it means there was an API error previously and we should not retry just yet.
 		if ( is_wp_error( $cache ) ) {
 			// Initialize the in-memory cache and return it.
-			$this->incentive = [];
+			$this->incentive = array();
 
 			return $this->incentive;
 		}
 
 		// Gather the store context data.
-		$store_context = [
+		$store_context = array(
 			// Store ISO-2 country code, e.g. `US`.
 			'country'      => WC()->countries->get_base_country(),
 			// Store locale, e.g. `en_US`.
@@ -394,7 +454,7 @@ class WcPayWelcomePage {
 			// Whether the store has at least one payment gateway enabled.
 			'has_payments' => ! empty( WC()->payment_gateways()->get_available_payment_gateways() ),
 			'has_wcpay'    => $this->has_wcpay(),
-		];
+		);
 
 		// Fingerprint the store context through a hash of certain entries.
 		$store_context_hash = $this->generate_context_hash( $store_context );
@@ -422,9 +482,9 @@ class WcPayWelcomePage {
 
 		$response = wp_remote_get(
 			$url,
-			[
+			array(
 				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-			]
+			)
 		);
 
 		// Return early if there is an error, waiting 6 hours before the next attempt.
@@ -445,11 +505,11 @@ class WcPayWelcomePage {
 
 		$cache_for = wp_remote_retrieve_header( $response, 'cache-for' );
 		// Initialize the in-memory cache.
-		$this->incentive = [];
+		$this->incentive = array();
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			// Decode the results, falling back to an empty array.
-			$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? [];
+			$results = json_decode( wp_remote_retrieve_body( $response ), true ) ?? array();
 
 			// Find all `welcome_page` incentives.
 			$incentives = array_filter(
@@ -461,7 +521,7 @@ class WcPayWelcomePage {
 
 			// Use the first found matching incentive or empty array if none was found.
 			// Store incentive in the in-memory cache.
-			$this->incentive = empty( $incentives ) ? [] : reset( $incentives );
+			$this->incentive = empty( $incentives ) ? array() : reset( $incentives );
 		}
 
 		// Skip transient cache if `cache-for` header equals zero.
@@ -478,11 +538,11 @@ class WcPayWelcomePage {
 		// or 1 day in seconds. Also attach a timestamp to the transient data so we know when we last fetched.
 		set_transient(
 			self::CACHE_TRANSIENT_NAME,
-			[
+			array(
 				'incentive'    => $this->incentive,
 				'context_hash' => $store_context_hash,
 				'timestamp'    => time(),
-			],
+			),
 			! empty( $cache_for ) ? (int) $cache_for : DAY_IN_SECONDS
 		);
 
@@ -502,14 +562,76 @@ class WcPayWelcomePage {
 		// Entries like `active_for` have no place in the hash generation since they change automatically.
 		return md5(
 			wp_json_encode(
-				[
+				array(
 					'country'      => $context['country'] ?? '',
 					'locale'       => $context['locale'] ?? '',
 					'has_orders'   => $context['has_orders'] ?? false,
 					'has_payments' => $context['has_payments'] ?? false,
 					'has_wcpay'    => $context['has_wcpay'] ?? false,
-				]
+				)
 			)
 		);
+	}
+
+	/**
+	 * Get the slug of the active payments task.
+	 *
+	 * It can be either 'woocommerce-payments' or 'payments'.
+	 *
+	 * @return string Either 'woocommerce-payments' or 'payments'. Empty string if no task is found.
+	 */
+	private function get_active_payments_task_slug(): string {
+		$setup_task_list    = TaskLists::get_list( 'setup' );
+		$extended_task_list = TaskLists::get_list( 'extended' );
+		if ( empty( $setup_task_list ) && empty( $extended_task_list ) ) {
+			return '';
+		}
+
+		$payments_task = $setup_task_list->get_task( 'payments' );
+		if ( ! empty( $payments_task ) && $payments_task->can_view() ) {
+			return 'payments';
+		}
+
+		$payments_task = $extended_task_list->get_task( 'payments' );
+		if ( ! empty( $payments_task ) && $payments_task->can_view() ) {
+			return 'payments';
+		}
+
+		$woopayments_task = $setup_task_list->get_task( 'woocommerce-payments' );
+		if ( ! empty( $woopayments_task ) && $woopayments_task->can_view() ) {
+			return 'woocommerce-payments';
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the WooCommerce setup task list Payments task instance.
+	 *
+	 * @return Task|null The Payments task instance. null if the task is not found.
+	 */
+	private function get_payments_task(): ?Task {
+		$task_list = TaskLists::get_list( 'setup' );
+		if ( empty( $task_list ) ) {
+			return null;
+		}
+
+		$payments_task = $task_list->get_task( 'payments' );
+		if ( empty( $payments_task ) ) {
+			return null;
+		}
+
+		return $payments_task;
+	}
+
+	/**
+	 * Determine if the WooCommerce setup task list Payments task is complete.
+	 *
+	 * @return bool True if the Payments task is complete, false otherwise.
+	 */
+	private function is_payments_task_complete(): bool {
+		$payments_task = $this->get_payments_task();
+
+		return ! empty( $payments_task ) && $payments_task->is_complete();
 	}
 }

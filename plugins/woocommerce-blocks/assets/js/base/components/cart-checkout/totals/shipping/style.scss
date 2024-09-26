@@ -39,6 +39,7 @@
 		padding: 0;
 		text-decoration: underline;
 		cursor: pointer;
+		text-align: left;
 	}
 	.wc-block-components-totals-shipping__change-address-button {
 		@include link-button();
