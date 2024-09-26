@@ -3,11 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import {
-	createInterpolateElement,
-	useContext,
-	useEffect,
-} from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 
 /**
