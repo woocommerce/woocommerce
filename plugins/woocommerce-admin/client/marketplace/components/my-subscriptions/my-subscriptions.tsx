@@ -16,10 +16,7 @@ import {
 	AvailableSubscriptionsTable,
 	InstalledSubscriptionsTable,
 } from './table/table';
-import {
-	availableSubscriptionRow,
-	installedSubscriptionRow,
-} from './table/table-rows';
+import { subscriptionRow } from './table/table-rows';
 import { Subscription } from './types';
 import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
@@ -57,7 +54,8 @@ export default function MySubscriptions(): JSX.Element {
 		( subscription: Subscription ) =>
 			! subscription.subscription_installed &&
 			wccomSettings?.wooUpdateManagerPluginSlug !==
-				subscription.product_slug
+				subscription.product_slug &&
+			! subscription.maxed // no more connections allowed for the subscription so it's no longer "available to use"
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
@@ -107,7 +105,7 @@ export default function MySubscriptions(): JSX.Element {
 					<InstalledSubscriptionsTable
 						isLoading={ isLoading }
 						rows={ subscriptionsInstalled.map( ( item ) => {
-							return installedSubscriptionRow( item );
+							return subscriptionRow( item, 'installed' );
 						} ) }
 					/>
 				</div>
@@ -127,7 +125,7 @@ export default function MySubscriptions(): JSX.Element {
 						<AvailableSubscriptionsTable
 							isLoading={ isLoading }
 							rows={ subscriptionsAvailable.map( ( item ) => {
-								return availableSubscriptionRow( item );
+								return subscriptionRow( item, 'available' );
 							} ) }
 						/>
 					</div>
