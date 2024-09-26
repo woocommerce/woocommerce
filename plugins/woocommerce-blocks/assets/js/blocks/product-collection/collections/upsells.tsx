@@ -13,7 +13,7 @@ import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.UPSELLS,
-	title: __( 'Upsells', 'woocommerce' ),
+	title: __( 'Upsells - random change', 'woocommerce' ),
 	icon: <Icon icon={ trendingUp } />,
 	description: __(
 		'Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.',
