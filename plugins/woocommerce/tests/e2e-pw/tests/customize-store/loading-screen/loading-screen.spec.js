@@ -54,7 +54,7 @@ test.describe( 'Assembler - Loading Page', { tag: '@gutenberg' }, () => {
 				'no'
 			);
 
-			await activateTheme( 'twentynineteen' );
+			await activateTheme( baseURL, 'twentynineteen' );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}

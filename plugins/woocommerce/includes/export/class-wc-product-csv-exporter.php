@@ -110,6 +110,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				'id'                 => __( 'ID', 'woocommerce' ),
 				'type'               => __( 'Type', 'woocommerce' ),
 				'sku'                => __( 'SKU', 'woocommerce' ),
+				'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
 				'name'               => __( 'Name', 'woocommerce' ),
 				'published'          => __( 'Published', 'woocommerce' ),
 				'featured'           => __( 'Is featured?', 'woocommerce' ),
