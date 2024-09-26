@@ -28,7 +28,7 @@ const debounceUpdate = debounce(
 		if ( 'min_price' in price ) {
 			if (
 				Number( price.min_price ) >= context.minRange &&
-				Number( price.minRange ) <= context.maxRange
+				Number( price.min_price ) <= context.maxRange
 			) {
 				validatedPrices.min_price = price.min_price;
 			} else {
@@ -39,7 +39,7 @@ const debounceUpdate = debounce(
 		if ( 'max_price' in price ) {
 			if (
 				Number( price.max_price ) >= context.minRange &&
-				Number( price.maxRange ) <= context.maxRange
+				Number( price.max_price ) <= context.maxRange
 			) {
 				validatedPrices.max_price = price.max_price;
 			} else {
