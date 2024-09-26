@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
@@ -189,6 +191,21 @@ class ProductButton extends AbstractBlock {
 				data-wc-layout-init="callbacks.syncTemporaryNumberOfItemsOnLoad"
 			';
 
+			$wrapper_attributes = get_block_wrapper_attributes(
+				array(
+					'class' => implode(
+						' ',
+						array_filter(
+							[
+								'wp-block-button wc-block-components-product-button',
+								esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
+								esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
+							]
+						)
+					),
+				)
+			);
+
 			/**
 			 * Filters the add to cart button class.
 			 *
@@ -199,7 +216,7 @@ class ProductButton extends AbstractBlock {
 			return apply_filters(
 				'woocommerce_loop_add_to_cart_link',
 				strtr(
-					'<div class="wp-block-button wc-block-components-product-button {classes} {custom_classes}"
+					'<div {wrapper_attributes}
 						{div_directives}
 					>
 						<{html_element}
@@ -214,8 +231,7 @@ class ProductButton extends AbstractBlock {
 						{view_cart_html}
 					</div>',
 					array(
-						'{classes}'                => esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-						'{custom_classes}'         => esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
+						'{wrapper_attributes}'     => $wrapper_attributes,
 						'{html_element}'           => $html_element,
 						'{add_to_cart_url}'        => esc_url( $product->add_to_cart_url() ),
 						'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive',

@@ -521,9 +521,9 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			const locationRequestPromise = page.waitForRequest( filterRequest );
 			await pageObject.chooseCollectionInTemplate( 'featured' );
-			const locationRequest = await locationReuqestPromise;
+			const locationRequest = await locationRequestPromise;
 			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
 				locationRequest,
 				'archive'
@@ -550,9 +550,9 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			const locationRequestPromise = page.waitForRequest( filterRequest );
 			await pageObject.chooseCollectionInTemplate( 'featured' );
-			const locationRequest = await locationReuqestPromise;
+			const locationRequest = await locationRequestPromise;
 			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
 				locationRequest,
 				'archive'
@@ -575,9 +575,9 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			const locationRequestPromise = page.waitForRequest( filterRequest );
 			await pageObject.chooseCollectionInPost( 'featured' );
-			const locationRequest = await locationReuqestPromise;
+			const locationRequest = await locationRequestPromise;
 			const { type, sourceData } =
 				getLocationDetailsFromRequest( locationRequest );
 
@@ -594,10 +594,10 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollectionInSingleProductBlock();
-			const locationReuqestPromise =
+			const locationRequestPromise =
 				page.waitForRequest( filterProductRequest );
 			await pageObject.chooseCollectionInPost( 'featured' );
-			const locationRequest = await locationReuqestPromise;
+			const locationRequest = await locationRequestPromise;
 			const { type, productId } = getLocationDetailsFromRequest(
 				locationRequest,
 				'product'
