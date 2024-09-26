@@ -11,6 +11,7 @@ import './style.scss';
 import RecommendedExtensions from './recommended-extensions';
 import KnowledgeBase from './knowledge-base';
 import { getAdminSetting } from '~/utils/admin-settings';
+import Promotions from '~/marketplace/components/promotions/promotions';
 import '../data';
 
 const CouponsOverview = () => {
@@ -23,6 +24,7 @@ const CouponsOverview = () => {
 
 	return (
 		<div className="woocommerce-marketing-coupons">
+			<Promotions promoCardOnly={ true } />
 			{ showExtensions && (
 				<RecommendedExtensions
 					title={ __(

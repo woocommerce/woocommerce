@@ -1,0 +1,42 @@
+.promo-card-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+}
+
+.promo-card {
+	background-color: #fff;
+	border: 1px solid #ccc;
+	padding: 20px;
+	border-radius: 5px;
+	width: 300px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.promo-title {
+	font-size: 1.5em;
+	margin-bottom: 10px;
+}
+
+.promo-text {
+	font-size: 1em;
+	color: #555;
+}
+
+.promo-links {
+	margin-top: 15px;
+}
+
+.promo-cta {
+	display: inline-block;
+	margin-right: 10px;
+	padding: 10px 15px;
+	background-color: #0073aa;
+	color: #fff;
+	text-decoration: none;
+	border-radius: 3px;
+}
+
+.promo-cta:hover {
+	background-color: #005a8a;
+}
