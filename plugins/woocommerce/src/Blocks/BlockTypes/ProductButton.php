@@ -89,9 +89,9 @@ class ProductButton extends AbstractBlock {
 		);
 
 		if ( $product ) {
-			$number_of_items_in_cart      = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
-			$more_than_one_item           = $number_of_items_in_cart > 0;
-			$initial_product_text         = $more_than_one_item ? sprintf(
+			$number_of_items_in_cart = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
+			$more_than_one_item      = $number_of_items_in_cart > 0;
+			$initial_product_text    = $more_than_one_item ? sprintf(
 			/* translators: %s: product number. */
 				__( '%s in cart', 'woocommerce' ),
 				$number_of_items_in_cart
