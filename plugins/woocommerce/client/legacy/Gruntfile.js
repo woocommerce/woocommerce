@@ -1,6 +1,6 @@
 module.exports = function ( grunt ) {
 	'use strict';
-	var sass = require( 'sass' );
+	const sass = require( 'sass' );
 
 	grunt.initConfig( {
 		// Setting folder templates.
