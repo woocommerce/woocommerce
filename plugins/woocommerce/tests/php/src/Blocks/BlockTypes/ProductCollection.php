@@ -1228,14 +1228,12 @@ class ProductCollection extends \WP_UnitTestCase {
 		$parsed_block                              = $this->get_base_parsed_block();
 		$parsed_block['attrs']['query']['orderBy'] = 'price';
 
-		// Test ascending order
 		$parsed_block['attrs']['query']['order'] = 'asc';
 		$merged_query                            = $this->initialize_merged_query( $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
 
 		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price ASC', $query->request );
 
-		// Test descending order
 		$parsed_block['attrs']['query']['order'] = 'desc';
 		$merged_query                            = $this->initialize_merged_query( $parsed_block );
 		$query                                   = new WP_Query( $merged_query );
