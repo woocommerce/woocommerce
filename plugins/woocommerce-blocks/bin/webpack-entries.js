@@ -221,7 +221,10 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-reviews/index.tsx',
 		'product-details':
 			'./assets/js/atomic/blocks/product-elements/product-details/index.tsx',
-		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}' ),
+		...getBlockEntries( '{index,block,frontend}.{t,j}s{,x}', {
+			...blocks,
+			...cartAndCheckoutBlocks,
+		} ),
 
 		// Interactivity component styling
 		'wc-interactivity-checkbox-list':
