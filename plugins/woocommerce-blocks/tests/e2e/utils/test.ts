@@ -133,10 +133,11 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
+		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
-		console.log( 'Disposed request' );
+
+		// Reset the database to the initial state via snapshot import.
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
-		console.log( 'Cleared db' );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
@@ -162,7 +163,7 @@ const test = base.extend<
 				baseURL: workerInfo.project.use.baseURL as string,
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
-			console.log( 'RequestUtils setup' );
+
 			await use( requestUtils as RequestUtils );
 		},
 		{ scope: 'worker', auto: true },
