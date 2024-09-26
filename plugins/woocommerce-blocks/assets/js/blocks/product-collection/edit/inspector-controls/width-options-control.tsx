@@ -33,12 +33,15 @@ const getHelpText = ( type: WidthOptions ) => {
 	return __( 'Specify a fixed width.', 'woocommerce' );
 };
 
-const WidthOptionsControl = ( props: DimensionsControlProps ) => {
-	const { widthType, fixedWidth = '' } = props.dimensions;
+const WidthOptionsControl = ( {
+	dimensions,
+	setAttributes,
+}: DimensionsControlProps ) => {
+	const { widthType, fixedWidth = '' } = dimensions;
 	const setDimensions = ( type: WidthOptions ) => {
-		props.setAttributes( {
+		setAttributes( {
 			dimensions: {
-				...props.dimensions,
+				...dimensions,
 				widthType: type,
 			},
 		} );
@@ -67,10 +70,10 @@ const WidthOptionsControl = ( props: DimensionsControlProps ) => {
 			</ToggleGroupControl>
 			{ widthType === WidthOptions.FIXED && (
 				<UnitControl
-					onChange={ ( value: number ) => {
-						props.setAttributes( {
+					onChange={ ( value: string ) => {
+						setAttributes( {
 							dimensions: {
-								...props.dimensions,
+								...dimensions,
 								fixedWidth: value,
 							},
 						} );
