@@ -593,6 +593,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'format'        => 'promo-card',
 					'pages'         => [
 						[
+							'path'     => '',
 							'pathname' => '/wp-admin/edit.php?post_type=shop_coupon',
 						],
 					],
@@ -638,6 +639,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'format'        => 'promo-card',
 					'pages'         => [
 						[ 
+							'path'     => '',
 							'pathname' => '/wp-admin/admin.php?page=wc-admin',
 						]
 					],
