@@ -132,8 +132,11 @@ const test = base.extend<
 		await page.evaluate( () => {
 			window.localStorage.clear();
 		} );
-		console.log( 'Cleared db' );
+
+		await page.request.dispose();
+		console.log( 'Disposed request' );
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
+		console.log( 'Cleared db' );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
