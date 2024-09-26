@@ -132,7 +132,7 @@ test.describe(
 
 		test(
 			'allows customer to calculate Free Shipping in cart block if in Netherlands',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page, context, cartBlockPage } ) => {
 				await context.clearCookies();
 
@@ -173,7 +173,7 @@ test.describe(
 
 		test(
 			'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page, context, cartBlockPage } ) => {
 				await context.clearCookies();
 
@@ -226,7 +226,7 @@ test.describe(
 
 		test(
 			'should show correct total cart block price after updating quantity',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page, context, cartBlockPage } ) => {
 				await context.clearCookies();
 
@@ -266,7 +266,7 @@ test.describe(
 
 		test(
 			'should show correct total cart block price with 2 different products and flat rate/local pickup',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page, context, cartBlockPage } ) => {
 				await context.clearCookies();
 
