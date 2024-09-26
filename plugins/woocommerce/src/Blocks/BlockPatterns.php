@@ -99,6 +99,7 @@ class BlockPatterns {
 			return;
 		}
 
+		$s = microtime(true);
 		$default_headers = array(
 			'title'         => 'Title',
 			'slug'          => 'Slug',
@@ -125,6 +126,7 @@ class BlockPatterns {
 
 			$this->pattern_registry->register_block_pattern( $file, $pattern_data, $this->dictionary );
 		}
+		error_log( 'register_block_patterns elapsed time before: ' . microtime(true) - $s );
 	}
 
 	/**
