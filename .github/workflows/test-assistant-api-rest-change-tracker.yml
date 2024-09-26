@@ -43,10 +43,29 @@ jobs:
 
       - name: Determine Milestone Date
         id: get_milestone_date
-        working-directory: .github/workflows/scripts
-        run: bash determine_milestone_date.sh
-        env:
-          GITHUB_EVENT_PATH_PULL_REQUEST_MILESTONE_TITLE: ${{ github.event.pull_request.milestone.title }}
+        run: |
+          #!/bin/bash
+          
+          MILESTONE_TITLE="${{ github.event.pull_request.milestone.title }}"
+          MILESTONE_DATE="Undefined"
+          
+          # Mapping of milestone titles to release dates
+          declare -A MILESTONE_DATES
+          MILESTONE_DATES=(
+            ["9.4.0"]="2024-10-21"
+            ["9.5.0"]="2024-11-25"
+            ["9.6.0"]="2024-12-30"
+            ["9.7.0"]="2025-02-03"  
+            ["9.8.0"]="2025-03-10" 
+          )
+          
+          # Check if the milestone title exists in our predefined list and get the date
+          if [[ -v "MILESTONE_DATES[${MILESTONE_TITLE}]" ]]; then
+            MILESTONE_DATE=${MILESTONE_DATES[${MILESTONE_TITLE}]}
+          fi
+          
+          # Export for later steps
+          echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
 
       # Notify Slack Step
       - name: Notify Slack

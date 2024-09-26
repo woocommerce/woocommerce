@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix an issue where virtual products could not be purchased when using the Additional Fields API
