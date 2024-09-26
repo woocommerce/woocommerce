@@ -119,10 +119,12 @@ const ProductCollectionContent = ( {
 	/**
 	 * Set max-width if fixed width is set.
 	 */
-	const { widthType, fixedWidth } = attributes?.dimensions;
-	if ( WidthOptions.FIXED === widthType && fixedWidth ) {
+	if (
+		WidthOptions.FIXED === attributes?.dimensions?.widthType &&
+		attributes?.dimensions?.fixedWidth
+	) {
 		style = {
-			maxWidth: fixedWidth,
+			maxWidth: attributes.dimensions.fixedWidth,
 			margin: '0 auto',
 		};
 	}
