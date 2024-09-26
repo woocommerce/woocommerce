@@ -89,21 +89,23 @@ class ProductButton extends AbstractBlock {
 		);
 
 		if ( $product ) {
-			$number_of_items_in_cart = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
-			$more_than_one_item      = $number_of_items_in_cart > 0;
-			$initial_product_text    = $more_than_one_item ? sprintf(
+			$number_of_items_in_cart      = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
+			$more_than_one_item           = $number_of_items_in_cart > 0;
+			$initial_product_text         = $more_than_one_item ? sprintf(
 			/* translators: %s: product number. */
 				__( '%s in cart', 'woocommerce' ),
 				$number_of_items_in_cart
 			) : $product->add_to_cart_text();
-			$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
-			$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
-			$is_ajax_button           = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock();
-			$html_element             = $is_ajax_button ? 'button' : 'a';
-			$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$custom_width_classes     = isset( $attributes['width'] ) ? 'has-custom-width wp-block-button__width-' . $attributes['width'] : '';
-			$custom_align_classes     = isset( $attributes['textAlign'] ) ? 'align-' . $attributes['textAlign'] : '';
-			$html_classes             = implode(
+			$cart_redirect_after_add       = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
+			$ajax_add_to_cart_enabled      = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
+			$is_ajax_button                = $ajax_add_to_cart_enabled && ! $cart_redirect_after_add && $product->supports( 'ajax_add_to_cart' ) && $product->is_purchasable() && $product->is_in_stock();
+			$html_element                  = $is_ajax_button ? 'button' : 'a';
+			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+			$classname                     = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
+			$custom_width_classes          = isset( $attributes['width'] ) ? 'has-custom-width wp-block-button__width-' . $attributes['width'] : '';
+			$custom_align_classes          = isset( $attributes['textAlign'] ) ? 'align-' . $attributes['textAlign'] : '';
+			$html_classes                  = implode(
 				' ',
 				array_filter(
 					array(
