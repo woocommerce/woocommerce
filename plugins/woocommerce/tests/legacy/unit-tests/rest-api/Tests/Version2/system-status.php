@@ -190,7 +190,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$active_theme = wp_get_theme();
 		$theme        = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['theme'];
 
-		$this->assertEquals( 13, count( $theme ) );
+		$this->assertEquals( 14, count( $theme ) );
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$this->assertEquals( $active_theme->Name, $theme['name'] );
 	}
@@ -285,7 +285,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$matching_tool_data = current(
 			array_filter(
 				$data,
-				function( $tool ) {
+				function ( $tool ) {
 					return 'regenerate_thumbnails' === $tool['id'];
 				}
 			)

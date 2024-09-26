@@ -5,9 +5,7 @@
 	"icon": "miniCartAlt",
 	"description": "Display a button for shoppers to quickly view their cart.",
 	"category": "woocommerce",
-	"keywords": [
-		"WooCommerce"
-	],
+	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"supports": {
 		"html": false,
@@ -34,6 +32,10 @@
 		"addToCartBehaviour": {
 			"type": "string",
 			"default": "none"
+		},
+		"onCartClickBehaviour": {
+			"type": "string",
+			"default": "open_drawer"
 		},
 		"hasHiddenPrice": {
 			"type": "boolean",
