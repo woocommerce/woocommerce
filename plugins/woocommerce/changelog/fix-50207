@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Bust WC object cache on direct post meta update to prevent stale cache read.

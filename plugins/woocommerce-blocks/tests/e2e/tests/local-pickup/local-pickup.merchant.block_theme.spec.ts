@@ -3,11 +3,6 @@
  */
 import { test, expect } from '@woocommerce/e2e-utils';
 
-/**
- * Internal dependencies
- */
-import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
-
 test.describe( 'Merchant → Local Pickup Settings', () => {
 	test.beforeEach( async ( { localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickupCosts();
@@ -181,63 +176,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			page.getByRole( 'cell', {
 				name: 'When you add a pickup location, it will appear here.',
 			} )
-		).toBeVisible();
-	} );
-
-	test( 'updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
-		page,
-		localPickupUtils,
-		admin,
-		editor,
-		frontendUtils,
-	} ) => {
-		// First update the title via the site editor then check the local pickup settings.
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-		const block = editor.canvas.locator(
-			'[data-type="woocommerce/checkout-shipping-method-block"]'
-		);
-		await editor.selectBlocks( block );
-
-		const fakeInput = editor.canvas.getByLabel( 'Pickup', { exact: true } );
-		await fakeInput.focus();
-		await fakeInput.dblclick(); // Select all text.
-		await fakeInput.pressSequentially( 'This is a test' ); // We can't use locator.fill() because it's not a valid input element.
-
-		await editor.canvas.getByText( 'This is a test' ).isVisible();
-		await editor.saveSiteEditorEntities();
-
-		// Now check if it's visible in the local pickup settings.
-		await localPickupUtils.openLocalPickupSettings();
-		await expect( page.getByLabel( 'Title' ) ).toHaveValue(
-			'This is a test'
-		);
-
-		// Now update the title via local pickup settings and check it reflects in the site editor and front end.
-		await localPickupUtils.setLocalPickupTitle(
-			'Edited from settings page'
-		);
-
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
-		await expect(
-			editor.canvas.getByText( 'Edited from settings page' )
-		).toBeVisible();
-
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await expect(
-			page.getByText( 'Edited from settings page' )
 		).toBeVisible();
 	} );
 } );

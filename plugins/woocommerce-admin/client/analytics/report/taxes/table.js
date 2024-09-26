@@ -131,7 +131,7 @@ class TaxesReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals ) {
+	getSummary( totals, totalResults = 0 ) {
 		const {
 			tax_codes: taxesCodes = 0,
 			total_tax: totalTax = 0,
@@ -143,7 +143,16 @@ class TaxesReportTable extends Component {
 		const currency = getCurrencyConfig();
 		return [
 			{
-				label: _n( 'tax code', 'tax codes', taxesCodes, 'woocommerce' ),
+				label: _n( 'tax', 'taxes', totalResults, 'woocommerce' ),
+				value: formatValue( currency, 'number', totalResults ),
+			},
+			{
+				label: _n(
+					'distinct code',
+					'distinct codes',
+					taxesCodes,
+					'woocommerce'
+				),
 				value: formatValue( currency, 'number', taxesCodes ),
 			},
 			{

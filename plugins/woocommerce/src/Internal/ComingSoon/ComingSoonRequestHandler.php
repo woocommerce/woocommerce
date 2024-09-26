@@ -78,7 +78,12 @@ class ComingSoonRequestHandler {
 		);
 
 		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
-			include $coming_soon_template;
+			if ( ! $is_fse_theme && $is_store_coming_soon && function_exists( 'get_the_block_template_html' ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo get_the_block_template_html();
+			} else {
+				include $coming_soon_template;
+			}
 		}
 
 		if ( ! $is_fse_theme && $is_store_coming_soon ) {
