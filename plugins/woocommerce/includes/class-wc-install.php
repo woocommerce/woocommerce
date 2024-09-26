@@ -2570,9 +2570,9 @@ $hpos_table_schema;
 </ul>
 <!-- /wp:list -->
 
-<!-- wp:paragraph -->
-<h2>Refunds</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Refunds</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Once your return is received and inspected, we will send you an email to notify you that we have received your returned item. We will also notify you of the approval or rejection of your refund.</p>
@@ -2610,17 +2610,17 @@ $hpos_table_schema;
 <p>Only regular priced items may be refunded. Sale items cannot be refunded.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Exchanges</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Exchanges</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>We only replace items if they are defective or damaged. If you need to exchange it for the same item, send us an email at {email address} and send your item to: {physical address}.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Gifts</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Gifts</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>If the item was marked as a gift when purchased and shipped directly to you, you’ll receive a gift credit for the value of your return. Once the returned item is received, a gift certificate will be mailed to you.</p>
@@ -2630,9 +2630,9 @@ $hpos_table_schema;
 <p>If the item wasn’t marked as a gift when purchased, or the gift giver had the order shipped to themselves to give to you later, we will send a refund to the gift giver and they will find out about your return.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Shipping returns</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Shipping returns</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>To return your product, you should mail your product to: {physical address}.</p>
@@ -2650,9 +2650,9 @@ $hpos_table_schema;
 <p>If you are returning more expensive items, you may consider using a trackable shipping service or purchasing shipping insurance. We don’t guarantee that we will receive your returned item.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h2>Need help?</h2>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Need help?</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Contact us at {email} for questions related to refunds and returns.</p>
