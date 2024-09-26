@@ -122,15 +122,13 @@ export const Transitional = ( {
 					) }
 
 					<Button
+						href={ homeUrl }
 						className="woocommerce-customize-store__transitional-preview-button"
-						variant={
-							isEntrepreneurFlow() ? 'secondary' : 'primary'
-						}
+						variant="link"
 						onClick={ () => {
 							trackEvent(
 								'customize_your_store_transitional_preview_store_click'
 							);
-							window.open( homeUrl, '_blank' );
 						} }
 					>
 						{ __( 'View store', 'woocommerce' ) }
@@ -178,19 +176,20 @@ export const Transitional = ( {
 											'woocommerce'
 										) }
 									</p>
-									<a
+									<Button
+										variant="link"
+										href={ `${ ADMIN_URL }edit.php?post_type=product` }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_product_list_click'
 											);
 										} }
-										href={ `${ ADMIN_URL }edit.php?post_type=product` }
 									>
 										{ __(
 											'Go to Products',
 											'woocommerce'
 										) }
-									</a>
+									</Button>
 								</div>
 							</div>
 
@@ -214,19 +213,20 @@ export const Transitional = ( {
 											'woocommerce'
 										) }
 									</p>
-									<a
+									<Button
+										variant="link"
+										href={ `${ ADMIN_URL }site-editor.php` }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_editor_click'
 											);
 										} }
-										href={ `${ ADMIN_URL }site-editor.php` }
 									>
 										{ __(
 											'Go to the Editor',
 											'woocommerce'
 										) }
-									</a>
+									</Button>
 								</div>
 							</div>
 
@@ -250,7 +250,9 @@ export const Transitional = ( {
 											'woocommerce'
 										) }
 									</p>
-									<a
+									<Button
+										variant="link"
+										href={ `${ ADMIN_URL }admin.php?page=wc-admin` }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_home_click'
@@ -259,10 +261,9 @@ export const Transitional = ( {
 												type: 'GO_BACK_TO_HOME',
 											} );
 										} }
-										href={ `${ ADMIN_URL }admin.php?page=wc-admin` }
 									>
 										{ __( 'Back to Home', 'woocommerce' ) }
-									</a>
+									</Button>
 								</div>
 							</div>
 						</div>
