@@ -30,7 +30,7 @@ test.describe(
 					'woocommerce_customize_store_onboarding_tour_hidden',
 					'yes'
 				);
-				await activateTheme( 'twentytwentyfour' );
+				await activateTheme( baseURL, 'twentytwentyfour' );
 			} catch ( error ) {
 				console.log( 'Store completed option not updated' );
 			}
