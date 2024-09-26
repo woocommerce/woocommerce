@@ -340,9 +340,11 @@ add_action(
 				'methods'             => 'GET',
 				'callback'            => 'wc_cleanup_reset_site_via_api',
 				'permission_callback' => function () {
+					// phpcs:disable WordPress.Security.NonceVerification.Recommended
 					$provided_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
-					$valid_key    = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
-					return $provided_key === $valid_key;
+						$valid_key    = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
+						// phpcs:enable WordPress.Security.NonceVerification.Recommended
+						return $provided_key === $valid_key;
 				},
 			)
 		);
