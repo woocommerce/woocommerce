@@ -1019,7 +1019,7 @@ class ProductCollection extends AbstractBlock {
 			add_filter( 'posts_clauses', array( $this, 'add_price_sorting_posts_clauses' ), 10, 2 );
 			return array(
 				'isProductCollection' => true,
-				'orderby'             => 'price',
+				'orderby'             => $orderby,
 			);
 		}
 
@@ -1697,10 +1697,11 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Add the `posts_clauses` filter to the main query.
+	 * Add the `posts_clauses` filter to add price-based sorting
 	 *
-	 * @param array    $clauses The query clauses.
+	 * @param array    $clauses The list of clauses for the query.
 	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
 	 */
 	public function add_price_sorting_posts_clauses( $clauses, $query ) {
 		$query_vars                  = $query->query_vars;
@@ -1711,19 +1712,16 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$orderby = $query_vars['orderby'] ?? null;
-
 		if ( 'price' !== $orderby ) {
 			return $clauses;
 		}
 
-		$clauses['join'] = $this->append_product_sorting_table_join( $clauses['join'] );
-		$order           = $query_vars['order'] ?? 'desc';
+		$clauses['join']    = $this->append_product_sorting_table_join( $clauses['join'] );
+		$is_ascending_order = 'asc' === strtolower( $query_vars['order'] ?? 'desc' );
 
-		if ( 'asc' === strtolower( $order ) ) {
-			$clauses['orderby'] = ' wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC ';
-		} else {
-			$clauses['orderby'] = ' wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC ';
-		}
+		$clauses['orderby'] = $is_ascending_order ?
+			'wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC' :
+			'wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC';
 
 		return $clauses;
 	}
