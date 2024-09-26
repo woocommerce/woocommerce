@@ -413,7 +413,7 @@ export default function Content(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__content">
-			<Promotions />
+			<Promotions promoCardOnly={ false } />
 			<InstallNewProductModal products={ filteredProducts } />
 			{ selectedTab !== 'business-services' &&
 				selectedTab !== 'my-subscriptions' && <ConnectNotice /> }

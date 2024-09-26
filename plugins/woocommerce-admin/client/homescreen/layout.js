@@ -24,6 +24,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import ActivityHeader from '~/activity-panel/activity-header';
+import Promotions from '~/marketplace/components/promotions/promotions';
 import { ActivityPanel } from './activity-panel';
 import { Column } from './column';
 import InboxPanel from '../inbox-panel';
@@ -136,6 +137,7 @@ export const Layout = ( {
 					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
+					<Promotions promoCardOnly={ true } />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
 					{ window.wcAdminFeatures.analytics && <StatsOverview /> }

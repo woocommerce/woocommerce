@@ -25,6 +25,7 @@ import { Channels, ChannelsRef } from './Channels';
 import { InstalledExtensions } from './InstalledExtensions';
 import { DiscoverTools } from './DiscoverTools';
 import { LearnMarketing } from './LearnMarketing';
+import Promotions from '~/marketplace/components/promotions/promotions';
 import './MarketingOverviewMultichannel.scss';
 
 export const MarketingOverviewMultichannel: React.FC = () => {
@@ -85,6 +86,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
+			<Promotions promoCardOnly={ true } />
 			{ ! isIntroductionBannerDismissed && (
 				<IntroductionBanner
 					onDismissClick={ dismissIntroductionBanner }
