@@ -22,41 +22,34 @@ const debounceUpdate = debounce(
 		parentContext: ProductFiltersContext,
 		price: Record< string, string >
 	) => {
-		Object.keys( price ).forEach( ( key ) => {
-			if ( key !== 'min_price' && key !== 'max_price' ) {
-				delete price[ key ];
-				return;
-			}
-			if ( ! price[ key ] ) {
-				delete price[ key ];
-			}
-		} );
-
-		const params = parentContext.params;
+		const validatedPrices: Record< string, string > = {};
+		const params = { ...parentContext.params };
 
 		if ( 'min_price' in price ) {
 			if (
-				Number( price.min_price ) >= context.maxRange ||
-				Number( price.min_price ) <= context.minRange
+				Number( price.min_price ) >= context.minRange &&
+				Number( price.minRange ) <= context.maxRange
 			) {
+				validatedPrices.min_price = price.min_price;
+			} else {
 				delete params.min_price;
-				delete price.min_price;
 			}
 		}
 
 		if ( 'max_price' in price ) {
 			if (
-				Number( price.max_price ) <= context.minRange ||
-				Number( price.max_price ) >= context.maxRange
+				Number( price.max_price ) >= context.minRange &&
+				Number( price.maxRange ) <= context.maxRange
 			) {
+				validatedPrices.max_price = price.max_price;
+			} else {
 				delete params.max_price;
-				delete price.max_price;
 			}
 		}
 
 		parentContext.params = {
 			...params,
-			...price,
+			...validatedPrices,
 		};
 	},
 	100
