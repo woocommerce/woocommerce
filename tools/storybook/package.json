@@ -18,7 +18,8 @@
 		"watch:build:project": "pnpm --if-present '/^watch:build:project:.*$/'",
 		"watch:build:project:storybook": "wireit",
 		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce-blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
-		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook"
+		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook",
+		"preinstall": "npx only-allow pnpm"
 	},
 	"engines": {
 		"node": "^20.11.1",
@@ -68,11 +69,11 @@
 			"files": [
 				".storybook/*.{js,jsx,ts,tsx,html}",
 				"import-wp-css-storybook.sh",
-				"../../../packages/js/components/src/**/stories/*.story.@(js|tsx)",
-				"../../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)",
-				"../../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)",
-				"../../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)",
-				"../../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)"
+				"../../packages/js/components/src/**/stories/*.story.@(js|tsx)",
+				"../../packages/js/experimental/src/**/stories/*.story.@(js|tsx)",
+				"../../packages/js/onboarding/src/**/stories/*.story.@(js|tsx)",
+				"../../packages/js/product-editor/src/**/*.(stories|story).@(js|tsx)",
+				"../../plugins/woocommerce-admin/client/**/stories/*.story.@(js|tsx)"
 			],
 			"output": [
 				"storybook-static"
@@ -106,6 +107,9 @@
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
 			"files": [
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"package.json"
 			]
 		}
