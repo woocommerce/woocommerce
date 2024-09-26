@@ -190,7 +190,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param string          $context Request context.
 	 * @return array Product data to be included in the response.
 	 */
-	protected function prepare_object_for_response_core($object_data, $request, $context ): array {
+	protected function prepare_object_for_response_core( $object_data, $request, $context ): array {
 		$data = $this->get_product_data( $object_data, $context, $request );
 
 		// Add variations to variable products.

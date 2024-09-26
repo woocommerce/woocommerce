@@ -7,6 +7,11 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
  * Tests relating to the WC_Abstract_Product class.
  */
 class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
+	public function tearDown(): void {
+		parent::tearDown();
+		remove_all_filters('woocommerce_get_cogs_total_value');
+	}
+
 	/**
 	 * @var int
 	 */
@@ -220,5 +225,34 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $product->is_on_sale() );
 		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
+	}
+
+	/**
+	 * @testdox The Cost of Goods Sold value van be set and retrieved.
+	 */
+	public function test_cogs_value() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertEquals(0, $product->get_cogs_value());
+		$this->assertEquals(0, $product->get_cogs_effective_value());
+		$this->assertEquals(0, $product->get_cogs_total_value());
+
+		$product->set_cogs_value(12.34);
+
+		$this->assertEquals(12.34, $product->get_cogs_value());
+		$this->assertEquals(12.34, $product->get_cogs_effective_value());
+		$this->assertEquals(12.34, $product->get_cogs_total_value());
+	}
+
+	/**
+	 * @testdox The total Cost of Goods Sold value van be modified using the woocommerce_get_cogs_total_value filter.
+	 */
+	public function test_cogs_total_value_can_be_altered_via_filter() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value(12.34);
+
+		add_filter('woocommerce_get_cogs_total_value', fn($value, $product) => $value+$product->get_id(), 10, 2);
+
+		$this->assertEquals(12.34+$product->get_id(), $product->get_cogs_total_value());
 	}
 }

@@ -1,9 +1,22 @@
 <?php
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+
 /**
  * Class WC_Product_Data_Store_CPT_Test
  */
 class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+	use CogsAwareUnitTestSuiteTrait;
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->disable_cogs_feature();
+		remove_all_filters( 'woocommerce_load_cogs_value' );
+		remove_all_filters( 'woocommerce_save_cogs_value' );
+	}
 
 	/**
 	 * @testdox Variations should appear when searching for parent product's SKU.
@@ -176,5 +189,99 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$product = wc_get_product( $product->get_id() );
 		$this->assertEmpty( $product->get_meta( 'test', true ) );
+	}
+
+	/**
+	 * @testdox Cost of Goods Sold information is not persisted when the feature is disabled.
+	 */
+	public function test_cogs_is_not_persisted_when_feature_is_disabled() {
+		$this->disable_cogs_feature();
+
+		$product = new WC_Product();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		$this->assertEmpty( get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testdox Cost of Goods Sold information is persisted when the feature is enabled and the value is non-zero.
+	 */
+	public function test_cogs_is_persisted_when_feature_is_enabled_and_value_is_non_zero() {
+		$this->enable_cogs_feature();
+
+		$product = new WC_Product();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		$this->assertEquals( '12.34', get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testdox Cost of Goods Sold information is not persisted when the feature is enabled but the value is zero.
+	 */
+	public function test_cogs_is_not_persisted_when_feature_is_enabled_and_value_is_zero() {
+		$this->enable_cogs_feature();
+
+		$product = new WC_Product();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		$this->assertEquals( '12.34', get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+
+		$product->set_cogs_value( 0 );
+		$product->save();
+
+		$this->assertEmpty( get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testdox Loaded Cost of Goods Sold information can be modified using the woocommerce_load_cogs_value filter.
+	 */
+	public function test_cogs_loaded_value_can_be_altered_via_filter() {
+		$this->enable_cogs_feature();
+
+		$product = new WC_Product();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		add_filter( 'woocommerce_load_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_value() );
+	}
+
+	/**
+	 * @testdox Saved Cost of Goods Sold information can be modified using the woocommerce_save_cogs_value filter.
+	 */
+	public function test_cogs_saved_value_can_be_altered_via_filter() {
+		$this->enable_cogs_feature();
+
+		add_filter( 'woocommerce_save_cogs_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
+
+		$product = new WC_Product();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		$this->assertEquals( (string) ( 12.34 + $product->get_id() ), get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testdox Saving of the Cost of Goods Sold information can be suppressed using the woocommerce_save_cogs_value filter with a return value of null.
+	 */
+	public function test_cogs_saved_value_saving_can_be_suppressed_via_filter() {
+		$this->enable_cogs_feature();
+
+		$product = new WC_Product();
+		$product->set_cogs_value( 12.34 );
+		$product->save();
+
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		add_filter( 'woocommerce_save_cogs_value', fn( $value, $product ) => null, 10, 2 );
+
+		$product->set_cogs_value( 56.78 );
+		$product->save();
+
+		$this->assertEquals( '12.34', get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
 	}
 }
