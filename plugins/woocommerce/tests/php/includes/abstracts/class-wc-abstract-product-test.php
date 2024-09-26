@@ -7,9 +7,13 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
  * Tests relating to the WC_Abstract_Product class.
  */
 class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * Runs after each test.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_all_filters('woocommerce_get_cogs_total_value');
+		remove_all_filters( 'woocommerce_get_cogs_total_value' );
 	}
 
 	/**
@@ -233,15 +237,15 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	public function test_cogs_value() {
 		$product = WC_Helper_Product::create_simple_product();
 
-		$this->assertEquals(0, $product->get_cogs_value());
-		$this->assertEquals(0, $product->get_cogs_effective_value());
-		$this->assertEquals(0, $product->get_cogs_total_value());
+		$this->assertEquals( 0, $product->get_cogs_value() );
+		$this->assertEquals( 0, $product->get_cogs_effective_value() );
+		$this->assertEquals( 0, $product->get_cogs_total_value() );
 
-		$product->set_cogs_value(12.34);
+		$product->set_cogs_value( 12.34 );
 
-		$this->assertEquals(12.34, $product->get_cogs_value());
-		$this->assertEquals(12.34, $product->get_cogs_effective_value());
-		$this->assertEquals(12.34, $product->get_cogs_total_value());
+		$this->assertEquals( 12.34, $product->get_cogs_value() );
+		$this->assertEquals( 12.34, $product->get_cogs_effective_value() );
+		$this->assertEquals( 12.34, $product->get_cogs_total_value() );
 	}
 
 	/**
@@ -249,10 +253,10 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_cogs_total_value_can_be_altered_via_filter() {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_cogs_value(12.34);
+		$product->set_cogs_value( 12.34 );
 
-		add_filter('woocommerce_get_cogs_total_value', fn($value, $product) => $value+$product->get_id(), 10, 2);
+		add_filter( 'woocommerce_get_cogs_total_value', fn( $value, $product ) => $value + $product->get_id(), 10, 2 );
 
-		$this->assertEquals(12.34+$product->get_id(), $product->get_cogs_total_value());
+		$this->assertEquals( 12.34 + $product->get_id(), $product->get_cogs_total_value() );
 	}
 }
