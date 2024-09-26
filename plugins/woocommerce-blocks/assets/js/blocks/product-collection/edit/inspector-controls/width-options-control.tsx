@@ -50,7 +50,8 @@ const WidthOptionsControl = ( {
 	return (
 		<ToolsPanelItem
 			label={ __( 'Width', 'woocommerce' ) }
-			hasValue={ () => true }
+			hasValue={ () => widthType !== WidthOptions.FILL }
+			isShownByDefault
 		>
 			<ToggleGroupControl
 				label={ __( 'Width', 'woocommerce' ) }
