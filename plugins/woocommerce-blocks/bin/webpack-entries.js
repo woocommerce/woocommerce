@@ -100,6 +100,10 @@ const blocks = {
 		isExperimental: true,
 		customDir: 'product-filters/inner-blocks/stock-filter',
 	},
+	'product-filter-stock-chips': {
+		isExperimental: true,
+		customDir: 'product-filters/inner-blocks/stock-chips',
+	},
 	'product-filter-price': {
 		customDir: 'product-filters/inner-blocks/price-filter',
 		isExperimental: true,

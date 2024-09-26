@@ -1,120 +1,115 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
-import clsx from 'clsx';
-import { useBlockProps } from '@wordpress/block-editor';
-import { Disabled } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import { CheckboxList } from '@woocommerce/blocks-components';
-import Label from '@woocommerce/base-components/filter-element-label';
-import type { BlockEditProps } from '@wordpress/blocks';
-import { getSetting } from '@woocommerce/settings';
+import {
+	BlockContextProvider,
+	useBlockProps,
+	InnerBlocks,
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
+import { __ } from '@wordpress/i18n';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { BlockProps } from './types';
-import { Inspector } from './components/inspector';
-import { PreviewDropdown } from '../components/preview-dropdown';
+import { InitialDisabled } from '../../components/initial-disabled';
+import { getStockFilterData } from './utils';
 
-type CollectionData = {
-	stock_status_counts: StockStatusCount[];
-};
-
-type StockStatusCount = {
-	status: string;
-	count: number;
-};
-
-const Edit = ( props: BlockEditProps< BlockProps > ) => {
-	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-stock-filter', props.attributes.className ),
-	} );
-
-	const { showCounts, displayStyle } = props.attributes;
-	const stockStatusOptions: Record< string, string > = getSetting(
-		'stockStatusOptions',
-		{}
+const Edit = () => {
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		useBlockProps(),
+		{
+			template: [
+				[
+					'core/group',
+					{
+						layout: {
+							type: 'flex',
+							flexWrap: 'nowrap',
+						},
+						metadata: {
+							name: __( 'Header', 'woocommerce' ),
+						},
+						style: {
+							spacing: {
+								blockGap: '0',
+							},
+						},
+					},
+					[
+						[
+							'core/heading',
+							{
+								level: 3,
+								content: __( 'Status', 'woocommerce' ),
+							},
+						],
+						[
+							'woocommerce/product-filter-clear-button',
+							{
+								lock: {
+									remove: true,
+									move: false,
+								},
+							},
+						],
+					],
+				],
+				[
+					'woocommerce/product-filter-chips',
+					{
+						lock: {
+							remove: true,
+						},
+					},
+				],
+			],
+		}
 	);
 
-	const { results: filteredCounts } = useCollectionData( {
+	const { results, isLoading } = useCollectionData( {
 		queryStock: true,
 		queryState: {},
 		isEditor: true,
 	} );
 
-	const listOptions = useMemo( () => {
-		return Object.entries( stockStatusOptions )
-			.map( ( [ key, value ] ) => {
-				const count = (
-					filteredCounts as unknown as CollectionData
-				 )?.stock_status_counts?.find(
-					( item: StockStatusCount ) => item.status === key
-				)?.count;
+	const stock = getStockFilterData( results );
 
-				return {
-					value: key,
-					label: (
-						<Label
-							name={ value }
-							count={
-								showCounts && count ? Number( count ) : null
-							}
-						/>
-					),
-					count: count || 0,
-				};
-			} )
-			.filter( ( item ) => item.count > 0 );
-	}, [ stockStatusOptions, filteredCounts, showCounts ] );
+	const labels = useMemo(
+		() => ( {
+			instock: __( 'In stock', 'woocommerce' ),
+			outofstock: __( 'Out of stock', 'woocommerce' ),
+			onbackorder: __( 'On backorder', 'woocommerce' ),
+		} ),
+		[]
+	);
+
+	const data = stock.map( ( { status, count } ) => {
+		const label = labels[ status ];
+		return {
+			label: label + ` (${ count.toString() })`,
+			value: status,
+		};
+	} );
 
 	return (
-		<>
-			{
-				<div { ...blockProps }>
-					<Inspector { ...props } />
-					<Disabled>
-						<div
-							className={ clsx( `style-${ displayStyle }`, {
-								'is-loading': false,
-							} ) }
-						>
-							{ displayStyle === 'dropdown' ? (
-								<>
-									<PreviewDropdown
-										placeholder={
-											props.attributes.selectType ===
-											'single'
-												? __(
-														'Select stock status',
-														'woocommerce'
-												  )
-												: __(
-														'Select stock statuses',
-														'woocommerce'
-												  )
-										}
-									/>
-								</>
-							) : (
-								<CheckboxList
-									className={ 'wc-block-stock-filter-list' }
-									options={ listOptions }
-									checked={ [] }
-									onChange={ () => {
-										// noop
-									} }
-									isLoading={ false }
-									isDisabled={ true }
-								/>
-							) }
-						</div>
-					</Disabled>
-				</div>
-			}
-		</>
+		<div { ...innerBlocksProps }>
+			<InitialDisabled>
+				<BlockContextProvider
+					value={ {
+						filterData: {
+							items: data,
+							stock,
+							isLoading,
+						},
+					} }
+				>
+					{ children }
+				</BlockContextProvider>
+			</InitialDisabled>
+		</div>
 	);
 };
 

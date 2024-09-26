@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
-use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Package;
@@ -32,6 +30,7 @@ final class ProductFilterStockStatus extends AbstractBlock {
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
+		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
 	}
 
 	/**
@@ -115,6 +114,37 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	}
 
 	/**
+	 * Get the block context.
+	 *
+	 * @param array $stock_count The block attributes.
+	 * @return array
+	 */
+	private function create_context_by_stock_counts( $stock_count ) {
+		$stock_statuses          = wc_get_product_stock_status_options();
+		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$selected_stock_statuses = explode( ',', $query );
+
+		$stock = array_map(
+			function ( $item ) use ( $stock_statuses, $selected_stock_statuses ) {
+				$label = $stock_statuses[ $item['status'] ] . ' (' . $item['count'] . ')';
+				return array(
+					'label'    => $label,
+					'value'    => $item['status'],
+					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
+				);
+			},
+			$stock_count
+		);
+
+		return array(
+			'items'   => $stock,
+			'actions' => array(
+				'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+			),
+		);
+	}
+
+	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -123,108 +153,23 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// don't render if its admin, or ajax in progress.
-		if ( is_admin() || wp_doing_ajax() ) {
-			return '';
-		}
 
-		$stock_status_counts = $this->get_stock_status_counts( $block );
-		$wrapper_attributes  = get_block_wrapper_attributes(
-			array(
-				'data-has-filter' => empty( $stock_status_counts ) ? 'no' : 'yes',
-			)
-		);
+		$stock_counts = $this->get_stock_status_counts( $block );
+
+		$filter_context = $this->create_context_by_stock_counts( $stock_counts );
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
-			$wrapper_attributes,
-			$this->get_stock_filter_html( $stock_status_counts, $attributes ),
-		);
-	}
-
-	/**
-	 * Stock filter HTML
-	 *
-	 * @param array $stock_counts       An array of stock counts.
-	 * @param array $attributes Block attributes. Default empty array.
-	 * @return string Rendered block type output.
-	 */
-	private function get_stock_filter_html( $stock_counts, $attributes ) {
-		if ( empty( $stock_counts ) ) {
-			return '';
-		}
-
-		$display_style  = $attributes['displayStyle'] ?? 'list';
-		$show_counts    = $attributes['showCounts'] ?? false;
-		$select_type    = $attributes['selectType'] ?? 'single';
-		$stock_statuses = wc_get_product_stock_status_options();
-
-		$placeholder_text = 'single' === $select_type ? __( 'Select stock status', 'woocommerce' ) : __( 'Select stock statuses', 'woocommerce' );
-
-		// check the url params to select initial item on page load.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is not required here.
-		$query                   = isset( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ? sanitize_text_field( wp_unslash( $_GET[ self::STOCK_STATUS_QUERY_VAR ] ) ) : '';
-		$selected_stock_statuses = explode( ',', $query );
-
-		$list_items = array_values(
-			array_map(
-				function ( $item ) use ( $stock_statuses, $show_counts, $selected_stock_statuses ) {
-					$label = $show_counts ? $stock_statuses[ $item['status'] ] . ' (' . $item['count'] . ')' : $stock_statuses[ $item['status'] ];
-					return array(
-						'label'   => $label,
-						'value'   => $item['status'],
-						'checked' => in_array( $item['status'], $selected_stock_statuses, true ),
-					);
+			get_block_wrapper_attributes(),
+			array_reduce(
+				$block->parsed_block['innerBlocks'],
+				function ( $carry, $parsed_block ) use ( $filter_context ) {
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					return $carry;
 				},
-				$stock_counts
+				''
 			)
 		);
-
-		$selected_items = array_values(
-			array_filter(
-				$list_items,
-				function ( $item ) use ( $selected_stock_statuses ) {
-						return in_array( $item['value'], $selected_stock_statuses, true );
-				}
-			)
-		);
-
-		$data_directive = wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
-
-		ob_start();
-		?>
-
-		<div data-wc-interactive='<?php echo esc_attr( $data_directive ); ?>'>
-			<?php if ( 'list' === $display_style ) { ?>
-				<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CheckboxList::render() escapes output.
-				echo CheckboxList::render(
-					array(
-						'items'     => $list_items,
-						'on_change' => "{$this->get_full_block_name()}::actions.onCheckboxChange",
-					)
-				);
-				?>
-			<?php } ?>
-
-			<?php if ( 'dropdown' === $display_style ) : ?>
-				<?php
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dropdown::render() escapes output.
-				echo Dropdown::render(
-					array(
-						'items'          => $list_items,
-						'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
-						'selected_items' => $selected_items,
-						'select_type'    => $select_type,
-						'placeholder'    => $placeholder_text,
-					)
-				);
-				?>
-			<?php endif; ?>
-		</div>
-
-		<?php
-		return ob_get_clean();
 	}
 
 	/**
@@ -258,6 +203,43 @@ final class ProductFilterStockStatus extends AbstractBlock {
 			function ( $stock_count ) {
 				return $stock_count['count'] > 0;
 			}
+		);
+	}
+
+	/**
+	 * Register pattern for default product attribute.
+	 */
+	public function register_block_patterns() {
+		register_block_pattern(
+			'woocommerce/default-stock-filter',
+			array(
+				'title'    => '',
+				'inserter' => false,
+				'content'  =>
+				'
+<!-- wp:woocommerce/product-filter-stock -->
+<div class="wp-block-woocommerce-product-filter-attribute">
+	<!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+	<div class="wp-block-group">
+		<!-- wp:heading {"level":3} -->
+		<h3 class="wp-block-heading">Status</h3>
+		<!-- /wp:heading -->
+		<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true}} -->
+		<!-- wp:buttons {"layout":{"type":"flex"}} -->
+		<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
+			<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
+			<!-- /wp:button --></div>
+		<!-- /wp:buttons -->
+		<!-- /wp:woocommerce/product-filter-clear-button --></div>
+	<!-- /wp:group -->
+	<!-- wp:woocommerce/product-filter-chips {"lock":{"remove":true}} -->
+	<div class="wp-block-woocommerce-product-filter-chips wc-block-product-filter-chips"></div>
+	<!-- /wp:woocommerce/product-filter-chips -->
+
+</div>
+<!-- /wp:woocommerce/product-filter-stock -->
+					',
+			)
 		);
 	}
 }

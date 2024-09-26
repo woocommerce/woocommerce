@@ -11,10 +11,12 @@ import { productFilterOptions } from '@woocommerce/icons';
 import './style.scss';
 import edit from './edit';
 import metadata from './block.json';
+import save from './save';
 
 if ( isExperimentalBlocksEnabled() ) {
 	registerBlockType( metadata, {
 		icon: productFilterOptions,
+		save,
 		edit,
 	} );
 }
