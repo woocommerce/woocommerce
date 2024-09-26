@@ -125,7 +125,7 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		add_filter( 'woocommerce_save_cogs_overrides_parent_value_flag', fn( $value, $product ) => null, 10, 2 );
 
-		$product->set_cogs_value( ! $flag_value );
+		$product->set_cogs_value_overrides_parent( ! $flag_value );
 		$product->save();
 
 		// We expect to get what we saved the first time.
