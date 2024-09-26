@@ -99,10 +99,12 @@ class BlockPatterns {
 			return;
 		}
 
+		$s = microtime(true);
 		$patterns = $this->get_block_patterns();
 		foreach ( $patterns as $pattern ) {
 			$this->pattern_registry->register_block_pattern( $pattern['source'], $pattern, $this->dictionary );
 		}
+		error_log( 'register_block_patterns elapsed time: ' . microtime(true) - $s );
 	}
 
 	/**
