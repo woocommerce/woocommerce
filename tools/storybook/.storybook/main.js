@@ -28,11 +28,18 @@ module.exports = {
 		if ( configType === 'DEVELOPMENT' ) {
 			return {};
 		}
+
+		let pathPrefix = (
+			process.env.STORYBOOK_COMPOSITION_PATH_PREFIX ?? ''
+		).trim();
+		if ( pathPrefix && ! pathPrefix.startsWith( '/' ) ) {
+			pathPrefix = '/' + pathPrefix;
+		}
 		return {
 			'woocommerce-blocks': {
 				expanded: false,
 				title: 'WooCommerce Blocks',
-				url: '/assets/woocommerce-blocks',
+				url: pathPrefix + '/assets/woocommerce-blocks',
 			},
 		};
 	},
