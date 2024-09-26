@@ -50,7 +50,7 @@ const collection = {
 		'Select specific products to recommend to customers.',
 		'woocommerce'
 	),
-	keywords: [ 'specific', 'choose' ],
+	keywords: [ 'specific', 'choose', 'recommend' ],
 	scope: [],
 };
 
@@ -75,7 +75,7 @@ const heading: InnerBlockTemplate = [
 	{
 		textAlign: 'center',
 		level: 2,
-		content: __( 'Hand-Picked', 'woocommerce' ),
+		content: __( 'Recommended products', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },
 	},
 ];

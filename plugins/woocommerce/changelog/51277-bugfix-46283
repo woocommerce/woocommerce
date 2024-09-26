@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a styling bug where the guest order confirmation email input was too wide.
