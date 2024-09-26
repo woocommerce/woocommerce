@@ -164,7 +164,7 @@ const test = base.extend<
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
 
-			await use( requestUtils as RequestUtils );
+			await use( requestUtils );
 		},
 		{ scope: 'worker', auto: true },
 	],
