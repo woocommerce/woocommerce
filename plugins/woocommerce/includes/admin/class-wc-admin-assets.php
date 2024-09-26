@@ -579,7 +579,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					],
 					'cta_link'  => '/wp-admin/admin.php?page=wc-admin&tab=extensions&path=%2Fextensions',
 					'content' => [
-						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/tos">T&C</a>’s apply.',
+						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/products/#sale-ts-and-cs">T&C</a>’s apply.',
 					],
 					'title' => [
 						'en_US' => 'Black Friday sale',
@@ -602,7 +602,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					],
 					'cta_link'  => '/wp-admin/admin.php?page=wc-admin&path=%2Fextensions&tab=extensions&term=Coupons',
 					'content' => [
-						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/tos">T&C</a>’s apply.',
+						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/products/#sale-ts-and-cs">T&C</a>’s apply.',
 					],
 					'title' => [
 						'en_US' => 'Black Friday sale',
@@ -625,7 +625,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					],
 					'cta_link'  => '/wp-admin/admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=marketing-extensions',
 					'content' => [
-						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/tos">T&C</a>’s apply.',
+						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/products/#sale-ts-and-cs">T&C</a>’s apply.',
 					],
 					'title' => [
 						'en_US' => 'Black Friday sale',
@@ -648,7 +648,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					],
 					'cta_link'  => '/wp-admin/admin.php?page=wc-admin&tab=extensions&path=%2Fextensions',
 					'content' => [
-						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/tos">T&C</a>’s apply.',
+						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/products/#sale-ts-and-cs">T&C</a>’s apply.',
 					],
 					'title' => [
 						'en_US' => 'Black Friday sale',
