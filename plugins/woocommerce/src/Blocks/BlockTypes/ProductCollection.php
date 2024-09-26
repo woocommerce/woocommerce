@@ -146,7 +146,8 @@ class ProductCollection extends AbstractBlock {
 		$style = '';
 
 		if ( isset( $fixed_width ) ) {
-			$style .= sprintf( 'width:%dpx;', intval( $fixed_width ) );
+			$style .= sprintf( 'width:%s;', esc_attr( $fixed_width ) );
+			$style .= 'margin: 0 auto;';
 		}
 		return $style;
 	}
@@ -433,8 +434,7 @@ class ProductCollection extends AbstractBlock {
 				$block_content = $this->enable_client_side_navigation( $block_content );
 			}
 		}
-
-		return $block_content;
+		return sprintf( '<div>%s</div>', $block_content );
 	}
 
 	/**

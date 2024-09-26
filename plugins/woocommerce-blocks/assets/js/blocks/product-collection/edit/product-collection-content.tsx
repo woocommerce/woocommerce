@@ -123,7 +123,7 @@ const ProductCollectionContent = ( {
 	if ( WidthOptions.FIXED === widthType && fixedWidth ) {
 		style = {
 			maxWidth: fixedWidth,
-			margin: 'auto',
+			margin: '0 auto',
 		};
 	}
 
