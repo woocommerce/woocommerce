@@ -571,20 +571,22 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'format'        => 'promo-card',
 					'pages'         => [
 						[
-							'page'  => 'wc-admin',
-							'path'  => '/extensions',
+							'page' => 'wc-admin',
+							'path' => '/extensions',
 						],
 					],
-					'cta_label' => [
+					'cta_label'     => [
 						'en_US' => 'Shop extensions',
 					],
-					'cta_link'  => '/wp-admin/admin.php?page=wc-admin&tab=extensions&path=%2Fextensions',
-					'content' => [
-						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/products/#sale-ts-and-cs">T&C</a>’s apply.',
+					'cta_link'      => '/wp-admin/admin.php?page=wc-admin&tab=extensions&path=%2Fextensions',
+					'content'       => [
+						"en_US" => 'Save up to 30% on extensions and themes. Sale ends December 3 at 3pm UTC. <a href="https://woocommerce.com/products/#sale-ts-and-cs">T&Cs</a> apply.',
 					],
-					'title' => [
+					'title'         => [
 						'en_US' => 'Black Friday sale',
 					],
+					'style'         => 'has-background',
+					'icon'          => 'percent',
 				];
 
 				// Marketing > Coupons
@@ -618,7 +620,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'date_to_gmt'   => '2024-10-22 23:59',
 					'format'        => 'promo-card',
 					'pages'         => [
-						[ 
+						[
 							'page'  => 'wc-admin',
 							'path'  => '/marketing',
 						],
@@ -642,7 +644,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'date_to_gmt'   => '2024-10-22 23:59',
 					'format'        => 'promo-card',
 					'pages'         => [
-						[ 
+						[
 							'path'     => '',
 							'pathname' => '/wp-admin/admin.php?page=wc-admin',
 						]

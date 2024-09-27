@@ -3,21 +3,32 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { createElement, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
-import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import './promo-card.scss';
 import { Promotion } from '../promotions/types';
+import sanitizeHTML from '../../../lib/sanitize-html';
+import PercentSVG from './images/percent';
 
 interface PromoCardProps {
 	promotion: Promotion;
 }
 
-const PromoCard: React.FC< PromoCardProps > = ( { promotion } ) => {
-	const { id } = promotion;
+const imageComponents = {
+	percent: PercentSVG,
+};
+
+const PromoCard = ( {
+	promotion,
+}: PromoCardProps ): React.ReactElement | null => {
+
+	const id = promotion.id;
+
+	if ( ! id ) return null;
 
 	const [ isVisible, setIsVisible ] = useState(
 		localStorage.getItem( `wc-marketplacePromoClosed-${ id }` ) !== 'true'
@@ -52,25 +63,74 @@ const PromoCard: React.FC< PromoCardProps > = ( { promotion } ) => {
 		return true;
 	};
 
-	return (
-		<div className="promo-card">
+	const classNames =
+		'promo-card' + ( promotion.style ? ` ${ promotion.style }` : '' );
+
+	const content = (
+		<div className="promo-content">
 			<h2 className="promo-title">{ promotion.title?.en_US }</h2>
 			<p
 				className="promo-text"
-				dangerouslySetInnerHTML={ { __html: promotion.content.en_US } } // Render HTML in the text
-			></p>
-			<div className="promo-links">
-				<Button className="promo-cta-dismiss" onClick={ handleDismiss }>
-					{ __( 'Dismiss', 'woocommerce' ) }
-				</Button>
-				<Button
-					className="promo-cta"
-					href={ promotion.cta_link ?? '' }
-					onClick={ handleClick }
-				>
-					{ promotion.cta_label?.en_US }
-				</Button>
-			</div>
+				dangerouslySetInnerHTML={ sanitizeHTML(
+					promotion.content?.en_US
+				) } // Render HTML in the text
+			/>
+		</div>
+	);
+
+	const links = (
+		<div className="promo-links">
+			<Button
+				className="promo-cta"
+				href={ promotion.cta_link ?? '' }
+				onClick={ handleClick }
+			>
+				{ promotion.cta_label?.en_US }
+			</Button>
+			<Button className="promo-cta-link" onClick={ handleDismiss }>
+				{ __( 'Dismiss', 'woocommerce' ) }
+			</Button>
+		</div>
+	);
+
+	function getImage() {
+		if (
+			promotion.icon &&
+			Object.hasOwn( imageComponents, promotion.icon )
+		) {
+			const ImageComponent =
+				imageComponents[
+					promotion.icon as keyof typeof imageComponents
+				];
+			return ImageComponent ? (
+				<div className="promo-image">
+					{ createElement( ImageComponent ) }
+				</div>
+			) : null;
+		}
+
+		return null;
+	}
+
+	return (
+		<div className={ classNames }>
+			{ promotion?.style === 'has-background' ? (
+				<>
+					<div className="promo-content-links">
+						{ content }
+						{ links }
+					</div>
+					{ getImage() }
+				</>
+			) : (
+				<>
+					<div className="promo-content-image">
+						{ content }
+						{ getImage() }
+					</div>
+					{ links }
+				</>
+			) }
 		</div>
 	);
 };
