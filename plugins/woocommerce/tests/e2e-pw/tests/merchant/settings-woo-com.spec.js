@@ -7,7 +7,7 @@ test.describe(
 		tag: [
 			'@services',
 			'@skip-on-default-pressable',
-			'@skip-on-default-pressable',
+			'@skip-on-default-wpcom',
 		],
 	},
 	() => {
