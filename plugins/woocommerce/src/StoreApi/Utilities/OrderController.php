@@ -182,7 +182,7 @@ class OrderController {
 	 * Allows plugins to perform custom validation before payment.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @throws RouteException Exceptionif validation fails.
+	 * @throws RouteException Exception if validation fails.
 	 */
 	protected function perform_custom_order_validation( \WC_Order $order ) {
 		$validation_errors = new \WP_Error();
