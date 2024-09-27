@@ -113,7 +113,7 @@ test.describe(
 					.click();
 
 				await expect(
-					page.getByText( 'Receiver wordpress@example.com' )
+					page.getByText( `Receiver ${admin.email}` )
 				).toBeVisible();
 				await expect(
 					page.getByText( 'Subject [WooCommerce Core E2E' )
