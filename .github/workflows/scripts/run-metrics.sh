@@ -3,7 +3,7 @@
 set -eo pipefail
 
 GITHUB_EVENT_NAME='pull_request'
-GITHUB_SHA='1cb6eedc0b4e7cf14457699611341d4b778e90db'
+GITHUB_SHA=$(git rev-parse HEAD)
 ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
