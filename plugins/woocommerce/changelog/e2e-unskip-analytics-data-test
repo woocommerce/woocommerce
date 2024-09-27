@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Unskip analytics-data.spec.js test on external sites.

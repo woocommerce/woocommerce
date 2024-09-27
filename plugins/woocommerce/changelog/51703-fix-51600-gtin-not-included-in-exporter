@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adds the missing global_unique_id to the product export columns
