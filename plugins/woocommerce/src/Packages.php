@@ -153,7 +153,6 @@ class Packages {
 	/**
 	 * Prepare merged packages for initialization.
 	 * Especially useful when running actions early in the 'plugins_loaded' timeline.
-	 *
 	 */
 	public static function prepare_packages() {
 		foreach ( self::get_enabled_packages() as $package_name => $package_class ) {

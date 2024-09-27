@@ -54,7 +54,7 @@ class Brands {
 		return ( $assignment <= 6 ); // Considering 5% of the 0-120 range.
 	}
 
-	/*
+	/**
 	 * If WooCommerce Brands gets activated forcibly, without WooCommerce active (e.g. via '--skip-plugins'),
 	 * remove WooCommerce Brands initialization functions early on in the 'plugins_loaded' timeline.
 	 */
