@@ -74,17 +74,17 @@
 }
 
 .promo-cta {
-	display: inline-block;
-	margin-right: 10px;
-	padding: 10px 15px;
 	background-color: #0073aa;
-	color: #fff;
-	text-decoration: none;
 	border-radius: 3px;
+	color: #fff;
+	display: flex;
+	padding: 10px 15px;
+	text-decoration: none;
 }
 
 .promo-cta:hover {
 	background-color: #005a8a;
+	color: #fff;
 }
 
 .promo-cta-link {
