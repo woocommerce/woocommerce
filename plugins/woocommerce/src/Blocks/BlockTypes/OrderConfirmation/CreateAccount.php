@@ -179,6 +179,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 		}
 
 		$result = $this->process_form_post( $order );
+		$notice = '';
 
 		if ( is_wp_error( $result ) ) {
 			$notice = wc_print_notice( $result->get_error_message(), 'error', [], true );
