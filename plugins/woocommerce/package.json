@@ -508,7 +508,6 @@
 						"start": "env:test"
 					},
 					"events": [
-						"pull_request",
 						"push"
 					],
 					"report": {
