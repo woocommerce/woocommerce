@@ -17,12 +17,13 @@ function title() {
 }
 
 if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+	export WP_ARTIFACTS_PATH=$ARTIFACTS_PATH
+
 	# It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df
 	# where compare-perf reporting mode was introduced for processing the provided reports.
 	BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
-	WP_ARTIFACTS_PATH=$ARTIFACTS_PATH
 	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$HEAD_BRANCH (head) on WordPress v$WP_VERSION"
 
 	title "##[group]Setting up necessary tooling"
