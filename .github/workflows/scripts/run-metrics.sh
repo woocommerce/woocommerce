@@ -2,9 +2,9 @@
 
 set -eo pipefail
 
-# GITHUB_EVENT_NAME='pull_request'
-# GITHUB_SHA=$(git rev-parse HEAD)
-# ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
+GITHUB_EVENT_NAME='pull_request'
+GITHUB_SHA=$(git rev-parse HEAD)
+ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
@@ -34,8 +34,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
   	title "Comparing performance: benchmarking head"
 	# TODO: benchmark for missing reports only.
-	# RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-	# RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+	RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+	RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	title "Comparing performance: building baseline"
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
@@ -45,8 +45,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
   	title "Comparing performance: benchmarking baseline"
 	# TODO: benchmark for missing reports only.
-	# RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-	# RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+	RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+	RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	# This step is intended for running the script locally.
 	title "Comparing performance: restoring codebase state back to head"
