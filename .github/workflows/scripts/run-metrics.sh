@@ -65,8 +65,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		# This step is intended for running the script locally.
 		title "##[group]Restoring codebase state back to head"
 		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
+		pnpm install --frozen-lockfile > /dev/null &
 		pnpm run --if-present clean:build
-		pnpm install --frozen-lockfile
 		echo '##[endgroup]'
 	fi
 
