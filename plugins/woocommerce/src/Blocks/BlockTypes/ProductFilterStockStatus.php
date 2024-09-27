@@ -137,10 +137,13 @@ final class ProductFilterStockStatus extends AbstractBlock {
 		);
 
 		return array(
-			'items'   => $stock,
-			'actions' => array(
-				'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+			'filterData'         => array(
+				'items'   => $stock,
+				'actions' => array(
+					'toggleFilter' => "{$this->get_full_block_name()}::actions.toggleFilter",
+				),
 			),
+			'hasSelectedFilters' => ! empty( $selected_stock_statuses ),
 		);
 	}
 
@@ -154,17 +157,23 @@ final class ProductFilterStockStatus extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 
-		$stock_counts = $this->get_stock_status_counts( $block );
-
+		$stock_counts   = $this->get_stock_status_counts( $block );
 		$filter_context = $this->create_context_by_stock_counts( $stock_counts );
+
+		$wrapper_attributes = array(
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wc-context'     => wp_json_encode( $filter_context['hasSelectedFilters'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+		);
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
-			get_block_wrapper_attributes(),
+			get_block_wrapper_attributes(
+				$wrapper_attributes
+			),
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context['filterData'] ) ) )->render();
 					return $carry;
 				},
 				''
@@ -215,30 +224,31 @@ final class ProductFilterStockStatus extends AbstractBlock {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  =>
-				'
-<!-- wp:woocommerce/product-filter-stock -->
-<div class="wp-block-woocommerce-product-filter-attribute">
-	<!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-	<div class="wp-block-group">
-		<!-- wp:heading {"level":3} -->
-		<h3 class="wp-block-heading">Status</h3>
-		<!-- /wp:heading -->
-		<!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true}} -->
-		<!-- wp:buttons {"layout":{"type":"flex"}} -->
-		<div class="wp-block-buttons"><!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
-			<div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
-			<!-- /wp:button --></div>
-		<!-- /wp:buttons -->
-		<!-- /wp:woocommerce/product-filter-clear-button --></div>
-	<!-- /wp:group -->
-	<!-- wp:woocommerce/product-filter-chips {"lock":{"remove":true}} -->
-	<div class="wp-block-woocommerce-product-filter-chips wc-block-product-filter-chips"></div>
-	<!-- /wp:woocommerce/product-filter-chips -->
-
+				'content'  => '
+<!-- wp:woocommerce/product-filter-stock-status -->
+<div class="wp-block-woocommerce-product-filter-stock-status">
+  <!-- wp:group {"metadata":{"name":"Header"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+  <div class="wp-block-group">
+    <!-- wp:heading {"level":3} -->
+    <h3 class="wp-block-heading">Status</h3>
+    <!-- /wp:heading -->
+    <!-- wp:woocommerce/product-filter-clear-button {"lock":{"remove":true,"move":false}} -->
+    <!-- wp:buttons {"layout":{"type":"flex"}} -->
+    <div class="wp-block-buttons">
+      <!-- wp:button {"className":"wc-block-product-filter-clear-button is-style-outline","style":{"border":{"width":"0px","style":"none"},"typography":{"textDecoration":"underline"},"outline":"none","fontSize":"medium"}} -->
+      <div class="wp-block-button wc-block-product-filter-clear-button is-style-outline" style="text-decoration:underline"><a class="wp-block-button__link wp-element-button" style="border-style:none;border-width:0px">Clear</a></div>
+      <!-- /wp:button -->
+    </div>
+    <!-- /wp:buttons -->
+    <!-- /wp:woocommerce/product-filter-clear-button -->
+  </div>
+  <!-- /wp:group -->
+  <!-- wp:woocommerce/product-filter-chips {"lock":{"remove":true}} -->
+  <div class="wp-block-woocommerce-product-filter-chips wc-block-product-filter-chips"></div>
+  <!-- /wp:woocommerce/product-filter-chips -->
 </div>
-<!-- /wp:woocommerce/product-filter-stock -->
-					',
+<!-- /wp:woocommerce/product-filter-stock-status -->
+				',
 			)
 		);
 	}

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { getElement, store } from '@woocommerce/interactivity';
-import { HTMLElementEvent } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -25,6 +24,7 @@ const getUrl = ( activeFilters: string ) => {
 store( 'woocommerce/product-filter-stock-status', {
 	actions: {
 		toggleFilter: () => {
+			console.log( 'ci entro' );
 			// get the active filters from the url:
 			const url = new URL( window.location.href );
 			const currentFilters =

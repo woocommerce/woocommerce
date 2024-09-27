@@ -14,7 +14,7 @@ export const getStockFilterData = ( results: unknown ) => {
 
 	const { stock_status_counts: stockStatusCounts } = results;
 
-	return stockStatusCounts as Array< {
+	return ( stockStatusCounts ?? [] ) as Array< {
 		status: StockStatus;
 		count: number;
 	} >;
