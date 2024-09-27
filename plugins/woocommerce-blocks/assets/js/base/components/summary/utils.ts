@@ -32,7 +32,8 @@ const getFirstParagraph = ( source: string ) => {
 export const generateSummary = (
 	source: string,
 	maxLength = 15,
-	countType: CountType = 'words'
+	countType: CountType = 'words',
+	truncateToFirstParagraph = true
 ) => {
 	const sourceWithParagraphs = autop( source );
 	const sourceWordCount = count( sourceWithParagraphs, countType );
@@ -44,16 +45,20 @@ export const generateSummary = (
 	const firstParagraph = getFirstParagraph( sourceWithParagraphs );
 	const firstParagraphWordCount = count( firstParagraph, countType );
 
-	if ( firstParagraphWordCount <= maxLength ) {
+	if ( truncateToFirstParagraph && firstParagraphWordCount <= maxLength ) {
 		return firstParagraph;
 	}
 
+	const sourceToTruncate = truncateToFirstParagraph
+		? firstParagraph
+		: sourceWithParagraphs;
+
 	if ( countType === 'words' ) {
-		return trimWords( firstParagraph, maxLength );
+		return trimWords( sourceToTruncate, maxLength );
 	}
 
 	return trimCharacters(
-		firstParagraph,
+		sourceToTruncate,
 		maxLength,
 		countType === 'characters_including_spaces'
 	);
