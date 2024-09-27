@@ -13,9 +13,10 @@ import { registerProductEditorBlockType } from '../../../utils';
  */
 import blockConfiguration from './block.json';
 import { Edit } from './edit';
+import { NoticeBlockAttributes } from './types';
 
 const { name, ...metadata } =
-	blockConfiguration as BlockConfiguration< TextBlockAttributes >;
+	blockConfiguration as BlockConfiguration< NoticeBlockAttributes >;
 
 export { metadata, name };
 
