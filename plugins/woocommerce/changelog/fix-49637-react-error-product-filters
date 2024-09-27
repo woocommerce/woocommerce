@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Filter blocks: fix potential React error when users interact with filter blocks.
