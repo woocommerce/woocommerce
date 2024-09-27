@@ -27,7 +27,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	title "Comparing performance: building head"
 	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout $GITHUB_REF
-	pnpm clean:build
+	pnpm run clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
 
@@ -38,7 +38,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	title "Comparing performance: building baseline"
 	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
-	# pnpm clean:build
+	pnpm run clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
 
@@ -49,7 +49,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	title "Comparing performance: restoring codebase state back to head"
 	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout $GITHUB_REF
-	pnpm clean:build
+	pnpm run clean:build
 
   	title "Comparing performance: processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
