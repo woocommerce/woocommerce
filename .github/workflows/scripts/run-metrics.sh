@@ -79,7 +79,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# - Be tracked on https://www.codevitals.run/project/woo for all existing
 	#   metrics.
 	IFS=. read -ra WP_VERSION_ARRAY <<< "$WP_VERSION"
-	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA $BASE_SHA --tests-branch $GITHUB_SHA --wp-version "${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}" --ci --skip-benchmarking
+	ARTIFACTS_PATH="$ARTIFACTS_PATH" pnpm --filter="compare-perf" run compare perf $GITHUB_SHA $BASE_SHA --tests-branch $GITHUB_SHA --wp-version "${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}" --ci --skip-benchmarking
 	echo '##[endgroup]'
 
 	title "##[group]Publish results to CodeVitals"
