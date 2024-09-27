@@ -4,7 +4,6 @@ set -eo pipefail
 
 GITHUB_EVENT_NAME='pull_request'
 GITHUB_SHA=$(git rev-parse HEAD)
-ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
@@ -71,10 +70,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# - Be compatible with the new WP version used in the “Tested up to” flag.
 	# - Be tracked on https://www.codevitals.run/project/woo for all existing
 	#   metrics.
-	# IFS=. read -ra WP_VERSION_ARRAY <<< "$WP_VERSION"
-	# pnpm --filter="compare-perf" run compare perf $GITHUB_SHA $BASE_SHA --tests-branch $GITHUB_SHA --wp-version "${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}" --skip-benchmarking
+	IFS=. read -ra WP_VERSION_ARRAY <<< "$WP_VERSION"
+	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA $BASE_SHA --tests-branch $GITHUB_SHA --wp-version "${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}" --skip-benchmarking
+	echo '##[endgroup]'
 
-	# title "Publish results to CodeVitals"
+	title "##[group]Publish results to CodeVitals"
 	# COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
 	# pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
 	echo '##[endgroup]'
