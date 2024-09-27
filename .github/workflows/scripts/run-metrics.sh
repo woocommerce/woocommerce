@@ -2,10 +2,10 @@
 
 set -eo pipefail
 
-GITHUB_EVENT_NAME='pull_request'
-GITHUB_SHA=$(git rev-parse HEAD)
-#ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce)/artifacts"
-export ARTIFACTS_PATH="$(realpath "$(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf")/artifacts"
+# The commented variables are for troubleshooting locally.
+# GITHUB_EVENT_NAME='pull_request'
+# GITHUB_SHA=$(git rev-parse HEAD)
+# ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce)/artifacts"
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
