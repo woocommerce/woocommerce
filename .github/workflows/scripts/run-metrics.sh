@@ -20,7 +20,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# where compare-perf reporting mode was introduced for processing the provided reports.
 	BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
-	title "Comparing performance between: $BASE_SHA (base@trunk) and $GITHUB_SHA (head@$GITHUB_REF) on WordPress v$WP_VERSION"
+	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$GITHUB_REF (head) on WordPress v$WP_VERSION"
 
 	title "Setting up compare-perf"
     # pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
