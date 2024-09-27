@@ -71,6 +71,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	fi
 
   	title "##[group]Processing reports under $ARTIFACTS_PATH"
+  	ls -l $ARTIFACTS_PATH
 	# Updating the WP version used for performance jobs means there’s a high
 	# chance that the reference commit used for performance test stability
 	# becomes incompatible with the WP version. So, every time the "Tested up
