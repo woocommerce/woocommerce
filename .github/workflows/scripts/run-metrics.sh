@@ -28,9 +28,9 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
 	echo '##[endgroup]'
 
-	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name *_${$GITHUB_SHA}_* -print -quit)"; then
+	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name "*_${$GITHUB_SHA}_*" -print -quit)"; then
 		title "Skipping benchmarking head as benchmarking results already available under $ARTIFACTS_PATH"
-		find $ARTIFACTS_PATH -maxdepth 1 -name *_${$GITHUB_SHA}_* -print -quit
+		find $ARTIFACTS_PATH -maxdepth 1 -name "*_${$GITHUB_SHA}_*" -print -quit
 	else
 		title "##[group]Comparing performance: building head"
 		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
@@ -45,9 +45,9 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 	fi
 
-	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name *_${BASE_SHA}_* -print -quit)"; then
+	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name "*_${BASE_SHA}_*" -print -quit)"; then
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
-		find $ARTIFACTS_PATH -maxdepth 1 -name *_${BASE_SHA}_* -print -quit
+		find $ARTIFACTS_PATH -maxdepth 1 -name "*_${BASE_SHA}_*" -print -quit
 	else
 		title "##[group]Comparing performance: building baseline"
 		git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
