@@ -1050,7 +1050,7 @@
           "menu_title": "Registering custom collections",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-collection-block/register-product-collection.md",
-          "hash": "021a567cece90d4c56991d0778d7f291d1489c7a559b6fade5f001cd9920dc77",
+          "hash": "379612b00de83bebadd338aa55f8af2432927d9b53df4e2fdfe24cfcaf050069",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-collection-block/register-product-collection.md",
           "id": "3bf26fc7c56ae6e6a56e1171f750f5204fcfcece"
         },
@@ -1804,5 +1804,5 @@
       "categories": []
     }
   ],
-  "hash": "0344db5f1a802e436d9f949849b969bdabc88f4ef2a1886c9fc4e8e6ff7c7518"
+  "hash": "1ef1bca2f921a7928db9a2803f58f44a15d47deac7b05697bfb8dffc9bee17a5"
 }
