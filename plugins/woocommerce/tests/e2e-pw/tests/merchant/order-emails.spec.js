@@ -73,7 +73,6 @@ test.describe(
 
 		test(
 			'can receive new order email',
-			{ tag: [ '@skip-on-default-pressable', '@skip-on-default-wpcom' ] },
 			async ( { page, baseURL } ) => {
 				// New order emails are sent automatically when we create a simple order. Verify that we get these.
 				// Need to create a new order for this test because we clear logs before each run.
@@ -228,7 +227,6 @@ test.describe(
 
 		test(
 			'can resend new order notification',
-			{ tag: '@skip-on-default-wpcom' },
 			async ( { page } ) => {
 				// resend the new order notification
 				await page.goto(
