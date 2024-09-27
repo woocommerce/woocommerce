@@ -31,7 +31,7 @@ const test = baseTest.extend( {
 
 test(
 	'Check the title of the shop page after the page has been deleted',
-	{ tag: [ '@payments', '@services', '@could-be-unit-test' ] },
+	{ tag: [ '@payments', '@services', '@could-be-lower-level-test' ] },
 	async ( { page } ) => {
 		await page.goto( '/shop/' );
 		expect( await page.title() ).toBe(
