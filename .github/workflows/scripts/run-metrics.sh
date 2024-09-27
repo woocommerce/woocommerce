@@ -33,7 +33,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		title "Skipping benchmarking head as benchmarking results already available under $ARTIFACTS_PATH"
 	else
 		title "##[group]Building head"
-		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
+		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build
 		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 		pnpm --filter='@woocommerce/plugin-woocommerce' build
@@ -53,7 +53,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 
 		title "##[group]Building baseline"
-		git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
+		git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA > /dev/null && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build
 		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 		pnpm --filter='@woocommerce/plugin-woocommerce' build
