@@ -55,7 +55,22 @@ export function changeUrl( newUrl: string ) {
 			}
 		} );
 
-		window.location.href = url.href;
+		/**
+		 * Submit the filter URL through a hidden form to bypass the browser cache.
+		 */
+		const form = document.createElement( 'form' );
+		form.method = 'GET';
+		form.action = url.pathname;
+		form.style.display = 'none';
+		url.searchParams.forEach( ( value, key ) => {
+			const input = document.createElement( 'input' );
+			input.type = 'hidden';
+			input.name = key;
+			input.value = value;
+			form.appendChild( input );
+		} );
+		document.body.appendChild( form );
+		form.submit();
 	} else {
 		window.history.replaceState( {}, '', newUrl );
 	}
