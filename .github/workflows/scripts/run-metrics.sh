@@ -29,7 +29,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	title "Comparing performance: building head"
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
-	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+	pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
 
   	title "Comparing performance: benchmarking head"
@@ -40,7 +40,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	title "Comparing performance: building baseline"
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
-	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+	pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
 
   	title "Comparing performance: benchmarking baseline"
@@ -48,9 +48,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 	# RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
+	# This step is intended for running the script locally.
 	title "Comparing performance: restoring codebase state back to head"
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
+	pnpm install
 
   	title "Comparing performance: processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
