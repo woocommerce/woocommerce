@@ -23,7 +23,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	echo "Comparing performance between: $BASE_SHA (base) and $GITHUB_SHA (head) on WordPress v$WP_VERSION"
 
 	title "Setting up compare-perf"
-    pnpm install --frozen-lockfile --filter="compare-perf"
+    pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
 
   	title "Comparing performance: benchmarking"
 	# TODO: benchmark for missing reports only.
