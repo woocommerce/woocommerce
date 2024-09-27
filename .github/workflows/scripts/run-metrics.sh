@@ -2,6 +2,9 @@
 
 set -eo pipefail
 
+GITHUB_EVENT_NAME='pull_request'
+GITHUB_SHA='1cb6eedc0b4e7cf14457699611341d4b778e90db'
+
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
  	exit 1
@@ -15,11 +18,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df
 	# where compare-perf reporting mode was introduced for processing the provided reports.
 	BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
-	echo "Comparing performance between: $BASE_SHA -> $GITHUB_SHA"
-
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
-	echo "WP_VERSION: $WP_VERSION"
-	IFS=. read -ra WP_VERSION_ARRAY <<< "$WP_VERSION"
+	echo "Comparing performance between: $BASE_SHA (base) and $GITHUB_SHA (head) on WordPress v$WP_VERSION"
 
 	title "Installing dependencies"
     # pnpm install --frozen-lockfile --filter="compare-perf" > /dev/null
@@ -37,6 +37,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# - Be compatible with the new WP version used in the “Tested up to” flag.
 	# - Be tracked on https://www.codevitals.run/project/woo for all existing
 	#   metrics.
+	# IFS=. read -ra WP_VERSION_ARRAY <<< "$WP_VERSION"
 	# pnpm --filter="compare-perf" run compare perf $GITHUB_SHA $BASE_SHA --tests-branch $GITHUB_SHA --wp-version "${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}"
 
 	# title "Publish results to CodeVitals"
