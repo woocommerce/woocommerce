@@ -194,7 +194,7 @@ class OrderController {
 		 *
 		 * @param \WC_Order $order             The order object.
 		 * @param \WP_Error $validation_errors WP_Error object to add custom errors to.
-		 * @since 9.3.4
+		 * @since 9.5.0
 		 */
 		do_action( 'woocommerce_checkout_validate_order_before_payment', $order, $validation_errors );
 
