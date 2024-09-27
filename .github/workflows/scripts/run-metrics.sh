@@ -38,7 +38,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	title "Comparing performance: building baseline"
-	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet 55f855a2e6d769b5ae44305b2772eb30d3e721df
+	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA
 	pnpm run --if-present clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
