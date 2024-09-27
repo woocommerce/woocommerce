@@ -11,10 +11,10 @@
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"scripts": {
-		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:storybook$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:storybook": "wireit",
-		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:storybook$/'",
 		"watch:build:project": "pnpm --if-present '/^watch:build:project:.*$/'",
 		"watch:build:project:storybook": "wireit",
 		"copy-blocks-storybook-iframe": "cp ../../plugins/woocommerce-blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
@@ -50,6 +50,8 @@
 		"@storybook/react": "7.6.19",
 		"@storybook/react-webpack5": "7.6.19",
 		"@storybook/theming": "7.6.19",
+		"@woocommerce/admin-library": "workspace:*",
+		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
@@ -79,10 +81,9 @@
 				"storybook-static"
 			],
 			"dependencies": [
-				"../../plugins/woocommerce:build:project",
-				"../../plugins/woocommerce-blocks:build:project",
 				"import-wp-css-for-storybook",
-				"dependencyOutputs"
+				"dependencyOutputs",
+				"../../plugins/woocommerce-blocks:build:project:storybook"
 			]
 		},
 		"watch:build:project:storybook": {
@@ -93,7 +94,6 @@
 				"BABEL_ENV": "storybook"
 			},
 			"dependencies": [
-				"../../plugins/woocommerce:build:project",
 				"import-wp-css-for-storybook",
 				"dependencyOutputs"
 			]
