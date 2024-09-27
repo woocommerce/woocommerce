@@ -983,6 +983,21 @@ if ( 0 < $mu_plugins_count ) :
 				<td><?php echo esc_html( $theme['parent_author_url'] ); ?></td>
 			</tr>
 		<?php endif ?>
+		<?php if ( isset( $theme['is_block_theme'] ) ) : ?>
+		<tr>
+			<td data-export-label="Theme type"><?php esc_html_e( 'Theme type', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether the current active theme is a block theme or a classic theme.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td>
+				<?php
+				if ( $theme['is_block_theme'] ) {
+					esc_html_e( 'Block theme', 'woocommerce' );
+				} else {
+					esc_html_e( 'Classic theme', 'woocommerce' );
+				}
+				?>
+			</td>
+		</tr>
+		<?php endif ?>
 		<tr>
 			<td data-export-label="WooCommerce Support"><?php esc_html_e( 'WooCommerce support', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Displays whether or not the current active theme declares WooCommerce support.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
