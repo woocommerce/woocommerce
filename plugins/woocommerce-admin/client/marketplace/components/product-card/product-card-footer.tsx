@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
@@ -64,8 +64,17 @@ function ProductCardFooter( props: { product: Product } ) {
 		return true;
 	}
 
-	// We hardcode this for now while we only display prices in USD.
-	const currencySymbol = '$';
+	const currencyFormats: { [ key: string ]: string } = {
+		USD: '$%s',
+		AUD: 'A$%s',
+		CAD: 'C$%s',
+		EUR: '€%s',
+		GBP: '£%s',
+	};
+
+	const getCurrencyFormat = ( currencyCode: string ) => {
+		return currencyFormats[ currencyCode ] || '%s';
+	};
 
 	function getPriceLabel(): string {
 		if ( product.price === 0 ) {
@@ -76,7 +85,51 @@ function ProductCardFooter( props: { product: Product } ) {
 			return __( 'Free plan available', 'woocommerce' );
 		}
 
-		return currencySymbol + product.price;
+		return sprintf( getCurrencyFormat( product.currency ), product.price );
+	}
+
+	function getPriceSuffix(): string {
+		// Paid simple products have a billing period of ''.
+		if (
+			product.billingPeriodInterval === 1 ||
+			product.billingPeriod === ''
+		) {
+			switch ( product.billingPeriod ) {
+				case 'day':
+					return __( 'daily', 'woocommerce' );
+				case 'week':
+					return __( 'weekly', 'woocommerce' );
+				case 'month':
+					return __( 'monthly', 'woocommerce' );
+				case 'year':
+				case '':
+					return __( 'annually', 'woocommerce' );
+				default:
+					return '';
+			}
+		}
+
+		let period;
+		switch ( product.billingPeriod ) {
+			case 'day':
+				period = __( 'days', 'woocommerce' );
+				break;
+			case 'week':
+				period = __( 'weeks', 'woocommerce' );
+				break;
+			case 'month':
+				period = __( 'months', 'woocommerce' );
+				break;
+			default:
+				period = __( 'years', 'woocommerce' );
+		}
+
+		return sprintf(
+			// translators: %1$d: billing period interval, %2$s: billing period (e.g. days, weeks, months, years)
+			__( 'every %1$d %2$s', 'woocommerce' ),
+			product.billingPeriodInterval,
+			period
+		);
 	}
 
 	function getBillingText(): string {
@@ -85,11 +138,40 @@ function ProductCardFooter( props: { product: Product } ) {
 		}
 
 		if ( product.price !== 0 ) {
-			return __( ' annually', 'woocommerce' );
+			return getPriceSuffix();
 		}
 
 		return '';
 	}
+
+	const getReaderPriceLabel = () => {
+		if ( product.isOnSale ) {
+			return sprintf(
+				//translators: %1$s is the sale price of the product, %2$s is the regular price of the product, %3$s is the billing period
+				__(
+					'Sale Price %1$s %3$s, regular price %2$s %3$s',
+					'woocommerce'
+				),
+				getPriceLabel(),
+				sprintf(
+					getCurrencyFormat( product.currency ),
+					product.regularPrice
+				),
+				getBillingText()
+			);
+		}
+
+		if ( product.price !== 0 && product.freemium_type !== 'primary' ) {
+			return sprintf(
+				//translators: %1$s is the price of the product, %2$s is the billing period
+				__( ' %1$s, %2$s ', 'woocommerce' ),
+				getPriceLabel(),
+				getBillingText()
+			);
+		}
+
+		return getPriceLabel();
+	};
 
 	if ( shouldShowAddToStore( product ) ) {
 		return (
@@ -107,9 +189,28 @@ function ProductCardFooter( props: { product: Product } ) {
 		<>
 			<div className="woocommerce-marketplace__product-card__price">
 				<span className="woocommerce-marketplace__product-card__price-label">
-					{ getPriceLabel() }
+					<span className="screen-reader-text">
+						{ getReaderPriceLabel() }
+					</span>
+					<span aria-hidden>{ getPriceLabel() }</span>
 				</span>
-				<span className="woocommerce-marketplace__product-card__price-billing">
+
+				{ product.isOnSale && (
+					<span
+						className="woocommerce-marketplace__product-card__on-sale"
+						aria-hidden
+					>
+						{ sprintf(
+							getCurrencyFormat( product.currency ),
+							product.regularPrice
+						) }
+					</span>
+				) }
+
+				<span
+					className="woocommerce-marketplace__product-card__price-billing"
+					aria-hidden
+				>
 					{ getBillingText() }
 				</span>
 			</div>
@@ -120,10 +221,24 @@ function ProductCardFooter( props: { product: Product } ) {
 							<Icon icon={ 'star-filled' } size={ 16 } />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							{ product.averageRating }
+							<span aria-hidden>{ product.averageRating }</span>
+							<span className="screen-reader-text">
+								{ sprintf(
+									// translators: %.1f: average rating
+									__( '%.1f stars', 'woocommerce' ),
+									product.averageRating
+								) }
+							</span>
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-count">
-							({ product.reviewsCount })
+							<span aria-hidden>({ product.reviewsCount })</span>
+							<span className="screen-reader-text">
+								{ sprintf(
+									// translators: %d: rating count
+									__( 'from %d reviews', 'woocommerce' ),
+									product.reviewsCount
+								) }
+							</span>
 						</span>
 					</>
 				) }

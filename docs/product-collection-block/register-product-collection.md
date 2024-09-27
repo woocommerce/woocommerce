@@ -6,20 +6,19 @@ tags: how-to
 
 # Register Product Collection
 
-The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
+The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
 
-> [!WARNING]
-> It's experimental and may change in the future. Please use it with caution.
+🚨 **Caution:** It's experimental and may change in the future. Please use it with caution.
 
 **There are two ways to use this function:**
 
-1. Using `@woocommerce/dependency-extraction-webpack-plugin` in a Webpack configuration: This will allow you to import the function from the package & use it in your code. For example:
+1. Using `@woocommerce/dependency-extraction-webpack-plugin` in a Webpack configuration: This will allow you to import the function from the package & use it in your code. For example:
 
 	```tsx
 	import { __experimentalRegisterProductCollection } from "@woocommerce/blocks-registry";
 	```
 
-2. Using the global `wc` object: This will allow you to use the function using the global JS object without importing it. For example:
+2. Using the global `wc` object: This will allow you to use the function using the global JS object without importing it. For example:
 
 	```tsx
 	wc.wcBlocksRegistry.__experimentalRegisterProductCollection({
@@ -27,8 +26,21 @@ The `__experimentalRegisterProductCollection` function is part of the `@woocom
 	});
 	```
 
-> [!TIP]
-> The first method is recommended if you are using Webpack.
+Be sure to add `wc-blocks-registry` as a dependency to your script if you opt to use the `wc` global.
+
+  ```php
+  function enqueue_my_custom_product_collection_script() {
+      wp_enqueue_script(
+          'my-custom-product-collection',
+          plugins_url( '/dist/my-custom-product-collection.js', __FILE__ ),
+          array( 'wc-blocks-registry' ),
+          10
+      );
+  }
+  add_action( 'enqueue_block_editor_assets', 'enqueue_my_custom_product_collection_script' );
+  ```
+
+💡 **Tip:** The first method is recommended if you are using Webpack.
 
 ## Defining a Collection
 
@@ -36,7 +48,7 @@ We will explain important arguments that can be passed to `__experimentalRegiste
 
 A Collection is defined by an object that can contain the following fields:
 
-- `name` (type `string`): A unique and machine-readable collection name. We recommend using the format `<plugin-name>/product-collection/<collection-name>`. Both `<plugin-name>` and `<collection-name>` should consist only of alphanumeric characters and hyphens (e.g., `my-plugin/product-collection/my-collection`).
+- `name` (type `string`): A unique and machine-readable collection name. We recommend using the format `&lt;plugin-name&gt;/product-collection/&lt;collection-name&gt;`. Both `&lt;plugin-name&gt;` and `&lt;collection-name&gt;` should consist only of alphanumeric characters and hyphens (e.g., `my-plugin/product-collection/my-collection`).
 - `title` (type `string`): The title of the collection, which will be displayed in various places including the block inserter and collection chooser.
 - `description` (optional, type `string`): A human-readable description of the collection.
 - `innerBlocks` (optional, type `Array[]`): An array of inner blocks that will be added to the collection. If not provided, the default inner blocks will be used.
@@ -113,7 +125,7 @@ __experimentalRegisterProductCollection({
 });
 ```
 
-As you can see in the example above, we are registering a new collection with the name `woocommerce/product-collection/my-custom-collection` & title `My Custom Collection`. Here is screenshot of how it will look like:
+As you can see in the example above, we are registering a new collection with the name `woocommerce/product-collection/my-custom-collection` & title `My Custom Collection`. Here is screenshot of how it will look like:
 ![image](https://github.com/woocommerce/woocommerce/assets/16707866/7fddbc02-a6cd-494e-b2f4-13dd5ef9cf96)
 
 ### Example 2: Register a new collection with a preview
@@ -243,8 +255,7 @@ This will create a collection with a heading, product image, and product price. 
 
 ![image](https://github.com/woocommerce/woocommerce/assets/16707866/3d92c084-91e9-4872-a898-080b4b93afca)
 
-> [!TIP]
-> You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
+💡 **Tip:** You can learn more about inner blocks template in the [Inner Blocks](https://developer.wordpress.org/block-editor/how-to-guides/block-tutorial/nested-blocks-inner-blocks/#template) documentation.
 
 ### Example 5: Collection with `usesReference` argument
 
@@ -278,5 +289,4 @@ __experimentalRegisterProductCollection({
 
 ---
 
-> [!TIP]
-> You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.
+💡 **Tip:** You can also take a look at how we are defining our core collections at `plugins/woocommerce-blocks/assets/js/blocks/product-collection/collections` directory. Our core collections will also evolve over time.

@@ -18,7 +18,8 @@ import type { HTMLAttributes } from 'react';
 import './style.scss';
 import type { BlockAttributes } from './types';
 
-type Props = BlockAttributes & HTMLAttributes< HTMLDivElement >;
+type Props = BlockAttributes &
+	HTMLAttributes< HTMLDivElement > & { align: boolean };
 
 export const Block = ( props: Props ): JSX.Element | null => {
 	const { className, align } = props;

@@ -237,7 +237,7 @@ function wc_set_loop_prop( $prop, $value = '' ) {
 }
 
 /**
- * Set the current visbility for a product in the woocommerce_loop global.
+ * Set the current visibility for a product in the woocommerce_loop global.
  *
  * @since 4.4.0
  * @param int  $product_id Product it to cache visibility for.
@@ -299,6 +299,9 @@ function wc_generator_tag( $gen, $type ) {
  * @return array
  */
 function wc_body_class( $classes ) {
+
+	global $wp;
+
 	$classes = (array) $classes;
 
 	if ( is_shop() ) {
@@ -327,6 +330,11 @@ function wc_body_class( $classes ) {
 		$classes[] = 'woocommerce-account';
 		$classes[] = 'woocommerce-page';
 
+		$account_page_id = get_option( 'woocommerce_myaccount_page_id' );
+
+		if ( ! empty( $account_page_id ) && ( get_post_field( 'post_name', $account_page_id ) === basename( $wp->request ) && is_user_logged_in() ) ) {
+			$classes[] = 'woocommerce-dashboard';
+		}
 	}
 
 	if ( is_store_notice_showing() ) {
@@ -1480,10 +1488,48 @@ if ( ! function_exists( 'woocommerce_result_count' ) ) {
 		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
 			return;
 		}
-		$args = array(
-			'total'    => wc_get_loop_prop( 'total' ),
-			'per_page' => wc_get_loop_prop( 'per_page' ),
-			'current'  => wc_get_loop_prop( 'current_page' ),
+
+		/**
+		 * Filters the default orderby option.
+		 *
+		 * @since 1.6.4
+		 *
+		 * @param string  $default_orderby The default orderby option.
+		 */
+		$default_orderby = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', '' ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : $default_orderby;
+
+		// If products follow the default order this doesn't need to be informed.
+		$orderby = 'menu_order' === $orderby ? '' : $orderby;
+
+		$orderby = is_string( $orderby ) ? $orderby : '';
+
+		/**
+		 * Filters ordered by messages.
+		 *
+		 * @since 9.3.0
+		 *
+		 * @param array  $orderedby_messages The list of messages per orderby key.
+		 */
+		$catalog_orderedby_options = apply_filters(
+			'woocommerce_catalog_orderedby',
+			array(
+				'menu_order' => __( 'Default sorting', 'woocommerce' ),
+				'popularity' => __( 'Sorted by popularity', 'woocommerce' ),
+				'rating'     => __( 'Sorted by average rating', 'woocommerce' ),
+				'date'       => __( 'Sorted by latest', 'woocommerce' ),
+				'price'      => __( 'Sorted by price: low to high', 'woocommerce' ),
+				'price-desc' => __( 'Sorted by price: high to low', 'woocommerce' ),
+			)
+		);
+		$orderedby                 = isset( $catalog_orderedby_options[ $orderby ] ) ? $catalog_orderedby_options[ $orderby ] : '';
+		$orderedby                 = is_string( $orderedby ) ? $orderedby : '';
+		$args                      = array(
+			'total'     => wc_get_loop_prop( 'total' ),
+			'per_page'  => wc_get_loop_prop( 'per_page' ),
+			'current'   => wc_get_loop_prop( 'current_page' ),
+			'orderedby' => $orderedby,
 		);
 
 		wc_get_template( 'loop/result-count.php', $args );
@@ -3805,7 +3851,7 @@ function wc_empty_cart_message() {
 	// This adds the cart-empty classname to the notice to preserve backwards compatibility (for styling purposes etc).
 	$notice = str_replace( 'class="woocommerce-info"', 'class="cart-empty woocommerce-info"', $notice );
 
-	// Return the notice within a consistent wrapper element. This is targetted by some scripts such as cart.js.
+	// Return the notice within a consistent wrapper element. This is targeted by some scripts such as cart.js.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo '<div class="wc-empty-cart-message">' . $notice . '</div>';
 }
@@ -4095,3 +4141,48 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 		add_option( $option_name, WC()->version );
 	}
 }
+
+/**
+ * Add aria-label to pagination numbers.
+ *
+ * @param string $html HTML output.
+ * @param array  $args An array of arguments. See paginate_links()
+ *                     for information on accepted arguments.
+ *
+ * @return string
+ */
+function wc_add_aria_label_to_pagination_numbers( $html, $args ) {
+	$p         = new WP_HTML_Tag_Processor( $html );
+	$n         = 1;
+	$page_text = __( 'Page', 'woocommerce' );
+
+	while ( $p->next_tag( array( 'class_name' => 'page-numbers' ) ) ) {
+		if (
+			$p->has_class( 'prev' ) ||
+			$p->has_class( 'next' ) ||
+			( 'SPAN' !== $p->get_tag() && 'A' !== $p->get_tag() ) ) {
+			continue;
+		}
+
+		if ( $p->has_class( 'current' ) ) {
+			$n = $args['current'];
+		}
+
+		if ( $p->has_class( 'dots' ) ) {
+			if ( $args['current'] - $args['mid_size'] > $n ) {
+				$n = $args['current'] - $args['mid_size'] - 1;
+			} else {
+				$n = $args['total'] - $args['end_size'];
+			}
+			++$n;
+			continue;
+		}
+
+		$p->set_attribute( 'aria-label', $page_text . ' ' . number_format_i18n( $n ) );
+		++$n;
+	}
+
+	$html = $p->get_updated_html();
+	return $html;
+}
+add_filter( 'paginate_links_output', 'wc_add_aria_label_to_pagination_numbers', 10, 2 );

@@ -12,6 +12,7 @@ if ( class_exists( 'WC_Settings_Accounts', false ) ) {
 }
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * WC_Settings_Accounts.
@@ -78,8 +79,26 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'default'       => 'no',
 				'type'          => 'checkbox',
 				'checkboxgroup' => 'start',
-				'legend'        => __( 'Allow customers to create an account:', 'woocommerce' ),
+				'legend'        => __( 'Allow customers to create an account', 'woocommerce' ),
 				'autoload'      => false,
+			),
+			array(
+				'title'             => __( 'Account creation', 'woocommerce' ),
+				'desc'              => __( 'After checkout (recommended)', 'woocommerce' ),
+				'desc_tip'          => sprintf(
+					/* Translators: %1$s and %2$s are opening and closing <a> tags respectively. */
+					__( 'Customers can create an account after their order is placed. Customize messaging %1$shere%2$s.', 'woocommerce' ),
+					'<a href="' . esc_url( admin_url( 'site-editor.php?postId=woocommerce%2Fwoocommerce%2F%2Forder-confirmation&postType=wp_template&canvas=edit' ) ) . '">',
+					'</a>'
+				),
+				'id'                => 'woocommerce_enable_delayed_account_creation',
+				'default'           => 'yes',
+				'type'              => 'checkbox',
+				'checkboxgroup'     => '',
+				'autoload'          => false,
+				'custom_attributes' => array(
+					'disabled-tooltip' => __( 'Enable guest checkout to use this feature.', 'woocommerce' ),
+				),
 			),
 			array(
 				'title'         => __( 'Account creation', 'woocommerce' ),
@@ -91,24 +110,30 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'autoload'      => false,
 			),
 			array(
-				'title'         => __( 'Account creation options', 'woocommerce' ),
-				'desc'          => __( 'Use email address as account login (recommended)', 'woocommerce' ),
-				'desc_tip'      => __( 'If unchecked, customers will need to set a username during account creation.', 'woocommerce' ),
-				'id'            => 'woocommerce_registration_generate_username',
-				'default'       => 'yes',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'autoload'      => false,
+				'title'             => __( 'Account creation options', 'woocommerce' ),
+				'desc'              => __( 'Send password setup link (recommended)', 'woocommerce' ),
+				'desc_tip'          => __( 'New users receive an email to set up their password.', 'woocommerce' ),
+				'id'                => 'woocommerce_registration_generate_password',
+				'default'           => 'yes',
+				'type'              => 'checkbox',
+				'checkboxgroup'     => 'start',
+				'autoload'          => false,
+				'custom_attributes' => array(
+					'disabled-tooltip' => __( 'Enable an account creation method to use this feature.', 'woocommerce' ),
+				),
 			),
 			array(
-				'title'         => __( 'Account creation options', 'woocommerce' ),
-				'desc'          => __( 'Send password setup link (recommended)', 'woocommerce' ),
-				'desc_tip'      => __( 'New customers receive an email to set up their password.', 'woocommerce' ),
-				'id'            => 'woocommerce_registration_generate_password',
-				'default'       => 'yes',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'end',
-				'autoload'      => false,
+				'title'             => __( 'Account creation options', 'woocommerce' ),
+				'desc'              => __( 'Use email address as account login (recommended)', 'woocommerce' ),
+				'desc_tip'          => __( 'If unchecked, customers will need to set a username during account creation.', 'woocommerce' ),
+				'id'                => 'woocommerce_registration_generate_username',
+				'default'           => 'yes',
+				'type'              => 'checkbox',
+				'checkboxgroup'     => 'end',
+				'autoload'          => false,
+				'custom_attributes' => array(
+					'disabled-tooltip' => __( 'Enable an account creation method to use this feature.', 'woocommerce' ),
+				),
 			),
 			array(
 				'title'         => __( 'Account erasure requests', 'woocommerce' ),
@@ -239,6 +264,15 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 		);
 
+		if ( ! Features::is_enabled( 'experimental-blocks' ) ) {
+			$account_settings = array_filter(
+				$account_settings,
+				function ( $setting ) {
+					return 'woocommerce_enable_delayed_account_creation' !== $setting['id'];
+				},
+			);
+		}
+
 		// Change settings when using the block based checkout.
 		if ( CartCheckoutUtils::is_checkout_block_default() ) {
 			$account_settings = array_filter(
@@ -251,6 +285,24 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				function ( $setting ) {
 					if ( 'woocommerce_registration_generate_password' === $setting['id'] ) {
 						unset( $setting['checkboxgroup'] );
+					}
+					return $setting;
+				},
+				$account_settings
+			);
+		} else {
+			$account_settings = array_map(
+				function ( $setting ) {
+					if ( 'woocommerce_enable_delayed_account_creation' === $setting['id'] ) {
+						$setting['desc_tip'] = sprintf(
+							/* Translators: %1$s and %2$s are opening and closing <a> tags respectively. */
+							__( 'This feature is only available with the Cart & Checkout blocks. %1$sLearn more%2$s.', 'woocommerce' ),
+							'<a href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout">',
+							'</a>'
+						);
+						$setting['disabled']                              = true;
+						$setting['value']                                 = 0;
+						$setting['custom_attributes']['disabled-tooltip'] = __( 'Your store is using shortcode checkout. Use the Checkout blocks to activate this option.', 'woocommerce' );
 					}
 					return $setting;
 				},
@@ -278,29 +330,49 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 		?>
 		<script type="text/javascript">
 			document.addEventListener('DOMContentLoaded', function() {
+				// Move tooltips to label element. This is not possible through the settings field API so this is a workaround
+				// until said API is refactored.
+				document.querySelectorAll('input[disabled-tooltip]').forEach(function(element) {
+					const label = element.closest('label');
+					label.setAttribute('disabled-tooltip', element.getAttribute('disabled-tooltip'));
+				});
+
+				// This handles settings that are enabled/disabled based on other settings.
 				const checkboxes = [
 					document.getElementById("woocommerce_enable_signup_and_login_from_checkout"),
 					document.getElementById("woocommerce_enable_myaccount_registration"),
+					document.getElementById("woocommerce_enable_delayed_account_creation"),
 					document.getElementById("woocommerce_enable_signup_from_checkout_for_subscriptions")
 				];
 				const inputs = [
 					document.getElementById("woocommerce_registration_generate_username"),
 					document.getElementById("woocommerce_registration_generate_password")
 				];
-
-				function updateInputs() {
+				checkboxes.forEach(cb => cb && cb.addEventListener('change', function() {
 					const isChecked = checkboxes.some(cb => cb && cb.checked);
 					inputs.forEach(input => {
 						if ( ! input ) {
 							return;
 						}
 						input.disabled = !isChecked;
-						input.closest('td').classList.toggle("disabled", !isChecked);
 					});
-				}
+				}));
+				checkboxes[0].dispatchEvent(new Event('change')); // Initial state
 
-				checkboxes.forEach(cb => cb && cb.addEventListener('change', updateInputs));
-				updateInputs(); // Initial state
+				// Guest checkout should toggle off some options.
+				const guestCheckout = document.getElementById("woocommerce_enable_guest_checkout");
+
+				if ( guestCheckout ) {
+					guestCheckout.addEventListener('change', function() {
+						const isChecked = this.checked;
+						const input = document.getElementById("woocommerce_enable_delayed_account_creation");
+						if ( ! input ) {
+							return;
+						}
+						input.disabled = !isChecked;
+					});
+					guestCheckout.dispatchEvent(new Event('change')); // Initial state
+				}
 			});
 		</script>
 		<?php

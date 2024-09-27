@@ -4,7 +4,7 @@
 import apiFetch from '@wordpress/api-fetch';
 
 export function acceptWcsTos() {
-	const path = '/wc/v1/connect/tos';
+	const path = '/wcshipping/v1/tos';
 	return apiFetch( {
 		path,
 		method: 'POST',
@@ -13,7 +13,15 @@ export function acceptWcsTos() {
 }
 
 export function getWcsAssets() {
-	const path = '/wc/v1/connect/assets';
+	const path = '/wcshipping/v1/assets';
+	return apiFetch( {
+		path,
+		method: 'GET',
+	} );
+}
+
+export function getWcsLabelPurchaseConfigs( orderId ) {
+	const path = `wcshipping/v1/config/label-purchase/${ orderId }`;
 	return apiFetch( {
 		path,
 		method: 'GET',

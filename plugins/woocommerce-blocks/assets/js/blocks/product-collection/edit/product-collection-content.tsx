@@ -10,16 +10,16 @@ import { useInstanceId } from '@wordpress/compose';
 import { useEffect, useRef, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * Internal dependencies
  */
-import type {
+import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
-	ProductCollectionEditComponentProps,
+	ProductCollectionContentProps,
+	WidthOptions,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
@@ -68,19 +68,23 @@ const useQueryId = (
 
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
-	usesReference,
 	...props
-}: ProductCollectionEditComponentProps ) => {
+}: ProductCollectionContentProps ) => {
 	const isInitialAttributesSet = useRef( false );
-	const { clientId, attributes, setAttributes } = props;
-	const location = useGetLocation( props.context, props.clientId );
+	const {
+		clientId,
+		attributes,
+		setAttributes,
+		location,
+		isUsingReferencePreviewMode,
+	} = props;
 
 	useSetPreviewState( {
 		setPreviewState,
 		setAttributes,
 		location,
 		attributes,
-		usesReference,
+		isUsingReferencePreviewMode,
 	} );
 
 	const blockProps = useBlockProps();
@@ -109,6 +113,21 @@ const ProductCollectionContent = ( {
 				__privatePreviewState: initialPreviewState,
 			} ),
 	};
+
+	let style = {};
+
+	/**
+	 * Set max-width if fixed width is set.
+	 */
+	if (
+		WidthOptions.FIXED === attributes?.dimensions?.widthType &&
+		attributes?.dimensions?.fixedWidth
+	) {
+		style = {
+			maxWidth: attributes.dimensions.fixedWidth,
+			margin: '0 auto',
+		};
+	}
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
@@ -156,7 +175,7 @@ const ProductCollectionContent = ( {
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
-			<div { ...innerBlocksProps } />
+			<div { ...innerBlocksProps } style={ style } />
 		</div>
 	);
 };

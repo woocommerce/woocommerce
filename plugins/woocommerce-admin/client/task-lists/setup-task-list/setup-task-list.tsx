@@ -200,6 +200,10 @@ export const SetupTaskList: React.FC< TaskListProps > = ( {
 		recordEvent( `${ listEventPrefix }click`, {
 			task_name: task.id,
 			context: layoutString,
+			...( task?.additionalData?.wooPaymentsIncentiveId && {
+				woopayments_incentive_id:
+					task.additionalData.wooPaymentsIncentiveId,
+			} ),
 		} );
 	};
 

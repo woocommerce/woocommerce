@@ -5190,8 +5190,38 @@ img.help_tip {
 			float: none;
 		}
 
-		td.disabled {
-			opacity: 0.5;
+		label:has(input:disabled) {
+			cursor: not-allowed;
+			> input:disabled {
+				opacity: 0.7;
+				cursor: not-allowed;
+				pointer-events: none;
+			}
+			&[disabled-tooltip] {
+				position: relative;
+			}
+			&[disabled-tooltip]::before {
+				pointer-events: none;
+				content: attr(disabled-tooltip);
+				position: absolute;
+				top: -6px;
+				left: 6px;
+				transform: translateX(-50%) translateY(-100%);
+				background: black;
+				text-align: center;
+				color: #fff;
+				padding: 6px;
+				font-size: 12px;
+				min-width: 80px;
+				max-width: 200px;
+				border-radius: 5px;
+				pointer-events: none;
+				opacity:0;
+			}
+			&[disabled-tooltip]:hover::before,
+			&[disabled-tooltip]:focus::before {
+				opacity:1
+			}
 		}
 
 		fieldset {
