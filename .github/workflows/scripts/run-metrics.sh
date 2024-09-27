@@ -28,35 +28,40 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
 	echo '##[endgroup]'
 
-	title "Comparing performance: building head"
+	title "##[group]Comparing performance: building head"
 	git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
 	pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	pnpm --filter='@woocommerce/plugin-woocommerce' build
+	echo '##[endgroup]'
 
-  	title "Comparing performance: benchmarking head"
+  	title "##[group]Comparing performance: benchmarking head"
 	# TODO: benchmark for missing reports only.
 	RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 	RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+	echo '##[endgroup]'
 
-	title "Comparing performance: building baseline"
+	title "##[group]Comparing performance: building baseline"
 	git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
 	pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	pnpm --filter='@woocommerce/plugin-woocommerce' build
+	echo '##[endgroup]'
 
-  	title "Comparing performance: benchmarking baseline"
+  	title "##[group]Comparing performance: benchmarking baseline"
 	# TODO: benchmark for missing reports only.
 	RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 	RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+	echo '##[endgroup]'
 
 	# This step is intended for running the script locally.
-	title "Comparing performance: restoring codebase state back to head"
+	title "##[group]Comparing performance: restoring codebase state back to head"
 	git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
 	pnpm install --frozen-lockfile
+	echo '##[endgroup]'
 
-  	title "Comparing performance: processing reports"
+  	title "##[group]Comparing performance: processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
 	# chance that the reference commit used for performance test stability
 	# becomes incompatible with the WP version. So, every time the "Tested up
@@ -72,6 +77,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# title "Publish results to CodeVitals"
 	# COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
 	# pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
+	echo '##[endgroup]'
 else
   	echo "Unsupported event: $GITHUB_EVENT_NAME"
 fi
