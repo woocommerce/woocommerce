@@ -455,7 +455,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		/**
 		 * Filter to customize the "Cost of Goods Sold value overrides the parent value" flag that gets loaded for a given variable product.
 		 *
-		 * @since x.x.x
+		 * @since 9.5.0
 		 *
 		 * @param bool $cogs_value_overrides_parent The flag as read from the database.
 		 * @param WC_Product $product The product for which the flag is being loaded.
@@ -573,7 +573,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			 * or to suppress the saving of the flag (so that custom storage can be used) if null is returned.
 			 * Note that returning null will suppress any database access (for either saving the flag or deleting it).
 			 *
-			 * @since x.x.x
+			 * @since 9.5.0
 			 *
 			 * @param bool|null $cogs_value_overrides_parent The flag to be written to the database. If null is returned nothing will be written or deleted.
 			 * @param WC_Product $product The product for which the flag is being saved.

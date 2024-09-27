@@ -2245,7 +2245,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		/**
 		 * Filter to customize the total Cost of Goods Sold value that get_cogs_total_value returns for a given product.
 		 *
-		 * @since x.x.x
+		 * @since 9.5.0
 		 *
 		 * @param float $total_value The effective total value of the product.
 		 * @param WC_Product $product The product for which the total value is being retrieved.

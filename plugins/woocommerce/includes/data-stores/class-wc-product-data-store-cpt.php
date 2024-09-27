@@ -467,7 +467,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given product.
 		 *
-		 * @since x.x.x
+		 * @since 9.5.0
 		 *
 		 * @param float $cogs_value The value as read from the database.
 		 * @param WC_Product $product The product for which the value is being loaded.
@@ -717,7 +717,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 * Filter to customize the Cost of Goods Sold value that gets saved for a given product,
 			 * or to suppress the saving of the value (so that custom storage can be used).
 			 *
-			 * @since x.x.x
+			 * @since 9.5.0
 			 *
 			 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
 			 * @param WC_Product $product The product for which the value is being saved.
