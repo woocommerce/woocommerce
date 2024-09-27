@@ -31,7 +31,6 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name "*_${GITHUB_SHA}_*" -print -quit)"; then
 		title "Skipping benchmarking head as benchmarking results already available under $ARTIFACTS_PATH"
-		find $ARTIFACTS_PATH -maxdepth 1 -name "*_${GITHUB_SHA}_*" -print -quit
 	else
 		title "##[group]Building head"
 		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
@@ -48,10 +47,12 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name "*_${BASE_SHA}_*" -print -quit)"; then
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
-		find $ARTIFACTS_PATH -maxdepth 1 -name "*_${BASE_SHA}_*" -print -quit
 	else
-		title "##[group]Building baseline"
+		title "##[group]Checkout baseline"
 		git fetch --no-tags --quiet origin trunk
+		echo '##[endgroup]'
+
+		title "##[group]Building baseline"
 		git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build
 		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
