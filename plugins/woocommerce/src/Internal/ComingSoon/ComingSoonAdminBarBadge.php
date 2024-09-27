@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ComingSoon;
+
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 
