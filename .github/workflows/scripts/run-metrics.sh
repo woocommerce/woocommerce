@@ -22,6 +22,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
+	WP_ARTIFACTS_PATH=$ARTIFACTS_PATH
 	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$HEAD_BRANCH (head) on WordPress v$WP_VERSION"
 
 	title "##[group]Setting up necessary tooling"
