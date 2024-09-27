@@ -145,8 +145,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return boolval( $locked );
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$result = $wpdb->query( $query );
+		// The insert query can potentially result in a deadlock if there is high concurrency
+		// when trying to insert products, which will result in a false negative for SKU lock
+		// and incorrectly products not being created.
+		// To mitigate this, we will retry the query 3 times before giving up.
+		for ( $attempts = 0; $attempts < 3; $attempts++ ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$result = $wpdb->query( $query );
+			if ( false !== $result ) {
+				break;
+			}
+		}
 
 		return (bool) $result;
 	}
