@@ -2801,7 +2801,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 			$method->invoke( $order_controller, $order );
 
-			// Clean up the test action
+			// Clean up the test action.
 			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
 	}
 
