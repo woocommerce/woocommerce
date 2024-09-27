@@ -2800,7 +2800,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 					$errors->add('custom_error', 'This is a custom validation error');
 			}, 10, 2);
 
-			// Use reflection to make the protected method accessible
+			// Use reflection to make the protected method accessible.
 			$reflection = new ReflectionClass( $order_controller );
 			$method = $reflection->getMethod( 'perform_custom_order_validation' );
 			$method->setAccessible( true );
