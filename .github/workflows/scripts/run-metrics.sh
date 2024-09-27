@@ -4,7 +4,7 @@ set -eo pipefail
 
 GITHUB_EVENT_NAME='pull_request'
 GITHUB_SHA=$(git rev-parse HEAD)
-export ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
+ARTIFACTS_PATH='~/PhpstormProjects/plugins/woocommerce/artifacts/'
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
@@ -49,9 +49,12 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	echo '##[endgroup]'
 
   	title "##[group]Comparing performance: benchmarking baseline"
-	# TODO: benchmark for missing reports only.
-	RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-	RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name \'*_${BASE_SHA}_*\' -print -quit)"; then
+  	  	echo "Skipping benchmarking as benchmarking results already available under $ARTIFACTS_PATH"
+	else
+  	  	RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+  	  	RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+	fi
 	echo '##[endgroup]'
 
 	# This step is intended for running the script locally.
