@@ -24,7 +24,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$HEAD_BRANCH (head) on WordPress v$WP_VERSION"
 
 	title "Setting up necessary tooling"
-	pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
+	pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null &
 	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
 
 	title "Comparing performance: building head"
@@ -53,7 +53,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	title "Comparing performance: restoring codebase state back to head"
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
-	pnpm install
+	pnpm install --frozen-lockfile
 
   	title "Comparing performance: processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
