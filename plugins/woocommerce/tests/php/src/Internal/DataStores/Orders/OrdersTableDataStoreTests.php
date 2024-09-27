@@ -2795,7 +2795,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$method = $reflection->getMethod( 'perform_custom_order_validation' );
 			$method->setAccessible( true );
 
-			// Assert that the method throws a RouteException with our custom error
+			// Assert that the method throws a RouteException with our custom error.
 			$this->expectException( RouteException::class );
 			$this->expectExceptionMessage( 'This is a custom validation error' );
 
