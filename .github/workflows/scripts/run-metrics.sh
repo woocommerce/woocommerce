@@ -24,7 +24,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$HEAD_BRANCH (head) on WordPress v$WP_VERSION"
 
 	title "Setting up compare-perf"
-    pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
+	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
 
 	title "Comparing performance: building head"
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
@@ -69,7 +69,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	# title "Publish results to CodeVitals"
 	# COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
-    # pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
+	# pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
 else
   	echo "Unsupported event: $GITHUB_EVENT_NAME"
 fi
