@@ -124,7 +124,9 @@ export const Transitional = ( {
 					<Button
 						href={ homeUrl }
 						className="woocommerce-customize-store__transitional-preview-button"
-						variant="link"
+						variant={
+							isEntrepreneurFlow() ? 'secondary' : 'primary'
+						}
 						onClick={ () => {
 							trackEvent(
 								'customize_your_store_transitional_preview_store_click'
@@ -252,7 +254,6 @@ export const Transitional = ( {
 									</p>
 									<Button
 										variant="link"
-										href={ `${ ADMIN_URL }admin.php?page=wc-admin` }
 										onClick={ () => {
 											trackEvent(
 												'customize_your_store_transitional_home_click'
