@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ComingSoon;
+
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 
@@ -117,4 +118,61 @@ class ComingSoonAdminBarBadge {
 			</style>';
 		}
 	}
+}
+
+add_action( 'show_user_profile', '\Automattic\WooCommerce\Internal\ComingSoon\custom_user_profile_field' );
+add_action( 'edit_user_profile', '\Automattic\WooCommerce\Internal\ComingSoon\custom_user_profile_field' );
+
+function custom_user_profile_field( $user ) {
+    ?>
+	<br />
+    <h3><?php _e('WooCommerce Options', 'textdomain'); ?></h3>
+    <table class="form-table">
+        <tr>
+            <th><label for="custom_option"><?php _e('Toolbar', 'textdomain'); ?></label></th>
+            <td>
+                <label><input type="checkbox" name="custom_option" id="custom_option" value="<?php echo esc_attr( get_user_meta( $user->ID, 'custom_option', true ) ); ?>" class="regular-text" /> Show the site visibility badge in toolbar.</label>
+            </td>
+        </tr>
+    </table>
+    <?php
+}
+
+add_action( 'personal_options_update', '\Automattic\WooCommerce\Internal\ComingSoon\save_custom_user_profile_field' );
+add_action( 'edit_user_profile_update', '\Automattic\WooCommerce\Internal\ComingSoon\save_custom_user_profile_field' );
+
+function save_custom_user_profile_field( $user_id ) {
+    if ( !current_user_can( 'edit_user', $user_id ) ) {
+        return false;
+    }
+    update_user_meta( $user_id, 'custom_option', sanitize_text_field( $_POST['custom_option'] ) );
+}
+
+
+add_action( 'personal_options', '\Automattic\WooCommerce\Internal\ComingSoon\custom_show_badge_option' );
+
+function custom_show_badge_option( $user ) {
+    ?>
+    <tr>
+        <th scope="row"><?php _e('Site Visibility Badge', 'textdomain'); ?></th>
+        <td>
+            <label for="show_badge">
+                <input type="checkbox" name="show_badge" id="show_badge" value="1" <?php checked( get_user_meta( $user->ID, 'show_badge', true ), 1 ); ?> />
+                <?php _e('Show WooCommerce site visibility badge in Toolbar', 'textdomain'); ?>
+            </label>
+        </td>
+    </tr>
+    <?php
+}
+
+add_action( 'personal_options_update', 'save_show_badge_option' );
+add_action( 'edit_user_profile_update', 'save_show_badge_option' );
+
+function save_show_badge_option( $user_id ) {
+    if ( ! current_user_can( 'edit_user', $user_id ) ) {
+        return false;
+    }
+
+    $show_badge = isset( $_POST['show_badge'] ) ? 1 : 0;
+    update_user_meta( $user_id, 'show_badge', $show_badge );
 }
