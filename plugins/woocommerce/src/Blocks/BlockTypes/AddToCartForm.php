@@ -94,13 +94,23 @@ class AddToCartForm extends AbstractBlock {
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
 		$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 
-		$classname          = $attributes['className'] ?? '';
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
+		$classes = implode(
+			' ',
+			array_filter(
+				array(
+					'wp-block-add-to-cart-form wc-block-add-to-cart-form',
+					esc_attr( $classes_and_styles['classes'] ),
+					esc_attr( $product_classname ),
+				)
+			)
+		);
+
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => 'wc-block-add-to-cart-form ' . esc_attr( $classes_and_styles['classes'] ) . ' ' . esc_attr( $classname ) . ' ' . esc_attr( $product_classname ),
+				'class' => $classes,
 				'style' => esc_attr( $classes_and_styles['styles'] ),
 			)
 		);
