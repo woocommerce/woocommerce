@@ -38,6 +38,14 @@ const orderOptions = [
 		value: 'date/asc',
 	},
 	{
+		label: __( 'Price, high to low', 'woocommerce' ),
+		value: 'price/desc',
+	},
+	{
+		label: __( 'Price, low to high', 'woocommerce' ),
+		value: 'price/asc',
+	},
+	{
 		value: 'popularity/desc',
 		label: __( 'Best Selling', 'woocommerce' ),
 	},
