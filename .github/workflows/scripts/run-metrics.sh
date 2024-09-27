@@ -4,7 +4,7 @@ set -eo pipefail
 
 GITHUB_EVENT_NAME='pull_request'
 GITHUB_SHA=$(git rev-parse HEAD)
-ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce/artifacts)"
+ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce)/artifacts"
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
@@ -58,14 +58,14 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		echo '##[endgroup]'
-	fi
 
-	# This step is intended for running the script locally.
-	title "##[group]Comparing performance: restoring codebase state back to head"
-	git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
-	pnpm run --if-present clean:build
-	pnpm install --frozen-lockfile
-	echo '##[endgroup]'
+		# This step is intended for running the script locally.
+		title "##[group]Comparing performance: restoring codebase state back to head"
+		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
+		pnpm run --if-present clean:build
+		pnpm install --frozen-lockfile
+		echo '##[endgroup]'
+	fi
 
   	title "##[group]Comparing performance: processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
