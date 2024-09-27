@@ -2799,7 +2799,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			$this->expectException(RouteException::class);
 			$this->expectExceptionMessage('This is a custom validation error');
 
-			$method->invoke($order_controller, $order);
+			$method->invoke( $order_controller, $order );
 
 			// Clean up the test action
 			remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
