@@ -264,7 +264,12 @@ test.describe(
 			const replyText = `Thank you for your feedback! (replied ${ Date.now() })`;
 			await replyTextArea.fill( replyText );
 
-			await page.locator( 'button.save.button.button-primary' ).click();
+			await page
+				.getByRole( 'cell', { name: 'Reply to Comment' } )
+				.getByRole( 'button', { name: 'Reply', exact: true } )
+				.click();
+
+			await expect( replyTextArea ).toBeHidden();
 
 			const productLink = await reviewRow
 				.locator( 'a.comments-view-item-link' )
