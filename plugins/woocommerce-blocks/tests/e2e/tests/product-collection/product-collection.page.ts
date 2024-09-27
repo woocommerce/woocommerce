@@ -207,7 +207,8 @@ class ProductCollectionPage {
 	}
 
 	async chooseProductInEditorProductPickerIfAvailable(
-		pageReference: Page | FrameLocator
+		pageReference: Page | FrameLocator,
+		productName = 'Album'
 	) {
 		const editorProductPicker = pageReference.locator(
 			SELECTORS.productPicker
@@ -217,7 +218,7 @@ class ProductCollectionPage {
 			await editorProductPicker
 				.locator( 'label' )
 				.filter( {
-					hasText: 'Album',
+					hasText: productName,
 				} )
 				.click();
 		}

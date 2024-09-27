@@ -7,8 +7,6 @@
 
 declare(strict_types=1);
 
-
-use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskList;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 
@@ -166,4 +164,11 @@ class Fake_WC_Payments_Gateway extends WC_Payment_Gateway {
 	public function set_partially_onboarded( $partially_onboarded ) {
 		$this->partially_onboarded = $partially_onboarded;
 	}
+}
+
+if ( ! class_exists( '\WC_Payments' ) ) {
+	/**
+	 * Fake WooPayments main class for testing.
+	 */
+	class WC_Payments {}
 }

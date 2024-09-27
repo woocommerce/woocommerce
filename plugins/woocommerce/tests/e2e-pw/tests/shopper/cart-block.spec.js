@@ -75,7 +75,7 @@ test.describe( 'Cart Block page', { tag: [ '@payments', '@services' ] }, () => {
 
 	test(
 		'can see empty cart, add and remove simple & cross sell product, increase to max quantity',
-		{ tag: [ '@could-be-unit-test' ] },
+		{ tag: [ '@could-be-lower-level-test' ] },
 		async ( { page, testPage } ) => {
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );

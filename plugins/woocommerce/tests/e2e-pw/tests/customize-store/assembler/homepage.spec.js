@@ -64,7 +64,7 @@ test.describe( 'Assembler -> Homepage', { tag: '@gutenberg' }, () => {
 				'no'
 			);
 
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}

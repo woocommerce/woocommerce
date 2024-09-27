@@ -107,7 +107,11 @@ async function fetchJsonWithCache(
 async function fetchSearchResults(
 	params: URLSearchParams,
 	abortSignal?: AbortSignal
-): Promise< Product[] > {
+): Promise< {
+	products: Product[];
+	totalPages: number;
+	totalProducts: number;
+} > {
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
@@ -138,6 +142,8 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
+							regularPrice: product.regular_price,
+							isOnSale: product.is_on_sale,
 							averageRating: product.rating ?? null,
 							reviewsCount: product.reviews_count ?? null,
 							isInstallable: product.is_installable,
@@ -151,9 +157,12 @@ async function fetchSearchResults(
 						};
 					}
 				);
-				resolve( products );
+				const totalPages = ( json as SearchAPIJSONType ).total_pages;
+				const totalProducts = ( json as SearchAPIJSONType )
+					.total_products;
+				resolve( { products, totalPages, totalProducts } );
 			} )
-			.catch( () => reject );
+			.catch( reject );
 	} );
 }
 
@@ -171,6 +180,17 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 		} ) ) as Promise< ProductGroup[] >;
 	} catch ( error ) {
 		return [];
+	}
+}
+
+function getProductType( tab: string ): ProductType {
+	switch ( tab ) {
+		case 'themes':
+			return ProductType.theme;
+		case 'business-services':
+			return ProductType.businessService;
+		default:
+			return ProductType.extension;
 	}
 }
 
@@ -408,6 +428,8 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		icon: subscription.product_icon,
 		url: subscription.product_url,
 		price: -1,
+		regularPrice: -1,
+		isOnSale: false,
 		averageRating: null,
 		reviewsCount: null,
 		isInstallable: false,
@@ -478,6 +500,7 @@ export {
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,
 	getInstallUrl,
