@@ -9,7 +9,6 @@ import { test as base, expect } from '@woocommerce/e2e-utils';
  */
 import ProductCollectionPage, {
 	BLOCK_LABELS,
-	Collections,
 	SELECTORS,
 } from './product-collection.page';
 
