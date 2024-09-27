@@ -16,6 +16,9 @@ function title() {
 }
 
 if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+	# Disable some of git-hooks to reduce distractions and amount of output.
+	SKIP_POST_CHECKOUT=1
+
 	# It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df
 	# where compare-perf reporting mode was introduced for processing the provided reports.
 	BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
@@ -26,8 +29,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
     # pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
 
 	title "Comparing performance: building head"
-	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout $GITHUB_REF
-	pnpm run clean:build
+	git reset --hard && git checkout $GITHUB_REF
+	pnpm run --if-present clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
 
@@ -37,8 +40,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	title "Comparing performance: building baseline"
-	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
-	pnpm run clean:build
+	git reset --hard && git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
+	pnpm run --if-present clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
 
@@ -48,8 +51,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	title "Comparing performance: restoring codebase state back to head"
-	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout $GITHUB_REF
-	pnpm run clean:build
+	git reset --hard && git checkout $GITHUB_REF
+	pnpm run --if-present clean:build
 
   	title "Comparing performance: processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
