@@ -23,16 +23,12 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
 	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$HEAD_BRANCH (head) on WordPress v$WP_VERSION"
 
-	echo "$(find $ARTIFACTS_PATH -maxdepth 1 -name \'*_${BASE_SHA}_*\' -print -quit)"
-	echo "find $ARTIFACTS_PATH -maxdepth 1 -name \'*_${BASE_SHA}_*\' -print -quit"
-
-
 	title "##[group]Setting up necessary tooling"
 	pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null &
 	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
 	echo '##[endgroup]'
 
-	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name \'*_${BASE_SHA}_*\' -print -quit)"; then
+	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name *_${BASE_SHA}_* -print -quit)"; then
 		title "Skipping benchmarking head as benchmarking results already available under $ARTIFACTS_PATH"
 	else
 		title "##[group]Comparing performance: building head"
@@ -49,7 +45,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 	fi
 
-	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name \'*_${BASE_SHA}_*\' -print -quit)"; then
+	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name *_${BASE_SHA}_* -print -quit)"; then
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
 	else
 		title "##[group]Comparing performance: building baseline"
