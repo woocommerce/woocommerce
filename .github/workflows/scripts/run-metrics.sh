@@ -33,14 +33,14 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		title "Skipping benchmarking head as benchmarking results already available under $ARTIFACTS_PATH"
 		find $ARTIFACTS_PATH -maxdepth 1 -name "*_${GITHUB_SHA}_*" -print -quit
 	else
-		title "##[group]Comparing performance: building head"
+		title "##[group]Building head"
 		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build
 		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 		pnpm --filter='@woocommerce/plugin-woocommerce' build
 		echo '##[endgroup]'
 
-		title "##[group]Comparing performance: benchmarking head"
+		title "##[group]Benchmarking head"
 		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		echo '##[endgroup]'
@@ -50,27 +50,27 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
 		find $ARTIFACTS_PATH -maxdepth 1 -name "*_${BASE_SHA}_*" -print -quit
 	else
-		title "##[group]Comparing performance: building baseline"
+		title "##[group]Building baseline"
 		git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build
 		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 		pnpm --filter='@woocommerce/plugin-woocommerce' build
 		echo '##[endgroup]'
 
-		title "##[group]Comparing performance: benchmarking baseline"
+		title "##[group]Benchmarking baseline"
 		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		echo '##[endgroup]'
 
 		# This step is intended for running the script locally.
-		title "##[group]Comparing performance: restoring codebase state back to head"
+		title "##[group]Restoring codebase state back to head"
 		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH > /dev/null && echo 'On' $(git rev-parse HEAD)
 		pnpm run --if-present clean:build
 		pnpm install --frozen-lockfile
 		echo '##[endgroup]'
 	fi
 
-  	title "##[group]Comparing performance: processing reports"
+  	title "##[group]Processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
 	# chance that the reference commit used for performance test stability
 	# becomes incompatible with the WP version. So, every time the "Tested up
