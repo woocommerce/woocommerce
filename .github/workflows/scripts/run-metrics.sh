@@ -21,8 +21,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
 	echo "Comparing performance between: $BASE_SHA (base) and $GITHUB_SHA (head) on WordPress v$WP_VERSION"
 
-	title "Installing dependencies"
-    # pnpm install --frozen-lockfile --filter="compare-perf" > /dev/null
+	title "Setting up compare-perf"
+    pnpm install --frozen-lockfile --filter="compare-perf" > /dev/null
 
   	title "Comparing performance: benchmarking"
 	# TODO: benchmark for missing reports only.
