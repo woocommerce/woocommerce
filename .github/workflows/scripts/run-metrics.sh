@@ -30,7 +30,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
 	pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
-	# pnpm --filter='@woocommerce/plugin-woocommerce' build
+	pnpm --filter='@woocommerce/plugin-woocommerce' build
 
   	title "Comparing performance: benchmarking head"
 	# TODO: benchmark for missing reports only.
@@ -41,7 +41,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA> /dev/null && echo 'On' $(git rev-parse HEAD)
 	pnpm run --if-present clean:build
 	pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
-	# pnpm --filter='@woocommerce/plugin-woocommerce' build
+	pnpm --filter='@woocommerce/plugin-woocommerce' build
 
   	title "Comparing performance: benchmarking baseline"
 	# TODO: benchmark for missing reports only.
