@@ -25,14 +25,13 @@ const imageComponents = {
 const PromoCard = ( {
 	promotion,
 }: PromoCardProps ): React.ReactElement | null => {
-
-	const id = promotion.id;
-
-	if ( ! id ) return null;
+	const id = promotion?.id;
 
 	const [ isVisible, setIsVisible ] = useState(
 		localStorage.getItem( `wc-marketplacePromoClosed-${ id }` ) !== 'true'
 	);
+
+	if ( ! promotion?.id ) return null;
 
 	if ( ! isVisible ) return null;
 
@@ -85,7 +84,7 @@ const PromoCard = ( {
 				href={ promotion.cta_link ?? '' }
 				onClick={ handleClick }
 			>
-				{ promotion.cta_label?.en_US }
+				{ promotion.cta_label?.en_US ?? '' }
 			</Button>
 			<Button className="promo-cta-link" onClick={ handleDismiss }>
 				{ __( 'Dismiss', 'woocommerce' ) }
