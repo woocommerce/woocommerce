@@ -216,7 +216,7 @@ class ProductRating extends AbstractBlock {
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
 					'class' => $classes,
-					'style' => esc_attr( $styles_and_classes['styles'] ?? '' )
+					'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
 				)
 			);
 

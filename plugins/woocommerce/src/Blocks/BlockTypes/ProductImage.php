@@ -221,7 +221,7 @@ class ProductImage extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'class' => $classes,
-				'style' => esc_attr( $classes_and_styles['styles'] )
+				'style' => esc_attr( $classes_and_styles['styles'] ),
 			)
 		);
 
