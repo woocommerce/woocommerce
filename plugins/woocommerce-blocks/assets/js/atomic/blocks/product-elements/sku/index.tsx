@@ -29,6 +29,9 @@ const blockConfig: BlockConfiguration = {
 		'woocommerce/product-meta',
 	],
 	edit,
+	save() {
+		return null;
+	},
 	supports,
 };
 

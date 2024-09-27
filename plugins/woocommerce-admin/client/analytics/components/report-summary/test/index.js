@@ -134,7 +134,7 @@ describe( 'ReportSummary', () => {
 		).toBeInTheDocument();
 	} );
 
-	test( 'should display SummaryListPlaceholder when isRequesting is true', () => {
+	test( 'should display SummaryListPlaceholder when summaryData.isRequesting is true', () => {
 		const { container } = renderChart( 'number', null, null, false, true );
 
 		expect(

@@ -34,7 +34,7 @@ class Controller extends GenericController implements ExportableInterface {
 	protected $rest_base = 'reports/customers';
 
 	/**
-	 * Get data from Query.
+	 * Get data from Customers\Query.
 	 *
 	 * @override GenericController::get_datastore_data()
 	 *
@@ -304,18 +304,20 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']['default']      = 'date_registered';
-		$params['orderby']['enum']         = array(
-			'username',
-			'name',
-			'country',
-			'city',
-			'state',
-			'postcode',
-			'date_registered',
-			'date_last_active',
-			'orders_count',
-			'total_spend',
-			'avg_order_value',
+		$params['orderby']['enum']         = $this->apply_custom_orderby_filters(
+			array(
+				'username',
+				'name',
+				'country',
+				'city',
+				'state',
+				'postcode',
+				'date_registered',
+				'date_last_active',
+				'orders_count',
+				'total_spend',
+				'avg_order_value',
+			)
 		);
 		$params['match']                   = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),

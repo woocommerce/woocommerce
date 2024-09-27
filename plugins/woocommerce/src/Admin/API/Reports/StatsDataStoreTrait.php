@@ -105,7 +105,7 @@ trait StatsDataStoreTrait {
 			'pages'     => $total_pages,
 			'page_no'   => (int) $query_args['page'],
 		);
-		// If the requested page is out off range, return the deault empty object.
+		// If the requested page is out off range, return the default empty object.
 		if ( $query_args['page'] >= 1 && $query_args['page'] <= $total_pages ) {
 			// Fetch the actual data.
 			$data = $this->get_noncached_stats_data( $query_args, $params, $data, $expected_interval_count );

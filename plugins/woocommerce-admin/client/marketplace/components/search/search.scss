@@ -2,29 +2,15 @@
 
 .woocommerce-marketplace__search {
 	grid-area: mktpl-search;
-	background: $gutenberg-gray-100;
-	border: 1.5px solid transparent;
-	border-radius: 2px;
-	display: flex;
-	height: 40px;
-	padding: 4px 8px 4px 12px;
-
-	input[type="search"] {
-		all: unset;
-		flex-grow: 1;
-	}
-
-	&:focus-within {
-		background: #fff;
-		border-color: var(--wp-admin-theme-color, #3858e9);
-	}
+	margin-top: 15px;
+	width: 320px;
 
 	@media (width <= $breakpoint-medium) {
 		margin: $grid-unit-20 $grid-unit-20 $grid-unit-10 $grid-unit-20;
-	}
-}
+		width: calc(100% - $grid-unit-20 * 2);
 
-.woocommerce-marketplace__search-button {
-	all: unset;
-	cursor: pointer;
+		.components-input-control__input {
+			font-size: 13px !important;
+		}
+	}
 }

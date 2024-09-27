@@ -295,7 +295,7 @@ function custom_override_checkout_fields( $fields ) {
 add_action( 'woocommerce_admin_order_data_after_shipping_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta($order){
-    echo '<p><strong>'. esc_html__( 'Phone From Checkout Form' ) . ':</strong> ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '</p>';
+    echo '&lt;p&gt;&lt;strong&gt;'. esc_html__( 'Phone From Checkout Form' ) . ':&lt;/strong&gt; ' . esc_html( $order->get_meta( '_shipping_phone', true ) ) . '&lt;/p&gt;';
 }
 ```
 
@@ -317,7 +317,7 @@ add_action( 'woocommerce_after_order_notes', 'my_custom_checkout_field' );
 
 function my_custom_checkout_field( $checkout ) {
 
-    echo '<div id="my_custom_checkout_field"><h2>' . esc_html__( 'My Field' ) . '</h2>';
+    echo '&lt;div id="my_custom_checkout_field"&gt;&lt;h2&gt;' . esc_html__( 'My Field' ) . '&lt;/h2&gt;';
 
     woocommerce_form_field(
         'my_field_name',
@@ -330,7 +330,7 @@ function my_custom_checkout_field( $checkout ) {
         $checkout->get_value( 'my_field_name' )
     );
 
-    echo '</div>';
+    echo '&lt;/div&gt;';
 
 }
 ```
@@ -387,7 +387,7 @@ If you wish to display the custom field value on the admin order edition page, y
 add_action( 'woocommerce_admin_order_data_after_billing_address', 'my_custom_checkout_field_display_admin_order_meta', 10, 1 );
 
 function my_custom_checkout_field_display_admin_order_meta( $order ){
-    echo '<p><strong>' . esc_html__( 'My Field' ) . ':</strong> ' . esc_html( $order->get_meta( 'My Field', true ) ) . '</p>';
+    echo '&lt;p&gt;&lt;strong&gt;' . esc_html__( 'My Field' ) . ':&lt;/strong&gt; ' . esc_html( $order->get_meta( 'My Field', true ) ) . '&lt;/p&gt;';
 }
 ```
 

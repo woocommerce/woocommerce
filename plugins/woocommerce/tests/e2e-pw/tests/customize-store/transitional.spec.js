@@ -31,7 +31,7 @@ test.describe(
 			);
 
 			// Need a block enabled theme to test
-			await activateTheme( 'twentytwentyfour' );
+			await activateTheme( baseURL, 'twentytwentyfour' );
 		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
@@ -49,7 +49,7 @@ test.describe(
 
 		test.afterAll( async ( { baseURL } ) => {
 			// Reset theme back to default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 
 			// Reset tour to visible.
 			await setOption(

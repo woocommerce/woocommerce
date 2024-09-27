@@ -29,7 +29,7 @@ test.describe(
 			);
 
 			// Need a block enabled theme to test
-			await activateTheme( 'twentytwentyfour' );
+			await activateTheme( baseURL, 'twentytwentyfour' );
 		} );
 
 		test.beforeEach( async ( { baseURL } ) => {
@@ -47,7 +47,7 @@ test.describe(
 
 		test.afterAll( async ( { baseURL } ) => {
 			// Reset theme to the default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 
 			// Reset tour to visible.
 			await setOption(
@@ -117,8 +117,9 @@ test.describe(
 
 		test( 'it shows the "non default block theme" banner when the theme is a block theme different than TT4', async ( {
 			page,
+			baseURL,
 		} ) => {
-			await activateTheme( 'twentytwentythree' );
+			await activateTheme( baseURL, 'twentytwentythree' );
 
 			await page.goto( CUSTOMIZE_STORE_URL );
 
@@ -132,8 +133,9 @@ test.describe(
 
 		test( 'clicking on "Go to the Customizer" with a classic theme should go to the customizer', async ( {
 			page,
+			baseURL,
 		} ) => {
-			await activateTheme( 'twentytwenty' );
+			await activateTheme( baseURL, 'twentytwenty' );
 
 			await page.goto( CUSTOMIZE_STORE_URL );
 

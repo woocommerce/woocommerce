@@ -27,7 +27,6 @@ use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
-use Automattic\WooCommerce\Internal\McStats;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
@@ -46,7 +45,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '9.3.0';
+	public $version = '9.5.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -384,8 +383,10 @@ final class WooCommerce {
 			unset( $error_copy['message'] );
 
 			$context = array(
-				'source' => 'fatal-errors',
-				'error'  => $error_copy,
+				'source'         => 'fatal-errors',
+				'error'          => $error_copy,
+				// Indicate that this error should be logged remotely if remote logging is enabled.
+				'remote-logging' => true,
 			);
 
 			if ( false !== strpos( $message, 'Stack trace:' ) ) {
@@ -406,12 +407,6 @@ final class WooCommerce {
 				$message,
 				$context
 			);
-
-			// Record fatal error stats.
-			$container = wc_get_container();
-			$mc_stats  = $container->get( McStats::class );
-			$mc_stats->add( 'error', 'fatal-errors-during-shutdown' );
-			$mc_stats->do_server_side_stats();
 
 			/**
 			 * Action triggered when there are errors during shutdown.
@@ -728,6 +723,9 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
+			// Simulate loading plugin for the legacy reports.
+			// This will be removed after moving the legacy reports to a separate plugin.
+			include_once WC_ABSPATH . 'includes/admin/woocommerce-legacy-reports.php';
 		}
 
 		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.

@@ -285,7 +285,7 @@ final class BlockTypesController {
 	 * and prevent them from showing as an option in the Legacy Widget block.
 	 *
 	 * @param array $widget_types An array of widgets hidden in core.
-	 * @return array $widget_types An array inluding the WooCommerce widgets to hide.
+	 * @return array $widget_types An array including the WooCommerce widgets to hide.
 	 */
 	public function hide_legacy_widgets_with_block_equivalent( $widget_types ) {
 		array_push(
@@ -404,7 +404,6 @@ final class BlockTypesController {
 		// Update plugins/woocommerce-blocks/docs/internal-developers/blocks/feature-flags-and-experimental-interfaces.md
 		// when modifying this list.
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$block_types[] = 'ProductFilter';
 			$block_types[] = 'ProductFilters';
 			$block_types[] = 'ProductFiltersOverlay';
 			$block_types[] = 'ProductFiltersOverlayNavigation';
@@ -414,6 +413,9 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterRating';
 			$block_types[] = 'ProductFilterActive';
 			$block_types[] = 'ProductFilterClearButton';
+			$block_types[] = 'ProductFilterCheckboxList';
+			$block_types[] = 'ProductFilterChips';
+			$block_types[] = 'OrderConfirmation\CreateAccount';
 		}
 
 		/**

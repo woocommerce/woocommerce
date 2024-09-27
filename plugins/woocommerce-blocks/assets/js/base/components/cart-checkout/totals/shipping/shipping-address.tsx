@@ -35,7 +35,7 @@ export const ShippingAddress = ( {
 
 	const label = hasFormattedAddress
 		? __( 'Change address', 'woocommerce' )
-		: __( 'Calculate shipping for your location', 'woocommerce' );
+		: __( 'Enter address to check delivery options', 'woocommerce' );
 	const formattedLocation = formatShippingAddress( shippingAddress );
 	return (
 		<>

@@ -23,7 +23,27 @@ export type CheckoutState = {
 	shouldCreateAccount: boolean; // Should a user account be created?
 	status: STATUS; // Status of the checkout
 	useShippingAsBilling: boolean; // Should the billing form be hidden and inherit the shipping address?
+	editingBillingAddress: boolean; // Is the billing address being edited?
+	editingShippingAddress: boolean; // Is the shipping address being edited?
 };
+
+// Default editing state for CustomerAddress component comes from the current address and whether or not we're in the editor.
+const hasBillingAddress = !! (
+	checkoutData.billing_address.address_1 &&
+	( checkoutData.billing_address.first_name ||
+		checkoutData.billing_address.last_name )
+);
+
+const hasShippingAddress = !! (
+	checkoutData.shipping_address.address_1 &&
+	( checkoutData.shipping_address.first_name ||
+		checkoutData.shipping_address.last_name )
+);
+
+const billingMatchesShipping = isSameAddress(
+	checkoutData.billing_address,
+	checkoutData.shipping_address
+);
 
 export const defaultState: CheckoutState = {
 	additionalFields: checkoutData.additional_fields || {},
@@ -38,8 +58,7 @@ export const defaultState: CheckoutState = {
 	redirectUrl: '',
 	shouldCreateAccount: false,
 	status: STATUS.IDLE,
-	useShippingAsBilling: isSameAddress(
-		checkoutData.billing_address,
-		checkoutData.shipping_address
-	),
+	useShippingAsBilling: billingMatchesShipping,
+	editingBillingAddress: ! hasBillingAddress,
+	editingShippingAddress: ! hasShippingAddress,
 };

@@ -32,6 +32,36 @@ class FilesystemUtil {
 	}
 
 	/**
+	 * Recursively creates a directory (if it doesn't exist) and adds an empty index.html and a .htaccess to prevent
+	 * directory listing.
+	 *
+	 * @since 9.3.0
+	 *
+	 * @param string $path Directory to create.
+	 * @throws \Exception In case of error.
+	 */
+	public static function mkdir_p_not_indexable( string $path ): void {
+		$wp_fs = self::get_wp_filesystem();
+
+		if ( $wp_fs->is_dir( $path ) ) {
+			return;
+		}
+
+		if ( ! wp_mkdir_p( $path ) ) {
+			throw new \Exception( esc_html( sprintf( 'Could not create directory: %s.', wp_basename( $path ) ) ) );
+		}
+
+		$files = array(
+			'.htaccess'  => 'deny from all',
+			'index.html' => '',
+		);
+
+		foreach ( $files as $name => $content ) {
+			$wp_fs->put_contents( trailingslashit( $path ) . $name, $content );
+		}
+	}
+
+	/**
 	 * Wrapper to initialize the WP filesystem with defined credentials if they are available.
 	 *
 	 * @return bool True if the $wp_filesystem global was successfully initialized.

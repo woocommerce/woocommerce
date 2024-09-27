@@ -1,4 +1,7 @@
 <?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -7,11 +10,14 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+use ReflectionClass;
+use WC_Data_Store;
+use WC_Order;
 
 /**
  * Tests for DataSynchronizer class.
  */
-class DataSynchronizerTests extends HposTestCase {
+class DataSynchronizerTests extends \HposTestCase {
 	use ArraySubsetAsserts;
 	use HPOSToggleTrait;
 
@@ -141,7 +147,7 @@ class DataSynchronizerTests extends HposTestCase {
 
 		$post_order = OrderHelper::create_order();
 		$this->assertInstanceOf(
-			WP_Post::class,
+			\WP_Post::class,
 			get_post( $post_order->get_id() ),
 			'The order was initially created as a post.'
 		);
