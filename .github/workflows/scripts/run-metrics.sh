@@ -23,7 +23,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
 	title "Comparing performance between: $BASE_SHA@trunk (base) and $GITHUB_SHA@$HEAD_BRANCH (head) on WordPress v$WP_VERSION"
 
-	title "Setting up compare-perf"
+	title "Setting up necessary tooling"
+	pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install &
 	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
 
 	title "Comparing performance: building head"
