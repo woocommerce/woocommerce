@@ -4,6 +4,7 @@ set -eo pipefail
 
 GITHUB_EVENT_NAME='pull_request'
 GITHUB_SHA='1cb6eedc0b4e7cf14457699611341d4b778e90db'
+ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
@@ -22,7 +23,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	echo "Comparing performance between: $BASE_SHA (base) and $GITHUB_SHA (head) on WordPress v$WP_VERSION"
 
 	title "Setting up compare-perf"
-    pnpm install --frozen-lockfile --filter="compare-perf" > /dev/null
+    pnpm install --frozen-lockfile --filter="compare-perf"
 
   	title "Comparing performance: benchmarking"
 	# TODO: benchmark for missing reports only.
