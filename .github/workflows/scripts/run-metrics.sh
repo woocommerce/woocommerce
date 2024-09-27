@@ -39,7 +39,6 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 
 		title "##[group]Comparing performance: benchmarking head"
-		# TODO: benchmark for missing reports only.
 		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 		echo '##[endgroup]'
