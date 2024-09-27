@@ -17,7 +17,7 @@ function title() {
 }
 
 if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
-	export WP_ARTIFACTS_PATH=$ARTIFACTS_PATH
+	mkdir -p $ARTIFACTS_PATH && export WP_ARTIFACTS_PATH=$ARTIFACTS_PATH
 
 	# It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df
 	# where compare-perf reporting mode was introduced for processing the provided reports.
