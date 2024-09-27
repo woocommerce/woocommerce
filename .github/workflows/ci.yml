@@ -124,6 +124,8 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
+        with:
+          depth: ${{ ( ( matrix.testType == 'performance' && '0' ) || '1' ) }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Install Monorepo'
