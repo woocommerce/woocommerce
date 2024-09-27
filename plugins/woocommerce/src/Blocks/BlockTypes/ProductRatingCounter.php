@@ -193,9 +193,20 @@ class ProductRatingCounter extends AbstractBlock {
 				10
 			);
 
+			$classes = implode(
+				' ',
+				array_filter(
+					array(
+						'wc-block-components-product-rating-counter wc-block-grid__product-rating-counter',
+						esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
+						esc_attr( $styles_and_classes['classes'] ),
+					)
+				)
+			);
+
 			$wrapper_attributes = get_block_wrapper_attributes(
 				array(
-					'class' => 'wc-block-components-product-rating-counter wc-block-grid__product-rating-counter ' . esc_attr( $text_align_styles_and_classes['class'] ?? '' ) . ' ' . esc_attr( $styles_and_classes['classes'] ),
+					'class' => $classes,
 					'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
 				)
 			);
