@@ -238,6 +238,13 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 			'Invalid displayLayout: displayLayout must be an object.'
 		);
 	}
+	// attributes.dimensions
+	if (
+		config.attributes?.dimensions !== undefined &&
+		typeof config.attributes.dimensions !== 'object'
+	) {
+		console.warn( 'Invalid dimensions: dimensions must be an object.' );
+	}
 	// attributes.hideControls
 	if (
 		config.attributes?.hideControls !== undefined &&
