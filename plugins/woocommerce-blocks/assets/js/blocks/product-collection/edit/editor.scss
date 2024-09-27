@@ -180,6 +180,16 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	}
 }
 
+// Product to Show Radio Control
+.wc-block-product-collection-product-reference-radio {
+	width: 100%;
+
+	// Current gap is really small so we increase it
+	.components-flex {
+		gap: 8px;
+	}
+}
+
 // Linked Product Control
 .wc-block-product-collection-linked-product-control {
 	width: 100%;

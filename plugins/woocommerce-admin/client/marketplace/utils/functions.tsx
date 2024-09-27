@@ -142,6 +142,8 @@ async function fetchSearchResults(
 							url: product.link,
 							// Due to backwards compatibility, raw_price is from search API, price is from featured API
 							price: product.raw_price ?? product.price,
+							regularPrice: product.regular_price,
+							isOnSale: product.is_on_sale,
 							averageRating: product.rating ?? null,
 							reviewsCount: product.reviews_count ?? null,
 							isInstallable: product.is_installable,
@@ -426,6 +428,8 @@ const subscriptionToProduct = ( subscription: Subscription ): Product => {
 		icon: subscription.product_icon,
 		url: subscription.product_url,
 		price: -1,
+		regularPrice: -1,
+		isOnSale: false,
 		averageRating: null,
 		reviewsCount: null,
 		isInstallable: false,

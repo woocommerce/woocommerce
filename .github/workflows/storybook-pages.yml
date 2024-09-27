@@ -27,6 +27,8 @@ jobs:
 
             - name: Build Storybook
               run: pnpm --filter='@woocommerce/storybook' build-storybook --quiet
+              env:
+                  STORYBOOK_COMPOSITION_PATH_PREFIX: /woocommerce
 
             - name: Deploy
               uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0

@@ -260,7 +260,7 @@ test.describe( 'Assembler -> Color Pickers', { tag: '@gutenberg' }, () => {
 			);
 
 			// Reset theme back to default.
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 			await customizeStorePageObject.resetCustomizeStoreChanges(
 				baseURL
 			);
