@@ -246,6 +246,14 @@ test.describe(
 				'wp-admin/edit.php?post_type=product&page=product-reviews'
 			);
 
+			// Handle notice if present
+			await page.addLocatorHandler(
+				page.getByRole( 'link', { name: 'Dismiss' } ),
+				async () => {
+					await page.getByRole( 'link', { name: 'Dismiss' } ).click();
+				}
+			);
+
 			const reviewRow = page.locator( `#comment-${ review.id }` );
 			await reviewRow.hover();
 			await reviewRow.getByRole( 'button', { name: 'Reply' } ).click();
