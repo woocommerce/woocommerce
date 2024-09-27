@@ -88,7 +88,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA $BASE_SHA --tests-branch $GITHUB_SHA --wp-version "${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}" --ci --skip-benchmarking
 	echo '##[endgroup]'
 
-	if [ "$GITHUB_EVENT_NAME" == "push" ]; then
+	if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
 		title "##[group]Publish results to CodeVitals"
 		COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
 		pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
