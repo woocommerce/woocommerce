@@ -12,8 +12,10 @@
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:copy-assets": "wireit",
-		"build:project:actualize-translation-domains": "node ./bin/package-update-textdomain.js",
+		"build:project:copy-assets:legacy": "wireit",
+		"build:project:copy-assets:admin": "wireit",
+		"build:project:copy-assets:blocks": "wireit",
+		"build:project:actualize-translation-domains": "wireit",
 		"build:zip": "./bin/build-zip.sh",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
@@ -657,11 +659,40 @@
 		"ignoreRoot": []
 	},
 	"wireit": {
-		"build:project:copy-assets": {
-			"command": "rm -rf assets/client/blocks assets/client/admin assets/js assets/css && cp -r ../woocommerce-admin/build assets/client/admin && cp -r client/legacy/build/js assets/js && cp -r client/legacy/build/css assets/css && cp -r ../woocommerce-blocks/build assets/client/blocks && cp -r ../woocommerce-blocks/blocks.ini blocks.ini",
-			"dependencies": [
-				"dependencyOutputs"
+		"build:project:copy-assets:legacy": {
+			"command": "rsync -avhW --checksum --delete --quiet client/legacy/build/css/ assets/css && rsync -avhW --checksum --delete --quiet client/legacy/build/js/ assets/js",
+			"files": [
+				"client/legacy/build/**/*.*"
+			],
+			"output": [
+				"assets/css",
+				"assets/js"
 			]
+		},
+		"build:project:copy-assets:admin": {
+			"command": "rsync -avhW --checksum --delete --quiet ../woocommerce-admin/build/ assets/client/admin",
+			"files": [
+				"../woocommerce-admin/build/**/*.*"
+			],
+			"output": [
+				"assets/client/admin"
+			]
+		},
+		"build:project:copy-assets:blocks": {
+			"command": "rsync -avhW --checksum --delete --quiet ../woocommerce-blocks/build/ assets/client/blocks && rsync -avhW --checksum --quiet ../woocommerce-blocks/blocks.ini blocks.ini",
+			"files": [
+				"../woocommerce-blocks/build/**/*.*"
+			],
+			"output": [
+				"assets/client/blocks"
+			]
+		},
+		"build:project:actualize-translation-domains": {
+			"command": "node ./bin/package-update-textdomain.js",
+			"files": [
+				"packages/**/*.php"
+			],
+			"output": []
 		},
 		"watch:build:project:copy-assets": {
 			"command": "nodemon --exec \"pnpm run\" build:project",
@@ -681,6 +712,7 @@
 				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
 				"node_modules/@woocommerce/api/dist/",
 				"node_modules/@woocommerce/admin-e2e-tests/build",
+				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/admin-library/build",
