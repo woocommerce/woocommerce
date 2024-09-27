@@ -208,9 +208,19 @@ class ProductImage extends AbstractBlock {
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
+		$classes = implode(
+			' ',
+			array_filter(
+				array(
+					'wc-block-components-product-image wc-block-grid__product-image',
+					esc_attr( $classes_and_styles['classes'] ),
+				)
+			)
+		);
+
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => 'wc-block-components-product-image wc-block-grid__product-image ' . $classes_and_styles['classes'],
+				'class' => $classes,
 				'style' => esc_attr( $classes_and_styles['styles'] )
 			)
 		);
