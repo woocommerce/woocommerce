@@ -2,9 +2,9 @@
 
 set -eo pipefail
 
-# GITHUB_EVENT_NAME='pull_request'
-# GITHUB_SHA='1cb6eedc0b4e7cf14457699611341d4b778e90db'
-# ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
+GITHUB_EVENT_NAME='pull_request'
+GITHUB_SHA='1cb6eedc0b4e7cf14457699611341d4b778e90db'
+ARTIFACTS_PATH='~/PhpstormProjects/woocommerce/tools/compare-perf/artifacts'
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
@@ -26,8 +26,8 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
     # pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
 
 	title "Comparing performance: building head"
-	# git reset --hard && git checkout $GITHUB_REF
-	# pnpm clean:build
+	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout $GITHUB_REF
+	pnpm clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
 
@@ -37,7 +37,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	title "Comparing performance: building baseline"
-	# git reset --hard && git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
+	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout 55f855a2e6d769b5ae44305b2772eb30d3e721df
 	# pnpm clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
@@ -46,6 +46,10 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# TODO: benchmark for missing reports only.
 	# RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 	# RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+
+	title "Comparing performance: restoring codebase state back to head"
+	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout $GITHUB_REF
+	pnpm clean:build
 
   	title "Comparing performance: processing reports"
 	# Updating the WP version used for performance jobs means there’s a high
