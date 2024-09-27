@@ -28,18 +28,22 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false --ignore-scripts
 	echo '##[endgroup]'
 
-	title "##[group]Comparing performance: building head"
-	git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
-	pnpm run --if-present clean:build
-	pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
-	pnpm --filter='@woocommerce/plugin-woocommerce' build
-	echo '##[endgroup]'
+	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name \'*_${BASE_SHA}_*\' -print -quit)"; then
+		title "Skipping benchmarking head as benchmarking results already available under $ARTIFACTS_PATH"
+	else
+		title "##[group]Comparing performance: building head"
+		git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH> /dev/null && echo 'On' $(git rev-parse HEAD)
+		pnpm run --if-present clean:build
+		pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
+		pnpm --filter='@woocommerce/plugin-woocommerce' build
+		echo '##[endgroup]'
 
-  	title "##[group]Comparing performance: benchmarking head"
-	# TODO: benchmark for missing reports only.
-	RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-	RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
-	echo '##[endgroup]'
+		title "##[group]Comparing performance: benchmarking head"
+		# TODO: benchmark for missing reports only.
+		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+		echo '##[endgroup]'
+	fi
 
 	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name \'*_${BASE_SHA}_*\' -print -quit)"; then
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
