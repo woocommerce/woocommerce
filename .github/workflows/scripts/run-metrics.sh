@@ -27,7 +27,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
     # pnpm install --filter='compare-perf...' --frozen-lockfile --config.dedupe-peer-dependents=false
 
 	title "Comparing performance: building head"
-	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout --quiet $HEAD_BRANCH
+	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH
 	pnpm run --if-present clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
@@ -38,7 +38,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	title "Comparing performance: building baseline"
-	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout --quiet 55f855a2e6d769b5ae44305b2772eb30d3e721df
+	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet 55f855a2e6d769b5ae44305b2772eb30d3e721df
 	pnpm run --if-present clean:build
 	# pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile --config.dedupe-peer-dependents=false
 	# pnpm --filter='@woocommerce/plugin-woocommerce' build
@@ -49,7 +49,7 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	# RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
 
 	title "Comparing performance: restoring codebase state back to head"
-	git reset --hard && SKIP_POST_CHECKOUT=1 git checkout --quiet $HEAD_BRANCH
+	git reset --hard && git -c core.hooksPath=/dev/null checkout --quiet $HEAD_BRANCH
 	pnpm run --if-present clean:build
 
   	title "Comparing performance: processing reports"
