@@ -47,6 +47,10 @@ test.describe( 'Product Collection registration', () => {
 			name: 'My Custom Collection with Advanced Preview',
 			label: 'Block: My Custom Collection with Advanced Preview',
 		},
+		myCustomCollectionWithProductContext: {
+			name: 'My Custom Collection - Product Context',
+			label: 'Block: My Custom Collection - Product Context',
+		},
 	};
 
 	// Activate plugin which registers custom product collections
@@ -372,7 +376,7 @@ test.describe( 'Product Collection registration', () => {
 		} );
 	} );
 
-	test.skip( 'Product picker should be shown when selected product is deleted', async ( {
+	test( 'Product picker should be shown when selected product is deleted', async ( {
 		pageObject,
 		admin,
 		editor,
@@ -396,6 +400,9 @@ test.describe( 'Product Collection registration', () => {
 		await pageObject.chooseCollectionInPost(
 			'myCustomCollectionWithProductContext'
 		);
+		const block = editor.canvas.getByLabel(
+			MY_REGISTERED_COLLECTIONS.myCustomCollectionWithProductContext.label
+		);
 
 		// Verify that product picker is shown in Editor
 		const editorProductPicker = editor.canvas.locator(
@@ -408,6 +415,9 @@ test.describe( 'Product Collection registration', () => {
 			editor.canvas,
 			'A Test Product'
 		);
+		await expect(
+			block.getByLabel( BLOCK_LABELS.productImage ).first()
+		).toBeVisible();
 		await expect( editorProductPicker ).toBeHidden();
 
 		await editor.saveDraft();
@@ -436,6 +446,9 @@ test.describe( 'Product Collection registration', () => {
 
 		// Product Picker shouldn't be shown as product is available now
 		await page.reload();
+		await expect(
+			block.getByLabel( BLOCK_LABELS.productImage ).first()
+		).toBeVisible();
 		await expect( editorProductPicker ).toBeHidden();
 
 		// Delete the product from database, instead of trashing it
@@ -449,6 +462,7 @@ test.describe( 'Product Collection registration', () => {
 		} );
 
 		// Product picker should be shown in Editor
+		await page.reload();
 		await expect( deletedProductPicker ).toBeVisible();
 	} );
 } );
