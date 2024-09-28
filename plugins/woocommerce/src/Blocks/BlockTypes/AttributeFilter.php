@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 /**
  * AttributeFilter class.
  */
-class AttributeFilter extends AbstractFilterBlock {
+class AttributeFilter extends AbstractBlock {
 	/**
 	 * Block name.
 	 *
@@ -24,6 +24,19 @@ class AttributeFilter extends AbstractFilterBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 		$this->asset_data_registry->add( 'attributes', array_values( wc_get_attribute_taxonomies() ) );
+
+		// Enqueue any `queryState` that the UI will need to be aware of
+		// (Ex: the category id if we're on a category page, the tag id if we're on a tag page/etc)
+		$queryState = [];
+
+		if (is_product_category()) {
+			$queryState['category'] = get_queried_object_id();
+		}
+		if (is_product_tag()) {
+			$queryState['tag'] = get_queried_object()->term_id;
+		}
+
+		$this->asset_data_registry->add( 'queryState', $queryState );
 	}
 
 	/**
