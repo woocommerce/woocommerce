@@ -77,10 +77,12 @@ const Promotions: ( {
 					return null;
 				}
 
-				// Promotion is a notice
+				// Promotion is a promo
 				if ( promotion.format === 'promo-card' ) {
 					return <PromoCard key={ index } promotion={ promotion } />;
 				}
+
+				// Promotion is a notice
 				if ( promotion.format === 'notice' ) {
 					if ( ! promotion?.content ) {
 						return null;

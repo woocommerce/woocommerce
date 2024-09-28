@@ -73,7 +73,7 @@ const PromoCard = ( {
 				className="promo-text"
 				dangerouslySetInnerHTML={ sanitizeHTML(
 					promotion.content?.en_US
-				) } // Render HTML in the text
+				) }
 			/>
 		</div>
 	);
