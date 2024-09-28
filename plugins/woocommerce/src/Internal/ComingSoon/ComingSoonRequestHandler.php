@@ -91,8 +91,8 @@ class ComingSoonRequestHandler {
 		}
 
 		if ( $is_fse_theme ) {
-			// Since we've already rendered a template, return null to ensure no other template is rendered.
-			return null;
+			// Since we've already rendered a template, return empty string to ensure no other template is rendered.
+			return '';
 		} else {
 			// In non-FSE themes, other templates will still be rendered.
 			// We need to exit to prevent further processing.
