@@ -565,7 +565,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				// Extensions > Discover
 				$promotions[] = [
-					'id'            => 'promo-1',
 					'date_from_gmt' => '2024-09-04 00:00',
 					'date_to_gmt'   => '2024-10-22 23:59',
 					'format'        => 'promo-card',
@@ -591,7 +590,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				// Marketing > Coupons
 				$promotions[] = [
-					'id'            => 'promo-2',
 					'date_from_gmt' => '2024-09-04 00:00',
 					'date_to_gmt'   => '2024-10-22 23:59',
 					'format'        => 'promo-card',
@@ -615,7 +613,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				// Marketing > Overview
 				$promotions[] = [
-					'id'            => 'promo-3',
 					'date_from_gmt' => '2024-09-04 00:00',
 					'date_to_gmt'   => '2024-10-22 23:59',
 					'format'        => 'promo-card',
@@ -639,7 +636,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				// WooCommerce > Home
 				$promotions[] = [
-					'id'            => 'promo-4',
 					'date_from_gmt' => '2024-09-04 00:00',
 					'date_to_gmt'   => '2024-10-22 23:59',
 					'format'        => 'promo-card',

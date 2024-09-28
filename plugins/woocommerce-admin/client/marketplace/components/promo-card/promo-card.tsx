@@ -25,36 +25,37 @@ const imageComponents = {
 const PromoCard = ( {
 	promotion,
 }: PromoCardProps ): React.ReactElement | null => {
-	const id = promotion?.id;
+	const uri = window.location.pathname + window.location.search;
+
+	const getDismissedURIs = () =>
+		JSON.parse(
+			localStorage.getItem( 'wc-marketplaceDismissedPromos' ) || '[]'
+		);
 
 	const [ isVisible, setIsVisible ] = useState(
-		localStorage.getItem( `wc-marketplacePromoClosed-${ id }` ) !== 'true'
+		! getDismissedURIs().includes( uri )
 	);
-
-	if ( ! promotion?.id ) return null;
 
 	if ( ! isVisible ) return null;
 
-	const uri = window.location.pathname + window.location.search;
-
 	recordEvent( 'marketplace_promotion_viewed', {
-		id,
 		uri,
 	} );
 
 	const handleDismiss = () => {
 		setIsVisible( false );
-		localStorage.setItem( `wc-marketplacePromoClosed-${ id }`, 'true' );
+		localStorage.setItem(
+			'wc-marketplaceDismissedPromos',
+			JSON.stringify( getDismissedURIs().concat( uri ) )
+		);
 
 		recordEvent( 'marketplace_promotion_dismissed', {
-			id,
 			uri,
 		} );
 	};
 
 	const handleClick = () => {
 		recordEvent( 'marketplace_promotion_actioned', {
-			id,
 			uri,
 			target_uri: promotion.cta_link,
 		} );

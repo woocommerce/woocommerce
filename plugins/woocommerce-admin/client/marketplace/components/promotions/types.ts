@@ -6,7 +6,6 @@ export type Page = {
 };
 
 export type Promotion = {
-	id?: string;
 	date_from_gmt: string;
 	date_to_gmt: string;
 	format: string;
