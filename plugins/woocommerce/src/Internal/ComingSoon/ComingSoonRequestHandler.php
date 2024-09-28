@@ -39,7 +39,7 @@ class ComingSoonRequestHandler {
 	 * @internal
 	 *
 	 * @param string $template The path to the previously determined template.
-	 * @return string|null The path to the 'coming soon' template or null to prevent further template loading in FSE themes.
+	 * @return string The path to the 'coming soon' template or any empty string to prevent further template loading in FSE themes.
 	 */
 	public function handle_template_include( $template ) {
 		global $wp;
