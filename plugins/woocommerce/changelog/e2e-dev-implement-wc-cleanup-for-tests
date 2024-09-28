@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Calls the WC Cleanup plugin during test setup on external environments

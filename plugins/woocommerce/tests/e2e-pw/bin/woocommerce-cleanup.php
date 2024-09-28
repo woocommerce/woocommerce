@@ -21,21 +21,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_cleanup_media() {
 	$args = array(
-		'post_type'   => 'attachment',
-		'numberposts' => -1,
-		'post_status' => null,
-		'post_parent' => null,
+		'post_type'      => 'attachment',
+		'posts_per_page' => -1,
+		'post_status'    => 'any',
+		'fields'         => 'ids',
 	);
 
-	$attachments         = get_posts( $args );
+	$attachment_ids      = get_posts( $args );
 	$excluded_file_names = array( 'image-01', 'image-02', 'image-03' );
 
-	if ( $attachments ) {
-		foreach ( $attachments as $attachment ) {
-			$file_name = pathinfo( get_attached_file( $attachment->ID ), PATHINFO_FILENAME );
-			if ( ! in_array( $file_name, $excluded_file_names, true ) ) {
-				wp_delete_attachment( $attachment->ID, true );
-			}
+	foreach ( $attachment_ids as $attachment_id ) {
+		$file_name = pathinfo( get_attached_file( $attachment_id ), PATHINFO_FILENAME );
+		if ( ! in_array( $file_name, $excluded_file_names, true ) ) {
+			wp_delete_attachment( $attachment_id, true );
 		}
 	}
 
@@ -70,8 +68,8 @@ function wc_cleanup_directory( $dir, $excluded_file_names = array() ) {
 		}
 	}
 
-	// Remove the empty directory if it's not the base upload directory.
-	if ( wp_upload_dir()['basedir'] !== $dir ) {
+	// Only remove directory if it's empty and not the base upload directory.
+	if ( wp_upload_dir()['basedir'] !== $dir && count( scandir( $dir ) ) <= 2 ) {
 		if ( function_exists( 'wp_delete_directory' ) ) {
 			wp_delete_directory( $dir );
 		} elseif ( function_exists( 'WP_Filesystem' ) ) {
@@ -155,14 +153,16 @@ function wc_cleanup_reset_site() {
 	}
 
 	// Remove all orders.
-	$orders = get_posts(
+	$orders      = get_posts(
 		array(
-			'post_type'   => 'shop_order',
-			'numberposts' => -1,
+			'post_type'      => 'shop_order',
+			'posts_per_page' => -1,
+			'post_status'    => 'any',
 		)
 	);
+	$order_count = count( $orders );
 	foreach ( $orders as $order ) {
-		wp_delete_post( $order->ID, true );
+		$result = wp_delete_post( $order->ID, true );
 	}
 
 	// Remove all products.
@@ -217,10 +217,6 @@ function wc_cleanup_reset_site() {
 		// Set the active theme to Twenty Twenty-Three.
 		switch_theme( 'twentytwentythree' );
 	}
-
-	// Clean up the WooCommerce analytics tables.
-	wc_cleanup_analytics_table( 'wc_order_stats' );
-	wc_cleanup_analytics_table( 'wc_customer_lookup' );
 
 	// Remove all taxes.
 	wc_cleanup_taxes();
@@ -341,17 +337,14 @@ add_action(
 			'wc-cleanup/v1',
 			'/reset',
 			array(
-				'methods'             => 'POST',
+				'methods'             => 'GET',
 				'callback'            => 'wc_cleanup_reset_site_via_api',
 				'permission_callback' => function () {
-					// Verify the nonce before processing the request.
-					if ( ! isset( $_POST['wc_cleanup_reset_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wc_cleanup_reset_nonce'] ) ), 'wc_cleanup_reset_action' ) ) {
-						return new WP_Error( 'rest_forbidden', esc_html__( 'Nonce verification failed', 'woocommerce' ), array( 'status' => 403 ) );
-					}
-
+					// phpcs:disable WordPress.Security.NonceVerification.Recommended
 					$provided_key = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
-					$valid_key    = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
-					return $provided_key === $valid_key;
+						$valid_key    = 'FUFP2UrAbJa_.GMfs*nXne*9Fq7abvYv'; // Replace with your actual secret key.
+						// phpcs:enable WordPress.Security.NonceVerification.Recommended
+						return $provided_key === $valid_key;
 				},
 			)
 		);
@@ -359,11 +352,11 @@ add_action(
 );
 
 /**
- * Reset the WooCommerce site via API.
+ * Reset the site via API call.
  *
  * @return WP_REST_Response
  */
 function wc_cleanup_reset_site_via_api() {
 	wc_cleanup_reset_site();
-	return new WP_REST_Response( 'WooCommerce site has been reset.', 200 );
+	return new WP_REST_Response( array( 'message' => 'Site reset successfully' ), 200 );
 }
