@@ -643,7 +643,7 @@
           "menu_title": "Integrating admin pages",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
-          "hash": "c172fff2814f552e2ab5712edb9e716f75c27946d993a1ade8f2269cc9a8689d",
+          "hash": "9a8dc2055f8ea1abd30a57711a3d93168e7104ba40be65a7f7a704eaff2f04fb",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/working-with-woocommerce-admin-pages.md",
           "id": "6f9cc63bc4c614b9e01174069a5ddc4f3d7aa467"
         },
@@ -1805,5 +1805,5 @@
       "categories": []
     }
   ],
-  "hash": "f9e4ca069c837a2ac02419708c2adf44d1cf2aa18a1310f9ff9751c43192a481"
+  "hash": "7df127d2b26b4b233eff0380f1a8ddd1d686ed85b0dcad661f568dcd2477e022"
 }
