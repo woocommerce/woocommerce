@@ -11,8 +11,10 @@
 	"author": "Automattic",
 	"license": "GPL-3.0-or-later",
 	"scripts": {
-		"build-storybook": "pnpm build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true storybook build -c ./.storybook",
+		"build-storybook": "pnpm build-woocommerce && pnpm build-woocommerce-blocks-storybook && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true storybook build -c ./.storybook",
+		"postbuild-storybook": "cp ../../plugins/woocommerce-blocks/storybook/dist/iframe.html ./storybook-static/assets/woocommerce-blocks",
 		"build-woocommerce": "pnpm --filter=@woocommerce/plugin-woocommerce build",
+		"build-woocommerce-blocks-storybook": "pnpm --filter=@woocommerce/block-library storybook:build",
 		"preinstall": "npx only-allow pnpm",
 		"storybook": "pnpm build-woocommerce && ./import-wp-css-storybook.sh && BABEL_ENV=storybook STORYBOOK=true storybook dev -c ./.storybook -p 6007 --ci",
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook"
@@ -42,6 +44,7 @@
 		"@storybook/api": "7.6.19",
 		"@storybook/components": "7.6.19",
 		"@storybook/core-events": "7.6.19",
+		"@storybook/manager-api": "7.6.19",
 		"@storybook/react": "7.6.19",
 		"@storybook/react-webpack5": "7.6.19",
 		"@storybook/theming": "7.6.19",

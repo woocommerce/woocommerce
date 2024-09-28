@@ -27,6 +27,7 @@ export type BlockAttributes = {
 	iconSize?: number;
 	overlayMode: ProductFiltersBlockOverlayAttributeOptions;
 	triggerType: BlockVariationTriggerType;
+	overlayIcon: string;
 	style: {
 		border?: {
 			radius?: string | BorderRadius;

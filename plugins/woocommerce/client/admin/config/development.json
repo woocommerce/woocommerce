@@ -17,7 +17,6 @@
 		"marketing": true,
 		"minified-js": true,
 		"mobile-app-banner": true,
-		"navigation": true,
 		"onboarding": true,
 		"onboarding-tasks": true,
 		"pattern-toolkit-full-composability": true,
@@ -39,6 +38,7 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"blueprint": true,
-		"reactify-classic-payments-settings": false
+		"reactify-classic-payments-settings": false,
+		"use-wp-horizon": false
 	}
 }

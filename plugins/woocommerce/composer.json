@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "9.4.0",
+	"version": "9.5.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -34,7 +34,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.8.1",
+		"woocommerce/action-scheduler": "3.8.2",
 		"woocommerce/blueprint": "*"
 	},
 	"require-dev": {
@@ -96,12 +96,10 @@
 	},
 	"scripts": {
 		"post-install-cmd": [
-			"@composer bin all install --ansi",
-			"sh ./bin/package-update.sh"
+			"sh ./bin/post-install.sh"
 		],
 		"post-update-cmd": [
-			"@composer bin all update --ansi",
-			"sh ./bin/package-update.sh"
+			"sh ./bin/post-update.sh"
 		],
 		"test": [
 			"phpunit"

@@ -127,7 +127,7 @@ test.describe(
 
 		test(
 			'allows customer to calculate Free Shipping if in Germany',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page } ) => {
 				await page.goto( '/cart/' );
 				// Set shipping country to Germany
@@ -149,7 +149,7 @@ test.describe(
 
 		test(
 			'allows customer to calculate Flat rate and Local pickup if in France',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page } ) => {
 				await page.goto( '/cart/' );
 				// Set shipping country to France
@@ -179,7 +179,7 @@ test.describe(
 
 		test(
 			'should show correct total cart price after updating quantity',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page } ) => {
 				await page.goto( '/cart/' );
 				await page.locator( 'input.qty' ).fill( '4' );
@@ -200,7 +200,7 @@ test.describe(
 
 		test(
 			'should show correct total cart price with 2 products and flat rate',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page } ) => {
 				await addAProductToCart( page, secondProductId );
 
@@ -222,7 +222,7 @@ test.describe(
 
 		test(
 			'should show correct total cart price with 2 products without flat rate',
-			{ tag: [ '@could-be-unit-test' ] },
+			{ tag: [ '@could-be-lower-level-test' ] },
 			async ( { page } ) => {
 				await addAProductToCart( page, secondProductId );
 
