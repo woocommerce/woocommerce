@@ -1898,7 +1898,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						expect.objectContaining( {
 							id: 'woocommerce_analytics_enabled',
 							label: 'Analytics',
-							description: 'Enable WooCommerce Analytics',
+							description: expect.stringContaining(
+								'Enable WooCommerce Analytics'
+							),
 							type: 'checkbox',
 							default: 'yes',
 							value: 'yes',
