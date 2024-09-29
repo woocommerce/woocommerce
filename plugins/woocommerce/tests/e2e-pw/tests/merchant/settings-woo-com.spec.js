@@ -8,14 +8,14 @@ test.describe(
 		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.beforeAll( async ( { baseURL } ) => {
-			// make sure the analytics connection is disabled
+			// Make sure the usage tracking is disabled.
 			const api = new wcApi( {
 				url: baseURL,
 				consumerKey: process.env.CONSUMER_KEY,
 				consumerSecret: process.env.CONSUMER_SECRET,
 				version: 'wc/v3',
 			} );
-			await api.put( 'settings/advanced/woocommerce_analytics_enabled', {
+			await api.put( 'settings/advanced/woocommerce_allow_tracking', {
 				value: 'no',
 			} );
 			await api.put(
@@ -26,12 +26,12 @@ test.describe(
 			);
 		} );
 
-		test( 'can enable analytics tracking', async ( { page } ) => {
+		test( 'can enable usage tracking', async ( { page } ) => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=advanced&section=woocommerce_com'
 			);
 
-			// enable analytics tracking
+			// Enable usage tracking.
 			await page
 				.getByLabel( 'Allow usage of WooCommerce to be tracked' )
 				.check();
