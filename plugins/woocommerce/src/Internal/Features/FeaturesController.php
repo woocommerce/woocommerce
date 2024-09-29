@@ -166,11 +166,27 @@ class FeaturesController {
 			$legacy_features = array(
 				'analytics'            => array(
 					'name'               => __( 'Analytics', 'woocommerce' ),
-					'description'        => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+					'description'        => sprintf(
+						// translators: 1: line break tag.
+						__(
+							'Enable WooCommerce Analytics%1$s
+							The legacy Reports code will soon get removed.
+							If you enable the currently maintained Analytics now, you will not be able to turn it back off.',
+							'woocommerce'
+						),
+						'<br/>'
+					),
 					'option_key'         => Analytics::TOGGLE_OPTION_NAME,
 					'is_experimental'    => false,
 					'enabled_by_default' => true,
-					'disable_ui'         => false,
+					// Do not show the setting at all, if that's completely fresh install.
+					'disable_ui'         => get_option( Analytics::TOGGLE_OPTION_NAME, null ) === null,
+					'setting'            => array(
+						// Disable turning the feature off.
+						'disabled'        => function () {
+							return get_option( Analytics::TOGGLE_OPTION_NAME ) === 'yes';
+						},
+					),
 					'is_legacy'          => true,
 				),
 				'product_block_editor' => array(
