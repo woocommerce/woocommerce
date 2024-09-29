@@ -169,8 +169,8 @@ class FeaturesController {
 					'description'        => sprintf(
 						// translators: 1: line break tag.
 						__(
-							'Enable WooCommerce Analytics%1$s
-							The legacy Reports code will soon get removed.
+							'Enable WooCommerce Analytics.%1$s
+							The legacy Reports code will soon be removed.
 							If you enable the currently maintained Analytics now, you will not be able to turn it back off.',
 							'woocommerce'
 						),
