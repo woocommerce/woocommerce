@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Include all e2e and API tests for external envs
