@@ -183,7 +183,7 @@ class FeaturesController {
 					'disable_ui'         => get_option( Analytics::TOGGLE_OPTION_NAME, null ) === null,
 					'setting'            => array(
 						// Disable turning the feature off.
-						'disabled'       => function () {
+						'disabled' => function () {
 							return get_option( Analytics::TOGGLE_OPTION_NAME ) === 'yes';
 						},
 					),
