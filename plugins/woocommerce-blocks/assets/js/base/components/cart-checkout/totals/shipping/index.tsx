@@ -165,6 +165,7 @@ export const TotalsShipping = ( {
 						shippingRates={ shippingRates }
 						isLoadingRates={ isLoadingRates }
 						isAddressComplete={ addressComplete }
+						shippingAddress={ shippingAddress }
 					/>
 				) }
 		</div>

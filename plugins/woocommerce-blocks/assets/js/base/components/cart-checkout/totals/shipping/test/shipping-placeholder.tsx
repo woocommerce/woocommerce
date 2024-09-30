@@ -32,7 +32,7 @@ describe( 'ShippingPlaceholder', () => {
 			/>
 		);
 		expect(
-			screen.getByText( 'Calculated during checkout' )
+			screen.getByText( 'Calculated at checkout' )
 		).toBeInTheDocument();
 	} );
 

@@ -31,7 +31,7 @@ export const ShippingPlaceholder = ( {
 			<span className="wc-block-components-shipping-placeholder__value">
 				{ isCheckout
 					? label
-					: __( 'Calculated during checkout', 'woocommerce' ) }
+					: __( 'Calculated at checkout', 'woocommerce' ) }
 			</span>
 		);
 	}
