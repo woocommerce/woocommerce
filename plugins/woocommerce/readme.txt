@@ -173,6 +173,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Resolved fatal error when applying Brands-restricted coupon [#51577](https://github.com/woocommerce/woocommerce/pull/51577)
 * Fix - Fix CSS issue with Safari 18.0 on the product form page. [#51734](https://github.com/woocommerce/woocommerce/pull/51734)
 * Fix - Add a new notice to the plugins list for products used without subscriptions reminding them to purchase. [#51060](https://github.com/woocommerce/woocommerce/pull/51060)
 * Fix - Added missing wp-block- classes to order confirmation, store notices, and breadcrumb blocks. [#51380](https://github.com/woocommerce/woocommerce/pull/51380)
