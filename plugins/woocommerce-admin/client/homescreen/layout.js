@@ -137,7 +137,7 @@ export const Layout = ( {
 					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
-					<Promotions promoCardOnly={ true } />
+					<Promotions format="promo-card" />
 				</Column>
 				<Column shouldStick={ shouldStickColumns }>
 					{ window.wcAdminFeatures.analytics && <StatsOverview /> }

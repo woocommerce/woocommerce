@@ -24,7 +24,7 @@ const CouponsOverview = () => {
 
 	return (
 		<div className="woocommerce-marketing-coupons">
-			<Promotions promoCardOnly={ true } />
+			<Promotions format="promo-card" />
 			{ showExtensions && (
 				<RecommendedExtensions
 					title={ __(

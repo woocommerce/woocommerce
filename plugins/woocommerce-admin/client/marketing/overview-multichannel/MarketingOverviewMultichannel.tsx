@@ -86,7 +86,7 @@ export const MarketingOverviewMultichannel: React.FC = () => {
 
 	return (
 		<div className="woocommerce-marketing-overview-multichannel">
-			<Promotions promoCardOnly={ true } />
+			<Promotions format="promo-card" />
 			{ ! isIntroductionBannerDismissed && (
 				<IntroductionBanner
 					onDismissClick={ dismissIntroductionBanner }

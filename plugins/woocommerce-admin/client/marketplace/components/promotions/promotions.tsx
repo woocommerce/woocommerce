@@ -15,18 +15,15 @@ declare global {
 }
 
 const Promotions: ( {
-	promoCardOnly,
+	format,
 }: {
-	promoCardOnly?: boolean;
-} ) => null | JSX.Element = ( { promoCardOnly = false } ) => {
+	format?: string;
+} ) => null | JSX.Element = ( { format = 'notice' } ) => {
 	const urlParams = new URLSearchParams( window.location.search );
 	const currentPage = urlParams.get( 'page' );
 
 	const promotions = ( window?.wcMarketplace?.promotions ?? [] ).filter(
-		( x ) =>
-			promoCardOnly
-				? x.format === 'promo-card'
-				: x.format !== 'promo-card'
+		( x ) => x.format === format
 	);
 	const currentDateUTC = Date.now();
 	const currentPath = decodeURIComponent( urlParams.get( 'path' ) || '' );
