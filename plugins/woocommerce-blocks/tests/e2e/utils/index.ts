@@ -10,7 +10,6 @@ export * from './mini-cart';
 export * from './performance';
 export * from './request-utils';
 export * from './shipping';
-export * from './storeApi';
 
 export * from './test';
 

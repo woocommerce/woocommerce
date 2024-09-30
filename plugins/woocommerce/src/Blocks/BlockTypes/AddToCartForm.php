@@ -73,6 +73,8 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
+		$is_external_product_with_url = $product instanceof \WC_Product_External && $product->get_product_url();
+
 		ob_start();
 
 		/**
@@ -92,16 +94,17 @@ class AddToCartForm extends AbstractBlock {
 
 		$parsed_attributes                     = $this->parse_attributes( $attributes );
 		$is_descendent_of_single_product_block = $parsed_attributes['isDescendentOfSingleProductBlock'];
-		$product                               = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
 
-		$classname          = $attributes['className'] ?? '';
+		if ( ! $is_external_product_with_url ) {
+			$product = $this->add_is_descendent_of_single_product_block_hidden_input_to_product_form( $product, $is_descendent_of_single_product_block );
+		}
+
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 		$product_classname  = $is_descendent_of_single_product_block ? 'product' : '';
 
 		$form = sprintf(
-			'<div class="wp-block-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s %3$s" style="%4$s">%5$s</div>',
+			'<div class="wp-block-add-to-cart-form wc-block-add-to-cart-form %1$s %2$s" style="%3$s">%4$s</div>',
 			esc_attr( $classes_and_styles['classes'] ),
-			esc_attr( $classname ),
 			esc_attr( $product_classname ),
 			esc_attr( $classes_and_styles['styles'] ),
 			$product

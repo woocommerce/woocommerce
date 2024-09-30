@@ -1,13 +1,23 @@
 == Changelog ==
 
+= 9.3.3 2024-09-25 =
+
+**WooCommerce**
+
+* Fix - An issue where virtual products could not be purchased when using the Additional Fields API [#51630](https://github.com/woocommerce/woocommerce/pull/51630)
+* Fix - Restore the previous default for `woocommerce_product_import_batch_size` (process 30 lines per batch when importing product CSV data) [#51631] (https://github.com/woocommerce/woocommerce/pull/51631)
+
 = 9.3.2 2024-09-18 =
 
-- Fix - Improve the product importer's handling of filepaths under Windows [#51456](https://github.com/woocommerce/woocommerce/pull/51456)
-- Fix - Revert changes related to low stock product notifications [#51441](https://github.com/woocommerce/woocommerce/pull/51441)
-- Fix - Resolve a bug where manually triggering `added_to_cart` event without a button element caused an Exception [#51449](https://github.com/woocommerce/woocommerce/pull/51449)
+**WooCommerce**
 
+* Fix - Improve the product importer's handling of filepaths under Windows [#51456](https://github.com/woocommerce/woocommerce/pull/51456)
+* Fix - Revert changes related to low stock product notifications [#51441](https://github.com/woocommerce/woocommerce/pull/51441)
+* Fix - Resolve a bug where manually triggering `added_to_cart` event without a button element caused an Exception [#51449](https://github.com/woocommerce/woocommerce/pull/51449)
 
 = 9.3.1 2024-09-12 =
+
+**WooCommerce**
 
 * Tweak - Disable remote logging feature by default [#51312](https://github.com/woocommerce/woocommerce/pull/51312)
 
@@ -253,14 +263,12 @@
 
 * Fix - Ensure translation is fully loaded for certain parts of Checkout block. [#50892](https://github.com/woocommerce/woocommerce/pull/50892)
 
-
 = 9.2.2 2024-08-22 =
 
 **WooCommerce**
 
 * Fix - Revert PR#48731 to address possible issues with plugins using WC's bundled select2 package. [#50854](https://github.com/woocommerce/woocommerce/pull/50854)
 * Fix - Partially revert PR#48709 as it could cause issues for some users of the REST API system_status endpoint. [#50881](https://github.com/woocommerce/woocommerce/pull/50881)
-
 
 = 9.2.1 2024-08-21 =
 

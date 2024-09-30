@@ -28,7 +28,7 @@ class Init {
 				add_filter(
 					'admin_body_class',
 					static function ( $classes ) {
-						return "$classes is-fullscreen-mode";
+						return "$classes";
 					}
 				);
 			}

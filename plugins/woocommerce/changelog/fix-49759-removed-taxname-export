@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve performance of tax report export generation and fix tax_code for removed rates.
