@@ -43,7 +43,7 @@ test.describe( 'Product Collection: Product Picker', () => {
 	// Activate plugin which registers custom product collections
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activatePlugin(
-			'register-product-collection-tester'
+			'woocommerce-blocks-test-register-product-collection'
 		);
 	} );
 
