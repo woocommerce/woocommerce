@@ -285,6 +285,17 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Register a value that will be returned when a constant is requested with "get_constant_value" (or "constant_is_defined").
+	 * A value of null will cause the constant to be considered as not defined.
+	 *
+	 * @param string     $constant_name The name of the constant to register the value for.
+	 * @param mixed|null $value The value to register, or null to register the constant as not defined.
+	 */
+	public function register_constant_mock( string $constant_name, $value ) {
+		wc_get_container()->get( LegacyProxy::class )->register_constant_mock( $constant_name, $value );
+	}
+
+	/**
 	 * Asserts that a certain callable output is equivalent to a given piece of HTML.
 	 *
 	 * "Equivalent" means that the string representations of the HTML pieces are equal

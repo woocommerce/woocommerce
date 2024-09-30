@@ -78,7 +78,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	 * @testdox 'register_class_mocks' can be used to return class mocks by passing mock factory callbacks.
 	 */
 	public function test_register_class_mocks_can_be_used_so_that_get_instance_of_uses_a_factory_function_to_return_the_instance() {
-		$mock_factory = function( $code, $message, $http_status_code = 400, $data = array() ) {
+		$mock_factory = function ( $code, $message, $http_status_code = 400, $data = array() ) {
 			return "$code, $message, $http_status_code";
 		};
 		$this->sut->register_class_mocks( array( \WC_Data_Exception::class => $mock_factory ) );
@@ -100,7 +100,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_for_test_register_function_mocks_throws_if_invalid_parameters_supplied() {
 		return array(
-			array( 1234, function() {} ),
+			array( 1234, function () {} ),
 			array( 'SomeClassName', 1234 ),
 		);
 	}
@@ -126,8 +126,8 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	public function test_register_function_mocks_can_be_used_so_that_call_function_calls_mock_functions() {
 		$this->sut->register_function_mocks(
 			array(
-				'substr' => function( $string, $start, $length ) {
-					return "I'm returning substr of '$string' from $start with length $length";
+				'substr' => function ( $the_string, $start, $length ) {
+					return "I'm returning substr of '$the_string' from $start with length $length";
 				},
 			)
 		);
@@ -152,9 +152,9 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_for_test_register_static_mocks_throws_if_invalid_parameters_supplied() {
 		return array(
-			array( 1234, array( 'some_method' => function(){} ) ),
+			array( 1234, array( 'some_method' => function () {} ) ),
 			array( 'SomeClassName', 1234 ),
-			array( 'SomeClassName', array( 1234 => function(){} ) ),
+			array( 'SomeClassName', array( 1234 => function () {} ) ),
 			array( 'SomeClassName', array( 'the_method' => 1234 ) ),
 		);
 	}
@@ -181,7 +181,7 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 		$this->sut->register_static_mocks(
 			array(
 				DependencyClass::class => array(
-					'concat' => function( ...$parts ) {
+					'concat' => function ( ...$parts ) {
 						return "I'm returning concat of these parts: " . join( ' ', $parts );
 					},
 				),
@@ -233,7 +233,8 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 
 		$this->sut->register_function_mocks(
 			array(
-				'substr' => function( $string, $start, $length ) {
+                // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				'substr' => function ( $the_string, $start, $length ) {
 					return null;
 				},
 			)
@@ -242,7 +243,8 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 		$this->sut->register_static_mocks(
 			array(
 				DependencyClass::class => array(
-					'concat' => function( ...$parts ) {
+                    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+					'concat' => function ( ...$parts ) {
 						return null;
 					},
 				),
@@ -251,11 +253,123 @@ class MockableLegacyProxyTest extends \WC_Unit_Test_Case {
 
 		$this->sut->register_global_mocks( array( 'wpdb' => new \stdClass() ) );
 
+		$this->sut->register_constant_mock( 'DB_USER', null );
+		$this->sut->register_constant_mock( 'I_WISH_TO_NOT_EXIST', 'NOPE' );
+
 		$this->sut->reset();
 
 		$this->test_call_function_works_as_regular_legacy_proxy_if_no_mocks_registered();
 		$this->test_call_static_works_as_regular_legacy_proxy_if_no_mocks_registered();
 		$this->test_call_static_works_as_regular_legacy_proxy_if_no_mocks_registered();
 		$this->test_get_global_works_as_regular_legacy_proxy_if_no_mocks_registered();
+		$this->test_constant_is_defined_works_as_regular_legacy_proxy_if_no_mocks_registered( 'DB_USER', true );
+		$this->test_constant_is_defined_works_as_regular_legacy_proxy_if_no_mocks_registered( 'I_WISH_TO_NOT_EXIST', false );
+		$this->test_get_constant_value_returns_actual_value_for_existing_not_mocked_constant();
+		$this->test_get_constant_value_returns_default_value_for_non_existing_and_not_mocked_constant();
+	}
+
+	/**
+	 * @testdox 'constant_is_defined' works as in LegacyProxy if no constant mocks are registered.
+	 *
+	 * @testWith ["DB_USER", true]
+	 *           ["I_WISH_TO_NOT_EXIST", false]
+	 *
+	 * @param string $constant_name Name of the constant to test.
+	 * @param  bool   $expected_defined The constant is expected to be considered defined or not.
+	 */
+	public function test_constant_is_defined_works_as_regular_legacy_proxy_if_no_mocks_registered( string $constant_name, bool $expected_defined ) {
+		$this->assertEquals( $expected_defined, $this->sut->constant_is_defined( $constant_name ) );
+	}
+
+	/**
+	 * @testdox 'constant_is_defined' returns true for a constant that actually exists and hasn't been mocked.
+	 */
+	public function test_constant_is_defined_returns_true_for_actually_existing_not_mocked_constant() {
+		$this->assertTrue( $this->sut->constant_is_defined( 'DB_USER' ) );
+	}
+
+	/**
+	 * @testdox 'constant_is_defined' returns false for a constant that doesn't exist and hasn't been mocked.
+	 */
+	public function test_constant_is_defined_returns_false_for_non_existing_and_not_mocked_constant() {
+		$this->assertFalse( $this->sut->constant_is_defined( 'I_DONT_EXIST' ) );
+	}
+
+	/**
+	 * @testdox 'constant_is_defined' returns true for a constant that actually exists and has been mocked with a non-null value.
+	 */
+	public function test_constant_is_defined_returns_true_for_existing_and_mocked_constant() {
+		$this->sut->register_constant_mock( 'DB_USER', 'myself' );
+		$this->assertTrue( $this->sut->constant_is_defined( 'DB_USER' ) );
+	}
+
+	/**
+	 * @testdox 'constant_is_defined' returns false for a constant that doesn't exist and has been mocked with a value of null.
+	 */
+	public function test_constant_is_defined_returns_false_for_existing_and_mocked_with_null_value_constant() {
+		$this->sut->register_constant_mock( 'DB_USER', null );
+		$this->assertFalse( $this->sut->constant_is_defined( 'DB_USER' ) );
+	}
+
+	/**
+	 * @testdox 'constant_is_defined' returns true for a constant that doesn't exist but has been mocked with a non-null value.
+	 */
+	public function test_constant_is_defined_returns_true_for_not_existing_but_mocked_constant() {
+		$this->sut->register_constant_mock( 'I_AM_MOCK', 'yes' );
+		$this->assertTrue( $this->sut->constant_is_defined( 'I_AM_MOCK' ) );
+	}
+
+	/**
+	 * @testdox 'constant_is_defined' returns false for a constant that doesn't exist but has been mocked with a value of null.
+	 */
+	public function test_constant_is_defined_returns_false_for_not_existing_and_mocked_constant_with_value_null() {
+		$this->sut->register_constant_mock( 'I_AM_MOCK', null );
+		$this->assertFalse( $this->sut->constant_is_defined( 'I_AM_MOCK' ) );
+	}
+
+	/**
+	 * @testdox 'get_constant_value' returns the actual value of a constant that exists and hasn't been mocked.
+	 */
+	public function test_get_constant_value_returns_actual_value_for_existing_not_mocked_constant() {
+		$this->assertEquals( DB_USER, $this->sut->get_constant_value( 'DB_USER' ) );
+	}
+
+	/**
+	 * @testdox 'get_constant_value' returns the supplied default value of a constant that doesn't exist and hasn't been mocked.
+	 */
+	public function test_get_constant_value_returns_default_value_for_non_existing_and_not_mocked_constant() {
+		$this->assertEquals( 'indeed', $this->sut->get_constant_value( 'I_DONT_EXIST', 'indeed' ) );
+	}
+
+	/**
+	 * @testdox 'get_constant_value' returns the mocked value of a constant that exists and has been mocked.
+	 */
+	public function test_get_constant_value_returns_mocked_value_for_existing_mocked_constant() {
+		$this->sut->register_constant_mock( 'DB_USER', 'myself' );
+		$this->assertEquals( 'myself', $this->sut->get_constant_value( 'DB_USER' ) );
+	}
+
+	/**
+	 * @testdox 'get_constant_value' returns the supplied default value of a constant that exists but has been mocked with a value of null.
+	 */
+	public function test_get_constant_value_returns_default_value_for_existing_constant_mocked_as_null() {
+		$this->sut->register_constant_mock( 'DB_USER', null );
+		$this->assertEquals( 'no_one', $this->sut->get_constant_value( 'DB_USER', 'no_one' ) );
+	}
+
+	/**
+	 * @testdox 'get_constant_value' returns the mocked value of a constant that doesn't exist but has been mocked.
+	 */
+	public function test_get_constant_value_returns_mocked_value_for_non_existing_mocked_constant() {
+		$this->sut->register_constant_mock( 'I_AM_MOCK', 'indeed' );
+		$this->assertEquals( 'indeed', $this->sut->get_constant_value( 'I_AM_MOCK' ) );
+	}
+
+	/**
+	 * @testdox 'get_constant_value' returns the supplied default value of a constant that doesn't exist and has been mocked with a value of null.
+	 */
+	public function test_get_constant_value_returns_default_value_for_non_existing_constant_mocked_as_null() {
+		$this->sut->register_constant_mock( 'I_AM_MOCK', null );
+		$this->assertEquals( 'nope', $this->sut->get_constant_value( 'I_AM_MOCK', 'nope' ) );
 	}
 }

@@ -118,4 +118,25 @@ class LegacyProxy {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		exit( $status );
 	}
+
+	/**
+	 * Check if a constant is defined.
+	 *
+	 * @param string $constant_name The name of the constant.
+	 * @return bool True if the constant is defined, false otherwise.
+	 */
+	public function constant_is_defined( string $constant_name ) {
+		return defined( $constant_name );
+	}
+
+	/**
+	 * Get the value of a constant, or a default value.
+	 *
+	 * @param string     $constant_name The name of the constant.
+	 * @param mixed|null $default_value The default value to return if the constant is not defined.
+	 * @return mixed|null The value of the constant if it's defined, $default otherwise.
+	 */
+	public function get_constant_value( string $constant_name, $default_value = null ) {
+		return defined( $constant_name ) ? constant( $constant_name ) : $default_value;
+	}
 }

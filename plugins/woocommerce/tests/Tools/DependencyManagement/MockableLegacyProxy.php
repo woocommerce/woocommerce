@@ -54,6 +54,13 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	private $mocked_exit = null;
 
 	/**
+	 * The currently registered constant mocks, null values will for the constant to be considered as not defined.
+	 *
+	 * @var array
+	 */
+	private $mocked_constants = array();
+
+	/**
 	 * Reset the instance to its initial state by removing all the mocks.
 	 */
 	public function reset() {
@@ -62,6 +69,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 		$this->mocked_statics   = array();
 		$this->mocked_globals   = array();
 		$this->mocked_exit      = null;
+		$this->mocked_constants = array();
 	}
 
 	/**
@@ -255,5 +263,54 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			exit( $status );
 		}
+	}
+
+	/**
+	 * Register a value that will be returned when a constant is requested with "get_constant_value" (or "constant_is_defined").
+	 * A value of null will cause the constant to be considered as not defined.
+	 *
+	 * @param string     $constant_name The name of the constant to register the value for.
+	 * @param mixed|null $value The value to register, or null to register the constant as not defined.
+	 */
+	public function register_constant_mock( string $constant_name, $value ) {
+		$this->mocked_constants[ $constant_name ] = $value;
+	}
+
+	/**
+	 * Unregister a constant mock that was previously registered with register_constant_mock.
+	 * @param string $constant_name The name of the constant to unregister the mock for.
+	 */
+	public function unregister_constant_mock( string $constant_name ) {
+		unset( $this->mocked_constants[ $constant_name ] );
+	}
+
+	/**
+	 * Get the value of a constant, a mocked value, or a default value. How it works:
+	 *
+	 * 1. Constant is mocked with a non-null value (regardless of whether the constant actually exists or not): the mocked value.
+	 * 2. Constant is mocked with a value of null (regardless of whether the constant actually exists or not): $default.
+	 * 3. Constant is not mocked, and it's actually defined: the constant value.
+	 * 4. Constant is not mocked, and it's not defined: $default.
+	 *
+	 * @param string     $constant_name The name of the constant.
+	 * @param mixed|null $default_value The default value to return if the constant is not defined and not mocked with a value other than null.
+	 * @return mixed|null The constant value, the mocked value, or $default.
+	 */
+	public function get_constant_value( string $constant_name, $default_value = null ) {
+		if ( array_key_exists( $constant_name, $this->mocked_constants ) ) {
+			return is_null( $this->mocked_constants[ $constant_name ] ) ? $default_value : $this->mocked_constants[ $constant_name ];
+		} else {
+			return parent::get_constant_value( $constant_name, $default_value );
+		}
+	}
+
+	/**
+	 * Check if a constant is defined or mocked. See 'get_constant_value' for the logic.
+	 *
+	 * @param string $constant_name The name of the constant.
+	 * @return bool True if the constant is defined or has been mocked with 'register_constant_mock' and with a value other than null, false otherwise.
+	 */
+	public function constant_is_defined( string $constant_name ) {
+		return array_key_exists( $constant_name, $this->mocked_constants ) ? ! is_null( $this->mocked_constants[ $constant_name ] ) : parent::constant_is_defined( $constant_name );
 	}
 }
