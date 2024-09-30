@@ -4,7 +4,7 @@ Pages rendered with React and pages that include the WooCommerce Admin header (c
 
 This is the API you will use to add your own React-powered page, or to include the WooCommerce Admin header on your plugin pages.
 
-### Connecting a PHP-powered Page
+## Connecting a PHP-powered Page
 
 To show the WooCommerce Admin header on existing PHP-powered admin pages (most plugin pages), use the `wc_admin_connect_page()` function.
 
@@ -16,7 +16,7 @@ Connecting pages uses five parameters to `wc_admin_connect_page()`:
 -   `title` - Page title. Used to build breadcrumbs. String or array of breadcrumb pieces. Required.
 -   `path` - Page path (relative). Used for linking breadcrumb pieces when this page is a `parent`. Optional.
 
-#### Examples
+### Examples
 
 ```php
 // WooCommerce > Settings > General (default tab).
@@ -64,16 +64,16 @@ wc_admin_connect_page(
 );
 ```
 
-### Determining Screen ID
+## Determining Screen ID
 
 WooCommerce Admin implements it's own version of `get_current_screen()` to allow for more precise identification of admin pages.
 
 Some screen ID formats that the function will generate are:
 
-- `{$current_screen->action}-{$current_screen->action}-tab-section`
-- `{$current_screen->action}-{$current_screen->action}-tab`
-- `{$current_screen->action}-{$current_screen->action}` if no tab is present
-- `{$current_screen->action}` if no action or tab is present
+-   `{$current_screen->action}-{$current_screen->action}-tab-section`
+-   `{$current_screen->action}-{$current_screen->action}-tab`
+-   `{$current_screen->action}-{$current_screen->action}` if no tab is present
+-   `{$current_screen->action}` if no action or tab is present
 
 WooCommerce Admin can recognize WooCommerce pages that have both tabs and sub sections. For example, `woocommerce_page_wc-settings-products-inventory` is the `WooCommerce > Settings > Products > Inventory` page.
 
@@ -94,11 +94,8 @@ Register pages with `wc_admin_register_page()` using these parameters:
 -   `capability` - User capability needed to access this page. Optional (defaults to `manage_options`).
 -   `icon` - Dashicons helper class or base64-encoded SVG. Include the entire dashicon class name, ie `dashicons-*`. This is optional and won't be included in WC Navigation.
 -   `position` - Menu item position for parent pages. Optional. See: `add_menu_page()`.
--   `nav_args` - Arguments for registering items in WooCommerce Navigation.
--   `nav_args[ 'order' ]` - Order number for presentation.
--   `nav_args[ 'parent' ]`- Menu for item to fall under.`woocommerce`,`woocommerce-settings`,`woocommerce-analytics`, or another category added by an extension are available.
 
-#### Example - Adding a New Analytics Report
+### Example - Adding a New Analytics Report
 
 Add our new report using the appropriate filter:
 
@@ -132,7 +129,7 @@ function add_report_menu_item( $report_pages ) {
 add_filter( 'woocommerce_admin_report_menu_items', 'add_report_menu_item' );
 ```
 
-#### Example - Adding a New WooCommerce Admin Page
+### Example - Adding a New WooCommerce Admin Page
 
 Alternatively, register a regular page with the controller.
 
@@ -147,17 +144,13 @@ function add_extension_register_page() {
 		'title'    => __( 'My Example Page', 'my-textdomain' ),
 		'parent'   => 'woocommerce',
 		'path'     => '/example',
-		'nav_args' => array(
-			'order'  => 10,
-			'parent' => 'woocommerce',
-		),
 	) );
 }
 
 add_action( 'admin_menu', 'add_extension_register_page' );
 ```
 
-Supply a React component on the client side. Be sure to use the same id supplied in PHP in `navArgs`.
+Supply a React component on the client side.
 
 ```javascript
 import { addFilter } from '@wordpress/hooks';
@@ -179,7 +172,7 @@ addFilter( 'woocommerce_admin_pages_list', 'my-namespace', ( pages ) => {
 } );
 ```
 
-### Further Reading
+## Further Reading
 
 -   Check out the [`PageController`](../woocommerce/src/Admin/PageController.php) class.
 -   See how we're [connecting existing WooCommerce pages](../woocommerce/includes/react-admin/page-controller-functions.php).

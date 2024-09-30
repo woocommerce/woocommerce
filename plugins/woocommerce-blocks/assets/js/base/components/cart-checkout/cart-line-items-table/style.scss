@@ -13,7 +13,7 @@ table.wc-block-cart-items {
 	width: 100%;
 
 	.wc-block-cart-items__header {
-		@include font-size( smaller );
+		@include font-size(smaller);
 		text-transform: uppercase;
 
 		.wc-block-cart-items__header-image {
@@ -31,7 +31,6 @@ table.wc-block-cart-items {
 		}
 	}
 	.wc-block-cart-items__row {
-
 		.wc-block-cart-item__wrap > *,
 		.wc-block-components-quantity-selector {
 			margin-bottom: $gap-small;
@@ -53,7 +52,7 @@ table.wc-block-cart-items {
 			.wc-block-cart-item__remove-link {
 				@include link-button();
 				@include hover-effect();
-				@include font-size( smaller );
+				@include font-size(smaller);
 
 				text-transform: none;
 				white-space: nowrap;
@@ -65,7 +64,7 @@ table.wc-block-cart-items {
 			line-height: 1.4;
 		}
 		.wc-block-cart-item__total {
-			@include font-size( regular );
+			@include font-size(regular);
 			text-align: right;
 			line-height: 1.8;
 		}
@@ -154,6 +153,18 @@ table.wc-block-cart-items {
 		}
 		td:last-child {
 			padding-right: $gap;
+		}
+	}
+
+	&.has-dark-controls {
+		.wc-block-cart-items {
+			border-color: $input-border-dark;
+			th {
+				color: $input-text-dark;
+			}
+			td {
+				border-color: $input-border-dark;
+			}
 		}
 	}
 }

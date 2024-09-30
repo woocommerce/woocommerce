@@ -25,6 +25,7 @@ export interface BlockAttributes {
 	contents: string;
 	miniCartIcon?: IconType;
 	addToCartBehaviour: string;
+	onCartClickBehaviour: string;
 	hasHiddenPrice: boolean;
 	priceColor: ColorItem;
 	iconColor: ColorItem;
