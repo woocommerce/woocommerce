@@ -8,14 +8,16 @@ import { getElement, store } from '@woocommerce/interactivity';
  */
 import { navigate } from '../../frontend';
 
+const prefix = 'filter_stock_status';
+
 const getUrl = ( activeFilters: string ) => {
 	const url = new URL( window.location.href );
 	const { searchParams } = url;
 
 	if ( activeFilters !== '' ) {
-		searchParams.set( 'filter_stock_status', activeFilters );
+		searchParams.set( prefix, activeFilters );
 	} else {
-		searchParams.delete( 'filter_stock_status' );
+		searchParams.delete( prefix );
 	}
 
 	return url.href;
@@ -24,11 +26,9 @@ const getUrl = ( activeFilters: string ) => {
 store( 'woocommerce/product-filter-stock-status', {
 	actions: {
 		toggleFilter: () => {
-			console.log( 'ci entro' );
 			// get the active filters from the url:
 			const url = new URL( window.location.href );
-			const currentFilters =
-				url.searchParams.get( 'filter_stock_status' ) || '';
+			const currentFilters = url.searchParams.get( prefix ) || '';
 
 			// split out the active filters into an array.
 			const filtersArr =
@@ -37,13 +37,11 @@ store( 'woocommerce/product-filter-stock-status', {
 			const { ref } = getElement();
 			const value = ref.getAttribute( 'value' );
 
-			if ( filtersArr.includes( value ) ) {
-				filtersArr.splice( filtersArr.indexOf( value ), 1 );
-			} else {
-				filtersArr.push( value );
-			}
+			const newFilterArr = filtersArr.includes( value )
+				? [ ...filtersArr.filter( ( filter ) => filter !== value ) ]
+				: [ ...filtersArr, value ];
 
-			navigate( getUrl( filtersArr.join( ',' ) ) );
+			navigate( getUrl( newFilterArr.join( ',' ) ) );
 		},
 	},
 } );
