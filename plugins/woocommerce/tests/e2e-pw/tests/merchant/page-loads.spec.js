@@ -87,8 +87,8 @@ const wcPages = [
 			{
 				name: 'Overview',
 				heading: 'Overview',
-				element: '.woocommerce-marketing-card-header-description',
-				text: 'Start by adding a channel to your store',
+				element: '.woocommerce-marketing-channels-card',
+				text: 'Channels',
 			},
 			{
 				name: 'Coupons',
