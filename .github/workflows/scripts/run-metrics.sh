@@ -42,8 +42,12 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 
 		title "##[group]Benchmarking head"
-		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+		for ROUND in {1..2}; do
+			# We can afford only 2 rounds, each one takes ~2 minutes.
+			echo "$(date +"%T"): Round $ROUND of 2"
+			RESULTS_ID="editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+			RESULTS_ID="product-editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+        done
 		echo '##[endgroup]'
 	fi
 
@@ -62,8 +66,12 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 
 		title "##[group]Benchmarking baseline"
-		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+		for ROUND in {1..3}; do
+			# Each round takes ~2 minutes, running for ~6 minutes presumable generates good enough baseline (cached for 1 week in CI).
+			echo "$(date +"%T"): Round $ROUND of 3"
+			RESULTS_ID="editor_${BASE_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+			RESULTS_ID="product-editor_${BASE_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+        done
 		echo '##[endgroup]'
 
 		# This step is intended for running the script locally.
