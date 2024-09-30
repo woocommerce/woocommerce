@@ -3,9 +3,9 @@
 set -eo pipefail
 
 # The commented variables are for troubleshooting locally.
-# GITHUB_EVENT_NAME='pull_request'
-# GITHUB_SHA=$(git rev-parse HEAD)
-# ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)/artifacts"
+GITHUB_EVENT_NAME='pull_request'
+GITHUB_SHA=$(git rev-parse HEAD)
+ARTIFACTS_PATH="$(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)/artifacts"
 
 if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	echo "::error::GITHUB_EVENT_NAME must be set"
