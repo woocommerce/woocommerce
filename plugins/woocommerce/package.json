@@ -504,6 +504,9 @@
 						"tests/metrics/**",
 						".wp-env.json"
 					],
+					"testEnv": {
+						"start": "env:test"
+					},
 					"events": [
 						"push"
 					],
