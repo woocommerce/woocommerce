@@ -12,3 +12,4 @@
 # Files in root of repository
 /.* @woocommerce/flux
 /*.* @woocommerce/flux
+/changelog.txt

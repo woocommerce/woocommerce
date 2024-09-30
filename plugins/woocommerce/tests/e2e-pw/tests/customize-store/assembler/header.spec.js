@@ -51,7 +51,7 @@ test.describe( 'Assembler -> headers', { tag: '@gutenberg' }, () => {
 				'no'
 			);
 
-			await activateTheme( DEFAULT_THEME );
+			await activateTheme( baseURL, DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
