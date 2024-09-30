@@ -132,7 +132,7 @@ jobs:
           install: '${{ matrix.projectName }}...'
           build: ${{ ( github.ref_type == 'tag' && 'false' ) || matrix.projectName }}
           build-type: ${{ ( matrix.testType == 'unit:php' && 'backend' ) || 'full' }}
-          pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && matrix.testType == 'e2e' }}
+          pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
           pull-package-deps: '${{ matrix.projectName }}'
 
       - name: 'Update wp-env config'
@@ -182,6 +182,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: 'last-run__${{ strategy.job-index }}'
+
+      - name: 'Download Performance metrics baseline'
+        if: ${{ matrix.report.resultsPath != '' && matrix.testType == 'performance'}}
+        uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
+        with:
+          path: 'tools/compare-perf/artifacts/*_55f855a2e6d769b5ae44305b2772eb30d3e721df_*'
+          key: "${{ runner.os }}-woocommerce-performance-metrics-55f855a2e6d769b5ae44305b2772eb30d3e721df-${{ hashFiles( 'plugins/woocommerce/tests/performance/**/*.js' ) }}"
+          restore-keys: '${{ runner.os }}-woocommerce-performance-metrics-55f855a2e6d769b5ae44305b2772eb30d3e721df-'
 
       - name: 'Run tests (${{ matrix.testType }})'
         env:
