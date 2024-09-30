@@ -396,7 +396,7 @@ class ProductCollectionPage {
 
 	async addFilter(
 		name:
-			| 'Show Hand-picked Products'
+			| 'Show Hand-picked'
 			| 'Keyword'
 			| 'Show product categories'
 			| 'Show product tags'
