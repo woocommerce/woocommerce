@@ -42,8 +42,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 
 		title "##[group]Benchmarking head"
-		RESULTS_ID="editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-		RESULTS_ID="product-editor_${GITHUB_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+		for ROUND in {1..2}; do
+			echo "$(date +"%T"): Round $ROUND of 2"
+			RESULTS_ID="editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+			RESULTS_ID="product-editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+        done
 		echo '##[endgroup]'
 	fi
 
@@ -62,8 +65,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 
 		title "##[group]Benchmarking baseline"
-		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
-		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+		for ROUND in {1..5}; do
+			echo "$(date +"%T"): Round $ROUND of 5"
+			RESULTS_ID="editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
+			RESULTS_ID="product-editor_${GITHUB_SHA}_round-$ROUND" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
+        done
 		echo '##[endgroup]'
 
 		# This step is intended for running the script locally.
