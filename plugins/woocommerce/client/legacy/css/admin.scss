@@ -8765,3 +8765,8 @@ table.bar_chart {
 html:has(#status-table-templates){
 	scroll-padding-top: 80px;
 }
+
+// Fix for Safari bug: https://bugs.webkit.org/show_bug.cgi?id=280063.
+.woocommerce-admin-page #postbox-container-2 {
+	clear: left;
+}
