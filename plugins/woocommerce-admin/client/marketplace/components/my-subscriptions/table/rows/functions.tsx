@@ -355,11 +355,16 @@ export function subscriptionStatus(
 			);
 		}
 
-	return subscription.lifetime
-		? __( 'Lifetime', 'woocommerce' )
-		: subscription.autorenew
-		? __( 'Active', 'woocommerce' )
-		: __( 'Cancelled', 'woocommerce' );
+		let status;
+		if ( subscription.lifetime ) {
+			status = __( 'Lifetime', 'woocommerce' );
+		} else if ( subscription.autorenew ) {
+			status = __( 'Active', 'woocommerce' );
+		} else {
+			status = __( 'Cancelled', 'woocommerce' );
+		}
+
+		return status;
 	}
 	return {
 		display: getStatus(),
