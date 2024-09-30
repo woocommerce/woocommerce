@@ -184,7 +184,7 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Download Performance metrics baseline'
-        if: ${{ matrix.testType == 'performance' }}
+        if: ${{ matrix.testType == 'performance' && matrix.report.resultsPath != '' }}
         uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319
         with:
           path: 'tools/compare-perf/artifacts/*_55f855a2e6d769b5ae44305b2772eb30d3e721df_*'
