@@ -47,7 +47,7 @@ test.describe( 'Shopper → Extensibility', () => {
 			// First test by only partially filling in the address form.
 			await checkoutPageObject.page
 				.getByLabel( 'Country/Region' )
-				.fill( 'United Kingdom (UK)' );
+				.selectOption( 'United Kingdom (UK)' );
 			await checkoutPageObject.page.getByLabel( 'Country/Region' ).blur();
 
 			await checkoutPageObject.page.evaluate(
@@ -55,13 +55,13 @@ test.describe( 'Shopper → Extensibility', () => {
 			);
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'United Kingdom (UK)' );
+			).toHaveValue( 'GB' );
 			await checkoutPageObject.page.evaluate(
 				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
 			);
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).not.toHaveValue( 'United Kingdom (UK)' );
+			).not.toHaveValue( 'GB' );
 
 			// Next fully test the address form (so it pushes), then run extensionCartUpdate with
 			// overwriteDirtyCustomerData: true so overwriting is possible, but since the address pushed it should not
@@ -69,13 +69,13 @@ test.describe( 'Shopper → Extensibility', () => {
 			await checkoutPageObject.fillInCheckoutWithTestData();
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'United States (US)' );
+			).toHaveValue( 'US' );
 			await checkoutPageObject.page.evaluate(
 				"wc.blocksCheckout.extensionCartUpdate( { namespace: 'woocommerce-blocks-test-extension-cart-update', overwriteDirtyCustomerData: true } )"
 			);
 			await expect(
 				checkoutPageObject.page.getByLabel( 'Country/Region' )
-			).toHaveValue( 'United States (US)' );
+			).toHaveValue( 'US' );
 		} );
 		test( 'Cart data can be modified by extensions', async ( {
 			checkoutPageObject,
