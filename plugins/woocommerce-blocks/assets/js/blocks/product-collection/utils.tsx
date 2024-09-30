@@ -103,15 +103,10 @@ const isInProductArchive = () => {
 const isFirstBlockThatUsesPageContext = (
 	property: 'inherit' | 'filterable'
 ) => {
-	// We use experimental selector because it's been graduated as stable (`getBlocksByName`)
-	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
-	// available in WordPress 6.5.
-	// Created issue for that: https://github.com/woocommerce/woocommerce/issues/44768.
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet, natively.
-	const { __experimentalGetGlobalBlocksByName, getBlock } =
-		select( blockEditorStore );
-	const productCollectionBlockIDs = __experimentalGetGlobalBlocksByName(
+	const { getBlocksByName, getBlock } = select( blockEditorStore );
+	const productCollectionBlockIDs = getBlocksByName(
 		'woocommerce/product-collection'
 	) as string[];
 
