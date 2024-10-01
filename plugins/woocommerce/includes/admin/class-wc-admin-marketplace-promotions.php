@@ -163,6 +163,7 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		$promotions = json_decode( wp_remote_retrieve_body( $raw_promotions ), true );
+
 		if ( ! is_array( $promotions ) ) {
 			$promotions = array();
 
@@ -267,6 +268,16 @@ class WC_Admin_Marketplace_Promotions {
 	private static function filter_out_inactive_promotions( $promotions = array() ) {
 		$now_date_time     = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 		$active_promotions = array();
+
+		/* Promos arrive as an array of arrays with the key 'promos'.
+		We merge them into the main array. */
+		if (
+			! empty( $promotions['promos'] )
+			&& is_array( $promotions['promos'] )
+		) {
+			$promotions = array_merge( $promotions, $promotions['promos'] );
+			unset( $promotions['promos'] );
+		}
 
 		foreach ( $promotions as $promotion ) {
 			if ( ! isset( $promotion['date_from_gmt'] ) || ! isset( $promotion['date_to_gmt'] ) ) {
