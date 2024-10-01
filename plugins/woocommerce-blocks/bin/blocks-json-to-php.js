@@ -16,18 +16,14 @@ const path = require( 'path' );
 const glob = require( 'glob' );
 const json2php = require( 'json2php' );
 
-const blocksDir = path.join( __dirname, '../assets/js/blocks' );
-const blocksDir2 = path.join( __dirname, '../build' );
+const blocksDir = path.join( __dirname, '../build' );
 const outputDir = path.join( __dirname, '../build' );
 const outputFile = path.join( outputDir, 'blocks-json.php' );
 
 const blocks = {};
 
 const globSync = glob.sync;
-const blockMetadataFiles = [
-	...globSync( `${ blocksDir }/**/block.json` ),
-	...globSync( `${ blocksDir2 }/**/block.json` ),
-];
+const blockMetadataFiles = globSync( `${ blocksDir }/**/block.json` );
 
 blockMetadataFiles.forEach( ( file ) => {
 	const blockJson = JSON.parse( fs.readFileSync( file, 'utf8' ) );
