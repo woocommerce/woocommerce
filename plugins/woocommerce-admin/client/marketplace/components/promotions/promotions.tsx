@@ -17,8 +17,8 @@ declare global {
 const Promotions: ( {
 	format,
 }: {
-	format?: string;
-} ) => null | JSX.Element = ( { format = 'notice' } ) => {
+	format: string;
+} ) => null | JSX.Element = ( { format } ) => {
 	const urlParams = new URLSearchParams( window.location.search );
 	const currentPage = urlParams.get( 'page' );
 
